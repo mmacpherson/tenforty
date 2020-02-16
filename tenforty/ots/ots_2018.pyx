@@ -1,5 +1,10 @@
-from libc.stdlib cimport malloc, free
+# -*- coding: utf-8 -*-
+# cython: language_level=3
 
+import tempfile
+import shutil
+
+from libc.stdlib cimport malloc, free
 
 ctypedef int (*f_type)(int, char**)
 
@@ -9,8 +14,8 @@ cdef extern from "Python.h":
 
 
 cdef extern from "_ots_2018.c":
-    double us_TaxRateFormula(double x, int us_status)    
-    int us_main(int argc, char *argv[])
+    double _us_TaxRateFormula(double x, int us_status)
+    int _us_main(int argc, char *argv[])
 
 
 cdef int call_argc_argv(f_type fn, char* infile):
@@ -28,8 +33,24 @@ cdef int call_argc_argv(f_type fn, char* infile):
 
 
 def tax_rate(double x, int status):
-    return us_TaxRateFormula(x, status) 
+    return _us_TaxRateFormula(x, status)
 
 
-def US_main(infile):
-    return call_argc_argv(us_main, PyUnicode_AsUTF8(infile))
+def us_main(infile_text):
+
+    tmpdir = tempfile.mkdtemp()
+
+    returnfile = f"{tmpdir}/peace.txt"
+    returnfile_completed = f"{tmpdir}/peace_out.txt"
+
+    with open(returnfile, "w") as fp:
+        print(infile_text, file=fp)
+
+    retcode = call_argc_argv(_us_main, PyUnicode_AsUTF8(returnfile))
+
+    with open(returnfile_completed) as fp:
+        result = fp.read()
+
+    shutil.rmtree(tmpdir)
+
+    return result

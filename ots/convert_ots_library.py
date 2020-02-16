@@ -31,7 +31,7 @@ def extract_includes(src):
     includes, rest = [], []
     for line in src:
         if line.startswith("#include"):
-            includes.append(line)
+            includes.append(line.strip())
         else:
             rest.append(line)
     return (includes, rest)
@@ -77,6 +77,14 @@ def rename_node(node, vals, prefix=""):
         rename_node(c, vals, prefix)
 
 
+class CGenWithoutPrintfCalls(c_generator.CGenerator):
+    def _generate_stmt(self, n, add_indent=False):
+        if isinstance(n, c_ast.FuncCall) and n.name.name == "printf":
+            return ";"
+        else:
+            return super()._generate_stmt(n, add_indent)
+
+
 def build_ots_library(config):
 
     out_lines = []
@@ -95,7 +103,7 @@ def build_ots_library(config):
     includes = sorted(e for e in includes if "taxsolve_routines" not in e)
     out_lines.extend(includes)
 
-    cgen = c_generator.CGenerator()
+    cgen = CGenWithoutPrintfCalls()
     # -- parse and rename source files
     for fn, _ in config["sources"]:
         ast = parse_file(
