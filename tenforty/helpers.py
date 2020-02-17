@@ -31,7 +31,7 @@ def generate_ots_return(form_values, schema):
     return "\n".join(form_lines)
 
 
-def parse_ots_return(text):
+def parse_ots_return(text, schema):
     out = {}
     for line in text.split("\n"):
         if "=" in line:
@@ -53,13 +53,7 @@ def parse_ots_return(text):
             (_effective,) = [e.rstrip("%") for e in line.split() if e.endswith("%")]
             out["effective_tax_rate"] = float(_effective)
 
-    out["total_income"] = out["L6"]
-    out["adjusted_gross_income"] = out["L7"]
-    out["agi"] = out["L7"]
-    out["amt"] = out["Your Alternative Minimum Tax"]
-    out["taxable_income"] = out["L10"]
-    out["total_tax"] = out["L15"]
-    out["total_payments"] = out["L18"]
-    out["tax_owed"] = out["L22"]
+    for rename_pair in schema:
+        out[rename_pair.alias] = out[rename_pair.key]
 
     return out

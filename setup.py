@@ -4,10 +4,6 @@ from setuptools import find_packages, setup
 from setuptools.extension import Extension
 from Cython.Build import cythonize
 
-# from distutils.core import setup
-# from distutils.extension import Extension
-# from Cython.Distutils import build_ext
-
 with open("README.md") as f:
     readme = f.read()
 
@@ -16,11 +12,17 @@ with open("LICENSE.txt") as f:
 
 extensions = [
     Extension(
+        "tenforty.ots_2019",
+        ["tenforty/ots/ots_2019.pyx"],
+        libraries=[],
+        include_dirs=[],
+    ),
+    Extension(
         "tenforty.ots_2018",
         ["tenforty/ots/ots_2018.pyx"],
         libraries=[],
         include_dirs=[],
-    )
+    ),
 ]
 
 setup(

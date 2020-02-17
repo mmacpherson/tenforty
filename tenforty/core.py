@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from . import helpers
 from . import data
+from . import ots_2019
 from . import ots_2018
 
 
@@ -8,8 +9,16 @@ def us_1040(form_values, year="latest"):
     """Compute US federal tax return.
 
     """
-    return_text = helpers.generate_ots_return(form_values, data.US_1040)
-    return helpers.parse_ots_return(ots_2018.us_main(return_text))
+    _dispatch = {
+        "latest": (ots_2019.us_main, data.US_1040_2019),
+        "2019": (ots_2019.us_main, data.US_1040_2019),
+        "2018": (ots_2018.us_main, data.US_1040_2018),
+    }
+    main_fn, schema = _dispatch[str(year)]
+    return helpers.parse_ots_return(
+        main_fn(helpers.generate_ots_return(form_values, schema["input_wrap"])),
+        schema["output_wrap"],
+    )
 
 
 def tax_rate(adjusted_gross_income, status=1, year="latest"):
