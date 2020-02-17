@@ -23,6 +23,12 @@ extensions = [
         libraries=[],
         include_dirs=[],
     ),
+    Extension(
+        "tenforty.ots_2017",
+        ["tenforty/ots/ots_2017.pyx"],
+        libraries=[],
+        include_dirs=[],
+    ),
 ]
 
 setup(
