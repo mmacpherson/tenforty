@@ -2,6 +2,7 @@
 
 from setuptools import find_packages, setup
 from setuptools.extension import Extension
+
 from Cython.Build import cythonize
 
 with open("README.md") as f:

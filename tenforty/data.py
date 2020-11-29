@@ -27,7 +27,11 @@ RenamePair = collections.namedtuple("RenamePair", "key alias")
 
 US_1040_2019 = dict(
     input_wrap=(
-        Field(key="Title:", aliases="title", terminator="\n",),
+        Field(
+            key="Title:",
+            aliases="title",
+            terminator="\n",
+        ),
         Field(
             key="Status",
             aliases=("status", "filing_status"),
@@ -82,9 +86,28 @@ US_1040_2019 = dict(
         ),
         Field(key="L1", aliases=("wages", "wages_salaries_tips", "w2_box_1")),
         Field(key="L2a", aliases=("tax_exempt_interest",)),
-        Field(key="L2b", aliases=("interest", "1099_int_box_1", "1099_interest",)),
-        Field(key="L3a", aliases=("qualified_dividends", "1099_div_box_1b",)),
-        Field(key="L3b", aliases=("ordinary_dividends", "1099_div_box_1a",)),
+        Field(
+            key="L2b",
+            aliases=(
+                "interest",
+                "1099_int_box_1",
+                "1099_interest",
+            ),
+        ),
+        Field(
+            key="L3a",
+            aliases=(
+                "qualified_dividends",
+                "1099_div_box_1b",
+            ),
+        ),
+        Field(
+            key="L3b",
+            aliases=(
+                "ordinary_dividends",
+                "1099_div_box_1a",
+            ),
+        ),
         Field(key="L4a", aliases=("ira_distributions",)),
         Field(key="L4b", aliases=("taxable_ira_distributions",)),
         Field(key="L4c"),
@@ -197,7 +220,11 @@ US_1040_2019 = dict(
 
 US_1040_2018 = dict(
     input_wrap=(
-        Field(key="Title:", aliases="title", terminator="\n",),
+        Field(
+            key="Title:",
+            aliases="title",
+            terminator="\n",
+        ),
         Field(
             key="Status",
             aliases=("status", "filing_status"),
@@ -259,24 +286,65 @@ US_1040_2018 = dict(
         ),
         Field(key="L1", aliases=("wages", "wages_salaries_tips", "w2_box_1")),
         Field(key="L2a", aliases=("tax_exempt_interest",)),
-        Field(key="L2b", aliases=("interest", "1099_int_box_1", "1099_interest",)),
-        Field(key="L3a", aliases=("qualified_dividends", "1099_div_box_1b",)),
-        Field(key="L3b", aliases=("ordinary_dividends", "1099_div_box_1a",)),
+        Field(
+            key="L2b",
+            aliases=(
+                "interest",
+                "1099_int_box_1",
+                "1099_interest",
+            ),
+        ),
+        Field(
+            key="L3a",
+            aliases=(
+                "qualified_dividends",
+                "1099_div_box_1b",
+            ),
+        ),
+        Field(
+            key="L3b",
+            aliases=(
+                "ordinary_dividends",
+                "1099_div_box_1a",
+            ),
+        ),
         Field(key="L4a", aliases=("ira_distributions",)),
         Field(key="L4b", aliases=("taxable_ira_distributions",)),
         Field(
             key="L5a",
             aliases=("social_security_benefits", "ss_benefits", "ssa_1099_box_5"),
         ),
-        Field(key="L9", aliases=("qualified_business_income_deduction",),),
-        Field(key="L12a", aliases=("child_tax_credit",),),
+        Field(
+            key="L9",
+            aliases=("qualified_business_income_deduction",),
+        ),
+        Field(
+            key="L12a",
+            aliases=("child_tax_credit",),
+        ),
         Field(
             key="L16",
-            aliases=("withheld", "withholding", "federal_income_tax_withheld",),
+            aliases=(
+                "withheld",
+                "withholding",
+                "federal_income_tax_withheld",
+            ),
         ),
-        Field(key="L17a", aliases=("eic", "earned_income_credit",),),
-        Field(key="L17b", aliases=("child_tax_credit", "schedule_8812_credit"),),
-        Field(key="L17c", aliases=("education_credit", "form_8863_credit"),),
+        Field(
+            key="L17a",
+            aliases=(
+                "eic",
+                "earned_income_credit",
+            ),
+        ),
+        Field(
+            key="L17b",
+            aliases=("child_tax_credit", "schedule_8812_credit"),
+        ),
+        Field(
+            key="L17c",
+            aliases=("education_credit", "form_8863_credit"),
+        ),
         Field(
             key="CapGains-A/D",
             aliases=(
@@ -390,7 +458,11 @@ US_1040_2018 = dict(
 
 US_1040_2017 = dict(
     input_wrap=(
-        Field(key="Title:", aliases="title", terminator="\n",),
+        Field(
+            key="Title:",
+            aliases="title",
+            terminator="\n",
+        ),
         Field(
             key="Status",
             aliases=("status", "filing_status"),
@@ -409,7 +481,10 @@ US_1040_2017 = dict(
             terminator="\n",
         ),
         Field(
-            key="Under65?", aliases="you_are_under_65", default="Y", terminator="\n",
+            key="Under65?",
+            aliases="you_are_under_65",
+            default="Y",
+            terminator="\n",
         ),
         Field(
             key="Dependents",
@@ -419,10 +494,29 @@ US_1040_2017 = dict(
             terminator="\n",
         ),
         Field(key="L7", aliases=("wages", "wages_salaries_tips", "w2_box_1")),
-        Field(key="L8a", aliases=("interest", "1099_int_box_1", "1099_interest",)),
+        Field(
+            key="L8a",
+            aliases=(
+                "interest",
+                "1099_int_box_1",
+                "1099_interest",
+            ),
+        ),
         Field(key="L8b", aliases=("tax_exempt_interest",)),
-        Field(key="L9", aliases=("ordinary_dividends", "1099_div_box_1a",)),
-        Field(key="L9b", aliases=("qualified_dividends", "1099_div_box_1b",)),
+        Field(
+            key="L9",
+            aliases=(
+                "ordinary_dividends",
+                "1099_div_box_1a",
+            ),
+        ),
+        Field(
+            key="L9b",
+            aliases=(
+                "qualified_dividends",
+                "1099_div_box_1b",
+            ),
+        ),
         Field(key="L10"),
         Field(key="L11"),
         Field(key="L12"),
@@ -542,4 +636,107 @@ US_1040_2017 = dict(
         RenamePair(key="L74", alias="total_payments"),
         RenamePair(key="L78", alias="tax_owed"),
     ),
+)
+
+CA_540_2019 = dict(
+    input_wrap=(
+        Field(key="Title:", terminator="\n"),
+        Field(key="FileName"),
+        Field(key="L6"),
+        Field(key="L8"),
+        Field(key="L9"),
+        Field(key="L10"),
+        Field(key="L12"),
+        Field(key="CA540_Subtr_A1"),
+        Field(key="CA540_Addit_A1"),
+        Field(key="CA540_Subtr_A2"),
+        Field(key="CA540_Addit_A2"),
+        Field(key="CA540_Subtr_A3"),
+        Field(key="CA540_Addit_A3"),
+        Field(key="CA540_Subtr_A4b"),
+        Field(key="CA540_Addit_A4b"),
+        Field(key="CA540_Subtr_A4d"),
+        Field(key="CA540_Addit_A4d"),
+        Field(key="CA540_Subtr_A6"),
+        Field(key="CA540_Addit_A6"),
+        Field(key="CA540_Subtr_B1"),
+        Field(key="CA540_Addit_B2"),
+        Field(key="CA540_Subtr_B3"),
+        Field(key="CA540_Addit_B3"),
+        Field(key="CA540_Subtr_B4"),
+        Field(key="CA540_Addit_B4"),
+        Field(key="CA540_Subtr_B5"),
+        Field(key="CA540_Addit_B5"),
+        Field(key="CA540_Subtr_B6"),
+        Field(key="CA540_Addit_B6"),
+        Field(key="CA540_Subtr_B7"),
+        Field(key="CA540_Subtr_B8a"),
+        Field(key="CA540_Subtr_B8b"),
+        Field(key="CA540_Addit_B8c"),
+        Field(key="CA540_Subtr_B8d"),
+        Field(key="CA540_Subtr_B8e"),
+        Field(key="CA540_Subtr_B8f"),
+        Field(key="CA540_Addit_B8f"),
+        Field(key="CA540_Subtr_B8g"),
+        Field(key="CA540_Subtr_C10"),
+        Field(key="CA540_Subtr_C11"),
+        Field(key="CA540_Addit_C11"),
+        Field(key="CA540_Subtr_C12"),
+        Field(key="CA540_Addit_C13"),
+        Field(key="CA540_Addit_C18"),
+        Field(key="CA540_Addit_C20"),
+        Field(key="CA540_Subtr_C21"),
+        Field(key="CA540_P2_1"),
+        Field(key="CA540_P2_Sub_5a"),
+        Field(key="CA540_P2_Sub_6"),
+        Field(key="CA540_P2_Add_8a"),
+        Field(key="CA540_P2_Add_8b"),
+        Field(key="CA540_P2_Add_8c"),
+        Field(key="CA540_P2_Sub_9"),
+        Field(key="CA540_P2_Add_9"),
+        Field(key="CA540_P2_Sub_11"),
+        Field(key="CA540_P2_Add_11"),
+        Field(key="CA540_P2_Sub_12"),
+        Field(key="CA540_P2_Add_12"),
+        Field(key="CA540_P2_Sub_13"),
+        Field(key="CA540_P2_Add_13"),
+        Field(key="CA540_P2_Sub_15"),
+        Field(key="CA540_P2_Add_15"),
+        Field(key="CA540_P2_Sub_16"),
+        Field(key="CA540_P2_Add_16"),
+        Field(key="CA540_P2_19"),
+        Field(key="CA540_P2_20"),
+        Field(key="CA540_P2_21"),
+        Field(key="L34"),
+        Field(key="L40"),
+        Field(key="L43"),
+        Field(key="L44"),
+        Field(key="L45"),
+        Field(key="L46"),
+        Field(key="L61"),
+        Field(key="L62"),
+        Field(key="L63"),
+        Field(key="L71"),
+        Field(key="L72"),
+        Field(key="L73"),
+        Field(key="L74"),
+        Field(key="L75"),
+        Field(key="L76"),
+        Field(key="L91"),
+        Field(key="L112"),
+        Field(key="L113"),
+        Field(key="Your1stName:", terminator="\n"),
+        Field(key="YourLastName:", terminator="\n"),
+        Field(key="YourSocSec#:", terminator="\n"),
+        Field(key="Spouse1stName:", terminator="\n"),
+        Field(key="SpouseLastName:", terminator="\n"),
+        Field(key="SpouseSocSec#:", terminator="\n"),
+        Field(key="Number&Street:", terminator="\n"),
+        Field(key="Apt#:", terminator="\n"),
+        Field(key="Town:", terminator="\n"),
+        Field(key="Zipcode:", terminator="\n"),
+        Field(key="YourDOB:", terminator="\n"),
+        Field(key="SpouseDOB:", terminator="\n"),
+    ),
+    output_wrap=(),
 )
