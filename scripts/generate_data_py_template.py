@@ -1,8 +1,8 @@
 import os
-import sys
 import re
+import sys
 
-"Run over an OTS template files to extract all the (line) names from the file."
+"Run over an OTS template file to extract all the (line) names from the file."
 
 
 def main(args):

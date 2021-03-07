@@ -13,6 +13,12 @@ with open("LICENSE.txt") as f:
 
 extensions = [
     Extension(
+        "tenforty.ots_2020",
+        ["tenforty/ots/ots_2020.pyx"],
+        libraries=[],
+        include_dirs=[],
+    ),
+    Extension(
         "tenforty.ots_2019",
         ["tenforty/ots/ots_2019.pyx"],
         libraries=[],
