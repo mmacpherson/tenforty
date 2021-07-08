@@ -2,6 +2,7 @@
 
 from setuptools import find_packages, setup
 from setuptools.extension import Extension
+
 from Cython.Build import cythonize
 
 with open("README.md") as f:
@@ -11,6 +12,12 @@ with open("LICENSE.txt") as f:
     license = f.read()
 
 extensions = [
+    Extension(
+        "tenforty.ots_2020",
+        ["tenforty/ots/ots_2020.pyx"],
+        libraries=[],
+        include_dirs=[],
+    ),
     Extension(
         "tenforty.ots_2019",
         ["tenforty/ots/ots_2019.pyx"],

@@ -3,7 +3,9 @@
 [OpenTaxSolver](http://opentaxsolver.sourceforge.net/) is an open-source project
 run by Aston Roberts (aston_roberts@yahoo.com):
 
-    OpenTaxSolver (OTS) is a free, safe + secure program for calculating Tax Form entries for Federal and State personal income taxes. It automatically fills-out and prints your forms.
+> OpenTaxSolver (OTS) is a free, safe + secure program for calculating Tax Form
+> entries for Federal and State personal income taxes. It automatically
+> fills-out and prints your forms.
 
 The project in this repo, `tenforty`, adds a layer atop OpenTaxSolver, to
 simplify the use of OpenTaxSolver as a library. To do this, we programmatically
@@ -25,5 +27,5 @@ and all the library sources will be built in this directory. Note that there
 will be a wait the first time you run this command while the requisite docker
 image is built.
 
-`make clean` cleans up this directory
-`make nuke` removes the created docker image, and cleans up this directory
+   `make clean` # cleans up this directory
+   `make nuke`  # removes the created docker image, and cleans up this directory

@@ -1,10 +1,10 @@
-Sample Module Repository
-========================
+## `tenforty` - A python package for computing US taxes.
 
-This simple project is an example repo for Python projects.
+`tenforty` computes US federal taxes, and taxes for some but not all states that
+have an income tax.
 
-`Learn more <http://www.kennethreitz.org/essays/repository-structure-and-python>`_.
+Provided you're comfortable with python, `tenforty` makes it convenient to
+explore tax scenarios quickly.
 
----------------
-
-If you want to learn more about ``setup.py`` files, check out `this repository <https://github.com/kennethreitz/setup.py>`_.
+For example, one can make a table or a plot that compares the taxes for a
+married couple filing separately vs jointly.

@@ -1,4 +1,3 @@
-import click
 import copy
 import os
 import re
@@ -6,11 +5,11 @@ import sys
 import tempfile
 from functools import partial, reduce
 
+import click
+import sh
 from pycparser import c_ast, c_generator, parse_file
 
 from config import OTS_CONFIG
-
-import sh
 
 
 class GlobalNamesVisitor(c_ast.NodeVisitor):
