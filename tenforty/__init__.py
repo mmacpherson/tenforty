@@ -1,1 +1,1 @@
-from .core import us_1040, tax_rate
+from .core import us_1040, ca_540, tax_rate
