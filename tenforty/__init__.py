@@ -1,1 +1,3 @@
-from .core import us_1040, ca_540, tax_rate
+"""Functions exposed to the `tenforty` package namespace."""
+
+from .core import evaluate_return, evaluate_returns  # noqa: F401

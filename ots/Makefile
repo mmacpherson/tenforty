@@ -1,28 +1,35 @@
-IMAGE=ots-convert
-OTS_DKR=docker run --rm -v $(PWD):/work $(IMAGE) python /work/convert_ots_library.py
-
-libraries: build _ots_2020.c _ots_2019.c _ots_2018.c _ots_2017.c
-
-build:
-	docker build -t $(IMAGE) .
-
-_ots_2020.c: OpenTaxSolver2020_18.05_linux64.tgz config.py
-	$(OTS_DKR) 2020 $< > $@
-
-_ots_2019.c: OpenTaxSolver2019_17.03_linux64.tgz config.py
-	$(OTS_DKR) 2019 $< > $@
-
-_ots_2018.c: OpenTaxSolver2018_16.06_linux64.tgz config.py
-	$(OTS_DKR) 2018 $< > $@
-
-_ots_2017.c: OpenTaxSolver2017_15.07_linux64.tgz config.py
-	$(OTS_DKR) 2017 $< > $@
+DEFAULT_GOAL: help
+.PHONY: install clean
 
 
-clean:
-	rm -f *.c
+generated: amalgamate.py ots-releases/OpenTaxSolver*.tgz ## >> generate wrapper files from OTS source
+	python amalgamate.py ots-releases/OpenTaxSolver*.tgz
 
-nuke: clean
-	docker rmi $(IMAGE)
+install: ## >> copy files over to main source directory
+	cp -R generated/* ../tenforty
 
-.PHONY: libraries build clean nuke
+clean: ## >> remove all generated files
+	rm -rf generated
+
+
+# And add help text after each target name starting with '\#\#'
+# A category can be added with @category
+HELP_FUN = \
+	%help; \
+	while(<>) { push @{$$help{$$2 // 'options'}}, [$$1, $$3] if /^([a-zA-Z\-\$\(]+)\s*:.*\#\#(?:@([a-zA-Z\-\)]+))?\s(.*)$$/ }; \
+	print "usage: make [target]\n\n"; \
+	for (sort keys %help) { \
+	print "${WHITE}$$_:${RESET}\n"; \
+	for (@{$$help{$$_}}) { \
+	$$sep = " " x (32 - length $$_->[0]); \
+	print "  ${YELLOW}$$_->[0]${RESET}$$sep${GREEN}$$_->[1]${RESET}\n"; \
+	}; \
+	print "\n"; }
+
+help: ##@help >> Show this help.
+	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "Note: to activate the environment in your local shell type:"
+	@echo "   $$ pyenv activate $(VENV)"
+
+# end

@@ -1,16 +1,21 @@
-# -*- coding: utf-8 -*-
-
-from .context import sample
-
-import unittest
+# ruff: noqa: D100, D103
+from tenforty.core import prefix_keys
 
 
-class BasicTestSuite(unittest.TestCase):
-    """Basic test cases."""
+def test_prefix_keys():
+    test_cases = [
+        (
+            {"key1": "value1", "key2": "value2"},
+            "test",
+            {"test_key1": "value1", "test_key2": "value2"},
+        ),
+        ({}, "test", {}),
+        (
+            {"key1": "value1", "key2": "value2"},
+            "",
+            {"key1": "value1", "key2": "value2"},
+        ),
+    ]
 
-    def test_absolute_truth_and_meaning(self):
-        assert True
-
-
-if __name__ == "__main__":
-    unittest.main()
+    for test_input, prefix, expected in test_cases:
+        assert prefix_keys(test_input, prefix) == expected

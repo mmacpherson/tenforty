@@ -1,8 +1,0 @@
-click
-cython
-jupyter
-nose
-pandas
-plotnine
-pytest
-sphinx
