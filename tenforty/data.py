@@ -240,7 +240,15 @@ US_1040_2020 = dict(
         Field(key="L29"),
         Field(key="L30"),
         Field(key="L38"),
-        Field(key="CapGains-A/D"),
+        Field(
+            key="CapGains-A/D",
+            aliases=(
+                "capital_gains_a_d",
+                "cap_gains_a_d",
+                "capital_gains_basis_reported",
+                "form_8949_check_a_or_d",
+            ),
+        ),
         Field(key="CapGains-B/E"),
         Field(key="CapGains-C/F"),
         Field(key="D4"),
