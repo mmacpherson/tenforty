@@ -1,54 +1,9 @@
-# -*- coding: utf-8 -*-
-
-from setuptools import find_packages, setup
-from setuptools.extension import Extension
+"""Setup for tenforty package."""
 
 from Cython.Build import cythonize
-
-with open("README.md") as f:
-    readme = f.read()
-
-with open("LICENSE.txt") as f:
-    license = f.read()
-
-extensions = [
-    Extension(
-        "tenforty.ots_2020",
-        ["tenforty/ots/ots_2020.pyx"],
-        libraries=[],
-        include_dirs=[],
-    ),
-    Extension(
-        "tenforty.ots_2019",
-        ["tenforty/ots/ots_2019.pyx"],
-        libraries=[],
-        include_dirs=[],
-    ),
-    Extension(
-        "tenforty.ots_2018",
-        ["tenforty/ots/ots_2018.pyx"],
-        libraries=[],
-        include_dirs=[],
-    ),
-    Extension(
-        "tenforty.ots_2017",
-        ["tenforty/ots/ots_2017.pyx"],
-        libraries=[],
-        include_dirs=[],
-    ),
-]
+from setuptools import Extension, find_packages, setup
 
 setup(
-    name="tenforty",
-    version="0.1.0",
-    description="Compute US federal taxes, and state taxes for some states.",
-    long_description=readme,
-    author="Mike Macpherson",
-    author_email="mmacpherson@users.noreply.github.com",
-    url="https://github.com/mmacpherson/tenforty",
-    license=license,
-    packages=find_packages(exclude=("tests", "docs")),
-    # cmdclass=dict(build_ext=build_ext),
-    ext_modules=cythonize(extensions),
-    zip_safe=False,
+    ext_modules=cythonize([Extension("tenforty.otslib", ["tenforty/otslib/ots.pyx"])]),
+    packages=find_packages(exclude=("tests",)),
 )

@@ -1,0 +1,70 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel", "Cython"]
+
+[project]
+authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
+classifiers = []
+dependencies = [
+  "pandas",
+  "pyarrow",  # To quiet pandas deprecation warning.
+  "pydantic >= 2",
+  "python-dotenv"
+]
+description = "Library to compute US federal taxes, and state taxes for some states."
+license = {file = "LICENSE.txt", content-type = "text/plain"}
+name = "tenforty"
+readme = {file = "README.md", content-type = "text/markdown"}
+urls = {github = "https://github.com/mmacpherson/tenforty"}
+version = "2022.1"
+
+[project.optional-dependencies]
+dev = [
+  "hypothesis",
+  "jupyter",
+  "pytest",
+  "seaborn"
+]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv"
+]
+fix = true
+indent-width = 4
+line-length = 88  # Same as Black.
+
+[tool.ruff.lint]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+ignore = [
+  "D203",
+  "D213",
+  "E501"  # We're already running black; if it doesn't break down further so be it.
+]
+per-file-ignores = {}
+select = ["A", "B", "D", "E", "F", "I", "ISC", "UP", "RUF", "W"]
+unfixable = []
