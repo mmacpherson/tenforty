@@ -38,6 +38,44 @@ pip install tenforty
 ```
 
 
+## Main Functions Documentation
+
+The two functions `evaluate_return` and `evaluate_returns` are the main
+interface to `tenforty`. They take exactly the same arguments, except that any
+of the arguments to `evaluate_returns` may either be a single value, or a list
+of values. `evaluate_return` is for evaluating one single return, and
+`evaluate_returns` evaluates all combinations of inputs subtended by the
+provided values and collects the results into a dataframe.
+
+The inputs to either function are "guarded" by a pydantic model, so you'll get
+an informative message about why your input was invalid if it was, along with a
+list of the valid options. (And if you're using a modern editor, you'll get nice
+autocomplete on the valid options.)
+
+Here are all arguments available for those two functions:
+
+
+| Argument                     | Type                     | Default             | Notes                              |
+|------------------------------|--------------------------|---------------------|------------------------------------|
+| `year`                       | int                      | 2022                | 2018-2022 inclusive                |
+| `state`                      | str | None               | None                | CA, NY, MA + No-income tax states  |
+| `filing_status`              | str                      | Single              | Single, Married/Joint, Head_of_House, Married/Sep, Widow(er) |
+| `num_dependents`             | int                      | 0                   |                                    |
+| `standard_or_itemized`       | str                      | Standard            | Standard or Itemized               |
+| `w2_income`                  | float                    | 0.0                 |                                    |
+| `taxable_interest`           | float                    | 0.0                 |                                    |
+| `qualified_dividends`        | float                    | 0.0                 |                                    |
+| `ordinary_dividends`         | float                    | 0.0                 |                                    |
+| `short_term_capital_gains`   | float                    | 0.0                 |                                    |
+| `long_term_capital_gains`    | float                    | 0.0                 |                                    |
+| `schedule_1_income`          | float                    | 0.0                 |                                    |
+| `itemized_deductions`        | float                    | 0.0                 |                                    |
+| `state_adjustment`           | float                    | 0.0                 |                                    |
+| `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
+
+Several concrete examples of calling either function are given in the Examples section.
+
+
 ## Examples
 
 Here are some examples of what you can do with tenforty:
@@ -240,6 +278,7 @@ df = (
 ```
 
 ![Image: Am I in AMT?](images/example4.svg)
+
 
 
 ## Known Limitations
