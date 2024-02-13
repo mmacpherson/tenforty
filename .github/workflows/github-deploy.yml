@@ -1,6 +1,13 @@
 name: Build and upload to PyPI
 
-on: push
+# I.e., only bother building wheels for pushes to main branch, or pushed tags.
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - v*
+
 
 jobs:
   build-wheels:
