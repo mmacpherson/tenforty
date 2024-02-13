@@ -58,10 +58,10 @@ Here are all arguments available for those two functions:
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
 | `year`                       | int                      | 2022                | 2018-2022 inclusive                |
-| `state`                      | str \| None               | None                | CA, NY, MA + AK, FL, NV, SD, TX, WA, WY |
-| `filing_status`              | str                      | Single              | Single, Married/Joint, Head_of_House, Married/Sep, Widow(er) |
+| `state`                      | str \| None               | None                | "CA", "NY", "MA" + "AK", "FL", "NV", "SD", "TX", "WA", "WY" |
+| `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
-| `standard_or_itemized`       | str                      | Standard            | Standard or Itemized               |
+| `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
 | `qualified_dividends`        | float                    | 0.0                 |                                    |
