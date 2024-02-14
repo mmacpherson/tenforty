@@ -16,7 +16,7 @@ license = {file = "LICENSE.txt", content-type = "text/plain"}
 name = "tenforty"
 readme = {file = "README.md", content-type = "text/markdown"}
 urls = {github = "https://github.com/mmacpherson/tenforty"}
-version = "2022.2"
+version = "2022.3"
 
 [project.optional-dependencies]
 dev = [

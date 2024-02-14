@@ -217,7 +217,7 @@ taxes:
 df = (
     evaluate_returns(
         w2_income=75_000,
-        state_of_residence="CA",
+        state="CA",
         long_term_capital_gains=list(range(0, 125_001, 5000)),
     )
     .loc[:, ["long_term_capital_gains", "state_total_tax", "federal_total_tax"]]
