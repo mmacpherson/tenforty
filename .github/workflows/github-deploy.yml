@@ -1,12 +1,15 @@
 name: Build and upload to PyPI
 
-# I.e., only bother building wheels for pushes to main branch, or pushed tags.
+# I.e., only bother building wheels for pushes to main branch, or pushed tags;
+# and then, only after the validation workflow has succeeded.
 on:
-  push:
-    branches:
-    - main
+  workflow_run:
+    workflows: [Validation Workflow]
+    branches: [main]
     tags:
     - v*
+    types:
+    - completed
 
 
 jobs:

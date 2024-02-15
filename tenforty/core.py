@@ -5,7 +5,6 @@ import logging
 import os
 import pathlib
 import re
-from enum import StrEnum
 from typing import Any
 
 import dotenv
@@ -21,6 +20,7 @@ from .models import (
     OTSForm,
     OTSState,
     OTSYear,
+    StrEnum,
     TaxReturnInput,
 )
 
@@ -470,7 +470,7 @@ def evaluate_returns(
 
     results = []
     for combo in combinations:
-        combo_map = dict(zip(parameter_names, combo))
+        combo_map = dict(zip(parameter_names, combo, strict=False))
         result = evaluate_return(**combo_map).model_dump()
 
         results.append(combo_map | result)
