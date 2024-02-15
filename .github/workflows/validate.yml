@@ -1,6 +1,11 @@
 name: Validate Code
 
-on: push
+on:
+  push:
+    branches:
+    - '*'
+    tags:
+    - v*
 
 jobs:
   build:
