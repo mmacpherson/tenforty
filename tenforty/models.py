@@ -6,13 +6,21 @@ used primarily for structuring and organizing configuration data.
 """
 
 # ruff: noqa: D101
-from enum import Enum, StrEnum
+from collections.abc import Callable
+from enum import Enum
 from functools import partial
-from typing import Callable
 
 from pydantic import BaseModel
 
 from . import _ots_form_models
+
+try:
+    from enum import StrEnum
+except ImportError:
+
+    class StrEnum(str, Enum):
+        def __str__(self):  # noqa: D105
+            return self.value
 
 
 class OTSYear(Enum):

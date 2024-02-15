@@ -1,5 +1,11 @@
 # tenforty
 
+[![GitHub Actions](https://github.com/mmacpherson/tenforty/actions/workflows/validate.yml/badge.svg)](https://github.com/mmacpherson/tenforty/actions)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mmacpherson/tenforty/main.svg)](https://results.pre-commit.ci/latest/github/mmacpherson/tenforty/main)
+[![PyPI](https://img.shields.io/pypi/v/tenforty.svg)](https://pypi.org/project/tenforty/)
+[![Python Version](https://img.shields.io/pypi/pyversions/tenforty.svg)](https://pypi.org/project/tenforty/)
+[![License](https://img.shields.io/github/license/mmacpherson/tenforty.svg)](https://github.com/mmacpherson/tenforty/blob/main/LICENSE.txt)
+
 
 ## Overview
 

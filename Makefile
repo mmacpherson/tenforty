@@ -86,7 +86,7 @@ run-hooks: ##@options >> run hooks over staged files
 	pre-commit run
 
 run-hooks-all-files: ##@options >> run hooks over ALL files in workspace
-	pre-commit run -a
+	pre-commit run --all-files
 
 
 # And add help text after each target name starting with '\#\#'

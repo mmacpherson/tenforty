@@ -1,3 +1,8 @@
+## [2022.4] - 2024-02-14
+### Added
+- Fix so StrEnum works in 3.10.
+- Add test action.
+
 ## [2022.3] - 2024-02-13
 ### Added
 - Fix example images in README.
