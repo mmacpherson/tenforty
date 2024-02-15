@@ -4,7 +4,7 @@ name: Build and upload to PyPI
 # and then, only after the validation workflow has succeeded.
 on:
   workflow_run:
-    workflows: [Validation Workflow]
+    workflows: [Validate Code]
     branches: [main]
     tags:
     - v*
