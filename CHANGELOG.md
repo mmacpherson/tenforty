@@ -1,3 +1,8 @@
+## [2023.1] - 2024-02-15
+### Added
+- Added OTS 2023.02 release.
+- Added Colab notebook.
+
 ## [2022.4] - 2024-02-14
 ### Added
 - Fix so StrEnum works in 3.10.
