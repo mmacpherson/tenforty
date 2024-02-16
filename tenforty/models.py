@@ -29,7 +29,7 @@ class OTSYear(Enum):
     YEAR_2020 = 2020
     YEAR_2021 = 2021
     YEAR_2022 = 2022
-    # YEAR_2023 = 2023
+    YEAR_2023 = 2023
 
 
 class OTSFilingStatus(StrEnum):
@@ -112,8 +112,7 @@ OTS_FORM_CONFIG = dict(
 
 
 class TaxReturnInput(BaseModel):
-    year: OTSYear = OTSYear.YEAR_2022
-    # year: OTSYear = OTSYear.YEAR_2023
+    year: OTSYear = OTSYear.YEAR_2023
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
     num_dependents: int = 0
@@ -177,67 +176,67 @@ def capital_gains_pre2021(term: str, year: int, amount: int) -> str:
 
 _NATURAL_FORM_CONFIG = [
     # 2023
-    # {
-    #     "year": 2023,
-    #     "form_id": "US_1040",
-    #     "input_map": {
-    #         "filing_status": "Status",
-    #         "num_dependents": "Dependents",
-    #         "w2_income": "L1a",
-    #         "taxable_interest": "L2b",
-    #         "qualified_dividends": "L3a",
-    #         "ordinary_dividends": "L3b",
-    #         "short_term_capital_gains": partial(capital_gains, "short"),
-    #         "long_term_capital_gains": partial(capital_gains, "long"),
-    #         "schedule_1_income": "S1_8z",
-    #         "itemized_deductions": "A6",
-    #         "incentive_stock_option_gains": "AMTws3",
-    #     },
-    #     "output_map": {
-    #         "L11": "adjusted_gross_income",
-    #         "L15": "taxable_income",
-    #         "L24": "total_tax",
-    #         "Your Alternative Minimum Tax": "amt",
-    #     },
-    # },
-    # {
-    #     "year": 2023,
-    #     "form_id": "CA_540",
-    #     "input_map": {
-    #         "num_dependents": "L10",
-    #         "state_adjustment": "CA540_P2_Add_6",
-    #     },
-    #     "output_map": {
-    #         "L15": "adjusted_gross_income",
-    #         "L19": "taxable_income",
-    #         "L64": "total_tax",
-    #     },
-    # },
-    # {
-    #     "year": 2023,
-    #     "form_id": "MA_1",
-    #     "input_map": {
-    #         "w2_income": "L3",
-    #         "_FED_L9": "La",
-    #         "_FED_L11": "Lb",
-    #         "num_dependents": "Dependents",
-    #     },
-    #     "output_map": {
-    #         "L21": "taxable_income",
-    #         "AGI": "adjusted_gross_income",
-    #         "L28": "total_tax",
-    #     },
-    # },
-    # {
-    #     "year": 2023,
-    #     "form_id": "NY_IT201",
-    #     "input_map": {},
-    #     "output_map": {
-    #         "L33": "adjusted_gross_income",
-    #         "L37": "taxable_income",
-    #         "L46": "total_tax",
-    #     },
-    # },
+    {
+        "year": 2023,
+        "form_id": "US_1040",
+        "input_map": {
+            "filing_status": "Status",
+            "num_dependents": "Dependents",
+            "w2_income": "L1a",
+            "taxable_interest": "L2b",
+            "qualified_dividends": "L3a",
+            "ordinary_dividends": "L3b",
+            "short_term_capital_gains": partial(capital_gains, "short"),
+            "long_term_capital_gains": partial(capital_gains, "long"),
+            "schedule_1_income": "S1_8z",
+            "itemized_deductions": "A6",
+            "incentive_stock_option_gains": "AMTws3",
+        },
+        "output_map": {
+            "L11": "adjusted_gross_income",
+            "L15": "taxable_income",
+            "L24": "total_tax",
+            "Your Alternative Minimum Tax": "amt",
+        },
+    },
+    {
+        "year": 2023,
+        "form_id": "CA_540",
+        "input_map": {
+            "num_dependents": "L10",
+            "state_adjustment": "CA540_P2_Add_6",
+        },
+        "output_map": {
+            "L15": "adjusted_gross_income",
+            "L19": "taxable_income",
+            "L64": "total_tax",
+        },
+    },
+    {
+        "year": 2023,
+        "form_id": "MA_1",
+        "input_map": {
+            "w2_income": "L3",
+            "_FED_L9": "La",
+            "_FED_L11": "Lb",
+            "num_dependents": "Dependents",
+        },
+        "output_map": {
+            "L21": "taxable_income",
+            "AGI": "adjusted_gross_income",
+            "L28": "total_tax",
+        },
+    },
+    {
+        "year": 2023,
+        "form_id": "NY_IT201",
+        "input_map": {},
+        "output_map": {
+            "L33": "adjusted_gross_income",
+            "L37": "taxable_income",
+            "L46": "total_tax",
+        },
+    },
     # 2022
     {
         "year": 2022,

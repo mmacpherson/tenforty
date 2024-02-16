@@ -23,10 +23,10 @@ repos:
   - id: name-tests-test
     args: [--pytest]
   - id: trailing-whitespace
-- repo: https://github.com/psf/black
+- repo: https://github.com/psf/black-pre-commit-mirror
   rev: 24.2.0
   hooks:
-  - id: black
+  - id: black-jupyter
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.2.1
   hooks:

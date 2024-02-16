@@ -675,9 +675,6 @@ def main(ots_tarballs, template_file, gen_dir):
     source_groups = dict()
     configs = []
     for ots_tarball in ots_tarballs:
-        if "2023" in ots_tarball:
-            # Skip until California works.
-            continue
         source_group, _configs = process_ots_tarball(ots_tarball)
         source_groups |= source_group
         configs += _configs

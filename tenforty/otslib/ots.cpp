@@ -2292,6 +2292,48 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from "ots_2022_f8995" */
 
+/* Module declarations from "ots_2023_NJ_1040" */
+
+/* Module declarations from "ots_2023_US_1040_Sched_C" */
+
+/* Module declarations from "ots_2023_f8829" */
+
+/* Module declarations from "ots_2023_f8959" */
+
+/* Module declarations from "ots_2023_f8960" */
+
+/* Module declarations from "ots_2023_f8995" */
+
+/* Module declarations from "ots_2023_f8606" */
+
+/* Module declarations from "ots_2023_CA_540" */
+
+/* Module declarations from "ots_2023_HSA_f8889" */
+
+/* Module declarations from "ots_2023_MA_1" */
+
+/* Module declarations from "ots_2023_NC_D400" */
+
+/* Module declarations from "ots_2023_NY_IT201" */
+
+/* Module declarations from "ots_2023_OH_IT1040" */
+
+/* Module declarations from "ots_2023_PA_40" */
+
+/* Module declarations from "ots_2023_US_1040" */
+
+/* Module declarations from "ots_2023_VA_760" */
+
+/* Module declarations from "ots_2023_f2210" */
+
+/* Module declarations from "ots_2023_US_1040_Sched_E_brokerage_royalties" */
+
+/* Module declarations from "ots_2023_CA_5805" */
+
+/* Module declarations from "ots_2023_f8812" */
+
+/* Module declarations from "ots_2023_US_1040_Sched_SE" */
+
 /* Module declarations from "tenforty.otslib" */
 static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_call(int, char *); /*proto*/
 /* #### Code section: typeinfo ### */
@@ -2328,6 +2370,7 @@ static const char __pyx_k_PA_40[] = "PA_40";
 static const char __pyx_k_enter[] = "__enter__";
 static const char __pyx_k_f2210[] = "f2210";
 static const char __pyx_k_f8606[] = "f8606";
+static const char __pyx_k_f8812[] = "f8812";
 static const char __pyx_k_f8829[] = "f8829";
 static const char __pyx_k_f8959[] = "f8959";
 static const char __pyx_k_f8960[] = "f8960";
@@ -2370,6 +2413,7 @@ static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_returnfile_completed[] = "returnfile_completed";
 static const char __pyx_k_py_unicode_returnfile[] = "py_unicode_returnfile";
 static const char __pyx_k_tenforty_otslib_ots_pyx[] = "tenforty/otslib/ots.pyx";
+static const char __pyx_k_US_1040_Sched_E_brokerage_royalt[] = "US_1040_Sched_E_brokerage_royalties";
 /* #### Code section: decls ### */
 static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_year, PyObject *__pyx_v_form, PyObject *__pyx_v_form_text, PyObject *__pyx_v_fed_form_text); /* proto */
 /* #### Code section: late_includes ### */
@@ -2541,6 +2585,48 @@ typedef struct {
   #endif
   #if CYTHON_USE_MODULE_STATE
   #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
   PyObject *__pyx_n_u_CA_540;
   PyObject *__pyx_n_u_CA_5805;
   PyObject *__pyx_n_u_FED_FILENAME;
@@ -2555,6 +2641,7 @@ typedef struct {
   PyObject *__pyx_n_s_TemporaryDirectory;
   PyObject *__pyx_n_u_US_1040;
   PyObject *__pyx_n_u_US_1040_Sched_C;
+  PyObject *__pyx_n_u_US_1040_Sched_E_brokerage_royalt;
   PyObject *__pyx_n_u_US_1040_Sched_SE;
   PyObject *__pyx_n_u_VA_760;
   PyObject *__pyx_n_s__2;
@@ -2567,6 +2654,7 @@ typedef struct {
   PyObject *__pyx_n_s_exit;
   PyObject *__pyx_n_u_f2210;
   PyObject *__pyx_n_u_f8606;
+  PyObject *__pyx_n_u_f8812;
   PyObject *__pyx_n_u_f8829;
   PyObject *__pyx_n_u_f8959;
   PyObject *__pyx_n_u_f8960;
@@ -2665,6 +2753,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_TemporaryDirectory);
   Py_CLEAR(clear_module_state->__pyx_n_u_US_1040);
   Py_CLEAR(clear_module_state->__pyx_n_u_US_1040_Sched_C);
+  Py_CLEAR(clear_module_state->__pyx_n_u_US_1040_Sched_E_brokerage_royalt);
   Py_CLEAR(clear_module_state->__pyx_n_u_US_1040_Sched_SE);
   Py_CLEAR(clear_module_state->__pyx_n_u_VA_760);
   Py_CLEAR(clear_module_state->__pyx_n_s__2);
@@ -2677,6 +2766,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_exit);
   Py_CLEAR(clear_module_state->__pyx_n_u_f2210);
   Py_CLEAR(clear_module_state->__pyx_n_u_f8606);
+  Py_CLEAR(clear_module_state->__pyx_n_u_f8812);
   Py_CLEAR(clear_module_state->__pyx_n_u_f8829);
   Py_CLEAR(clear_module_state->__pyx_n_u_f8959);
   Py_CLEAR(clear_module_state->__pyx_n_u_f8960);
@@ -2753,6 +2843,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_TemporaryDirectory);
   Py_VISIT(traverse_module_state->__pyx_n_u_US_1040);
   Py_VISIT(traverse_module_state->__pyx_n_u_US_1040_Sched_C);
+  Py_VISIT(traverse_module_state->__pyx_n_u_US_1040_Sched_E_brokerage_royalt);
   Py_VISIT(traverse_module_state->__pyx_n_u_US_1040_Sched_SE);
   Py_VISIT(traverse_module_state->__pyx_n_u_VA_760);
   Py_VISIT(traverse_module_state->__pyx_n_s__2);
@@ -2765,6 +2856,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_exit);
   Py_VISIT(traverse_module_state->__pyx_n_u_f2210);
   Py_VISIT(traverse_module_state->__pyx_n_u_f8606);
+  Py_VISIT(traverse_module_state->__pyx_n_u_f8812);
   Py_VISIT(traverse_module_state->__pyx_n_u_f8829);
   Py_VISIT(traverse_module_state->__pyx_n_u_f8959);
   Py_VISIT(traverse_module_state->__pyx_n_u_f8960);
@@ -2977,6 +3069,48 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 #if CYTHON_USE_MODULE_STATE
 #endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#endif
 #define __pyx_n_u_CA_540 __pyx_mstate_global->__pyx_n_u_CA_540
 #define __pyx_n_u_CA_5805 __pyx_mstate_global->__pyx_n_u_CA_5805
 #define __pyx_n_u_FED_FILENAME __pyx_mstate_global->__pyx_n_u_FED_FILENAME
@@ -2991,6 +3125,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_TemporaryDirectory __pyx_mstate_global->__pyx_n_s_TemporaryDirectory
 #define __pyx_n_u_US_1040 __pyx_mstate_global->__pyx_n_u_US_1040
 #define __pyx_n_u_US_1040_Sched_C __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C
+#define __pyx_n_u_US_1040_Sched_E_brokerage_royalt __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt
 #define __pyx_n_u_US_1040_Sched_SE __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE
 #define __pyx_n_u_VA_760 __pyx_mstate_global->__pyx_n_u_VA_760
 #define __pyx_n_s__2 __pyx_mstate_global->__pyx_n_s__2
@@ -3003,6 +3138,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_exit __pyx_mstate_global->__pyx_n_s_exit
 #define __pyx_n_u_f2210 __pyx_mstate_global->__pyx_n_u_f2210
 #define __pyx_n_u_f8606 __pyx_mstate_global->__pyx_n_u_f8606
+#define __pyx_n_u_f8812 __pyx_mstate_global->__pyx_n_u_f8812
 #define __pyx_n_u_f8829 __pyx_mstate_global->__pyx_n_u_f8829
 #define __pyx_n_u_f8959 __pyx_mstate_global->__pyx_n_u_f8959
 #define __pyx_n_u_f8960 __pyx_mstate_global->__pyx_n_u_f8960
@@ -3047,8 +3183,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_codeobj__4 __pyx_mstate_global->__pyx_codeobj__4
 /* #### Code section: module_code ### */
 
-/* "tenforty/otslib/ots.pyx":84
- * cimport ots_2022_f8995
+/* "tenforty/otslib/ots.pyx":105
+ * cimport ots_2023_US_1040_Sched_SE
  *
  * cdef f_type lookup_ots_call(int year, char* form):             # <<<<<<<<<<<<<<
  *     if (year == 2018) and (form == "MA_1"):
@@ -3066,7 +3202,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("lookup_ots_call", 1);
 
-  /* "tenforty/otslib/ots.pyx":85
+  /* "tenforty/otslib/ots.pyx":106
  *
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -3079,15 +3215,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":86
+    /* "tenforty/otslib/ots.pyx":107
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main             # <<<<<<<<<<<<<<
@@ -3097,7 +3233,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_MA_1_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":85
+    /* "tenforty/otslib/ots.pyx":106
  *
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -3106,7 +3242,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":87
+  /* "tenforty/otslib/ots.pyx":108
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main
  *     if (year == 2018) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -3119,15 +3255,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L7_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L7_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":88
+    /* "tenforty/otslib/ots.pyx":109
  *         return ots_2018_MA_1.main
  *     if (year == 2018) and (form == "US_1040_Sched_C"):
  *         return ots_2018_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -3137,7 +3273,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_US_1040_Sched_C_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":87
+    /* "tenforty/otslib/ots.pyx":108
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main
  *     if (year == 2018) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -3146,7 +3282,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":89
+  /* "tenforty/otslib/ots.pyx":110
  *     if (year == 2018) and (form == "US_1040_Sched_C"):
  *         return ots_2018_US_1040_Sched_C.main
  *     if (year == 2018) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -3159,15 +3295,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L10_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 110, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L10_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":90
+    /* "tenforty/otslib/ots.pyx":111
  *         return ots_2018_US_1040_Sched_C.main
  *     if (year == 2018) and (form == "VA_760"):
  *         return ots_2018_VA_760.main             # <<<<<<<<<<<<<<
@@ -3177,7 +3313,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_VA_760_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":89
+    /* "tenforty/otslib/ots.pyx":110
  *     if (year == 2018) and (form == "US_1040_Sched_C"):
  *         return ots_2018_US_1040_Sched_C.main
  *     if (year == 2018) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -3186,7 +3322,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":91
+  /* "tenforty/otslib/ots.pyx":112
  *     if (year == 2018) and (form == "VA_760"):
  *         return ots_2018_VA_760.main
  *     if (year == 2018) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -3199,15 +3335,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L13_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 112, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L13_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":92
+    /* "tenforty/otslib/ots.pyx":113
  *         return ots_2018_VA_760.main
  *     if (year == 2018) and (form == "OH_IT1040"):
  *         return ots_2018_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3217,7 +3353,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_OH_IT1040_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":91
+    /* "tenforty/otslib/ots.pyx":112
  *     if (year == 2018) and (form == "VA_760"):
  *         return ots_2018_VA_760.main
  *     if (year == 2018) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -3226,7 +3362,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":93
+  /* "tenforty/otslib/ots.pyx":114
  *     if (year == 2018) and (form == "OH_IT1040"):
  *         return ots_2018_OH_IT1040.main
  *     if (year == 2018) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -3239,15 +3375,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L16_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 114, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L16_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":94
+    /* "tenforty/otslib/ots.pyx":115
  *         return ots_2018_OH_IT1040.main
  *     if (year == 2018) and (form == "CA_540"):
  *         return ots_2018_CA_540.main             # <<<<<<<<<<<<<<
@@ -3257,7 +3393,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_CA_540_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":93
+    /* "tenforty/otslib/ots.pyx":114
  *     if (year == 2018) and (form == "OH_IT1040"):
  *         return ots_2018_OH_IT1040.main
  *     if (year == 2018) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -3266,7 +3402,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":95
+  /* "tenforty/otslib/ots.pyx":116
  *     if (year == 2018) and (form == "CA_540"):
  *         return ots_2018_CA_540.main
  *     if (year == 2018) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -3279,15 +3415,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L19_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L19_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":96
+    /* "tenforty/otslib/ots.pyx":117
  *         return ots_2018_CA_540.main
  *     if (year == 2018) and (form == "NJ_1040"):
  *         return ots_2018_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -3297,7 +3433,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_NJ_1040_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":95
+    /* "tenforty/otslib/ots.pyx":116
  *     if (year == 2018) and (form == "CA_540"):
  *         return ots_2018_CA_540.main
  *     if (year == 2018) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -3306,7 +3442,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":97
+  /* "tenforty/otslib/ots.pyx":118
  *     if (year == 2018) and (form == "NJ_1040"):
  *         return ots_2018_NJ_1040.main
  *     if (year == 2018) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -3319,15 +3455,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L22_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L22_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":98
+    /* "tenforty/otslib/ots.pyx":119
  *         return ots_2018_NJ_1040.main
  *     if (year == 2018) and (form == "PA_40"):
  *         return ots_2018_PA_40.main             # <<<<<<<<<<<<<<
@@ -3337,7 +3473,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_PA_40_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":97
+    /* "tenforty/otslib/ots.pyx":118
  *     if (year == 2018) and (form == "NJ_1040"):
  *         return ots_2018_NJ_1040.main
  *     if (year == 2018) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -3346,7 +3482,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":99
+  /* "tenforty/otslib/ots.pyx":120
  *     if (year == 2018) and (form == "PA_40"):
  *         return ots_2018_PA_40.main
  *     if (year == 2018) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -3359,15 +3495,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L25_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L25_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":100
+    /* "tenforty/otslib/ots.pyx":121
  *         return ots_2018_PA_40.main
  *     if (year == 2018) and (form == "US_1040"):
  *         return ots_2018_US_1040.main             # <<<<<<<<<<<<<<
@@ -3377,7 +3513,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_US_1040_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":99
+    /* "tenforty/otslib/ots.pyx":120
  *     if (year == 2018) and (form == "PA_40"):
  *         return ots_2018_PA_40.main
  *     if (year == 2018) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -3386,7 +3522,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":101
+  /* "tenforty/otslib/ots.pyx":122
  *     if (year == 2018) and (form == "US_1040"):
  *         return ots_2018_US_1040.main
  *     if (year == 2018) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -3399,15 +3535,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L28_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L28_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":102
+    /* "tenforty/otslib/ots.pyx":123
  *         return ots_2018_US_1040.main
  *     if (year == 2018) and (form == "NY_IT201"):
  *         return ots_2018_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -3417,7 +3553,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_NY_IT201_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":101
+    /* "tenforty/otslib/ots.pyx":122
  *     if (year == 2018) and (form == "US_1040"):
  *         return ots_2018_US_1040.main
  *     if (year == 2018) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -3426,7 +3562,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":103
+  /* "tenforty/otslib/ots.pyx":124
  *     if (year == 2018) and (form == "NY_IT201"):
  *         return ots_2018_NY_IT201.main
  *     if (year == 2018) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -3439,15 +3575,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L31_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L31_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":104
+    /* "tenforty/otslib/ots.pyx":125
  *         return ots_2018_NY_IT201.main
  *     if (year == 2018) and (form == "NC_D400"):
  *         return ots_2018_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3457,7 +3593,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2018::taxsolve_NC_D400_2018::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":103
+    /* "tenforty/otslib/ots.pyx":124
  *     if (year == 2018) and (form == "NY_IT201"):
  *         return ots_2018_NY_IT201.main
  *     if (year == 2018) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -3466,7 +3602,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":105
+  /* "tenforty/otslib/ots.pyx":126
  *     if (year == 2018) and (form == "NC_D400"):
  *         return ots_2018_NC_D400.main
  *     if (year == 2019) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -3479,15 +3615,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L34_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L34_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":106
+    /* "tenforty/otslib/ots.pyx":127
  *         return ots_2018_NC_D400.main
  *     if (year == 2019) and (form == "MA_1"):
  *         return ots_2019_MA_1.main             # <<<<<<<<<<<<<<
@@ -3497,7 +3633,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_MA_1_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":105
+    /* "tenforty/otslib/ots.pyx":126
  *     if (year == 2018) and (form == "NC_D400"):
  *         return ots_2018_NC_D400.main
  *     if (year == 2019) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -3506,7 +3642,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":107
+  /* "tenforty/otslib/ots.pyx":128
  *     if (year == 2019) and (form == "MA_1"):
  *         return ots_2019_MA_1.main
  *     if (year == 2019) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -3519,15 +3655,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L37_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 107, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L37_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":108
+    /* "tenforty/otslib/ots.pyx":129
  *         return ots_2019_MA_1.main
  *     if (year == 2019) and (form == "NY_IT201"):
  *         return ots_2019_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -3537,7 +3673,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_NY_IT201_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":107
+    /* "tenforty/otslib/ots.pyx":128
  *     if (year == 2019) and (form == "MA_1"):
  *         return ots_2019_MA_1.main
  *     if (year == 2019) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -3546,7 +3682,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":109
+  /* "tenforty/otslib/ots.pyx":130
  *     if (year == 2019) and (form == "NY_IT201"):
  *         return ots_2019_NY_IT201.main
  *     if (year == 2019) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -3559,15 +3695,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L40_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L40_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":110
+    /* "tenforty/otslib/ots.pyx":131
  *         return ots_2019_NY_IT201.main
  *     if (year == 2019) and (form == "US_1040_Sched_C"):
  *         return ots_2019_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -3577,7 +3713,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_US_1040_Sched_C_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":109
+    /* "tenforty/otslib/ots.pyx":130
  *     if (year == 2019) and (form == "NY_IT201"):
  *         return ots_2019_NY_IT201.main
  *     if (year == 2019) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -3586,7 +3722,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":111
+  /* "tenforty/otslib/ots.pyx":132
  *     if (year == 2019) and (form == "US_1040_Sched_C"):
  *         return ots_2019_US_1040_Sched_C.main
  *     if (year == 2019) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -3599,15 +3735,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L43_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 132, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 132, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L43_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":112
+    /* "tenforty/otslib/ots.pyx":133
  *         return ots_2019_US_1040_Sched_C.main
  *     if (year == 2019) and (form == "VA_760"):
  *         return ots_2019_VA_760.main             # <<<<<<<<<<<<<<
@@ -3617,7 +3753,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_VA_760_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":111
+    /* "tenforty/otslib/ots.pyx":132
  *     if (year == 2019) and (form == "US_1040_Sched_C"):
  *         return ots_2019_US_1040_Sched_C.main
  *     if (year == 2019) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -3626,7 +3762,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":113
+  /* "tenforty/otslib/ots.pyx":134
  *     if (year == 2019) and (form == "VA_760"):
  *         return ots_2019_VA_760.main
  *     if (year == 2019) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -3639,15 +3775,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L46_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 113, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L46_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":114
+    /* "tenforty/otslib/ots.pyx":135
  *         return ots_2019_VA_760.main
  *     if (year == 2019) and (form == "OH_IT1040"):
  *         return ots_2019_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3657,7 +3793,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_OH_IT1040_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":113
+    /* "tenforty/otslib/ots.pyx":134
  *     if (year == 2019) and (form == "VA_760"):
  *         return ots_2019_VA_760.main
  *     if (year == 2019) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -3666,7 +3802,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":115
+  /* "tenforty/otslib/ots.pyx":136
  *     if (year == 2019) and (form == "OH_IT1040"):
  *         return ots_2019_OH_IT1040.main
  *     if (year == 2019) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -3679,15 +3815,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L49_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 115, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L49_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":116
+    /* "tenforty/otslib/ots.pyx":137
  *         return ots_2019_OH_IT1040.main
  *     if (year == 2019) and (form == "PA_40"):
  *         return ots_2019_PA_40.main             # <<<<<<<<<<<<<<
@@ -3697,7 +3833,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_PA_40_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":115
+    /* "tenforty/otslib/ots.pyx":136
  *     if (year == 2019) and (form == "OH_IT1040"):
  *         return ots_2019_OH_IT1040.main
  *     if (year == 2019) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -3706,7 +3842,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":117
+  /* "tenforty/otslib/ots.pyx":138
  *     if (year == 2019) and (form == "PA_40"):
  *         return ots_2019_PA_40.main
  *     if (year == 2019) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -3719,15 +3855,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L52_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 138, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L52_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":118
+    /* "tenforty/otslib/ots.pyx":139
  *         return ots_2019_PA_40.main
  *     if (year == 2019) and (form == "US_1040"):
  *         return ots_2019_US_1040.main             # <<<<<<<<<<<<<<
@@ -3737,7 +3873,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_US_1040_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":117
+    /* "tenforty/otslib/ots.pyx":138
  *     if (year == 2019) and (form == "PA_40"):
  *         return ots_2019_PA_40.main
  *     if (year == 2019) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -3746,7 +3882,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":119
+  /* "tenforty/otslib/ots.pyx":140
  *     if (year == 2019) and (form == "US_1040"):
  *         return ots_2019_US_1040.main
  *     if (year == 2019) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -3759,15 +3895,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L55_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L55_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":120
+    /* "tenforty/otslib/ots.pyx":141
  *         return ots_2019_US_1040.main
  *     if (year == 2019) and (form == "NJ_1040"):
  *         return ots_2019_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -3777,7 +3913,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_NJ_1040_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":119
+    /* "tenforty/otslib/ots.pyx":140
  *     if (year == 2019) and (form == "US_1040"):
  *         return ots_2019_US_1040.main
  *     if (year == 2019) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -3786,7 +3922,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":121
+  /* "tenforty/otslib/ots.pyx":142
  *     if (year == 2019) and (form == "NJ_1040"):
  *         return ots_2019_NJ_1040.main
  *     if (year == 2019) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -3799,15 +3935,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L58_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L58_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":122
+    /* "tenforty/otslib/ots.pyx":143
  *         return ots_2019_NJ_1040.main
  *     if (year == 2019) and (form == "NC_D400"):
  *         return ots_2019_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3817,7 +3953,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_NC_D400_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":121
+    /* "tenforty/otslib/ots.pyx":142
  *     if (year == 2019) and (form == "NJ_1040"):
  *         return ots_2019_NJ_1040.main
  *     if (year == 2019) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -3826,7 +3962,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":123
+  /* "tenforty/otslib/ots.pyx":144
  *     if (year == 2019) and (form == "NC_D400"):
  *         return ots_2019_NC_D400.main
  *     if (year == 2019) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -3839,15 +3975,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L61_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L61_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":124
+    /* "tenforty/otslib/ots.pyx":145
  *         return ots_2019_NC_D400.main
  *     if (year == 2019) and (form == "CA_540"):
  *         return ots_2019_CA_540.main             # <<<<<<<<<<<<<<
@@ -3857,7 +3993,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2019::taxsolve_CA_540_2019::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":123
+    /* "tenforty/otslib/ots.pyx":144
  *     if (year == 2019) and (form == "NC_D400"):
  *         return ots_2019_NC_D400.main
  *     if (year == 2019) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -3866,7 +4002,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":125
+  /* "tenforty/otslib/ots.pyx":146
  *     if (year == 2019) and (form == "CA_540"):
  *         return ots_2019_CA_540.main
  *     if (year == 2020) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -3879,15 +4015,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L64_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L64_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":126
+    /* "tenforty/otslib/ots.pyx":147
  *         return ots_2019_CA_540.main
  *     if (year == 2020) and (form == "OH_IT1040"):
  *         return ots_2020_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3897,7 +4033,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_OH_IT1040_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":125
+    /* "tenforty/otslib/ots.pyx":146
  *     if (year == 2019) and (form == "CA_540"):
  *         return ots_2019_CA_540.main
  *     if (year == 2020) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -3906,7 +4042,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":127
+  /* "tenforty/otslib/ots.pyx":148
  *     if (year == 2020) and (form == "OH_IT1040"):
  *         return ots_2020_OH_IT1040.main
  *     if (year == 2020) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -3919,15 +4055,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L67_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L67_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":128
+    /* "tenforty/otslib/ots.pyx":149
  *         return ots_2020_OH_IT1040.main
  *     if (year == 2020) and (form == "NC_D400"):
  *         return ots_2020_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3937,7 +4073,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_NC_D400_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":127
+    /* "tenforty/otslib/ots.pyx":148
  *     if (year == 2020) and (form == "OH_IT1040"):
  *         return ots_2020_OH_IT1040.main
  *     if (year == 2020) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -3946,7 +4082,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":129
+  /* "tenforty/otslib/ots.pyx":150
  *     if (year == 2020) and (form == "NC_D400"):
  *         return ots_2020_NC_D400.main
  *     if (year == 2020) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -3959,15 +4095,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L70_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L70_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":130
+    /* "tenforty/otslib/ots.pyx":151
  *         return ots_2020_NC_D400.main
  *     if (year == 2020) and (form == "US_1040"):
  *         return ots_2020_US_1040.main             # <<<<<<<<<<<<<<
@@ -3977,7 +4113,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_US_1040_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":129
+    /* "tenforty/otslib/ots.pyx":150
  *     if (year == 2020) and (form == "NC_D400"):
  *         return ots_2020_NC_D400.main
  *     if (year == 2020) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -3986,7 +4122,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":131
+  /* "tenforty/otslib/ots.pyx":152
  *     if (year == 2020) and (form == "US_1040"):
  *         return ots_2020_US_1040.main
  *     if (year == 2020) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -3999,15 +4135,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L73_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 152, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 152, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L73_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":132
+    /* "tenforty/otslib/ots.pyx":153
  *         return ots_2020_US_1040.main
  *     if (year == 2020) and (form == "NY_IT201"):
  *         return ots_2020_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -4017,7 +4153,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_NY_IT201_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":131
+    /* "tenforty/otslib/ots.pyx":152
  *     if (year == 2020) and (form == "US_1040"):
  *         return ots_2020_US_1040.main
  *     if (year == 2020) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -4026,7 +4162,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":133
+  /* "tenforty/otslib/ots.pyx":154
  *     if (year == 2020) and (form == "NY_IT201"):
  *         return ots_2020_NY_IT201.main
  *     if (year == 2020) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
@@ -4039,15 +4175,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L76_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L76_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":134
+    /* "tenforty/otslib/ots.pyx":155
  *         return ots_2020_NY_IT201.main
  *     if (year == 2020) and (form == "HSA_f8889"):
  *         return ots_2020_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -4057,7 +4193,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":133
+    /* "tenforty/otslib/ots.pyx":154
  *     if (year == 2020) and (form == "NY_IT201"):
  *         return ots_2020_NY_IT201.main
  *     if (year == 2020) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
@@ -4066,7 +4202,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":135
+  /* "tenforty/otslib/ots.pyx":156
  *     if (year == 2020) and (form == "HSA_f8889"):
  *         return ots_2020_HSA_f8889.main
  *     if (year == 2020) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -4079,15 +4215,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L79_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L79_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":136
+    /* "tenforty/otslib/ots.pyx":157
  *         return ots_2020_HSA_f8889.main
  *     if (year == 2020) and (form == "MA_1"):
  *         return ots_2020_MA_1.main             # <<<<<<<<<<<<<<
@@ -4097,7 +4233,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_MA_1_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":135
+    /* "tenforty/otslib/ots.pyx":156
  *     if (year == 2020) and (form == "HSA_f8889"):
  *         return ots_2020_HSA_f8889.main
  *     if (year == 2020) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -4106,7 +4242,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":137
+  /* "tenforty/otslib/ots.pyx":158
  *     if (year == 2020) and (form == "MA_1"):
  *         return ots_2020_MA_1.main
  *     if (year == 2020) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -4119,15 +4255,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L82_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L82_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":138
+    /* "tenforty/otslib/ots.pyx":159
  *         return ots_2020_MA_1.main
  *     if (year == 2020) and (form == "VA_760"):
  *         return ots_2020_VA_760.main             # <<<<<<<<<<<<<<
@@ -4137,7 +4273,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_VA_760_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":137
+    /* "tenforty/otslib/ots.pyx":158
  *     if (year == 2020) and (form == "MA_1"):
  *         return ots_2020_MA_1.main
  *     if (year == 2020) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -4146,7 +4282,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":139
+  /* "tenforty/otslib/ots.pyx":160
  *     if (year == 2020) and (form == "VA_760"):
  *         return ots_2020_VA_760.main
  *     if (year == 2020) and (form == "f8606"):             # <<<<<<<<<<<<<<
@@ -4159,15 +4295,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L85_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 160, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 160, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L85_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":140
+    /* "tenforty/otslib/ots.pyx":161
  *         return ots_2020_VA_760.main
  *     if (year == 2020) and (form == "f8606"):
  *         return ots_2020_f8606.main             # <<<<<<<<<<<<<<
@@ -4177,7 +4313,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":139
+    /* "tenforty/otslib/ots.pyx":160
  *     if (year == 2020) and (form == "VA_760"):
  *         return ots_2020_VA_760.main
  *     if (year == 2020) and (form == "f8606"):             # <<<<<<<<<<<<<<
@@ -4186,7 +4322,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":141
+  /* "tenforty/otslib/ots.pyx":162
  *     if (year == 2020) and (form == "f8606"):
  *         return ots_2020_f8606.main
  *     if (year == 2020) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -4199,15 +4335,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L88_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L88_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":142
+    /* "tenforty/otslib/ots.pyx":163
  *         return ots_2020_f8606.main
  *     if (year == 2020) and (form == "NJ_1040"):
  *         return ots_2020_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -4217,7 +4353,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_NJ_1040_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":141
+    /* "tenforty/otslib/ots.pyx":162
  *     if (year == 2020) and (form == "f8606"):
  *         return ots_2020_f8606.main
  *     if (year == 2020) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -4226,7 +4362,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":143
+  /* "tenforty/otslib/ots.pyx":164
  *     if (year == 2020) and (form == "NJ_1040"):
  *         return ots_2020_NJ_1040.main
  *     if (year == 2020) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -4239,15 +4375,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L91_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 143, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 143, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L91_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":144
+    /* "tenforty/otslib/ots.pyx":165
  *         return ots_2020_NJ_1040.main
  *     if (year == 2020) and (form == "US_1040_Sched_C"):
  *         return ots_2020_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -4257,7 +4393,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_US_1040_Sched_C_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":143
+    /* "tenforty/otslib/ots.pyx":164
  *     if (year == 2020) and (form == "NJ_1040"):
  *         return ots_2020_NJ_1040.main
  *     if (year == 2020) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -4266,7 +4402,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":145
+  /* "tenforty/otslib/ots.pyx":166
  *     if (year == 2020) and (form == "US_1040_Sched_C"):
  *         return ots_2020_US_1040_Sched_C.main
  *     if (year == 2020) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -4279,15 +4415,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L94_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 166, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 166, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L94_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":146
+    /* "tenforty/otslib/ots.pyx":167
  *         return ots_2020_US_1040_Sched_C.main
  *     if (year == 2020) and (form == "PA_40"):
  *         return ots_2020_PA_40.main             # <<<<<<<<<<<<<<
@@ -4297,7 +4433,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_PA_40_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":145
+    /* "tenforty/otslib/ots.pyx":166
  *     if (year == 2020) and (form == "US_1040_Sched_C"):
  *         return ots_2020_US_1040_Sched_C.main
  *     if (year == 2020) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -4306,7 +4442,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":147
+  /* "tenforty/otslib/ots.pyx":168
  *     if (year == 2020) and (form == "PA_40"):
  *         return ots_2020_PA_40.main
  *     if (year == 2020) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -4319,15 +4455,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L97_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L97_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":148
+    /* "tenforty/otslib/ots.pyx":169
  *         return ots_2020_PA_40.main
  *     if (year == 2020) and (form == "CA_540"):
  *         return ots_2020_CA_540.main             # <<<<<<<<<<<<<<
@@ -4337,7 +4473,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2020::taxsolve_CA_540_2020::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":147
+    /* "tenforty/otslib/ots.pyx":168
  *     if (year == 2020) and (form == "PA_40"):
  *         return ots_2020_PA_40.main
  *     if (year == 2020) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -4346,7 +4482,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":149
+  /* "tenforty/otslib/ots.pyx":170
  *     if (year == 2020) and (form == "CA_540"):
  *         return ots_2020_CA_540.main
  *     if (year == 2021) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -4359,15 +4495,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L100_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L100_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":150
+    /* "tenforty/otslib/ots.pyx":171
  *         return ots_2020_CA_540.main
  *     if (year == 2021) and (form == "NJ_1040"):
  *         return ots_2021_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -4377,7 +4513,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_NJ_1040_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":149
+    /* "tenforty/otslib/ots.pyx":170
  *     if (year == 2020) and (form == "CA_540"):
  *         return ots_2020_CA_540.main
  *     if (year == 2021) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -4386,7 +4522,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":151
+  /* "tenforty/otslib/ots.pyx":172
  *     if (year == 2021) and (form == "NJ_1040"):
  *         return ots_2021_NJ_1040.main
  *     if (year == 2021) and (form == "US_1040_Sched_SE"):             # <<<<<<<<<<<<<<
@@ -4399,15 +4535,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L103_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_SE, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_SE, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L103_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":152
+    /* "tenforty/otslib/ots.pyx":173
  *         return ots_2021_NJ_1040.main
  *     if (year == 2021) and (form == "US_1040_Sched_SE"):
  *         return ots_2021_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -4417,7 +4553,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_US_1040_Sched_SE_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":151
+    /* "tenforty/otslib/ots.pyx":172
  *     if (year == 2021) and (form == "NJ_1040"):
  *         return ots_2021_NJ_1040.main
  *     if (year == 2021) and (form == "US_1040_Sched_SE"):             # <<<<<<<<<<<<<<
@@ -4426,7 +4562,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":153
+  /* "tenforty/otslib/ots.pyx":174
  *     if (year == 2021) and (form == "US_1040_Sched_SE"):
  *         return ots_2021_US_1040_Sched_SE.main
  *     if (year == 2021) and (form == "f8606"):             # <<<<<<<<<<<<<<
@@ -4439,15 +4575,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L106_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L106_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":154
+    /* "tenforty/otslib/ots.pyx":175
  *         return ots_2021_US_1040_Sched_SE.main
  *     if (year == 2021) and (form == "f8606"):
  *         return ots_2021_f8606.main             # <<<<<<<<<<<<<<
@@ -4457,7 +4593,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":153
+    /* "tenforty/otslib/ots.pyx":174
  *     if (year == 2021) and (form == "US_1040_Sched_SE"):
  *         return ots_2021_US_1040_Sched_SE.main
  *     if (year == 2021) and (form == "f8606"):             # <<<<<<<<<<<<<<
@@ -4466,7 +4602,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":155
+  /* "tenforty/otslib/ots.pyx":176
  *     if (year == 2021) and (form == "f8606"):
  *         return ots_2021_f8606.main
  *     if (year == 2021) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -4479,15 +4615,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L109_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 155, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L109_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":156
+    /* "tenforty/otslib/ots.pyx":177
  *         return ots_2021_f8606.main
  *     if (year == 2021) and (form == "CA_540"):
  *         return ots_2021_CA_540.main             # <<<<<<<<<<<<<<
@@ -4497,7 +4633,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_CA_540_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":155
+    /* "tenforty/otslib/ots.pyx":176
  *     if (year == 2021) and (form == "f8606"):
  *         return ots_2021_f8606.main
  *     if (year == 2021) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -4506,7 +4642,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":157
+  /* "tenforty/otslib/ots.pyx":178
  *     if (year == 2021) and (form == "CA_540"):
  *         return ots_2021_CA_540.main
  *     if (year == 2021) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
@@ -4519,15 +4655,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L112_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 178, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L112_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":158
+    /* "tenforty/otslib/ots.pyx":179
  *         return ots_2021_CA_540.main
  *     if (year == 2021) and (form == "HSA_f8889"):
  *         return ots_2021_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -4537,7 +4673,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":157
+    /* "tenforty/otslib/ots.pyx":178
  *     if (year == 2021) and (form == "CA_540"):
  *         return ots_2021_CA_540.main
  *     if (year == 2021) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
@@ -4546,7 +4682,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":159
+  /* "tenforty/otslib/ots.pyx":180
  *     if (year == 2021) and (form == "HSA_f8889"):
  *         return ots_2021_HSA_f8889.main
  *     if (year == 2021) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -4559,15 +4695,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L115_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L115_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":160
+    /* "tenforty/otslib/ots.pyx":181
  *         return ots_2021_HSA_f8889.main
  *     if (year == 2021) and (form == "MA_1"):
  *         return ots_2021_MA_1.main             # <<<<<<<<<<<<<<
@@ -4577,7 +4713,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_MA_1_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":159
+    /* "tenforty/otslib/ots.pyx":180
  *     if (year == 2021) and (form == "HSA_f8889"):
  *         return ots_2021_HSA_f8889.main
  *     if (year == 2021) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -4586,7 +4722,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":161
+  /* "tenforty/otslib/ots.pyx":182
  *     if (year == 2021) and (form == "MA_1"):
  *         return ots_2021_MA_1.main
  *     if (year == 2021) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -4599,15 +4735,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L118_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 182, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 182, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L118_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":162
+    /* "tenforty/otslib/ots.pyx":183
  *         return ots_2021_MA_1.main
  *     if (year == 2021) and (form == "NC_D400"):
  *         return ots_2021_NC_D400.main             # <<<<<<<<<<<<<<
@@ -4617,7 +4753,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_NC_D400_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":161
+    /* "tenforty/otslib/ots.pyx":182
  *     if (year == 2021) and (form == "MA_1"):
  *         return ots_2021_MA_1.main
  *     if (year == 2021) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -4626,7 +4762,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":163
+  /* "tenforty/otslib/ots.pyx":184
  *     if (year == 2021) and (form == "NC_D400"):
  *         return ots_2021_NC_D400.main
  *     if (year == 2021) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -4639,15 +4775,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L121_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 184, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 184, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L121_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":164
+    /* "tenforty/otslib/ots.pyx":185
  *         return ots_2021_NC_D400.main
  *     if (year == 2021) and (form == "NY_IT201"):
  *         return ots_2021_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -4657,7 +4793,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_NY_IT201_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":163
+    /* "tenforty/otslib/ots.pyx":184
  *     if (year == 2021) and (form == "NC_D400"):
  *         return ots_2021_NC_D400.main
  *     if (year == 2021) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -4666,7 +4802,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":165
+  /* "tenforty/otslib/ots.pyx":186
  *     if (year == 2021) and (form == "NY_IT201"):
  *         return ots_2021_NY_IT201.main
  *     if (year == 2021) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -4679,15 +4815,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L124_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L124_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":166
+    /* "tenforty/otslib/ots.pyx":187
  *         return ots_2021_NY_IT201.main
  *     if (year == 2021) and (form == "OH_IT1040"):
  *         return ots_2021_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -4697,7 +4833,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_OH_IT1040_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":165
+    /* "tenforty/otslib/ots.pyx":186
  *     if (year == 2021) and (form == "NY_IT201"):
  *         return ots_2021_NY_IT201.main
  *     if (year == 2021) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -4706,7 +4842,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":167
+  /* "tenforty/otslib/ots.pyx":188
  *     if (year == 2021) and (form == "OH_IT1040"):
  *         return ots_2021_OH_IT1040.main
  *     if (year == 2021) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -4719,15 +4855,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L127_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L127_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":168
+    /* "tenforty/otslib/ots.pyx":189
  *         return ots_2021_OH_IT1040.main
  *     if (year == 2021) and (form == "PA_40"):
  *         return ots_2021_PA_40.main             # <<<<<<<<<<<<<<
@@ -4737,7 +4873,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_PA_40_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":167
+    /* "tenforty/otslib/ots.pyx":188
  *     if (year == 2021) and (form == "OH_IT1040"):
  *         return ots_2021_OH_IT1040.main
  *     if (year == 2021) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -4746,7 +4882,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":169
+  /* "tenforty/otslib/ots.pyx":190
  *     if (year == 2021) and (form == "PA_40"):
  *         return ots_2021_PA_40.main
  *     if (year == 2021) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -4759,15 +4895,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L130_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 190, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 190, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L130_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":170
+    /* "tenforty/otslib/ots.pyx":191
  *         return ots_2021_PA_40.main
  *     if (year == 2021) and (form == "US_1040"):
  *         return ots_2021_US_1040.main             # <<<<<<<<<<<<<<
@@ -4777,7 +4913,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_US_1040_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":169
+    /* "tenforty/otslib/ots.pyx":190
  *     if (year == 2021) and (form == "PA_40"):
  *         return ots_2021_PA_40.main
  *     if (year == 2021) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -4786,7 +4922,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":171
+  /* "tenforty/otslib/ots.pyx":192
  *     if (year == 2021) and (form == "US_1040"):
  *         return ots_2021_US_1040.main
  *     if (year == 2021) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -4799,15 +4935,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L133_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L133_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":172
+    /* "tenforty/otslib/ots.pyx":193
  *         return ots_2021_US_1040.main
  *     if (year == 2021) and (form == "US_1040_Sched_C"):
  *         return ots_2021_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -4817,7 +4953,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_US_1040_Sched_C_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":171
+    /* "tenforty/otslib/ots.pyx":192
  *     if (year == 2021) and (form == "US_1040"):
  *         return ots_2021_US_1040.main
  *     if (year == 2021) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -4826,7 +4962,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":173
+  /* "tenforty/otslib/ots.pyx":194
  *     if (year == 2021) and (form == "US_1040_Sched_C"):
  *         return ots_2021_US_1040_Sched_C.main
  *     if (year == 2021) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -4839,15 +4975,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L136_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 194, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 194, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L136_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":174
+    /* "tenforty/otslib/ots.pyx":195
  *         return ots_2021_US_1040_Sched_C.main
  *     if (year == 2021) and (form == "VA_760"):
  *         return ots_2021_VA_760.main             # <<<<<<<<<<<<<<
@@ -4857,7 +4993,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_VA_760_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":173
+    /* "tenforty/otslib/ots.pyx":194
  *     if (year == 2021) and (form == "US_1040_Sched_C"):
  *         return ots_2021_US_1040_Sched_C.main
  *     if (year == 2021) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -4866,7 +5002,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":175
+  /* "tenforty/otslib/ots.pyx":196
  *     if (year == 2021) and (form == "VA_760"):
  *         return ots_2021_VA_760.main
  *     if (year == 2021) and (form == "CA_5805"):             # <<<<<<<<<<<<<<
@@ -4879,15 +5015,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L139_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_5805, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_5805, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L139_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":176
+    /* "tenforty/otslib/ots.pyx":197
  *         return ots_2021_VA_760.main
  *     if (year == 2021) and (form == "CA_5805"):
  *         return ots_2021_CA_5805.main             # <<<<<<<<<<<<<<
@@ -4897,7 +5033,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_CA_5805_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":175
+    /* "tenforty/otslib/ots.pyx":196
  *     if (year == 2021) and (form == "VA_760"):
  *         return ots_2021_VA_760.main
  *     if (year == 2021) and (form == "CA_5805"):             # <<<<<<<<<<<<<<
@@ -4906,7 +5042,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":177
+  /* "tenforty/otslib/ots.pyx":198
  *     if (year == 2021) and (form == "CA_5805"):
  *         return ots_2021_CA_5805.main
  *     if (year == 2021) and (form == "f2210"):             # <<<<<<<<<<<<<<
@@ -4919,15 +5055,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L142_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f2210, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f2210, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L142_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":178
+    /* "tenforty/otslib/ots.pyx":199
  *         return ots_2021_CA_5805.main
  *     if (year == 2021) and (form == "f2210"):
  *         return ots_2021_f2210.main             # <<<<<<<<<<<<<<
@@ -4937,7 +5073,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_f2210_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":177
+    /* "tenforty/otslib/ots.pyx":198
  *     if (year == 2021) and (form == "CA_5805"):
  *         return ots_2021_CA_5805.main
  *     if (year == 2021) and (form == "f2210"):             # <<<<<<<<<<<<<<
@@ -4946,7 +5082,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":179
+  /* "tenforty/otslib/ots.pyx":200
  *     if (year == 2021) and (form == "f2210"):
  *         return ots_2021_f2210.main
  *     if (year == 2021) and (form == "f8960"):             # <<<<<<<<<<<<<<
@@ -4959,15 +5095,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L145_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8960, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8960, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L145_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":180
+    /* "tenforty/otslib/ots.pyx":201
  *         return ots_2021_f2210.main
  *     if (year == 2021) and (form == "f8960"):
  *         return ots_2021_f8960.main             # <<<<<<<<<<<<<<
@@ -4977,7 +5113,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_f8960_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":179
+    /* "tenforty/otslib/ots.pyx":200
  *     if (year == 2021) and (form == "f2210"):
  *         return ots_2021_f2210.main
  *     if (year == 2021) and (form == "f8960"):             # <<<<<<<<<<<<<<
@@ -4986,7 +5122,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":181
+  /* "tenforty/otslib/ots.pyx":202
  *     if (year == 2021) and (form == "f8960"):
  *         return ots_2021_f8960.main
  *     if (year == 2021) and (form == "f8959"):             # <<<<<<<<<<<<<<
@@ -4999,15 +5135,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L148_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 202, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8959, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8959, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 202, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L148_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":182
+    /* "tenforty/otslib/ots.pyx":203
  *         return ots_2021_f8960.main
  *     if (year == 2021) and (form == "f8959"):
  *         return ots_2021_f8959.main             # <<<<<<<<<<<<<<
@@ -5017,7 +5153,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2021::taxsolve_f8959_2021::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":181
+    /* "tenforty/otslib/ots.pyx":202
  *     if (year == 2021) and (form == "f8960"):
  *         return ots_2021_f8960.main
  *     if (year == 2021) and (form == "f8959"):             # <<<<<<<<<<<<<<
@@ -5026,7 +5162,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":183
+  /* "tenforty/otslib/ots.pyx":204
  *     if (year == 2021) and (form == "f8959"):
  *         return ots_2021_f8959.main
  *     if (year == 2022) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
@@ -5039,15 +5175,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L151_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 183, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 183, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L151_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":184
+    /* "tenforty/otslib/ots.pyx":205
  *         return ots_2021_f8959.main
  *     if (year == 2022) and (form == "HSA_f8889"):
  *         return ots_2022_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -5057,7 +5193,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":183
+    /* "tenforty/otslib/ots.pyx":204
  *     if (year == 2021) and (form == "f8959"):
  *         return ots_2021_f8959.main
  *     if (year == 2022) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
@@ -5066,7 +5202,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":185
+  /* "tenforty/otslib/ots.pyx":206
  *     if (year == 2022) and (form == "HSA_f8889"):
  *         return ots_2022_HSA_f8889.main
  *     if (year == 2022) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -5079,15 +5215,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L154_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 206, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 206, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L154_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":186
+    /* "tenforty/otslib/ots.pyx":207
  *         return ots_2022_HSA_f8889.main
  *     if (year == 2022) and (form == "MA_1"):
  *         return ots_2022_MA_1.main             # <<<<<<<<<<<<<<
@@ -5097,7 +5233,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_MA_1_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":185
+    /* "tenforty/otslib/ots.pyx":206
  *     if (year == 2022) and (form == "HSA_f8889"):
  *         return ots_2022_HSA_f8889.main
  *     if (year == 2022) and (form == "MA_1"):             # <<<<<<<<<<<<<<
@@ -5106,7 +5242,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":187
+  /* "tenforty/otslib/ots.pyx":208
  *     if (year == 2022) and (form == "MA_1"):
  *         return ots_2022_MA_1.main
  *     if (year == 2022) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -5119,15 +5255,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L157_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 187, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 187, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L157_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":188
+    /* "tenforty/otslib/ots.pyx":209
  *         return ots_2022_MA_1.main
  *     if (year == 2022) and (form == "NJ_1040"):
  *         return ots_2022_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -5137,7 +5273,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_NJ_1040_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":187
+    /* "tenforty/otslib/ots.pyx":208
  *     if (year == 2022) and (form == "MA_1"):
  *         return ots_2022_MA_1.main
  *     if (year == 2022) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
@@ -5146,7 +5282,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":189
+  /* "tenforty/otslib/ots.pyx":210
  *     if (year == 2022) and (form == "NJ_1040"):
  *         return ots_2022_NJ_1040.main
  *     if (year == 2022) and (form == "f8959"):             # <<<<<<<<<<<<<<
@@ -5159,15 +5295,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L160_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8959, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 189, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8959, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L160_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":190
+    /* "tenforty/otslib/ots.pyx":211
  *         return ots_2022_NJ_1040.main
  *     if (year == 2022) and (form == "f8959"):
  *         return ots_2022_f8959.main             # <<<<<<<<<<<<<<
@@ -5177,7 +5313,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_f8959_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":189
+    /* "tenforty/otslib/ots.pyx":210
  *     if (year == 2022) and (form == "NJ_1040"):
  *         return ots_2022_NJ_1040.main
  *     if (year == 2022) and (form == "f8959"):             # <<<<<<<<<<<<<<
@@ -5186,7 +5322,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":191
+  /* "tenforty/otslib/ots.pyx":212
  *     if (year == 2022) and (form == "f8959"):
  *         return ots_2022_f8959.main
  *     if (year == 2022) and (form == "f8960"):             # <<<<<<<<<<<<<<
@@ -5199,15 +5335,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L163_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 191, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8960, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 191, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8960, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L163_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":192
+    /* "tenforty/otslib/ots.pyx":213
  *         return ots_2022_f8959.main
  *     if (year == 2022) and (form == "f8960"):
  *         return ots_2022_f8960.main             # <<<<<<<<<<<<<<
@@ -5217,7 +5353,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_f8960_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":191
+    /* "tenforty/otslib/ots.pyx":212
  *     if (year == 2022) and (form == "f8959"):
  *         return ots_2022_f8959.main
  *     if (year == 2022) and (form == "f8960"):             # <<<<<<<<<<<<<<
@@ -5226,7 +5362,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":193
+  /* "tenforty/otslib/ots.pyx":214
  *     if (year == 2022) and (form == "f8960"):
  *         return ots_2022_f8960.main
  *     if (year == 2022) and (form == "f8606"):             # <<<<<<<<<<<<<<
@@ -5239,15 +5375,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L166_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 193, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 193, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L166_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":194
+    /* "tenforty/otslib/ots.pyx":215
  *         return ots_2022_f8960.main
  *     if (year == 2022) and (form == "f8606"):
  *         return ots_2022_f8606.main             # <<<<<<<<<<<<<<
@@ -5257,7 +5393,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":193
+    /* "tenforty/otslib/ots.pyx":214
  *     if (year == 2022) and (form == "f8960"):
  *         return ots_2022_f8960.main
  *     if (year == 2022) and (form == "f8606"):             # <<<<<<<<<<<<<<
@@ -5266,7 +5402,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":195
+  /* "tenforty/otslib/ots.pyx":216
  *     if (year == 2022) and (form == "f8606"):
  *         return ots_2022_f8606.main
  *     if (year == 2022) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -5279,15 +5415,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L169_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 216, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 216, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L169_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":196
+    /* "tenforty/otslib/ots.pyx":217
  *         return ots_2022_f8606.main
  *     if (year == 2022) and (form == "CA_540"):
  *         return ots_2022_CA_540.main             # <<<<<<<<<<<<<<
@@ -5297,7 +5433,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_CA_540_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":195
+    /* "tenforty/otslib/ots.pyx":216
  *     if (year == 2022) and (form == "f8606"):
  *         return ots_2022_f8606.main
  *     if (year == 2022) and (form == "CA_540"):             # <<<<<<<<<<<<<<
@@ -5306,7 +5442,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":197
+  /* "tenforty/otslib/ots.pyx":218
  *     if (year == 2022) and (form == "CA_540"):
  *         return ots_2022_CA_540.main
  *     if (year == 2022) and (form == "CA_5805"):             # <<<<<<<<<<<<<<
@@ -5319,15 +5455,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L172_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 197, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_5805, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 197, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_5805, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L172_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":198
+    /* "tenforty/otslib/ots.pyx":219
  *         return ots_2022_CA_540.main
  *     if (year == 2022) and (form == "CA_5805"):
  *         return ots_2022_CA_5805.main             # <<<<<<<<<<<<<<
@@ -5337,7 +5473,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_CA_5805_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":197
+    /* "tenforty/otslib/ots.pyx":218
  *     if (year == 2022) and (form == "CA_540"):
  *         return ots_2022_CA_540.main
  *     if (year == 2022) and (form == "CA_5805"):             # <<<<<<<<<<<<<<
@@ -5346,7 +5482,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":199
+  /* "tenforty/otslib/ots.pyx":220
  *     if (year == 2022) and (form == "CA_5805"):
  *         return ots_2022_CA_5805.main
  *     if (year == 2022) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -5359,15 +5495,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L175_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 199, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 220, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 199, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 220, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L175_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":200
+    /* "tenforty/otslib/ots.pyx":221
  *         return ots_2022_CA_5805.main
  *     if (year == 2022) and (form == "NC_D400"):
  *         return ots_2022_NC_D400.main             # <<<<<<<<<<<<<<
@@ -5377,7 +5513,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_NC_D400_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":199
+    /* "tenforty/otslib/ots.pyx":220
  *     if (year == 2022) and (form == "CA_5805"):
  *         return ots_2022_CA_5805.main
  *     if (year == 2022) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
@@ -5386,7 +5522,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":201
+  /* "tenforty/otslib/ots.pyx":222
  *     if (year == 2022) and (form == "NC_D400"):
  *         return ots_2022_NC_D400.main
  *     if (year == 2022) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -5399,15 +5535,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L178_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 222, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 201, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 222, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L178_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":202
+    /* "tenforty/otslib/ots.pyx":223
  *         return ots_2022_NC_D400.main
  *     if (year == 2022) and (form == "NY_IT201"):
  *         return ots_2022_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -5417,7 +5553,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_NY_IT201_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":201
+    /* "tenforty/otslib/ots.pyx":222
  *     if (year == 2022) and (form == "NC_D400"):
  *         return ots_2022_NC_D400.main
  *     if (year == 2022) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
@@ -5426,7 +5562,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":203
+  /* "tenforty/otslib/ots.pyx":224
  *     if (year == 2022) and (form == "NY_IT201"):
  *         return ots_2022_NY_IT201.main
  *     if (year == 2022) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -5439,15 +5575,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L181_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 203, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 203, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L181_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":204
+    /* "tenforty/otslib/ots.pyx":225
  *         return ots_2022_NY_IT201.main
  *     if (year == 2022) and (form == "OH_IT1040"):
  *         return ots_2022_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -5457,7 +5593,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_OH_IT1040_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":203
+    /* "tenforty/otslib/ots.pyx":224
  *     if (year == 2022) and (form == "NY_IT201"):
  *         return ots_2022_NY_IT201.main
  *     if (year == 2022) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
@@ -5466,7 +5602,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":205
+  /* "tenforty/otslib/ots.pyx":226
  *     if (year == 2022) and (form == "OH_IT1040"):
  *         return ots_2022_OH_IT1040.main
  *     if (year == 2022) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -5479,15 +5615,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L184_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 226, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L184_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":206
+    /* "tenforty/otslib/ots.pyx":227
  *         return ots_2022_OH_IT1040.main
  *     if (year == 2022) and (form == "PA_40"):
  *         return ots_2022_PA_40.main             # <<<<<<<<<<<<<<
@@ -5497,7 +5633,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_PA_40_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":205
+    /* "tenforty/otslib/ots.pyx":226
  *     if (year == 2022) and (form == "OH_IT1040"):
  *         return ots_2022_OH_IT1040.main
  *     if (year == 2022) and (form == "PA_40"):             # <<<<<<<<<<<<<<
@@ -5506,7 +5642,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":207
+  /* "tenforty/otslib/ots.pyx":228
  *     if (year == 2022) and (form == "PA_40"):
  *         return ots_2022_PA_40.main
  *     if (year == 2022) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -5519,15 +5655,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L187_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L187_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":208
+    /* "tenforty/otslib/ots.pyx":229
  *         return ots_2022_PA_40.main
  *     if (year == 2022) and (form == "US_1040"):
  *         return ots_2022_US_1040.main             # <<<<<<<<<<<<<<
@@ -5537,7 +5673,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_US_1040_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":207
+    /* "tenforty/otslib/ots.pyx":228
  *     if (year == 2022) and (form == "PA_40"):
  *         return ots_2022_PA_40.main
  *     if (year == 2022) and (form == "US_1040"):             # <<<<<<<<<<<<<<
@@ -5546,7 +5682,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":209
+  /* "tenforty/otslib/ots.pyx":230
  *     if (year == 2022) and (form == "US_1040"):
  *         return ots_2022_US_1040.main
  *     if (year == 2022) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -5559,15 +5695,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L190_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 230, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 230, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L190_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":210
+    /* "tenforty/otslib/ots.pyx":231
  *         return ots_2022_US_1040.main
  *     if (year == 2022) and (form == "US_1040_Sched_C"):
  *         return ots_2022_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -5577,7 +5713,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_US_1040_Sched_C_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":209
+    /* "tenforty/otslib/ots.pyx":230
  *     if (year == 2022) and (form == "US_1040"):
  *         return ots_2022_US_1040.main
  *     if (year == 2022) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
@@ -5586,7 +5722,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":211
+  /* "tenforty/otslib/ots.pyx":232
  *     if (year == 2022) and (form == "US_1040_Sched_C"):
  *         return ots_2022_US_1040_Sched_C.main
  *     if (year == 2022) and (form == "US_1040_Sched_SE"):             # <<<<<<<<<<<<<<
@@ -5599,15 +5735,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L193_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 232, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_SE, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_SE, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 232, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L193_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":212
+    /* "tenforty/otslib/ots.pyx":233
  *         return ots_2022_US_1040_Sched_C.main
  *     if (year == 2022) and (form == "US_1040_Sched_SE"):
  *         return ots_2022_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -5617,7 +5753,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_US_1040_Sched_SE_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":211
+    /* "tenforty/otslib/ots.pyx":232
  *     if (year == 2022) and (form == "US_1040_Sched_C"):
  *         return ots_2022_US_1040_Sched_C.main
  *     if (year == 2022) and (form == "US_1040_Sched_SE"):             # <<<<<<<<<<<<<<
@@ -5626,7 +5762,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":213
+  /* "tenforty/otslib/ots.pyx":234
  *     if (year == 2022) and (form == "US_1040_Sched_SE"):
  *         return ots_2022_US_1040_Sched_SE.main
  *     if (year == 2022) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -5639,15 +5775,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L196_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L196_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":214
+    /* "tenforty/otslib/ots.pyx":235
  *         return ots_2022_US_1040_Sched_SE.main
  *     if (year == 2022) and (form == "VA_760"):
  *         return ots_2022_VA_760.main             # <<<<<<<<<<<<<<
@@ -5657,7 +5793,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_VA_760_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":213
+    /* "tenforty/otslib/ots.pyx":234
  *     if (year == 2022) and (form == "US_1040_Sched_SE"):
  *         return ots_2022_US_1040_Sched_SE.main
  *     if (year == 2022) and (form == "VA_760"):             # <<<<<<<<<<<<<<
@@ -5666,7 +5802,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":215
+  /* "tenforty/otslib/ots.pyx":236
  *     if (year == 2022) and (form == "VA_760"):
  *         return ots_2022_VA_760.main
  *     if (year == 2022) and (form == "f2210"):             # <<<<<<<<<<<<<<
@@ -5679,15 +5815,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L199_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f2210, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 215, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f2210, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L199_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":216
+    /* "tenforty/otslib/ots.pyx":237
  *         return ots_2022_VA_760.main
  *     if (year == 2022) and (form == "f2210"):
  *         return ots_2022_f2210.main             # <<<<<<<<<<<<<<
@@ -5697,7 +5833,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_f2210_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":215
+    /* "tenforty/otslib/ots.pyx":236
  *     if (year == 2022) and (form == "VA_760"):
  *         return ots_2022_VA_760.main
  *     if (year == 2022) and (form == "f2210"):             # <<<<<<<<<<<<<<
@@ -5706,7 +5842,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":217
+  /* "tenforty/otslib/ots.pyx":238
  *     if (year == 2022) and (form == "f2210"):
  *         return ots_2022_f2210.main
  *     if (year == 2022) and (form == "f8829"):             # <<<<<<<<<<<<<<
@@ -5719,15 +5855,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L202_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 238, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8829, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 217, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8829, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 238, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L202_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":218
+    /* "tenforty/otslib/ots.pyx":239
  *         return ots_2022_f2210.main
  *     if (year == 2022) and (form == "f8829"):
  *         return ots_2022_f8829.main             # <<<<<<<<<<<<<<
@@ -5737,7 +5873,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_r = OpenTaxSolver2022::taxsolve_f8829_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":217
+    /* "tenforty/otslib/ots.pyx":238
  *     if (year == 2022) and (form == "f2210"):
  *         return ots_2022_f2210.main
  *     if (year == 2022) and (form == "f8829"):             # <<<<<<<<<<<<<<
@@ -5746,12 +5882,12 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":219
+  /* "tenforty/otslib/ots.pyx":240
  *     if (year == 2022) and (form == "f8829"):
  *         return ots_2022_f8829.main
  *     if (year == 2022) and (form == "f8995"):             # <<<<<<<<<<<<<<
  *         return ots_2022_f8995.main
- *
+ *     if (year == 2023) and (form == "NJ_1040"):
  */
   __pyx_t_2 = (__pyx_v_year == 0x7E6);
   if (__pyx_t_2) {
@@ -5759,35 +5895,875 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L205_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 240, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8995, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 219, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8995, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 240, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_2;
   __pyx_L205_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tenforty/otslib/ots.pyx":220
+    /* "tenforty/otslib/ots.pyx":241
  *         return ots_2022_f8829.main
  *     if (year == 2022) and (form == "f8995"):
  *         return ots_2022_f8995.main             # <<<<<<<<<<<<<<
- *
- *
+ *     if (year == 2023) and (form == "NJ_1040"):
+ *         return ots_2023_NJ_1040.main
  */
     __pyx_r = OpenTaxSolver2022::taxsolve_f8995_2022::main;
     goto __pyx_L0;
 
-    /* "tenforty/otslib/ots.pyx":219
+    /* "tenforty/otslib/ots.pyx":240
  *     if (year == 2022) and (form == "f8829"):
  *         return ots_2022_f8829.main
  *     if (year == 2022) and (form == "f8995"):             # <<<<<<<<<<<<<<
  *         return ots_2022_f8995.main
+ *     if (year == 2023) and (form == "NJ_1040"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":242
+ *     if (year == 2022) and (form == "f8995"):
+ *         return ots_2022_f8995.main
+ *     if (year == 2023) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_NJ_1040.main
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L208_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NJ_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 242, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L208_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":243
+ *         return ots_2022_f8995.main
+ *     if (year == 2023) and (form == "NJ_1040"):
+ *         return ots_2023_NJ_1040.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):
+ *         return ots_2023_US_1040_Sched_C.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_NJ_1040_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":242
+ *     if (year == 2022) and (form == "f8995"):
+ *         return ots_2022_f8995.main
+ *     if (year == 2023) and (form == "NJ_1040"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_NJ_1040.main
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":244
+ *     if (year == 2023) and (form == "NJ_1040"):
+ *         return ots_2023_NJ_1040.main
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040_Sched_C.main
+ *     if (year == 2023) and (form == "f8829"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L211_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_C, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 244, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L211_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":245
+ *         return ots_2023_NJ_1040.main
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):
+ *         return ots_2023_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f8829"):
+ *         return ots_2023_f8829.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_Sched_C_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":244
+ *     if (year == 2023) and (form == "NJ_1040"):
+ *         return ots_2023_NJ_1040.main
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040_Sched_C.main
+ *     if (year == 2023) and (form == "f8829"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":246
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):
+ *         return ots_2023_US_1040_Sched_C.main
+ *     if (year == 2023) and (form == "f8829"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8829.main
+ *     if (year == 2023) and (form == "f8959"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L214_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8829, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L214_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":247
+ *         return ots_2023_US_1040_Sched_C.main
+ *     if (year == 2023) and (form == "f8829"):
+ *         return ots_2023_f8829.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f8959"):
+ *         return ots_2023_f8959.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f8829_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":246
+ *     if (year == 2023) and (form == "US_1040_Sched_C"):
+ *         return ots_2023_US_1040_Sched_C.main
+ *     if (year == 2023) and (form == "f8829"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8829.main
+ *     if (year == 2023) and (form == "f8959"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":248
+ *     if (year == 2023) and (form == "f8829"):
+ *         return ots_2023_f8829.main
+ *     if (year == 2023) and (form == "f8959"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8959.main
+ *     if (year == 2023) and (form == "f8960"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L217_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8959, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L217_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":249
+ *         return ots_2023_f8829.main
+ *     if (year == 2023) and (form == "f8959"):
+ *         return ots_2023_f8959.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f8960"):
+ *         return ots_2023_f8960.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f8959_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":248
+ *     if (year == 2023) and (form == "f8829"):
+ *         return ots_2023_f8829.main
+ *     if (year == 2023) and (form == "f8959"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8959.main
+ *     if (year == 2023) and (form == "f8960"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":250
+ *     if (year == 2023) and (form == "f8959"):
+ *         return ots_2023_f8959.main
+ *     if (year == 2023) and (form == "f8960"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8960.main
+ *     if (year == 2023) and (form == "f8995"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L220_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 250, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8960, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 250, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L220_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":251
+ *         return ots_2023_f8959.main
+ *     if (year == 2023) and (form == "f8960"):
+ *         return ots_2023_f8960.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f8995"):
+ *         return ots_2023_f8995.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f8960_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":250
+ *     if (year == 2023) and (form == "f8959"):
+ *         return ots_2023_f8959.main
+ *     if (year == 2023) and (form == "f8960"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8960.main
+ *     if (year == 2023) and (form == "f8995"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":252
+ *     if (year == 2023) and (form == "f8960"):
+ *         return ots_2023_f8960.main
+ *     if (year == 2023) and (form == "f8995"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8995.main
+ *     if (year == 2023) and (form == "f8606"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L223_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 252, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8995, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 252, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L223_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":253
+ *         return ots_2023_f8960.main
+ *     if (year == 2023) and (form == "f8995"):
+ *         return ots_2023_f8995.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f8606"):
+ *         return ots_2023_f8606.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f8995_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":252
+ *     if (year == 2023) and (form == "f8960"):
+ *         return ots_2023_f8960.main
+ *     if (year == 2023) and (form == "f8995"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8995.main
+ *     if (year == 2023) and (form == "f8606"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":254
+ *     if (year == 2023) and (form == "f8995"):
+ *         return ots_2023_f8995.main
+ *     if (year == 2023) and (form == "f8606"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8606.main
+ *     if (year == 2023) and (form == "CA_540"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L226_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 254, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8606, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 254, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L226_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":255
+ *         return ots_2023_f8995.main
+ *     if (year == 2023) and (form == "f8606"):
+ *         return ots_2023_f8606.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "CA_540"):
+ *         return ots_2023_CA_540.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f8606::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":254
+ *     if (year == 2023) and (form == "f8995"):
+ *         return ots_2023_f8995.main
+ *     if (year == 2023) and (form == "f8606"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8606.main
+ *     if (year == 2023) and (form == "CA_540"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":256
+ *     if (year == 2023) and (form == "f8606"):
+ *         return ots_2023_f8606.main
+ *     if (year == 2023) and (form == "CA_540"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_CA_540.main
+ *     if (year == 2023) and (form == "HSA_f8889"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L229_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 256, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_540, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 256, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L229_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":257
+ *         return ots_2023_f8606.main
+ *     if (year == 2023) and (form == "CA_540"):
+ *         return ots_2023_CA_540.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "HSA_f8889"):
+ *         return ots_2023_HSA_f8889.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_CA_540_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":256
+ *     if (year == 2023) and (form == "f8606"):
+ *         return ots_2023_f8606.main
+ *     if (year == 2023) and (form == "CA_540"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_CA_540.main
+ *     if (year == 2023) and (form == "HSA_f8889"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":258
+ *     if (year == 2023) and (form == "CA_540"):
+ *         return ots_2023_CA_540.main
+ *     if (year == 2023) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_HSA_f8889.main
+ *     if (year == 2023) and (form == "MA_1"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L232_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 258, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_HSA_f8889, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 258, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L232_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":259
+ *         return ots_2023_CA_540.main
+ *     if (year == 2023) and (form == "HSA_f8889"):
+ *         return ots_2023_HSA_f8889.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "MA_1"):
+ *         return ots_2023_MA_1.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_HSA_f8889::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":258
+ *     if (year == 2023) and (form == "CA_540"):
+ *         return ots_2023_CA_540.main
+ *     if (year == 2023) and (form == "HSA_f8889"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_HSA_f8889.main
+ *     if (year == 2023) and (form == "MA_1"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":260
+ *     if (year == 2023) and (form == "HSA_f8889"):
+ *         return ots_2023_HSA_f8889.main
+ *     if (year == 2023) and (form == "MA_1"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_MA_1.main
+ *     if (year == 2023) and (form == "NC_D400"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L235_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 260, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_MA_1, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 260, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L235_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":261
+ *         return ots_2023_HSA_f8889.main
+ *     if (year == 2023) and (form == "MA_1"):
+ *         return ots_2023_MA_1.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "NC_D400"):
+ *         return ots_2023_NC_D400.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_MA_1_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":260
+ *     if (year == 2023) and (form == "HSA_f8889"):
+ *         return ots_2023_HSA_f8889.main
+ *     if (year == 2023) and (form == "MA_1"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_MA_1.main
+ *     if (year == 2023) and (form == "NC_D400"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":262
+ *     if (year == 2023) and (form == "MA_1"):
+ *         return ots_2023_MA_1.main
+ *     if (year == 2023) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_NC_D400.main
+ *     if (year == 2023) and (form == "NY_IT201"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L238_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 262, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NC_D400, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 262, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L238_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":263
+ *         return ots_2023_MA_1.main
+ *     if (year == 2023) and (form == "NC_D400"):
+ *         return ots_2023_NC_D400.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "NY_IT201"):
+ *         return ots_2023_NY_IT201.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_NC_D400_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":262
+ *     if (year == 2023) and (form == "MA_1"):
+ *         return ots_2023_MA_1.main
+ *     if (year == 2023) and (form == "NC_D400"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_NC_D400.main
+ *     if (year == 2023) and (form == "NY_IT201"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":264
+ *     if (year == 2023) and (form == "NC_D400"):
+ *         return ots_2023_NC_D400.main
+ *     if (year == 2023) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_NY_IT201.main
+ *     if (year == 2023) and (form == "OH_IT1040"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L241_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 264, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_NY_IT201, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 264, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L241_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":265
+ *         return ots_2023_NC_D400.main
+ *     if (year == 2023) and (form == "NY_IT201"):
+ *         return ots_2023_NY_IT201.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "OH_IT1040"):
+ *         return ots_2023_OH_IT1040.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_NY_IT201_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":264
+ *     if (year == 2023) and (form == "NC_D400"):
+ *         return ots_2023_NC_D400.main
+ *     if (year == 2023) and (form == "NY_IT201"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_NY_IT201.main
+ *     if (year == 2023) and (form == "OH_IT1040"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":266
+ *     if (year == 2023) and (form == "NY_IT201"):
+ *         return ots_2023_NY_IT201.main
+ *     if (year == 2023) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_OH_IT1040.main
+ *     if (year == 2023) and (form == "PA_40"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L244_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 266, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_OH_IT1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 266, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L244_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":267
+ *         return ots_2023_NY_IT201.main
+ *     if (year == 2023) and (form == "OH_IT1040"):
+ *         return ots_2023_OH_IT1040.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "PA_40"):
+ *         return ots_2023_PA_40.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_OH_IT1040_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":266
+ *     if (year == 2023) and (form == "NY_IT201"):
+ *         return ots_2023_NY_IT201.main
+ *     if (year == 2023) and (form == "OH_IT1040"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_OH_IT1040.main
+ *     if (year == 2023) and (form == "PA_40"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":268
+ *     if (year == 2023) and (form == "OH_IT1040"):
+ *         return ots_2023_OH_IT1040.main
+ *     if (year == 2023) and (form == "PA_40"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_PA_40.main
+ *     if (year == 2023) and (form == "US_1040"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L247_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_PA_40, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 268, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L247_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":269
+ *         return ots_2023_OH_IT1040.main
+ *     if (year == 2023) and (form == "PA_40"):
+ *         return ots_2023_PA_40.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "US_1040"):
+ *         return ots_2023_US_1040.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_PA_40_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":268
+ *     if (year == 2023) and (form == "OH_IT1040"):
+ *         return ots_2023_OH_IT1040.main
+ *     if (year == 2023) and (form == "PA_40"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_PA_40.main
+ *     if (year == 2023) and (form == "US_1040"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":270
+ *     if (year == 2023) and (form == "PA_40"):
+ *         return ots_2023_PA_40.main
+ *     if (year == 2023) and (form == "US_1040"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040.main
+ *     if (year == 2023) and (form == "VA_760"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L250_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 270, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 270, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L250_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":271
+ *         return ots_2023_PA_40.main
+ *     if (year == 2023) and (form == "US_1040"):
+ *         return ots_2023_US_1040.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "VA_760"):
+ *         return ots_2023_VA_760.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":270
+ *     if (year == 2023) and (form == "PA_40"):
+ *         return ots_2023_PA_40.main
+ *     if (year == 2023) and (form == "US_1040"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040.main
+ *     if (year == 2023) and (form == "VA_760"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":272
+ *     if (year == 2023) and (form == "US_1040"):
+ *         return ots_2023_US_1040.main
+ *     if (year == 2023) and (form == "VA_760"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_VA_760.main
+ *     if (year == 2023) and (form == "f2210"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L253_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 272, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_VA_760, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 272, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L253_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":273
+ *         return ots_2023_US_1040.main
+ *     if (year == 2023) and (form == "VA_760"):
+ *         return ots_2023_VA_760.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f2210"):
+ *         return ots_2023_f2210.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_VA_760_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":272
+ *     if (year == 2023) and (form == "US_1040"):
+ *         return ots_2023_US_1040.main
+ *     if (year == 2023) and (form == "VA_760"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_VA_760.main
+ *     if (year == 2023) and (form == "f2210"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":274
+ *     if (year == 2023) and (form == "VA_760"):
+ *         return ots_2023_VA_760.main
+ *     if (year == 2023) and (form == "f2210"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f2210.main
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L256_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 274, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f2210, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 274, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L256_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":275
+ *         return ots_2023_VA_760.main
+ *     if (year == 2023) and (form == "f2210"):
+ *         return ots_2023_f2210.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f2210_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":274
+ *     if (year == 2023) and (form == "VA_760"):
+ *         return ots_2023_VA_760.main
+ *     if (year == 2023) and (form == "f2210"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f2210.main
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":276
+ *     if (year == 2023) and (form == "f2210"):
+ *         return ots_2023_f2210.main
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+ *     if (year == 2023) and (form == "CA_5805"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L259_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 276, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_E_brokerage_royalt, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 276, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L259_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":277
+ *         return ots_2023_f2210.main
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "CA_5805"):
+ *         return ots_2023_CA_5805.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_Sched_E_brokerage_royalties_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":276
+ *     if (year == 2023) and (form == "f2210"):
+ *         return ots_2023_f2210.main
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+ *     if (year == 2023) and (form == "CA_5805"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":278
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+ *     if (year == 2023) and (form == "CA_5805"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_CA_5805.main
+ *     if (year == 2023) and (form == "f8812"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L262_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 278, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_CA_5805, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 278, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L262_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":279
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+ *     if (year == 2023) and (form == "CA_5805"):
+ *         return ots_2023_CA_5805.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "f8812"):
+ *         return ots_2023_f8812.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_CA_5805_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":278
+ *     if (year == 2023) and (form == "US_1040_Sched_E_brokerage_royalties"):
+ *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+ *     if (year == 2023) and (form == "CA_5805"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_CA_5805.main
+ *     if (year == 2023) and (form == "f8812"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":280
+ *     if (year == 2023) and (form == "CA_5805"):
+ *         return ots_2023_CA_5805.main
+ *     if (year == 2023) and (form == "f8812"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8812.main
+ *     if (year == 2023) and (form == "US_1040_Sched_SE"):
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L265_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 280, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_f8812, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 280, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L265_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":281
+ *         return ots_2023_CA_5805.main
+ *     if (year == 2023) and (form == "f8812"):
+ *         return ots_2023_f8812.main             # <<<<<<<<<<<<<<
+ *     if (year == 2023) and (form == "US_1040_Sched_SE"):
+ *         return ots_2023_US_1040_Sched_SE.main
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_f8812_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":280
+ *     if (year == 2023) and (form == "CA_5805"):
+ *         return ots_2023_CA_5805.main
+ *     if (year == 2023) and (form == "f8812"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_f8812.main
+ *     if (year == 2023) and (form == "US_1040_Sched_SE"):
+ */
+  }
+
+  /* "tenforty/otslib/ots.pyx":282
+ *     if (year == 2023) and (form == "f8812"):
+ *         return ots_2023_f8812.main
+ *     if (year == 2023) and (form == "US_1040_Sched_SE"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040_Sched_SE.main
+ *
+ */
+  __pyx_t_2 = (__pyx_v_year == 0x7E7);
+  if (__pyx_t_2) {
+  } else {
+    __pyx_t_1 = __pyx_t_2;
+    goto __pyx_L268_bool_binop_done;
+  }
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_form); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 282, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_US_1040_Sched_SE, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 282, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_2;
+  __pyx_L268_bool_binop_done:;
+  if (__pyx_t_1) {
+
+    /* "tenforty/otslib/ots.pyx":283
+ *         return ots_2023_f8812.main
+ *     if (year == 2023) and (form == "US_1040_Sched_SE"):
+ *         return ots_2023_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
+ *
+ *
+ */
+    __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_Sched_SE_2023::main;
+    goto __pyx_L0;
+
+    /* "tenforty/otslib/ots.pyx":282
+ *     if (year == 2023) and (form == "f8812"):
+ *         return ots_2023_f8812.main
+ *     if (year == 2023) and (form == "US_1040_Sched_SE"):             # <<<<<<<<<<<<<<
+ *         return ots_2023_US_1040_Sched_SE.main
  *
  */
   }
 
-  /* "tenforty/otslib/ots.pyx":84
- * cimport ots_2022_f8995
+  /* "tenforty/otslib/ots.pyx":105
+ * cimport ots_2023_US_1040_Sched_SE
  *
  * cdef f_type lookup_ots_call(int year, char* form):             # <<<<<<<<<<<<<<
  *     if (year == 2018) and (form == "MA_1"):
@@ -5806,7 +6782,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   return __pyx_r;
 }
 
-/* "tenforty/otslib/ots.pyx":223
+/* "tenforty/otslib/ots.pyx":286
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
@@ -5878,7 +6854,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 286, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -5886,9 +6862,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 286, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, 1); __PYX_ERR(0, 223, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, 1); __PYX_ERR(0, 286, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -5896,21 +6872,21 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 286, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, 2); __PYX_ERR(0, 223, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, 2); __PYX_ERR(0, 286, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_fed_form_text);
           if (value) { values[3] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 286, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "_evaluate_form") < 0)) __PYX_ERR(0, 223, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "_evaluate_form") < 0)) __PYX_ERR(0, 286, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -5930,7 +6906,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, __pyx_nargs); __PYX_ERR(0, 223, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, __pyx_nargs); __PYX_ERR(0, 286, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5996,19 +6972,19 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   __Pyx_RefNannySetupContext("_evaluate_form", 0);
   __Pyx_INCREF(__pyx_v_form_text);
 
-  /* "tenforty/otslib/ots.pyx":238
+  /* "tenforty/otslib/ots.pyx":301
  *     """
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)             # <<<<<<<<<<<<<<
  *
  *     cdef char** c_argv = NULL
  */
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_year); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_AsWritableString(__pyx_v_form); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
-  __pyx_t_3 = __pyx_f_8tenforty_6otslib_lookup_ots_call(__pyx_t_1, __pyx_t_2); if (unlikely(__pyx_t_3 == ((__pyx_t_8tenforty_6otslib_f_type)NULL) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_year); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_AsWritableString(__pyx_v_form); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_8tenforty_6otslib_lookup_ots_call(__pyx_t_1, __pyx_t_2); if (unlikely(__pyx_t_3 == ((__pyx_t_8tenforty_6otslib_f_type)NULL) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
   __pyx_v_ots_form_function = __pyx_t_3;
 
-  /* "tenforty/otslib/ots.pyx":240
+  /* "tenforty/otslib/ots.pyx":303
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
  *
  *     cdef char** c_argv = NULL             # <<<<<<<<<<<<<<
@@ -6017,7 +6993,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  */
   __pyx_v_c_argv = NULL;
 
-  /* "tenforty/otslib/ots.pyx":243
+  /* "tenforty/otslib/ots.pyx":306
  *     cdef object py_unicode_returnfile
  *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
@@ -6025,9 +7001,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         # Run federal tax file first as needed.
  */
   /*with:*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_tempfile); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 243, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_tempfile); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 306, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_TemporaryDirectory); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 243, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_TemporaryDirectory); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 306, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -6048,13 +7024,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       PyObject *__pyx_callargs[2] = {__pyx_t_5, NULL};
       __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_1, 0+__pyx_t_1);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 243, __pyx_L1_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 306, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
-    __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 243, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 306, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 243, __pyx_L3_error)
+    __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 306, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_8 = NULL;
     __pyx_t_1 = 0;
@@ -6074,7 +7050,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       PyObject *__pyx_callargs[2] = {__pyx_t_8, NULL};
       __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_1, 0+__pyx_t_1);
       __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 243, __pyx_L3_error)
+      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 306, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -6093,7 +7069,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_v_tmpdir = __pyx_t_5;
           __pyx_t_5 = 0;
 
-          /* "tenforty/otslib/ots.pyx":246
+          /* "tenforty/otslib/ots.pyx":309
  *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
@@ -6103,22 +7079,22 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_12 = (__pyx_v_fed_form_text != Py_None);
           if (__pyx_t_12) {
 
-            /* "tenforty/otslib/ots.pyx":248
+            /* "tenforty/otslib/ots.pyx":311
  *         if fed_form_text is not None:
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"             # <<<<<<<<<<<<<<
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)
  */
-            __pyx_t_5 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_empty_unicode); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 248, __pyx_L7_error)
+            __pyx_t_5 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_empty_unicode); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 311, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_5);
-            __pyx_t_4 = __Pyx_PyUnicode_ConcatInPlace(__pyx_t_5, __pyx_kp_u_fed_form_txt); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L7_error)
+            __pyx_t_4 = __Pyx_PyUnicode_ConcatInPlace(__pyx_t_5, __pyx_kp_u_fed_form_txt); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 311, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_4);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             __pyx_v_ff_path = ((PyObject*)__pyx_t_4);
             __pyx_t_4 = 0;
 
-            /* "tenforty/otslib/ots.pyx":249
+            /* "tenforty/otslib/ots.pyx":312
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6126,20 +7102,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *
  */
             /*with:*/ {
-              __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L7_error)
+              __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 312, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_INCREF(__pyx_v_ff_path);
               __Pyx_GIVEREF(__pyx_v_ff_path);
-              if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_ff_path)) __PYX_ERR(0, 249, __pyx_L7_error);
+              if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_ff_path)) __PYX_ERR(0, 312, __pyx_L7_error);
               __Pyx_INCREF(__pyx_n_u_w);
               __Pyx_GIVEREF(__pyx_n_u_w);
-              if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_n_u_w)) __PYX_ERR(0, 249, __pyx_L7_error);
-              __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_open, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 249, __pyx_L7_error)
+              if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_n_u_w)) __PYX_ERR(0, 312, __pyx_L7_error);
+              __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_open, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 312, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_5);
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-              __pyx_t_13 = __Pyx_PyObject_LookupSpecial(__pyx_t_5, __pyx_n_s_exit); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 249, __pyx_L7_error)
+              __pyx_t_13 = __Pyx_PyObject_LookupSpecial(__pyx_t_5, __pyx_n_s_exit); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 312, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_13);
-              __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_5, __pyx_n_s_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 249, __pyx_L14_error)
+              __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_5, __pyx_n_s_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 312, __pyx_L14_error)
               __Pyx_GOTREF(__pyx_t_6);
               __pyx_t_8 = NULL;
               __pyx_t_1 = 0;
@@ -6159,7 +7135,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 PyObject *__pyx_callargs[2] = {__pyx_t_8, NULL};
                 __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_1, 0+__pyx_t_1);
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-                if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L14_error)
+                if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 312, __pyx_L14_error)
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
               }
@@ -6178,28 +7154,28 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __pyx_v_fp = __pyx_t_6;
                     __pyx_t_6 = 0;
 
-                    /* "tenforty/otslib/ots.pyx":250
+                    /* "tenforty/otslib/ots.pyx":313
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)             # <<<<<<<<<<<<<<
  *
  *             # Update location of fed file in state form.
  */
-                    __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 250, __pyx_L18_error)
+                    __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 313, __pyx_L18_error)
                     __Pyx_GOTREF(__pyx_t_6);
                     __Pyx_INCREF(__pyx_v_fed_form_text);
                     __Pyx_GIVEREF(__pyx_v_fed_form_text);
-                    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_fed_form_text)) __PYX_ERR(0, 250, __pyx_L18_error);
-                    __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 250, __pyx_L18_error)
+                    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_fed_form_text)) __PYX_ERR(0, 313, __pyx_L18_error);
+                    __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 313, __pyx_L18_error)
                     __Pyx_GOTREF(__pyx_t_5);
-                    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_file, __pyx_v_fp) < 0) __PYX_ERR(0, 250, __pyx_L18_error)
-                    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 250, __pyx_L18_error)
+                    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_file, __pyx_v_fp) < 0) __PYX_ERR(0, 313, __pyx_L18_error)
+                    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 313, __pyx_L18_error)
                     __Pyx_GOTREF(__pyx_t_4);
                     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
                     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-                    /* "tenforty/otslib/ots.pyx":249
+                    /* "tenforty/otslib/ots.pyx":312
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6218,20 +7194,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                   /*except:*/ {
                     __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                    if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_6) < 0) __PYX_ERR(0, 249, __pyx_L20_except_error)
+                    if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_6) < 0) __PYX_ERR(0, 312, __pyx_L20_except_error)
                     __Pyx_XGOTREF(__pyx_t_4);
                     __Pyx_XGOTREF(__pyx_t_5);
                     __Pyx_XGOTREF(__pyx_t_6);
-                    __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 249, __pyx_L20_except_error)
+                    __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 312, __pyx_L20_except_error)
                     __Pyx_GOTREF(__pyx_t_8);
                     __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_8, NULL);
                     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
                     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                    if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 249, __pyx_L20_except_error)
+                    if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 312, __pyx_L20_except_error)
                     __Pyx_GOTREF(__pyx_t_17);
                     __pyx_t_12 = __Pyx_PyObject_IsTrue(__pyx_t_17);
                     __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-                    if (__pyx_t_12 < 0) __PYX_ERR(0, 249, __pyx_L20_except_error)
+                    if (__pyx_t_12 < 0) __PYX_ERR(0, 312, __pyx_L20_except_error)
                     __pyx_t_18 = (!__pyx_t_12);
                     if (unlikely(__pyx_t_18)) {
                       __Pyx_GIVEREF(__pyx_t_4);
@@ -6239,7 +7215,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                       __Pyx_XGIVEREF(__pyx_t_6);
                       __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_5, __pyx_t_6);
                       __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_6 = 0;
-                      __PYX_ERR(0, 249, __pyx_L20_except_error)
+                      __PYX_ERR(0, 312, __pyx_L20_except_error)
                     }
                     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
                     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -6265,7 +7241,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   if (__pyx_t_13) {
                     __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_tuple_, NULL);
                     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-                    if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 249, __pyx_L7_error)
+                    if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 312, __pyx_L7_error)
                     __Pyx_GOTREF(__pyx_t_16);
                     __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
                   }
@@ -6280,14 +7256,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __pyx_L27:;
             }
 
-            /* "tenforty/otslib/ots.pyx":253
+            /* "tenforty/otslib/ots.pyx":316
  *
  *             # Update location of fed file in state form.
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)             # <<<<<<<<<<<<<<
  *
  *         returnfile = f"{tmpdir}/form.txt"
  */
-            __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_form_text, __pyx_n_s_replace); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 253, __pyx_L7_error)
+            __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_form_text, __pyx_n_s_replace); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 316, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_5);
             __pyx_t_4 = NULL;
             __pyx_t_1 = 0;
@@ -6307,14 +7283,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[3] = {__pyx_t_4, __pyx_n_u_FED_FILENAME, __pyx_v_ff_path};
               __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_1, 2+__pyx_t_1);
               __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 253, __pyx_L7_error)
+              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 316, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             }
             __Pyx_DECREF_SET(__pyx_v_form_text, __pyx_t_6);
             __pyx_t_6 = 0;
 
-            /* "tenforty/otslib/ots.pyx":246
+            /* "tenforty/otslib/ots.pyx":309
  *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
@@ -6323,22 +7299,22 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  */
           }
 
-          /* "tenforty/otslib/ots.pyx":255
+          /* "tenforty/otslib/ots.pyx":318
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)
  *
  *         returnfile = f"{tmpdir}/form.txt"             # <<<<<<<<<<<<<<
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)
  */
-          __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L7_error)
+          __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 318, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_6);
-          __pyx_t_5 = __Pyx_PyUnicode_ConcatInPlace(__pyx_t_6, __pyx_kp_u_form_txt); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 255, __pyx_L7_error)
+          __pyx_t_5 = __Pyx_PyUnicode_ConcatInPlace(__pyx_t_6, __pyx_kp_u_form_txt); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 318, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __pyx_v_returnfile = ((PyObject*)__pyx_t_5);
           __pyx_t_5 = 0;
 
-          /* "tenforty/otslib/ots.pyx":256
+          /* "tenforty/otslib/ots.pyx":319
  *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6346,20 +7322,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *
  */
           /*with:*/ {
-            __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 256, __pyx_L7_error)
+            __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 319, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_5);
             __Pyx_INCREF(__pyx_v_returnfile);
             __Pyx_GIVEREF(__pyx_v_returnfile);
-            if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_v_returnfile)) __PYX_ERR(0, 256, __pyx_L7_error);
+            if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_v_returnfile)) __PYX_ERR(0, 319, __pyx_L7_error);
             __Pyx_INCREF(__pyx_n_u_w);
             __Pyx_GIVEREF(__pyx_n_u_w);
-            if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_n_u_w)) __PYX_ERR(0, 256, __pyx_L7_error);
-            __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_open, __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 256, __pyx_L7_error)
+            if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_n_u_w)) __PYX_ERR(0, 319, __pyx_L7_error);
+            __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_open, __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 319, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_6);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-            __pyx_t_13 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_n_s_exit); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 256, __pyx_L7_error)
+            __pyx_t_13 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_n_s_exit); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 319, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_13);
-            __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 256, __pyx_L28_error)
+            __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 319, __pyx_L28_error)
             __Pyx_GOTREF(__pyx_t_4);
             __pyx_t_8 = NULL;
             __pyx_t_1 = 0;
@@ -6379,7 +7355,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[2] = {__pyx_t_8, NULL};
               __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_1, 0+__pyx_t_1);
               __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 256, __pyx_L28_error)
+              if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 319, __pyx_L28_error)
               __Pyx_GOTREF(__pyx_t_5);
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
             }
@@ -6398,28 +7374,28 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_4);
                   __pyx_t_4 = 0;
 
-                  /* "tenforty/otslib/ots.pyx":257
+                  /* "tenforty/otslib/ots.pyx":320
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)             # <<<<<<<<<<<<<<
  *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  */
-                  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 257, __pyx_L32_error)
+                  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 320, __pyx_L32_error)
                   __Pyx_GOTREF(__pyx_t_4);
                   __Pyx_INCREF(__pyx_v_form_text);
                   __Pyx_GIVEREF(__pyx_v_form_text);
-                  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_form_text)) __PYX_ERR(0, 257, __pyx_L32_error);
-                  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 257, __pyx_L32_error)
+                  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_form_text)) __PYX_ERR(0, 320, __pyx_L32_error);
+                  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 320, __pyx_L32_error)
                   __Pyx_GOTREF(__pyx_t_6);
-                  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_file, __pyx_v_fp) < 0) __PYX_ERR(0, 257, __pyx_L32_error)
-                  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 257, __pyx_L32_error)
+                  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_file, __pyx_v_fp) < 0) __PYX_ERR(0, 320, __pyx_L32_error)
+                  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 320, __pyx_L32_error)
                   __Pyx_GOTREF(__pyx_t_5);
                   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-                  /* "tenforty/otslib/ots.pyx":256
+                  /* "tenforty/otslib/ots.pyx":319
  *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6438,20 +7414,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_6, &__pyx_t_4) < 0) __PYX_ERR(0, 256, __pyx_L34_except_error)
+                  if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_6, &__pyx_t_4) < 0) __PYX_ERR(0, 319, __pyx_L34_except_error)
                   __Pyx_XGOTREF(__pyx_t_5);
                   __Pyx_XGOTREF(__pyx_t_6);
                   __Pyx_XGOTREF(__pyx_t_4);
-                  __pyx_t_8 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 256, __pyx_L34_except_error)
+                  __pyx_t_8 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 319, __pyx_L34_except_error)
                   __Pyx_GOTREF(__pyx_t_8);
                   __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_8, NULL);
                   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                  if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 256, __pyx_L34_except_error)
+                  if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 319, __pyx_L34_except_error)
                   __Pyx_GOTREF(__pyx_t_17);
                   __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_17);
                   __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-                  if (__pyx_t_18 < 0) __PYX_ERR(0, 256, __pyx_L34_except_error)
+                  if (__pyx_t_18 < 0) __PYX_ERR(0, 319, __pyx_L34_except_error)
                   __pyx_t_12 = (!__pyx_t_18);
                   if (unlikely(__pyx_t_12)) {
                     __Pyx_GIVEREF(__pyx_t_5);
@@ -6459,7 +7435,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_XGIVEREF(__pyx_t_4);
                     __Pyx_ErrRestoreWithState(__pyx_t_5, __pyx_t_6, __pyx_t_4);
                     __pyx_t_5 = 0; __pyx_t_6 = 0; __pyx_t_4 = 0;
-                    __PYX_ERR(0, 256, __pyx_L34_except_error)
+                    __PYX_ERR(0, 319, __pyx_L34_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
                   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6485,7 +7461,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 if (__pyx_t_13) {
                   __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_tuple_, NULL);
                   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-                  if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 256, __pyx_L7_error)
+                  if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 319, __pyx_L7_error)
                   __Pyx_GOTREF(__pyx_t_14);
                   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
                 }
@@ -6500,7 +7476,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L41:;
           }
 
-          /* "tenforty/otslib/ots.pyx":259
+          /* "tenforty/otslib/ots.pyx":322
  *             print(form_text, file=fp)
  *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)             # <<<<<<<<<<<<<<
@@ -6509,7 +7485,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  */
           __pyx_v_c_argv = ((char **)malloc(((sizeof(char *)) * 2)));
 
-          /* "tenforty/otslib/ots.pyx":260
+          /* "tenforty/otslib/ots.pyx":323
  *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
@@ -6519,16 +7495,16 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_12 = (__pyx_v_c_argv == NULL);
           if (unlikely(__pyx_t_12)) {
 
-            /* "tenforty/otslib/ots.pyx":261
+            /* "tenforty/otslib/ots.pyx":324
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  *         if c_argv is NULL:
  *             raise MemoryError()             # <<<<<<<<<<<<<<
  *         try:
  *             py_unicode_returnfile = returnfile
  */
-            PyErr_NoMemory(); __PYX_ERR(0, 261, __pyx_L7_error)
+            PyErr_NoMemory(); __PYX_ERR(0, 324, __pyx_L7_error)
 
-            /* "tenforty/otslib/ots.pyx":260
+            /* "tenforty/otslib/ots.pyx":323
  *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
@@ -6537,7 +7513,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  */
           }
 
-          /* "tenforty/otslib/ots.pyx":262
+          /* "tenforty/otslib/ots.pyx":325
  *         if c_argv is NULL:
  *             raise MemoryError()
  *         try:             # <<<<<<<<<<<<<<
@@ -6546,7 +7522,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  */
           /*try:*/ {
 
-            /* "tenforty/otslib/ots.pyx":263
+            /* "tenforty/otslib/ots.pyx":326
  *             raise MemoryError()
  *         try:
  *             py_unicode_returnfile = returnfile             # <<<<<<<<<<<<<<
@@ -6556,27 +7532,27 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __Pyx_INCREF(__pyx_v_returnfile);
             __pyx_v_py_unicode_returnfile = __pyx_v_returnfile;
 
-            /* "tenforty/otslib/ots.pyx":264
+            /* "tenforty/otslib/ots.pyx":327
  *         try:
  *             py_unicode_returnfile = returnfile
  *             c_argv[1] = py_unicode_returnfile             # <<<<<<<<<<<<<<
  *             ots_form_function(2, c_argv)
  *         finally:
  */
-            __pyx_t_2 = __Pyx_PyObject_AsWritableString(__pyx_v_py_unicode_returnfile); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 264, __pyx_L44_error)
+            __pyx_t_2 = __Pyx_PyObject_AsWritableString(__pyx_v_py_unicode_returnfile); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 327, __pyx_L44_error)
             (__pyx_v_c_argv[1]) = __pyx_t_2;
 
-            /* "tenforty/otslib/ots.pyx":265
+            /* "tenforty/otslib/ots.pyx":328
  *             py_unicode_returnfile = returnfile
  *             c_argv[1] = py_unicode_returnfile
  *             ots_form_function(2, c_argv)             # <<<<<<<<<<<<<<
  *         finally:
  *             free(c_argv)
  */
-            __pyx_v_ots_form_function(2, __pyx_v_c_argv); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 265, __pyx_L44_error)
+            __pyx_v_ots_form_function(2, __pyx_v_c_argv); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 328, __pyx_L44_error)
           }
 
-          /* "tenforty/otslib/ots.pyx":267
+          /* "tenforty/otslib/ots.pyx":330
  *             ots_form_function(2, c_argv)
  *         finally:
  *             free(c_argv)             # <<<<<<<<<<<<<<
@@ -6626,19 +7602,19 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L45:;
           }
 
-          /* "tenforty/otslib/ots.pyx":270
+          /* "tenforty/otslib/ots.pyx":333
  *
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")             # <<<<<<<<<<<<<<
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()
  */
-          __pyx_t_4 = PyUnicode_Replace(__pyx_v_returnfile, __pyx_kp_u_txt, __pyx_kp_u_out_txt, -1L); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 270, __pyx_L7_error)
+          __pyx_t_4 = PyUnicode_Replace(__pyx_v_returnfile, __pyx_kp_u_txt, __pyx_kp_u_out_txt, -1L); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 333, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_4);
           __pyx_v_returnfile_completed = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "tenforty/otslib/ots.pyx":271
+          /* "tenforty/otslib/ots.pyx":334
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
@@ -6646,11 +7622,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *
  */
           /*with:*/ {
-            __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_open, __pyx_v_returnfile_completed); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 271, __pyx_L7_error)
+            __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_open, __pyx_v_returnfile_completed); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 334, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_21 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 271, __pyx_L7_error)
+            __pyx_t_21 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 334, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_21);
-            __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 271, __pyx_L48_error)
+            __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 334, __pyx_L48_error)
             __Pyx_GOTREF(__pyx_t_5);
             __pyx_t_8 = NULL;
             __pyx_t_19 = 0;
@@ -6670,7 +7646,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[2] = {__pyx_t_8, NULL};
               __pyx_t_6 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_19, 0+__pyx_t_19);
               __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 271, __pyx_L48_error)
+              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 334, __pyx_L48_error)
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             }
@@ -6689,14 +7665,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_5);
                   __pyx_t_5 = 0;
 
-                  /* "tenforty/otslib/ots.pyx":272
+                  /* "tenforty/otslib/ots.pyx":335
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()             # <<<<<<<<<<<<<<
  *
  *     return result
  */
-                  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_fp, __pyx_n_s_read); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 272, __pyx_L52_error)
+                  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_fp, __pyx_n_s_read); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 335, __pyx_L52_error)
                   __Pyx_GOTREF(__pyx_t_4);
                   __pyx_t_6 = NULL;
                   __pyx_t_19 = 0;
@@ -6716,14 +7692,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     PyObject *__pyx_callargs[2] = {__pyx_t_6, NULL};
                     __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_19, 0+__pyx_t_19);
                     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-                    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 272, __pyx_L52_error)
+                    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 335, __pyx_L52_error)
                     __Pyx_GOTREF(__pyx_t_5);
                     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                   }
                   __pyx_v_result = __pyx_t_5;
                   __pyx_t_5 = 0;
 
-                  /* "tenforty/otslib/ots.pyx":271
+                  /* "tenforty/otslib/ots.pyx":334
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
@@ -6742,20 +7718,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_6) < 0) __PYX_ERR(0, 271, __pyx_L54_except_error)
+                  if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_6) < 0) __PYX_ERR(0, 334, __pyx_L54_except_error)
                   __Pyx_XGOTREF(__pyx_t_5);
                   __Pyx_XGOTREF(__pyx_t_4);
                   __Pyx_XGOTREF(__pyx_t_6);
-                  __pyx_t_8 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 271, __pyx_L54_except_error)
+                  __pyx_t_8 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 334, __pyx_L54_except_error)
                   __Pyx_GOTREF(__pyx_t_8);
                   __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_8, NULL);
                   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                  if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 271, __pyx_L54_except_error)
+                  if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 334, __pyx_L54_except_error)
                   __Pyx_GOTREF(__pyx_t_14);
                   __pyx_t_12 = __Pyx_PyObject_IsTrue(__pyx_t_14);
                   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-                  if (__pyx_t_12 < 0) __PYX_ERR(0, 271, __pyx_L54_except_error)
+                  if (__pyx_t_12 < 0) __PYX_ERR(0, 334, __pyx_L54_except_error)
                   __pyx_t_18 = (!__pyx_t_12);
                   if (unlikely(__pyx_t_18)) {
                     __Pyx_GIVEREF(__pyx_t_5);
@@ -6763,7 +7739,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_XGIVEREF(__pyx_t_6);
                     __Pyx_ErrRestoreWithState(__pyx_t_5, __pyx_t_4, __pyx_t_6);
                     __pyx_t_5 = 0; __pyx_t_4 = 0; __pyx_t_6 = 0;
-                    __PYX_ERR(0, 271, __pyx_L54_except_error)
+                    __PYX_ERR(0, 334, __pyx_L54_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
                   __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6789,7 +7765,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 if (__pyx_t_21) {
                   __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_tuple_, NULL);
                   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-                  if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 271, __pyx_L7_error)
+                  if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 334, __pyx_L7_error)
                   __Pyx_GOTREF(__pyx_t_15);
                   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
                 }
@@ -6804,7 +7780,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L61:;
           }
 
-          /* "tenforty/otslib/ots.pyx":243
+          /* "tenforty/otslib/ots.pyx":306
  *     cdef object py_unicode_returnfile
  *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
@@ -6823,20 +7799,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_5) < 0) __PYX_ERR(0, 243, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_5) < 0) __PYX_ERR(0, 306, __pyx_L9_except_error)
           __Pyx_XGOTREF(__pyx_t_6);
           __Pyx_XGOTREF(__pyx_t_4);
           __Pyx_XGOTREF(__pyx_t_5);
-          __pyx_t_8 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 243, __pyx_L9_except_error)
+          __pyx_t_8 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 306, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_8);
           __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_8, NULL);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-          if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 243, __pyx_L9_except_error)
+          if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 306, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_21);
           __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_21);
           __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-          if (__pyx_t_18 < 0) __PYX_ERR(0, 243, __pyx_L9_except_error)
+          if (__pyx_t_18 < 0) __PYX_ERR(0, 306, __pyx_L9_except_error)
           __pyx_t_12 = (!__pyx_t_18);
           if (unlikely(__pyx_t_12)) {
             __Pyx_GIVEREF(__pyx_t_6);
@@ -6844,7 +7820,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __Pyx_XGIVEREF(__pyx_t_5);
             __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_4, __pyx_t_5);
             __pyx_t_6 = 0; __pyx_t_4 = 0; __pyx_t_5 = 0;
-            __PYX_ERR(0, 243, __pyx_L9_except_error)
+            __PYX_ERR(0, 306, __pyx_L9_except_error)
           }
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6870,7 +7846,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
         if (__pyx_t_7) {
           __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_tuple_, NULL);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-          if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 243, __pyx_L1_error)
+          if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 306, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_11);
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         }
@@ -6885,18 +7861,18 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
     __pyx_L65:;
   }
 
-  /* "tenforty/otslib/ots.pyx":274
+  /* "tenforty/otslib/ots.pyx":337
  *             result = fp.read()
  *
  *     return result             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 274, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 337, __pyx_L1_error) }
   __Pyx_INCREF(__pyx_v_result);
   __pyx_r = __pyx_v_result;
   goto __pyx_L0;
 
-  /* "tenforty/otslib/ots.pyx":223
+  /* "tenforty/otslib/ots.pyx":286
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
@@ -6956,6 +7932,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_TemporaryDirectory, __pyx_k_TemporaryDirectory, sizeof(__pyx_k_TemporaryDirectory), 0, 0, 1, 1},
     {&__pyx_n_u_US_1040, __pyx_k_US_1040, sizeof(__pyx_k_US_1040), 0, 1, 0, 1},
     {&__pyx_n_u_US_1040_Sched_C, __pyx_k_US_1040_Sched_C, sizeof(__pyx_k_US_1040_Sched_C), 0, 1, 0, 1},
+    {&__pyx_n_u_US_1040_Sched_E_brokerage_royalt, __pyx_k_US_1040_Sched_E_brokerage_royalt, sizeof(__pyx_k_US_1040_Sched_E_brokerage_royalt), 0, 1, 0, 1},
     {&__pyx_n_u_US_1040_Sched_SE, __pyx_k_US_1040_Sched_SE, sizeof(__pyx_k_US_1040_Sched_SE), 0, 1, 0, 1},
     {&__pyx_n_u_VA_760, __pyx_k_VA_760, sizeof(__pyx_k_VA_760), 0, 1, 0, 1},
     {&__pyx_n_s__2, __pyx_k__2, sizeof(__pyx_k__2), 0, 0, 1, 1},
@@ -6968,6 +7945,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
     {&__pyx_n_u_f2210, __pyx_k_f2210, sizeof(__pyx_k_f2210), 0, 1, 0, 1},
     {&__pyx_n_u_f8606, __pyx_k_f8606, sizeof(__pyx_k_f8606), 0, 1, 0, 1},
+    {&__pyx_n_u_f8812, __pyx_k_f8812, sizeof(__pyx_k_f8812), 0, 1, 0, 1},
     {&__pyx_n_u_f8829, __pyx_k_f8829, sizeof(__pyx_k_f8829), 0, 1, 0, 1},
     {&__pyx_n_u_f8959, __pyx_k_f8959, sizeof(__pyx_k_f8959), 0, 1, 0, 1},
     {&__pyx_n_u_f8960, __pyx_k_f8960, sizeof(__pyx_k_f8960), 0, 1, 0, 1},
@@ -7012,9 +7990,9 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) __PYX_ERR(0, 249, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 250, __pyx_L1_error)
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 261, __pyx_L1_error)
+  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) __PYX_ERR(0, 312, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 313, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 324, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -7025,29 +8003,29 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "tenforty/otslib/ots.pyx":249
+  /* "tenforty/otslib/ots.pyx":312
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
  *
  */
-  __pyx_tuple_ = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 249, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 312, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "tenforty/otslib/ots.pyx":223
+  /* "tenforty/otslib/ots.pyx":286
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
  */
-  __pyx_tuple__3 = PyTuple_Pack(13, __pyx_n_s_year, __pyx_n_s_form, __pyx_n_s_form_text, __pyx_n_s_fed_form_text, __pyx_n_s_ots_form_function, __pyx_n_s_c_argv, __pyx_n_s_py_unicode_returnfile, __pyx_n_s_tmpdir, __pyx_n_s_ff_path, __pyx_n_s_fp, __pyx_n_s_returnfile, __pyx_n_s_returnfile_completed, __pyx_n_s_result); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(13, __pyx_n_s_year, __pyx_n_s_form, __pyx_n_s_form_text, __pyx_n_s_fed_form_text, __pyx_n_s_ots_form_function, __pyx_n_s_c_argv, __pyx_n_s_py_unicode_returnfile, __pyx_n_s_tmpdir, __pyx_n_s_ff_path, __pyx_n_s_fp, __pyx_n_s_returnfile, __pyx_n_s_returnfile_completed, __pyx_n_s_result); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tenforty_otslib_ots_pyx, __pyx_n_s_evaluate_form, 223, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 223, __pyx_L1_error)
-  __pyx_tuple__5 = PyTuple_Pack(1, Py_None); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_tenforty_otslib_ots_pyx, __pyx_n_s_evaluate_form, 286, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 286, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(1, Py_None); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
   __Pyx_RefNannyFinishContext();
@@ -7449,17 +8427,17 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_tempfile, __pyx_t_2) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "tenforty/otslib/ots.pyx":223
+  /* "tenforty/otslib/ots.pyx":286
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8tenforty_6otslib_1_evaluate_form, 0, __pyx_n_s_evaluate_form, NULL, __pyx_n_s_tenforty_otslib, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8tenforty_6otslib_1_evaluate_form, 0, __pyx_n_s_evaluate_form, NULL, __pyx_n_s_tenforty_otslib, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_tuple__5);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_evaluate_form, __pyx_t_2) < 0) __PYX_ERR(0, 223, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_evaluate_form, __pyx_t_2) < 0) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "tenforty/otslib/ots.pyx":1

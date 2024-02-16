@@ -20,6 +20,8 @@ The package is built on top of the [Open Tax
 Solver](https://opentaxsolver.sourceforge.net/) project, wrapping its
 functionality into a Python library.
 
+[![Try In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mmacpherson/tenforty/blob/main/notebooks/tenforty_Package_Demo.ipynb)
+
 
 ## Features
 
@@ -53,10 +55,9 @@ of values. `evaluate_return` is for evaluating one single return, and
 `evaluate_returns` evaluates all combinations of inputs subtended by the
 provided values and collects the results into a dataframe.
 
-The inputs to either function are "guarded" by a pydantic model, so you'll get
-an informative message about why your input was invalid if it was, along with a
-list of the valid options. (And if you're using a modern editor, you'll get nice
-autocomplete on the valid options.)
+The inputs to either function are validated, and if for example a filing status
+is misspelled, you'll get an informative error message along with a list of the
+valid options.
 
 Here are all arguments available for those two functions:
 
@@ -79,12 +80,28 @@ Here are all arguments available for those two functions:
 | `state_adjustment`           | float                    | 0.0                 |                                    |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
 
-Several concrete examples of calling either function are given in the Examples section.
+The functions output these fields:
+
+| Output Field                    |
+|---------------------------------|
+| total_tax                       |
+| federal_adjusted_gross_income   |
+| federal_effective_tax_rate      |
+| federal_tax_bracket             |
+| federal_taxable_income          |
+| federal_amt                     |
+| federal_total_tax               |
+| state_adjusted_gross_income     |
+| state_taxable_income            |
+| state_total_tax                 |
+| state_tax_bracket               |
+| state_effective_tax_rate        |
+
 
 
 ## Examples
 
-Here are some examples of what you can do with tenforty:
+Here are some examples of what you can do with `tenforty`:
 
 ### Basic Evaluation
 
@@ -253,8 +270,8 @@ df = (
 ### Plot: Will I Incur Alternative Minimum Tax (AMT)?
 
 Employees at tech companies are commonly issued incentive stock options, the
-exercise of which can put them in a (surprising!) situation where they need to
-pay actual money in taxes on paper gains, via the alternative minimum tax. With
+exercise of which can put them in a situation where they need to pay actual
+money in taxes on paper gains, via the alternative minimum tax. With
 `tenforty`'s help you can see it coming at least: ;)
 
 
@@ -293,7 +310,7 @@ df = (
   capital gains, so if those apply to your situation the output tax will be
   underestimated.
 - Although Open Tax Solver includes support for more, `tenforty` only supports
-  California, Massachusetts and New York. (Technically it supports all the
+  California, Massachusetts and New York. (It also supports all the
   no-income-tax states like Texas and Nevada. :) ) Furthermore, only California
   has been tested against any tax returns prepared independently by professional
   tax software, so the Massachusetts and New York support is especially
