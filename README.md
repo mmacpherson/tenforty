@@ -16,8 +16,9 @@ impact of various factors on tax liabilities. It's particularly useful for those
 who would like to understand or optimize their taxes by evaluating how tax form
 inputs affect their outputs.
 
-The package is built on top of the [Open Tax
-Solver](https://opentaxsolver.sourceforge.net/) project, wrapping its
+The package is built on top of the
+[Open Tax Solver](https://opentaxsolver.sourceforge.net/)
+project, wrapping its
 functionality into a Python library.
 
 [![Try In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mmacpherson/tenforty/blob/main/notebooks/tenforty_Package_Demo.ipynb)
@@ -64,7 +65,7 @@ Here are all arguments available for those two functions:
 
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
-| `year`                       | int                      | 2022                | 2018-2022 inclusive                |
+| `year`                       | int                      | 2023                | 2018-2023 inclusive                |
 | `state`                      | str \| None               | None                | "CA", "NY", "MA" + "AK", "FL", "NV", "SD", "TX", "WA", "WY" |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
@@ -119,21 +120,21 @@ evaluate_return(
 This results in the following:
 
 ``` python
-{'total_tax': 10043.0,
+{'total_tax': 8484.0,
  'federal_adjusted_gross_income': 100000.0,
  'federal_effective_tax_rate': 11.4,
  'federal_tax_bracket': 12.0,
  'federal_taxable_income': 74100.0,
  'federal_amt': 0.0,
  'federal_total_tax': 8484.0,
- 'state_adjusted_gross_income': 100000.0,
- 'state_taxable_income': 89596.0,
- 'state_total_tax': 1559.0,
- 'state_tax_bracket': 6.0,
- 'state_effective_tax_rate': 3.0}
+ 'state_adjusted_gross_income': 0.0,
+ 'state_taxable_income': 0.0,
+ 'state_total_tax': 0.0,
+ 'state_tax_bracket': 0.0,
+ 'state_effective_tax_rate': 0.0}
 ```
 
-No `year=` argument was specified here, so the current tax year, 2022, was used.
+No `year=` argument was specified here, so the current tax year, 2023, was used.
 The output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary.
 
@@ -165,21 +166,20 @@ evaluate_returns(
 
 This results in a `pandas.DataFrame`:
 
-``` python
-   w2_income  federal_effective_tax_rate  federal_tax_bracket  state_effective_tax_rate  state_tax_bracket
-0      50000                        10.3                 12.0                       1.5                2.0
-1     100000                        11.4                 12.0                       3.0                6.0
-2     150000                        14.9                 22.0                       4.6                9.3
-3     200000                        17.0                 22.0                       5.9                9.3
-4     250000                        18.5                 24.0                       6.6                9.3
-```
+|   w2_income |   federal_effective_tax_rate |   federal_tax_bracket |   state_effective_tax_rate |   state_tax_bracket |
+|------------:|-----------------------------:|----------------------:|---------------------------:|--------------------:|
+|       50000 |                         10.3 |                    12 |                        1.5 |                 2   |
+|      100000 |                         11.4 |                    12 |                        3   |                 6   |
+|      150000 |                         14.9 |                    22 |                        4.6 |                 9.3 |
+|      200000 |                         17   |                    22 |                        5.9 |                 9.3 |
+|      250000 |                         18.5 |                    24 |                        6.6 |                 9.3 |
 
 
 ### Plot: Federal Tax as a Function of W2 Income
 
-Since the output is a dataframe, one can use their visualization tool of choice
-to make plots. Here we revisit the example above, evaluating a wider range of W2
-incomes at finer resolution than before.
+Since the output is a dataframe, one may readily use any of numerous
+visualization tools to make plots. Here we revisit the example above, evaluating
+a wider range of W2 incomes at finer resolution than before.
 
 ``` python
 import seaborn.objects as so
@@ -207,7 +207,7 @@ tax on $100K of W2 income for the past five years.
 
 ``` python
 df = evaluate_returns(
-    year=[2018, 2019, 2020, 2021, 2022], w2_income=100_000
+    year=[2018, 2019, 2020, 2021, 2022, 2023], w2_income=100_000
 ).astype({"year": "category"})
 
 (
