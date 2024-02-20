@@ -1,3 +1,8 @@
+## [2023.2] - 2024-02-19
+### Added
+- Fix issue where short-term capital gains weren't included.
+- Add tests that would have caught this.
+
 ## [2023.1] - 2024-02-15
 ### Added
 - Added OTS 2023.02 release.

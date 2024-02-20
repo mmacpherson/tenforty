@@ -267,7 +267,7 @@ def map_natural_to_ots_input(
                         out[ots_key] = v
             case _ if callable(ots_key):
                 _ots_key, _ots_value = ots_key(v)
-                out[_ots_key] = _ots_value
+                out[_ots_key] = out.get(_ots_key, "") + "\n" + _ots_value
             case _:
                 raise ValueError(f"Unexpected OTS key type: [{type(ots_key)}]")
 
@@ -337,7 +337,7 @@ def evaluate_natural_input_form(
 
 ## LEVEL 2: Map from validated user models to natural description.
 def evaluate_return(
-    year: int = 2022,
+    year: int = 2023,
     state: str | None = None,
     #
     filing_status: str = "Single",
@@ -383,7 +383,7 @@ def evaluate_return(
 
 
 def evaluate_returns(
-    year: list[int] | int = 2022,
+    year: list[int] | int = 2023,
     state: list[str | None] | str | None = None,
     filing_status: list[str] | str = "Single",
     num_dependents: list[int] | int = 0,
