@@ -28,7 +28,7 @@ name = "tenforty"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">= 3.10"
 urls = {github = "https://github.com/mmacpherson/tenforty"}
-version = "2023.1"
+version = "2023.2"
 
 [project.optional-dependencies]
 dev = [
