@@ -6,7 +6,7 @@
 #
 SHELL:=/bin/bash
 PROJECT=tenforty
-PYTHON_VERSION=3.11.7
+PYTHON_VERSION=3.12.2
 VENV=${PROJECT}-${PYTHON_VERSION}
 VENV_DIR=$(shell pyenv root)/versions/${VENV}
 VENV_BIN=${VENV_DIR}/bin
