@@ -95,12 +95,12 @@ cimport ots_2023_NY_IT201
 cimport ots_2023_OH_IT1040
 cimport ots_2023_PA_40
 cimport ots_2023_US_1040
+cimport ots_2023_US_1040_Sched_SE
 cimport ots_2023_VA_760
 cimport ots_2023_f2210
 cimport ots_2023_US_1040_Sched_E_brokerage_royalties
 cimport ots_2023_CA_5805
 cimport ots_2023_f8812
-cimport ots_2023_US_1040_Sched_SE
 
 cdef f_type lookup_ots_call(int year, char* form):
     if (year == 2018) and (form == "MA_1"):
@@ -269,6 +269,8 @@ cdef f_type lookup_ots_call(int year, char* form):
         return ots_2023_PA_40.main
     if (year == 2023) and (form == "US_1040"):
         return ots_2023_US_1040.main
+    if (year == 2023) and (form == "US_1040_Sched_SE"):
+        return ots_2023_US_1040_Sched_SE.main
     if (year == 2023) and (form == "VA_760"):
         return ots_2023_VA_760.main
     if (year == 2023) and (form == "f2210"):
@@ -279,8 +281,6 @@ cdef f_type lookup_ots_call(int year, char* form):
         return ots_2023_CA_5805.main
     if (year == 2023) and (form == "f8812"):
         return ots_2023_f8812.main
-    if (year == 2023) and (form == "US_1040_Sched_SE"):
-        return ots_2023_US_1040_Sched_SE.main
 
 
 def _evaluate_form(year, form, form_text, fed_form_text=None):
