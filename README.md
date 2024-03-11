@@ -24,6 +24,11 @@ functionality into a Python library.
 
 [![Try In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mmacpherson/tenforty/blob/main/notebooks/tenforty_Package_Demo.ipynb)
 
+A GPT interface to `tenforty` is available with a ChatGPT+ account
+[here](https://chat.openai.com/g/g-jkF9Et8tT-tax-driver). This GPT, and the
+`tenforty` package itself, are discussed in a blog post
+[here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
+
 
 ## Features
 
