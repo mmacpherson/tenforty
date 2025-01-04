@@ -73,11 +73,18 @@ particular typing:
 
     make env
 
-will create a pyenv virtual environment named `tenforty-{python_version}`
-containing `tenforty` and its dependencies, and similarly-named jupyter kernel
-that make all those packages available to Jupyter.
+uses `uv` to create a virtual environment containing `tenforty` and its
+dependencies.
 
-If you prefer to use something other than pyenv, `tenforty` is a vanilla
+For Jupyter notebook development, the command:
+
+    make jupyter-env
+
+installs a jupyter kernel named like `py-tenforty-{python_version}` that makes
+all the same packages available to Jupyter. (Start jupyter e.g. like `uv run
+jupyter lab`.)
+
+If you prefer to use something other than `uv`, `tenforty` is a vanilla
 setuptools-based package, and in that case the `Makefile` recipes might provide
 some help on your way.
 
@@ -179,16 +186,15 @@ releasing on GitHub is as follows:
 To date we're using a kind of `CalVer` variant for versioning:
 `{tax_year}.{version_increment}`
 
-
 Here, the `tax_year` is the most recent tax year included, and
-`version_increment` just counts the number of updates, starting with 1.
+`version_increment` just counts the number of updates, starting with 1, e.g.
+`2022.3`.
 
-The version is stored in `pyproject.toml`, e.g. `version = "2022.3"`.
+Update the version in `pyproject.toml`, e.g. `version = "2022.3"`. The format of
+the tags that signal a new release is the same as the package versions, except
+that they're prefixed with a `v`, e.g. `v2022.3`.
 
-The format of the tags that signal a new release is the same, except that it's
-prefixed with a `v`, e.g. `v2022.3`.
-
-There also a changelog at [`CHANGELOG.md`](CHANGELOG.md) that should be updated.
+Update the changelog at [`CHANGELOG.md`](CHANGELOG.md).
 
 So for example, when a new release "20XY.Z" is ready to go:
 
@@ -198,9 +204,10 @@ So for example, when a new release "20XY.Z" is ready to go:
    to TestPyPI went smoothly.
 3. Trigger a new GitHub release and PyPI version by pushing a tag:
 
-    git tag -a v20XY.Z -m "made less wrong"
-    git push origin v20XY.Z
-
+```{shell}
+git tag -a v20XY.Z -m "made less wrong"
+git push origin v20XY.Z
+```
 
 ## Contributing
 

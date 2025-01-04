@@ -445,7 +445,7 @@ def postprocess_source_groups(
 
 
 def build_amalgamation(
-    source_groups: dict[str, dict[str, dict[str, list[str]]]]
+    source_groups: dict[str, dict[str, dict[str, list[str]]]],
 ) -> str:
     """Build an amalgamated C++ source file from various source groups.
 
