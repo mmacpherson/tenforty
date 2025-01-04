@@ -14,31 +14,30 @@ clean: ## Remove all environment and build files
 	rm -rf tenforty.log .ruff_cache .mypy_cache .ipynb_checkpoints dist tenforty.egg-info
 	rm -rf .hypothesis .pytest_cache build tenforty/*.so **/__pycache__
 
-venv: ## Create virtual environment using uv
-	uv venv $(VENV)
+install: ## Install package and dependencies
+	uv pip install --upgrade -e ".[dev]"
 
-install: venv ## Install package and dependencies
-	uv pip install -e ".[dev]"
+lock: install ## Update uv lock file
+	uv lock --upgrade
 
 ipykernel: install ## Install Jupyter kernel
-	$(PYTHON) -m pip install ipykernel jupyter
-	$(PYTHON) -m pip install git+https://github.com/IsaGrue/nb_black.git
-	$(PYTHON) -m ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
+	uv pip install ipykernel jupyter
+	uv run ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
 
 test: ## Run tests
-	$(PYTHON) -m pytest
+	uv run python -m pytest
 
 hooks: ## Install pre-commit hooks
-	pre-commit install
+	uv run pre-commit install
 
 update-hooks: ## Update pre-commit hooks
-	pre-commit autoupdate
+	uv run pre-commit autoupdate
 
 run-hooks: ## Run hooks on staged files
-	pre-commit run
+	uv run pre-commit run
 
 run-hooks-all-files: ## Run hooks on all files
-	pre-commit run --all-files
+	uv run pre-commit run --all-files
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -1,6 +1,7 @@
 # tenforty-specific
 ots/generated/**
 scratch/
+uv.lock # This is a library, not an application.
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
