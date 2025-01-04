@@ -23,14 +23,12 @@ repos:
   - id: name-tests-test
     args: [--pytest]
   - id: trailing-whitespace
-- repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 24.10.0
-  hooks:
-  - id: black-jupyter
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.8.4
   hooks:
   - id: ruff
+    args: [--fix, --exit-non-zero-on-fix]
+  - id: ruff-format
     args: [--fix, --exit-non-zero-on-fix]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.14.0

@@ -1,44 +1,61 @@
 [build-system]
+requires = ["setuptools>=68.0", "wheel", "Cython>=3.0"]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools", "wheel", "Cython"]
 
 [project]
+name = "tenforty"
+version = "2023.4"
+description = "Library to compute US federal taxes, and state taxes for some states."
 authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
+requires-python = ">= 3.10"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE.txt", content-type = "text/plain"}
 classifiers = [
-  "Programming Language :: Cython",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Operating System :: MacOS",
-  "Operating System :: POSIX :: Linux",
-  "License :: OSI Approved :: MIT License",
-  "Development Status :: 4 - Beta",
-  "Intended Audience :: Developers",
-  "Intended Audience :: Financial and Insurance Industry",
-  "Topic :: Office/Business :: Financial :: Accounting"
+    "Programming Language :: Cython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Office/Business :: Financial :: Accounting"
 ]
 dependencies = [
-  "pandas",
-  "pyarrow",  # To quiet pandas deprecation warning.
-  "pydantic >= 2",
-  "python-dotenv"
+    "pandas>=2.0",
+    "pyarrow",  # To quiet pandas deprecation warning
+    "pydantic>=2",
+    "python-dotenv",
 ]
-description = "Library to compute US federal taxes, and state taxes for some states."
-license = {file = "LICENSE.txt", content-type = "text/plain"}
-name = "tenforty"
-readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">= 3.10"
-urls = {github = "https://github.com/mmacpherson/tenforty"}
-version = "2023.4"
 
 [project.optional-dependencies]
 dev = [
-  "hypothesis",
-  "jupyter",
-  "pytest",
-  "seaborn"
+    "hypothesis",
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff>=0.2.0",
+    "pre-commit",
 ]
+
+jupyter = [
+    "jupyter",
+    "seaborn",
+    "ipykernel",
+]
+
+[tool.setuptools]
+packages = ["tenforty"]
+package-dir = {tenforty = "tenforty"}
+
+[tool.setuptools.package-data]
+"tenforty.otslib" = ["*.pyx", "*.pxd"]
+
+[tool.cython]
+language_level = "3"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -75,6 +92,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 ignore = [
+"ISC001",
   "D203",
   "D213",
   "E501"  # We're already running black; if it doesn't break down further so be it.
