@@ -48,11 +48,15 @@ jupyter = [
 ]
 
 [tool.setuptools]
-packages = ["tenforty"]
-package-dir = {tenforty = "tenforty"}
+package-dir = {"" = "src"}
+packages = ["tenforty", "tenforty.otslib"]
+
+ext-modules = [
+  {name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs=["src/tenforty/otslib"]}
+]
 
 [tool.setuptools.package-data]
-"tenforty.otslib" = ["*.pyx", "*.pxd"]
+"tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]
 
 [tool.cython]
 language_level = "3"

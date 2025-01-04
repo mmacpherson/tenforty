@@ -32,8 +32,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
-        # os: [ubuntu-22.04, windows-2022, macos-13, macos-14]
+        # macos-13 is an intel runner, macos-{14,15} are apple silicon
         os: [ubuntu-latest, macos-13, macos-14, macos-15]
 
     steps:
@@ -92,7 +91,7 @@ jobs:
     # we've already seen a successful push to testpypi. Testpypi throws an error
     # if you try to push the same version again, so we suppress on v* tag to
     # avoid a harmless-but-confusing failure error in the Actions UI.
-    if: "!startsWith(github.ref, 'refs/tags/v')"
+    if: startsWith(github.ref, 'refs/tags/test-v')
     needs: [build-wheels, build-sdist]
     runs-on: ubuntu-latest
     environment:
@@ -111,7 +110,6 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
-        verbose: true
 
   github-release:
     name: >-
