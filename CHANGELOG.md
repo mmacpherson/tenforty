@@ -1,3 +1,7 @@
+## [2023.6] - 2025-01-04
+### Added
+- Updated from OTS2023 release 21.03 to 21.06
+
 ## [2023.5] - 2025-01-04
 ### Added
 - Included `macos-15` wheel

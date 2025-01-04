@@ -30,7 +30,7 @@ license = {file = "LICENSE.txt", content-type = "text/plain"}
 name = "tenforty"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">= 3.10"
-version = "2023.5"
+version = "2023.6"
 
 [project.optional-dependencies]
 dev = [

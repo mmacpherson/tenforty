@@ -61545,7 +61545,7 @@ namespace taxsolve_MA_1_2023 {
 /************************************************************************/
 
 
-float thisversion=21.00;
+float thisversion=21.02;
 
 
 
@@ -61593,6 +61593,7 @@ int main( int argc, char *argv[] )
  double MassBankInterest, Iexempt, AGI;
  double Unemployment, Lottery;
  double MassRetirement[2];
+ double L6a=0.0, L6b=0.0;
  double L23a_inc=0.0, L23a=0.0, L23b_inc=0.0, L23b=0.0, L28a=0.0, L28b=0.0,
 	L33[6], L35a=0.0, L35b=0.0, L38a=0.0, L38b=0.0, L38c=0.0;
  double L43a=0.0, L43b=0.0;
@@ -61769,8 +61770,20 @@ int main( int argc, char *argv[] )
    showline_wmsg( 5, word );
   }
 
- GetLine( "L6", &L[6] );	/* Business income/loss. */
- ShowLineNonZero(6);
+ get_parameter( infile, 'l', word, "L6" );			// Update in 2024.
+ if (strcmp( word, "L6a" ) == 0)
+  { /*NewForm*/
+   get_parameters( infile, 'f', &L6a, "L6a" );
+   showline_wlabelnz( "L6a", L6a );	/* Business income/loss. */
+   GetLine( "L6b", &L6b );
+   showline_wlabelnz( "L6b", L6b );	/* Farm income/loss. */
+  } /*NewForm*/
+ else
+  { /*OldForm*/
+   get_parameters( infile, 'f', &L6a, "L6a" );
+   showline_wlabelnz( "L6a", L6a );	/* Business income/loss. */
+  } /*OldForm*/
+ L[6] = L6a + L6b;
 
  GetLine( "L7", &L[7] );	/* Rental, royality, REMIC. */
  ShowLineNonZero(7);
@@ -61810,9 +61823,9 @@ int main( int argc, char *argv[] )
  showline_wlabel( "L14a", L[14] );
  L[14] = L[14] / 2.0;
  if (status == MARRIED_FILING_SEPARAT)
-  L[14] = smallerof( L[14] , 1500.0 );
+  L[14] = smallerof( L[14] , 2000.0 );			/* Updated for 2023. */
  else
-  L[14] = smallerof( L[14] , 3000.0 );
+  L[14] = smallerof( L[14] , 4000.0 );
  ShowLineNonZero(14);
 
  GetLine( "L15", &L[15] );	/* Other Deductions (sched Y, L19) */
@@ -62621,7 +62634,7 @@ namespace taxsolve_NY_IT201_2023 {
 /* Corrections 2022 taxes - Jason Striegel				*/
 /************************************************************************/
 
-float thisversion=21.00;
+float thisversion=21.01;
 
 
 double A[10], S[10];
@@ -63779,6 +63792,7 @@ int main( int argc, char *argv[] )
 
  // GetLineF( "L7", &L[7] );	/* Capital gains/losses (fed sched D) */
  L[7] = PrelimFedReturn.schedD[16];
+ if ( L[7] < 0.0) L[7] = PrelimFedReturn.schedD[21];
  showline(7);
 
  // GetLineF( "L8", &L[8] );	/* Other gains/losses (fed form 4794) */
@@ -64469,7 +64483,7 @@ namespace taxsolve_OH_IT1040_2023 {
 
 
 
-double thisversion=21.00;
+double thisversion=21.01;
 
 
 double TaxRateFunction( double x, int status )
@@ -64523,11 +64537,9 @@ int main( int argc, char *argv[] )
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
  time_t now;
- double factorA;
  double L2a, L2b, L7a, L8a, L8b, L8c;
  double jfc=0.0, exemption_amnt;
  double SchedA[MAX_LINES], SchedC[MAX_LINES];
- char *DateBeganResidence, *DateEndResidence, *OtherState;
 
  /* Intercept any command-line arguments. */
  printf("OH IT1040 2023 - v%3.1f\n", thisversion);
@@ -64614,46 +64626,49 @@ int main( int argc, char *argv[] )
 
  GetLine( "SchedA_1", &SchedA[1] );	/* Non-Ohio state or local gov't interest and dividends */
  GetLine( "SchedA_2", &SchedA[2] );	/* Ohio pass-through entity and financial institutions taxes paid */
- GetLine( "SchedA_3", &SchedA[3] );	/* Reimbursed college tuit. fees deducted prev yrs. */
- GetLine( "SchedA_4", &SchedA[4] );	/* Losses from sale or disposition of Ohio public obligations */
- GetLine( "SchedA_5", &SchedA[5] );	/* Nonmedical withdrawals from medical savings account */
- GetLine( "SchedA_6", &SchedA[6] );	/* Reimbursement of expenses previously deducted for Ohio income tax ...*/
- GetLine( "SchedA_7", &SchedA[7] );	/* Adjustment for Internal Revenue Code sections 168(k) and 179 */
- GetLine( "SchedA_8", &SchedA[8] );	/* Federal interest and dividends subject to state taxation */
- GetLine( "SchedA_9", &SchedA[9] );	/* Miscellaneous federal income tax additions */
+ GetLine( "SchedA_3", &SchedA[3] );
+ GetLine( "SchedA_4", &SchedA[4] );
+ GetLine( "SchedA_5", &SchedA[5] );
+ GetLine( "SchedA_6", &SchedA[6] );
+ GetLine( "SchedA_7", &SchedA[7] );
+ GetLine( "SchedA_8", &SchedA[8] );
+ GetLine( "SchedA_9", &SchedA[9] );
+ GetLine( "SchedA_10", &SchedA[10] );
 
- GetLine( "SchedA_11", &SchedA[11] );	/* Business income deduction (Ohio Schedule IT BUS, line 11) */
- GetLine( "SchedA_12", &SchedA[12] );	/* Compensation earned in Ohio by residents of neighboring states */
- GetLine( "SchedA_13", &SchedA[13] );	/* State/municipal tax overpayments (IRS 1040, Sched 1, line 10) */
- GetLine( "SchedA_14", &SchedA[14] );	/* Taxable Social Security benefits */
- GetLine( "SchedA_15", &SchedA[15] );	/* Certain railroad retirement benefits */
- GetLine( "SchedA_16", &SchedA[16] );	/* Interest income from Ohio public obligations ... */
- GetLine( "SchedA_17", &SchedA[17] );	/* Amounts contributed to an individual development account */
- GetLine( "SchedA_18", &SchedA[18] );	/* Amounts contributed to an STABLE account */
- GetLine( "SchedA_19", &SchedA[19] );	/* Income from out-of-state business */
+ GetLine( "SchedA_12", &SchedA[12] );	/* Business income deduction (Ohio Schedule IT BUS, line 11) */
+ GetLine( "SchedA_13", &SchedA[13] );	/* Compensation earned in Ohio by residents of neighboring states */
+ GetLine( "SchedA_14", &SchedA[14] );
+ GetLine( "SchedA_15", &SchedA[15] );
+ GetLine( "SchedA_16", &SchedA[16] );
+ GetLine( "SchedA_17", &SchedA[17] );
+ GetLine( "SchedA_18", &SchedA[18] );
+ GetLine( "SchedA_19", &SchedA[19] );
+ GetLine( "SchedA_20", &SchedA[20] );
+ GetLine( "SchedA_21", &SchedA[21] );
+ GetLine( "SchedA_22", &SchedA[22] );
 
- GetLine( "SchedA_20", &SchedA[20] );	/* Federal interest and dividends exempt from state taxation */
- GetLine( "SchedA_21", &SchedA[21] );	/* Adjustment for Internal Revenue Code 168(k), 179 depreciation */
- GetLine( "SchedA_22", &SchedA[22] );	/* Refund or reimbursements shown on IRS form 1040, line 21 */
- GetLine( "SchedA_23", &SchedA[23] );	/* Repayment of income reported in a prior year */
- GetLine( "SchedA_24", &SchedA[24] );	/* Wage expense not deducted ... */
- GetLine( "SchedA_25", &SchedA[25] );	/* Miscellaneous federal income tax deductions */
+ GetLine( "SchedA_23", &SchedA[23] );
+ GetLine( "SchedA_24", &SchedA[24] );
+ GetLine( "SchedA_25", &SchedA[25] );
+ GetLine( "SchedA_26", &SchedA[26] );
+ GetLine( "SchedA_27", &SchedA[27] );
+ GetLine( "SchedA_28", &SchedA[28] );
 
- GetLine( "SchedA_26", &SchedA[26] );	/* Military pay for Ohio residents received while stationed outside Ohio */
- GetLine( "SchedA_27", &SchedA[27] );	/* Income earned by military nonresidents ... */
- GetLine( "SchedA_28", &SchedA[28] );	/* Uniformed services retirement income */
- GetLine( "SchedA_29", &SchedA[29] );	/* Military injury relief fund */
- GetLine( "SchedA_30", &SchedA[30] );	/* Certain Ohio National Guard reimbursements and benefits */
+ GetLine( "SchedA_29", &SchedA[29] );
+ GetLine( "SchedA_30", &SchedA[30] );
+ GetLine( "SchedA_31", &SchedA[31] );
+ GetLine( "SchedA_32", &SchedA[32] );
+ GetLine( "SchedA_33", &SchedA[33] );
 
- GetLine( "SchedA_31", &SchedA[21] );	/* Ohio 529 contributions, tuition credit purchases */
- GetLine( "SchedA_32", &SchedA[32] );	/* Pell College Opportunity taxable grant amounts used for room and board */
- GetLine( "SchedA_33", &SchedA[33] );	/* Ohio educator expenses in excess of federal deduction */
+ GetLine( "SchedA_34", &SchedA[34] );
+ GetLine( "SchedA_35", &SchedA[35] );
+ GetLine( "SchedA_36", &SchedA[36] );
 
- GetLine( "SchedA_34", &SchedA[34] );	/* Disability benefits */
- GetLine( "SchedA_35", &SchedA[35] );	/* Survivorship benefits */
- GetLine( "SchedA_36", &SchedA[36] );	/* Unreimbursed long-term care insurance premiums ... */
- GetLine( "SchedA_37", &SchedA[37] );	/* Funds deposited into, and earnings of, a medical savings account */
- GetLine( "SchedA_38", &SchedA[38] );	/* Qualified organ donor expenses */
+ GetLine( "SchedA_39", &SchedA[39] );
+ GetLine( "SchedA_40", &SchedA[40] );
+ GetLine( "SchedA_41", &SchedA[41] );
+ GetLine( "SchedA_42", &SchedA[42] );
+ GetLine( "SchedA_43", &SchedA[43] );
 
  /* Schedule of Credits. */
  GetLine( "Credits_2", &SchedC[2] );	/* Retirement income credit */
@@ -64670,6 +64685,7 @@ int main( int argc, char *argv[] )
    SchedC[8] = smallerof( SchedC[8], 100.0 );
  else
    SchedC[8] = smallerof( SchedC[8], 50.0 );
+
  GetLine( "Credits_13", &SchedC[13] );	/* Earned income credit */
  GetLine( "Credits_14", &SchedC[14] );	/* Home school expenses credit. */
  GetLine( "Credits_15", &SchedC[15] );	/* Scholarship donation credit. */
@@ -64679,38 +64695,40 @@ int main( int argc, char *argv[] )
  GetLine( "Credits_19", &SchedC[19] );	/* Job retention credit, nonrefundable portion */
  GetLine( "Credits_20", &SchedC[20] );	/* Credit for eligible new employees in an enterprise zone */
  GetLine( "Credits_21", &SchedC[21] );	/* Credit for purchases of grape production property */
- GetLine( "Credits_22", &SchedC[22] );	/* Invest Ohio credit */
- GetLine( "Credits_23", &SchedC[23] );	/* Lead abatement credit */
- GetLine( "Credits_24", &SchedC[24] );	/* Opportunity zone investment credit */
- GetLine( "Credits_25", &SchedC[25] );	/* Tech investment credit */
- GetLine( "Credits_26", &SchedC[26] );	/* Enterprise zone day care and training credits */
- GetLine( "Credits_27", &SchedC[27] );	/* Research and development credit */
- GetLine( "Credits_28", &SchedC[28] );	/* Nonrefundable Ohio historic preservation credit */
+ GetLine( "Credits_22", &SchedC[22] );
+ GetLine( "Credits_23", &SchedC[23] );
+ GetLine( "Credits_24", &SchedC[24] );
+ GetLine( "Credits_25", &SchedC[25] );
+ GetLine( "Credits_26", &SchedC[26] );
+ GetLine( "Credits_27", &SchedC[27] );
+ GetLine( "Credits_28", &SchedC[28] );
+ GetLine( "Credits_29", &SchedC[29] );
+ GetLine( "Credits_30", &SchedC[30] );
+ GetLine( "Credits_31", &SchedC[31] );
+ GetLine( "Credits_32", &SchedC[32] );
+ GetLine( "Credits_33", &SchedC[33] );
 
- DateBeganResidence = GetTextLine( "DateBeganResidence:" );
- DateEndResidence = GetTextLine( "DateEndResidence:" );
- OtherState = GetTextLine( "OtherState:" );
- GetLine( "Credits_31", &SchedC[31] );	/* Portion L3 was not earned in Ohio. */
 
- GetLine( "Credits_34", &SchedC[34] );	/* Resident credit - OH IT RC, line 7 */
+ GetLine( "Credits_36", &SchedC[36] );	/* Non-Resident credit */
+ GetLine( "Credits_37", &SchedC[37] );	/* Resident credit - OH IT RC, line 7 */
 
- GetLine( "Credits_36", &SchedC[36] );	/* Refundable Historic preservation credit */
- GetLine( "Credits_37", &SchedC[37] );	/* Refundable Business jobs credit */
- GetLine( "Credits_38", &SchedC[38] );	/* Pass-through entity credit */
- GetLine( "Credits_39", &SchedC[39] );	/* Motion picture production credit */
- GetLine( "Credits_40", &SchedC[40] );	/* Venture capital credit */
+ GetLine( "Credits_39", &SchedC[39] );	/* Refundable Historic preservation credit */
+ GetLine( "Credits_40", &SchedC[40] );	/* Refundable Business jobs credit */
+ GetLine( "Credits_41", &SchedC[41] );	/* Pass-through entity credit */
+ GetLine( "Credits_42", &SchedC[42] );	/* Motion picture production credit */
+ GetLine( "Credits_43", &SchedC[43] );	/* Venture capital credit */
 
 
  /* ---- Do Calculations. ---- */
 
- for (j=1; j <= 9; j++)
-  SchedA[10] = SchedA[10] + SchedA[j];
+ for (j=1; j <= 10; j++)
+  SchedA[11] = SchedA[11] + SchedA[j];
 
- for (j=11; j <= 38; j++)
-  SchedA[39] = SchedA[39] + SchedA[j];
+ for (j=12; j <= 43; j++)
+  SchedA[44] = SchedA[44] + SchedA[j];
 
- L2a = SchedA[10];
- L2b = SchedA[39];
+ L2a = SchedA[11];
+ L2b = SchedA[44];
  L[3] = L[1] + L2a - L2b;
 
  if (L[3] <= 40000.0)			/* Updated for 2023. */
@@ -64748,25 +64766,17 @@ int main( int argc, char *argv[] )
     SchedC[12] = smallerof( jfc * SchedC[11], 650.0 );
   } /*Joint_Filing_Credit*/
 
- for (j=12; j <= 28; j++)
-  SchedC[29] = SchedC[29] + SchedC[j];
- SchedC[30] = NotLessThanZero( SchedC[11] - SchedC[29] );
+ for (j=12; j <= 33; j++)
+  SchedC[34] = SchedC[34] + SchedC[j];
+ SchedC[35] = NotLessThanZero( SchedC[11] - SchedC[34] );
 
- SchedC[32] = L[3];
- j = 10000.0 * SchedC[31] / SchedC[32];
- factorA = (double)j / 10000.0;
- // printf(" %4g\n", factorA );
- if (factorA > 1.0)
-  factorA = 1.0;
- SchedC[33] = SchedC[30] * factorA;
-
- SchedC[35] = SchedC[10] + SchedC[29] + SchedC[33] + SchedC[34];
- L[9] = SchedC[35];
+ SchedC[38] = SchedC[10] + SchedC[34] + SchedC[36] + SchedC[37];
+ L[9] = SchedC[38];
  L[10] = NotLessThanZero( L8c - L[9] );
 
- for (j=36; j <= 40; j++)
-  SchedC[41] = SchedC[41] + SchedC[j];
- L[16] = SchedC[41];
+ for (j=39; j <= 44; j++)
+  SchedC[44] = SchedC[44] + SchedC[j];
+ L[16] = SchedC[44];
 
  L[13] = L[10] + L[11] + L[12];			/* Total Ohio tax liability before withholding or estimated payments. */
  L[18] = L[14] + L[15] + L[16] + L[17];		/* Total Ohio tax payments */
@@ -64828,7 +64838,7 @@ int main( int argc, char *argv[] )
   }
 
  fprintf(outfile,"\n-- 2023 Ohio Schedule A --\n");
- for (j = 1; j <= 39; j++)
+ for (j = 1; j <= 44; j++)
   {
    sprintf( label, "SchedA%d", j );
    showline_wlabel( label, SchedA[j] );
@@ -64842,24 +64852,7 @@ int main( int argc, char *argv[] )
   }
  if (jfc > 0.0)
   fprintf(outfile,"JFC = %d\n", (int)(100.0 * jfc + 0.25) );
- for (j = 12; j <= 30; j++)
-  {
-   sprintf( label, "Credits%d", j );
-   showline_wlabel( label, SchedC[j] );
-  }
-
- if (DateBeganResidence[0] != 0)
-  fprintf(outfile,"   DateBeganResidence: %s\n", DateBeganResidence );
- if (DateEndResidence[0] != 0)
-  fprintf(outfile,"   DateEndResidence: %s\n", DateEndResidence );
- if (OtherState[0] != 0)
-  fprintf(outfile,"   OtherState: %s\n", OtherState );
-
- sprintf(word,"%5.4f", factorA );
-printf("factorA = %g, word = '%s'\n", factorA, word );
- fprintf(outfile,"   Credits32a \"%s\"\n", word );
-
- for (j = 31; j <= 41; j++)
+ for (j = 12; j <= 44; j++)
   {
    sprintf( label, "Credits%d", j );
    showline_wlabel( label, SchedC[j] );
@@ -65231,7 +65224,7 @@ namespace taxsolve_US_1040_2023 {
 /* Aston Roberts 1-5-2024	aston_roberts@yahoo.com			*/
 /************************************************************************/
 
-float thisversion=21.0;
+float thisversion=21.02;
 
 
 
@@ -65350,7 +65343,7 @@ void capgains_qualdividends_worksheets( int status )			/* Updated for 2023. */
  if (Do_SchedD)
   qcgws[3] = NotLessThanZero(smallerof( SchedD[15], SchedD[16] ));
  else
-  qcgws[3] = Sched1[13];
+  qcgws[3] = L[7];
  qcgws[4] = qcgws[2] + qcgws[3];
  qcgws[5] = NotLessThanZero( qcgws[1] - qcgws[4] );
  switch (status)
@@ -67340,6 +67333,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
  GetLine( "A8a", &homemort[0] );	/* Home mortgage interest and points reported to you on Form 1098.*/
  GetLine( "A8b", &homemort[1] );	/* Home mortgage interest not reported to you on Form 1098.*/
  GetLine( "A8c", &homemort[2] );	/* Points not reported to you on Form 1098.*/
+ homemort[3] = 0;
  // GetLine( "A8d", &homemort[3] );	/* Mortgage insurance premiums. */
  GetOptionalLine( "A8d or A9", labelx, &tmpval );
  if (strcmp( labelx, "A9" ) == 0)
@@ -67534,7 +67528,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
     Do_QDCGTW = Yes;
    if (Do_QDCGTW)
     {
-     fprintf(outfile,"Doing 'Qualified Dividends and Capital Gain tax Worksheet', page 36.\n");
+     fprintf(outfile,"Doing 'Qualified Dividends and Capital Gain tax Worksheet', page 37.\n");
      capgains_qualdividends_worksheets( status );
     }
    else
@@ -68176,7 +68170,7 @@ namespace taxsolve_VA_760_2023 {
 
 
 
-float thisversion=21.00;
+float thisversion=21.01;
 
 
 double TaxRateFunction( double income, int status )
@@ -68212,7 +68206,7 @@ int main( int argc, char *argv[] )
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
  time_t now;
- double L19b=0.0, std_ded=0.0, min2file;
+ double L19b=0.0, std_ded=0.0, min2file, STA_VAGI=0.0;
 
  /* Intercept any command-line arguments. */
  printf("VA-760 2023 - v%3.1f\n", thisversion);
@@ -68459,7 +68453,15 @@ int main( int argc, char *argv[] )
  showline(16);
  Report_bracket_info( L[15], L[16], status );
 
- GetLine( "L17", &L[17] );	/* Spouse Tax Adjustment. */
+ get_parameter( infile, 'l', word, "L17" );
+ if (strcmp( word, "STA_VAGI" ) == 0)
+  {
+   get_parameters( infile, 'f', &STA_VAGI, "STA_VAGI" );
+   showline_wlabelnz( "STA_VAGI", STA_VAGI );
+   get_parameter( infile, 's', word, "L17" );
+  }
+ get_parameters( infile, 'f', &L[17], "L17" );
+ // GetLine( "L17", &L[17] );	/* Spouse Tax Adjustment. */		// Update in 2024.
  showline(17);
 
  L[18] = L[16] - L[17];

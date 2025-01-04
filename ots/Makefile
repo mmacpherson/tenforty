@@ -6,7 +6,7 @@ generated: amalgamate.py ots-releases/OpenTaxSolver*.tgz ## >> generate wrapper 
 	python amalgamate.py ots-releases/OpenTaxSolver*.tgz
 
 install: ## >> copy files over to main source directory
-	cp -R generated/* ../tenforty
+	cp -R generated/* ../src/tenforty
 
 clean: ## >> remove all generated files
 	rm -rf generated
@@ -29,7 +29,5 @@ HELP_FUN = \
 help: ##@help >> Show this help.
 	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 	@echo ""
-	@echo "Note: to activate the environment in your local shell type:"
-	@echo "   $$ pyenv activate $(VENV)"
 
 # end
