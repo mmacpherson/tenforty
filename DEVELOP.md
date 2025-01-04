@@ -78,10 +78,11 @@ dependencies.
 
 For Jupyter notebook development, the command:
 
-    make ipykernel
+    make jupyter-env
 
-installs a jupyter kernel named like `py-tenforty-{python_version}` that make
-all the same packages available to Jupyter.
+installs a jupyter kernel named like `py-tenforty-{python_version}` that makes
+all the same packages available to Jupyter. (Start jupyter e.g. like `uv run
+jupyter lab`.)
 
 If you prefer to use something other than `uv`, `tenforty` is a vanilla
 setuptools-based package, and in that case the `Makefile` recipes might provide

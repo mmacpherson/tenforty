@@ -36,8 +36,8 @@ env: check-uv ## Install package and dependencies
 	uv venv
 	uv pip install --upgrade --editable ".[dev]"
 
-ipykernel: env ## Install Jupyter kernel
-	uv pip install ipykernel jupyter
+jupyter-env: env ## Install Jupyter kernel
+	uv pip install --upgrade --editable ".[jupyter]"
 	uv run python -m ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
 
 test: env ## Run tests

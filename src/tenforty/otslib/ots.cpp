@@ -1517,9 +1517,9 @@ static const char *__pyx_f[] = {
 
 /* "src/tenforty/otslib/ots.pyx":13
  * from libc.stdlib cimport free, malloc
- * 
+ *
  * ctypedef int (*f_type)(int, char **)             # <<<<<<<<<<<<<<
- * 
+ *
  * cimport ots_2018_MA_1
  */
 typedef int (*__pyx_t_8tenforty_6otslib_f_type)(int, char **);
@@ -3203,7 +3203,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 
 /* "src/tenforty/otslib/ots.pyx":105
  * cimport ots_2023_f8812
- * 
+ *
  * cdef f_type lookup_ots_call(int year, char* form):             # <<<<<<<<<<<<<<
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main
@@ -3221,7 +3221,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   __Pyx_RefNannySetupContext("lookup_ots_call", 1);
 
   /* "src/tenforty/otslib/ots.pyx":106
- * 
+ *
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):             # <<<<<<<<<<<<<<
  *         return ots_2018_MA_1.main
@@ -3252,7 +3252,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     goto __pyx_L0;
 
     /* "src/tenforty/otslib/ots.pyx":106
- * 
+ *
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):             # <<<<<<<<<<<<<<
  *         return ots_2018_MA_1.main
@@ -6745,7 +6745,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  *         return ots_2023_CA_5805.main
  *     if (year == 2023) and (form == "f8812"):             # <<<<<<<<<<<<<<
  *         return ots_2023_f8812.main
- * 
+ *
  */
   __pyx_t_2 = (__pyx_v_year == 0x7E7);
   if (__pyx_t_2) {
@@ -6765,8 +6765,8 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  *         return ots_2023_CA_5805.main
  *     if (year == 2023) and (form == "f8812"):
  *         return ots_2023_f8812.main             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
     __pyx_r = OpenTaxSolver2023::taxsolve_f8812_2023::main;
     goto __pyx_L0;
@@ -6776,13 +6776,13 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  *         return ots_2023_CA_5805.main
  *     if (year == 2023) and (form == "f8812"):             # <<<<<<<<<<<<<<
  *         return ots_2023_f8812.main
- * 
+ *
  */
   }
 
   /* "src/tenforty/otslib/ots.pyx":105
  * cimport ots_2023_f8812
- * 
+ *
  * cdef f_type lookup_ots_call(int year, char* form):             # <<<<<<<<<<<<<<
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main
@@ -6801,15 +6801,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
 }
 
 /* "src/tenforty/otslib/ots.pyx":286
- * 
- * 
+ *
+ *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- * 
+ *
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -6818,7 +6818,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 ); /*proto*/
 PyDoc_STRVAR(__pyx_doc_8tenforty_6otslib__evaluate_form, "Evaluate an OTS tax form given year, form, and form content.\n\n    year: int\n    form: str\n    form_text: str\n    fed_file: str | None\n\n    Returns completed form as str.\n\n    Validation of year, form, form_text is not done here, but in\n    `tenforty.evaluate_form`, because it's more conveniently outside the cython\n    context.\n    ");
 static PyMethodDef __pyx_mdef_8tenforty_6otslib_1_evaluate_form = {"_evaluate_form", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_8tenforty_6otslib_1_evaluate_form, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_8tenforty_6otslib__evaluate_form};
-static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -6993,9 +6993,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
   /* "src/tenforty/otslib/ots.pyx":301
  *     """
- * 
+ *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef char** c_argv = NULL
  */
   __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_year); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
@@ -7005,18 +7005,18 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
   /* "src/tenforty/otslib/ots.pyx":303
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
- * 
+ *
  *     cdef char** c_argv = NULL             # <<<<<<<<<<<<<<
  *     cdef object py_unicode_returnfile
- * 
+ *
  */
   __pyx_v_c_argv = NULL;
 
   /* "src/tenforty/otslib/ots.pyx":306
  *     cdef object py_unicode_returnfile
- * 
+ *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
- * 
+ *
  *         # Run federal tax file first as needed.
  */
   /*with:*/ {
@@ -7089,7 +7089,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_5 = 0;
 
           /* "src/tenforty/otslib/ots.pyx":309
- * 
+ *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
  *             # Write out federal file to hardcoded location.
@@ -7118,7 +7118,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
- * 
+ *
  */
             /*with:*/ {
               __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 312, __pyx_L7_error)
@@ -7177,7 +7177,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)             # <<<<<<<<<<<<<<
- * 
+ *
  *             # Update location of fed file in state form.
  */
                     __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 313, __pyx_L18_error)
@@ -7199,7 +7199,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
- * 
+ *
  */
                   }
                   __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -7233,7 +7233,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                       __Pyx_GIVEREF(__pyx_t_5);
                       __Pyx_XGIVEREF(__pyx_t_6);
                       __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_5, __pyx_t_6);
-                      __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_6 = 0; 
+                      __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_6 = 0;
                       __PYX_ERR(0, 312, __pyx_L20_except_error)
                     }
                     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -7276,10 +7276,10 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             }
 
             /* "src/tenforty/otslib/ots.pyx":316
- * 
+ *
  *             # Update location of fed file in state form.
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)             # <<<<<<<<<<<<<<
- * 
+ *
  *         returnfile = f"{tmpdir}/form.txt"
  */
             __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_form_text, __pyx_n_s_replace); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 316, __pyx_L7_error)
@@ -7310,7 +7310,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_t_6 = 0;
 
             /* "src/tenforty/otslib/ots.pyx":309
- * 
+ *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
  *             # Write out federal file to hardcoded location.
@@ -7320,7 +7320,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
           /* "src/tenforty/otslib/ots.pyx":318
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)
- * 
+ *
  *         returnfile = f"{tmpdir}/form.txt"             # <<<<<<<<<<<<<<
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)
@@ -7334,11 +7334,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_5 = 0;
 
           /* "src/tenforty/otslib/ots.pyx":319
- * 
+ *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
  *             print(form_text, file=fp)
- * 
+ *
  */
           /*with:*/ {
             __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 319, __pyx_L7_error)
@@ -7397,7 +7397,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)             # <<<<<<<<<<<<<<
- * 
+ *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  */
                   __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 320, __pyx_L32_error)
@@ -7415,11 +7415,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
                   /* "src/tenforty/otslib/ots.pyx":319
- * 
+ *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
  *             print(form_text, file=fp)
- * 
+ *
  */
                 }
                 __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
@@ -7453,7 +7453,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_GIVEREF(__pyx_t_6);
                     __Pyx_XGIVEREF(__pyx_t_4);
                     __Pyx_ErrRestoreWithState(__pyx_t_5, __pyx_t_6, __pyx_t_4);
-                    __pyx_t_5 = 0; __pyx_t_6 = 0; __pyx_t_4 = 0; 
+                    __pyx_t_5 = 0; __pyx_t_6 = 0; __pyx_t_4 = 0;
                     __PYX_ERR(0, 319, __pyx_L34_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -7497,7 +7497,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
           /* "src/tenforty/otslib/ots.pyx":322
  *             print(form_text, file=fp)
- * 
+ *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)             # <<<<<<<<<<<<<<
  *         if c_argv is NULL:
  *             raise MemoryError()
@@ -7505,7 +7505,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_v_c_argv = ((char **)malloc(((sizeof(char *)) * 2)));
 
           /* "src/tenforty/otslib/ots.pyx":323
- * 
+ *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
@@ -7524,7 +7524,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             PyErr_NoMemory(); __PYX_ERR(0, 324, __pyx_L7_error)
 
             /* "src/tenforty/otslib/ots.pyx":323
- * 
+ *
  *         c_argv = <char**>malloc(sizeof(char*) * 2)
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
@@ -7575,7 +7575,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ots_form_function(2, c_argv)
  *         finally:
  *             free(c_argv)             # <<<<<<<<<<<<<<
- * 
+ *
  *         # OTS generates an output file based on the name of the input file.
  */
           /*finally:*/ {
@@ -7622,7 +7622,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           }
 
           /* "src/tenforty/otslib/ots.pyx":333
- * 
+ *
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")             # <<<<<<<<<<<<<<
  *         with open(returnfile_completed) as fp:
@@ -7638,7 +7638,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
  *             result = fp.read()
- * 
+ *
  */
           /*with:*/ {
             __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_open, __pyx_v_returnfile_completed); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 334, __pyx_L7_error)
@@ -7688,7 +7688,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()             # <<<<<<<<<<<<<<
- * 
+ *
  *     return result
  */
                   __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_fp, __pyx_n_s_read); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 335, __pyx_L52_error)
@@ -7723,7 +7723,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
  *             result = fp.read()
- * 
+ *
  */
                 }
                 __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
@@ -7757,7 +7757,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_GIVEREF(__pyx_t_4);
                     __Pyx_XGIVEREF(__pyx_t_6);
                     __Pyx_ErrRestoreWithState(__pyx_t_5, __pyx_t_4, __pyx_t_6);
-                    __pyx_t_5 = 0; __pyx_t_4 = 0; __pyx_t_6 = 0; 
+                    __pyx_t_5 = 0; __pyx_t_4 = 0; __pyx_t_6 = 0;
                     __PYX_ERR(0, 334, __pyx_L54_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -7801,9 +7801,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
           /* "src/tenforty/otslib/ots.pyx":306
  *     cdef object py_unicode_returnfile
- * 
+ *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
- * 
+ *
  *         # Run federal tax file first as needed.
  */
         }
@@ -7838,7 +7838,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __Pyx_GIVEREF(__pyx_t_4);
             __Pyx_XGIVEREF(__pyx_t_5);
             __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_4, __pyx_t_5);
-            __pyx_t_6 = 0; __pyx_t_4 = 0; __pyx_t_5 = 0; 
+            __pyx_t_6 = 0; __pyx_t_4 = 0; __pyx_t_5 = 0;
             __PYX_ERR(0, 306, __pyx_L9_except_error)
           }
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7882,7 +7882,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
   /* "src/tenforty/otslib/ots.pyx":337
  *             result = fp.read()
- * 
+ *
  *     return result             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
@@ -7892,11 +7892,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   goto __pyx_L0;
 
   /* "src/tenforty/otslib/ots.pyx":286
- * 
- * 
+ *
+ *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- * 
+ *
  */
 
   /* function exit code */
@@ -8027,18 +8027,18 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
- * 
+ *
  */
   __pyx_tuple_ = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 312, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
   /* "src/tenforty/otslib/ots.pyx":286
- * 
- * 
+ *
+ *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- * 
+ *
  */
   __pyx_tuple__3 = PyTuple_Pack(13, __pyx_n_s_year, __pyx_n_s_form, __pyx_n_s_form_text, __pyx_n_s_fed_form_text, __pyx_n_s_ots_form_function, __pyx_n_s_c_argv, __pyx_n_s_py_unicode_returnfile, __pyx_n_s_tmpdir, __pyx_n_s_ff_path, __pyx_n_s_fp, __pyx_n_s_returnfile, __pyx_n_s_returnfile_completed, __pyx_n_s_result); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
@@ -8411,8 +8411,8 @@ if (!__Pyx_RefNanny) {
   #endif
 
   /* "src/tenforty/otslib/ots.pyx":7
- * 
- * 
+ *
+ *
  * import os             # <<<<<<<<<<<<<<
  * import sys
  * import tempfile
@@ -8423,11 +8423,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "src/tenforty/otslib/ots.pyx":8
- * 
+ *
  * import os
  * import sys             # <<<<<<<<<<<<<<
  * import tempfile
- * 
+ *
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_sys, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -8438,7 +8438,7 @@ if (!__Pyx_RefNanny) {
  * import os
  * import sys
  * import tempfile             # <<<<<<<<<<<<<<
- * 
+ *
  * from libc.stdlib cimport free, malloc
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_tempfile, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
@@ -8447,11 +8447,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "src/tenforty/otslib/ots.pyx":286
- * 
- * 
+ *
+ *
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- * 
+ *
  */
   __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8tenforty_6otslib_1_evaluate_form, 0, __pyx_n_s_evaluate_form, NULL, __pyx_n_s_tenforty_otslib, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
