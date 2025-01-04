@@ -10,6 +10,9 @@
             "src/tenforty/otslib"
         ],
         "language": "c++",
+        "library_dirs": [
+            "src/tenforty/otslib"
+        ],
         "name": "tenforty.otslib",
         "sources": [
             "src/tenforty/otslib/ots.pyx"
@@ -7884,6 +7887,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             result = fp.read()
  *
  *     return result             # <<<<<<<<<<<<<<
+ *
  */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 337, __pyx_L1_error) }
