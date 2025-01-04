@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tenforty"
-version = "2023.4"
+version = "2023.5"
 description = "Library to compute US federal taxes, and state taxes for some states."
 authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
 requires-python = ">= 3.10"

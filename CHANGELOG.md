@@ -1,3 +1,8 @@
+## [2023.5] - 2025-01-04
+### Added
+- Included `macos-15` wheel
+- Switched from pyenv to uv dev setup
+
 ## [2023.4] - 2025-01-04
 ### Added
 - Included 3.13 build. Updated ubuntu builder.

@@ -5,7 +5,7 @@ PROJECT := tenforty
 PYTHON_VERSION := 3.12
 VENV := .venv
 PYTHON := $(VENV)/bin/python
-JUPYTER_ENV_NAME := "python-$(PROJECT)"
+JUPYTER_ENV_NAME := "py-$(PROJECT)-$(PYTHON_VERSION)"
 UV_CHECK := $(shell command -v uv 2> /dev/null)
 
 define UV_INSTALL_MSG
@@ -38,7 +38,7 @@ env: check-uv ## Install package and dependencies
 
 ipykernel: env ## Install Jupyter kernel
 	uv pip install ipykernel jupyter
-	uv run ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
+	uv run python -m ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
 
 test: env ## Run tests
 	uv run python -m pytest

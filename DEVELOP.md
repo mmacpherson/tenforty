@@ -73,11 +73,17 @@ particular typing:
 
     make env
 
-will create a pyenv virtual environment named `tenforty-{python_version}`
-containing `tenforty` and its dependencies, and similarly-named jupyter kernel
-that make all those packages available to Jupyter.
+uses `uv` to create a virtual environment containing `tenforty` and its
+dependencies.
 
-If you prefer to use something other than pyenv, `tenforty` is a vanilla
+For Jupyter notebook development, the command:
+
+    make ipykernel
+
+installs a jupyter kernel named like `py-tenforty-{python_version}` that make
+all the same packages available to Jupyter.
+
+If you prefer to use something other than `uv`, `tenforty` is a vanilla
 setuptools-based package, and in that case the `Makefile` recipes might provide
 some help on your way.
 
