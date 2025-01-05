@@ -2,9 +2,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#ifdef _WIN32
+#include <string.h>
+#else
 #include <string.h>
 #include <strings.h>
-#include <time.h>
+#endif
 #define printf(...)
 #define system(...)
 namespace OpenTaxSolver2018 {
