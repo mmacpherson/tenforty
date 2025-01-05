@@ -8,11 +8,14 @@ from setuptools import Extension, setup
 extra_compile_args = []
 extra_link_args = []
 
-# Detect if we're on Windows using MSVC
+
+num_threads = 4
 if platform.system() == "Windows":
-    # Example flags to avoid ICEs on large single-file compiles
-    extra_compile_args += ["/bigobj", "/GL-"]
+    # Leaner flags for efficient compilation
+    extra_compile_args += ["/bigobj", "/GL-", "/O2", "/Zm2000"]
     extra_link_args += ["/LTCG:OFF"]
+elif platform.system() == "Darwin":
+    num_threads = 3
 
 extensions = [
     Extension(
@@ -24,4 +27,8 @@ extensions = [
     )
 ]
 
-setup(ext_modules=cythonize(extensions, compiler_directives={"language_level": 3}))
+setup(
+    ext_modules=cythonize(
+        extensions, compiler_directives={"language_level": 3}, nthreads=num_threads
+    )
+)
