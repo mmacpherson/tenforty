@@ -46,9 +46,6 @@ jupyter = [
   "ipykernel"
 ]
 
-[tool.cython]
-language_level = "3"
-
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -94,13 +91,6 @@ unfixable = []
 
 [tool.ruff.lint.per-file-ignores]
 "*.ipynb" = ["B018"]
-
-[tool.setuptools]
-ext-modules = [
-  {name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"]}
-]
-package-dir = {"" = "src"}
-packages = ["tenforty", "tenforty.otslib"]
 
 [tool.setuptools.package-data]
 "tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]
