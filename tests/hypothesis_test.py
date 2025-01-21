@@ -170,12 +170,12 @@ def test_evaluate_return_properties(
     for key, val in result.model_dump().items():
         assert val >= 0, f"{key} should be non-negative"
 
-    assert (
-        result.federal_taxable_income <= result.federal_adjusted_gross_income
-    ), "Federal taxable income should not exceed federal adjusted gross income"
-    assert (
-        result.state_taxable_income <= result.state_adjusted_gross_income
-    ), "State taxable income should not exceed state adjusted gross income"
+    assert result.federal_taxable_income <= result.federal_adjusted_gross_income, (
+        "Federal taxable income should not exceed federal adjusted gross income"
+    )
+    assert result.state_taxable_income <= result.state_adjusted_gross_income, (
+        "State taxable income should not exceed state adjusted gross income"
+    )
 
     # assert (
     #     result.federal_amt <= result.federal_total_tax
