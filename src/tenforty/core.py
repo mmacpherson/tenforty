@@ -337,7 +337,7 @@ def evaluate_natural_input_form(
 
 ## LEVEL 2: Map from validated user models to natural description.
 def evaluate_return(
-    year: int = 2023,
+    year: int = 2024,
     state: str | None = None,
     #
     filing_status: str = "Single",

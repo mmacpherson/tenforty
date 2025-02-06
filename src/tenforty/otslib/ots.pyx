@@ -101,6 +101,27 @@ cimport ots_2023_f2210
 cimport ots_2023_US_1040_Sched_E_brokerage_royalties
 cimport ots_2023_CA_5805
 cimport ots_2023_f8812
+cimport ots_2024_NJ_1040
+cimport ots_2024_US_1040_Sched_E_brokerage_royalties
+cimport ots_2024_f8812
+cimport ots_2024_f8829
+cimport ots_2024_f8959
+cimport ots_2024_f8960
+cimport ots_2024_f8995
+cimport ots_2024_US_1040_Sched_SE
+cimport ots_2024_f8606
+cimport ots_2024_CA_540
+cimport ots_2024_CA_5805
+cimport ots_2024_HSA_f8889
+cimport ots_2024_MA_1
+cimport ots_2024_NC_D400
+cimport ots_2024_NY_IT201
+cimport ots_2024_OH_IT1040
+cimport ots_2024_PA_40
+cimport ots_2024_US_1040
+cimport ots_2024_US_1040_Sched_C
+cimport ots_2024_VA_760
+cimport ots_2024_f2210
 
 cdef f_type lookup_ots_call(int year, char* form):
     if (year == 2018) and (form == "MA_1"):
@@ -281,6 +302,48 @@ cdef f_type lookup_ots_call(int year, char* form):
         return ots_2023_CA_5805.main
     if (year == 2023) and (form == "f8812"):
         return ots_2023_f8812.main
+    if (year == 2024) and (form == "NJ_1040"):
+        return ots_2024_NJ_1040.main
+    if (year == 2024) and (form == "US_1040_Sched_E_brokerage_royalties"):
+        return ots_2024_US_1040_Sched_E_brokerage_royalties.main
+    if (year == 2024) and (form == "f8812"):
+        return ots_2024_f8812.main
+    if (year == 2024) and (form == "f8829"):
+        return ots_2024_f8829.main
+    if (year == 2024) and (form == "f8959"):
+        return ots_2024_f8959.main
+    if (year == 2024) and (form == "f8960"):
+        return ots_2024_f8960.main
+    if (year == 2024) and (form == "f8995"):
+        return ots_2024_f8995.main
+    if (year == 2024) and (form == "US_1040_Sched_SE"):
+        return ots_2024_US_1040_Sched_SE.main
+    if (year == 2024) and (form == "f8606"):
+        return ots_2024_f8606.main
+    if (year == 2024) and (form == "CA_540"):
+        return ots_2024_CA_540.main
+    if (year == 2024) and (form == "CA_5805"):
+        return ots_2024_CA_5805.main
+    if (year == 2024) and (form == "HSA_f8889"):
+        return ots_2024_HSA_f8889.main
+    if (year == 2024) and (form == "MA_1"):
+        return ots_2024_MA_1.main
+    if (year == 2024) and (form == "NC_D400"):
+        return ots_2024_NC_D400.main
+    if (year == 2024) and (form == "NY_IT201"):
+        return ots_2024_NY_IT201.main
+    if (year == 2024) and (form == "OH_IT1040"):
+        return ots_2024_OH_IT1040.main
+    if (year == 2024) and (form == "PA_40"):
+        return ots_2024_PA_40.main
+    if (year == 2024) and (form == "US_1040"):
+        return ots_2024_US_1040.main
+    if (year == 2024) and (form == "US_1040_Sched_C"):
+        return ots_2024_US_1040_Sched_C.main
+    if (year == 2024) and (form == "VA_760"):
+        return ots_2024_VA_760.main
+    if (year == 2024) and (form == "f2210"):
+        return ots_2024_f2210.main
 
 
 def _evaluate_form(year, form, form_text, fed_form_text=None):
