@@ -1,3 +1,7 @@
+## [2024.1] - 2025-02-05
+### Added
+- Added OTS 2024 22.01 release
+
 ## [2023.6] - 2025-01-04
 ### Added
 - Updated from OTS2023 release 21.03 to 21.06
