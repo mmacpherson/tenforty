@@ -73,7 +73,7 @@ Here are all arguments available for those two functions:
 
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
-| `year`                       | int                      | 2023                | 2018-2023 inclusive                |
+| `year`                       | int                      | 2024                | 2018-2024 inclusive                |
 | `state`                      | str \| None               | None                | "CA", "NY", "MA" + "AK", "FL", "NV", "SD", "TX", "WA", "WY" |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
@@ -142,7 +142,7 @@ This results in the following:
  'state_effective_tax_rate': 0.0}
 ```
 
-No `year=` argument was specified here, so the current tax year, 2023, was used.
+No `year=` argument was specified here, so the current tax year, 2024, was used.
 The output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary.
 
@@ -215,7 +215,7 @@ tax on $100K of W2 income for the past five years.
 
 ``` python
 df = evaluate_returns(
-    year=[2018, 2019, 2020, 2021, 2022, 2023], w2_income=100_000
+    year=[2018, 2019, 2020, 2021, 2022, 2023, 2024], w2_income=100_000
 ).astype({"year": "category"})
 
 (
