@@ -80,8 +80,8 @@ Here are all arguments available for those two functions:
 | `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
-| `qualified_dividends`        | float                    | 0.0                 |                                    |
-| `ordinary_dividends`         | float                    | 0.0                 |                                    |
+| `qualified_dividend`        | float                    | 0.0                 |                                    |
+| `ordinary_dividend`         | float                    | 0.0                 |                                    |
 | `short_term_capital_gains`   | float                    | 0.0                 |                                    |
 | `long_term_capital_gains`    | float                    | 0.0                 |                                    |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
