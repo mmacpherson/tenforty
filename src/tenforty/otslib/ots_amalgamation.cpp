@@ -71589,6 +71589,14 @@ void GetString( char *linename, char *chstr )	/* Get a character-string value. *
  get_parameters( infile, 'w', chstr, linename );
 }
 
+void GetLineString( char *linename, char *chstr )	/* Get a character-string value. */
+{
+ char word[1024];
+ get_parameter( infile, 's', word, linename);
+ get_parameter( infile, 'w', chstr, linename );
+ consume_leading_trailing_whitespace( chstr );
+}
+
 
 double smallerof( double a, double b ) { if (a<b) return a; else return b; }
 double SmallerOf( double a, double b ) { if (a<b) return a; else return b; }
@@ -71827,6 +71835,18 @@ int check_form_version( char *title_as_read_in, char *expected_title )
  else
   return 1;
 }
+
+
+void check_if_yes( char *label )	/* Check box 'Y' or "N'. */
+{
+ char word[999];
+ int flag;
+ get_parameter( infile, 's', word, label );
+ get_param_single_line( infile, 'b', &flag, label );
+ if (flag)
+  fprintf(outfile,"%s X\n", label );
+}
+
 
 //==================================================
 //====== Import Return Data Support Functions ======
@@ -74616,7 +74636,7 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
- int i, j, k;
+ int i, j, k, stop=0;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
 
@@ -74685,27 +74705,41 @@ int main( int argc, char *argv[] )
  L4a = L[2] * 0.9235;									/* Updated for 2024. */
  showline_wlabel( "L4a", L4a );
  L4c = NotLessThanZero( L4a );
- showline_wlabel( "L4c", L4c );
- showline_wlabel( "L5a", L5a );
- L5b = NotLessThanZero( L5a * 0.9235 );
- showline_wlabel( "L5b", L5b );
- L[6] = L4c + L5b;
- showline(6);
- showline_wlabel("L8a", L8a);
- showline_wlabel("L8b", L8b);
- showline_wlabel("L8c", L8c);
- L8d = L8a + L8b + L8c;
- showline_wlabel("L8d", L8d);
- L[9] = NotLessThanZero( L[7] - L8d );
- showline(9);
- L[10] = 0.124 * SmallerOf( L[6], L[9]);
- showline(10);
- L[11] = L[6] * 0.029;									/* Updated for 2024. */
- showline(11);
- L[12] = L[10] + L[11];
- showline_wmsg( 12, "Also enter this number on Schedule-2, line 4." );
- L[13] = L[12] * 0.5;
- showline_wmsg( 13, "Also enter this number on Schedule-1, line 15." );
+ if (L4c < 400.0)
+  {
+   if (L5a > 0.0)
+    L4c = 0.0;
+   else
+    {
+     fprintf(outfile,"\nStop.  You do NOT owe self-employment tax.\n\n");
+     printf("\nStop.  You do NOT owe self-employment tax.\n\n");
+     stop = 1;
+    }
+  }
+ if (!stop)
+  { /*!stop*/
+    showline_wlabel( "L4c", L4c );
+    showline_wlabel( "L5a", L5a );
+    L5b = NotLessThanZero( L5a * 0.9235 );
+    showline_wlabel( "L5b", L5b );
+    L[6] = L4c + L5b;
+    showline(6);
+    showline_wlabel("L8a", L8a);
+    showline_wlabel("L8b", L8b);
+    showline_wlabel("L8c", L8c);
+    L8d = L8a + L8b + L8c;
+    showline_wlabel("L8d", L8d);
+    L[9] = NotLessThanZero( L[7] - L8d );
+    showline(9);
+    L[10] = 0.124 * SmallerOf( L[6], L[9]);
+    showline(10);
+    L[11] = L[6] * 0.029;									/* Updated for 2024. */
+    showline(11);
+    L[12] = L[10] + L[11];
+    showline_wmsg( 12, "Also enter this number on Schedule-2, line 4." );
+    L[13] = L[12] * 0.5;
+    showline_wmsg( 13, "Also enter this number on Schedule-1, line 15." );
+  } /*!stop*/
 
  /* ----- .... Until here.  ----- */
 
@@ -75065,7 +75099,7 @@ namespace taxsolve_CA_540_2024 {
 /* Aston Roberts 1-2-2025	aston_roberts@yahoo.com			*/
 /************************************************************************/
 
-float thisversion=22.01;
+float thisversion=22.02;
 
 
 
@@ -75793,6 +75827,7 @@ int main( int argc, char *argv[] )
 	 sched540Cb24i=0.0, sched540Cb24j=0.0, sched540Cb24k=0.0, sched540Cb24z=0.0,
 	 sched540Cc24z=0.0;
  int CkPayedUseTaxCDTFA=0;
+ char labelx[1024]="";
  time_t now;
 
  /* Decode any command-line arguments. */
@@ -76661,9 +76696,28 @@ int main( int argc, char *argv[] )
 
  GetLineF( "L73", &L[73] ); 	/* Realestate withholding. */
 
- GetLineF( "L74", &L[74] ); 	/* Excess SDI. */
+ // GetLineF( "L74", &L[74] ); 	/* Excess SDI. */
 
- GetLineF( "L75", &L[75] ); 	/* Earned Income Tax Credit (EITC). */
+ /* Allow un-needed L74 for now. (Remove *optional* logic for 2024, once reoved from on ALL templates.) */
+ get_parameter( infile, 'l', labelx, "L74 or L75");
+ if (strcmp( labelx, "L74" ) == 0)
+  {
+   get_parameters( infile, 'f', &L[74], labelx );
+   GetLineF( "L75", &L[75] ); 	/* Earned Income Tax Credit (EITC). */
+  }
+ else
+ if (strcmp( labelx, "L75" ) == 0)
+  {
+   get_parameters( infile, 'f', &L[75], labelx );
+   showline(75);
+  }
+ else
+  {
+   printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
+   fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
+   exit(1);
+  }
+
 
  GetLineF( "L76", &L[76] ); 	/* Young Child Tax Credit (YCTC). */
 
@@ -77981,18 +78035,6 @@ double ComputeTax(double taxableIncome)
 }
 
 
-void check_if_yes( char *label )
-{
- char word[999];
- int flag;
- get_parameter( infile, 's', word, label );
- get_param_single_line( infile, 'b', &flag, label );
- if (flag)
-  fprintf(outfile,"%s X\n", label );
-}
-
-
-
 /*----------------------------------------------------------------------------*/
 /* ---				Main					  --- */
 /*----------------------------------------------------------------------------*/
@@ -79020,7 +79062,7 @@ namespace taxsolve_NY_IT201_2024 {
 /* Corrections 2023 taxes - Jason Striegel				*/
 /************************************************************************/
 
-float thisversion=22.00;
+float thisversion=22.01;
 
 
 double A[10], S[10];
@@ -79090,6 +79132,18 @@ char *pull_initial( char *name )
 }
 
 
+ void grab_line_string( char *fline, char *strng )
+ { /* Grab a string and copy it into pre-allocated character array. */
+  char twrd[2048];
+  strng[0] = '\0';
+  do
+   {
+    next_word(fline, twrd, " \t=" );
+    if (twrd[0] != ';')
+     { strcat( strng, twrd );  strcat( strng, " " ); }
+   }
+  while ((fline[0] != '\0') && (strstr( twrd, ";" ) == 0));
+ }
 
 
 
@@ -79458,25 +79512,25 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strncmp(word,"Dep5_",5) == 0) j = 5; else j = -1;
      if (j > 0)
       {
-	next_word( fline, word, " \t\n\r" );
+	grab_line_string( fline, word );	// next_word( fline, word, " \t\n\r" );
 	Dep_info[j].Name1st = strdup( word );
 	read_line(infile,fline);
 	next_word( fline, word, " \t\n\r" );
 	if (strstr( word, "_LastName:" ) == 0)
 	 { printf("Error: expected dependent %d last name, but found '%s'\n", j, word ); }
-	next_word( fline, word, " \t\n\r" );
+	grab_line_string( fline, word );	// next_word( fline, word, " \t\n\r" );
 	Dep_info[j].NameLst = strdup( word );
 	read_line(infile,fline);
         next_word( fline, word, " \t\n\r" );
         if (strstr( word, "_SocSec#:" ) == 0)
          { printf("Error: expected dependent %d SocSec#, but found '%s'\n", j, word ); }
-        next_word( fline, word, " \t\n\r" );
+	grab_line_string( fline, word );	// next_word( fline, word, " \t\n\r" );
         Dep_info[j].SocSec = strdup( word );
         read_line(infile,fline);
         next_word( fline, word, " \t\n\r" );
         if (strstr( word, "_Relation:" ) == 0)
          { printf("Error: expected dependent %d Relation, but found '%s'\n", j, word ); }
-        next_word( fline, word, " \t\n\r" );
+	grab_line_string( fline, word );	// next_word( fline, word, " \t\n\r" );
         Dep_info[j].Relat = strdup( word );
         nDeps = j;
       }
@@ -80869,7 +80923,7 @@ namespace taxsolve_OH_IT1040_2024 {
 
 
 
-double thisversion=22.00;
+double thisversion=22.01;
 
 
 double TaxRateFunction( double x, int status )
@@ -81278,6 +81332,8 @@ int main( int argc, char *argv[] )
  GetTextLineF( "Town:" );
  fprintf(outfile,"State: OH\n");
  GetTextLineF( "Zipcode:" );
+ GetTextLineF( "AddressLine2:" );
+ GetTextLineF( "OhioCounty:" );
 
  fprintf(outfile,"CkFYrRes: X\n");
  if (status == MARRIED_FILING_JOINTLY)
@@ -81614,7 +81670,7 @@ namespace taxsolve_US_1040_2024 {
 /* Aston Roberts 1-5-2025	aston_roberts@yahoo.com			*/
 /************************************************************************/
 
-float thisversion=22.00;
+float thisversion=22.04;
 
 
 
@@ -81622,7 +81678,7 @@ float thisversion=22.00;
 double SchedA[MAX_LINES], SchedB[MAX_LINES], SchedD[MAX_LINES], amtws[MAX_LINES];
 double Sched1[MAX_LINES], Sched2[MAX_LINES], Sched3[MAX_LINES];
 double Sched3_13a=0.0, Sched3_13b=0.0, Sched3_13c=0.0, Sched3_13d=0.0,
-	Sched3_13z=0.0;
+	Sched3_13z=0.0, SchedD1ad=0.0, SchedD1ae=0.0, SchedD1ah=0.0, SchedD8ad=0.0, SchedD8ae=0.0, SchedD8ah=0.0;
 double L1a=0.0, L1b=0.0, L1c=0.0, L1d=0.0, L1e=0.0, L1f=0.0, L1g=0.0, L1h=0.0, L1i=0.0;
 double L2a=0.0;			/* Tax-exempt interest (only for SocSec calculations). */
 double L3a=0.0;			/* Qualified dividends. */
@@ -81648,7 +81704,7 @@ int adjerrcnt=0;
 			/* Following values taken from 1040-Instructions pg 110. */	/* Updated for 2024. */
 double brkpt[4][9]={
 		{ 0.0,  11600.0,  47150.0, 100525.0, 191950.0, 243725.0, 609350.0, 9e19 },  /* Single */
-		{ 0.0,  23200.0,  94300.0, 201050.0, 383900.0, 487450.0, 731,201.0, 9e19 },  /* Married, filing jointly. */
+		{ 0.0,  23200.0,  94300.0, 201050.0, 383900.0, 487450.0, 731201.0, 9e19 },  /* Married, filing jointly. */
 		{ 0.0,  11600.0,  47150.0, 100525.0, 191950.0, 243725.0, 365600.0, 9e19 },  /* Married, filing separate. */
 		{ 0.0,  16550.0,  63100.0, 100500.0, 191150.0, 243700.0, 609350.0, 9e19 },  /* Head of Household. */
 		     };
@@ -82774,10 +82830,31 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2024. */
    free_capgain_list( &long_trades );
   }
 
- stcg = SchedD[1] + SchedD[2] + SchedD[3];
- ltcg = SchedD[8] + SchedD[9] + SchedD[10];
 
- GetLine( "D4", &SchedD[4] );       /* Short term gain from 6252 and short-term gain or loss from Forms 4684, 6781, 8824. */
+ get_parameter( infile, 'l', labelx, "D1a_d or D4" );	/* Optionally (for 2024) get either D1a or D4 here. */
+ if (strcmp( labelx, "D1ad" ) == 0)
+  {
+   get_parameters( infile, 'f', &SchedD1ad, "D1ad" );
+   showline_wlabelnz( labelx, SchedD1ad );
+   GetLine( "D1ae", &SchedD1ae );
+   showline_wlabelnz( "D1ae", SchedD1ae );
+   SchedD1ah = SchedD1ad - SchedD1ae;
+   showline_wlabelnz( "D1ah", SchedD1ah );
+   GetLine( "D4", &SchedD[4] );
+  }
+ else
+ if (strcmp( labelx, "D4" ) == 0)
+  {
+   get_parameters( infile, 'f', &SchedD[4], "D4" );
+  }
+ else
+  {
+   printf("Error: Found '%s' when expecteding D1ad or D4.\n", labelx );
+   fprintf(outfile,"Error: Found '%s' when expecteding D1a or D4.\n", labelx );
+   exit(1);
+  }
+ // GetLine( "D4", &SchedD[4] );       /* Short term gain from 6252 and short-term gain or loss from Forms 4684, 6781, 8824. */
+
  GetLine( "D5", &SchedD[5] );       /* Net short-term gain or loss from partnerships, S corps, estates, trusts from K-1. */
 
  get_parameter( infile, 's', word, "D6" );	/* Carryover short-term loss from last year.  Or, LastYear's Return Output File-name. */
@@ -82792,7 +82869,36 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2024. */
     } while (strcmp(word,";") != 0);
   }
 
- GetLine( "D11", &SchedD[11] );	    /* Gain from Form 4797. */
+
+ get_parameter( infile, 'l', labelx, "D8ad or D11" );	/* Optionally (for 2024) get either D8a or D11 here. */
+ if (strcmp( labelx, "D8ad" ) == 0)
+  {
+   get_parameters( infile, 'f', &SchedD8ad, "D8ad" );
+   showline_wlabelnz( labelx, SchedD8ad );
+   GetLine( "D8ae", &SchedD8ae );
+   showline_wlabelnz( "D8ae", SchedD8ae );
+   SchedD8ah = SchedD8ad - SchedD8ae;
+   showline_wlabelnz( "D8ah", SchedD8ah );
+   GetLine( "D11", &SchedD[11] );
+  }
+ else
+ if (strcmp( labelx, "D11" ) == 0)
+  {
+   get_parameters( infile, 'f', &SchedD[11], "D11" );
+  }
+ else
+  {
+   printf("Error: Found '%s' when expecteding D8ad or D11.\n", labelx );
+   fprintf(outfile,"Error: Found '%s' when expecteding D1a or D4.\n", labelx );
+   exit(1);
+  }
+ // GetLine( "D11", &SchedD[11] );	    /* Gain from Form 4797. */
+
+
+ stcg = SchedD[1] + SchedD[2] + SchedD[3];
+ ltcg = SchedD[8] + SchedD[9] + SchedD[10];
+
+
  GetLine( "D12", &SchedD[12] );	    /* Partnership net long-term gain or loss. */
  GetLine( "D13", &SchedD[13] );	    /* Cap Gains Distributions - 1099-DIV col. 2a. */
  GetLine( "D14", &SchedD[14] );     /* Carryover long-term loss from last year. Or, leave blank if last year's file entered in line D6. */
@@ -82852,7 +82958,7 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2024. */
    fprintf(outfile," D4 = %6.2f\n", SchedD[4] );
    fprintf(outfile," D5 = %6.2f\n", SchedD[5] );
    fprintf(outfile," D6 = %6.2f		(Carry-over Loss)\n", SchedD[6] );
-   SchedD[7] = SchedD[1] + SchedD[2] + SchedD[3] + SchedD[4] + SchedD[5] + SchedD[6];
+   SchedD[7] = SchedD1ah + SchedD[1] + SchedD[2] + SchedD[3] + SchedD[4] + SchedD[5] + SchedD[6];
    fprintf(outfile," D7 = %6.2f		{ Net short-term capital gain or loss }\n", SchedD[7] );
 
    fprintf(outfile," D8bd = %10.2f\n   D8be = %10.2f\n   D8bg = %10.2f\n   D8bh = %10.2f\n", SchedDd[8], absolutev(SchedDe[8]), SchedDg[8], SchedD[8] );
@@ -82866,7 +82972,7 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2024. */
    fprintf(outfile," D12 = %6.2f\n", SchedD[12] );
    fprintf(outfile," D13 = %6.2f\n", SchedD[13] );
    fprintf(outfile," D14 = %6.2f	(Carry-over Loss)\n", SchedD[14] );
-   SchedD[15] = SchedD[8] + SchedD[9] + SchedD[10] + SchedD[11] + SchedD[12] + SchedD[13] + SchedD[14];
+   SchedD[15] = SchedD8ah + SchedD[8] + SchedD[9] + SchedD[10] + SchedD[11] + SchedD[12] + SchedD[13] + SchedD[14];
    fprintf(outfile," D15 = %6.2f		{ Net long-term capital gain or loss }\n", SchedD[15] );
    fprintf(outfile,"EndPDFpage.\nPDFpage: 12 12\n");
 
@@ -83862,7 +83968,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
  showline_wlabelnz( "S1_21", Sched1[21] );
  showline_wlabel( "S1_22", Sched1[22] );
  showline( 10 );
- showline_wlabelmsg( "L11", L[11], "Adjusted Gross Income" );
+ showline_wlabelmsg( "L11", L[11], "Adjusted Gross Income (AGI)" );
 
 
  if ((L[2] != 0.0) || (L[3] != 0.0))
@@ -84337,13 +84443,26 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
       {
 	if (strstr( labelx,"SocSec" ) != 0)
 	  format_socsec( word, 1 );
-	fprintf(outfile, "%s \"%s\"\n", labelx, word );
+	fprintf(outfile, "%s %s\n", labelx, word );
       }
      else
      if (strncmp( labelx,"CkDep", 5 ) == 0)
       {
 	if (toupper(word[0]) == 'Y')
 	 fprintf(outfile, "%s X\n", labelx );
+      }
+     else
+     if ((strncmp( labelx,"L35b", 4 ) == 0) || (strncmp( labelx,"L35d", 4 ) == 0))
+      {
+	 fprintf(outfile, "%s %s\n", labelx, word );
+      }
+     else
+     if (strncmp( labelx,"L35c", 4 ) == 0)
+      {
+	if (strcasecmp( word, "Savings" ) == 0)
+	 fprintf(outfile, "CkL35cSavings X\n");
+	if (strcasecmp( word, "Checking" ) == 0)
+	 fprintf(outfile, "CkL35cChecking X\n");
       }
     } /*valid_entry*/
    get_word(infile, labelx );
@@ -84406,7 +84525,7 @@ namespace taxsolve_US_1040_Sched_C_2024 {
 /* Earlier Updates	Robert Heller  heller@deepsoft.com		*/
 /************************************************************************/
 
-float thisversion=22.00;
+float thisversion=22.02;
 
 
 
@@ -84742,22 +84861,26 @@ int main( int argc, char *argv[] )
  showline(30);
  L[31] = L[29] - L[30];
  showline_wmsg(31,"Net Profit (loss)");
- if (L[31] > 0.0)
-  fprintf(outfile,"Enter %2.2f on Form 1040 line S1_12. Sched-SE line 2. Estates/trusts on Form 1041 line 3.\n", L[31]);
- else
- if (L[31] < 0.0)
+
+ if (L[31] < 0.0) // Loss
   {
-   // fprintf(outfile,"Mark box 32a accordingly\n");
    if (L32 == Yes)
     {
-     fprintf(outfile,"If you checked 32a, enter %2.2f on Form 1040 line S1_12.\n", L[31]);
-     fprintf(outfile,"        Estates and trusts, enter on Form 1041, line 3.\n");
      fprintf(outfile,"Ck32a: x\n");
     }
    else
     {
-     fprintf(outfile,"If you checked 32b, you must attach Form 6198. Your loss may be limited.\n");
      fprintf(outfile,"Ck32b: x\n");
+     fprintf(outfile,"You must attach Form 6198. Your loss may be limited.\n");
+    }
+  }
+
+ // For either profit, or loss when "All investment is at risk", message is the same
+ if ((L[31] >= 0.0) || L32 == Yes)
+  {
+    {
+     fprintf(outfile,"Enter %2.2f on Form 1040 line S1_3.   Sched-SE line 2.\n", L[31] );
+     fprintf(outfile,"        Estates and trusts, enter on Form 1041, line 3.\n");
     }
   }
 
@@ -85305,7 +85428,7 @@ namespace taxsolve_f2210_2024 {
 /*                                                                      */
 /************************************************************************/
 
-float thisversion=5.00;
+float thisversion=5.01;
 
 
 
@@ -85317,7 +85440,7 @@ int BoxA = 0, BoxB = 0, BoxC = 0, BoxD = 0, BoxE = 0, Num_Days = 0;
 			/* Following values taken from 1040-Instructions pg 110. */	/* Updated for 2024. */
 double brkpt[4][9]={
 		{ 0.0,  11600.0,  47150.0, 100525.0, 191950.0, 243725.0, 609350.0, 9e19 },  /* Single */
-		{ 0.0,  23200.0,  94300.0, 201050.0, 383900.0, 487450.0, 731,201.0, 9e19 },  /* Married, filing jointly. */
+		{ 0.0,  23200.0,  94300.0, 201050.0, 383900.0, 487450.0, 731201.0, 9e19 },  /* Married, filing jointly. */
 		{ 0.0,  11600.0,  47150.0, 100525.0, 191950.0, 243725.0, 365600.0, 9e19 },  /* Married, filing separate. */
 		{ 0.0,  16550.0,  63100.0, 100500.0, 191150.0, 243700.0, 609350.0, 9e19 },  /* Head of Household. */
 		     };
@@ -85958,6 +86081,369 @@ else
 #undef Regular
 #undef INDIVIDUAL
 #undef ESTATE
+}
+namespace taxsolve_MI_1040_2024 {
+#define SINGLE                  1
+#define MARRIED_FILING_JOINTLY  2
+#define MARRIED_FILING_SEPARAT  3
+#define Yes 1
+#define No  0
+/************************************************************************
+  TaxSolve_MI_1040_2024.c - Michigan 2024 MI-1040 State Taxes.
+   Copyright (C) 2025 - C. Kindman
+
+  GNU Public License - GPL:
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License as
+  published by the Free Software Foundation; either version 2 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+  02111-1307 USA.
+
+  2-4-2025	http://opentaxsolver.sourceforge.com/
+
+ ************************************************************************/
+
+
+
+float thisversion=1.01;
+
+
+double flat_tax_rate = 0.0425;		/* Updated for 2024. */
+
+
+/* ------------------- Main -------------------------------------- */
+int main( int argc, char *argv[] )
+{
+ int j, jj, k, status;
+ char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[500], labelx[1000];
+ time_t now;
+ int residency=0, L9a=0, L9b=0, L9c=0, L9d=0, L9e=0;
+ double L9aa=0.0, L9bb=0.0, L9cc=0.0, L9dd=0.0, L9ee=0.0, L18a=0.0, L19a=0.0, L27a=0.0;
+ double interest=0.0, penalty=0.0;
+
+ /*-----------------------------------------*/
+ /* --- Decode any command line options. -- */
+ /*-----------------------------------------*/
+ printf("MI-1040 2024 - v%3.2f\n", thisversion);
+ jj = 1;  k=1;
+ while (jj < argc)
+ {
+  if (strcmp(argv[jj],"-verbose")==0)  { verbose = 1; }
+  else
+  if (strcmp(argv[jj],"-round_to_whole_dollars")==0)  { round_to_whole_dollars = 1; }
+  else
+  if (k==1)
+   {
+    infname = strdup(argv[jj]);
+    infile = fopen(argv[jj],"r");
+    if (infile==0)
+     {
+	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
+	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
+	exit(1);
+     }
+    k = 2;
+    /* Base name of output file on input file. */
+    strcpy(outfname,argv[jj]);
+    j = strlen(outfname)-1;
+    while ((j>=0) && (outfname[j]!='.')) j--;
+    if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
+    outfile = fopen(outfname,"w");
+    if (outfile==0)
+     {
+	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
+	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
+	exit(1);
+     }
+    printf("Writing results to file:  %s\n", outfname);
+   }
+  else
+   {
+	printf("Unknown command-line parameter '%s'\n", argv[jj]);
+	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
+	exit(1);
+   }
+  jj++;
+ }
+
+ if (infile==0)
+  {
+	printf("Error: No input file on command line.\n");
+	fprintf(outfile,"Error: No input file on command line.\n");
+	exit(1);
+  }
+
+
+ /*--------------------------*/
+ /* ---- Get Input Data ---- */
+ /*--------------------------*/
+
+ /* Pre-initialize all lines to zeros. */
+ for (j = 0; j < MAX_LINES; j++) { L[j] = 0.0; }
+
+ /* Accept parameters from input file. */
+ /* Expect  D-400 lines, something like:
+	Title:  MI-1040 1999 Return
+	L6	34900.0  {Wages}
+ */
+
+ /* Accept Form's "Title" line, and put out with date-stamp for your records. */
+ read_line( infile, word );
+ now = time(0);
+ fprintf(outfile,"\n%s,	 v%2.2f, %s\n", word, thisversion, ctime( &now ));
+ check_form_version( word, "Title:  MI-1040" );
+
+ get_parameter( infile, 's', word, "Status"); /* 1=single, 2=married/joint, 3=married/separate/ */
+ get_parameter( infile, 'l', word, "Status ?");
+ if ((word[0]>'0') && (word[0]<'6')) status = word[0]-48; else
+ if (strncasecmp(word,"Single",4)==0) status = SINGLE; else
+ if (strncasecmp(word,"Married/Joint",13)==0) status = MARRIED_FILING_JOINTLY; else
+ if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILING_SEPARAT;
+ else
+  {
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep/\nExiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep.\nExiting.\n", word);
+   exit(1);
+  }
+ fprintf(outfile,"Status = %s (%d)\n", word, status);
+
+
+ check_if_yes( "CkFarmFish" );
+
+ // ResidencyStatus Resident { (answer: Resident, Nonresident, PartYear ) }
+ GetLineString( "ResidencyStatus", word );
+ if (strcasecmp( word, "Resident" ) == 0)
+  residency = 1;
+ else
+ if (strcasecmp( word, "Nonresident" ) == 0)
+  residency = 2;
+ else
+ if (strcasecmp( word, "PartYear" ) == 0)
+  residency = 3;
+
+printf("Residency = %d, word = '%s'\n", residency, word );
+
+ GetInteger( "L9a", &L9a );	/* Number of exemptions. */
+printf("L9a = %d\n", L9a );
+ GetInteger( "L9b", &L9b );	/* */
+printf("L9b = %d\n", L9b );
+ GetInteger( "L9c", &L9c );	/* */
+printf("L9c = %d\n", L9c );
+ GetInteger( "L9d", &L9d );	/* */
+ GetInteger( "L9e", &L9e );	/* Claimed as dependent */
+
+ GetLine( "L10", &L[10] );	/* Adjusted Gross Income from your U.S. Form 1040 */
+ GetLine( "L11", &L[11] );	/* Additions from Schedule 1, line 9. */
+ GetLine( "L13", &L[13] );	/* Subtractions from Schedule 1, line 31.*/
+ GetLine( "L15", &L[15] );	/* Exemption allowance. Enter amount from line 9f or Schedule NR, line 19. */
+
+ GetLine( "L18a", &L18a );
+ GetLine( "L18b", &L[18] );
+ GetLine( "L19a", &L19a );
+ GetLine( "L19b", &L[19] );
+
+ GetLine( "L21", &L[21] );
+ GetLine( "L22", &L[22] );
+ GetLine( "L23", &L[23] );
+
+ GetLine( "L25", &L[25] );
+ GetLine( "L26", &L[26] );
+ GetLine( "L27a", &L27a );
+
+ GetLine( "L28", &L[28] );
+ GetLine( "L29", &L[29] );
+ GetLine( "L30", &L[30] );
+ GetLine( "L31", &L[31] );
+
+ check_if_yes( "Ck32a" );
+ check_if_yes( "Ck32b" );
+ GetLine( "L32c", &L[32] );
+
+ GetLine( "Interest", &interest );
+ GetLine( "Penalty", &penalty );
+ GetLine( "L36", &L[36] );
+
+
+ /*-------------------------------*/
+ /* ---- Do Tax Calculations ---- */
+ /*-------------------------------*/
+
+ L9aa = 5600.0 * L9a;
+ L9bb = 3300.0 * L9b;
+ L9cc = 500.0 * L9c;
+ L9dd = 5600.0 * L9d;
+ L9ee = 1500.0 * L9e;
+ L[9] = L9aa + L9bb + L9cc + L9dd + L9ee;
+ L[12] = L[10] + L[11];
+ L[14] = NotLessThanZero( L[12] - L[13] );
+ L[16] = NotLessThanZero( L[14] - L[15] );
+ L[17] = flat_tax_rate * L[16];
+ L[20] = NotLessThanZero( L[17] - L[18] - L[19] );
+ L[24] = L[20] +  L[21] +  L[22] +  L[23];
+ L[27] = 0.30 * L27a;
+
+ for (j=25; j <= 32; j++)
+  L[33] = L[33] + L[j];
+
+ if (L[33] < L[24])
+  { /*Owe*/
+    L[34] = L[24] - L[33] + interest + penalty;
+
+  } /*Owe*/
+ else
+  { /*Refund*/
+    L[35] = L[33] - L[24];
+    L[37] = L[35] - L[36];
+
+  } /*Refund*/
+
+
+ /*-------------------------*/
+ /* ---- Print Results ---- */
+ /*-------------------------*/
+
+ showline_wlabelnz( "L9a", L9a );
+ showline_wlabelnz( "L9aa", L9aa );
+
+ showline_wlabelnz( "L9b", L9b );
+ showline_wlabelnz( "L9bb", L9bb );
+
+ showline_wlabelnz( "L9c", L9c );
+ showline_wlabelnz( "L9cc", L9cc );
+
+ showline_wlabelnz( "L9d", L9d );
+ showline_wlabelnz( "L9dd", L9dd );
+
+ showline_wlabelnz( "L9e", L9e );
+ showline_wlabelnz( "L9ee", L9ee );
+
+ showline(9);	/* */
+ showline(10);	/* */
+ showline(11);	/* */
+ showline(12);	/* */
+ showline(13);	/* */
+ showline_wmsg(14, "Income subject to tax." );	/* Income subject to tax. */
+ showline(15);	/* */
+ showline_wmsg(16, "Taxable income." );		/* */
+ showline_wmsg(17, "Tax." );			/* */
+
+ showline_wlabelnz( "L18a", L18a );
+ showline_wlabelnz( "L18b", L[18] );
+
+ showline_wlabelnz( "L19a", L19a );
+ showline_wlabelnz( "L19b", L[19] );
+
+ for (j=20; j <= 26; j++)
+  showline(j);
+
+ showline_wlabelnz( "L27a", L27a );
+
+ for (j=27; j <= 33; j++)
+  showline(j);
+
+ showline_wlabelnz( "interest", interest );
+ showline_wlabelnz( "penalty", penalty );
+ ShowLineNonZero_wMsg( 34, "You OWE." );
+ showline(35);
+ showline(36);
+ ShowLineNonZero_wMsg( 37, "REFUND." );
+
+
+
+ fprintf(outfile,"\n{ --------- }\n");
+ GetTextLineF( "Your1stName:" );
+ GetTextLineF( "YourInitial:" );
+ GetTextLineF( "YourLastName:" );
+
+ writeout_line = 0;
+ socsec = GetTextLineF( "YourSocSec#:" );
+ strcpy( socsectmp, socsec );   /* Copy to buffer, since formatting could add 2-chars. */
+ format_socsec( socsectmp, 0 );
+ fprintf(outfile,"YourSocSec#: %s\n", socsectmp );
+ free( socsec );
+ writeout_line = 1;
+
+   GetTextLineF( "Spouse1stName:" );
+   GetTextLineF( "SpouseInitial:" );
+   GetTextLineF( "SpouseLastName:" );
+   writeout_line = 0;
+   socsec = GetTextLineF( "SpouseSocSec#:" );
+   strcpy( socsectmp, socsec );   /* Copy to buffer, since formatting could add 2-chars. */
+   format_socsec( socsectmp, 0 );
+   fprintf(outfile,"SpouseSocSec#: %s\n", socsectmp );
+   free( socsec );
+   writeout_line = 1;
+
+ GetTextLineF( "Number&Street:" );
+ GetTextLineF( "Town:" );
+ GetTextLineF( "State:" );
+ GetTextLineF( "Zipcode:" );
+
+ GetTextLineF( "SchoolDist:" );
+
+ switch (residency)
+  {
+   case 1: fprintf(outfile,"CkResident X\n");	break;
+   case 2: fprintf(outfile,"CkNonRes X\n");	break;
+   case 3: fprintf(outfile,"CkPartyear X\n");   break;
+  }
+
+ get_word(infile, labelx );     /* Look for optional fields. */
+ read_comment_filtered_line( infile, word, 512 );
+ fprintf(outfile,"%s	\"%s\"\n", labelx, word );
+ get_word(infile, labelx );     /* Look for optional fields. */
+ read_comment_filtered_line( infile, word, 512 );
+ fprintf(outfile,"%s	\"%s\"\n", labelx, word );
+ check_if_yes( "CkChecking" );
+ check_if_yes( "CkSavings" );
+
+ fclose(infile);
+ grab_any_pdf_markups( infname, outfile );
+ fclose(outfile);
+ Display_File( outfname );
+ printf("\nResults written to file '%s'\n", outfname);
+ return 0;
+}
+
+
+
+
+/***	 Summary of useful functions:
+
+	 GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+					  values following that label (until ";") into variable.
+	 GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
+	 GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
+	 GetLine1( "label", &variable )  - Like GetLine() above, but expects single value (no sum, no ";" in input file).
+
+	 c = SmallerOf( a, b );		- Selects smaller of two values.
+	 c = LargerOf( a, b );		- Selects larger of two values.
+	 c = NotLessThanZero( a );	- Selects positive value or zero. Prevents negative values.
+
+	 showline( j )			- Writes currency value of L[j] to output file with label in nice format.
+	 shownum( j )			- Writes integer value of L[j] to output file with label in nice format.
+	 showline_wmsg( j, "msg" )	- Like showline, but adds the provided message to the output line.
+	 ShowLineNonZero( j )		- Like showline, but only writes non-zero values.
+	 ShowLineNonZero_wMsg( j, "msg" ) - Like showline_wmsg, but only writes non-zero values.
+	 showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
+	 showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
+	 showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
+***/
+
+#undef SINGLE
+#undef MARRIED_FILING_JOINTLY
+#undef MARRIED_FILING_SEPARAT
+#undef Yes
+#undef No
 }
 #undef MAX_LINES
 }

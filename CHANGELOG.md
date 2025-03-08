@@ -1,3 +1,7 @@
+## [2024.3] - 2025-03-08
+### Added
+- Updated OTS 2024 tax-year release from 22.01 to 22.05
+
 ## [2024.2] - 2025-02-05
 ### Added
 - Update README to refer to 2024 tax year
