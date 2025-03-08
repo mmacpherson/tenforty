@@ -10,7 +10,7 @@ from collections.abc import Callable
 from enum import Enum
 from functools import partial
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from . import _ots_form_models
 
@@ -128,6 +128,18 @@ class TaxReturnInput(BaseModel):
     itemized_deductions: float = 0.0
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
+
+    @model_validator(mode="after")
+    def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
+        """Handle case where only qualified dividends is provided."""
+        # On the 1040, the "ordinary dividends" box, recently Line 3b, includes
+        # qualified dividends, recently Line 3a, so we must ensure that ordinary
+        # dividends is at least as much as qualified dividends. E.g. if only
+        # qualified dividends is specified, ordinary dividends would be zero,
+        # and that will give an incorrect result.
+        if self.qualified_dividends > self.ordinary_dividends:
+            self.ordinary_dividends = self.qualified_dividends
+        return self
 
 
 class InterpretedTaxReturn(BaseModel):
