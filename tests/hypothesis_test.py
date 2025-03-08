@@ -185,3 +185,48 @@ def test_evaluate_return_properties(
     #     assert (
     #         result.federal_total_tax <= result.federal_taxable_income
     #     ), "Federal total tax should not exceed taxable income"
+
+
+@settings(max_examples=100)
+@given(
+    year=st.sampled_from(SUPPORTED_YEARS),
+    state=st.sampled_from(SUPPORTED_STATES),
+    filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
+    qualified_dividends=st.floats(min_value=10000, max_value=500000),
+)
+def test_qualified_dividends_properly_taxed(
+    year,
+    state,
+    filing_status,
+    qualified_dividends,
+):
+    """Test that qualified dividends are properly included in ordinary dividends."""
+    # Test with only qualified dividends
+    result = tenforty.evaluate_return(
+        year=year,
+        state=state,
+        filing_status=filing_status,
+        w2_income=0,
+        qualified_dividends=qualified_dividends,
+    )
+
+    # Compare with ordinary dividends explicitly set
+    result_with_ordinary = tenforty.evaluate_return(
+        year=year,
+        state=state,
+        filing_status=filing_status,
+        w2_income=0,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=qualified_dividends,  # Explicitly set ordinary = qualified
+    )
+
+    # Main test: Results should be identical when ordinary = qualified is explicit
+    assert (
+        abs(result.federal_total_tax - result_with_ordinary.federal_total_tax) < 1e-6
+    ), "Setting ordinary_dividends explicitly should not change the tax result"
+
+    # For very high income, we should definitely see some tax
+    if qualified_dividends > 100000:
+        assert result.federal_total_tax > 0, (
+            f"Qualified dividends of {qualified_dividends} should generate tax"
+        )

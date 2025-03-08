@@ -1,3 +1,7 @@
+## [2024.4] - 2025-03-08
+### Added
+- Fix and add test coverage for qualified dividends bug. Thanks @nanoticity for the report.
+
 ## [2024.3] - 2025-03-08
 ### Added
 - Updated OTS 2024 tax-year release from 22.01 to 22.05
