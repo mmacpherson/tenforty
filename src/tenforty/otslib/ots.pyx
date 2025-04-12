@@ -123,6 +123,7 @@ cimport ots_2024_US_1040_Sched_C
 cimport ots_2024_VA_760
 cimport ots_2024_f2210
 cimport ots_2024_MI_1040
+cimport ots_2024_OR_40
 
 cdef f_type lookup_ots_call(int year, char* form):
     if (year == 2018) and (form == "MA_1"):
@@ -347,6 +348,8 @@ cdef f_type lookup_ots_call(int year, char* form):
         return ots_2024_f2210.main
     if (year == 2024) and (form == "MI_1040"):
         return ots_2024_MI_1040.main
+    if (year == 2024) and (form == "OR_40"):
+        return ots_2024_OR_40.main
 
 
 def _evaluate_form(year, form, form_text, fed_form_text=None):
