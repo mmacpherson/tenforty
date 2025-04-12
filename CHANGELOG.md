@@ -1,3 +1,8 @@
+## [2024.5] - 2025-04-12
+### Added
+- Fix typo in `evaluate_returns()` call. Thanks @ericsheier for the report.
+- Updated OTS 2024 tax-year release from 22.05 to 22.06
+
 ## [2024.4] - 2025-03-08
 ### Added
 - Fix and add test coverage for qualified dividends bug. Thanks @nanoticity for the report.
