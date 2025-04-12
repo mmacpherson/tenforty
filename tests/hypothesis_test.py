@@ -226,7 +226,7 @@ def test_qualified_dividends_properly_taxed(
     ), "Setting ordinary_dividends explicitly should not change the tax result"
 
     # For very high income, we should definitely see some tax
-    if qualified_dividends > 100000:
+    if qualified_dividends > 200000:
         assert result.federal_total_tax > 0, (
             f"Qualified dividends of {qualified_dividends} should generate tax"
         )

@@ -390,8 +390,8 @@ def evaluate_returns(
     standard_or_itemized: list[str] | str = "Standard",
     w2_income: list[float] | float = 0.0,
     taxable_interest: list[float] | float = 0.0,
-    qualified_dividend: list[float] | float = 0.0,
-    ordinary_dividend: list[float] | float = 0.0,
+    qualified_dividends: list[float] | float = 0.0,
+    ordinary_dividends: list[float] | float = 0.0,
     short_term_capital_gains: list[float] | float = 0.0,
     long_term_capital_gains: list[float] | float = 0.0,
     schedule_1_income: list[float] | float = 0.0,
@@ -423,8 +423,8 @@ def evaluate_returns(
     standard_or_itemized = ensure_list(standard_or_itemized)
     w2_incomes = ensure_list(w2_income)
     taxable_interests = ensure_list(taxable_interest)
-    qualified_dividends = ensure_list(qualified_dividend)
-    ordinary_dividends = ensure_list(ordinary_dividend)
+    qualified_dividends = ensure_list(qualified_dividends)
+    ordinary_dividends = ensure_list(ordinary_dividends)
     short_term_capital_gains = ensure_list(short_term_capital_gains)
     long_term_capital_gains = ensure_list(long_term_capital_gains)
     schedule_1_incomes = ensure_list(schedule_1_income)
