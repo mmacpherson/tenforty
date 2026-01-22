@@ -407,14 +407,15 @@ def patch_add_pdf_markup(lines: list[str]) -> list[str]:
         return lines
 
     # Walk through lines until we hit the end of the function, replacing
-    # "new".
+    # "new" using word boundary matching to avoid false positives.
     ix = start_ix + 1
     while True:
         line = lines[ix]
         if line.strip() == "}":
             break
 
-        lines[ix] = line.replace("new", "_new")
+        # Use word boundary matching instead of naive replace
+        lines[ix] = re.sub(r"\bnew\b", "_new", line)
         ix += 1
 
     return lines
@@ -442,6 +443,31 @@ def postprocess_source_groups(
                 group["source"] = patch_add_pdf_markup(group["source"])
 
     return (outer_key, source_group)
+
+
+def validate_no_leaked_macros(amalgamation: str) -> None:
+    """Verify all #defines are properly #undef'd.
+
+    Args:
+    ----
+        amalgamation: The amalgamated C++ source code as a string.
+
+    Raises:
+    ------
+        ValueError: If there are macros defined but not undefined.
+
+    """
+    # Extract macro names from #define directives
+    # Match simple macros (#define FOO) and function-like macros (#define FOO(...))
+    defines = re.findall(r"^#define\s+(\w+)", amalgamation, re.MULTILINE)
+    undefs = re.findall(r"^#undef\s+(\w+)", amalgamation, re.MULTILINE)
+
+    # These are intentionally defined globally (we #define and #undef them)
+    allowed_leaks = {"printf", "system"}
+
+    leaked = set(defines) - set(undefs) - allowed_leaks
+    if leaked:
+        raise ValueError(f"Leaked macros detected: {leaked}")
 
 
 def build_amalgamation(
@@ -482,7 +508,12 @@ def build_amalgamation(
     out += ["#undef system(...)"]
     out += ["#undef printf(...)"]
 
-    return "\n".join(out)
+    amalgamation = "\n".join(out)
+
+    # Validate that all macros are properly cleaned up
+    validate_no_leaked_macros(amalgamation)
+
+    return amalgamation
 
 
 def build_cython_sources(
