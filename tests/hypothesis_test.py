@@ -298,7 +298,9 @@ def test_evaluate_return_properties(
 
 
 @example(year=2024, state="CA", filing_status="Single", qualified_dividends=50000.0)
-@example(year=2024, state=None, filing_status="Married/Joint", qualified_dividends=100000.0)
+@example(
+    year=2024, state=None, filing_status="Married/Joint", qualified_dividends=100000.0
+)
 @settings(max_examples=100)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
