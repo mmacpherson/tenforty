@@ -1,6 +1,7 @@
 # tenforty-specific
 ots/generated/**
 scratch/
+.claude/settings.local.json
 # This is a library, not an application.
 uv.lock
 
