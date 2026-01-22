@@ -2,4 +2,3 @@
 
 cdef extern from "ots_2024.cpp" namespace "OpenTaxSolver2024::taxsolve_CA_540_2024":
     int main( int argc, char *argv[] )
-
