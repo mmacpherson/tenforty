@@ -287,10 +287,13 @@ def test_evaluate_return_properties(
         "State taxable income should not exceed state adjusted gross income"
     )
 
-    # assert (
-    #     result.federal_amt <= result.federal_total_tax
-    # ), "AMT should not be more than total federal tax."
+    assert result.federal_amt <= result.federal_total_tax, (
+        f"AMT ({result.federal_amt}) should not be more than total federal tax ({result.federal_total_tax})."
+    )
 
+    # TODO: Investigate - this assertion is commented out because the tax total
+    # can exceed taxable income when there are capital gains taxes computed
+    # separately.
     # if result.federal_amt == 0:
     #     assert (
     #         result.federal_total_tax <= result.federal_taxable_income
