@@ -32,11 +32,14 @@ def _evaluate_form(year, form, form_text, fed_form_text=None):
     `tenforty.evaluate_form`, because it's more conveniently outside the cython
     context.
     """
+    import warnings
 
     cdef f_type ots_form_function = lookup_ots_call(year, form)
 
+    cdef bytes program_name = b"ots"
+    cdef bytes file_path_bytes
     cdef char** c_argv = NULL
-    cdef object py_unicode_returnfile
+    cdef int result_code
 
     with tempfile.TemporaryDirectory() as tmpdir:
 
@@ -54,13 +57,18 @@ def _evaluate_form(year, form, form_text, fed_form_text=None):
         with open(returnfile, "w") as fp:
             print(form_text, file=fp)
 
-        c_argv = <char**>malloc(sizeof(char*) * 2)
+        file_path_bytes = returnfile.encode('utf-8')
+        c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
         if c_argv is NULL:
             raise MemoryError()
         try:
-            py_unicode_returnfile = returnfile
-            c_argv[1] = py_unicode_returnfile
-            ots_form_function(2, c_argv)
+            c_argv[0] = program_name
+            c_argv[1] = file_path_bytes
+            c_argv[2] = NULL  # NULL-terminate argv
+            result_code = ots_form_function(2, c_argv)
+            if result_code != 0:
+                # Log warning but don't fail - OTS uses exit codes inconsistently
+                warnings.warn(f"OTS returned non-zero exit code: {{result_code}}")
         finally:
             free(c_argv)
 
