@@ -462,12 +462,9 @@ def validate_no_leaked_macros(amalgamation: str) -> None:
     defines = re.findall(r"^#define\s+(\w+)", amalgamation, re.MULTILINE)
     undefs = re.findall(r"^#undef\s+(\w+)", amalgamation, re.MULTILINE)
 
-    # These are intentionally defined globally (we #define and #undef them)
-    allowed_leaks = {"printf", "system"}
-
-    leaked = set(defines) - set(undefs) - allowed_leaks
+    leaked = set(defines) - set(undefs)
     if leaked:
-        raise ValueError(f"Leaked macros detected: {leaked}")
+        raise ValueError(f"Leaked macros detected: {sorted(leaked)}")
 
 
 def build_single_year_amalgamation(
