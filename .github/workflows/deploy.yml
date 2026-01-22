@@ -41,7 +41,7 @@ jobs:
       uses: pypa/cibuildwheel@v3.3.1
       env:
         CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-*
-        CIBW_SKIP: "*-win32"
+        CIBW_SKIP: '*-win32'
 
     - uses: actions/upload-artifact@v6
       with:
