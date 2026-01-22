@@ -15,6 +15,24 @@ from typing import Any
 import click
 
 FED_FILENAME = "__FED_FILENAME__"
+
+WINDOWS_COMPAT_SHIM = """\
+#ifdef _MSC_VER
+#include <string.h>
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <strings.h>
+#endif
+"""
+
+WINDOWS_COMPAT_SHIM_END = """\
+#ifdef _MSC_VER
+#undef strcasecmp
+#undef strncasecmp
+#endif
+"""
+
 PXD_TEMPLATE = """\
 # distutils: language = c++
 
@@ -221,6 +239,7 @@ def find_all_includes(source_groups: dict[str, dict[str, Any]]) -> list[str]:
     # going to inline it ONCE in each year's namespace so all the
     # return-generating routines can use it.
     includes.remove('#include "taxsolve_routines.c"')
+    includes.discard('#include <strings.h>')  # Handled by Windows compat shim
 
     return list(sorted(includes))
 
@@ -486,12 +505,14 @@ def build_single_year_amalgamation(
 
     """
     out = []
+    out += [WINDOWS_COMPAT_SHIM]
     out += all_includes
     out += ["#define printf(...)"]
     out += ["#define system(...)"]
     out += amalgamate_source(outer_ns, source_group)
     out += ["#undef system(...)"]
     out += ["#undef printf(...)"]
+    out += [WINDOWS_COMPAT_SHIM_END]
     return "\n".join(out)
 
 

@@ -1562,9 +1562,9 @@ static const char* const __pyx_f[] = {
 
 /* "src/tenforty/otslib/ots.pyx":13
  * from libc.stdlib cimport free, malloc
- *
+ * 
  * ctypedef int (*f_type)(int, char **)             # <<<<<<<<<<<<<<
- *
+ * 
  * cimport ots_2018_MA_1
 */
 typedef int (*__pyx_t_8tenforty_6otslib_f_type)(int, char **);
@@ -2096,6 +2096,9 @@ static CYTHON_INLINE PyObject* __Pyx_PyUnicode_FromOrdinal_Padded(int value, Py_
     )
 static CYTHON_INLINE PyObject* __Pyx_uchar___Pyx_PyUnicode_From_int(int value, Py_ssize_t width, char padding_char);
 static CYTHON_INLINE PyObject* __Pyx____Pyx_PyUnicode_From_int(int value, Py_ssize_t width, char padding_char, char format_char);
+
+/* PyRuntimeWarning_Check.proto */
+#define __Pyx_PyExc_RuntimeWarning_Check(obj)  __Pyx_TypeCheck(obj, PyExc_RuntimeWarning)
 
 /* SwapException.proto */
 #if CYTHON_FAST_THREAD_STATE
@@ -2844,7 +2847,7 @@ return 0;
 
 /* "src/tenforty/otslib/ots.pyx":128
  * cimport ots_2024_OR_40
- *
+ * 
  * cdef f_type lookup_ots_call(int year, char* form):             # <<<<<<<<<<<<<<
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main
@@ -2862,7 +2865,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   __Pyx_RefNannySetupContext("lookup_ots_call", 0);
 
   /* "src/tenforty/otslib/ots.pyx":129
- *
+ * 
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):             # <<<<<<<<<<<<<<
  *         return ots_2018_MA_1.main
@@ -2893,7 +2896,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
     goto __pyx_L0;
 
     /* "src/tenforty/otslib/ots.pyx":129
- *
+ * 
  * cdef f_type lookup_ots_call(int year, char* form):
  *     if (year == 2018) and (form == "MA_1"):             # <<<<<<<<<<<<<<
  *         return ots_2018_MA_1.main
@@ -7306,7 +7309,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  *         return ots_2024_MI_1040.main
  *     if (year == 2024) and (form == "OR_40"):             # <<<<<<<<<<<<<<
  *         return ots_2024_OR_40.main
- *
+ * 
 */
   __pyx_t_2 = (__pyx_v_year == 0x7E8);
   if (__pyx_t_2) {
@@ -7326,8 +7329,8 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  *         return ots_2024_MI_1040.main
  *     if (year == 2024) and (form == "OR_40"):
  *         return ots_2024_OR_40.main             # <<<<<<<<<<<<<<
- *
- *
+ * 
+ * 
 */
     __pyx_r = OpenTaxSolver2024::taxsolve_OR_40_2024::main;
     goto __pyx_L0;
@@ -7337,13 +7340,13 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
  *         return ots_2024_MI_1040.main
  *     if (year == 2024) and (form == "OR_40"):             # <<<<<<<<<<<<<<
  *         return ots_2024_OR_40.main
- *
+ * 
 */
   }
 
   /* "src/tenforty/otslib/ots.pyx":128
  * cimport ots_2024_OR_40
- *
+ * 
  * cdef f_type lookup_ots_call(int year, char* form):             # <<<<<<<<<<<<<<
  *     if (year == 2018) and (form == "MA_1"):
  *         return ots_2018_MA_1.main
@@ -7362,15 +7365,15 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
 }
 
 /* "src/tenforty/otslib/ots.pyx":355
- *
- *
+ * 
+ * 
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- *
+ * 
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self,
+static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7379,7 +7382,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 ); /*proto*/
 PyDoc_STRVAR(__pyx_doc_8tenforty_6otslib__evaluate_form, "Evaluate an OTS tax form given year, form, and form content.\n\n    year: int\n    form: str\n    form_text: str\n    fed_file: str | None\n\n    Returns completed form as str.\n\n    Validation of year, form, form_text is not done here, but in\n    `tenforty.evaluate_form`, because it's more conveniently outside the cython\n    context.\n    ");
 static PyMethodDef __pyx_mdef_8tenforty_6otslib_1_evaluate_form = {"_evaluate_form", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_8tenforty_6otslib_1_evaluate_form, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_8tenforty_6otslib__evaluate_form};
-static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self,
+static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7533,7 +7536,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *     context.
  *     """
  *     import warnings             # <<<<<<<<<<<<<<
- *
+ * 
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
 */
   __pyx_t_2 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_warnings, 0, 0, NULL, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 369, __pyx_L1_error)
@@ -7544,9 +7547,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
   /* "src/tenforty/otslib/ots.pyx":371
  *     import warnings
- *
+ * 
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)             # <<<<<<<<<<<<<<
- *
+ * 
  *     cdef bytes program_name = b"ots"
 */
   __pyx_t_3 = __Pyx_PyLong_As_int(__pyx_v_year); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 371, __pyx_L1_error)
@@ -7556,7 +7559,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
   /* "src/tenforty/otslib/ots.pyx":373
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
- *
+ * 
  *     cdef bytes program_name = b"ots"             # <<<<<<<<<<<<<<
  *     cdef bytes file_path_bytes
  *     cdef char** c_argv = NULL
@@ -7569,15 +7572,15 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *     cdef bytes file_path_bytes
  *     cdef char** c_argv = NULL             # <<<<<<<<<<<<<<
  *     cdef int result_code
- *
+ * 
 */
   __pyx_v_c_argv = NULL;
 
   /* "src/tenforty/otslib/ots.pyx":378
  *     cdef int result_code
- *
+ * 
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
- *
+ * 
  *         # Run federal tax file first as needed.
 */
   /*with:*/ {
@@ -7648,7 +7651,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_7 = 0;
 
           /* "src/tenforty/otslib/ots.pyx":381
- *
+ * 
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
  *             # Write out federal file to hardcoded location.
@@ -7677,7 +7680,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
- *
+ * 
 */
             /*with:*/ {
               __pyx_t_7 = NULL;
@@ -7733,7 +7736,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)             # <<<<<<<<<<<<<<
- *
+ * 
  *             # Update location of fed file in state form.
 */
                     __pyx_t_1 = NULL;
@@ -7756,7 +7759,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
- *
+ * 
 */
                   }
                   __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -7790,7 +7793,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                       __Pyx_GIVEREF(__pyx_t_7);
                       __Pyx_XGIVEREF(__pyx_t_1);
                       __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_7, __pyx_t_1);
-                      __pyx_t_6 = 0;  __pyx_t_7 = 0;  __pyx_t_1 = 0;
+                      __pyx_t_6 = 0;  __pyx_t_7 = 0;  __pyx_t_1 = 0; 
                       __PYX_ERR(0, 384, __pyx_L20_except_error)
                     }
                     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7833,10 +7836,10 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             }
 
             /* "src/tenforty/otslib/ots.pyx":388
- *
+ * 
  *             # Update location of fed file in state form.
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)             # <<<<<<<<<<<<<<
- *
+ * 
  *         returnfile = f"{tmpdir}/form.txt"
 */
             __pyx_t_7 = __pyx_v_form_text;
@@ -7853,7 +7856,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_t_1 = 0;
 
             /* "src/tenforty/otslib/ots.pyx":381
- *
+ * 
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
  *             # Write out federal file to hardcoded location.
@@ -7863,7 +7866,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
           /* "src/tenforty/otslib/ots.pyx":390
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)
- *
+ * 
  *         returnfile = f"{tmpdir}/form.txt"             # <<<<<<<<<<<<<<
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)
@@ -7877,11 +7880,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_7 = 0;
 
           /* "src/tenforty/otslib/ots.pyx":391
- *
+ * 
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
  *             print(form_text, file=fp)
- *
+ * 
 */
           /*with:*/ {
             __pyx_t_1 = NULL;
@@ -7937,7 +7940,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)             # <<<<<<<<<<<<<<
- *
+ * 
  *         file_path_bytes = returnfile.encode('utf-8')
 */
                   __pyx_t_7 = NULL;
@@ -7956,11 +7959,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
                   /* "src/tenforty/otslib/ots.pyx":391
- *
+ * 
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
  *             print(form_text, file=fp)
- *
+ * 
 */
                 }
                 __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
@@ -7994,7 +7997,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_GIVEREF(__pyx_t_1);
                     __Pyx_XGIVEREF(__pyx_t_7);
                     __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_1, __pyx_t_7);
-                    __pyx_t_8 = 0;  __pyx_t_1 = 0;  __pyx_t_7 = 0;
+                    __pyx_t_8 = 0;  __pyx_t_1 = 0;  __pyx_t_7 = 0; 
                     __PYX_ERR(0, 391, __pyx_L34_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -8038,7 +8041,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
           /* "src/tenforty/otslib/ots.pyx":394
  *             print(form_text, file=fp)
- *
+ * 
  *         file_path_bytes = returnfile.encode('utf-8')             # <<<<<<<<<<<<<<
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:
@@ -8049,7 +8052,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_7 = 0;
 
           /* "src/tenforty/otslib/ots.pyx":395
- *
+ * 
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator             # <<<<<<<<<<<<<<
  *         if c_argv is NULL:
@@ -8138,7 +8141,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:             # <<<<<<<<<<<<<<
  *                 # Log warning but don't fail - OTS uses exit codes inconsistently
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}")
+ *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
 */
             __pyx_t_13 = (__pyx_v_result_code != 0);
             if (__pyx_t_13) {
@@ -8146,7 +8149,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               /* "src/tenforty/otslib/ots.pyx":405
  *             if result_code != 0:
  *                 # Log warning but don't fail - OTS uses exit codes inconsistently
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}")             # <<<<<<<<<<<<<<
+ *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)             # <<<<<<<<<<<<<<
  *         finally:
  *             free(c_argv)
 */
@@ -8159,8 +8162,8 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
               __pyx_t_9 = 0;
               {
-                PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_t_6};
-                __pyx_t_7 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_warn, __pyx_callargs+__pyx_t_9, (2-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+                PyObject *__pyx_callargs[3] = {__pyx_t_1, __pyx_t_6, ((PyObject *)(((PyTypeObject*)PyExc_RuntimeWarning)))};
+                __pyx_t_7 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_warn, __pyx_callargs+__pyx_t_9, (3-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                 __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
                 __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                 if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 405, __pyx_L44_error)
@@ -8173,16 +8176,16 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:             # <<<<<<<<<<<<<<
  *                 # Log warning but don't fail - OTS uses exit codes inconsistently
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}")
+ *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
 */
             }
           }
 
           /* "src/tenforty/otslib/ots.pyx":407
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}")
+ *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
  *         finally:
  *             free(c_argv)             # <<<<<<<<<<<<<<
- *
+ * 
  *         # OTS generates an output file based on the name of the input file.
 */
           /*finally:*/ {
@@ -8227,7 +8230,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           }
 
           /* "src/tenforty/otslib/ots.pyx":410
- *
+ * 
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")             # <<<<<<<<<<<<<<
  *         with open(returnfile_completed) as fp:
@@ -8243,7 +8246,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
  *             result = fp.read()
- *
+ * 
 */
           /*with:*/ {
             __pyx_t_6 = NULL;
@@ -8299,7 +8302,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()             # <<<<<<<<<<<<<<
- *
+ * 
  *     return result
 */
                   __pyx_t_7 = __pyx_v_fp;
@@ -8320,7 +8323,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
  *             result = fp.read()
- *
+ * 
 */
                 }
                 __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
@@ -8354,7 +8357,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_GIVEREF(__pyx_t_7);
                     __Pyx_XGIVEREF(__pyx_t_6);
                     __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_7, __pyx_t_6);
-                    __pyx_t_8 = 0;  __pyx_t_7 = 0;  __pyx_t_6 = 0;
+                    __pyx_t_8 = 0;  __pyx_t_7 = 0;  __pyx_t_6 = 0; 
                     __PYX_ERR(0, 411, __pyx_L55_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -8398,9 +8401,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
           /* "src/tenforty/otslib/ots.pyx":378
  *     cdef int result_code
- *
+ * 
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
- *
+ * 
  *         # Run federal tax file first as needed.
 */
         }
@@ -8435,7 +8438,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __Pyx_GIVEREF(__pyx_t_7);
             __Pyx_XGIVEREF(__pyx_t_8);
             __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_7, __pyx_t_8);
-            __pyx_t_6 = 0;  __pyx_t_7 = 0;  __pyx_t_8 = 0;
+            __pyx_t_6 = 0;  __pyx_t_7 = 0;  __pyx_t_8 = 0; 
             __PYX_ERR(0, 378, __pyx_L9_except_error)
           }
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -8479,9 +8482,8 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 
   /* "src/tenforty/otslib/ots.pyx":414
  *             result = fp.read()
- *
+ * 
  *     return result             # <<<<<<<<<<<<<<
- *
 */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 414, __pyx_L1_error) }
@@ -8490,11 +8492,11 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   goto __pyx_L0;
 
   /* "src/tenforty/otslib/ots.pyx":355
- *
- *
+ * 
+ * 
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- *
+ * 
 */
 
   /* function exit code */
@@ -8833,7 +8835,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_otslib(PyObject *__pyx_pyinit_modu
         Py_FatalError("failed to import 'refnanny' module");
   }
   #endif
-
+  
 __Pyx_RefNannySetupContext("PyInit_otslib", 0);
   __Pyx_init_runtime_version();
   if (__Pyx_check_binary_version(__PYX_LIMITED_VERSION_HEX, __Pyx_get_runtime_version(), CYTHON_COMPILING_IN_LIMITED_API) < (0)) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -8870,8 +8872,8 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
   /*--- Execution code ---*/
 
   /* "src/tenforty/otslib/ots.pyx":7
- *
- *
+ * 
+ * 
  * import os             # <<<<<<<<<<<<<<
  * import sys
  * import tempfile
@@ -8883,11 +8885,11 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "src/tenforty/otslib/ots.pyx":8
- *
+ * 
  * import os
  * import sys             # <<<<<<<<<<<<<<
  * import tempfile
- *
+ * 
 */
   __pyx_t_1 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_sys, 0, 0, NULL, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
   __pyx_t_2 = __pyx_t_1;
@@ -8899,7 +8901,7 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
  * import os
  * import sys
  * import tempfile             # <<<<<<<<<<<<<<
- *
+ * 
  * from libc.stdlib cimport free, malloc
 */
   __pyx_t_1 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_tempfile, 0, 0, NULL, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
@@ -8909,11 +8911,11 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "src/tenforty/otslib/ots.pyx":355
- *
- *
+ * 
+ * 
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- *
+ * 
 */
   __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8tenforty_6otslib_1_evaluate_form, 0, __pyx_mstate_global->__pyx_n_u_evaluate_form, NULL, __pyx_mstate_global->__pyx_n_u_tenforty_otslib, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 355, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -8996,18 +8998,18 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
- *
+ * 
 */
   __pyx_mstate_global->__pyx_tuple[0] = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 384, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[0]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[0]);
 
   /* "src/tenforty/otslib/ots.pyx":355
- *
- *
+ * 
+ * 
  * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
- *
+ * 
 */
   __pyx_mstate_global->__pyx_tuple[1] = PyTuple_Pack(1, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 355, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[1]);
@@ -9042,33 +9044,33 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
 static int __Pyx_InitConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   {
-    const struct { const unsigned int length: 9; } index[] = {{1},{33},{13},{9},{8},{27},{4},{6},{7},{16},{9},{4},{7},{7},{7},{8},{9},{5},{5},{20},{18},{7},{15},{35},{16},{6},{18},{6},{18},{9},{14},{8},{5},{5},{5},{5},{5},{5},{5},{13},{7},{4},{15},{4},{9},{2},{8},{13},{5},{8},{10},{8},{4},{2},{17},{3},{5},{12},{12},{4},{7},{6},{11},{10},{20},{12},{10},{3},{8},{15},{8},{6},{6},{1},{4},{8},{4},{281},{3}};
-    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (737 bytes) */
-const char* const cstring = "(\265/\375`\346\002\275\026\000\306\352\223;\020\223u\000\000\n)\020D\200\002\005P\007\222B\241\006\204\0020\226P)+\237R\276\0242\335\345H\362jf1K\360H\351\200?\374\30153t\002b\314\036\002\0028/\356?\001\205\000y\000\177\000\372\373\234o\306&\371-\341\263h\331\243\270\376D\020Y\252\342\356\251t)gI\031I9u\250\026\022\207)A\351\272\024\210\177\240t\251\356\344$''\367NZ,\026+t\3575\342\356:\361P\\&$!\016\342\nqWu\254.\245r\357C\226\232%\2308\236\032\233R]\2766}\371\324(v\223\226\351\022\231q\210\001~h\032m<\210\277\221\026e?\302\371m0J\\\216\300/3\252?\217^-)\036\001\245xI\367\223|-\372)\272\373W\242\241\273y\276Na\376\243\030\312\350kz\030j\331k\360CU\253[\251Z\254\260\205B\235V\335\212\025v'\024*tw\367\327\027\035/\215\347\327\345\273\317|\027\366\337\315\332K\321\307\217&&_\377\316/E\215\342\214\277\022\026\2772=o\267\322p\357\305\365:_\324\343Mq\366\217\271\371gp\206\271\353\303\301\227\371^\376rI3\016\236\rS\027\266\326\2632\354\016\234m\2004\013Y%\270Z\002\001\200\300\016\267\033>\355\335\020\237\226\224\023B;\321RV\211O\033\332\000\036vH\263\n\200Z\276\237\2361\245X\346[Ss~\026A\223\324\347k\367\222I\276>\323\363\206\017\352?\335\301\327?\232\244\353\021=?\377wG\3633x?\217\027\215\2217\307\340l\352R\314\246\211\315\022\213\372\324\370\304\345\233\330\375\311[\376\210\202\330=\247\306'\234\202O\353mtc\023j\244\234\t\032G\023\315l\366\210S=*\302\326\222t8\035\017\242\266\262\003\266\010\241\275;c\337\340\034lll\366a\341Ps\360l\225JR\0236v\000\304\2066vE\215P5p\n@\254\207\006\233\031\254\261\275\260E*\007b\275\331i&\262Vl\007PKZ]\266\305\306\336Uf_\250\234\312\205X\317\216\251,\252\002\250]\311\341\240\250yf\2405UE!\227\025#\260\261U\266EuEU\340Xn\007=(0\304Pe\334\0061e\225\233\226\353\006\251\302~\000[:\037ey\306\0019\322p<\257m\350ps\ngf\352ufu\346\252\210\340\210\341\0031\301t\223\273\320\001.\033T\221A\207\274sV-$\364\202@\255\371\265\364\356\265/U\377\352\202\021\026$`\256\332\372\3356\020\177# \264\2134\037\210\367\253\003\223\246\352\n?\264^\313\2230\277""\303\003-a\330z \006SE\210h\035\205\331\224\000Q\003\005";
-    PyObject *data = __Pyx_DecompressString(cstring, 737, 3);
+    const struct { const unsigned int length: 9; } index[] = {{1},{33},{13},{9},{8},{27},{4},{6},{7},{16},{9},{4},{7},{7},{7},{8},{9},{5},{5},{20},{18},{7},{15},{35},{16},{6},{18},{6},{18},{9},{14},{8},{5},{5},{5},{5},{5},{5},{5},{13},{7},{4},{15},{4},{9},{2},{8},{13},{5},{8},{10},{8},{4},{2},{17},{3},{5},{12},{12},{4},{7},{6},{11},{10},{20},{12},{10},{3},{8},{15},{8},{6},{6},{1},{4},{8},{4},{284},{3}};
+    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (739 bytes) */
+const char* const cstring = "(\265/\375`\351\002\315\026\000\366j\224;\020\223u\000\000\n)\020D\200\002\005P\007\222B\241\006\204\0020\226P)+\237R\276\0242\335\345H\362\232\210\\\014\301#\345B\037\360\237Ht\014\004\304\230=\004\004p^\334\177\002\205\000z\000\200\000X\177\237\363\315\330$\277%|\026-\373\024\327\237\030\"KW\334\275\225.\345,*$*\247\016\325R\3420&)]\227\nq\220\224.\325\235\274\004\345\344\036\312\006\213\305\n\335{\221\270\267P\274\224\326I\211\210\207\264D\334U\035\253K\251\334\003\221\245f\t&\216\247\306\246T\227\257M_>5\212\335\244e\272Df\034b\200\037\232F\034\017\342o\244E\331\217p~\033\214\022\227#\360\313\214\352\317\243W\213\312G\356\245xI\367\223|-\372)\272\373W\242\241\273y\276Na\376\243\030\312\350kz\030j\331k\360C\325F\267Rm\260\302\r\024\352\264\352V\254\260;\241P\241\273\273\277\276\350xi<\277.\337}\346\273\260\377n\326^\212>~41\371\372w~)j\024g\374\225\260\370\225\351y\273\225\206{/\255\327\371\242\036o\212\263\177\314\315?\2033\314[ \016\276\314\367\362\227K\232\003,\267=\033\246.l\255ge\330\0368\333\000i&\262Jp\265\004\002\000\201\035n7|\332\273!>-)G\204v\242\251\254\022\2376\264\001<\354\220f\025\000\265|?=cJ\261\314\267\246\346\374,\202&\251\317\327\356%\223|}\246\347\r\037\324\177\272\203\257\1774I\327#z~\376\357\216\346g\360~\036/\032#o\216\301\331\324\245\230M\023\233%\026\365\251\361\211\3137\261\373\223\267\374\021\005q\247\306'\234\202O\353mtc\023j\244\234\t\032G\023\315l\366\210S=*\302\326\262\270j&\035N\307\203\250\271v\300\026!\264wg\354\033\234\203\215\215\315@,\034j\016\236\255RIj\302\306\016\200\330\320\306\272\324\010U\003\247\000\304zh\260\231\301\032\333\013[\244r \326\233\235f#k\305v\000\265\244\325e[l\354]e\366\205\312\251\\\210\365\354\230\312\242*\200ZWN\007E\3153\003\255\251*\n\271\254\030\201\215\255\262-\252.U\201\013=(0\304Pe\334\0061e\225\233\226\353\006\254\302\301\003\316X\236M\343\031\004\344h\302\361\274\266\241\303\315)\234\231\251\327\231\325\231\253\"\202#\206\017\304\004\323M\356B\007\270lPE\006\035\362\316Y\265\220\320\013\002""\265\346\327\322\273\327\276T\375\253\013FX\220\200\271j\353w\333@\374\215\200\320.\322| \336\257\016L\232\252+\374\320z-O\302\374\016\017\264\204a\353\201\030L\025!\242u\024fS\002D\r\024";
+    PyObject *data = __Pyx_DecompressString(cstring, 739, 3);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (791 bytes) */
-const char* const cstring = "BZh91AY&SY\377\252\3000\000\000t\177\377\347\177\363\365l\177\377\363\257\367\377 \277\357\377\364\000@@@@@@@@\000@@@\000@\000@\002r\253@\031\020J`\243\310\324\3656\211\243\324=M\003L\214\200\000\323j2\000\006\322\036$\320\315F\230\3655\006\247\244&\t2\006\203Dh\021\246\214\200\000\032\000h\000\0004\320\323\rM\250a=\001\r\000\000\000\r\000\032\000\000\000\000\000\000\320\000\341\240\032\000\r\001\2404\000\000\003M\032h\003 \000\001\243L\2031W\216_ \335\376\357\360 \034\034@&`3)a\223\213&\224j\313J\2016\210]\320\342\266\242P\225\007\320,fJ\ts\225Uu\301\202a\026>\335\250\275\366\326\316\266\356\347\313\327~uf\027\331\\P\222\264\251\014\314Jvy\227\266\306\013\260\340)t\213\341+NT\250#Z\252\001\314@\000d\nx>@\034\344vl\341\210\271\333\217\216/O\216J\234\200U\264\207\022\237\264\2666\227L$\001*\"b+!\367U6\236z\n\341\363J\264\311m\262\312\250\232\303a\353\002\253\244;\r\221\254\246`EX\032zl\214aQi\363\235\0304E\323\322\246\245\215O\253\266\300*\262\035\251\202|y\364Sn\251\t}\353\002\366\331\003\2378\204\030\"~*\342\n:`\317\004\361 \000\024c<\3038cP\370\002\342C,CG(\263\2001\004\204\022\220\000\241d\304\t2\025\347\254!S\001\246\235\372&\\\334:\031C\036\004?\301o\251\367E\215\035!\224:#W\233+\025p\2155--v`\257\344\363N\000\355\3416\342\225\327\204\0033\323-\252\362#pg\251\351\253(\314\335\202\252nEzS\276\034Wd\340\361\237XxZ\245\200\353\270&\206\317i}\020\314w\216\366\264,\263\n_\336t\225\235ra\006\014\231\031u\265\250\361\257\216Z\355\250B-`\204 \267\343v\270\271\252\352.c\316\001\r\260\333-$\021@\004\211 \t\341\246y\020b\030\353F\032e\260 \207\204L\213\201c\001\234^XK\254\215\221R\224\320E3_\352\\N<$\252\240\261b\223I\221]\026\"\350a\326\344\311\307\221\0330\271\211\316\250\212\351\202\225}K\014f\273DH\214\310`\035m\253\\\300\240\230\246\022\252\036\307K\032\253]\234PiycR\274\023\320\247\207\210HI\245\310\312\024\034\221V\000+\034L\027\254\213\030\205\265IX\245\033\264\354F\340\230@\022A\306F\314\004\23499H\307\233\210\343\341\345f\277\200\276]\303\332`\2666\202\341\007""\326\020\342\013\222\266\307F4xL{\021Q\206\373\247;\033\233\327\2501\347|\345A\315\370z\275\324R)!\316\007w;3O\331,+D\352\\\024M\241>u\342N3N]h\240\216cb\3672\020@\346$\300\217\370\273\222)\302\204\207\375V\001\200";
-    PyObject *data = __Pyx_DecompressString(cstring, 791, 2);
+    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (819 bytes) */
+const char* const cstring = "BZh91AY&SY\017\354=\372\000\000t\177\377\347\177\363\365l\177\377\363\257\367\377 \277\357\377\364\000@@@@@@@@\000@@@\000@\000@\002}\266\267#\241\316!\024\315\024~\246S&j44= i\221\220\001\241\246L \003G\244\323\324\375SM4\336\2501\352\236\240\320\210\301&&M4z\212y&\207\241\036\220h\r\r4\365\000\000\000\006\201\243A\220j\231\2412\246jz\232\031\0314d\321\246\206 2i\241\223\021\210\000\000\311\246\232\032d\320\rOR5=C)\264@\320\332\201\240\001\243A\2404\003L\004a\000\001\243L\023\324e\030f\354\341\371f\325\264\201o\370\004\274\003\310`2\330\206\\J\230*(\004\304!\214\020\262\251\021'K\003g\0278\022s60\254\214\\\261(z\333U\327\265\265){;\277_o\232\331\213\200Z\330\302\307;\215F\220iz\005o\346&\037\304\341#\223\311l\336\356\323\245HF\265U\203\230\200\000U\2110=H\001kJ\336\310\016\225\257\345\374\027z\346\264\206\310\005\023\322]C\371\3542\247\026\3704\001(!\361\030k]\252\304\227\337G\220\\\237ZFC\261\343\235r\331t<\320|c\016\316y\013\354\301As\2431\371M\304\026T\236\351\221ccLX|\372o\250|\263|]\270\001\225A\271\243>M*.\336\266\002\037<``\3340&\2753rM\215o&b\025\212\321\306\236!\020\332\223\177f\352g=\274P\226\323\206\234\2469t\222\332\300~D\304<A\301\324s\026a\003\231\244\003:\355\3545\022\276\342\340\010X\014\374\004\267\353\307\016f\306\030\003\0365v!r\317\340\342\022\222\356\333\213vif\000h\302u=#\034 \034\255O\355\330\345I0d&\246\244\037,\232\346TV\365i\314\327o\336\203\003FH\206\205\0240\036v\004\322\321\266\256\200^;\347\275\254\352W\205-\336d\013\205\\\241\313\031r\256\364\221#\343Z9*\250\203\237\"\303\234\3457\0333\212\365\031\013\001\334p\022o\302\241\250\220D \t\r$\004\316q\266\2100C+\210`f\025@ \206\204L\252q\255`\346\027\324\022\362\337H\260\212@b\211m\331\2553:\005c\224.Pt\034\rS\334{\035\207[\217\006\036\253\351ux\230\313\014F\207\021ZJ\013^y\003\314>T7\006U\"\225(4\022\232a2\235\253d1\224UN'Hm5\310\221\3014\344\320\320\350\010HlE\316A\210\362\300\004F\372\305\372E\314B\242\201b\203\357Q\256\372\304\241\300\314\301\3431\241\300\354\016VZ\355J\304\250\200\261m""\357\001A;\307\264\241xn\002H\027k\207\020^spt\2414\222\252\324\023\223\202\312\225\027w~\374\330\2660(\223i\360'\241\366Y\2020T\005<\356n\245\243\177C\201\343p\316.\214\311u\357\225\225\241\323\372Ht\303Y/\026\332\030\303\352-$\3300\377\027rE8P\220\017\354=\372";
+    PyObject *data = __Pyx_DecompressString(cstring, 819, 2);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (725 bytes) */
-const char* const cstring = "x\332mR\315N\333@\020&\022E\241\230\026#A)\252P\242rhK\001'%\220Tj+\013B\241*\277\201J=\2156\316\032,l\257\263\336@\214\372\000\034}\334\243\2179\346\310\221G\310\321\307<\002\217\320Y\002EH]ig\276\331\375v<\363y\276\355\035\325r\234\212\026\367i#\3473\177\361\222r\226\243mG\344,\326\240\237s\3136m,\332\214{K\242-\226\037\000\260\226P>\344\326\262\240>\036\213h\231\211\320u\352\312-\005Q[]\257\233PZ1\224-\033%\200\315\352\006ln\377\254\356\232;U\200\255\232\tv\271\\\256\354\230P\330\331\206\202\261b\354\256\303\306\212a\354\376\030D\277a\373\250h\024\366\266\320\253\203\275CX1\366M4\000\373Q\033\367\206c\t\330\245mqH\355#\352\005\214\023\216\207\234Z\202\361\350\270v\227\347\336A\315:\245\rX\177\032V\241\316\331\031\345\344\204\002g\021q\205C\303\247\224Z\365\227\tk\253\006\t#\337r\330\222\3058\366\357\3704\264\200\360\223s\313E\014\216\017\202\023\213\326\211u\006@}A9\240?'n\213\010\nJ:\014QY\000\273X,\030vy\325XE\001\nE4\305\212]\256\224\224Y\305\213J\245\204\262\017\236\010l\316\266! \342\324v\\\252\366]\000\365H\320PQ\036i\001\246n\371\026~\326\t\341_\225\216\240^\010\340\021\254\020\227\307\032-\314\201\313'\036z\026P\237\205\370\327\006\337S\t\204\303\374\200\005\001w|\021pv\302\211wOn\266\210;@\234\222\006\247\201\213\035s\032\266\\1\260\240\306f0Q\252\324G\204\027^\340R\201}AH\305}>D\rj\023|\030F!\326\031(\352\303D-\r&\n\260\271\020U\023^\320p\270\322\223\206\027\027\204\373j;\376I\030Q\302{C\037:\371\3337C\332x\177x>\331\353\026\272\233\327\371\376\360\234$\375\341\327R\277\035\031z>\331\323\347\223Md\215\014\215jW_\345\253$\323\327\246\343\272\314H=\325\247\342\203\330\221\355\244\231N(\310\222\343;\346\370L\034%\331N\246\367\376\313\365A?;\025\037\306M\231I\307\365X\217?\312\323\204\244\232\202\013\3628\311\367\263\263\362C\362\275S\350\230iV\217g\344\264l&/:\365n&\315\216]\255\305o\343\203T\033O\263\243\2516\031\347\343\022\346\371\017\230\355\315.`\212\365N3\325^^\375\221\237\260\205\211\031\371L\036\364\346\314\033\375&\337\327&\342L\254Z\032\315\311""\313\316LW\357\276\273\316\337\225\324\233\304\247\251\246\252lI\263?<vU@\r\377\002\272\205r\272";
-    PyObject *data = __Pyx_DecompressString(cstring, 725, 1);
+    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (729 bytes) */
+const char* const cstring = "x\332mR\315n\323@\020n\244R\245\340@]\251P*\204\022\321\003\177m\234\320\204\004\t\220\325\246PD[\322\264H\234F\033g\335Z\330^g\275i\343\212\007\310\321\307=\372\230c\216=\362\0109\372\230G\350#0\233\024\020\022+\355\3147\273\337\216g>\317\373\303\343V\236S\321\343>\355\344}\346o\\R\316\362\264\357\210\274\305:\364M\276h\323\316\206\315\270\267)\372\242\370\033\000\353\t\345Cn\025\005\365\361XDE&B\327i+\267\031D}u\275mBe\313P\266fT\000v\033;\260\273\367\271q`\3567\000>\266L\260k\265Z}\337\204\322\376\036\224\214-\343`\033v\266\014\343\340\323,\372\006{\307e\243t\370\021\275:8<\202-\343\213\211\006\340K\324\307\275\343X\002\016h_\034Q\373\230z\001\343\204\343!\247\226`<:iM\363\3348hYg\264\003\333\377\206\rhs\366\235rrJ\201\263\210\270\302\241\341\277\224V\343\253\t\257\253\006\t#\337r\330\246\3058\366\357\3704\264\200\360\323s\313E\014\216\017\202\023\213\266\211\365\035\200\372\202r@\177N\334\036\021\024\224t\030\242\262\000v\271\\2\354Z\325\250\242\000\2452\232r\335\256\325+\312T\361\242^\257\240\354\263'\002\233\263m\010\2108\263\035\227\252=\r\240\035\t\032*\312_Z\200\251{\276\205\237uB\370S\245#\250\027\002x\004+\304\345\261N\017s\340\362\211\207\236\005\324g!\376\265\331\367T\002\3410?`A\300\035_\004\234\235r\342\335\220\273=\342\316\020\247\244\303i\340b\307\234\206=W\314,\250\261\231M\224*\365/\302\013/p\251\300\276 \244\342&\037\242\016\265\t>\014\243\020\353\014\024\365\367Dm\316&\n\260\271\020U\023^\320q\270\322\223\206\027\027\204\373j;\376i\030Q\302\307s\317\207\205\353GsZn2\277\236\034\216J\243\335\253\302d\376\261$\223\371\207R\277^\230\273\275<\326\327\223]d-\314-j\203w\362A\222\231h\367\343\266\314H=\325W\342f\354\310~\322M\227\024d\311\311\224\231[\215\243$;\314\214\237\275\275jN\262+\361Q\334\225\2314\247\307z\374R\236%$\325\024|!O\222\302$\273&\237'\037\206\245\241\231f\365xU\336\227\335\344\356\260=\312\244\331;\203\327\361\223\270\231j\2714\273\230j\313q!\256`\236\377\200\265\361\332\013L\261=\354\246\332\275\301\017\371\n[XZ\225\267ds\374\330""\374\251\377,\216\233G\023m)\316\304\252\253\305\274\274\034\256\216\364\321\323\253\302\264\252\3612\276N5UhO\232\223\371;\203\022\312\370\013*\317t;";
+    PyObject *data = __Pyx_DecompressString(cstring, 729, 1);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #else /* compression: none (998 bytes) */
-const char* const bytes = "?OTS returned non-zero exit code: /fed-form.txt/form.txt_out.txtsrc/tenforty/otslib/ots.pyx.txtCA_540CA_5805__FED_FILENAME__HSA_f8889MA_1MI_1040NC_D400NJ_1040NY_IT201OH_IT1040OR_40PA_40__Pyx_PyDict_NextRefTemporaryDirectoryUS_1040US_1040_Sched_CUS_1040_Sched_E_brokerage_royaltiesUS_1040_Sched_SEVA_760asyncio.coroutinesc_argvcline_in_traceback__enter___evaluate_form__exit__f2210f8606f8812f8829f8959f8960f8995fed_form_textff_pathfilefile_path_bytesformform_textfp__func___is_coroutineitems__main____module____name__openosots_form_functionpopprintprogram_name__qualname__readreplaceresultresult_codereturnfilereturnfile_completed__set_name__setdefaultsystempfiletenforty.otslib__test__tmpdirvalueswwarnwarningsyear\320\000*\250!\360\034\000\014\r\340\004$\240O\2601\260F\270!\340\004\036\230a\340\004\031\230\021\360\006\000\n\022\320\021$\240F\250!\360\006\000\t\014\210>\230\027\240\001\340\014\026\220b\230\001\230\021\330\021\025\220Q\220i\230x\240q\330\020\025\220Q\220o\240U\250!\360\006\000\r\030\220y\240\010\250\001\320)=\270Q\340\010\025\220R\220q\230\001\330\r\021\220\021\220,\230h\240a\330\014\021\220\021\220+\230U\240!\340\010\032\230*\240G\2501\250A\330\010\021\220\030\230\026\230q\240\016\250b\260\001\330\010\013\2107\220#\220Q\330\014\r\330\010\t\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\032\320\032+\2501\250C\250q\330\014\017\210|\2303\230a\340\020\030\230\005\230Q\320\036A\300\021\300!\340\014\020\220\001\220\021\360\006\000\t \230z\250\030\260\021\260(\270!\330\r\021\220\021\320\022+\2501\330\014\025\220R\220u\230A\340\004\013\2101ots";
+    #else /* compression: none (1001 bytes) */
+const char* const bytes = "?OTS returned non-zero exit code: /fed-form.txt/form.txt_out.txtsrc/tenforty/otslib/ots.pyx.txtCA_540CA_5805__FED_FILENAME__HSA_f8889MA_1MI_1040NC_D400NJ_1040NY_IT201OH_IT1040OR_40PA_40__Pyx_PyDict_NextRefTemporaryDirectoryUS_1040US_1040_Sched_CUS_1040_Sched_E_brokerage_royaltiesUS_1040_Sched_SEVA_760asyncio.coroutinesc_argvcline_in_traceback__enter___evaluate_form__exit__f2210f8606f8812f8829f8959f8960f8995fed_form_textff_pathfilefile_path_bytesformform_textfp__func___is_coroutineitems__main____module____name__openosots_form_functionpopprintprogram_name__qualname__readreplaceresultresult_codereturnfilereturnfile_completed__set_name__setdefaultsystempfiletenforty.otslib__test__tmpdirvalueswwarnwarningsyear\320\000*\250!\360\034\000\014\r\340\004$\240O\2601\260F\270!\340\004\036\230a\340\004\031\230\021\360\006\000\n\022\320\021$\240F\250!\360\006\000\t\014\210>\230\027\240\001\340\014\026\220b\230\001\230\021\330\021\025\220Q\220i\230x\240q\330\020\025\220Q\220o\240U\250!\360\006\000\r\030\220y\240\010\250\001\320)=\270Q\340\010\025\220R\220q\230\001\330\r\021\220\021\220,\230h\240a\330\014\021\220\021\220+\230U\240!\340\010\032\230*\240G\2501\250A\330\010\021\220\030\230\026\230q\240\016\250b\260\001\330\010\013\2107\220#\220Q\330\014\r\330\010\t\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\032\320\032+\2501\250C\250q\330\014\017\210|\2303\230a\340\020\030\230\005\230Q\320\036A\300\021\300/\320QR\340\014\020\220\001\220\021\360\006\000\t \230z\250\030\260\021\260(\270!\330\r\021\220\021\320\022+\2501\330\014\025\220R\220u\230A\340\004\013\2101ots";
     PyObject *data = NULL;
     CYTHON_UNUSED_VAR(__Pyx_DecompressString);
     #endif
@@ -9164,12 +9166,12 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
 static int __Pyx_InitGlobals(void) {
   /* PythonCompatibility.init */
   if (likely(__Pyx_init_co_variables() == 0)); else
-
+  
   if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L1_error)
 
   /* CommonTypesMetaclass.init */
   if (likely(__pyx_CommonTypesMetaclass_init(__pyx_m) == 0)); else
-
+  
   if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L1_error)
 
   /* CachedMethodType.init */
@@ -9183,12 +9185,12 @@ static int __Pyx_InitGlobals(void) {
       }
   } // error handling follows
   #endif
-
+  
   if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L1_error)
 
   /* CythonFunctionShared.init */
   if (likely(__pyx_CyFunction_init(__pyx_m) == 0)); else
-
+  
   if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L1_error)
 
   return 0;
