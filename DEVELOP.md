@@ -163,7 +163,7 @@ retrieved, a basic level of testing. There are also several property checks in
 place, for instance checking that total tax monotonically increases with
 increasing W2 income.
 
-A GitHub Actions step runs the tests against versions 3.10, 3.11, and 3.12 on
+A GitHub Actions step runs the tests against Python 3.10 through 3.14 on
 every push. The local `make test` recipe only runs the tests against the
 interpreter that the virtual environment is configured with. (So far) we've
 found that if the tests pass in one interpreter, they tend to pass in the others
