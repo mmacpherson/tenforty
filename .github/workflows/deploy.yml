@@ -21,7 +21,7 @@ jobs:
       run: |
         python -m pip install .[dev]
     - name: Run tests
-      run: pytest
+      run: pytest --hypothesis-profile=ci
 
   # Build wheels and sdist only on pushes to main, and only if validation
   # succeeds
