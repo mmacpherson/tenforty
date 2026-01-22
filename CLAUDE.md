@@ -29,7 +29,7 @@ Cython-based C++ bindings with pandas DataFrame output.
 - `src/tenforty/` - Main package
   - `core.py` - evaluate_return(), evaluate_returns() API
   - `otslib/` - Cython bindings to OTS C++ code
-- `ots/` - Build tooling
+- `ots/` - Build tooling (see `ots/README.md` for amalgamation rationale)
   - `amalgamate.py` - Generates per-year .cpp files from OTS tarballs
   - `ots.template.pyx` - Cython template
 - `tests/` - pytest + hypothesis tests
