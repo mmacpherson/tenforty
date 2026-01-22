@@ -1,4 +1,5 @@
 # distutils: language = c++
 
-cdef extern from "ots_amalgamation.cpp" namespace "OpenTaxSolver2021::taxsolve_US_1040_Sched_SE_2021":
+cdef extern from "ots_2021.cpp" namespace "OpenTaxSolver2021::taxsolve_US_1040_Sched_SE_2021":
     int main( int argc, char *argv[] )
+

@@ -18,7 +18,7 @@ FED_FILENAME = "__FED_FILENAME__"
 PXD_TEMPLATE = """\
 # distutils: language = c++
 
-cdef extern from "{fname}" namespace "{outer_ns}::{inner_ns}":
+cdef extern from "ots_{year}.cpp" namespace "{outer_ns}::{inner_ns}":
     int main( int argc, char *argv[] )
 """
 
@@ -470,10 +470,38 @@ def validate_no_leaked_macros(amalgamation: str) -> None:
         raise ValueError(f"Leaked macros detected: {leaked}")
 
 
-def build_amalgamation(
-    source_groups: dict[str, dict[str, dict[str, list[str]]]],
+def build_single_year_amalgamation(
+    outer_ns: str,
+    source_group: dict[str, dict[str, list[str]]],
+    all_includes: list[str],
 ) -> str:
-    """Build an amalgamated C++ source file from various source groups.
+    """Build amalgamation for a single tax year.
+
+    Args:
+    ----
+        outer_ns: The outer namespace (e.g., "OpenTaxSolver2024").
+        source_group: The source group for this year.
+        all_includes: List of #include directives to include.
+
+    Returns:
+    -------
+        A string representing the amalgamated C++ source for this year.
+
+    """
+    out = []
+    out += all_includes
+    out += ["#define printf(...)"]
+    out += ["#define system(...)"]
+    out += amalgamate_source(outer_ns, source_group)
+    out += ["#undef system(...)"]
+    out += ["#undef printf(...)"]
+    return "\n".join(out)
+
+
+def build_per_year_amalgamations(
+    source_groups: dict[str, dict[str, dict[str, list[str]]]],
+) -> dict[str, str]:
+    """Build per-year amalgamated C++ source files.
 
     Args:
     ----
@@ -482,44 +510,33 @@ def build_amalgamation(
 
     Returns:
     -------
-        A string representing the amalgamated C++ source.
+        A dictionary mapping filenames (e.g., "ots_2024.cpp") to content.
 
     """
     # Find all includes in any source file.
     all_includes = find_all_includes(source_groups)
 
-    # Initialize the lines of the aggregation.
-    out = []
+    result = {}
+    for outer_ns, source_group in source_groups.items():
+        # Extract year from namespace (e.g., "OpenTaxSolver2024" -> "2024")
+        year = outer_ns.replace("OpenTaxSolver", "")
+        filename = f"ots_{year}.cpp"
 
-    # Includes go at the top.
-    out += all_includes
+        amalgamation = build_single_year_amalgamation(
+            outer_ns, source_group, all_includes
+        )
 
-    # Disable printf so stdout stays quiet.
-    out += ["#define printf(...)"]
+        # Validate that all macros are properly cleaned up
+        validate_no_leaked_macros(amalgamation)
 
-    # And system too.
-    out += ["#define system(...)"]
+        result[filename] = amalgamation
 
-    # Tack on aggregations.
-    for outer_namespace, source_group in source_groups.items():
-        out += amalgamate_source(outer_namespace, source_group)
-
-    # Close out redefinitions.
-    out += ["#undef system(...)"]
-    out += ["#undef printf(...)"]
-
-    amalgamation = "\n".join(out)
-
-    # Validate that all macros are properly cleaned up
-    validate_no_leaked_macros(amalgamation)
-
-    return amalgamation
+    return result
 
 
 def build_cython_sources(
     source_groups: dict[str, dict[str, dict[str, list[str]]]],
     cython_template_file: str,
-    amalgamation_file: str,
 ) -> dict[str, str]:
     """Build Cython source files from the given source groups.
 
@@ -528,7 +545,6 @@ def build_cython_sources(
         source_groups: A dictionary where each key is an outer namespace and the value
         is a dictionary representing different source groups.
         cython_template_file: The file name of the Cython template file.
-        amalgamation_file: The file name of the amalgamation file.
 
     Returns:
     -------
@@ -540,6 +556,9 @@ def build_cython_sources(
     import_map = dict()
     for outer_ns, source_group in source_groups.items():
         outer_ns_short = shorten_outer_ns(outer_ns)
+        # Extract year from namespace (e.g., "OpenTaxSolver2024" -> 2024)
+        year = int(outer_ns.replace("OpenTaxSolver", ""))
+
         for inner_ns in source_group:
             inner_ns_short = shorten_inner_ns(inner_ns)
             if inner_ns_short == "routines":
@@ -548,14 +567,13 @@ def build_cython_sources(
             modname = f"{outer_ns_short}_{inner_ns_short}"
             fname = f"{modname}.pxd"
             content = PXD_TEMPLATE.format(
-                fname=amalgamation_file,
+                year=year,
                 outer_ns=outer_ns,
                 inner_ns=inner_ns,
             )
             out[fname] = content
             cimports += [f"cimport {modname}"]
 
-            year = int(outer_ns_short.split("_")[-1])
             if year not in import_map:
                 import_map[year] = dict()
 
@@ -696,7 +714,7 @@ OTS_FORM_CONFIG = {configs!r}
 @click.option("--template-file", default="ots.template.pyx")
 @click.option("--gen-dir", default="generated")
 def main(ots_tarballs, template_file, gen_dir):
-    """Generate single amalgamated C++ source file from OTS release tarballs.
+    """Generate per-year amalgamated C++ source files from OTS release tarballs.
 
     Also generate supporting cython form-executor routine, and pxd interface
     files. In total, generates the files needed to build the OTS cython module.
@@ -719,15 +737,16 @@ def main(ots_tarballs, template_file, gen_dir):
     # Generate per-form configuration module.
     generated_files["_ots_form_models.py"] = build_config_file(configs)
 
-    # Build c++ amalgamation.
-    amalgation_file = "ots_amalgamation.cpp"
-    generated_files[f"otslib/{amalgation_file}"] = build_amalgamation(source_groups)
+    # Build per-year c++ amalgamations.
+    per_year_files = build_per_year_amalgamations(source_groups)
+    for filename, content in per_year_files.items():
+        generated_files[f"otslib/{filename}"] = content
 
     # Generate cython source files.
     generated_files |= dict(
         (f"otslib/{fname}", content)
         for (fname, content) in build_cython_sources(
-            source_groups, template_file, amalgation_file
+            source_groups, template_file
         ).items()
     )
 

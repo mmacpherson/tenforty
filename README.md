@@ -4,7 +4,7 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mmacpherson/tenforty/main.svg)](https://results.pre-commit.ci/latest/github/mmacpherson/tenforty/main)
 [![PyPI](https://img.shields.io/pypi/v/tenforty.svg)](https://pypi.org/project/tenforty/)
 [![Python Version](https://img.shields.io/pypi/pyversions/tenforty.svg)](https://pypi.org/project/tenforty/)
-[![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS-blue)](https://pypi.org/project/tenforty/)
+[![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS_%7C_Windows-blue)](https://pypi.org/project/tenforty/)
 [![License](https://img.shields.io/github/license/mmacpherson/tenforty.svg)](https://github.com/mmacpherson/tenforty/blob/main/LICENSE.txt)
 
 
@@ -314,10 +314,6 @@ df = (
 
 ## Known Limitations
 
-- Currently does not support Windows. The Colab notebook linked above, or using
-  WSL might be a workaround until this is resolved. Glad for any help from those
-  more familiar with Windows
-  [(issue)](https://github.com/mmacpherson/tenforty/issues/19).
 - Medicare and Net Investment Income Tax are not automatically computed on
   capital gains, so if those apply to your situation the output tax will be
   underestimated.
