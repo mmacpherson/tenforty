@@ -402,7 +402,7 @@ def _evaluate_form(year, form, form_text, fed_form_text=None):
             result_code = ots_form_function(2, c_argv)
             if result_code != 0:
                 # Log warning but don't fail - OTS uses exit codes inconsistently
-                warnings.warn(f"OTS returned non-zero exit code: {result_code}")
+                warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
         finally:
             free(c_argv)
 
