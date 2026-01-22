@@ -239,7 +239,7 @@ def find_all_includes(source_groups: dict[str, dict[str, Any]]) -> list[str]:
     # going to inline it ONCE in each year's namespace so all the
     # return-generating routines can use it.
     includes.remove('#include "taxsolve_routines.c"')
-    includes.discard('#include <strings.h>')  # Handled by Windows compat shim
+    includes.discard("#include <strings.h>")  # Handled by Windows compat shim
 
     return list(sorted(includes))
 
