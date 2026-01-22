@@ -412,4 +412,3 @@ def _evaluate_form(year, form, form_text, fed_form_text=None):
             result = fp.read()
 
     return result
-
