@@ -2,8 +2,8 @@ DEFAULT_GOAL: help
 .PHONY: install clean
 
 
-generated: amalgamate.py ots-releases/OpenTaxSolver*.tgz ## >> generate wrapper files from OTS source
-	python amalgamate.py ots-releases/OpenTaxSolver*.tgz
+generated: generate_otslib.py ots-releases/OpenTaxSolver*.tgz ## >> generate wrapper files from OTS source
+	python generate_otslib.py ots-releases/OpenTaxSolver*.tgz
 
 install: ## >> copy files over to main source directory
 	cp -R generated/* ../src/tenforty

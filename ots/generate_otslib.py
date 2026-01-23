@@ -1,8 +1,13 @@
-"""Plocess, transform, and amalgamated source code from OTS releases.
+"""Generate per-form C++ source files and Cython bindings from OTS releases.
 
-Includes a variety of functions for parsing and manipulating source code from
-OpenTaxSolver (OTS), handling file operations, and generating Cython interfaces
-to integrate with the OTS system.
+Processes OpenTaxSolver (OTS) release tarballs to generate:
+- Per-form C++ source files (ots_{year}_{form}.cpp) with inlined shared routines
+- Cython .pxd declaration files for each form
+- The ots.pyx Cython module that dispatches to form-specific entry points
+- Form field configuration (_ots_form_models.py)
+
+Per-form file generation (vs single amalgamated file) is used to avoid
+MSVC Internal Compiler Errors on Windows when compiling large source files.
 """
 
 import pathlib
@@ -15,11 +20,58 @@ from typing import Any
 import click
 
 FED_FILENAME = "__FED_FILENAME__"
+
+WINDOWS_COMPAT_SHIM = """\
+#ifdef _MSC_VER
+#include <string.h>
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <strings.h>
+#endif
+"""
+
+WINDOWS_COMPAT_SHIM_END = """\
+#ifdef _MSC_VER
+#undef strcasecmp
+#undef strncasecmp
+#endif
+"""
+
 PXD_TEMPLATE = """\
 # distutils: language = c++
 
-cdef extern from "{fname}" namespace "{outer_ns}::{inner_ns}":
+cdef extern from "{cpp_file}" namespace "{outer_ns}::{inner_ns}":
     int main( int argc, char *argv[] )
+"""
+
+ROUTINES_HEADER_TEMPLATE = """\
+#pragma once
+{windows_shim}
+{includes}
+#define printf(...)
+#define system(...)
+
+{routines_macros}
+
+namespace {outer_ns} {{
+
+{routines_source}
+
+}} // namespace {outer_ns}
+"""
+
+FORM_FILE_TEMPLATE = """\
+#include "{routines_header}"
+namespace {outer_ns} {{
+namespace {inner_ns} {{
+
+{form_defines}
+{form_source}
+{form_undefs}
+
+}} // namespace {inner_ns}
+}} // namespace {outer_ns}
 """
 
 
@@ -221,6 +273,7 @@ def find_all_includes(source_groups: dict[str, dict[str, Any]]) -> list[str]:
     # going to inline it ONCE in each year's namespace so all the
     # return-generating routines can use it.
     includes.remove('#include "taxsolve_routines.c"')
+    includes.discard("#include <strings.h>")  # Handled by Windows compat shim
 
     return list(sorted(includes))
 
@@ -240,52 +293,6 @@ def define_to_undef(defline: str) -> str:
     define, varname, *_ = defline.strip().split()
     assert define == "#define"
     return f"#undef {varname}"
-
-
-def amalgamate_source(ns: str, source: dict[str, dict[str, list[str]]]) -> list[str]:
-    """Amalgamate various C source code pieces into a single source.
-
-    Args:
-    ----
-        ns: The namespace for the amalgamation.
-        source: A dictionary where keys are sub-namespaces and values are dictionaries
-        representing grouped lines of source code (includes, defines, source).
-
-    Returns:
-    -------
-        A list of strings representing the amalgamated C source code.
-
-    """
-    out = []
-    # taxsolve_routines is singled out so it can effectively be included in each
-    # of the other sources.
-    taxsolve_routines = source["taxsolve_routines"]
-    other_source = dict((k, v) for (k, v) in source.items() if k != "taxsolve_routines")
-
-    # Namespace of entire ots-year module.
-    out += [f"namespace {ns} {{"]
-
-    # Add taxsolve routines. Don't add the undefines yet, because we want to do
-    # that *after* all the source have been included.
-    taxsolve_routines_undefs = [
-        define_to_undef(e) for e in taxsolve_routines["defines"]
-    ]
-    out += taxsolve_routines["defines"] + taxsolve_routines["source"]
-
-    for gns, group in other_source.items():
-        ns_open = [f"namespace {gns} {{"]
-        defs = group["defines"]
-        undefs = [define_to_undef(e) for e in defs]
-        ns_close = ["}"]
-        out += ns_open + defs + group["source"] + undefs + ns_close
-
-    # NOW undefine the taxsolve_routines #defines.
-    out += taxsolve_routines_undefs
-
-    # Closes ots-year namespace.
-    out += ["}"]
-
-    return out
 
 
 def shorten_outer_ns(ns: str) -> str:
@@ -374,6 +381,35 @@ def generate_lookup_function_code(import_map: dict[int, dict[str, str]]) -> str:
     return "\n".join(f"    {e}" for e in out)
 
 
+def strip_redundant_date_record_vars(lines: list[str]) -> list[str]:
+    """Strip redundant date_record variable declarations from form source.
+
+    The taxsolve_routines defines:
+        struct date_record { int month, day, year; } yourDOB, spouseDOB, DL;
+
+    Some forms (like VA_760) redundantly declare these same variables:
+        struct date_record yourDOB, spouseDOB, DL;
+
+    When routines are inlined in the same namespace as form code, this causes
+    redefinition errors. This function removes the redundant declarations.
+
+    Args:
+    ----
+        lines: A list of strings representing the lines of source code.
+
+    Returns:
+    -------
+        A list of strings with redundant date_record variable declarations removed.
+
+    """
+    # Pattern matches: struct date_record yourDOB, spouseDOB, DL;
+    # But NOT: struct date_record { ... } yourDOB, ...  (the definition itself)
+    pattern = re.compile(
+        r"^\s*struct\s+date_record\s+yourDOB\s*,\s*spouseDOB\s*,\s*DL\s*;\s*$"
+    )
+    return [line for line in lines if not pattern.match(line)]
+
+
 def patch_add_pdf_markup(lines: list[str]) -> list[str]:
     """Patch the 'add_pdf_markup' function in the source code to avoid compilation errors.
 
@@ -407,14 +443,15 @@ def patch_add_pdf_markup(lines: list[str]) -> list[str]:
         return lines
 
     # Walk through lines until we hit the end of the function, replacing
-    # "new".
+    # "new" using word boundary matching to avoid false positives.
     ix = start_ix + 1
     while True:
         line = lines[ix]
         if line.strip() == "}":
             break
 
-        lines[ix] = line.replace("new", "_new")
+        # Use word boundary matching instead of naive replace
+        lines[ix] = re.sub(r"\bnew\b", "_new", line)
         ix += 1
 
     return lines
@@ -440,14 +477,120 @@ def postprocess_source_groups(
         match (outer_key, inner_key):
             case (_, "taxsolve_routines"):
                 group["source"] = patch_add_pdf_markup(group["source"])
+            case _:
+                # Strip redundant date_record variable declarations from forms
+                # (routines already define these, so forms don't need to)
+                group["source"] = strip_redundant_date_record_vars(group["source"])
 
     return (outer_key, source_group)
 
 
-def build_amalgamation(
+def make_routines_inline(source_lines: list[str]) -> list[str]:
+    """Transform routines source for header-only use with inline specifiers.
+
+    Uses C++17 inline variables and functions to allow multiple inclusion
+    without ODR violations.
+
+    Args:
+    ----
+        source_lines: Lines of routines source code.
+
+    Returns:
+    -------
+        Lines with inline specifiers added to functions and global variables.
+
+    """
+    # First pass: identify multi-line struct definitions that declare variables
+    # Pattern: "struct name" on one line, closing "} vars;" on a later line
+    struct_lines_needing_inline = set()
+    i = 0
+    while i < len(source_lines):
+        line = source_lines[i]
+        # Check for struct definition start without brace on same line
+        if re.match(r"^struct\s+\w+\s*($|/\*)", line):
+            # Look ahead for closing brace with variable declarations
+            j = i + 1
+            while j < len(source_lines):
+                closing_line = source_lines[j]
+                # Check for "} var1, var2;" pattern (closing brace with variables)
+                if re.match(r"^\s*\}\s*\w+", closing_line):
+                    struct_lines_needing_inline.add(i)
+                    break
+                # Check for just "};" (no variables) - stop looking
+                if re.match(r"^\s*\}\s*;", closing_line):
+                    break
+                j += 1
+        i += 1
+
+    result = []
+    for i, line in enumerate(source_lines):
+        # Add inline to function definitions (return type followed by function name and paren)
+        # Handles pointer returns like "char *func(" as well as "int func("
+        if re.match(
+            r"^(void|int|char|double|float|struct\s+\w+)\s*\*?\s*\w+\s*\(", line
+        ):
+            line = "inline " + line
+        # Add inline to global variable definitions
+        # Handles pointers like "FILE *infile" as well as "int count"
+        elif re.match(
+            r"^(double|int|char|float|FILE)\s*\*?\s*\w+(\s*\[|=|,|;| )", line
+        ):
+            if "typedef" not in line:
+                line = "inline " + line
+        # Handle struct: add inline if it declares variables (single or multi-line)
+        elif re.match(r"^struct\s+\w+", line):
+            if i in struct_lines_needing_inline:
+                # Multi-line struct with variables
+                line = "inline " + line
+            else:
+                # Check for single-line struct with variables
+                stripped = line.strip()
+                no_comment = re.sub(r"/\*.*?\*/", "", stripped)
+                no_comment = re.sub(r"//.*$", "", no_comment).strip()
+                match = re.match(r"^struct\s+(\w+)\s*(.*)", no_comment)
+                if match:
+                    after_name = match.group(2).strip()
+                    # If it has a brace and ends with vars, or has identifier right after name
+                    if "{" in after_name or (
+                        after_name and re.match(r"^\w+", after_name)
+                    ):
+                        line = "inline " + line
+        result.append(line)
+    return result
+
+
+def validate_no_leaked_macros(amalgamation: str) -> None:
+    """Verify all #defines are properly #undef'd.
+
+    Args:
+    ----
+        amalgamation: The amalgamated C++ source code as a string.
+
+    Raises:
+    ------
+        ValueError: If there are macros defined but not undefined.
+
+    """
+    # Extract macro names from #define directives
+    # Match simple macros (#define FOO) and function-like macros (#define FOO(...))
+    defines = re.findall(r"^#define\s+(\w+)", amalgamation, re.MULTILINE)
+    undefs = re.findall(r"^#undef\s+(\w+)", amalgamation, re.MULTILINE)
+
+    leaked = set(defines) - set(undefs)
+    if leaked:
+        raise ValueError(f"Leaked macros detected: {sorted(leaked)}")
+
+
+def build_routines_headers(
     source_groups: dict[str, dict[str, dict[str, list[str]]]],
-) -> str:
-    """Build an amalgamated C++ source file from various source groups.
+) -> dict[str, str]:
+    """Build per-year routines header files.
+
+    Generates one header per year containing the shared taxsolve_routines
+    with inline specifiers for C++17 compatibility.
+
+    Macros are NOT undef'd in the header since form code needs them.
+    Form files are responsible for cleaning up macros after use.
 
     Args:
     ----
@@ -456,39 +599,116 @@ def build_amalgamation(
 
     Returns:
     -------
-        A string representing the amalgamated C++ source.
+        A dictionary mapping header filenames to content.
 
     """
-    # Find all includes in any source file.
     all_includes = find_all_includes(source_groups)
 
-    # Initialize the lines of the aggregation.
-    out = []
+    result = {}
+    for outer_ns, source_group in source_groups.items():
+        year = outer_ns.replace("OpenTaxSolver", "")
+        taxsolve_routines = source_group["taxsolve_routines"]
 
-    # Includes go at the top.
-    out += all_includes
+        # Make routines inline-compatible
+        inline_source = make_routines_inline(taxsolve_routines["source"])
 
-    # Disable printf so stdout stays quiet.
-    out += ["#define printf(...)"]
+        header_filename = f"ots_{year}_routines.h"
+        content = ROUTINES_HEADER_TEMPLATE.format(
+            windows_shim=WINDOWS_COMPAT_SHIM,
+            includes="\n".join(all_includes),
+            outer_ns=outer_ns,
+            routines_macros="\n".join(taxsolve_routines["defines"]),
+            routines_source="\n".join(inline_source),
+        )
+        result[header_filename] = content
 
-    # And system too.
-    out += ["#define system(...)"]
+    return result
 
-    # Tack on aggregations.
-    for outer_namespace, source_group in source_groups.items():
-        out += amalgamate_source(outer_namespace, source_group)
 
-    # Close out redefinitions.
-    out += ["#undef system(...)"]
-    out += ["#undef printf(...)"]
+def build_form_file(
+    outer_ns: str,
+    inner_ns: str,
+    form_source: dict[str, list[str]],
+    year: str,
+) -> str:
+    """Build form file that includes shared routines header.
 
-    return "\n".join(out)
+    Each form file includes the per-year routines header and contains
+    only form-specific code. Routines macros are NOT undef'd here since
+    #pragma once prevents re-including the header for subsequent forms.
+
+    Args:
+    ----
+        outer_ns: The outer namespace (e.g., "OpenTaxSolver2024").
+        inner_ns: The inner namespace (e.g., "taxsolve_US_1040").
+        form_source: Dictionary with 'defines' and 'source' for the form.
+        year: The tax year (e.g., "2024").
+
+    Returns:
+    -------
+        The form file content as a string.
+
+    """
+    form_defs = form_source["defines"]
+    form_undefs = [define_to_undef(e) for e in form_defs]
+
+    return FORM_FILE_TEMPLATE.format(
+        routines_header=f"ots_{year}_routines.h",
+        outer_ns=outer_ns,
+        inner_ns=inner_ns,
+        form_defines="\n".join(form_defs),
+        form_source="\n".join(form_source["source"]),
+        form_undefs="\n".join(form_undefs),
+    )
+
+
+def build_per_form_files(
+    source_groups: dict[str, dict[str, dict[str, list[str]]]],
+) -> dict[str, str]:
+    """Build per-form C++ source files and per-year routines headers.
+
+    Generates:
+    - Per-year routines header files (ots_{year}_routines.h)
+    - Per-form C++ files that include the appropriate header
+
+    Args:
+    ----
+        source_groups: A dictionary where each key is an outer namespace and the value
+        is a dictionary representing different source groups.
+
+    Returns:
+    -------
+        A dictionary mapping filenames to content.
+
+    """
+    result = {}
+
+    # Generate per-year routines headers
+    # Headers intentionally don't undef macros - form files do the cleanup
+    routines_headers = build_routines_headers(source_groups)
+    for filename, content in routines_headers.items():
+        result[filename] = content
+
+    # Generate form files (each includes the shared header)
+    for outer_ns, source_group in source_groups.items():
+        year = outer_ns.replace("OpenTaxSolver", "")
+
+        for inner_ns, form_source in source_group.items():
+            if inner_ns == "taxsolve_routines":
+                continue
+
+            inner_ns_short = shorten_inner_ns(inner_ns)
+            form_filename = f"ots_{year}_{inner_ns_short}.cpp"
+
+            content = build_form_file(outer_ns, inner_ns, form_source, year)
+            result[form_filename] = content
+
+    return result
 
 
 def build_cython_sources(
     source_groups: dict[str, dict[str, dict[str, list[str]]]],
     cython_template_file: str,
-    amalgamation_file: str,
 ) -> dict[str, str]:
     """Build Cython source files from the given source groups.
 
@@ -497,7 +717,6 @@ def build_cython_sources(
         source_groups: A dictionary where each key is an outer namespace and the value
         is a dictionary representing different source groups.
         cython_template_file: The file name of the Cython template file.
-        amalgamation_file: The file name of the amalgamation file.
 
     Returns:
     -------
@@ -509,6 +728,9 @@ def build_cython_sources(
     import_map = dict()
     for outer_ns, source_group in source_groups.items():
         outer_ns_short = shorten_outer_ns(outer_ns)
+        # Extract year from namespace (e.g., "OpenTaxSolver2024" -> 2024)
+        year = int(outer_ns.replace("OpenTaxSolver", ""))
+
         for inner_ns in source_group:
             inner_ns_short = shorten_inner_ns(inner_ns)
             if inner_ns_short == "routines":
@@ -516,15 +738,15 @@ def build_cython_sources(
 
             modname = f"{outer_ns_short}_{inner_ns_short}"
             fname = f"{modname}.pxd"
+            cpp_file = f"ots_{year}_{inner_ns_short}.cpp"
             content = PXD_TEMPLATE.format(
-                fname=amalgamation_file,
+                cpp_file=cpp_file,
                 outer_ns=outer_ns,
                 inner_ns=inner_ns,
             )
             out[fname] = content
             cimports += [f"cimport {modname}"]
 
-            year = int(outer_ns_short.split("_")[-1])
             if year not in import_map:
                 import_map[year] = dict()
 
@@ -655,7 +877,7 @@ def build_config_file(configs: list[dict[str, Any]]) -> str:
     return f"""\
 # THIS FILE IS PROGRAMMATICALLY GENERATED.
 # DO NOT EDIT BY HAND.
-# See `ots/amalgamate.py` to regenerate.
+# See `ots/generate_otslib.py` to regenerate.
 OTS_FORM_CONFIG = {configs!r}
     """
 
@@ -665,7 +887,7 @@ OTS_FORM_CONFIG = {configs!r}
 @click.option("--template-file", default="ots.template.pyx")
 @click.option("--gen-dir", default="generated")
 def main(ots_tarballs, template_file, gen_dir):
-    """Generate single amalgamated C++ source file from OTS release tarballs.
+    """Generate per-form C++ source files from OTS release tarballs.
 
     Also generate supporting cython form-executor routine, and pxd interface
     files. In total, generates the files needed to build the OTS cython module.
@@ -688,15 +910,16 @@ def main(ots_tarballs, template_file, gen_dir):
     # Generate per-form configuration module.
     generated_files["_ots_form_models.py"] = build_config_file(configs)
 
-    # Build c++ amalgamation.
-    amalgation_file = "ots_amalgamation.cpp"
-    generated_files[f"otslib/{amalgation_file}"] = build_amalgamation(source_groups)
+    # Build per-form c++ source files with shared headers.
+    per_form_files = build_per_form_files(source_groups)
+    for filename, content in per_form_files.items():
+        generated_files[f"otslib/{filename}"] = content
 
     # Generate cython source files.
     generated_files |= dict(
         (f"otslib/{fname}", content)
         for (fname, content) in build_cython_sources(
-            source_groups, template_file, amalgation_file
+            source_groups, template_file
         ).items()
     )
 

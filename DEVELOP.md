@@ -95,12 +95,12 @@ some help on your way.
 | `core.py`               | Business logic for layers 2 and 3 above.                          |
 | `models.py`             | Pydantic models and natural-language mappings.                    |
 | `_ots_form_models.py`   | Programmatically-generated representations of required fields for all OTS forms. |
-| `otslib/`               | Cython module source code. See [`ots/README.txt`](ots/README.txt). |
+| `otslib/`               | Cython module source code. See [`ots/README.md`](ots/README.md). |
 
 
 The Cython interface to OTS under `otslib/` is generated programmatically from
 the OTS source code distribution tarballs. The code to do this is under the
-folder `ots/`, and is documented at [`ots/README.txt`](ots/README.txt).
+folder `ots/`, and is documented at [`ots/README.md`](ots/README.md).
 
 ### Linting
 
@@ -163,7 +163,7 @@ retrieved, a basic level of testing. There are also several property checks in
 place, for instance checking that total tax monotonically increases with
 increasing W2 income.
 
-A GitHub Actions step runs the tests against versions 3.10, 3.11, and 3.12 on
+A GitHub Actions step runs the tests against Python 3.10 through 3.14 on
 every push. The local `make test` recipe only runs the tests against the
 interpreter that the virtual environment is configured with. (So far) we've
 found that if the tests pass in one interpreter, they tend to pass in the others

@@ -11,7 +11,9 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
   "License :: OSI Approved :: MIT License",
   "Development Status :: 4 - Beta",
@@ -96,11 +98,12 @@ unfixable = []
 "*.ipynb" = ["B018"]
 
 [tool.setuptools]
-ext-modules = [
-  {name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"]}
-]
+# Note: Extension modules are configured in setup.py for platform-specific
+# compiler flags (e.g., /bigobj on Windows). The per-year .cpp files
+# (ots_2018.cpp, etc.) are included by Cython through the .pxd files'
+# "cdef extern from" directives, not compiled separately.
 package-dir = {"" = "src"}
 packages = ["tenforty", "tenforty.otslib"]
 
 [tool.setuptools.package-data]
-"tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]
+"tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp", "*.h"]

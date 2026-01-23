@@ -15,7 +15,7 @@ Cython-based C++ bindings with pandas DataFrame output.
 - `pip install -e ".[dev]"` - Install in dev mode
 - `pytest` - Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` - Run with CI profile (500 examples)
-- `python ots/amalgamate.py ots/ots-releases/*.tgz` - Regenerate OTS bindings
+- `python ots/generate_otslib.py ots/ots-releases/*.tgz` - Regenerate OTS bindings
 
 ## Python Style
 - Use modern type hints (PEP 604 unions with `|`, generics without `typing` module)
@@ -30,7 +30,7 @@ Cython-based C++ bindings with pandas DataFrame output.
   - `core.py` - evaluate_return(), evaluate_returns() API
   - `otslib/` - Cython bindings to OTS C++ code
 - `ots/` - Build tooling (see `ots/README.md` for amalgamation rationale)
-  - `amalgamate.py` - Generates per-year .cpp files from OTS tarballs
+  - `generate_otslib.py` - Generates per-form .cpp files from OTS tarballs
   - `ots.template.pyx` - Cython template
 - `tests/` - pytest + hypothesis tests
 

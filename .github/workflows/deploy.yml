@@ -6,22 +6,52 @@ on: push
 jobs:
   # Run validation on every push
   validate:
-    runs-on: ubuntu-latest
+    name: validate (${{ matrix.os }}, ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
     - uses: actions/checkout@v6
+
+    - name: Set up MinGW (Windows)
+      if: runner.os == 'Windows'
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+        static: 0
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install deps
+
+    - name: Install deps (Windows)
+      if: runner.os == 'Windows'
       run: |
-        python -m pip install .[dev]
+        echo "=== Checking gcc ==="
+        which gcc
+        gcc --version
+        gcc -dumpmachine
+        echo "=== PATH ==="
+        echo $PATH | tr ':' '\n' | grep -i mingw || true
+        echo "=== Setting up pydistutils.cfg ==="
+        echo "[build]" > $HOME/pydistutils.cfg
+        echo "compiler = mingw32" >> $HOME/pydistutils.cfg
+        pip install cython setuptools wheel
+        pip install --no-build-isolation .[dev]
+      shell: bash
+      env:
+        USE_MINGW: "1"
+
+    - name: Install deps (Unix)
+      if: runner.os != 'Windows'
+      run: python -m pip install .[dev]
+
     - name: Run tests
-      run: pytest
+      run: pytest --hypothesis-profile=ci
 
   # Build wheels and sdist only on pushes to main, and only if validation
   # succeeds
@@ -32,15 +62,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v6
 
+    - name: Set up MinGW (Windows)
+      if: runner.os == 'Windows'
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+        static: 0
+
     - name: Build wheels
       uses: pypa/cibuildwheel@v3.3.1
       env:
-        CIBW_BUILD: cp310-* cp311-* cp312-* cp313-*
+        CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-*
+        CIBW_SKIP: '*-win32'
+        CIBW_BEFORE_BUILD_WINDOWS: >
+          echo [build] > %USERPROFILE%\pydistutils.cfg &&
+          echo compiler = mingw32 >> %USERPROFILE%\pydistutils.cfg &&
+          pip install delvewheel
+        CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: delvewheel repair -w {dest_dir} {wheel}
 
     - uses: actions/upload-artifact@v6
       with:
