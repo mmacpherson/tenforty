@@ -18,17 +18,17 @@ namespace taxsolve_US_1040_Sched_SE_2021 {
  modify it under the terms of the GNU General Public License as
  published by the Free Software Foundation; either version 2 of the
  License, or (at your option) any later version.
-
+ 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  General Public License for more details.
-
+ 
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
  02111-1307 USA
-
+ 
  Provided by Steve Wiswell, March 16, 2021.
 
  ************************************************************************/
@@ -102,8 +102,8 @@ int main( int argc, char *argv[] )
  GetTextLineF( "YourName:" );
  GetTextLineF( "YourSocSec#:" );
 
- GetLine( "L2", &L[2] );	/* Net Profit/Loss */
- GetLine( "L5a", &L5a );	/* Church employee income from Form W-2 */
+ GetLine( "L2", &L[2] );	/* Net Profit/Loss */	
+ GetLine( "L5a", &L5a );	/* Church employee income from Form W-2 */	
  L[7] = 142800.0;           	/* Fixed value for tax year 2021 */			/* Updated for 2021. */
  GetLine( "L8a", &L8a );	/* Wages & Tips */
  GetLine( "L8b", &L8b );	/* Unreported tips from Form 4137, line 10 */
@@ -143,7 +143,7 @@ int main( int argc, char *argv[] )
 
  /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -178,3 +178,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_US_1040_Sched_SE_2021
 } // namespace OpenTaxSolver2021
+

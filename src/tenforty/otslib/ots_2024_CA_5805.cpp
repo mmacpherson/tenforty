@@ -81,7 +81,7 @@ double TaxRateFormula( double income, int status )
    if (income <  96107.00)  tax =  2331.69 +  0.08 * (income -  81364.00);  else
    if (income < 490493.00)  tax =  3511.13 + 0.093 * (income -  96107.00);  else
    if (income < 588593.00)  tax = 40189.03 + 0.103 * (income - 490493.00);  else
-   if (income < 980987.00)  tax = 50293.33 + 0.113 * (income - 588593.00);
+   if (income < 980987.00)  tax = 50293.33 + 0.113 * (income - 588593.00); 
    else                     tax = 94633.85 + 0.123 * (income - 980987.00);
   }
  return (int)(tax+0.5);
@@ -95,7 +95,7 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
  if (income < 100000.0)   /* Quantize to match tax-table exactly. */
   {
-   if (income < 99951.0)
+   if (income < 99951.0) 
     {
      k = (income + 49) / 100;
      x = 100 * (double)k;
@@ -139,7 +139,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 	L[8] = FAIWSL3;
 	if((status == MARRIED_FILING_JOINTLY) || (status == WIDOW))
 		L[9] = thresh_mfj;
-	else if((status == SINGLE) || (status == MARRIED_FILING_SEPARAT))
+	else if((status == SINGLE) || (status == MARRIED_FILING_SEPARAT)) 
 		L[9] = thresh_sep_single;
 	else if(status == HEAD_OF_HOUSEHOLD)
 		L[9] = thresh_HoH;
@@ -147,7 +147,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 	L[11] = Round(L[10] * 0.06);
 	L[12] = SmallerOf(L[7], L[11]);
 	L[13] = Round(L[5] - L[12]);
-
+	
 	fprintf(outfile, " Line 6 Worksheet - Column (%c),\n", column);
 	for(i = 1; i <= 13; i++)
 		fprintf(outfile, "L6WS_%d%c %0.2lf\n", i, column, L[i]);
@@ -165,7 +165,7 @@ int main( int argc, char *argv[] )
  int Quest2, Quest3 = 0, Num_Days = -1;		/* negative Num_Days used as a flag below */
  double Wthd_Per_1, Wthd_Per_2, Wthd_Per_3, Wthd_Per_4, CA_AGI;
  double a10add, b10add, c10add, d10add;
-
+ 
 
  /* line entry variables L[n] are declared in taxsolve_routines.c */
 
@@ -278,7 +278,7 @@ for(i = 0; i <= 13; i++){
  fprintf(outfile, "%s\n", "==================================================");
  fprintf(outfile, "%s\n", "                                                            CAUTION\nThis program fills out Form 5805 to determine WHETHER OR NOT you owe a penalty\nfor underpayment of estimated tax.  It calculates the AMOUNT of any penalty you\nmay owe for the MOST LIKELY CASE in which up to four estimated tax payments have\n been made.  You should carefully review the instructions for Form 5805 to see if the\ncalculations are correct for your particular tax situation.  DO NOT INTERPRET a\ndefault zero value for the penalty on the filled PDF to indicate that you do not owe\na penalty, especially if you have not input all required information, including the\nactual dates on which you made your payments. Scroll down to the end of this\nresults file to see if you had an underpayment for any period.  If so, you may owe\na penalty.\n\nItemized deductions are limited for high-income taxpayers.  When you are\nchecking calculations, values on line 6 of Part III may appear to be in error due to\nthese limitations.  See this results file and the last page of the output PDF for the\nlimitation calculations.  Also note that the annualization factor values on lines 4\nof the last page of the output PDF round by default to the nearest integer.  Use\nthe values in this results file for lines L6WS_4a, L6WS_4b, L6WS_4c, and L6WS_4d,\n which for most individual taxpayers will be 4.0, 2.4, 1.5, and 1.0, respectively.\n\nThis program does not calculate the phase-out of exemption credits for high-income\ntaxpayers as collection of the necessary information for each period would\nunnecessarily complicate this program for most users and the impact of exemption\nlimitations on the tax estimates would be negligible.  See instructions for line 11.");
  fprintf(outfile, "%s\n\n", "==================================================");
-
+ 
  /* ----- Place all your form-specific code below here .... ------ */
 
  // Exam
@@ -309,9 +309,9 @@ for(i = 0; i <= 13; i++){
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  {
-   printf("Error: unrecognized status '%s'. Exiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
+  { 
+   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
    exit(1);
   }
 
@@ -386,7 +386,7 @@ else if (strncasecmp(word,"No",2)==0){
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
   exit(1);
-
+ 
  }
 
 
@@ -426,7 +426,7 @@ showline( 6 );
 /* otherwise, error message re: unexpected input item is thrown */
 
   GetLineF( "L8", &L[8] );
-
+ 
   GetInteger( "Num_Days", &Num_Days);
 
 	if(Quest2 == No){			/* Not using Annualized Income Installment Method */
@@ -449,10 +449,10 @@ showline( 6 );
 
 			L[12] = L[10] * Num_Days * line_12_multiplier;
 			L[13] = L[11] - L[12];
-
+	
 			showline( 11 );
 			showline( 12 );
-
+		
 			showline_wmsg(13, "PENALTY.  Enter this amount on Form 540, line 113; Form 540NR, line 123; or Form 541, line 44.\n Also, check the box for FTB 5805.\n");
 		}
 	}
@@ -462,7 +462,7 @@ showline( 6 );
 
 	/* Inputs must be read even if Annualized Income Installment Method is not used; */
 	/* otherwise, error message re: unexpected input is thrown */
-
+	
 	   GetLine( "SchdAI_1a", &a[1] );
 	   GetLine( "SchdAI_1b", &b[1] );
 	   GetLine( "SchdAI_1c", &c[1] );
@@ -487,7 +487,7 @@ showline( 6 );
 //	   GetLine1( "SchdAI_2b", &b[2] );
 //	   GetLine1( "SchdAI_2c", &c[2] );
 //	   GetLine1( "SchdAI_2d", &d[2] );
-
+ 	
 	   GetLine( "SchdAI_4a", &a[4] );
 	   GetLine( "SchdAI_4b", &b[4] );
 	   GetLine( "SchdAI_4c", &c[4] );
@@ -496,13 +496,13 @@ showline( 6 );
 //	   GetLine( "SchdAI_6a", &a[6] );
 //	   GetLine( "SchdAI_6b", &b[6] );
 //	   GetLine( "SchdAI_6c", &c[6] );
-//	   GetLine( "SchdAI_6d", &d[6] );
-
+//	   GetLine( "SchdAI_6d", &d[6] );	   
+	
 	   GetLine( "SchdAI_7a", &a[7] );
 	   b[7] = a[7];
 	   c[7] = a[7];
 	   d[7] = a[7];
-
+	
 	   GetLine( "SchdAI_10a_add", &a10add );
 	   GetLine( "SchdAI_10b_add", &b10add );
 	   GetLine( "SchdAI_10c_add", &c10add );
@@ -516,8 +516,8 @@ showline( 6 );
 	   GetLine( "SchdAI_13a", &a[13] );
 	   GetLine( "SchdAI_13b", &b[13] );
 	   GetLine( "SchdAI_13c", &c[13] );
-	   GetLine( "SchdAI_13d", &d[13] );
-
+	   GetLine( "SchdAI_13d", &d[13] ); 	   
+	
 	   GetLine( "SchdAI_14ba", &L14ba );
 	   GetLine( "SchdAI_14bb", &L14bb );
 	   GetLine( "SchdAI_14bc", &L14bc );
@@ -527,7 +527,7 @@ showline( 6 );
 	   GetLine( "SchdAI_14db", &L14db );
 	   GetLine( "SchdAI_14dc", &L14dc );
 	   GetLine( "SchdAI_14dd", &L14dd );
-
+	
 	   GetLine( "FAIWS_1a", &FAIWS_a[1]);
 	   GetLine( "FAIWS_1b", &FAIWS_b[1]);
 	   GetLine( "FAIWS_1c", &FAIWS_c[1]);
@@ -536,7 +536,7 @@ showline( 6 );
 	   GetLine( "L6WS_2a", &L6WS_a[2]);
 	   GetLine( "L6WS_2b", &L6WS_b[2]);
 	   GetLine( "L6WS_2c", &L6WS_c[2]);
-	   GetLine( "L6WS_2d", &L6WS_d[2]);
+	   GetLine( "L6WS_2d", &L6WS_d[2]);	   
 
         GetLine( "WSII_2a", &A[2]);
 	GetLine( "WSII_2b", &B[2]);
@@ -557,12 +557,12 @@ showline( 6 );
 	c[3] = c[1] * c[2];
 	d[3] = d[1] * d[2];
 
-	a[5] = a[2];
+	a[5] = a[2];		
 	b[5] = b[2];
 	c[5] = c[2];
 	d[5] = d[2];
 
-	a[6] = a[4] * a[5];		/* calculation for lower income filers */
+	a[6] = a[4] * a[5];		/* calculation for lower income filers */		
 	b[6] = b[4] * b[5];		/* these values will be overwritten if higher income thresholds are exceeded */
 	c[6] = c[4] * c[5];
 	d[6] = d[4] * d[5];
@@ -579,7 +579,7 @@ showline( 6 );
 			a[6] = L6WS('a', a[4], L6WS_a[2], a[5], FAIWS_a[3], status);
 		}
 	}
-
+	
 	FAIWS_b[3] = FAIWS_b[1] * b[5];
 	fprintf(outfile, "FAIWS_1b\t%0.2lf\n", FAIWS_b[1]);
 	fprintf(outfile, "FAIWS_2b\t%0.2lf\n", b[5]);
@@ -590,7 +590,7 @@ showline( 6 );
 	(((status == SINGLE) || (status == MARRIED_FILING_SEPARAT)) && (FAIWS_b[3] > thresh_sep_single)) || \
 	((status == HEAD_OF_HOUSEHOLD) && (FAIWS_b[3] > thresh_HoH))){
 			b[6] = L6WS('b', b[4], L6WS_b[2], b[5], FAIWS_b[3], status);
-		}
+		}	
 	}
 
 	FAIWS_c[3] = FAIWS_c[1] * c[5];
@@ -621,7 +621,7 @@ showline( 6 );
 
 	a[8] = LargerOf(a[6], a[7]);
 	b[8] = LargerOf(b[6], b[7]);
-	c[8] = LargerOf(c[6], c[7]);
+	c[8] = LargerOf(c[6], c[7]); 
 	d[8] = LargerOf(d[6], d[7]);
 
 	a[9] = a[3] - a[8];
@@ -630,12 +630,12 @@ showline( 6 );
 	d[9] = d[3] - d[8];
 
 	a[10] = TaxRateFunction( a[9], status);
-	b[10] = TaxRateFunction( b[9], status);
+	b[10] = TaxRateFunction( b[9], status);	
 	c[10] = TaxRateFunction( c[9], status);
 	d[10] = TaxRateFunction( d[9], status);
 
 	a[10] += a10add;
-	b[10] += b10add;
+	b[10] += b10add;	
 	c[10] += c10add;
 	d[10] += d10add;
 
@@ -679,16 +679,16 @@ showline( 6 );
 	b[22] = NotLessThanZero(b[21] - b[18]);
 	b[23] = SmallerOf(b[18], b[21]);
 	B[1] = b[23];
-
+	
 	c[17] = a[23] + b[23];
 	c[18] = NotLessThanZero(c[16] - c[17]);
 	c[19] = 0;
-	c[20] = b[22];
+	c[20] = b[22];	
 	c[21] = c[19] + c[20];
 	c[22] = NotLessThanZero(c[21] - c[18]);
 	c[23] = SmallerOf(c[18], c[21]);
 	C[1] = c[23];
-
+	
 	d[17] = a[23] + b[23] + c[23];
 	d[18] = NotLessThanZero(d[16] - d[17]);
 	d[19] = Round(L[6] * 0.30);
@@ -698,7 +698,7 @@ showline( 6 );
 	d[23] = SmallerOf(d[18], d[21]);
 	D[1] = d[23];
 
-	}
+	}	
 		/* WORKSHEET II */
 
 	/* A[2], B[2], C[2], D[2] contain estimated taxes paid each period.  Add uneven withholding in period */
@@ -718,7 +718,7 @@ showline( 6 );
 		C[2] = C[2] + L[3] * (92.0 / 365.0);
 		D[2] = D[2] + L[3] * (122.0 / 365.0);
 	}
-
+	
 	A[6] = A[2];
 
 	if(A[1] >= A[6])
@@ -765,7 +765,7 @@ showline( 6 );
 	D[4] = D[2] + D[3];
 	D[5] = C[7] + C[8];
 	D[6] = NotLessThanZero(D[4] - D[5]);
-
+	
 	if(D[1] >= D[6])
 		D[8] = D[1] - D[6];
 	else
@@ -776,7 +776,7 @@ showline( 6 );
 	A[0] = A[11] + B[11] + C[11] + A[13] + B[13] + C[13] + D[13];	/* line 14 of WSII */
 
 	if(Quest2 == Yes){
-
+	
 		for(i = 18; i <= 14; i++){
 			fprintf(outfile, "SecA_%d%s %0.2lf\n", i, "a", A[i]);
 			fprintf(outfile, "SecA_%d%s %0.2lf\n", i, "b", B[i]);
@@ -815,7 +815,7 @@ showline( 6 );
 			fprintf(outfile, "SchdAI_%d%s %0.2lf\n", i, "c", c[i]);
 			fprintf(outfile, "SchdAI_%d%s %0.2lf\n", i, "d", d[i]);
 		}
-
+		
 		fprintf(outfile, "%s %0.2lf\n", "L14aa", L14aa);
 		fprintf(outfile, "%s %0.2lf\n", "L14ab", L14ab);
 		fprintf(outfile, "%s %0.2lf\n", "L14ac", L14ac);
@@ -853,16 +853,16 @@ showline( 6 );
 				fprintf(outfile, "WSII_%d%s %0.2lf\n", i, "d", D[i]);
 		}
 		fprintf(outfile, "WSII_%d %0.2lf     %s\n", 14, A[0], "PENALTY");
-
+	
 		if((A[8] == 0) && (B[8] == 0) && (C[8] == 0) && (D[8] == 0))
 			fprintf(outfile, "As line 8 on WSII is zero for all payment periods, you don't owe a penalty.\n");
 		else
 			fprintf(outfile, "%s\n%s\n%s\n", "There is an underpayment for one or more periods.  See the  instructions and if", "you have not already done so, enter the number of days any payment was late", "into the GUI so this program can calculate the penalty.");
 	}
 
-  /***
+  /*** 
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -880,7 +880,7 @@ showline( 6 );
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-
+	
   ***/
 
  fclose(infile);
@@ -908,3 +908,4 @@ showline( 6 );
 
 } // namespace taxsolve_CA_5805_2024
 } // namespace OpenTaxSolver2024
+

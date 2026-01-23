@@ -165,7 +165,7 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (i=0; i<MAX_LINES; i++)
+ for (i=0; i<MAX_LINES; i++) 
   {
    L[i] = 0.0;
    COJ[i] = 0.0;
@@ -198,42 +198,42 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  {
-   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+  { 
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word); 
+   exit(1); 
   }
  switch (status)
  {
-  case SINGLE: 			fprintf(outfile,"Status = Single (%d)\n", status);
+  case SINGLE: 			fprintf(outfile,"Status = Single (%d)\n", status); 
 				L[6] = 1;
 				break;
-  case MARRIED_FILLING_JOINTLY: fprintf(outfile,"Status = Married/Joint (%d)\n", status);
-				fprintf(outfile," Check_Spouse = X\n");
+  case MARRIED_FILLING_JOINTLY: fprintf(outfile,"Status = Married/Joint (%d)\n", status); 
+				fprintf(outfile," Check_Spouse = X\n"); 
 				L[6] = 2;
 				break;
   case MARRIED_FILLING_SEPARAT: fprintf(outfile,"Status = Married/Sep (%d)\n", status);
 				L[6] = 1;
 				break;
-  case HEAD_OF_HOUSEHOLD: 	fprintf(outfile,"Status = Head_of_Household (%d)\n", status);
+  case HEAD_OF_HOUSEHOLD: 	fprintf(outfile,"Status = Head_of_Household (%d)\n", status); 
 				L[6] = 1;
 				break;
-  case WIDOW: 		  	fprintf(outfile,"Status = Widow(er) (%d)\n", status);
+  case WIDOW: 		  	fprintf(outfile,"Status = Widow(er) (%d)\n", status); 
 				L[6] = 1;
 				break;
  }
 
  fprintf(outfile, "L6a = %d\n", (int)(L[6]) );
  L[6] = 1000.0 * L[6];
- shownum(6);
+ shownum(6); 
 
  get_parameter( infile, 's', word, "YouOver65" );	/* Exemptions, Over 65. */
- get_parameter( infile, 'b', &j, "YouOver65");
+ get_parameter( infile, 'b', &j, "YouOver65"); 
  L[7] = j;
  if (j) fprintf(outfile," Check_Over65 = X\n");
 
  get_parameter( infile, 's', word, "SpouseOver65" );	/* Exemptions, Spouse Over 65. */
- get_param_single_line( infile, 'b', &j, "SpouseOver65");
+ get_param_single_line( infile, 'b', &j, "SpouseOver65"); 
  if (status == MARRIED_FILLING_JOINTLY)
   {
    L[7] = L[7] + j;
@@ -241,15 +241,15 @@ int main( int argc, char *argv[] )
   }
  fprintf(outfile, "L7a = %d\n", (int)(L[7]) );
  L[7] = 1000.0 * L[7];
- shownum(7);
+ shownum(7); 
 
  get_parameter( infile, 's', word, "YouBlindDisa" );	/* Exemptions, Blind/disabled. */
- get_parameter( infile, 'b', &j, "YouBlindDisa");
+ get_parameter( infile, 'b', &j, "YouBlindDisa"); 
  L[8] = j;
  if (j) fprintf(outfile," Check_Blind = X\n");
 
  get_parameter( infile, 's', word, "SpouseBlindDisa" );    /* Exemptions, Spouse Blind/disabled. */
- get_param_single_line( infile, 'b', &j, "SpouseBlindDisa");
+ get_param_single_line( infile, 'b', &j, "SpouseBlindDisa"); 
  if (status == MARRIED_FILLING_JOINTLY)
   {
    L[8] = L[8] + j;
@@ -257,15 +257,15 @@ int main( int argc, char *argv[] )
   }
  fprintf(outfile, "L8a = %d\n", (int)(L[8]) );
  L[8] = 1000.0 * L[8];
- shownum(8);
+ shownum(8); 
 
  get_parameter( infile, 's', word, "YouVeteran" );	/* Exemptions, Veteran */
- get_parameter( infile, 'b', &j, "YouVeteran");
+ get_parameter( infile, 'b', &j, "YouVeteran"); 
  L[9] = j;
  if (j) fprintf(outfile," Check_Vet = X\n");
 
  get_parameter( infile, 's', word, "SpouseVeteran" );    /* Exemptions, Spouse Veteran */
- get_param_single_line( infile, 'b', &j, "SpouseVeteran");
+ get_param_single_line( infile, 'b', &j, "SpouseVeteran"); 
  if (status == MARRIED_FILLING_JOINTLY)
   {
    L[8] = L[8] + j;
@@ -273,30 +273,30 @@ int main( int argc, char *argv[] )
   }
  fprintf(outfile, "L9a = %d\n", (int)(L[9]) );
  L[9] = 6000.0 * L[9];
- shownum(9);
+ shownum(9); 
 
  get_parameter( infile, 's', word, "L10" );	/* Exemptions, children. */
- get_parameter( infile, 'i', &j, "L10");
+ get_parameter( infile, 'i', &j, "L10"); 
  fprintf(outfile, "L10a = %d\n", j );
  L[10] = 1500.0 * j;
- shownum(10);
+ shownum(10); 
 
  get_parameter( infile, 's', word, "L11" );	/* Exemptions, other dependents. */
- get_parameter( infile, 'i', &j, "L11");
+ get_parameter( infile, 'i', &j, "L11"); 
  fprintf(outfile, "L11a = %d\n", j );
  L[11] = 1500.0 * j;
- shownum(11);
+ shownum(11); 
 
  get_parameter( infile, 's', word, "L12" );	/* Exemptions, college kids. */
- get_parameter( infile, 'i', &j, "L12");
+ get_parameter( infile, 'i', &j, "L12"); 
  fprintf(outfile, "L11a = %d\n", j );
  L[12] = 1000.0 * j;
- shownum(12);
+ shownum(12); 
 
  fprintf(outfile," FillOutForm_wRoundedNumbers_wZerosAfterDecPt\n" );
 
  L[13] = L[6] + L[7] + L[8] + L[9] + L[10] + L[11] + L[12];
- showline(13);
+ showline(13); 
 
  GetLineF( "L15", &L[15] );	/* Wages. */
 
@@ -347,7 +347,7 @@ int main( int argc, char *argv[] )
      fprintf(outfile," --- You do not need to file, (except to get refund).  Income < $10,000. ---\n");
   }
  else
-  { if (L[29] < 20000.0)
+  { if (L[29] < 20000.0) 
      fprintf(outfile," --- You do not need to file, (except to get refund).  Income < $20,000. ---\n");
   }
 
@@ -442,7 +442,7 @@ int main( int argc, char *argv[] )
  else
   { /*Sched  COJ +Worksheet-I*/
     fprintf(outfile,"\nSchedule COJ Credit for Income or Wage Taxes Paid to Other Jurisdiction (Previously Sched A):\n");
-    showline_wlabel("COJ_1", COJ[1]);
+    showline_wlabel("COJ_1", COJ[1]); 
     COJ[2] = L[29];
     showline_wlabel("COJ_2", COJ[2]);
     COJ[3] = smallerof( 1.0, (COJ[1] / COJ[2]) );
@@ -564,7 +564,7 @@ int main( int argc, char *argv[] )
 
  for (j=65; j <= 73; j++)
   L[74] = L[74] + L[j];
-
+ 
  if (L[62] < L[53])
   {
    L[63] = L[53] - L[62];
@@ -583,7 +583,7 @@ int main( int argc, char *argv[] )
    L[76] = L[64] - L[74];
    showline_wmsg( 76, "Refund !!!" );
   }
-
+ 
  fprintf(outfile,"\n{ --------- }\n");
  Your1stName    = GetTextLineF( "Your1stName:" );
  YourInitial    = GetTextLineF( "YourInitial:" );
@@ -641,3 +641,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_NJ_1040_2019
 } // namespace OpenTaxSolver2019
+

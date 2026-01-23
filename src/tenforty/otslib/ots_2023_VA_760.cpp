@@ -43,7 +43,7 @@ double TaxRateFunction( double income, int status )
  if (income < 3000.0) return income * 0.02; else
  if (income < 5000.0) return  60.0 + (income - 3000.0) * 0.03; else
  if (income < 17000.0) return 120.0 + (income - 5000.0) * 0.05; else
- return 720.0 + (income - 17000.0) * 0.0575;
+ return 720.0 + (income - 17000.0) * 0.0575; 
 }
 
 
@@ -101,7 +101,7 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (i=0; i<MAX_LINES; i++)
+ for (i=0; i<MAX_LINES; i++) 
   {
    L[i] = 0.0;
   }
@@ -127,10 +127,10 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILING_SEPARAT; else
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD;
  else
-  {
-   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+  { 
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word); 
+   exit(1); 
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -208,12 +208,12 @@ int main( int argc, char *argv[] )
 
  get_parameter( infile, 's', word, "OtherDependents" );	/* Dependents not including you or spouse. */
  get_parameters( infile, 'i', &exemptionsA, "OtherDependents");
- if (exemptionsA > 0)
+ if (exemptionsA > 0) 
   fprintf(outfile,"ExmpDeps: %d\n", exemptionsA );
  if (status == MARRIED_FILING_JOINTLY)
   exemptionsA = 2 + exemptionsA;
  else
-  exemptionsA = 1 + exemptionsA;
+  exemptionsA = 1 + exemptionsA; 
  fprintf(outfile,"NExemptionsA = %d\n", exemptionsA );
  fprintf(outfile,"ExemptionsA = %d\n", 930 * exemptionsA );
 
@@ -227,8 +227,8 @@ int main( int argc, char *argv[] )
 
  /* Handle Exemptions for:  YouOver65:      SpOver65:       YouBlind:     SpBlind:       */
 
- get_parameter( infile, 's', word, "YouBlind" );
- get_parameter( infile, 'b', &youBlind, "YouBlind");
+ get_parameter( infile, 's', word, "YouBlind" );   
+ get_parameter( infile, 'b', &youBlind, "YouBlind"); 
  if (youBlind != 0)
   {
    fprintf(outfile,"YouBlind = 1\n");
@@ -236,7 +236,7 @@ int main( int argc, char *argv[] )
   }
 
  get_parameter( infile, 's', word, "SpouseBlind" );
- get_param_single_line( infile, 'b', &spouseBlind, "SpouseBlind");
+ get_param_single_line( infile, 'b', &spouseBlind, "SpouseBlind"); 
  if (status == MARRIED_FILING_JOINTLY)
   {
    if (spouseDOB.year < 1959)			/* Updated for 2023. */
@@ -282,7 +282,7 @@ int main( int argc, char *argv[] )
  L[8] = L[4] + L[5] + L[6] + L[7];
  showline(8);
 
- L[9] = L[3] - L[8];
+ L[9] = L[3] - L[8]; 
  showline(9);			/* Virginia Adjusted Gross Income (VAGI) */
 
  GetLineF( "L10", &L[10] );	/* Deductions - Std or Itemized minus income taxes */
@@ -294,7 +294,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILING_SEPARAT:  std_ded = 8000.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     exit(1);  
 	break;
   }
 
@@ -304,7 +304,7 @@ int main( int argc, char *argv[] )
 
  L[12] = 930.0 * exemptionsA + 800.0 * exemptionsB;
  showline(12);
-
+  
  GetLineF( "L13", &L[13] );	/* Deductions from Virginia Adjusted Gross Income Schedule ADJ, Line 9. */
 
  L[14] = L[10] + L[11] + L[12];
@@ -329,7 +329,7 @@ int main( int argc, char *argv[] )
  showline(17);
 
  L[18] = L[16] - L[17];
- showline_wmsg( 18, "Net Amount of Tax" );
+ showline_wmsg( 18, "Net Amount of Tax" );	
 
  GetLineF( "L19a", &L[19] );	/* Virginia tax withheld for 2023. */
  GetLineF( "L19b", &L19b );	/* Spouse's Virginia tax withheld. */
@@ -424,3 +424,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_VA_760_2023
 } // namespace OpenTaxSolver2023
+

@@ -71,7 +71,7 @@ void check_if_yes( char *label )
  int flag;
  get_parameter( infile, 's', word, label );
  get_param_single_line( infile, 'b', &flag, label );
- if (flag)
+ if (flag) 
   fprintf(outfile,"%s X\n", label );
 }
 
@@ -92,9 +92,9 @@ int main( int argc, char *argv[] )
  double MassRetirement[2];
  double L23a=0.0, L33[6], L35a=0.0, L35b=0.0, L38a=0.0, L38b=0.0, L38c=0.0;
  double L43a=0.0, L43b=0.0;
-
+ 
  printf("Massachusetts Form-1 2022 - v%3.2f\n", thisversion);
-
+ 
  /* Decode any command-line arguments. */
  i = 1;  k=1;
  while (i < argc)
@@ -147,10 +147,10 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILING_SEPARAT; else
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
- else
-  {
-   printf("Error: unrecognized status '%s'. Exiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
+ else 
+  { 
+   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -159,7 +159,7 @@ int main( int argc, char *argv[] )
 
  switch (status)
   {
-   case SINGLE:
+   case SINGLE: 
 	Exemptions[0] = 4400.0;
 	fprintf(outfile," Check_single x\n");
    	break;
@@ -171,20 +171,20 @@ int main( int argc, char *argv[] )
 	Exemptions[0] = 6800.0;
 	fprintf(outfile," Check_hh x\n");
 	break;
-   case MARRIED_FILING_JOINTLY:
+   case MARRIED_FILING_JOINTLY: 
 	Exemptions[0] = 8800.0;
 	fprintf(outfile," Check_mfj x\n");
 	break;
-  }
+  }   
 
  GetLineF( "La", &L_a );	/* Only for PDF form.  Not used otherwise. */
  GetLineF( "Lb", &L_b );	/* Only for PDF form.  Not used otherwise. */
-
+ 
  fprintf(outfile,"L2. Exemptions: \n");
  fprintf(outfile,"  2a.  = %6.2f   Personal exemptions\n", Exemptions[0]);
 
  get_parameter( infile, 's', word, "Dependents" );
- get_parameter( infile, 'i', &ndep, "Dependents");
+ get_parameter( infile, 'i', &ndep, "Dependents"); 
  Exemptions[1] = (double)ndep * 1000.0;
  if (Exemptions[1] > 0.0)
   {
@@ -202,7 +202,7 @@ int main( int argc, char *argv[] )
   }
  get_parameter( infile, 's', word, "Age65Spouse");
  get_param_single_line( infile, 'b', &flag, "Spouse age over 65?");
- if (flag)
+ if (flag) 
   {
    i65++;
    fprintf(outfile,"Check_2csp X\n");
@@ -216,14 +216,14 @@ int main( int argc, char *argv[] )
 
  get_parameter( infile, 's', word, "BlindYou");
  get_parameter( infile, 'b', &flag, "Your Blindness?");
- if (flag)
+ if (flag) 
   {
    iblind++;
    fprintf(outfile,"Check_2dyou X\n");
   }
  get_parameter( infile, 's', word, "BlindSpouse");
  get_param_single_line( infile, 'b', &flag, "Spouse Blindness?");
- if (flag)
+ if (flag) 
   {
    iblind++;
    fprintf(outfile,"Check_2dsp X\n");
@@ -285,7 +285,7 @@ int main( int argc, char *argv[] )
 
  L[10] = Sum( L, 3, 9 );
  showline_wmsg( 10, "TOTAL 5.0% INCOME" );
-
+ 
  /* Amount paid to SS, Medicare, RR, US, or Mass retirement */
  GetLine( "L11a", &MassRetirement[0] ); /* You */
  if (MassRetirement[0] > 2000) MassRetirement[0] = 2000;
@@ -376,7 +376,7 @@ int main( int argc, char *argv[] )
     { /*not_sep*/
      switch (status)
       {
-       case SINGLE:
+       case SINGLE:  
 		threshA = 8000.0;
 		threshB = 14000.0;
 		break;
@@ -384,11 +384,11 @@ int main( int argc, char *argv[] )
 		threshA = 14400.0 + 1000.0 * ndep;
 		threshB = 25200.0 + 1750.0 * ndep;
 		break;
-       case MARRIED_FILING_JOINTLY:
+       case MARRIED_FILING_JOINTLY: 
 		threshA = 16400.0 + 1000.0 * ndep;
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
-	default: fprintf(outfile,"Bad filing status.\n");
+	default: fprintf(outfile,"Bad filing status.\n"); 
 		printf("Bad filing status.\n");  exit(1); break;
       }
      if (AGI <= threshA)
@@ -444,11 +444,11 @@ int main( int argc, char *argv[] )
 
  GetLine1( "L36", &L[36] );	/* AMENDED RETURN ONLY. Overpayment from original return. */
  L[36] = NotLessThanZero( L[36] );
- ShowLineNonZero( 36 );
+ ShowLineNonZero( 36 );	 
 
  L[37] = Sum( L, 32, 36 );
  showline_wmsg(37,"Income Tax After Credits Contributions, Use Tax + HC Penalty");
-
+ 
  /* Payments section. */
 
  GetLineFnz( "L38a", &L38a );	/* Mass income tax withheld, Forms W-2 */
@@ -483,8 +483,8 @@ int main( int argc, char *argv[] )
  ShowLineNonZero(45);
 
  get_parameter( infile, 's', word, "L46num" );	/* Number of dependent household members under 13 or over 65. */
- get_parameters( infile, 'i', &ndep12, "L46num");
- fprintf(outfile,"L46num = %d\n", ndep12 );
+ get_parameters( infile, 'i', &ndep12, "L46num"); 
+ fprintf(outfile,"L46num = %d\n", ndep12 ); 
  L[46] = ndep12 * 180.0;
  ShowLineNonZero(46);
 
@@ -503,7 +503,7 @@ int main( int argc, char *argv[] )
  GetLine( "L52", &L[52] );	/* Overpayment to be applied to next year's estimated tax */
 
  /* Refund or Owe section. */
- if (L[37] < L[50])
+ if (L[37] < L[50]) 
   {
    L[51] = L[50] - L[37];
    fprintf(outfile,"L51 = %6.2f  Overpayment!\n", L[51] );
@@ -513,7 +513,7 @@ int main( int argc, char *argv[] )
    L[53] = L[51] - L[52];
    fprintf(outfile,"L53 = %6.2f  THIS IS YOUR REFUND\n", L[53] );
   }
- else
+ else 
   {
    L[54] = L[37] - L[50];
    fprintf(outfile,"L54 = %6.2f  TAX DUE !!!\n", L[54] );
@@ -542,7 +542,7 @@ int main( int argc, char *argv[] )
 
  GetTextLineF( "RoutingNum:" );
  GetTextLineF( "AccntNum:" );
- answ = GetTextLine( "AccountType:" );
+ answ = GetTextLine( "AccountType:" ); 
  if (strcasecmp( answ, "Savings" ) == 0)
   fprintf(outfile," Check_SavingsAccnt X\n");
  if (strcasecmp( answ, "Checking" ) == 0)
@@ -575,3 +575,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_MA_1_2022
 } // namespace OpenTaxSolver2022
+

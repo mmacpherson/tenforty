@@ -82,7 +82,7 @@ double TaxRateFormula( double income, int status )
    if (income <  78710.00)  tax =  1909.65 +  0.08 * (income -  66636.00);  else
    if (income < 401705.00)  tax =  2875.57 + 0.093 * (income -  78710.00);  else
    if (income < 482047.00)  tax = 32914.11 + 0.103 * (income - 401705.00);  else
-   if (income < 803410.00)  tax = 41189.34 + 0.113 * (income - 482047.00);
+   if (income < 803410.00)  tax = 41189.34 + 0.113 * (income - 482047.00); 
    else                     tax = 77503.36 + 0.123 * (income - 803410.00);
   }
  return (int)(tax+0.5);
@@ -141,7 +141,7 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
  if (income < 100000.0)   /* Quantize to match tax-table exactly. */
   {
-   if (income < 99951.0)
+   if (income < 99951.0) 
     {
      k = (income + 49) / 100;
      x = 100 * (double)k;
@@ -161,7 +161,7 @@ void test_tax_function()
  for (income=50.0; income < 100000.0; income = income + 100.0)
   printf("%g: %8g %8g %8g\n", income,
 		TaxRateFunction( income, SINGLE ),
-		TaxRateFunction( income, MARRIED_FILLING_JOINTLY ),
+		TaxRateFunction( income, MARRIED_FILLING_JOINTLY ), 
 		TaxRateFunction( income, HEAD_OF_HOUSEHOLD ) );
  exit(0);
 }
@@ -231,8 +231,8 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
  char fline[2000], word[2000], tword[2000];
  int linenum;
 
- for (linenum=0; linenum<MAX_LINES; linenum++)
-  {
+ for (linenum=0; linenum<MAX_LINES; linenum++) 
+  { 
    fed_data->fedline[linenum] = 0.0;
    fed_data->schedA[linenum] = 0.0;
    fed_data->sched1[linenum] = 0.0;
@@ -265,7 +265,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
   {
    printf("Error: Could not open Federal return '%s'\n", fedlogfile);
    fprintf(outfile,"Error: Could not open Federal return '%s'\n", fedlogfile);
-   exit( 1 );
+   exit( 1 ); 
   }
  fed_data->Itemized = 1; /* Set initial default values. */
  read_line(infile,fline);  linenum = 0;
@@ -378,7 +378,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	 fprintf(outfile,"Error: Reading Fed line number '%s%s'\n",word,fline);
         }
        next_word(fline, word, " \t=");
-       if (sscanf(word,"%lf", &fed_data->schedA[linenum])!=1)
+       if (sscanf(word,"%lf", &fed_data->schedA[linenum])!=1) 
         {
  	 printf("Error: Reading Fed schedA %d '%s%s'\n",linenum,word,fline);
 	 fprintf(outfile, "Error: Reading Fed schedA %d '%s%s'\n",linenum,word,fline);
@@ -396,7 +396,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	 fprintf(outfile,"Error: Reading Fed line number 'S1_%s %s'\n", tword, fline);
         }
        next_word(fline, word, " \t=");
-       if (sscanf(word,"%lf", &fed_data->sched1[linenum])!=1)
+       if (sscanf(word,"%lf", &fed_data->sched1[linenum])!=1) 
         {
  	 printf("Error: Reading Fed sched1 %d '%s%s'\n", linenum, word, fline);
 	 fprintf(outfile, "Error: Reading Fed sched1 %d '%s%s'\n", linenum, word, fline);
@@ -413,11 +413,11 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILLING_SEPARAT; else
      if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
      if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
-     else
-      {
-       printf("Error: unrecognized status '%s'. Exiting.\n", word);
+     else 
+      { 
+       printf("Error: unrecognized status '%s'. Exiting.\n", word); 
        fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-       return 0;
+       return 0; 
       }
     }
    read_line(infile,fline);
@@ -450,7 +450,7 @@ void display_part2column( int j, int col )
 {
  switch (col)
   {
-   case 0:
+   case 0: 
 	if (sched540part2[j] != 0.0)
 	 fprintf(outfile," SchedCA540_Part2_%d = %6.2f\n", j, sched540part2[j] );
 	break;
@@ -489,7 +489,7 @@ int main( int argc, char *argv[] )
 	sched540Cb[MAX_LINES], sched540Cc[MAX_LINES],
 	threshA=0, std_ded=0;
  char word[4000], *infname=0, outfname[4000], prelim_1040_outfilename[5000];
- char 	*Your1stName="", *YourLastName="", YourName[2048]="", YourNames[2048]="",
+ char 	*Your1stName="", *YourLastName="", YourName[2048]="", YourNames[2048]="", 
 	*YourMidInitial="", *SpouseMidInitial="",
 	*Spouse1stName="", *SpouseLastName="", *socsec;
  double  sched540A4d=0.0, sched540Ab4d=0.0, sched540Ac4d=0.0,
@@ -527,21 +527,21 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (j=0; j<MAX_LINES; j++)
-  {
-    L[j] = 0.0;
-    sched540A[j] = 0.0;
-    sched540Ab[j] = 0.0;
-    sched540Ac[j] = 0.0;
-    sched540B[j] = 0.0;
-    sched540Bb[j] = 0.0;
-    sched540Bc[j] = 0.0;
-    sched540C[j] = 0.0;
-    sched540Cb[j] = 0.0;
-    sched540Cc[j] = 0.0;
-    sched540part2[j] = 0.0;
-    sched540part2_sub[j] = 0.0;
-    sched540part2_add[j] = 0.0;
+ for (j=0; j<MAX_LINES; j++) 
+  { 
+    L[j] = 0.0;  
+    sched540A[j] = 0.0; 
+    sched540Ab[j] = 0.0; 
+    sched540Ac[j] = 0.0; 
+    sched540B[j] = 0.0; 
+    sched540Bb[j] = 0.0; 
+    sched540Bc[j] = 0.0; 
+    sched540C[j] = 0.0; 
+    sched540Cb[j] = 0.0; 
+    sched540Cc[j] = 0.0; 
+    sched540part2[j] = 0.0; 
+    sched540part2_sub[j] = 0.0; 
+    sched540part2_add[j] = 0.0; 
   }
 
  /* Accept parameters from input file. */
@@ -600,7 +600,7 @@ int main( int argc, char *argv[] )
  if (iline9 > 0) fprintf(outfile,"  L9a = %d\n", iline9 );
 
  get_parameter( infile, 's', word, "L10" );  /* Number of Dependents. */
- get_parameter( infile, 'i', &iline10, "L10");
+ get_parameter( infile, 'i', &iline10, "L10"); 
  L[10] = iline10 * 378.0;
  showline(10);
  if (iline10 > 0) fprintf(outfile,"  L10a = %d\n", iline10 );
@@ -963,7 +963,7 @@ int main( int argc, char *argv[] )
   { /*Itemized Deductions Worksheet*/
     double ws[40];
     // printf("Yes, Fed AGI (%6.2f) is more than threshold (%6.2f).\n", L[13], threshA );
-    for (j=1; j <= 10; j++) ws[j] = 0.0;
+    for (j=1; j <= 10; j++) ws[j] = 0.0;    
     ws[1] = sched540part2[28];
     ws[2] = PrelimFedReturn.schedA[4] + PrelimFedReturn.schedA[9] + PrelimFedReturn.schedA[15] + PrelimFedReturn.schedA[16];
     ws[3] = ws[1] - ws[2];
@@ -1037,7 +1037,7 @@ int main( int argc, char *argv[] )
   fprintf(outfile," SchedCA540_Part2_8ea = %6.2f\n", sched540part2[8] );
  if (sched540part2_add[8] != 0.0)
   fprintf(outfile," SchedCA540_Part2_8ec = %6.2f\n", sched540part2_add[8] );
-
+ 
  for (j=9; j <= 17; j++)
    display_part2( j );
  display_part2column( 18, 0 );
@@ -1082,7 +1082,7 @@ int main( int argc, char *argv[] )
 		     default: min2file = 41351.0;	break;
 		    }
 	  break;
-   case MARRIED_FILLING_JOINTLY:
+   case MARRIED_FILLING_JOINTLY: 
 		if (iline9 == 0)		 /*Both Under65*/
 		   switch (iline10)
 		    {
@@ -1124,7 +1124,7 @@ int main( int argc, char *argv[] )
 	  break;
   }
  if (L[17] <= min2file)
-  fprintf(outfile,"You may not need to file CA Taxes, due to your California Adjusted Gross Income (%6.2f <= %6.2f).\n",
+  fprintf(outfile,"You may not need to file CA Taxes, due to your California Adjusted Gross Income (%6.2f <= %6.2f).\n", 
 	L[17], min2file );
 
  showline(18);
@@ -1144,16 +1144,16 @@ int main( int argc, char *argv[] )
  if (L[13] > threshA)
   { /*Line32-Exemption-credits-worksheet*/
     double ws_a, ws_b, ws_c, ws_d, ws_e, ws_f, ws_g, ws_h, ws_i, ws_j, ws_k, ws_l, ws_m, ws_n;
-    printf(" Doing AGI Limitations worksheet.\n");
+    printf(" Doing AGI Limitations worksheet.\n"); 
     ws_a = L[13];
     ws_b = threshA;
     ws_c = ws_a - ws_b;
     if (status != MARRIED_FILLING_SEPARAT)
-	ws_d = Round(ws_c / 2500.0);
-    else
+	ws_d = Round(ws_c / 2500.0);  
+    else 
 	ws_d = Round(ws_c / 1250.0);
-    ws_e = 6.0 * ws_d;
-    ws_f = iline7 + iline8 + iline9;
+    ws_e = 6.0 * ws_d;  
+    ws_f = iline7 + iline8 + iline9; 
     ws_g = ws_e * ws_f;
     ws_h = L[7] + L[8] + L[9];
     ws_i = NotLessThanZero( ws_h - ws_g );
@@ -1218,17 +1218,17 @@ int main( int argc, char *argv[] )
 
  /* Payments. */
  GetLineF( "L71", &L[71] ); 	/* CA income tax withheld. */
-
+ 
  GetLineF( "L72", &L[72] ); 	/* Estimated tax paid. */
-
+ 
  GetLineF( "L73", &L[73] ); 	/* Realestate withholding. */
-
+ 
  GetLineF( "L74", &L[74] ); 	/* Excess SDI. */
 
  GetLineF( "L75", &L[75] ); 	/* Earned Income Tax Credit (EITC). */
 
  GetLineF( "L76", &L[76] ); 	/* Young Child Tax Credit (YCTC). */
-
+ 
  L[77] = L[71] + L[72] + L[73] + L[74] + L[75] + L[76];
  showline_wmsg(77,"Total Payments");
 
@@ -1245,7 +1245,7 @@ int main( int argc, char *argv[] )
    L[93] = L[91] - L[77];
    showline(93);
   }
-
+ 
  GetLine( "L112", &L[112] );	/* Interest, late penalties. */
  GetLine( "L113", &L[113] );	/* Underpayment of estimated tax penalty. (FTB 5805) */
 
@@ -1274,7 +1274,7 @@ int main( int argc, char *argv[] )
    L[114] = L[111] + L[112] + L[113];
    showline(114);
   }
-
+ 
  fprintf(outfile,"\nSelect any charity contributions and complete\n form accordingly.\n");
 
  fprintf(outfile,"\n{ --------- }\n");
@@ -1346,3 +1346,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_CA_540_2019
 } // namespace OpenTaxSolver2019
+

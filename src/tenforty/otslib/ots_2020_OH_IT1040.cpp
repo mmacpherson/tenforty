@@ -126,7 +126,7 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (mm=0; mm<MAX_LINES; mm++)
+ for (mm=0; mm<MAX_LINES; mm++) 
   {
    L[mm] = 0.0;
    SchedA[mm] = 0.0;
@@ -153,20 +153,20 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILLING_SEPARAT; else
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD;
  else
-  {
-   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+  { 
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word); 
+   exit(1); 
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
  get_parameter( infile, 's', word, "Exemptions" );	/* Exemptions, self/depend. */
- get_parameters( infile, 'i', &exemptions, "Exemptions");
+ get_parameters( infile, 'i', &exemptions, "Exemptions"); 
 
  /* Answer YES only if Married Filing Jointly, and you and your spouse */
  /* each have qualifying Ohio adjusted gross income of at least $500. */
  get_parameter( infile, 's', word, "JointCredit" );
- get_parameter( infile, 'b', &qualify_jfc, "JointCredit ?");
+ get_parameter( infile, 'b', &qualify_jfc, "JointCredit ?"); 
 
  GetLine( "L1", &L[1] );	/* Federal Adjusted Gross Income */
  GetLine( "L4", &L[4] );	/* Personal and dependent exemption deduction, Sched-J */
@@ -221,7 +221,7 @@ int main( int argc, char *argv[] )
  GetLine( "SchedA_36", &SchedA[36] );	/* Unreimbursed long-term care insurance premiums ... */
  GetLine( "SchedA_37", &SchedA[37] );	/* Funds deposited into, and earnings of, a medical savings account */
  GetLine( "SchedA_38", &SchedA[38] );	/* Qualified organ donor expenses */
-
+ 
  /* Schedule of Credits. */
  GetLine( "Credits_2", &SchedC[2] );	/* Retirement income credit */
  SchedC[2] = smallerof( SchedC[2], 200.0 );
@@ -292,9 +292,9 @@ int main( int argc, char *argv[] )
 
  if (L[5] < 30000.0)
   SchedC[8] = 20.0 * exemptions;	/* Exemption credtit. */
-
+ 
  for (j=2; j <= 8; j++)
-  SchedC[9] = SchedC[9] + SchedC[j];
+  SchedC[9] = SchedC[9] + SchedC[j];		
  SchedC[9] = SchedC[9] + SchedC7a;
 
  SchedC[10] = NotLessThanZero( SchedC[1] - SchedC[9] );
@@ -311,7 +311,7 @@ int main( int argc, char *argv[] )
   } /*Joint_Filing_Credit*/
 
  for (j=11; j <= 23; j++)
-  SchedC[24] = SchedC[24] + SchedC[j];
+  SchedC[24] = SchedC[24] + SchedC[j];          
  SchedC[25] = NotLessThanZero( SchedC[10] - SchedC[24] );
 
  SchedC[27] = L[3];
@@ -323,7 +323,7 @@ int main( int argc, char *argv[] )
  SchedC[30] = L[3];
  j = 10000.0 * SchedC[29] / SchedC[30];
  factorB = (double)j / 10000.0;
- // printf(" %4g\n", factorB );
+ // printf(" %4g\n", factorB );			
  SchedC[31] = SchedC[25] * factorB;
  // SchedC[31] = L[13];
  SchedC[33] = smallerof( SchedC[31], SchedC[32] );
@@ -333,7 +333,7 @@ int main( int argc, char *argv[] )
  L[10] = NotLessThanZero( L8c - L[9] );
 
  for (j=35; j <= 39; j++)
-  SchedC[40] = SchedC[40] + SchedC[j];
+  SchedC[40] = SchedC[40] + SchedC[j];          
  L[16] = SchedC[40];
 
  L[13] = L[10] + L[11] + L[12];			/* Total Ohio tax liability before withholding or estimated payments. */
@@ -485,3 +485,4 @@ printf("factorB = %g, word = '%s'\n", factorB, word );
 
 } // namespace taxsolve_OH_IT1040_2020
 } // namespace OpenTaxSolver2020
+

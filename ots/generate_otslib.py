@@ -485,11 +485,13 @@ def postprocess_source_groups(
     return (outer_key, source_group)
 
 
-def make_routines_inline(source_lines: list[str]) -> list[str]:
-    """Transform routines source for header-only use with inline specifiers.
+def make_routines_header_safe(source_lines: list[str]) -> list[str]:
+    """Transform routines source for header-only use across multiple translation units.
 
-    Uses C++17 inline variables and functions to allow multiple inclusion
-    without ODR violations.
+    Uses `inline` for functions (C++17 compatible) and `static` for global variables.
+    MSVC has bugs with C++17 inline variables causing runtime crashes, so we use
+    `static` for variables instead. Since each form runs independently (one form's
+    main() at a time), having separate copies of global state per-form is correct.
 
     Args:
     ----
@@ -497,12 +499,12 @@ def make_routines_inline(source_lines: list[str]) -> list[str]:
 
     Returns:
     -------
-        Lines with inline specifiers added to functions and global variables.
+        Lines with inline added to functions and static added to global variables.
 
     """
     # First pass: identify multi-line struct definitions that declare variables
     # Pattern: "struct name" on one line, closing "} vars;" on a later line
-    struct_lines_needing_inline = set()
+    struct_lines_needing_static = set()
     i = 0
     while i < len(source_lines):
         line = source_lines[i]
@@ -514,7 +516,7 @@ def make_routines_inline(source_lines: list[str]) -> list[str]:
                 closing_line = source_lines[j]
                 # Check for "} var1, var2;" pattern (closing brace with variables)
                 if re.match(r"^\s*\}\s*\w+", closing_line):
-                    struct_lines_needing_inline.add(i)
+                    struct_lines_needing_static.add(i)
                     break
                 # Check for just "};" (no variables) - stop looking
                 if re.match(r"^\s*\}\s*;", closing_line):
@@ -530,18 +532,20 @@ def make_routines_inline(source_lines: list[str]) -> list[str]:
             r"^(void|int|char|double|float|struct\s+\w+)\s*\*?\s*\w+\s*\(", line
         ):
             line = "inline " + line
-        # Add inline to global variable definitions
+        # Add static to global variable definitions
         # Handles pointers like "FILE *infile" as well as "int count"
+        # Using static instead of inline because MSVC has bugs with C++17 inline variables
         elif re.match(
             r"^(double|int|char|float|FILE)\s*\*?\s*\w+(\s*\[|=|,|;| )", line
         ):
             if "typedef" not in line:
-                line = "inline " + line
-        # Handle struct: add inline if it declares variables (single or multi-line)
+                line = "static " + line
+        # Handle struct: add static if it declares variables (single or multi-line)
+        # Using static instead of inline because MSVC has bugs with C++17 inline variables
         elif re.match(r"^struct\s+\w+", line):
-            if i in struct_lines_needing_inline:
+            if i in struct_lines_needing_static:
                 # Multi-line struct with variables
-                line = "inline " + line
+                line = "static " + line
             else:
                 # Check for single-line struct with variables
                 stripped = line.strip()
@@ -554,7 +558,7 @@ def make_routines_inline(source_lines: list[str]) -> list[str]:
                     if "{" in after_name or (
                         after_name and re.match(r"^\w+", after_name)
                     ):
-                        line = "inline " + line
+                        line = "static " + line
         result.append(line)
     return result
 
@@ -609,8 +613,8 @@ def build_routines_headers(
         year = outer_ns.replace("OpenTaxSolver", "")
         taxsolve_routines = source_group["taxsolve_routines"]
 
-        # Make routines inline-compatible
-        inline_source = make_routines_inline(taxsolve_routines["source"])
+        # Make routines header-safe (inline for functions, static for variables)
+        inline_source = make_routines_header_safe(taxsolve_routines["source"])
 
         header_filename = f"ots_{year}_routines.h"
         content = ROUTINES_HEADER_TEMPLATE.format(

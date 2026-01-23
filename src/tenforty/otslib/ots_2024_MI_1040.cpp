@@ -66,8 +66,8 @@ int main( int argc, char *argv[] )
     infile = fopen(argv[jj],"r");
     if (infile==0)
      {
-	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
+	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]); 
+	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]); 
 	exit(1);
      }
     k = 2;
@@ -79,16 +79,16 @@ int main( int argc, char *argv[] )
     outfile = fopen(outfname,"w");
     if (outfile==0)
      {
-	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
+	printf("ERROR: Output file '%s' could not be opened.\n", outfname); 
+	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname); 
 	exit(1);
      }
     printf("Writing results to file:  %s\n", outfname);
    }
   else
    {
-	printf("Unknown command-line parameter '%s'\n", argv[jj]);
-	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
+	printf("Unknown command-line parameter '%s'\n", argv[jj]); 
+	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]); 
 	exit(1);
    }
   jj++;
@@ -96,11 +96,11 @@ int main( int argc, char *argv[] )
 
  if (infile==0)
   {
-	printf("Error: No input file on command line.\n");
-	fprintf(outfile,"Error: No input file on command line.\n");
+	printf("Error: No input file on command line.\n"); 
+	fprintf(outfile,"Error: No input file on command line.\n"); 
 	exit(1);
   }
-
+ 
 
  /*--------------------------*/
  /* ---- Get Input Data ---- */
@@ -128,10 +128,10 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Joint",13)==0) status = MARRIED_FILING_JOINTLY; else
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILING_SEPARAT;
  else
-  {
-   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep/\nExiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep.\nExiting.\n", word);
-   exit(1);
+  { 
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep/\nExiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep.\nExiting.\n", word); 
+   exit(1); 
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -159,10 +159,10 @@ printf("L9b = %d\n", L9b );
 printf("L9c = %d\n", L9c );
  GetInteger( "L9d", &L9d );	/* */
  GetInteger( "L9e", &L9e );	/* Claimed as dependent */
-
- GetLine( "L10", &L[10] );	/* Adjusted Gross Income from your U.S. Form 1040 */
- GetLine( "L11", &L[11] );	/* Additions from Schedule 1, line 9. */
- GetLine( "L13", &L[13] );	/* Subtractions from Schedule 1, line 31.*/
+ 
+ GetLine( "L10", &L[10] );	/* Adjusted Gross Income from your U.S. Form 1040 */  
+ GetLine( "L11", &L[11] );	/* Additions from Schedule 1, line 9. */  
+ GetLine( "L13", &L[13] );	/* Subtractions from Schedule 1, line 31.*/  
  GetLine( "L15", &L[15] );	/* Exemption allowance. Enter amount from line 9f or Schedule NR, line 19. */
 
  GetLine( "L18a", &L18a );
@@ -230,20 +230,20 @@ printf("L9c = %d\n", L9c );
  /* ---- Print Results ---- */
  /*-------------------------*/
 
- showline_wlabelnz( "L9a", L9a );
- showline_wlabelnz( "L9aa", L9aa );
+ showline_wlabelnz( "L9a", L9a ); 
+ showline_wlabelnz( "L9aa", L9aa ); 
 
- showline_wlabelnz( "L9b", L9b );
- showline_wlabelnz( "L9bb", L9bb );
+ showline_wlabelnz( "L9b", L9b ); 
+ showline_wlabelnz( "L9bb", L9bb ); 
 
- showline_wlabelnz( "L9c", L9c );
- showline_wlabelnz( "L9cc", L9cc );
+ showline_wlabelnz( "L9c", L9c ); 
+ showline_wlabelnz( "L9cc", L9cc ); 
 
- showline_wlabelnz( "L9d", L9d );
- showline_wlabelnz( "L9dd", L9dd );
+ showline_wlabelnz( "L9d", L9d ); 
+ showline_wlabelnz( "L9dd", L9dd ); 
 
- showline_wlabelnz( "L9e", L9e );
- showline_wlabelnz( "L9ee", L9ee );
+ showline_wlabelnz( "L9e", L9e ); 
+ showline_wlabelnz( "L9ee", L9ee ); 
 
  showline(9);	/* */
  showline(10);	/* */
@@ -265,15 +265,15 @@ printf("L9c = %d\n", L9c );
   showline(j);
 
  showline_wlabelnz( "L27a", L27a );
-
+ 
  for (j=27; j <= 33; j++)
   showline(j);
 
  showline_wlabelnz( "interest", interest );
  showline_wlabelnz( "penalty", penalty );
  ShowLineNonZero_wMsg( 34, "You OWE." );
- showline(35);
- showline(36);
+ showline(35); 
+ showline(36); 
  ShowLineNonZero_wMsg( 37, "REFUND." );
 
 
@@ -366,3 +366,4 @@ printf("L9c = %d\n", L9c );
 
 } // namespace taxsolve_MI_1040_2024
 } // namespace OpenTaxSolver2024
+

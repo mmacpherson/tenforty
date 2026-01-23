@@ -46,7 +46,7 @@ int main( int argc, char *argv[] )
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
- double L16b=0.0, L20b=0.0, L24b=0.0, Mileage_1stHalf=0.0, Mileage_2ndHalf=0.0,
+ double L16b=0.0, L20b=0.0, L24b=0.0, Mileage_1stHalf=0.0, Mileage_2ndHalf=0.0, 
 	L44a_1stHalf=0.0, L44a_2ndHalf=0.0, L44a=0.0, L44b=0.0, L44c=0.0;
  int L32=0;
  char veh_mm[1024]="", veh_dd[1024]="", veh_yy[1024]="";
@@ -127,7 +127,7 @@ int main( int argc, char *argv[] )
  else
   if (strcasecmp( word, "Other" ) == 0)
   fprintf(outfile,"CkFother: X\n");
-
+ 
  answ = GetTextLine( "GPartic:" );
  next_word( answ, word, " \t;" );
  if (toupper( word[0] ) == 'Y')
@@ -135,7 +135,7 @@ int main( int argc, char *argv[] )
  else
  if ((mystrcasestr( word, "N/A" ) == 0) && (toupper( word[0] ) == 'N'))
   fprintf(outfile,"CkNotParticipate: X\n");
-
+ 
  answ = GetTextLine( "Hacquired:" );
  next_word( answ, word, " \t;" );
  if (toupper( word[0] ) == 'Y')
@@ -148,7 +148,7 @@ int main( int argc, char *argv[] )
  else
  if ((mystrcasestr( word, "N/A" ) == 0) && (toupper( word[0] ) == 'N'))
   fprintf(outfile,"CkNotReq1099: X\n");
-
+ 
  answ = GetTextLine( "Jfile1099s:" );
  next_word( answ, word, " \t;" );
  if (toupper( word[0] ) == 'Y')
@@ -156,11 +156,11 @@ int main( int argc, char *argv[] )
  else
  if ((mystrcasestr( word, "N/A" ) == 0) && (toupper( word[0] ) == 'N'))
   fprintf(outfile,"CkNotFile1099: X\n");
-
+ 
 
  GetLine( "L1", &L[1] );	/* Gross Receipts */
 
- GetLine( "L2", &L[2] );	/* Returns and Allowances */
+ GetLine( "L2", &L[2] );	/* Returns and Allowances */	
 
  // GetLine( "L4", &L[4] );	/* Cost of Goods Sold */
 
@@ -249,7 +249,7 @@ int main( int argc, char *argv[] )
   fprintf(outfile,"Ck33cOther: X\n");
  else
  if (word[0] != '\0')
-  printf("Warning: Unexpected answer for L33: '%s'\n", word );
+  printf("Warning: Unexpected answer for L33: '%s'\n", word ); 
 
  answ = GetTextLine( "L34:" );
  next_word( answ, word, " \t;" );
@@ -258,7 +258,7 @@ int main( int argc, char *argv[] )
  else
  if (toupper( word[0] ) == 'N')
   fprintf(outfile,"Ck34No: X\n");
-
+ 
  GetLine( "L35", &L[35] );	/* Inventory at beginning of year */
 
  GetLine( "L36", &L[36] );	/* Purchases minus cost of personel items */
@@ -280,7 +280,7 @@ int main( int argc, char *argv[] )
  next_word( answ, veh_mm, " \t-/.,;" );
  next_word( answ, veh_dd, " \t-/.,;" );
  next_word( answ, veh_yy, " \t-/.,;" );
-
+ 
  GetLine( "L44a_1stHalf", &L44a_1stHalf );		/* Vehicle Miles 1/1/2022 - 6/30/2022 */
  GetLine( "L44a_2ndHalf", &L44a_2ndHalf );		/* Vehicle Miles 7/1/2022 - 12/31/2022 */
  L44a = L44a_1stHalf + L44a_2ndHalf;
@@ -367,7 +367,7 @@ int main( int argc, char *argv[] )
  showline(25);
  showline(26);
  showline_wlabel( "L27a", L[27] );
- L[28] = L[8] + L[9] + L[10] + L[11] + L[12] + L[13] + L[14] + L[15] + L[16] + L16b + L[17] + L[18]
+ L[28] = L[8] + L[9] + L[10] + L[11] + L[12] + L[13] + L[14] + L[15] + L[16] + L16b + L[17] + L[18] 
  	 + L[19] + L[20] + L20b + L[21] + L[22] + L[23] + L[24] + L24b + L[25] + L[26] + L[27];
  showline_wmsg(28,"Total expenses");
  L[29] = L[7] - L[28];
@@ -481,3 +481,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_US_1040_Sched_C_2022
 } // namespace OpenTaxSolver2022
+

@@ -110,9 +110,9 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILING_SEPARAT; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  {
-   printf("Error: unrecognized status '%s'. Exiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
+  { 
+   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -124,7 +124,7 @@ int main( int argc, char *argv[] )
 
  L[1] = oneA - oneB;
  fprintf(outfile,"L1c = %2.2f\n", L[1] );		/* Net compensation. */
-
+ 
  GetLineF( "L2", &L[2] );	/* Interest Income. */
 
  GetLineF( "L3", &L[3] );	/* Dividend Income. */
@@ -209,7 +209,7 @@ int main( int argc, char *argv[] )
    L[30] = L[29];
    showline_wmsg(30,"REFUND");
   }
-
+ 
  fprintf(outfile,"\n{ --------- }\n");
  do_all_caps = 1;
  Your1stName = GetTextLineF( "Your1stName:" );
@@ -233,7 +233,7 @@ int main( int argc, char *argv[] )
   {
    if (status == MARRIED_FILING_JOINTLY)
     {
-     YourNames = (char *)malloc( strlen(YourLastName) + strlen( Your1stName ) +
+     YourNames = (char *)malloc( strlen(YourLastName) + strlen( Your1stName ) + 
 				  strlen( SpouseLastName ) + strlen( Spouse1stName ) + 20 );
      strcpy( YourNames, Your1stName );
      if (strcmp( YourLastName, SpouseLastName ) == 0)
@@ -280,3 +280,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_PA_40_2021
 } // namespace OpenTaxSolver2021
+

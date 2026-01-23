@@ -208,14 +208,14 @@ int main( int argc, char *argv[] )
             GetTextLineF(L1_name[row][col]) ;
         } else if (col == 2) {  // qualified business income (loss)
             GetLine(L1_name[row][col], &row_val );
-            // If zero value was entered, and this row has a non-blank name,
+            // If zero value was entered, and this row has a non-blank name, 
             // and both a 1040 and schedule C filename have been provided (auto_calc), calculate the total
             if ((row_val == 0.0) && (strlen(row_name) > 0) && auto_calc) {
                 fprintf(outfile, "INFO: Auto calculating QBI profit/loss for L1_%s_%s\n", L1_row_names[row], L1_col_names[col]);
                 L1[row][2] =  f_sch_c.L31 - (f1040i.S1_15 + f1040i.S1_16 + f1040i.S1_17);
                 fprintf(outfile, "INFO: L1_%s_%s = %6.2f = f_sch_c.L31 - (f1040i.S1_15 + f1040i.S1_16 + f1040i.S1_17) = "
-                    "%6.2f - (%6.2f + %6.2f + %6.2f)\n",
-                    L1_row_names[row], L1_col_names[col],
+                    "%6.2f - (%6.2f + %6.2f + %6.2f)\n",  
+                    L1_row_names[row], L1_col_names[col], 
                     L1[row][2], f_sch_c.L31, f1040i.S1_15, f1040i.S1_16, f1040i.S1_17);
             } else {
                 L1[row][2] =  row_val;
@@ -234,7 +234,7 @@ int main( int argc, char *argv[] )
 
  // double L11_prelim;
  // GetLine( "L11", &L11_prelim );
- //
+ // 
  // if ((L11_prelim == 0.0) && auto_calc) {
  //     fprintf(outfile, "INFO: Auto calculating QBI L11\n");
  //     L[11] = f1040i.L11 - f1040i.L12;
@@ -300,7 +300,7 @@ int main( int argc, char *argv[] )
 
  /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -318,7 +318,7 @@ int main( int argc, char *argv[] )
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-
+	
   ***/
 
  fclose(infile);
@@ -335,3 +335,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_f8995_2024
 } // namespace OpenTaxSolver2024
+

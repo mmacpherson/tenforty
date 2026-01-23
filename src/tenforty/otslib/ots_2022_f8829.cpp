@@ -171,7 +171,7 @@ int main( int argc, char *argv[] )
  // use of the space, leave L[4] at 0.0
  L[7] = (L[4] != 0.0) ? (L[6] * L[3]) : L[3];
 
-
+ 
  ShowLineNonZero( 7 );
 
  GetLine( "L8", &L[8] );
@@ -247,7 +247,7 @@ int main( int argc, char *argv[] )
 
  // Sum the second block of direct expenses
  La[23] = La[16] + La[17] + La[18] + La[19] + La[20] + La[21] + La[22];
-
+ 
  // Sum the second block of indirect expenses
  Lb[23] = Lb[16] + Lb[17] + Lb[18] + Lb[19] + Lb[20] + Lb[21] + Lb[22];
 
@@ -337,7 +337,7 @@ int main( int argc, char *argv[] )
 
  /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -355,7 +355,7 @@ int main( int argc, char *argv[] )
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-
+	
   ***/
 
  fclose(infile);
@@ -374,3 +374,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_f8829_2022
 } // namespace OpenTaxSolver2022
+

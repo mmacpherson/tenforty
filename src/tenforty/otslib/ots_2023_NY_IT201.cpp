@@ -48,7 +48,7 @@ double A[10], S[10];
 int 	status=0;
 
 char 	statusnames[10][20]={"0","Single","Married/Joint","Married/Sep","Head_of_House","Widow"};
-char 	*Your1stName="", *YourLastName="", *YourInitial="",
+char 	*Your1stName="", *YourLastName="", *YourInitial="", 
 	*Spouse1stName="", *SpouseLastName="", *SpouseInitial="";
 char	*YourSocSec=0, *SpouseSocSec=0, *MailAddress=0, *AptNumber=0,
 	Town[2048]="", StateName[1024]="", Zipcode[1024]="";
@@ -118,8 +118,8 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
  char fline[4000], word[4000], tword[2000];
  int linenum, j;
 
- for (linenum=0; linenum<MAX_LINES; linenum++)
-  {
+ for (linenum=0; linenum<MAX_LINES; linenum++) 
+  { 
    fed_data->fedline[linenum] = 0.0;
    fed_data->schedA[linenum] = 0.0;
    fed_data->schedD[linenum] = 0.0;
@@ -140,7 +140,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
   {
    printf("Error: Could not open Federal return '%s'\n", fedlogfile);
    fprintf(outfile,"Error: Could not open Federal return '%s'\n", fedlogfile);
-   return 0;
+   return 0; 
   }
  fed_data->Itemized = 1; /* Set initial default values. */
  read_line(infile,fline);  linenum = 0;
@@ -181,7 +181,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strcmp( word, "A5a" ) == 0)
       {
 	next_word(fline, word, " \t=");
-	if (sscanf(word,"%lf", &fed_data->schedA5a) != 1)
+	if (sscanf(word,"%lf", &fed_data->schedA5a) != 1) 
          {
           printf("Error: Reading Fed SchedA5a %d '%s%s'\n",linenum,word,fline);
 	  fprintf(outfile, "Error: Reading Fed SchedA %d '%s%s'\n",linenum,word,fline);
@@ -194,7 +194,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strcmp( word, "A5b" ) == 0)
       {
 	next_word(fline, word, " \t=");
-	if (sscanf(word,"%lf", &fed_data->schedA5b) != 1)
+	if (sscanf(word,"%lf", &fed_data->schedA5b) != 1) 
          {
           printf("Error: Reading Fed SchedA5b %d '%s%s'\n",linenum,word,fline);
 	  fprintf(outfile, "Error: Reading Fed SchedA %d '%s%s'\n",linenum,word,fline);
@@ -207,7 +207,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strcmp( word, "A5c" ) == 0)
       {
 	next_word(fline, word, " \t=");
-	if (sscanf(word,"%lf", &fed_data->schedA5c) != 1)
+	if (sscanf(word,"%lf", &fed_data->schedA5c) != 1) 
          {
           printf("Error: Reading Fed SchedA5c %d '%s%s'\n",linenum,word,fline);
 	  fprintf(outfile, "Error: Reading Fed SchedA %d '%s%s'\n",linenum,word,fline);
@@ -220,7 +220,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strcmp( word, "A8a" ) == 0)
       {
 	next_word(fline, word, " \t=");
-	if (sscanf(word,"%lf", &fed_data->schedA8a) != 1)
+	if (sscanf(word,"%lf", &fed_data->schedA8a) != 1) 
          {
           printf("Error: Reading Fed SchedA8a %d '%s%s'\n",linenum,word,fline);
 	  fprintf(outfile, "Error: Reading Fed SchedA %d '%s%s'\n",linenum,word,fline);
@@ -233,7 +233,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strcmp( word, "A8b" ) == 0)
       {
 	next_word(fline, word, " \t=");
-	if (sscanf(word,"%lf", &fed_data->schedA8b) != 1)
+	if (sscanf(word,"%lf", &fed_data->schedA8b) != 1) 
          {
           printf("Error: Reading Fed SchedA8b %d '%s%s'\n",linenum,word,fline);
 	  fprintf(outfile, "Error: Reading Fed SchedA %d '%s%s'\n",linenum,word,fline);
@@ -246,7 +246,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strcmp( word, "A8c" ) == 0)
       {
 	next_word(fline, word, " \t=");
-	if (sscanf(word,"%lf", &fed_data->schedA8c) != 1)
+	if (sscanf(word,"%lf", &fed_data->schedA8c) != 1) 
          {
           printf("Error: Reading Fed SchedA8c %d '%s%s'\n",linenum,word,fline);
 	  fprintf(outfile, "Error: Reading Fed SchedA %d '%s%s'\n",linenum,word,fline);
@@ -263,7 +263,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	 fprintf(outfile,"Error: Reading Fed line number '%s%s'\n",word,fline);
         }
        next_word(fline, word, " \t=");
-       if (sscanf(word,"%lf", &fed_data->schedA[linenum])!=1)
+       if (sscanf(word,"%lf", &fed_data->schedA[linenum])!=1) 
         {
 	 printf("Error: Reading Fed schedA %d '%s%s'\n",linenum,word,fline);
 	 fprintf(outfile, "Error: Reading Fed schedA %d '%s%s'\n",linenum,word,fline);
@@ -295,7 +295,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	 }
       } /*Schedule-D*/
      else
-     if (sscanf(word,"%lf", &fed_data->schedD[linenum]) != 1)
+     if (sscanf(word,"%lf", &fed_data->schedD[linenum]) != 1) 
       {
        if (strncasecmp(word,"yes",1) == 0) fed_data->schedD[linenum] = 1;
        else
@@ -315,7 +315,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
    if (strcmp(word,"S1_2a") == 0)
     {
      next_word(fline, word, " \t=:");
-     if (sscanf(word,"%lf", &fed_data->sched[1][2]) != 1)
+     if (sscanf(word,"%lf", &fed_data->sched[1][2]) != 1) 
       {
        printf("Error: Reading Fed sched1 line 2 '%s'\n", word );
        fprintf(outfile,"Error: Reading Fed sched1 line 2 '%s'\n", word );
@@ -340,7 +340,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      else
       {
 	next_word(fline, word, " \t=:");
-	if (sscanf(word,"%lf", &fed_data->sched[1][linenum]) != 1)
+	if (sscanf(word,"%lf", &fed_data->sched[1][linenum]) != 1) 
          {
 	  printf("Error: Reading Fed sched1 line %d '%s'\n", linenum, word );
 	  fprintf(outfile,"Error: Reading Fed sched1 line %d '%s'\n", linenum, word );
@@ -361,7 +361,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      else
       {
 	next_word(fline, word, " \t=:");
-	if (sscanf(word,"%lf", &fed_data->sched[2][linenum]) != 1)
+	if (sscanf(word,"%lf", &fed_data->sched[2][linenum]) != 1) 
 	 {
 	  printf("Error: Reading Fed sched2 line %d '%s'\n", linenum, word );
 	  fprintf(outfile,"Error: Reading Fed sched2 line %d '%s'\n", linenum, word );
@@ -383,7 +383,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if ((linenum != 6) && (linenum != 13))
       {
 	next_word(fline, word, " \t=:");
-	if (sscanf(word,"%lf", &fed_data->sched[3][linenum]) != 1)
+	if (sscanf(word,"%lf", &fed_data->sched[3][linenum]) != 1) 
 	 {
 	  printf("Error: Reading Fed sched3 line %d '%s'\n", linenum, word );
 	  fprintf(outfile,"Error: Reading Fed sched3 line %d '%s'\n", linenum, word );
@@ -401,7 +401,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	status = SINGLE;
      else
      if (strncasecmp(word,"Married/Joint",13)==0)
-	status = MARRIED_FILING_JOINTLY;
+	status = MARRIED_FILING_JOINTLY; 
      else
      if (strncasecmp(word,"Married/Sep",11)==0)
 	status = MARRIED_FILING_SEPARAT;
@@ -411,11 +411,11 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      else
      if (strncasecmp(word,"Widow",4)==0)
 	status = WIDOW;
-     else
-      {
-       printf("Error: unrecognized status '%s'. Exiting.\n", word);
+     else 
+      { 
+       printf("Error: unrecognized status '%s'. Exiting.\n", word); 
        fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-       return 0;
+       return 0; 
       }
     }
    else
@@ -563,7 +563,7 @@ void Report_bracket_info( double income, double tx, int status )
 	if (income <=    27900.0) rate = 0.0525;  else
 	if (income <=   161550.0) rate = 0.0550;  else
 	if (income <=   323200.0) rate = 0.0600;  else
-	if (income <=  2155350.0) rate = 0.0685;  else
+	if (income <=  2155350.0) rate = 0.0685;  else  
 	if (income <=  5000000.0) rate = 0.0965; else
 	if (income <= 25000000.0) rate = 0.103; else rate = 0.109;
       break;
@@ -1062,7 +1062,7 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (j=0; j<MAX_LINES; j++)
+ for (j=0; j<MAX_LINES; j++) 
   {
    L[j] = 0.0;
    form_IT196[j] = 0.0;
@@ -1125,7 +1125,7 @@ int main( int argc, char *argv[] )
   fprintf(outfile,"CkD2_1n: X\n");
 
  GetTextLineF( "D2_2-YRCamount" );
-
+ 
  answ = GetTextLineF( "D3-NonQualComp" );
  next_word( answ, word, " \t;" );
  if (toupper( word[0] ) == 'Y')
@@ -1146,7 +1146,7 @@ int main( int argc, char *argv[] )
  GetTextLineF( "G_SpecCondCode" );
 
  get_parameter( infile, 's', word, "Dependent" );
- get_parameter( infile, 'b', &Dependent, "Dependent?");
+ get_parameter( infile, 'b', &Dependent, "Dependent?"); 
 
  // GetLineF( "L1", &L[1] );	/* Wages. */
  L[1] = PrelimFedReturn.fedline[1];
@@ -1329,18 +1329,18 @@ int main( int argc, char *argv[] )
 
  switch (status)	/* Determine the Deduction Threshold (IT196 pg 18). */
   {
-   case WIDOW:
+   case WIDOW: 
    case MARRIED_FILING_JOINTLY: dedthresh = 338850.0;	break;
    case HEAD_OF_HOUSEHOLD: 	dedthresh = 310600.0;	break;
    case SINGLE: 		dedthresh = 282400.0;	break;
-   case MARRIED_FILING_SEPARAT:
+   case MARRIED_FILING_SEPARAT: 
    default:			dedthresh = 169400.0;	break;
   }
 
  if (L[19] <= dedthresh)
   {
-   form_IT196[40] = form_IT196[4] + form_IT196[9] + form_IT196[15] + form_IT196[19] + form_IT196[20]
-		 + form_IT196[28] + form_IT196[39];
+   form_IT196[40] = form_IT196[4] + form_IT196[9] + form_IT196[15] + form_IT196[19] + form_IT196[20] 
+		 + form_IT196[28] + form_IT196[39];	
    fprintf(outfile,"Check_IT196_DedNotLimited = X\n");
   }
  else
@@ -1427,9 +1427,9 @@ int main( int argc, char *argv[] )
     } /*wrksheet4 - IT196-Pg20*/
    else
    if (L[33] < 1000000.0)
-    {
+    { 
      form_IT196[46] = 0.50 * form_IT196[45];
-    }
+    } 
    else
    if (L[33] < 10000000.0)
     { /*wrksheet5 - IT196-Pg20*/
@@ -1461,7 +1461,7 @@ int main( int argc, char *argv[] )
 
  switch (status)	/* Determine the Std. Deduction. Instructions Pg. 15. */
   {
-   case SINGLE: if (Dependent)   std_ded = 3100.0;
+   case SINGLE: if (Dependent)   std_ded = 3100.0; 
 		else 		 std_ded = 8000.0;			/* Updated for 2023. */
 	break;
    case MARRIED_FILING_JOINTLY:  std_ded = 16050.0; break;
@@ -1470,7 +1470,7 @@ int main( int argc, char *argv[] )
    case WIDOW: 			 std_ded = 16050.0; break;
   }
 
- if (std_ded > itemized_ded)
+ if (std_ded > itemized_ded) 
   {
    L[34] = std_ded;
    fprintf(outfile,"Check_Std = X\n");
@@ -1544,7 +1544,7 @@ int main( int argc, char *argv[] )
     if (L[19] < 20000.0) L[40] = 60.0 + 15.0 * (Exemptions-1); else
     if (L[19] < 22000.0) L[40] = 60.0 + 10.0 * (Exemptions-1); else
     if (L[19] < 25000.0) L[40] = 50.0 + 10.0 * (Exemptions-1); else
-    if (L[19] < 28000.0) L[40] = 40.0 +  5.0 * (Exemptions-1); else
+    if (L[19] < 28000.0) L[40] = 40.0 +  5.0 * (Exemptions-1); else  
     if (L[19] < 32000.0) L[40] = 20.0 +  5.0 * (Exemptions-1); else  L[40] = 0.0;
    }
   else
@@ -1555,7 +1555,7 @@ int main( int argc, char *argv[] )
     if (L[19] < 20000.0) L[40] = 30.0 + 8.0 * (Exemptions-1); else
     if (L[19] < 22000.0) L[40] = 30.0 + 5.0 * (Exemptions-1); else
     if (L[19] < 25000.0) L[40] = 25.0 + 5.0 * (Exemptions-1); else
-    if (L[19] < 28000.0) L[40] = 20.0 + 3.0 * (Exemptions-1); else
+    if (L[19] < 28000.0) L[40] = 20.0 + 3.0 * (Exemptions-1); else  
     if (L[19] < 32000.0) L[40] = 10.0 + 3.0 * (Exemptions-1); else  L[40] = 0.0;
    }
  showline_wmsg(40,"NY state household credit");	/* NY state household credit, (pg 29). */
@@ -1577,7 +1577,7 @@ int main( int argc, char *argv[] )
  showline_wmsg(46,"Total New York State taxes");
 
  get_parameter( infile, 's', word, "NYC_Resident" );
- get_parameters( infile, 'b', &nyc_resident, "NYC_Resident (yes/no) ?");
+ get_parameters( infile, 'b', &nyc_resident, "NYC_Resident (yes/no) ?"); 
 
  GetLine( "L50", &L[50] );	/* Part-year New York City resident tax */
  GetLine( "L51", &L[51] );	/* Other New York City taxes */
@@ -1857,3 +1857,4 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_NY_IT201_2023
 } // namespace OpenTaxSolver2023
+
