@@ -92,17 +92,17 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
   spc='\n';
  do
   {  /*Absorb any leading white-space.*/
-     word[j]=getc(infile); 
-     if (word[j]=='{') 
-      { 
+     word[j]=getc(infile);
+     if (word[j]=='{')
+      {
        do word[j]=getc(infile); while ((word[j]!='}') && (!feof(infile)));
        word[j]=getc(infile);
       }
-  } 
+  }
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]==ltc) || (word[j]=='\r')));
  if (word[j]=='$')
   word[j]=getc(infile);
- if (word[j]==';') 
+ if (word[j]==';')
   j++;
  else
  if (word[j]=='\n')
@@ -122,7 +122,7 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
         j++;  word[j] = getc(infile);
         if (word[j]=='{') do word[j] = getc(infile); while ((!feof(infile)) && (word[j]!='}'));
 	if (word[j]==',') word[j] = getc(infile);
-      } 
+      }
    while ((!feof(infile)) && ((word[j]!=spc) && (word[j]!='\t') && (word[j]!='\n') && (word[j]!=';')));
    if (word[j]==';') ungetc(word[j],infile);
   }
@@ -190,7 +190,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  int i, *ii;
  double y, *yy;
 
- if (kind=='w') 
+ if (kind=='w')
   { single_line_entry = 1;  whole_line_entry = 1; }
 
  get_word(infile, word);
@@ -211,7 +211,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if (sscanf(word,"%lf",&y)!=1) 
+   if (sscanf(word,"%lf",&y)!=1)
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    yy = (double *)x;
    *yy = y;
@@ -222,8 +222,8 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    owrd = (char *)x;
    strcpy( owrd, word );
    if (emssg[0]!='\0')
-    { if (strcmp(word,emssg)!=0) 
-       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); } 
+    { if (strcmp(word,emssg)!=0)
+       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); }
     }
   }
  else
@@ -297,7 +297,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if (sscanf(word,"%lf",&y)!=1) 
+   if (sscanf(word,"%lf",&y)!=1)
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    yy = (double *)x;
    *yy = *yy + y;
@@ -322,7 +322,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='b')
   {
-   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcmp(word,"Y")==0) || (strcmp(word,"1")==0)) 
+   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcmp(word,"Y")==0) || (strcmp(word,"1")==0))
 	j = 1;
    else
    if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcmp(word,"N")==0) || (strcmp(word,"0")==0))
@@ -333,9 +333,9 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
 	get_word(infile,word);
 	return;
      }
-   else 
-    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg); 
-     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg); 
+   else
+    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg);
+     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg);
      exit(1);
     }
    ii = (int *)x;
@@ -513,10 +513,10 @@ void read_comment_filtered_line( FILE *infile, char *line, int maxlen )
  int j=0;
  do
   {
-   line[j] = getc(infile);  
-   if (line[j]=='{') 
-    { 
-     do line[j] = getc(infile); 
+   line[j] = getc(infile);
+   if (line[j]=='{')
+    {
+     do line[j] = getc(infile);
      while ((line[j] != '}') && (!feof(infile)));
        line[j] = getc(infile);
      line[j] = ' ';
@@ -537,7 +537,7 @@ void shownum( int j )
 { fprintf(outfile, "L%d = %d\n", j, (int)L[j]); }
 
 /* Show line only if non-zero. */	/* Depricated in favor of ShowLineNonZero (clearer name). */
-void ShowLine( int j )	
+void ShowLine( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show line only if non-zero. */
@@ -545,7 +545,7 @@ void ShowLineNonZero( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show-Line with a message. */
-void showline_wmsg( int j, char *msg )	
+void showline_wmsg( int j, char *msg )
 { fprintf(outfile,"L%d = %6.2f\t\t%s\n", j, L[j], msg); }
 
 /* Show line with a message, only if non-zero. */
@@ -562,9 +562,9 @@ void showline_wlabel( char *label, double value )
 
 /* Show-line with specified label and value. */
 void showline_wlabelnz( char *label, double value )
-{ 
+{
  if (value != 0.0)
-  fprintf(outfile, "%s = %6.2f\n", label, value ); 
+  fprintf(outfile, "%s = %6.2f\n", label, value );
 }
 
 /* Show-line with specified label, value, and message. */
@@ -636,7 +636,7 @@ void Display_File( char *filename )
   {
    printf("%s", line);
    fgets(line, 500, infile);
-  } 
+  }
  fclose(infile);
 }
 
@@ -651,7 +651,7 @@ void get_comment( FILE *infile, char *word )
  int j=0;
 
  do  /*Absorb any leading white-space.*/
-     word[j] = getc(infile); 
+     word[j] = getc(infile);
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]=='\n') || (word[j]=='\r')));
  if (word[j] == '{')
   {
@@ -713,9 +713,9 @@ char *GetTextLineF( char *linename )
     {
      k++;
      if (k >= 5000)
-      { 
-        line[k-1] = '\0';  
-        while ((!feof(infile)) && (getc(infile) != '\n'));  
+      {
+        line[k-1] = '\0';
+        while ((!feof(infile)) && (getc(infile) != '\n'));
         consume_leading_trailing_whitespace( line );
 	fprintf(outfile, "%s %s\n", linename, line );
         return strdup( line );
@@ -735,7 +735,7 @@ char *GetTextLineF( char *linename )
     }
   }
  if (writeout_line)
-  fprintf(outfile, "%s %s\n", linename, line ); 
+  fprintf(outfile, "%s %s\n", linename, line );
  return strdup( line );
 }
 
@@ -753,7 +753,7 @@ char *GetTextLine( char *linename )
 
 
 void format_socsec( char *line, int kind )
-{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */	
+{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */
   char buf[20]="";	  /* Kind = 1 forces 9-consecutive digits w/no spaces. */
   int j=0, k=0;
   while ((line[j] != '\0') && (k < 11))
@@ -903,11 +903,11 @@ void intercept_any_pdf_markups( FILE *infile )
 void exude_pdf_markups( FILE *outfile )
 { /* Add any intercepted PDF-markups to the tax-output file. */
   struct pdf_markup_record *old;
-  if (!outfile) return;  
+  if (!outfile) return;
   while (pdf_markup_list)
    {
     if (pdf_markup_list->page > 0)
-     fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page, 
+     fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page,
 		pdf_markup_list->xpos, pdf_markup_list->ypos, pdf_markup_list->tagname );
     fprintf(outfile,"%s = %s\n", pdf_markup_list->tagname, pdf_markup_list->value );
     old = pdf_markup_list;
@@ -1009,7 +1009,7 @@ double brkpt[4][9]={
 
 
 double TaxRateFormula( double x, int status )  /* Returns tax due. */
-{		
+{
   double sum=0.0;
   int   bracket=0;
   if (status == WIDOW) status = MARRIED_FILLING_JOINTLY;  /* Handle case of widow(er). */
@@ -1023,11 +1023,11 @@ double TaxRateFormula( double x, int status )  /* Returns tax due. */
 }
 
 
-void Report_bracket_info( double income, double addedtx, int status )  
+void Report_bracket_info( double income, double addedtx, int status )
 {
   double tx;
   int  bracket=0;
-  tx = TaxRateFormula( income, status );  
+  tx = TaxRateFormula( income, status );
   if (status == WIDOW) status = MARRIED_FILLING_JOINTLY;  /* Handle case of widow(er). */
   status = status - 1;  /* Arrays start at zero; not one. */
   while (brkpt[status][bracket+1] < income) bracket++;
@@ -1140,7 +1140,7 @@ void capgains_qualdividends_worksheets( int status )			/* Updated for 2019. */
 /* Form 6251 asks many highly specialized questions, which are assumed zero for most filers. 	*/
 /* Those who should make the additional entries will no-doubt know who they are, and can 	*/
 /* simply add them to this section.  The balance of the routine will be helpful in either case. */
-/* --- Anyone indicated to fill-out Form 6251 should review the 6251 instruction booklet. ---	*/ 
+/* --- Anyone indicated to fill-out Form 6251 should review the 6251 instruction booklet. ---	*/
 /*----------------------------------------------------------------------------------------------*/
 double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. */
 {
@@ -1153,7 +1153,7 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
  fprintf(outfile,"Review AMT form6251 routine for your situation.\n");
 
  /* Part I - Alternative Minimum Taxable Income (AMTI) */
- if (L[11] > 0.0)  
+ if (L[11] > 0.0)
   amtws[1] = L[11];
  else
   amtws[1] = L[8] - L[9] - L[10];
@@ -1210,21 +1210,21 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
 	offsetA = 3896.0;
 	amtexmption = 71700.0;
 	break;
-     case MARRIED_FILLING_JOINTLY: case WIDOW: 
+     case MARRIED_FILLING_JOINTLY: case WIDOW:
 	thresholdA = 1020600.0;
 	thresholdB = 1467400.0;
 	thresholdC = 194800.0;
 	offsetA = 3896.0;
 	amtexmption = 111700.0;
 	break;
-     case MARRIED_FILLING_SEPARAT: 
+     case MARRIED_FILLING_SEPARAT:
 	thresholdA = 510300.0;
 	thresholdB = 733700.0;
 	thresholdC = 97400.0;
 	offsetA = 1948.0;
         amtexmption = 55850.0;
 	break;
-     default:  printf("Status %d not handled.\n", status);  exit(1); 
+     default:  printf("Status %d not handled.\n", status);  exit(1);
   }
 
  if (amtws[4] > thresholdA)
@@ -1267,10 +1267,10 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
         amtws[18] = 0.28 * amtws[17] - offsetA;
        switch (status)
         {
-           case MARRIED_FILLING_JOINTLY:  case WIDOW: 
+           case MARRIED_FILLING_JOINTLY:  case WIDOW:
 	     amtws[19] = 78750.0;
 	   break;
-           case SINGLE:  case MARRIED_FILLING_SEPARAT: 
+           case SINGLE:  case MARRIED_FILLING_SEPARAT:
    	     amtws[19] = 39375.0;
    	   break;
            case HEAD_OF_HOUSEHOLD:
@@ -1286,14 +1286,14 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
        amtws[21] = NotLessThanZero( amtws[19] - amtws[20] );
        amtws[22] = smallerof( amtws[12], amtws[13] );
        amtws[23] = smallerof( amtws[21], amtws[22] );
-       amtws[24] = amtws[22] - amtws[23];  
+       amtws[24] = amtws[22] - amtws[23];
        switch (status)
 	{
 	   case SINGLE:  			      amtws[25] = 434550.0;  break;
 	   case MARRIED_FILLING_SEPARAT:	      amtws[25] = 244425.0;  break;
 	   case MARRIED_FILLING_JOINTLY: case WIDOW:  amtws[25] = 488850.0;  break;
 	   case HEAD_OF_HOUSEHOLD: 		      amtws[25] = 461700.0;  break;
-	   default:  printf("Status %d not handled.\n", status);  exit(1); 
+	   default:  printf("Status %d not handled.\n", status);  exit(1);
 	}
        amtws[26] = amtws[21];
        if (Do_QDCGTW)
@@ -1335,7 +1335,7 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
        amtws[7] = 0.28 * amtws[6] - offsetA;
      }
     amtws[9] = amtws[7] - amtws[8];
-  } 
+  }
  amtws[10] = L12a + Sched2[2] - Sched3[1];
  amtws[11] = NotLessThanZero( amtws[9] - amtws[10] );
  printf("	AMTws[11] = Abs( %6.2f - %6.2f ) = Abs( %6.2f )\n", amtws[9], amtws[10], amtws[9] - amtws[10] );
@@ -1358,11 +1358,11 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
    else
     file_amt = No;
   }
- if (force_print_all_pdf_forms) 
+ if (force_print_all_pdf_forms)
   file_amt = 1;
  if (file_amt)
   fprintf(outfile,"PDFpage: 13 13\n");	/* Optional PDF Page. */
- for (j=0; j<100; j++) 
+ for (j=0; j<100; j++)
   {
    if (j == 2)
     {
@@ -1389,8 +1389,8 @@ double form6251_AlternativeMinimumTax( int itemized )						/* Updated for 2019. 
  if (file_amt)
   fprintf(outfile,"EndPDFpage.\n");
  fprintf(outfile,"	AMTws[11] = Abs( %6.2f - %6.2f ) = Abs( %6.2f )\n", amtws[9], amtws[10], amtws[9] - amtws[10] );
- fprintf(outfile,"Your Alternative Minimum Tax = %8.2f\n", amtws[11] ); 
- printf("Your Alternative Minimum Tax = %8.2f\n", amtws[11] ); 
+ fprintf(outfile,"Your Alternative Minimum Tax = %8.2f\n", amtws[11] );
+ printf("Your Alternative Minimum Tax = %8.2f\n", amtws[11] );
  return amtws[11];
 }
 
@@ -1429,7 +1429,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
  char fline[1000], word[1000];
  int linenum;
 
- for (linenum=0; linenum<MAX_LINES; linenum++) 
+ for (linenum=0; linenum<MAX_LINES; linenum++)
   { fed_data->fedline[linenum] = 0.0;  fed_data->schedD[linenum] = 0.0; }
  convert_slashes( fedlogfile );
  infile = fopen(fedlogfile, "r");
@@ -1454,11 +1454,11 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	printf("Error: Reading fed line %d '%s%s'\n",linenum,word,fline);
      if (verbose) printf("FedLin[%d] = %2.2f\n", linenum, fed_data->fedline[linenum]);
     }
-   if ((strstr(word,"D") == word) && (strstr(fline," = ") != 0)) 
+   if ((strstr(word,"D") == word) && (strstr(fline," = ") != 0))
     {
      if (sscanf(&word[1],"%d",&linenum)!=1) printf("Error: Reading fed line number '%s%s'\n",word,fline);
      next_word(fline, word, " \t=");	remove_certain_chars( word, "," );
-     if (sscanf(word,"%lf", &fed_data->schedD[linenum]) != 1) 
+     if (sscanf(word,"%lf", &fed_data->schedD[linenum]) != 1)
       {
        if (strcasecmp(word,"yes") == 0) fed_data->schedD[linenum] = 1;
        else
@@ -1480,7 +1480,7 @@ void CapitalLossCarryOverWorksheet( char *fedlogfile, struct FedReturnData *Last
  int k;
 
  ImportFederalReturnData( fedlogfile, LastYearsReturn );
- if (LastYearsReturn->schedD[21] == 0.0) 
+ if (LastYearsReturn->schedD[21] == 0.0)
   {
    printf(" No carry-over loss.\n");
    fprintf(outfile," No carry-over loss.\n");
@@ -1549,7 +1549,7 @@ struct capgain_record
 double total_sales, total_costs=0.0;
 
 
-void new_capgain( struct capgain_record **list, char *comment, double buy_amnt, 
+void new_capgain( struct capgain_record **list, char *comment, double buy_amnt,
 					char *buy_date, double sell_amnt, char *sell_date )
 { /* Add a new entry to a list. */
   struct capgain_record *new_item, *prev;
@@ -1590,14 +1590,14 @@ void print_capgain_list( struct capgain_record *list, int section, char *message
    if (strlen( word ) > 27) word[30] = '\0';
    if ((strlen(word) > 0) && (word[ strlen(word) - 1 ] == '}')) word[ strlen(word) - 1 ] = '\0';
    while (strlen( word ) < 27) strcat( word, " " ); 	/* Fields become formatted right-justified. */
-   fprintf(outfile," %s %10s %10s %14.2f %14.2f %14.2f\n", word, item->buy_date, item->sell_date, item->sell_amnt, 
+   fprintf(outfile," %s %10s %10s %14.2f %14.2f %14.2f\n", word, item->buy_date, item->sell_date, item->sell_amnt,
 	absolutev(item->buy_amnt), item->sell_amnt + item->buy_amnt );
    total_sales = total_sales + item->sell_amnt;
    total_costs = total_costs + item->buy_amnt;
    item = item->nxt;
   }
  fprintf(outfile," ---------------------------------------------------------------------------------------\n");
- fprintf(outfile," %d. Totals:                                        %14.2f %14.2f %14.2f\n\n", 
+ fprintf(outfile," %d. Totals:                                        %14.2f %14.2f %14.2f\n\n",
 	section + 1, total_sales, absolutev(total_costs), total_sales + total_costs );
 
  /* Now re-list them for update by the PDF-Convertor. */
@@ -1698,7 +1698,7 @@ void get_gain_and_losses( char *label )
 	 break;
     case 2:	toggle++;
 	 if (sscanf(word,"%lf",&amnt2)!=1)
-	  { printf("ERROR: Bad float '%s', reading %s.\n", word, label ); 
+	  { printf("ERROR: Bad float '%s', reading %s.\n", word, label );
 	    fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, label );
 	    exit(1);
 	  }
@@ -1835,7 +1835,7 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2019. */
   {
    if (sscanf(word,"%lf",&SchedD[6]) != 1) LastYearsOutFile = strdup(word);
    do
-    { get_word(infile,word); 
+    { get_word(infile,word);
       if ((strlen(word) > 0) && (strcmp(word,";") != 0))
        fprintf(outfile,"Warning: Unexpected multiple values on line D6.  '%s' ignored.\n If multi-part filename, then surround it in quotes (\").", word );
     } while (strcmp(word,";") != 0);
@@ -1853,17 +1853,17 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2019. */
   CapitalLossCarryOverWorksheet( LastYearsOutFile, &LastYearsReturn );
 
  if (SchedD[6] > 0.0)
-  { 
+  {
    /* fprintf(outfile,"Warning: D6 Carryover Loss must be NEGATIVE.\n"); */
    SchedD[6] = -SchedD[6];
   }
  if (SchedD[14] > 0.0)
-  { 
+  {
    /* fprintf(outfile,"Warning: D14 Carryover Loss must be NEGATIVE.\n"); */
    SchedD[14] = -SchedD[14];
   }
 
- if ((SchedD[4] != 0.0) || (SchedD[5] != 0.0) || (SchedD[6] != 0.0) || (SchedD[11] != 0.0) || 
+ if ((SchedD[4] != 0.0) || (SchedD[5] != 0.0) || (SchedD[6] != 0.0) || (SchedD[11] != 0.0) ||
      (SchedD[12] != 0.0) || (SchedD[13] != 0.0) || (SchedD[14] != 0.0))
   { Do_SchedD = Yes; }	/* Set Do_SchedD in case it was not already set by Cap-Gain/Loss in rows 1-3, or 8-10. */
 
@@ -1896,7 +1896,7 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2019. */
    /* Part ||| */
    SchedD[16] = SchedD[7] + SchedD[15];
    fprintf(outfile," D16 = %6.2f\n", SchedD[16]);
-   if (SchedD[16] > 0.0) 
+   if (SchedD[16] > 0.0)
     { /*gain*/
      L[6] = SchedD[16];
      if ((SchedD[15] > 0.0) && (SchedD[16] > 0.0))
@@ -1934,14 +1934,14 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2019. */
 	 } /*no*/
        doline22 = 0;
       } /* Lines 17-21 */
-     else 
+     else
       {
        printf(" D17 = no\n CkD17n X\n");
        doline22 = Yes;
       }
-    } /*gain*/  
+    } /*gain*/
    else
-   if (SchedD[16] < 0.0) 
+   if (SchedD[16] < 0.0)
     { /*loss*/	/* Schedule-D line 21. Skip to here from line 16 if a loss. */
      double maxloss;
 
@@ -1963,12 +1963,12 @@ void get_cap_gains()		/* This is Schedule-D. */			/* Updated for 2019. */
       { /*yes*/
        fprintf(outfile," D22 = Yes\n CkD22y X\n");
        // printf("Complete 'Qualified Dividends and Capital Gain tax Worksheet', instructions page 44.\n");
-       Do_QDCGTW = Yes;	
+       Do_QDCGTW = Yes;
       } /*yes*/
      else
       { /*no*/
        fprintf(outfile," D22 = No\n CkD22n X\n");
-       // Do_QDCGTW = No;	
+       // Do_QDCGTW = No;
       } /*no*/
     }
 
@@ -2003,7 +2003,7 @@ void sched_D_tax_worksheet( int status )			/* Updated for 2019. */
  ws[14] = NotLessThanZero( ws[1] - ws[13] );
  fprintf(outfile,"  Sched-D tax Worksheet line 13 = %6.2f\n", ws[13]);
  fprintf(outfile,"  Sched-D tax Worksheet line 14 = %6.2f\n", ws[14]);
- switch (status) 
+ switch (status)
   { case SINGLE: case MARRIED_FILLING_SEPARAT: ws[15] = 39375.0; break;
     case MARRIED_FILLING_JOINTLY: case WIDOW:  ws[15] = 78750.0; break;
     case HEAD_OF_HOUSEHOLD:      	       ws[15] = 52750.0; break;
@@ -2011,7 +2011,7 @@ void sched_D_tax_worksheet( int status )			/* Updated for 2019. */
  ws[16] = smallerof( ws[1], ws[15] );
  ws[17] = smallerof( ws[14], ws[16] );
  ws[18] = NotLessThanZero( ws[1] - ws[10] );
- switch (status) 
+ switch (status)
   { case SINGLE: case MARRIED_FILLING_SEPARAT: ws[19] = smallerof( ws[1], 160725.0 );  break;
     case MARRIED_FILLING_JOINTLY: case WIDOW:  ws[19] = smallerof( ws[1], 321450.0 );  break;
     case HEAD_OF_HOUSEHOLD:      	       ws[19] = smallerof( ws[1], 160700.0 );  break;
@@ -2024,10 +2024,10 @@ void sched_D_tax_worksheet( int status )			/* Updated for 2019. */
    ws[23] = smallerof( ws[1], ws[13] );
    ws[24] = ws[22];
    ws[25] = NotLessThanZero( ws[23] - ws[24] );
-   switch (status) 
+   switch (status)
     { case SINGLE: 			ws[24] = 434550.0;  break;
       case MARRIED_FILLING_SEPARAT: 	ws[24] = 244425.0;  break;
-      case MARRIED_FILLING_JOINTLY: 
+      case MARRIED_FILLING_JOINTLY:
       case WIDOW:  			ws[24] = 488850.0;  break;
       case HEAD_OF_HOUSEHOLD:		ws[24] = 461700.0;  break;
     }
@@ -2169,15 +2169,15 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
    switch (state)
     {
      case 0:
-	if (strcmp( word1, "L2b" ) == 0) 
-	 { 
-	  state = 8;  ncnt = 15; 
+	if (strcmp( word1, "L2b" ) == 0)
+	 {
+	  state = 8;  ncnt = 15;
 	  pg = 0;  cnt = 0;  newentry = 1;
 	  strcpy( pgstr, "B1_" );
 	 }
 	else
 	if (strcmp( word1, "L3b" ) == 0)
-	 { 
+	 {
 	  if (pg > 0)
 	   {
 	    fprintf(outfile,"EndPDFpage.\n");
@@ -2191,7 +2191,7 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 	if (word1[0] == ';')
 	 {
 	  state = 0;
-	  if (pg > 0) 
+	  if (pg > 0)
            {
             fprintf(outfile,"Btotal = %8.2f\n", total );
             fprintf(outfile,"EndPDFpage.\n");
@@ -2205,7 +2205,7 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 	  cnt++;
 	  if (cnt == ncnt)
 	   {
-	    if (pg > 0) 
+	    if (pg > 0)
 	     {
 		fprintf(outfile,"Btotal = %8.2f\n", total );
 		fprintf(outfile,"EndPDFpage.\n");
@@ -2228,10 +2228,10 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
      	 }
 	break;
      case 9:
-	if (word1[0] == ';') 
+	if (word1[0] == ';')
 	 {
 	  state = 0;
-	  if (pg > 0) 
+	  if (pg > 0)
            {
             fprintf(outfile,"Btotal = %8.2f\n", total );
             fprintf(outfile,"EndPDFpage.\n");
@@ -2245,7 +2245,7 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 	  cnt++;
 	  if (cnt == ncnt)
 	   {
-	    if (pg > 0) 
+	    if (pg > 0)
 	     {
 		fprintf(outfile,"Btotal = %8.2f\n", total );
 		fprintf(outfile,"EndPDFpage.\n");
@@ -2273,7 +2273,7 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
    else
     newentry = 0;
   }
- if (pg > 0) 
+ if (pg > 0)
   {
    printf("Error: Missing ending ';' on L%d\n", state );
    fprintf(outfile,"Btotal = %6.2f\n", total );
@@ -2335,15 +2335,15 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
-  { 
+  {
    L[j] = 0.0;
-   SchedA[j] = 0.0; 
+   SchedA[j] = 0.0;
    SchedD[j] = 0.0;
    Sched1[j] = 0.0;
    Sched2[j] = 0.0;
    Sched3[j] = 0.0;
    ws_sched_D[j] = 0.0;
-   amtws[j] = 0.0; 
+   amtws[j] = 0.0;
   }
 
  /* Accept parameters from input file. */
@@ -2367,9 +2367,9 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
+  {
+   printf("Error: unrecognized status '%s'. Exiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -2378,7 +2378,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  get_parameter( infile, 'b', &j, "You_65+Over?" );
  StdDedChart_NumBoxesChecked = j;
  if (j == 0)
-   under65 = 1;  
+   under65 = 1;
  else
   {
    under65 = 0;
@@ -2421,7 +2421,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  GetLineFnz( "L2a", &L2a );	/* Tax-exempt interest. (only for SocialSecurity calculations) */
  GetLineF( "L2b", &L[2] );	/* Taxable interest. (Sched-B) */
  GetLineF( "L3a", &L3a );	/* Qualified Dividends. (Sched-B) */
- if (L3a > 0.0) Do_QDCGTW = Yes;	
+ if (L3a > 0.0) Do_QDCGTW = Yes;
  GetLineF( "L3b", &L[3] );	/* Ordinary Dividends. (Sched-B) */
  GetLineF( "L4a", &L4a );	/* IRAs distributions. */
  GetLineF( "L4b", &L4b );	/* Taxable IRAs distributions. */
@@ -2489,7 +2489,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  GetLineFnz( "S1_19", &Sched1[19] );	/* IRA deduction (Done above) */
 
  SocSec_Worksheet();		/* This calc. depends on line L5a and Sched1[9-19].  Calculates L5b, which is L[5]. */
- showline_wlabel( "L5b", L[5] ); 
+ showline_wlabel( "L5b", L[5] );
 
  showline( 6 );
  L[7] = L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + Sched1[9];
@@ -2510,7 +2510,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
     {
      ws[6] = ws[4] - ws[5];
      if (status == MARRIED_FILLING_JOINTLY)
-      ws[7] = ws[6] / 30000.0; 
+      ws[7] = ws[6] / 30000.0;
      else
       ws[7] = ws[6] / 15000.0;
      if (ws[7] >= 1.0)
@@ -2535,30 +2535,30 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  L[8] = L[7] - Sched1[22];
  showline_wlabelmsg( "L8b", L[8], "Adjusted Gross Income" );
 
- if (under65 == 0) over65 = 1; 
+ if (under65 == 0) over65 = 1;
  switch (status)	/* Check for minimum income to file. */				/* Updated for 2019. */
   {
    case SINGLE:  		  if (under65) exemption_threshold = 12200.0;
 				  else  exemption_threshold = 13850.0;
 	break;
    case MARRIED_FILLING_JOINTLY:  if (under65==2) exemption_threshold = 24400.0;
-				  else 
-				  if (under65==1) exemption_threshold = 25700.0;  
+				  else
+				  if (under65==1) exemption_threshold = 25700.0;
 				  else  exemption_threshold = 27000.0;
 				  if (under65 != 2) over65 = 1;
 	break;
    case MARRIED_FILLING_SEPARAT:  exemption_threshold = 5.0;
 	break;
-   case HEAD_OF_HOUSEHOLD: 	  if (under65) exemption_threshold = 18350.0;  
+   case HEAD_OF_HOUSEHOLD: 	  if (under65) exemption_threshold = 18350.0;
 				  else  exemption_threshold = 20000.0;
 	break;
-   case WIDOW:  		  if (under65) exemption_threshold = 24400.0;  
+   case WIDOW:  		  if (under65) exemption_threshold = 24400.0;
 				  else  exemption_threshold = 25700.0;
   }
  if (L[8] < exemption_threshold)
   {
    printf(" (L8 = %3.2f < Threshold = %3.2f)\n", L[8], exemption_threshold );
-   printf("You may not need to file a return, due to your income level.\n"); 
+   printf("You may not need to file a return, due to your income level.\n");
    fprintf(outfile,"You may not need to file a return, due to your income level.\n");
   }
 
@@ -2629,7 +2629,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
    fprintf(outfile,"  B6 = %6.2f\n", L[3] );
   }
 
- fprintf(outfile, "StdDedChart_NumBoxesChecked = %d\n", StdDedChart_NumBoxesChecked ); 
+ fprintf(outfile, "StdDedChart_NumBoxesChecked = %d\n", StdDedChart_NumBoxesChecked );
  if (StdDedChart_NumBoxesChecked == 0)
   {
    S_STD_DEDUC   = 12200.0;						/* Updated for 2019. */
@@ -2641,25 +2641,25 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
   { /* Std. Deduction chart for People who were Born Before January 2, 1955, or Were Blind, pg 30. */
     switch (StdDedChart_NumBoxesChecked)		/* Does not handle if someone claims you or joint-spouse as dependent. */
      {				/* (Qualifying Widow/er has same amounts as MFJ, so not broken into separate variable.) */
-      case 1: 
+      case 1:
 	S_STD_DEDUC   = 13850.0;					/* Updated for 2019. */
 	MFJ_STD_DEDUC = 25700.0;
 	MFS_STD_DEDUC = 13500.0;
 	HH_STD_DEDUC  = 20000.0;
 	break;
-      case 2: 
+      case 2:
 	S_STD_DEDUC   = 15500.0;
 	MFJ_STD_DEDUC = 27000.0;
 	MFS_STD_DEDUC = 14800.0;
 	HH_STD_DEDUC  = 21650.0;
 	break;
-      case 3: 
+      case 3:
 	MFJ_STD_DEDUC = 28300.0;
 	MFS_STD_DEDUC = 16100.0;
 	S_STD_DEDUC   = 15500.0;	/* Cannot happen, but set to appease compiler. */
 	HH_STD_DEDUC  = 21650.0;	/* .. */
 	break;
-      case 4: 
+      case 4:
 	MFJ_STD_DEDUC = 29600.0;
 	MFS_STD_DEDUC = 17400.0;
 	S_STD_DEDUC   = 15500.0;	/* Cannot happen, but set to appease compiler. */
@@ -2667,7 +2667,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1); 
+		exit(1);
      }
     fprintf(outfile,"(Assuming no one is claiming your or your joint-spouse as a dependent.)\n");
   }
@@ -2676,7 +2676,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
   {
    case SINGLE:
 		std_deduc = S_STD_DEDUC;	break;
-   case MARRIED_FILLING_SEPARAT:  
+   case MARRIED_FILLING_SEPARAT:
 		std_deduc = MFS_STD_DEDUC;	break;
    case WIDOW:
    case MARRIED_FILLING_JOINTLY:
@@ -2711,7 +2711,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 
  L12a = TaxRateFunction( L[11], status );
 
- if (L[11] <= 0.0) 
+ if (L[11] <= 0.0)
   { /*exception*/
     printf(" Exception (Sched-D Instructions page D-16) - Do not use QDCGT or Sched-D Tax Worksheets.\n");
   } /*exception*/
@@ -2757,14 +2757,14 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
     }
    else
    if (strstr( labelx, "AMTws" ) != 0)
-    { 
+    {
      get_parameters( infile, 'f', &tmpval, labelx );
      if ((sscanf( &(labelx[5]), "%d", &j) == 1) && (j >= 3) && (j < 3))
       amtws[j] = tmpval;
      else
       {
-        printf("ERROR reading '%s'.\n", labelx ); 
-        fprintf(outfile,"ERROR reading '%s'.\n", labelx ); 
+        printf("ERROR reading '%s'.\n", labelx );
+        fprintf(outfile,"ERROR reading '%s'.\n", labelx );
       }
     }
    else
@@ -2789,7 +2789,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
     }
    else
     {
-     printf("ERROR1: Found '%s' when expecting 'S2_2 or AMTwsXX or B7a'\n", labelx ); 
+     printf("ERROR1: Found '%s' when expecting 'S2_2 or AMTwsXX or B7a'\n", labelx );
      fprintf(outfile,"ERROR1: Found '%s' when expecting 'S2_2 or AMTwsXX'\n", labelx );
      exit(1);
     }
@@ -2825,7 +2825,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  GetLine( "S2_8", &Sched2[8] );		/* Taxes from Forms 8959, 8960, others. */
  GetLine( "S2_9", &Sched2[9] );		/* Section 965 net tax liability installment from Form965-A. */
 
- GetLine( "S3_1", &Sched3[1] ); 	/*  Foreign tax credit. Form 1116. (Needed by AMT form6251.) */ 
+ GetLine( "S3_1", &Sched3[1] ); 	/*  Foreign tax credit. Form 1116. (Needed by AMT form6251.) */
 
  Sched2[1] = form6251_AlternativeMinimumTax( itemize );	/* (Depends on L11 and prior lines.) */
  if (Sched2[1] == 0.0)
@@ -2854,9 +2854,9 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  L[12] = Sched2[3] + L12a;
  showline( 12 );
  Report_bracket_info( L[11], Sched2[3], status );
- 
+
  L[15] = Sched2[10];
- 
+
 
  /* -- Schedule 3 -- Part I - Nonrefundable Credits */
  showline_wlabel( "S3_1", Sched3[1] );
@@ -2924,7 +2924,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 
  L[18] = L18a + L18b + L18c + L18d;
  showline_wlabelnz( "L18e", L[18] );
- 
+
  L[19] = L[17] + L[18];
  showline_wmsg( 19, "Total Payments" );
 
@@ -2936,7 +2936,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
    fprintf(outfile,"L20 = %6.2f  Amount you Overpaid!!!\n", L[20] );
    fprintf(outfile,"L21a = %6.2f \n", L[20] );
   }
- else 
+ else
   { /* Tax-Due */
    L[23] = L[16] - L[19];
    fprintf(outfile,"L23 = %6.2f  DUE !!!\n", L[23] );
@@ -2945,7 +2945,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
  ShowLineNonZero( 24 );
  fprintf(outfile,"------------------------------\n");
 
- 
+
  fprintf(outfile,"\n{ --------- Identity-Information:  --------- }\n");
  Your1stName    = GetTextLineF( "Your1stName:" );
  YourLastName   = GetTextLineF( "YourLastName:" );
@@ -3008,5 +3008,3 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 #undef strcasecmp
 #undef strncasecmp
 #endif
-
-

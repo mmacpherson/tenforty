@@ -82,7 +82,7 @@ int Round( double x )
 { int y; if (x<0.0) y = x - 0.5; else y = x + 0.5;  return y; }
 
 
-double Conditional_Round( double x )	
+double Conditional_Round( double x )
 {	/* Round only if round_to_whole_dollars flag is set. */
   if (!round_to_whole_dollars)
    return x;
@@ -110,17 +110,17 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
   spc='\n';
  do
   {  /*Absorb any leading white-space.*/
-     word[j]=getc(infile); 
-     if (word[j]=='{') 
-      { 
+     word[j]=getc(infile);
+     if (word[j]=='{')
+      {
        do word[j]=getc(infile); while ((word[j]!='}') && (!feof(infile)));
        word[j]=getc(infile);
       }
-  } 
+  }
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]==ltc) || (word[j]=='\r')));
  if (word[j]=='$')
   word[j]=getc(infile);
- if (word[j]==';') 
+ if (word[j]==';')
   j++;
  else
  if (word[j]=='\n')
@@ -140,7 +140,7 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
         j++;  word[j] = getc(infile);
         if (word[j]=='{') do word[j] = getc(infile); while ((!feof(infile)) && (word[j]!='}'));
 	if (word[j]==',') word[j] = getc(infile);
-      } 
+      }
    while ((!feof(infile)) && ((word[j]!=spc) && (word[j]!='\t') && (word[j]!='\n') && (word[j]!=';')));
    if (word[j]==';') ungetc(word[j],infile);
   }
@@ -326,7 +326,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  int i, *ii;
  double y, *yy;
 
- if (kind=='w') 
+ if (kind=='w')
   { single_line_entry = 1;  whole_line_entry = 1; }
 
  get_word(infile, word);
@@ -347,7 +347,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1)) 
+   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1))
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    if (round_to_whole_dollars)
     y = Round( y );
@@ -360,8 +360,8 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    owrd = (char *)x;
    strcpy( owrd, word );
    if (emssg[0]!='\0')
-    { if (strcmp(word,emssg)!=0) 
-       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); } 
+    { if (strcmp(word,emssg)!=0)
+       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); }
     }
   }
  else
@@ -462,7 +462,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='b')
   {
-   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcmp(word,"Y")==0) || (strcmp(word,"1")==0)) 
+   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcmp(word,"Y")==0) || (strcmp(word,"1")==0))
 	j = 1;
    else
    if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcmp(word,"N")==0) || (strcmp(word,"0")==0))
@@ -473,9 +473,9 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
 	get_word(infile,word);
 	return;
      }
-   else 
-    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg); 
-     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg); 
+   else
+    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg);
+     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg);
      exit(1);
     }
    ii = (int *)x;
@@ -653,10 +653,10 @@ void read_comment_filtered_line( FILE *infile, char *line, int maxlen )
  int j=0;
  do
   {
-   line[j] = getc(infile);  
-   if (line[j]=='{') 
-    { 
-     do line[j] = getc(infile); 
+   line[j] = getc(infile);
+   if (line[j]=='{')
+    {
+     do line[j] = getc(infile);
      while ((line[j] != '}') && (!feof(infile)));
      line[j] = ' ';
     }
@@ -678,7 +678,7 @@ void shownum( int j )
 { fprintf(outfile, "L%d = %d\n", j, (int)L[j]); }
 
 /* Show line only if non-zero. */	/* Depricated in favor of ShowLineNonZero (clearer name). */
-void ShowLine( int j )	
+void ShowLine( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show line only if non-zero. */
@@ -686,7 +686,7 @@ void ShowLineNonZero( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show-Line with a message. */
-void showline_wmsg( int j, char *msg )	
+void showline_wmsg( int j, char *msg )
 { fprintf(outfile,"L%d = %6.2f\t\t%s\n", j, L[j], msg); }
 
 /* Show line with a message, only if non-zero. */
@@ -703,9 +703,9 @@ void showline_wlabel( char *label, double value )
 
 /* Show-line with specified label and value. */
 void showline_wlabelnz( char *label, double value )
-{ 
+{
  if (value != 0.0)
-  fprintf(outfile, "%s = %6.2f\n", label, value ); 
+  fprintf(outfile, "%s = %6.2f\n", label, value );
 }
 
 /* Show-line with specified label, value, and message. */
@@ -808,7 +808,7 @@ void Display_File( char *filename )
   {
    printf("%s", line);
    fgets(line, 500, infile);
-  } 
+  }
  fclose(infile);
 }
 
@@ -823,7 +823,7 @@ void get_comment( FILE *infile, char *word )
  int j=0;
 
  do  /*Absorb any leading white-space.*/
-     word[j] = getc(infile); 
+     word[j] = getc(infile);
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]=='\n') || (word[j]=='\r')));
  if (word[j] == '{')
   {
@@ -885,9 +885,9 @@ char *GetTextLineF( char *linename )
     {
      k++;
      if (k >= 5000)
-      { 
-        line[k-1] = '\0';  
-        while ((!feof(infile)) && (getc(infile) != '\n'));  
+      {
+        line[k-1] = '\0';
+        while ((!feof(infile)) && (getc(infile) != '\n'));
         consume_leading_trailing_whitespace( line );
 	fprintf(outfile, "%s %s\n", linename, line );
         return strdup( line );
@@ -907,7 +907,7 @@ char *GetTextLineF( char *linename )
     }
   }
  if (writeout_line)
-  fprintf(outfile, "%s %s\n", linename, line ); 
+  fprintf(outfile, "%s %s\n", linename, line );
  return strdup( line );
 }
 
@@ -925,7 +925,7 @@ char *GetTextLine( char *linename )
 
 
 void format_socsec( char *line, int kind )
-{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */	
+{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */
   char buf[20]="";	  /* Kind = 1 forces 9-consecutive digits w/no spaces. */
   int j=0, k=0;
   while ((line[j] != '\0') && (k < 11))
@@ -1075,11 +1075,11 @@ void intercept_any_pdf_markups( FILE *infile )
 void exude_pdf_markups( FILE *outfile )
 { /* Add any intercepted PDF-markups to the tax-output file. */
   struct pdf_markup_record *old;
-  if (!outfile) return;  
+  if (!outfile) return;
   while (pdf_markup_list)
    {
     if (pdf_markup_list->page > 0)
-     fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page, 
+     fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page,
 		pdf_markup_list->xpos, pdf_markup_list->ypos, pdf_markup_list->tagname );
     fprintf(outfile,"%s = %s\n", pdf_markup_list->tagname, pdf_markup_list->value );
     old = pdf_markup_list;
@@ -1227,7 +1227,7 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (mm=0; mm<MAX_LINES; mm++) 
+ for (mm=0; mm<MAX_LINES; mm++)
   {
    L[mm] = 0.0;
    SchedA[mm] = 0.0;
@@ -1254,20 +1254,20 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILLING_SEPARAT; else
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word); 
-   exit(1); 
+  {
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
+   exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
  get_parameter( infile, 's', word, "Exemptions" );	/* Exemptions, self/depend. */
- get_parameters( infile, 'i', &exemptions, "Exemptions"); 
+ get_parameters( infile, 'i', &exemptions, "Exemptions");
 
  /* Answer YES only if Married Filing Jointly, and you and your spouse */
  /* each have qualifying Ohio adjusted gross income of at least $500. */
  get_parameter( infile, 's', word, "JointCredit" );
- get_parameter( infile, 'b', &qualify_jfc, "JointCredit ?"); 
+ get_parameter( infile, 'b', &qualify_jfc, "JointCredit ?");
 
  GetLine( "L1", &L[1] );	/* Federal Adjusted Gross Income */
  GetLine( "L4", &L[4] );	/* Personal and dependent exemption deduction, Sched-J */
@@ -1322,7 +1322,7 @@ int main( int argc, char *argv[] )
  GetLine( "SchedA_36", &SchedA[36] );	/* Unreimbursed long-term care insurance premiums ... */
  GetLine( "SchedA_37", &SchedA[37] );	/* Funds deposited into, and earnings of, a medical savings account */
  GetLine( "SchedA_38", &SchedA[38] );	/* Qualified organ donor expenses */
- 
+
  /* Schedule of Credits. */
  GetLine( "Credits_2", &SchedC[2] );	/* Retirement income credit */
  SchedC[2] = smallerof( SchedC[2], 200.0 );
@@ -1393,9 +1393,9 @@ int main( int argc, char *argv[] )
 
  if (L[5] < 30000.0)
   SchedC[8] = 20.0 * exemptions;	/* Exemption credtit. */
- 
+
  for (j=2; j <= 8; j++)
-  SchedC[9] = SchedC[9] + SchedC[j];		
+  SchedC[9] = SchedC[9] + SchedC[j];
  SchedC[9] = SchedC[9] + SchedC7a;
 
  SchedC[10] = NotLessThanZero( SchedC[1] - SchedC[9] );
@@ -1412,7 +1412,7 @@ int main( int argc, char *argv[] )
   } /*Joint_Filing_Credit*/
 
  for (j=11; j <= 23; j++)
-  SchedC[24] = SchedC[24] + SchedC[j];          
+  SchedC[24] = SchedC[24] + SchedC[j];
  SchedC[25] = NotLessThanZero( SchedC[10] - SchedC[24] );
 
  SchedC[27] = L[3];
@@ -1424,7 +1424,7 @@ int main( int argc, char *argv[] )
  SchedC[30] = L[3];
  j = 10000.0 * SchedC[29] / SchedC[30];
  factorB = (double)j / 10000.0;
- // printf(" %4g\n", factorB );			
+ // printf(" %4g\n", factorB );
  SchedC[31] = SchedC[25] * factorB;
  // SchedC[31] = L[13];
  SchedC[33] = smallerof( SchedC[31], SchedC[32] );
@@ -1434,7 +1434,7 @@ int main( int argc, char *argv[] )
  L[10] = NotLessThanZero( L8c - L[9] );
 
  for (j=35; j <= 39; j++)
-  SchedC[40] = SchedC[40] + SchedC[j];          
+  SchedC[40] = SchedC[40] + SchedC[j];
  L[16] = SchedC[40];
 
  L[13] = L[10] + L[11] + L[12];			/* Total Ohio tax liability before withholding or estimated payments. */
@@ -1595,5 +1595,3 @@ printf("factorB = %g, word = '%s'\n", factorB, word );
 #undef strcasecmp
 #undef strncasecmp
 #endif
-
-

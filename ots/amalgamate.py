@@ -488,7 +488,9 @@ def strip_redundant_date_record_vars(lines: list[str]) -> list[str]:
     """
     # Pattern matches: struct date_record yourDOB, spouseDOB, DL;
     # But NOT: struct date_record { ... } yourDOB, ...  (the definition itself)
-    pattern = re.compile(r"^\s*struct\s+date_record\s+yourDOB\s*,\s*spouseDOB\s*,\s*DL\s*;\s*$")
+    pattern = re.compile(
+        r"^\s*struct\s+date_record\s+yourDOB\s*,\s*spouseDOB\s*,\s*DL\s*;\s*$"
+    )
     return [line for line in lines if not pattern.match(line)]
 
 

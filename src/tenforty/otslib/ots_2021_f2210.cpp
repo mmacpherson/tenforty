@@ -83,7 +83,7 @@ int Round( double x )
 { int y; if (x<0.0) y = x - 0.5; else y = x + 0.5;  return y; }
 
 
-double Conditional_Round( double x )	
+double Conditional_Round( double x )
 {	/* Round only if round_to_whole_dollars flag is set. */
   if (!round_to_whole_dollars)
    return x;
@@ -111,17 +111,17 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
   spc='\n';
  do
   {  /*Absorb any leading white-space.*/
-     word[j]=getc(infile); 
-     if (word[j]=='{') 
-      { 
+     word[j]=getc(infile);
+     if (word[j]=='{')
+      {
        do word[j]=getc(infile); while ((word[j]!='}') && (!feof(infile)));
        word[j]=getc(infile);
       }
-  } 
+  }
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]==ltc) || (word[j]=='\r')));
  if (word[j]=='$')
   word[j] = getc(infile);
- if (word[j]==';') 
+ if (word[j]==';')
   j++;
  else
  if (word[j]=='\n')
@@ -146,7 +146,7 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
 	  word[j] = ' ';
 	 }
 	if (word[j]==',') word[j] = getc(infile);
-      } 
+      }
    while ((!feof(infile)) && ((word[j]!=spc) && (word[j]!='\t') && (word[j]!='\n') && (word[j]!=';')));
    if (word[j]==';') ungetc(word[j],infile);
   }
@@ -332,7 +332,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  int i, *ii;
  double y, *yy;
 
- if (kind=='w') 
+ if (kind=='w')
   { single_line_entry = 1;  whole_line_entry = 1; }
  value_was_detected = 0;
 
@@ -356,7 +356,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1)) 
+   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1))
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    if (round_to_whole_dollars)
     y = Round( y );
@@ -369,8 +369,8 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    owrd = (char *)x;
    strcpy( owrd, word );
    if (emssg[0]!='\0')
-    { if (strcmp(word,emssg)!=0) 
-       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); } 
+    { if (strcmp(word,emssg)!=0)
+       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); }
     }
   }
  else
@@ -397,7 +397,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0))
     i = 1;
    else
-   if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0)) 
+   if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0))
     i = 0;
    else if (strcasecmp(word,"N/A")==0) i = notappvalue;
    else if ((single_line_entry) && (strlen( word ) == 0)) i = notappvalue;
@@ -476,7 +476,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='b')
   {
-   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0)) 
+   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0))
 	j = 1;
    else
    if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0))
@@ -489,9 +489,9 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
 	*ii = notappvalue;
 	return;
      }
-   else 
-    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg); 
-     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg); 
+   else
+    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg);
+     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg);
      exit(1);
     }
    ii = (int *)x;
@@ -670,10 +670,10 @@ void read_comment_filtered_line( FILE *infile, char *line, int maxlen )
  int j=0;
  do
   {
-   line[j] = getc(infile);  
-   if (line[j]=='{') 
-    { 
-     do line[j] = getc(infile); 
+   line[j] = getc(infile);
+   if (line[j]=='{')
+    {
+     do line[j] = getc(infile);
      while ((line[j] != '}') && (!feof(infile)));
      line[j] = ' ';
     }
@@ -695,7 +695,7 @@ void shownum( int j )
 { fprintf(outfile, "L%d = %d\n", j, (int)L[j]); }
 
 /* Show line only if non-zero. */	/* Depricated in favor of ShowLineNonZero (clearer name). */
-void ShowLine( int j )	
+void ShowLine( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show line only if non-zero. */
@@ -703,7 +703,7 @@ void ShowLineNonZero( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show-Line with a message. */
-void showline_wmsg( int j, char *msg )	
+void showline_wmsg( int j, char *msg )
 { fprintf(outfile,"L%d = %6.2f\t\t%s\n", j, L[j], msg); }
 
 /* Show line with a message, only if non-zero. */
@@ -724,9 +724,9 @@ void showline_wlabel( char *label, double value )
 
 /* Show-line with specified label and value. */
 void showline_wlabelnz( char *label, double value )
-{ 
+{
  if (value != 0.0)
-  fprintf(outfile, "%s = %6.2f\n", label, value ); 
+  fprintf(outfile, "%s = %6.2f\n", label, value );
 }
 
 /* Show-line with specified label, value, and message. */
@@ -735,7 +735,7 @@ void showline_wlabelmsg( char *label, double value, char *msg )
 
 /* Show a character-string line with specified label, if string is not empty. */
 void Show_String_wLabel( char *label, char *msg )
-{ 
+{
  if ((msg != 0) && (msg[0] != '\0'))
   fprintf(outfile, "%s %s\n", label, msg );
 }
@@ -836,7 +836,7 @@ void Display_File( char *filename )
   {
    printf("%s", line);
    fgets(line, 500, infile);
-  } 
+  }
  fclose(infile);
 }
 
@@ -851,7 +851,7 @@ void get_comment( FILE *infile, char *word )
  int j=0;
 
  do  /*Absorb any leading white-space.*/
-     word[j] = getc(infile); 
+     word[j] = getc(infile);
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]=='\n') || (word[j]=='\r')));
  if (word[j] == '{')
   {
@@ -923,9 +923,9 @@ char *GetTextLineF( char *linename )
     {
      k++;
      if (k >= 5000)
-      { 
-        line[k-1] = '\0';  
-        while ((!feof(infile)) && (getc(infile) != '\n'));  
+      {
+        line[k-1] = '\0';
+        while ((!feof(infile)) && (getc(infile) != '\n'));
         consume_leading_trailing_whitespace( line );
 	fprintf(outfile, "%s %s\n", linename, line );
         return strdup( line );
@@ -938,7 +938,7 @@ char *GetTextLineF( char *linename )
  if (do_all_caps)
   capitalize( line );
  if (writeout_line)
-  fprintf(outfile, "%s %s\n", linename, line ); 
+  fprintf(outfile, "%s %s\n", linename, line );
  return strdup( line );
 }
 
@@ -956,7 +956,7 @@ char *GetTextLine( char *linename )
 
 
 void format_socsec( char *line, int kind )
-{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */	
+{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */
   char buf[20]="";	  /* Kind = 1 forces 9-consecutive digits w/no spaces. */
   int j=0, k=0;
   while ((line[j] != '\0') && (k < 11))
@@ -1012,7 +1012,7 @@ int whitespace_invariant_strstr( char *haystack, char *needle )	/* Return 1 if m
  wrd1 = (char *)malloc( strlen( haystack ) + 1 );
  ne = strdup( needle );
  wrd2 = (char *)malloc( strlen( needle ) + 1 );
- do 
+ do
   {
    next_word( hay, wrd1, " \t\n\r" );
    next_word( ne, wrd2, " \t\n\r" );
@@ -1086,7 +1086,7 @@ struct pdf_markup_record
   struct pdf_markup_record *next;
  } *pdf_markup_list=0;
 
-void add_pdf_markup( char *tagname, int page, float xpos, float ypos, 
+void add_pdf_markup( char *tagname, int page, float xpos, float ypos,
 			int fontsz, int setcol, float txtred, float txtgrn, float txtblu, char *value )
 {
  struct pdf_markup_record *_new;
@@ -1185,19 +1185,19 @@ void intercept_any_pdf_markups( FILE *infile )
 void exude_pdf_markups( FILE *outfile )
 { /* Add any intercepted PDF-markups to the tax-output file. */
   struct pdf_markup_record *old;
-  if (!outfile) return;  
+  if (!outfile) return;
   while (pdf_markup_list)
    {
     if (pdf_markup_list->page > 0)
      {
       if ((pdf_markup_list->fontsz == 10) && (pdf_markup_list->setcol == 0))
-       fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page, 
+       fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page,
 		pdf_markup_list->xpos, pdf_markup_list->ypos, pdf_markup_list->tagname );
       else
-       fprintf(outfile,"NewPDFMarkup( %d, %g, %g, %d, %d, %g, %g, %g ) %s\n", 
-		pdf_markup_list->page, 
+       fprintf(outfile,"NewPDFMarkup( %d, %g, %g, %d, %d, %g, %g, %g ) %s\n",
+		pdf_markup_list->page,
 		pdf_markup_list->xpos, pdf_markup_list->ypos,
-		pdf_markup_list->fontsz, pdf_markup_list->setcol, 
+		pdf_markup_list->fontsz, pdf_markup_list->setcol,
 		pdf_markup_list->txtred, pdf_markup_list->txtgrn, pdf_markup_list->txtblu,
 		pdf_markup_list->tagname );
      }
@@ -1267,7 +1267,7 @@ double brkpt[4][9]={
 		     };
 
 double TaxRateFormula( double x, int status )  /* Returns tax due. */
-{		
+{
   double sum=0.0;
   int   bracket=0;
   if (status == WIDOW) status = MARRIED_FILING_JOINTLY;  /* Handle case of widow(er). */
@@ -1305,7 +1305,7 @@ double Estate_Trust_TaxRateFunction( double income )
  if (income < 2650.0) return income * 0.10; else
  if (income < 9550.0) return  265.0 + (income - 2650.0) * 0.24; else
  if (income < 13050.0) return 1921.0 + (income - 9550.0) * 0.35; else
- return 3146.0 + (income - 13050.0) * 0.37; 
+ return 3146.0 + (income - 13050.0) * 0.37;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1425,9 +1425,9 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
+  {
+   printf("Error: unrecognized status '%s'. Exiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -1518,69 +1518,69 @@ else
 
 	/* Inputs must be read; */
 	/* otherwise, error message re: unexpected input is thrown */
-	
+
 	   GetLine( "SecA_11a", &A[11] );
 	   GetLine( "SecA_11b", &B[11] );
 	   GetLine( "SecA_11c", &C[11] );
 	   GetLine( "SecA_11d", &D[11] );
-	
+
 	   GetLine( "SchdAI_1a", &a[1] );
 	   GetLine( "SchdAI_1b", &b[1] );
 	   GetLine( "SchdAI_1c", &c[1] );
-	   GetLine( "SchdAI_1d", &d[1] );  
-	
+	   GetLine( "SchdAI_1d", &d[1] );
+
 	   GetLine( "SchdAI_4a", &a[4] );
 	   GetLine( "SchdAI_4b", &b[4] );
 	   GetLine( "SchdAI_4c", &c[4] );
-	   GetLine( "SchdAI_4d", &d[4] ); 
-	
+	   GetLine( "SchdAI_4d", &d[4] );
+
 	    GetLine( "SchdAI_7a", &a[7] );
 	    b[7] = a[7];
 	    c[7] = a[7];
 	    d[7] = a[7];
-	
+
 	    GetLine( "SchdAI_9a", &a[9] );
 	   GetLine( "SchdAI_9b", &b[9] );
 	   GetLine( "SchdAI_9c", &c[9] );
-	   GetLine( "SchdAI_9d", &d[9] ); 
-	
+	   GetLine( "SchdAI_9d", &d[9] );
+
 	    GetLine( "SchdAI_12a", &a[12] );
 	    b[12] = a[12];
 	    c[12] = a[12];
 	    d[12] = a[12];
-	
+
 	    GetLine( "SchdAI_14a", &a[14] );
 	   GetLine( "SchdAI_14b", &b[14] );
 	   GetLine( "SchdAI_14c", &c[14] );
 	   GetLine( "SchdAI_14d", &d[14] );
-	
+
 	    GetLine( "SchdAI_16a", &a[16] );
 	   GetLine( "SchdAI_16b", &b[16] );
 	   GetLine( "SchdAI_16c", &c[16] );
 	   GetLine( "SchdAI_16d", &d[16] );
-	
+
 	    GetLine( "SchdAI_18a", &a[18] );
 	   GetLine( "SchdAI_18b", &b[18] );
 	   GetLine( "SchdAI_18c", &c[18] );
 	   GetLine( "SchdAI_18d", &d[18] );
-	
+
 	    GetLine( "SchdAI_28a", &a[28] );
 	   GetLine( "SchdAI_28b", &b[28] );
 	   GetLine( "SchdAI_28c", &c[28] );
 	   GetLine( "SchdAI_28d", &d[28] );
-	
+
 	    GetLine( "SchdAI_30a", &a[30] );
 	   GetLine( "SchdAI_30b", &b[30] );
 	   GetLine( "SchdAI_30c", &c[30] );
 	   GetLine( "SchdAI_30d", &d[30] );
-	
+
 	    GetLine( "SchdAI_32a", &a[32] );
 	   GetLine( "SchdAI_32b", &b[32] );
 	   GetLine( "SchdAI_32c", &c[32] );
 	   GetLine( "SchdAI_32d", &d[32] );
-	
+
 	 GetLine( "L19", &L[19] );
-	
+
 	  /* Schedule AI - PART 1 */
 
   if(BoxC == Yes){
@@ -1598,7 +1598,7 @@ else
 		d[3] = d[1] * d[2];
 
 		for(i = 4; i <= 8; i++){
-		
+
 			a[i] = 0;
 			b[i] = 0;
 			c[i] = 0;
@@ -1609,8 +1609,8 @@ else
 		b[10] = 0;
 		c[10] = 0;
 		d[10] = 0;
-	
-	       	a[11] = a[3] - a[9];	
+
+	       	a[11] = a[3] - a[9];
 		b[11] = b[3] - b[9];
 		c[11] = c[3] - c[9];
 		d[11] = d[3] - d[9];
@@ -1622,7 +1622,7 @@ else
 
 		if(a[14] < 0)
 			a[14] = Estate_Trust_TaxRateFunction(a[13]);	/* else defaults to the entered value */
-		if(b[14] < 0)		
+		if(b[14] < 0)
 			b[14] = Estate_Trust_TaxRateFunction(b[13]);
 		if(c[14] < 0)
 			c[14] = Estate_Trust_TaxRateFunction(c[13]);
@@ -1639,12 +1639,12 @@ else
 		b[3] = b[1] * b[2];
 		c[3] = c[1] * c[2];
 		d[3] = d[1] * d[2];
-	
+
 		a[5] = a[2];
 		b[5] = b[2];
 		c[5] = c[2];
 		d[5] = d[2];
-	
+
 		a[6] = a[4] * a[5];
 		b[6] = b[4] * b[5];
 		c[6] = c[4] * c[5];
@@ -1654,13 +1654,13 @@ else
 		b[8] = LargerOf(b[6], b[7]);
 		c[8] = LargerOf(c[6], c[7]);
 		d[8] = LargerOf(d[6], d[7]);
-	
-		a[10] = a[8] + a[9];		
+
+		a[10] = a[8] + a[9];
 		b[10] = b[8] + b[9];
 		c[10] = c[8] + c[9];
 		d[10] = d[8] + d[9];
-	
-       	        a[11] = a[3] - a[10];	
+
+       	        a[11] = a[3] - a[10];
 		b[11] = b[3] - b[10];
 		c[11] = c[3] - c[10];
 		d[11] = d[3] - d[10];
@@ -1679,18 +1679,18 @@ else
 		if(d[14] < 0)
 			d[14] = TaxRateFunction(d[13], status);
 	}
-	
+
 		/* Interrupt Part I to Calculate Line 15 */
-	
+
 		/* Schedule AI - Part II - Annualized Self-Employment Tax */
-	
+
 		a[29] = 35700;
 		b[29] = 59500;
 		c[29] = 95200;
 		d[29] = 142800;
-	
+
 		a[31] = NotLessThanZero(a[29] - a[30]);
-		b[31] = NotLessThanZero(b[29] - b[30]);	
+		b[31] = NotLessThanZero(b[29] - b[30]);
 		c[31] = NotLessThanZero(c[29] - c[30]);
 		d[31] = NotLessThanZero(d[29] - d[30]);
 
@@ -1698,61 +1698,61 @@ else
 		b[32] = 0.2976;
 		c[32] = 0.186;
 		d[32] = 0.124;
-	
+
 		a[33] = a[32] * SmallerOf(a[28], a[31]);
 		b[33] = b[32] * SmallerOf(b[28], b[31]);
 		c[33] = c[32] * SmallerOf(c[28], c[31]);
 		d[33] = d[32] * SmallerOf(d[28], d[31]);
-	
+
 		a[34] = 0.116;
 		b[34] = 0.0696;
 		c[34] = 0.0435;
 		d[34] = 0.029;
-	
+
 		a[35] = Round(a[28] * a[34]);
-		b[35] = Round(b[28] * b[34]);	
+		b[35] = Round(b[28] * b[34]);
 		c[35] = Round(c[28] * c[34]);
 		d[35] = Round(d[28] * d[34]);
-	
+
 		a[36] = a[33] + a[35];
-		b[36] = b[33] + b[35];	
+		b[36] = b[33] + b[35];
 		c[36] = c[33] + c[35];
 		d[36] = d[33] + d[35];
-	
+
 		/* End Part II Annualized Self-Employment Tax */
 		/* Continue Part I */
-	
+
 		a[15] = a[36];
 		b[15] = b[36];
 		c[15] = c[36];
-		d[15] = d[36];	
-		
+		d[15] = d[36];
+
 		a[17] = a[14] + a[15] + a[16];
 		b[17] = b[14] + b[15] + b[16];
 		c[17] = c[14] + c[15] + c[16];
 		d[17] = d[14] + d[15] + d[16];
-	
+
 		a[19] = NotLessThanZero(a[17] - a[18]);
 		b[19] = NotLessThanZero(b[17] - b[18]);
 		c[19] = NotLessThanZero(c[17] - c[18]);
 		d[19] = NotLessThanZero(d[17] - d[18]);
-	
+
 		a[20] = 0.225;
 		b[20] = 0.45;
 		c[20] = 0.675;
 		d[20] = 0.90;
-	
+
 		a[21] = Round(a[19] * a[20]);
 		b[21] = Round(b[19] * b[20]);
 		c[21] = Round(c[19] * c[20]);
 		d[21] = Round(d[19] * d[20]);
-	
+
 		a[23] = NotLessThanZero(a[21]);
 		a[24] = Round(L[9] * 0.25);
 		a[26] = a[24];
 		a[27] = SmallerOf(a[23], a[26]);
 		A[10] = a[27];
-	
+
 		b[22] = a[27];
 		b[23] = NotLessThanZero(b[21] - b[22]);
 		b[24] = Round(L[9] * 0.25);
@@ -1760,7 +1760,7 @@ else
 		b[26] = b[24] + b[25];
 		b[27] = SmallerOf(b[23], b[26]);
 		B[10] = b[27];
-	
+
 		c[22] = a[27] + b[27];
 		c[23] = NotLessThanZero(c[21] - c[22]);
 		c[24] = Round(L[9] * 0.25);
@@ -1768,7 +1768,7 @@ else
 		c[26] = c[24] + c[25];
 		c[27] = SmallerOf(c[23], c[26]);
 		C[10] = c[27];
-	
+
 		d[22] = a[27] + b[27] + c[27];
 		d[23] = NotLessThanZero(d[21] - d[22]);
 		d[24] = Round(L[9] * 0.25);
@@ -1786,13 +1786,13 @@ else
 			C[10] = Round(L[9] * 0.25);
 			D[10] = Round(L[9] * 0.25);
 		}
-	
+
 		A[15] = A[11];
 		if(A[10] >= A[15])
 			A[17] = A[10] - A[15];
 		else
 			A[18] = A[15] - A[10];
-	
+
 		B[12] = A[18];
 		B[13] = B[11] + B[12];
 		B[14] = A[16] + A[17];
@@ -1805,7 +1805,7 @@ else
 			B[17] = B[10] - B[15];
 		else
 			B[18] = B[15] - B[10];
-	
+
 		C[12] = B[18];
 		C[13] = C[11] + C[12];
 		C[14] = B[16] + B[17];
@@ -1818,7 +1818,7 @@ else
 			C[17] = C[10] - C[15];
 		else
 			C[18] = C[15] - C[10];
-	
+
 		D[12] = C[18];
 		D[13] = D[11] + D[12];
 		D[14] = C[16] + C[17];
@@ -1907,5 +1907,3 @@ else
 #undef strcasecmp
 #undef strncasecmp
 #endif
-
-

@@ -2,4 +2,3 @@
 
 cdef extern from "ots_2021_f8960.cpp" namespace "OpenTaxSolver2021::taxsolve_f8960_2021":
     int main( int argc, char *argv[] )
-

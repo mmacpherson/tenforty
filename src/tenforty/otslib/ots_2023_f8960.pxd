@@ -2,4 +2,3 @@
 
 cdef extern from "ots_2023_f8960.cpp" namespace "OpenTaxSolver2023::taxsolve_f8960_2023":
     int main( int argc, char *argv[] )
-

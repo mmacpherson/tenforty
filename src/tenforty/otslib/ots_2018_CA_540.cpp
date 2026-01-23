@@ -85,17 +85,17 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
   spc='\n';
  do
   {  /*Absorb any leading white-space.*/
-     word[j]=getc(infile); 
-     if (word[j]=='{') 
-      { 
+     word[j]=getc(infile);
+     if (word[j]=='{')
+      {
        do word[j]=getc(infile); while ((word[j]!='}') && (!feof(infile)));
        word[j]=getc(infile);
       }
-  } 
+  }
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]==ltc) || (word[j]=='\r')));
  if (word[j]=='$')
   word[j]=getc(infile);
- if (word[j]==';') 
+ if (word[j]==';')
   j++;
  else
  if (word[j]=='\n')
@@ -115,7 +115,7 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
         j++;  word[j] = getc(infile);
         if (word[j]=='{') do word[j] = getc(infile); while ((!feof(infile)) && (word[j]!='}'));
 	if (word[j]==',') word[j] = getc(infile);
-      } 
+      }
    while ((!feof(infile)) && ((word[j]!=spc) && (word[j]!='\t') && (word[j]!='\n') && (word[j]!=';')));
    if (word[j]==';') ungetc(word[j],infile);
   }
@@ -183,7 +183,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  int i, *ii;
  double y, *yy;
 
- if (kind=='w') 
+ if (kind=='w')
   { single_line_entry = 1;  whole_line_entry = 1; }
 
  get_word(infile, word);
@@ -204,7 +204,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if (sscanf(word,"%lf",&y)!=1) 
+   if (sscanf(word,"%lf",&y)!=1)
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    yy = (double *)x;
    *yy = y;
@@ -215,8 +215,8 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    owrd = (char *)x;
    strcpy( owrd, word );
    if (emssg[0]!='\0')
-    { if (strcmp(word,emssg)!=0) 
-       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); } 
+    { if (strcmp(word,emssg)!=0)
+       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); }
     }
   }
  else
@@ -290,7 +290,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if (sscanf(word,"%lf",&y)!=1) 
+   if (sscanf(word,"%lf",&y)!=1)
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    yy = (double *)x;
    *yy = *yy + y;
@@ -315,7 +315,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='b')
   {
-   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcmp(word,"Y")==0) || (strcmp(word,"1")==0)) 
+   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcmp(word,"Y")==0) || (strcmp(word,"1")==0))
 	j = 1;
    else
    if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcmp(word,"N")==0) || (strcmp(word,"0")==0))
@@ -326,9 +326,9 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
 	get_word(infile,word);
 	return;
      }
-   else 
-    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg); 
-     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg); 
+   else
+    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg);
+     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg);
      exit(1);
     }
    ii = (int *)x;
@@ -426,19 +426,19 @@ int interpret_date( char *datestr, int *month, int *day, int *year, char *emssg 
  if (strncasecmp( word1, "Nov", 3 ) == 0)  *month = 11;  else
  if (strncasecmp( word1, "Dec", 3 ) == 0)  *month = 12;  else
  if ((sscanf( word1, "%d", month) != 1) || (*month < 1) || (*month > 12))
-  {printf("Wanring: Bad month '%s' on '%s'\n", word1, emssg ); 
+  {printf("Wanring: Bad month '%s' on '%s'\n", word1, emssg );
    fprintf(outfile,"Warning: Bad month '%s' on '%s'\n", word1, emssg );
    return 0;
   }
  next_word( owrd, word1, " /,-\t\n\r" );
  if ((sscanf( word1, "%d", day) != 1) || (*day < 1) || (*day > 31))
-  {printf("ERROR: Bad day '%s' on '%s'\n", word1, emssg ); 
+  {printf("ERROR: Bad day '%s' on '%s'\n", word1, emssg );
    fprintf(outfile,"ERROR: Bad day '%s' on '%s'\n", word1, emssg );
    return 0;
   }
  next_word( owrd, word1, " /,-\t\n\r" );
  if ((sscanf( word1, "%d", year) != 1) || (*year < 0) || (*year > 3000))
-  {printf("ERROR: Bad year '%s' on '%s'\n", word1, emssg ); 
+  {printf("ERROR: Bad year '%s' on '%s'\n", word1, emssg );
    fprintf(outfile,"ERROR: Bad year '%s' on '%s'\n", word1, emssg );
    return 0;
   }
@@ -486,7 +486,7 @@ int get_date( char *datestr, char *emssg )	/* Returns days from 1-1-1980. */
    case 11: days = 304; break;
    case 12: days = 334; break;
    default: printf("ERROR: Bad month '%d'\n",month); fprintf(outfile,"ERROR: Bad month '%d'\n",month); exit(1); break;
-  } 
+  }
 
  /* Assumes all years have 365-days. */
  days = days + day + 365 * (year - 80) - 1;
@@ -509,10 +509,10 @@ void read_comment_filtered_line( FILE *infile, char *line, int maxlen )
  int j=0;
  do
   {
-   line[j] = getc(infile);  
-   if (line[j]=='{') 
-    { 
-     do line[j] = getc(infile); 
+   line[j] = getc(infile);
+   if (line[j]=='{')
+    {
+     do line[j] = getc(infile);
      while ((line[j] != '}') && (!feof(infile)));
        line[j] = getc(infile);
      line[j] = ' ';
@@ -533,7 +533,7 @@ void shownum( int j )
 { fprintf(outfile, "L%d = %d\n", j, (int)L[j]); }
 
 /* Show line only if non-zero. */	/* Depricated in favor of ShowLineNonZero (clearer name). */
-void ShowLine( int j )	
+void ShowLine( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show line only if non-zero. */
@@ -541,7 +541,7 @@ void ShowLineNonZero( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show-Line with a message. */
-void showline_wmsg( int j, char *msg )	
+void showline_wmsg( int j, char *msg )
 { fprintf(outfile,"L%d = %6.2f\t\t%s\n", j, L[j], msg); }
 
 /* Show line only if non-zero. */
@@ -558,9 +558,9 @@ void showline_wlabel( char *label, double value )
 
 /* Show-line with specified label and value. */
 void showline_wlabelnz( char *label, double value )
-{ 
+{
  if (value != 0.0)
-  fprintf(outfile, "%s = %6.2f\n", label, value ); 
+  fprintf(outfile, "%s = %6.2f\n", label, value );
 }
 
 /* Show-line with specified label, value, and message. */
@@ -632,7 +632,7 @@ void Display_File( char *filename )
   {
    printf("%s", line);
    fgets(line, 500, infile);
-  } 
+  }
  fclose(infile);
 }
 
@@ -647,7 +647,7 @@ void get_comment( FILE *infile, char *word )
  int j=0;
 
  do  /*Absorb any leading white-space.*/
-     word[j] = getc(infile); 
+     word[j] = getc(infile);
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]=='\n') || (word[j]=='\r')));
  if (word[j] == '{')
   {
@@ -709,9 +709,9 @@ char *GetTextLineF( char *linename )
     {
      k++;
      if (k >= 5000)
-      { 
-        line[k-1] = '\0';  
-        while ((!feof(infile)) && (getc(infile) != '\n'));  
+      {
+        line[k-1] = '\0';
+        while ((!feof(infile)) && (getc(infile) != '\n'));
         consume_leading_trailing_whitespace( line );
 	fprintf(outfile, "%s %s\n", linename, line );
         return strdup( line );
@@ -731,7 +731,7 @@ char *GetTextLineF( char *linename )
     }
   }
  if (writeout_line)
-  fprintf(outfile, "%s %s\n", linename, line ); 
+  fprintf(outfile, "%s %s\n", linename, line );
  return strdup( line );
 }
 
@@ -749,7 +749,7 @@ char *GetTextLine( char *linename )
 
 
 void format_socsec( char *line, int kind )
-{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */	
+{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */
   char buf[20]="";	  /* Kind = 1 forces 9-consecutive digits w/no spaces. */
   int j=0, k=0;
   while ((line[j] != '\0') && (k < 11))
@@ -899,11 +899,11 @@ void intercept_any_pdf_markups( FILE *infile )
 void exude_pdf_markups( FILE *outfile )
 { /* Add any intercepted PDF-markups to the tax-output file. */
   struct pdf_markup_record *old;
-  if (!outfile) return;  
+  if (!outfile) return;
   while (pdf_markup_list)
    {
     if (pdf_markup_list->page > 0)
-     fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page, 
+     fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page,
 		pdf_markup_list->xpos, pdf_markup_list->ypos, pdf_markup_list->tagname );
     fprintf(outfile,"%s = %s\n", pdf_markup_list->tagname, pdf_markup_list->value );
     old = pdf_markup_list;
@@ -1007,7 +1007,7 @@ double TaxRateFormula( double income, int status )
    if (income <  76343.00)  tax =  1852.21 +  0.08 * (income -  64632.00);  else
    if (income < 389627.00)  tax =  2789.09 + 0.093 * (income -  76343.00);  else
    if (income < 467553.00)  tax = 31924.50 + 0.103 * (income - 389627.00);  else
-   if (income < 779253.00)  tax = 39950.88 + 0.113 * (income - 467553.00); 
+   if (income < 779253.00)  tax = 39950.88 + 0.113 * (income - 467553.00);
    else                     tax = 75172.98 + 0.123 * (income - 779253.00);
   }
  return (int)(tax+0.5);
@@ -1027,7 +1027,7 @@ void Report_bracket_info( double income, int status )
    if (income <  56085.00)  rate = 0.08;  else
    if (income < 286492.00)  rate = 0.093;  else
    if (income < 343788.00)  rate = 0.103;  else
-   if (income < 572980.00)  rate = 0.113;  else  rate = 0.123; 
+   if (income < 572980.00)  rate = 0.113;  else  rate = 0.123;
   }
  else
  if ((status==MARRIED_FILLING_JOINTLY) || (status==WIDOW))
@@ -1066,7 +1066,7 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
  if (income < 100000.0)   /* Quantize to match tax-table exactly. */
   {
-   if (income < 99951.0) 
+   if (income < 99951.0)
     {
      k = (income + 49) / 100;
      x = 100 * (double)k;
@@ -1086,7 +1086,7 @@ void test_tax_function()
  for (income=50.0; income < 100000.0; income = income + 100.0)
   printf("%g: %8g %8g %8g\n", income,
 		TaxRateFunction( income, SINGLE ),
-		TaxRateFunction( income, MARRIED_FILLING_JOINTLY ), 
+		TaxRateFunction( income, MARRIED_FILLING_JOINTLY ),
 		TaxRateFunction( income, HEAD_OF_HOUSEHOLD ) );
  exit(0);
 }
@@ -1097,7 +1097,7 @@ void test_tax_function()
 
 struct FedReturnData
  {
-  double fedline[MAX_LINES], schedA[MAX_LINES], 
+  double fedline[MAX_LINES], schedA[MAX_LINES],
 	schedA5a, schedA5b, schedA5c,
 	schedA8a, schedA8b, schedA8c,
 	sched1[MAX_LINES],
@@ -1155,8 +1155,8 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
  char fline[2000], word[2000], tword[2000];
  int linenum;
 
- for (linenum=0; linenum<MAX_LINES; linenum++) 
-  { 
+ for (linenum=0; linenum<MAX_LINES; linenum++)
+  {
    fed_data->fedline[linenum] = 0.0;
    fed_data->schedA[linenum] = 0.0;
    fed_data->sched1[linenum] = 0.0;
@@ -1181,7 +1181,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
   {
    printf("Error: Could not open Federal return '%s'\n", fedlogfile);
    fprintf(outfile,"Error: Could not open Federal return '%s'\n", fedlogfile);
-   exit( 1 ); 
+   exit( 1 );
   }
  fed_data->Itemized = 1; /* Set initial default values. */
  read_line(infile,fline);  linenum = 0;
@@ -1270,7 +1270,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	 fprintf(outfile,"Error: Reading Fed line number '%s%s'\n",word,fline);
         }
        next_word(fline, word, " \t=");
-       if (sscanf(word,"%lf", &fed_data->schedA[linenum])!=1) 
+       if (sscanf(word,"%lf", &fed_data->schedA[linenum])!=1)
         {
  	 printf("Error: Reading Fed schedA %d '%s%s'\n",linenum,word,fline);
 	 fprintf(outfile, "Error: Reading Fed schedA %d '%s%s'\n",linenum,word,fline);
@@ -1288,7 +1288,7 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 	 fprintf(outfile,"Error: Reading Fed line number 'S1_%s %s'\n", tword, fline);
         }
        next_word(fline, word, " \t=");
-       if (sscanf(word,"%lf", &fed_data->sched1[linenum])!=1) 
+       if (sscanf(word,"%lf", &fed_data->sched1[linenum])!=1)
         {
  	 printf("Error: Reading Fed sched1 %d '%s%s'\n", linenum, word, fline);
 	 fprintf(outfile, "Error: Reading Fed sched1 %d '%s%s'\n", linenum, word, fline);
@@ -1305,11 +1305,11 @@ int ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
      if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILLING_SEPARAT; else
      if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
      if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
-     else 
-      { 
-       printf("Error: unrecognized status '%s'. Exiting.\n", word); 
+     else
+      {
+       printf("Error: unrecognized status '%s'. Exiting.\n", word);
        fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-       return 0; 
+       return 0;
       }
     }
    read_line(infile,fline);
@@ -1342,7 +1342,7 @@ void display_part2column( int j, int col )
 {
  switch (col)
   {
-   case 0: 
+   case 0:
 	if (sched540part2[j] != 0.0)
 	 fprintf(outfile," SchedCA540_Part2_%d = %6.2f\n", j, sched540part2[j] );
 	break;
@@ -1378,7 +1378,7 @@ int main( int argc, char *argv[] )
  double min2file=0.0, sched540[MAX_LINES], sched540b[MAX_LINES], sched540c[MAX_LINES],
 	threshA=0, std_ded=0;
  char word[4000], *infname=0, outfname[4000], prelim_1040_outfilename[5000];
- char 	*Your1stName="", *YourLastName="", YourName[2048]="", YourNames[2048]="", 
+ char 	*Your1stName="", *YourLastName="", YourName[2048]="", YourNames[2048]="",
 	*YourMidInitial="", *SpouseMidInitial="",
 	*Spouse1stName="", *SpouseLastName="", *socsec;
  double  sched540b21a=0.0, sched540b21b=0.0, sched540c21c=0.0, sched540b21d=0.0,
@@ -1415,15 +1415,15 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (j=0; j<MAX_LINES; j++) 
-  { 
-    L[j] = 0.0;  
-    sched540[j] = 0.0; 
-    sched540b[j] = 0.0; 
-    sched540c[j] = 0.0; 
-    sched540part2[j] = 0.0; 
-    sched540part2_sub[j] = 0.0; 
-    sched540part2_add[j] = 0.0; 
+ for (j=0; j<MAX_LINES; j++)
+  {
+    L[j] = 0.0;
+    sched540[j] = 0.0;
+    sched540b[j] = 0.0;
+    sched540c[j] = 0.0;
+    sched540part2[j] = 0.0;
+    sched540part2_sub[j] = 0.0;
+    sched540part2_add[j] = 0.0;
   }
 
  /* Accept parameters from input file. */
@@ -1482,7 +1482,7 @@ int main( int argc, char *argv[] )
  if (iline9 > 0) fprintf(outfile,"  L9a = %d\n", iline9 );
 
  get_parameter( infile, 's', word, "L10" );  /* Number of Dependents. */
- get_parameter( infile, 'i', &iline10, "L10"); 
+ get_parameter( infile, 'i', &iline10, "L10");
  L[10] = iline10 * 367.0;
  showline(10);
  if (iline10 > 0) fprintf(outfile,"  L10a = %d\n", iline10 );
@@ -1706,7 +1706,7 @@ int main( int argc, char *argv[] )
   { /*Itemized Deductions Worksheet*/
     double ws[40];
     // printf("Yes, Fed AGI (%6.2f) is more than threshold (%6.2f).\n", L[13], threshA );
-    for (j=1; j <= 10; j++) ws[j] = 0.0;    
+    for (j=1; j <= 10; j++) ws[j] = 0.0;
     ws[1] = sched540part2[28];
     ws[2] = PrelimFedReturn.schedA[4] + PrelimFedReturn.schedA[9] + PrelimFedReturn.schedA[15] + PrelimFedReturn.schedA[16];
     ws[3] = ws[1] - ws[2];
@@ -1779,7 +1779,7 @@ int main( int argc, char *argv[] )
   fprintf(outfile," SchedCA540_Part2_8ea = %6.2f\n", sched540part2[8] );
  if (sched540part2_add[8] != 0.0)
   fprintf(outfile," SchedCA540_Part2_8ec = %6.2f\n", sched540part2_add[8] );
- 
+
  for (j=9; j <= 17; j++)
    display_part2( j );
  display_part2column( 18, 0 );
@@ -1824,7 +1824,7 @@ int main( int argc, char *argv[] )
 		     default: min2file = 36569.0;	break;
 		    }
 	  break;
-   case MARRIED_FILLING_JOINTLY: 
+   case MARRIED_FILLING_JOINTLY:
 		if (iline9 == 0)		 /*Both Under65*/
 		   switch (iline10)
 		    {
@@ -1866,7 +1866,7 @@ int main( int argc, char *argv[] )
 	  break;
   }
  if (L[17] <= min2file)
-  fprintf(outfile,"You may not need to file CA Taxes, due to your California Adjusted Gross Income (%6.2f <= %6.2f).\n", 
+  fprintf(outfile,"You may not need to file CA Taxes, due to your California Adjusted Gross Income (%6.2f <= %6.2f).\n",
 	L[17], min2file );
 
  showline(18);
@@ -1886,16 +1886,16 @@ int main( int argc, char *argv[] )
  if (L[13] > threshA)
   { /*Line32-Exemption-credits-worksheet*/
     double ws_a, ws_b, ws_c, ws_d, ws_e, ws_f, ws_g, ws_h, ws_i, ws_j, ws_k, ws_l, ws_m, ws_n;
-    printf(" Doing AGI Limitations worksheet.\n"); 
+    printf(" Doing AGI Limitations worksheet.\n");
     ws_a = L[13];
     ws_b = threshA;
     ws_c = ws_a - ws_b;
     if (status != MARRIED_FILLING_SEPARAT)
-	ws_d = Round(ws_c / 2500.0);  
-    else 
+	ws_d = Round(ws_c / 2500.0);
+    else
 	ws_d = Round(ws_c / 1250.0);
-    ws_e = 6.0 * ws_d;  
-    ws_f = iline7 + iline8 + iline9; 
+    ws_e = 6.0 * ws_d;
+    ws_f = iline7 + iline8 + iline9;
     ws_g = ws_e * ws_f;
     ws_h = L[7] + L[8] + L[9];
     ws_i = NotLessThanZero( ws_h - ws_g );
@@ -1960,15 +1960,15 @@ int main( int argc, char *argv[] )
 
  /* Payments. */
  GetLineF( "L71", &L[71] ); 	/* CA income tax withheld. */
- 
+
  GetLineF( "L72", &L[72] ); 	/* Estimated tax paid. */
- 
+
  GetLineF( "L73", &L[73] ); 	/* Realestate withholding. */
- 
+
  GetLineF( "L74", &L[74] ); 	/* Excess SDI. */
 
  GetLineF( "L75", &L[75] ); 	/* Earned Income Tax Credit (EITC). */
- 
+
  L[76] = L[71] + L[72] + L[73] + L[74] + L[75];
  showline_wmsg(76,"Total Payments");
 
@@ -1985,7 +1985,7 @@ int main( int argc, char *argv[] )
    L[93] = L[91] - L[76];
    showline(93);
   }
- 
+
  GetLine( "L112", &L[112] );	/* Interest, late penalties. */
  GetLine( "L113", &L[113] );	/* Underpayment of estimated tax penalty. (FTB 5805) */
 
@@ -2014,7 +2014,7 @@ int main( int argc, char *argv[] )
    L[114] = L[111] + L[112] + L[113];
    showline(114);
   }
- 
+
  fprintf(outfile,"\nSelect any charity contributions and complete\n form accordingly.\n");
 
  fprintf(outfile,"\n{ --------- }\n");
@@ -2093,5 +2093,3 @@ int main( int argc, char *argv[] )
 #undef strcasecmp
 #undef strncasecmp
 #endif
-
-
