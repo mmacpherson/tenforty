@@ -1,6 +1,6 @@
 # THIS FILE IS PROGRAMMATICALLY GENERATED.
 # DO NOT EDIT BY HAND.
-# See `ots/amalgamate.py` to regenerate.
+# See `ots/generate_otslib.py` to regenerate.
 OTS_FORM_CONFIG = [
     {
         "year": 2018,
