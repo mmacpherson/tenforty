@@ -2,4 +2,3 @@
 
 cdef extern from "ots_2021_NJ_1040.cpp" namespace "OpenTaxSolver2021::taxsolve_NJ_1040_2021":
     int main( int argc, char *argv[] )
-

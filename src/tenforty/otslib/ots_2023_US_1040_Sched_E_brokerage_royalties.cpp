@@ -264,4 +264,3 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
 
 } // namespace taxsolve_US_1040_Sched_E_brokerage_royalties_2023
 } // namespace OpenTaxSolver2023
-

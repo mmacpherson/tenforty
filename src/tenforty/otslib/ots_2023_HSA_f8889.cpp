@@ -94,7 +94,7 @@ int main( int argc, char *argv[] )
 
  GetTextLineF( "YourName:" );
  GetTextLineF( "YourSocSec#:" );
- 
+
  writeout_line = 0;     /* Suppress GetLineF's from immediately writing to outfile. */
  answ = GetTextLineF( "L1:" );
  next_word( answ, word, " \t;" );
@@ -132,7 +132,7 @@ int main( int argc, char *argv[] )
  GetLineF( "L14a", &L14a );
  GetLineF( "L14b", &L14b );
  L14c = L14a - L14b;
- showline_wlabel( "L14c", L14c ); 
+ showline_wlabel( "L14c", L14c );
  GetLineF( "L15", &L[15] );
  L[16] = NotLessThanZero( L14c - L[15] );
  showline_wmsg( 16, "Taxable HSA distributions. Include this on Sched-1 Line 8e on your 1040 Form." );
@@ -173,4 +173,3 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_HSA_f8889
 } // namespace OpenTaxSolver2023
-

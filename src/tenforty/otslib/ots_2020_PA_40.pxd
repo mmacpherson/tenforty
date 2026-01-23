@@ -2,4 +2,3 @@
 
 cdef extern from "ots_2020_PA_40.cpp" namespace "OpenTaxSolver2020::taxsolve_PA_40_2020":
     int main( int argc, char *argv[] )
-

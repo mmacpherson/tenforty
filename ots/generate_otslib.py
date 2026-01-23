@@ -545,7 +545,9 @@ def make_routines_inline(source_lines: list[str]) -> list[str]:
                 if match:
                     after_name = match.group(2).strip()
                     # If it has a brace and ends with vars, or has identifier right after name
-                    if "{" in after_name or (after_name and re.match(r"^\w+", after_name)):
+                    if "{" in after_name or (
+                        after_name and re.match(r"^\w+", after_name)
+                    ):
                         line = "inline " + line
         result.append(line)
     return result

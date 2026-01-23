@@ -23,7 +23,7 @@ namespace taxsolve_f8606 {
 /* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA             */
 /* 02111-1307 USA                                                       */
 /*									*/
-/* Provided by Fred Robinson - 2022-7-8.				*/	
+/* Provided by Fred Robinson - 2022-7-8.				*/
 /************************************************************************/
 
 float thisversion = 2.00;
@@ -291,4 +291,3 @@ int main(int argc, char *argv[])
 
 } // namespace taxsolve_f8606
 } // namespace OpenTaxSolver2022
-

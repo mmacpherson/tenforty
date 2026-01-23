@@ -41,7 +41,7 @@ double TaxRateFunction( double x, int status )
 {							/* Updated for 2024. */
  if (x <=  26050.0) return    0.0; else
  if (x <= 100000.0) return  360.69 + (x-26050.0)  * 0.0275;
- else		    return 2394.32 + (x-100000.0) * 0.035; 
+ else		    return 2394.32 + (x-100000.0) * 0.035;
 }
 
 
@@ -119,7 +119,7 @@ int main( int argc, char *argv[] )
  if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
 
  /* Pre-initialize all lines to zeros. */
- for (mm=0; mm<MAX_LINES; mm++) 
+ for (mm=0; mm<MAX_LINES; mm++)
   {
    L[mm] = 0.0;
    SchedA[mm] = 0.0;
@@ -147,20 +147,20 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Married/Sep",11)==0) status = MARRIED_FILING_SEPARAT; else
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word); 
-   exit(1); 
+  {
+   printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
+   exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
  get_parameter( infile, 's', word, "Exemptions" );	/* Exemptions, self/depend. */
- get_parameters( infile, 'i', &exemptions, "Exemptions"); 
+ get_parameters( infile, 'i', &exemptions, "Exemptions");
 
  /* Answer YES only if Married Filing Jointly, and you and your spouse */
  /* each have qualifying Ohio adjusted gross income of at least $500. */
  get_parameter( infile, 's', word, "JointCredit" );
- get_parameter( infile, 'b', &qualify_jfc, "JointCredit ?"); 
+ get_parameter( infile, 'b', &qualify_jfc, "JointCredit ?");
 
  GetLine( "L1", &L[1] );	/* Federal Adjusted Gross Income */
  GetLine( "L4", &L[4] );	/* Personal and dependent exemption deduction, Sched-J */
@@ -222,7 +222,7 @@ int main( int argc, char *argv[] )
  GetLine( "SchedA_43", &SchedA[43] );
  GetLine( "SchedA_44", &SchedA[44] );
  GetLine( "SchedA_45", &SchedA[45] );
- 
+
  /* Schedule of Credits. */
  GetLine( "Credits_2", &SchedC[2] );	/* Retirement income credit */
  SchedC[2] = smallerof( SchedC[2], 200.0 );
@@ -304,9 +304,9 @@ int main( int argc, char *argv[] )
 
  if (L[5] < 30000.0)
   SchedC[9] = 20.0 * exemptions;	/* Exemption credtit. */
- 
+
  for (j=2; j <= 9; j++)
-  SchedC[10] = SchedC[10] + SchedC[j];		
+  SchedC[10] = SchedC[10] + SchedC[j];
 
  SchedC[11] = NotLessThanZero( SchedC[1] - SchedC[10] );
 
@@ -322,7 +322,7 @@ int main( int argc, char *argv[] )
   } /*Joint_Filing_Credit*/
 
  for (j=12; j <= 34; j++)
-  SchedC[35] = SchedC[35] + SchedC[j];          
+  SchedC[35] = SchedC[35] + SchedC[j];
  SchedC[36] = NotLessThanZero( SchedC[11] - SchedC[34] );
 
  SchedC[39] = SchedC[10] + SchedC[35] + SchedC[37] + SchedC[38];
@@ -330,7 +330,7 @@ int main( int argc, char *argv[] )
  L[10] = NotLessThanZero( L8c - L[9] );
 
  for (j=40; j <= 45; j++)
-  SchedC[46] = SchedC[46] + SchedC[j];          
+  SchedC[46] = SchedC[46] + SchedC[j];
  L[16] = SchedC[46];
 
  L[13] = L[10] + L[11] + L[12];			/* Total Ohio tax liability before withholding or estimated payments. */
@@ -465,4 +465,3 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_OH_IT1040_2024
 } // namespace OpenTaxSolver2024
-
