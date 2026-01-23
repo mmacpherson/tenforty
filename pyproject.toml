@@ -106,4 +106,4 @@ package-dir = {"" = "src"}
 packages = ["tenforty", "tenforty.otslib"]
 
 [tool.setuptools.package-data]
-"tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]
+"tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp", "*.h"]

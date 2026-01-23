@@ -119,10 +119,11 @@
         ],
         "extra_compile_args": [
             "-O2",
-            "-std=c++11"
+            "-std=c++17"
         ],
         "include_dirs": [
-            "src/tenforty/otslib"
+            "src/tenforty/otslib",
+            "/home/mike/projects/tenforty/src/tenforty/otslib"
         ],
         "language": "c++",
         "name": "tenforty.otslib",

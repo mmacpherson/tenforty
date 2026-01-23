@@ -45,29 +45,33 @@ cdef extern from "{cpp_file}" namespace "{outer_ns}::{inner_ns}":
     int main( int argc, char *argv[] )
 """
 
-FORM_FILE_TEMPLATE = """\
+ROUTINES_HEADER_TEMPLATE = """\
+#pragma once
 {windows_shim}
 {includes}
 #define printf(...)
 #define system(...)
-namespace {outer_ns} {{
-namespace {inner_ns} {{
 
 {routines_macros}
+
+namespace {outer_ns} {{
+
 {routines_source}
+
+}} // namespace {outer_ns}
+"""
+
+FORM_FILE_TEMPLATE = """\
+#include "{routines_header}"
+namespace {outer_ns} {{
+namespace {inner_ns} {{
 
 {form_defines}
 {form_source}
 {form_undefs}
 
-{routines_undefs}
-
 }} // namespace {inner_ns}
 }} // namespace {outer_ns}
-
-#undef printf
-#undef system
-{windows_shim_end}
 """
 
 
@@ -481,6 +485,72 @@ def postprocess_source_groups(
     return (outer_key, source_group)
 
 
+def make_routines_inline(source_lines: list[str]) -> list[str]:
+    """Transform routines source for header-only use with inline specifiers.
+
+    Uses C++17 inline variables and functions to allow multiple inclusion
+    without ODR violations.
+
+    Args:
+    ----
+        source_lines: Lines of routines source code.
+
+    Returns:
+    -------
+        Lines with inline specifiers added to functions and global variables.
+
+    """
+    # First pass: identify multi-line struct definitions that declare variables
+    # Pattern: "struct name" on one line, closing "} vars;" on a later line
+    struct_lines_needing_inline = set()
+    i = 0
+    while i < len(source_lines):
+        line = source_lines[i]
+        # Check for struct definition start without brace on same line
+        if re.match(r"^struct\s+\w+\s*($|/\*)", line):
+            # Look ahead for closing brace with variable declarations
+            j = i + 1
+            while j < len(source_lines):
+                closing_line = source_lines[j]
+                # Check for "} var1, var2;" pattern (closing brace with variables)
+                if re.match(r"^\s*\}\s*\w+", closing_line):
+                    struct_lines_needing_inline.add(i)
+                    break
+                # Check for just "};" (no variables) - stop looking
+                if re.match(r"^\s*\}\s*;", closing_line):
+                    break
+                j += 1
+        i += 1
+
+    result = []
+    for i, line in enumerate(source_lines):
+        # Add inline to function definitions (return type followed by function name and paren)
+        if re.match(r"^(void|int|char|double|float|struct\s+\w+)\s+\w+\s*\(", line):
+            line = "inline " + line
+        # Add inline to global variable definitions
+        elif re.match(r"^(double|int|char|float|FILE)\s+\w+(\s*\[|=|;| )", line):
+            if "typedef" not in line:
+                line = "inline " + line
+        # Handle struct: add inline if it declares variables (single or multi-line)
+        elif re.match(r"^struct\s+\w+", line):
+            if i in struct_lines_needing_inline:
+                # Multi-line struct with variables
+                line = "inline " + line
+            else:
+                # Check for single-line struct with variables
+                stripped = line.strip()
+                no_comment = re.sub(r"/\*.*?\*/", "", stripped)
+                no_comment = re.sub(r"//.*$", "", no_comment).strip()
+                match = re.match(r"^struct\s+(\w+)\s*(.*)", no_comment)
+                if match:
+                    after_name = match.group(2).strip()
+                    # If it has a brace and ends with vars, or has identifier right after name
+                    if "{" in after_name or (after_name and re.match(r"^\w+", after_name)):
+                        line = "inline " + line
+        result.append(line)
+    return result
+
+
 def validate_no_leaked_macros(amalgamation: str) -> None:
     """Verify all #defines are properly #undef'd.
 
@@ -503,54 +573,95 @@ def validate_no_leaked_macros(amalgamation: str) -> None:
         raise ValueError(f"Leaked macros detected: {sorted(leaked)}")
 
 
+def build_routines_headers(
+    source_groups: dict[str, dict[str, dict[str, list[str]]]],
+) -> dict[str, str]:
+    """Build per-year routines header files.
+
+    Generates one header per year containing the shared taxsolve_routines
+    with inline specifiers for C++17 compatibility.
+
+    Macros are NOT undef'd in the header since form code needs them.
+    Form files are responsible for cleaning up macros after use.
+
+    Args:
+    ----
+        source_groups: A dictionary where each key is an outer namespace and the value
+        is a dictionary representing different source groups.
+
+    Returns:
+    -------
+        A dictionary mapping header filenames to content.
+
+    """
+    all_includes = find_all_includes(source_groups)
+
+    result = {}
+    for outer_ns, source_group in source_groups.items():
+        year = outer_ns.replace("OpenTaxSolver", "")
+        taxsolve_routines = source_group["taxsolve_routines"]
+
+        # Make routines inline-compatible
+        inline_source = make_routines_inline(taxsolve_routines["source"])
+
+        header_filename = f"ots_{year}_routines.h"
+        content = ROUTINES_HEADER_TEMPLATE.format(
+            windows_shim=WINDOWS_COMPAT_SHIM,
+            includes="\n".join(all_includes),
+            outer_ns=outer_ns,
+            routines_macros="\n".join(taxsolve_routines["defines"]),
+            routines_source="\n".join(inline_source),
+        )
+        result[header_filename] = content
+
+    return result
+
+
 def build_form_file(
     outer_ns: str,
     inner_ns: str,
-    taxsolve_routines: dict[str, list[str]],
     form_source: dict[str, list[str]],
-    all_includes: list[str],
+    year: str,
 ) -> str:
-    """Build a self-contained form file with inlined routines.
+    """Build form file that includes shared routines header.
 
-    Each form file contains:
-    - Windows shim and includes
-    - Shared taxsolve_routines (inlined)
-    - Form-specific code
-    - Proper macro cleanup
+    Each form file includes the per-year routines header and contains
+    only form-specific code. Routines macros are NOT undef'd here since
+    #pragma once prevents re-including the header for subsequent forms.
 
-    This duplicates the routines in each file but keeps files self-contained
-    and avoids complex C++ parsing for header generation.
+    Args:
+    ----
+        outer_ns: The outer namespace (e.g., "OpenTaxSolver2024").
+        inner_ns: The inner namespace (e.g., "taxsolve_US_1040").
+        form_source: Dictionary with 'defines' and 'source' for the form.
+        year: The tax year (e.g., "2024").
+
+    Returns:
+    -------
+        The form file content as a string.
 
     """
-    # Form-specific macros
     form_defs = form_source["defines"]
     form_undefs = [define_to_undef(e) for e in form_defs]
 
-    # Routines macros
-    routines_undefs = [define_to_undef(e) for e in taxsolve_routines["defines"]]
-
     return FORM_FILE_TEMPLATE.format(
-        windows_shim=WINDOWS_COMPAT_SHIM,
-        includes="\n".join(all_includes),
+        routines_header=f"ots_{year}_routines.h",
         outer_ns=outer_ns,
         inner_ns=inner_ns,
-        routines_macros="\n".join(taxsolve_routines["defines"]),
-        routines_source="\n".join(taxsolve_routines["source"]),
-        routines_undefs="\n".join(routines_undefs),
         form_defines="\n".join(form_defs),
         form_source="\n".join(form_source["source"]),
         form_undefs="\n".join(form_undefs),
-        windows_shim_end=WINDOWS_COMPAT_SHIM_END,
     )
 
 
 def build_per_form_files(
     source_groups: dict[str, dict[str, dict[str, list[str]]]],
 ) -> dict[str, str]:
-    """Build per-form C++ source files.
+    """Build per-form C++ source files and per-year routines headers.
 
-    Each form file is self-contained with inlined routines.
-    This keeps files small enough for MSVC to compile without ICE errors.
+    Generates:
+    - Per-year routines header files (ots_{year}_routines.h)
+    - Per-form C++ files that include the appropriate header
 
     Args:
     ----
@@ -562,14 +673,18 @@ def build_per_form_files(
         A dictionary mapping filenames to content.
 
     """
-    all_includes = find_all_includes(source_groups)
-
     result = {}
+
+    # Generate per-year routines headers
+    # Headers intentionally don't undef macros - form files do the cleanup
+    routines_headers = build_routines_headers(source_groups)
+    for filename, content in routines_headers.items():
+        result[filename] = content
+
+    # Generate form files (each includes the shared header)
     for outer_ns, source_group in source_groups.items():
         year = outer_ns.replace("OpenTaxSolver", "")
-        taxsolve_routines = source_group["taxsolve_routines"]
 
-        # Generate form files (each with inlined routines)
         for inner_ns, form_source in source_group.items():
             if inner_ns == "taxsolve_routines":
                 continue
@@ -577,11 +692,7 @@ def build_per_form_files(
             inner_ns_short = shorten_inner_ns(inner_ns)
             form_filename = f"ots_{year}_{inner_ns_short}.cpp"
 
-            content = build_form_file(
-                outer_ns, inner_ns, taxsolve_routines, form_source, all_includes
-            )
-
-            validate_no_leaked_macros(content)
+            content = build_form_file(outer_ns, inner_ns, form_source, year)
             result[form_filename] = content
 
     return result
