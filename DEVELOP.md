@@ -95,12 +95,12 @@ some help on your way.
 | `core.py`               | Business logic for layers 2 and 3 above.                          |
 | `models.py`             | Pydantic models and natural-language mappings.                    |
 | `_ots_form_models.py`   | Programmatically-generated representations of required fields for all OTS forms. |
-| `otslib/`               | Cython module source code. See [`ots/README.txt`](ots/README.txt). |
+| `otslib/`               | Cython module source code. See [`ots/README.md`](ots/README.md). |
 
 
 The Cython interface to OTS under `otslib/` is generated programmatically from
 the OTS source code distribution tarballs. The code to do this is under the
-folder `ots/`, and is documented at [`ots/README.txt`](ots/README.txt).
+folder `ots/`, and is documented at [`ots/README.md`](ots/README.md).
 
 ### Linting
 

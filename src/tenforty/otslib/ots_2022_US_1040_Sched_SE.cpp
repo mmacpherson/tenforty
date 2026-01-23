@@ -83,7 +83,7 @@ int Round( double x )
 { int y; if (x<0.0) y = x - 0.5; else y = x + 0.5;  return y; }
 
 
-double Conditional_Round( double x )
+double Conditional_Round( double x )	
 {	/* Round only if round_to_whole_dollars flag is set. */
   if (!round_to_whole_dollars)
    return x;
@@ -111,17 +111,17 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
   spc='\n';
  do
   {  /*Absorb any leading white-space.*/
-     word[j]=getc(infile);
-     if (word[j]=='{')
-      {
+     word[j]=getc(infile); 
+     if (word[j]=='{') 
+      { 
        do word[j]=getc(infile); while ((word[j]!='}') && (!feof(infile)));
        word[j]=getc(infile);
       }
-  }
+  } 
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]==ltc) || (word[j]=='\r')));
  if (word[j]=='$')
   word[j] = getc(infile);
- if (word[j]==';')
+ if (word[j]==';') 
   j++;
  else
  if (word[j]=='\n')
@@ -146,7 +146,7 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
 	  word[j] = ' ';
 	 }
 	if (word[j]==',') word[j] = getc(infile);
-      }
+      } 
    while ((!feof(infile)) && ((word[j]!=spc) && (word[j]!='\t') && (word[j]!='\n') && (word[j] !='\r') && (word[j]!=';')));
    if (word[j]==';') ungetc(word[j],infile);
   }
@@ -332,7 +332,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  int i, *ii;
  double y, *yy;
 
- if (kind=='w')
+ if (kind=='w') 
   { single_line_entry = 1;  whole_line_entry = 1; }
  value_was_detected = 0;
 
@@ -356,7 +356,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1))
+   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1)) 
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    if (round_to_whole_dollars)
     y = Round( y );
@@ -369,8 +369,8 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    owrd = (char *)x;
    strcpy( owrd, word );
    if (emssg[0]!='\0')
-    { if (strcmp(word,emssg)!=0)
-       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); }
+    { if (strcmp(word,emssg)!=0) 
+       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); } 
     }
   }
  else
@@ -397,7 +397,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0))
     i = 1;
    else
-   if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0))
+   if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0)) 
     i = 0;
    else if (strcasecmp(word,"N/A")==0) i = notappvalue;
    else if ((single_line_entry) && (strlen( word ) == 0)) i = notappvalue;
@@ -476,7 +476,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='b')
   {
-   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0))
+   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0)) 
 	j = 1;
    else
    if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0))
@@ -489,9 +489,9 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
 	*ii = notappvalue;
 	return;
      }
-   else
-    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg);
-     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg);
+   else 
+    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg); 
+     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg); 
      exit(1);
     }
    ii = (int *)x;
@@ -711,7 +711,7 @@ void read_line_safe( FILE *infile, char *line, int maxlen )
 {
  char ch;
  int j=0;
- do
+ do  
   {
    ch = getc(infile);
    if (j < maxlen - 1)
@@ -728,10 +728,10 @@ void read_comment_filtered_line( FILE *infile, char *line, int maxlen )
  int j=0;
  do
   {
-   line[j] = getc(infile);
-   if (line[j]=='{')
-    {
-     do line[j] = getc(infile);
+   line[j] = getc(infile);  
+   if (line[j]=='{') 
+    { 
+     do line[j] = getc(infile); 
      while ((line[j] != '}') && (!feof(infile)));
      line[j] = ' ';
     }
@@ -753,7 +753,7 @@ void shownum( int j )
 { fprintf(outfile, "L%d = %d\n", j, (int)L[j]); }
 
 /* Show line only if non-zero. */	/* Depricated in favor of ShowLineNonZero (clearer name). */
-void ShowLine( int j )
+void ShowLine( int j )	
 { if (L[j]!=0) showline( j ); }
 
 /* Show line only if non-zero. */
@@ -761,7 +761,7 @@ void ShowLineNonZero( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show-Line with a message. */
-void showline_wmsg( int j, char *msg )
+void showline_wmsg( int j, char *msg )	
 { fprintf(outfile,"L%d = %6.2f\t\t%s\n", j, L[j], msg); }
 
 /* Show line with a message, only if non-zero. */
@@ -782,9 +782,9 @@ void showline_wlabel( char *label, double value )
 
 /* Show-line with specified label and value. */
 void showline_wlabelnz( char *label, double value )
-{
+{ 
  if (value != 0.0)
-  fprintf(outfile, "%s = %6.2f\n", label, value );
+  fprintf(outfile, "%s = %6.2f\n", label, value ); 
 }
 
 /* Show-line with specified label, value, and message. */
@@ -793,7 +793,7 @@ void showline_wlabelmsg( char *label, double value, char *msg )
 
 /* Show a character-string line with specified label, if string is not empty. */
 void Show_String_wLabel( char *label, char *msg )
-{
+{ 
  if ((msg != 0) && (msg[0] != '\0'))
   fprintf(outfile, "%s %s\n", label, msg );
 }
@@ -894,7 +894,7 @@ void Display_File( char *filename )
   {
    printf("%s", line);
    fgets(line, 500, infile);
-  }
+  } 
  fclose(infile);
 }
 
@@ -909,7 +909,7 @@ void get_comment( FILE *infile, char *word )
  int j=0;
 
  do  /*Absorb any leading white-space.*/
-     word[j] = getc(infile);
+     word[j] = getc(infile); 
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]=='\n') || (word[j]=='\r')));
  if (word[j] == '{')
   {
@@ -981,9 +981,9 @@ char *GetTextLineF( char *linename )
     {
      k++;
      if (k >= 5000)
-      {
-        line[k-1] = '\0';
-        while ((!feof(infile)) && (getc(infile) != '\n'));
+      { 
+        line[k-1] = '\0';  
+        while ((!feof(infile)) && (getc(infile) != '\n'));  
         consume_leading_trailing_whitespace( line );
 	fprintf(outfile, "%s %s\n", linename, line );
         return strdup( line );
@@ -996,7 +996,7 @@ char *GetTextLineF( char *linename )
  if (do_all_caps)
   capitalize( line );
  if (writeout_line)
-  fprintf(outfile, "%s %s\n", linename, line );
+  fprintf(outfile, "%s %s\n", linename, line ); 
  return strdup( line );
 }
 
@@ -1014,7 +1014,7 @@ char *GetTextLine( char *linename )
 
 
 void format_socsec( char *line, int kind )
-{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */
+{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */	
   char buf[20]="";	  /* Kind = 1 forces 9-consecutive digits w/no spaces. */
   int j=0, k=0;
   while ((line[j] != '\0') && (k < 11))
@@ -1070,7 +1070,7 @@ int whitespace_invariant_strstr( char *haystack, char *needle )	/* Return 1 if m
  wrd1 = (char *)malloc( strlen( haystack ) + 1 );
  ne = strdup( needle );
  wrd2 = (char *)malloc( strlen( needle ) + 1 );
- do
+ do 
   {
    next_word( hay, wrd1, " \t\n\r" );
    next_word( ne, wrd2, " \t\n\r" );
@@ -1199,7 +1199,7 @@ int ImportReturnData(char *return_filename, P_FORM_IMPORT_DEF p_form_imp_def, in
     if (infile==0) {
         printf("Error: Could not open return '%s'\n", return_filename);
         fprintf(outfile,"Error: Could not open return '%s'\n", return_filename);
-        return( 1 );
+        return( 1 ); 
     }
     read_line(infile,fline);
     while (!feof(infile)) {
@@ -1209,7 +1209,7 @@ int ImportReturnData(char *return_filename, P_FORM_IMPORT_DEF p_form_imp_def, in
             if (strcmp(word, (p_form_imp_def + d)->field_name) == 0) {
                 // Found a matching field; run the call the correct function
                 P_FORM_IMPORT_DEF pd = p_form_imp_def + d;
-                if (pd->p_field_val != NULL)
+                if (pd->p_field_val != NULL) 
                     GrabLineValue( word, fline, pd->p_field_val);
                 if (pd->p_field_string != NULL)
                     GrabLineAlloc( fline, pd->p_field_string) ;
@@ -1221,7 +1221,7 @@ int ImportReturnData(char *return_filename, P_FORM_IMPORT_DEF p_form_imp_def, in
     }
 
     fclose( infile );
-    return( 0 );
+    return( 0 ); 
 
 }
 
@@ -1258,7 +1258,7 @@ struct pdf_markup_record
   struct pdf_markup_record *next;
  } *pdf_markup_list=0;
 
-void add_pdf_markup( char *tagname, int page, float xpos, float ypos,
+void add_pdf_markup( char *tagname, int page, float xpos, float ypos, 
 			int fontsz, int setcol, float txtred, float txtgrn, float txtblu, char *value )
 {
  struct pdf_markup_record *_new;
@@ -1357,19 +1357,19 @@ void intercept_any_pdf_markups( FILE *infile )
 void exude_pdf_markups( FILE *outfile )
 { /* Add any intercepted PDF-markups to the tax-output file. */
   struct pdf_markup_record *old;
-  if (!outfile) return;
+  if (!outfile) return;  
   while (pdf_markup_list)
    {
     if (pdf_markup_list->page > 0)
      {
       if ((pdf_markup_list->fontsz == 10) && (pdf_markup_list->setcol == 0))
-       fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page,
+       fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page, 
 		pdf_markup_list->xpos, pdf_markup_list->ypos, pdf_markup_list->tagname );
       else
-       fprintf(outfile,"NewPDFMarkup( %d, %g, %g, %d, %d, %g, %g, %g ) %s\n",
-		pdf_markup_list->page,
+       fprintf(outfile,"NewPDFMarkup( %d, %g, %g, %d, %d, %g, %g, %g ) %s\n", 
+		pdf_markup_list->page, 
 		pdf_markup_list->xpos, pdf_markup_list->ypos,
-		pdf_markup_list->fontsz, pdf_markup_list->setcol,
+		pdf_markup_list->fontsz, pdf_markup_list->setcol, 
 		pdf_markup_list->txtred, pdf_markup_list->txtgrn, pdf_markup_list->txtblu,
 		pdf_markup_list->tagname );
      }
@@ -1414,17 +1414,17 @@ void grab_any_pdf_markups( char *infname, FILE *outfile )
  modify it under the terms of the GNU General Public License as
  published by the Free Software Foundation; either version 2 of the
  License, or (at your option) any later version.
-
+ 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  General Public License for more details.
-
+ 
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
  02111-1307 USA
-
+ 
  Provided by Steve Wiswell, March 16, 2021.
 
  ************************************************************************/
@@ -1498,8 +1498,8 @@ int main( int argc, char *argv[] )
  GetTextLineF( "YourName:" );
  GetTextLineF( "YourSocSec#:" );
 
- GetLine( "L2", &L[2] );	/* Net Profit/Loss */
- GetLine( "L5a", &L5a );	/* Church employee income from Form W-2 */
+ GetLine( "L2", &L[2] );	/* Net Profit/Loss */	
+ GetLine( "L5a", &L5a );	/* Church employee income from Form W-2 */	
  L[7] = 147000.0;           	/* Fixed value for tax year 2022 */			/* Updated for 2022. */
  GetLine( "L8a", &L8a );	/* Wages & Tips */
  GetLine( "L8b", &L8b );	/* Unreported tips from Form 4137, line 10 */
@@ -1539,7 +1539,7 @@ int main( int argc, char *argv[] )
 
  /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -1583,3 +1583,5 @@ int main( int argc, char *argv[] )
 #undef strcasecmp
 #undef strncasecmp
 #endif
+
+

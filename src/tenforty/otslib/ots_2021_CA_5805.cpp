@@ -83,7 +83,7 @@ int Round( double x )
 { int y; if (x<0.0) y = x - 0.5; else y = x + 0.5;  return y; }
 
 
-double Conditional_Round( double x )
+double Conditional_Round( double x )	
 {	/* Round only if round_to_whole_dollars flag is set. */
   if (!round_to_whole_dollars)
    return x;
@@ -111,17 +111,17 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
   spc='\n';
  do
   {  /*Absorb any leading white-space.*/
-     word[j]=getc(infile);
-     if (word[j]=='{')
-      {
+     word[j]=getc(infile); 
+     if (word[j]=='{') 
+      { 
        do word[j]=getc(infile); while ((word[j]!='}') && (!feof(infile)));
        word[j]=getc(infile);
       }
-  }
+  } 
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]==ltc) || (word[j]=='\r')));
  if (word[j]=='$')
   word[j] = getc(infile);
- if (word[j]==';')
+ if (word[j]==';') 
   j++;
  else
  if (word[j]=='\n')
@@ -146,7 +146,7 @@ void get_word( FILE *infile, char *word )	/* Absorb comments. */
 	  word[j] = ' ';
 	 }
 	if (word[j]==',') word[j] = getc(infile);
-      }
+      } 
    while ((!feof(infile)) && ((word[j]!=spc) && (word[j]!='\t') && (word[j]!='\n') && (word[j]!=';')));
    if (word[j]==';') ungetc(word[j],infile);
   }
@@ -332,7 +332,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  int i, *ii;
  double y, *yy;
 
- if (kind=='w')
+ if (kind=='w') 
   { single_line_entry = 1;  whole_line_entry = 1; }
  value_was_detected = 0;
 
@@ -356,7 +356,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='f')
   {
-   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1))
+   if ((!valid_float(word)) || (sscanf(word,"%lf",&y)!=1)) 
     {printf("ERROR: Bad float '%s', reading %s.\n", word, emssg); fprintf(outfile,"ERROR: Bad float '%s', reading %s.\n", word, emssg); exit(1); }
    if (round_to_whole_dollars)
     y = Round( y );
@@ -369,8 +369,8 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    owrd = (char *)x;
    strcpy( owrd, word );
    if (emssg[0]!='\0')
-    { if (strcmp(word,emssg)!=0)
-       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); }
+    { if (strcmp(word,emssg)!=0) 
+       {printf("ERROR1: Found '%s' when expecting '%s'\n", word, emssg); fprintf(outfile,"ERROR1: Found '%s' when expecting '%s'\n", word, emssg); exit(1); } 
     }
   }
  else
@@ -397,7 +397,7 @@ void get_parameter( FILE *infile, char kind, void *x, char *emssg )
    if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0))
     i = 1;
    else
-   if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0))
+   if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0)) 
     i = 0;
    else if (strcasecmp(word,"N/A")==0) i = notappvalue;
    else if ((single_line_entry) && (strlen( word ) == 0)) i = notappvalue;
@@ -476,7 +476,7 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
  else
  if (kind=='b')
   {
-   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0))
+   if ((strcasecmp(word,"TRUE")==0) || (strcasecmp(word,"YES")==0) || (strcasecmp(word,"Y")==0) || (strcmp(word,"1")==0)) 
 	j = 1;
    else
    if ((strcasecmp(word,"FALSE")==0) || (strcasecmp(word,"NO")==0) || (strcasecmp(word,"N")==0) || (strcmp(word,"0")==0))
@@ -489,9 +489,9 @@ void get_parameters( FILE *infile, char kind, void *x, char *emssg )
 	*ii = notappvalue;
 	return;
      }
-   else
-    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg);
-     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg);
+   else 
+    {printf("ERROR2: Bad boolean '%s', reading %s.\n", word, emssg); 
+     fprintf(outfile,"ERROR: Bad boolean '%s', reading %s.\n", word, emssg); 
      exit(1);
     }
    ii = (int *)x;
@@ -670,10 +670,10 @@ void read_comment_filtered_line( FILE *infile, char *line, int maxlen )
  int j=0;
  do
   {
-   line[j] = getc(infile);
-   if (line[j]=='{')
-    {
-     do line[j] = getc(infile);
+   line[j] = getc(infile);  
+   if (line[j]=='{') 
+    { 
+     do line[j] = getc(infile); 
      while ((line[j] != '}') && (!feof(infile)));
      line[j] = ' ';
     }
@@ -695,7 +695,7 @@ void shownum( int j )
 { fprintf(outfile, "L%d = %d\n", j, (int)L[j]); }
 
 /* Show line only if non-zero. */	/* Depricated in favor of ShowLineNonZero (clearer name). */
-void ShowLine( int j )
+void ShowLine( int j )	
 { if (L[j]!=0) showline( j ); }
 
 /* Show line only if non-zero. */
@@ -703,7 +703,7 @@ void ShowLineNonZero( int j )
 { if (L[j]!=0) showline( j ); }
 
 /* Show-Line with a message. */
-void showline_wmsg( int j, char *msg )
+void showline_wmsg( int j, char *msg )	
 { fprintf(outfile,"L%d = %6.2f\t\t%s\n", j, L[j], msg); }
 
 /* Show line with a message, only if non-zero. */
@@ -724,9 +724,9 @@ void showline_wlabel( char *label, double value )
 
 /* Show-line with specified label and value. */
 void showline_wlabelnz( char *label, double value )
-{
+{ 
  if (value != 0.0)
-  fprintf(outfile, "%s = %6.2f\n", label, value );
+  fprintf(outfile, "%s = %6.2f\n", label, value ); 
 }
 
 /* Show-line with specified label, value, and message. */
@@ -735,7 +735,7 @@ void showline_wlabelmsg( char *label, double value, char *msg )
 
 /* Show a character-string line with specified label, if string is not empty. */
 void Show_String_wLabel( char *label, char *msg )
-{
+{ 
  if ((msg != 0) && (msg[0] != '\0'))
   fprintf(outfile, "%s %s\n", label, msg );
 }
@@ -836,7 +836,7 @@ void Display_File( char *filename )
   {
    printf("%s", line);
    fgets(line, 500, infile);
-  }
+  } 
  fclose(infile);
 }
 
@@ -851,7 +851,7 @@ void get_comment( FILE *infile, char *word )
  int j=0;
 
  do  /*Absorb any leading white-space.*/
-     word[j] = getc(infile);
+     word[j] = getc(infile); 
  while ((!feof(infile)) && ((word[j]==' ') || (word[j]=='\t') || (word[j]=='\n') || (word[j]=='\r')));
  if (word[j] == '{')
   {
@@ -923,9 +923,9 @@ char *GetTextLineF( char *linename )
     {
      k++;
      if (k >= 5000)
-      {
-        line[k-1] = '\0';
-        while ((!feof(infile)) && (getc(infile) != '\n'));
+      { 
+        line[k-1] = '\0';  
+        while ((!feof(infile)) && (getc(infile) != '\n'));  
         consume_leading_trailing_whitespace( line );
 	fprintf(outfile, "%s %s\n", linename, line );
         return strdup( line );
@@ -938,7 +938,7 @@ char *GetTextLineF( char *linename )
  if (do_all_caps)
   capitalize( line );
  if (writeout_line)
-  fprintf(outfile, "%s %s\n", linename, line );
+  fprintf(outfile, "%s %s\n", linename, line ); 
  return strdup( line );
 }
 
@@ -956,7 +956,7 @@ char *GetTextLine( char *linename )
 
 
 void format_socsec( char *line, int kind )
-{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */
+{ /* Expect 3+2+4=9 digits.  Kind = 0 places space after 3rd+5th chars. */	
   char buf[20]="";	  /* Kind = 1 forces 9-consecutive digits w/no spaces. */
   int j=0, k=0;
   while ((line[j] != '\0') && (k < 11))
@@ -1012,7 +1012,7 @@ int whitespace_invariant_strstr( char *haystack, char *needle )	/* Return 1 if m
  wrd1 = (char *)malloc( strlen( haystack ) + 1 );
  ne = strdup( needle );
  wrd2 = (char *)malloc( strlen( needle ) + 1 );
- do
+ do 
   {
    next_word( hay, wrd1, " \t\n\r" );
    next_word( ne, wrd2, " \t\n\r" );
@@ -1086,7 +1086,7 @@ struct pdf_markup_record
   struct pdf_markup_record *next;
  } *pdf_markup_list=0;
 
-void add_pdf_markup( char *tagname, int page, float xpos, float ypos,
+void add_pdf_markup( char *tagname, int page, float xpos, float ypos, 
 			int fontsz, int setcol, float txtred, float txtgrn, float txtblu, char *value )
 {
  struct pdf_markup_record *_new;
@@ -1185,19 +1185,19 @@ void intercept_any_pdf_markups( FILE *infile )
 void exude_pdf_markups( FILE *outfile )
 { /* Add any intercepted PDF-markups to the tax-output file. */
   struct pdf_markup_record *old;
-  if (!outfile) return;
+  if (!outfile) return;  
   while (pdf_markup_list)
    {
     if (pdf_markup_list->page > 0)
      {
       if ((pdf_markup_list->fontsz == 10) && (pdf_markup_list->setcol == 0))
-       fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page,
+       fprintf(outfile,"NewPDFMarkup( %d, %g, %g ) %s\n", pdf_markup_list->page, 
 		pdf_markup_list->xpos, pdf_markup_list->ypos, pdf_markup_list->tagname );
       else
-       fprintf(outfile,"NewPDFMarkup( %d, %g, %g, %d, %d, %g, %g, %g ) %s\n",
-		pdf_markup_list->page,
+       fprintf(outfile,"NewPDFMarkup( %d, %g, %g, %d, %d, %g, %g, %g ) %s\n", 
+		pdf_markup_list->page, 
 		pdf_markup_list->xpos, pdf_markup_list->ypos,
-		pdf_markup_list->fontsz, pdf_markup_list->setcol,
+		pdf_markup_list->fontsz, pdf_markup_list->setcol, 
 		pdf_markup_list->txtred, pdf_markup_list->txtgrn, pdf_markup_list->txtblu,
 		pdf_markup_list->tagname );
      }
@@ -1288,7 +1288,7 @@ double TaxRateFormula( double income, int status )
    if (income <  79812.00)  tax =  1936.38 +  0.08 * (income -  67569.00);  else
    if (income < 407329.00)  tax =  2915.82 + 0.093 * (income -  79812.00);  else
    if (income < 488796.00)  tax = 33374.90 + 0.103 * (income - 407329.00);  else
-   if (income < 814658.00)  tax = 41766.00 + 0.113 * (income - 488796.00);
+   if (income < 814658.00)  tax = 41766.00 + 0.113 * (income - 488796.00); 
    else                     tax = 78588.41 + 0.123 * (income - 814658.00);
   }
  return (int)(tax+0.5);
@@ -1301,7 +1301,7 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
  if (income < 100000.0)   /* Quantize to match tax-table exactly. */
   {
-   if (income < 99951.0)
+   if (income < 99951.0) 
     {
      k = (income + 49) / 100;
      x = 100 * (double)k;
@@ -1335,7 +1335,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 	L[8] = FAIWSL3;
 	if((status == MARRIED_FILING_JOINTLY) || (status == WIDOW))
 		L[9] = 424581;
-	else if((status == SINGLE) || (status == MARRIED_FILING_SEPARAT))
+	else if((status == SINGLE) || (status == MARRIED_FILING_SEPARAT)) 
 		L[9] = 212288;
 	else if(status == HEAD_OF_HOUSEHOLD)
 		L[9] = 318437;
@@ -1343,7 +1343,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 	L[11] = Round(L[10] * 0.06);
 	L[12] = SmallerOf(L[7], L[11]);
 	L[13] = Round(L[5] - L[12]);
-
+	
 	fprintf(outfile, " Line 6 Worksheet - Column (%c),\n", column);
 	for(i = 1; i <= 13; i++)
 		fprintf(outfile, "L6WS_%d%c %0.2lf\n", i, column, L[i]);
@@ -1361,7 +1361,7 @@ int main( int argc, char *argv[] )
  int Quest2, Quest3 = 0, Num_Days = -1;		/* negative Num_Days used as a flag below */
  double Wthd_Per_1, Wthd_Per_2, Wthd_Per_3, Wthd_Per_4, CA_AGI;
  double a10add, b10add, c10add, d10add;
-
+ 
 
  /* line entry variables L[n] are declared in taxsolve_routines.c */
 
@@ -1466,7 +1466,7 @@ for(i = 0; i <= 13; i++){
  fprintf(outfile, "%s\n", "==================================================");
  fprintf(outfile, "%s\n", "                                                            CAUTION\nThis program fills out Form 5805 to determine WHETHER OR NOT you owe a penalty\nfor underpayment of estimated tax.  It calculates the AMOUNT of any penalty you\nmay owe for the MOST LIKELY CASE in which up to four estimated tax payments have\n been made.  You should carefully review the instructions for Form 5805 to see if the\ncalculations are correct for your particular tax situation.  DO NOT INTERPRET a\ndefault zero value for the penalty on the filled PDF to indicate that you do not owe\na penalty, especially if you have not input all required information, including the\nactual dates on which you made your payments. Scroll down to the end of this\nresults file to see if you had an underpayment for any period.  If so, you may owe\na penalty.\n\nItemized deductions are limited for high-income taxpayers.  When you are\nchecking calculations, values on line 6 of Part III may appear to be in error due to\nthese limitations.  See this results file and the last page of the output PDF for the\nlimitation calculations.  Also note that the annualization factor values on lines 4\nof the last page of the output PDF round by default to the nearest integer.  Use\nthe values in this results file for lines L6WS_4a, L6WS_4b, L6WS_4c, and L6WS_4d,\n which for most individual taxpayers will be 4.0, 2.4, 1.5, and 1.0, respectively.\n\nThis program does not calculate the phase-out of exemption credits for high-income\ntaxpayers as collection of the necessary information for each period would\nunnecessarily complicate this program for most users and the impact of exemption\nlimitations on the tax estimates would be negligible.  See instructions for line 11.");
  fprintf(outfile, "%s\n\n", "==================================================");
-
+ 
  /* ----- Place all your form-specific code below here .... ------ */
 
  // Exam
@@ -1497,9 +1497,9 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  {
-   printf("Error: unrecognized status '%s'. Exiting.\n", word);
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
+  { 
+   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
    exit(1);
   }
 
@@ -1574,7 +1574,7 @@ else if (strncasecmp(word,"No",2)==0){
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
   exit(1);
-
+ 
  }
 
 
@@ -1614,7 +1614,7 @@ showline( 6 );
 /* otherwise, error message re: unexpected input item is thrown */
 
   GetLineF( "L8", &L[8] );
-
+ 
   GetInteger( "Num_Days", &Num_Days);
 
 	if(Quest2 == No){			/* Not using Annualized Income Installment Method */
@@ -1637,10 +1637,10 @@ showline( 6 );
 
 			L[12] = L[10] * Num_Days * 0.00008;
 			L[13] = L[11] - L[12];
-
+	
 			showline( 11 );
 			showline( 12 );
-
+		
 			showline_wmsg(13, "PENALTY.  Enter this amount on Form 540, line 113; Form 540NR, line 123; or Form 541, line 44.\n Also, check the box for FTB 5805.\n");
 		}
 	}
@@ -1650,7 +1650,7 @@ showline( 6 );
 
 	/* Inputs must be read even if Annualized Income Installment Method is not used; */
 	/* otherwise, error message re: unexpected input is thrown */
-
+	
 	   GetLine( "SchdAI_1a", &a[1] );
 	   GetLine( "SchdAI_1b", &b[1] );
 	   GetLine( "SchdAI_1c", &c[1] );
@@ -1675,7 +1675,7 @@ showline( 6 );
 //	   GetLine1( "SchdAI_2b", &b[2] );
 //	   GetLine1( "SchdAI_2c", &c[2] );
 //	   GetLine1( "SchdAI_2d", &d[2] );
-
+ 	
 	   GetLine( "SchdAI_4a", &a[4] );
 	   GetLine( "SchdAI_4b", &b[4] );
 	   GetLine( "SchdAI_4c", &c[4] );
@@ -1684,17 +1684,17 @@ showline( 6 );
 //	   GetLine( "SchdAI_6a", &a[6] );
 //	   GetLine( "SchdAI_6b", &b[6] );
 //	   GetLine( "SchdAI_6c", &c[6] );
-//	   GetLine( "SchdAI_6d", &d[6] );
-
+//	   GetLine( "SchdAI_6d", &d[6] );	   
+	
 	   GetLine( "SchdAI_7a", &a[7] );
 	   b[7] = a[7];
 	   c[7] = a[7];
 	   d[7] = a[7];
-
+	
 	   GetLine( "SchdAI_10a_add", &a10add );
 	   GetLine( "SchdAI_10b_add", &b10add );
 	   GetLine( "SchdAI_10c_add", &c10add );
-	   GetLine( "SchdAI_10d_add", &d10add );
+	   GetLine( "SchdAI_10d_add", &d10add ); 
 
 	   GetLine( "SchdAI_11a", &a[11] );
 	   GetLine( "SchdAI_11b", &b[11] );
@@ -1704,8 +1704,8 @@ showline( 6 );
 	   GetLine( "SchdAI_13a", &a[13] );
 	   GetLine( "SchdAI_13b", &b[13] );
 	   GetLine( "SchdAI_13c", &c[13] );
-	   GetLine( "SchdAI_13d", &d[13] );
-
+	   GetLine( "SchdAI_13d", &d[13] ); 	   
+	
 	   GetLine( "SchdAI_14ba", &L14ba );
 	   GetLine( "SchdAI_14bb", &L14bb );
 	   GetLine( "SchdAI_14bc", &L14bc );
@@ -1715,7 +1715,7 @@ showline( 6 );
 	   GetLine( "SchdAI_14db", &L14db );
 	   GetLine( "SchdAI_14dc", &L14dc );
 	   GetLine( "SchdAI_14dd", &L14dd );
-
+	
 	   GetLine( "FAIWS_1a", &FAIWS_a[1]);
 	   GetLine( "FAIWS_1b", &FAIWS_b[1]);
 	   GetLine( "FAIWS_1c", &FAIWS_c[1]);
@@ -1724,7 +1724,7 @@ showline( 6 );
 	   GetLine( "L6WS_2a", &L6WS_a[2]);
 	   GetLine( "L6WS_2b", &L6WS_b[2]);
 	   GetLine( "L6WS_2c", &L6WS_c[2]);
-	   GetLine( "L6WS_2d", &L6WS_d[2]);
+	   GetLine( "L6WS_2d", &L6WS_d[2]);	   
 
         GetLine( "WSII_2a", &A[2]);
 	GetLine( "WSII_2b", &B[2]);
@@ -1734,19 +1734,19 @@ showline( 6 );
 	GetLine( "WSII_10a", &A[10]);
 	GetLine( "WSII_10b", &B[10]);
 	GetLine( "WSII_10c", &C[10]);
-	GetLine( "WSII_10d", &D[10]);
+	GetLine( "WSII_10d", &D[10]);	   
 
 	a[3] = a[1] * a[2];
 	b[3] = b[1] * b[2];
 	c[3] = c[1] * c[2];
 	d[3] = d[1] * d[2];
 
-	a[5] = a[2];
+	a[5] = a[2];		
 	b[5] = b[2];
 	c[5] = c[2];
 	d[5] = d[2];
 
-	a[6] = a[4] * a[5];		/* calculation for lower income filers */
+	a[6] = a[4] * a[5];		/* calculation for lower income filers */		
 	b[6] = b[4] * b[5];		/* these values will be overwritten if higher income thresholds are exceeded */
 	c[6] = c[4] * c[5];
 	d[6] = d[4] * d[5];
@@ -1763,7 +1763,7 @@ showline( 6 );
 			a[6] = L6WS('a', a[4], L6WS_a[2], a[5], FAIWS_a[3], status);
 		}
 	}
-
+	
 	FAIWS_b[3] = FAIWS_b[1] * b[5];
 	fprintf(outfile, "FAIWS_1b\t%0.2lf\n", FAIWS_b[1]);
 	fprintf(outfile, "FAIWS_2b\t%0.2lf\n", b[5]);
@@ -1774,7 +1774,7 @@ showline( 6 );
 	(((status == SINGLE) || (status == MARRIED_FILING_SEPARAT)) && (FAIWS_b[3] > 212288.00)) || \
 	((status == HEAD_OF_HOUSEHOLD) && (FAIWS_b[3] > 318437.00))){
 			b[6] = L6WS('b', b[4], L6WS_b[2], b[5], FAIWS_b[3], status);
-		}
+		}	
 	}
 
 	FAIWS_c[3] = FAIWS_c[1] * c[5];
@@ -1805,7 +1805,7 @@ showline( 6 );
 
 	a[8] = LargerOf(a[6], a[7]);
 	b[8] = LargerOf(b[6], b[7]);
-	c[8] = LargerOf(c[6], c[7]);
+	c[8] = LargerOf(c[6], c[7]); 
 	d[8] = LargerOf(d[6], d[7]);
 
 	a[9] = a[3] - a[8];
@@ -1814,12 +1814,12 @@ showline( 6 );
 	d[9] = d[3] - d[8];
 
 	a[10] = TaxRateFunction( a[9], status);
-	b[10] = TaxRateFunction( b[9], status);
+	b[10] = TaxRateFunction( b[9], status);	
 	c[10] = TaxRateFunction( c[9], status);
 	d[10] = TaxRateFunction( d[9], status);
 
 	a[10] += a10add;
-	b[10] += b10add;
+	b[10] += b10add;	
 	c[10] += c10add;
 	d[10] += d10add;
 
@@ -1863,16 +1863,16 @@ showline( 6 );
 	b[22] = NotLessThanZero(b[21] - b[18]);
 	b[23] = SmallerOf(b[18], b[21]);
 	B[1] = b[23];
-
+	
 	c[17] = a[23] + b[23];
 	c[18] = NotLessThanZero(c[16] - c[17]);
 	c[19] = 0;
-	c[20] = b[22];
+	c[20] = b[22];	
 	c[21] = c[19] + c[20];
 	c[22] = NotLessThanZero(c[21] - c[18]);
 	c[23] = SmallerOf(c[18], c[21]);
 	C[1] = c[23];
-
+	
 	d[17] = a[23] + b[23] + c[23];
 	d[18] = NotLessThanZero(d[16] - d[17]);
 	d[19] = Round(L[6] * 0.30);
@@ -1882,7 +1882,7 @@ showline( 6 );
 	d[23] = SmallerOf(d[18], d[21]);
 	D[1] = d[23];
 
-	}
+	}	
 		/* WORKSHEET II */
 
 	/* A[2], B[2], C[2], D[2] contain estimated taxes paid each period.  Add uneven withholding in period */
@@ -1902,7 +1902,7 @@ showline( 6 );
 		C[2] = C[2] + L[3] * (92.0 / 365.0);
 		D[2] = D[2] + L[3] * (122.0 / 365.0);
 	}
-
+	
 	A[6] = A[2];
 
 	if(A[1] >= A[6])
@@ -1911,7 +1911,7 @@ showline( 6 );
 		A[9] = A[6] - A[1];
 
 	A[11] = A[8] * A[10]/365 * 0.03;
-
+		
 	B[3] = A[9];
 	B[4] = B[2] + B[3];
 	B[5] = A[7] + A[8];
@@ -1946,7 +1946,7 @@ showline( 6 );
 	D[4] = D[2] + D[3];
 	D[5] = C[7] + C[8];
 	D[6] = NotLessThanZero(D[4] - D[5]);
-
+	
 	if(D[1] >= D[6])
 		D[8] = D[1] - D[6];
 	else
@@ -1957,7 +1957,7 @@ showline( 6 );
 	A[0] = A[11] + B[11] + C[11] + D[11];	/* line 12 of WSII */
 
 	if(Quest2 == Yes){
-
+	
 		for(i = 18; i <= 14; i++){
 			fprintf(outfile, "SecA_%d%s %0.2lf\n", i, "a", A[i]);
 			fprintf(outfile, "SecA_%d%s %0.2lf\n", i, "b", B[i]);
@@ -1996,7 +1996,7 @@ showline( 6 );
 			fprintf(outfile, "SchdAI_%d%s %0.2lf\n", i, "c", c[i]);
 			fprintf(outfile, "SchdAI_%d%s %0.2lf\n", i, "d", d[i]);
 		}
-
+		
 		fprintf(outfile, "%s %0.2lf\n", "L14aa", L14aa);
 		fprintf(outfile, "%s %0.2lf\n", "L14ab", L14ab);
 		fprintf(outfile, "%s %0.2lf\n", "L14ac", L14ac);
@@ -2034,16 +2034,16 @@ showline( 6 );
 				fprintf(outfile, "WSII_%d%s %0.2lf\n", i, "d", D[i]);
 		}
 		fprintf(outfile, "WSII_%d %0.2lf     %s\n", 12, A[0], "PENALTY");
-
+	
 		if((A[8] == 0) && (B[8] == 0) && (C[8] == 0) && (D[8] == 0))
 			fprintf(outfile, "As line 8 on WSII is zero for all payment periods, you don't owe a penalty.\n");
 		else
 			fprintf(outfile, "%s\n%s\n%s\n", "There is an underpayment for one or more periods.  See the  instructions and if", "you have not already done so, enter the number of days any payment was late", "into the GUI so this program can calculate the penalty.");
 	}
 
-  /***
+  /*** 
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -2061,7 +2061,7 @@ showline( 6 );
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-
+	
   ***/
 
  fclose(infile);
@@ -2098,3 +2098,5 @@ showline( 6 );
 #undef strcasecmp
 #undef strncasecmp
 #endif
+
+

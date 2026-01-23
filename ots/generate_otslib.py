@@ -1,8 +1,13 @@
-"""Plocess, transform, and amalgamated source code from OTS releases.
+"""Generate per-form C++ source files and Cython bindings from OTS releases.
 
-Includes a variety of functions for parsing and manipulating source code from
-OpenTaxSolver (OTS), handling file operations, and generating Cython interfaces
-to integrate with the OTS system.
+Processes OpenTaxSolver (OTS) release tarballs to generate:
+- Per-form C++ source files (ots_{year}_{form}.cpp) with inlined shared routines
+- Cython .pxd declaration files for each form
+- The ots.pyx Cython module that dispatches to form-specific entry points
+- Form field configuration (_ots_form_models.py)
+
+Per-form file generation (vs single amalgamated file) is used to avoid
+MSVC Internal Compiler Errors on Windows when compiling large source files.
 """
 
 import pathlib
@@ -286,99 +291,6 @@ def define_to_undef(defline: str) -> str:
     return f"#undef {varname}"
 
 
-def amalgamate_source(ns: str, source: dict[str, dict[str, list[str]]]) -> list[str]:
-    """Amalgamate various C source code pieces into a single source.
-
-    Args:
-    ----
-        ns: The namespace for the amalgamation.
-        source: A dictionary where keys are sub-namespaces and values are dictionaries
-        representing grouped lines of source code (includes, defines, source).
-
-    Returns:
-    -------
-        A list of strings representing the amalgamated C source code.
-
-    """
-    out = []
-    # taxsolve_routines is singled out so it can effectively be included in each
-    # of the other sources.
-    taxsolve_routines = source["taxsolve_routines"]
-    other_source = dict((k, v) for (k, v) in source.items() if k != "taxsolve_routines")
-
-    # Namespace of entire ots-year module.
-    out += [f"namespace {ns} {{"]
-
-    # Add taxsolve routines. Don't add the undefines yet, because we want to do
-    # that *after* all the source have been included.
-    taxsolve_routines_undefs = [
-        define_to_undef(e) for e in taxsolve_routines["defines"]
-    ]
-    out += taxsolve_routines["defines"] + taxsolve_routines["source"]
-
-    for gns, group in other_source.items():
-        ns_open = [f"namespace {gns} {{"]
-        defs = group["defines"]
-        undefs = [define_to_undef(e) for e in defs]
-        ns_close = ["}"]
-        out += ns_open + defs + group["source"] + undefs + ns_close
-
-    # NOW undefine the taxsolve_routines #defines.
-    out += taxsolve_routines_undefs
-
-    # Closes ots-year namespace.
-    out += ["}"]
-
-    return out
-
-
-def amalgamate_single_form(
-    outer_ns: str,
-    inner_ns: str,
-    taxsolve_routines: dict[str, list[str]],
-    form_source: dict[str, list[str]],
-) -> list[str]:
-    """Amalgamate source for a single form with shared routines.
-
-    Args:
-    ----
-        outer_ns: The outer namespace (e.g., "OpenTaxSolver2024").
-        inner_ns: The inner namespace for this form (e.g., "taxsolve_CA_540_2024").
-        taxsolve_routines: The shared taxsolve_routines source group.
-        form_source: The source group for this specific form.
-
-    Returns:
-    -------
-        A list of strings representing the amalgamated C source code for this form.
-
-    """
-    out = []
-
-    # Open outer namespace
-    out += [f"namespace {outer_ns} {{"]
-
-    # Add taxsolve routines with their defines
-    taxsolve_routines_undefs = [
-        define_to_undef(e) for e in taxsolve_routines["defines"]
-    ]
-    out += taxsolve_routines["defines"] + taxsolve_routines["source"]
-
-    # Add this form's namespace
-    out += [f"namespace {inner_ns} {{"]
-    defs = form_source["defines"]
-    undefs = [define_to_undef(e) for e in defs]
-    out += defs + form_source["source"] + undefs
-    out += ["}"]  # Close form namespace
-
-    # Undefine taxsolve_routines macros
-    out += taxsolve_routines_undefs
-
-    # Close outer namespace
-    out += ["}"]
-
-    return out
-
-
 def shorten_outer_ns(ns: str) -> str:
     """Shorten the outer namespace string by replacing a specific substring.
 
@@ -589,36 +501,6 @@ def validate_no_leaked_macros(amalgamation: str) -> None:
     leaked = set(defines) - set(undefs)
     if leaked:
         raise ValueError(f"Leaked macros detected: {sorted(leaked)}")
-
-
-def build_single_year_amalgamation(
-    outer_ns: str,
-    source_group: dict[str, dict[str, list[str]]],
-    all_includes: list[str],
-) -> str:
-    """Build amalgamation for a single tax year.
-
-    Args:
-    ----
-        outer_ns: The outer namespace (e.g., "OpenTaxSolver2024").
-        source_group: The source group for this year.
-        all_includes: List of #include directives to include.
-
-    Returns:
-    -------
-        A string representing the amalgamated C++ source for this year.
-
-    """
-    out = []
-    out += [WINDOWS_COMPAT_SHIM]
-    out += all_includes
-    out += ["#define printf(...)"]
-    out += ["#define system(...)"]
-    out += amalgamate_source(outer_ns, source_group)
-    out += ["#undef system(...)"]
-    out += ["#undef printf(...)"]
-    out += [WINDOWS_COMPAT_SHIM_END]
-    return "\n".join(out)
 
 
 def build_form_file(
@@ -876,7 +758,7 @@ def build_config_file(configs: list[dict[str, Any]]) -> str:
     return f"""\
 # THIS FILE IS PROGRAMMATICALLY GENERATED.
 # DO NOT EDIT BY HAND.
-# See `ots/amalgamate.py` to regenerate.
+# See `ots/generate_otslib.py` to regenerate.
 OTS_FORM_CONFIG = {configs!r}
     """
 
