@@ -13,7 +13,8 @@ extra_compile_args = []
 if platform.system() == "Windows":
     # /O2: Optimize for speed
     # /EHsc: Enable C++ exception handling
-    extra_compile_args = ["/O2", "/EHsc"]
+    # /GL-: Disable whole program optimization to avoid MSVC LTCG internal compiler errors
+    extra_compile_args = ["/O2", "/EHsc", "/GL-"]
 elif platform.system() == "Darwin":
     extra_compile_args = ["-O2", "-std=c++11"]
 else:
