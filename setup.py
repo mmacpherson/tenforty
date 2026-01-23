@@ -61,7 +61,7 @@ if platform.system() == "Windows":
         # -DMS_WIN64: Tell Python headers we're on 64-bit Windows (required for MinGW-64)
         # See https://github.com/cython/cython/issues/3405
         extra_compile_args = ["-DMS_WIN64", "-O2", "-std=c++17"]
-        # Static link GCC runtime to avoid DLL dependencies and potential
+        # Static link C++ runtime to avoid DLL dependencies and potential
         # ABI conflicts with MSVC-built Python.
         extra_link_args = ["-static-libgcc", "-static-libstdc++"]
     else:
