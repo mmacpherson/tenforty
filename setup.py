@@ -65,9 +65,15 @@ if platform.system() == "Windows":
         # ABI conflicts with MSVC-built Python.
         extra_link_args = ["-static-libgcc", "-static-libstdc++"]
     else:
-        # MSVC fallback - may have runtime issues due to inline variable handling
-        # Define SIZEOF_VOID_P for 64-bit builds (we skip 32-bit in CI)
-        extra_compile_args = ["/Od", "/EHsc", "/GL-", "/std:c++17", "/DSIZEOF_VOID_P=8"]
+        # MSVC - using static variables (not inline) to avoid MSVC's buggy C++17
+        # inline variable handling that caused runtime crashes.
+        # /Od: Disable optimization
+        # /EHsc: C++ exception handling
+        # /GL-: Disable whole program optimization
+        # /bigobj: Allow more sections in object files (needed for large generated code)
+        extra_compile_args = ["/Od", "/EHsc", "/GL-", "/bigobj", "/std:c++17", "/DSIZEOF_VOID_P=8"]
+        # Disable LTCG to avoid internal compiler errors with large generated code
+        extra_link_args = ["/LTCG:OFF"]
 elif platform.system() == "Darwin":
     extra_compile_args = ["-O2", "-std=c++17"]
 else:
