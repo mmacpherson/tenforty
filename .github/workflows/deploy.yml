@@ -16,14 +16,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
       with:
         python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+
     - name: Install deps
-      run: python -m pip install .[dev]
+      run: uv sync
+
     - name: Run tests
-      run: pytest --hypothesis-profile=ci
+      run: uv run pytest --hypothesis-profile=ci
 
   # Build wheels and sdist only on pushes to main, and only if validation
   # succeeds

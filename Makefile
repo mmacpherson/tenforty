@@ -33,26 +33,30 @@ clean: ## Remove all environment and build files
 	rm -rf .hypothesis .pytest_cache build tenforty/*.so **/__pycache__
 
 env: check-uv ## Install package and dependencies
-	uv venv
-	uv pip install --upgrade --editable ".[dev]"
+	uv sync
 
-jupyter-env: env ## Install Jupyter kernel
-	uv pip install --upgrade --editable ".[jupyter]"
+jupyter-env: check-uv ## Install Jupyter kernel
+	uv sync --extra jupyter
 	uv run python -m ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
 
-test: env ## Run tests
-	uv run python -m pytest
+test: check-uv ## Run tests
+	uv sync
+	uv run pytest
 
-hooks: env ## Install pre-commit hooks
+hooks: check-uv ## Install pre-commit hooks
+	uv sync
 	uv run pre-commit install
 
-update-hooks: env ## Update pre-commit hooks
+update-hooks: check-uv ## Update pre-commit hooks
+	uv sync
 	uv run pre-commit autoupdate
 
-run-hooks: env ## Run hooks on staged files
+run-hooks: check-uv ## Run hooks on staged files
+	uv sync
 	uv run pre-commit run
 
-run-hooks-all-files: env ## Run hooks on all files
+run-hooks-all-files: check-uv ## Run hooks on all files
+	uv sync
 	uv run pre-commit run --all-files
 
 help: ## Show this help

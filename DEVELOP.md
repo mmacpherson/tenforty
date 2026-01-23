@@ -62,31 +62,53 @@ drop down to the middle layer and evaluate any combination of line-level values
 you cared to.
 
 
-## Development
+## Development Setup
 
 To modify `tenforty`'s source code, first clone the repository, or your own fork
 of it, locally. A `Makefile` is provided, and you can view the available
 commands by just typing `make` in the repository root.
 
-Some make recipes are provided to help set up your development environment; in
-particular typing:
+### With UV (recommended)
 
-    make env
+[UV](https://docs.astral.sh/uv/) is a fast Python package manager. Install it first:
 
-uses `uv` to create a virtual environment containing `tenforty` and its
-dependencies.
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-For Jupyter notebook development, the command:
+Then use the Makefile recipes:
 
-    make jupyter-env
+```bash
+make env    # or: uv sync
+make test   # or: uv run pytest
+```
 
-installs a jupyter kernel named like `py-tenforty-{python_version}` that makes
-all the same packages available to Jupyter. (Start jupyter e.g. like `uv run
-jupyter lab`.)
+For Jupyter notebook development:
 
-If you prefer to use something other than `uv`, `tenforty` is a vanilla
-setuptools-based package, and in that case the `Makefile` recipes might provide
-some help on your way.
+```bash
+make jupyter-env
+```
+
+This installs a jupyter kernel named like `py-tenforty-{python_version}` that makes
+all the same packages available to Jupyter. Start jupyter with `uv run jupyter lab`.
+
+### With pip
+
+If you prefer pip, `tenforty` is a vanilla setuptools-based package:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
+pytest
+```
+
+For Jupyter support with pip:
+
+```bash
+pip install -e ".[dev,jupyter]"
+python -m ipykernel install --user --name=tenforty --display-name="py-tenforty"
+```
 
 ### Source File Guide
 

@@ -47,6 +47,16 @@ jupyter = [
   "ipykernel"
 ]
 
+# For uv users: uv sync (dev syncs by default)
+[dependency-groups]
+dev = [
+  "hypothesis",
+  "pytest>=7.0",
+  "pytest-cov",
+  "ruff>=0.2.0",
+  "pre-commit"
+]
+
 [tool.cython]
 language_level = "3"
 
