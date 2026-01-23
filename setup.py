@@ -18,17 +18,17 @@ OTSLIB_DIR = str(pathlib.Path(__file__).parent / "src" / "tenforty" / "otslib")
 def use_mingw() -> bool:
     """Check if we should use MinGW on Windows.
 
-    Returns True if USE_MINGW env var is set, if pydistutils.cfg exists
-    with compiler=mingw32, or if gcc is available in PATH.
-    """
-    import shutil
+    Returns True only if USE_MINGW env var is explicitly set, or if
+    pydistutils.cfg exists with compiler=mingw32.
 
+    Does NOT auto-detect gcc in PATH - this caused issues where random gcc
+    installations would trigger MinGW mode unexpectedly.
+    """
     # Debug output
     print(f"DEBUG: USE_MINGW env var = {os.environ.get('USE_MINGW')!r}")
     pydistutils_cfg = pathlib.Path.home() / "pydistutils.cfg"
     print(f"DEBUG: pydistutils.cfg path = {pydistutils_cfg}")
     print(f"DEBUG: pydistutils.cfg exists = {pydistutils_cfg.exists()}")
-    print(f"DEBUG: gcc in PATH = {shutil.which('gcc')}")
 
     if os.environ.get("USE_MINGW"):
         print("DEBUG: Using MinGW (env var)")
@@ -39,11 +39,7 @@ def use_mingw() -> bool:
         if "mingw32" in content:
             print("DEBUG: Using MinGW (pydistutils.cfg)")
             return True
-    # Fallback: check if gcc is in PATH
-    if shutil.which("gcc"):
-        print("DEBUG: Using MinGW (gcc in PATH)")
-        return True
-    print("DEBUG: Not using MinGW")
+    print("DEBUG: Not using MinGW, will use MSVC")
     return False
 
 
