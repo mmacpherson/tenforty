@@ -11,10 +11,10 @@ from setuptools import Extension, setup
 
 extra_compile_args = []
 if platform.system() == "Windows":
-    # /O1: Optimize for size (avoiding /O2 due to MSVC internal compiler errors)
+    # /Od: Disable optimization (MSVC ICE bugs prevent any optimization level)
     # /EHsc: Enable C++ exception handling
     # /GL-: Disable whole program optimization to avoid MSVC LTCG ICEs
-    extra_compile_args = ["/O1", "/EHsc", "/GL-"]
+    extra_compile_args = ["/Od", "/EHsc", "/GL-"]
 elif platform.system() == "Darwin":
     extra_compile_args = ["-O2", "-std=c++11"]
 else:
