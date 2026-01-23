@@ -1,7 +1,6 @@
 """Build configuration for tenforty with C++17 compiler flags."""
 
 import pathlib
-import platform
 
 from Cython.Build import cythonize
 from setuptools import Extension, setup
