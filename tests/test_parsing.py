@@ -166,7 +166,9 @@ def test_validate_parsed_fields_includes_context():
 def test_validate_parsed_fields_custom_spec():
     """Verify validation works with custom field specifications."""
     custom_specs = [
-        OutputFieldSpec(name="test", ots_key="TEST", required=True, min_value=0, max_value=100),
+        OutputFieldSpec(
+            name="test", ots_key="TEST", required=True, min_value=0, max_value=100
+        ),
     ]
     fields = {"TEST": 50}
     warnings = validate_parsed_fields(fields, custom_specs)

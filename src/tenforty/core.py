@@ -227,7 +227,9 @@ def validate_parsed_fields(
 
         if value is None:
             if spec.required:
-                warnings_list.append(f"Missing required field '{spec.ots_key}'{context}")
+                warnings_list.append(
+                    f"Missing required field '{spec.ots_key}'{context}"
+                )
             continue
 
         if not isinstance(value, (int, float)):
@@ -291,7 +293,9 @@ def evaluate_form(
 
     form_text = generate_ots_return(federal_form_values, federal_form_config)
     logger.debug(f"Raw Federal OTS Input:\n{form_text}")
-    ots_output = otslib._evaluate_form(year, federal_form_id, form_text, on_error=on_error)
+    ots_output = otslib._evaluate_form(
+        year, federal_form_id, form_text, on_error=on_error
+    )
     logger.debug(f"Raw Federal OTS Output:\n{ots_output}")
     federal_return = parse_ots_return(ots_output, year=year, form_id=federal_form_id)
     logger.debug(f"Completed Federal Form Values: {federal_return}")

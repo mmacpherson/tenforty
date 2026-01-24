@@ -70,7 +70,11 @@ FEDERAL_1040_OUTPUT_FIELDS = [
     OutputFieldSpec(name="taxable_income", ots_key="L15", required=True, min_value=0),
     OutputFieldSpec(name="total_tax", ots_key="L24", required=True, min_value=0),
     OutputFieldSpec(
-        name="tax_bracket", ots_key="tax_bracket", required=False, min_value=0, max_value=37
+        name="tax_bracket",
+        ots_key="tax_bracket",
+        required=False,
+        min_value=0,
+        max_value=37,
     ),
     OutputFieldSpec(
         name="effective_tax_rate",
