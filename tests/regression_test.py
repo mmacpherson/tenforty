@@ -7,7 +7,7 @@ IRS Tax Withholding Estimator.
 
 import pytest
 from conftest import (
-    ALL_IRS_SCENARIOS,
+    ALL_TAX_SCENARIOS,
     TaxScenario,
     scenario_id,
 )
@@ -100,49 +100,6 @@ MA_SCENARIOS = [
     },
 ]
 
-CA_SCENARIOS = [
-    {
-        "year": 2024,
-        "state": "CA",
-        "filing_status": "Single",
-        "w2_income": 75000,
-        "expected_federal_min": 8000,
-        "expected_federal_max": 10000,
-        "expected_state_min": 2800,
-        "expected_state_max": 3000,
-    },
-    {
-        "year": 2024,
-        "state": "CA",
-        "filing_status": "Single",
-        "w2_income": 150000,
-        "expected_federal_min": 24000,
-        "expected_federal_max": 28000,
-        "expected_state_min": 9000,
-        "expected_state_max": 12000,
-    },
-    {
-        "year": 2024,
-        "state": "CA",
-        "filing_status": "Married/Joint",
-        "w2_income": 200000,
-        "expected_federal_min": 27000,
-        "expected_federal_max": 30000,
-        "expected_state_min": 10000,
-        "expected_state_max": 13000,
-    },
-    {
-        "year": 2023,
-        "state": "CA",
-        "filing_status": "Single",
-        "w2_income": 100000,
-        "expected_federal_min": 13000,
-        "expected_federal_max": 17000,
-        "expected_state_min": 5200,
-        "expected_state_max": 5500,
-    },
-]
-
 
 @pytest.mark.parametrize(
     "scenario",
@@ -210,40 +167,7 @@ def test_ma_tax_scenarios(scenario):
     )
 
 
-@pytest.mark.parametrize(
-    "scenario",
-    CA_SCENARIOS,
-    ids=lambda s: f"CA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
-)
-def test_ca_tax_scenarios(scenario):
-    """Test CA state tax calculations against expected ranges."""
-    result = evaluate_return(
-        year=scenario["year"],
-        state=scenario["state"],
-        filing_status=scenario["filing_status"],
-        w2_income=scenario["w2_income"],
-    )
-
-    assert (
-        scenario["expected_federal_min"]
-        <= result.federal_total_tax
-        <= scenario["expected_federal_max"]
-    ), (
-        f"Federal tax {result.federal_total_tax} not in expected range "
-        f"[{scenario['expected_federal_min']}, {scenario['expected_federal_max']}]"
-    )
-
-    assert (
-        scenario["expected_state_min"]
-        <= result.state_total_tax
-        <= scenario["expected_state_max"]
-    ), (
-        f"State tax {result.state_total_tax} not in expected range "
-        f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
-    )
-
-
-@pytest.mark.parametrize("scenario", ALL_IRS_SCENARIOS, ids=scenario_id)
+@pytest.mark.parametrize("scenario", ALL_TAX_SCENARIOS, ids=scenario_id)
 def test_irs_gold_standard_scenarios(scenario: TaxScenario):
     """Test against IRS-sourced gold-standard scenarios."""
     result = evaluate_return(
