@@ -126,8 +126,8 @@ The IRS Direct File repository contains 163 input scenario files but only 4 have
 
 ## Test Implementation
 
-These scenarios are implemented in `tests/fixtures/irs_scenarios.py` and run via:
+These scenarios are implemented in `tests/conftest.py` and run via:
 
 ```bash
-pytest tests/regression_test.py::test_irs_gold_standard_scenarios -v
+pytest tests/regression_test.py::test_all_tax_scenarios -v
 ```

@@ -168,8 +168,8 @@ def test_ma_tax_scenarios(scenario):
 
 
 @pytest.mark.parametrize("scenario", ALL_TAX_SCENARIOS, ids=scenario_id)
-def test_irs_gold_standard_scenarios(scenario: TaxScenario):
-    """Test against IRS-sourced gold-standard scenarios."""
+def test_all_tax_scenarios(scenario: TaxScenario):
+    """Test against IRS gold-standard and regression baseline scenarios."""
     result = evaluate_return(
         year=scenario.year,
         state=scenario.state,

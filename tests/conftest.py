@@ -123,7 +123,10 @@ IRS_DIRECT_FILE_SCENARIOS = [
 
 # REGRESSION_SCENARIOS: These are NOT validated against external sources.
 # They capture current library output to detect unexpected changes.
-# Wide ranges are used since these are not precision-validated.
+# Wide ranges (~10-15% variance) are intentional because:
+# 1. These baselines were captured from library output, not authoritative sources
+# 2. Minor OTS updates or rounding changes shouldn't cause test failures
+# 3. The goal is catching major regressions, not precise validation
 REGRESSION_SCENARIOS = [
     TaxScenario(
         source="Library baseline (no external validation)",

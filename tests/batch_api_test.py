@@ -137,7 +137,8 @@ class TestDataFrameStructure:
             w2_income=100000.0,
         )
 
-        assert result["state"].dtype == pl.Utf8
+        # Handle both pl.Utf8 (older polars) and pl.String (newer polars)
+        assert result["state"].dtype in (pl.Utf8, pl.String)
 
     def test_no_null_values_in_tax_columns(self):
         """Core tax columns should not have null values."""
@@ -161,25 +162,25 @@ class TestConsistency:
                 "year": 2024,
                 "state": "NY",
                 "filing_status": "Single",
-                "w2_income": 75000,
+                "w2_income": 75000.0,
             },
             {
                 "year": 2024,
                 "state": "MA",
                 "filing_status": "Single",
-                "w2_income": 100000,
+                "w2_income": 100000.0,
             },
             {
                 "year": 2023,
                 "state": "CA",
                 "filing_status": "Married/Joint",
-                "w2_income": 150000,
+                "w2_income": 150000.0,
             },
             {
                 "year": 2024,
                 "state": None,
                 "filing_status": "Single",
-                "w2_income": 50000,
+                "w2_income": 50000.0,
             },
         ],
         ids=["NY-75k", "MA-100k", "CA-150k", "Federal-only-50k"],
