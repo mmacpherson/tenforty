@@ -1,0 +1,337 @@
+Title:  US Federal 1040 Tax Form - 2022
+
+{ --- Your Filing Status & Exemptions --- }
+
+Status        Single    { Single, Married/Joint, Head_of_House, Married/Sep, Widow(er) }
+
+You_65+Over?	N	{ Were you born before January 2, 1958 ? (answer: Yes, No) }
+You_Blind?	N	{ Are you blind ? (answer: Yes, No) }
+Spouse_65+Over?	N	{ Was Spouse born before January 2, 1958 ? (answer: Yes, No) }
+Spouse_Blind?	N	{ Is Spouse blind ? (answer: Yes, No) }
+
+Dependents      0       { Number of Dependents, (answer: 1, 2, 3, 4, 5, 6, 7, 8, 9, ...)
+				self=1, spouse, etc. }
+
+VirtCurr?	N	{ During 2022, did you receive/exchange/sell any Digital Asset? (answer: Yes, No) }
+
+
+{ ---- Income ---- }
+
+{ -- Wages from W-2 forms Box-1. -- }
+L1a	110000
+		;
+
+L1b		; { Household employee wages not reported on Form(s) W-2. }
+L1c		; { Tip income not reported on line 1a. }
+L1d		; { Medicaid waiver payments not reported on Form(s) W-2. }
+L1e		; { Taxable dependent care benefits from Form 2441, line 26. }
+L1f		; { Employer-provided adoption benefits from Form 8839, line 29. }
+L1g		; { Wages from Form 8919, line 6. }
+L1h		; { Other earned income. }
+L1i		; { Nontaxable combat pay election. }
+
+ { --- Interest --- }
+ { -- Tax-Exempt Interest. (Only used for SocialSecurity calculations). --
+      (Any private activity bond interest exempt from regular tax, is entered under Schedule 2 below.) }
+L2a      	;
+
+ { -- Taxable Interest -- 1099-INT(s) box 1 }
+L2b
+		;
+
+ { --- Dividends --- }
+ { -- Qualified Dividends 1099-DIV box 1b -- }
+L3a
+		;
+
+ { -- Ordinary Dividends 1099-DIV box 1a. -- }
+L3b
+		;
+
+ { --- Other Income & Credits --- }
+L4a		;       { IRA distributions. (1099-R) }
+L4b		;       { Taxable IRA distributions. (1099-R) }
+L5a		;       { Pensions, Annuites. (1099-R) }
+L5b		;       { Taxable Pensions, Annuites. (1099-R) }
+L6a		;       { Social Security benefits.  Forms SSA-1099 box-5. }
+
+L13		;	{ Qualified business income deduction. }
+L19		; 	{ Child tax credit/credit for other dependents. }
+
+L25a		;       { Federal income tax withheld, from W-2's, box-2. }
+L25b		;       { Federal income tax withheld, from 1099's. }
+L25c		;       { Federal income tax withheld, from other forms. }
+L26		;	{ Estimated tax payments made for the year. }
+
+{ -- Refundable Credits -- }
+L27		;	{ Earned Income Credit (EIC). Attach Sched EIC if you have qualifying child. }
+L28		;	{ Child Tax Credit, Schedule 8812 }
+L29		;	{ American Opportunity Credit, Form 8863, line 8 }
+
+{ -- Penalties -- }
+L38		;	{ Estimated Tax Under-payment Penalty }
+
+{ --- Schedule D: Capital Gains/Loses --- }
+
+ f8949_spreadsheet:        { Optional CSV spread-sheet File-name for Cap-Gain/loss trades. }
+
+ { When there are multiple buy-dates, specify "various-short" or "various-long", instead of a specific date. }
+ { If acquired by inheritance, then specify "inherited" instead of a specific date. }
+ {Text Editor Note: When adding a security, All values must be present. "~" is a necessary place holder for No Adjustment. }
+
+CapGains-A/D	        { Capital Gains/Losses, 1099-B. For Basis Reported to IRS (Form 8949 marks A or D) }
+			{  Enter for each:  $BuyAmnt Date, $SellAmnt Date, AdjCode $AdjAmnt }
+                ;
+CapGains-B/E	        { Capital Gains/Losses, 1099-B. For Basis NOT Reported to IRS (Form 8949 marks B/E) }
+			{  Enter for each:  $BuyAmnt Date, $SellAmnt Date, AdjCode $AdjAmnt }
+                ;
+CapGains-C/F	        { Capital Gains/Losses, 1099-B. For when Form 8949 (A,B,D,E) CANNOT be checked. (marks C/F) }
+			{  Enter for each:  $BuyAmnt Date, $SellAmnt Date, AdjCode $AdjAmnt }
+                ;
+
+D4		;	{ Short-term gain from 6252, gain or loss from Forms 4684, 6781, 8824. }
+D5		;	{ Short-term gain/loss from partnerships, S corps, estates, trusts, K-1. }
+D6              ;       { Short-term 2021 loss carryover. Or, LastYear's return output File-name. }
+D11		;       { Gain from Form 4797. }
+D12		;       { Partnership net long-term gains or losses. }
+D13		;       { Cap Gains Distributions - 1099-DIV column 2a. }
+D14             ;       { Long-term 2021 loss carryover. Leave blank if file-name used in line D6. }
+D19             ;       { Amount, if any, from line 18 of Unrecaptured Section 1250 Gain Worksheet. }
+Collectibles 	;	{ Long Term Gain or Loss from Collectibles, Form 8949 Part II. (Usually zero.) }
+
+{ --- Schedule 1: Additional Income --- }
+
+S1_1		;       { Taxable refunds. }
+S1_2a		;       { Alimony received. }
+S1_2b:			 { Date of divorce or separation. }
+S1_3		;       { Business income/loss. (Sched C) }
+S1_4		;       { Other gains or losses. (form 4797) }
+S1_5		;       { Rent realestate/royalties/partnerships/S corp. Sched E }
+S1_6		;       { Farm income/loss. (Sched F) }
+S1_7		;       { Unemployment compensation }
+S1_8a		;       { Net operating loss }
+S1_8b		;       { Gambling income }
+S1_8c		;       { Cancellation of debt }
+S1_8d		;       { Foreign earned income exclusion from Form 2555 }
+S1_8e		;       { Income from Form 8853 }
+S1_8f		;       { Income from Form 8889 }
+S1_8g		;       { Alaska Permanent Fund dividends }
+S1_8h		;	{ Jury duty pay }
+S1_8i		;       { Prizes and awards }
+S1_8j		;       { Activity not engaged in for profit income }
+S1_8k		;       { Stock options }
+S1_8l		;       { Rental of personal property income if for profit but not business. }
+S1_8m		;       { Olympic and Paralympic medals + prizes }
+S1_8n		;       { Section 951(a) inclusion }
+S1_8o		;       { Section 951A(a) inclusion }
+S1_8p		;       { Section 461(l) excess business loss adjustment }
+S1_8q		;       { Taxable distributions from an ABLE account }
+S1_8r		;	{ Scholarship and fellowship grants not reported on Form W-2 }
+S1_8s		;	{ Nontaxable Medicaid waiver payments included on Form 1040, line 1a or 1d }
+S1_8t		;	{ Pension from nonqualifed deferred compensation plan or section 457 plan }
+S1_8u		;	{ Wages earned while incarcerated }
+S1_8z		;       { Other income. }
+ S1_8z_Type:             { Type of Other Income. }
+
+{ ---- Schedule 1, Part II: Adjustments to Gross Income ---- }
+S1_11    	;       { Educator expenses }
+S1_12		;       { Bus. exp.: reservists, artists, ... Attach Form 2106 }
+S1_13		;       { Health savings account deduction. Attach Form 8889 }
+S1_14		;       { Moving expenses. Attach Form 3903 }
+S1_15		;       { Deductable part of self-employment tax. Attach Schedule SE}
+S1_16		;       { Self-employed SEP, SIMPS1_E, and qualified plans }
+S1_17		;       { Self-employed health insurance deduction }
+S1_18		;       { Penalty on early withdrawal of savings }
+S1_19a		;       { Alimony paid }
+ AlimRecipSSN:             { Alimony recipient's SocSec Number. }
+ DivorceDate:              { Divorce or Separation Date }
+S1_20		;       { IRA deduction }
+S1_21      	;       { Student loan interest deduction }
+S1_23		;	{ Archer MSA deduction }
+S1_24a		;	{ Jury duty pay }
+S1_24b		;	{ Deductible expenses of rental of personal property }
+S1_24c		;	{ Nontaxable Olympic and Paralympic medals & prizes }
+S1_24d		;	{ Reforestation amortization and expenses }
+S1_24e		;	{ Repayment of supplemental unemployment benefits }
+S1_24f		;	{ Contributions to section 501(c)(18)(D) pension plans  }
+S1_24g		;	{ Contributions by certain chaplains to section 403(b) plans }
+S1_24h		;	{ Attorney fees and court costs for unlawful discrimination claims }
+S1_24i		;	{ Attorney fees and court costs for award from the IRS }
+S1_24j		;	{ Housing deduction from Form 2555 }
+S1_24k		;	{ Excess deductions of section 67(e) expenses from Schedule K-1 }
+S1_24z		;	{ Other adjustments. }
+S1_24z_Type:		 { Type of Other adjustments. }
+
+
+{ ---- Tax and Credits ---- }
+ { -- Schedule A: Itemized deductions -- }
+ A1             ;       { Unreimbursed medical expenses. }
+ A5a            ;       { State and local income taxes. (W-2's boxes 17 + 19.)  Or sales taxes. }
+ CheckBoxA5a    N ;     { Check (Y) if using sales taxes instead of income taxes. (answer: Yes, No) }
+ A5b            ;       { Real estate taxes.}
+ A5c            ;       { Personal property (eg. automobile) taxes. }
+ A6             ;       { Other taxes.}
+ A8a            ;       { Home mortgage interest and points reported to you on Form 1098.}
+ A8b            ;       { Home mortgage interest not reported to you on Form 1098.}
+ A8c            ;       { Points not reported to you on Form 1098.}
+ A8d            ;       { Mortgage insurance premiums. }
+ A9             ;       { Investment interest. Attach Form 4952}
+
+ A11		;       { Charity contributions by Cash or Check. }
+ A12		;       { Charity contributions Other Than cash or check. }
+ A13		;       { Charity contributions CarryOver from prior year. }
+
+ A15            ;       { Casualty or theft loss(es).}
+ A16            ;       { Other expenses}
+ A18       N    ;       { Elect to itemize, even when less than standard deduction. (answer: Yes, No) }
+
+{ -- Schedule B: Part III -- }
+ B7a	N	;	{ Financial account in foreign country ? (answer: Yes, No) }
+ B7aa		;	{ If yes above, did you file FinCEN Form 114 ? (answer: n/a, Yes, No) }
+ B7b		;	{ If yes above, name of country. }
+ B8	N	;	{ Did you receive a foreign trust ? (answer: Yes, No) }
+
+
+{ --- Alternative Minimum Tax (AMT) Entries (if needed) --- }
+ AMTws2c	;	{ Investment interest expense (difference between regular tax and AMT) (Form 6251 line 2c). }
+ AMTws2g	;	{ Private activity bond interest exempt from regular tax (Form 6251 line 2g). }
+ AMTws3		;	{ Other adjustments, including income-based related adjustments. }
+ AMTws8		;	{ Alternative minimum tax foreign tax credit. }
+
+{ --- Schedule 2: Additional Taxes --- }
+S2_2		;	{ Excess advance premium tax credit repayment. Form 8962. }
+S2_4            ;       { Self-employment tax. Sched SE }
+S2_5            ;       { Social security and Medicare tax from Form 4137. }
+S2_6            ;       { Uncollected Social security and Medicare tax from Form 8919 }
+S2_8		;	{ Additional tax on IRAs, other qualified retirement plans, Form 5329 }
+S2_9            ;       { Household employment taxes. Sched H }
+S2_10		;       { First-time homebuyer credit repayment. Form 5405. }
+S2_11		;	{ Additional Medicare Tax. Attach Form 8959 }
+S2_12		;	{ Net investment income tax. Attach Form 8960 }
+S2_13		;	{ Uncollected social security ... from Form W-2, box 12 }
+S2_14		;	{ Interest on tax due on installment income }
+S2_15		;	{ Interest on the deferred tax on gain from certain installment sales }
+S2_16		;	{ Recapture of low-income housing credit. Attach Form 8611 }
+
+S2_17a		;	{ Recapture of other credits. }
+ S2_17a_Type:		 { Type and form number }
+S2_17b		;	{ Recapture of federal mortgage subsidy. }
+S2_17c		;	{ Additional tax on HSA distributions. Attach Form 8889 }
+S2_17d		;	{ Additional tax on an HSA, Attach Form 8889 }
+S2_17e		;	{ Additional tax on Archer MSA distributions. Attach Form 8853 }
+S2_17f		;	{ Additional tax on Medicare Advantage MSA distributions. Form 8853 }
+S2_17g		;	{ Recapture of a charitable contribution deduction }
+S2_17h		;	{ Income you received from a nonqualified deferred compensation }
+S2_17i		;	{ Compensation received from nonqualified deferred compensation plan }
+S2_17j		;	{ Section 72(m)(5) excess benefits tax  }
+S2_17k		;	{ Golden parachute payments }
+S2_17l		;	{ Tax on accumulation distribution of trusts }
+S2_17m		;	{ Excise tax on insider stock compensation }
+S2_17n		;	{ Look-back interest under section 167(g) or 460(b) }
+S2_17o		;	{ Tax on non-effectively connected income }
+S2_17p		;	{ Any interest from Form 8621, line 16f, }
+S2_17q		;	{ Any interest from Form 8621, line 24 }
+S2_17z		;	{ Any other taxes. }
+ S2_17z_Type:		 { Type of other taxes. }
+S2_19           ;       { Additional tax from Schedule 8812 }
+S2_20           ;       { Section 965 net tax liability installment from Form 965-A }
+
+{ --- Schedule 3: Part 1 - Nonrefundable Credits --- }
+S3_1             ;       { Foreign tax credit, form 1116 }
+S3_2             ;       { Child/dependent care expense credits. Form 2441, Line 11. }
+S3_3             ;       { Education credits. Form 8863, line 19. }
+S3_4             ;       { Retirement savings contributions credit. Form 8880. }
+S3_5             ;       { Residential energy credits. Form 5695. }
+	{ Other nonrefundable credits. }
+S3_6a            ;       { General business credit. Form 3800. }
+S3_6b            ;       { Credit for prior year minimum tax. Form 8801. }
+S3_6c            ;       { Adoption credit. Attach Form 8839 }
+S3_6d            ;       { Credit for the elderly or disabled. Attach Schedule R }
+S3_6e            ;       { Alternative motor vehicle credit. Attach Form 8910 }
+S3_6f            ;       { Qualified plug-in motor vehicle credit. Attach Form 8936 }
+S3_6g            ;       { Mortgage interest credit. Attach Form 8396 }
+S3_6h            ;       { District of Columbia first-time homebuyer credit. Attach Form 8859 }
+S3_6i            ;       { Qualified electric vehicle credit. Attach Form 8834 }
+S3_6j            ;       { Alternative fuel vehicle refueling property credit. Attach Form 8911 }
+S3_6k            ;       { Credit to holders of tax credit bonds. Attach Form 8912 }
+S3_6l            ;       { Amount on Form 8978, line 14. }
+S3_6z            ;       { Other nonrefundable credits. }
+S3_6z_Type:               { Type of Other nonrefundable credits. }
+
+{ --- Schedule 3: Part II - Other Payments and Refundable Credits --- }
+S3_9		;	{ Net premium tax credit. Form 8962. }
+S3_10		;	{ Amnt paid in filing extension req. }
+S3_11		;	{ Excess Soc. Sec. + tier 1 RRTA tax withheld. }
+S3_12		;	{ Credits for federal tax on fuels. Attach form 4136. }
+S3_13a		;	{ Credits from Form 2439. }
+S3_13b		;	{ Credits from Form 7202, qualified sick leave. }
+S3_13d		;	{ Credit for repayment of amounts included in income from prior years. }
+S3_13f		;	{ Deferred amount of net 965 tax liability }
+S3_13h		;	{ Qualified sick and family leave credits from Schedule(s) H and Form 7202 }
+S3_13z		;	{ Credits from Other. }
+ S3_13z_Type:		 { Type of other payments or refundable credits. }
+
+{ -------------------------------------------- }
+{ --- Optional info for Auto-Fillout only. --- }
+
+   { Your 1st-Name, Middle-Initial }
+ Your1stName:
+ YourLastName:
+ YourSocSec#:
+
+   { Spouse 1st-Name, Middle-Initial -- If Married-Filing-Jointly, otherwise leave spouse fields blank. }
+ Spouse1stName:			{ Leave blank if Single, etc. }
+ SpouseLastName:
+ SpouseSocSec#:
+
+   { Your Address }
+ Number&Street:
+ Apt#:
+ Town/City:
+ State:
+ ZipCode:
+
+   { Your Occupation(s) }
+ YourOccupat:
+ SpouseOccupat:
+
+   { - - - - - - - - -- - - - - - - - - }
+   { Dependent-1 Information (optional) }
+ Dep1_FirstName:		{ First Dependent's first-name. }
+ Dep1_LastName:			{ First Dependent's last-name. }
+ Dep1_SocSec#:			{ First Dependent's Social Security number. }
+ Dep1_Relation:			{ First Dependent's relationship. }
+ CkDep1_ChildTxCrd:		{ (answer: Yes, No) }
+ CkDep1_CrdOtherDep:		{ (answer: Yes, No) }
+
+   { Dependent-2 Information (optional) }
+ Dep2_FirstName:
+ Dep2_LastName:
+ Dep2_SocSec#:
+ Dep2_Relation:
+ CkDep2_ChildTxCrd:		{ (answer: Yes, No) }
+ CkDep2_CrdOtherDep:		{ (answer: Yes, No) }
+
+   { Dependent-3 Information (optional) }
+ Dep3_FirstName:
+ Dep3_LastName:
+ Dep3_SocSec#:
+ Dep3_Relation:
+ CkDep3_ChildTxCrd:		{ (answer: Yes, No) }
+ CkDep3_CrdOtherDep:		{ (answer: Yes, No) }
+
+   { Dependent-4 Information (optional) }
+ Dep4_FirstName:
+ Dep4_LastName:
+ Dep4_SocSec#:
+ Dep4_Relation:
+ CkDep4_ChildTxCrd:		{ (answer: Yes, No) }
+ CkDep4_CrdOtherDep:		{ (answer: Yes, No) }
+
+
+   { Other Dependents }
+ CkMoreThan_4_Dependents:	{ (answer: Yes, No) }
+
+{
+ --------------------------------------------
+}
