@@ -2,6 +2,16 @@
 build-backend = "setuptools.build_meta"
 requires = ["setuptools>=68.0", "wheel", "Cython>=3.0"]
 
+# For uv users: uv sync (dev syncs by default)
+[dependency-groups]
+dev = [
+  "hypothesis",
+  "pytest>=7.0",
+  "pytest-cov",
+  "ruff>=0.2.0",
+  "pre-commit"
+]
+
 [project]
 authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
 classifiers = [
@@ -21,8 +31,7 @@ classifiers = [
   "Topic :: Office/Business :: Financial :: Accounting"
 ]
 dependencies = [
-  "pandas>=2.0",
-  "pyarrow",  # To quiet pandas deprecation warning
+  "polars>=1.0",
   "pydantic>=2",
   "python-dotenv"
 ]
@@ -44,17 +53,8 @@ dev = [
 jupyter = [
   "jupyter",
   "seaborn",
+  "pyarrow",  # For seaborn's dataframe interchange protocol with polars
   "ipykernel"
-]
-
-# For uv users: uv sync (dev syncs by default)
-[dependency-groups]
-dev = [
-  "hypothesis",
-  "pytest>=7.0",
-  "pytest-cov",
-  "ruff>=0.2.0",
-  "pre-commit"
 ]
 
 [tool.cython]
