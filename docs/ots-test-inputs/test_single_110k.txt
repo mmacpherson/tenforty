@@ -1,0 +1,235 @@
+Title: US Federal 1040 Tax Form - 2022
+Status Single
+You_65+Over? N
+You_Blind? N
+Spouse_65+Over? N
+Spouse_Blind? N
+Dependents 0
+VirtCurr? N
+L1a 110000;
+L1b ;
+L1c ;
+L1d ;
+L1e ;
+L1f ;
+L1g ;
+L1h ;
+L1i ;
+L2a ;
+L2b ;
+L3a ;
+L3b ;
+L4a ;
+L4b ;
+L5a ;
+L5b ;
+L6a ;
+L13 ;
+L19 ;
+L25a ;
+L25b ;
+L25c ;
+L26 ;
+L27 ;
+L28 ;
+L29 ;
+L38 ;
+f8949_spreadsheet:
+CapGains-A/D ;
+CapGains-B/E ;
+CapGains-C/F ;
+D4 ;
+D5 ;
+D6 ;
+D11 ;
+D12 ;
+D13 ;
+D14 ;
+D19 ;
+Collectibles ;
+S1_1 ;
+S1_2a ;
+S1_2b:
+S1_3 ;
+S1_4 ;
+S1_5 ;
+S1_6 ;
+S1_7 ;
+S1_8a ;
+S1_8b ;
+S1_8c ;
+S1_8d ;
+S1_8e ;
+S1_8f ;
+S1_8g ;
+S1_8h ;
+S1_8i ;
+S1_8j ;
+S1_8k ;
+S1_8l ;
+S1_8m ;
+S1_8n ;
+S1_8o ;
+S1_8p ;
+S1_8q ;
+S1_8r ;
+S1_8s ;
+S1_8t ;
+S1_8u ;
+S1_8z ;
+S1_8z_Type:
+S1_11 ;
+S1_12 ;
+S1_13 ;
+S1_14 ;
+S1_15 ;
+S1_16 ;
+S1_17 ;
+S1_18 ;
+S1_19a ;
+AlimRecipSSN:
+DivorceDate:
+S1_20 ;
+S1_21 ;
+S1_23 ;
+S1_24a ;
+S1_24b ;
+S1_24c ;
+S1_24d ;
+S1_24e ;
+S1_24f ;
+S1_24g ;
+S1_24h ;
+S1_24i ;
+S1_24j ;
+S1_24k ;
+S1_24z ;
+S1_24z_Type:
+A1 ;
+A5a ;
+CheckBoxA5a ;
+A5b ;
+A5c ;
+A6 ;
+A8a ;
+A8b ;
+A8c ;
+A8d ;
+A9 ;
+A11 ;
+A12 ;
+A13 ;
+A15 ;
+A16 ;
+A18 ;
+B7a ;
+B7aa ;
+B7b ;
+B8 ;
+AMTws2c ;
+AMTws2g ;
+AMTws3 ;
+AMTws8 ;
+S2_2 ;
+S2_4 ;
+S2_5 ;
+S2_6 ;
+S2_8 ;
+S2_9 ;
+S2_10 ;
+S2_11 ;
+S2_12 ;
+S2_13 ;
+S2_14 ;
+S2_15 ;
+S2_16 ;
+S2_17a ;
+S2_17a_Type:
+S2_17b ;
+S2_17c ;
+S2_17d ;
+S2_17e ;
+S2_17f ;
+S2_17g ;
+S2_17h ;
+S2_17i ;
+S2_17j ;
+S2_17k ;
+S2_17l ;
+S2_17m ;
+S2_17n ;
+S2_17o ;
+S2_17p ;
+S2_17q ;
+S2_17z ;
+S2_17z_Type:
+S2_19 ;
+S2_20 ;
+S3_1 ;
+S3_2 ;
+S3_3 ;
+S3_4 ;
+S3_5 ;
+S3_6a ;
+S3_6b ;
+S3_6c ;
+S3_6d ;
+S3_6e ;
+S3_6f ;
+S3_6g ;
+S3_6h ;
+S3_6i ;
+S3_6j ;
+S3_6k ;
+S3_6l ;
+S3_6z ;
+S3_6z_Type:
+S3_9 ;
+S3_10 ;
+S3_11 ;
+S3_12 ;
+S3_13a ;
+S3_13b ;
+S3_13d ;
+S3_13f ;
+S3_13h ;
+S3_13z ;
+S3_13z_Type:
+Your1stName:
+YourLastName:
+YourSocSec#:
+Spouse1stName:
+SpouseLastName:
+SpouseSocSec#:
+Number&Street:
+Apt#:
+Town/City:
+State:
+ZipCode:
+YourOccupat:
+SpouseOccupat:
+Dep1_FirstName:
+Dep1_LastName:
+Dep1_SocSec#:
+Dep1_Relation:
+CkDep1_ChildTxCrd:
+CkDep1_CrdOtherDep:
+Dep2_FirstName:
+Dep2_LastName:
+Dep2_SocSec#:
+Dep2_Relation:
+CkDep2_ChildTxCrd:
+CkDep2_CrdOtherDep:
+Dep3_FirstName:
+Dep3_LastName:
+Dep3_SocSec#:
+Dep3_Relation:
+CkDep3_ChildTxCrd:
+CkDep3_CrdOtherDep:
+Dep4_FirstName:
+Dep4_LastName:
+Dep4_SocSec#:
+Dep4_Relation:
+CkDep4_ChildTxCrd:
+CkDep4_CrdOtherDep:
+CkMoreThan_4_Dependents:

@@ -6,6 +6,11 @@ IRS Tax Withholding Estimator.
 """
 
 import pytest
+from conftest import (
+    ALL_TAX_SCENARIOS,
+    TaxScenario,
+    scenario_id,
+)
 
 from tenforty import evaluate_return
 
@@ -162,6 +167,53 @@ def test_ma_tax_scenarios(scenario):
     )
 
 
+@pytest.mark.parametrize("scenario", ALL_TAX_SCENARIOS, ids=scenario_id)
+def test_all_tax_scenarios(scenario: TaxScenario):
+    """Test against IRS gold-standard and regression baseline scenarios."""
+    result = evaluate_return(
+        year=scenario.year,
+        state=scenario.state,
+        filing_status=scenario.filing_status,
+        w2_income=scenario.w2_income,
+        taxable_interest=scenario.taxable_interest,
+        qualified_dividends=scenario.qualified_dividends,
+        ordinary_dividends=scenario.ordinary_dividends,
+        long_term_capital_gains=scenario.long_term_capital_gains,
+        short_term_capital_gains=scenario.short_term_capital_gains,
+        num_dependents=scenario.num_dependents,
+    )
+
+    if scenario.expected_federal_tax_min is not None:
+        assert (
+            scenario.expected_federal_tax_min
+            <= result.federal_total_tax
+            <= scenario.expected_federal_tax_max
+        ), (
+            f"[{scenario.source}] Federal tax {result.federal_total_tax} not in range "
+            f"[{scenario.expected_federal_tax_min}, {scenario.expected_federal_tax_max}]"
+        )
+
+    if scenario.expected_state_tax_min is not None:
+        assert (
+            scenario.expected_state_tax_min
+            <= result.state_total_tax
+            <= scenario.expected_state_tax_max
+        ), (
+            f"[{scenario.source}] State tax {result.state_total_tax} not in range "
+            f"[{scenario.expected_state_tax_min}, {scenario.expected_state_tax_max}]"
+        )
+
+    if scenario.expected_federal_agi_min is not None:
+        assert (
+            scenario.expected_federal_agi_min
+            <= result.federal_adjusted_gross_income
+            <= scenario.expected_federal_agi_max
+        ), (
+            f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} not in range "
+            f"[{scenario.expected_federal_agi_min}, {scenario.expected_federal_agi_max}]"
+        )
+
+
 def test_ny_tax_increases_with_income():
     """Verify that NY state tax increases monotonically with income."""
     incomes = [50000, 100000, 150000, 200000]
@@ -182,6 +234,21 @@ def test_ma_tax_increases_with_income():
     incomes = [50000, 100000, 150000, 200000]
     results = [
         evaluate_return(year=2024, state="MA", filing_status="Single", w2_income=income)
+        for income in incomes
+    ]
+
+    for i in range(len(results) - 1):
+        assert results[i].state_total_tax < results[i + 1].state_total_tax, (
+            f"State tax did not increase: {results[i].state_total_tax} >= {results[i + 1].state_total_tax} "
+            f"for incomes {incomes[i]} vs {incomes[i + 1]}"
+        )
+
+
+def test_ca_tax_increases_with_income():
+    """Verify that CA state tax increases monotonically with income."""
+    incomes = [50000, 100000, 150000, 200000]
+    results = [
+        evaluate_return(year=2024, state="CA", filing_status="Single", w2_income=income)
         for income in incomes
     ]
 
