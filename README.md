@@ -338,7 +338,10 @@ df = (
 ## Development & Contributing
 
 If you're interested to learn more about how the package works, please see
-[DEVELOP.md](./DEVELOP.md) in this directory.
+[docs/develop.md](./docs/develop.md).
+
+Additional documentation:
+- [Error Handling](./docs/error-handling.md) - Configuring `on_error` modes and exception types
 
 Contributions to `tenforty` are welcome! If you have suggestions for
 improvements or encounter any issues, please feel free to open an issue or
