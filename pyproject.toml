@@ -21,8 +21,7 @@ classifiers = [
   "Topic :: Office/Business :: Financial :: Accounting"
 ]
 dependencies = [
-  "pandas>=2.0",
-  "pyarrow",  # To quiet pandas deprecation warning
+  "polars>=1.0",
   "pydantic>=2",
   "python-dotenv"
 ]
@@ -44,6 +43,7 @@ dev = [
 jupyter = [
   "jupyter",
   "seaborn",
+  "pyarrow",  # For seaborn's dataframe interchange protocol with polars
   "ipykernel"
 ]
 
