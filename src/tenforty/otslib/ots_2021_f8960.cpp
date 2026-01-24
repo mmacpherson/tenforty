@@ -107,9 +107,9 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
+  {
+   printf("Error: unrecognized status '%s'. Exiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -118,21 +118,21 @@ int main( int argc, char *argv[] )
  get_parameter( infile, 'l', word, "Entity?");
  if (strncasecmp(word,"Individual",3)==0) individual = Yes;
  fprintf(outfile,"Entity = %s (%d)\n", word, individual);
-     
+
  get_parameter( infile, 's', word, "Sec6013g" );
  get_parameter( infile, 'l', word, "Sec6013g?");
  if (strncasecmp(word,"Yes",1)==0)
    fprintf(outfile, "CkSec6013g X\n");
-  
+
  get_parameter( infile, 's', word, "Sec6013h" );
  get_parameter( infile, 'l', word, "Sec6013h?");
  if (strncasecmp(word,"Yes",1)==0)
    fprintf(outfile, "CkSec6013h X\n");
-  
+
  get_parameter( infile, 's', word, "Sec1141_10g" );
  get_parameter( infile, 'l', word, "Sec1141_10g?");
  if (strncasecmp(word,"Yes",1)==0)
-   fprintf(outfile, "CkSec1141_10g X\n");  
+   fprintf(outfile, "CkSec1141_10g X\n");
 
  GetLineF( "L1", &L[1] );
  GetLineF( "L2", &L[2] );
@@ -193,11 +193,11 @@ int main( int argc, char *argv[] )
    L[20] = SmallerOf( L18c, L19c );
    L[21] = L[20] * 0.038;
    showline_wmsg( 21, "Include on your tax return see instructions)" );
- }  
+ }
 
   /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -215,7 +215,7 @@ int main( int argc, char *argv[] )
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-	
+
   ***/
 
  fclose(infile);
@@ -238,4 +238,3 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_f8960_2021
 } // namespace OpenTaxSolver2021
-

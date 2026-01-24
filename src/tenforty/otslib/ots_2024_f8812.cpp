@@ -110,9 +110,9 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
+  {
+   printf("Error: unrecognized status '%s'. Exiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -125,7 +125,7 @@ int main( int argc, char *argv[] )
  L2d = L2a + L2b + L2c;
  showline_wlabel( "L2d", L2d );
 
- L[3]  = L[1] + L2d;	
+ L[3]  = L[1] + L2d;
  showline( 3 );
 
  GetLine( "L4", &L[4] ); 	// Number of qualifying children under age 17, who have Soc.Sec. numbers.
@@ -162,15 +162,15 @@ int main( int argc, char *argv[] )
  L[11] = L[10] * 0.05;		// Checked for tax-year 2024.
  showline( 11 );
 
- GetLine( "L13", &L[13] );	// Amount from Credit Limit Worksheet A 
+ GetLine( "L13", &L[13] );	// Amount from Credit Limit Worksheet A
 
- GetLine( "Amnt19", &L[19] );	// Amount on Form 1040, line 19. 
+ GetLine( "Amnt19", &L[19] );	// Amount on Form 1040, line 19.
 
  GetLine( "L18a", &L18a );	// Earned income (see instructions) }
- GetLine( "L18b", &L18b ); 	// Nontaxable combat pay (see instructions) } 
+ GetLine( "L18b", &L18b ); 	// Nontaxable combat pay (see instructions) }
 
- GetLine( "L21", &L[21] );	// Withheld Soc.Sec., Medicare, & Additional Medicare taxes 
- GetLine( "L22", &L[22] );	// Total of amounts from Sched-1 (Form 1040), line 15; Sched-2  lines 5+6, 13+22 
+ GetLine( "L21", &L[21] );	// Withheld Soc.Sec., Medicare, & Additional Medicare taxes
+ GetLine( "L22", &L[22] );	// Total of amounts from Sched-1 (Form 1040), line 15; Sched-2  lines 5+6, 13+22
 
  GetLine( "L24", &L[24] );	// Total of amounts from Form 1040, line 27, and Sched-3 line 11. }
 
@@ -196,8 +196,8 @@ int main( int argc, char *argv[] )
      fprintf(outfile,"You may be able to take the additional child tax credit on Form 1040, , line 28.\n");
     }
 
-   // Part II-A Additional Child Tax Credit for All Filers 
-   // Caution: If you file Form 2555, you cannot claim the additional child tax credit. 
+   // Part II-A Additional Child Tax Credit for All Filers
+   // Caution: If you file Form 2555, you cannot claim the additional child tax credit.
 
    L16a  = L[12] - L[14];
    showline_wlabel( "L16a", L16a );
@@ -283,7 +283,7 @@ int main( int argc, char *argv[] )
 
  /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -301,7 +301,7 @@ int main( int argc, char *argv[] )
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-	
+
   ***/
 
  fclose(infile);
@@ -324,4 +324,3 @@ int main( int argc, char *argv[] )
 
 } // namespace taxsolve_f8812_2024
 } // namespace OpenTaxSolver2024
-

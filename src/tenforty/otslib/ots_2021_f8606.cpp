@@ -7,7 +7,7 @@ namespace taxsolve_f8606 {
 /************************************************************************/
 /* TaxSolve_Form_8606.c -                                               */
 /*									*/
-/* Provided by Fred Robinson - 2021-7-8.				*/	
+/* Provided by Fred Robinson - 2021-7-8.				*/
 /************************************************************************/
 
 float thisversion = 1.01;
@@ -275,4 +275,3 @@ int main(int argc, char *argv[])
 
 } // namespace taxsolve_f8606
 } // namespace OpenTaxSolver2021
-

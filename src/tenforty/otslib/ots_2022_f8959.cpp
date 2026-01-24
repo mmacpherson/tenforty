@@ -120,9 +120,9 @@ int main( int argc, char *argv[] )
  if (strncasecmp(word,"Head_of_House",4)==0) status = HEAD_OF_HOUSEHOLD; else
  if (strncasecmp(word,"Widow",4)==0) status = WIDOW;
  else
-  { 
-   printf("Error: unrecognized status '%s'. Exiting.\n", word); 
-   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word); 
+  {
+   printf("Error: unrecognized status '%s'. Exiting.\n", word);
+   fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
    exit(1);
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
@@ -187,11 +187,11 @@ withholding on Medicare wages" );
  L[24] = L[22] + L[23];
  showline_wmsg( 24, "include this amount with \
 federal income tax withholding on Form 1040, 1040-SR, or 1040-NR, line 25c (Form 1040-PR or \
-1040-SS filers, see instructions)" );  
+1040-SS filers, see instructions)" );
 
  /***
     Summary of useful functions:
-	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of 
+	GetLine( "label", &variable )	- Looks for "label" in input file, and places the corresponding sum of
 					  values following that label (until ";") into variable.
 	GetLineF( "label", &variable )	- Like GetLine() above, but also writes the result to the output file.
 	GetLineFnz(( "label", &variable ) - Like GetLine(), but only writes non-zero values to the output file.
@@ -209,7 +209,7 @@ federal income tax withholding on Form 1040, 1040-SR, or 1040-NR, line 25c (Form
 	showline_wlabel( "label", value ) - For custom line names and variables not in the default L[] array.
 	showline_wlabelnz( "label", value ) - Like showline_wlabel, but only writes non-zero values.
 	showline_wlabelmsg( "label", value, "msg" ) - Like showline_wlabel,but adds the provided message to the output line.
-	
+
   ***/
 
  fclose(infile);
@@ -233,4 +233,3 @@ federal income tax withholding on Form 1040, 1040-SR, or 1040-NR, line 25c (Form
 
 } // namespace taxsolve_f8959_2022
 } // namespace OpenTaxSolver2022
-
