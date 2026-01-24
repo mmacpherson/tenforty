@@ -352,13 +352,14 @@ cdef f_type lookup_ots_call(int year, char* form):
         return ots_2024_OR_40.main
 
 
-def _evaluate_form(year, form, form_text, fed_form_text=None):
+def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):
     """Evaluate an OTS tax form given year, form, and form content.
 
     year: int
     form: str
     form_text: str
     fed_file: str | None
+    on_error: str - "raise", "warn", or "ignore"
 
     Returns completed form as str.
 
@@ -401,8 +402,12 @@ def _evaluate_form(year, form, form_text, fed_form_text=None):
             c_argv[2] = NULL  # NULL-terminate argv
             result_code = ots_form_function(2, c_argv)
             if result_code != 0:
-                # Log warning but don't fail - OTS uses exit codes inconsistently
-                warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
+                error_msg = f"OTS returned non-zero exit code: {result_code}"
+                if on_error == "raise":
+                    from tenforty.models import OTSError
+                    raise OTSError(result_code, year, form, error_msg)
+                elif on_error == "warn":
+                    warnings.warn(error_msg, RuntimeWarning)
         finally:
             free(c_argv)
 
@@ -412,3 +417,4 @@ def _evaluate_form(year, form, form_text, fed_form_text=None):
             result = fp.read()
 
     return result
+

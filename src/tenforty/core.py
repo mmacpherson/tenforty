@@ -18,8 +18,10 @@ from .models import (
     InterpretedTaxReturn,
     OTSFieldTerminator,
     OTSForm,
+    OTSParseError,
     OTSState,
     OTSYear,
+    OutputFieldSpec,
     StrEnum,
     TaxReturnInput,
 )
@@ -129,18 +131,31 @@ def generate_ots_return(form_values: dict[str, Any], form_config: OTSForm) -> st
     return "\n".join(form_lines)
 
 
-def parse_ots_return(text: str) -> dict[str, Any]:
+def parse_ots_return(
+    text: str,
+    year: int | None = None,
+    form_id: str | None = None,
+) -> dict[str, Any]:
     """Parse an OTS return text into a dict of values.
 
     Args:
     ----
         text: The OTS return text.
+        year: Optional tax year for context in error messages.
+        form_id: Optional form ID for context in error messages.
 
     Returns:
     -------
         The parsed tax return values.
 
+    Raises:
+    ------
+        OTSParseError: If the output is empty or cannot be parsed.
+
     """
+    if not text or not text.strip():
+        context = f" for {year}/{form_id}" if year and form_id else ""
+        raise OTSParseError(f"OTS output is empty{context}", raw_output=text)
 
     def parse_value(val: str) -> int | float | str:
         """Parse string value into number if you can."""
@@ -178,12 +193,72 @@ def parse_ots_return(text: str) -> dict[str, Any]:
     return fields
 
 
+def validate_parsed_fields(
+    fields: dict[str, Any],
+    field_specs: list[OutputFieldSpec],
+    year: int | None = None,
+    form_id: str | None = None,
+    strict: bool = False,
+) -> list[str]:
+    """Validate parsed OTS fields against specifications.
+
+    Args:
+    ----
+        fields: Parsed fields from OTS output.
+        field_specs: List of field specifications to validate against.
+        year: Optional tax year for context in error messages.
+        form_id: Optional form ID for context in error messages.
+        strict: If True, raise OTSParseError on validation failures.
+
+    Returns:
+    -------
+        List of validation warning messages (empty if all valid).
+
+    Raises:
+    ------
+        OTSParseError: If strict=True and validation fails.
+
+    """
+    warnings_list: list[str] = []
+    context = f" for {year}/{form_id}" if year and form_id else ""
+
+    for spec in field_specs:
+        value = fields.get(spec.ots_key)
+
+        if value is None:
+            if spec.required:
+                warnings_list.append(f"Missing required field '{spec.ots_key}'{context}")
+            continue
+
+        if not isinstance(value, (int, float)):
+            continue
+
+        if spec.min_value is not None and value < spec.min_value:
+            warnings_list.append(
+                f"Field '{spec.ots_key}' value {value} below minimum {spec.min_value}{context}"
+            )
+
+        if spec.max_value is not None and value > spec.max_value:
+            warnings_list.append(
+                f"Field '{spec.ots_key}' value {value} above maximum {spec.max_value}{context}"
+            )
+
+    if strict and warnings_list:
+        raise OTSParseError(
+            f"Validation failed{context}: {'; '.join(warnings_list)}",
+            raw_output=str(fields),
+        )
+
+    return warnings_list
+
+
 def evaluate_form(
     year: int,
     federal_form_id: str = "US_1040",
     state_form_id: str | None = None,
     federal_form_values: dict[str, Any] | None = None,
     state_form_values: dict[str, Any] | None = None,
+    on_error: str = "raise",
 ) -> dict[str, dict[str, Any] | None]:
     """Evaluate an OTS form and return parsed values.
 
@@ -193,9 +268,10 @@ def evaluate_form(
     ----
         year: The tax year.
         federal_form_id: The OTS federal form ID.
-        state_form_id: The OTS federal form ID.
+        state_form_id: The OTS state form ID.
         federal_form_values: Input form values.
         state_form_values: Input form values.
+        on_error: Error handling policy ("raise", "warn", or "ignore").
 
     Returns:
     -------
@@ -215,9 +291,9 @@ def evaluate_form(
 
     form_text = generate_ots_return(federal_form_values, federal_form_config)
     logger.debug(f"Raw Federal OTS Input:\n{form_text}")
-    ots_output = otslib._evaluate_form(year, federal_form_id, form_text)
+    ots_output = otslib._evaluate_form(year, federal_form_id, form_text, on_error=on_error)
     logger.debug(f"Raw Federal OTS Output:\n{ots_output}")
-    federal_return = parse_ots_return(ots_output)
+    federal_return = parse_ots_return(ots_output, year=year, form_id=federal_form_id)
     logger.debug(f"Completed Federal Form Values: {federal_return}")
 
     # Process state return.
@@ -239,9 +315,10 @@ def evaluate_form(
         state_form_id,
         state_form_text,
         fed_form_text=ots_output,
+        on_error=on_error,
     )
     logger.debug(f"Raw State OTS Output:\n{state_output}")
-    state_return = parse_ots_return(state_output)
+    state_return = parse_ots_return(state_output, year=year, form_id=state_form_id)
     logger.debug(f"Completed State Form Values:\n{state_return}")
 
     return {"federal": federal_return, "state": state_return}
@@ -286,7 +363,10 @@ def map_ots_to_natural_output(
 
 
 def evaluate_natural_input_form(
-    year: OTSYear, state: OTSState, natural_form_values: dict[str, Any]
+    year: OTSYear,
+    state: OTSState,
+    natural_form_values: dict[str, Any],
+    on_error: str = "raise",
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
     federal_form_id = "US_1040"
@@ -312,6 +392,7 @@ def evaluate_natural_input_form(
         state_form_id,
         federal_form_values,
         state_form_values,
+        on_error=on_error,
     )
 
     federal_natural_output = map_ots_to_natural_output(
@@ -353,6 +434,7 @@ def evaluate_return(
     itemized_deductions: float = 0.0,
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
+    on_error: str = "raise",
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters."""
     input_data = TaxReturnInput(
@@ -378,6 +460,7 @@ def evaluate_return(
             input_data.year,
             input_data.state,
             input_data.model_dump(exclude={"year", "state"}),
+            on_error=on_error,
         )
     )
 
@@ -398,6 +481,7 @@ def evaluate_returns(
     itemized_deductions: list[float] | float = 0.0,
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
+    on_error: str = "raise",
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid of inputs.
 
@@ -471,7 +555,7 @@ def evaluate_returns(
     results = []
     for combo in combinations:
         combo_map = dict(zip(parameter_names, combo, strict=False))
-        result = evaluate_return(**combo_map).model_dump()
+        result = evaluate_return(**combo_map, on_error=on_error).model_dump()
 
         results.append(combo_map | result)
 

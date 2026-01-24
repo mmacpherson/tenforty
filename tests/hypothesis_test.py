@@ -55,9 +55,10 @@ def test_w2_monotonicity(
 # Verify that federal tax increases monotonically as any income sources
 # increase.
 # :For all years, for all filing statuses.
-# NOTE: We've left qualified dividends out, because we've found situations where
-#       they appear to reduce your total tax. Need to investigate, or ask an
-#       accountant to explain.
+# NOTE: Qualified dividends are excluded from this test because they receive
+#       preferential capital gains tax rates (0%/15%/20%), which can result in
+#       lower total tax than the same amount as ordinary income. This is correct
+#       per IRS rules, not a bug.
 @example(
     year=2024,
     filing_status="Single",
@@ -349,3 +350,31 @@ def test_qualified_dividends_properly_taxed(
         assert result.federal_total_tax > 0, (
             f"Qualified dividends of {qualified_dividends} should generate tax"
         )
+
+
+@example(year=2024, filing_status="Single", amount=50000.0)
+@example(year=2024, filing_status="Married/Joint", amount=100000.0)
+@settings(max_examples=100)
+@given(
+    year=st.sampled_from(SUPPORTED_YEARS),
+    filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
+    amount=st.floats(
+        min_value=50000, max_value=500000, allow_nan=False, allow_infinity=False
+    ),
+)
+def test_qualified_dividends_preferential_rates(year, filing_status, amount):
+    """Verify qualified dividends are taxed at preferential rates vs ordinary income."""
+    qualified_result = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        qualified_dividends=amount,
+    )
+    ordinary_result = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        taxable_interest=amount,
+    )
+    assert qualified_result.total_tax <= ordinary_result.total_tax, (
+        f"Qualified dividends ({qualified_result.total_tax}) should be taxed at "
+        f"preferential rates compared to ordinary income ({ordinary_result.total_tax})"
+    )

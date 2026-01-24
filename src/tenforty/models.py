@@ -23,6 +23,65 @@ except ImportError:
             return self.value
 
 
+class OTSErrorPolicy(StrEnum):
+    RAISE = "raise"
+    WARN = "warn"
+    IGNORE = "ignore"
+
+
+class OTSError(Exception):
+    """Raised when OTS returns a non-zero exit code."""
+
+    def __init__(  # noqa: D107
+        self,
+        exit_code: int,
+        year: int,
+        form: str,
+        message: str | None = None,
+    ):
+        self.exit_code = exit_code
+        self.year = year
+        self.form = form
+        super().__init__(
+            message or f"OTS returned exit code {exit_code} for {year}/{form}"
+        )
+
+
+class OTSParseError(Exception):
+    """Raised when OTS output cannot be parsed."""
+
+    def __init__(self, message: str, raw_output: str | None = None):  # noqa: D107
+        self.raw_output = raw_output
+        super().__init__(message)
+
+
+class OutputFieldSpec(BaseModel):
+    """Specification for validating an OTS output field."""
+
+    name: str
+    ots_key: str
+    required: bool = True
+    min_value: float | None = None
+    max_value: float | None = None
+
+
+FEDERAL_1040_OUTPUT_FIELDS = [
+    OutputFieldSpec(name="agi", ots_key="L11", required=True, min_value=0),
+    OutputFieldSpec(name="taxable_income", ots_key="L15", required=True, min_value=0),
+    OutputFieldSpec(name="total_tax", ots_key="L24", required=True, min_value=0),
+    OutputFieldSpec(
+        name="tax_bracket", ots_key="tax_bracket", required=False, min_value=0, max_value=37
+    ),
+    OutputFieldSpec(
+        name="effective_tax_rate",
+        ots_key="effective_tax_rate",
+        required=False,
+        min_value=0,
+        max_value=100,
+    ),
+]
+
+
 class OTSYear(Enum):
     YEAR_2018 = 2018
     YEAR_2019 = 2019
