@@ -14,8 +14,9 @@ ctypedef int (*f_type)(int, char **)
 
 {CIMPORTS}
 
-cdef f_type lookup_ots_call(int year, char* form):
+cdef f_type lookup_ots_call(int year, str form):
 {LOOKUP_FN_BODY}
+    return NULL
 
 
 def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):

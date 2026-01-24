@@ -366,10 +366,13 @@ def generate_lookup_function_code(import_map: dict[int, dict[str, str]]) -> str:
 
     """
     out = []
+    first = True
     for outer, group in import_map.items():
         for inner, code in group.items():
-            out += [f'if (year == {outer}) and (form == "{inner}"):']
+            keyword = "if" if first else "elif"
+            out += [f'{keyword} year == {outer} and form == "{inner}":']
             out += [f"    return {code}"]
+            first = False
 
     return "\n".join(f"    {e}" for e in out)
 
