@@ -2,10 +2,14 @@
 
 [![GitHub Actions](https://github.com/mmacpherson/tenforty/actions/workflows/deploy.yml/badge.svg)](https://github.com/mmacpherson/tenforty/actions/workflows/deploy.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mmacpherson/tenforty/main.svg)](https://results.pre-commit.ci/latest/github/mmacpherson/tenforty/main)
+
 [![PyPI](https://img.shields.io/pypi/v/tenforty.svg)](https://pypi.org/project/tenforty/)
 [![Python Version](https://img.shields.io/pypi/pyversions/tenforty.svg)](https://pypi.org/project/tenforty/)
-[![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS-blue)](https://pypi.org/project/tenforty/)
+[![Downloads](https://img.shields.io/pypi/dm/tenforty.svg)](https://pypi.org/project/tenforty/)
+
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License](https://img.shields.io/github/license/mmacpherson/tenforty.svg)](https://github.com/mmacpherson/tenforty/blob/main/LICENSE.txt)
+[![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS-blue)](https://pypi.org/project/tenforty/)
 
 
 ## Overview
