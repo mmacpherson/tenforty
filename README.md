@@ -2,10 +2,14 @@
 
 [![GitHub Actions](https://github.com/mmacpherson/tenforty/actions/workflows/deploy.yml/badge.svg)](https://github.com/mmacpherson/tenforty/actions/workflows/deploy.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mmacpherson/tenforty/main.svg)](https://results.pre-commit.ci/latest/github/mmacpherson/tenforty/main)
+
 [![PyPI](https://img.shields.io/pypi/v/tenforty.svg)](https://pypi.org/project/tenforty/)
 [![Python Version](https://img.shields.io/pypi/pyversions/tenforty.svg)](https://pypi.org/project/tenforty/)
-[![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS-blue)](https://pypi.org/project/tenforty/)
+[![Downloads](https://img.shields.io/pypi/dm/tenforty.svg)](https://pypi.org/project/tenforty/)
+
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License](https://img.shields.io/github/license/mmacpherson/tenforty.svg)](https://github.com/mmacpherson/tenforty/blob/main/LICENSE.txt)
+[![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS-blue)](https://pypi.org/project/tenforty/)
 
 
 ## Overview
@@ -50,6 +54,8 @@ Known limitations of this package are detailed in the
 
 ## Installation
 
+Requires Python 3.10+.
+
 ```sh
 pip install tenforty
 ```
@@ -91,20 +97,20 @@ Here are all arguments available for those two functions:
 
 The functions output these fields:
 
-| Output Field                    |
-|---------------------------------|
-| total_tax                       |
-| federal_adjusted_gross_income   |
-| federal_effective_tax_rate      |
-| federal_tax_bracket             |
-| federal_taxable_income          |
-| federal_amt                     |
-| federal_total_tax               |
-| state_adjusted_gross_income     |
-| state_taxable_income            |
-| state_total_tax                 |
-| state_tax_bracket               |
-| state_effective_tax_rate        |
+| Output Field                    | Description                                           |
+|---------------------------------|-------------------------------------------------------|
+| total_tax                       | Combined federal and state tax liability              |
+| federal_adjusted_gross_income   | Federal Adjusted Gross Income (Form 1040 Line 11)     |
+| federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
+| federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
+| federal_taxable_income          | Income subject to federal tax after deductions        |
+| federal_amt                     | Federal Alternative Minimum Tax                       |
+| federal_total_tax               | Total federal tax liability                           |
+| state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
+| state_taxable_income            | Income subject to state tax after deductions          |
+| state_total_tax                 | Total state tax liability                             |
+| state_tax_bracket               | Marginal state tax bracket                            |
+| state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
 
 
 
@@ -321,9 +327,9 @@ df = (
 ## Known Limitations
 
 - Currently does not support Windows. The Colab notebook linked above, or using
-  WSL might be a workaround until this is resolved. Glad for any help from those
-  more familiar with Windows
-  [(issue)](https://github.com/mmacpherson/tenforty/issues/19).
+  WSL are workarounds. Attempts have been made to get Windows builds working, but
+  runtime crashes persist due to compiler interoperability challenges; see
+  [Windows Build Research](./docs/windows-build-research.md) for details.
 - Medicare and Net Investment Income Tax are not automatically computed on
   capital gains, so if those apply to your situation the output tax will be
   underestimated.
