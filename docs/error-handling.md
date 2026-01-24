@@ -77,14 +77,15 @@ from tenforty import OTSParseError
 try:
     result = evaluate_return(w2_income=50000)
 except OTSParseError as e:
-    print(f"Message: {e.message}")
+    print(f"Message: {e}")
     if e.raw_output:
         print(f"Raw output: {e.raw_output}")
 ```
 
 Attributes:
-- `message`: Description of the parsing error
 - `raw_output`: The raw OTS output that couldn't be parsed (if available)
+
+The error message is accessible via `str(e)` (inherited from `Exception`).
 
 ### `OTSErrorPolicy` Enum
 
