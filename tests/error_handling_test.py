@@ -67,3 +67,20 @@ def test_ots_error_custom_message():
         exit_code=1, year=2024, form="US_1040", message="Custom error message"
     )
     assert str(error) == "Custom error message"
+
+
+def test_invalid_year_form_raises_value_error():
+    """Verify that invalid year/form combinations raise ValueError."""
+    import pytest
+
+    from tenforty import otslib
+
+    with pytest.raises(
+        ValueError, match=r"Unknown year/form combination: 1999/US_1040"
+    ):
+        otslib._evaluate_form(1999, "US_1040", "Title: Test")
+
+    with pytest.raises(
+        ValueError, match=r"Unknown year/form combination: 2024/INVALID"
+    ):
+        otslib._evaluate_form(2024, "INVALID", "Title: Test")

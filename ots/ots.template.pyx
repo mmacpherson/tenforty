@@ -14,8 +14,9 @@ ctypedef int (*f_type)(int, char **)
 
 {CIMPORTS}
 
-cdef f_type lookup_ots_call(int year, char* form):
+cdef f_type lookup_ots_call(int year, str form):
 {LOOKUP_FN_BODY}
+    return NULL
 
 
 def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):
@@ -36,6 +37,8 @@ def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):
     import warnings
 
     cdef f_type ots_form_function = lookup_ots_call(year, form)
+    if ots_form_function is NULL:
+        raise ValueError(f"Unknown year/form combination: {year}/{form}")
 
     cdef bytes program_name = b"ots"
     cdef bytes file_path_bytes

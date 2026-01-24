@@ -491,7 +491,7 @@ def evaluate_returns(
 
     This function generalizes `evaluate_return` to handle vector-valued inputs,
     computing the outer product of all input vectors, and applying `evaluate_return` to each combination.
-    The results are then compiled into a pandas DataFrame.
+    The results are then compiled into a polars DataFrame.
 
     Example:
     -------
@@ -560,7 +560,6 @@ def evaluate_returns(
     for combo in combinations:
         combo_map = dict(zip(parameter_names, combo, strict=False))
         result = evaluate_return(**combo_map, on_error=on_error).model_dump()
-
         results.append(combo_map | result)
 
     return pl.DataFrame(results).cast({"state": pl.Utf8})
