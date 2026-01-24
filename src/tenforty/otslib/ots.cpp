@@ -2085,6 +2085,12 @@ static CYTHON_INLINE PyObject* __Pyx_PyUnicode_FromOrdinal_Padded(int value, Py_
 static CYTHON_INLINE PyObject* __Pyx_uchar___Pyx_PyUnicode_From_int(int value, Py_ssize_t width, char padding_char);
 static CYTHON_INLINE PyObject* __Pyx____Pyx_PyUnicode_From_int(int value, Py_ssize_t width, char padding_char, char format_char);
 
+/* ImportFrom.proto */
+static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name);
+
+/* RaiseException.export */
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
 /* PyRuntimeWarning_Check.proto */
 #define __Pyx_PyExc_RuntimeWarning_Check(obj)  __Pyx_TypeCheck(obj, PyExc_RuntimeWarning)
 
@@ -2279,6 +2285,9 @@ static void __Pyx_AddTraceback(const char *funcname, int c_line,
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE int __Pyx_PyLong_As_int(PyObject *);
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyLong_From_int(int value);
 
 /* FormatTypeName.proto */
 #if CYTHON_COMPILING_IN_LIMITED_API
@@ -2632,7 +2641,7 @@ static PyObject *__pyx_builtin_open;
 static PyObject *__pyx_builtin_print;
 /* #### Code section: string_decls ### */
 /* #### Code section: decls ### */
-static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_year, PyObject *__pyx_v_form, PyObject *__pyx_v_form_text, PyObject *__pyx_v_fed_form_text); /* proto */
+static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_year, PyObject *__pyx_v_form, PyObject *__pyx_v_form_text, PyObject *__pyx_v_fed_form_text, PyObject *__pyx_v_on_error); /* proto */
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 /* SmallCodeConfig */
@@ -2658,7 +2667,7 @@ typedef struct {
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_values;
   PyObject *__pyx_tuple[2];
   PyObject *__pyx_codeobj_tab[1];
-  PyObject *__pyx_string_tab[79];
+  PyObject *__pyx_string_tab[85];
 /* #### Code section: module_state_contents ### */
 /* CommonTypesMetaclass.module_state_decls */
 PyTypeObject *__pyx_CommonTypesMetaclassType;
@@ -2701,83 +2710,89 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 /* #### Code section: constant_name_defines ### */
 #define __pyx_kp_u_ __pyx_string_tab[0]
 #define __pyx_kp_u_OTS_returned_non_zero_exit_code __pyx_string_tab[1]
-#define __pyx_kp_u_fed_form_txt __pyx_string_tab[2]
-#define __pyx_kp_u_form_txt __pyx_string_tab[3]
-#define __pyx_kp_u_out_txt __pyx_string_tab[4]
-#define __pyx_kp_u_src_tenforty_otslib_ots_pyx __pyx_string_tab[5]
-#define __pyx_kp_u_txt __pyx_string_tab[6]
-#define __pyx_n_u_CA_540 __pyx_string_tab[7]
-#define __pyx_n_u_CA_5805 __pyx_string_tab[8]
-#define __pyx_n_u_FED_FILENAME __pyx_string_tab[9]
-#define __pyx_n_u_HSA_f8889 __pyx_string_tab[10]
-#define __pyx_n_u_MA_1 __pyx_string_tab[11]
-#define __pyx_n_u_MI_1040 __pyx_string_tab[12]
-#define __pyx_n_u_NC_D400 __pyx_string_tab[13]
-#define __pyx_n_u_NJ_1040 __pyx_string_tab[14]
-#define __pyx_n_u_NY_IT201 __pyx_string_tab[15]
-#define __pyx_n_u_OH_IT1040 __pyx_string_tab[16]
-#define __pyx_n_u_OR_40 __pyx_string_tab[17]
-#define __pyx_n_u_PA_40 __pyx_string_tab[18]
-#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[19]
-#define __pyx_n_u_TemporaryDirectory __pyx_string_tab[20]
-#define __pyx_n_u_US_1040 __pyx_string_tab[21]
-#define __pyx_n_u_US_1040_Sched_C __pyx_string_tab[22]
-#define __pyx_n_u_US_1040_Sched_E_brokerage_royalt __pyx_string_tab[23]
-#define __pyx_n_u_US_1040_Sched_SE __pyx_string_tab[24]
-#define __pyx_n_u_VA_760 __pyx_string_tab[25]
-#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[26]
-#define __pyx_n_u_c_argv __pyx_string_tab[27]
-#define __pyx_n_u_cline_in_traceback __pyx_string_tab[28]
-#define __pyx_n_u_enter __pyx_string_tab[29]
-#define __pyx_n_u_evaluate_form __pyx_string_tab[30]
-#define __pyx_n_u_exit __pyx_string_tab[31]
-#define __pyx_n_u_f2210 __pyx_string_tab[32]
-#define __pyx_n_u_f8606 __pyx_string_tab[33]
-#define __pyx_n_u_f8812 __pyx_string_tab[34]
-#define __pyx_n_u_f8829 __pyx_string_tab[35]
-#define __pyx_n_u_f8959 __pyx_string_tab[36]
-#define __pyx_n_u_f8960 __pyx_string_tab[37]
-#define __pyx_n_u_f8995 __pyx_string_tab[38]
-#define __pyx_n_u_fed_form_text __pyx_string_tab[39]
-#define __pyx_n_u_ff_path __pyx_string_tab[40]
-#define __pyx_n_u_file __pyx_string_tab[41]
-#define __pyx_n_u_file_path_bytes __pyx_string_tab[42]
-#define __pyx_n_u_form __pyx_string_tab[43]
-#define __pyx_n_u_form_text __pyx_string_tab[44]
-#define __pyx_n_u_fp __pyx_string_tab[45]
-#define __pyx_n_u_func __pyx_string_tab[46]
-#define __pyx_n_u_is_coroutine __pyx_string_tab[47]
-#define __pyx_n_u_items __pyx_string_tab[48]
-#define __pyx_n_u_main __pyx_string_tab[49]
-#define __pyx_n_u_module __pyx_string_tab[50]
-#define __pyx_n_u_name __pyx_string_tab[51]
-#define __pyx_n_u_open __pyx_string_tab[52]
-#define __pyx_n_u_os __pyx_string_tab[53]
-#define __pyx_n_u_ots_form_function __pyx_string_tab[54]
-#define __pyx_n_u_pop __pyx_string_tab[55]
-#define __pyx_n_u_print __pyx_string_tab[56]
-#define __pyx_n_u_program_name __pyx_string_tab[57]
-#define __pyx_n_u_qualname __pyx_string_tab[58]
-#define __pyx_n_u_read __pyx_string_tab[59]
-#define __pyx_n_u_replace __pyx_string_tab[60]
-#define __pyx_n_u_result __pyx_string_tab[61]
-#define __pyx_n_u_result_code __pyx_string_tab[62]
-#define __pyx_n_u_returnfile __pyx_string_tab[63]
-#define __pyx_n_u_returnfile_completed __pyx_string_tab[64]
-#define __pyx_n_u_set_name __pyx_string_tab[65]
-#define __pyx_n_u_setdefault __pyx_string_tab[66]
-#define __pyx_n_u_sys __pyx_string_tab[67]
-#define __pyx_n_u_tempfile __pyx_string_tab[68]
-#define __pyx_n_u_tenforty_otslib __pyx_string_tab[69]
-#define __pyx_n_u_test __pyx_string_tab[70]
-#define __pyx_n_u_tmpdir __pyx_string_tab[71]
-#define __pyx_n_u_values __pyx_string_tab[72]
-#define __pyx_n_u_w __pyx_string_tab[73]
-#define __pyx_n_u_warn __pyx_string_tab[74]
-#define __pyx_n_u_warnings __pyx_string_tab[75]
-#define __pyx_n_u_year __pyx_string_tab[76]
-#define __pyx_kp_b_iso88591_O1F_a_F_b_Qixq_QoU_y_Q_Rq_ha_U __pyx_string_tab[77]
-#define __pyx_n_b_ots __pyx_string_tab[78]
+#define __pyx_kp_u__2 __pyx_string_tab[2]
+#define __pyx_kp_u_fed_form_txt __pyx_string_tab[3]
+#define __pyx_kp_u_form_txt __pyx_string_tab[4]
+#define __pyx_kp_u_out_txt __pyx_string_tab[5]
+#define __pyx_kp_u_src_tenforty_otslib_ots_pyx __pyx_string_tab[6]
+#define __pyx_kp_u_txt __pyx_string_tab[7]
+#define __pyx_n_u_CA_540 __pyx_string_tab[8]
+#define __pyx_n_u_CA_5805 __pyx_string_tab[9]
+#define __pyx_n_u_FED_FILENAME __pyx_string_tab[10]
+#define __pyx_n_u_HSA_f8889 __pyx_string_tab[11]
+#define __pyx_n_u_MA_1 __pyx_string_tab[12]
+#define __pyx_n_u_MI_1040 __pyx_string_tab[13]
+#define __pyx_n_u_NC_D400 __pyx_string_tab[14]
+#define __pyx_n_u_NJ_1040 __pyx_string_tab[15]
+#define __pyx_n_u_NY_IT201 __pyx_string_tab[16]
+#define __pyx_n_u_OH_IT1040 __pyx_string_tab[17]
+#define __pyx_n_u_OR_40 __pyx_string_tab[18]
+#define __pyx_n_u_OTSError __pyx_string_tab[19]
+#define __pyx_n_u_PA_40 __pyx_string_tab[20]
+#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[21]
+#define __pyx_n_u_TemporaryDirectory __pyx_string_tab[22]
+#define __pyx_n_u_US_1040 __pyx_string_tab[23]
+#define __pyx_n_u_US_1040_Sched_C __pyx_string_tab[24]
+#define __pyx_n_u_US_1040_Sched_E_brokerage_royalt __pyx_string_tab[25]
+#define __pyx_n_u_US_1040_Sched_SE __pyx_string_tab[26]
+#define __pyx_n_u_VA_760 __pyx_string_tab[27]
+#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[28]
+#define __pyx_n_u_c_argv __pyx_string_tab[29]
+#define __pyx_n_u_cline_in_traceback __pyx_string_tab[30]
+#define __pyx_n_u_enter __pyx_string_tab[31]
+#define __pyx_n_u_error_msg __pyx_string_tab[32]
+#define __pyx_n_u_evaluate_form __pyx_string_tab[33]
+#define __pyx_n_u_exit __pyx_string_tab[34]
+#define __pyx_n_u_f2210 __pyx_string_tab[35]
+#define __pyx_n_u_f8606 __pyx_string_tab[36]
+#define __pyx_n_u_f8812 __pyx_string_tab[37]
+#define __pyx_n_u_f8829 __pyx_string_tab[38]
+#define __pyx_n_u_f8959 __pyx_string_tab[39]
+#define __pyx_n_u_f8960 __pyx_string_tab[40]
+#define __pyx_n_u_f8995 __pyx_string_tab[41]
+#define __pyx_n_u_fed_form_text __pyx_string_tab[42]
+#define __pyx_n_u_ff_path __pyx_string_tab[43]
+#define __pyx_n_u_file __pyx_string_tab[44]
+#define __pyx_n_u_file_path_bytes __pyx_string_tab[45]
+#define __pyx_n_u_form __pyx_string_tab[46]
+#define __pyx_n_u_form_text __pyx_string_tab[47]
+#define __pyx_n_u_fp __pyx_string_tab[48]
+#define __pyx_n_u_func __pyx_string_tab[49]
+#define __pyx_n_u_is_coroutine __pyx_string_tab[50]
+#define __pyx_n_u_items __pyx_string_tab[51]
+#define __pyx_n_u_main __pyx_string_tab[52]
+#define __pyx_n_u_module __pyx_string_tab[53]
+#define __pyx_n_u_name __pyx_string_tab[54]
+#define __pyx_n_u_on_error __pyx_string_tab[55]
+#define __pyx_n_u_open __pyx_string_tab[56]
+#define __pyx_n_u_os __pyx_string_tab[57]
+#define __pyx_n_u_ots_form_function __pyx_string_tab[58]
+#define __pyx_n_u_pop __pyx_string_tab[59]
+#define __pyx_n_u_print __pyx_string_tab[60]
+#define __pyx_n_u_program_name __pyx_string_tab[61]
+#define __pyx_n_u_qualname __pyx_string_tab[62]
+#define __pyx_n_u_raise __pyx_string_tab[63]
+#define __pyx_n_u_read __pyx_string_tab[64]
+#define __pyx_n_u_replace __pyx_string_tab[65]
+#define __pyx_n_u_result __pyx_string_tab[66]
+#define __pyx_n_u_result_code __pyx_string_tab[67]
+#define __pyx_n_u_returnfile __pyx_string_tab[68]
+#define __pyx_n_u_returnfile_completed __pyx_string_tab[69]
+#define __pyx_n_u_set_name __pyx_string_tab[70]
+#define __pyx_n_u_setdefault __pyx_string_tab[71]
+#define __pyx_n_u_sys __pyx_string_tab[72]
+#define __pyx_n_u_tempfile __pyx_string_tab[73]
+#define __pyx_n_u_tenforty_models __pyx_string_tab[74]
+#define __pyx_n_u_tenforty_otslib __pyx_string_tab[75]
+#define __pyx_n_u_test __pyx_string_tab[76]
+#define __pyx_n_u_tmpdir __pyx_string_tab[77]
+#define __pyx_n_u_values __pyx_string_tab[78]
+#define __pyx_n_u_w __pyx_string_tab[79]
+#define __pyx_n_u_warn __pyx_string_tab[80]
+#define __pyx_n_u_warnings __pyx_string_tab[81]
+#define __pyx_n_u_year __pyx_string_tab[82]
+#define __pyx_kp_b_iso88591_a_O1F_a_F_b_Qixq_QoU_y_Q_Rq_ha __pyx_string_tab[83]
+#define __pyx_n_b_ots __pyx_string_tab[84]
 /* #### Code section: module_state_clear ### */
 #if CYTHON_USE_MODULE_STATE
 static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
@@ -2794,7 +2809,7 @@ static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
   #endif
   for (int i=0; i<2; ++i) { Py_CLEAR(clear_module_state->__pyx_tuple[i]); }
   for (int i=0; i<1; ++i) { Py_CLEAR(clear_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<79; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<85; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
 /* #### Code section: module_state_clear_contents ### */
 /* CommonTypesMetaclass.module_state_clear */
 Py_CLEAR(clear_module_state->__pyx_CommonTypesMetaclassType);
@@ -2819,7 +2834,7 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_unicode);
   for (int i=0; i<2; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_tuple[i]); }
   for (int i=0; i<1; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<79; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<85; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
 /* #### Code section: module_state_traverse_contents ### */
 /* CommonTypesMetaclass.module_state_traverse */
 Py_VISIT(traverse_module_state->__pyx_CommonTypesMetaclassType);
@@ -7355,7 +7370,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
 /* "src/tenforty/otslib/ots.pyx":355
  *
  *
- * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
+ * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
 */
@@ -7368,7 +7383,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_8tenforty_6otslib__evaluate_form, "Evaluate an OTS tax form given year, form, and form content.\n\n    year: int\n    form: str\n    form_text: str\n    fed_file: str | None\n\n    Returns completed form as str.\n\n    Validation of year, form, form_text is not done here, but in\n    `tenforty.evaluate_form`, because it's more conveniently outside the cython\n    context.\n    ");
+PyDoc_STRVAR(__pyx_doc_8tenforty_6otslib__evaluate_form, "Evaluate an OTS tax form given year, form, and form content.\n\n    year: int\n    form: str\n    form_text: str\n    fed_file: str | None\n    on_error: str - \"raise\", \"warn\", or \"ignore\"\n\n    Returns completed form as str.\n\n    Validation of year, form, form_text is not done here, but in\n    `tenforty.evaluate_form`, because it's more conveniently outside the cython\n    context.\n    ");
 static PyMethodDef __pyx_mdef_8tenforty_6otslib_1_evaluate_form = {"_evaluate_form", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_8tenforty_6otslib_1_evaluate_form, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_8tenforty_6otslib__evaluate_form};
 static PyObject *__pyx_pw_8tenforty_6otslib_1_evaluate_form(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
@@ -7381,11 +7396,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   PyObject *__pyx_v_form = 0;
   PyObject *__pyx_v_form_text = 0;
   PyObject *__pyx_v_fed_form_text = 0;
+  PyObject *__pyx_v_on_error = 0;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[4] = {0,0,0,0};
+  PyObject* values[5] = {0,0,0,0,0};
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -7401,11 +7417,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   #endif
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
   {
-    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_year,&__pyx_mstate_global->__pyx_n_u_form,&__pyx_mstate_global->__pyx_n_u_form_text,&__pyx_mstate_global->__pyx_n_u_fed_form_text,0};
+    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_year,&__pyx_mstate_global->__pyx_n_u_form,&__pyx_mstate_global->__pyx_n_u_form_text,&__pyx_mstate_global->__pyx_n_u_fed_form_text,&__pyx_mstate_global->__pyx_n_u_on_error,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
     if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 355, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
+        case  5:
+        values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 355, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
         if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 355, __pyx_L3_error)
@@ -7428,11 +7448,16 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
       if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "_evaluate_form", 0) < (0)) __PYX_ERR(0, 355, __pyx_L3_error)
       if (!values[3]) values[3] = __Pyx_NewRef(((PyObject *)Py_None));
+      if (!values[4]) values[4] = __Pyx_NewRef(((PyObject *)((PyObject*)__pyx_mstate_global->__pyx_n_u_raise)));
       for (Py_ssize_t i = __pyx_nargs; i < 3; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, i); __PYX_ERR(0, 355, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 5, i); __PYX_ERR(0, 355, __pyx_L3_error) }
       }
     } else {
       switch (__pyx_nargs) {
+        case  5:
+        values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 355, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
         if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 355, __pyx_L3_error)
@@ -7448,15 +7473,17 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         default: goto __pyx_L5_argtuple_error;
       }
       if (!values[3]) values[3] = __Pyx_NewRef(((PyObject *)Py_None));
+      if (!values[4]) values[4] = __Pyx_NewRef(((PyObject *)((PyObject*)__pyx_mstate_global->__pyx_n_u_raise)));
     }
     __pyx_v_year = values[0];
     __pyx_v_form = values[1];
     __pyx_v_form_text = values[2];
     __pyx_v_fed_form_text = values[3];
+    __pyx_v_on_error = values[4];
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 4, __pyx_nargs); __PYX_ERR(0, 355, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 5, __pyx_nargs); __PYX_ERR(0, 355, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -7467,7 +7494,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8tenforty_6otslib__evaluate_form(__pyx_self, __pyx_v_year, __pyx_v_form, __pyx_v_form_text, __pyx_v_fed_form_text);
+  __pyx_r = __pyx_pf_8tenforty_6otslib__evaluate_form(__pyx_self, __pyx_v_year, __pyx_v_form, __pyx_v_form_text, __pyx_v_fed_form_text, __pyx_v_on_error);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -7477,7 +7504,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_year, PyObject *__pyx_v_form, PyObject *__pyx_v_form_text, PyObject *__pyx_v_fed_form_text) {
+static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_year, PyObject *__pyx_v_form, PyObject *__pyx_v_form_text, PyObject *__pyx_v_fed_form_text, PyObject *__pyx_v_on_error) {
   PyObject *__pyx_v_warnings = NULL;
   __pyx_t_8tenforty_6otslib_f_type __pyx_v_ots_form_function;
   PyObject *__pyx_v_program_name = 0;
@@ -7488,6 +7515,8 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   PyObject *__pyx_v_ff_path = NULL;
   PyObject *__pyx_v_fp = NULL;
   PyObject *__pyx_v_returnfile = NULL;
+  PyObject *__pyx_v_error_msg = NULL;
+  PyObject *__pyx_v_OTSError = NULL;
   PyObject *__pyx_v_returnfile_completed = NULL;
   PyObject *__pyx_v_result = NULL;
   PyObject *__pyx_r = NULL;
@@ -7511,41 +7540,42 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   PyObject *__pyx_t_17 = NULL;
   PyObject *__pyx_t_18 = NULL;
   int __pyx_t_19;
-  int __pyx_t_20;
-  char const *__pyx_t_21;
-  PyObject *__pyx_t_22 = NULL;
+  Py_ssize_t __pyx_t_20;
+  int __pyx_t_21;
+  char const *__pyx_t_22;
+  PyObject *__pyx_t_23 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_evaluate_form", 0);
   __Pyx_INCREF(__pyx_v_form_text);
 
-  /* "src/tenforty/otslib/ots.pyx":369
+  /* "src/tenforty/otslib/ots.pyx":370
  *     context.
  *     """
  *     import warnings             # <<<<<<<<<<<<<<
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
 */
-  __pyx_t_2 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_warnings, 0, 0, NULL, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 369, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_warnings, 0, 0, NULL, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 370, __pyx_L1_error)
   __pyx_t_1 = __pyx_t_2;
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_warnings = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "src/tenforty/otslib/ots.pyx":371
+  /* "src/tenforty/otslib/ots.pyx":372
  *     import warnings
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)             # <<<<<<<<<<<<<<
  *
  *     cdef bytes program_name = b"ots"
 */
-  __pyx_t_3 = __Pyx_PyLong_As_int(__pyx_v_year); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 371, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_AsWritableString(__pyx_v_form); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 371, __pyx_L1_error)
-  __pyx_t_5 = __pyx_f_8tenforty_6otslib_lookup_ots_call(__pyx_t_3, __pyx_t_4); if (unlikely(__pyx_t_5 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 371, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyLong_As_int(__pyx_v_year); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 372, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_AsWritableString(__pyx_v_form); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 372, __pyx_L1_error)
+  __pyx_t_5 = __pyx_f_8tenforty_6otslib_lookup_ots_call(__pyx_t_3, __pyx_t_4); if (unlikely(__pyx_t_5 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 372, __pyx_L1_error)
   __pyx_v_ots_form_function = __pyx_t_5;
 
-  /* "src/tenforty/otslib/ots.pyx":373
+  /* "src/tenforty/otslib/ots.pyx":374
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
  *
  *     cdef bytes program_name = b"ots"             # <<<<<<<<<<<<<<
@@ -7555,7 +7585,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_ots);
   __pyx_v_program_name = __pyx_mstate_global->__pyx_n_b_ots;
 
-  /* "src/tenforty/otslib/ots.pyx":375
+  /* "src/tenforty/otslib/ots.pyx":376
  *     cdef bytes program_name = b"ots"
  *     cdef bytes file_path_bytes
  *     cdef char** c_argv = NULL             # <<<<<<<<<<<<<<
@@ -7564,7 +7594,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
   __pyx_v_c_argv = NULL;
 
-  /* "src/tenforty/otslib/ots.pyx":378
+  /* "src/tenforty/otslib/ots.pyx":379
  *     cdef int result_code
  *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
@@ -7573,9 +7603,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
   /*with:*/ {
     __pyx_t_6 = NULL;
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_tempfile); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 378, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_tempfile); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 379, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_TemporaryDirectory); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 378, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_TemporaryDirectory); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 379, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_t_9 = 1;
@@ -7595,13 +7625,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_8, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 378, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
-    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 378, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 379, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_6 = NULL;
-    __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 378, __pyx_L3_error)
+    __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 379, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_9 = 1;
     #if CYTHON_UNPACK_METHODS
@@ -7620,7 +7650,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       __pyx_t_8 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_7, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 378, __pyx_L3_error)
+      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 379, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_8);
     }
     __pyx_t_7 = __pyx_t_8;
@@ -7638,7 +7668,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_v_tmpdir = __pyx_t_7;
           __pyx_t_7 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":381
+          /* "src/tenforty/otslib/ots.pyx":382
  *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
@@ -7648,22 +7678,22 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_13 = (__pyx_v_fed_form_text != Py_None);
           if (__pyx_t_13) {
 
-            /* "src/tenforty/otslib/ots.pyx":383
+            /* "src/tenforty/otslib/ots.pyx":384
  *         if fed_form_text is not None:
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"             # <<<<<<<<<<<<<<
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)
 */
-            __pyx_t_7 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 383, __pyx_L7_error)
+            __pyx_t_7 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 384, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_7);
-            __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_7, __pyx_mstate_global->__pyx_kp_u_fed_form_txt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 383, __pyx_L7_error)
+            __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_7, __pyx_mstate_global->__pyx_kp_u_fed_form_txt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 384, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
             __pyx_v_ff_path = ((PyObject*)__pyx_t_1);
             __pyx_t_1 = 0;
 
-            /* "src/tenforty/otslib/ots.pyx":384
+            /* "src/tenforty/otslib/ots.pyx":385
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
@@ -7677,13 +7707,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 PyObject *__pyx_callargs[3] = {__pyx_t_7, __pyx_v_ff_path, __pyx_mstate_global->__pyx_n_u_w};
                 __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_9, (3-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                 __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-                if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 384, __pyx_L7_error)
+                if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 385, __pyx_L7_error)
                 __Pyx_GOTREF(__pyx_t_1);
               }
-              __pyx_t_14 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 384, __pyx_L7_error)
+              __pyx_t_14 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 385, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_14);
               __pyx_t_8 = NULL;
-              __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 384, __pyx_L14_error)
+              __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 385, __pyx_L14_error)
               __Pyx_GOTREF(__pyx_t_6);
               __pyx_t_9 = 1;
               #if CYTHON_UNPACK_METHODS
@@ -7702,7 +7732,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __pyx_t_7 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_6, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-                if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 384, __pyx_L14_error)
+                if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 385, __pyx_L14_error)
                 __Pyx_GOTREF(__pyx_t_7);
               }
               __pyx_t_6 = __pyx_t_7;
@@ -7720,7 +7750,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __pyx_v_fp = __pyx_t_6;
                     __pyx_t_6 = 0;
 
-                    /* "src/tenforty/otslib/ots.pyx":385
+                    /* "src/tenforty/otslib/ots.pyx":386
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)             # <<<<<<<<<<<<<<
@@ -7731,18 +7761,18 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __pyx_t_9 = 1;
                     {
                       PyObject *__pyx_callargs[2 + ((CYTHON_VECTORCALL) ? 1 : 0)] = {__pyx_t_1, __pyx_v_fed_form_text};
-                      __pyx_t_7 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 385, __pyx_L18_error)
+                      __pyx_t_7 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 386, __pyx_L18_error)
                       __Pyx_GOTREF(__pyx_t_7);
-                      if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_7, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 385, __pyx_L18_error)
+                      if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_7, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 386, __pyx_L18_error)
                       __pyx_t_6 = __Pyx_Object_Vectorcall_CallFromBuilder((PyObject*)__pyx_builtin_print, __pyx_callargs+__pyx_t_9, (2-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET), __pyx_t_7);
                       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
                       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-                      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 385, __pyx_L18_error)
+                      if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 386, __pyx_L18_error)
                       __Pyx_GOTREF(__pyx_t_6);
                     }
                     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-                    /* "src/tenforty/otslib/ots.pyx":384
+                    /* "src/tenforty/otslib/ots.pyx":385
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
@@ -7761,20 +7791,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                   /*except:*/ {
                     __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                    if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_7, &__pyx_t_1) < 0) __PYX_ERR(0, 384, __pyx_L20_except_error)
+                    if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_7, &__pyx_t_1) < 0) __PYX_ERR(0, 385, __pyx_L20_except_error)
                     __Pyx_XGOTREF(__pyx_t_6);
                     __Pyx_XGOTREF(__pyx_t_7);
                     __Pyx_XGOTREF(__pyx_t_1);
-                    __pyx_t_8 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_7, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 384, __pyx_L20_except_error)
+                    __pyx_t_8 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_7, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 385, __pyx_L20_except_error)
                     __Pyx_GOTREF(__pyx_t_8);
                     __pyx_t_18 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_8, NULL);
                     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
                     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                    if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 384, __pyx_L20_except_error)
+                    if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 385, __pyx_L20_except_error)
                     __Pyx_GOTREF(__pyx_t_18);
                     __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_18);
                     __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-                    if (__pyx_t_13 < (0)) __PYX_ERR(0, 384, __pyx_L20_except_error)
+                    if (__pyx_t_13 < (0)) __PYX_ERR(0, 385, __pyx_L20_except_error)
                     __pyx_t_19 = (!__pyx_t_13);
                     if (unlikely(__pyx_t_19)) {
                       __Pyx_GIVEREF(__pyx_t_6);
@@ -7782,7 +7812,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                       __Pyx_XGIVEREF(__pyx_t_1);
                       __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_7, __pyx_t_1);
                       __pyx_t_6 = 0;  __pyx_t_7 = 0;  __pyx_t_1 = 0;
-                      __PYX_ERR(0, 384, __pyx_L20_except_error)
+                      __PYX_ERR(0, 385, __pyx_L20_except_error)
                     }
                     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
                     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7808,7 +7838,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   if (__pyx_t_14) {
                     __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_mstate_global->__pyx_tuple[0], NULL);
                     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-                    if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 384, __pyx_L7_error)
+                    if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 385, __pyx_L7_error)
                     __Pyx_GOTREF(__pyx_t_17);
                     __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
                   }
@@ -7823,7 +7853,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __pyx_L27:;
             }
 
-            /* "src/tenforty/otslib/ots.pyx":388
+            /* "src/tenforty/otslib/ots.pyx":389
  *
  *             # Update location of fed file in state form.
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)             # <<<<<<<<<<<<<<
@@ -7837,13 +7867,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[3] = {__pyx_t_7, __pyx_mstate_global->__pyx_n_u_FED_FILENAME, __pyx_v_ff_path};
               __pyx_t_1 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_replace, __pyx_callargs+__pyx_t_9, (3-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 388, __pyx_L7_error)
+              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 389, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_1);
             }
             __Pyx_DECREF_SET(__pyx_v_form_text, __pyx_t_1);
             __pyx_t_1 = 0;
 
-            /* "src/tenforty/otslib/ots.pyx":381
+            /* "src/tenforty/otslib/ots.pyx":382
  *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
@@ -7852,22 +7882,22 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           }
 
-          /* "src/tenforty/otslib/ots.pyx":390
+          /* "src/tenforty/otslib/ots.pyx":391
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)
  *
  *         returnfile = f"{tmpdir}/form.txt"             # <<<<<<<<<<<<<<
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)
 */
-          __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 390, __pyx_L7_error)
+          __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 391, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_7 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_1, __pyx_mstate_global->__pyx_kp_u_form_txt); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 390, __pyx_L7_error)
+          __pyx_t_7 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_1, __pyx_mstate_global->__pyx_kp_u_form_txt); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 391, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           __pyx_v_returnfile = ((PyObject*)__pyx_t_7);
           __pyx_t_7 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":391
+          /* "src/tenforty/otslib/ots.pyx":392
  *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
@@ -7881,13 +7911,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[3] = {__pyx_t_1, __pyx_v_returnfile, __pyx_mstate_global->__pyx_n_u_w};
               __pyx_t_7 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_9, (3-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-              if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 391, __pyx_L7_error)
+              if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 392, __pyx_L7_error)
               __Pyx_GOTREF(__pyx_t_7);
             }
-            __pyx_t_14 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 391, __pyx_L7_error)
+            __pyx_t_14 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 392, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_14);
             __pyx_t_6 = NULL;
-            __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 391, __pyx_L28_error)
+            __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 392, __pyx_L28_error)
             __Pyx_GOTREF(__pyx_t_8);
             __pyx_t_9 = 1;
             #if CYTHON_UNPACK_METHODS
@@ -7906,7 +7936,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_8, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 391, __pyx_L28_error)
+              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 392, __pyx_L28_error)
               __Pyx_GOTREF(__pyx_t_1);
             }
             __pyx_t_8 = __pyx_t_1;
@@ -7924,7 +7954,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_8);
                   __pyx_t_8 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":392
+                  /* "src/tenforty/otslib/ots.pyx":393
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)             # <<<<<<<<<<<<<<
@@ -7935,18 +7965,18 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __pyx_t_9 = 1;
                   {
                     PyObject *__pyx_callargs[2 + ((CYTHON_VECTORCALL) ? 1 : 0)] = {__pyx_t_7, __pyx_v_form_text};
-                    __pyx_t_1 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 392, __pyx_L32_error)
+                    __pyx_t_1 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 393, __pyx_L32_error)
                     __Pyx_GOTREF(__pyx_t_1);
-                    if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_1, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 392, __pyx_L32_error)
+                    if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_1, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 393, __pyx_L32_error)
                     __pyx_t_8 = __Pyx_Object_Vectorcall_CallFromBuilder((PyObject*)__pyx_builtin_print, __pyx_callargs+__pyx_t_9, (2-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET), __pyx_t_1);
                     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
                     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                    if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 392, __pyx_L32_error)
+                    if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 393, __pyx_L32_error)
                     __Pyx_GOTREF(__pyx_t_8);
                   }
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":391
+                  /* "src/tenforty/otslib/ots.pyx":392
  *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
@@ -7965,20 +7995,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_7) < 0) __PYX_ERR(0, 391, __pyx_L34_except_error)
+                  if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_7) < 0) __PYX_ERR(0, 392, __pyx_L34_except_error)
                   __Pyx_XGOTREF(__pyx_t_8);
                   __Pyx_XGOTREF(__pyx_t_1);
                   __Pyx_XGOTREF(__pyx_t_7);
-                  __pyx_t_6 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 391, __pyx_L34_except_error)
+                  __pyx_t_6 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 392, __pyx_L34_except_error)
                   __Pyx_GOTREF(__pyx_t_6);
                   __pyx_t_18 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_6, NULL);
                   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
                   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-                  if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 391, __pyx_L34_except_error)
+                  if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 392, __pyx_L34_except_error)
                   __Pyx_GOTREF(__pyx_t_18);
                   __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_t_18);
                   __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-                  if (__pyx_t_19 < (0)) __PYX_ERR(0, 391, __pyx_L34_except_error)
+                  if (__pyx_t_19 < (0)) __PYX_ERR(0, 392, __pyx_L34_except_error)
                   __pyx_t_13 = (!__pyx_t_19);
                   if (unlikely(__pyx_t_13)) {
                     __Pyx_GIVEREF(__pyx_t_8);
@@ -7986,7 +8016,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_XGIVEREF(__pyx_t_7);
                     __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_1, __pyx_t_7);
                     __pyx_t_8 = 0;  __pyx_t_1 = 0;  __pyx_t_7 = 0;
-                    __PYX_ERR(0, 391, __pyx_L34_except_error)
+                    __PYX_ERR(0, 392, __pyx_L34_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8012,7 +8042,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 if (__pyx_t_14) {
                   __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_mstate_global->__pyx_tuple[0], NULL);
                   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-                  if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 391, __pyx_L7_error)
+                  if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 392, __pyx_L7_error)
                   __Pyx_GOTREF(__pyx_t_15);
                   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
                 }
@@ -8027,19 +8057,19 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L41:;
           }
 
-          /* "src/tenforty/otslib/ots.pyx":394
+          /* "src/tenforty/otslib/ots.pyx":395
  *             print(form_text, file=fp)
  *
  *         file_path_bytes = returnfile.encode('utf-8')             # <<<<<<<<<<<<<<
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:
 */
-          __pyx_t_7 = PyUnicode_AsUTF8String(__pyx_v_returnfile); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 394, __pyx_L7_error)
+          __pyx_t_7 = PyUnicode_AsUTF8String(__pyx_v_returnfile); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 395, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_7);
           __pyx_v_file_path_bytes = ((PyObject*)__pyx_t_7);
           __pyx_t_7 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":395
+          /* "src/tenforty/otslib/ots.pyx":396
  *
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator             # <<<<<<<<<<<<<<
@@ -8048,7 +8078,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           __pyx_v_c_argv = ((char **)malloc(((sizeof(char *)) * 3)));
 
-          /* "src/tenforty/otslib/ots.pyx":396
+          /* "src/tenforty/otslib/ots.pyx":397
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
@@ -8058,16 +8088,16 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_13 = (__pyx_v_c_argv == NULL);
           if (unlikely(__pyx_t_13)) {
 
-            /* "src/tenforty/otslib/ots.pyx":397
+            /* "src/tenforty/otslib/ots.pyx":398
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:
  *             raise MemoryError()             # <<<<<<<<<<<<<<
  *         try:
  *             c_argv[0] = program_name
 */
-            PyErr_NoMemory(); __PYX_ERR(0, 397, __pyx_L7_error)
+            PyErr_NoMemory(); __PYX_ERR(0, 398, __pyx_L7_error)
 
-            /* "src/tenforty/otslib/ots.pyx":396
+            /* "src/tenforty/otslib/ots.pyx":397
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
@@ -8076,7 +8106,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           }
 
-          /* "src/tenforty/otslib/ots.pyx":398
+          /* "src/tenforty/otslib/ots.pyx":399
  *         if c_argv is NULL:
  *             raise MemoryError()
  *         try:             # <<<<<<<<<<<<<<
@@ -8085,27 +8115,27 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           /*try:*/ {
 
-            /* "src/tenforty/otslib/ots.pyx":399
+            /* "src/tenforty/otslib/ots.pyx":400
  *             raise MemoryError()
  *         try:
  *             c_argv[0] = program_name             # <<<<<<<<<<<<<<
  *             c_argv[1] = file_path_bytes
  *             c_argv[2] = NULL  # NULL-terminate argv
 */
-            __pyx_t_4 = __Pyx_PyBytes_AsWritableString(__pyx_v_program_name); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 399, __pyx_L44_error)
+            __pyx_t_4 = __Pyx_PyBytes_AsWritableString(__pyx_v_program_name); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 400, __pyx_L44_error)
             (__pyx_v_c_argv[0]) = __pyx_t_4;
 
-            /* "src/tenforty/otslib/ots.pyx":400
+            /* "src/tenforty/otslib/ots.pyx":401
  *         try:
  *             c_argv[0] = program_name
  *             c_argv[1] = file_path_bytes             # <<<<<<<<<<<<<<
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)
 */
-            __pyx_t_4 = __Pyx_PyBytes_AsWritableString(__pyx_v_file_path_bytes); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 400, __pyx_L44_error)
+            __pyx_t_4 = __Pyx_PyBytes_AsWritableString(__pyx_v_file_path_bytes); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 401, __pyx_L44_error)
             (__pyx_v_c_argv[1]) = __pyx_t_4;
 
-            /* "src/tenforty/otslib/ots.pyx":401
+            /* "src/tenforty/otslib/ots.pyx":402
  *             c_argv[0] = program_name
  *             c_argv[1] = file_path_bytes
  *             c_argv[2] = NULL  # NULL-terminate argv             # <<<<<<<<<<<<<<
@@ -8114,63 +8144,177 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
             (__pyx_v_c_argv[2]) = NULL;
 
-            /* "src/tenforty/otslib/ots.pyx":402
+            /* "src/tenforty/otslib/ots.pyx":403
  *             c_argv[1] = file_path_bytes
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)             # <<<<<<<<<<<<<<
  *             if result_code != 0:
- *                 # Log warning but don't fail - OTS uses exit codes inconsistently
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
 */
-            __pyx_t_3 = __pyx_v_ots_form_function(2, __pyx_v_c_argv); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 402, __pyx_L44_error)
+            __pyx_t_3 = __pyx_v_ots_form_function(2, __pyx_v_c_argv); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 403, __pyx_L44_error)
             __pyx_v_result_code = __pyx_t_3;
 
-            /* "src/tenforty/otslib/ots.pyx":403
+            /* "src/tenforty/otslib/ots.pyx":404
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:             # <<<<<<<<<<<<<<
- *                 # Log warning but don't fail - OTS uses exit codes inconsistently
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
+ *                 if on_error == "raise":
 */
             __pyx_t_13 = (__pyx_v_result_code != 0);
             if (__pyx_t_13) {
 
               /* "src/tenforty/otslib/ots.pyx":405
+ *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:
- *                 # Log warning but don't fail - OTS uses exit codes inconsistently
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)             # <<<<<<<<<<<<<<
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"             # <<<<<<<<<<<<<<
+ *                 if on_error == "raise":
+ *                     from tenforty.models import OTSError
+*/
+              __pyx_t_7 = __Pyx_PyUnicode_From_int(__pyx_v_result_code, 0, ' ', 'd'); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 405, __pyx_L44_error)
+              __Pyx_GOTREF(__pyx_t_7);
+              __pyx_t_1 = __Pyx_PyUnicode_Concat(__pyx_mstate_global->__pyx_kp_u_OTS_returned_non_zero_exit_code, __pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 405, __pyx_L44_error)
+              __Pyx_GOTREF(__pyx_t_1);
+              __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+              __pyx_v_error_msg = ((PyObject*)__pyx_t_1);
+              __pyx_t_1 = 0;
+
+              /* "src/tenforty/otslib/ots.pyx":406
+ *             if result_code != 0:
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
+ *                 if on_error == "raise":             # <<<<<<<<<<<<<<
+ *                     from tenforty.models import OTSError
+ *                     raise OTSError(result_code, year, form, error_msg)
+*/
+              __pyx_t_13 = (__Pyx_PyUnicode_Equals(__pyx_v_on_error, __pyx_mstate_global->__pyx_n_u_raise, Py_EQ)); if (unlikely((__pyx_t_13 < 0))) __PYX_ERR(0, 406, __pyx_L44_error)
+              if (__pyx_t_13) {
+
+                /* "src/tenforty/otslib/ots.pyx":407
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
+ *                 if on_error == "raise":
+ *                     from tenforty.models import OTSError             # <<<<<<<<<<<<<<
+ *                     raise OTSError(result_code, year, form, error_msg)
+ *                 elif on_error == "warn":
+*/
+                {
+                  PyObject* const __pyx_imported_names[] = {__pyx_mstate_global->__pyx_n_u_OTSError};
+                  __pyx_t_14 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_tenforty_models, __pyx_imported_names, 1, NULL, 0); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 407, __pyx_L44_error)
+                }
+                __pyx_t_1 = __pyx_t_14;
+                __Pyx_GOTREF(__pyx_t_1);
+                {
+                  PyObject* const __pyx_imported_names[] = {__pyx_mstate_global->__pyx_n_u_OTSError};
+                  __pyx_t_20 = 0; {
+                    __pyx_t_7 = __Pyx_ImportFrom(__pyx_t_1, __pyx_imported_names[__pyx_t_20]); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 407, __pyx_L44_error)
+                    __Pyx_GOTREF(__pyx_t_7);
+                    switch (__pyx_t_20) {
+                      case 0:
+                      __Pyx_INCREF(__pyx_t_7);
+                      __pyx_v_OTSError = __pyx_t_7;
+                      break;
+                      default:;
+                    }
+                    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+                  }
+                }
+                __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+                /* "src/tenforty/otslib/ots.pyx":408
+ *                 if on_error == "raise":
+ *                     from tenforty.models import OTSError
+ *                     raise OTSError(result_code, year, form, error_msg)             # <<<<<<<<<<<<<<
+ *                 elif on_error == "warn":
+ *                     warnings.warn(error_msg, RuntimeWarning)
+*/
+                __pyx_t_7 = NULL;
+                __Pyx_INCREF(__pyx_v_OTSError);
+                __pyx_t_8 = __pyx_v_OTSError;
+                __pyx_t_6 = __Pyx_PyLong_From_int(__pyx_v_result_code); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 408, __pyx_L44_error)
+                __Pyx_GOTREF(__pyx_t_6);
+                __pyx_t_9 = 1;
+                #if CYTHON_UNPACK_METHODS
+                if (unlikely(PyMethod_Check(__pyx_t_8))) {
+                  __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_8);
+                  assert(__pyx_t_7);
+                  PyObject* __pyx__function = PyMethod_GET_FUNCTION(__pyx_t_8);
+                  __Pyx_INCREF(__pyx_t_7);
+                  __Pyx_INCREF(__pyx__function);
+                  __Pyx_DECREF_SET(__pyx_t_8, __pyx__function);
+                  __pyx_t_9 = 0;
+                }
+                #endif
+                {
+                  PyObject *__pyx_callargs[5] = {__pyx_t_7, __pyx_t_6, __pyx_v_year, __pyx_v_form, __pyx_v_error_msg};
+                  __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_8, __pyx_callargs+__pyx_t_9, (5-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+                  __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+                  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+                  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+                  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 408, __pyx_L44_error)
+                  __Pyx_GOTREF(__pyx_t_1);
+                }
+                __Pyx_Raise(__pyx_t_1, 0, 0, 0);
+                __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+                __PYX_ERR(0, 408, __pyx_L44_error)
+
+                /* "src/tenforty/otslib/ots.pyx":406
+ *             if result_code != 0:
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
+ *                 if on_error == "raise":             # <<<<<<<<<<<<<<
+ *                     from tenforty.models import OTSError
+ *                     raise OTSError(result_code, year, form, error_msg)
+*/
+              }
+
+              /* "src/tenforty/otslib/ots.pyx":409
+ *                     from tenforty.models import OTSError
+ *                     raise OTSError(result_code, year, form, error_msg)
+ *                 elif on_error == "warn":             # <<<<<<<<<<<<<<
+ *                     warnings.warn(error_msg, RuntimeWarning)
+ *         finally:
+*/
+              __pyx_t_13 = (__Pyx_PyUnicode_Equals(__pyx_v_on_error, __pyx_mstate_global->__pyx_n_u_warn, Py_EQ)); if (unlikely((__pyx_t_13 < 0))) __PYX_ERR(0, 409, __pyx_L44_error)
+              if (__pyx_t_13) {
+
+                /* "src/tenforty/otslib/ots.pyx":410
+ *                     raise OTSError(result_code, year, form, error_msg)
+ *                 elif on_error == "warn":
+ *                     warnings.warn(error_msg, RuntimeWarning)             # <<<<<<<<<<<<<<
  *         finally:
  *             free(c_argv)
 */
-              __pyx_t_1 = __pyx_v_warnings;
-              __Pyx_INCREF(__pyx_t_1);
-              __pyx_t_8 = __Pyx_PyUnicode_From_int(__pyx_v_result_code, 0, ' ', 'd'); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 405, __pyx_L44_error)
-              __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_6 = __Pyx_PyUnicode_Concat(__pyx_mstate_global->__pyx_kp_u_OTS_returned_non_zero_exit_code, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 405, __pyx_L44_error)
-              __Pyx_GOTREF(__pyx_t_6);
-              __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              __pyx_t_9 = 0;
-              {
-                PyObject *__pyx_callargs[3] = {__pyx_t_1, __pyx_t_6, ((PyObject *)(((PyTypeObject*)PyExc_RuntimeWarning)))};
-                __pyx_t_7 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_warn, __pyx_callargs+__pyx_t_9, (3-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-                __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-                __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-                if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 405, __pyx_L44_error)
-                __Pyx_GOTREF(__pyx_t_7);
-              }
-              __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+                __pyx_t_8 = __pyx_v_warnings;
+                __Pyx_INCREF(__pyx_t_8);
+                __pyx_t_9 = 0;
+                {
+                  PyObject *__pyx_callargs[3] = {__pyx_t_8, __pyx_v_error_msg, ((PyObject *)(((PyTypeObject*)PyExc_RuntimeWarning)))};
+                  __pyx_t_1 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_warn, __pyx_callargs+__pyx_t_9, (3-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+                  __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+                  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 410, __pyx_L44_error)
+                  __Pyx_GOTREF(__pyx_t_1);
+                }
+                __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-              /* "src/tenforty/otslib/ots.pyx":403
+                /* "src/tenforty/otslib/ots.pyx":409
+ *                     from tenforty.models import OTSError
+ *                     raise OTSError(result_code, year, form, error_msg)
+ *                 elif on_error == "warn":             # <<<<<<<<<<<<<<
+ *                     warnings.warn(error_msg, RuntimeWarning)
+ *         finally:
+*/
+              }
+
+              /* "src/tenforty/otslib/ots.pyx":404
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:             # <<<<<<<<<<<<<<
- *                 # Log warning but don't fail - OTS uses exit codes inconsistently
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
+ *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
+ *                 if on_error == "raise":
 */
             }
           }
 
-          /* "src/tenforty/otslib/ots.pyx":407
- *                 warnings.warn(f"OTS returned non-zero exit code: {result_code}", RuntimeWarning)
+          /* "src/tenforty/otslib/ots.pyx":412
+ *                     warnings.warn(error_msg, RuntimeWarning)
  *         finally:
  *             free(c_argv)             # <<<<<<<<<<<<<<
  *
@@ -8185,51 +8329,51 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             /*exception exit:*/{
               __Pyx_PyThreadState_declare
               __Pyx_PyThreadState_assign
-              __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_22 = 0;
+              __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_23 = 0;
               __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
               __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
               __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
               __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-               __Pyx_ExceptionSwap(&__pyx_t_17, &__pyx_t_18, &__pyx_t_22);
+               __Pyx_ExceptionSwap(&__pyx_t_17, &__pyx_t_18, &__pyx_t_23);
               if ( unlikely(__Pyx_GetException(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16) < 0)) __Pyx_ErrFetch(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
               __Pyx_XGOTREF(__pyx_t_14);
               __Pyx_XGOTREF(__pyx_t_15);
               __Pyx_XGOTREF(__pyx_t_16);
               __Pyx_XGOTREF(__pyx_t_17);
               __Pyx_XGOTREF(__pyx_t_18);
-              __Pyx_XGOTREF(__pyx_t_22);
-              __pyx_t_3 = __pyx_lineno; __pyx_t_20 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
+              __Pyx_XGOTREF(__pyx_t_23);
+              __pyx_t_3 = __pyx_lineno; __pyx_t_21 = __pyx_clineno; __pyx_t_22 = __pyx_filename;
               {
                 free(__pyx_v_c_argv);
               }
               __Pyx_XGIVEREF(__pyx_t_17);
               __Pyx_XGIVEREF(__pyx_t_18);
-              __Pyx_XGIVEREF(__pyx_t_22);
-              __Pyx_ExceptionReset(__pyx_t_17, __pyx_t_18, __pyx_t_22);
+              __Pyx_XGIVEREF(__pyx_t_23);
+              __Pyx_ExceptionReset(__pyx_t_17, __pyx_t_18, __pyx_t_23);
               __Pyx_XGIVEREF(__pyx_t_14);
               __Pyx_XGIVEREF(__pyx_t_15);
               __Pyx_XGIVEREF(__pyx_t_16);
               __Pyx_ErrRestore(__pyx_t_14, __pyx_t_15, __pyx_t_16);
-              __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_22 = 0;
-              __pyx_lineno = __pyx_t_3; __pyx_clineno = __pyx_t_20; __pyx_filename = __pyx_t_21;
+              __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0; __pyx_t_23 = 0;
+              __pyx_lineno = __pyx_t_3; __pyx_clineno = __pyx_t_21; __pyx_filename = __pyx_t_22;
               goto __pyx_L7_error;
             }
             __pyx_L45:;
           }
 
-          /* "src/tenforty/otslib/ots.pyx":410
+          /* "src/tenforty/otslib/ots.pyx":415
  *
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")             # <<<<<<<<<<<<<<
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()
 */
-          __pyx_t_7 = PyUnicode_Replace(__pyx_v_returnfile, __pyx_mstate_global->__pyx_kp_u_txt, __pyx_mstate_global->__pyx_kp_u_out_txt, -1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 410, __pyx_L7_error)
-          __Pyx_GOTREF(__pyx_t_7);
-          __pyx_v_returnfile_completed = ((PyObject*)__pyx_t_7);
-          __pyx_t_7 = 0;
+          __pyx_t_1 = PyUnicode_Replace(__pyx_v_returnfile, __pyx_mstate_global->__pyx_kp_u_txt, __pyx_mstate_global->__pyx_kp_u_out_txt, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 415, __pyx_L7_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_v_returnfile_completed = ((PyObject*)__pyx_t_1);
+          __pyx_t_1 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":411
+          /* "src/tenforty/otslib/ots.pyx":416
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
@@ -8237,43 +8381,43 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *
 */
           /*with:*/ {
-            __pyx_t_6 = NULL;
+            __pyx_t_8 = NULL;
             __pyx_t_9 = 1;
             {
-              PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_v_returnfile_completed};
-              __pyx_t_7 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_9, (2-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-              __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-              if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 411, __pyx_L7_error)
-              __Pyx_GOTREF(__pyx_t_7);
+              PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_returnfile_completed};
+              __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_9, (2-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+              __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 416, __pyx_L7_error)
+              __Pyx_GOTREF(__pyx_t_1);
             }
-            __pyx_t_22 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 411, __pyx_L7_error)
-            __Pyx_GOTREF(__pyx_t_22);
-            __pyx_t_1 = NULL;
-            __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 411, __pyx_L49_error)
-            __Pyx_GOTREF(__pyx_t_8);
+            __pyx_t_23 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 416, __pyx_L7_error)
+            __Pyx_GOTREF(__pyx_t_23);
+            __pyx_t_6 = NULL;
+            __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 416, __pyx_L50_error)
+            __Pyx_GOTREF(__pyx_t_7);
             __pyx_t_9 = 1;
             #if CYTHON_UNPACK_METHODS
-            if (likely(PyMethod_Check(__pyx_t_8))) {
-              __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_8);
-              assert(__pyx_t_1);
-              PyObject* __pyx__function = PyMethod_GET_FUNCTION(__pyx_t_8);
-              __Pyx_INCREF(__pyx_t_1);
+            if (likely(PyMethod_Check(__pyx_t_7))) {
+              __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_7);
+              assert(__pyx_t_6);
+              PyObject* __pyx__function = PyMethod_GET_FUNCTION(__pyx_t_7);
+              __Pyx_INCREF(__pyx_t_6);
               __Pyx_INCREF(__pyx__function);
-              __Pyx_DECREF_SET(__pyx_t_8, __pyx__function);
+              __Pyx_DECREF_SET(__pyx_t_7, __pyx__function);
               __pyx_t_9 = 0;
             }
             #endif
             {
-              PyObject *__pyx_callargs[2] = {__pyx_t_1, NULL};
-              __pyx_t_6 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_8, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-              __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-              __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 411, __pyx_L49_error)
-              __Pyx_GOTREF(__pyx_t_6);
+              PyObject *__pyx_callargs[2] = {__pyx_t_6, NULL};
+              __pyx_t_8 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_7, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (__pyx_t_9*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+              __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+              __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+              if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 416, __pyx_L50_error)
+              __Pyx_GOTREF(__pyx_t_8);
             }
-            __pyx_t_8 = __pyx_t_6;
-            __pyx_t_6 = 0;
-            __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+            __pyx_t_7 = __pyx_t_8;
+            __pyx_t_8 = 0;
+            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
             /*try:*/ {
               {
                 __Pyx_PyThreadState_declare
@@ -8283,30 +8427,30 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XGOTREF(__pyx_t_17);
                 __Pyx_XGOTREF(__pyx_t_16);
                 /*try:*/ {
-                  __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_8);
-                  __pyx_t_8 = 0;
+                  __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_7);
+                  __pyx_t_7 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":412
+                  /* "src/tenforty/otslib/ots.pyx":417
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()             # <<<<<<<<<<<<<<
  *
  *     return result
 */
-                  __pyx_t_7 = __pyx_v_fp;
-                  __Pyx_INCREF(__pyx_t_7);
+                  __pyx_t_1 = __pyx_v_fp;
+                  __Pyx_INCREF(__pyx_t_1);
                   __pyx_t_9 = 0;
                   {
-                    PyObject *__pyx_callargs[2] = {__pyx_t_7, NULL};
-                    __pyx_t_8 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_read, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-                    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-                    if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 412, __pyx_L53_error)
-                    __Pyx_GOTREF(__pyx_t_8);
+                    PyObject *__pyx_callargs[2] = {__pyx_t_1, NULL};
+                    __pyx_t_7 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_read, __pyx_callargs+__pyx_t_9, (1-__pyx_t_9) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+                    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+                    if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 417, __pyx_L54_error)
+                    __Pyx_GOTREF(__pyx_t_7);
                   }
-                  __pyx_v_result = __pyx_t_8;
-                  __pyx_t_8 = 0;
+                  __pyx_v_result = __pyx_t_7;
+                  __pyx_t_7 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":411
+                  /* "src/tenforty/otslib/ots.pyx":416
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
@@ -8317,77 +8461,77 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
                 __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
                 __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
-                goto __pyx_L58_try_end;
-                __pyx_L53_error:;
+                goto __pyx_L59_try_end;
+                __pyx_L54_error:;
                 __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
                 __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
                 __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_7, &__pyx_t_6) < 0) __PYX_ERR(0, 411, __pyx_L55_except_error)
-                  __Pyx_XGOTREF(__pyx_t_8);
+                  if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_1, &__pyx_t_8) < 0) __PYX_ERR(0, 416, __pyx_L56_except_error)
                   __Pyx_XGOTREF(__pyx_t_7);
-                  __Pyx_XGOTREF(__pyx_t_6);
-                  __pyx_t_1 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 411, __pyx_L55_except_error)
-                  __Pyx_GOTREF(__pyx_t_1);
-                  __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_1, NULL);
-                  __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-                  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                  if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 411, __pyx_L55_except_error)
+                  __Pyx_XGOTREF(__pyx_t_1);
+                  __Pyx_XGOTREF(__pyx_t_8);
+                  __pyx_t_6 = PyTuple_Pack(3, __pyx_t_7, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 416, __pyx_L56_except_error)
+                  __Pyx_GOTREF(__pyx_t_6);
+                  __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_23, __pyx_t_6, NULL);
+                  __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
+                  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+                  if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 416, __pyx_L56_except_error)
                   __Pyx_GOTREF(__pyx_t_15);
                   __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_15);
                   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-                  if (__pyx_t_13 < (0)) __PYX_ERR(0, 411, __pyx_L55_except_error)
+                  if (__pyx_t_13 < (0)) __PYX_ERR(0, 416, __pyx_L56_except_error)
                   __pyx_t_19 = (!__pyx_t_13);
                   if (unlikely(__pyx_t_19)) {
-                    __Pyx_GIVEREF(__pyx_t_8);
                     __Pyx_GIVEREF(__pyx_t_7);
-                    __Pyx_XGIVEREF(__pyx_t_6);
-                    __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_7, __pyx_t_6);
-                    __pyx_t_8 = 0;  __pyx_t_7 = 0;  __pyx_t_6 = 0;
-                    __PYX_ERR(0, 411, __pyx_L55_except_error)
+                    __Pyx_GIVEREF(__pyx_t_1);
+                    __Pyx_XGIVEREF(__pyx_t_8);
+                    __Pyx_ErrRestoreWithState(__pyx_t_7, __pyx_t_1, __pyx_t_8);
+                    __pyx_t_7 = 0;  __pyx_t_1 = 0;  __pyx_t_8 = 0;
+                    __PYX_ERR(0, 416, __pyx_L56_except_error)
                   }
-                  __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                   __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-                  __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-                  goto __pyx_L54_exception_handled;
+                  __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+                  __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+                  goto __pyx_L55_exception_handled;
                 }
-                __pyx_L55_except_error:;
+                __pyx_L56_except_error:;
                 __Pyx_XGIVEREF(__pyx_t_18);
                 __Pyx_XGIVEREF(__pyx_t_17);
                 __Pyx_XGIVEREF(__pyx_t_16);
                 __Pyx_ExceptionReset(__pyx_t_18, __pyx_t_17, __pyx_t_16);
                 goto __pyx_L7_error;
-                __pyx_L54_exception_handled:;
+                __pyx_L55_exception_handled:;
                 __Pyx_XGIVEREF(__pyx_t_18);
                 __Pyx_XGIVEREF(__pyx_t_17);
                 __Pyx_XGIVEREF(__pyx_t_16);
                 __Pyx_ExceptionReset(__pyx_t_18, __pyx_t_17, __pyx_t_16);
-                __pyx_L58_try_end:;
+                __pyx_L59_try_end:;
               }
             }
             /*finally:*/ {
               /*normal exit:*/{
-                if (__pyx_t_22) {
-                  __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_mstate_global->__pyx_tuple[0], NULL);
-                  __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-                  if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 411, __pyx_L7_error)
+                if (__pyx_t_23) {
+                  __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_23, __pyx_mstate_global->__pyx_tuple[0], NULL);
+                  __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
+                  if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 416, __pyx_L7_error)
                   __Pyx_GOTREF(__pyx_t_16);
                   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
                 }
-                goto __pyx_L52;
+                goto __pyx_L53;
               }
-              __pyx_L52:;
+              __pyx_L53:;
             }
-            goto __pyx_L62;
-            __pyx_L49_error:;
-            __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
+            goto __pyx_L63;
+            __pyx_L50_error:;
+            __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
             goto __pyx_L7_error;
-            __pyx_L62:;
+            __pyx_L63:;
           }
 
-          /* "src/tenforty/otslib/ots.pyx":378
+          /* "src/tenforty/otslib/ots.pyx":379
  *     cdef int result_code
  *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
@@ -8406,32 +8550,32 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_7, &__pyx_t_8) < 0) __PYX_ERR(0, 378, __pyx_L9_except_error)
-          __Pyx_XGOTREF(__pyx_t_6);
-          __Pyx_XGOTREF(__pyx_t_7);
+          if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_7) < 0) __PYX_ERR(0, 379, __pyx_L9_except_error)
           __Pyx_XGOTREF(__pyx_t_8);
-          __pyx_t_1 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 378, __pyx_L9_except_error)
-          __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, NULL);
+          __Pyx_XGOTREF(__pyx_t_1);
+          __Pyx_XGOTREF(__pyx_t_7);
+          __pyx_t_6 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 379, __pyx_L9_except_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __pyx_t_23 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_6, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-          if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 378, __pyx_L9_except_error)
-          __Pyx_GOTREF(__pyx_t_22);
-          __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_t_22);
-          __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-          if (__pyx_t_19 < (0)) __PYX_ERR(0, 378, __pyx_L9_except_error)
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 379, __pyx_L9_except_error)
+          __Pyx_GOTREF(__pyx_t_23);
+          __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_t_23);
+          __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
+          if (__pyx_t_19 < (0)) __PYX_ERR(0, 379, __pyx_L9_except_error)
           __pyx_t_13 = (!__pyx_t_19);
           if (unlikely(__pyx_t_13)) {
-            __Pyx_GIVEREF(__pyx_t_6);
-            __Pyx_GIVEREF(__pyx_t_7);
-            __Pyx_XGIVEREF(__pyx_t_8);
-            __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_7, __pyx_t_8);
-            __pyx_t_6 = 0;  __pyx_t_7 = 0;  __pyx_t_8 = 0;
-            __PYX_ERR(0, 378, __pyx_L9_except_error)
+            __Pyx_GIVEREF(__pyx_t_8);
+            __Pyx_GIVEREF(__pyx_t_1);
+            __Pyx_XGIVEREF(__pyx_t_7);
+            __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_1, __pyx_t_7);
+            __pyx_t_8 = 0;  __pyx_t_1 = 0;  __pyx_t_7 = 0;
+            __PYX_ERR(0, 379, __pyx_L9_except_error)
           }
-          __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-          __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+          __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
           goto __pyx_L8_exception_handled;
         }
         __pyx_L9_except_error:;
@@ -8453,7 +8597,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
         if (__pyx_t_2) {
           __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[0], NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 378, __pyx_L1_error)
+          if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 379, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         }
@@ -8461,20 +8605,21 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       }
       __pyx_L6:;
     }
-    goto __pyx_L66;
+    goto __pyx_L67;
     __pyx_L3_error:;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     goto __pyx_L1_error;
-    __pyx_L66:;
+    __pyx_L67:;
   }
 
-  /* "src/tenforty/otslib/ots.pyx":414
+  /* "src/tenforty/otslib/ots.pyx":419
  *             result = fp.read()
  *
  *     return result             # <<<<<<<<<<<<<<
+ *
 */
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 414, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 419, __pyx_L1_error) }
   __Pyx_INCREF(__pyx_v_result);
   __pyx_r = __pyx_v_result;
   goto __pyx_L0;
@@ -8482,7 +8627,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   /* "src/tenforty/otslib/ots.pyx":355
  *
  *
- * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
+ * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
 */
@@ -8503,6 +8648,8 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   __Pyx_XDECREF(__pyx_v_ff_path);
   __Pyx_XDECREF(__pyx_v_fp);
   __Pyx_XDECREF(__pyx_v_returnfile);
+  __Pyx_XDECREF(__pyx_v_error_msg);
+  __Pyx_XDECREF(__pyx_v_OTSError);
   __Pyx_XDECREF(__pyx_v_returnfile_completed);
   __Pyx_XDECREF(__pyx_v_result);
   __Pyx_XDECREF(__pyx_v_form_text);
@@ -8901,7 +9048,7 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
   /* "src/tenforty/otslib/ots.pyx":355
  *
  *
- * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
+ * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
 */
@@ -8960,8 +9107,8 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
 
 static int __Pyx_InitCachedBuiltins(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
-  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_open); if (!__pyx_builtin_open) __PYX_ERR(0, 384, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_print); if (!__pyx_builtin_print) __PYX_ERR(0, 385, __pyx_L1_error)
+  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_open); if (!__pyx_builtin_open) __PYX_ERR(0, 385, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_print); if (!__pyx_builtin_print) __PYX_ERR(0, 386, __pyx_L1_error)
 
   /* Cached unbound methods */
   __pyx_mstate->__pyx_umethod_PyDict_Type_items.type = (PyObject*)&PyDict_Type;
@@ -8981,25 +9128,25 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "src/tenforty/otslib/ots.pyx":384
+  /* "src/tenforty/otslib/ots.pyx":385
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
  *
 */
-  __pyx_mstate_global->__pyx_tuple[0] = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 384, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[0] = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 385, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[0]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[0]);
 
   /* "src/tenforty/otslib/ots.pyx":355
  *
  *
- * def _evaluate_form(year, form, form_text, fed_form_text=None):             # <<<<<<<<<<<<<<
+ * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
 */
-  __pyx_mstate_global->__pyx_tuple[1] = PyTuple_Pack(1, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 355, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[1] = PyTuple_Pack(2, Py_None, ((PyObject*)__pyx_mstate_global->__pyx_n_u_raise)); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 355, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[1]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[1]);
   #if CYTHON_IMMORTAL_CONSTANTS
@@ -9032,42 +9179,42 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
 static int __Pyx_InitConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   {
-    const struct { const unsigned int length: 9; } index[] = {{1},{33},{13},{9},{8},{27},{4},{6},{7},{16},{9},{4},{7},{7},{7},{8},{9},{5},{5},{20},{18},{7},{15},{35},{16},{6},{18},{6},{18},{9},{14},{8},{5},{5},{5},{5},{5},{5},{5},{13},{7},{4},{15},{4},{9},{2},{8},{13},{5},{8},{10},{8},{4},{2},{17},{3},{5},{12},{12},{4},{7},{6},{11},{10},{20},{12},{10},{3},{8},{15},{8},{6},{6},{1},{4},{8},{4},{284},{3}};
-    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (739 bytes) */
-const char* const cstring = "(\265/\375`\351\002\315\026\000\366j\224;\020\223u\000\000\n)\020D\200\002\005P\007\222B\241\006\204\0020\226P)+\237R\276\0242\335\345H\362\232\210\\\014\301#\345B\037\360\237Ht\014\004\304\230=\004\004p^\334\177\002\205\000z\000\200\000X\177\237\363\315\330$\277%|\026-\373\024\327\237\030\"KW\334\275\225.\345,*$*\247\016\325R\3420&)]\227\nq\220\224.\325\235\274\004\345\344\036\312\006\213\305\n\335{\221\270\267P\274\224\326I\211\210\207\264D\334U\035\253K\251\334\003\221\245f\t&\216\247\306\246T\227\257M_>5\212\335\244e\272Df\034b\200\037\232F\034\017\342o\244E\331\217p~\033\214\022\227#\360\313\214\352\317\243W\213\312G\356\245xI\367\223|-\372)\272\373W\242\241\273y\276Na\376\243\030\312\350kz\030j\331k\360C\325F\267Rm\260\302\r\024\352\264\352V\254\260;\241P\241\273\273\277\276\350xi<\277.\337}\346\273\260\377n\326^\212>~41\371\372w~)j\024g\374\225\260\370\225\351y\273\225\206{/\255\327\371\242\036o\212\263\177\314\315?\2033\314[ \016\276\314\367\362\227K\232\003,\267=\033\246.l\255ge\330\0368\333\000i&\262Jp\265\004\002\000\201\035n7|\332\273!>-)G\204v\242\251\254\022\2376\264\001<\354\220f\025\000\265|?=cJ\261\314\267\246\346\374,\202&\251\317\327\356%\223|}\246\347\r\037\324\177\272\203\257\1774I\327#z~\376\357\216\346g\360~\036/\032#o\216\301\331\324\245\230M\023\233%\026\365\251\361\211\3137\261\373\223\267\374\021\005q\247\306'\234\202O\353mtc\023j\244\234\t\032G\023\315l\366\210S=*\302\326\262\270j&\035N\307\203\250\271v\300\026!\264wg\354\033\234\203\215\215\315@,\034j\016\236\255RIj\302\306\016\200\330\320\306\272\324\010U\003\247\000\304zh\260\231\301\032\333\013[\244r \326\233\235f#k\305v\000\265\244\325e[l\354]e\366\205\312\251\\\210\365\354\230\312\242*\200ZWN\007E\3153\003\255\251*\n\271\254\030\201\215\255\262-\252.U\201\013=(0\304Pe\334\0061e\225\233\226\353\006\254\302\301\003\316X\236M\343\031\004\344h\302\361\274\266\241\303\315)\234\231\251\327\231\325\231\253\"\202#\206\017\304\004\323M\356B\007\270lPE\006\035\362\316Y\265\220\320\013\002""\265\346\327\322\273\327\276T\375\253\013FX\220\200\271j\353w\333@\374\215\200\320.\322| \336\257\016L\232\252+\374\320z-O\302\374\016\017\264\204a\353\201\030L\025!\242u\024fS\002D\r\024";
-    PyObject *data = __Pyx_DecompressString(cstring, 739, 3);
+    const struct { const unsigned int length: 9; } index[] = {{1},{33},{1},{13},{9},{8},{27},{4},{6},{7},{16},{9},{4},{7},{7},{7},{8},{9},{5},{8},{5},{20},{18},{7},{15},{35},{16},{6},{18},{6},{18},{9},{9},{14},{8},{5},{5},{5},{5},{5},{5},{5},{13},{7},{4},{15},{4},{9},{2},{8},{13},{5},{8},{10},{8},{8},{4},{2},{17},{3},{5},{12},{12},{5},{4},{7},{6},{11},{10},{20},{12},{10},{3},{8},{15},{15},{8},{6},{6},{1},{4},{8},{4},{330},{3}};
+    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (803 bytes) */
+const char* const cstring = "(\265/\375`E\003\315\030\000\006o\241: \223s\000\234\002\252/\020\032\030\0107\003\324\0173\210\2644|\265n)\322V\366\372V\333\\R\252\202S3\213\031\326\037\343\242\310\364o\t\000\352\345vD\204\321\365\353\200m(\222\000\202\000\220\000\340\337|,g\321\240\370\352\3571\266\370\232\344\317\204/\243a\357\342\372\023M`(\214\273\007\203/\306+\326\214\313\274\244\274\224:\323\214\212\333\254\270t\335\207\211\253\\\272\217\256\344*-%\367ZR(\024*t\217\225\342\276j\361\\V,*'n\262:q?u\250\356\343\344\236\n\206\232\244\2268f};P]\276\356\370p\326\347\365\016\r\323$\022\337\220\003\374\260\243D$\362\340\375DZ\204\275\350\342\337\341(o)\002\277\304\247~,b\315\274\220\002\372\346[\276y\313\353\376\244-\177<\301\353^\212\226t\317\344k\321\263\350\356_y\206\356f~\215\266\374G1\274\321\326\3640\324\260\327\340\207\247T\007rJ\241\302\224\311T\002\351@PaW2\231Bww\177m\317\321\346\274\2732\351\370u\371\3568\237m\375g\261\366R\364\361\313qa\353_\376R\324\347\305\367#]\361+\321l;\220\020\367jV\254\374\242\036-z\261\277\313\342\307\271\270\345+\225\007\240XHES\010\003\032\365&\254/\025\266\3054&m\340Vn\203v+u\330j \365a\223\364l\003\243\330\211j\301\321\024\010\000\004~\270\035\021P\263\233\"\2406\232\235\310J\262\027\325\"\240f\260\001P\374\330\031I\006-\003\200\206\355\243\331U\212%\266::\371\261\010\232\244\316\257\335\363H\222L\362uF\263\r\037\324\237\335\301\327?\232\344\203\367s=\236\371\263\243\371\030\264\217?\213\026\217\366|\221\026\273.6u)b\323\274fyE\235\003Y\337ROA@\315\333\347\266*\320F\263\013\031'\203\210\355l\021\227\202\322\204\255\026\023\323P9u\265'\030VN\3756E\303\352\315B\231\200lD\035\251\027[\202\241\213\240E0\254\257\255\332\251t!a\005\371\274f%\023\264\211\204\325n\217\315\323\203\260\255\257\230JC\202&\001\332\247t\224*l\353@h5\330\326\230\264\"\r\351)\010\255 Y+v\240\276\266\303\206H\271\320\352\305J1\0245cK\204j#\225fkl\253Uo\366F\312\245\234\301\n\332\257T&m\010\325bf#\030\264C( \306PU\265\raU\225\263-\327\r\327\306l,&\032\376x{\355\34436\310\221\202s|-C\217\263+""\360j\336H'^\202\022\201<~0\342\234\024\0343\234\023\013`9\031\014]`\327\000t\202\216\tG-v\216}0\247\335\037\347\361^\233\256OV\377\212\005\303.8\300E\265\203\007jB \255b\321\267\245}\332\265&@\307t\231\327P1\371\263ra\002\007\036v\321\300A\037*\330x \020f\024A\"y\364\315\"\022D1\024";
+    PyObject *data = __Pyx_DecompressString(cstring, 803, 3);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (819 bytes) */
-const char* const cstring = "BZh91AY&SY\017\354=\372\000\000t\177\377\347\177\363\365l\177\377\363\257\367\377 \277\357\377\364\000@@@@@@@@\000@@@\000@\000@\002}\266\267#\241\316!\024\315\024~\246S&j44= i\221\220\001\241\246L \003G\244\323\324\375SM4\336\2501\352\236\240\320\210\301&&M4z\212y&\207\241\036\220h\r\r4\365\000\000\000\006\201\243A\220j\231\2412\246jz\232\031\0314d\321\246\206 2i\241\223\021\210\000\000\311\246\232\032d\320\rOR5=C)\264@\320\332\201\240\001\243A\2404\003L\004a\000\001\243L\023\324e\030f\354\341\371f\325\264\201o\370\004\274\003\310`2\330\206\\J\230*(\004\304!\214\020\262\251\021'K\003g\0278\022s60\254\214\\\261(z\333U\327\265\265){;\277_o\232\331\213\200Z\330\302\307;\215F\220iz\005o\346&\037\304\341#\223\311l\336\356\323\245HF\265U\203\230\200\000U\2110=H\001kJ\336\310\016\225\257\345\374\027z\346\264\206\310\005\023\322]C\371\3542\247\026\3704\001(!\361\030k]\252\304\227\337G\220\\\237ZFC\261\343\235r\331t<\320|c\016\316y\013\354\301As\2431\371M\304\026T\236\351\221ccLX|\372o\250|\263|]\270\001\225A\271\243>M*.\336\266\002\037<``\3340&\2753rM\215o&b\025\212\321\306\236!\020\332\223\177f\352g=\274P\226\323\206\234\2469t\222\332\300~D\304<A\301\324s\026a\003\231\244\003:\355\3545\022\276\342\340\010X\014\374\004\267\353\307\016f\306\030\003\0365v!r\317\340\342\022\222\356\333\213vif\000h\302u=#\034 \034\255O\355\330\345I0d&\246\244\037,\232\346TV\365i\314\327o\336\203\003FH\206\205\0240\036v\004\322\321\266\256\200^;\347\275\254\352W\205-\336d\013\205\\\241\313\031r\256\364\221#\343Z9*\250\203\237\"\303\234\3457\0333\212\365\031\013\001\334p\022o\302\241\250\220D \t\r$\004\316q\266\2100C+\210`f\025@ \206\204L\252q\255`\346\027\324\022\362\337H\260\212@b\211m\331\2553:\005c\224.Pt\034\rS\334{\035\207[\217\006\036\253\351ux\230\313\014F\207\021ZJ\013^y\003\314>T7\006U\"\225(4\022\232a2\235\253d1\224UN'Hm5\310\221\3014\344\320\320\350\010HlE\316A\210\362\300\004F\372\305\372E\314B\242\201b\203\357Q\256\372\304\241\300\314\301\3431\241\300\354\016VZ\355J\304\250\200\261m""\357\001A;\307\264\241xn\002H\027k\207\020^spt\2414\222\252\324\023\223\202\312\225\027w~\374\330\2660(\223i\360'\241\366Y\2020T\005<\356n\245\243\177C\201\343p\316.\214\311u\357\225\225\241\323\372Ht\303Y/\026\332\030\303\352-$\3300\377\027rE8P\220\017\354=\372";
-    PyObject *data = __Pyx_DecompressString(cstring, 819, 2);
+    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (860 bytes) */
+const char* const cstring = "BZh91AY&SY\206:\267\030\000\000G\177\377\345\177\377\365l\177\377\363\257\367\377 \277\357\377\364\000@@@@@@@@\000@@@\000@\000@\002\275\266\273\255\216\235np\324M\032\247\223&\223\014$\014\217S\324ddh\r\03242\r\003A\241\243\02044\321\342\236\240\320\210\301\004b\014MSe\001\246\312z\236\243C@\320\000\000\000\000\003@\320D\302&S\0214<\240\311\220\000\000\r\003@\000\000\000\310\001\352\000\r4\223Si4G\250\000\323@4\000\000\000\0004\r\r\000\000\000\323j1,M)\343\343\347\357\361@\244\277\264\300\214\006F\214\017K\021\030\225\254-(\t\252!\225\241\206\2423\2350\006\316#\202L\244F0\252\306\360+G\304\030 \352\037{\"\033Z\245:\210\362j`\277\345\332\324b1\010,piKJj@A\263\316r!\227\370\373\216\370C\351\362\261`\276\207\365\257Z\261\t\271\266\360\331 \005x\346a\016\322\003\234\256\216\330M/\277\350\350f\320\237\nJ \024\340Sh\216\3502)F\3048T\002\224\205\007)\026EK\3638\324\344\257^\345\313\335\303\333S\032\224\267\033mTNo\007\005\272\217\314a4\202+a*\255 z\n\224;.&MSL\272\006\017\225\205\025G\025dh\027u^/\020\002+\341\203\203d\3318\326_\253\024\004>\031\000\307\36209R\0334\035_<\\\225\307A \317yJ\033Z6d\265\245\007\303l\332\250F\223%C!\255\346\2042\020F\265\276\220\241\004\263q\212Q0!R\000\312?\344c\230\345{-\360d\300R\000d\331M\201\0271\301=\360\232\242~\202\313\262\370t\206BF\312\204\243$rLd];\014S\004\266\333\0008\334\227QnT\212\275bjk\301\361\244ZL\t\352z\267\325\312\367n\264a\221\301\343Y\341\301D\312\317\210\300\231\272[j\331\013\311\204\3676\035yu\246-\306@\256\2462r\307-yr\307\201\226\221\346\3065*\222\016\222%\2079\312m\314n\221V\273f\252\355\340\010t\006\300\351\nA\025\000\022!P\026v\354O\312!\365\204\226\262\254\311\234[$\202\034\212\271\224\343Z\301\313\214\315A0>%\3370xH\2220\205;6\254\250\351\203\213\003\224%\234\3478\032\246\225\354uy\363\350S\2447#v\027}udb\260\230\266\363H\261\222\202\327\246,$b]Q\201\252\006\220\276\t\022\314\311\340$@`\234\351\344\251\256[\245\320U\241\3279\313\026\212,\212|\351'&\206\207@B#b.b\014H\025\240P[\253\030\247\022\334((\025\320}S\352}""\"@\200\022A\230SN\001\013\351g1\262\356\340\326\357\024|h\320O\003\304\233\352=\223\317\240{\221\353Lo\014\014\323#\253\332J\013b\035*\266\236\203\010\202GU:\217Q\223\271\267\007|\331\260]-+\025pY\271\022\031c\224\027\371\254\3530\273&\362\220\262\277\ns\276r7\365\326\241B}\031\217!wU[\030R\014\024:T\222\212\201\220L\"\223\234B\302`\n\377\305\334\221N\024$!\216\255\306\000";
+    PyObject *data = __Pyx_DecompressString(cstring, 860, 2);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (729 bytes) */
-const char* const cstring = "x\332mR\315n\323@\020n\244R\245\340@]\251P*\204\022\321\003\177m\234\320\204\004\t\220\325\246PD[\322\264H\234F\033g\335Z\330^g\275i\343\212\007\310\321\307=\372\230c\216=\362\0109\372\230G\350#0\233\024\020\022+\355\3147\273\337\216g>\317\373\303\343V\236S\321\343>\355\344}\346o\\R\316\362\264\357\210\274\305:\364M\276h\323\316\206\315\270\267)\372\242\370\033\000\353\t\345Cn\025\005\365\361XDE&B\327i+\267\031D}u\275mBe\313P\266fT\000v\033;\260\273\367\271q`\3567\000>\266L\260k\265Z}\337\204\322\376\036\224\214-\343`\033v\266\014\343\340\323,\372\006{\307e\243t\370\021\275:8<\202-\343\213\211\006\340K\324\307\275\343X\002\016h_\034Q\373\230z\001\343\204\343!\247\226`<:iM\363\3348hYg\264\003\333\377\206\rhs\366\235rrJ\201\263\210\270\302\241\341\277\224V\343\253\t\257\253\006\t#\337r\330\246\3058\366\357\3704\264\200\360\323s\313E\014\216\017\202\023\213\266\211\365\035\200\372\202r@\177N\334\036\021\024\224t\030\242\262\000v\271\\2\354Z\325\250\242\000\2452\232r\335\256\325+\312T\361\242^\257\240\354\263'\002\233\263m\010\2108\263\035\227\252=\r\240\035\t\032*\312_Z\200\251{\276\205\237uB\370S\245#\250\027\002x\004+\304\345\261N\017s\340\362\211\207\236\005\324g!\376\265\331\367T\002\3410?`A\300\035_\004\234\235r\342\335\220\273=\342\316\020\247\244\303i\340b\307\234\206=W\314,\250\261\231M\224*\365/\302\013/p\251\300\276 \244\342&\037\242\016\265\t>\014\243\020\353\014\024\365\367Dm\316&\n\260\271\020U\023^\320q\270\322\223\206\027\027\204\373j;\376i\030Q\302\307s\317\207\205\353GsZn2\277\236\034\216J\243\335\253\302d\376\261$\223\371\207R\277^\230\273\275<\326\327\223]d-\314-j\203w\362A\222\231h\367\343\266\314H=\325W\342f\354\310~\322M\227\024d\311\311\224\231[\215\243$;\314\214\237\275\275jN\262+\361Q\334\225\2314\247\307z\374R\236%$\325\024|!O\222\302$\273&\237'\037\206\245\241\231f\365xU\336\227\335\344\356\260=\312\244\331;\203\327\361\223\270\231j\2714\273\230j\313q!\256`\236\377\200\265\361\332\013L\261=\354\246\332\275\301\017\371\n[XZ\225\267ds\374\330""\374\251\377,\216\233G\023m)\316\304\252\253\305\274\274\034\256\216\364\321\323\253\302\264\252\3612\276N5UhO\232\223\371;\203\022\312\370\013*\317t;";
-    PyObject *data = __Pyx_DecompressString(cstring, 729, 1);
+    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (795 bytes) */
+const char* const cstring = "x\332mRAO\333J\020&\022\252Bk^1\205>@\010%j\017-\274\006'%4yR[Y!\274R\025(\004\236\324\323h\343\254\203U\333\353\354n\332\270z?\200\243\217{\3641\307\034s\354O\310\321\307\374\204\376\2047Kh\253J]ig\276\331\231\235\235\371vJ\247\027\255\002\247\262\317C\332)\204,|\366\205rV\240\003O\026\034\326\241\177\027^\357\272\264\363\314e<(\311\201\334\375\016\200\365\245\326\202;\273\222\206x,\343]&\205\357\265\265*E\361@\273\0336T\367,-kV\025\340\260y\000\207G\357\232'\366q\023\340M\313\006\267V\253\325\217m(\037\037A\331\332\263N\032p\260gY'og\326\0078\272\250X\345\3237\250\365\301\3519\240\270h59g\374\275\215\006\300\373x\200\373\300s$\234\320\201<\247\356\005\r\"\306\t\307CN\035\311x|\331\272\311w\253\240\345\\\321\0164~5\233\320\346\354#\345\244K\201\263\230\370\322\243\342\327\220V\363_\033^\354[D\304\241\343\261\222\3038\362\340\205T8@x\367\223\343#\006/\004\311\211C\333\304\371\010@CI9*]1\004\242\013\364\023\361\373DR\320\\\242\003\271\006p+\225\262\345\326\366\255}d\244\\AQ\251\273\265zU\213}t\324\353U\374\207\331\025\211]\272.DD^\271\236O\365\2761\240\035K*t\310\317\260\010S\367C\007\000<\001?\312\365$\r\004@@\260T\\\001\353\3641\007\256\220\004\250Y8+\227E4d\002\277s\366\256N$=\026F,\212\270\027\312\210\263.'\301\355\245^\237\3703\304\211'(\247\244\303i\344#\017\234\212\276/g\022\364T\315\006N\327\375\023\241#\210|*\261I\020T\336&E\324\241.\301\213\"\026Xt\244C\277\317[\t\353\246\276\370a\316\306\017\260q\201\214\312 \352x\\sM\305\347\317\204\207z{aW\304\224\360\311\334\366d\373\325\230|\333\2323\026\247\363\217\323\323Qyt8.N\347\267\024\231\316\257+\363\333\235\271\273\313\023\363qz8,\"^0\256_\251?\323\334\324x\230\264UN\231\231\271\232\234%\236\032\244\275lIC\226^\336D.\256%q\232\037\346&O_\216\317\246\371\325\344<\351\251\\\266h&f\362\227\272JIfh\270\243.\323\3424\277\241\266\323\177\206\345\241\235\345\315dM=T\275\364\217a{\224\313\362\367\256_$\217\222\263\314X\314\362\013\231\261\234\024\223*\346\371\r\330\230l\354`\212\306\260\227\031\367\257\377S\317\025""\311\2266'\233\257\307\275\257\271l\351ARW\r\325\313V\326'\353\026f^\331PO\322b\372rtg\344\216\355luK9\251\231\255l\252fj\246;\303\263\251\261\224\344\022M\300BA}\031\256\215\314\321\223q\361\246\201\3112>\224\031\272\247\276\262\247\363\367\256\313H\372\377\322\347\231D";
+    PyObject *data = __Pyx_DecompressString(cstring, 795, 1);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #else /* compression: none (1001 bytes) */
-const char* const bytes = "?OTS returned non-zero exit code: /fed-form.txt/form.txt_out.txtsrc/tenforty/otslib/ots.pyx.txtCA_540CA_5805__FED_FILENAME__HSA_f8889MA_1MI_1040NC_D400NJ_1040NY_IT201OH_IT1040OR_40PA_40__Pyx_PyDict_NextRefTemporaryDirectoryUS_1040US_1040_Sched_CUS_1040_Sched_E_brokerage_royaltiesUS_1040_Sched_SEVA_760asyncio.coroutinesc_argvcline_in_traceback__enter___evaluate_form__exit__f2210f8606f8812f8829f8959f8960f8995fed_form_textff_pathfilefile_path_bytesformform_textfp__func___is_coroutineitems__main____module____name__openosots_form_functionpopprintprogram_name__qualname__readreplaceresultresult_codereturnfilereturnfile_completed__set_name__setdefaultsystempfiletenforty.otslib__test__tmpdirvalueswwarnwarningsyear\320\000*\250!\360\034\000\014\r\340\004$\240O\2601\260F\270!\340\004\036\230a\340\004\031\230\021\360\006\000\n\022\320\021$\240F\250!\360\006\000\t\014\210>\230\027\240\001\340\014\026\220b\230\001\230\021\330\021\025\220Q\220i\230x\240q\330\020\025\220Q\220o\240U\250!\360\006\000\r\030\220y\240\010\250\001\320)=\270Q\340\010\025\220R\220q\230\001\330\r\021\220\021\220,\230h\240a\330\014\021\220\021\220+\230U\240!\340\010\032\230*\240G\2501\250A\330\010\021\220\030\230\026\230q\240\016\250b\260\001\330\010\013\2107\220#\220Q\330\014\r\330\010\t\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\032\320\032+\2501\250C\250q\330\014\017\210|\2303\230a\340\020\030\230\005\230Q\320\036A\300\021\300/\320QR\340\014\020\220\001\220\021\360\006\000\t \230z\250\030\260\021\260(\270!\330\r\021\220\021\320\022+\2501\330\014\025\220R\220u\230A\340\004\013\2101ots";
+    #else /* compression: none (1093 bytes) */
+const char* const bytes = ".OTS returned non-zero exit code: ?/fed-form.txt/form.txt_out.txtsrc/tenforty/otslib/ots.pyx.txtCA_540CA_5805__FED_FILENAME__HSA_f8889MA_1MI_1040NC_D400NJ_1040NY_IT201OH_IT1040OR_40OTSErrorPA_40__Pyx_PyDict_NextRefTemporaryDirectoryUS_1040US_1040_Sched_CUS_1040_Sched_E_brokerage_royaltiesUS_1040_Sched_SEVA_760asyncio.coroutinesc_argvcline_in_traceback__enter__error_msg_evaluate_form__exit__f2210f8606f8812f8829f8959f8960f8995fed_form_textff_pathfilefile_path_bytesformform_textfp__func___is_coroutineitems__main____module____name__on_erroropenosots_form_functionpopprintprogram_name__qualname__raisereadreplaceresultresult_codereturnfilereturnfile_completed__set_name__setdefaultsystempfiletenforty.modelstenforty.otslib__test__tmpdirvalueswwarnwarningsyear\320\000*\320*>\270a\360\036\000\014\r\340\004$\240O\2601\260F\270!\340\004\036\230a\340\004\031\230\021\360\006\000\n\022\320\021$\240F\250!\360\006\000\t\014\210>\230\027\240\001\340\014\026\220b\230\001\230\021\330\021\025\220Q\220i\230x\240q\330\020\025\220Q\220o\240U\250!\360\006\000\r\030\220y\240\010\250\001\320)=\270Q\340\010\025\220R\220q\230\001\330\r\021\220\021\220,\230h\240a\330\014\021\220\021\220+\230U\240!\340\010\032\230*\240G\2501\250A\330\010\021\220\030\230\026\230q\240\016\250b\260\001\330\010\013\2107\220#\220Q\330\014\r\330\010\t\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\032\320\032+\2501\250C\250q\330\014\017\210|\2303\230a\330\020\034\320\034?\270q\300\001\330\020\023\2209\230C\230q\330\024\031\320\0310\260\001\330\024\032\230(\240!\240=\260\006\260f\270A\330\025\036\230c\240\021\330\024\034\230E\240\021\240+\250Q\340\014\020\220\001\220\021\360\006\000\t \230z\250\030\260\021\260(\270!\330\r\021\220\021\320\022+\2501\330\014\025\220R\220u\230A\340\004\013\2101ots";
     PyObject *data = NULL;
     CYTHON_UNUSED_VAR(__Pyx_DecompressString);
     #endif
     PyObject **stringtab = __pyx_mstate->__pyx_string_tab;
     Py_ssize_t pos = 0;
-    for (int i = 0; i < 77; i++) {
+    for (int i = 0; i < 83; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyUnicode_DecodeUTF8(bytes + pos, bytes_length, NULL);
-      if (likely(string) && i >= 7) PyUnicode_InternInPlace(&string);
+      if (likely(string) && i >= 8) PyUnicode_InternInPlace(&string);
       if (unlikely(!string)) {
         Py_XDECREF(data);
         __PYX_ERR(0, 1, __pyx_L1_error)
@@ -9075,7 +9222,7 @@ const char* const bytes = "?OTS returned non-zero exit code: /fed-form.txt/form.
       stringtab[i] = string;
       pos += bytes_length;
     }
-    for (int i = 77; i < 79; i++) {
+    for (int i = 83; i < 85; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyBytes_FromStringAndSize(bytes + pos, bytes_length);
       stringtab[i] = string;
@@ -9086,14 +9233,14 @@ const char* const bytes = "?OTS returned non-zero exit code: /fed-form.txt/form.
       }
     }
     Py_XDECREF(data);
-    for (Py_ssize_t i = 0; i < 79; i++) {
+    for (Py_ssize_t i = 0; i < 85; i++) {
       if (unlikely(PyObject_Hash(stringtab[i]) == -1)) {
         __PYX_ERR(0, 1, __pyx_L1_error)
       }
     }
     #if CYTHON_IMMORTAL_CONSTANTS
     {
-      PyObject **table = stringtab + 77;
+      PyObject **table = stringtab + 83;
       for (Py_ssize_t i=0; i<2; ++i) {
         #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
         #if PY_VERSION_HEX < 0x030E0000
@@ -9139,9 +9286,9 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   PyObject* tuple_dedup_map = PyDict_New();
   if (unlikely(!tuple_dedup_map)) return -1;
   {
-    const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 16, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 355};
-    PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_year, __pyx_mstate->__pyx_n_u_form, __pyx_mstate->__pyx_n_u_form_text, __pyx_mstate->__pyx_n_u_fed_form_text, __pyx_mstate->__pyx_n_u_warnings, __pyx_mstate->__pyx_n_u_ots_form_function, __pyx_mstate->__pyx_n_u_program_name, __pyx_mstate->__pyx_n_u_file_path_bytes, __pyx_mstate->__pyx_n_u_c_argv, __pyx_mstate->__pyx_n_u_result_code, __pyx_mstate->__pyx_n_u_tmpdir, __pyx_mstate->__pyx_n_u_ff_path, __pyx_mstate->__pyx_n_u_fp, __pyx_mstate->__pyx_n_u_returnfile, __pyx_mstate->__pyx_n_u_returnfile_completed, __pyx_mstate->__pyx_n_u_result};
-    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_src_tenforty_otslib_ots_pyx, __pyx_mstate->__pyx_n_u_evaluate_form, __pyx_mstate->__pyx_kp_b_iso88591_O1F_a_F_b_Qixq_QoU_y_Q_Rq_ha_U, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
+    const __Pyx_PyCode_New_function_description descr = {5, 0, 0, 19, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 355};
+    PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_year, __pyx_mstate->__pyx_n_u_form, __pyx_mstate->__pyx_n_u_form_text, __pyx_mstate->__pyx_n_u_fed_form_text, __pyx_mstate->__pyx_n_u_on_error, __pyx_mstate->__pyx_n_u_warnings, __pyx_mstate->__pyx_n_u_ots_form_function, __pyx_mstate->__pyx_n_u_program_name, __pyx_mstate->__pyx_n_u_file_path_bytes, __pyx_mstate->__pyx_n_u_c_argv, __pyx_mstate->__pyx_n_u_result_code, __pyx_mstate->__pyx_n_u_tmpdir, __pyx_mstate->__pyx_n_u_ff_path, __pyx_mstate->__pyx_n_u_fp, __pyx_mstate->__pyx_n_u_returnfile, __pyx_mstate->__pyx_n_u_error_msg, __pyx_mstate->__pyx_n_u_OTSError, __pyx_mstate->__pyx_n_u_returnfile_completed, __pyx_mstate->__pyx_n_u_result};
+    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_src_tenforty_otslib_ots_pyx, __pyx_mstate->__pyx_n_u_evaluate_form, __pyx_mstate->__pyx_kp_b_iso88591_a_O1F_a_F_b_Qixq_QoU_y_Q_Rq_ha, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
   }
   Py_DECREF(tuple_dedup_map);
   return 0;
@@ -11158,6 +11305,153 @@ static CYTHON_INLINE PyObject* __Pyx____Pyx_PyUnicode_From_int(int value, Py_ssi
         return PyUnicode_FromOrdinal(*dpos);
     }
     return __Pyx_PyUnicode_BuildFromAscii(ulength, dpos, (int) length, prepend_sign, padding_char);
+}
+
+/* ImportFrom */
+static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name) {
+    PyObject* value = __Pyx_PyObject_GetAttrStr(module, name);
+    if (unlikely(!value) && PyErr_ExceptionMatches(PyExc_AttributeError)) {
+        const char* module_name_str = 0;
+        PyObject* module_name = 0;
+        PyObject* module_dot = 0;
+        PyObject* full_name = 0;
+        PyErr_Clear();
+        module_name_str = PyModule_GetName(module);
+        if (unlikely(!module_name_str)) { goto modbad; }
+        module_name = PyUnicode_FromString(module_name_str);
+        if (unlikely(!module_name)) { goto modbad; }
+        module_dot = PyUnicode_Concat(module_name, __pyx_mstate_global->__pyx_kp_u_);
+        if (unlikely(!module_dot)) { goto modbad; }
+        full_name = PyUnicode_Concat(module_dot, name);
+        if (unlikely(!full_name)) { goto modbad; }
+        #if (CYTHON_COMPILING_IN_PYPY && PYPY_VERSION_NUM  < 0x07030400) ||\
+                CYTHON_COMPILING_IN_GRAAL
+        {
+            PyObject *modules = PyImport_GetModuleDict();
+            if (unlikely(!modules))
+                goto modbad;
+            value = PyObject_GetItem(modules, full_name);
+        }
+        #else
+        value = PyImport_GetModule(full_name);
+        #endif
+      modbad:
+        Py_XDECREF(full_name);
+        Py_XDECREF(module_dot);
+        Py_XDECREF(module_name);
+    }
+    if (unlikely(!value)) {
+        PyErr_Format(PyExc_ImportError, "cannot import name %S", name);
+    }
+    return value;
+}
+
+/* RaiseException */
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause) {
+    PyObject* owned_instance = NULL;
+    if (tb == Py_None) {
+        tb = 0;
+    } else if (tb && !PyTraceBack_Check(tb)) {
+        PyErr_SetString(PyExc_TypeError,
+            "raise: arg 3 must be a traceback or None");
+        goto bad;
+    }
+    if (value == Py_None)
+        value = 0;
+    if (PyExceptionInstance_Check(type)) {
+        if (value) {
+            PyErr_SetString(PyExc_TypeError,
+                "instance exception may not have a separate value");
+            goto bad;
+        }
+        value = type;
+        type = (PyObject*) Py_TYPE(value);
+    } else if (PyExceptionClass_Check(type)) {
+        PyObject *instance_class = NULL;
+        if (value && PyExceptionInstance_Check(value)) {
+            instance_class = (PyObject*) Py_TYPE(value);
+            if (instance_class != type) {
+                int is_subclass = PyObject_IsSubclass(instance_class, type);
+                if (!is_subclass) {
+                    instance_class = NULL;
+                } else if (unlikely(is_subclass == -1)) {
+                    goto bad;
+                } else {
+                    type = instance_class;
+                }
+            }
+        }
+        if (!instance_class) {
+            PyObject *args;
+            if (!value)
+                args = PyTuple_New(0);
+            else if (PyTuple_Check(value)) {
+                Py_INCREF(value);
+                args = value;
+            } else
+                args = PyTuple_Pack(1, value);
+            if (!args)
+                goto bad;
+            owned_instance = PyObject_Call(type, args, NULL);
+            Py_DECREF(args);
+            if (!owned_instance)
+                goto bad;
+            value = owned_instance;
+            if (!PyExceptionInstance_Check(value)) {
+                PyErr_Format(PyExc_TypeError,
+                             "calling %R should have returned an instance of "
+                             "BaseException, not %R",
+                             type, Py_TYPE(value));
+                goto bad;
+            }
+        }
+    } else {
+        PyErr_SetString(PyExc_TypeError,
+            "raise: exception class must be a subclass of BaseException");
+        goto bad;
+    }
+    if (cause) {
+        PyObject *fixed_cause;
+        if (cause == Py_None) {
+            fixed_cause = NULL;
+        } else if (PyExceptionClass_Check(cause)) {
+            fixed_cause = PyObject_CallObject(cause, NULL);
+            if (fixed_cause == NULL)
+                goto bad;
+        } else if (PyExceptionInstance_Check(cause)) {
+            fixed_cause = cause;
+            Py_INCREF(fixed_cause);
+        } else {
+            PyErr_SetString(PyExc_TypeError,
+                            "exception causes must derive from "
+                            "BaseException");
+            goto bad;
+        }
+        PyException_SetCause(value, fixed_cause);
+    }
+    PyErr_SetObject(type, value);
+    if (tb) {
+#if PY_VERSION_HEX >= 0x030C00A6
+        PyException_SetTraceback(value, tb);
+#elif CYTHON_FAST_THREAD_STATE
+        PyThreadState *tstate = __Pyx_PyThreadState_Current;
+        PyObject* tmp_tb = tstate->curexc_traceback;
+        if (tb != tmp_tb) {
+            Py_INCREF(tb);
+            tstate->curexc_traceback = tb;
+            Py_XDECREF(tmp_tb);
+        }
+#else
+        PyObject *tmp_type, *tmp_value, *tmp_tb;
+        PyErr_Fetch(&tmp_type, &tmp_value, &tmp_tb);
+        Py_INCREF(tb);
+        PyErr_Restore(tmp_type, tmp_value, tb);
+        Py_XDECREF(tmp_tb);
+#endif
+    }
+bad:
+    Py_XDECREF(owned_instance);
+    return;
 }
 
 /* SwapException */
@@ -13324,6 +13618,75 @@ raise_neg_overflow:
     return (int) -1;
 }
 
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyLong_From_int(int value) {
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+    const int neg_one = (int) -1, const_zero = (int) 0;
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic pop
+#endif
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(int) < sizeof(long)) {
+            return PyLong_FromLong((long) value);
+        } else if (sizeof(int) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#if !CYTHON_COMPILING_IN_PYPY
+        } else if (sizeof(int) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(int) <= sizeof(long)) {
+            return PyLong_FromLong((long) value);
+        } else if (sizeof(int) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+        }
+    }
+    {
+        unsigned char *bytes = (unsigned char *)&value;
+#if !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX >= 0x030d00A4
+        if (is_unsigned) {
+            return PyLong_FromUnsignedNativeBytes(bytes, sizeof(value), -1);
+        } else {
+            return PyLong_FromNativeBytes(bytes, sizeof(value), -1);
+        }
+#elif !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX < 0x030d0000
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        return _PyLong_FromByteArray(bytes, sizeof(int),
+                                     little, !is_unsigned);
+#else
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        PyObject *from_bytes, *result = NULL, *kwds = NULL;
+        PyObject *py_bytes = NULL, *order_str = NULL;
+        from_bytes = PyObject_GetAttrString((PyObject*)&PyLong_Type, "from_bytes");
+        if (!from_bytes) return NULL;
+        py_bytes = PyBytes_FromStringAndSize((char*)bytes, sizeof(int));
+        if (!py_bytes) goto limited_bad;
+        order_str = PyUnicode_FromString(little ? "little" : "big");
+        if (!order_str) goto limited_bad;
+        {
+            PyObject *args[3+(CYTHON_VECTORCALL ? 1 : 0)] = { NULL, py_bytes, order_str };
+            if (!is_unsigned) {
+                kwds = __Pyx_MakeVectorcallBuilderKwds(1);
+                if (!kwds) goto limited_bad;
+                if (__Pyx_VectorcallBuilder_AddArgStr("signed", __Pyx_NewRef(Py_True), kwds, args+3, 0) < 0) goto limited_bad;
+            }
+            result = __Pyx_Object_Vectorcall_CallFromBuilder(from_bytes, args+1, 2 | __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET, kwds);
+        }
+        limited_bad:
+        Py_XDECREF(kwds);
+        Py_XDECREF(order_str);
+        Py_XDECREF(py_bytes);
+        Py_XDECREF(from_bytes);
+        return result;
+#endif
+    }
+}
+
 /* FormatTypeName */
 #if CYTHON_COMPILING_IN_LIMITED_API && __PYX_LIMITED_VERSION_HEX < 0x030d0000
 static __Pyx_TypeName
@@ -13357,7 +13720,7 @@ __Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp)
         result = name;
         name = NULL;
     } else {
-        result = __Pyx_NewRef(__pyx_mstate_global->__pyx_kp_u_);
+        result = __Pyx_NewRef(__pyx_mstate_global->__pyx_kp_u__2);
     }
     goto done;
 }

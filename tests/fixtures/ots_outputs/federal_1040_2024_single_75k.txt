@@ -1,0 +1,150 @@
+Title: US Federal 1040 Tax Form - 2024,	 v22.05, Fri Jan 23 21:12:12 2026
+
+Status = Single (1)
+CkSingle X
+CkYourself X
+L6ab = 1
+ChkVirtNo X
+L1a = 75000.00
+L1b =   0.00
+L1c =   0.00
+L1d =   0.00
+L1e =   0.00
+L1f =   0.00
+L1g =   0.00
+L1h =   0.00
+L1i =   0.00
+L1z = 75000.00
+L2b =   0.00
+L3a =   0.00
+L3b =   0.00
+L4a =   0.00
+L4b =   0.00
+L5a =   0.00
+L5b =   0.00
+L6a =   0.00
+StdDedChart_NumBoxesChecked = 0
+S1_1099K_err =   0.00
+S1_1 =   0.00
+S1_2a =   0.00
+S1_2b:
+S1_3 =   0.00
+S1_3 =   0.00
+S1_8z_Type:
+S1_9 =   0.00
+S1_10 =   0.00
+S1_11 =   0.00
+S1_12 =   0.00
+S1_13 =   0.00
+S1_14 =   0.00
+S1_15 =   0.00
+S1_16 =   0.00
+S1_17 =   0.00
+S1_18 =   0.00
+S1_19a =   0.00
+AlimRecipSSN:
+DivorceDate:
+S1_20 =   0.00
+S1_21 =   0.00
+S1_23 =   0.00
+S1_24a =   0.00
+S1_24b =   0.00
+S1_24c =   0.00
+S1_24d =   0.00
+S1_24e =   0.00
+S1_24f =   0.00
+S1_24g =   0.00
+S1_24h =   0.00
+S1_24i =   0.00
+S1_24j =   0.00
+S1_24k =   0.00
+S1_24z =   0.00
+S1_24z_Type:
+S1_25 =   0.00
+S1_26 =   0.00
+CheckBoxA5a X
+  (Itemizations < Std-Deduction,   0.00 < 14600.00)
+Use standard deduction.
+ A2 = 75000.00
+ A3 = 5625.00
+A5a =   0.00
+A5b =   0.00
+A5c =   0.00
+A5d =   0.00
+A5e =   0.00
+A8a =   0.00
+A8b =   0.00
+A8c =   0.00
+A8d =   0.00
+A8e =   0.00
+L6b =   0.00
+L7 =   0.00
+L8 =   0.00
+L9 = 75000.00
+S1_20 =   0.00
+S1_22 =   0.00
+L10 =   0.00
+L11 = 75000.00		Adjusted Gross Income (AGI)
+L12 = 14600.00
+L13 =   0.00
+L14 = 14600.00
+L15 = 60400.00		Taxable Income
+L16 = 8347.00		Tax
+CkB7a_N X
+CkB8_N X
+Review AMT form6251 routine for your situation.
+ 		AMT_Form_6251_L1 = 60400.00
+ 		AMT_Form_6251_L2a = 14600.00
+ 		AMT_Form_6251_L2 = 14600.00
+ 		AMT_Form_6251_L4 = 75000.00
+ 		AMT_Form_6251_L5 = 85700.00
+ 		AMT_Form_6251_L10 =  8347.00
+ 		AMT_Form_6251_L11 =     0.00
+	AMTws[11] = OnlyIfMoreThanZero(   0.00 - 8347.00 ) =   0.00
+Your Alternative Minimum Tax =     0.00
+ (Not subject to Alternative Minimum Tax.)
+S2_17a_Type:
+S2_17z_Type:
+L17 =   0.00
+L18 = 8347.00
+L19 =   0.00
+S3_1 =   0.00
+S3_2 =   0.00
+S3_3 =   0.00
+S3_4 =   0.00
+S3_5a =   0.00
+S3_5b =   0.00
+S3_6a =   0.00
+S3_6b =   0.00
+S3_6c =   0.00
+S3_6d =   0.00
+S3_6e =   0.00
+S3_6e =   0.00
+S3_6g =   0.00
+S3_6h =   0.00
+S3_6i =   0.00
+S3_6j =   0.00
+S3_6j =   0.00
+S3_6l =   0.00
+S3_6m =   0.00
+S3_6z =   0.00
+S3_6z_Type:
+S3_7 =   0.00
+L20 =   0.00
+S3_13z_Type:
+S3_15 =   0.00
+L21 =   0.00
+L22 = 8347.00
+L23 =   0.00
+L24 = 8347.00		Total Tax
+ You are in the 22.0% marginal tax bracket,
+ and you are paying an effective 13.8% tax on your income.
+L26 =   0.00
+L28 =   0.00
+L29 =   0.00
+L30 =   0.00
+L31 =   0.00
+L32 =   0.00		Total other payments and refundable credits
+L33 =   0.00		Total Payments
+L37 = 8347.00  DUE !!!
+         (Which is 100.0% of your Total Federal Tax.)
