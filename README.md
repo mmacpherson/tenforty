@@ -327,9 +327,9 @@ df = (
 ## Known Limitations
 
 - Currently does not support Windows. The Colab notebook linked above, or using
-  WSL might be a workaround until this is resolved. Glad for any help from those
-  more familiar with Windows
-  [(issue)](https://github.com/mmacpherson/tenforty/issues/19).
+  WSL are workarounds. Attempts have been made to get Windows builds working, but
+  runtime crashes persist due to compiler interoperability challenges; see
+  [Windows Build Research](./docs/windows-build-research.md) for details.
 - Medicare and Net Investment Income Tax are not automatically computed on
   capital gains, so if those apply to your situation the output tax will be
   underestimated.
