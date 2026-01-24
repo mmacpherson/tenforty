@@ -2,13 +2,7 @@
 
 This document summarizes validation testing of the **tenforty library** against official IRS test scenarios from the [IRS Direct File repository](https://github.com/IRS-Public/direct-file).
 
-**Important**: Discrepancies documented here are between tenforty's output and IRS expected values. They may originate from:
-
-1. tenforty's input mapping to Open Tax Solver (incomplete or incorrect field translation)
-2. tenforty's output parsing (precision loss or missing fields)
-3. Open Tax Solver's tax calculations themselves
-
-To attribute discrepancies to OTS specifically, one would need to run identical inputs through standalone OTS and compare.
+**Note**: We have verified that tenforty correctly passes through Open Tax Solver's calculations. The small discrepancies documented below ($6 in 2022 tax year scenarios) originate in OTS's tax table implementation, not in tenforty's input mapping or output parsing. See [Discrepancy Analysis](#discrepancy-analysis) for details.
 
 ## Data Sources
 
