@@ -50,6 +50,8 @@ Known limitations of this package are detailed in the
 
 ## Installation
 
+Requires Python 3.10+.
+
 ```sh
 pip install tenforty
 ```
@@ -91,20 +93,20 @@ Here are all arguments available for those two functions:
 
 The functions output these fields:
 
-| Output Field                    |
-|---------------------------------|
-| total_tax                       |
-| federal_adjusted_gross_income   |
-| federal_effective_tax_rate      |
-| federal_tax_bracket             |
-| federal_taxable_income          |
-| federal_amt                     |
-| federal_total_tax               |
-| state_adjusted_gross_income     |
-| state_taxable_income            |
-| state_total_tax                 |
-| state_tax_bracket               |
-| state_effective_tax_rate        |
+| Output Field                    | Description                                           |
+|---------------------------------|-------------------------------------------------------|
+| total_tax                       | Combined federal and state tax liability              |
+| federal_adjusted_gross_income   | Federal Adjusted Gross Income (Form 1040 Line 11)     |
+| federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
+| federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
+| federal_taxable_income          | Income subject to federal tax after deductions        |
+| federal_amt                     | Federal Alternative Minimum Tax                       |
+| federal_total_tax               | Total federal tax liability                           |
+| state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
+| state_taxable_income            | Income subject to state tax after deductions          |
+| state_total_tax                 | Total state tax liability                             |
+| state_tax_bracket               | Marginal state tax bracket                            |
+| state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
 
 
 
