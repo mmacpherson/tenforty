@@ -335,16 +335,14 @@ df = (
   provisional.
 
 
-## Contributing
+## Development & Contributing
 
-We welcome contributions of all kinds! Whether you're reporting a bug, suggesting a new feature, or submitting a pull request, your help makes `tenforty` better for everyone.
+Contributions are welcome! See our [Contributing Guidelines](CONTRIBUTING.md) for the development process and coding standards.
 
-To get started, please review our [Contributing Guidelines](CONTRIBUTING.md) for information on our development process and coding standards.
-
-For deeper technical dives and reference documentation, see:
-- [Development Guide](./docs/develop.md) – Detailed information on package internals, building Cython extensions, and environment setup.
-- [Error Handling](./docs/error-handling.md) – How to configure `on_error` policies and handle package-specific exceptions.
-- [IRS Validation](./docs/irs-validation.md) – An overview of our testing methodology against official IRS and state tax sources.
+Documentation for developers:
+- [Development Guide](./docs/develop.md) - Package internals, Cython extensions, and environment setup
+- [Error Handling](./docs/error-handling.md) - Configuring `on_error` policies and exception types
+- [IRS Validation](./docs/irs-validation.md) - Testing methodology against official IRS and state sources
 
 
 ## License
