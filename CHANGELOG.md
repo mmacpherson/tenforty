@@ -1,3 +1,15 @@
+## [2024.6] - 2026-01-25
+### Added
+- Python 3.14 support for CI and wheel builds
+- Configurable error handling and parsing robustness
+- State tax regression tests
+- Phase 2 testing improvements with IRS validation
+- Refactored OTS lookup from if-elif chain to dictionary
+- Consolidated documentation under docs/
+- CONTRIBUTING.md
+- Windows build limitation docs
+- Infrastructure modernization with UV best practices
+
 ## [2024.5] - 2025-04-12
 ### Added
 - Fix typo in `evaluate_returns()` call. Thanks @ericsheier for the report.
