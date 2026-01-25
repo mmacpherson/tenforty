@@ -190,7 +190,7 @@ We analyzed the IRS Modernized e-File (MeF) Assurance Testing System (ATS) scena
 
 **Conclusion:** All 8 examined MeF ATS scenarios include forms or schedules that tenforty does not currently support (self-employment income, household employment, energy credits, premium tax credits, farm income, etc.). None are simple W2-only scenarios.
 
-The extracted PDF text files are preserved in `docs/irs-mef-ats-scenarios/` for reference.
+The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-file-providers/assurance-testing-system-ats).
 
 ## Coverage Summary
 
