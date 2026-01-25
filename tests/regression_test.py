@@ -8,13 +8,14 @@ Also includes range-based sanity checks and monotonicity tests.
 """
 
 import pytest
-from conftest import (
+
+from tenforty import evaluate_return
+
+from .fixtures.scenarios import (
     REGRESSION_SCENARIOS,
     TaxScenario,
     scenario_id,
 )
-
-from tenforty import evaluate_return
 
 # Range-based sanity check scenarios (not exact values, just reasonable ranges)
 NY_SCENARIOS = [

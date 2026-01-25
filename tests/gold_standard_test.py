@@ -10,13 +10,14 @@ See docs/irs-validation.md for detailed scenario analysis.
 """
 
 import pytest
-from conftest import (
+
+from tenforty import evaluate_return
+
+from .fixtures.scenarios import (
     IRS_DIRECT_FILE_SCENARIOS,
     TaxScenario,
     scenario_id,
 )
-
-from tenforty import evaluate_return
 
 
 @pytest.mark.parametrize("scenario", IRS_DIRECT_FILE_SCENARIOS, ids=scenario_id)

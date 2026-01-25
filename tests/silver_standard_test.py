@@ -11,14 +11,15 @@ See docs/irs-validation.md for methodology and bracket references.
 """
 
 import pytest
-from conftest import (
+
+from tenforty import evaluate_return
+
+from .fixtures.scenarios import (
     SILVER_STANDARD_FEDERAL_SCENARIOS,
     SILVER_STANDARD_STATE_SCENARIOS,
     TaxScenario,
     scenario_id,
 )
-
-from tenforty import evaluate_return
 
 
 def run_tax_scenario(scenario: TaxScenario):
