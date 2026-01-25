@@ -8,7 +8,7 @@ import re
 from typing import Any
 
 import dotenv
-import polars as pl
+import pandas as pd
 
 from . import otslib
 from .models import (
@@ -486,7 +486,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
-) -> pl.DataFrame:
+) -> pd.DataFrame:
     """Evaluate tax returns for a grid of inputs.
 
     This function generalizes `evaluate_return` to handle vector-valued inputs,
@@ -562,4 +562,4 @@ def evaluate_returns(
         result = evaluate_return(**combo_map, on_error=on_error).model_dump()
         results.append(combo_map | result)
 
-    return pl.DataFrame(results).cast({"state": pl.Utf8})
+    return pd.DataFrame(results)

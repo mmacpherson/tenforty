@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="449.28pt" height="334.08pt" viewBox="0 0 449.28 334.08" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="448.389251pt" height="334.08pt" viewBox="0 0 448.389251 334.08" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-01-23T18:28:42.230543</dc:date>
+    <dc:date>2025-02-05T17:28:51.346198</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+      <dc:title>Matplotlib v3.10.0, https://matplotlib.org/</dc:title>
      </cc:Agent>
     </dc:creator>
    </cc:Work>
@@ -22,89 +22,32 @@
  <g id="figure_1">
   <g id="patch_1">
    <path d="M 0 334.08
-L 449.28 334.08
-L 449.28 0
+L 448.389251 334.08
+L 448.389251 0
 L 0 0
 z
 " style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="patch_2">
-    <path d="M 57.587031 291.458125
-L 442.08 291.458125
-L 442.08 22.2
-L 57.587031 22.2
+    <path d="M 63.049219 291.458125
+L 439.765696 291.458125
+L 439.765696 22.2
+L 63.049219 22.2
 z
-" style="fill: #ffffff"/>
+" style="fill: #eaeaf2"/>
    </g>
    <g id="matplotlib.axis_1">
     <g id="xtick_1">
      <g id="line2d_1">
-      <path d="M 75.063984 291.458125
-L 75.063984 22.2
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 80.172695 291.458125
+L 80.172695 22.2
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_1">
-      <!-- $0 -->
-      <g style="fill: #262626" transform="translate(68.881641 309.208125) scale(0.11 -0.11)">
+      <!-- 0 -->
+      <g style="fill: #262626" transform="translate(77.081523 309.208125) scale(0.11 -0.11)">
        <defs>
-        <path id="Roboto-Regular-24" d="M 2106 5288
-L 2106 4334
-L 1638 4334
-L 1638 5288
-L 2106 5288
-z
-M 2050 184
-L 2050 -650
-L 1584 -650
-L 1584 184
-L 2050 184
-z
-M 2675 1172
-Q 2675 1359 2590 1509
-Q 2506 1659 2312 1784
-Q 2119 1909 1794 2016
-Q 1400 2138 1114 2313
-Q 828 2488 673 2747
-Q 519 3006 519 3375
-Q 519 3759 684 4037
-Q 850 4316 1153 4466
-Q 1456 4616 1866 4616
-Q 2184 4616 2434 4520
-Q 2684 4425 2857 4237
-Q 3031 4050 3123 3778
-Q 3216 3506 3216 3150
-L 2641 3150
-Q 2641 3359 2591 3534
-Q 2541 3709 2441 3839
-Q 2341 3969 2197 4039
-Q 2053 4109 1866 4109
-Q 1603 4109 1433 4018
-Q 1263 3928 1181 3764
-Q 1100 3600 1100 3384
-Q 1100 3184 1181 3034
-Q 1263 2884 1458 2764
-Q 1653 2644 1997 2528
-Q 2400 2400 2681 2226
-Q 2963 2053 3109 1801
-Q 3256 1550 3256 1178
-Q 3256 775 3075 498
-Q 2894 222 2566 78
-Q 2238 -66 1797 -66
-Q 1531 -66 1272 6
-Q 1013 78 803 242
-Q 594 406 469 676
-Q 344 947 344 1341
-L 925 1341
-Q 925 1075 1001 901
-Q 1078 728 1206 626
-Q 1334 525 1489 483
-Q 1644 441 1797 441
-Q 2078 441 2273 530
-Q 2469 619 2572 784
-Q 2675 950 2675 1172
-z
-" transform="scale(0.015625)"/>
         <path id="Roboto-Regular-30" d="M 3234 2638
 L 3234 1944
 Q 3234 1384 3134 1000
@@ -151,20 +94,19 @@ Q 2653 1469 2653 1850
 z
 " transform="scale(0.015625)"/>
        </defs>
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-30"/>
       </g>
      </g>
     </g>
     <g id="xtick_2">
      <g id="line2d_2">
-      <path d="M 144.971797 291.458125
-L 144.971797 22.2
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 148.6666 291.458125
+L 148.6666 22.2
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_2">
-      <!-- $50K -->
-      <g style="fill: #262626" transform="translate(132.247031 309.208125) scale(0.11 -0.11)">
+      <!-- 50000 -->
+      <g style="fill: #262626" transform="translate(133.210741 309.208125) scale(0.11 -0.11)">
        <defs>
         <path id="Roboto-Regular-35" d="M 1109 2166
 L 647 2284
@@ -203,44 +145,24 @@ Q 1563 2456 1414 2378
 Q 1266 2300 1109 2166
 z
 " transform="scale(0.015625)"/>
-        <path id="Roboto-Regular-4b" d="M 1131 4550
-L 1131 0
-L 528 0
-L 528 4550
-L 1131 4550
-z
-M 3878 4550
-L 1988 2428
-L 925 1325
-L 825 1969
-L 1625 2850
-L 3153 4550
-L 3878 4550
-z
-M 3297 0
-L 1613 2219
-L 1972 2697
-L 4016 0
-L 3297 0
-z
-" transform="scale(0.015625)"/>
        </defs>
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-35" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-35"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
       </g>
      </g>
     </g>
     <g id="xtick_3">
      <g id="line2d_3">
-      <path d="M 214.879609 291.458125
-L 214.879609 22.2
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 217.160505 291.458125
+L 217.160505 22.2
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_3">
-      <!-- $100K -->
-      <g style="fill: #262626" transform="translate(199.063672 309.208125) scale(0.11 -0.11)">
+      <!-- 100000 -->
+      <g style="fill: #262626" transform="translate(198.613474 309.208125) scale(0.11 -0.11)">
        <defs>
         <path id="Roboto-Regular-31" d="M 2278 4575
 L 2278 0
@@ -253,40 +175,42 @@ L 2278 4575
 z
 " transform="scale(0.015625)"/>
        </defs>
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-31" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-31"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(281.005859 0)"/>
       </g>
      </g>
     </g>
     <g id="xtick_4">
      <g id="line2d_4">
-      <path d="M 284.787422 291.458125
-L 284.787422 22.2
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 285.65441 291.458125
+L 285.65441 22.2
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_4">
-      <!-- $150K -->
-      <g style="fill: #262626" transform="translate(268.971484 309.208125) scale(0.11 -0.11)">
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-31" transform="translate(56.201172 0)"/>
-       <use xlink:href="#Roboto-Regular-35" transform="translate(112.402344 0)"/>
+      <!-- 150000 -->
+      <g style="fill: #262626" transform="translate(267.107379 309.208125) scale(0.11 -0.11)">
+       <use xlink:href="#Roboto-Regular-31"/>
+       <use xlink:href="#Roboto-Regular-35" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(281.005859 0)"/>
       </g>
      </g>
     </g>
     <g id="xtick_5">
      <g id="line2d_5">
-      <path d="M 354.695234 291.458125
-L 354.695234 22.2
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 354.148315 291.458125
+L 354.148315 22.2
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_5">
-      <!-- $200K -->
-      <g style="fill: #262626" transform="translate(338.879297 309.208125) scale(0.11 -0.11)">
+      <!-- 200000 -->
+      <g style="fill: #262626" transform="translate(335.601284 309.208125) scale(0.11 -0.11)">
        <defs>
         <path id="Roboto-Regular-32" d="M 3359 475
 L 3359 0
@@ -318,34 +242,36 @@ L 3359 475
 z
 " transform="scale(0.015625)"/>
        </defs>
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-32" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-32"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(281.005859 0)"/>
       </g>
      </g>
     </g>
     <g id="xtick_6">
      <g id="line2d_6">
-      <path d="M 424.603047 291.458125
-L 424.603047 22.2
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 422.64222 291.458125
+L 422.64222 22.2
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_6">
-      <!-- $250K -->
-      <g style="fill: #262626" transform="translate(408.787109 309.208125) scale(0.11 -0.11)">
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-32" transform="translate(56.201172 0)"/>
-       <use xlink:href="#Roboto-Regular-35" transform="translate(112.402344 0)"/>
+      <!-- 250000 -->
+      <g style="fill: #262626" transform="translate(404.095189 309.208125) scale(0.11 -0.11)">
+       <use xlink:href="#Roboto-Regular-32"/>
+       <use xlink:href="#Roboto-Regular-35" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(281.005859 0)"/>
       </g>
      </g>
     </g>
     <g id="text_7">
      <!-- W2 Income -->
-     <g style="fill: #262626" transform="translate(219.697578 324.4425) scale(0.12 -0.12)">
+     <g style="fill: #262626" transform="translate(221.27152 324.4425) scale(0.12 -0.12)">
       <defs>
        <path id="Roboto-Regular-57" d="M 1725 1375
 L 2628 4550
@@ -596,58 +522,59 @@ z
    <g id="matplotlib.axis_2">
     <g id="ytick_1">
      <g id="line2d_7">
-      <path d="M 57.587031 279.219119
-L 442.08 279.219119
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 63.049219 279.219119
+L 439.765696 279.219119
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_8">
-      <!-- $0 -->
-      <g style="fill: #262626" transform="translate(35.722344 283.344119) scale(0.11 -0.11)">
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
+      <!-- 0 -->
+      <g style="fill: #262626" transform="translate(47.366875 283.344119) scale(0.11 -0.11)">
+       <use xlink:href="#Roboto-Regular-30"/>
       </g>
      </g>
     </g>
     <g id="ytick_2">
      <g id="line2d_8">
-      <path d="M 57.587031 234.344037
-L 442.08 234.344037
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 63.049219 234.344037
+L 439.765696 234.344037
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_9">
-      <!-- $10K -->
+      <!-- 10000 -->
       <g style="fill: #262626" transform="translate(22.6375 238.469037) scale(0.11 -0.11)">
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-31" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-31"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
       </g>
      </g>
     </g>
     <g id="ytick_3">
      <g id="line2d_9">
-      <path d="M 57.587031 189.468954
-L 442.08 189.468954
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 63.049219 189.468954
+L 439.765696 189.468954
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_10">
-      <!-- $20K -->
+      <!-- 20000 -->
       <g style="fill: #262626" transform="translate(22.6375 193.593954) scale(0.11 -0.11)">
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-32" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-32"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
       </g>
      </g>
     </g>
     <g id="ytick_4">
      <g id="line2d_10">
-      <path d="M 57.587031 144.593871
-L 442.08 144.593871
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 63.049219 144.593871
+L 439.765696 144.593871
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_11">
-      <!-- $30K -->
+      <!-- 30000 -->
       <g style="fill: #262626" transform="translate(22.6375 148.718871) scale(0.11 -0.11)">
        <defs>
         <path id="Roboto-Regular-33" d="M 1222 2559
@@ -704,21 +631,22 @@ L 1222 2084
 z
 " transform="scale(0.015625)"/>
        </defs>
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-33" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-33"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
       </g>
      </g>
     </g>
     <g id="ytick_5">
      <g id="line2d_11">
-      <path d="M 57.587031 99.718788
-L 442.08 99.718788
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 63.049219 99.718788
+L 439.765696 99.718788
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_12">
-      <!-- $40K -->
+      <!-- 40000 -->
       <g style="fill: #262626" transform="translate(22.6375 103.843788) scale(0.11 -0.11)">
        <defs>
         <path id="Roboto-Regular-34" d="M 3453 1531
@@ -739,26 +667,28 @@ L 2819 4550
 z
 " transform="scale(0.015625)"/>
        </defs>
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-34" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-34"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
       </g>
      </g>
     </g>
     <g id="ytick_6">
      <g id="line2d_12">
-      <path d="M 57.587031 54.843706
-L 442.08 54.843706
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
+      <path d="M 63.049219 54.843706
+L 439.765696 54.843706
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #ffffff; stroke-linecap: round"/>
      </g>
      <g id="text_13">
-      <!-- $50K -->
+      <!-- 50000 -->
       <g style="fill: #262626" transform="translate(22.6375 58.968706) scale(0.11 -0.11)">
-       <use xlink:href="#Roboto-Regular-24"/>
-       <use xlink:href="#Roboto-Regular-35" transform="translate(56.201172 0)"/>
+       <use xlink:href="#Roboto-Regular-35"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(56.201172 0)"/>
        <use xlink:href="#Roboto-Regular-30" transform="translate(112.402344 0)"/>
-       <use xlink:href="#Roboto-Regular-4b" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(168.603516 0)"/>
+       <use xlink:href="#Roboto-Regular-30" transform="translate(224.804688 0)"/>
       </g>
      </g>
     </g>
@@ -959,41 +889,41 @@ z
     </g>
    </g>
    <g id="line2d_13">
-    <path d="M 75.063984 279.219119
-L 94.638172 279.147319
-L 111.416047 273.650122
-L 156.157047 256.41809
-L 157.555203 255.677651
-L 228.861172 205.256008
-L 349.102609 112.642812
-L 419.010422 40.721517
-L 424.603047 34.439006
-L 424.603047 34.439006
-" clip-path="url(#pbd832bc499)" style="fill: none; stroke: #4c72b0; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 80.172695 279.219119
+L 99.350988 279.147319
+L 115.789526 273.650122
+L 159.625625 256.41809
+L 160.995503 255.677651
+L 230.859286 205.256008
+L 348.668802 112.642812
+L 417.162707 40.721517
+L 422.64222 34.439006
+L 422.64222 34.439006
+" clip-path="url(#p162c6bd047)" style="fill: none; stroke: #4c72b0; stroke-width: 1.5; stroke-linecap: round"/>
    </g>
    <g id="patch_3">
-    <path d="M 57.587031 291.458125
-L 57.587031 22.2
+    <path d="M 63.049219 291.458125
+L 63.049219 22.2
 " style="fill: none; stroke: #ffffff; stroke-width: 1.25; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="patch_4">
-    <path d="M 442.08 291.458125
-L 442.08 22.2
+    <path d="M 439.765696 291.458125
+L 439.765696 22.2
 " style="fill: none; stroke: #ffffff; stroke-width: 1.25; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="patch_5">
-    <path d="M 57.587031 291.458125
-L 442.08 291.458125
+    <path d="M 63.049219 291.458125
+L 439.765696 291.458125
 " style="fill: none; stroke: #ffffff; stroke-width: 1.25; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="patch_6">
-    <path d="M 57.587031 22.2
-L 442.08 22.2
+    <path d="M 63.049219 22.2
+L 439.765696 22.2
 " style="fill: none; stroke: #ffffff; stroke-width: 1.25; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_15">
     <!-- Federal Tax as a Function of W2 Income -->
-    <g transform="translate(142.758828 16.2) scale(0.12 -0.12)">
+    <g transform="translate(144.33277 16.2) scale(0.12 -0.12)">
      <defs>
       <path id="Roboto-Regular-73" d="M 2409 897
 Q 2409 1022 2354 1130
@@ -1176,8 +1106,8 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pbd832bc499">
-   <rect x="57.587031" y="22.2" width="384.492969" height="269.258125"/>
+  <clipPath id="p162c6bd047">
+   <rect x="63.049219" y="22.2" width="376.716477" height="269.258125"/>
   </clipPath>
  </defs>
 </svg>

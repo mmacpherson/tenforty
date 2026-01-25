@@ -1,6 +1,6 @@
 """Tests for the evaluate_returns() batch API."""
 
-import polars as pl
+import pandas as pd
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
@@ -18,10 +18,10 @@ class TestBatchBasics:
             w2_income=75000.0,
         )
 
-        assert isinstance(result, pl.DataFrame)
+        assert isinstance(result, pd.DataFrame)
         assert len(result) == 1
-        assert result["w2_income"][0] == 75000.0
-        assert result["federal_total_tax"][0] > 0
+        assert result["w2_income"].iloc[0] == 75000.0
+        assert result["federal_total_tax"].iloc[0] > 0
 
     def test_multiple_w2_incomes(self):
         """Multiple W2 incomes should produce correct number of rows."""
@@ -34,7 +34,7 @@ class TestBatchBasics:
         )
 
         assert len(result) == len(incomes)
-        assert result["w2_income"].to_list() == incomes
+        assert result["w2_income"].tolist() == incomes
 
     def test_multiple_states(self):
         """Multiple states in single batch call."""
@@ -47,8 +47,8 @@ class TestBatchBasics:
         )
 
         assert len(result) == len(states)
-        assert result["state"].to_list() == states
-        for row in result.iter_rows(named=True):
+        assert result["state"].tolist() == states
+        for _, row in result.iterrows():
             assert row["state_total_tax"] > 0
 
     def test_multiple_years(self):
@@ -62,7 +62,7 @@ class TestBatchBasics:
         )
 
         assert len(result) == len(years)
-        assert result["year"].to_list() == years
+        assert result["year"].tolist() == years
 
     def test_cartesian_product(self):
         """Multiple parameters create cartesian product."""
@@ -126,8 +126,9 @@ class TestDataFrameStructure:
         ]
 
         for col in numeric_cols:
-            dtype = result[col].dtype
-            assert dtype.is_numeric(), f"Column {col} should be numeric, got {dtype}"
+            assert pd.api.types.is_numeric_dtype(result[col]), (
+                f"Column {col} should be numeric, got {result[col].dtype}"
+            )
 
     def test_state_column_is_string(self):
         """State column should be string type."""
@@ -137,8 +138,9 @@ class TestDataFrameStructure:
             w2_income=100000.0,
         )
 
-        # Handle both pl.Utf8 (older polars) and pl.String (newer polars)
-        assert result["state"].dtype in (pl.Utf8, pl.String)
+        assert pd.api.types.is_object_dtype(
+            result["state"]
+        ) or pd.api.types.is_string_dtype(result["state"])
 
     def test_no_null_values_in_tax_columns(self):
         """Core tax columns should not have null values."""
@@ -148,8 +150,8 @@ class TestDataFrameStructure:
             w2_income=[50000.0, 100000.0],
         )
 
-        assert result["federal_total_tax"].null_count() == 0
-        assert result["total_tax"].null_count() == 0
+        assert result["federal_total_tax"].isna().sum() == 0
+        assert result["total_tax"].isna().sum() == 0
 
 
 class TestConsistency:
@@ -191,7 +193,7 @@ class TestConsistency:
         batch_result = evaluate_returns(**params)
 
         assert len(batch_result) == 1
-        row = batch_result.row(0, named=True)
+        row = batch_result.iloc[0]
 
         assert row["federal_total_tax"] == single_result.federal_total_tax
         assert row["federal_taxable_income"] == single_result.federal_taxable_income
@@ -213,7 +215,7 @@ class TestConsistency:
             w2_income=incomes,
         )
 
-        assert result["w2_income"].to_list() == incomes
+        assert result["w2_income"].tolist() == incomes
 
 
 class TestEdgeCases:
@@ -228,7 +230,7 @@ class TestEdgeCases:
         )
 
         assert len(result) == 1
-        assert result["federal_total_tax"][0] == 0
+        assert result["federal_total_tax"].iloc[0] == 0
 
     def test_federal_only_no_state(self):
         """Federal-only calculation (state=None) should work."""
@@ -239,8 +241,8 @@ class TestEdgeCases:
         )
 
         assert len(result) == 1
-        assert result["federal_total_tax"][0] > 0
-        assert result["state_total_tax"][0] == 0
+        assert result["federal_total_tax"].iloc[0] > 0
+        assert result["state_total_tax"].iloc[0] == 0
 
     def test_mixed_state_and_none(self):
         """Mix of state and None should work."""
@@ -251,9 +253,9 @@ class TestEdgeCases:
         )
 
         assert len(result) == 3
-        assert result.filter(pl.col("state") == "NY")["state_total_tax"][0] > 0
-        assert result.filter(pl.col("state").is_null())["state_total_tax"][0] == 0
-        assert result.filter(pl.col("state") == "MA")["state_total_tax"][0] > 0
+        assert result.loc[result["state"] == "NY", "state_total_tax"].iloc[0] > 0
+        assert result.loc[result["state"].isna(), "state_total_tax"].iloc[0] == 0
+        assert result.loc[result["state"] == "MA", "state_total_tax"].iloc[0] > 0
 
     def test_all_filing_statuses(self):
         """All filing statuses should work in batch mode."""
@@ -266,5 +268,5 @@ class TestEdgeCases:
         )
 
         assert len(result) == len(statuses)
-        for row in result.iter_rows(named=True):
+        for _, row in result.iterrows():
             assert row["federal_total_tax"] > 0

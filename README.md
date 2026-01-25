@@ -40,7 +40,7 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 
 - Compute US federal taxes, as well as taxes for several US states.
 - Explore how taxes vary as a function of income, state, filing status, and year.
-- Easily integrate with data analysis and visualization tools in Python with `polars` support.
+- Easily integrate with data analysis and visualization tools in Python with `pandas` support.
 - Evaluate "what if" tax scenarios efficiently and reproducibly.
 
 
@@ -178,7 +178,7 @@ evaluate_returns(
 ]
 ```
 
-This results in a `polars.DataFrame` (use `.to_pandas()` if you need pandas compatibility):
+This results in a `pandas.DataFrame`:
 
 |   w2_income |   federal_effective_tax_rate |   federal_tax_bracket |   state_effective_tax_rate |   state_tax_bracket |
 |------------:|-----------------------------:|----------------------:|---------------------------:|--------------------:|
@@ -220,11 +220,9 @@ moment `tenforty` supports back to the 2018 tax year. Here we show the federal
 tax on $100K of W2 income for the past five years.
 
 ``` python
-import polars as pl
-
 df = evaluate_returns(
     year=[2018, 2019, 2020, 2021, 2022, 2023, 2024], w2_income=100_000
-).cast({"year": pl.Utf8})
+).astype({"year": "category"})
 
 (
     so.Plot(df, x="year", y="total_tax")
@@ -253,18 +251,16 @@ appreciated stock this year, and show the breakdown between state and federal
 taxes:
 
 ``` python
-import polars as pl
-
 df = (
     evaluate_returns(
         w2_income=75_000,
         state="CA",
         long_term_capital_gains=list(range(0, 125_001, 5000)),
     )
-    .select(["long_term_capital_gains", "state_total_tax", "federal_total_tax"])
-    .unpivot(index="long_term_capital_gains", variable_name="Type", value_name="tax")
-    .with_columns(
-        pl.col("Type").replace(
+    .loc[:, ["long_term_capital_gains", "state_total_tax", "federal_total_tax"]]
+    .melt("long_term_capital_gains", var_name="Type", value_name="tax")
+    .assign(
+        Type=lambda f: f.Type.map(
             {"state_total_tax": "State", "federal_total_tax": "Federal"}
         )
     )
@@ -294,16 +290,14 @@ money in taxes on paper gains, via the alternative minimum tax. With
 
 
 ``` python
-import polars as pl
-
 df = (
     tenforty.evaluate_returns(
         w2_income=100_000, incentive_stock_option_gains=list(range(0, 100_001, 2500))
     )
-    .select(["incentive_stock_option_gains", "federal_total_tax", "federal_amt"])
-    .unpivot(index="incentive_stock_option_gains", variable_name="Type", value_name="tax")
-    .with_columns(
-        pl.col("Type").replace(
+    .loc[:, ["incentive_stock_option_gains", "federal_total_tax", "federal_amt"]]
+    .melt("incentive_stock_option_gains", var_name="Type", value_name="tax")
+    .assign(
+        Type=lambda f: f.Type.map(
             {"federal_amt": "AMT", "federal_total_tax": '"Regular" Tax'}
         )
     )
