@@ -11,6 +11,19 @@ This document captures an architectural assessment of the new “graph” backen
 
 Separately, `tenforty-spec/` is a Haskell DSL intended to be the *source of truth* for tax logic, compiling to the JSON graph format.
 
+### How the Haskell DSL helps correctness (and what it currently does)
+
+The Haskell layer is not “just codegen”; it is (and should remain) the main place we lock down correctness before anything is serialized to JSON.
+
+Current, concrete ways `tenforty-spec/` improves safety:
+
+- **Unit-typed arithmetic via phantom types**: amounts are tracked as `Amount Dollars` vs `Amount Rate` etc, so the AST only allows sensible combinations (e.g. `Dollars * Rate -> Dollars`). This prevents entire classes of “unit confusion” bugs at compile time.
+- **Total-by-status values**: `ByStatus` forces every status case to be provided; there is no “forgot to handle HOH/QW” footgun.
+- **Per-form graph validation**: the Form builder validates internal integrity (no undefined line references, no undefined outputs, no undefined tables, no cycles) before JSON emission.
+- **Table monotonicity validation**: bracket thresholds are checked to be monotone for all statuses, preventing malformed bracket tables.
+
+These are strong primitives; we should lean further into them rather than duplicating validation downstream in Rust/Python.
+
 ## High-Level Assessment
 
 ### What’s strong
@@ -47,6 +60,26 @@ Separately, `tenforty-spec/` is a Haskell DSL intended to be the *source of trut
 - **Graphs must be dependency-complete** (imports resolved transitively) for production evaluation.
 - **Correctness > performance** until parity and coverage targets are met; then optimize with JIT/batching.
 
+## Additional Opportunities: Use Haskell to “Lock It Down” More
+
+Even after we make the runtime strict, the highest-leverage place to prevent wrong results is still the DSL compiler. Today we get good guarantees *within a single form*, but we can tighten correctness further in three main ways:
+
+1) **Cross-form import validation (FormSet-level checks)**
+- Gap: imports are recorded, but there isn’t a single Haskell-side “form set” check that every `(form, line, year)` import resolves to an exported line in the referenced form.
+- Risk: it’s possible to emit a set of graphs where imports exist but are missing from the shipped artifacts (or the imported line was renamed/removed), and discover it later.
+- Opportunity: add a local-dev validation step that loads/compiles the full set of forms for a year, builds an export index, and fails if any import can’t be resolved. This keeps “graph set completeness” a *compiler property*.
+
+2) **Eliminate floating-point in the DSL core (rounding correctness)**
+- Gap: values are mostly `Double` in the DSL, while tax computations often depend on exact rounding at specific steps (e.g. whole-dollar rounding, bracket boundary behavior).
+- Risk: threshold edge cases and rounding drift can produce subtle parity failures (and worse, “nearly correct but wrong” answers).
+- Opportunity: represent money as fixed-precision integers (whole dollars or cents) in the Haskell AST and make rounding points explicit. Convert to `Double` only at the serialization boundary if needed for the Rust runtime.
+
+3) **Encode more domain constraints in types / smart constructors**
+- Gap: we don’t encode invariants like “non-negative”, “whole dollars”, or “rate in [0,1]” in the type system today; correctness relies on convention and tests.
+- Opportunity: introduce refined newtypes / smart constructors (e.g. `Rate01`, `NonNegative Dollars`, `WholeDollars`) and/or compile-time helpers so illegal states become unrepresentable (or at least rejected at compile time / build time).
+
+These tighten the “contract” before JSON exists, reducing the need for downstream defensive behavior.
+
 ## Roadmap: Proposed Changes + Success Criteria
 
 The sequence below is intentionally staged so each step can be validated independently.
@@ -68,6 +101,25 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 **Verification**
 - Run `pytest` and confirm the new strictness tests pass on environments with graph available.
+
+---
+
+### Phase 1b — Strengthen the DSL contract (local-dev checks; no CI dependency)
+
+**Changes**
+- Add Haskell-side validation that operates on a *set of forms* for a given year:
+  - Build an export index: for each compiled form, list the exported line IDs that are valid import targets.
+  - Verify every import `(form, line, year)` resolves to a known export in the referenced form (same year).
+- Remove/avoid “silent zero” fallbacks in the compiler where possible (if a line ref is missing, fail compilation rather than emit `0`).
+- Document the local-dev workflow in terms of repo recipes (e.g., `make spec-graphs`, `make forms-sync`), and keep CI agnostic to Haskell.
+
+**Success criteria**
+- Generating graphs fails fast with a clear error when any import can’t be resolved.
+- A shipped `src/tenforty/forms/` set can be proven dependency-complete by running the local-dev validation once (before commit).
+- No “missing line produces 0” behavior remains in the code path reachable from valid DSL input.
+
+**Verification**
+- Run the local-dev recipes to regenerate and sync graphs and confirm validation passes before committing updated JSON artifacts.
 
 ---
 
