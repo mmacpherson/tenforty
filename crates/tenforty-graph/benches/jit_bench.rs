@@ -5,7 +5,7 @@ use graphlib::{eval::Runtime, graph::{FilingStatus, Graph}};
 use graphlib::jit::{JitBatchRuntime, JitCompiler, JitRuntime, BATCH_SIZE};
 
 fn load_demo_graph() -> Graph {
-    let json = include_str!("../demo/graph.json");
+    let json = include_str!("../../src/tenforty/forms/us_1040_simple.json");
     Graph::from_json(json).unwrap()
 }
 

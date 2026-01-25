@@ -8,6 +8,7 @@ uv.lock
 # tenforty-graph build outputs
 crates/tenforty-graph/pkg/
 crates/tenforty-graph/demo/pkg
+crates/tenforty-graph/demo/graph.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

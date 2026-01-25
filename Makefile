@@ -97,10 +97,12 @@ graph-throughput: ## Run throughput comparison (interpreter vs JIT vs SIMD)
 wasm: ## Build wasm module (release)
 	wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
 	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
+	cp src/tenforty/forms/us_1040_simple.json crates/tenforty-graph/demo/graph.json
 
 wasm-dev: ## Build wasm module (debug)
 	wasm-pack build --target web --dev crates/tenforty-graph -- --features wasm --no-default-features
 	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
+	cp src/tenforty/forms/us_1040_simple.json crates/tenforty-graph/demo/graph.json
 
 wasm-serve: wasm-dev ## Serve demo locally
 	python3 -m http.server 8080 -d crates/tenforty-graph/demo
