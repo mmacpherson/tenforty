@@ -4,6 +4,31 @@ This document summarizes validation testing of the **tenforty library** against 
 
 **Note**: We have verified that tenforty correctly passes through Open Tax Solver's calculations. The small discrepancies documented below ($6 in 2022 tax year scenarios) originate in OTS's tax table implementation, not in tenforty's input mapping or output parsing. See [Discrepancy Analysis](#discrepancy-analysis) for details.
 
+## Terminology: Gold, Silver, and Baseline Standards
+
+We use three tiers of test scenarios with decreasing confidence levels:
+
+### Gold Standard
+**Definition**: Worked examples from official IRS or state tax authority sources with exact expected outputs.
+
+**Examples**: IRS Direct File test fixtures (ATS-1, ATS-2, etc.)
+
+**Confidence**: Highest. If we match these, we're computing taxes correctly.
+
+### Silver Standard
+**Definition**: Formula-derived from published tax brackets. These are "correct by construction" using official bracket rates and standard deduction amounts, but aren't from official worked examples.
+
+**Examples**: Scenarios testing bracket boundaries for federal and state taxes
+
+**Confidence**: High. The formulas are straightforward, but there may be edge cases or credits we're not accounting for.
+
+### OTS Baseline
+**Definition**: Captured OTS library output with NO external validation. Only detects unexpected changes in library behavior.
+
+**Examples**: Regression test scenarios capturing current OTS behavior
+
+**Confidence**: Low for correctness validation. Useful only for detecting regressions.
+
 ## Data Sources
 
 ### IRS Direct File Test Repository
@@ -109,25 +134,168 @@ The consistent +$6 difference in 2022 scenarios (but exact match in 2023) sugges
 
 The OTS input files used for this verification are available in `docs/ots-test-inputs/`.
 
+## IRS Tax Bracket Verification Scenarios (2024)
+
+In addition to the IRS Direct File scenarios, we verify tax calculations against the official 2024 IRS tax bracket formulas. These scenarios test bracket boundary transitions and mid-bracket calculations.
+
+### 2024 Tax Brackets Used
+
+**Single:**
+- 10%: $0 - $11,600
+- 12%: $11,601 - $47,150
+- 22%: $47,151 - $100,525
+- 24%: $100,526 - $191,950
+
+**Married Filing Jointly:**
+- 10%: $0 - $23,200
+- 12%: $23,201 - $94,300
+- 22%: $94,301 - $201,050
+- 24%: $201,051 - $383,900
+
+**Standard Deductions:** Single $14,600, MFJ $29,200
+
+### Validated Tax Table Scenarios
+
+| Filing Status | W2 Income | Taxable Income | Formula Tax | OTS Tax | Difference |
+|---------------|-----------|----------------|-------------|---------|------------|
+| Single | $26,200 | $11,600 | $1,160 | $1,160 | Exact |
+| Single | $44,600 | $30,000 | $3,368 | $3,368 | Exact |
+| Single | $61,750 | $47,150 | $5,426 | $5,432 | +$6 |
+| Single | $89,600 | $75,000 | $11,553 | $11,559 | +$6 |
+| Single | $115,125 | $100,525 | $17,169 | $17,169 | Exact |
+| Single | $164,600 | $150,000 | $29,043 | $29,043 | Exact |
+| MFJ | $52,400 | $23,200 | $2,320 | $2,320 | Exact |
+| MFJ | $89,200 | $60,000 | $6,736 | $6,736 | Exact |
+| MFJ | $123,500 | $94,300 | $10,852 | $10,858 | +$6 |
+| MFJ | $179,200 | $150,000 | $23,106 | $23,106 | Exact |
+
+**Note:** Some scenarios show a consistent +$6 OTS rounding difference, matching the pattern observed in IRS Direct File 2022 scenarios.
+
+## IRS MeF ATS Scenario Analysis
+
+We analyzed the IRS Modernized e-File (MeF) Assurance Testing System (ATS) scenarios for TY2024. These are official IRS e-file certification test cases.
+
+### Scenarios Examined
+
+| Scenario | Taxpayer | Status | Reason Not Usable |
+|----------|----------|--------|-------------------|
+| 1 | Betsy Brown | Single, GA | Schedule H (household employment taxes) |
+| 2 | Sean John & Joan Jackson | MFJ, SC | Schedule C, Schedule A, EITC |
+| 3 | Lynette Heather | Single, ID | Schedule F (farm), Schedule E (rental), 1099-R |
+| 4 | Henry Dawson | Single, PA | Form 5695 (residential energy credits) |
+| 5 | Andy Griffin | Single, WA | Form 2441, Form 8862, Form 8863, EITC |
+| 7 | Elizabeth Austin | N/A | Form 4868 (extension request only) |
+| 8 | Morgan Gardner | Single, NV | Form 8936 (clean vehicle credit), Form 8962 (PTC) |
+| 12 | Sam Gardenia | Single, KY | Schedule C (self-employment), Schedule SE |
+
+**Conclusion:** All 8 examined MeF ATS scenarios include forms or schedules that tenforty does not currently support (self-employment income, household employment, energy credits, premium tax credits, farm income, etc.). None are simple W2-only scenarios.
+
+The extracted PDF text files are preserved in `docs/irs-mef-ats-scenarios/` for reference.
+
 ## Coverage Summary
 
-| Tax Year | Scenarios Validated | Exact Matches | Minor Discrepancies |
-|----------|---------------------|---------------|---------------------|
-| 2023 | 2 | 1 (ATS-1) | 1 (ATS-2 - credits not implemented) |
-| 2022 | 2 | 0 | 2 ($6 difference each) |
+### Gold Standard (IRS Direct File)
+
+| Source | Tax Year | Scenarios | Exact Matches | Minor Discrepancies |
+|--------|----------|-----------|---------------|---------------------|
+| IRS Direct File | 2023 | 2 | 1 (ATS-1) | 1 (ATS-2 - credits) |
+| IRS Direct File | 2022 | 2 | 0 | 2 ($6 each) |
+| **Total Gold** | | **4** | **1** | **3** |
+
+### Silver Standard (Formula-Derived)
+
+| Category | Tax Year | Filing Statuses | Scenarios | Notes |
+|----------|----------|-----------------|-----------|-------|
+| Federal | 2024 | Single, MFJ, HoH | 18 | Bracket boundaries 10%-32% |
+| Federal | 2023 | Single, MFJ | 2 | 12% bracket verification |
+| California | 2024 | Single | 6 | Brackets 1%-9.3% |
+| Massachusetts | 2024 | Single, MFJ | 4 | Flat 5% rate |
+| New York | 2024 | Single, MFJ | 6 | Brackets 4%-6.85% |
+| **Total Silver** | | | **36** | |
+
+### OTS Baseline (Regression Only)
+
+| Category | Scenarios | Purpose |
+|----------|-----------|---------|
+| Federal | 4 | Detect OTS changes |
+| California | 4 | Detect OTS changes |
+| **Total Baseline** | **8** | |
+
+### Grand Total
+
+| Tier | Scenarios | Purpose |
+|------|-----------|---------|
+| Gold Standard | 4 | IRS-validated correctness |
+| Silver Standard | 36 | Formula-derived validation |
+| OTS Baseline | 8 | Regression detection |
+| **Total** | **48** | |
+
+## State Tax Bracket Reference
+
+### California 2024 (Single)
+
+| Taxable Income | Rate | Cumulative Tax at Top |
+|----------------|------|----------------------|
+| $0 - $10,756 | 1% | $107.56 |
+| $10,756 - $25,499 | 2% | $402.42 |
+| $25,499 - $40,245 | 4% | $992.26 |
+| $40,245 - $55,866 | 6% | $1,929.52 |
+| $55,866 - $70,606 | 8% | $3,108.72 |
+| $70,606+ | 9.3% | — |
+
+Standard deduction: $5,540 (Single), $11,080 (MFJ)
+Personal exemption credit: $144 (Single), $288 (MFJ)
+
+### Massachusetts 2024
+
+- Flat 5% rate on taxable income
+- Personal exemption: $4,400 (Single), $8,800 (MFJ)
+- 4% surtax on income over $1,053,750
+
+### New York 2024 (Single)
+
+| Taxable Income | Rate |
+|----------------|------|
+| $0 - $8,500 | 4% |
+| $8,500 - $11,700 | 4.5% |
+| $11,700 - $13,900 | 5.25% |
+| $13,900 - $80,650 | 5.5% |
+| $80,650 - $215,400 | 6% |
+| $215,400+ | 6.85% |
+
+Standard deduction: $8,000 (Single), $16,050 (MFJ)
 
 ## Future Work
 
-The IRS Direct File repository contains 163 input scenario files but only 4 have expected outputs. Additional validation could come from:
-
-1. **IRS MeF ATS scenarios**: Published PDFs with worked examples (requires manual extraction)
-2. **Third-party calculators**: Cross-validation against TurboTax, H&R Block test cases
-3. **State tax validation**: Currently no IRS source for state tax expected values
+1. **More gold-standard sources**: Find official state tax worked examples
+2. **Credits implementation**: Add EITC/CTC computation to enable more MeF ATS scenarios
+3. **Additional states**: Expand silver-standard coverage to more states
 
 ## Test Implementation
 
-These scenarios are implemented in `tests/conftest.py` and run via:
+Scenarios are defined in `tests/conftest.py` and split across test files by category:
 
+| File | Purpose | Scenarios |
+|------|---------|-----------|
+| `gold_standard_test.py` | IRS Direct File validation | 4 |
+| `silver_standard_test.py` | Formula-derived validation | 36 |
+| `regression_test.py` | OTS baseline + sanity checks | 8 + range/monotonicity |
+
+Run all tests:
 ```bash
-pytest tests/regression_test.py::test_all_tax_scenarios -v
+pytest tests/ -v
+```
+
+Expected output: `100 passed, 31 xfailed`
+
+Run only silver standard tests:
+```bash
+pytest tests/silver_standard_test.py -v
+```
+
+The 31 xfailed tests are scenarios where OTS output differs from formula-derived expected values. Each discrepancy is documented in the scenario's `known_failure` field.
+
+To see actual discrepancies (run xfail tests as regular failures):
+```bash
+pytest tests/silver_standard_test.py --runxfail -v
 ```

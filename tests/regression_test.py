@@ -1,19 +1,22 @@
-"""Regression tests with known tax scenarios for state validation.
+"""Regression tests: OTS baseline scenarios and sanity checks.
 
-These test scenarios are based on expected tax calculations for specific income levels.
-The expected values should be validated against official state tax calculators or
-IRS Tax Withholding Estimator.
+These tests capture current OTS library behavior to detect unexpected changes.
+The expected values have NO external validation - they only detect regressions,
+not correctness.
+
+Also includes range-based sanity checks and monotonicity tests.
 """
 
 import pytest
 from conftest import (
-    ALL_TAX_SCENARIOS,
+    REGRESSION_SCENARIOS,
     TaxScenario,
     scenario_id,
 )
 
 from tenforty import evaluate_return
 
+# Range-based sanity check scenarios (not exact values, just reasonable ranges)
 NY_SCENARIOS = [
     {
         "year": 2024,
@@ -101,13 +104,58 @@ MA_SCENARIOS = [
 ]
 
 
+@pytest.mark.parametrize("scenario", REGRESSION_SCENARIOS, ids=scenario_id)
+def test_ots_baseline(scenario: TaxScenario):
+    """Test against captured OTS baseline values (regression detection only).
+
+    These expected values are OTS output captured at a point in time.
+    They detect library behavior changes but do NOT validate correctness.
+    """
+    result = evaluate_return(
+        year=scenario.year,
+        state=scenario.state,
+        filing_status=scenario.filing_status,
+        w2_income=scenario.w2_income,
+        taxable_interest=scenario.taxable_interest,
+        qualified_dividends=scenario.qualified_dividends,
+        ordinary_dividends=scenario.ordinary_dividends,
+        long_term_capital_gains=scenario.long_term_capital_gains,
+        short_term_capital_gains=scenario.short_term_capital_gains,
+        num_dependents=scenario.num_dependents,
+    )
+
+    if scenario.expected_federal_tax is not None:
+        assert result.federal_total_tax == pytest.approx(
+            scenario.expected_federal_tax, abs=0.01
+        ), (
+            f"[{scenario.source}] Federal tax {result.federal_total_tax} != "
+            f"baseline {scenario.expected_federal_tax}"
+        )
+
+    if scenario.expected_state_tax is not None:
+        assert result.state_total_tax == pytest.approx(
+            scenario.expected_state_tax, abs=0.01
+        ), (
+            f"[{scenario.source}] State tax {result.state_total_tax} != "
+            f"baseline {scenario.expected_state_tax}"
+        )
+
+    if scenario.expected_federal_agi is not None:
+        assert result.federal_adjusted_gross_income == pytest.approx(
+            scenario.expected_federal_agi, abs=0.01
+        ), (
+            f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} != "
+            f"baseline {scenario.expected_federal_agi}"
+        )
+
+
 @pytest.mark.parametrize(
     "scenario",
     NY_SCENARIOS,
     ids=lambda s: f"NY-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
-def test_ny_tax_scenarios(scenario):
-    """Test NY state tax calculations against expected ranges."""
+def test_ny_tax_ranges(scenario):
+    """Sanity check: NY tax falls within expected ranges."""
     result = evaluate_return(
         year=scenario["year"],
         state=scenario["state"],
@@ -139,8 +187,8 @@ def test_ny_tax_scenarios(scenario):
     MA_SCENARIOS,
     ids=lambda s: f"MA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
-def test_ma_tax_scenarios(scenario):
-    """Test MA state tax calculations against expected ranges."""
+def test_ma_tax_ranges(scenario):
+    """Sanity check: MA tax falls within expected ranges."""
     result = evaluate_return(
         year=scenario["year"],
         state=scenario["state"],
@@ -165,53 +213,6 @@ def test_ma_tax_scenarios(scenario):
         f"State tax {result.state_total_tax} not in expected range "
         f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
     )
-
-
-@pytest.mark.parametrize("scenario", ALL_TAX_SCENARIOS, ids=scenario_id)
-def test_all_tax_scenarios(scenario: TaxScenario):
-    """Test against IRS gold-standard and regression baseline scenarios."""
-    result = evaluate_return(
-        year=scenario.year,
-        state=scenario.state,
-        filing_status=scenario.filing_status,
-        w2_income=scenario.w2_income,
-        taxable_interest=scenario.taxable_interest,
-        qualified_dividends=scenario.qualified_dividends,
-        ordinary_dividends=scenario.ordinary_dividends,
-        long_term_capital_gains=scenario.long_term_capital_gains,
-        short_term_capital_gains=scenario.short_term_capital_gains,
-        num_dependents=scenario.num_dependents,
-    )
-
-    if scenario.expected_federal_tax_min is not None:
-        assert (
-            scenario.expected_federal_tax_min
-            <= result.federal_total_tax
-            <= scenario.expected_federal_tax_max
-        ), (
-            f"[{scenario.source}] Federal tax {result.federal_total_tax} not in range "
-            f"[{scenario.expected_federal_tax_min}, {scenario.expected_federal_tax_max}]"
-        )
-
-    if scenario.expected_state_tax_min is not None:
-        assert (
-            scenario.expected_state_tax_min
-            <= result.state_total_tax
-            <= scenario.expected_state_tax_max
-        ), (
-            f"[{scenario.source}] State tax {result.state_total_tax} not in range "
-            f"[{scenario.expected_state_tax_min}, {scenario.expected_state_tax_max}]"
-        )
-
-    if scenario.expected_federal_agi_min is not None:
-        assert (
-            scenario.expected_federal_agi_min
-            <= result.federal_adjusted_gross_income
-            <= scenario.expected_federal_agi_max
-        ), (
-            f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} not in range "
-            f"[{scenario.expected_federal_agi_min}, {scenario.expected_federal_agi_max}]"
-        )
 
 
 def test_ny_tax_increases_with_income():
