@@ -16,7 +16,7 @@ We use three tiers of test scenarios with decreasing confidence levels:
 **Confidence**: Highest. If we match these, we're computing taxes correctly.
 
 ### Silver Standard
-**Definition**: Formula-derived from published tax brackets. These are "correct by construction" using official bracket rates and standard deduction amounts, but aren't from official worked examples.
+**Definition**: Formula-derived from published tax brackets. These are "correct by construction" using official bracket rates and standard deduction amounts, but aren't from worked examples.
 
 **Examples**: Scenarios testing bracket boundaries for federal and state taxes
 
@@ -136,7 +136,7 @@ The OTS input files used for this verification are available in `docs/ots-test-i
 
 ## IRS Tax Bracket Verification Scenarios (2024)
 
-In addition to the IRS Direct File scenarios, we verify tax calculations against the official 2024 IRS tax bracket formulas. These scenarios test bracket boundary transitions and mid-bracket calculations.
+In addition to the IRS Direct File scenarios, we verify tax calculations against the official 2024 IRS tax bracket formulas and Tax Tables.
 
 ### 2024 Tax Brackets Used
 
@@ -156,20 +156,20 @@ In addition to the IRS Direct File scenarios, we verify tax calculations against
 
 ### Validated Tax Table Scenarios
 
-| Filing Status | W2 Income | Taxable Income | Formula Tax | OTS Tax | Difference |
-|---------------|-----------|----------------|-------------|---------|------------|
-| Single | $26,200 | $11,600 | $1,160 | $1,160 | Exact |
-| Single | $44,600 | $30,000 | $3,368 | $3,368 | Exact |
-| Single | $61,750 | $47,150 | $5,426 | $5,432 | +$6 |
-| Single | $89,600 | $75,000 | $11,553 | $11,559 | +$6 |
-| Single | $115,125 | $100,525 | $17,169 | $17,169 | Exact |
-| Single | $164,600 | $150,000 | $29,043 | $29,043 | Exact |
-| MFJ | $52,400 | $23,200 | $2,320 | $2,320 | Exact |
-| MFJ | $89,200 | $60,000 | $6,736 | $6,736 | Exact |
-| MFJ | $123,500 | $94,300 | $10,852 | $10,858 | +$6 |
-| MFJ | $179,200 | $150,000 | $23,106 | $23,106 | Exact |
+For incomes under $100,000, we verify against **IRS Tax Tables**, which use the midpoint of income brackets (e.g., $11,625 for the $11,600-$11,650 range). OTS consistently follows these tables.
 
-**Note:** Some scenarios show a consistent +$6 OTS rounding difference, matching the pattern observed in IRS Direct File 2022 scenarios.
+| Filing Status | W2 Income | Taxable Income | Table/Formula Tax | OTS Tax | Status |
+|---------------|-----------|----------------|-------------------|---------|--------|
+| Single | $26,200 | $11,600 | $1,163 (Table) | $1,163 | Match |
+| Single | $44,600 | $30,000 | $3,371 (Table) | $3,371 | Match |
+| Single | $61,750 | $47,150 | $5,432 (Table) | $5,432 | Match |
+| Single | $89,600 | $75,000 | $11,559 (Table) | $11,559 | Match |
+| Single | $115,125 | $100,525 | $17,168.50 (Exact) | $17,168.50 | Exact |
+| Single | $164,600 | $150,000 | $29,042.50 (Exact) | $29,042.50 | Exact |
+| MFJ | $52,400 | $23,200 | $2,323 (Table) | $2,323 | Match |
+| MFJ | $89,200 | $60,000 | $6,739 (Table) | $6,739 | Match |
+| MFJ | $123,500 | $94,300 | $10,858 (Table) | $10,858 | Match |
+| MFJ | $179,200 | $150,000 | $23,106 (Exact) | $23,106 | Exact |
 
 ## IRS MeF ATS Scenario Analysis
 
@@ -244,7 +244,7 @@ The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-
 | $70,606+ | 9.3% | — |
 
 Standard deduction: $5,540 (Single), $11,080 (MFJ)
-Personal exemption credit: $144 (Single), $288 (MFJ)
+Personal exemption credit: $149 (Single), $298 (MFJ)
 
 ### Massachusetts 2024
 
@@ -264,6 +264,7 @@ Personal exemption credit: $144 (Single), $288 (MFJ)
 | $215,400+ | 6.85% |
 
 Standard deduction: $8,000 (Single), $16,050 (MFJ)
+Household credit: Up to $75 (Single), $180 (MFJ) depending on FAGI
 
 ## Future Work
 
@@ -273,7 +274,7 @@ Standard deduction: $8,000 (Single), $16,050 (MFJ)
 
 ## Test Implementation
 
-Scenarios are defined in `tests/conftest.py` and split across test files by category:
+Scenarios are defined in `tests/fixtures/scenarios.py` and split across test files by category:
 
 | File | Purpose | Scenarios |
 |------|---------|-----------|
@@ -286,14 +287,14 @@ Run all tests:
 pytest tests/ -v
 ```
 
-Expected output: `100 passed, 31 xfailed`
+Expected output: `125 passed, 6 xfailed`
 
 Run only silver standard tests:
 ```bash
 pytest tests/silver_standard_test.py -v
 ```
 
-The 31 xfailed tests are scenarios where OTS output differs from formula-derived expected values. Each discrepancy is documented in the scenario's `known_failure` field.
+The 6 xfailed tests are scenarios where OTS output differs from formula-derived expected values due to documented bugs or missing formula complexity (e.g. NY Supplemental Tax). Each discrepancy is documented in the scenario's `known_failure` field.
 
 To see actual discrepancies (run xfail tests as regular failures):
 ```bash
