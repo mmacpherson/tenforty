@@ -14,14 +14,18 @@ ctypedef int (*f_type)(int, char **)
 
 {CIMPORTS}
 
-_OTS_LOOKUP = {{
-{LOOKUP_DICT}
+_OTS_KEY_TO_INDEX = {{
+{LOOKUP_DICT_KEYS}
 }}
+
+cdef f_type _ots_get_function(int index):
+{LOOKUP_SWITCH}
+    return NULL
 
 cdef f_type lookup_ots_call(int year, str form):
     cdef tuple key = (year, form)
-    if key in _OTS_LOOKUP:
-        return _OTS_LOOKUP[key]
+    if key in _OTS_KEY_TO_INDEX:
+        return _ots_get_function(_OTS_KEY_TO_INDEX[key])
     return NULL
 
 
