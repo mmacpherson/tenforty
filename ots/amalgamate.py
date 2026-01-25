@@ -352,8 +352,8 @@ def generate_import_map_code(import_map: dict[int, dict[str, str]]) -> str:
     return "\n".join(out)
 
 
-def generate_lookup_function_code(import_map: dict[int, dict[str, str]]) -> str:
-    """Generate the lookup function code for use in Cython modules.
+def generate_lookup_dict_entries(import_map: dict[int, dict[str, str]]) -> str:
+    """Generate the key-to-index dictionary entries for use in Cython modules.
 
     Args:
     ----
@@ -362,19 +362,42 @@ def generate_lookup_function_code(import_map: dict[int, dict[str, str]]) -> str:
 
     Returns:
     -------
-        A string representing the generated lookup function code.
+        A string representing the generated dictionary entries mapping keys to indices.
 
     """
     out = []
-    first = True
+    index = 0
     for outer, group in import_map.items():
-        for inner, code in group.items():
-            keyword = "if" if first else "elif"
-            out += [f'{keyword} year == {outer} and form == "{inner}":']
-            out += [f"    return {code}"]
-            first = False
+        for inner, _ in group.items():
+            out.append(f'    ({outer}, "{inner}"): {index},')
+            index += 1
 
-    return "\n".join(f"    {e}" for e in out)
+    return "\n".join(out)
+
+
+def generate_lookup_switch(import_map: dict[int, dict[str, str]]) -> str:
+    """Generate the switch-like if-elif chain mapping indices to function pointers.
+
+    Args:
+    ----
+        import_map: A dictionary mapping year to another dictionary, which maps module
+        names to their corresponding code.
+
+    Returns:
+    -------
+        A string representing the generated if-elif chain for index-to-function lookup.
+
+    """
+    out = []
+    index = 0
+    for _outer, group in import_map.items():
+        for _inner, code in group.items():
+            keyword = "if" if index == 0 else "elif"
+            out.append(f"    {keyword} index == {index}:")
+            out.append(f"        return {code}")
+            index += 1
+
+    return "\n".join(out)
 
 
 def patch_add_pdf_markup(lines: list[str]) -> list[str]:
@@ -570,7 +593,8 @@ def build_cython_sources(
 
     out[cython_template_file.replace(".template", "")] = template.format(
         CIMPORTS="\n".join(cimports),
-        LOOKUP_FN_BODY=generate_lookup_function_code(import_map),
+        LOOKUP_DICT_KEYS=generate_lookup_dict_entries(import_map),
+        LOOKUP_SWITCH=generate_lookup_switch(import_map),
         FED_FILENAME=FED_FILENAME,
     )
 

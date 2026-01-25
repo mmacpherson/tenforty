@@ -14,8 +14,18 @@ ctypedef int (*f_type)(int, char **)
 
 {CIMPORTS}
 
+_OTS_KEY_TO_INDEX = {{
+{LOOKUP_DICT_KEYS}
+}}
+
+cdef f_type _ots_get_function(int index):
+{LOOKUP_SWITCH}
+    return NULL
+
 cdef f_type lookup_ots_call(int year, str form):
-{LOOKUP_FN_BODY}
+    cdef tuple key = (year, form)
+    if key in _OTS_KEY_TO_INDEX:
+        return _ots_get_function(_OTS_KEY_TO_INDEX[key])
     return NULL
 
 
@@ -38,7 +48,7 @@ def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):
 
     cdef f_type ots_form_function = lookup_ots_call(year, form)
     if ots_form_function is NULL:
-        raise ValueError(f"Unknown year/form combination: {year}/{form}")
+        raise ValueError(f"Unknown year/form combination: {{year}}/{{form}}")
 
     cdef bytes program_name = b"ots"
     cdef bytes file_path_bytes
