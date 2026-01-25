@@ -20,6 +20,7 @@ export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
 .PHONY: help clean env env-full env-graph-only jupyter-env test test-full hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: spec-graphs forms-sync
 
 check-uv: ## Check if uv is installed
 	@if [ -z "$(UV_CHECK)" ]; then \
@@ -104,6 +105,13 @@ wasm-dev: ## Build wasm module (debug)
 
 wasm-serve: wasm-dev ## Serve demo locally
 	python3 -m http.server 8080 -d crates/tenforty-graph/demo
+
+## tenforty-spec (Haskell) targets (local dev only; CI does not run these)
+spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.json
+	cd tenforty-spec && cabal run tenforty-compile -- all -p
+
+forms-sync: ## Sync tenforty-spec/*.json into src/tenforty/forms/
+	python3 scripts/forms_sync.py
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

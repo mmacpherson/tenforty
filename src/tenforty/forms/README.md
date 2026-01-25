@@ -10,6 +10,7 @@ This directory is **generated artifacts only**: JSON tax graphs compiled from th
 
 From the repo root:
 
-1. Build and run the compiler:
-   - `cd tenforty-spec && cabal run tenforty-compile -- all -p`
-2. Copy the resulting `tenforty-spec/*.json` into this directory.
+1. Generate JSON graphs from the DSL:
+   - `make spec-graphs`
+2. Sync generated graphs into this package:
+   - `make forms-sync`
