@@ -374,7 +374,9 @@ def evaluate_natural_input_form(
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
     federal_form_id = "US_1040"
-    federal_natural_config = NATURAL_FORM_CONFIG[(year.value, federal_form_id)]
+    federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
+    if federal_natural_config is None:
+        raise ValueError(f"OTS does not support {year.value}/{federal_form_id}")
     federal_form_values = map_natural_to_ots_input(
         natural_form_values, federal_natural_config.input_map
     )
@@ -384,7 +386,9 @@ def evaluate_natural_input_form(
         state_natural_config = None
         state_form_values = None
     else:
-        state_natural_config = NATURAL_FORM_CONFIG[(year.value, state_form_id)]
+        state_natural_config = NATURAL_FORM_CONFIG.get((year.value, state_form_id))
+        if state_natural_config is None:
+            raise ValueError(f"OTS does not support {year.value}/{state_form_id}")
         state_form_values = map_natural_to_ots_input(
             natural_form_values, state_natural_config.input_map
         )

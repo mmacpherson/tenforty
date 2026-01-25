@@ -94,6 +94,7 @@ class OTSYear(Enum):
     YEAR_2022 = 2022
     YEAR_2023 = 2023
     YEAR_2024 = 2024
+    YEAR_2025 = 2025
 
 
 class OTSFilingStatus(StrEnum):

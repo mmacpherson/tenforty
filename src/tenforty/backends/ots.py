@@ -1,14 +1,16 @@
 """OTS (Open Tax Solver) backend implementation."""
 
 from ..core import evaluate_natural_input_form
-from ..models import InterpretedTaxReturn, OTSYear, TaxReturnInput
+from ..models import OTS_FORM_CONFIG, InterpretedTaxReturn, TaxReturnInput
 
 
 class OTSBackend:
     """Backend using Open Tax Solver C++ bindings via Cython."""
 
     name = "ots"
-    supported_years = tuple(y.value for y in OTSYear)
+    supported_years = tuple(
+        sorted({year for (year, form_id) in OTS_FORM_CONFIG if form_id == "US_1040"})
+    )
 
     def __init__(self) -> None:
         """Initialize the backend instance."""
