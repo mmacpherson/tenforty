@@ -393,13 +393,13 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
 #             5.5% ($27,900-$161,550), 6% ($161,550-$323,200), 6.85% ($323,200+)
 SILVER_STANDARD_STATE_SCENARIOS = [
     # ========== CALIFORNIA SCENARIOS ==========
-    # CA 2024: Standard deduction $5,540, Personal exemption credit $144
+    # CA 2024: Standard deduction $5,540, Personal exemption credit $149
     # Brackets: 1% ($0-$10,756), 2% ($10,756-$25,499), 4% ($25,499-$40,245),
     #           6% ($40,245-$55,866), 8% ($55,866-$70,606), 9.3% ($70,606+)
     #
     # CA Single at top of 1% bracket
-    # CA taxable: $10,756, CA tax: $10,756 x 0.01 = $107.56, less $144 credit = $0
-    # Federal taxable: $1,696, Federal tax: $169.60
+    # CA taxable: $10,756, CA tax: $10,756 x 0.01 = $107.56, less $149 credit = $0
+    # Federal taxable: $1,696, Federal tax: $169.60 (Formula) -> $169 (OTS Tables)
     TaxScenario(
         source="CA 2024 Tax Brackets (computed)",
         description="CA Single at top of 1% bracket",
@@ -407,13 +407,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="CA",
         filing_status="Single",
         w2_income=16296.0,  # CA taxable $10,756 + $5,540 std ded
-        expected_federal_tax=169.6,
+        expected_federal_tax=169.0,
         expected_state_tax=0.0,
-        known_failure="OTS rounds federal to $169 vs formula $169.60",
     ),
     # CA Single in 2% bracket
-    # CA taxable: $20,000, CA tax: $107.56 + $184.88 = $292.44, less $144 credit = $148.44
-    # Federal taxable: $10,940, Federal tax: $1,094.00
+    # CA taxable: $20,000, CA tax: $107.56 + $184.88 = $292.44, less $149 credit = $143.44
+    # Federal taxable: $10,940, Federal tax: $1,094.00 (Formula) -> $1093 (OTS Tables)
     TaxScenario(
         source="CA 2024 Tax Brackets (computed)",
         description="CA Single in 2% bracket",
@@ -421,13 +420,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="CA",
         filing_status="Single",
         w2_income=25540.0,  # CA taxable $20,000 + $5,540 std ded
-        expected_federal_tax=1094.0,
-        expected_state_tax=148.44,
-        known_failure="OTS computes federal=$1,093 (-$1), state=$143 (-$5.44)",
+        expected_federal_tax=1093.0,
+        expected_state_tax=143.0,  # OTS rounds to nearest dollar ($143.44 -> $143)
     ),
     # CA Single in 4% bracket
-    # CA taxable: $35,000, CA tax: $402.42 + $380.04 = $782.46, less $144 credit = $638.46
-    # Federal taxable: $25,940, Federal tax: $2,880.80
+    # CA taxable: $35,000, CA tax: $402.42 + $380.04 = $782.46, less $149 credit = $633.46
+    # Federal taxable: $25,940, Federal tax: $2,880.80 (Formula) -> $2879 (OTS Tables)
     TaxScenario(
         source="CA 2024 Tax Brackets (computed)",
         description="CA Single in 4% bracket",
@@ -435,13 +433,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="CA",
         filing_status="Single",
         w2_income=40540.0,  # CA taxable $35,000 + $5,540 std ded
-        expected_federal_tax=2880.8,
-        expected_state_tax=638.46,
-        known_failure="OTS computes federal=$2,879 (-$1.80), state=$633 (-$5.46)",
+        expected_federal_tax=2879.0,
+        expected_state_tax=633.0,  # OTS rounds to nearest dollar ($633.46 -> $633)
     ),
     # CA Single in 6% bracket
-    # CA taxable: $50,000, CA tax: $992.26 + $585.30 = $1,577.56, less $144 credit = $1,433.56
-    # Federal taxable: $40,940, Federal tax: $4,680.80
+    # CA taxable: $50,000, CA tax: $992.26 + $585.30 = $1,577.56, less $149 credit = $1,428.56
+    # Federal taxable: $40,940, Federal tax: $4,680.80 (Formula) -> $4679 (OTS Tables)
     TaxScenario(
         source="CA 2024 Tax Brackets (computed)",
         description="CA Single in 6% bracket",
@@ -449,13 +446,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="CA",
         filing_status="Single",
         w2_income=55540.0,  # CA taxable $50,000 + $5,540 std ded
-        expected_federal_tax=4680.8,
-        expected_state_tax=1433.56,
-        known_failure="OTS computes federal=$4,679 (-$1.80), state=$1,429 (-$4.56)",
+        expected_federal_tax=4679.0,
+        expected_state_tax=1429.0,  # OTS rounds to nearest dollar ($1428.56 -> $1429)
     ),
     # CA Single in 8% bracket
-    # CA taxable: $65,000, CA tax: $1,929.52 + $730.72 = $2,660.24, less $144 credit = $2,516.24
-    # Federal taxable: $55,940, Federal tax: $7,359.80
+    # CA taxable: $65,000, CA tax: $1,929.52 + $730.72 = $2,660.24, less $149 credit = $2,511.24
+    # Federal taxable: $55,940, Federal tax: $7,359.80 (Formula) -> $7357 (OTS Tables)
     TaxScenario(
         source="CA 2024 Tax Brackets (computed)",
         description="CA Single in 8% bracket",
@@ -463,13 +459,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="CA",
         filing_status="Single",
         w2_income=70540.0,  # CA taxable $65,000 + $5,540 std ded
-        expected_federal_tax=7359.8,
-        expected_state_tax=2516.24,
-        known_failure="OTS computes federal=$7,357 (-$2.80), state=$2,511 (-$5.24)",
+        expected_federal_tax=7357.0,
+        expected_state_tax=2511.0,  # OTS rounds to nearest dollar ($2511.24 -> $2511)
     ),
     # CA Single in 9.3% bracket
-    # CA taxable: $100,000, CA tax: $3,108.72 + $2,733.64 = $5,842.36, less $144 credit = $5,698.36
-    # Federal taxable: $90,940, Federal tax: $15,059.80
+    # CA taxable: $100,000, CA tax: $3,108.72 + $2,733.64 = $5,842.36, less $149 credit = $5,693.36
+    # Federal taxable: $90,940, Federal tax: $15,059.80 (Formula) -> $15057 (OTS Tables)
     TaxScenario(
         source="CA 2024 Tax Brackets (computed)",
         description="CA Single in 9.3% bracket",
@@ -477,9 +472,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="CA",
         filing_status="Single",
         w2_income=105540.0,  # CA taxable $100,000 + $5,540 std ded
-        expected_federal_tax=15059.8,
-        expected_state_tax=5698.36,
-        known_failure="OTS computes federal=$15,057 (-$2.80), state=$5,693 (-$5.36)",
+        expected_federal_tax=15057.0,
+        expected_state_tax=5693.0,  # OTS rounds to nearest dollar ($5693.36 -> $5693)
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ)
