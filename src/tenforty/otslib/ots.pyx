@@ -125,231 +125,125 @@ cimport ots_2024_f2210
 cimport ots_2024_MI_1040
 cimport ots_2024_OR_40
 
+_OTS_LOOKUP = {
+    (2018, "MA_1"): ots_2018_MA_1.main,
+    (2018, "US_1040_Sched_C"): ots_2018_US_1040_Sched_C.main,
+    (2018, "VA_760"): ots_2018_VA_760.main,
+    (2018, "OH_IT1040"): ots_2018_OH_IT1040.main,
+    (2018, "CA_540"): ots_2018_CA_540.main,
+    (2018, "NJ_1040"): ots_2018_NJ_1040.main,
+    (2018, "PA_40"): ots_2018_PA_40.main,
+    (2018, "US_1040"): ots_2018_US_1040.main,
+    (2018, "NY_IT201"): ots_2018_NY_IT201.main,
+    (2018, "NC_D400"): ots_2018_NC_D400.main,
+    (2019, "MA_1"): ots_2019_MA_1.main,
+    (2019, "NY_IT201"): ots_2019_NY_IT201.main,
+    (2019, "US_1040_Sched_C"): ots_2019_US_1040_Sched_C.main,
+    (2019, "VA_760"): ots_2019_VA_760.main,
+    (2019, "OH_IT1040"): ots_2019_OH_IT1040.main,
+    (2019, "PA_40"): ots_2019_PA_40.main,
+    (2019, "US_1040"): ots_2019_US_1040.main,
+    (2019, "NJ_1040"): ots_2019_NJ_1040.main,
+    (2019, "NC_D400"): ots_2019_NC_D400.main,
+    (2019, "CA_540"): ots_2019_CA_540.main,
+    (2020, "OH_IT1040"): ots_2020_OH_IT1040.main,
+    (2020, "NC_D400"): ots_2020_NC_D400.main,
+    (2020, "US_1040"): ots_2020_US_1040.main,
+    (2020, "NY_IT201"): ots_2020_NY_IT201.main,
+    (2020, "HSA_f8889"): ots_2020_HSA_f8889.main,
+    (2020, "MA_1"): ots_2020_MA_1.main,
+    (2020, "VA_760"): ots_2020_VA_760.main,
+    (2020, "f8606"): ots_2020_f8606.main,
+    (2020, "NJ_1040"): ots_2020_NJ_1040.main,
+    (2020, "US_1040_Sched_C"): ots_2020_US_1040_Sched_C.main,
+    (2020, "PA_40"): ots_2020_PA_40.main,
+    (2020, "CA_540"): ots_2020_CA_540.main,
+    (2021, "NJ_1040"): ots_2021_NJ_1040.main,
+    (2021, "US_1040_Sched_SE"): ots_2021_US_1040_Sched_SE.main,
+    (2021, "f8606"): ots_2021_f8606.main,
+    (2021, "CA_540"): ots_2021_CA_540.main,
+    (2021, "HSA_f8889"): ots_2021_HSA_f8889.main,
+    (2021, "MA_1"): ots_2021_MA_1.main,
+    (2021, "NC_D400"): ots_2021_NC_D400.main,
+    (2021, "NY_IT201"): ots_2021_NY_IT201.main,
+    (2021, "OH_IT1040"): ots_2021_OH_IT1040.main,
+    (2021, "PA_40"): ots_2021_PA_40.main,
+    (2021, "US_1040"): ots_2021_US_1040.main,
+    (2021, "US_1040_Sched_C"): ots_2021_US_1040_Sched_C.main,
+    (2021, "VA_760"): ots_2021_VA_760.main,
+    (2021, "CA_5805"): ots_2021_CA_5805.main,
+    (2021, "f2210"): ots_2021_f2210.main,
+    (2021, "f8960"): ots_2021_f8960.main,
+    (2021, "f8959"): ots_2021_f8959.main,
+    (2022, "HSA_f8889"): ots_2022_HSA_f8889.main,
+    (2022, "MA_1"): ots_2022_MA_1.main,
+    (2022, "NJ_1040"): ots_2022_NJ_1040.main,
+    (2022, "f8959"): ots_2022_f8959.main,
+    (2022, "f8960"): ots_2022_f8960.main,
+    (2022, "f8606"): ots_2022_f8606.main,
+    (2022, "CA_540"): ots_2022_CA_540.main,
+    (2022, "CA_5805"): ots_2022_CA_5805.main,
+    (2022, "NC_D400"): ots_2022_NC_D400.main,
+    (2022, "NY_IT201"): ots_2022_NY_IT201.main,
+    (2022, "OH_IT1040"): ots_2022_OH_IT1040.main,
+    (2022, "PA_40"): ots_2022_PA_40.main,
+    (2022, "US_1040"): ots_2022_US_1040.main,
+    (2022, "US_1040_Sched_C"): ots_2022_US_1040_Sched_C.main,
+    (2022, "US_1040_Sched_SE"): ots_2022_US_1040_Sched_SE.main,
+    (2022, "VA_760"): ots_2022_VA_760.main,
+    (2022, "f2210"): ots_2022_f2210.main,
+    (2022, "f8829"): ots_2022_f8829.main,
+    (2022, "f8995"): ots_2022_f8995.main,
+    (2023, "NJ_1040"): ots_2023_NJ_1040.main,
+    (2023, "US_1040_Sched_C"): ots_2023_US_1040_Sched_C.main,
+    (2023, "f8829"): ots_2023_f8829.main,
+    (2023, "f8959"): ots_2023_f8959.main,
+    (2023, "f8960"): ots_2023_f8960.main,
+    (2023, "f8995"): ots_2023_f8995.main,
+    (2023, "f8606"): ots_2023_f8606.main,
+    (2023, "CA_540"): ots_2023_CA_540.main,
+    (2023, "HSA_f8889"): ots_2023_HSA_f8889.main,
+    (2023, "MA_1"): ots_2023_MA_1.main,
+    (2023, "NC_D400"): ots_2023_NC_D400.main,
+    (2023, "NY_IT201"): ots_2023_NY_IT201.main,
+    (2023, "OH_IT1040"): ots_2023_OH_IT1040.main,
+    (2023, "PA_40"): ots_2023_PA_40.main,
+    (2023, "US_1040"): ots_2023_US_1040.main,
+    (2023, "US_1040_Sched_SE"): ots_2023_US_1040_Sched_SE.main,
+    (2023, "VA_760"): ots_2023_VA_760.main,
+    (2023, "f2210"): ots_2023_f2210.main,
+    (2023, "US_1040_Sched_E_brokerage_royalties"): ots_2023_US_1040_Sched_E_brokerage_royalties.main,
+    (2023, "CA_5805"): ots_2023_CA_5805.main,
+    (2023, "f8812"): ots_2023_f8812.main,
+    (2024, "NJ_1040"): ots_2024_NJ_1040.main,
+    (2024, "US_1040_Sched_E_brokerage_royalties"): ots_2024_US_1040_Sched_E_brokerage_royalties.main,
+    (2024, "f8812"): ots_2024_f8812.main,
+    (2024, "f8829"): ots_2024_f8829.main,
+    (2024, "f8959"): ots_2024_f8959.main,
+    (2024, "f8960"): ots_2024_f8960.main,
+    (2024, "f8995"): ots_2024_f8995.main,
+    (2024, "US_1040_Sched_SE"): ots_2024_US_1040_Sched_SE.main,
+    (2024, "f8606"): ots_2024_f8606.main,
+    (2024, "CA_540"): ots_2024_CA_540.main,
+    (2024, "CA_5805"): ots_2024_CA_5805.main,
+    (2024, "HSA_f8889"): ots_2024_HSA_f8889.main,
+    (2024, "MA_1"): ots_2024_MA_1.main,
+    (2024, "NC_D400"): ots_2024_NC_D400.main,
+    (2024, "NY_IT201"): ots_2024_NY_IT201.main,
+    (2024, "OH_IT1040"): ots_2024_OH_IT1040.main,
+    (2024, "PA_40"): ots_2024_PA_40.main,
+    (2024, "US_1040"): ots_2024_US_1040.main,
+    (2024, "US_1040_Sched_C"): ots_2024_US_1040_Sched_C.main,
+    (2024, "VA_760"): ots_2024_VA_760.main,
+    (2024, "f2210"): ots_2024_f2210.main,
+    (2024, "MI_1040"): ots_2024_MI_1040.main,
+    (2024, "OR_40"): ots_2024_OR_40.main,
+}
+
 cdef f_type lookup_ots_call(int year, str form):
-    if year == 2018 and form == "MA_1":
-        return ots_2018_MA_1.main
-    elif year == 2018 and form == "US_1040_Sched_C":
-        return ots_2018_US_1040_Sched_C.main
-    elif year == 2018 and form == "VA_760":
-        return ots_2018_VA_760.main
-    elif year == 2018 and form == "OH_IT1040":
-        return ots_2018_OH_IT1040.main
-    elif year == 2018 and form == "CA_540":
-        return ots_2018_CA_540.main
-    elif year == 2018 and form == "NJ_1040":
-        return ots_2018_NJ_1040.main
-    elif year == 2018 and form == "PA_40":
-        return ots_2018_PA_40.main
-    elif year == 2018 and form == "US_1040":
-        return ots_2018_US_1040.main
-    elif year == 2018 and form == "NY_IT201":
-        return ots_2018_NY_IT201.main
-    elif year == 2018 and form == "NC_D400":
-        return ots_2018_NC_D400.main
-    elif year == 2019 and form == "MA_1":
-        return ots_2019_MA_1.main
-    elif year == 2019 and form == "NY_IT201":
-        return ots_2019_NY_IT201.main
-    elif year == 2019 and form == "US_1040_Sched_C":
-        return ots_2019_US_1040_Sched_C.main
-    elif year == 2019 and form == "VA_760":
-        return ots_2019_VA_760.main
-    elif year == 2019 and form == "OH_IT1040":
-        return ots_2019_OH_IT1040.main
-    elif year == 2019 and form == "PA_40":
-        return ots_2019_PA_40.main
-    elif year == 2019 and form == "US_1040":
-        return ots_2019_US_1040.main
-    elif year == 2019 and form == "NJ_1040":
-        return ots_2019_NJ_1040.main
-    elif year == 2019 and form == "NC_D400":
-        return ots_2019_NC_D400.main
-    elif year == 2019 and form == "CA_540":
-        return ots_2019_CA_540.main
-    elif year == 2020 and form == "OH_IT1040":
-        return ots_2020_OH_IT1040.main
-    elif year == 2020 and form == "NC_D400":
-        return ots_2020_NC_D400.main
-    elif year == 2020 and form == "US_1040":
-        return ots_2020_US_1040.main
-    elif year == 2020 and form == "NY_IT201":
-        return ots_2020_NY_IT201.main
-    elif year == 2020 and form == "HSA_f8889":
-        return ots_2020_HSA_f8889.main
-    elif year == 2020 and form == "MA_1":
-        return ots_2020_MA_1.main
-    elif year == 2020 and form == "VA_760":
-        return ots_2020_VA_760.main
-    elif year == 2020 and form == "f8606":
-        return ots_2020_f8606.main
-    elif year == 2020 and form == "NJ_1040":
-        return ots_2020_NJ_1040.main
-    elif year == 2020 and form == "US_1040_Sched_C":
-        return ots_2020_US_1040_Sched_C.main
-    elif year == 2020 and form == "PA_40":
-        return ots_2020_PA_40.main
-    elif year == 2020 and form == "CA_540":
-        return ots_2020_CA_540.main
-    elif year == 2021 and form == "NJ_1040":
-        return ots_2021_NJ_1040.main
-    elif year == 2021 and form == "US_1040_Sched_SE":
-        return ots_2021_US_1040_Sched_SE.main
-    elif year == 2021 and form == "f8606":
-        return ots_2021_f8606.main
-    elif year == 2021 and form == "CA_540":
-        return ots_2021_CA_540.main
-    elif year == 2021 and form == "HSA_f8889":
-        return ots_2021_HSA_f8889.main
-    elif year == 2021 and form == "MA_1":
-        return ots_2021_MA_1.main
-    elif year == 2021 and form == "NC_D400":
-        return ots_2021_NC_D400.main
-    elif year == 2021 and form == "NY_IT201":
-        return ots_2021_NY_IT201.main
-    elif year == 2021 and form == "OH_IT1040":
-        return ots_2021_OH_IT1040.main
-    elif year == 2021 and form == "PA_40":
-        return ots_2021_PA_40.main
-    elif year == 2021 and form == "US_1040":
-        return ots_2021_US_1040.main
-    elif year == 2021 and form == "US_1040_Sched_C":
-        return ots_2021_US_1040_Sched_C.main
-    elif year == 2021 and form == "VA_760":
-        return ots_2021_VA_760.main
-    elif year == 2021 and form == "CA_5805":
-        return ots_2021_CA_5805.main
-    elif year == 2021 and form == "f2210":
-        return ots_2021_f2210.main
-    elif year == 2021 and form == "f8960":
-        return ots_2021_f8960.main
-    elif year == 2021 and form == "f8959":
-        return ots_2021_f8959.main
-    elif year == 2022 and form == "HSA_f8889":
-        return ots_2022_HSA_f8889.main
-    elif year == 2022 and form == "MA_1":
-        return ots_2022_MA_1.main
-    elif year == 2022 and form == "NJ_1040":
-        return ots_2022_NJ_1040.main
-    elif year == 2022 and form == "f8959":
-        return ots_2022_f8959.main
-    elif year == 2022 and form == "f8960":
-        return ots_2022_f8960.main
-    elif year == 2022 and form == "f8606":
-        return ots_2022_f8606.main
-    elif year == 2022 and form == "CA_540":
-        return ots_2022_CA_540.main
-    elif year == 2022 and form == "CA_5805":
-        return ots_2022_CA_5805.main
-    elif year == 2022 and form == "NC_D400":
-        return ots_2022_NC_D400.main
-    elif year == 2022 and form == "NY_IT201":
-        return ots_2022_NY_IT201.main
-    elif year == 2022 and form == "OH_IT1040":
-        return ots_2022_OH_IT1040.main
-    elif year == 2022 and form == "PA_40":
-        return ots_2022_PA_40.main
-    elif year == 2022 and form == "US_1040":
-        return ots_2022_US_1040.main
-    elif year == 2022 and form == "US_1040_Sched_C":
-        return ots_2022_US_1040_Sched_C.main
-    elif year == 2022 and form == "US_1040_Sched_SE":
-        return ots_2022_US_1040_Sched_SE.main
-    elif year == 2022 and form == "VA_760":
-        return ots_2022_VA_760.main
-    elif year == 2022 and form == "f2210":
-        return ots_2022_f2210.main
-    elif year == 2022 and form == "f8829":
-        return ots_2022_f8829.main
-    elif year == 2022 and form == "f8995":
-        return ots_2022_f8995.main
-    elif year == 2023 and form == "NJ_1040":
-        return ots_2023_NJ_1040.main
-    elif year == 2023 and form == "US_1040_Sched_C":
-        return ots_2023_US_1040_Sched_C.main
-    elif year == 2023 and form == "f8829":
-        return ots_2023_f8829.main
-    elif year == 2023 and form == "f8959":
-        return ots_2023_f8959.main
-    elif year == 2023 and form == "f8960":
-        return ots_2023_f8960.main
-    elif year == 2023 and form == "f8995":
-        return ots_2023_f8995.main
-    elif year == 2023 and form == "f8606":
-        return ots_2023_f8606.main
-    elif year == 2023 and form == "CA_540":
-        return ots_2023_CA_540.main
-    elif year == 2023 and form == "HSA_f8889":
-        return ots_2023_HSA_f8889.main
-    elif year == 2023 and form == "MA_1":
-        return ots_2023_MA_1.main
-    elif year == 2023 and form == "NC_D400":
-        return ots_2023_NC_D400.main
-    elif year == 2023 and form == "NY_IT201":
-        return ots_2023_NY_IT201.main
-    elif year == 2023 and form == "OH_IT1040":
-        return ots_2023_OH_IT1040.main
-    elif year == 2023 and form == "PA_40":
-        return ots_2023_PA_40.main
-    elif year == 2023 and form == "US_1040":
-        return ots_2023_US_1040.main
-    elif year == 2023 and form == "US_1040_Sched_SE":
-        return ots_2023_US_1040_Sched_SE.main
-    elif year == 2023 and form == "VA_760":
-        return ots_2023_VA_760.main
-    elif year == 2023 and form == "f2210":
-        return ots_2023_f2210.main
-    elif year == 2023 and form == "US_1040_Sched_E_brokerage_royalties":
-        return ots_2023_US_1040_Sched_E_brokerage_royalties.main
-    elif year == 2023 and form == "CA_5805":
-        return ots_2023_CA_5805.main
-    elif year == 2023 and form == "f8812":
-        return ots_2023_f8812.main
-    elif year == 2024 and form == "NJ_1040":
-        return ots_2024_NJ_1040.main
-    elif year == 2024 and form == "US_1040_Sched_E_brokerage_royalties":
-        return ots_2024_US_1040_Sched_E_brokerage_royalties.main
-    elif year == 2024 and form == "f8812":
-        return ots_2024_f8812.main
-    elif year == 2024 and form == "f8829":
-        return ots_2024_f8829.main
-    elif year == 2024 and form == "f8959":
-        return ots_2024_f8959.main
-    elif year == 2024 and form == "f8960":
-        return ots_2024_f8960.main
-    elif year == 2024 and form == "f8995":
-        return ots_2024_f8995.main
-    elif year == 2024 and form == "US_1040_Sched_SE":
-        return ots_2024_US_1040_Sched_SE.main
-    elif year == 2024 and form == "f8606":
-        return ots_2024_f8606.main
-    elif year == 2024 and form == "CA_540":
-        return ots_2024_CA_540.main
-    elif year == 2024 and form == "CA_5805":
-        return ots_2024_CA_5805.main
-    elif year == 2024 and form == "HSA_f8889":
-        return ots_2024_HSA_f8889.main
-    elif year == 2024 and form == "MA_1":
-        return ots_2024_MA_1.main
-    elif year == 2024 and form == "NC_D400":
-        return ots_2024_NC_D400.main
-    elif year == 2024 and form == "NY_IT201":
-        return ots_2024_NY_IT201.main
-    elif year == 2024 and form == "OH_IT1040":
-        return ots_2024_OH_IT1040.main
-    elif year == 2024 and form == "PA_40":
-        return ots_2024_PA_40.main
-    elif year == 2024 and form == "US_1040":
-        return ots_2024_US_1040.main
-    elif year == 2024 and form == "US_1040_Sched_C":
-        return ots_2024_US_1040_Sched_C.main
-    elif year == 2024 and form == "VA_760":
-        return ots_2024_VA_760.main
-    elif year == 2024 and form == "f2210":
-        return ots_2024_f2210.main
-    elif year == 2024 and form == "MI_1040":
-        return ots_2024_MI_1040.main
-    elif year == 2024 and form == "OR_40":
-        return ots_2024_OR_40.main
+    cdef tuple key = (year, form)
+    if key in _OTS_LOOKUP:
+        return _OTS_LOOKUP[key]
     return NULL
 
 
