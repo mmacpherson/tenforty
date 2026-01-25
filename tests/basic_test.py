@@ -1,7 +1,8 @@
 # ruff: noqa: D100, D103
 from tenforty import evaluate_return
+from tenforty.backends import OTSBackend
 from tenforty.core import prefix_keys
-from tenforty.models import OTSFilingStatus, OTSState, OTSYear
+from tenforty.models import OTSFilingStatus, OTSState
 
 
 def test_prefix_keys():
@@ -25,7 +26,7 @@ def test_prefix_keys():
 
 def test_basic_evaluation():
     """Make sure the lights are on."""
-    for year in OTSYear:
+    for year in OTSBackend.supported_years:
         for state in OTSState:
             for filing_status in OTSFilingStatus:
                 result = evaluate_return(
