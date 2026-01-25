@@ -4,28 +4,25 @@ from __future__ import annotations
 
 from .models import OTSFilingStatus, OTSState
 
-NATURAL_TO_LINE = {
-    "w2_income": "L1a_w2_wages",
-    "taxable_interest": "L2b_taxable_interest",
-    "ordinary_dividends": "L3b_ordinary_dividends",
-    "taxable_ira": "L4b_taxable_ira",
-    "taxable_pension": "L5b_taxable_pension",
-    "taxable_ss": "L6b_taxable_ss",
-    "capital_gain": "L7a_capital_gain",
-    "short_term_capital_gains": "L7a_capital_gain",
-    "long_term_capital_gains": "L7a_capital_gain",
-    "schedule_1_income": "L8_sched1_income",
-    "adjustments": "L10_adjustments",
-    "itemized_deductions": "L12e_itemized_ded",
-    "qbi_deduction": "L13a_qbi_deduction",
-    "w2_withholding": "L25a_w2_withholding",
-    "estimated_payments": "L26_estimated_payments",
+NATURAL_TO_NODE = {
+    # Federal (1040)
+    "w2_income": "us_1040_L1a_wages",
+    "taxable_interest": "us_1040_L2b_taxable_interest",
+    "qualified_dividends": "us_1040_L3a_qualified_dividends",
+    "ordinary_dividends": "us_1040_L3b_ordinary_dividends",
+    # Schedule D (capital gains/losses)
+    "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
+    "long_term_capital_gains": "us_schedule_d_L8a_long_term_totals",
+    # Schedule 1 (approximation): map aggregate values into “other” buckets.
+    "schedule_1_income": "us_schedule_1_L8z_other_income",
+    # Schedule A (approximation): map aggregate value into “other deductions”.
+    "itemized_deductions": "us_schedule_a_L16_other_deductions",
 }
 
 CAPITAL_GAINS_FIELDS = {"short_term_capital_gains", "long_term_capital_gains"}
 
 LINE_TO_NATURAL = {
-    "L11a_agi": "adjusted_gross_income",
+    "L11_agi": "adjusted_gross_income",
     "L15_taxable_income": "taxable_income",
     "L16_tax": "tax",
     "L24_total_tax": "total_tax",
@@ -50,14 +47,13 @@ STATE_FORM_NAMES = {
 STATE_NATURAL_TO_LINE = {
     OTSState.CA: {
         "itemized_deductions": "L18_itemized",
-        "num_dependents": "L32",
     },
 }
 
 STATE_OUTPUT_LINES = {
     OTSState.CA: {
-        "L17": "state_adjusted_gross_income",
-        "L19": "state_taxable_income",
-        "L64": "state_total_tax",
+        "L17_ca_agi": "state_adjusted_gross_income",
+        "L19_ca_taxable_income": "state_taxable_income",
+        "L64_ca_total_tax": "state_total_tax",
     },
 }

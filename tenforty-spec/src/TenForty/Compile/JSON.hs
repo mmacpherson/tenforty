@@ -35,6 +35,16 @@ import qualified TenForty.Expr as E
 import TenForty.Form
 import qualified TenForty.Table as T
 
+verboseLineId :: Line -> Text
+verboseLineId ln =
+  let lid = unLineId (lineId ln)
+      name = lineName ln
+  in if T.null name
+        || T.isInfixOf "_" lid
+        || not (T.isPrefixOf "L" lid)
+     then lid
+     else lid <> "_" <> name
+
 
 data ComputationGraph = ComputationGraph
   { cgMeta    :: GraphMeta
@@ -313,7 +323,7 @@ compileFormToJSON = Aeson.encode . compileForm
 compileLines :: Form -> Compile [Int]
 compileLines frm = do
   forM_ (formInputs frm) $ \ln -> do
-    nid <- emitNamedNode (unLineId (lineId ln)) OpInput
+    nid <- emitNamedNode (verboseLineId ln) OpInput
     registerLine (lineId ln) nid
     registerInput nid
 
@@ -321,7 +331,7 @@ compileLines frm = do
     case lineType ln of
       LineInput -> pure ()
       LineComputed expr -> do
-        nid <- compileExpr (Just $ unLineId (lineId ln)) expr
+        nid <- compileExpr (Just $ verboseLineId ln) expr
         registerLine (lineId ln) nid
       LineWorksheet _ steps -> do
         forM_ steps $ \step -> do
@@ -340,7 +350,7 @@ compileLines frm = do
     mNid <- lookupLineId (lineId ln)
     case mNid of
       Just nid -> pure nid
-      Nothing  -> emitNamedNode (unLineId (lineId ln)) (OpLiteral 0)
+      Nothing  -> emitNamedNode (verboseLineId ln) (OpLiteral 0)
 
   pure outputIds
 

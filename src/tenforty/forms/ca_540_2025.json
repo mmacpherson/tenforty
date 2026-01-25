@@ -2,7 +2,7 @@
     "imports": [
         {
             "form": "us_1040",
-            "line": "L11a_agi",
+            "line": "L11",
             "year": 2025
         },
         {
@@ -51,45 +51,45 @@
         },
         "1": {
             "id": 1,
-            "name": "L32",
+            "name": "L32_exemption_credits",
             "op": {
                 "type": "input"
             }
         },
         "10": {
             "id": 10,
-            "name": "L92",
+            "name": "L92_young_child_credit",
             "op": {
                 "type": "input"
             }
         },
         "11": {
             "id": 11,
-            "name": "L93",
+            "name": "L93_foster_youth_credit",
             "op": {
                 "type": "input"
             }
         },
         "12": {
             "id": 12,
-            "name": "L94",
+            "name": "L94_other_refundable_credits",
             "op": {
                 "type": "input"
             }
         },
         "13": {
             "id": 13,
-            "name": "L13",
+            "name": "L13_federal_agi",
             "op": {
                 "form": "us_1040",
-                "line": "L11a_agi",
+                "line": "L11",
                 "type": "import",
                 "year": 2025
             }
         },
         "14": {
             "id": 14,
-            "name": "L14",
+            "name": "L14_ca_subtractions",
             "op": {
                 "form": "ca_schedule_ca",
                 "line": "TOTAL_SUB",
@@ -99,7 +99,7 @@
         },
         "15": {
             "id": 15,
-            "name": "L15",
+            "name": "L15_agi_minus_subtractions",
             "op": {
                 "left": 13,
                 "right": 14,
@@ -108,7 +108,7 @@
         },
         "16": {
             "id": 16,
-            "name": "L16",
+            "name": "L16_ca_additions",
             "op": {
                 "form": "ca_schedule_ca",
                 "line": "TOTAL_ADD",
@@ -118,7 +118,7 @@
         },
         "17": {
             "id": 17,
-            "name": "L17",
+            "name": "L17_ca_agi",
             "op": {
                 "left": 15,
                 "right": 16,
@@ -141,7 +141,7 @@
         },
         "2": {
             "id": 2,
-            "name": "L34",
+            "name": "L34_other_tax_schedule_g",
             "op": {
                 "type": "input"
             }
@@ -183,7 +183,7 @@
         },
         "24": {
             "id": 24,
-            "name": "L18",
+            "name": "L18_deduction",
             "op": {
                 "left": 0,
                 "right": 23,
@@ -207,7 +207,7 @@
         },
         "27": {
             "id": 27,
-            "name": "L19",
+            "name": "L19_ca_taxable_income",
             "op": {
                 "left": 25,
                 "right": 26,
@@ -216,7 +216,7 @@
         },
         "28": {
             "id": 28,
-            "name": "L31",
+            "name": "L31_ca_bracket_tax",
             "op": {
                 "income": 27,
                 "table": "ca_brackets_2025",
@@ -232,7 +232,7 @@
         },
         "3": {
             "id": 3,
-            "name": "L47",
+            "name": "L47_total_credits",
             "op": {
                 "type": "input"
             }
@@ -247,7 +247,7 @@
         },
         "31": {
             "id": 31,
-            "name": "L33",
+            "name": "L33_tax_after_exemptions",
             "op": {
                 "left": 29,
                 "right": 30,
@@ -256,7 +256,7 @@
         },
         "32": {
             "id": 32,
-            "name": "L35",
+            "name": "L35_tax_subtotal",
             "op": {
                 "left": 31,
                 "right": 2,
@@ -280,7 +280,7 @@
         },
         "35": {
             "id": 35,
-            "name": "L48",
+            "name": "L48_tax_after_credits",
             "op": {
                 "left": 33,
                 "right": 34,
@@ -306,7 +306,7 @@
             "id": 38,
             "op": {
                 "type": "literal",
-                "value": 0.01
+                "value": 1.0e-2
             }
         },
         "39": {
@@ -320,7 +320,7 @@
         },
         "4": {
             "id": 4,
-            "name": "L61",
+            "name": "L61_amt",
             "op": {
                 "type": "input"
             }
@@ -334,7 +334,7 @@
         },
         "41": {
             "id": 41,
-            "name": "L62",
+            "name": "L62_behavioral_health_tax",
             "op": {
                 "left": 40,
                 "right": 39,
@@ -359,7 +359,7 @@
         },
         "44": {
             "id": 44,
-            "name": "L64",
+            "name": "L64_ca_total_tax",
             "op": {
                 "left": 43,
                 "right": 5,
@@ -384,7 +384,7 @@
         },
         "47": {
             "id": 47,
-            "name": "L75",
+            "name": "L75_total_payments_before_credits",
             "op": {
                 "left": 6,
                 "right": 46,
@@ -393,7 +393,7 @@
         },
         "48": {
             "id": 48,
-            "name": "L91",
+            "name": "L91_ca_eitc",
             "op": {
                 "form": "ca_ftb_3514",
                 "line": "L18",
@@ -411,7 +411,7 @@
         },
         "5": {
             "id": 5,
-            "name": "L63",
+            "name": "L63_other_taxes",
             "op": {
                 "type": "input"
             }
@@ -426,7 +426,7 @@
         },
         "51": {
             "id": 51,
-            "name": "L95",
+            "name": "L95_total_refundable_credits",
             "op": {
                 "left": 48,
                 "right": 50,
@@ -435,7 +435,7 @@
         },
         "52": {
             "id": 52,
-            "name": "L96",
+            "name": "L96_total_payments",
             "op": {
                 "left": 47,
                 "right": 51,
@@ -467,7 +467,7 @@
         },
         "56": {
             "id": 56,
-            "name": "L110",
+            "name": "L110_overpayment",
             "op": {
                 "cond": 53,
                 "otherwise": 55,
@@ -492,7 +492,7 @@
         },
         "59": {
             "id": 59,
-            "name": "L111",
+            "name": "L111_amount_owed",
             "op": {
                 "left": 57,
                 "right": 58,
@@ -501,28 +501,28 @@
         },
         "6": {
             "id": 6,
-            "name": "L71",
+            "name": "L71_ca_withholding",
             "op": {
                 "type": "input"
             }
         },
         "7": {
             "id": 7,
-            "name": "L72",
+            "name": "L72_estimated_payments",
             "op": {
                 "type": "input"
             }
         },
         "8": {
             "id": 8,
-            "name": "L73",
+            "name": "L73_extension_payment",
             "op": {
                 "type": "input"
             }
         },
         "9": {
             "id": 9,
-            "name": "L74",
+            "name": "L74_excess_sdi",
             "op": {
                 "type": "input"
             }
@@ -548,27 +548,27 @@
             "brackets": {
                 "head_of_household": [
                     {
-                        "rate": 0.01,
+                        "rate": 1.0e-2,
                         "threshold": 21527
                     },
                     {
-                        "rate": 0.02,
+                        "rate": 2.0e-2,
                         "threshold": 51001
                     },
                     {
-                        "rate": 0.04,
+                        "rate": 4.0e-2,
                         "threshold": 80493
                     },
                     {
-                        "rate": 0.06,
+                        "rate": 6.0e-2,
                         "threshold": 111734
                     },
                     {
-                        "rate": 0.08,
+                        "rate": 8.0e-2,
                         "threshold": 141214
                     },
                     {
-                        "rate": 0.093,
+                        "rate": 9.3e-2,
                         "threshold": 721324
                     },
                     {
@@ -586,27 +586,27 @@
                 ],
                 "married_joint": [
                     {
-                        "rate": 0.01,
+                        "rate": 1.0e-2,
                         "threshold": 21512
                     },
                     {
-                        "rate": 0.02,
+                        "rate": 2.0e-2,
                         "threshold": 50998
                     },
                     {
-                        "rate": 0.04,
+                        "rate": 4.0e-2,
                         "threshold": 80490
                     },
                     {
-                        "rate": 0.06,
+                        "rate": 6.0e-2,
                         "threshold": 111732
                     },
                     {
-                        "rate": 0.08,
+                        "rate": 8.0e-2,
                         "threshold": 141212
                     },
                     {
-                        "rate": 0.093,
+                        "rate": 9.3e-2,
                         "threshold": 721318
                     },
                     {
@@ -624,27 +624,27 @@
                 ],
                 "married_separate": [
                     {
-                        "rate": 0.01,
+                        "rate": 1.0e-2,
                         "threshold": 10756
                     },
                     {
-                        "rate": 0.02,
+                        "rate": 2.0e-2,
                         "threshold": 25499
                     },
                     {
-                        "rate": 0.04,
+                        "rate": 4.0e-2,
                         "threshold": 40245
                     },
                     {
-                        "rate": 0.06,
+                        "rate": 6.0e-2,
                         "threshold": 55866
                     },
                     {
-                        "rate": 0.08,
+                        "rate": 8.0e-2,
                         "threshold": 70606
                     },
                     {
-                        "rate": 0.093,
+                        "rate": 9.3e-2,
                         "threshold": 360659
                     },
                     {
@@ -662,27 +662,27 @@
                 ],
                 "qualifying_widow": [
                     {
-                        "rate": 0.01,
+                        "rate": 1.0e-2,
                         "threshold": 21512
                     },
                     {
-                        "rate": 0.02,
+                        "rate": 2.0e-2,
                         "threshold": 50998
                     },
                     {
-                        "rate": 0.04,
+                        "rate": 4.0e-2,
                         "threshold": 80490
                     },
                     {
-                        "rate": 0.06,
+                        "rate": 6.0e-2,
                         "threshold": 111732
                     },
                     {
-                        "rate": 0.08,
+                        "rate": 8.0e-2,
                         "threshold": 141212
                     },
                     {
-                        "rate": 0.093,
+                        "rate": 9.3e-2,
                         "threshold": 721318
                     },
                     {
@@ -700,27 +700,27 @@
                 ],
                 "single": [
                     {
-                        "rate": 0.01,
+                        "rate": 1.0e-2,
                         "threshold": 10756
                     },
                     {
-                        "rate": 0.02,
+                        "rate": 2.0e-2,
                         "threshold": 25499
                     },
                     {
-                        "rate": 0.04,
+                        "rate": 4.0e-2,
                         "threshold": 40245
                     },
                     {
-                        "rate": 0.06,
+                        "rate": 6.0e-2,
                         "threshold": 55866
                     },
                     {
-                        "rate": 0.08,
+                        "rate": 8.0e-2,
                         "threshold": 70606
                     },
                     {
-                        "rate": 0.093,
+                        "rate": 9.3e-2,
                         "threshold": 360659
                     },
                     {

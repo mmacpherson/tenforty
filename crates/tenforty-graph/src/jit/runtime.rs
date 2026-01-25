@@ -430,7 +430,7 @@ mod tests {
 
     #[test]
     fn test_jit_with_demo_graph() {
-        let json = include_str!("../../../../src/tenforty/forms/us_1040_simple.json");
+        let json = include_str!("../../demo/graph_source.json");
         let graph = Graph::from_json(json).unwrap();
 
         let compiler = JitCompiler::new().unwrap();
@@ -491,7 +491,7 @@ mod tests {
 
     #[test]
     fn test_simd_batch_with_demo_graph() {
-        let json = include_str!("../../../../src/tenforty/forms/us_1040_simple.json");
+        let json = include_str!("../../demo/graph_source.json");
         let graph = Graph::from_json(json).unwrap();
         let compiler = JitCompiler::new().unwrap();
 

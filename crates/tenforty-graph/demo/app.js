@@ -716,7 +716,7 @@ function setupCollapsibles() {
 }
 
 async function loadGraph() {
-    const response = await fetch('graph.json');
+    const response = await fetch('graph_source.json');
     const json = await response.text();
     graph = Graph.fromJson(json);
 }

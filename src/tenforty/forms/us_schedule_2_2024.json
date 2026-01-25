@@ -1,0 +1,322 @@
+{
+    "imports": [
+        {
+            "form": "us_form_6251",
+            "line": "L11",
+            "year": 2024
+        },
+        {
+            "form": "us_schedule_se",
+            "line": "L10",
+            "year": 2024
+        },
+        {
+            "form": "us_form_8959",
+            "line": "L18",
+            "year": 2024
+        },
+        {
+            "form": "us_form_8960",
+            "line": "L17",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+    ],
+    "meta": {
+        "form_id": "us_schedule_2",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L2_excess_aptc",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L5_unreported_ss_medicare",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L14_reserved_14",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L15_reserved_15",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L16_reserved_16",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L17_other_additional_taxes",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L1_amt",
+            "op": {
+                "form": "us_form_6251",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L3_part1_total",
+            "op": {
+                "left": 14,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L4_self_employment_tax",
+            "op": {
+                "form": "us_schedule_se",
+                "line": "L10",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L8_8959",
+            "op": {
+                "form": "us_form_8959",
+                "line": "L18",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L8_8960",
+            "op": {
+                "form": "us_form_8960",
+                "line": "L17",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L8_additional_medicare_niit",
+            "op": {
+                "left": 17,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L6_additional_tax_ira",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "left": 16,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "left": 20,
+                "right": 2,
+                "type": "add"
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "left": 21,
+                "right": 3,
+                "type": "add"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 22,
+                "right": 4,
+                "type": "add"
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 23,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 24,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 25,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 26,
+                "right": 7,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 27,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 28,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L7a_household_employment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "left": 29,
+                "right": 10,
+                "type": "add"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "left": 30,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "left": 31,
+                "right": 12,
+                "type": "add"
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L18_part2_subtotal",
+            "op": {
+                "left": 32,
+                "right": 13,
+                "type": "add"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L7b_first_time_homebuyer",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L9_section_965",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L10_reserved_10",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L11_reserved_11",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L12_reserved_12",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L13_reserved_13",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        33,
+        33,
+        15
+    ],
+    "tables": {}
+}

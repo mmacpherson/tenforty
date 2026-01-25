@@ -10,6 +10,9 @@ crates/tenforty-graph/pkg/
 crates/tenforty-graph/demo/pkg
 crates/tenforty-graph/demo/graph.json
 
+# tenforty-spec generated graph outputs (local dev artifacts)
+tenforty-spec/*.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

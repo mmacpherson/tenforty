@@ -14,7 +14,7 @@ use graphlib::jit::{JitBatchRuntime, JitCompiler, JitRuntime, BATCH_SIZE};
 const NUM_SCENARIOS: usize = 100_000;
 
 fn load_demo_graph() -> Graph {
-    let json = include_str!("../../src/tenforty/forms/us_1040_simple.json");
+    let json = include_str!("../demo/graph_source.json");
     Graph::from_json(json).unwrap()
 }
 

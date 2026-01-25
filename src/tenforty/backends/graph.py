@@ -6,10 +6,9 @@ import pathlib
 from functools import lru_cache
 
 from ..mappings import (
-    CAPITAL_GAINS_FIELDS,
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
-    NATURAL_TO_LINE,
+    NATURAL_TO_NODE,
     STATE_FORM_NAMES,
     STATE_OUTPUT_LINES,
 )
@@ -60,6 +59,31 @@ def _load_linked_graph(year: int, state: OTSState | None):
         if state_graph is None:
             raise ValueError(f"No {form_name} graph available for year {year}")
         gs.add(form_name, state_graph)
+
+    # Resolve transitive imports strictly by loading referenced form graphs
+    # from `src/tenforty/forms/` (generated artifacts).
+    while True:
+        unresolved = gs.unresolved_imports()
+        if not unresolved:
+            break
+
+        loaded_forms = set(gs.forms())
+        needed = sorted(
+            {(u.form, u.year) for u in unresolved if u.form not in loaded_forms}
+        )
+        if not needed:
+            break
+
+        progress = False
+        for form_id, imp_year in needed:
+            graph = _load_graph(form_id, imp_year)
+            if graph is None:
+                continue
+            gs.add(form_id, graph)
+            progress = True
+
+        if not progress:
+            break
 
     unresolved = gs.unresolved_imports()
     if unresolved:
@@ -114,28 +138,31 @@ class GraphBackend:
             evaluator.set(input_name, 0.0)
 
         natural_values = tax_input.model_dump(
-            exclude={"year", "state", "filing_status"}
+            exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
 
-        cap_gains = natural_values.get(
-            "short_term_capital_gains", 0
-        ) + natural_values.get("long_term_capital_gains", 0)
-        if cap_gains != 0:
-            evaluator.set("us_1040_L7a_capital_gain", float(cap_gains))
-
+        unsupported: list[tuple[str, object]] = []
         for natural_name, value in natural_values.items():
-            if natural_name in CAPITAL_GAINS_FIELDS:
-                continue
-            if natural_name in NATURAL_TO_LINE and value != 0:
-                line_name = NATURAL_TO_LINE[natural_name]
+            if natural_name in NATURAL_TO_NODE and value != 0:
+                node_name = NATURAL_TO_NODE[natural_name]
                 try:
-                    evaluator.set(f"us_1040_{line_name}", float(value))
+                    evaluator.set(node_name, float(value))
                 except Exception as exc:
                     raise RuntimeError(
                         "Graph backend mapping error: expected input node not found.\n"
                         f"Natural field: {natural_name}\n"
-                        f"Expected node: us_1040_{line_name}"
+                        f"Expected node: {node_name}"
                     ) from exc
+            elif natural_name not in NATURAL_TO_NODE and value not in (0, 0.0, None):
+                unsupported.append((natural_name, value))
+
+        if unsupported:
+            details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
+            raise NotImplementedError(
+                "Graph backend does not yet support some non-zero inputs.\n"
+                "Provide these as 0 for now, or use backend='ots'.\n"
+                f"Unsupported inputs:\n{details}"
+            )
 
         return evaluator, graph
 
@@ -154,7 +181,7 @@ class GraphBackend:
 
         result = {}
 
-        agi = evaluator.eval("us_1040_L11a_agi")
+        agi = evaluator.eval("us_1040_L11_agi")
         result["federal_adjusted_gross_income"] = agi
 
         taxable = evaluator.eval("us_1040_L15_taxable_income")
@@ -209,17 +236,23 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        output_node = LINE_TO_NATURAL.get(output, output)
-        for line, natural in LINE_TO_NATURAL.items():
-            if natural == output:
-                output_node = line
-                break
+        if output.startswith("us_1040_"):
+            output_node = output
         else:
             output_node = output
+            for line, natural in LINE_TO_NATURAL.items():
+                if natural == output:
+                    output_node = line
+                    break
+            output_node = f"us_1040_{output_node}"
 
-        input_node = NATURAL_TO_LINE.get(wrt, wrt)
+        input_node = NATURAL_TO_NODE.get(wrt, wrt)
+        if not isinstance(input_node, str):
+            input_node = str(input_node)
+        if not input_node.startswith(("us_", "ca_")):
+            input_node = f"us_1040_{input_node}"
 
-        return evaluator.gradient(f"us_1040_{output_node}", f"us_1040_{input_node}")
+        return evaluator.gradient(output_node, input_node)
 
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
@@ -241,22 +274,30 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        output_node = output
-        for line, natural in LINE_TO_NATURAL.items():
-            if natural == output:
-                output_node = line
-                break
+        if output.startswith("us_1040_"):
+            output_node = output
+        else:
+            output_node = output
+            for line, natural in LINE_TO_NATURAL.items():
+                if natural == output:
+                    output_node = line
+                    break
+            output_node = f"us_1040_{output_node}"
 
-        input_node = NATURAL_TO_LINE.get(var, var)
+        input_node = NATURAL_TO_NODE.get(var, var)
+        if not isinstance(input_node, str):
+            input_node = str(input_node)
+        if not input_node.startswith(("us_", "ca_")):
+            input_node = f"us_1040_{input_node}"
 
         natural_values = tax_input.model_dump(
-            exclude={"year", "state", "filing_status"}
+            exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
         current_val = natural_values.get(var, 0)
         if current_val == 0:
             natural_var = var
-            for nat, line in NATURAL_TO_LINE.items():
-                if line == var:
+            for nat, node in NATURAL_TO_NODE.items():
+                if node == var:
                     natural_var = nat
                     break
             current_val = natural_values.get(natural_var, 0)
@@ -269,9 +310,7 @@ class GraphBackend:
             initial_guess = tax_estimate
 
         try:
-            return evaluator.solve(
-                f"us_1040_{output_node}", target, f"us_1040_{input_node}", initial_guess
-            )
+            return evaluator.solve(output_node, target, input_node, initial_guess)
         except Exception as exc:
             msg = str(exc)
             if "Failed to converge" in msg or "Zero gradient" in msg:

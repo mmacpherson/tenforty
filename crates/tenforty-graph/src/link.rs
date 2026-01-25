@@ -71,7 +71,15 @@ impl GraphSet {
             for node in graph.nodes.values() {
                 if let Op::Import { form, line, year } = &node.op {
                     let resolved = self.graphs.get(form).and_then(|target_graph| {
-                        target_graph.output_node_by_name(line)
+                        target_graph
+                            .outputs
+                            .iter()
+                            .filter_map(|id| target_graph.nodes.get(id))
+                            .find(|n| {
+                                n.name
+                                    .as_deref()
+                                    .is_some_and(|name| name == line || name.starts_with(&format!("{line}_")))
+                            })
                     });
 
                     if resolved.is_none() {
@@ -125,10 +133,12 @@ impl GraphSet {
             for &output_id in &graph.outputs {
                 if let Some(node) = graph.nodes.get(&output_id) {
                     if let Some(ref name) = node.name {
-                        import_targets.insert(
-                            (form_id.clone(), name.clone()),
-                            output_id + offset,
-                        );
+                        import_targets.insert((form_id.clone(), name.clone()), output_id + offset);
+                        if let Some((base, _)) = name.split_once('_') {
+                            import_targets
+                                .entry((form_id.clone(), base.to_string()))
+                                .or_insert(output_id + offset);
+                        }
                     }
                 }
             }
@@ -139,6 +149,11 @@ impl GraphSet {
                     import_targets
                         .entry((form_id.clone(), name.clone()))
                         .or_insert(node.id + offset);
+                    if let Some((base, _)) = name.split_once('_') {
+                        import_targets
+                            .entry((form_id.clone(), base.to_string()))
+                            .or_insert(node.id + offset);
+                    }
                 }
             }
         }
