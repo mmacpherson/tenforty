@@ -352,7 +352,7 @@ def generate_import_map_code(import_map: dict[int, dict[str, str]]) -> str:
     return "\n".join(out)
 
 
-def generate_lookup_dict_keys(import_map: dict[int, dict[str, str]]) -> str:
+def generate_lookup_dict_entries(import_map: dict[int, dict[str, str]]) -> str:
     """Generate the key-to-index dictionary entries for use in Cython modules.
 
     Args:
@@ -593,7 +593,7 @@ def build_cython_sources(
 
     out[cython_template_file.replace(".template", "")] = template.format(
         CIMPORTS="\n".join(cimports),
-        LOOKUP_DICT_KEYS=generate_lookup_dict_keys(import_map),
+        LOOKUP_DICT_KEYS=generate_lookup_dict_entries(import_map),
         LOOKUP_SWITCH=generate_lookup_switch(import_map),
         FED_FILENAME=FED_FILENAME,
     )
