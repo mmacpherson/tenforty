@@ -5,6 +5,14 @@ scratch/
 # This is a library, not an application.
 uv.lock
 
+# tenforty-graph build outputs
+crates/tenforty-graph/pkg/
+crates/tenforty-graph/demo/pkg
+crates/tenforty-graph/demo/graph.json
+
+# tenforty-spec generated graph outputs (local dev artifacts)
+tenforty-spec/*.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

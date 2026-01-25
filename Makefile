@@ -19,7 +19,8 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env venv ipykernel update jupyter test
+.PHONY: help clean env env-full env-graph-only jupyter-env test test-full hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: spec-graphs forms-sync
 
 check-uv: ## Check if uv is installed
 	@if [ -z "$(UV_CHECK)" ]; then \
@@ -35,12 +36,27 @@ clean: ## Remove all environment and build files
 env: check-uv ## Install package and dependencies
 	uv sync
 
+env-full: check-uv ## Install with graph backend (requires Rust toolchain)
+	uv sync --extra graph-dev
+	uv run maturin develop --features python -m crates/tenforty-graph/Cargo.toml
+	@cp $(VENV)/lib/python*/site-packages/graphlib/graphlib.*.so src/tenforty/graphlib/ 2>/dev/null || true
+
+env-graph-only: check-uv ## Graph backend only (Windows compatible, no OTS)
+	uv sync --extra graph-dev
+	uv run maturin develop --features python -m crates/tenforty-graph/Cargo.toml
+	@cp $(VENV)/lib/python*/site-packages/graphlib/graphlib.*.so src/tenforty/graphlib/ 2>/dev/null || true
+	TENFORTY_GRAPH_ONLY=1 uv sync --extra graph-dev
+
 jupyter-env: check-uv ## Install Jupyter kernel
 	uv sync --extra jupyter
 	uv run python -m ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
 
 test: check-uv ## Run tests
 	uv sync
+	uv run pytest
+
+test-full: check-uv ## Run tests with graph backend
+	$(MAKE) env-full
 	uv run pytest
 
 hooks: check-uv ## Install pre-commit hooks
@@ -58,6 +74,44 @@ run-hooks: check-uv ## Run hooks on staged files
 run-hooks-all-files: check-uv ## Run hooks on all files
 	uv sync
 	uv run pre-commit run --all-files
+
+## Graph library (Rust) targets
+graph-build: ## Build graph library (interpreter only)
+	cargo build -p tenforty-graph --release
+
+graph-build-jit: ## Build graph library with JIT+SIMD
+	cargo build -p tenforty-graph --release --features jit
+
+graph-test: ## Test graph library (interpreter only)
+	cargo test -p tenforty-graph
+
+graph-test-jit: ## Test graph library with JIT+SIMD
+	cargo test -p tenforty-graph --features jit
+
+graph-bench: ## Run JIT benchmarks
+	cargo bench -p tenforty-graph --features jit
+
+graph-throughput: ## Run throughput comparison (interpreter vs JIT vs SIMD)
+	cargo run -p tenforty-graph --example throughput_bench --features "jit parallel" --release
+
+## WASM targets
+wasm: ## Build wasm module (release)
+	wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
+	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
+
+wasm-dev: ## Build wasm module (debug)
+	wasm-pack build --target web --dev crates/tenforty-graph -- --features wasm --no-default-features
+	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
+
+wasm-serve: wasm-dev ## Serve demo locally
+	python3 -m http.server 8080 -d crates/tenforty-graph/demo
+
+## tenforty-spec (Haskell) targets (local dev only; CI does not run these)
+spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.json
+	cd tenforty-spec && cabal run tenforty-compile -- all -p
+
+forms-sync: ## Sync tenforty-spec/*.json into src/tenforty/forms/
+	python3 scripts/forms_sync.py
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

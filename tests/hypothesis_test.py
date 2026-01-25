@@ -3,9 +3,10 @@ from hypothesis import example, given, settings
 from hypothesis import strategies as st
 
 import tenforty
-from tenforty.models import OTSFilingStatus, OTSState, OTSYear
+from tenforty.backends import OTSBackend
+from tenforty.models import OTSFilingStatus, OTSState
 
-SUPPORTED_YEARS = [e.value for e in OTSYear]
+SUPPORTED_YEARS = list(OTSBackend.supported_years)
 SUPPORTED_STATES = [e.value for e in OTSState]
 
 

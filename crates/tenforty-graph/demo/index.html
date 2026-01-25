@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Calculator Demo - tenforty-graph</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tax Calculator Demo</h1>
+            <p class="subtitle">Powered by tenforty-graph WebAssembly</p>
+        </header>
+
+        <main>
+            <div class="col-inputs">
+            <section class="card">
+                <h2>Filing Status & State</h2>
+                <div class="two-col">
+                    <div class="input-group">
+                        <label for="filing-status">Filing Status</label>
+                        <select id="filing-status">
+                            <option value="single">Single</option>
+                            <option value="married_joint">Married Filing Jointly</option>
+                            <option value="married_separate">Married Filing Separately</option>
+                            <option value="head_of_household">Head of Household</option>
+                            <option value="qualifying_widow">Qualifying Widow(er)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="state">State</label>
+                        <select id="state">
+                            <option value="none">Federal Only</option>
+                            <option value="california">California</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Earned Income</h2>
+                <div class="slider-group">
+                    <label for="wages">Wages & Salary</label>
+                    <div class="slider-row">
+                        <input type="range" id="wages-slider" min="0" max="500000" step="1000" value="75000">
+                        <div class="input-wrapper compact">
+                            <span class="prefix">$</span>
+                            <input type="number" id="wages" value="75000" min="0" step="1000">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Investment Income</h2>
+                <div class="slider-group">
+                    <label for="interest">Interest Income</label>
+                    <div class="slider-row">
+                        <input type="range" id="interest-slider" min="0" max="50000" step="100" value="500">
+                        <div class="input-wrapper compact">
+                            <span class="prefix">$</span>
+                            <input type="number" id="interest" value="500" min="0" step="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label for="dividends">Dividends</label>
+                    <div class="slider-row">
+                        <input type="range" id="dividends-slider" min="0" max="50000" step="100" value="1000">
+                        <div class="input-wrapper compact">
+                            <span class="prefix">$</span>
+                            <input type="number" id="dividends" value="1000" min="0" step="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label for="stcg">Short-Term Capital Gains</label>
+                    <div class="slider-row">
+                        <input type="range" id="stcg-slider" min="0" max="100000" step="500" value="0">
+                        <div class="input-wrapper compact">
+                            <span class="prefix">$</span>
+                            <input type="number" id="stcg" value="0" min="0" step="500">
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label for="ltcg">Long-Term Capital Gains</label>
+                    <div class="slider-row">
+                        <input type="range" id="ltcg-slider" min="0" max="200000" step="1000" value="0">
+                        <div class="input-wrapper compact">
+                            <span class="prefix">$</span>
+                            <input type="number" id="ltcg" value="0" min="0" step="1000">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card collapsible" id="amt-section">
+                <h2 class="collapsible-header">
+                    <span>AMT (Stock Options)</span>
+                    <span class="toggle-icon">+</span>
+                </h2>
+                <div class="collapsible-content">
+                    <p class="description">ISO exercise spread triggers Alternative Minimum Tax</p>
+                    <div class="slider-group">
+                        <label for="iso">ISO Exercise Gains</label>
+                        <div class="slider-row">
+                            <input type="range" id="iso-slider" min="0" max="500000" step="5000" value="0">
+                            <div class="input-wrapper compact">
+                                <span class="prefix">$</span>
+                                <input type="number" id="iso" value="0" min="0" step="5000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            </div>
+
+            <div class="col-results">
+            <section class="card tax-breakdown">
+                <h2>Tax Breakdown</h2>
+                <div class="breakdown-table">
+                    <div class="breakdown-row">
+                        <span class="label">Gross Income</span>
+                        <span class="value" id="gross-income">$0</span>
+                    </div>
+                    <div class="breakdown-row deduction">
+                        <span class="label">- Standard Deduction</span>
+                        <span class="value" id="std-deduction">-$0</span>
+                    </div>
+                    <div class="breakdown-row subtotal">
+                        <span class="label">= Taxable Income</span>
+                        <span class="value" id="taxable-income">$0</span>
+                    </div>
+                    <div class="breakdown-divider"></div>
+                    <div class="breakdown-row">
+                        <span class="label">Ordinary Income Tax</span>
+                        <span class="value" id="ordinary-tax">$0</span>
+                    </div>
+                    <div class="breakdown-row" id="ltcg-tax-row">
+                        <span class="label">Capital Gains Tax</span>
+                        <span class="value" id="ltcg-tax">$0</span>
+                    </div>
+                    <div class="breakdown-row" id="niit-row" style="display: none;">
+                        <span class="label">Net Investment Income Tax (3.8%)</span>
+                        <span class="value" id="niit">$0</span>
+                    </div>
+                    <div class="breakdown-row" id="medicare-row" style="display: none;">
+                        <span class="label">Additional Medicare Tax (0.9%)</span>
+                        <span class="value" id="medicare-tax">$0</span>
+                    </div>
+                    <div class="breakdown-row amt-indicator" id="amt-row" style="display: none;">
+                        <span class="label" id="amt-label">Alternative Minimum Tax</span>
+                        <span class="value" id="amt">$0</span>
+                    </div>
+                    <div class="breakdown-divider"></div>
+                    <div class="breakdown-row total federal">
+                        <span class="label">Federal Tax</span>
+                        <span class="value" id="federal-tax">$0</span>
+                    </div>
+                    <div class="breakdown-row" id="state-tax-row" style="display: none;">
+                        <span class="label">California State Tax</span>
+                        <span class="value" id="state-tax">$0</span>
+                    </div>
+                    <div class="breakdown-row total combined" id="total-row" style="display: none;">
+                        <span class="label">Total Tax</span>
+                        <span class="value" id="total-tax">$0</span>
+                    </div>
+                </div>
+                <div class="rate-display">
+                    <div class="rate-item">
+                        <span class="rate-value" id="effective-rate">0%</span>
+                        <span class="rate-label">Effective Rate</span>
+                    </div>
+                    <div class="rate-item">
+                        <span class="rate-value" id="marginal-rate">0%</span>
+                        <span class="rate-label">Marginal Rate</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card visualization">
+                <div class="chart-header">
+                    <h2>Tax Curve</h2>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="stacked-toggle">
+                        <span>Show breakdown</span>
+                    </label>
+                </div>
+                <div class="chart-container">
+                    <svg id="tax-chart" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <linearGradient id="curveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.3"/>
+                                <stop offset="100%" style="stop-color:#667eea;stop-opacity:0.05"/>
+                            </linearGradient>
+                        </defs>
+                        <g class="grid"></g>
+                        <g class="axis-labels"></g>
+                        <g class="stacked-areas"></g>
+                        <path class="tax-area" fill="url(#curveGradient)"></path>
+                        <path class="tax-curve" fill="none" stroke="#667eea" stroke-width="2"></path>
+                        <g class="current-point">
+                            <line class="crosshair-v" stroke="#e74c3c" stroke-dasharray="4,4"></line>
+                            <line class="crosshair-h" stroke="#e74c3c" stroke-dasharray="4,4"></line>
+                            <circle r="6" fill="#e74c3c"></circle>
+                        </g>
+                    </svg>
+                    <div class="stacked-legend" id="stacked-legend" style="display: none;"></div>
+                    <div class="chart-tooltip" id="chart-tooltip"></div>
+                </div>
+            </section>
+
+            <section class="card bracket-viz">
+                <h2>Bracket Breakdown</h2>
+                <div class="bracket-bar" id="bracket-bar"></div>
+                <div class="bracket-legend" id="bracket-legend"></div>
+            </section>
+
+            <section class="card sensitivity">
+                <h2>Gradient Sensitivity</h2>
+                <p class="description">Tax impact of +$1,000 in each income type (autodiff)</p>
+                <div class="sensitivity-grid" id="sensitivity-grid">
+                    <div class="sensitivity-item">
+                        <span class="sens-label">Wages</span>
+                        <span class="sens-value" id="sens-wages">+$0</span>
+                        <span class="sens-rate" id="sens-wages-rate">0%</span>
+                    </div>
+                    <div class="sensitivity-item">
+                        <span class="sens-label">Interest</span>
+                        <span class="sens-value" id="sens-interest">+$0</span>
+                        <span class="sens-rate" id="sens-interest-rate">0%</span>
+                    </div>
+                    <div class="sensitivity-item">
+                        <span class="sens-label">LTCG</span>
+                        <span class="sens-value" id="sens-ltcg">+$0</span>
+                        <span class="sens-rate" id="sens-ltcg-rate">0%</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card solver">
+                <h2>Inverse Solver</h2>
+                <p class="description">What wages would result in a specific tax amount?</p>
+                <div class="input-group">
+                    <label for="target-tax">Target Federal Tax</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">$</span>
+                        <input type="number" id="target-tax" value="10000" min="0" step="1000">
+                    </div>
+                </div>
+                <button id="solve-btn">
+                    <span class="btn-text">Calculate Required Wages</span>
+                    <span class="btn-loading" style="display: none;">Solving...</span>
+                </button>
+                <div class="solver-animation" id="solver-animation" style="display: none;">
+                    <svg id="solver-chart" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
+                        <path class="solver-curve" fill="none" stroke="#3498db" stroke-width="2"></path>
+                        <line class="target-line" stroke="#27ae60" stroke-width="2" stroke-dasharray="6,3"></line>
+                        <g class="iteration-points"></g>
+                        <line class="tangent-line" stroke="#e74c3c" stroke-width="1.5"></line>
+                        <circle class="current-iter" r="5" fill="#e74c3c"></circle>
+                    </svg>
+                    <div class="solver-stats">
+                        <span>Iteration: <strong id="iter-count">0</strong></span>
+                        <span>Error: <strong id="iter-error">$0</strong></span>
+                    </div>
+                </div>
+                <div class="result-row" id="solver-result" style="display: none;">
+                    <span class="label">Required Wages</span>
+                    <span class="value" id="solved-wages">$0</span>
+                </div>
+            </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>2024 Tax Brackets | Graph-based computation with autodiff</p>
+        </footer>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading WebAssembly module...</p>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

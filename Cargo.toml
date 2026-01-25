@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/tenforty-graph"]
+resolver = "2"

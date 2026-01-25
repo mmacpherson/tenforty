@@ -1,0 +1,140 @@
+"""Tests for backend abstraction layer."""
+
+import pytest
+
+from tenforty.backends import OTSBackend, available_backends, get_backend
+from tenforty.backends.protocol import TaxBackend
+from tenforty.models import TaxReturnInput
+
+
+class TestOTSBackend:
+    """Tests for OTS backend."""
+
+    def test_ots_backend_is_available(self):
+        """OTS backend should be available when otslib is installed."""
+        backend = OTSBackend()
+        assert backend.is_available()
+
+    def test_ots_backend_implements_protocol(self):
+        """OTS backend should implement TaxBackend protocol."""
+        backend = OTSBackend()
+        assert isinstance(backend, TaxBackend)
+
+    def test_ots_backend_evaluate(self):
+        """OTS backend should evaluate tax returns."""
+        backend = OTSBackend()
+        tax_input = TaxReturnInput(year=2024, w2_income=100_000)
+        result = backend.evaluate(tax_input)
+        assert result.federal_total_tax > 5000
+
+    def test_ots_backend_supported_years(self):
+        """OTS backend should support years 2018-2024."""
+        backend = OTSBackend()
+        assert 2018 in backend.supported_years
+        assert 2024 in backend.supported_years
+
+    def test_ots_backend_gradient_returns_none(self):
+        """OTS backend does not support autodiff."""
+        backend = OTSBackend()
+        tax_input = TaxReturnInput(year=2024, w2_income=100_000)
+        result = backend.gradient(tax_input, "total_tax", "w2_income")
+        assert result is None
+
+    def test_ots_backend_solve_returns_none(self):
+        """OTS backend does not support solver."""
+        backend = OTSBackend()
+        tax_input = TaxReturnInput(year=2024, w2_income=100_000)
+        result = backend.solve(tax_input, "total_tax", 10000, "w2_income")
+        assert result is None
+
+
+class TestBackendSelection:
+    """Tests for backend selection logic."""
+
+    def test_available_backends_includes_ots(self):
+        """OTS should always be in available backends."""
+        backends = available_backends()
+        assert "ots" in backends
+
+    def test_get_backend_ots(self):
+        """Should be able to get OTS backend explicitly."""
+        backend = get_backend("ots")
+        assert backend.name == "ots"
+
+    def test_get_backend_default_is_ots(self):
+        """Default backend should be OTS."""
+        backend = get_backend()
+        assert backend.name == "ots"
+
+
+class TestGraphBackend:
+    """Tests for graph backend (requires graph module)."""
+
+    @pytest.fixture
+    def graph_available(self):
+        """Check if graph backend is available."""
+        try:
+            from tenforty.backends import GraphBackend
+
+            backend = GraphBackend()
+            return backend.is_available()
+        except ImportError:
+            return False
+
+    def test_graph_backend_available(self, graph_available):
+        """Graph backend availability test."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty.backends import GraphBackend
+
+        backend = GraphBackend()
+        assert backend.is_available()
+
+    def test_graph_backend_evaluate(self, graph_available):
+        """Graph backend should evaluate tax returns."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty.backends import GraphBackend
+
+        backend = GraphBackend()
+        tax_input = TaxReturnInput(year=2024, w2_income=100_000)
+        result = backend.evaluate(tax_input)
+        assert result.federal_total_tax > 0
+
+    def test_graph_backend_ca_requires_all_imports(self, graph_available):
+        """Graph backend should fail hard if required imports are missing."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty import evaluate_return
+
+        with pytest.raises(RuntimeError, match="Unresolved imports"):
+            evaluate_return(year=2024, state="CA", w2_income=100_000, backend="graph")
+
+    def test_graph_backend_gradient(self, graph_available):
+        """Graph backend should compute gradients."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty.backends import GraphBackend
+
+        backend = GraphBackend()
+        tax_input = TaxReturnInput(year=2024, w2_income=100_000)
+        result = backend.gradient(tax_input, "L24_total_tax", "L1a_w2_wages")
+        assert result is not None
+        assert 0 < result < 1
+
+    def test_graph_backend_solve(self, graph_available):
+        """Graph backend should solve for inputs."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty.backends import GraphBackend
+
+        backend = GraphBackend()
+        tax_input = TaxReturnInput(year=2024, w2_income=0)
+        result = backend.solve(tax_input, "L24_total_tax", 10000, "L1a_w2_wages")
+        assert result is not None
+        assert result > 0

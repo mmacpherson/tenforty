@@ -5,7 +5,7 @@ import logging
 import os
 import pathlib
 import re
-from typing import Any
+from typing import Any, Literal
 
 import dotenv
 import polars as pl
@@ -374,7 +374,9 @@ def evaluate_natural_input_form(
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
     federal_form_id = "US_1040"
-    federal_natural_config = NATURAL_FORM_CONFIG[(year.value, federal_form_id)]
+    federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
+    if federal_natural_config is None:
+        raise ValueError(f"OTS does not support {year.value}/{federal_form_id}")
     federal_form_values = map_natural_to_ots_input(
         natural_form_values, federal_natural_config.input_map
     )
@@ -384,7 +386,9 @@ def evaluate_natural_input_form(
         state_natural_config = None
         state_form_values = None
     else:
-        state_natural_config = NATURAL_FORM_CONFIG[(year.value, state_form_id)]
+        state_natural_config = NATURAL_FORM_CONFIG.get((year.value, state_form_id))
+        if state_natural_config is None:
+            raise ValueError(f"OTS does not support {year.value}/{state_form_id}")
         state_form_values = map_natural_to_ots_input(
             natural_form_values, state_natural_config.input_map
         )
@@ -439,6 +443,7 @@ def evaluate_return(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
+    backend: Literal["ots", "graph"] = "ots",
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters."""
     input_data = TaxReturnInput(
@@ -459,14 +464,22 @@ def evaluate_return(
         incentive_stock_option_gains=incentive_stock_option_gains,
     )
 
-    return InterpretedTaxReturn(
-        **evaluate_natural_input_form(
-            input_data.year,
-            input_data.state,
-            input_data.model_dump(exclude={"year", "state"}),
-            on_error=on_error,
+    if backend == "ots":
+        return InterpretedTaxReturn(
+            **evaluate_natural_input_form(
+                input_data.year,
+                input_data.state,
+                input_data.model_dump(exclude={"year", "state"}),
+                on_error=on_error,
+            )
         )
-    )
+
+    if backend == "graph":
+        from .backends.graph import GraphBackend
+
+        return GraphBackend().evaluate(input_data)
+
+    raise ValueError(f"Unknown backend: {backend}")
 
 
 def evaluate_returns(
@@ -486,6 +499,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
+    backend: Literal["ots", "graph"] = "ots",
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid of inputs.
 
@@ -559,7 +573,117 @@ def evaluate_returns(
     results = []
     for combo in combinations:
         combo_map = dict(zip(parameter_names, combo, strict=False))
-        result = evaluate_return(**combo_map, on_error=on_error).model_dump()
+        result = evaluate_return(
+            **combo_map, on_error=on_error, backend=backend
+        ).model_dump()
         results.append(combo_map | result)
 
     return pl.DataFrame(results).cast({"state": pl.Utf8})
+
+
+def marginal_rate(
+    year: int = 2024,
+    state: str | None = None,
+    filing_status: str = "Single",
+    num_dependents: int = 0,
+    standard_or_itemized: str = "Standard",
+    w2_income: float = 0.0,
+    taxable_interest: float = 0.0,
+    qualified_dividends: float = 0.0,
+    ordinary_dividends: float = 0.0,
+    short_term_capital_gains: float = 0.0,
+    long_term_capital_gains: float = 0.0,
+    schedule_1_income: float = 0.0,
+    itemized_deductions: float = 0.0,
+    state_adjustment: float = 0.0,
+    incentive_stock_option_gains: float = 0.0,
+    *,
+    wrt: str = "w2_income",
+    output: str = "total_tax",
+) -> float:
+    """Compute marginal tax rate via autodiff (graph backend only).
+
+    This computes the derivative of `output` with respect to `wrt`.
+    """
+    tax_input = TaxReturnInput(
+        year=year,
+        state=state,
+        filing_status=filing_status,
+        num_dependents=num_dependents,
+        standard_or_itemized=standard_or_itemized,
+        w2_income=w2_income,
+        taxable_interest=taxable_interest,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        short_term_capital_gains=short_term_capital_gains,
+        long_term_capital_gains=long_term_capital_gains,
+        schedule_1_income=schedule_1_income,
+        itemized_deductions=itemized_deductions,
+        state_adjustment=state_adjustment,
+        incentive_stock_option_gains=incentive_stock_option_gains,
+    )
+
+    from .backends.graph import GraphBackend
+
+    backend = GraphBackend()
+    if not backend.is_available():
+        raise RuntimeError("Graph backend is not available")
+
+    result = backend.gradient(tax_input, output, wrt)
+    if result is None:
+        raise RuntimeError("Graph backend does not support autodiff")
+
+    return result
+
+
+def solve_for_income(
+    target_tax: float,
+    year: int = 2024,
+    state: str | None = None,
+    filing_status: str = "Single",
+    num_dependents: int = 0,
+    standard_or_itemized: str = "Standard",
+    w2_income: float = 0.0,
+    taxable_interest: float = 0.0,
+    qualified_dividends: float = 0.0,
+    ordinary_dividends: float = 0.0,
+    short_term_capital_gains: float = 0.0,
+    long_term_capital_gains: float = 0.0,
+    schedule_1_income: float = 0.0,
+    itemized_deductions: float = 0.0,
+    state_adjustment: float = 0.0,
+    incentive_stock_option_gains: float = 0.0,
+    *,
+    for_input: str = "w2_income",
+    output: str = "total_tax",
+) -> float:
+    """Solve for an input value that produces a target output (graph backend only)."""
+    tax_input = TaxReturnInput(
+        year=year,
+        state=state,
+        filing_status=filing_status,
+        num_dependents=num_dependents,
+        standard_or_itemized=standard_or_itemized,
+        w2_income=w2_income,
+        taxable_interest=taxable_interest,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        short_term_capital_gains=short_term_capital_gains,
+        long_term_capital_gains=long_term_capital_gains,
+        schedule_1_income=schedule_1_income,
+        itemized_deductions=itemized_deductions,
+        state_adjustment=state_adjustment,
+        incentive_stock_option_gains=incentive_stock_option_gains,
+    )
+
+    from .backends.graph import GraphBackend
+
+    backend = GraphBackend()
+    if not backend.is_available():
+        raise RuntimeError("Graph backend is not available")
+
+    result = backend.solve(tax_input, output=output, target=target_tax, var=for_input)
+    if result is None:
+        raise RuntimeError("Graph backend solver did not converge")
+
+    return result

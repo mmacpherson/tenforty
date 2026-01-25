@@ -1,0 +1,61 @@
+[[bench]]
+harness = false
+name = "jit_bench"
+
+[dependencies]
+rayon = {version = "1.10", optional = true}
+serde = {version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+thiserror = "1.0"
+
+[dependencies.cranelift]
+optional = true
+version = "0.111"
+
+[dependencies.cranelift-jit]
+optional = true
+version = "0.111"
+
+[dependencies.cranelift-module]
+optional = true
+version = "0.111"
+
+[dependencies.cranelift-native]
+optional = true
+version = "0.111"
+
+[dependencies.js-sys]
+optional = true
+version = "0.3"
+
+[dependencies.pyo3]
+features = ["extension-module"]
+optional = true
+version = "0.26"
+
+[dependencies.wasm-bindgen]
+optional = true
+version = "0.2"
+
+[dev-dependencies]
+approx = "0.5"
+criterion = "0.5"
+proptest = "1.0"
+
+[features]
+default = ["parallel"]
+jit = ["cranelift", "cranelift-jit", "cranelift-module", "cranelift-native"]
+parallel = ["rayon"]
+python = ["pyo3", "parallel"]
+wasm = ["wasm-bindgen", "js-sys"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "graphlib"
+
+[package]
+description = "Tax computation graph runtime with autodiff and inverse solving"
+edition = "2021"
+license = "MIT"
+name = "tenforty-graph"
+version = "2025.1.0"

@@ -1,0 +1,5 @@
+dist-newstyle/
+*.hi
+*.o
+*.cabal.bak
+.ghc.environment.*

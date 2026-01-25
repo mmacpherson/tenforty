@@ -1,0 +1,372 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "meta": {
+        "form_id": "us_form_2441",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1_num_qualifying",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L2_qualified_expenses",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 3000
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L3_expense_limit",
+            "op": {
+                "cond": 8,
+                "otherwise": 10,
+                "then": 9,
+                "type": "if_positive"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L4_limited_expenses",
+            "op": {
+                "left": 1,
+                "right": 11,
+                "type": "min"
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "left": 2,
+                "right": 3,
+                "type": "min"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L7_earned_income_limited",
+            "op": {
+                "left": 12,
+                "right": 13,
+                "type": "min"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L8_agi",
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "type": "literal",
+                "value": 15000
+            }
+        },
+        "18": {
+            "id": 18,
+            "op": {
+                "left": 15,
+                "right": 17,
+                "type": "sub"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L9_excess",
+            "op": {
+                "left": 16,
+                "right": 18,
+                "type": "max"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L5_earned_income_taxpayer",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "type": "literal",
+                "value": 2000
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "left": 19,
+                "right": 21,
+                "type": "div"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 20,
+                "right": 22,
+                "type": "mul"
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L9_steps",
+            "op": {
+                "arg": 23,
+                "type": "floor"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "type": "literal",
+                "value": 35
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "type": "literal",
+                "value": 15
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 24,
+                "right": 26,
+                "type": "min"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L9_credit_percentage_cents",
+            "op": {
+                "left": 25,
+                "right": 27,
+                "type": "sub"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "type": "literal",
+                "value": 0.35
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L6_earned_income_spouse",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "type": "literal",
+                "value": 100
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "left": 24,
+                "right": 30,
+                "type": "div"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "type": "literal",
+                "value": 0.15
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "left": 31,
+                "right": 32,
+                "type": "min"
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "left": 29,
+                "right": 33,
+                "type": "sub"
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L10_tentative_credit",
+            "op": {
+                "left": 14,
+                "right": 34,
+                "type": "mul"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 4,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "38": {
+            "id": 38,
+            "name": "L14_net_employer_benefits",
+            "op": {
+                "left": 36,
+                "right": 37,
+                "type": "max"
+            }
+        },
+        "39": {
+            "id": 39,
+            "name": "L16_limited_benefits",
+            "op": {
+                "left": 38,
+                "right": 6,
+                "type": "min"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L12_employer_benefits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "left": 38,
+                "right": 39,
+                "type": "sub"
+            }
+        },
+        "42": {
+            "id": 42,
+            "name": "L26_taxable_benefits",
+            "op": {
+                "left": 40,
+                "right": 41,
+                "type": "max"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L13_forfeited_benefits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L15_exclusion_limit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "op": {
+                "type": "literal",
+                "value": 2
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "left": 0,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "type": "literal",
+                "value": 6000
+            }
+        }
+    },
+    "outputs": [
+        35,
+        35,
+        38,
+        39,
+        42,
+        11,
+        12,
+        14,
+        28
+    ],
+    "tables": {}
+}
