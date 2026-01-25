@@ -1,0 +1,12 @@
+[build-system]
+build-backend = "maturin"
+requires = ["maturin>=1.0,<2.0"]
+
+[project]
+name = "tenforty-graph"
+requires-python = ">=3.10"
+version = "2025.1.0"
+
+[tool.maturin]
+features = ["python"]
+module-name = "tenforty.graphlib"
