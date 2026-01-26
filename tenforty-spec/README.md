@@ -1,29 +1,32 @@
-# tenforty-dsl
+# tenforty-spec
 
 Haskell DSL for defining tax forms as computation graphs.
 
+This is intended to be the **source of truth** for tax logic. The JSON graphs
+used by the Rust/Python/WASM graph runtime are generated from this code and
+synced into `src/tenforty/forms/`.
+
 ## Prerequisites
 
-### Arch Linux (via GHCup - recommended)
+### Install GHC + Cabal (via GHCup - recommended)
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 source ~/.ghcup/env
 ```
 
-### Other systems
-Same ghcup command works on all Linux, macOS, and WSL.
+The same `ghcup` flow works on Linux, macOS, and WSL.
 
 ## Building
 
 ```bash
-cd tenforty-dsl
+cd tenforty-spec
 cabal build
 ```
 
 ## Running the Compiler
 
 ```bash
-# Compile Form 1040 to JSON
+# Compile Form 1040 to JSON (writes to `tenforty-spec/forms/*.json` by default)
 cabal run tenforty-compile -- us_1040_2025 -o us_1040_2025.json -p
 
 # Compile Schedule 1
@@ -33,11 +36,35 @@ cabal run tenforty-compile -- us_schedule_1_2025 -o us_schedule_1_2025.json -p
 cabal run tenforty-compile -- all -p
 ```
 
+From repo root, the equivalent is:
+
+```bash
+make spec-graphs
+```
+
+To sync the compiled JSON graphs into the runtime package:
+
+```bash
+make forms-sync
+```
+
 ## Running Tests
 
 ```bash
 cabal test
 ```
+
+## Formatting and Linting (local dev)
+
+These are local-only tools (not enforced in CI):
+
+```bash
+make fmt          # fourmolu + cabal-fmt
+make lint         # hlint (prints hints)
+make lint-strict  # hlint (fails on hints)
+```
+
+If the tools are missing, the Makefile prints install commands.
 
 ## Line Annotation Convention
 
@@ -82,7 +109,7 @@ l1z <- interior "L1z" "total_wages" $
 ## Project Structure
 
 ```
-tenforty-dsl/
+tenforty-spec/
 ├── src/TenForty/
 │   ├── Types.hs         -- FilingStatus, Amount phantom types
 │   ├── Expr.hs          -- Expression GADT
