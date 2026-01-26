@@ -1,9 +1,9 @@
-use wasm_bindgen::prelude::*;
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 
-use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
 use crate::eval::Runtime as RsRuntime;
+use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
 use crate::link::{GraphSet as RsGraphSet, UnresolvedImport as RsUnresolvedImport};
 use crate::{autodiff, solver};
 
@@ -72,7 +72,9 @@ impl Graph {
     pub fn from_json(json: &str) -> Result<Graph, JsError> {
         let graph = RsGraph::from_json(json)
             .map_err(|e| JsError::new(&format!("Failed to parse graph: {}", e)))?;
-        Ok(Graph { inner: Rc::new(graph) })
+        Ok(Graph {
+            inner: Rc::new(graph),
+        })
     }
 
     #[wasm_bindgen(js_name = toJson)]
@@ -112,9 +114,7 @@ impl Runtime {
     #[wasm_bindgen(constructor)]
     pub fn new(graph: &Graph, filing_status: &FilingStatus) -> Self {
         let graph_rc = Rc::clone(&graph.inner);
-        let graph_ref: &'static RsGraph = unsafe {
-            &*(Rc::as_ptr(&graph_rc) as *const RsGraph)
-        };
+        let graph_ref: &'static RsGraph = unsafe { &*(Rc::as_ptr(&graph_rc) as *const RsGraph) };
         Runtime {
             graph: graph_rc,
             inner: RefCell::new(RsRuntime::new(graph_ref, filing_status.0)),
@@ -165,8 +165,14 @@ impl Runtime {
 
         let guess = initial_guess.unwrap_or(target);
 
-        solver::solve(&mut self.inner.borrow_mut(), output_id, target, input_id, guess)
-            .map_err(|e| JsError::new(&format!("{}", e)))
+        solver::solve(
+            &mut self.inner.borrow_mut(),
+            output_id,
+            target,
+            input_id,
+            guess,
+        )
+        .map_err(|e| JsError::new(&format!("{}", e)))
     }
 }
 

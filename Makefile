@@ -21,6 +21,7 @@ export UV_INSTALL_MSG
 DEFAULT_GOAL: help
 .PHONY: help clean env env-full env-graph-only jupyter-env test test-full hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs forms-sync
+.PHONY: spec-fmt spec-lint spec-lint-strict
 
 check-uv: ## Check if uv is installed
 	@if [ -z "$(UV_CHECK)" ]; then \
@@ -109,6 +110,15 @@ wasm-serve: wasm-dev ## Serve demo locally
 ## tenforty-spec (Haskell) targets (local dev only; CI does not run these)
 spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.json
 	cd tenforty-spec && cabal run tenforty-compile -- all -p
+
+spec-fmt: ## Format tenforty-spec (fourmolu, cabal-fmt)
+	$(MAKE) -C tenforty-spec fmt
+
+spec-lint: ## Lint tenforty-spec (hlint, non-blocking)
+	$(MAKE) -C tenforty-spec lint
+
+spec-lint-strict: ## Lint tenforty-spec (hlint, fails on hints)
+	$(MAKE) -C tenforty-spec lint-strict
 
 forms-sync: ## Sync tenforty-spec/*.json into src/tenforty/forms/
 	python3 scripts/forms_sync.py

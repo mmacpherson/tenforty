@@ -1,13 +1,13 @@
-use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
 use pyo3::types::PyDict;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
 use crate::eval::Runtime as RsRuntime;
+use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
 use crate::link::{GraphSet as RsGraphSet, UnresolvedImport as RsUnresolvedImport};
 use crate::{autodiff, solver, viz};
 
@@ -54,7 +54,10 @@ impl FilingStatus {
             }
             "head_of_household" | "hoh" => Ok(FilingStatus(RsFilingStatus::HeadOfHousehold)),
             "qualifying_widow" | "qw" => Ok(FilingStatus(RsFilingStatus::QualifyingWidow)),
-            _ => Err(PyValueError::new_err(format!("Unknown filing status: {}", s))),
+            _ => Err(PyValueError::new_err(format!(
+                "Unknown filing status: {}",
+                s
+            ))),
         }
     }
 
@@ -77,10 +80,15 @@ fn parse_filing_status(s: &str) -> PyResult<RsFilingStatus> {
     match s.to_lowercase().replace(['-', ' '], "_").as_str() {
         "single" => Ok(RsFilingStatus::Single),
         "married_joint" | "married_filing_jointly" | "mfj" => Ok(RsFilingStatus::MarriedJoint),
-        "married_separate" | "married_filing_separately" | "mfs" => Ok(RsFilingStatus::MarriedSeparate),
+        "married_separate" | "married_filing_separately" | "mfs" => {
+            Ok(RsFilingStatus::MarriedSeparate)
+        }
         "head_of_household" | "hoh" => Ok(RsFilingStatus::HeadOfHousehold),
         "qualifying_widow" | "qw" => Ok(RsFilingStatus::QualifyingWidow),
-        _ => Err(PyValueError::new_err(format!("Unknown filing status: {}", s))),
+        _ => Err(PyValueError::new_err(format!(
+            "Unknown filing status: {}",
+            s
+        ))),
     }
 }
 
@@ -95,7 +103,9 @@ impl Graph {
     fn from_json(json: &str) -> PyResult<Self> {
         let graph = RsGraph::from_json(json)
             .map_err(|e| PyValueError::new_err(format!("Failed to parse graph: {}", e)))?;
-        Ok(Graph { inner: Arc::new(graph) })
+        Ok(Graph {
+            inner: Arc::new(graph),
+        })
     }
 
     fn to_json(&self) -> PyResult<String> {
@@ -149,7 +159,11 @@ impl Graph {
         inputs: Bound<'_, PyDict>,
         statuses: Vec<String>,
         outputs: Vec<String>,
-    ) -> PyResult<(Vec<String>, HashMap<String, Vec<f64>>, HashMap<String, Vec<f64>>)> {
+    ) -> PyResult<(
+        Vec<String>,
+        HashMap<String, Vec<f64>>,
+        HashMap<String, Vec<f64>>,
+    )> {
         // Extract inputs dict to HashMap
         let inputs: HashMap<String, Vec<f64>> = inputs
             .iter()
@@ -189,13 +203,27 @@ impl Graph {
             } else {
                 for &val in input_values[depth] {
                     current.insert(input_names[depth].clone(), val);
-                    cartesian_recurse(input_names, input_values, statuses, current, depth + 1, scenarios);
+                    cartesian_recurse(
+                        input_names,
+                        input_values,
+                        statuses,
+                        current,
+                        depth + 1,
+                        scenarios,
+                    );
                 }
             }
         }
 
         let mut current = HashMap::new();
-        cartesian_recurse(&input_names, &input_values, &parsed_statuses, &mut current, 0, &mut scenarios);
+        cartesian_recurse(
+            &input_names,
+            &input_values,
+            &parsed_statuses,
+            &mut current,
+            0,
+            &mut scenarios,
+        );
 
         // Evaluate scenarios (parallel when available)
         let graph = &self.inner;
@@ -231,7 +259,8 @@ impl Graph {
             .collect();
 
         // Build column-oriented data
-        let status_col: Vec<String> = results.iter()
+        let status_col: Vec<String> = results
+            .iter()
             .map(|(s, _, _)| match s {
                 RsFilingStatus::Single => "single".to_string(),
                 RsFilingStatus::MarriedJoint => "married_joint".to_string(),
@@ -244,7 +273,8 @@ impl Graph {
         // Input columns
         let mut input_cols: HashMap<String, Vec<f64>> = HashMap::new();
         for input_name in &input_names {
-            let values: Vec<f64> = results.iter()
+            let values: Vec<f64> = results
+                .iter()
                 .map(|(_, inputs, _)| inputs.get(*input_name).copied().unwrap_or(0.0))
                 .collect();
             input_cols.insert((*input_name).clone(), values);
@@ -253,7 +283,8 @@ impl Graph {
         // Output columns
         let mut output_cols: HashMap<String, Vec<f64>> = HashMap::new();
         for output_name in &outputs {
-            let values: Vec<f64> = results.iter()
+            let values: Vec<f64> = results
+                .iter()
                 .map(|(_, _, outputs)| outputs.get(output_name).copied().unwrap_or(0.0))
                 .collect();
             output_cols.insert(output_name.clone(), values);
@@ -274,9 +305,7 @@ impl Runtime {
     #[new]
     fn new(graph: &Graph, filing_status: &FilingStatus) -> Self {
         let graph_arc = Arc::clone(&graph.inner);
-        let graph_ref: &'static RsGraph = unsafe {
-            &*(Arc::as_ptr(&graph_arc) as *const RsGraph)
-        };
+        let graph_ref: &'static RsGraph = unsafe { &*(Arc::as_ptr(&graph_arc) as *const RsGraph) };
         Runtime {
             graph: graph_arc,
             inner: RsRuntime::new(graph_ref, filing_status.0),

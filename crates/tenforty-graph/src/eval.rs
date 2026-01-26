@@ -170,7 +170,11 @@ impl<'g> Runtime<'g> {
                 self.eval_node(node_id)
             }
 
-            Op::IfPositive { cond, then, otherwise } => {
+            Op::IfPositive {
+                cond,
+                then,
+                otherwise,
+            } => {
                 let c = self.eval_node(*cond)?;
                 if c > 0.0 {
                     self.eval_node(*then)

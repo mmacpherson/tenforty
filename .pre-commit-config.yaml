@@ -7,13 +7,22 @@ ci:
   autoupdate_branch: ''
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
   autoupdate_schedule: weekly
-  skip: []
+  # Hooks that require local toolchains (Rust/Haskell/etc) should generally be
+  # skipped on pre-commit.ci, and enforced via dedicated CI jobs instead.
+  skip: [cargo-clippy, cargo-fmt]
   submodules: false
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0
   hooks:
+  - id: check-added-large-files
+    args: [--maxkb=2000]
+  - id: check-case-conflict
+  - id: check-json
   - id: check-merge-conflict
+  - id: check-toml
+  - id: check-yaml
+  - id: debug-statements
   - id: detect-aws-credentials
     args: [--allow-missing-credentials]
   - id: detect-private-key
@@ -29,6 +38,14 @@ repos:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]
   - id: ruff-format
+- repo: https://github.com/crate-ci/typos
+  rev: v1.42.1
+  hooks:
+  - id: typos
+    # Only *check* spelling in prose; avoid rewriting identifiers in code.
+    args: [--force-exclude]
+    files: \.(md|txt)$
+    exclude: ^tests/fixtures/
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.16.0
   hooks:
@@ -36,3 +53,23 @@ repos:
     args: [--autofix, --indent, '2']
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
+- repo: https://github.com/pre-commit/mirrors-prettier
+  rev: v3.1.0
+  hooks:
+  - id: prettier
+    files: ^crates/tenforty-graph/demo/.*\.(css|html|js|json)$
+- repo: local
+  hooks:
+  - id: cargo-fmt
+    name: cargo fmt
+    language: system
+    entry: cargo fmt --all
+    pass_filenames: false
+    files: \.rs$
+  - id: cargo-clippy
+    name: cargo clippy
+    language: system
+    entry: cargo clippy --workspace --all-targets -- -D warnings
+    pass_filenames: false
+    stages: [manual]
+    files: \.rs$

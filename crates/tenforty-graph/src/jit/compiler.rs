@@ -37,8 +37,8 @@ impl JitCompiler {
             .set("opt_level", "speed")
             .map_err(|e| JitError::Cranelift(e.to_string()))?;
 
-        let isa_builder = cranelift_native::builder()
-            .map_err(|e| JitError::Cranelift(e.to_string()))?;
+        let isa_builder =
+            cranelift_native::builder().map_err(|e| JitError::Cranelift(e.to_string()))?;
         let isa = isa_builder
             .finish(settings::Flags::new(flag_builder))
             .map_err(|e| JitError::Cranelift(e.to_string()))?;
@@ -46,11 +46,13 @@ impl JitCompiler {
         Ok(JitCompiler { isa })
     }
 
-    pub fn compile(&self, graph: &Graph, filing_status: FilingStatus) -> Result<CompiledGraph, JitError> {
-        let builder = JITBuilder::with_isa(
-            self.isa.clone(),
-            cranelift_module::default_libcall_names(),
-        );
+    pub fn compile(
+        &self,
+        graph: &Graph,
+        filing_status: FilingStatus,
+    ) -> Result<CompiledGraph, JitError> {
+        let builder =
+            JITBuilder::with_isa(self.isa.clone(), cranelift_module::default_libcall_names());
         let mut module = JITModule::new(builder);
         let mut ctx = module.make_context();
 
@@ -61,7 +63,8 @@ impl JitCompiler {
         sig.params.push(AbiParam::new(ptr_type));
         ctx.func.signature = sig;
 
-        let func_id = module.declare_function("eval", Linkage::Export, &ctx.func.signature)
+        let func_id = module
+            .declare_function("eval", Linkage::Export, &ctx.func.signature)
             .map_err(Box::new)?;
 
         let (node_to_slot, num_slots) = build_slot_map(graph, filing_status);
@@ -75,7 +78,9 @@ impl JitCompiler {
             num_slots,
         )?;
 
-        module.define_function(func_id, &mut ctx).map_err(Box::new)?;
+        module
+            .define_function(func_id, &mut ctx)
+            .map_err(Box::new)?;
         module.clear_context(&mut ctx);
         module.finalize_definitions().map_err(Box::new)?;
 
@@ -94,11 +99,13 @@ impl JitCompiler {
         })
     }
 
-    pub fn compile_batch(&self, graph: &Graph, filing_status: FilingStatus) -> Result<CompiledBatchGraph, JitError> {
-        let builder = JITBuilder::with_isa(
-            self.isa.clone(),
-            cranelift_module::default_libcall_names(),
-        );
+    pub fn compile_batch(
+        &self,
+        graph: &Graph,
+        filing_status: FilingStatus,
+    ) -> Result<CompiledBatchGraph, JitError> {
+        let builder =
+            JITBuilder::with_isa(self.isa.clone(), cranelift_module::default_libcall_names());
         let mut module = JITModule::new(builder);
         let mut ctx = module.make_context();
 
@@ -109,7 +116,8 @@ impl JitCompiler {
         sig.params.push(AbiParam::new(ptr_type));
         ctx.func.signature = sig;
 
-        let func_id = module.declare_function("eval_batch", Linkage::Export, &ctx.func.signature)
+        let func_id = module
+            .declare_function("eval_batch", Linkage::Export, &ctx.func.signature)
             .map_err(Box::new)?;
 
         let (input_offsets, num_inputs) = build_batch_input_offsets(graph);
@@ -124,7 +132,9 @@ impl JitCompiler {
             &output_offsets,
         )?;
 
-        module.define_function(func_id, &mut ctx).map_err(Box::new)?;
+        module
+            .define_function(func_id, &mut ctx)
+            .map_err(Box::new)?;
         module.clear_context(&mut ctx);
         module.finalize_definitions().map_err(Box::new)?;
 
@@ -173,7 +183,10 @@ fn build_slot_map(graph: &Graph, filing_status: FilingStatus) -> (HashMap<NodeId
     (node_to_slot, slot)
 }
 
-fn build_input_offsets(graph: &Graph, node_to_slot: &HashMap<NodeId, usize>) -> HashMap<NodeId, usize> {
+fn build_input_offsets(
+    graph: &Graph,
+    node_to_slot: &HashMap<NodeId, usize>,
+) -> HashMap<NodeId, usize> {
     let mut offsets = HashMap::new();
     for &input_id in &graph.inputs {
         if let Some(&slot) = node_to_slot.get(&input_id) {
@@ -183,7 +196,10 @@ fn build_input_offsets(graph: &Graph, node_to_slot: &HashMap<NodeId, usize>) -> 
     offsets
 }
 
-fn build_output_offsets(graph: &Graph, node_to_slot: &HashMap<NodeId, usize>) -> HashMap<NodeId, usize> {
+fn build_output_offsets(
+    graph: &Graph,
+    node_to_slot: &HashMap<NodeId, usize>,
+) -> HashMap<NodeId, usize> {
     let mut offsets = HashMap::new();
     for &output_id in &graph.outputs {
         if let Some(&slot) = node_to_slot.get(&output_id) {
@@ -243,8 +259,7 @@ impl CompiledGraph {
     /// - `outputs` must point to a valid, mutable array of at least `num_slots()` f64 values
     /// - The arrays must remain valid for the duration of the call
     pub unsafe fn call(&self, inputs: *const f64, outputs: *mut f64) {
-        let func: unsafe extern "C" fn(*const f64, *mut f64) =
-            std::mem::transmute(self.func_ptr);
+        let func: unsafe extern "C" fn(*const f64, *mut f64) = std::mem::transmute(self.func_ptr);
         func(inputs, outputs);
     }
 }
@@ -292,8 +307,7 @@ impl CompiledBatchGraph {
     /// - The arrays must remain valid for the duration of the call
     /// - Memory layout is SoA: [input0×4][input1×4]... and [output0×4][output1×4]...
     pub unsafe fn call(&self, inputs: *const f64, outputs: *mut f64) {
-        let func: unsafe extern "C" fn(*const f64, *mut f64) =
-            std::mem::transmute(self.func_ptr);
+        let func: unsafe extern "C" fn(*const f64, *mut f64) = std::mem::transmute(self.func_ptr);
         func(inputs, outputs);
     }
 }
