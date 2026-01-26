@@ -2,7 +2,7 @@ use crate::graph::{FilingStatus, Graph, NodeId, Op};
 use crate::primitives;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use thiserror::Error;
 
@@ -16,6 +16,8 @@ pub enum EvalError {
     TableNotFound(String),
     #[error("Division by zero at node {0}")]
     DivisionByZero(NodeId),
+    #[error("Cycle detected: {0:?}")]
+    CycleDetected(Vec<String>),
 }
 
 pub struct Runtime<'g> {
@@ -23,6 +25,8 @@ pub struct Runtime<'g> {
     filing_status: FilingStatus,
     inputs: HashMap<NodeId, f64>,
     cache: HashMap<NodeId, f64>,
+    visiting: HashSet<NodeId>,
+    stack: Vec<NodeId>,
 }
 
 impl<'g> Runtime<'g> {
@@ -32,6 +36,8 @@ impl<'g> Runtime<'g> {
             filing_status,
             inputs: HashMap::new(),
             cache: HashMap::new(),
+            visiting: HashSet::new(),
+            stack: Vec::new(),
         }
     }
 
@@ -55,6 +61,8 @@ impl<'g> Runtime<'g> {
             .graph
             .node_id_by_name(name)
             .ok_or(EvalError::NodeNotFound(0))?;
+        self.visiting.clear();
+        self.stack.clear();
         self.eval_node(node_id)
     }
 
@@ -63,15 +71,39 @@ impl<'g> Runtime<'g> {
             return Ok(cached);
         }
 
+        if self.visiting.contains(&node_id) {
+            let start = self.stack.iter().position(|&id| id == node_id).unwrap_or(0);
+            let mut cycle_ids: Vec<NodeId> = self.stack[start..].to_vec();
+            cycle_ids.push(node_id);
+            let cycle = cycle_ids
+                .into_iter()
+                .map(|id| {
+                    self.graph
+                        .nodes
+                        .get(&id)
+                        .and_then(|n| n.name.clone())
+                        .unwrap_or_else(|| format!("node_{id}"))
+                })
+                .collect();
+            return Err(EvalError::CycleDetected(cycle));
+        }
+
+        self.visiting.insert(node_id);
+        self.stack.push(node_id);
+
         let node = self
             .graph
             .nodes
             .get(&node_id)
             .ok_or(EvalError::NodeNotFound(node_id))?;
 
-        let result = self.eval_op(&node.op, node_id)?;
-        self.cache.insert(node_id, result);
-        Ok(result)
+        let result = self.eval_op(&node.op, node_id);
+        self.stack.pop();
+        self.visiting.remove(&node_id);
+
+        let value = result?;
+        self.cache.insert(node_id, value);
+        Ok(value)
     }
 
     fn eval_op(&mut self, op: &Op, node_id: NodeId) -> Result<f64, EvalError> {

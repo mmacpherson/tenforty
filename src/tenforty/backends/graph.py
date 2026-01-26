@@ -67,6 +67,21 @@ def _load_linked_graph(year: int, state: OTSState | None):
         if not unresolved:
             break
 
+        mismatched_years = sorted({u.year for u in unresolved if u.year != year})
+        if mismatched_years:
+            mismatches = sorted(
+                {(u.form, u.line, u.year) for u in unresolved if u.year != year}
+            )
+            mismatch_lines = "\n".join(
+                f"- {form}:{line} ({imp_year})" for form, line, imp_year in mismatches
+            )
+            raise RuntimeError(
+                "Graph backend does not support linking mixed-year graphs.\n"
+                f"Requested year: {year}\n"
+                "Mismatched imports:\n"
+                f"{mismatch_lines}"
+            )
+
         loaded_forms = set(gs.forms())
         needed = sorted(
             {(u.form, u.year) for u in unresolved if u.form not in loaded_forms}
