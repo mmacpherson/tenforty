@@ -70,11 +70,11 @@ update-hooks: check-uv ## Update pre-commit hooks
 
 run-hooks: check-uv ## Run hooks on staged files
 	uv sync
-	uv run pre-commit run
+	uv run pre-commit run || uv run pre-commit run
 
 run-hooks-all-files: check-uv ## Run hooks on all files
 	uv sync
-	uv run pre-commit run --all-files
+	uv run pre-commit run --all-files || uv run pre-commit run --all-files
 
 ## Graph library (Rust) targets
 graph-build: ## Build graph library (interpreter only)
