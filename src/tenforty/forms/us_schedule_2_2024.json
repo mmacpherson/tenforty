@@ -270,6 +270,22 @@
                 "type": "add"
             }
         },
+        "34": {
+            "id": 34,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L21_total_other_taxes",
+            "op": {
+                "left": 33,
+                "right": 34,
+                "type": "add"
+            }
+        },
         "4": {
             "id": 4,
             "name": "L7b_first_time_homebuyer",
@@ -315,7 +331,7 @@
     },
     "outputs": [
         33,
-        33,
+        35,
         15
     ],
     "tables": {}

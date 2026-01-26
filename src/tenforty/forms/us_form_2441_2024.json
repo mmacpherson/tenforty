@@ -320,6 +320,22 @@
                 "type": "max"
             }
         },
+        "43": {
+            "id": 43,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "44": {
+            "id": 44,
+            "name": "L11_dependent_care_credit",
+            "op": {
+                "left": 35,
+                "right": 43,
+                "type": "add"
+            }
+        },
         "5": {
             "id": 5,
             "name": "L13_forfeited_benefits",
@@ -359,7 +375,7 @@
     },
     "outputs": [
         35,
-        35,
+        44,
         38,
         39,
         42,

@@ -3,3 +3,4 @@ dist-newstyle/
 *.o
 *.cabal.bak
 .ghc.environment.*
+*.json

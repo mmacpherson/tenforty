@@ -2,7 +2,7 @@
     "imports": [
         {
             "form": "us_1040",
-            "line": "L15",
+            "line": "L15_pre_qbi",
             "year": 2024
         }
     ],
@@ -127,7 +127,7 @@
             "name": "L12_taxable_income_before",
             "op": {
                 "form": "us_1040",
-                "line": "L15",
+                "line": "L15_pre_qbi",
                 "type": "import",
                 "year": 2024
             }

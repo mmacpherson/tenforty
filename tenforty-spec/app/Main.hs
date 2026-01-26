@@ -2,6 +2,7 @@ module Main (main) where
 
 import Data.Aeson.Encode.Pretty qualified as AP
 import Data.ByteString.Lazy qualified as BL
+import Data.ByteString.Lazy.Char8 qualified as BL8
 import Data.Text (Text)
 import Data.Text qualified as T
 import Options.Applicative
@@ -184,7 +185,7 @@ compileAndOutput opts formResult =
                         else compileFormToJSON frm
             case optOutput opts of
                 Nothing -> BL.putStr json >> putStrLn ""
-                Just fp -> BL.writeFile fp json
+                Just fp -> BL.writeFile fp (json <> BL8.pack "\n")
 
 compileToFile :: Options -> FilePath -> Either FormError Form -> IO ()
 compileToFile opts fp formResult =
@@ -198,5 +199,5 @@ compileToFile opts fp formResult =
                     if optPretty opts
                         then AP.encodePretty graph
                         else compileFormToJSON frm
-            BL.writeFile fp json
+            BL.writeFile fp (json <> BL8.pack "\n")
             putStrLn $ "Compiled: " ++ fp

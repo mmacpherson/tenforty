@@ -54,8 +54,8 @@ usForm8995_2025 = form "us_form_8995" 2025 $ do
         interior "L11" "combined_qbi_component" $
             l6 .+. l10
 
-    -- Line 12: Taxable income before QBI deduction (from Form 1040, line 15)
-    l12 <- interior "L12" "taxable_income_before" $ importForm "us_1040" "L15"
+    -- Line 12: Taxable income before QBI deduction
+    l12 <- interior "L12" "taxable_income_before" $ importForm "us_1040" "L15_pre_qbi"
 
     -- Line 13: Net capital gain (from Form 1040, lines 3a and 7, if applicable)
     l13 <- keyInput "L13" "net_capital_gain" "Net capital gain (qualified dividends + capital gain)"
