@@ -45,7 +45,7 @@ repos:
     # Only *check* spelling in prose; avoid rewriting identifiers in code.
     args: [--force-exclude]
     files: \.(md|txt)$
-    exclude: ^tests/fixtures/
+    exclude: ^(tests/fixtures/|CHANGELOG\.md$)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.16.0
   hooks:

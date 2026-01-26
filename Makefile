@@ -70,10 +70,12 @@ update-hooks: check-uv ## Update pre-commit hooks
 
 run-hooks: check-uv ## Run hooks on staged files
 	uv sync
+	# Retry handles hooks that auto-fix files (ruff, prettier, etc).
 	uv run pre-commit run || uv run pre-commit run
 
 run-hooks-all-files: check-uv ## Run hooks on all files
 	uv sync
+	# Retry handles hooks that auto-fix files (ruff, prettier, etc).
 	uv run pre-commit run --all-files || uv run pre-commit run --all-files
 
 ## Graph library (Rust) targets
