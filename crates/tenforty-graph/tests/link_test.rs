@@ -51,11 +51,19 @@ fn test_link_schedule_d_to_1040() {
     let linked = gs.link().expect("Linking should succeed");
 
     // Verify structure
-    assert!(linked.node_id_by_name("us_schedule_d_short_term_gain").is_some());
-    assert!(linked.node_id_by_name("us_schedule_d_long_term_gain").is_some());
-    assert!(linked.node_id_by_name("us_schedule_d_L16_net_gain").is_some());
+    assert!(linked
+        .node_id_by_name("us_schedule_d_short_term_gain")
+        .is_some());
+    assert!(linked
+        .node_id_by_name("us_schedule_d_long_term_gain")
+        .is_some());
+    assert!(linked
+        .node_id_by_name("us_schedule_d_L16_net_gain")
+        .is_some());
     assert!(linked.node_id_by_name("us_1040_L1a_w2_wages").is_some());
-    assert!(linked.node_id_by_name("us_1040_L15_taxable_income").is_some());
+    assert!(linked
+        .node_id_by_name("us_1040_L15_taxable_income")
+        .is_some());
 
     // Evaluate
     let mut rt = Runtime::new(&linked, FilingStatus::Single);
@@ -93,7 +101,9 @@ fn test_unresolved_import_becomes_input() {
     assert_eq!(unresolved[0].line, "L15_taxable_income");
 
     // Link anyway - unresolved import becomes an Input node
-    let linked = gs.link().expect("Linking should succeed with unresolved imports");
+    let linked = gs
+        .link()
+        .expect("Linking should succeed with unresolved imports");
 
     // The unresolved import should be an input node with a descriptive name
     let input_names: Vec<_> = linked
@@ -102,7 +112,9 @@ fn test_unresolved_import_becomes_input() {
         .filter_map(|id| linked.nodes.get(id).and_then(|n| n.name.clone()))
         .collect();
 
-    assert!(input_names.iter().any(|n| n.contains("import__state_form__us_1040__L15_taxable_income")));
+    assert!(input_names
+        .iter()
+        .any(|n| n.contains("import__state_form__us_1040__L15_taxable_income")));
 }
 
 #[test]

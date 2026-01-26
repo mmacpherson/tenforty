@@ -60,27 +60,70 @@ pub struct BracketTable {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Op {
     Input,
-    Literal { value: f64 },
-    Add { left: NodeId, right: NodeId },
-    Sub { left: NodeId, right: NodeId },
-    Mul { left: NodeId, right: NodeId },
-    Div { left: NodeId, right: NodeId },
-    Max { left: NodeId, right: NodeId },
-    Min { left: NodeId, right: NodeId },
-    Floor { arg: NodeId },
-    Neg { arg: NodeId },
-    Abs { arg: NodeId },
-    BracketTax { table: TableId, income: NodeId },
+    Literal {
+        value: f64,
+    },
+    Add {
+        left: NodeId,
+        right: NodeId,
+    },
+    Sub {
+        left: NodeId,
+        right: NodeId,
+    },
+    Mul {
+        left: NodeId,
+        right: NodeId,
+    },
+    Div {
+        left: NodeId,
+        right: NodeId,
+    },
+    Max {
+        left: NodeId,
+        right: NodeId,
+    },
+    Min {
+        left: NodeId,
+        right: NodeId,
+    },
+    Floor {
+        arg: NodeId,
+    },
+    Neg {
+        arg: NodeId,
+    },
+    Abs {
+        arg: NodeId,
+    },
+    BracketTax {
+        table: TableId,
+        income: NodeId,
+    },
     PhaseOut {
         base: f64,
         threshold: ByStatus<f64>,
         rate: f64,
         agi: NodeId,
     },
-    ByStatus { values: ByStatus<NodeId> },
-    Clamp { arg: NodeId, min: f64, max: f64 },
-    IfPositive { cond: NodeId, then: NodeId, otherwise: NodeId },
-    Import { form: String, line: String, year: u16 },
+    ByStatus {
+        values: ByStatus<NodeId>,
+    },
+    Clamp {
+        arg: NodeId,
+        min: f64,
+        max: f64,
+    },
+    IfPositive {
+        cond: NodeId,
+        then: NodeId,
+        otherwise: NodeId,
+    },
+    Import {
+        form: String,
+        line: String,
+        year: u16,
+    },
 }
 
 impl Op {
@@ -105,7 +148,11 @@ impl Op {
                 values.head_of_household,
                 values.qualifying_widow,
             ],
-            Op::IfPositive { cond, then, otherwise } => vec![*cond, *then, *otherwise],
+            Op::IfPositive {
+                cond,
+                then,
+                otherwise,
+            } => vec![*cond, *then, *otherwise],
         }
     }
 }
@@ -159,7 +206,9 @@ impl Graph {
     }
 
     pub fn node_by_name(&self, name: &str) -> Option<&Node> {
-        self.nodes.values().find(|n| n.name.as_deref() == Some(name))
+        self.nodes
+            .values()
+            .find(|n| n.name.as_deref() == Some(name))
     }
 
     pub fn node_id_by_name(&self, name: &str) -> Option<NodeId> {

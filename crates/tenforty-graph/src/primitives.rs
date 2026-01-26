@@ -77,13 +77,34 @@ mod tests {
 
     fn federal_2024_single_brackets() -> Vec<Bracket> {
         vec![
-            Bracket { threshold: 11600.0, rate: 0.10 },
-            Bracket { threshold: 47150.0, rate: 0.12 },
-            Bracket { threshold: 100525.0, rate: 0.22 },
-            Bracket { threshold: 191950.0, rate: 0.24 },
-            Bracket { threshold: 243725.0, rate: 0.32 },
-            Bracket { threshold: 609350.0, rate: 0.35 },
-            Bracket { threshold: f64::INFINITY, rate: 0.37 },
+            Bracket {
+                threshold: 11600.0,
+                rate: 0.10,
+            },
+            Bracket {
+                threshold: 47150.0,
+                rate: 0.12,
+            },
+            Bracket {
+                threshold: 100525.0,
+                rate: 0.22,
+            },
+            Bracket {
+                threshold: 191950.0,
+                rate: 0.24,
+            },
+            Bracket {
+                threshold: 243725.0,
+                rate: 0.32,
+            },
+            Bracket {
+                threshold: 609350.0,
+                rate: 0.35,
+            },
+            Bracket {
+                threshold: f64::INFINITY,
+                rate: 0.37,
+            },
         ]
     }
 
@@ -111,9 +132,7 @@ mod tests {
     #[test]
     fn test_bracket_tax_multiple_brackets() {
         let brackets = federal_2024_single_brackets();
-        let expected = 11600.0 * 0.10
-            + (47150.0 - 11600.0) * 0.12
-            + (75000.0 - 47150.0) * 0.22;
+        let expected = 11600.0 * 0.10 + (47150.0 - 11600.0) * 0.12 + (75000.0 - 47150.0) * 0.22;
         let actual = bracket_tax(&brackets, 75000.0);
         assert!((actual - expected).abs() < 0.01);
     }

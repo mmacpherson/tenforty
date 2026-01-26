@@ -5,11 +5,7 @@ use std::collections::HashMap;
 
 /// Compute the gradient of an output node with respect to an input node.
 /// Uses reverse-mode automatic differentiation (backpropagation).
-pub fn gradient(
-    runtime: &mut Runtime,
-    output: NodeId,
-    input: NodeId,
-) -> Result<f64, EvalError> {
+pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
     runtime.eval_node(output)?;
 
     let order = runtime.graph().topological_order();
@@ -29,14 +25,7 @@ pub fn gradient(
             None => continue,
         };
 
-        backprop(
-            &node.op,
-            node_id,
-            adj,
-            values,
-            runtime,
-            &mut adjoints,
-        )?;
+        backprop(&node.op, node_id, adj, values, runtime, &mut adjoints)?;
     }
 
     Ok(*adjoints.get(&input).unwrap_or(&0.0))
@@ -148,7 +137,11 @@ fn backprop(
             *adjoints.entry(node_id).or_insert(0.0) += adj;
         }
 
-        Op::IfPositive { cond, then, otherwise } => {
+        Op::IfPositive {
+            cond,
+            then,
+            otherwise,
+        } => {
             let c = values.get(cond).copied().unwrap_or(0.0);
             if c > 0.0 {
                 *adjoints.entry(*then).or_insert(0.0) += adj;
@@ -252,9 +245,18 @@ mod tests {
             "federal".to_string(),
             BracketTable {
                 brackets: ByStatus::uniform(vec![
-                    Bracket { threshold: 10000.0, rate: 0.10 },
-                    Bracket { threshold: 40000.0, rate: 0.20 },
-                    Bracket { threshold: f64::INFINITY, rate: 0.30 },
+                    Bracket {
+                        threshold: 10000.0,
+                        rate: 0.10,
+                    },
+                    Bracket {
+                        threshold: 40000.0,
+                        rate: 0.20,
+                    },
+                    Bracket {
+                        threshold: f64::INFINITY,
+                        rate: 0.30,
+                    },
                 ]),
             },
         );

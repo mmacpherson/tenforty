@@ -1,30 +1,24 @@
 module Main (main) where
 
-import qualified Data.Aeson.Encode.Pretty as AP
-import qualified Data.ByteString.Lazy as BL
+import Data.Aeson.Encode.Pretty qualified as AP
+import Data.ByteString.Lazy qualified as BL
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Options.Applicative
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
+import CA540_2024
+import CA540_2025
+import CAFTB3506_2024
+import CAFTB3506_2025
+import CAFTB3514_2024
+import CAFTB3514_2025
+import CAScheduleCA_2024
+import CAScheduleCA_2025
 import TenForty
 import US1040_2024
 import US1040_2025
-import USSchedule1_2024
-import USSchedule1_2025
-import USSchedule2_2024
-import USSchedule2_2025
-import USSchedule3_2024
-import USSchedule3_2025
-import USScheduleA_2024
-import USScheduleA_2025
-import USScheduleB_2024
-import USScheduleB_2025
-import USScheduleD_2024
-import USScheduleD_2025
-import USScheduleSE_2024
-import USScheduleSE_2025
 import USForm2441_2024
 import USForm2441_2025
 import USForm6251_2024
@@ -39,161 +33,170 @@ import USForm8960_2024
 import USForm8960_2025
 import USForm8995_2024
 import USForm8995_2025
-import CA540_2024
-import CA540_2025
-import CAScheduleCA_2024
-import CAScheduleCA_2025
-import CAFTB3506_2024
-import CAFTB3506_2025
-import CAFTB3514_2024
-import CAFTB3514_2025
-
+import USSchedule1_2024
+import USSchedule1_2025
+import USSchedule2_2024
+import USSchedule2_2025
+import USSchedule3_2024
+import USSchedule3_2025
+import USScheduleA_2024
+import USScheduleA_2025
+import USScheduleB_2024
+import USScheduleB_2025
+import USScheduleD_2024
+import USScheduleD_2025
+import USScheduleSE_2024
+import USScheduleSE_2025
 
 data Options = Options
-  { optForm   :: Text
-  , optOutput :: Maybe FilePath
-  , optPretty :: Bool
-  }
+    { optForm :: Text
+    , optOutput :: Maybe FilePath
+    , optPretty :: Bool
+    }
 
 optionsParser :: Parser Options
-optionsParser = Options
-  <$> strArgument
-      ( metavar "FORM"
-     <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, ca_540_2024, ca_540_2025, all)"
-      )
-  <*> optional (strOption
-      ( long "output"
-     <> short 'o'
-     <> metavar "FILE"
-     <> help "Output file (stdout if not specified)"
-      ))
-  <*> switch
-      ( long "pretty"
-     <> short 'p'
-     <> help "Pretty-print JSON output"
-      )
+optionsParser =
+    Options
+        <$> strArgument
+            ( metavar "FORM"
+                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, ca_540_2024, ca_540_2025, all)"
+            )
+        <*> optional
+            ( strOption
+                ( long "output"
+                    <> short 'o'
+                    <> metavar "FILE"
+                    <> help "Output file (stdout if not specified)"
+                )
+            )
+        <*> switch
+            ( long "pretty"
+                <> short 'p'
+                <> help "Pretty-print JSON output"
+            )
 
 optionsInfo :: ParserInfo Options
-optionsInfo = info (optionsParser <**> helper)
-  ( fullDesc
- <> progDesc "Compile tax forms to JSON computation graphs"
- <> header "tenforty-compile - Tax form DSL compiler"
-  )
-
+optionsInfo =
+    info
+        (optionsParser <**> helper)
+        ( fullDesc
+            <> progDesc "Compile tax forms to JSON computation graphs"
+            <> header "tenforty-compile - Tax form DSL compiler"
+        )
 
 main :: IO ()
 main = do
-  opts <- execParser optionsInfo
-  case T.toLower (optForm opts) of
-    "us_1040_2024" -> compileAndOutput opts us1040_2024
-    "us_1040_2025" -> compileAndOutput opts us1040_2025
-    "us_schedule_1_2024" -> compileAndOutput opts usSchedule1_2024
-    "us_schedule_1_2025" -> compileAndOutput opts usSchedule1_2025
-    "us_schedule_2_2024" -> compileAndOutput opts usSchedule2_2024
-    "us_schedule_2_2025" -> compileAndOutput opts usSchedule2_2025
-    "us_schedule_3_2024" -> compileAndOutput opts usSchedule3_2024
-    "us_schedule_3_2025" -> compileAndOutput opts usSchedule3_2025
-    "us_schedule_a_2024" -> compileAndOutput opts usScheduleA_2024
-    "us_schedule_a_2025" -> compileAndOutput opts usScheduleA_2025
-    "us_schedule_b_2024" -> compileAndOutput opts usScheduleB_2024
-    "us_schedule_b_2025" -> compileAndOutput opts usScheduleB_2025
-    "us_schedule_d_2024" -> compileAndOutput opts usScheduleD_2024
-    "us_schedule_d_2025" -> compileAndOutput opts usScheduleD_2025
-    "us_schedule_se_2024" -> compileAndOutput opts usScheduleSE_2024
-    "us_schedule_se_2025" -> compileAndOutput opts usScheduleSE_2025
-    "us_form_2441_2024" -> compileAndOutput opts usForm2441_2024
-    "us_form_2441_2025" -> compileAndOutput opts usForm2441_2025
-    "us_form_6251_2024" -> compileAndOutput opts usForm6251_2024
-    "us_form_6251_2025" -> compileAndOutput opts usForm6251_2025
-    "us_form_8812_2024" -> compileAndOutput opts usForm8812_2024
-    "us_form_8812_2025" -> compileAndOutput opts usForm8812_2025
-    "us_form_8863_2024" -> compileAndOutput opts usForm8863_2024
-    "us_form_8863_2025" -> compileAndOutput opts usForm8863_2025
-    "us_form_8959_2024" -> compileAndOutput opts usForm8959_2024
-    "us_form_8959_2025" -> compileAndOutput opts usForm8959_2025
-    "us_form_8960_2024" -> compileAndOutput opts usForm8960_2024
-    "us_form_8960_2025" -> compileAndOutput opts usForm8960_2025
-    "us_form_8995_2024" -> compileAndOutput opts usForm8995_2024
-    "us_form_8995_2025" -> compileAndOutput opts usForm8995_2025
-    "ca_540_2024" -> compileAndOutput opts ca540_2024
-    "ca_540_2025" -> compileAndOutput opts ca540_2025
-    "ca_schedule_ca_2024" -> compileAndOutput opts caScheduleCA_2024
-    "ca_schedule_ca_2025" -> compileAndOutput opts caScheduleCA_2025
-    "ca_ftb_3506_2024" -> compileAndOutput opts caFTB3506_2024
-    "ca_ftb_3506_2025" -> compileAndOutput opts caFTB3506_2025
-    "ca_ftb_3514_2024" -> compileAndOutput opts caFTB3514_2024
-    "ca_ftb_3514_2025" -> compileAndOutput opts caFTB3514_2025
-    "all" -> do
-      compileToFile opts "us_1040_2024.json" us1040_2024
-      compileToFile opts "us_1040_2025.json" us1040_2025
-      compileToFile opts "us_schedule_1_2024.json" usSchedule1_2024
-      compileToFile opts "us_schedule_1_2025.json" usSchedule1_2025
-      compileToFile opts "us_schedule_2_2024.json" usSchedule2_2024
-      compileToFile opts "us_schedule_2_2025.json" usSchedule2_2025
-      compileToFile opts "us_schedule_3_2024.json" usSchedule3_2024
-      compileToFile opts "us_schedule_3_2025.json" usSchedule3_2025
-      compileToFile opts "us_schedule_a_2024.json" usScheduleA_2024
-      compileToFile opts "us_schedule_a_2025.json" usScheduleA_2025
-      compileToFile opts "us_schedule_b_2024.json" usScheduleB_2024
-      compileToFile opts "us_schedule_b_2025.json" usScheduleB_2025
-      compileToFile opts "us_schedule_d_2024.json" usScheduleD_2024
-      compileToFile opts "us_schedule_d_2025.json" usScheduleD_2025
-      compileToFile opts "us_schedule_se_2024.json" usScheduleSE_2024
-      compileToFile opts "us_schedule_se_2025.json" usScheduleSE_2025
-      compileToFile opts "us_form_2441_2024.json" usForm2441_2024
-      compileToFile opts "us_form_2441_2025.json" usForm2441_2025
-      compileToFile opts "us_form_6251_2024.json" usForm6251_2024
-      compileToFile opts "us_form_6251_2025.json" usForm6251_2025
-      compileToFile opts "us_form_8812_2024.json" usForm8812_2024
-      compileToFile opts "us_form_8812_2025.json" usForm8812_2025
-      compileToFile opts "us_form_8863_2024.json" usForm8863_2024
-      compileToFile opts "us_form_8863_2025.json" usForm8863_2025
-      compileToFile opts "us_form_8959_2024.json" usForm8959_2024
-      compileToFile opts "us_form_8959_2025.json" usForm8959_2025
-      compileToFile opts "us_form_8960_2024.json" usForm8960_2024
-      compileToFile opts "us_form_8960_2025.json" usForm8960_2025
-      compileToFile opts "us_form_8995_2024.json" usForm8995_2024
-      compileToFile opts "us_form_8995_2025.json" usForm8995_2025
-      compileToFile opts "ca_540_2024.json" ca540_2024
-      compileToFile opts "ca_540_2025.json" ca540_2025
-      compileToFile opts "ca_schedule_ca_2024.json" caScheduleCA_2024
-      compileToFile opts "ca_schedule_ca_2025.json" caScheduleCA_2025
-      compileToFile opts "ca_ftb_3506_2024.json" caFTB3506_2024
-      compileToFile opts "ca_ftb_3506_2025.json" caFTB3506_2025
-      compileToFile opts "ca_ftb_3514_2024.json" caFTB3514_2024
-      compileToFile opts "ca_ftb_3514_2025.json" caFTB3514_2025
-    other -> do
-      hPutStrLn stderr $ "Unknown form: " ++ T.unpack other
-      hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514 (append _2024 or _2025), all"
-      exitFailure
-
+    opts <- execParser optionsInfo
+    case T.toLower (optForm opts) of
+        "us_1040_2024" -> compileAndOutput opts us1040_2024
+        "us_1040_2025" -> compileAndOutput opts us1040_2025
+        "us_schedule_1_2024" -> compileAndOutput opts usSchedule1_2024
+        "us_schedule_1_2025" -> compileAndOutput opts usSchedule1_2025
+        "us_schedule_2_2024" -> compileAndOutput opts usSchedule2_2024
+        "us_schedule_2_2025" -> compileAndOutput opts usSchedule2_2025
+        "us_schedule_3_2024" -> compileAndOutput opts usSchedule3_2024
+        "us_schedule_3_2025" -> compileAndOutput opts usSchedule3_2025
+        "us_schedule_a_2024" -> compileAndOutput opts usScheduleA_2024
+        "us_schedule_a_2025" -> compileAndOutput opts usScheduleA_2025
+        "us_schedule_b_2024" -> compileAndOutput opts usScheduleB_2024
+        "us_schedule_b_2025" -> compileAndOutput opts usScheduleB_2025
+        "us_schedule_d_2024" -> compileAndOutput opts usScheduleD_2024
+        "us_schedule_d_2025" -> compileAndOutput opts usScheduleD_2025
+        "us_schedule_se_2024" -> compileAndOutput opts usScheduleSE_2024
+        "us_schedule_se_2025" -> compileAndOutput opts usScheduleSE_2025
+        "us_form_2441_2024" -> compileAndOutput opts usForm2441_2024
+        "us_form_2441_2025" -> compileAndOutput opts usForm2441_2025
+        "us_form_6251_2024" -> compileAndOutput opts usForm6251_2024
+        "us_form_6251_2025" -> compileAndOutput opts usForm6251_2025
+        "us_form_8812_2024" -> compileAndOutput opts usForm8812_2024
+        "us_form_8812_2025" -> compileAndOutput opts usForm8812_2025
+        "us_form_8863_2024" -> compileAndOutput opts usForm8863_2024
+        "us_form_8863_2025" -> compileAndOutput opts usForm8863_2025
+        "us_form_8959_2024" -> compileAndOutput opts usForm8959_2024
+        "us_form_8959_2025" -> compileAndOutput opts usForm8959_2025
+        "us_form_8960_2024" -> compileAndOutput opts usForm8960_2024
+        "us_form_8960_2025" -> compileAndOutput opts usForm8960_2025
+        "us_form_8995_2024" -> compileAndOutput opts usForm8995_2024
+        "us_form_8995_2025" -> compileAndOutput opts usForm8995_2025
+        "ca_540_2024" -> compileAndOutput opts ca540_2024
+        "ca_540_2025" -> compileAndOutput opts ca540_2025
+        "ca_schedule_ca_2024" -> compileAndOutput opts caScheduleCA_2024
+        "ca_schedule_ca_2025" -> compileAndOutput opts caScheduleCA_2025
+        "ca_ftb_3506_2024" -> compileAndOutput opts caFTB3506_2024
+        "ca_ftb_3506_2025" -> compileAndOutput opts caFTB3506_2025
+        "ca_ftb_3514_2024" -> compileAndOutput opts caFTB3514_2024
+        "ca_ftb_3514_2025" -> compileAndOutput opts caFTB3514_2025
+        "all" -> do
+            compileToFile opts "us_1040_2024.json" us1040_2024
+            compileToFile opts "us_1040_2025.json" us1040_2025
+            compileToFile opts "us_schedule_1_2024.json" usSchedule1_2024
+            compileToFile opts "us_schedule_1_2025.json" usSchedule1_2025
+            compileToFile opts "us_schedule_2_2024.json" usSchedule2_2024
+            compileToFile opts "us_schedule_2_2025.json" usSchedule2_2025
+            compileToFile opts "us_schedule_3_2024.json" usSchedule3_2024
+            compileToFile opts "us_schedule_3_2025.json" usSchedule3_2025
+            compileToFile opts "us_schedule_a_2024.json" usScheduleA_2024
+            compileToFile opts "us_schedule_a_2025.json" usScheduleA_2025
+            compileToFile opts "us_schedule_b_2024.json" usScheduleB_2024
+            compileToFile opts "us_schedule_b_2025.json" usScheduleB_2025
+            compileToFile opts "us_schedule_d_2024.json" usScheduleD_2024
+            compileToFile opts "us_schedule_d_2025.json" usScheduleD_2025
+            compileToFile opts "us_schedule_se_2024.json" usScheduleSE_2024
+            compileToFile opts "us_schedule_se_2025.json" usScheduleSE_2025
+            compileToFile opts "us_form_2441_2024.json" usForm2441_2024
+            compileToFile opts "us_form_2441_2025.json" usForm2441_2025
+            compileToFile opts "us_form_6251_2024.json" usForm6251_2024
+            compileToFile opts "us_form_6251_2025.json" usForm6251_2025
+            compileToFile opts "us_form_8812_2024.json" usForm8812_2024
+            compileToFile opts "us_form_8812_2025.json" usForm8812_2025
+            compileToFile opts "us_form_8863_2024.json" usForm8863_2024
+            compileToFile opts "us_form_8863_2025.json" usForm8863_2025
+            compileToFile opts "us_form_8959_2024.json" usForm8959_2024
+            compileToFile opts "us_form_8959_2025.json" usForm8959_2025
+            compileToFile opts "us_form_8960_2024.json" usForm8960_2024
+            compileToFile opts "us_form_8960_2025.json" usForm8960_2025
+            compileToFile opts "us_form_8995_2024.json" usForm8995_2024
+            compileToFile opts "us_form_8995_2025.json" usForm8995_2025
+            compileToFile opts "ca_540_2024.json" ca540_2024
+            compileToFile opts "ca_540_2025.json" ca540_2025
+            compileToFile opts "ca_schedule_ca_2024.json" caScheduleCA_2024
+            compileToFile opts "ca_schedule_ca_2025.json" caScheduleCA_2025
+            compileToFile opts "ca_ftb_3506_2024.json" caFTB3506_2024
+            compileToFile opts "ca_ftb_3506_2025.json" caFTB3506_2025
+            compileToFile opts "ca_ftb_3514_2024.json" caFTB3514_2024
+            compileToFile opts "ca_ftb_3514_2025.json" caFTB3514_2025
+        other -> do
+            hPutStrLn stderr $ "Unknown form: " ++ T.unpack other
+            hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514 (append _2024 or _2025), all"
+            exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()
 compileAndOutput opts formResult =
-  case formResult of
-    Left err -> do
-      hPutStrLn stderr $ "Form validation error: " ++ show err
-      exitFailure
-    Right frm -> do
-      let graph = compileForm frm
-          json = if optPretty opts
-                 then AP.encodePretty graph
-                 else compileFormToJSON frm
-      case optOutput opts of
-        Nothing -> BL.putStr json >> putStrLn ""
-        Just fp -> BL.writeFile fp json
-
+    case formResult of
+        Left err -> do
+            hPutStrLn stderr $ "Form validation error: " ++ show err
+            exitFailure
+        Right frm -> do
+            let graph = compileForm frm
+                json =
+                    if optPretty opts
+                        then AP.encodePretty graph
+                        else compileFormToJSON frm
+            case optOutput opts of
+                Nothing -> BL.putStr json >> putStrLn ""
+                Just fp -> BL.writeFile fp json
 
 compileToFile :: Options -> FilePath -> Either FormError Form -> IO ()
 compileToFile opts fp formResult =
-  case formResult of
-    Left err -> do
-      hPutStrLn stderr $ "Form validation error for " ++ fp ++ ": " ++ show err
-      exitFailure
-    Right frm -> do
-      let graph = compileForm frm
-          json = if optPretty opts
-                 then AP.encodePretty graph
-                 else compileFormToJSON frm
-      BL.writeFile fp json
-      putStrLn $ "Compiled: " ++ fp
+    case formResult of
+        Left err -> do
+            hPutStrLn stderr $ "Form validation error for " ++ fp ++ ": " ++ show err
+            exitFailure
+        Right frm -> do
+            let graph = compileForm frm
+                json =
+                    if optPretty opts
+                        then AP.encodePretty graph
+                        else compileFormToJSON frm
+            BL.writeFile fp json
+            putStrLn $ "Compiled: " ++ fp

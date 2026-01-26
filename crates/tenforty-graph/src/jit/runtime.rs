@@ -54,7 +54,8 @@ impl<'g> JitRuntime<'g> {
         }
 
         unsafe {
-            self.compiled.call(self.slots.as_ptr(), self.slots.as_mut_ptr());
+            self.compiled
+                .call(self.slots.as_ptr(), self.slots.as_mut_ptr());
         }
 
         self.dirty = false;
@@ -179,7 +180,8 @@ impl<'g> JitBatchRuntime<'g> {
         }
 
         unsafe {
-            self.compiled.call(self.input_buffer.as_ptr(), self.output_buffer.as_mut_ptr());
+            self.compiled
+                .call(self.input_buffer.as_ptr(), self.output_buffer.as_mut_ptr());
         }
 
         self.dirty = false;
@@ -218,8 +220,8 @@ impl<'g> JitBatchRuntime<'g> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::jit::{JitCompiler, BATCH_SIZE};
     use crate::graph::{Bracket, BracketTable, ByStatus, Graph, Node, Op};
+    use crate::jit::{JitCompiler, BATCH_SIZE};
     use std::collections::HashMap;
 
     fn simple_graph() -> Graph {
@@ -302,9 +304,18 @@ mod tests {
             "federal".to_string(),
             BracketTable {
                 brackets: ByStatus::uniform(vec![
-                    Bracket { threshold: 10000.0, rate: 0.10 },
-                    Bracket { threshold: 40000.0, rate: 0.20 },
-                    Bracket { threshold: f64::INFINITY, rate: 0.30 },
+                    Bracket {
+                        threshold: 10000.0,
+                        rate: 0.10,
+                    },
+                    Bracket {
+                        threshold: 40000.0,
+                        rate: 0.20,
+                    },
+                    Bracket {
+                        threshold: f64::INFINITY,
+                        rate: 0.30,
+                    },
                 ]),
             },
         );
@@ -411,7 +422,11 @@ mod tests {
         jit_rt.set("income", 25000.0).unwrap();
         let grad = jit_rt.gradient("tax", "income").unwrap();
 
-        assert!((grad - 0.20).abs() < 1e-10, "Expected marginal rate 0.20, got {}", grad);
+        assert!(
+            (grad - 0.20).abs() < 1e-10,
+            "Expected marginal rate 0.20, got {}",
+            grad
+        );
     }
 
     #[test]
@@ -425,7 +440,11 @@ mod tests {
         let target_tax = 1000.0 + 15000.0 * 0.20;
         let income = jit_rt.solve("tax", target_tax, "income", 20000.0).unwrap();
 
-        assert!((income - 25000.0).abs() < 1.0, "Expected income ~25000, got {}", income);
+        assert!(
+            (income - 25000.0).abs() < 1.0,
+            "Expected income ~25000, got {}",
+            income
+        );
     }
 
     #[test]
@@ -473,7 +492,9 @@ mod tests {
             scalar_results[i] = jit_rt.eval("tax").unwrap();
         }
 
-        let batch_compiled = compiler.compile_batch(&graph, FilingStatus::Single).unwrap();
+        let batch_compiled = compiler
+            .compile_batch(&graph, FilingStatus::Single)
+            .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("income", &incomes).unwrap();
         let simd_results = batch_rt.eval_batch("tax").unwrap();
@@ -509,7 +530,9 @@ mod tests {
             scalar_results[i] = jit_rt.eval("federal_tax").unwrap();
         }
 
-        let batch_compiled = compiler.compile_batch(&graph, FilingStatus::Single).unwrap();
+        let batch_compiled = compiler
+            .compile_batch(&graph, FilingStatus::Single)
+            .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("wages", &wages).unwrap();
         batch_rt.set_batch("interest", &interest).unwrap();
@@ -534,7 +557,9 @@ mod tests {
 
         let incomes = [0.0, -100.0];
 
-        let batch_compiled = compiler.compile_batch(&graph, FilingStatus::Single).unwrap();
+        let batch_compiled = compiler
+            .compile_batch(&graph, FilingStatus::Single)
+            .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("income", &incomes).unwrap();
         let simd_results = batch_rt.eval_batch("tax").unwrap();
@@ -546,9 +571,9 @@ mod tests {
             let scalar_result = jit_rt.eval("tax").unwrap();
 
             assert!(
-                (scalar_result - simd_results[i]).abs() < 1e-6 ||
-                (scalar_result.is_nan() && simd_results[i].is_nan()) ||
-                (scalar_result.is_infinite() && simd_results[i].is_infinite()),
+                (scalar_result - simd_results[i]).abs() < 1e-6
+                    || (scalar_result.is_nan() && simd_results[i].is_nan())
+                    || (scalar_result.is_infinite() && simd_results[i].is_infinite()),
                 "Mismatch at index {} (income={}): scalar={}, simd={}",
                 i,
                 incomes[i],

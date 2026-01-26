@@ -6,11 +6,11 @@ pub mod primitives;
 pub mod solver;
 pub mod viz;
 
-pub use graph::{FilingStatus, Graph, Node, NodeId, Op, TableId};
-pub use eval::{Runtime, Scenario, ScenarioResult, eval_batch, eval_batch_named};
 pub use autodiff::gradient;
-pub use solver::solve;
+pub use eval::{eval_batch, eval_batch_named, Runtime, Scenario, ScenarioResult};
+pub use graph::{FilingStatus, Graph, Node, NodeId, Op, TableId};
 pub use link::{GraphSet, LinkError, UnresolvedImport};
+pub use solver::solve;
 
 #[cfg(feature = "jit")]
 pub mod jit;

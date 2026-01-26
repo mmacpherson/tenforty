@@ -5,11 +5,12 @@
 use graphlib::eval::Runtime;
 use graphlib::graph::{FilingStatus, Graph};
 use rayon::prelude::*;
-use std::sync::Arc;
 use std::time::Instant;
 
 #[cfg(feature = "jit")]
 use graphlib::jit::{JitBatchRuntime, JitCompiler, JitRuntime, BATCH_SIZE};
+#[cfg(feature = "jit")]
+use std::sync::Arc;
 
 const NUM_SCENARIOS: usize = 100_000;
 
@@ -50,7 +51,11 @@ fn bench_interpreter_sequential(graph: &Graph, scenarios: &[(f64, f64, f64)]) ->
     throughput
 }
 
-fn bench_interpreter_parallel(graph: &Graph, scenarios: &[(f64, f64, f64)], num_threads: usize) -> f64 {
+fn bench_interpreter_parallel(
+    graph: &Graph,
+    scenarios: &[(f64, f64, f64)],
+    num_threads: usize,
+) -> f64 {
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(num_threads)
         .build()
@@ -216,7 +221,11 @@ fn bench_jit_simd_sequential(graph: &Graph, scenarios: &[(f64, f64, f64)]) -> f6
 }
 
 #[cfg(feature = "jit")]
-fn bench_jit_simd_parallel(graph: &Graph, scenarios: &[(f64, f64, f64)], num_threads: usize) -> f64 {
+fn bench_jit_simd_parallel(
+    graph: &Graph,
+    scenarios: &[(f64, f64, f64)],
+    num_threads: usize,
+) -> f64 {
     let compiler = JitCompiler::new().unwrap();
 
     let pool = rayon::ThreadPoolBuilder::new()
@@ -228,7 +237,8 @@ fn bench_jit_simd_parallel(graph: &Graph, scenarios: &[(f64, f64, f64)], num_thr
         let start = Instant::now();
 
         // Process chunks of scenarios in parallel, each chunk processed with SIMD batches
-        let chunk_size = ((scenarios.len() / num_threads) / BATCH_SIZE * BATCH_SIZE).max(BATCH_SIZE * 100);
+        let chunk_size =
+            ((scenarios.len() / num_threads) / BATCH_SIZE * BATCH_SIZE).max(BATCH_SIZE * 100);
 
         let sum: f64 = scenarios
             .par_chunks(chunk_size)
@@ -316,7 +326,7 @@ fn main() {
     };
 
     println!("--- Sequential (single-threaded) ---");
-    let interp_1 = bench_interpreter_sequential(&graph, &scenarios);
+    bench_interpreter_sequential(&graph, &scenarios);
 
     #[cfg(feature = "jit")]
     let jit_1 = bench_jit_sequential(&graph, &scenarios);
@@ -396,6 +406,14 @@ fn main() {
     let peak_simd = results.iter().map(|r| r.3).fold(0.0f64, f64::max);
 
     println!("Interpreter: {:>12.0} scenarios/sec", peak_interp);
-    println!("JIT scalar:  {:>12.0} scenarios/sec ({:.1}x vs interpreter)", peak_jit, peak_jit / peak_interp);
-    println!("JIT+SIMD:    {:>12.0} scenarios/sec ({:.1}x vs interpreter)", peak_simd, peak_simd / peak_interp);
+    println!(
+        "JIT scalar:  {:>12.0} scenarios/sec ({:.1}x vs interpreter)",
+        peak_jit,
+        peak_jit / peak_interp
+    );
+    println!(
+        "JIT+SIMD:    {:>12.0} scenarios/sec ({:.1}x vs interpreter)",
+        peak_simd,
+        peak_simd / peak_interp
+    );
 }

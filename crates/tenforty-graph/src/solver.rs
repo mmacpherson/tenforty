@@ -44,7 +44,14 @@ pub fn solve(
     input: NodeId,
     initial_guess: f64,
 ) -> Result<f64, SolveError> {
-    solve_with_config(runtime, output, target, input, initial_guess, &SolverConfig::default())
+    solve_with_config(
+        runtime,
+        output,
+        target,
+        input,
+        initial_guess,
+        &SolverConfig::default(),
+    )
 }
 
 pub fn solve_with_config(
@@ -210,9 +217,18 @@ mod tests {
             "federal".to_string(),
             BracketTable {
                 brackets: ByStatus::uniform(vec![
-                    Bracket { threshold: 10000.0, rate: 0.10 },
-                    Bracket { threshold: 40000.0, rate: 0.20 },
-                    Bracket { threshold: f64::INFINITY, rate: 0.30 },
+                    Bracket {
+                        threshold: 10000.0,
+                        rate: 0.10,
+                    },
+                    Bracket {
+                        threshold: 40000.0,
+                        rate: 0.20,
+                    },
+                    Bracket {
+                        threshold: f64::INFINITY,
+                        rate: 0.30,
+                    },
                 ]),
             },
         );

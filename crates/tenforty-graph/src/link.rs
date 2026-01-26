@@ -8,7 +8,11 @@ use crate::graph::{
 #[derive(Debug, Error)]
 pub enum LinkError {
     #[error("Unresolved import: form '{form}' line '{line}' year {year}")]
-    UnresolvedImport { form: String, line: String, year: u16 },
+    UnresolvedImport {
+        form: String,
+        line: String,
+        year: u16,
+    },
     #[error("Form not found: '{0}'")]
     FormNotFound(String),
     #[error("Output node not found: form '{form}' line '{line}'")]
@@ -67,7 +71,7 @@ impl GraphSet {
     pub fn unresolved_imports(&self) -> Vec<UnresolvedImport> {
         let mut unresolved = Vec::new();
 
-        for (_form_id, graph) in &self.graphs {
+        for graph in self.graphs.values() {
             for node in graph.nodes.values() {
                 if let Op::Import { form, line, year } = &node.op {
                     let resolved = self.graphs.get(form).and_then(|target_graph| {
@@ -76,9 +80,9 @@ impl GraphSet {
                             .iter()
                             .filter_map(|id| target_graph.nodes.get(id))
                             .find(|n| {
-                                n.name
-                                    .as_deref()
-                                    .is_some_and(|name| name == line || name.starts_with(&format!("{line}_")))
+                                n.name.as_deref().is_some_and(|name| {
+                                    name == line || name.starts_with(&format!("{line}_"))
+                                })
                             })
                     });
 
@@ -355,7 +359,11 @@ fn remap_op(op: &Op, offset: NodeId, redirects: &HashMap<NodeId, NodeId>) -> Op 
                 qualifying_widow: remap_node_id(values.qualifying_widow, offset, redirects),
             },
         },
-        Op::IfPositive { cond, then, otherwise } => Op::IfPositive {
+        Op::IfPositive {
+            cond,
+            then,
+            otherwise,
+        } => Op::IfPositive {
             cond: remap_node_id(*cond, offset, redirects),
             then: remap_node_id(*then, offset, redirects),
             otherwise: remap_node_id(*otherwise, offset, redirects),
@@ -472,7 +480,11 @@ fn resolve_imports_in_op(op: &Op, redirects: &HashMap<NodeId, NodeId>) -> Option
         Op::Clamp { arg, min, max } => {
             if let Some(&new_arg) = redirects.get(arg) {
                 changed = true;
-                Op::Clamp { arg: new_arg, min: *min, max: *max }
+                Op::Clamp {
+                    arg: new_arg,
+                    min: *min,
+                    max: *max,
+                }
             } else {
                 op.clone()
             }
@@ -480,12 +492,20 @@ fn resolve_imports_in_op(op: &Op, redirects: &HashMap<NodeId, NodeId>) -> Option
         Op::BracketTax { table, income } => {
             if let Some(&new_income) = redirects.get(income) {
                 changed = true;
-                Op::BracketTax { table: table.clone(), income: new_income }
+                Op::BracketTax {
+                    table: table.clone(),
+                    income: new_income,
+                }
             } else {
                 op.clone()
             }
         }
-        Op::PhaseOut { base, threshold, rate, agi } => {
+        Op::PhaseOut {
+            base,
+            threshold,
+            rate,
+            agi,
+        } => {
             if let Some(&new_agi) = redirects.get(agi) {
                 changed = true;
                 Op::PhaseOut {
@@ -505,8 +525,11 @@ fn resolve_imports_in_op(op: &Op, redirects: &HashMap<NodeId, NodeId>) -> Option
             let new_hoh = redirects.get(&values.head_of_household).copied();
             let new_qw = redirects.get(&values.qualifying_widow).copied();
 
-            if new_single.is_some() || new_mj.is_some() || new_ms.is_some()
-                || new_hoh.is_some() || new_qw.is_some()
+            if new_single.is_some()
+                || new_mj.is_some()
+                || new_ms.is_some()
+                || new_hoh.is_some()
+                || new_qw.is_some()
             {
                 changed = true;
                 Op::ByStatus {
@@ -522,7 +545,11 @@ fn resolve_imports_in_op(op: &Op, redirects: &HashMap<NodeId, NodeId>) -> Option
                 op.clone()
             }
         }
-        Op::IfPositive { cond, then, otherwise } => {
+        Op::IfPositive {
+            cond,
+            then,
+            otherwise,
+        } => {
             let new_cond = redirects.get(cond).copied();
             let new_then = redirects.get(then).copied();
             let new_otherwise = redirects.get(otherwise).copied();

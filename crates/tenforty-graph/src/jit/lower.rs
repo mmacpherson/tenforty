@@ -53,9 +53,13 @@ pub fn lower_graph<M: Module>(
     }
 
     for &output_id in &graph.outputs {
-        if let (Some(&value), Some(&slot)) = (node_values.get(&output_id), node_to_slot.get(&output_id)) {
+        if let (Some(&value), Some(&slot)) =
+            (node_values.get(&output_id), node_to_slot.get(&output_id))
+        {
             let offset = (slot * 8) as i32;
-            builder.ins().store(MemFlags::new(), value, outputs_ptr, offset);
+            builder
+                .ins()
+                .store(MemFlags::new(), value, outputs_ptr, offset);
         }
     }
 
@@ -82,7 +86,9 @@ fn lower_op(
                 .get(&node_id)
                 .ok_or(JitError::NodeNotFound(node_id))?;
             let offset = (*slot * 8) as i32;
-            Ok(builder.ins().load(types::F64, MemFlags::new(), inputs_ptr, offset))
+            Ok(builder
+                .ins()
+                .load(types::F64, MemFlags::new(), inputs_ptr, offset))
         }
 
         Op::Literal { value } => Ok(builder.ins().f64const(*value)),
@@ -156,7 +162,11 @@ fn lower_op(
             get_node_value(target_id, node_values)
         }
 
-        Op::IfPositive { cond, then, otherwise } => {
+        Op::IfPositive {
+            cond,
+            then,
+            otherwise,
+        } => {
             let c = get_node_value(*cond, node_values)?;
             let t = get_node_value(*then, node_values)?;
             let e = get_node_value(*otherwise, node_values)?;
@@ -175,7 +185,12 @@ fn lower_op(
             Ok(lower_bracket_tax(builder, brackets, inc))
         }
 
-        Op::PhaseOut { base, threshold, rate, agi } => {
+        Op::PhaseOut {
+            base,
+            threshold,
+            rate,
+            agi,
+        } => {
             let thresh = *threshold.get(filing_status);
             let agi_val = get_node_value(*agi, node_values)?;
             Ok(lower_phase_out(builder, *base, thresh, *rate, agi_val))
@@ -239,7 +254,9 @@ fn lower_phase_out(
     let rate_val = builder.ins().f64const(rate);
     let zero = builder.ins().f64const(0.0);
 
-    let is_below = builder.ins().fcmp(FloatCC::LessThanOrEqual, agi, thresh_val);
+    let is_below = builder
+        .ins()
+        .fcmp(FloatCC::LessThanOrEqual, agi, thresh_val);
     let excess = builder.ins().fsub(agi, thresh_val);
     let reduction = builder.ins().fmul(excess, rate_val);
     let reduced = builder.ins().fsub(base_val, reduction);
@@ -294,7 +311,9 @@ pub fn lower_graph_simd<M: Module>(
     for (&output_id, &slot) in output_offsets {
         if let Some(&value) = node_values.get(&output_id) {
             let offset = (slot * BATCH_SIZE * 8) as i32;
-            builder.ins().store(MemFlags::new(), value, outputs_ptr, offset);
+            builder
+                .ins()
+                .store(MemFlags::new(), value, outputs_ptr, offset);
         }
     }
 
@@ -321,7 +340,9 @@ fn lower_op_simd(
                 .get(&node_id)
                 .ok_or(JitError::NodeNotFound(node_id))?;
             let offset = (*slot * BATCH_SIZE * 8) as i32;
-            Ok(builder.ins().load(types::F64X2, MemFlags::new(), inputs_ptr, offset))
+            Ok(builder
+                .ins()
+                .load(types::F64X2, MemFlags::new(), inputs_ptr, offset))
         }
 
         Op::Literal { value } => {
@@ -355,7 +376,9 @@ fn lower_op_simd(
             let one_scalar = builder.ins().f64const(1.0);
             let one = builder.ins().splat(types::F64X2, one_scalar);
             let is_zero = builder.ins().fcmp(FloatCC::Equal, r, zero);
-            let mask = builder.ins().bitcast(types::F64X2, MemFlags::new(), is_zero);
+            let mask = builder
+                .ins()
+                .bitcast(types::F64X2, MemFlags::new(), is_zero);
             let safe_r = builder.ins().bitselect(mask, one, r);
             let result = builder.ins().fdiv(l, safe_r);
             Ok(builder.ins().bitselect(mask, zero, result))
@@ -403,14 +426,20 @@ fn lower_op_simd(
             get_node_value_simd(target_id, node_values)
         }
 
-        Op::IfPositive { cond, then, otherwise } => {
+        Op::IfPositive {
+            cond,
+            then,
+            otherwise,
+        } => {
             let c = get_node_value_simd(*cond, node_values)?;
             let t = get_node_value_simd(*then, node_values)?;
             let e = get_node_value_simd(*otherwise, node_values)?;
             let zero_scalar = builder.ins().f64const(0.0);
             let zero = builder.ins().splat(types::F64X2, zero_scalar);
             let is_positive = builder.ins().fcmp(FloatCC::GreaterThan, c, zero);
-            let mask = builder.ins().bitcast(types::F64X2, MemFlags::new(), is_positive);
+            let mask = builder
+                .ins()
+                .bitcast(types::F64X2, MemFlags::new(), is_positive);
             Ok(builder.ins().bitselect(mask, t, e))
         }
 
@@ -424,7 +453,12 @@ fn lower_op_simd(
             Ok(lower_bracket_tax_simd(builder, brackets, inc_vec))
         }
 
-        Op::PhaseOut { base, threshold, rate, agi } => {
+        Op::PhaseOut {
+            base,
+            threshold,
+            rate,
+            agi,
+        } => {
             let thresh = *threshold.get(filing_status);
             let agi_val = get_node_value_simd(*agi, node_values)?;
             Ok(lower_phase_out_simd(builder, *base, thresh, *rate, agi_val))
@@ -454,7 +488,11 @@ fn lower_bracket_tax_simd(
     let tax1 = lower_bracket_tax(builder, brackets, inc1);
 
     let zero_vec_bytes: [u8; 16] = [0; 16];
-    let zero_const = builder.func.dfg.constants.insert((&zero_vec_bytes[..]).into());
+    let zero_const = builder
+        .func
+        .dfg
+        .constants
+        .insert((&zero_vec_bytes[..]).into());
     let mut tax_vec = builder.ins().vconst(types::F64X2, zero_const);
     tax_vec = builder.ins().insertlane(tax_vec, tax0, 0);
     tax_vec = builder.ins().insertlane(tax_vec, tax1, 1);
@@ -478,8 +516,12 @@ fn lower_phase_out_simd(
     let zero_scalar = builder.ins().f64const(0.0);
     let zero = builder.ins().splat(types::F64X2, zero_scalar);
 
-    let is_below = builder.ins().fcmp(FloatCC::LessThanOrEqual, agi_vec, thresh_val);
-    let mask = builder.ins().bitcast(types::F64X2, MemFlags::new(), is_below);
+    let is_below = builder
+        .ins()
+        .fcmp(FloatCC::LessThanOrEqual, agi_vec, thresh_val);
+    let mask = builder
+        .ins()
+        .bitcast(types::F64X2, MemFlags::new(), is_below);
     let excess = builder.ins().fsub(agi_vec, thresh_val);
     let reduction = builder.ins().fmul(excess, rate_val);
     let reduced = builder.ins().fsub(base_val, reduction);
