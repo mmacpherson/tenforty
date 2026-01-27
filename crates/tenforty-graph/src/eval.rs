@@ -1,4 +1,4 @@
-use crate::graph::{FilingStatus, Graph, NodeId, Op};
+use crate::graph::{FilingStatus, Graph, GraphError, NodeId, Op};
 use crate::primitives;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
@@ -12,12 +12,16 @@ pub enum EvalError {
     InputNotSet(String),
     #[error("Node {0} not found")]
     NodeNotFound(NodeId),
+    #[error("Node '{0}' not found")]
+    NodeNameNotFound(String),
     #[error("Table '{0}' not found")]
     TableNotFound(String),
     #[error("Division by zero at node {0}")]
     DivisionByZero(NodeId),
     #[error("Cycle detected: {0:?}")]
     CycleDetected(Vec<String>),
+    #[error(transparent)]
+    Graph(#[from] GraphError),
 }
 
 pub struct Runtime<'g> {
@@ -60,7 +64,7 @@ impl<'g> Runtime<'g> {
         let node_id = self
             .graph
             .node_id_by_name(name)
-            .ok_or(EvalError::NodeNotFound(0))?;
+            .ok_or_else(|| EvalError::NodeNameNotFound(name.to_string()))?;
         self.visiting.clear();
         self.stack.clear();
         self.eval_node(node_id)

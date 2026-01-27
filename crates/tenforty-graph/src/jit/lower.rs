@@ -15,22 +15,9 @@ pub fn lower_graph<M: Module>(
     node_to_slot: &HashMap<NodeId, usize>,
     _num_slots: usize,
 ) -> Result<(), JitError> {
-    let _ptr_type = module.target_config().pointer_type();
-
-    let mut func_ctx = FunctionBuilderContext::new();
-    let mut builder = FunctionBuilder::new(func, &mut func_ctx);
-
-    let entry_block = builder.create_block();
-    builder.append_block_params_for_function_params(entry_block);
-    builder.switch_to_block(entry_block);
-    builder.seal_block(entry_block);
-
-    let inputs_ptr = builder.block_params(entry_block)[0];
-    let outputs_ptr = builder.block_params(entry_block)[1];
-
     let mut node_values: HashMap<NodeId, Value> = HashMap::new();
 
-    let order = graph.topological_order();
+    let order = graph.topological_order()?;
 
     for node_id in &order {
         let node = match graph.nodes.get(node_id) {
@@ -286,7 +273,7 @@ pub fn lower_graph_simd<M: Module>(
 
     let mut node_values: HashMap<NodeId, Value> = HashMap::new();
 
-    let order = graph.topological_order();
+    let order = graph.topological_order()?;
 
     for node_id in &order {
         let node = match graph.nodes.get(node_id) {
