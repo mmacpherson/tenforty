@@ -321,9 +321,9 @@ def test_all_federal_outputs_parity(w2_income):
 
 @skip_if_graph_unavailable
 def test_ca_graph_requires_all_imports():
-    """Graph backend should fail hard until CA import closure is loaded."""
-    with pytest.raises(RuntimeError, match="Unresolved imports"):
-        evaluate_return(year=2024, state="CA", w2_income=100_000, backend="graph")
+    """Graph backend should load the full CA import closure."""
+    result = evaluate_return(year=2024, state="CA", w2_income=100_000, backend="graph")
+    assert result.state_total_tax > 0
 
 
 # === 2025 Sanity Tests (Graph Only) ===
@@ -352,9 +352,9 @@ def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
 
     for inp in graph.input_names():
         evaluator.set(inp, 0.0)
-    evaluator.set("us_1040_L1a_w2_wages", float(w2_income))
+    evaluator.set("us_1040_L1a_wages", float(w2_income))
 
-    federal_agi = evaluator.eval("us_1040_L11a_agi")
+    federal_agi = evaluator.eval("us_1040_L11_agi")
     federal_tax = evaluator.eval("us_1040_L24_total_tax")
 
     result = {
@@ -365,11 +365,8 @@ def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
     }
 
     if state == "CA":
-        try:
-            result["state_adjusted_gross_income"] = evaluator.eval("ca_540_L17")
-            result["state_total_tax"] = evaluator.eval("ca_540_L64")
-        except Exception:
-            pass
+        result["state_adjusted_gross_income"] = evaluator.eval("ca_540_L17_ca_agi")
+        result["state_total_tax"] = evaluator.eval("ca_540_L64_ca_total_tax")
 
     return result
 
@@ -405,5 +402,5 @@ def test_2025_vs_2024_brackets():
 @skip_if_graph_unavailable
 def test_ca_2025_sanity():
     """Sanity check CA 2025 (graph only, no OTS)."""
-    with pytest.raises(RuntimeError, match="Unresolved imports"):
-        _evaluate_2025_graph(100_000, state="CA")
+    result = _evaluate_2025_graph(100_000, state="CA")
+    assert result["state_total_tax"] >= 0

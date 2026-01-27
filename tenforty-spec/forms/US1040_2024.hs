@@ -76,6 +76,13 @@ us1040_2024 = form "us_1040" 2024 $ do
         interior "L12Final" "deduction_amount" $
             ifPos l12 l12 stdDed
 
+    -- Taxable income before the QBI deduction (used by Form 8995). This avoids
+    -- a cross-form cycle where 1040 imports the QBI deduction from 8995 while
+    -- 8995 tries to compute its limit using 1040 taxable income.
+    _l15PreQbi <-
+        interior "L15_pre_qbi" "taxable_income_before_qbi" $
+            l11 `subtractNotBelowZero` l12Final
+
     l13 <- interior "L13" "qbi_deduction" $ importForm "us_form_8995" "L16"
 
     l14 <-
@@ -161,6 +168,7 @@ us1040_2024 = form "us_1040" 2024 $ do
         , "L9"
         , "L11"
         , "L14"
+        , "L15_pre_qbi"
         , "L15"
         , "L16"
         , "L18"

@@ -1,4 +1,5 @@
 dist-newstyle/
+dist/
 *.hi
 *.o
 *.cabal.bak

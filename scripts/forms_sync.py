@@ -14,10 +14,11 @@ def main() -> None:
     if not forms_dir.exists():
         raise SystemExit(f"forms dir not found: {forms_dir}")
 
-    generated = sorted(spec_dir.glob("*.json"))
+    dist_dir = spec_dir / "dist"
+    generated = sorted(dist_dir.glob("*.json"))
     if not generated:
         raise SystemExit(
-            "No generated graphs found in tenforty-spec/*.json.\n"
+            "No generated graphs found in tenforty-spec/dist/*.json.\n"
             "Run `make spec-graphs` first."
         )
 

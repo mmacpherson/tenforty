@@ -4,16 +4,16 @@
 define HASKELL_FMT_INSTALL_MSG
 Missing formatting tools. Install with:
 
-    cabal update
-    cabal install --install-method=copy --installdir "$$HOME/.local/bin" --overwrite-policy=always fourmolu cabal-fmt
+    cabal install -j --install-method=copy --installdir "$$HOME/.local/bin" \
+        --overwrite-policy=always -w ghc-9.6 fourmolu cabal-fmt
 endef
 export HASKELL_FMT_INSTALL_MSG
 
 define HASKELL_LINT_INSTALL_MSG
 Missing hlint. Install with:
 
-    cabal update
-    cabal install --install-method=copy --installdir "$$HOME/.local/bin" --overwrite-policy=always hlint
+    cabal install -j --install-method=copy --installdir "$$HOME/.local/bin" \
+        --overwrite-policy=always -w ghc-9.6 hlint
 endef
 export HASKELL_LINT_INSTALL_MSG
 
@@ -49,10 +49,11 @@ lint-strict: ## Lint Haskell (hlint, fails on hints)
 	@hlint app src forms test
 
 install: ## Copy form JSON files to src/tenforty/forms/
-	cp forms/*.json ../src/tenforty/forms/
+	cp dist/*.json ../src/tenforty/forms/
 
 clean: ## Clean build artifacts
 	cabal clean
+	rm -rf dist
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

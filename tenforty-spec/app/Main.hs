@@ -2,9 +2,11 @@ module Main (main) where
 
 import Data.Aeson.Encode.Pretty qualified as AP
 import Data.ByteString.Lazy qualified as BL
+import Data.ByteString.Lazy.Char8 qualified as BL8
 import Data.Text (Text)
 import Data.Text qualified as T
 import Options.Applicative
+import System.Directory (createDirectoryIfMissing)
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -184,7 +186,7 @@ compileAndOutput opts formResult =
                         else compileFormToJSON frm
             case optOutput opts of
                 Nothing -> BL.putStr json >> putStrLn ""
-                Just fp -> BL.writeFile fp json
+                Just fp -> BL.writeFile fp (json <> BL8.pack "\n")
 
 compileToFile :: Options -> FilePath -> Either FormError Form -> IO ()
 compileToFile opts fp formResult =
@@ -193,10 +195,12 @@ compileToFile opts fp formResult =
             hPutStrLn stderr $ "Form validation error for " ++ fp ++ ": " ++ show err
             exitFailure
         Right frm -> do
-            let graph = compileForm frm
+            let outPath = "dist/" ++ fp
+                graph = compileForm frm
                 json =
                     if optPretty opts
                         then AP.encodePretty graph
                         else compileFormToJSON frm
-            BL.writeFile fp json
-            putStrLn $ "Compiled: " ++ fp
+            createDirectoryIfMissing True "dist"
+            BL.writeFile outPath (json <> BL8.pack "\n")
+            putStrLn $ "Compiled: " ++ outPath

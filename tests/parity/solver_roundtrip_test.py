@@ -65,7 +65,7 @@ def test_solve_for_w2_income(w2_income, filing_status):
         tax_input,
         output="L24_total_tax",
         target=target_tax,
-        var="L1a_w2_wages",
+        var="w2_income",
     )
 
     if solved_income is None:
@@ -148,7 +148,7 @@ def test_solve_for_capital_gains(w2_income, cap_gains):
         tax_input,
         output="L24_total_tax",
         target=target_tax,
-        var="L7a_capital_gain",
+        var="short_term_capital_gains",
     )
 
     if solved_cap_gains is None:
@@ -222,7 +222,7 @@ def test_solve_roundtrip_verify_tax(w2_income):
         tax_input,
         output="L24_total_tax",
         target=target_tax,
-        var="L1a_w2_wages",
+        var="w2_income",
     )
 
     if solved_income is None:

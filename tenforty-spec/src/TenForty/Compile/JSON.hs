@@ -357,10 +357,25 @@ compileLines frm = do
                         for_ mLastId (registerLine (lineId ln))
 
     forM (formOutputs frm) $ \ln -> do
-        mNid <- lookupLineId (lineId ln)
-        case mNid of
-            Just nid -> pure nid
-            Nothing -> emitNamedNode (verboseLineId ln) (OpLiteral 0)
+        nid <- do
+            mNid <- lookupLineId (lineId ln)
+            case mNid of
+                Just existing -> pure existing
+                Nothing -> emitNamedNode (verboseLineId ln) (OpLiteral 0)
+        ensureOutputNamed ln nid
+
+ensureOutputNamed :: Line -> Int -> Compile Int
+ensureOutputNamed ln nid = do
+    nodes <- gets csNodes
+    let desired = verboseLineId ln
+        lid = unLineId (lineId ln)
+        okName nm = nm == lid || T.isPrefixOf (lid <> "_") nm
+        currentName = Map.lookup nid nodes >>= nodeName
+    if maybe False okName currentName
+        then pure nid
+        else do
+            zero <- emitAnonymousNode (OpLiteral 0)
+            emitNamedNode desired (OpAdd nid zero)
 
 compileExpr :: Maybe Text -> Expr u -> Compile Int
 compileExpr mname = \case

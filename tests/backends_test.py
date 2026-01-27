@@ -104,14 +104,16 @@ class TestGraphBackend:
         assert result.federal_total_tax > 0
 
     def test_graph_backend_ca_requires_all_imports(self, graph_available):
-        """Graph backend should fail hard if required imports are missing."""
+        """Graph backend should load full CA import closure."""
         if not graph_available:
             pytest.skip("Graph backend not available")
 
         from tenforty import evaluate_return
 
-        with pytest.raises(RuntimeError, match="Unresolved imports"):
-            evaluate_return(year=2024, state="CA", w2_income=100_000, backend="graph")
+        result = evaluate_return(
+            year=2024, state="CA", w2_income=100_000, backend="graph"
+        )
+        assert result.state_total_tax > 0
 
     def test_graph_backend_gradient(self, graph_available):
         """Graph backend should compute gradients."""
@@ -122,7 +124,7 @@ class TestGraphBackend:
 
         backend = GraphBackend()
         tax_input = TaxReturnInput(year=2024, w2_income=100_000)
-        result = backend.gradient(tax_input, "L24_total_tax", "L1a_w2_wages")
+        result = backend.gradient(tax_input, "L24_total_tax", "w2_income")
         assert result is not None
         assert 0 < result < 1
 
@@ -135,6 +137,29 @@ class TestGraphBackend:
 
         backend = GraphBackend()
         tax_input = TaxReturnInput(year=2024, w2_income=0)
-        result = backend.solve(tax_input, "L24_total_tax", 10000, "L1a_w2_wages")
+        result = backend.solve(tax_input, "L24_total_tax", 10000, "w2_income")
         assert result is not None
         assert result > 0
+
+    def test_graph_backend_missing_dependency_fails(self, graph_available, monkeypatch):
+        """Graph backend should fail loudly when a required form graph is missing."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty.backends import graph as graph_module
+        from tenforty.models import OTSState
+
+        graph_module._load_graph.cache_clear()
+        graph_module._load_linked_graph.cache_clear()
+
+        orig = graph_module._load_graph
+
+        def fake_load_graph(form_id: str, year: int):
+            if form_id == "ca_schedule_ca":
+                return None
+            return orig(form_id, year)
+
+        monkeypatch.setattr(graph_module, "_load_graph", fake_load_graph)
+
+        with pytest.raises(RuntimeError, match="unresolved imports"):
+            graph_module._load_linked_graph(2024, OTSState.CA)

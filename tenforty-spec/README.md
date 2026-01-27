@@ -8,13 +8,12 @@ synced into `src/tenforty/forms/`.
 
 ## Prerequisites
 
-### Install GHC + Cabal (via GHCup - recommended)
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
-source ~/.ghcup/env
-```
+You need GHC (the Glasgow Haskell Compiler) and Cabal (the build tool).
 
-The same `ghcup` flow works on Linux, macOS, and WSL.
+**Recommended:** GHC 9.6 or 9.10 (well-tested with good library support)
+
+Install via [GHCup](https://www.haskell.org/ghcup/) (cross-platform) or your
+system package manager.
 
 ## Building
 
@@ -26,26 +25,18 @@ cabal build
 ## Running the Compiler
 
 ```bash
-# Compile Form 1040 to JSON (writes to `tenforty-spec/forms/*.json` by default)
+# Compile a single form to JSON
 cabal run tenforty-compile -- us_1040_2025 -o us_1040_2025.json -p
 
-# Compile Schedule 1
-cabal run tenforty-compile -- us_schedule_1_2025 -o us_schedule_1_2025.json -p
-
-# Compile all forms
+# Compile all forms (outputs to dist/*.json)
 cabal run tenforty-compile -- all -p
 ```
 
-From repo root, the equivalent is:
+From the repo root, use the Makefile:
 
 ```bash
-make spec-graphs
-```
-
-To sync the compiled JSON graphs into the runtime package:
-
-```bash
-make forms-sync
+make spec-graphs   # Compile all forms to tenforty-spec/dist/
+make forms-sync    # Sync dist/*.json into src/tenforty/forms/
 ```
 
 ## Running Tests
@@ -53,18 +44,6 @@ make forms-sync
 ```bash
 cabal test
 ```
-
-## Formatting and Linting (local dev)
-
-These are local-only tools (not enforced in CI):
-
-```bash
-make fmt          # fourmolu + cabal-fmt
-make lint         # hlint (prints hints)
-make lint-strict  # hlint (fails on hints)
-```
-
-If the tools are missing, the Makefile prints install commands.
 
 ## Line Annotation Convention
 
@@ -123,7 +102,8 @@ tenforty-spec/
 │   ├── US1040_2025.hs   -- Form 1040
 │   └── USSchedule1_2025.hs
 ├── app/Main.hs          -- CLI compiler
-└── test/Spec.hs         -- QuickCheck tests
+├── test/Spec.hs         -- QuickCheck tests
+└── dist/                -- Compiled JSON output (gitignored)
 ```
 
 ## Type Safety Features
@@ -153,3 +133,29 @@ tenforty-spec/
   "tables": [...]
 }
 ```
+
+---
+
+## Appendix: Development Tools
+
+The Makefile provides optional formatting and linting commands that require
+external tools (hlint, fourmolu, cabal-fmt). These are not required to build
+or run the compiler.
+
+```bash
+make fmt          # Format code (fourmolu + cabal-fmt)
+make lint         # Lint code (hlint, non-blocking)
+make lint-strict  # Lint code (hlint, fails on hints)
+```
+
+If missing, the Makefile prints install instructions. Here's one way to set
+them up:
+
+```bash
+cabal install -j --install-method=copy --installdir="$HOME/.local/bin" \
+    --overwrite-policy=always -w ghc-9.6 hlint fourmolu cabal-fmt
+```
+
+These tools often lag behind the latest GHC, so we pin them to GHC 9.6 which
+has broad compatibility. The `-w ghc-9.6` flag selects that compiler for
+building the tools only; it doesn't affect the project build.
