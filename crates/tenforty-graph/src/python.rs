@@ -142,6 +142,14 @@ impl Graph {
             .collect()
     }
 
+    fn imports(&self) -> Vec<(String, String, u16)> {
+        self.inner
+            .imports
+            .iter()
+            .map(|i| (i.form.clone(), i.line.clone(), i.year))
+            .collect()
+    }
+
     /// Evaluate scenarios defined by outer product of input ranges.
     ///
     /// Args:

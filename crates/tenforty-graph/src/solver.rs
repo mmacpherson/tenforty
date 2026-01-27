@@ -183,6 +183,7 @@ mod tests {
         Graph {
             meta: None,
             nodes,
+            imports: vec![],
             tables: HashMap::new(),
             inputs: vec![0],
             outputs: vec![4],
@@ -236,6 +237,7 @@ mod tests {
         Graph {
             meta: None,
             nodes,
+            imports: vec![],
             tables,
             inputs: vec![0],
             outputs: vec![1],

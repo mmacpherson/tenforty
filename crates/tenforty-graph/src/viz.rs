@@ -154,6 +154,7 @@ mod tests {
         let graph = Graph {
             meta: None,
             nodes,
+            imports: vec![],
             tables: HashMap::new(),
             inputs: vec![0],
             outputs: vec![2],

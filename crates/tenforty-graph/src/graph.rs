@@ -126,6 +126,13 @@ pub enum Op {
     },
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Import {
+    pub form: String,
+    pub line: String,
+    pub year: u16,
+}
+
 impl Op {
     pub fn dependencies(&self) -> Vec<NodeId> {
         match self {
@@ -187,9 +194,12 @@ pub enum Invariant {
 pub struct Graph {
     #[serde(default)]
     pub meta: Option<GraphMeta>,
+    #[serde(default)]
+    pub imports: Vec<Import>,
     pub nodes: HashMap<NodeId, Node>,
     #[serde(default)]
     pub tables: HashMap<TableId, BracketTable>,
+    #[serde(default)]
     pub inputs: Vec<NodeId>,
     pub outputs: Vec<NodeId>,
     #[serde(default)]

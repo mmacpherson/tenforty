@@ -147,19 +147,12 @@ class TestGraphBackend:
             pytest.skip("Graph backend not available")
 
         from tenforty.backends import graph as graph_module
-        from tenforty.models import OTSState
 
+        # Clear cache to ensure clean state
         graph_module._load_graph.cache_clear()
-        graph_module._load_linked_graph.cache_clear()
+        graph_module._link_graphs.cache_clear()
 
-        orig = graph_module._load_graph
-
-        def fake_load_graph(form_id: str, year: int):
-            if form_id == "ca_schedule_ca":
-                return None
-            return orig(form_id, year)
-
-        monkeypatch.setattr(graph_module, "_load_graph", fake_load_graph)
-
+        # Call _link_graphs with a list that is missing a dependency
+        # ca_540 imports ca_schedule_ca (and others), so omitting them should trigger the check
         with pytest.raises(RuntimeError, match="unresolved imports"):
-            graph_module._load_linked_graph(2024, OTSState.CA)
+            graph_module._link_graphs(2024, ("us_1040", "ca_540"))
