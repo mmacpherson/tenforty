@@ -64,11 +64,20 @@ def test_resolve_forms_with_input_trigger():
 
 def test_real_form_imports_loading():
     """Verify we can load imports from real JSON files."""
+    try:
+        from tenforty.graphlib import Graph  # noqa: F401
+    except ImportError:
+        pytest.skip("graphlib not available")
+
     # Find the forms directory relative to this test file
     # This assumes the test is running in the project root or tests/ dir
     forms_dir = Path("src/tenforty/forms")
     if not forms_dir.exists():
-        pytest.skip("Forms directory not found at src/tenforty/forms")
+        # Fallback for when running directly from tests/ dir
+        forms_dir = Path("../src/tenforty/forms")
+
+    if not forms_dir.exists():
+        pytest.skip(f"Forms directory not found at {forms_dir.absolute()}")
 
     imports = _get_form_imports(forms_dir, "us_schedule_3", 2024)
     assert len(imports) > 0, "Should have loaded imports for us_schedule_3"
