@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import pathlib
 from functools import lru_cache
 
@@ -15,6 +16,8 @@ from ..mappings import (
     STATE_OUTPUT_LINES,
 )
 from ..models import InterpretedTaxReturn, OTSState, TaxReturnInput
+
+logger = logging.getLogger(__name__)
 
 
 def _forms_dir() -> pathlib.Path:
@@ -223,7 +226,8 @@ class GraphBackend:
         result["federal_tax_bracket"] = 0.0
         try:
             result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
-        except Exception:
+        except Exception as exc:
+            logger.debug("AMT evaluation failed (Form 6251 may not be linked): %s", exc)
             result["federal_amt"] = 0.0
         result["state_adjusted_gross_income"] = 0.0
         result["state_taxable_income"] = 0.0
@@ -266,12 +270,15 @@ class GraphBackend:
         if output.startswith(("us_", "ca_")):
             output_node = output
         else:
-            output_node = output
+            output_node = None
             for line, natural in LINE_TO_NATURAL.items():
                 if natural == output:
                     output_node = line
                     break
-            output_node = f"us_1040_{output_node}"
+            if output_node is None:
+                output_node = f"us_1040_{output}"
+            else:
+                output_node = f"us_1040_{output_node}"
 
         # Resolve input node
         input_node = None
@@ -317,12 +324,15 @@ class GraphBackend:
         if output.startswith(("us_", "ca_")):
             output_node = output
         else:
-            output_node = output
+            output_node = None
             for line, natural in LINE_TO_NATURAL.items():
                 if natural == output:
                     output_node = line
                     break
-            output_node = f"us_1040_{output_node}"
+            if output_node is None:
+                output_node = f"us_1040_{output}"
+            else:
+                output_node = f"us_1040_{output_node}"
 
         # Resolve input node
         input_node = None
@@ -345,10 +355,6 @@ class GraphBackend:
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
         current_val = natural_values.get(var, 0)
-
-        # If input was mapped, we might not find 'var' in natural_values if 'var' was the node name?
-        # But 'var' here is expected to be natural name usually.
-        # If user passed node name as 'var', natural_values.get(var) might return None/0.
 
         if current_val == 0:
             natural_var = var
