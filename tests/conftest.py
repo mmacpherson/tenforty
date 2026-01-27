@@ -15,7 +15,26 @@ See docs/irs-validation.md for detailed discrepancy analysis.
 
 from dataclasses import dataclass
 
+import pytest
 from hypothesis import HealthCheck, settings
+
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line(
+        "markers", "requires_graph: mark test as requiring graph backend extension"
+    )
+
+
+def pytest_runtest_setup(item):
+    """Skip tests marked with requires_graph if graphlib is not available."""
+    if any(item.iter_markers(name="requires_graph")):
+        try:
+            # Try to import the Rust extension module directly
+            import tenforty.graphlib  # noqa: F401
+        except ImportError:
+            pytest.skip("graphlib backend not available (Rust extension not built)")
+
 
 settings.register_profile(
     "ci",

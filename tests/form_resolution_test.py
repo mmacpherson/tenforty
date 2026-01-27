@@ -62,13 +62,9 @@ def test_resolve_forms_with_input_trigger():
         assert "us_schedule_d" in forms
 
 
+@pytest.mark.requires_graph
 def test_real_form_imports_loading():
     """Verify we can load imports from real JSON files."""
-    try:
-        from tenforty.graphlib import Graph  # noqa: F401
-    except ImportError:
-        pytest.skip("graphlib not available")
-
     # Find the forms directory relative to this test file
     # This assumes the test is running in the project root or tests/ dir
     forms_dir = Path("src/tenforty/forms")
