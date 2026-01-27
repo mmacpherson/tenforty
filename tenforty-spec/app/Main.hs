@@ -1,5 +1,6 @@
 module Main (main) where
 
+import Control.Monad (unless, forM_)
 import Data.Aeson.Encode.Pretty qualified as AP
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Lazy.Char8 qualified as BL8
@@ -49,6 +50,48 @@ import USScheduleD_2024
 import USScheduleD_2025
 import USScheduleSE_2024
 import USScheduleSE_2025
+
+allForms :: [(FilePath, Either FormError Form)]
+allForms =
+    [ ("us_1040_2024.json", us1040_2024)
+    , ("us_1040_2025.json", us1040_2025)
+    , ("us_schedule_1_2024.json", usSchedule1_2024)
+    , ("us_schedule_1_2025.json", usSchedule1_2025)
+    , ("us_schedule_2_2024.json", usSchedule2_2024)
+    , ("us_schedule_2_2025.json", usSchedule2_2025)
+    , ("us_schedule_3_2024.json", usSchedule3_2024)
+    , ("us_schedule_3_2025.json", usSchedule3_2025)
+    , ("us_schedule_a_2024.json", usScheduleA_2024)
+    , ("us_schedule_a_2025.json", usScheduleA_2025)
+    , ("us_schedule_b_2024.json", usScheduleB_2024)
+    , ("us_schedule_b_2025.json", usScheduleB_2025)
+    , ("us_schedule_d_2024.json", usScheduleD_2024)
+    , ("us_schedule_d_2025.json", usScheduleD_2025)
+    , ("us_schedule_se_2024.json", usScheduleSE_2024)
+    , ("us_schedule_se_2025.json", usScheduleSE_2025)
+    , ("us_form_2441_2024.json", usForm2441_2024)
+    , ("us_form_2441_2025.json", usForm2441_2025)
+    , ("us_form_6251_2024.json", usForm6251_2024)
+    , ("us_form_6251_2025.json", usForm6251_2025)
+    , ("us_form_8812_2024.json", usForm8812_2024)
+    , ("us_form_8812_2025.json", usForm8812_2025)
+    , ("us_form_8863_2024.json", usForm8863_2024)
+    , ("us_form_8863_2025.json", usForm8863_2025)
+    , ("us_form_8959_2024.json", usForm8959_2024)
+    , ("us_form_8959_2025.json", usForm8959_2025)
+    , ("us_form_8960_2024.json", usForm8960_2024)
+    , ("us_form_8960_2025.json", usForm8960_2025)
+    , ("us_form_8995_2024.json", usForm8995_2024)
+    , ("us_form_8995_2025.json", usForm8995_2025)
+    , ("ca_540_2024.json", ca540_2024)
+    , ("ca_540_2025.json", ca540_2025)
+    , ("ca_schedule_ca_2024.json", caScheduleCA_2024)
+    , ("ca_schedule_ca_2025.json", caScheduleCA_2025)
+    , ("ca_ftb_3506_2024.json", caFTB3506_2024)
+    , ("ca_ftb_3506_2025.json", caFTB3506_2025)
+    , ("ca_ftb_3514_2024.json", caFTB3514_2024)
+    , ("ca_ftb_3514_2025.json", caFTB3514_2025)
+    ]
 
 data Options = Options
     { optForm :: Text
@@ -129,44 +172,26 @@ main = do
         "ca_ftb_3514_2024" -> compileAndOutput opts caFTB3514_2024
         "ca_ftb_3514_2025" -> compileAndOutput opts caFTB3514_2025
         "all" -> do
-            compileToFile opts "us_1040_2024.json" us1040_2024
-            compileToFile opts "us_1040_2025.json" us1040_2025
-            compileToFile opts "us_schedule_1_2024.json" usSchedule1_2024
-            compileToFile opts "us_schedule_1_2025.json" usSchedule1_2025
-            compileToFile opts "us_schedule_2_2024.json" usSchedule2_2024
-            compileToFile opts "us_schedule_2_2025.json" usSchedule2_2025
-            compileToFile opts "us_schedule_3_2024.json" usSchedule3_2024
-            compileToFile opts "us_schedule_3_2025.json" usSchedule3_2025
-            compileToFile opts "us_schedule_a_2024.json" usScheduleA_2024
-            compileToFile opts "us_schedule_a_2025.json" usScheduleA_2025
-            compileToFile opts "us_schedule_b_2024.json" usScheduleB_2024
-            compileToFile opts "us_schedule_b_2025.json" usScheduleB_2025
-            compileToFile opts "us_schedule_d_2024.json" usScheduleD_2024
-            compileToFile opts "us_schedule_d_2025.json" usScheduleD_2025
-            compileToFile opts "us_schedule_se_2024.json" usScheduleSE_2024
-            compileToFile opts "us_schedule_se_2025.json" usScheduleSE_2025
-            compileToFile opts "us_form_2441_2024.json" usForm2441_2024
-            compileToFile opts "us_form_2441_2025.json" usForm2441_2025
-            compileToFile opts "us_form_6251_2024.json" usForm6251_2024
-            compileToFile opts "us_form_6251_2025.json" usForm6251_2025
-            compileToFile opts "us_form_8812_2024.json" usForm8812_2024
-            compileToFile opts "us_form_8812_2025.json" usForm8812_2025
-            compileToFile opts "us_form_8863_2024.json" usForm8863_2024
-            compileToFile opts "us_form_8863_2025.json" usForm8863_2025
-            compileToFile opts "us_form_8959_2024.json" usForm8959_2024
-            compileToFile opts "us_form_8959_2025.json" usForm8959_2025
-            compileToFile opts "us_form_8960_2024.json" usForm8960_2024
-            compileToFile opts "us_form_8960_2025.json" usForm8960_2025
-            compileToFile opts "us_form_8995_2024.json" usForm8995_2024
-            compileToFile opts "us_form_8995_2025.json" usForm8995_2025
-            compileToFile opts "ca_540_2024.json" ca540_2024
-            compileToFile opts "ca_540_2025.json" ca540_2025
-            compileToFile opts "ca_schedule_ca_2024.json" caScheduleCA_2024
-            compileToFile opts "ca_schedule_ca_2025.json" caScheduleCA_2025
-            compileToFile opts "ca_ftb_3506_2024.json" caFTB3506_2024
-            compileToFile opts "ca_ftb_3506_2025.json" caFTB3506_2025
-            compileToFile opts "ca_ftb_3514_2024.json" caFTB3514_2024
-            compileToFile opts "ca_ftb_3514_2025.json" caFTB3514_2025
+            -- 1. Check if any individual form failed its own validation
+            let failures = [ (fp, err) | (fp, Left err) <- allForms ]
+            unless (null failures) $ do
+                hPutStrLn stderr "Individual form validation failed:"
+                forM_ failures $ \(fp, err) ->
+                    hPutStrLn stderr $ "  " ++ fp ++ ": " ++ show err
+                exitFailure
+
+            -- 2. Validate the set as a whole (cross-form imports)
+            let forms = [ f | (_, Right f) <- allForms ]
+                setErrors = validateFormSet forms
+
+            unless (null setErrors) $ do
+                hPutStrLn stderr "Cross-form import validation failed:"
+                forM_ setErrors $ \err ->
+                    hPutStrLn stderr $ "  " ++ show err
+                exitFailure
+
+            -- 3. Write output files
+            forM_ allForms $ \(fp, res) -> compileToFile opts fp res
         other -> do
             hPutStrLn stderr $ "Unknown form: " ++ T.unpack other
             hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514 (append _2024 or _2025), all"

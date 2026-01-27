@@ -223,6 +223,30 @@ spec n = do
                     Right _ -> pure ()
                     Left err -> expectationFailure $ show err
 
+        it "detects unresolved cross-form imports in a form set" $ do
+            let fid = FormId . T.pack
+                lid = LineId . T.pack
+            case form (fid "target") 2024 (input (lid "L1") "Target Line" "" Interior >> pure ()) of
+                Left err -> expectationFailure $ show err
+                Right targetForm ->
+                    case form
+                        (fid "source")
+                        2024
+                        (compute (lid "L2") "Source Line" "" Interior (importForm (fid "target") (lid "L9")) >> pure ())
+                        of
+                            Left err -> expectationFailure $ show err
+                            Right sourceForm -> do
+                                let errors = validateFormSet [sourceForm, targetForm]
+                                errors
+                                    `shouldBe` [ UnresolvedImport
+                                                    { fsErrorYear = 2024
+                                                    , fsErrorSourceForm = fid "source"
+                                                    , fsErrorSourceLine = lid "L2"
+                                                    , fsErrorTargetForm = fid "target"
+                                                    , fsErrorTargetLine = lid "L9"
+                                                    }
+                                              ]
+
         it "US Schedule 1 2024 is valid" $
             case usSchedule1_2024 of
                 Right _ -> pure ()

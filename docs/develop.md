@@ -157,7 +157,9 @@ Local developer workflow:
 Generating and syncing graphs:
 
 - `make spec-graphs` compiles graphs into `tenforty-spec/forms/*.json`.
+- `make spec-graphs` also validates cross-form imports for each year and fails fast on missing targets (form/line/year).
 - `make forms-sync` syncs those graphs into `src/tenforty/forms/`.
+- These Haskell checks are local-dev only; CI remains agnostic to `tenforty-spec/`.
 
 ### Logging
 

@@ -245,24 +245,26 @@ data CompileState = CompileState
     , csInputIds :: [Int]
     , csImports :: [(Text, Text, Int)] -- [(form_id, line_id, year)]
     , csYear :: Int
+    , csFormId :: FormId
     }
 
 newtype Compile a = Compile {unCompile :: State CompileState a}
     deriving newtype (Functor, Applicative, Monad, MonadState CompileState)
 
-runCompile :: Int -> Compile a -> (a, Map Int Node, [Int], [(Text, Text, Int)])
-runCompile year c =
-    let (a, st) = runState (unCompile c) (initState year)
+runCompile :: Form -> Compile a -> (a, Map Int Node, [Int], [(Text, Text, Int)])
+runCompile frm c =
+    let (a, st) = runState (unCompile c) (initState frm)
      in (a, csNodes st, reverse (csInputIds st), reverse (csImports st))
   where
-    initState yr =
+    initState form =
         CompileState
             { csNextId = 0
             , csNodes = Map.empty
             , csLineToId = Map.empty
             , csInputIds = []
             , csImports = []
-            , csYear = yr
+            , csYear = formYear form
+            , csFormId = formId form
             }
 
 freshId :: Compile Int
@@ -305,12 +307,15 @@ registerImport fid lid yr = modify' $ \s ->
 getYear :: Compile Int
 getYear = gets csYear
 
+getFormId :: Compile FormId
+getFormId = gets csFormId
+
 lookupLineId :: LineId -> Compile (Maybe Int)
 lookupLineId lid = gets (Map.lookup lid . csLineToId)
 
 compileForm :: Form -> ComputationGraph
 compileForm frm =
-    let (outputIds, nodes, inputIds, imports) = runCompile (formYear frm) (compileLines frm)
+    let (outputIds, nodes, inputIds, imports) = runCompile frm (compileLines frm)
         tables = Map.fromList [(getTableId tbl, compileTable tbl) | tbl <- formTables frm]
      in ComputationGraph
             { cgMeta =
@@ -357,11 +362,16 @@ compileLines frm = do
                         for_ mLastId (registerLine (lineId ln))
 
     forM (formOutputs frm) $ \ln -> do
-        nid <- do
-            mNid <- lookupLineId (lineId ln)
-            case mNid of
-                Just existing -> pure existing
-                Nothing -> emitNamedNode (verboseLineId ln) (OpLiteral 0)
+        mNid <- lookupLineId (lineId ln)
+        nid <- case mNid of
+            Just existing -> pure existing
+            Nothing -> do
+                fid <- getFormId
+                error $
+                    "Missing output line during compile: "
+                        <> T.unpack (unFormId fid)
+                        <> " -> "
+                        <> T.unpack (unLineId (lineId ln))
         ensureOutputNamed ln nid
 
 ensureOutputNamed :: Line -> Int -> Compile Int
@@ -384,7 +394,13 @@ compileExpr mname = \case
         mNid <- lookupLineId lid
         case mNid of
             Just nid -> pure nid
-            Nothing -> emitNode mname (OpLiteral 0)
+            Nothing -> do
+                fid <- getFormId
+                error $
+                    "Missing line reference during compile: "
+                        <> T.unpack (unFormId fid)
+                        <> " -> "
+                        <> T.unpack (unLineId lid)
     Import (FormId fid) (LineId lid) -> do
         yr <- getYear
         registerImport fid lid yr
