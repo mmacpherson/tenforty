@@ -9,12 +9,23 @@ pub const BATCH_SIZE: usize = 2;
 
 pub fn lower_graph<M: Module>(
     func: &mut codegen::ir::Function,
-    module: &mut M,
+    _module: &mut M,
     graph: &Graph,
     filing_status: FilingStatus,
     node_to_slot: &HashMap<NodeId, usize>,
     _num_slots: usize,
 ) -> Result<(), JitError> {
+    let mut func_ctx = FunctionBuilderContext::new();
+    let mut builder = FunctionBuilder::new(func, &mut func_ctx);
+
+    let entry_block = builder.create_block();
+    builder.append_block_params_for_function_params(entry_block);
+    builder.switch_to_block(entry_block);
+    builder.seal_block(entry_block);
+
+    let inputs_ptr = builder.block_params(entry_block)[0];
+    let outputs_ptr = builder.block_params(entry_block)[1];
+
     let mut node_values: HashMap<NodeId, Value> = HashMap::new();
 
     let order = graph.topological_order()?;
