@@ -23,7 +23,7 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
         form_id, year_str = stem.rsplit("_", 1)
         year = int(year_str)
 
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
         # 1. Policy: Metadata checks
@@ -47,15 +47,22 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
 
         # 2. Integrity: Node consistency
         nodes = data.get("nodes", {})
+        assert isinstance(nodes, dict), (
+            f"{filename}: expected nodes to be a dict, got {type(nodes)!r}"
+        )
         node_ids = set()
         for key_id, node in nodes.items():
             assert str(node.get("id")) == key_id, (
                 f"{filename}: node key {key_id} does not match id {node.get('id')}"
             )
             node_ids.add(node.get("id"))
+        assert len(node_ids) == len(nodes), f"{filename}: duplicate node ids detected"
 
         # 3. Integrity: Table references
         tables = data.get("tables", {})
+        assert isinstance(tables, dict), (
+            f"{filename}: expected tables to be a dict, got {type(tables)!r}"
+        )
         for node in nodes.values():
             op = node.get("op", {})
             if op.get("type") == "bracket_tax":
@@ -66,6 +73,9 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
 
         # 4. Integrity: Invariant references
         invariants = data.get("invariants", [])
+        assert isinstance(invariants, list), (
+            f"{filename}: expected invariants to be a list, got {type(invariants)!r}"
+        )
         for inv in invariants:
             if inv.get("type") == "ordering":
                 table_id = inv.get("table")
