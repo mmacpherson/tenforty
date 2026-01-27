@@ -12,8 +12,8 @@ def _iter_form_json_paths() -> list[str]:
     )
 
 
-def test_compiled_form_graphs_have_expected_metadata() -> None:
-    """Assert shipped graphs are DSL-generated and year-consistent."""
+def test_compiled_form_graphs_policy_and_integrity() -> None:
+    """Assert shipped graphs are DSL-generated, year-consistent, and structurally valid."""
     paths = _iter_form_json_paths()
     assert paths, "Expected at least one compiled form graph under src/tenforty/forms/"
 
@@ -26,6 +26,7 @@ def test_compiled_form_graphs_have_expected_metadata() -> None:
         with open(path) as f:
             data = json.load(f)
 
+        # 1. Policy: Metadata checks
         assert data.get("meta"), f"{filename}: missing meta"
         meta = data["meta"]
 
@@ -43,3 +44,35 @@ def test_compiled_form_graphs_have_expected_metadata() -> None:
             assert imp.get("year") == year, (
                 f"{filename}: import year mismatch: expected {year}, got {imp.get('year')!r}"
             )
+
+        # 2. Integrity: Node consistency
+        nodes = data.get("nodes", {})
+        node_ids = set()
+        for key_id, node in nodes.items():
+            assert str(node.get("id")) == key_id, (
+                f"{filename}: node key {key_id} does not match id {node.get('id')}"
+            )
+            node_ids.add(node.get("id"))
+
+        # 3. Integrity: Table references
+        tables = data.get("tables", {})
+        for node in nodes.values():
+            op = node.get("op", {})
+            if op.get("type") == "bracket_tax":
+                table_id = op.get("table")
+                assert table_id in tables, (
+                    f"{filename}: node {node.get('name')} references missing table {table_id!r}"
+                )
+            elif op.get("type") == "ordering":
+                # Assuming 'ordering' invariant might reference tables if implemented as op?
+                # Actually Invariants are separate. Let's check Ops only for now.
+                pass
+
+        # 4. Integrity: Invariant references
+        invariants = data.get("invariants", [])
+        for inv in invariants:
+            if inv.get("type") == "ordering":
+                table_id = inv.get("table")
+                assert table_id in tables, (
+                    f"{filename}: invariant references missing table {table_id!r}"
+                )
