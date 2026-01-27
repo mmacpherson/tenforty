@@ -6,7 +6,6 @@
 module Main (main) where
 
 import Data.Foldable (forM_)
-import Data.List (foldl')
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)

@@ -124,7 +124,7 @@ buildForm fid year builder =
                 }
      in case validateForm form of
             [] -> Right form
-            errs -> Left (head errs)
+            err : _ -> Left err
 
 input :: LineId -> Text -> Text -> LineImportance -> FormBuilder (Expr Dollars)
 input lid name desc importance = do

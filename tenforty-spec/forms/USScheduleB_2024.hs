@@ -57,10 +57,10 @@ usScheduleB_2024 = form "us_schedule_b" 2024 $ do
 
     -- Line 7a: At any time during the year, did you have a financial interest in
     --          or signature authority over a financial account in a foreign country?
-    l7a <- keyInput "L7a" "foreign_account" "Did you have a foreign financial account?"
+    _ <- keyInput "L7a" "foreign_account" "Did you have a foreign financial account?"
 
     -- Line 7b: If yes, enter the name of the foreign country
-    l7b <- keyInput "L7b" "foreign_country" "Name of foreign country"
+    _ <- keyInput "L7b" "foreign_country" "Name of foreign country"
 
     -- Line 8: During the year, did you receive a distribution from, or were you
     --         the grantor of, or transferor to, a foreign trust?
