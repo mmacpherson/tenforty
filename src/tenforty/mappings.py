@@ -17,6 +17,8 @@ NATURAL_TO_NODE = {
     "schedule_1_income": "us_schedule_1_L8z_other_income",
     # Schedule A (approximation): map aggregate value into “other deductions”.
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
+    # AMT (Form 6251)
+    "incentive_stock_option_gains": "us_form_6251_L2k_iso_adjustment",
 }
 
 CAPITAL_GAINS_FIELDS = {"short_term_capital_gains", "long_term_capital_gains"}
@@ -44,9 +46,11 @@ STATE_FORM_NAMES = {
     OTSState.CA: "ca_540",
 }
 
-STATE_NATURAL_TO_LINE = {
+STATE_NATURAL_TO_NODE = {
     OTSState.CA: {
-        "itemized_deductions": "L18_itemized",
+        "itemized_deductions": "ca_540_L18_itemized",
+        "num_dependents": "ca_ftb_3514_L2_num_children",
+        "state_adjustment": "ca_schedule_ca_A22_24",
     },
 }
 

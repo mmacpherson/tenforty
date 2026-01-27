@@ -11,6 +11,7 @@ from ..mappings import (
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
     STATE_FORM_NAMES,
+    STATE_NATURAL_TO_NODE,
     STATE_OUTPUT_LINES,
 )
 from ..models import InterpretedTaxReturn, OTSState, TaxReturnInput
@@ -138,18 +139,46 @@ class GraphBackend:
         natural_values = inputs_dict
 
         unsupported: list[tuple[str, object]] = []
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+
         for natural_name, value in natural_values.items():
-            if natural_name in NATURAL_TO_NODE and value != 0:
+            if value == 0 or value is None:
+                continue
+
+            handled = False
+
+            # 1. Check Federal mapping
+            if natural_name in NATURAL_TO_NODE:
                 node_name = NATURAL_TO_NODE[natural_name]
                 try:
                     evaluator.set(node_name, float(value))
+                    handled = True
                 except Exception as exc:
+                    # It is possible the node is not in the graph if we didn't link that form
+                    # (though usually federal forms are always linked).
+                    # Re-raise for debugging transparency as per roadmap.
                     raise RuntimeError(
                         "Graph backend mapping error: expected input node not found.\n"
                         f"Natural field: {natural_name}\n"
                         f"Expected node: {node_name}"
                     ) from exc
-            elif natural_name not in NATURAL_TO_NODE and value not in (0, 0.0, None):
+
+            # 2. Check State mapping
+            if natural_name in state_mapping:
+                node_name = state_mapping[natural_name]
+                try:
+                    evaluator.set(node_name, float(value))
+                    handled = True
+                except Exception:
+                    # If state form is not loaded, we might fail here.
+                    # But if we found it in mapping, we expect it to be handled.
+                    # However, if resolve_forms didn't pick it up, it might be missing.
+                    # We choose to be permissive if federal was handled, or if it's optional.
+                    # But if ONLY state mapped it, we should probably complain if it failed.
+                    if not handled:
+                        raise
+
+            if not handled:
                 unsupported.append((natural_name, value))
 
         if unsupported:
@@ -242,11 +271,24 @@ class GraphBackend:
                     break
             output_node = f"us_1040_{output_node}"
 
-        input_node = NATURAL_TO_NODE.get(wrt, wrt)
-        if not isinstance(input_node, str):
-            input_node = str(input_node)
-        if not input_node.startswith(("us_", "ca_")):
-            input_node = f"us_1040_{input_node}"
+        # Resolve input node
+        input_node = None
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+
+        # Check state mapping first if available
+        if wrt in state_mapping:
+            input_node = state_mapping[wrt]
+
+        # Fallback to federal mapping
+        if not input_node and wrt in NATURAL_TO_NODE:
+            input_node = NATURAL_TO_NODE[wrt]
+
+        if not input_node:
+            input_node = wrt
+            if not isinstance(input_node, str):
+                input_node = str(input_node)
+            if not input_node.startswith(("us_", "ca_")):
+                input_node = f"us_1040_{input_node}"
 
         return evaluator.gradient(output_node, input_node)
 
@@ -280,18 +322,35 @@ class GraphBackend:
                     break
             output_node = f"us_1040_{output_node}"
 
-        input_node = NATURAL_TO_NODE.get(var, var)
-        if not isinstance(input_node, str):
-            input_node = str(input_node)
-        if not input_node.startswith(("us_", "ca_")):
-            input_node = f"us_1040_{input_node}"
+        # Resolve input node
+        input_node = None
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+
+        if var in state_mapping:
+            input_node = state_mapping[var]
+
+        if not input_node and var in NATURAL_TO_NODE:
+            input_node = NATURAL_TO_NODE[var]
+
+        if not input_node:
+            input_node = var
+            if not isinstance(input_node, str):
+                input_node = str(input_node)
+            if not input_node.startswith(("us_", "ca_")):
+                input_node = f"us_1040_{input_node}"
 
         natural_values = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
         current_val = natural_values.get(var, 0)
+
+        # If input was mapped, we might not find 'var' in natural_values if 'var' was the node name?
+        # But 'var' here is expected to be natural name usually.
+        # If user passed node name as 'var', natural_values.get(var) might return None/0.
+
         if current_val == 0:
             natural_var = var
+            # Reverse lookup attempt
             for nat, node in NATURAL_TO_NODE.items():
                 if node == var:
                     natural_var = nat

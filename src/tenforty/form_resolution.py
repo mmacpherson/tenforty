@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from .mappings import NATURAL_TO_NODE, STATE_FORM_NAMES
+from .mappings import NATURAL_TO_NODE, STATE_FORM_NAMES, STATE_NATURAL_TO_NODE
 
 # Map from natural input name to the form ID that accepts it.
 # Derived from mapping prefixes (e.g., "us_1040_L1a" -> "us_1040").
@@ -98,6 +98,29 @@ def resolve_forms(
             state_enum = OTSState[state_upper]
             if state_enum in STATE_FORM_NAMES:
                 needed.add(STATE_FORM_NAMES[state_enum])
+
+            # Check state-specific mappings
+            state_mapping = STATE_NATURAL_TO_NODE.get(state_enum, {})
+            for field, value in inputs.items():
+                if value and value != 0 and field in state_mapping:
+                    node_name = state_mapping[field]
+                    # Heuristic to extract form_id from node_name
+                    # Assuming "{form_id}_L..."
+                    parts = node_name.split("_")
+                    split_idx = -1
+                    for i, part in enumerate(parts):
+                        if (
+                            part.startswith("L") and len(part) > 1 and part[1].isdigit()
+                        ) or (
+                            part.startswith("A") and len(part) > 1 and part[1].isdigit()
+                        ):
+                            split_idx = i
+                            break
+
+                    if split_idx != -1:
+                        form_id = "_".join(parts[:split_idx])
+                        needed.add(form_id)
+
         except KeyError:
             # Silent failure: if the state code is invalid or not in OTSState,
             # we simply don't load a state form.
