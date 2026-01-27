@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import pathlib
 from functools import lru_cache
 
@@ -11,9 +12,12 @@ from ..mappings import (
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
     STATE_FORM_NAMES,
+    STATE_NATURAL_TO_NODE,
     STATE_OUTPUT_LINES,
 )
 from ..models import InterpretedTaxReturn, OTSState, TaxReturnInput
+
+logger = logging.getLogger(__name__)
 
 
 def _forms_dir() -> pathlib.Path:
@@ -138,18 +142,45 @@ class GraphBackend:
         natural_values = inputs_dict
 
         unsupported: list[tuple[str, object]] = []
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+
         for natural_name, value in natural_values.items():
-            if natural_name in NATURAL_TO_NODE and value != 0:
+            if value == 0 or value is None:
+                continue
+
+            handled = False
+
+            # 1. Check Federal mapping
+            if natural_name in NATURAL_TO_NODE:
                 node_name = NATURAL_TO_NODE[natural_name]
                 try:
                     evaluator.set(node_name, float(value))
+                    handled = True
                 except Exception as exc:
+                    # It is possible the node is not in the graph if we didn't link that form
+                    # (though usually federal forms are always linked).
+                    # Re-raise for debugging transparency as per roadmap.
                     raise RuntimeError(
                         "Graph backend mapping error: expected input node not found.\n"
                         f"Natural field: {natural_name}\n"
                         f"Expected node: {node_name}"
                     ) from exc
-            elif natural_name not in NATURAL_TO_NODE and value not in (0, 0.0, None):
+
+            # 2. Check State mapping
+            if natural_name in state_mapping:
+                node_name = state_mapping[natural_name]
+                try:
+                    evaluator.set(node_name, float(value))
+                    handled = True
+                except Exception as exc:
+                    raise RuntimeError(
+                        "Graph backend mapping error: expected state input node not found.\n"
+                        f"State: {tax_input.state.value if tax_input.state else None}\n"
+                        f"Natural field: {natural_name}\n"
+                        f"Expected node: {node_name}"
+                    ) from exc
+
+            if not handled:
                 unsupported.append((natural_name, value))
 
         if unsupported:
@@ -193,7 +224,11 @@ class GraphBackend:
         )
 
         result["federal_tax_bracket"] = 0.0
-        result["federal_amt"] = 0.0
+        try:
+            result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
+        except Exception as exc:
+            logger.debug("AMT evaluation failed (Form 6251 may not be linked): %s", exc)
+            result["federal_amt"] = 0.0
         result["state_adjusted_gross_income"] = 0.0
         result["state_taxable_income"] = 0.0
         result["state_total_tax"] = 0.0
@@ -223,6 +258,37 @@ class GraphBackend:
 
         return result
 
+    def _resolve_input_node(
+        self, tax_input: TaxReturnInput, var: str, output_node: str | None = None
+    ) -> str:
+        """Resolve the graph input node for a natural variable.
+
+        Prefers federal vs state mappings based on the output node namespace.
+        """
+        if isinstance(var, str) and var.startswith(("us_", "ca_")):
+            return var
+
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+        federal_node = NATURAL_TO_NODE.get(var)
+        state_node = state_mapping.get(var)
+
+        if output_node and output_node.startswith("us_"):
+            input_node = federal_node or state_node
+        elif output_node and output_node.startswith("ca_"):
+            input_node = state_node or federal_node
+        else:
+            input_node = state_node or federal_node
+
+        if input_node:
+            return input_node
+
+        input_node = var
+        if not isinstance(input_node, str):
+            input_node = str(input_node)
+        if not input_node.startswith(("us_", "ca_")):
+            input_node = f"us_1040_{input_node}"
+        return input_node
+
     def gradient(
         self, tax_input: TaxReturnInput, output: str, wrt: str
     ) -> float | None:
@@ -232,21 +298,20 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        if output.startswith("us_1040_"):
+        if output.startswith(("us_", "ca_")):
             output_node = output
         else:
-            output_node = output
+            output_node = None
             for line, natural in LINE_TO_NATURAL.items():
                 if natural == output:
                     output_node = line
                     break
-            output_node = f"us_1040_{output_node}"
+            if output_node is None:
+                output_node = f"us_1040_{output}"
+            else:
+                output_node = f"us_1040_{output_node}"
 
-        input_node = NATURAL_TO_NODE.get(wrt, wrt)
-        if not isinstance(input_node, str):
-            input_node = str(input_node)
-        if not input_node.startswith(("us_", "ca_")):
-            input_node = f"us_1040_{input_node}"
+        input_node = self._resolve_input_node(tax_input, wrt, output_node)
 
         return evaluator.gradient(output_node, input_node)
 
@@ -270,28 +335,29 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        if output.startswith("us_1040_"):
+        if output.startswith(("us_", "ca_")):
             output_node = output
         else:
-            output_node = output
+            output_node = None
             for line, natural in LINE_TO_NATURAL.items():
                 if natural == output:
                     output_node = line
                     break
-            output_node = f"us_1040_{output_node}"
+            if output_node is None:
+                output_node = f"us_1040_{output}"
+            else:
+                output_node = f"us_1040_{output_node}"
 
-        input_node = NATURAL_TO_NODE.get(var, var)
-        if not isinstance(input_node, str):
-            input_node = str(input_node)
-        if not input_node.startswith(("us_", "ca_")):
-            input_node = f"us_1040_{input_node}"
+        input_node = self._resolve_input_node(tax_input, var, output_node)
 
         natural_values = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
         current_val = natural_values.get(var, 0)
+
         if current_val == 0:
             natural_var = var
+            # Reverse lookup attempt
             for nat, node in NATURAL_TO_NODE.items():
                 if node == var:
                     natural_var = nat

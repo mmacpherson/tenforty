@@ -164,12 +164,12 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 ---
 
-### Phase 4 — Improve mapping fidelity (Natural inputs → graph nodes; outputs → API)
+### Phase 4 — Improve mapping fidelity (Natural inputs → graph nodes; outputs → API) - **COMPLETED**
 
 **Changes**
 - Ensure `TaxReturnInput` fields are mapped consistently into graph node names:
   - For federal: expand beyond the current limited mapping set.
-  - For state (CA): actually use `STATE_NATURAL_TO_LINE` in `GraphBackend._create_evaluator()`.
+  - For state (CA): actually use `STATE_NATURAL_TO_NODE` in `GraphBackend._create_evaluator()`.
 - Standardize naming conventions for node names so mapping doesn’t require per-form hacks (e.g., `us_1040_L2b_taxable_interest`).
 - Add explicit handling for areas where OTS and the simplified graph differ (e.g., qualified dividends preferential rates):
   - Either encode the correct logic in DSL and ship the graph, or clearly document that the graph backend is a simplified model until implemented.
