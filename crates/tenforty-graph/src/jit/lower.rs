@@ -9,14 +9,12 @@ pub const BATCH_SIZE: usize = 2;
 
 pub fn lower_graph<M: Module>(
     func: &mut codegen::ir::Function,
-    module: &mut M,
+    _module: &mut M,
     graph: &Graph,
     filing_status: FilingStatus,
     node_to_slot: &HashMap<NodeId, usize>,
     _num_slots: usize,
 ) -> Result<(), JitError> {
-    let _ptr_type = module.target_config().pointer_type();
-
     let mut func_ctx = FunctionBuilderContext::new();
     let mut builder = FunctionBuilder::new(func, &mut func_ctx);
 
@@ -30,7 +28,7 @@ pub fn lower_graph<M: Module>(
 
     let mut node_values: HashMap<NodeId, Value> = HashMap::new();
 
-    let order = graph.topological_order();
+    let order = graph.topological_order()?;
 
     for node_id in &order {
         let node = match graph.nodes.get(node_id) {
@@ -286,7 +284,7 @@ pub fn lower_graph_simd<M: Module>(
 
     let mut node_values: HashMap<NodeId, Value> = HashMap::new();
 
-    let order = graph.topological_order();
+    let order = graph.topological_order()?;
 
     for node_id in &order {
         let node = match graph.nodes.get(node_id) {

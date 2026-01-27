@@ -1,4 +1,4 @@
-use crate::graph::{FilingStatus, Graph, NodeId};
+use crate::graph::{FilingStatus, Graph, GraphError, NodeId};
 use cranelift::prelude::*;
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
@@ -18,6 +18,8 @@ pub enum JitError {
     NodeNotFound(NodeId),
     #[error("Table '{0}' not found")]
     TableNotFound(String),
+    #[error(transparent)]
+    Graph(#[from] GraphError),
 }
 
 pub struct JitCompiler {
@@ -67,7 +69,7 @@ impl JitCompiler {
             .declare_function("eval", Linkage::Export, &ctx.func.signature)
             .map_err(Box::new)?;
 
-        let (node_to_slot, num_slots) = build_slot_map(graph, filing_status);
+        let (node_to_slot, num_slots) = build_slot_map(graph, filing_status)?;
 
         lower_graph(
             &mut ctx.func,
@@ -158,8 +160,11 @@ impl Default for JitCompiler {
     }
 }
 
-fn build_slot_map(graph: &Graph, filing_status: FilingStatus) -> (HashMap<NodeId, usize>, usize) {
-    let order = graph.topological_order();
+fn build_slot_map(
+    graph: &Graph,
+    filing_status: FilingStatus,
+) -> Result<(HashMap<NodeId, usize>, usize), JitError> {
+    let order = graph.topological_order()?;
     let mut node_to_slot = HashMap::new();
     let mut slot = 0;
 
@@ -180,7 +185,7 @@ fn build_slot_map(graph: &Graph, filing_status: FilingStatus) -> (HashMap<NodeId
         }
     }
 
-    (node_to_slot, slot)
+    Ok((node_to_slot, slot))
 }
 
 fn build_input_offsets(

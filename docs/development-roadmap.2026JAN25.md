@@ -84,7 +84,7 @@ These tighten the “contract” before JSON exists, reducing the need for downs
 
 The sequence below is intentionally staged so each step can be validated independently.
 
-### Phase 1 — Make missing dependencies visible (Strictness + Diagnostics)
+### Phase 1 — Make missing dependencies visible (Strictness + Diagnostics) - **COMPLETED**
 
 **Changes**
 - Make the graph backend adapter always strict:
@@ -123,7 +123,7 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 ---
 
-### Phase 2 — Implement dependency-complete form loading (Resolver)
+### Phase 2 — Implement dependency-complete form loading (Resolver) - **COMPLETED**
 
 **Changes**
 - Implement a form resolver that loads the transitive closure of imports for the requested evaluation:
@@ -185,7 +185,7 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 ---
 
-### Phase 5 — Tighten import semantics and runtime diagnostics (Rust)
+### Phase 5 — Tighten import semantics and runtime diagnostics (Rust) - **COMPLETED**
 
 **Changes**
 - Decide how to treat `Op::Import.year`:

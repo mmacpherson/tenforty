@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 use crate::graph::{
-    BracketTable, ByStatus, Graph, GraphMeta, Import, Invariant, Node, NodeId, Op, TableId,
+    BracketTable, ByStatus, Graph, GraphMeta, Invariant, Node, NodeId, Op, TableId,
 };
 
 #[derive(Debug, Error)]
@@ -266,7 +266,7 @@ impl GraphSet {
             }
         }
 
-        Ok(Graph {
+        let linked = Graph {
             meta: Some(GraphMeta {
                 form_id: Some("linked".to_string()),
                 year: None,
@@ -278,7 +278,15 @@ impl GraphSet {
             inputs: merged_inputs,
             outputs: merged_outputs,
             invariants: merged_invariants,
-        })
+        };
+
+        // Validate no cycles in the linked graph
+        linked.topological_order().map_err(|e| match e {
+            crate::graph::GraphError::CycleDetected(cycle) => LinkError::CircularDependency(cycle),
+            _ => LinkError::CircularDependency(vec!["Unknown error during linking".to_string()]),
+        })?;
+
+        Ok(linked)
     }
 }
 
@@ -595,6 +603,7 @@ fn remap_invariant(inv: &Invariant, form_id: &str, table_prefix: &str) -> Invari
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::graph::Import;
 
     fn simple_graph(prefix: &str) -> Graph {
         let mut nodes = HashMap::new();

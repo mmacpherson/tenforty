@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
     runtime.eval_node(output)?;
 
-    let order = runtime.graph().topological_order();
+    let order = runtime.graph().topological_order()?;
     let values = runtime.get_all_values();
 
     let mut adjoints: HashMap<NodeId, f64> = HashMap::new();

@@ -1,8 +1,17 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use thiserror::Error;
 
 pub type NodeId = u32;
 pub type TableId = String;
+
+#[derive(Debug, Error)]
+pub enum GraphError {
+    #[error("Cycle detected: {0:?}")]
+    CycleDetected(Vec<String>),
+    #[error("Node {0} not found")]
+    NodeNotFound(NodeId),
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -236,42 +245,67 @@ impl Graph {
         self.output_node_by_name(name).map(|n| n.id)
     }
 
-    pub fn topological_order(&self) -> Vec<NodeId> {
+    pub fn topological_order(&self) -> Result<Vec<NodeId>, GraphError> {
         let mut result = Vec::with_capacity(self.nodes.len());
         let mut visited = std::collections::HashSet::new();
         let mut temp_mark = std::collections::HashSet::new();
+        let mut stack = Vec::new();
 
         fn visit(
             id: NodeId,
             graph: &Graph,
             visited: &mut std::collections::HashSet<NodeId>,
             temp_mark: &mut std::collections::HashSet<NodeId>,
+            stack: &mut Vec<NodeId>,
             result: &mut Vec<NodeId>,
-        ) {
+        ) -> Result<(), GraphError> {
             if visited.contains(&id) {
-                return;
+                return Ok(());
             }
             if temp_mark.contains(&id) {
-                panic!("Graph has a cycle at node {}", id);
+                let start = stack.iter().position(|&node_id| node_id == id).unwrap_or(0);
+                let mut cycle_ids: Vec<NodeId> = stack[start..].to_vec();
+                cycle_ids.push(id);
+                let cycle = cycle_ids
+                    .into_iter()
+                    .map(|id| {
+                        graph
+                            .nodes
+                            .get(&id)
+                            .and_then(|n| n.name.clone())
+                            .unwrap_or_else(|| format!("node_{id}"))
+                    })
+                    .collect();
+                return Err(GraphError::CycleDetected(cycle));
             }
             temp_mark.insert(id);
+            stack.push(id);
 
             if let Some(node) = graph.nodes.get(&id) {
                 for dep in node.op.dependencies() {
-                    visit(dep, graph, visited, temp_mark, result);
+                    visit(dep, graph, visited, temp_mark, stack, result)?;
                 }
             }
 
+            stack.pop();
             temp_mark.remove(&id);
             visited.insert(id);
             result.push(id);
+            Ok(())
         }
 
         for &id in self.nodes.keys() {
-            visit(id, self, &mut visited, &mut temp_mark, &mut result);
+            visit(
+                id,
+                self,
+                &mut visited,
+                &mut temp_mark,
+                &mut stack,
+                &mut result,
+            )?;
         }
 
-        result
+        Ok(result)
     }
 }
 
@@ -310,5 +344,46 @@ mod tests {
         assert_eq!(graph.nodes.len(), 3);
         assert_eq!(graph.inputs, vec![0]);
         assert_eq!(graph.outputs, vec![2]);
+    }
+
+    #[test]
+    fn test_topological_order_cycle() {
+        let mut nodes = HashMap::new();
+        // Node 0 depends on node 1, node 1 depends on node 0
+        nodes.insert(
+            0,
+            Node {
+                id: 0,
+                op: Op::Add { left: 1, right: 0 },
+                name: Some("node_a".to_string()),
+            },
+        );
+        nodes.insert(
+            1,
+            Node {
+                id: 1,
+                op: Op::Neg { arg: 0 },
+                name: Some("node_b".to_string()),
+            },
+        );
+
+        let graph = Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![],
+            outputs: vec![0],
+            invariants: vec![],
+        };
+
+        let result = graph.topological_order();
+        assert!(result.is_err());
+        if let Err(GraphError::CycleDetected(cycle)) = result {
+            assert!(cycle.contains(&"node_a".to_string()));
+            assert!(cycle.contains(&"node_b".to_string()));
+        } else {
+            panic!("Expected CycleDetected error, got {:?}", result);
+        }
     }
 }
