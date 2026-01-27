@@ -63,10 +63,6 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
                 assert table_id in tables, (
                     f"{filename}: node {node.get('name')} references missing table {table_id!r}"
                 )
-            elif op.get("type") == "ordering":
-                # Assuming 'ordering' invariant might reference tables if implemented as op?
-                # Actually Invariants are separate. Let's check Ops only for now.
-                pass
 
         # 4. Integrity: Invariant references
         invariants = data.get("invariants", [])
@@ -76,3 +72,37 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
                 assert table_id in tables, (
                     f"{filename}: invariant references missing table {table_id!r}"
                 )
+
+        # 5. Integrity: Node references
+        for node in nodes.values():
+            op = node.get("op", {})
+            op_type = op.get("type")
+
+            refs_to_check = []
+            if op_type in ("add", "sub", "mul", "div", "max", "min"):
+                refs_to_check = [op.get("left"), op.get("right")]
+            elif op_type in ("floor", "neg", "abs"):
+                refs_to_check = [op.get("arg")]
+            elif op_type == "clamp":
+                refs_to_check = [op.get("arg")]
+            elif op_type == "bracket_tax":
+                refs_to_check = [op.get("income")]
+            elif op_type == "phase_out":
+                refs_to_check = [op.get("agi")]
+            elif op_type == "by_status":
+                values = op.get("values", {})
+                refs_to_check = [
+                    values.get("single"),
+                    values.get("married_joint"),
+                    values.get("married_separate"),
+                    values.get("head_of_household"),
+                    values.get("qualifying_widow"),
+                ]
+            elif op_type == "if_positive":
+                refs_to_check = [op.get("cond"), op.get("then"), op.get("otherwise")]
+
+            for ref in refs_to_check:
+                if ref is not None:
+                    assert str(ref) in nodes, (
+                        f"{filename}: node {node.get('name')} references non-existent node {ref}"
+                    )
