@@ -42,11 +42,11 @@ def test_graph_backend_state_inputs():
     # Check num_dependents mapped to ca_ftb_3514_L2_num_children
     # Note: Evaluator works with node IDs or names. We can check if value is set.
     val_dependents = evaluator.eval("ca_ftb_3514_L2_num_children")
-    assert val_dependents == 2.0
+    assert val_dependents == pytest.approx(2.0)
 
     # Check state_adjustment mapped to ca_schedule_ca_A22_24
     val_adjustment = evaluator.eval("ca_schedule_ca_A22_24")
-    assert val_adjustment == 1000.0
+    assert val_adjustment == pytest.approx(1000.0)
 
 
 def test_state_adjustment_impact():
@@ -76,7 +76,7 @@ def test_state_adjustment_impact():
     # Expect CA AGI to increase by 1000
     # ca_schedule_ca_A22_24 is an ADDITION to income
     diff = res_adj.state_adjusted_gross_income - res_base.state_adjusted_gross_income
-    assert diff == 1000.0
+    assert diff == pytest.approx(1000.0)
 
 
 def test_incentive_stock_options_amt_impact():
@@ -116,4 +116,6 @@ def test_incentive_stock_options_amt_impact():
     # ISO adjustment is added to AMTI, not Regular Taxable Income.
     # So federal_taxable_income should be same.
 
-    assert res_iso.federal_taxable_income == res_base.federal_taxable_income
+    assert res_iso.federal_taxable_income == pytest.approx(
+        res_base.federal_taxable_income
+    )

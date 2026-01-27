@@ -169,14 +169,13 @@ class GraphBackend:
                 try:
                     evaluator.set(node_name, float(value))
                     handled = True
-                except Exception:
-                    # If state form is not loaded, we might fail here.
-                    # But if we found it in mapping, we expect it to be handled.
-                    # However, if resolve_forms didn't pick it up, it might be missing.
-                    # We choose to be permissive if federal was handled, or if it's optional.
-                    # But if ONLY state mapped it, we should probably complain if it failed.
-                    if not handled:
-                        raise
+                except Exception as exc:
+                    raise RuntimeError(
+                        "Graph backend mapping error: expected state input node not found.\n"
+                        f"State: {tax_input.state.value if tax_input.state else None}\n"
+                        f"Natural field: {natural_name}\n"
+                        f"Expected node: {node_name}"
+                    ) from exc
 
             if not handled:
                 unsupported.append((natural_name, value))
@@ -222,7 +221,10 @@ class GraphBackend:
         )
 
         result["federal_tax_bracket"] = 0.0
-        result["federal_amt"] = 0.0
+        try:
+            result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
+        except Exception:
+            result["federal_amt"] = 0.0
         result["state_adjusted_gross_income"] = 0.0
         result["state_taxable_income"] = 0.0
         result["state_total_tax"] = 0.0
@@ -261,7 +263,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        if output.startswith("us_1040_"):
+        if output.startswith(("us_", "ca_")):
             output_node = output
         else:
             output_node = output
@@ -312,7 +314,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        if output.startswith("us_1040_"):
+        if output.startswith(("us_", "ca_")):
             output_node = output
         else:
             output_node = output

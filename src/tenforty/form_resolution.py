@@ -7,29 +7,36 @@ from pathlib import Path
 
 from .mappings import NATURAL_TO_NODE, STATE_FORM_NAMES, STATE_NATURAL_TO_NODE
 
+
+def _form_id_from_node_name(node_name: str) -> str | None:
+    """Best-effort extraction of a form_id from a graph node name.
+
+    Node names generally follow: "{form_id}_{line}_{description}", e.g.
+    - "us_1040_L1a_wages" -> "us_1040"
+    - "ca_schedule_ca_A22_24" -> "ca_schedule_ca"
+    """
+    parts = node_name.split("_")
+    split_idx = -1
+    for i, part in enumerate(parts):
+        if (part.startswith("L") and len(part) > 1 and part[1].isdigit()) or (
+            part.startswith("A") and len(part) > 1 and part[1].isdigit()
+        ):
+            split_idx = i
+            break
+
+    if split_idx == -1:
+        return None
+    return "_".join(parts[:split_idx])
+
+
 # Map from natural input name to the form ID that accepts it.
 # Derived from mapping prefixes (e.g., "us_1040_L1a" -> "us_1040").
 INPUT_TO_FORM: dict[str, str] = {}
 
 for natural_name, node_name in NATURAL_TO_NODE.items():
-    if "_" in node_name:
-        # Heuristic: split by first underscore to get form_id.
-        # Node names generally follow the convention "{form_id}_L{line_number}_{description}".
-        # Examples:
-        # "us_1040_L1a_wages" -> "us_1040"
-        # "us_schedule_d_L1a_short_term_totals" -> "us_schedule_d"
-
-        parts = node_name.split("_")
-        # Find the part starting with 'L' followed by a digit to identify the split point
-        split_idx = -1
-        for i, part in enumerate(parts):
-            if part.startswith("L") and len(part) > 1 and part[1].isdigit():
-                split_idx = i
-                break
-
-        if split_idx != -1:
-            form_id = "_".join(parts[:split_idx])
-            INPUT_TO_FORM[natural_name] = form_id
+    form_id = _form_id_from_node_name(node_name)
+    if form_id:
+        INPUT_TO_FORM[natural_name] = form_id
 
 # Manually add any missing ones or overrides if needed
 # (NATURAL_TO_NODE covers most inputs)
@@ -104,21 +111,8 @@ def resolve_forms(
             for field, value in inputs.items():
                 if value and value != 0 and field in state_mapping:
                     node_name = state_mapping[field]
-                    # Heuristic to extract form_id from node_name
-                    # Assuming "{form_id}_L..."
-                    parts = node_name.split("_")
-                    split_idx = -1
-                    for i, part in enumerate(parts):
-                        if (
-                            part.startswith("L") and len(part) > 1 and part[1].isdigit()
-                        ) or (
-                            part.startswith("A") and len(part) > 1 and part[1].isdigit()
-                        ):
-                            split_idx = i
-                            break
-
-                    if split_idx != -1:
-                        form_id = "_".join(parts[:split_idx])
+                    form_id = _form_id_from_node_name(node_name)
+                    if form_id:
                         needed.add(form_id)
 
         except KeyError:
