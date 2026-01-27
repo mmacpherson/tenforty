@@ -145,7 +145,7 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 ---
 
-### Phase 3 — Align runtime graphs with the DSL as the source of truth
+### Phase 3 — Align runtime graphs with the DSL as the source of truth - **COMPLETED**
 
 **Changes**
 - Keep the canonical file naming convention for shipped graphs as:
