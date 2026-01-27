@@ -1,8 +1,11 @@
 """Tests for form resolution logic."""
 
+import unittest.mock
 from pathlib import Path
 
-from tenforty.form_resolution import INPUT_TO_FORM, resolve_forms
+import pytest
+
+from tenforty.form_resolution import INPUT_TO_FORM, _get_form_imports, resolve_forms
 
 
 def test_input_to_form_mapping():
@@ -10,7 +13,6 @@ def test_input_to_form_mapping():
     assert INPUT_TO_FORM["w2_income"] == "us_1040"
     assert INPUT_TO_FORM["taxable_interest"] == "us_1040"
     assert INPUT_TO_FORM["short_term_capital_gains"] == "us_schedule_d"
-    # assert INPUT_TO_FORM["business_income"] == "us_schedule_c" # If mappings exist
 
 
 def test_resolve_forms_basic():
@@ -21,50 +23,37 @@ def test_resolve_forms_basic():
 
 def test_resolve_forms_with_state():
     """Resolve forms with state should include state form."""
-    # We need to mock _get_form_imports to avoid hitting disk
-    from tenforty import form_resolution
+    with unittest.mock.patch(
+        "tenforty.form_resolution._get_form_imports"
+    ) as mock_get_imports:
 
-    original_get_imports = form_resolution._get_form_imports
+        def side_effect(forms_dir, form_id, year):
+            if form_id == "ca_540":
+                return [("ca_schedule_ca", "line", 2024)]
+            return []
 
-    def mock_get_imports(forms_dir, form_id, year):
-        if form_id == "ca_540":
-            return [("ca_schedule_ca", "line", 2024)]
-        return []
-
-    try:
-        # Mock the lru_cache wrapper or the underlying function?
-        # _get_form_imports is decorated with lru_cache.
-        # We can bypass it or mock it.
-        # Since it is imported in the module, we can patch it.
-        form_resolution._get_form_imports = mock_get_imports
+        mock_get_imports.side_effect = side_effect
 
         forms = resolve_forms(2024, "CA", {}, Path("/tmp"))
         assert "us_1040" in forms
         assert "ca_540" in forms
         assert "ca_schedule_ca" in forms
 
-    finally:
-        form_resolution._get_form_imports = original_get_imports
-
 
 def test_resolve_forms_with_input_trigger():
     """Input should trigger form inclusion."""
-    from tenforty import form_resolution
+    with unittest.mock.patch(
+        "tenforty.form_resolution._get_form_imports"
+    ) as mock_get_imports:
 
-    original_get_imports = form_resolution._get_form_imports
-
-    def mock_get_imports(forms_dir, form_id, year):
-        if form_id == "us_schedule_d":
+        def side_effect(forms_dir, form_id, year):
+            if form_id == "us_schedule_d":
+                return []
+            if form_id == "us_1040":
+                return []
             return []
-        if form_id == "us_1040":
-            # 1040 imports Schedule D? Usually yes, but strictly it depends on graph.
-            # resolve_forms follows imports.
-            # But here we trigger via INPUT.
-            return []
-        return []
 
-    try:
-        form_resolution._get_form_imports = mock_get_imports
+        mock_get_imports.side_effect = side_effect
 
         inputs = {"short_term_capital_gains": 100}
         forms = resolve_forms(2024, None, inputs, Path("/tmp"))
@@ -72,5 +61,16 @@ def test_resolve_forms_with_input_trigger():
         assert "us_1040" in forms
         assert "us_schedule_d" in forms
 
-    finally:
-        form_resolution._get_form_imports = original_get_imports
+
+def test_real_form_imports_loading():
+    """Verify we can load imports from real JSON files."""
+    # Find the forms directory relative to this test file
+    # This assumes the test is running in the project root or tests/ dir
+    forms_dir = Path("src/tenforty/forms")
+    if not forms_dir.exists():
+        pytest.skip("Forms directory not found at src/tenforty/forms")
+
+    imports = _get_form_imports(forms_dir, "us_schedule_3", 2024)
+    assert len(imports) > 0, "Should have loaded imports for us_schedule_3"
+    forms = [i[0] for i in imports]
+    assert "us_form_2441" in forms

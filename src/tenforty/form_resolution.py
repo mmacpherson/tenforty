@@ -33,6 +33,8 @@ for natural_name, node_name in NATURAL_TO_NODE.items():
         # "us_1040_L1a_wages" -> "us_1040"
         # "us_schedule_d_L1a_short_term_totals" -> "us_schedule_d"
 
+        # Note: This heuristic relies on the convention in mappings.py where node names
+        # start with the form ID followed by "L" and a digit.
         parts = node_name.split("_")
         # find the part starting with 'L' followed by digit
         split_idx = -1
@@ -105,18 +107,7 @@ def resolve_forms(
 
     # Add state form
     if state:
-        # Convert state code to form name if needed
-        # STATE_FORM_NAMES keys are OTSState enum or str?
-        # mappings.py uses OTSState enum keys.
-        # We need to handle str input.
         state_upper = state.upper()
-        # Find enum matching string? Or iterate?
-        # Let's assume the caller passes a valid state identifier that matches or mapped
-        # For now, let's look it up via string match on enum names
-
-        # Simple lookup in STATE_FORM_NAMES values?
-        # No, STATE_FORM_NAMES maps State -> "ca_540"
-
         from .models import OTSState
 
         try:
@@ -142,9 +133,9 @@ def resolve_forms(
         imports = _get_form_imports(forms_dir, form_id, year)
 
         for imported_form, _, _imp_year in imports:
-            # We assume same year for now, or respect imported year
-            # The linker enforces year consistency or mixed years.
-            # Here we just gather forms.
+            # We assume same year for now, or respect imported year.
+            # NOTE: Strict year consistency (or support for mixed years) is enforced
+            # by the linker (GraphSet.link). Here we optimistically gather dependencies.
             if imported_form not in needed:
                 needed.add(imported_form)
                 queue.append(imported_form)

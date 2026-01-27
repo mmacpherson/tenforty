@@ -156,3 +156,23 @@ class TestGraphBackend:
         # ca_540 imports ca_schedule_ca (and others), so omitting them should trigger the check
         with pytest.raises(RuntimeError, match="unresolved imports"):
             graph_module._link_graphs(2024, ("us_1040", "ca_540"))
+
+    def test_graph_backend_integration_resolves_schedule_d(self, graph_available):
+        """Integration test: inputting capital gains should automatically load Schedule D."""
+        if not graph_available:
+            pytest.skip("Graph backend not available")
+
+        from tenforty.backends import GraphBackend
+
+        backend = GraphBackend()
+        # Providing capital gains requires us_schedule_d
+        tax_input = TaxReturnInput(
+            year=2024, w2_income=100_000, short_term_capital_gains=5000
+        )
+
+        # This will fail if resolve_forms doesn't find Schedule D,
+        # because us_1040 has an import for it that would otherwise be unresolved.
+        result = backend.evaluate(tax_input)
+
+        # Verify result is sane (tax should include tax on gains)
+        assert result.federal_total_tax > 0
