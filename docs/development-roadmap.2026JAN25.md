@@ -164,7 +164,7 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 ---
 
-### Phase 4 — Improve mapping fidelity (Natural inputs → graph nodes; outputs → API)
+### Phase 4 — Improve mapping fidelity (Natural inputs → graph nodes; outputs → API) - **COMPLETED**
 
 **Changes**
 - Ensure `TaxReturnInput` fields are mapped consistently into graph node names:
