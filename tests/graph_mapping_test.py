@@ -128,6 +128,30 @@ def test_overlapping_federal_state_mapping():
     assert state_val == pytest.approx(20000.0)
 
 
+def test_resolve_input_node_prefers_federal_for_federal_output():
+    """Ensure overlapping mappings use federal nodes for federal outputs."""
+    backend = GraphBackend()
+
+    tax_input = TaxReturnInput(
+        year=2025,
+        state=OTSState.CA,
+        filing_status=OTSFilingStatus.SINGLE,
+        w2_income=100000,
+        itemized_deductions=20000,
+        standard_or_itemized=OTSDeductionType.ITEMIZED,
+    )
+
+    federal_node = backend._resolve_input_node(
+        tax_input, "itemized_deductions", "us_1040_L15_taxable_income"
+    )
+    assert federal_node == "us_schedule_a_L16_other_deductions"
+
+    state_node = backend._resolve_input_node(
+        tax_input, "itemized_deductions", "ca_540_L19_ca_taxable_income"
+    )
+    assert state_node == "ca_540_L18_itemized"
+
+
 @pytest.mark.requires_graph
 def test_zero_value_inputs_not_set():
     """Test that zero values are handled correctly by the evaluator.

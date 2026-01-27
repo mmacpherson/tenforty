@@ -9,8 +9,6 @@ use std::time::Instant;
 
 #[cfg(feature = "jit")]
 use graphlib::jit::{JitBatchRuntime, JitCompiler, JitRuntime, BATCH_SIZE};
-#[cfg(feature = "jit")]
-use std::sync::Arc;
 
 const NUM_SCENARIOS: usize = 100_000;
 
@@ -114,12 +112,6 @@ fn bench_jit_sequential(graph: &Graph, scenarios: &[(f64, f64, f64)]) -> f64 {
 fn bench_jit_parallel(graph: &Graph, scenarios: &[(f64, f64, f64)], num_threads: usize) -> f64 {
     let compiler = JitCompiler::new().unwrap();
 
-    // Pre-compile one function per thread
-    let compiled_funcs: Vec<_> = (0..num_threads)
-        .map(|_| compiler.compile(graph, FilingStatus::Single).unwrap())
-        .collect();
-    let compiled_funcs = Arc::new(compiled_funcs);
-
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(num_threads)
         .build()
@@ -127,9 +119,6 @@ fn bench_jit_parallel(graph: &Graph, scenarios: &[(f64, f64, f64)], num_threads:
 
     pool.install(|| {
         use std::cell::RefCell;
-        use std::sync::atomic::{AtomicUsize, Ordering};
-
-        let thread_counter = AtomicUsize::new(0);
 
         thread_local! {
             static THREAD_IDX: RefCell<Option<usize>> = const { RefCell::new(None) };
@@ -329,10 +318,10 @@ fn main() {
     bench_interpreter_sequential(&graph, &scenarios);
 
     #[cfg(feature = "jit")]
-    let jit_1 = bench_jit_sequential(&graph, &scenarios);
+    bench_jit_sequential(&graph, &scenarios);
 
     #[cfg(feature = "jit")]
-    let simd_1 = bench_jit_simd_sequential(&graph, &scenarios);
+    bench_jit_simd_sequential(&graph, &scenarios);
 
     println!();
     println!("--- Parallel scaling ---");

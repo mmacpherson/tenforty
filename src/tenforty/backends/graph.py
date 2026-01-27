@@ -258,6 +258,37 @@ class GraphBackend:
 
         return result
 
+    def _resolve_input_node(
+        self, tax_input: TaxReturnInput, var: str, output_node: str | None = None
+    ) -> str:
+        """Resolve the graph input node for a natural variable.
+
+        Prefers federal vs state mappings based on the output node namespace.
+        """
+        if isinstance(var, str) and var.startswith(("us_", "ca_")):
+            return var
+
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+        federal_node = NATURAL_TO_NODE.get(var)
+        state_node = state_mapping.get(var)
+
+        if output_node and output_node.startswith("us_"):
+            input_node = federal_node or state_node
+        elif output_node and output_node.startswith("ca_"):
+            input_node = state_node or federal_node
+        else:
+            input_node = state_node or federal_node
+
+        if input_node:
+            return input_node
+
+        input_node = var
+        if not isinstance(input_node, str):
+            input_node = str(input_node)
+        if not input_node.startswith(("us_", "ca_")):
+            input_node = f"us_1040_{input_node}"
+        return input_node
+
     def gradient(
         self, tax_input: TaxReturnInput, output: str, wrt: str
     ) -> float | None:
@@ -280,24 +311,7 @@ class GraphBackend:
             else:
                 output_node = f"us_1040_{output_node}"
 
-        # Resolve input node
-        input_node = None
-        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
-
-        # Check state mapping first if available
-        if wrt in state_mapping:
-            input_node = state_mapping[wrt]
-
-        # Fallback to federal mapping
-        if not input_node and wrt in NATURAL_TO_NODE:
-            input_node = NATURAL_TO_NODE[wrt]
-
-        if not input_node:
-            input_node = wrt
-            if not isinstance(input_node, str):
-                input_node = str(input_node)
-            if not input_node.startswith(("us_", "ca_")):
-                input_node = f"us_1040_{input_node}"
+        input_node = self._resolve_input_node(tax_input, wrt, output_node)
 
         return evaluator.gradient(output_node, input_node)
 
@@ -334,22 +348,7 @@ class GraphBackend:
             else:
                 output_node = f"us_1040_{output_node}"
 
-        # Resolve input node
-        input_node = None
-        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
-
-        if var in state_mapping:
-            input_node = state_mapping[var]
-
-        if not input_node and var in NATURAL_TO_NODE:
-            input_node = NATURAL_TO_NODE[var]
-
-        if not input_node:
-            input_node = var
-            if not isinstance(input_node, str):
-                input_node = str(input_node)
-            if not input_node.startswith(("us_", "ca_")):
-                input_node = f"us_1040_{input_node}"
+        input_node = self._resolve_input_node(tax_input, var, output_node)
 
         natural_values = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
