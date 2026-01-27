@@ -18,6 +18,9 @@ fn make_income_graph() -> Graph {
 fn make_1040_with_import() -> Graph {
     let json = r#"{
         "meta": {"form_id": "us_1040", "year": 2024},
+        "imports": [
+            {"form": "us_schedule_d", "line": "L16_net_gain", "year": 2024}
+        ],
         "nodes": {
             "0": {"id": 0, "op": {"type": "input"}, "name": "L1a_w2_wages"},
             "1": {"id": 1, "op": {"type": "import", "form": "us_schedule_d", "line": "L16_net_gain", "year": 2024}, "name": "L7_capital_gain"},
@@ -81,6 +84,9 @@ fn test_unresolved_import_becomes_input() {
     // Create a graph that imports from a non-existent form
     let json = r#"{
         "meta": {"form_id": "state_form", "year": 2024},
+        "imports": [
+            {"form": "us_1040", "line": "L15_taxable_income", "year": 2024}
+        ],
         "nodes": {
             "0": {"id": 0, "op": {"type": "import", "form": "us_1040", "line": "L15_taxable_income", "year": 2024}, "name": "federal_taxable"},
             "1": {"id": 1, "op": {"type": "literal", "value": 0.05}, "name": "state_rate"},
@@ -135,6 +141,9 @@ fn test_chained_imports() {
     // Form B: imports from A, adds 100
     let form_b_json = r#"{
         "meta": {"form_id": "form_b", "year": 2024},
+        "imports": [
+            {"form": "form_a", "line": "doubled", "year": 2024}
+        ],
         "nodes": {
             "0": {"id": 0, "op": {"type": "import", "form": "form_a", "line": "doubled", "year": 2024}, "name": "from_a"},
             "1": {"id": 1, "op": {"type": "literal", "value": 100}, "name": "addition"},
@@ -148,6 +157,9 @@ fn test_chained_imports() {
     // Form C: imports from B, multiplies by 3
     let form_c_json = r#"{
         "meta": {"form_id": "form_c", "year": 2024},
+        "imports": [
+            {"form": "form_b", "line": "result", "year": 2024}
+        ],
         "nodes": {
             "0": {"id": 0, "op": {"type": "import", "form": "form_b", "line": "result", "year": 2024}, "name": "from_b"},
             "1": {"id": 1, "op": {"type": "literal", "value": 3}, "name": "multiplier"},

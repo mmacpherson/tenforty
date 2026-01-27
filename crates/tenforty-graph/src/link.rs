@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 use crate::graph::{
-    BracketTable, ByStatus, Graph, GraphMeta, Invariant, Node, NodeId, Op, TableId,
+    BracketTable, ByStatus, Graph, GraphMeta, Import, Invariant, Node, NodeId, Op, TableId,
 };
 
 #[derive(Debug, Error)]
@@ -28,7 +28,6 @@ pub struct UnresolvedImport {
     pub form: String,
     pub line: String,
     pub year: u16,
-    pub node_id: NodeId,
 }
 
 #[derive(Debug, Default)]
@@ -72,28 +71,26 @@ impl GraphSet {
         let mut unresolved = Vec::new();
 
         for graph in self.graphs.values() {
-            for node in graph.nodes.values() {
-                if let Op::Import { form, line, year } = &node.op {
-                    let resolved = self.graphs.get(form).and_then(|target_graph| {
-                        target_graph
-                            .outputs
-                            .iter()
-                            .filter_map(|id| target_graph.nodes.get(id))
-                            .find(|n| {
-                                n.name.as_deref().is_some_and(|name| {
-                                    name == line || name.starts_with(&format!("{line}_"))
-                                })
+            for import in &graph.imports {
+                let resolved = self.graphs.get(&import.form).and_then(|target_graph| {
+                    target_graph
+                        .outputs
+                        .iter()
+                        .filter_map(|id| target_graph.nodes.get(id))
+                        .find(|n| {
+                            n.name.as_deref().is_some_and(|name| {
+                                name == &import.line
+                                    || name.starts_with(&format!("{}_", import.line))
                             })
-                    });
+                        })
+                });
 
-                    if resolved.is_none() {
-                        unresolved.push(UnresolvedImport {
-                            form: form.clone(),
-                            line: line.clone(),
-                            year: *year,
-                            node_id: node.id,
-                        });
-                    }
+                if resolved.is_none() {
+                    unresolved.push(UnresolvedImport {
+                        form: import.form.clone(),
+                        line: import.line.clone(),
+                        year: import.year,
+                    });
                 }
             }
         }
@@ -106,6 +103,7 @@ impl GraphSet {
             return Ok(Graph {
                 meta: None,
                 nodes: HashMap::new(),
+                imports: Vec::new(),
                 tables: HashMap::new(),
                 inputs: Vec::new(),
                 outputs: Vec::new(),
@@ -275,6 +273,7 @@ impl GraphSet {
                 generated_by: Some("GraphSet::link".to_string()),
             }),
             nodes: merged_nodes,
+            imports: Vec::new(),
             tables: merged_tables,
             inputs: merged_inputs,
             outputs: merged_outputs,
@@ -631,6 +630,7 @@ mod tests {
                 generated_by: None,
             }),
             nodes,
+            imports: vec![],
             tables: HashMap::new(),
             inputs: vec![0],
             outputs: vec![2],
@@ -676,6 +676,11 @@ mod tests {
                 generated_by: None,
             }),
             nodes,
+            imports: vec![Import {
+                form: "form_a".to_string(),
+                line: "taxable".to_string(),
+                year: 2024,
+            }],
             tables: HashMap::new(),
             inputs: vec![0],
             outputs: vec![2],

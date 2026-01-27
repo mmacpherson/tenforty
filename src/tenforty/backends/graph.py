@@ -5,6 +5,7 @@ from __future__ import annotations
 import pathlib
 from functools import lru_cache
 
+from ..form_resolution import resolve_forms
 from ..mappings import (
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
@@ -38,9 +39,9 @@ def _load_graph(form_id: str, year: int):
     return Graph.from_json(form_path.read_text())
 
 
-@lru_cache(maxsize=8)
-def _load_linked_graph(year: int, state: OTSState | None):
-    """Load and link federal and state graphs for a given year."""
+@lru_cache(maxsize=16)
+def _link_graphs(year: int, form_ids: tuple[str, ...]):
+    """Link a specific set of graphs for a given year."""
     try:
         from ..graphlib import GraphSet
     except ImportError:
@@ -48,25 +49,16 @@ def _load_linked_graph(year: int, state: OTSState | None):
 
     gs = GraphSet()
 
-    federal = _load_graph("us_1040", year)
-    if federal is None:
-        raise ValueError(f"No federal graph available for year {year}")
-    gs.add("us_1040", federal)
+    for form_id in form_ids:
+        graph = _load_graph(form_id, year)
+        if graph is None:
+            raise ValueError(f"Required graph not found: {form_id}_{year}")
+        gs.add(form_id, graph)
 
-    if state and state != OTSState.NONE and state in STATE_FORM_NAMES:
-        form_name = STATE_FORM_NAMES[state]
-        state_graph = _load_graph(form_name, year)
-        if state_graph is None:
-            raise ValueError(f"No {form_name} graph available for year {year}")
-        gs.add(form_name, state_graph)
-
-    # Resolve transitive imports strictly by loading referenced form graphs
-    # from `src/tenforty/forms/` (generated artifacts).
-    while True:
-        unresolved = gs.unresolved_imports()
-        if not unresolved:
-            break
-
+    # Verify no unresolved imports remain (should be handled by resolve_forms,
+    # but strictly enforced here).
+    unresolved = gs.unresolved_imports()
+    if unresolved:
         mismatched_years = sorted({u.year for u in unresolved if u.year != year})
         if mismatched_years:
             mismatches = sorted(
@@ -82,26 +74,6 @@ def _load_linked_graph(year: int, state: OTSState | None):
                 f"{mismatch_lines}"
             )
 
-        loaded_forms = set(gs.forms())
-        needed = sorted(
-            {(u.form, u.year) for u in unresolved if u.form not in loaded_forms}
-        )
-        if not needed:
-            break
-
-        progress = False
-        for form_id, imp_year in needed:
-            graph = _load_graph(form_id, imp_year)
-            if graph is None:
-                continue
-            gs.add(form_id, graph)
-            progress = True
-
-        if not progress:
-            break
-
-    unresolved = gs.unresolved_imports()
-    if unresolved:
         missing = sorted({(u.form, u.line, u.year) for u in unresolved})
         missing_lines = "\n".join(
             f"- {form}:{line} ({imp_year})" for form, line, imp_year in missing
@@ -143,7 +115,18 @@ class GraphBackend:
         """Create an evaluator for the given input."""
         from ..graphlib import FilingStatus, Runtime
 
-        graph = _load_linked_graph(tax_input.year.value, tax_input.state)
+        # Determine required forms based on inputs and state
+        inputs_dict = tax_input.model_dump(
+            exclude={"year", "state", "filing_status", "standard_or_itemized"}
+        )
+        form_ids = resolve_forms(
+            tax_input.year.value,
+            tax_input.state.value if tax_input.state else None,
+            inputs_dict,
+            _forms_dir(),
+        )
+
+        graph = _link_graphs(tax_input.year.value, tuple(form_ids))
         filing_status = FilingStatus.from_str(
             FILING_STATUS_MAP.get(tax_input.filing_status, "single")
         )
@@ -152,9 +135,7 @@ class GraphBackend:
         for input_name in graph.input_names():
             evaluator.set(input_name, 0.0)
 
-        natural_values = tax_input.model_dump(
-            exclude={"year", "state", "filing_status", "standard_or_itemized"}
-        )
+        natural_values = inputs_dict
 
         unsupported: list[tuple[str, object]] = []
         for natural_name, value in natural_values.items():

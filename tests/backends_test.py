@@ -67,35 +67,19 @@ class TestBackendSelection:
         assert backend.name == "ots"
 
 
+@pytest.mark.requires_graph
 class TestGraphBackend:
     """Tests for graph backend (requires graph module)."""
 
-    @pytest.fixture
-    def graph_available(self):
-        """Check if graph backend is available."""
-        try:
-            from tenforty.backends import GraphBackend
-
-            backend = GraphBackend()
-            return backend.is_available()
-        except ImportError:
-            return False
-
-    def test_graph_backend_available(self, graph_available):
+    def test_graph_backend_available(self):
         """Graph backend availability test."""
-        if not graph_available:
-            pytest.skip("Graph backend not available")
-
         from tenforty.backends import GraphBackend
 
         backend = GraphBackend()
         assert backend.is_available()
 
-    def test_graph_backend_evaluate(self, graph_available):
+    def test_graph_backend_evaluate(self):
         """Graph backend should evaluate tax returns."""
-        if not graph_available:
-            pytest.skip("Graph backend not available")
-
         from tenforty.backends import GraphBackend
 
         backend = GraphBackend()
@@ -103,11 +87,8 @@ class TestGraphBackend:
         result = backend.evaluate(tax_input)
         assert result.federal_total_tax > 0
 
-    def test_graph_backend_ca_requires_all_imports(self, graph_available):
+    def test_graph_backend_ca_requires_all_imports(self):
         """Graph backend should load full CA import closure."""
-        if not graph_available:
-            pytest.skip("Graph backend not available")
-
         from tenforty import evaluate_return
 
         result = evaluate_return(
@@ -115,11 +96,8 @@ class TestGraphBackend:
         )
         assert result.state_total_tax > 0
 
-    def test_graph_backend_gradient(self, graph_available):
+    def test_graph_backend_gradient(self):
         """Graph backend should compute gradients."""
-        if not graph_available:
-            pytest.skip("Graph backend not available")
-
         from tenforty.backends import GraphBackend
 
         backend = GraphBackend()
@@ -128,11 +106,8 @@ class TestGraphBackend:
         assert result is not None
         assert 0 < result < 1
 
-    def test_graph_backend_solve(self, graph_available):
+    def test_graph_backend_solve(self):
         """Graph backend should solve for inputs."""
-        if not graph_available:
-            pytest.skip("Graph backend not available")
-
         from tenforty.backends import GraphBackend
 
         backend = GraphBackend()
@@ -141,25 +116,32 @@ class TestGraphBackend:
         assert result is not None
         assert result > 0
 
-    def test_graph_backend_missing_dependency_fails(self, graph_available, monkeypatch):
+    def test_graph_backend_missing_dependency_fails(self, monkeypatch):
         """Graph backend should fail loudly when a required form graph is missing."""
-        if not graph_available:
-            pytest.skip("Graph backend not available")
-
         from tenforty.backends import graph as graph_module
-        from tenforty.models import OTSState
 
+        # Clear cache to ensure clean state
         graph_module._load_graph.cache_clear()
-        graph_module._load_linked_graph.cache_clear()
+        graph_module._link_graphs.cache_clear()
 
-        orig = graph_module._load_graph
-
-        def fake_load_graph(form_id: str, year: int):
-            if form_id == "ca_schedule_ca":
-                return None
-            return orig(form_id, year)
-
-        monkeypatch.setattr(graph_module, "_load_graph", fake_load_graph)
-
+        # Call _link_graphs with a list that is missing a dependency
+        # ca_540 imports ca_schedule_ca (and others), so omitting them should trigger the check
         with pytest.raises(RuntimeError, match="unresolved imports"):
-            graph_module._load_linked_graph(2024, OTSState.CA)
+            graph_module._link_graphs(2024, ("us_1040", "ca_540"))
+
+    def test_graph_backend_integration_resolves_schedule_d(self):
+        """Integration test: inputting capital gains should automatically load Schedule D."""
+        from tenforty.backends import GraphBackend
+
+        backend = GraphBackend()
+        # Providing capital gains requires us_schedule_d
+        tax_input = TaxReturnInput(
+            year=2024, w2_income=100_000, short_term_capital_gains=5000
+        )
+
+        # This will fail if resolve_forms doesn't find Schedule D,
+        # because us_1040 has an import for it that would otherwise be unresolved.
+        result = backend.evaluate(tax_input)
+
+        # Verify result is sane (tax should include tax on gains)
+        assert result.federal_total_tax > 0
