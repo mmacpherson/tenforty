@@ -13,30 +13,14 @@ INPUT_TO_FORM: dict[str, str] = {}
 
 for natural_name, node_name in NATURAL_TO_NODE.items():
     if "_" in node_name:
-        # Heuristic: split by first underscore to get form_id
-        # Exception: us_schedule_d, us_schedule_1, etc. have underscores in form_id.
-        # Known form prefixes:
-        # us_1040, us_schedule_d, us_schedule_1, us_schedule_2, us_schedule_3
-        # us_schedule_a, us_schedule_b, us_schedule_eic, us_schedule_se
-        # us_form_2441, us_form_8863, us_form_8959, us_form_8960, us_form_8995
-        # ca_540, etc.
-
-        # Better heuristic: form IDs in this project seem to follow a convention.
-        # Let's try to match against known prefixes or just take everything before the LAST few underscores?
-        # No, "us_1040_L1a" -> "us_1040"
-        # "us_schedule_d_L1a" -> "us_schedule_d"
-        # "ca_540_L1" -> "ca_540"
-
-        # So we scan for "L" + digit? Or look for the first part that looks like a line number?
-        # Actually, simpler:
-        # form_id is everything up to the last capitalized "L" followed by digits?
+        # Heuristic: split by first underscore to get form_id.
+        # Node names generally follow the convention "{form_id}_L{line_number}_{description}".
+        # Examples:
         # "us_1040_L1a_wages" -> "us_1040"
         # "us_schedule_d_L1a_short_term_totals" -> "us_schedule_d"
 
-        # Note: This heuristic relies on the convention in mappings.py where node names
-        # start with the form ID followed by "L" and a digit.
         parts = node_name.split("_")
-        # find the part starting with 'L' followed by digit
+        # Find the part starting with 'L' followed by a digit to identify the split point
         split_idx = -1
         for i, part in enumerate(parts):
             if part.startswith("L") and len(part) > 1 and part[1].isdigit():
@@ -115,6 +99,8 @@ def resolve_forms(
             if state_enum in STATE_FORM_NAMES:
                 needed.add(STATE_FORM_NAMES[state_enum])
         except KeyError:
+            # Silent failure: if the state code is invalid or not in OTSState,
+            # we simply don't load a state form.
             pass
 
     # Resolve transitive imports
