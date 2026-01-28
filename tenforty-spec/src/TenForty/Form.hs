@@ -29,7 +29,9 @@ module TenForty.Form (
 
     -- * Validation
     validateForm,
+    validateFormSet,
     FormError (..),
+    FormSetError (..),
 ) where
 
 import Control.Monad.State.Strict
@@ -122,7 +124,7 @@ buildForm fid year builder =
                 }
      in case validateForm form of
             [] -> Right form
-            errs -> Left (head errs)
+            err : _ -> Left err
 
 input :: LineId -> Text -> Text -> LineImportance -> FormBuilder (Expr Dollars)
 input lid name desc importance = do
@@ -290,3 +292,70 @@ lineTableRefs ln = case lineType ln of
     LineInput -> Set.empty
     LineComputed expr -> extractTableRefs expr
     LineWorksheet _ ws -> foldMap (extractTableRefs . wsStepExpr) ws
+
+data FormSetError
+    = UnresolvedImport
+        { fsErrorYear :: Int
+        , fsErrorSourceForm :: FormId
+        , fsErrorSourceLine :: LineId
+        , fsErrorTargetForm :: FormId
+        , fsErrorTargetLine :: LineId
+        }
+    | MissingTargetForm
+        { fsErrorYear :: Int
+        , fsErrorSourceForm :: FormId
+        , fsErrorSourceLine :: LineId
+        , fsErrorTargetForm :: FormId
+        , fsErrorTargetLine :: LineId
+        }
+    deriving stock (Show, Eq)
+
+validateFormSet :: [Form] -> [FormSetError]
+validateFormSet forms =
+    let formsByYear = Map.fromListWith (++) [(formYear f, [f]) | f <- forms]
+     in concatMap (uncurry validateFormSetYear) (Map.toList formsByYear)
+
+validateFormSetYear :: Int -> [Form] -> [FormSetError]
+validateFormSetYear year forms =
+    let formMap = Map.fromList [(formId f, f) | f <- forms]
+        availableExports = Map.map (Map.keysSet . formLineMap) formMap
+     in concatMap (checkFormImports year availableExports) forms
+
+checkFormImports :: Int -> Map FormId (Set LineId) -> Form -> [FormSetError]
+checkFormImports year availableExports sourceForm =
+    concat
+        [ checkImport sourceForm (lineId ln) targetFid targetLid
+        | ln <- formLines sourceForm
+        , (targetFid, targetLid) <- Set.toList (lineImports ln)
+        ]
+  where
+    checkImport :: Form -> LineId -> FormId -> LineId -> [FormSetError]
+    checkImport srcForm srcLid targetFid targetLid =
+        case Map.lookup targetFid availableExports of
+            Nothing ->
+                [ MissingTargetForm
+                    { fsErrorYear = year
+                    , fsErrorSourceForm = formId srcForm
+                    , fsErrorSourceLine = srcLid
+                    , fsErrorTargetForm = targetFid
+                    , fsErrorTargetLine = targetLid
+                    }
+                ]
+            Just exports ->
+                if Set.member targetLid exports
+                    then []
+                    else
+                        [ UnresolvedImport
+                            { fsErrorYear = year
+                            , fsErrorSourceForm = formId srcForm
+                            , fsErrorSourceLine = srcLid
+                            , fsErrorTargetForm = targetFid
+                            , fsErrorTargetLine = targetLid
+                            }
+                        ]
+
+lineImports :: Line -> Set (FormId, LineId)
+lineImports ln = case lineType ln of
+    LineInput -> Set.empty
+    LineComputed expr -> E.extractImports expr
+    LineWorksheet _ ws -> foldMap (E.extractImports . wsStepExpr) ws
