@@ -296,9 +296,6 @@ impl Graph {
 
                     // Compile for this status
                     if let Ok(compiled) = compiler.compile_batch(graph, status) {
-                        let mut batch_inputs = vec![0.0; compiled.num_inputs() * BATCH_SIZE];
-                        let mut batch_outputs = vec![0.0; compiled.num_outputs() * BATCH_SIZE];
-
                         // Pre-calculate input mappings
                         let input_mappings: Vec<(&String, Option<usize>)> = input_names
                             .iter()
@@ -324,7 +321,11 @@ impl Graph {
                             .collect();
 
                         // Process block in chunks
-                        for chunk in block.chunks(BATCH_SIZE) {
+                        let process_chunk = |chunk: &[(RsFilingStatus, HashMap<String, f64>)]| {
+                            let mut chunk_results = Vec::with_capacity(chunk.len());
+                            let mut batch_inputs = vec![0.0; compiled.num_inputs() * BATCH_SIZE];
+                            let mut batch_outputs = vec![0.0; compiled.num_outputs() * BATCH_SIZE];
+
                             // Zero buffers
                             batch_inputs.fill(0.0);
                             // Fill inputs
@@ -353,9 +354,26 @@ impl Graph {
                                     };
                                     output_vals.insert((*name).clone(), val);
                                 }
-                                results.push((*stat, scen_inputs.clone(), output_vals));
+                                chunk_results.push((*stat, scen_inputs.clone(), output_vals));
                             }
-                        }
+                            chunk_results
+                        };
+
+                        #[cfg(feature = "parallel")]
+                        let chunk_results: Vec<_> = block
+                            .par_chunks(BATCH_SIZE)
+                            .map(process_chunk)
+                            .flatten()
+                            .collect();
+
+                        #[cfg(not(feature = "parallel"))]
+                        let chunk_results: Vec<_> = block
+                            .chunks(BATCH_SIZE)
+                            .map(process_chunk)
+                            .flatten()
+                            .collect();
+
+                        results.extend(chunk_results);
                     } else {
                         // Compilation failed, fallback to interpreter for this block
                         let block_vec = block.to_vec();
