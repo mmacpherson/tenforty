@@ -46,7 +46,7 @@ proptest = "1.0"
 default = ["parallel"]
 jit = ["cranelift", "cranelift-jit", "cranelift-module", "cranelift-native"]
 parallel = ["rayon"]
-python = ["pyo3", "parallel"]
+python = ["pyo3", "parallel", "jit"]
 wasm = ["wasm-bindgen", "js-sys"]
 
 [lib]

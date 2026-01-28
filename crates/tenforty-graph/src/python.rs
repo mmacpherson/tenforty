@@ -1,3 +1,5 @@
+#[cfg(feature = "jit")]
+use crate::jit::{JitCompiler, BATCH_SIZE};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -95,6 +97,44 @@ fn parse_filing_status(s: &str) -> PyResult<RsFilingStatus> {
 #[pyclass]
 pub struct Graph {
     inner: Arc<RsGraph>,
+}
+
+impl Graph {
+    fn eval_scenarios_interpreter(
+        &self,
+        scenarios: Vec<(RsFilingStatus, HashMap<String, f64>)>,
+        outputs: &[String],
+    ) -> Vec<(RsFilingStatus, HashMap<String, f64>, HashMap<String, f64>)> {
+        let graph = &self.inner;
+        #[cfg(feature = "parallel")]
+        let iter = scenarios.into_par_iter();
+        #[cfg(not(feature = "parallel"))]
+        let iter = scenarios.into_iter();
+
+        iter.map(|(status, input_vals)| {
+            let mut rt = RsRuntime::new(graph, status);
+
+            // Set all graph inputs to 0 first
+            for input_id in &graph.inputs {
+                rt.set_by_id(*input_id, 0.0);
+            }
+
+            // Set specified inputs
+            for (name, &value) in &input_vals {
+                let _ = rt.set(name, value);
+            }
+
+            // Evaluate outputs
+            let mut output_vals = HashMap::new();
+            for output in outputs {
+                if let Ok(value) = rt.eval(output) {
+                    output_vals.insert(output.clone(), value);
+                }
+            }
+            (status, input_vals, output_vals)
+        })
+        .collect()
+    }
 }
 
 #[pymethods]
@@ -198,23 +238,20 @@ impl Graph {
         fn cartesian_recurse(
             input_names: &[&String],
             input_values: &[&Vec<f64>],
-            statuses: &[RsFilingStatus],
+            status: RsFilingStatus,
             current: &mut HashMap<String, f64>,
             depth: usize,
             scenarios: &mut Vec<(RsFilingStatus, HashMap<String, f64>)>,
         ) {
             if depth == input_names.len() {
-                // At leaf: add one scenario per status
-                for &status in statuses {
-                    scenarios.push((status, current.clone()));
-                }
+                scenarios.push((status, current.clone()));
             } else {
                 for &val in input_values[depth] {
                     current.insert(input_names[depth].clone(), val);
                     cartesian_recurse(
                         input_names,
                         input_values,
-                        statuses,
+                        status,
                         current,
                         depth + 1,
                         scenarios,
@@ -223,48 +260,120 @@ impl Graph {
             }
         }
 
-        let mut current = HashMap::new();
-        cartesian_recurse(
-            &input_names,
-            &input_values,
-            &parsed_statuses,
-            &mut current,
-            0,
-            &mut scenarios,
-        );
+        // Outer loop over statuses to group them together for JIT efficiency
+        for &status in &parsed_statuses {
+            let mut current = HashMap::new();
+            cartesian_recurse(
+                &input_names,
+                &input_values,
+                status,
+                &mut current,
+                0,
+                &mut scenarios,
+            );
+        }
 
-        // Evaluate scenarios (parallel when available)
         let graph = &self.inner;
 
-        #[cfg(feature = "parallel")]
-        let iter = scenarios.into_par_iter();
-        #[cfg(not(feature = "parallel"))]
-        let iter = scenarios.into_iter();
+        #[cfg(feature = "jit")]
+        let results = {
+            let mut results = Vec::with_capacity(scenarios.len());
+            let compiler = JitCompiler::new().ok();
 
-        let results: Vec<(RsFilingStatus, HashMap<String, f64>, HashMap<String, f64>)> = iter
-            .map(|(status, input_vals)| {
-                let mut rt = RsRuntime::new(graph, status);
+            if let Some(compiler) = compiler {
+                let mut start_idx = 0;
+                while start_idx < scenarios.len() {
+                    let status = scenarios[start_idx].0;
 
-                // Set all graph inputs to 0 first
-                for input_id in &graph.inputs {
-                    rt.set_by_id(*input_id, 0.0);
-                }
+                    // Find end of this status block
+                    let mut end_idx = start_idx + 1;
+                    while end_idx < scenarios.len() && scenarios[end_idx].0 == status {
+                        end_idx += 1;
+                    }
 
-                // Set specified inputs
-                for (name, &value) in &input_vals {
-                    let _ = rt.set(name, value);
-                }
+                    let block = &scenarios[start_idx..end_idx];
+                    start_idx = end_idx;
 
-                // Evaluate outputs
-                let mut output_vals = HashMap::new();
-                for output in &outputs {
-                    if let Ok(value) = rt.eval(output) {
-                        output_vals.insert(output.clone(), value);
+                    // Compile for this status
+                    if let Ok(compiled) = compiler.compile_batch(graph, status) {
+                        let mut batch_inputs = vec![0.0; compiled.num_inputs() * BATCH_SIZE];
+                        let mut batch_outputs = vec![0.0; compiled.num_outputs() * BATCH_SIZE];
+
+                        // Pre-calculate input mappings
+                        let input_mappings: Vec<(&String, Option<usize>)> = input_names
+                            .iter()
+                            .map(|name| {
+                                if let Some(nid) = graph.node_id_by_name(name) {
+                                    (*name, compiled.input_offset(nid))
+                                } else {
+                                    (*name, None)
+                                }
+                            })
+                            .collect();
+
+                        // Output mappings
+                        let output_mappings: Vec<(&String, Option<usize>)> = outputs
+                            .iter()
+                            .map(|name| {
+                                if let Some(nid) = graph.node_id_by_name(name) {
+                                    (name, compiled.output_offset(nid))
+                                } else {
+                                    (name, None)
+                                }
+                            })
+                            .collect();
+
+                        // Process block in chunks
+                        for chunk in block.chunks(BATCH_SIZE) {
+                            // Zero buffers
+                            batch_inputs.fill(0.0);
+                            // Fill inputs
+                            for (lane, (_stat, scen_inputs)) in chunk.iter().enumerate() {
+                                for (name, slot_opt) in &input_mappings {
+                                    if let Some(slot) = slot_opt {
+                                        let val = scen_inputs.get(*name).copied().unwrap_or(0.0);
+                                        batch_inputs[*slot * BATCH_SIZE + lane] = val;
+                                    }
+                                }
+                            }
+
+                            // Call JIT
+                            unsafe {
+                                compiled.call(batch_inputs.as_ptr(), batch_outputs.as_mut_ptr());
+                            }
+
+                            // Read outputs
+                            for (lane, (stat, scen_inputs)) in chunk.iter().enumerate() {
+                                let mut output_vals = HashMap::new();
+                                for (name, slot_opt) in &output_mappings {
+                                    let val = if let Some(slot) = slot_opt {
+                                        batch_outputs[*slot * BATCH_SIZE + lane]
+                                    } else {
+                                        0.0
+                                    };
+                                    output_vals.insert((*name).clone(), val);
+                                }
+                                results.push((*stat, scen_inputs.clone(), output_vals));
+                            }
+                        }
+                    } else {
+                        // Compilation failed, fallback to interpreter for this block
+                        let block_vec = block.to_vec();
+                        results.extend(self.eval_scenarios_interpreter(block_vec, &outputs));
                     }
                 }
-                (status, input_vals, output_vals)
-            })
-            .collect();
+                Some(results)
+            } else {
+                None
+            }
+        };
+
+        #[cfg(feature = "jit")]
+        let results =
+            results.unwrap_or_else(|| self.eval_scenarios_interpreter(scenarios, &outputs));
+
+        #[cfg(not(feature = "jit"))]
+        let results = self.eval_scenarios_interpreter(scenarios, &outputs);
 
         // Build column-oriented data
         let status_col: Vec<String> = results

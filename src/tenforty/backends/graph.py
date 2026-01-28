@@ -244,6 +244,105 @@ class GraphBackend:
 
         return InterpretedTaxReturn(**result)
 
+    def evaluate_batch(
+        self,
+        year: int,
+        state: OTSState | None,
+        inputs: dict[str, list[float]],
+        statuses: list[str],
+    ) -> dict[str, list[float]]:
+        """Evaluate multiple scenarios efficiently using graph batch API."""
+        if not self.is_available():
+            raise RuntimeError("Graph backend is not available")
+
+        # Determine required forms (base case: use default inputs to find dependencies)
+        # In the future, we might want to check if any non-zero inputs in the batch
+        # trigger different form requirements.
+        form_ids = resolve_forms(
+            year,
+            state.value if state else None,
+            {},  # Empty inputs for dependency resolution for now
+            _forms_dir(),
+        )
+        graph = _link_graphs(year, tuple(form_ids))
+
+        # Map natural input names to graph node names
+        graph_inputs = {}
+        state_mapping = STATE_NATURAL_TO_NODE.get(state, {})
+
+        for natural_name, values in inputs.items():
+            node_name = None
+            if natural_name in NATURAL_TO_NODE:
+                node_name = NATURAL_TO_NODE[natural_name]
+            elif natural_name in state_mapping:
+                node_name = state_mapping[natural_name]
+
+            if node_name:
+                graph_inputs[node_name] = values
+
+        # Define outputs we want to capture
+        output_map = {
+            "us_1040_L11_agi": "federal_adjusted_gross_income",
+            "us_1040_L15_taxable_income": "federal_taxable_income",
+            "us_1040_L24_total_tax": "federal_total_tax",
+        }
+
+        if state and state != OTSState.NONE:
+            state_form = STATE_FORM_NAMES.get(state)
+            state_outputs = STATE_OUTPUT_LINES.get(state, {})
+            if state_form:
+                for line, key in state_outputs.items():
+                    output_map[f"{state_form}_{line}"] = key
+
+        # Call the batch API
+        graph_statuses = [FILING_STATUS_MAP.get(s, s) for s in statuses]
+        status_col, input_cols, output_cols = graph.eval_scenarios(
+            graph_inputs, graph_statuses, list(output_map.keys())
+        )
+
+        # Build final dictionary
+        rev_fs_map = {v: k.value for k, v in FILING_STATUS_MAP.items()}
+        final_results = {"filing_status": [rev_fs_map.get(s, s) for s in status_col]}
+
+        # Translate graph input names back to natural names if possible
+        rev_federal = {v: k for k, v in NATURAL_TO_NODE.items()}
+        rev_state = {v: k for k, v in state_mapping.items()}
+
+        for node_name, values in input_cols.items():
+            natural_name = (
+                rev_federal.get(node_name) or rev_state.get(node_name) or node_name
+            )
+            final_results[natural_name] = values
+
+        # Map outputs back to natural names
+        for node_name, values in output_cols.items():
+            final_results[output_map[node_name]] = values
+
+        # Post-process common fields
+        count = len(status_col)
+        final_results["total_tax"] = [
+            f + s
+            for f, s in zip(
+                final_results["federal_total_tax"],
+                final_results.get("state_total_tax", [0.0] * count),
+                strict=False,
+            )
+        ]
+
+        # Fill in missing expected fields with zeros
+        for field in [
+            "federal_amt",
+            "state_adjusted_gross_income",
+            "state_taxable_income",
+            "state_total_tax",
+            "state_tax_bracket",
+            "state_effective_tax_rate",
+        ]:
+            if field not in final_results:
+                final_results[field] = [0.0] * count
+
+        return final_results
+
     def _evaluate_state(self, evaluator, state: OTSState) -> dict[str, float] | None:
         """Evaluate state outputs from linked graph."""
         if state not in STATE_FORM_NAMES:
