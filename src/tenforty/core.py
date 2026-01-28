@@ -477,7 +477,20 @@ def evaluate_return(
     if backend == "graph":
         from .backends.graph import GraphBackend
 
-        return GraphBackend().evaluate(input_data)
+        try:
+            return GraphBackend().evaluate(input_data)
+        except Exception:
+            if on_error == "raise":
+                raise
+            if on_error == "warn":
+                logger.warning(
+                    "Graph backend failed for %s/%s (%s); returning defaults.",
+                    year,
+                    state,
+                    filing_status,
+                    exc_info=True,
+                )
+            return InterpretedTaxReturn()
 
     raise ValueError(f"Unknown backend: {backend}")
 
@@ -575,52 +588,63 @@ def evaluate_returns(
 
         graph_backend = GraphBackend()
         if graph_backend.is_available():
-            # For graph backend, we can optimize by using the batch API.
-            # We group by (year, state) since linking depends on those.
-            results = []
-            for y, s in itertools.product(years, states_of_residence):
-                # We can't batch everything if standard_or_itemized or num_dependents vary
-                # because they are currently handled as single values in evaluate_batch
-                # if they affect the graph logic outside of simple input nodes.
-                # Actually, num_dependents is an input node.
-                # standard_or_itemized is a bit trickier but usually just affects which inputs are used.
+            try:
+                # For graph backend, we can optimize by using the batch API.
+                # We group by (year, state) since linking depends on those.
+                results = []
+                for y, s in itertools.product(years, states_of_residence):
+                    # We can't batch everything if standard_or_itemized or num_dependents vary
+                    # because they are currently handled as single values in evaluate_batch
+                    # if they affect the graph logic outside of simple input nodes.
+                    # Actually, num_dependents is an input node.
+                    # standard_or_itemized is a bit trickier but usually just affects which inputs are used.
 
-                # Simplified: only batch if only statuses and numeric inputs vary.
-                # If everything else is constant, we use evaluate_batch.
-                # For now, let's group by (y, s, num_dep, std_or_item) too to be safe.
-                for nd, soi in itertools.product(num_dependents, standard_or_itemized):
-                    batch_inputs = {
-                        "w2_income": w2_incomes,
-                        "taxable_interest": taxable_interests,
-                        "qualified_dividends": qualified_dividends,
-                        "ordinary_dividends": ordinary_dividends,
-                        "short_term_capital_gains": short_term_capital_gains,
-                        "long_term_capital_gains": long_term_capital_gains,
-                        "schedule_1_income": schedule_1_incomes,
-                        "itemized_deductions": itemized_deductions,
-                        "state_adjustment": state_adjustments,
-                        "incentive_stock_option_gains": incentive_stock_option_gains,
-                        "num_dependents": [nd],
-                    }
-                    batch_results = graph_backend.evaluate_batch(
-                        y,
-                        OTSState(s) if s else OTSState.NONE,
-                        batch_inputs,
-                        filing_statuses,
+                    # Simplified: only batch if only statuses and numeric inputs vary.
+                    # If everything else is constant, we use evaluate_batch.
+                    # For now, let's group by (y, s, num_dep, std_or_item) too to be safe.
+                    for nd, soi in itertools.product(
+                        num_dependents, standard_or_itemized
+                    ):
+                        batch_inputs = {
+                            "w2_income": w2_incomes,
+                            "taxable_interest": taxable_interests,
+                            "qualified_dividends": qualified_dividends,
+                            "ordinary_dividends": ordinary_dividends,
+                            "short_term_capital_gains": short_term_capital_gains,
+                            "long_term_capital_gains": long_term_capital_gains,
+                            "schedule_1_income": schedule_1_incomes,
+                            "itemized_deductions": itemized_deductions,
+                            "state_adjustment": state_adjustments,
+                            "incentive_stock_option_gains": incentive_stock_option_gains,
+                            "num_dependents": [nd],
+                        }
+                        batch_results = graph_backend.evaluate_batch(
+                            y,
+                            OTSState(s) if s else OTSState.NONE,
+                            batch_inputs,
+                            filing_statuses,
+                        )
+
+                        # evaluate_batch returns a dict of columns. We need to add constant columns
+                        # and then convert to a list of dicts.
+                        batch_size = len(next(iter(batch_results.values())))
+                        for i in range(batch_size):
+                            row = {k: v[i] for k, v in batch_results.items()}
+                            row["year"] = y
+                            row["state"] = s
+                            row["num_dependents"] = nd
+                            row["standard_or_itemized"] = soi
+                            results.append(row)
+
+                return pl.DataFrame(results).cast({"state": pl.Utf8})
+            except Exception:
+                if on_error == "raise":
+                    raise
+                if on_error == "warn":
+                    logger.warning(
+                        "Graph batch evaluation failed; falling back to per-scenario evaluation.",
+                        exc_info=True,
                     )
-
-                    # evaluate_batch returns a dict of columns. We need to add constant columns
-                    # and then convert to a list of dicts.
-                    batch_size = len(next(iter(batch_results.values())))
-                    for i in range(batch_size):
-                        row = {k: v[i] for k, v in batch_results.items()}
-                        row["year"] = y
-                        row["state"] = s
-                        row["num_dependents"] = nd
-                        row["standard_or_itemized"] = soi
-                        results.append(row)
-
-            return pl.DataFrame(results).cast({"state": pl.Utf8})
 
     results = []
     for combo in combinations:

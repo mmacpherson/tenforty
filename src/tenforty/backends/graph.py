@@ -255,13 +255,16 @@ class GraphBackend:
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
 
-        # Determine required forms (base case: use default inputs to find dependencies)
-        # In the future, we might want to check if any non-zero inputs in the batch
-        # trigger different form requirements.
+        # Determine required forms using representative inputs from the batch.
+        # We use the max-absolute value per input to capture any non-zero cases.
+        resolve_inputs = {
+            name: (max(values, key=lambda v: abs(v)) if values else 0.0)
+            for name, values in inputs.items()
+        }
         form_ids = resolve_forms(
             year,
             state.value if state else None,
-            {},  # Empty inputs for dependency resolution for now
+            resolve_inputs,
             _forms_dir(),
         )
         graph = _link_graphs(year, tuple(form_ids))
