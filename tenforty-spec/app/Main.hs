@@ -19,6 +19,8 @@ import CAFTB3514_2024
 import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
+import NJ1040_2024
+import NJ1040_2025
 import TenForty
 import US1040_2024
 import US1040_2025
@@ -91,6 +93,8 @@ allForms =
     , ("ca_ftb_3506_2025.json", caFTB3506_2025)
     , ("ca_ftb_3514_2024.json", caFTB3514_2024)
     , ("ca_ftb_3514_2025.json", caFTB3514_2025)
+    , ("nj_1040_2024.json", nj1040_2024)
+    , ("nj_1040_2025.json", nj1040_2025)
     ]
 
 data Options = Options
@@ -162,7 +166,7 @@ main = do
                 Just res -> compileAndOutput opts res
                 Nothing -> do
                     hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
-                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514 (append _2024 or _2025), all"
+                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, nj_1040 (append _2024 or _2025), all"
                     exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()

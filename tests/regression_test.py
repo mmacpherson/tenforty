@@ -57,6 +57,59 @@ NY_SCENARIOS = [
     },
 ]
 
+NJ_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 4000,
+        "expected_federal_max": 4500,
+        "expected_state_min": 850,
+        "expected_state_max": 1100,
+    },
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 1700,
+        "expected_state_max": 2100,
+    },
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 5500,
+        "expected_state_max": 6500,
+    },
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 30000,
+        "expected_state_min": 8000,
+        "expected_state_max": 9500,
+    },
+    {
+        "year": 2023,
+        "state": "NJ",
+        "filing_status": "Single",
+        "w2_income": 100000,
+        "expected_federal_min": 13000,
+        "expected_federal_max": 17000,
+        "expected_state_min": 3200,
+        "expected_state_max": 4200,
+    },
+]
+
 MA_SCENARIOS = [
     {
         "year": 2024,
@@ -108,6 +161,39 @@ MA_SCENARIOS = [
 )
 def test_ny_tax_scenarios(scenario):
     """Test NY state tax calculations against expected ranges."""
+    result = evaluate_return(
+        year=scenario["year"],
+        state=scenario["state"],
+        filing_status=scenario["filing_status"],
+        w2_income=scenario["w2_income"],
+    )
+
+    assert (
+        scenario["expected_federal_min"]
+        <= result.federal_total_tax
+        <= scenario["expected_federal_max"]
+    ), (
+        f"Federal tax {result.federal_total_tax} not in expected range "
+        f"[{scenario['expected_federal_min']}, {scenario['expected_federal_max']}]"
+    )
+
+    assert (
+        scenario["expected_state_min"]
+        <= result.state_total_tax
+        <= scenario["expected_state_max"]
+    ), (
+        f"State tax {result.state_total_tax} not in expected range "
+        f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
+    )
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    NJ_SCENARIOS,
+    ids=lambda s: f"NJ-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_nj_tax_scenarios(scenario):
+    """Test NJ state tax calculations against expected ranges."""
     result = evaluate_return(
         year=scenario["year"],
         state=scenario["state"],
@@ -234,6 +320,21 @@ def test_ma_tax_increases_with_income():
     incomes = [50000, 100000, 150000, 200000]
     results = [
         evaluate_return(year=2024, state="MA", filing_status="Single", w2_income=income)
+        for income in incomes
+    ]
+
+    for i in range(len(results) - 1):
+        assert results[i].state_total_tax < results[i + 1].state_total_tax, (
+            f"State tax did not increase: {results[i].state_total_tax} >= {results[i + 1].state_total_tax} "
+            f"for incomes {incomes[i]} vs {incomes[i + 1]}"
+        )
+
+
+def test_nj_tax_increases_with_income():
+    """Verify that NJ state tax increases monotonically with income."""
+    incomes = [50000, 100000, 150000, 200000]
+    results = [
+        evaluate_return(year=2024, state="NJ", filing_status="Single", w2_income=income)
         for income in incomes
     ]
 

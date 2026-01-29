@@ -25,10 +25,14 @@ import CAFTB3514_2024
 import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
+import NJ1040_2024
+import NJ1040_2025
 import Tables2024
 import Tables2025
 import TablesCA2024
 import TablesCA2025
+import TablesNJ2024
+import TablesNJ2025
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
 import TenForty.Expr (extractLineRefs, extractTableRefs)
@@ -89,6 +93,18 @@ caTaxYears :: [CATaxYear]
 caTaxYears =
     [ CATaxYear 2024 californiaBrackets2024 caStandardDeduction2024 ca540_2024
     , CATaxYear 2025 californiaBrackets2025 caStandardDeduction2025 ca540_2025
+    ]
+
+data NJTaxYear = NJTaxYear
+    { njYear :: Int
+    , njBrackets :: NonEmpty Bracket
+    , njForm :: Either FormError Form
+    }
+
+njTaxYears :: [NJTaxYear]
+njTaxYears =
+    [ NJTaxYear 2024 newJerseyBrackets2024 nj1040_2024
+    , NJTaxYear 2025 newJerseyBrackets2025 nj1040_2025
     ]
 
 getExampleCount :: IO Int
@@ -196,6 +212,46 @@ spec n = do
                         Right bt ->
                             let r = marginalRate bt status (Amount inc)
                              in r >= 0 && r <= 0.123
+                        Left _ -> False
+
+    describe "New Jersey BracketTable" $ do
+        forM_ njTaxYears $ \njty -> do
+            let yr = show (njYear njty)
+
+            it ("validates NJ brackets " ++ yr) $
+                case mkBracketTable (njBrackets njty) of
+                    Right _ -> pure ()
+                    Left err -> expectationFailure err
+
+            it ("NJ bracket tax is non-negative (" ++ yr ++ ")") $ property $ \(Positive inc) ->
+                forAll (elements allFilingStatuses) $ \status ->
+                    case mkBracketTable (njBrackets njty) of
+                        Right bt -> evalBracketTax bt status (Amount inc) >= 0
+                        Left _ -> False
+
+            it ("NJ bracket tax is monotonic in income (" ++ yr ++ ")") $ property $ \(Positive base) (Positive extra) ->
+                forAll (elements allFilingStatuses) $ \status ->
+                    case mkBracketTable (njBrackets njty) of
+                        Right bt ->
+                            let tax1 = evalBracketTax bt status (Amount base)
+                                tax2 = evalBracketTax bt status (Amount (base + extra))
+                             in tax2 >= tax1
+                        Left _ -> False
+
+            it ("NJ bracket tax is less than income (" ++ yr ++ ")") $ property $ \(Positive inc) ->
+                forAll (elements allFilingStatuses) $ \status ->
+                    case mkBracketTable (njBrackets njty) of
+                        Right bt ->
+                            let tax = evalBracketTax bt status (Amount inc)
+                             in tax <= Amount inc
+                        Left _ -> False
+
+            it ("NJ marginal rate is bounded 0-10.75% (" ++ yr ++ ")") $ property $ \(Positive inc) ->
+                forAll (elements allFilingStatuses) $ \status ->
+                    case mkBracketTable (njBrackets njty) of
+                        Right bt ->
+                            let r = marginalRate bt status (Amount inc)
+                             in r >= 0 && r <= 0.1075
                         Left _ -> False
 
     describe "PhaseOut" $ do
@@ -421,6 +477,12 @@ spec n = do
             case caFTB3514_2025 of
                 Right _ -> pure ()
                 Left err -> expectationFailure $ show err
+
+        forM_ njTaxYears $ \njty ->
+            it ("NJ 1040 " ++ show (njYear njty) ++ " is valid") $
+                case njForm njty of
+                    Right _ -> pure ()
+                    Left err -> expectationFailure $ show err
 
     describe "Form Compilation" $ do
         forM_ taxYears $ \ty ->
@@ -719,6 +781,18 @@ spec n = do
                     gmYear (cgMeta graph) `shouldBe` 2025
                 Left err -> expectationFailure $ show err
 
+        forM_ njTaxYears $ \njty ->
+            it ("compiles NJ 1040 " ++ show (njYear njty) ++ " to valid JSON") $
+                case njForm njty of
+                    Right frm -> do
+                        let graph = compileForm frm
+                        gmFormId (cgMeta graph) `shouldBe` "nj_1040"
+                        gmYear (cgMeta graph) `shouldBe` njYear njty
+                        Map.size (cgNodes graph) `shouldSatisfy` (> 0)
+                        cgInputs graph `shouldSatisfy` (not . null)
+                        cgOutputs graph `shouldSatisfy` (not . null)
+                    Left err -> expectationFailure $ show err
+
     describe "Expression extraction" $ do
         it "extracts line references correctly" $ do
             let expr = line "L1" .+. line "L2" .-. line "L1"
@@ -997,6 +1071,34 @@ spec n = do
 
         it "2025 Head of Household is $11,412" $
             forStatus caStandardDeduction2025 HeadOfHousehold `shouldBe` 11412
+
+    describe "New Jersey exemptions" $ do
+        it "2024 personal exemption is $1,000" $
+            njPersonalExemption2024 `shouldBe` 1000
+
+        it "2024 dependent exemption is $1,500" $
+            njDependentExemption2024 `shouldBe` 1500
+
+        it "2024 veteran exemption is $6,000" $
+            njVeteranExemption2024 `shouldBe` 6000
+
+        it "2024 filing threshold Single is $10,000" $
+            forStatus njFilingThreshold2024 Single `shouldBe` 10000
+
+        it "2024 filing threshold MFJ is $20,000" $
+            forStatus njFilingThreshold2024 MarriedJoint `shouldBe` 20000
+
+        it "2025 personal exemption is $1,000" $
+            njPersonalExemption2025 `shouldBe` 1000
+
+        it "2025 dependent exemption is $1,500" $
+            njDependentExemption2025 `shouldBe` 1500
+
+        it "2025 filing threshold Single is $10,000" $
+            forStatus njFilingThreshold2025 Single `shouldBe` 10000
+
+        it "2025 filing threshold MFJ is $20,000" $
+            forStatus njFilingThreshold2025 MarriedJoint `shouldBe` 20000
 
     describe "E2E Compiled Form Properties" $ do
         forM_ taxYears $ \ty -> do
