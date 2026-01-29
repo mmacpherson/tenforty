@@ -210,8 +210,9 @@ The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-
 | Federal | 2023 | Single, MFJ | 2 | 12% bracket verification |
 | California | 2024 | Single | 6 | Brackets 1%-9.3% |
 | Massachusetts | 2024 | Single, MFJ | 4 | Flat 5% rate |
+| North Carolina | 2024 | Single, MFJ, HoH | 9 | Flat 4.5% rate |
 | New York | 2024 | Single, MFJ | 6 | Brackets 4%-6.85% |
-| **Total Silver** | | | **36** | |
+| **Total Silver** | | | **45** | |
 
 ### OTS Baseline (Regression Only)
 
@@ -226,9 +227,9 @@ The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-
 | Tier | Scenarios | Purpose |
 |------|-----------|---------|
 | Gold Standard | 4 | IRS-validated correctness |
-| Silver Standard | 36 | Formula-derived validation |
+| Silver Standard | 45 | Formula-derived validation |
 | OTS Baseline | 8 | Regression detection |
-| **Total** | **48** | |
+| **Total** | **57** | |
 
 ## State Tax Bracket Reference
 
@@ -251,6 +252,12 @@ Personal exemption credit: $149 (Single), $298 (MFJ)
 - Flat 5% rate on taxable income
 - Personal exemption: $4,400 (Single), $8,800 (MFJ)
 - 4% surtax on income over $1,053,750
+
+### North Carolina 2024
+
+- Flat 4.50% rate on NC taxable income
+- Standard deduction: $12,750 (Single/MFS), $25,500 (MFJ/QW), $19,125 (HoH)
+- Child deduction: $500-$3,000 per qualifying child, phased out by AGI and filing status
 
 ### New York 2024 (Single)
 
@@ -279,7 +286,7 @@ Scenarios are defined in `tests/fixtures/scenarios.py` and split across test fil
 | File | Purpose | Scenarios |
 |------|---------|-----------|
 | `gold_standard_test.py` | IRS Direct File validation | 4 |
-| `silver_standard_test.py` | Formula-derived validation | 36 |
+| `silver_standard_test.py` | Formula-derived validation | 45 |
 | `regression_test.py` | OTS baseline + sanity checks | 8 + range/monotonicity |
 
 Run all tests:

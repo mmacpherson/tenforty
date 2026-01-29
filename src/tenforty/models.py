@@ -114,6 +114,7 @@ class OTSState(Enum):
 
     CA = "CA"
     MA = "MA"
+    NC = "NC"
     NY = "NY"
 
     # No income-tax states are easy to support! :)
@@ -131,6 +132,7 @@ STATE_TO_FORM = {
     #
     OTSState.CA: "CA_540",
     OTSState.MA: "MA_1",
+    OTSState.NC: "NC_D400",
     OTSState.NY: "NY_IT201",
     # No income-tax states
     OTSState.AK: None,
@@ -305,6 +307,19 @@ _NATURAL_FORM_CONFIG = [
     },
     {
         "year": 2024,
+        "form_id": "NC_D400",
+        "input_map": {
+            "num_dependents": "L10a",
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
         "form_id": "NY_IT201",
         "input_map": {},
         "output_map": {
@@ -363,6 +378,19 @@ _NATURAL_FORM_CONFIG = [
             "L21": "taxable_income",
             "AGI": "adjusted_gross_income",
             "L28": "total_tax",
+        },
+    },
+    {
+        "year": 2023,
+        "form_id": "NC_D400",
+        "input_map": {
+            "num_dependents": "L10a",
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
         },
     },
     {
@@ -429,6 +457,19 @@ _NATURAL_FORM_CONFIG = [
     },
     {
         "year": 2022,
+        "form_id": "NC_D400",
+        "input_map": {
+            "num_dependents": "L10a",
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
+        },
+    },
+    {
+        "year": 2022,
         "form_id": "NY_IT201",
         "input_map": {},
         "output_map": {
@@ -487,6 +528,19 @@ _NATURAL_FORM_CONFIG = [
             "L21": "taxable_income",
             "AGI": "adjusted_gross_income",
             "L28": "total_tax",
+        },
+    },
+    {
+        "year": 2021,
+        "form_id": "NC_D400",
+        "input_map": {
+            "num_dependents": "L10a",
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
         },
     },
     {
@@ -553,6 +607,19 @@ _NATURAL_FORM_CONFIG = [
     },
     {
         "year": 2020,
+        "form_id": "NC_D400",
+        "input_map": {
+            "num_dependents": "L10a",
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
+        },
+    },
+    {
+        "year": 2020,
         "form_id": "NY_IT201",
         "input_map": {},
         "output_map": {
@@ -615,6 +682,18 @@ _NATURAL_FORM_CONFIG = [
     },
     {
         "year": 2019,
+        "form_id": "NC_D400",
+        "input_map": {
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
+        },
+    },
+    {
+        "year": 2019,
         "form_id": "NY_IT201",
         "input_map": {},
         "output_map": {
@@ -673,6 +752,18 @@ _NATURAL_FORM_CONFIG = [
             "L21": "taxable_income",
             "AGI": "adjusted_gross_income",
             "L28": "total_tax",
+        },
+    },
+    {
+        "year": 2018,
+        "form_id": "NC_D400",
+        "input_map": {
+            "state_adjustment": "L7",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L19": "total_tax",
         },
     },
     {

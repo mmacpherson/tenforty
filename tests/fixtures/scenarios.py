@@ -573,6 +573,139 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=5167.5,
         known_failure="OTS computes state=$5,223.36 (+$55.86) - Unknown reason (not household credit).",
     ),
+    # ========== NORTH CAROLINA SCENARIOS ==========
+    # NC 2024: Flat 4.50% rate, Standard deduction $12,750 (Single), $25,500 (MFJ),
+    #          $19,125 (HoH), $12,750 (MFS), $25,500 (QW)
+    # NC taxable income = Federal AGI + additions - deductions - child deduction - std deduction
+    # NC tax = NC taxable income x 0.045
+    #
+    # NC Single, low income (below standard deduction)
+    # NC taxable: max(0, $10,000 - $12,750) = $0, NC tax: $0
+    # Federal taxable: -$4,600 -> $0, Federal tax: $0
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC Single below standard deduction, $10,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Single",
+        w2_income=10000.0,
+        expected_federal_tax=0.0,
+        expected_state_tax=0.0,
+    ),
+    # NC Single, $50,000 income, no children
+    # NC taxable: $50,000 - $12,750 = $37,250
+    # NC tax: $37,250 x 0.045 = $1,676.25 -> $1,676
+    # Federal taxable: $35,400, Federal tax: $4,016 (Formula) -> $4,019 (Table)
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC Single, $50,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4019.0,
+        expected_state_tax=1676.0,
+    ),
+    # NC Single, $75,000 income, no children
+    # NC taxable: $75,000 - $12,750 = $62,250
+    # NC tax: $62,250 x 0.045 = $2,801.25 -> $2,801
+    # Federal taxable: $60,400, Federal tax: $8,339.80 -> $8,347 (Table)
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC Single, $75,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Single",
+        w2_income=75000.0,
+        expected_federal_tax=8347.0,
+        expected_state_tax=2801.0,
+    ),
+    # NC Single, $100,000 income, no children
+    # NC taxable: $100,000 - $12,750 = $87,250
+    # NC tax: $87,250 x 0.045 = $3,926.25 -> $3,926
+    # Federal taxable: $85,400, Federal tax: $13,841 -> $13,847 (Table)
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC Single, $100,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13847.0,
+        expected_state_tax=3926.0,
+    ),
+    # NC Single, $150,000 income, no children (over $100k, exact formula)
+    # NC taxable: $150,000 - $12,750 = $137,250
+    # NC tax: $137,250 x 0.045 = $6,176.25 -> $6,176
+    # Federal taxable: $135,400, Federal tax: $25,538.50
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC Single, $150,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_federal_tax=25538.5,
+        expected_state_tax=6176.0,
+    ),
+    # NC MFJ, $100,000 income, no children
+    # NC taxable: $100,000 - $25,500 = $74,500
+    # NC tax: $74,500 x 0.045 = $3,352.50 -> $3,353
+    # Federal taxable: $70,800, Federal tax: $8,032 (Formula) -> $8,035 (Table)
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC MFJ, $100,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8035.0,
+        expected_state_tax=3353.0,
+    ),
+    # NC MFJ, $200,000 income, no children (over $100k, exact formula)
+    # NC taxable: $200,000 - $25,500 = $174,500
+    # NC tax: $174,500 x 0.045 = $7,852.50 -> $7,853
+    # Federal taxable: $170,800, Federal tax: $27,682
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC MFJ, $200,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Married/Joint",
+        w2_income=200000.0,
+        expected_federal_tax=27682.0,
+        expected_state_tax=7853.0,
+    ),
+    # NC HoH, $60,000 income, no children
+    # NC taxable: $60,000 - $19,125 = $40,875
+    # NC tax: $40,875 x 0.045 = $1,839.375 -> $1,839
+    # Federal taxable: $38,100, Tax Table midpoint $38,125.
+    # Tax: $1,655 + ($38,125 - $16,550) x 0.12 = $4,244
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC HoH, $60,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_federal_tax=4244.0,
+        expected_state_tax=1839.0,
+    ),
+    # NC HoH, $100,000 income, no children
+    # NC taxable: $100,000 - $19,125 = $80,875
+    # NC tax: $80,875 x 0.045 = $3,639.375 -> $3,639
+    # Federal taxable: $78,100, Tax Table midpoint $78,125.
+    # Tax: $7,241 + ($78,125 - $63,100) x 0.22 = $10,546.50 -> $10,547
+    TaxScenario(
+        source="NC 2024 Tax Rate (computed)",
+        description="NC HoH, $100,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Head_of_House",
+        w2_income=100000.0,
+        expected_federal_tax=10547.0,
+        expected_state_tax=3639.0,
+    ),
 ]
 
 IRS_DIRECT_FILE_SCENARIOS = [
