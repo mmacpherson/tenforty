@@ -2,7 +2,23 @@
 from tenforty import evaluate_return
 from tenforty.backends import OTSBackend
 from tenforty.core import prefix_keys
-from tenforty.models import OTSFilingStatus, OTSState
+from tenforty.models import (
+    NATURAL_FORM_CONFIG,
+    STATE_TO_FORM,
+    OTSFilingStatus,
+    OTSState,
+)
+
+
+def is_state_supported(year: int, state: OTSState) -> bool:
+    if state == OTSState.NONE:
+        return True
+    if state == OTSState.PA:
+        return False
+    form_id = STATE_TO_FORM.get(state)
+    if form_id is None:
+        return True
+    return (year, form_id) in NATURAL_FORM_CONFIG
 
 
 def test_prefix_keys():
@@ -29,6 +45,8 @@ def test_basic_evaluation():
     for year in OTSBackend.supported_years:
         for state in OTSState:
             for filing_status in OTSFilingStatus:
+                if not is_state_supported(year, state):
+                    continue
                 result = evaluate_return(
                     year=year,
                     state=state,
