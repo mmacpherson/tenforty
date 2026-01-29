@@ -107,12 +107,12 @@ pa40_2025 = form "pa_40" 2025 $ do
     l27 <- keyInput "L27" "penalties_interest" "Penalties and interest"
 
     -- Line 28: Total payment due
-    l28 <-
+    _ <-
         keyOutput "L28" "total_payment_due" "Total payment due" $
             l26 .+. l27
 
     -- Line 29: Overpayment
-    l29 <-
+    _ <-
         keyOutput "L29" "overpayment" "Overpayment" $
             l24 `excessOf` (l12 .+. l25)
 

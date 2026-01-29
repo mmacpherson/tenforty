@@ -287,7 +287,7 @@ Run all tests:
 pytest tests/ -v
 ```
 
-Expected output: `125 passed, 6 xfailed`
+Expected output: tests should pass; scenarios marked with `known_failure` are expected to xfail.
 
 Run only silver standard tests:
 ```bash

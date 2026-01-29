@@ -1,9 +1,7 @@
 """Pytest configuration and hypothesis profiles for tenforty tests.
 
-See tests/scenarios.py for test data definitions.
+See tests/fixtures/scenarios.py for test data definitions.
 """
-
-from dataclasses import dataclass
 
 import pytest
 from hypothesis import HealthCheck, settings
