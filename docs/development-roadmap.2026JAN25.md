@@ -199,6 +199,11 @@ The sequence below is intentionally staged so each step can be validated indepen
 - A malformed/cyclic graph yields a structured error (not a panic).
 - Rust tests cover these error paths.
 
+**Repo scan update (2026-01-29)**
+- **Done:** Cycle detection now returns structured errors (see `GraphError::CycleDetected`) and link errors wrap these.
+- **Done:** `GraphSet::link()` now validates import-year consistency for both source and target graphs, returning explicit link errors.
+- **Done:** JIT runtimes now surface `NodeNameNotFound` instead of `NodeNotFound(0)` for missing nodes.
+
 **Verification**
 - Add/extend Rust unit tests in `crates/tenforty-graph/tests/` to cover:
   - Import-year mismatch behavior.
