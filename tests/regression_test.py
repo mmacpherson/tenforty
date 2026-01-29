@@ -156,6 +156,7 @@ def test_mi_tax_scenarios(scenario):
         state=scenario["state"],
         filing_status=scenario["filing_status"],
         w2_income=scenario["w2_income"],
+        backend="graph",
     )
 
     assert (
@@ -257,6 +258,7 @@ def test_all_tax_scenarios(scenario: TaxScenario):
         long_term_capital_gains=scenario.long_term_capital_gains,
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
+        backend=scenario.backend,
     )
 
     if scenario.expected_federal_tax_min is not None:
@@ -324,7 +326,13 @@ def test_mi_tax_increases_with_income():
     """Verify that MI state tax increases monotonically with income."""
     incomes = [50000, 100000, 150000, 200000]
     results = [
-        evaluate_return(year=2024, state="MI", filing_status="Single", w2_income=income)
+        evaluate_return(
+            year=2024,
+            state="MI",
+            filing_status="Single",
+            w2_income=income,
+            backend="graph",
+        )
         for income in incomes
     ]
 

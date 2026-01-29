@@ -1,3 +1,4 @@
+# ruff: noqa: RUF003
 """Pytest configuration, hypothesis profiles, and test scenarios for tenforty tests.
 
 Two types of test scenarios:
@@ -71,6 +72,7 @@ class TaxScenario:
     expected_state_tax_max: float | None = None
     expected_federal_agi_min: float | None = None
     expected_federal_agi_max: float | None = None
+    backend: str = "ots"
 
 
 IRS_DIRECT_FILE_SCENARIOS = [
@@ -165,6 +167,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=1905,
         expected_federal_agi_min=50000,
         expected_federal_agi_max=50000,
+        backend="graph",
     ),
     # Single, $75,000: MI tax = ($75,000 - $5,600) × 4.25% = $2,949.50
     TaxScenario(
@@ -180,6 +183,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=2970,
         expected_federal_agi_min=75000,
         expected_federal_agi_max=75000,
+        backend="graph",
     ),
     # Single, $150,000: MI tax = ($150,000 - $5,600) × 4.25% = $6,137
     TaxScenario(
@@ -195,6 +199,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=6160,
         expected_federal_agi_min=150000,
         expected_federal_agi_max=150000,
+        backend="graph",
     ),
     # MFJ, $100,000: MI tax = ($100,000 - 2×$5,600) × 4.25% = $3,774
     TaxScenario(
@@ -210,6 +215,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=3795,
         expected_federal_agi_min=100000,
         expected_federal_agi_max=100000,
+        backend="graph",
     ),
     # MFJ, $200,000: MI tax = ($200,000 - 2×$5,600) × 4.25% = $8,024
     TaxScenario(
@@ -225,6 +231,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=8050,
         expected_federal_agi_min=200000,
         expected_federal_agi_max=200000,
+        backend="graph",
     ),
     # MFJ, $200,000, 2 dependents: MI tax = ($200,000 - 4×$5,600) × 4.25% = $7,548
     TaxScenario(
@@ -241,6 +248,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=7575,
         expected_federal_agi_min=200000,
         expected_federal_agi_max=200000,
+        backend="graph",
     ),
     # Single, low income near exemption: $10,000
     # MI tax = ($10,000 - $5,600) × 4.25% = $187
@@ -257,6 +265,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=200,
         expected_federal_agi_min=10000,
         expected_federal_agi_max=10000,
+        backend="graph",
     ),
     # Single, income at exemption level: $5,600 -> MI tax = $0
     TaxScenario(
@@ -272,6 +281,7 @@ SILVER_STANDARD_MI_SCENARIOS = [
         expected_state_tax_max=5,
         expected_federal_agi_min=5600,
         expected_federal_agi_max=5600,
+        backend="graph",
     ),
 ]
 

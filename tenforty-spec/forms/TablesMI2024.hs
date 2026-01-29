@@ -18,7 +18,7 @@ miTaxRate2024 = 0.0425
 
 -- | 2024 Michigan personal exemption allowance per person
 -- Source: Michigan Department of Treasury
-miPersonalExemption2024 :: Amount Dollars
+miPersonalExemption2024 :: Amount Rate
 miPersonalExemption2024 = 5600
 
 -- | 2024 Michigan special exemption (deaf, blind, disabled)

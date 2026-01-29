@@ -28,8 +28,16 @@ mi1040_2025 = form "mi_1040" 2025 $ do
             l12 `subtractNotBelowZero` l13_sub
 
     -- Exemption inputs (Lines 9a-9e on the form)
-    l9a <- keyInput "L9a" "self_exemptions" "Personal exemptions (yourself)"
-    l9b <- keyInput "L9b" "spouse_exemptions" "Spouse exemptions"
+    l9a <- interior "L9a" "self_exemptions" $ dollars 1
+    l9b <-
+        interior "L9b" "spouse_exemptions" $
+            byStatusE $
+                byStatus
+                    (dollars 0) -- Single
+                    (dollars 1) -- MFJ
+                    (dollars 0) -- MFS
+                    (dollars 0) -- HOH
+                    (dollars 0) -- QW
     l9c <- keyInput "L9c" "dependents" "Number of dependent exemptions"
     l9d <- keyInput "L9d" "special_exemptions" "Special exemptions (disabled)"
     l9e <- keyInput "L9e" "veteran_exemptions" "Qualified disabled veteran exemptions"
@@ -52,7 +60,7 @@ mi1040_2025 = form "mi_1040" 2025 $ do
     -- Line 17: Michigan income tax (flat 4.25%)
     l17 <-
         keyOutput "L17" "mi_income_tax" "Michigan income tax" $
-            l16 .*. rate miTaxRate2025
+            l16 .*. lit miTaxRate2025
 
     -- Line 18a: Nonrefundable credits
     l18a <- keyInput "L18a" "nonrefundable_credits" "Nonrefundable credits"

@@ -17,9 +17,9 @@ miTaxRate2025 :: Amount Rate
 miTaxRate2025 = 0.0425
 
 -- | 2025 Michigan personal exemption allowance per person
--- Source: Michigan Department of Treasury (Form 446, Rev. 01-25)
-miPersonalExemption2025 :: Amount Dollars
-miPersonalExemption2025 = 5800
+-- Source: Michigan Department of Treasury
+miPersonalExemption2025 :: Amount Rate
+miPersonalExemption2025 = 5900
 
 -- | 2025 Michigan special exemption (deaf, blind, disabled)
 miSpecialExemption2025 :: Amount Dollars
