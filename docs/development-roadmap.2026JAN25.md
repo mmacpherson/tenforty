@@ -185,7 +185,7 @@ The sequence below is intentionally staged so each step can be validated indepen
 
 ---
 
-### Phase 5 — Tighten import semantics and runtime diagnostics (Rust) - **COMPLETED**
+### Phase 5 — Tighten import semantics and runtime diagnostics (Rust) - **PARTIALLY COMPLETED**
 
 **Changes**
 - Decide how to treat `Op::Import.year`:
@@ -198,6 +198,12 @@ The sequence below is intentionally staged so each step can be validated indepen
 - Linking validates import-year consistency (or fully supports year-aware resolution) with clear error messages.
 - A malformed/cyclic graph yields a structured error (not a panic).
 - Rust tests cover these error paths.
+
+**Repo scan update (2026-01-29)**
+- **Done:** Cycle detection now returns structured errors (see `GraphError::CycleDetected`) and link errors wrap these.
+- **Done (Python layer):** Mixed-year imports are detected in `src/tenforty/backends/graph.py` before linking.
+- **Still open:** `GraphSet` in Rust resolves imports by `(form_id, line)` only and does not include `year` in resolution keys. This means year-awareness is enforced in Python, not in the Rust linker itself.
+- **Still open:** JIT runtimes still emit `NodeNotFound(0)` in a few paths (see `crates/tenforty-graph/src/jit/runtime.rs`), which loses detail compared to name-aware errors in the interpreter.
 
 **Verification**
 - Add/extend Rust unit tests in `crates/tenforty-graph/tests/` to cover:
