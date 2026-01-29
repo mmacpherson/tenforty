@@ -1,0 +1,1296 @@
+{
+    "imports": [],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46
+    ],
+    "meta": {
+        "form_id": "nj_1040",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L7_senior_exemption",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L8_blind_disabled_exemption",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L19_capital_gains",
+            "op": {
+                "type": "input"
+            }
+        },
+        "100": {
+            "id": 100,
+            "name": "L43_nj_tax",
+            "op": {
+                "income": 99,
+                "table": "nj_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "101": {
+            "id": 101,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "102": {
+            "id": 102,
+            "op": {
+                "left": 100,
+                "right": 30,
+                "type": "sub"
+            }
+        },
+        "103": {
+            "id": 103,
+            "name": "L45_balance_of_tax",
+            "op": {
+                "left": 101,
+                "right": 102,
+                "type": "max"
+            }
+        },
+        "104": {
+            "id": 104,
+            "op": {
+                "left": 32,
+                "right": 33,
+                "type": "add"
+            }
+        },
+        "105": {
+            "id": 105,
+            "name": "L49_total_credits",
+            "op": {
+                "left": 31,
+                "right": 104,
+                "type": "add"
+            }
+        },
+        "106": {
+            "id": 106,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "107": {
+            "id": 107,
+            "op": {
+                "left": 103,
+                "right": 105,
+                "type": "sub"
+            }
+        },
+        "108": {
+            "id": 108,
+            "name": "L50_balance_after_credits",
+            "op": {
+                "left": 106,
+                "right": 107,
+                "type": "max"
+            }
+        },
+        "109": {
+            "id": 109,
+            "op": {
+                "left": 35,
+                "right": 36,
+                "type": "add"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L20a_pensions_taxable",
+            "op": {
+                "type": "input"
+            }
+        },
+        "110": {
+            "id": 110,
+            "op": {
+                "left": 34,
+                "right": 109,
+                "type": "add"
+            }
+        },
+        "111": {
+            "id": 111,
+            "name": "L54_nj_total_tax",
+            "op": {
+                "left": 108,
+                "right": 110,
+                "type": "add"
+            }
+        },
+        "112": {
+            "id": 112,
+            "op": {
+                "type": "literal",
+                "value": 50
+            }
+        },
+        "113": {
+            "id": 113,
+            "op": {
+                "type": "literal",
+                "value": 50
+            }
+        },
+        "114": {
+            "id": 114,
+            "op": {
+                "type": "literal",
+                "value": 25
+            }
+        },
+        "115": {
+            "id": 115,
+            "op": {
+                "type": "literal",
+                "value": 50
+            }
+        },
+        "116": {
+            "id": 116,
+            "op": {
+                "type": "literal",
+                "value": 50
+            }
+        },
+        "117": {
+            "id": 117,
+            "name": "PropTaxCredit",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 115,
+                    "married_joint": 113,
+                    "married_separate": 114,
+                    "qualifying_widow": 116,
+                    "single": 112
+                }
+            }
+        },
+        "118": {
+            "id": 118,
+            "op": {
+                "left": 45,
+                "right": 46,
+                "type": "add"
+            }
+        },
+        "119": {
+            "id": 119,
+            "op": {
+                "left": 44,
+                "right": 118,
+                "type": "add"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L21_partnership_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "120": {
+            "id": 120,
+            "op": {
+                "left": 43,
+                "right": 119,
+                "type": "add"
+            }
+        },
+        "121": {
+            "id": 121,
+            "op": {
+                "left": 42,
+                "right": 120,
+                "type": "add"
+            }
+        },
+        "122": {
+            "id": 122,
+            "op": {
+                "left": 41,
+                "right": 121,
+                "type": "add"
+            }
+        },
+        "123": {
+            "id": 123,
+            "op": {
+                "left": 40,
+                "right": 122,
+                "type": "add"
+            }
+        },
+        "124": {
+            "id": 124,
+            "op": {
+                "left": 39,
+                "right": 123,
+                "type": "add"
+            }
+        },
+        "125": {
+            "id": 125,
+            "op": {
+                "left": 38,
+                "right": 124,
+                "type": "add"
+            }
+        },
+        "126": {
+            "id": 126,
+            "op": {
+                "left": 117,
+                "right": 125,
+                "type": "add"
+            }
+        },
+        "127": {
+            "id": 127,
+            "name": "L66_total_payments",
+            "op": {
+                "left": 37,
+                "right": 126,
+                "type": "add"
+            }
+        },
+        "128": {
+            "id": 128,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "129": {
+            "id": 129,
+            "op": {
+                "left": 111,
+                "right": 127,
+                "type": "sub"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L22_s_corp_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "130": {
+            "id": 130,
+            "name": "L67_amount_owed",
+            "op": {
+                "left": 128,
+                "right": 129,
+                "type": "max"
+            }
+        },
+        "131": {
+            "id": 131,
+            "op": {
+                "left": 127,
+                "right": 111,
+                "type": "sub"
+            }
+        },
+        "132": {
+            "id": 132,
+            "op": {
+                "left": 127,
+                "right": 111,
+                "type": "sub"
+            }
+        },
+        "133": {
+            "id": 133,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "134": {
+            "id": 134,
+            "name": "L68_overpayment",
+            "op": {
+                "cond": 131,
+                "otherwise": 133,
+                "then": 132,
+                "type": "if_positive"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L23_rental_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L24_gambling_winnings",
+            "op": {
+                "type": "input"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L25_alimony_received",
+            "op": {
+                "type": "input"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L26_other_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L28a_retirement_exclusion",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L28b_other_retirement_exclusion",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L9_veteran_exemption",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L31_medical_expenses",
+            "op": {
+                "type": "input"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L32_alimony_paid",
+            "op": {
+                "type": "input"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L33_conservation_contribution",
+            "op": {
+                "type": "input"
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L34_health_enterprise_zone",
+            "op": {
+                "type": "input"
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L35_alt_business_adjustment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L36_organ_donation_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "L37a_njbest_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L37b_njclass_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L37c_higher_ed_tuition",
+            "op": {
+                "type": "input"
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "L40a_property_tax_paid",
+            "op": {
+                "type": "input"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L10_count",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "L44_other_jurisdiction_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L46_sheltered_workshop_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "32": {
+            "id": 32,
+            "name": "L47_gold_star_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L48_organ_donor_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "34": {
+            "id": 34,
+            "name": "L51_use_tax",
+            "op": {
+                "type": "input"
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L52_underpayment_interest",
+            "op": {
+                "type": "input"
+            }
+        },
+        "36": {
+            "id": 36,
+            "name": "L53_shared_responsibility",
+            "op": {
+                "type": "input"
+            }
+        },
+        "37": {
+            "id": 37,
+            "name": "L55_nj_withholding",
+            "op": {
+                "type": "input"
+            }
+        },
+        "38": {
+            "id": 38,
+            "name": "L57_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "39": {
+            "id": 39,
+            "name": "L58_nj_eitc",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L11_count",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "name": "L59_excess_ui_hc_wd",
+            "op": {
+                "type": "input"
+            }
+        },
+        "41": {
+            "id": 41,
+            "name": "L60_excess_disability",
+            "op": {
+                "type": "input"
+            }
+        },
+        "42": {
+            "id": 42,
+            "name": "L61_excess_family_leave",
+            "op": {
+                "type": "input"
+            }
+        },
+        "43": {
+            "id": 43,
+            "name": "L62_wounded_warrior_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "44": {
+            "id": 44,
+            "name": "L63_pass_through_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "45": {
+            "id": 45,
+            "name": "L64_child_dependent_care_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "46": {
+            "id": 46,
+            "name": "L65_nj_child_tax_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "type": "literal",
+                "value": 1000
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "type": "literal",
+                "value": 2000
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "type": "literal",
+                "value": 1000
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L12_count",
+            "op": {
+                "type": "input"
+            }
+        },
+        "50": {
+            "id": 50,
+            "op": {
+                "type": "literal",
+                "value": 1000
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "type": "literal",
+                "value": 1000
+            }
+        },
+        "52": {
+            "id": 52,
+            "name": "L6_regular_exemption",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 50,
+                    "married_joint": 48,
+                    "married_separate": 49,
+                    "qualifying_widow": 51,
+                    "single": 47
+                }
+            }
+        },
+        "53": {
+            "id": 53,
+            "op": {
+                "type": "literal",
+                "value": 1500
+            }
+        },
+        "54": {
+            "id": 54,
+            "name": "L10_dependent_children_exemption",
+            "op": {
+                "left": 3,
+                "right": 53,
+                "type": "mul"
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "type": "literal",
+                "value": 1500
+            }
+        },
+        "56": {
+            "id": 56,
+            "name": "L11_other_dependents_exemption",
+            "op": {
+                "left": 4,
+                "right": 55,
+                "type": "mul"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "type": "literal",
+                "value": 1000
+            }
+        },
+        "58": {
+            "id": 58,
+            "name": "L12_dependent_students_exemption",
+            "op": {
+                "left": 5,
+                "right": 57,
+                "type": "mul"
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 56,
+                "right": 58,
+                "type": "add"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L15_wages",
+            "op": {
+                "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "op": {
+                "left": 54,
+                "right": 59,
+                "type": "add"
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "left": 2,
+                "right": 60,
+                "type": "add"
+            }
+        },
+        "62": {
+            "id": 62,
+            "op": {
+                "left": 1,
+                "right": 61,
+                "type": "add"
+            }
+        },
+        "63": {
+            "id": 63,
+            "op": {
+                "left": 0,
+                "right": 62,
+                "type": "add"
+            }
+        },
+        "64": {
+            "id": 64,
+            "name": "L13_total_exemptions",
+            "op": {
+                "left": 52,
+                "right": 63,
+                "type": "add"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "left": 16,
+                "right": 17,
+                "type": "add"
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "left": 15,
+                "right": 65,
+                "type": "add"
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "left": 14,
+                "right": 66,
+                "type": "add"
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "left": 13,
+                "right": 67,
+                "type": "add"
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "left": 12,
+                "right": 68,
+                "type": "add"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L16a_taxable_interest",
+            "op": {
+                "type": "input"
+            }
+        },
+        "70": {
+            "id": 70,
+            "op": {
+                "left": 11,
+                "right": 69,
+                "type": "add"
+            }
+        },
+        "71": {
+            "id": 71,
+            "op": {
+                "left": 10,
+                "right": 70,
+                "type": "add"
+            }
+        },
+        "72": {
+            "id": 72,
+            "op": {
+                "left": 9,
+                "right": 71,
+                "type": "add"
+            }
+        },
+        "73": {
+            "id": 73,
+            "op": {
+                "left": 8,
+                "right": 72,
+                "type": "add"
+            }
+        },
+        "74": {
+            "id": 74,
+            "op": {
+                "left": 7,
+                "right": 73,
+                "type": "add"
+            }
+        },
+        "75": {
+            "id": 75,
+            "name": "L27_total_income",
+            "op": {
+                "left": 6,
+                "right": 74,
+                "type": "add"
+            }
+        },
+        "76": {
+            "id": 76,
+            "name": "L28_total_exclusions",
+            "op": {
+                "left": 18,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "77": {
+            "id": 77,
+            "name": "L29_nj_gross_income",
+            "op": {
+                "left": 75,
+                "right": 76,
+                "type": "sub"
+            }
+        },
+        "78": {
+            "id": 78,
+            "op": {
+                "left": 27,
+                "right": 28,
+                "type": "add"
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "left": 26,
+                "right": 78,
+                "type": "add"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L17_dividends",
+            "op": {
+                "type": "input"
+            }
+        },
+        "80": {
+            "id": 80,
+            "op": {
+                "left": 25,
+                "right": 79,
+                "type": "add"
+            }
+        },
+        "81": {
+            "id": 81,
+            "op": {
+                "left": 24,
+                "right": 80,
+                "type": "add"
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "left": 23,
+                "right": 81,
+                "type": "add"
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "left": 22,
+                "right": 82,
+                "type": "add"
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "left": 21,
+                "right": 83,
+                "type": "add"
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "left": 20,
+                "right": 84,
+                "type": "add"
+            }
+        },
+        "86": {
+            "id": 86,
+            "name": "L38_total_deductions",
+            "op": {
+                "left": 64,
+                "right": 85,
+                "type": "add"
+            }
+        },
+        "87": {
+            "id": 87,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "88": {
+            "id": 88,
+            "op": {
+                "left": 77,
+                "right": 86,
+                "type": "sub"
+            }
+        },
+        "89": {
+            "id": 89,
+            "name": "L39_taxable_income_before_prop_tax",
+            "op": {
+                "left": 87,
+                "right": 88,
+                "type": "max"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L18_business_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "90": {
+            "id": 90,
+            "op": {
+                "type": "literal",
+                "value": 15000
+            }
+        },
+        "91": {
+            "id": 91,
+            "op": {
+                "type": "literal",
+                "value": 15000
+            }
+        },
+        "92": {
+            "id": 92,
+            "op": {
+                "type": "literal",
+                "value": 7500
+            }
+        },
+        "93": {
+            "id": 93,
+            "op": {
+                "type": "literal",
+                "value": 15000
+            }
+        },
+        "94": {
+            "id": 94,
+            "op": {
+                "type": "literal",
+                "value": 15000
+            }
+        },
+        "95": {
+            "id": 95,
+            "name": "PropTaxLimit",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 93,
+                    "married_joint": 91,
+                    "married_separate": 92,
+                    "qualifying_widow": 94,
+                    "single": 90
+                }
+            }
+        },
+        "96": {
+            "id": 96,
+            "name": "L41_property_tax_deduction",
+            "op": {
+                "left": 29,
+                "right": 95,
+                "type": "min"
+            }
+        },
+        "97": {
+            "id": 97,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "98": {
+            "id": 98,
+            "op": {
+                "left": 89,
+                "right": 96,
+                "type": "sub"
+            }
+        },
+        "99": {
+            "id": 99,
+            "name": "L42_nj_taxable_income",
+            "op": {
+                "left": 97,
+                "right": 98,
+                "type": "max"
+            }
+        }
+    },
+    "outputs": [
+        64,
+        75,
+        77,
+        86,
+        89,
+        99,
+        100,
+        103,
+        111,
+        127,
+        130,
+        134
+    ],
+    "tables": {
+        "nj_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 1.4e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 1.75e-2,
+                        "threshold": 50000
+                    },
+                    {
+                        "rate": 2.45e-2,
+                        "threshold": 70000
+                    },
+                    {
+                        "rate": 3.5e-2,
+                        "threshold": 80000
+                    },
+                    {
+                        "rate": 5.525e-2,
+                        "threshold": 150000
+                    },
+                    {
+                        "rate": 6.37e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 8.97e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 0.1075,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 1.4e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 1.75e-2,
+                        "threshold": 50000
+                    },
+                    {
+                        "rate": 2.45e-2,
+                        "threshold": 70000
+                    },
+                    {
+                        "rate": 3.5e-2,
+                        "threshold": 80000
+                    },
+                    {
+                        "rate": 5.525e-2,
+                        "threshold": 150000
+                    },
+                    {
+                        "rate": 6.37e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 8.97e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 0.1075,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 1.4e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 1.75e-2,
+                        "threshold": 35000
+                    },
+                    {
+                        "rate": 2.45e-2,
+                        "threshold": 40000
+                    },
+                    {
+                        "rate": 3.5e-2,
+                        "threshold": 75000
+                    },
+                    {
+                        "rate": 5.525e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 6.37e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 8.97e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 0.1075,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 1.4e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 1.75e-2,
+                        "threshold": 50000
+                    },
+                    {
+                        "rate": 2.45e-2,
+                        "threshold": 70000
+                    },
+                    {
+                        "rate": 3.5e-2,
+                        "threshold": 80000
+                    },
+                    {
+                        "rate": 5.525e-2,
+                        "threshold": 150000
+                    },
+                    {
+                        "rate": 6.37e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 8.97e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 0.1075,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 1.4e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 1.75e-2,
+                        "threshold": 35000
+                    },
+                    {
+                        "rate": 2.45e-2,
+                        "threshold": 40000
+                    },
+                    {
+                        "rate": 3.5e-2,
+                        "threshold": 75000
+                    },
+                    {
+                        "rate": 5.525e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 6.37e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 8.97e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 0.1075,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}

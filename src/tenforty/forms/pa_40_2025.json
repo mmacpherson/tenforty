@@ -1,0 +1,572 @@
+{
+    "imports": [],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+    ],
+    "meta": {
+        "form_id": "pa_40",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1a_gross_compensation",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L1b_unreimbursed_expenses",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L13_pa_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L14_prior_year_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L15_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L16_extension_payment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L17_nonresident_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L21_tax_forgiveness_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L22_resident_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L23_other_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L25_use_tax",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L27_penalties_interest",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L2_interest_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L1c_net_compensation",
+            "op": {
+                "left": 20,
+                "right": 21,
+                "type": "max"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 23,
+                "right": 22,
+                "type": "max"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 25,
+                "right": 2,
+                "type": "max"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 27,
+                "right": 3,
+                "type": "max"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L3_dividend_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "left": 29,
+                "right": 4,
+                "type": "max"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "left": 31,
+                "right": 5,
+                "type": "max"
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "left": 33,
+                "right": 6,
+                "type": "max"
+            }
+        },
+        "35": {
+            "id": 35,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 35,
+                "right": 7,
+                "type": "max"
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 37,
+                "right": 8,
+                "type": "max"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "left": 36,
+                "right": 38,
+                "type": "add"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L4_business_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "left": 34,
+                "right": 39,
+                "type": "add"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "left": 32,
+                "right": 40,
+                "type": "add"
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "left": 30,
+                "right": 41,
+                "type": "add"
+            }
+        },
+        "43": {
+            "id": 43,
+            "op": {
+                "left": 28,
+                "right": 42,
+                "type": "add"
+            }
+        },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 26,
+                "right": 43,
+                "type": "add"
+            }
+        },
+        "45": {
+            "id": 45,
+            "name": "L9_total_pa_taxable_income",
+            "op": {
+                "left": 24,
+                "right": 44,
+                "type": "add"
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "left": 45,
+                "right": 9,
+                "type": "sub"
+            }
+        },
+        "48": {
+            "id": 48,
+            "name": "L11_adjusted_pa_taxable_income",
+            "op": {
+                "left": 46,
+                "right": 47,
+                "type": "max"
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "type": "literal",
+                "value": 3.07e-2
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L5_property_gain",
+            "op": {
+                "type": "input"
+            }
+        },
+        "50": {
+            "id": 50,
+            "name": "L12_pa_tax_liability",
+            "op": {
+                "left": 48,
+                "right": 49,
+                "type": "mul"
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "left": 13,
+                "right": 14,
+                "type": "add"
+            }
+        },
+        "52": {
+            "id": 52,
+            "op": {
+                "left": 12,
+                "right": 51,
+                "type": "add"
+            }
+        },
+        "53": {
+            "id": 53,
+            "name": "L18_total_estimated_payments",
+            "op": {
+                "left": 11,
+                "right": 52,
+                "type": "add"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "left": 16,
+                "right": 17,
+                "type": "add"
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "left": 15,
+                "right": 54,
+                "type": "add"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "left": 53,
+                "right": 55,
+                "type": "add"
+            }
+        },
+        "57": {
+            "id": 57,
+            "name": "L24_total_payments_credits",
+            "op": {
+                "left": 10,
+                "right": 56,
+                "type": "add"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 50,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L6_rental_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "op": {
+                "left": 59,
+                "right": 57,
+                "type": "sub"
+            }
+        },
+        "61": {
+            "id": 61,
+            "name": "L26_tax_due",
+            "op": {
+                "left": 58,
+                "right": 60,
+                "type": "max"
+            }
+        },
+        "62": {
+            "id": 62,
+            "name": "L28_total_payment_due",
+            "op": {
+                "left": 61,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "63": {
+            "id": 63,
+            "op": {
+                "left": 50,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "64": {
+            "id": 64,
+            "op": {
+                "left": 57,
+                "right": 63,
+                "type": "sub"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "left": 50,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "left": 57,
+                "right": 65,
+                "type": "sub"
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "68": {
+            "id": 68,
+            "name": "L29_overpayment",
+            "op": {
+                "cond": 64,
+                "otherwise": 67,
+                "then": 66,
+                "type": "if_positive"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L7_estate_trust_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L8_gambling_winnings",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L10_other_deductions",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        48,
+        50,
+        22,
+        57,
+        61,
+        62,
+        68,
+        45
+    ],
+    "tables": {}
+}

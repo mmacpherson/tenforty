@@ -60,15 +60,15 @@ njPersonalExemption2024 :: Amount Dollars
 njPersonalExemption2024 = 1000
 
 -- | Dependent exemption: $1,500 per qualifying dependent
-njDependentExemption2024 :: Amount Dollars
+njDependentExemption2024 :: Amount Rate
 njDependentExemption2024 = 1500
 
 -- | Dependent student additional exemption: $1,000 per qualifying student
-njDependentStudentExemption2024 :: Amount Dollars
+njDependentStudentExemption2024 :: Amount Rate
 njDependentStudentExemption2024 = 1000
 
 -- | Veteran exemption: $6,000 per qualifying veteran
-njVeteranExemption2024 :: Amount Dollars
+njVeteranExemption2024 :: Amount Rate
 njVeteranExemption2024 = 6000
 
 -- | Senior (65+), blind, or disabled exemption: $1,000 each

@@ -67,15 +67,15 @@ njPersonalExemption2025 :: Amount Dollars
 njPersonalExemption2025 = 1000
 
 -- | Dependent exemption: $1,500 per qualifying dependent
-njDependentExemption2025 :: Amount Dollars
+njDependentExemption2025 :: Amount Rate
 njDependentExemption2025 = 1500
 
 -- | Dependent student additional exemption: $1,000 per qualifying student
-njDependentStudentExemption2025 :: Amount Dollars
+njDependentStudentExemption2025 :: Amount Rate
 njDependentStudentExemption2025 = 1000
 
 -- | Veteran exemption: $6,000 per qualifying veteran
-njVeteranExemption2025 :: Amount Dollars
+njVeteranExemption2025 :: Amount Rate
 njVeteranExemption2025 = 6000
 
 -- | Senior (65+), blind, or disabled exemption: $1,000 each

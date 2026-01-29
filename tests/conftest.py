@@ -71,6 +71,7 @@ class TaxScenario:
     expected_state_tax_max: float | None = None
     expected_federal_agi_min: float | None = None
     expected_federal_agi_max: float | None = None
+    backend: str = "ots"
 
 
 IRS_DIRECT_FILE_SCENARIOS = [
@@ -258,6 +259,7 @@ REGRESSION_SCENARIOS = [
         expected_federal_tax_max=4500,
         expected_state_tax_min=850,
         expected_state_tax_max=1100,
+        backend="graph",
     ),
     TaxScenario(
         source="Library baseline (no external validation)",
@@ -270,6 +272,7 @@ REGRESSION_SCENARIOS = [
         expected_federal_tax_max=10000,
         expected_state_tax_min=1700,
         expected_state_tax_max=2100,
+        backend="graph",
     ),
     TaxScenario(
         source="Library baseline (no external validation)",
@@ -282,6 +285,7 @@ REGRESSION_SCENARIOS = [
         expected_federal_tax_max=28000,
         expected_state_tax_min=5500,
         expected_state_tax_max=6500,
+        backend="graph",
     ),
     TaxScenario(
         source="Library baseline (no external validation)",
@@ -294,6 +298,7 @@ REGRESSION_SCENARIOS = [
         expected_federal_tax_max=30000,
         expected_state_tax_min=8000,
         expected_state_tax_max=9500,
+        backend="graph",
     ),
 ]
 
