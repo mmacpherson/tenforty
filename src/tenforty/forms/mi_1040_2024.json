@@ -1,0 +1,471 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "meta": {
+        "form_id": "mi_1040",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L11_mi_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L13_sub",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L25_mi_withholding",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L26_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L27_extension_payment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L10_federal_agi",
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L12_subtotal",
+            "op": {
+                "left": 13,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 14,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L14_mi_income_subject_to_tax",
+            "op": {
+                "left": 15,
+                "right": 16,
+                "type": "max"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L9a_self_exemptions",
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L9c_dependents",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L9b_spouse_exemptions",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 22,
+                    "married_joint": 20,
+                    "married_separate": 21,
+                    "qualifying_widow": 23,
+                    "single": 19
+                }
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 3,
+                "right": 4,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 2,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 24,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L9f_total_exemptions",
+            "op": {
+                "left": 18,
+                "right": 27,
+                "type": "add"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "type": "literal",
+                "value": 5600
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L9d_special_exemptions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "L15_exemption_allowance",
+            "op": {
+                "left": 28,
+                "right": 29,
+                "type": "mul"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "left": 17,
+                "right": 30,
+                "type": "sub"
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L16_mi_taxable_income",
+            "op": {
+                "left": 31,
+                "right": 32,
+                "type": "max"
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "type": "literal",
+                "value": 4.25e-2
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L17_mi_income_tax",
+            "op": {
+                "left": 33,
+                "right": 34,
+                "type": "mul"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 5,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 35,
+                "right": 37,
+                "type": "sub"
+            }
+        },
+        "39": {
+            "id": 39,
+            "name": "L19_tax_after_credits",
+            "op": {
+                "left": 36,
+                "right": 38,
+                "type": "max"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L9e_veteran_exemptions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "name": "L21_mi_total_tax",
+            "op": {
+                "left": 39,
+                "right": 7,
+                "type": "add"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "left": 8,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "43": {
+            "id": 43,
+            "op": {
+                "left": 40,
+                "right": 42,
+                "type": "sub"
+            }
+        },
+        "44": {
+            "id": 44,
+            "name": "L24_tax_minus_credits",
+            "op": {
+                "left": 41,
+                "right": 43,
+                "type": "max"
+            }
+        },
+        "45": {
+            "id": 45,
+            "op": {
+                "left": 11,
+                "right": 12,
+                "type": "add"
+            }
+        },
+        "46": {
+            "id": 46,
+            "name": "L28_total_payments",
+            "op": {
+                "left": 10,
+                "right": 45,
+                "type": "add"
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "left": 46,
+                "right": 44,
+                "type": "sub"
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "left": 46,
+                "right": 44,
+                "type": "sub"
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L18a_nonrefundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "50": {
+            "id": 50,
+            "name": "L29_overpayment",
+            "op": {
+                "cond": 47,
+                "otherwise": 49,
+                "then": 48,
+                "type": "if_positive"
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "52": {
+            "id": 52,
+            "op": {
+                "left": 44,
+                "right": 46,
+                "type": "sub"
+            }
+        },
+        "53": {
+            "id": 53,
+            "name": "L31_amount_owed",
+            "op": {
+                "left": 51,
+                "right": 52,
+                "type": "max"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L18b_additional_nonrefundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L20_use_tax",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L22_property_tax_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L23_home_heating_credit",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        13,
+        17,
+        30,
+        33,
+        35,
+        40,
+        44,
+        46,
+        50,
+        53
+    ],
+    "tables": {}
+}

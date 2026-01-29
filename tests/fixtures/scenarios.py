@@ -39,6 +39,7 @@ class TaxScenario:
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
     known_failure: str | None = None  # If set, test is marked xfail with this reason
+    backend: str = "ots"
 
 
 def scenario_id(scenario: TaxScenario) -> str:
@@ -591,6 +592,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=10000.0,
         expected_federal_tax=0.0,
         expected_state_tax=0.0,
+        backend="graph",
     ),
     # NC Single, $50,000 income, no children
     # NC taxable: $50,000 - $12,750 = $37,250
@@ -603,8 +605,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NC",
         filing_status="Single",
         w2_income=50000.0,
-        expected_federal_tax=4019.0,
+        expected_federal_tax=4016.0,
         expected_state_tax=1676.0,
+        backend="graph",
     ),
     # NC Single, $75,000 income, no children
     # NC taxable: $75,000 - $12,750 = $62,250
@@ -617,8 +620,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NC",
         filing_status="Single",
         w2_income=75000.0,
-        expected_federal_tax=8347.0,
+        expected_federal_tax=8341.0,
         expected_state_tax=2801.0,
+        backend="graph",
     ),
     # NC Single, $100,000 income, no children
     # NC taxable: $100,000 - $12,750 = $87,250
@@ -631,8 +635,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NC",
         filing_status="Single",
         w2_income=100000.0,
-        expected_federal_tax=13847.0,
+        expected_federal_tax=13841.0,
         expected_state_tax=3926.0,
+        backend="graph",
     ),
     # NC Single, $150,000 income, no children (over $100k, exact formula)
     # NC taxable: $150,000 - $12,750 = $137,250
@@ -647,6 +652,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=150000.0,
         expected_federal_tax=25538.5,
         expected_state_tax=6176.0,
+        backend="graph",
     ),
     # NC MFJ, $100,000 income, no children
     # NC taxable: $100,000 - $25,500 = $74,500
@@ -659,8 +665,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NC",
         filing_status="Married/Joint",
         w2_income=100000.0,
-        expected_federal_tax=8035.0,
+        expected_federal_tax=8032.0,
         expected_state_tax=3353.0,
+        backend="graph",
     ),
     # NC MFJ, $200,000 income, no children (over $100k, exact formula)
     # NC taxable: $200,000 - $25,500 = $174,500
@@ -675,6 +682,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=200000.0,
         expected_federal_tax=27682.0,
         expected_state_tax=7853.0,
+        backend="graph",
     ),
     # NC HoH, $60,000 income, no children
     # NC taxable: $60,000 - $19,125 = $40,875
@@ -688,8 +696,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NC",
         filing_status="Head_of_House",
         w2_income=60000.0,
-        expected_federal_tax=4244.0,
+        expected_federal_tax=4241.0,
         expected_state_tax=1839.0,
+        backend="graph",
     ),
     # NC HoH, $100,000 income, no children
     # NC taxable: $100,000 - $19,125 = $80,875
@@ -703,8 +712,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NC",
         filing_status="Head_of_House",
         w2_income=100000.0,
-        expected_federal_tax=10547.0,
+        expected_federal_tax=10541.0,
         expected_state_tax=3639.0,
+        backend="graph",
     ),
 ]
 

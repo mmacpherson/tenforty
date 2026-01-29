@@ -38,6 +38,7 @@ def run_tax_scenario(scenario: TaxScenario):
         long_term_capital_gains=scenario.long_term_capital_gains,
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
+        backend=scenario.backend,
     )
 
     if scenario.expected_federal_tax is not None:

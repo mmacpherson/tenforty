@@ -1,0 +1,249 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L15_pre_qbi",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "meta": {
+        "form_id": "us_form_8995",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1_qbi_business_1",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L2_qbi_business_2",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "left": 10,
+                "right": 9,
+                "type": "max"
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "type": "literal",
+                "value": 0.2
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L6_qbi_component",
+            "op": {
+                "left": 11,
+                "right": 12,
+                "type": "mul"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L9_reit_ptp_total",
+            "op": {
+                "left": 4,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 15,
+                "right": 14,
+                "type": "max"
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "type": "literal",
+                "value": 0.2
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L10_reit_ptp_component",
+            "op": {
+                "left": 16,
+                "right": 17,
+                "type": "mul"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L11_combined_qbi_component",
+            "op": {
+                "left": 13,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L3_qbi_business_3",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L12_taxable_income_before",
+            "op": {
+                "form": "us_1040",
+                "line": "L15_pre_qbi",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "left": 20,
+                "right": 6,
+                "type": "sub"
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L14_taxable_income_less_cg",
+            "op": {
+                "left": 21,
+                "right": 22,
+                "type": "max"
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "type": "literal",
+                "value": 0.2
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L15_income_limitation",
+            "op": {
+                "left": 23,
+                "right": 24,
+                "type": "mul"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "L16_qbi_deduction",
+            "op": {
+                "left": 19,
+                "right": 25,
+                "type": "min"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L4_qbi_business_4",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L7_reit_dividends",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L8_ptp_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L13_net_capital_gain",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "left": 7,
+                "right": 2,
+                "type": "add"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L5_total_qbi",
+            "op": {
+                "left": 8,
+                "right": 3,
+                "type": "add"
+            }
+        }
+    },
+    "outputs": [
+        18,
+        19,
+        23,
+        25,
+        26,
+        9,
+        13,
+        14
+    ],
+    "tables": {}
+}
