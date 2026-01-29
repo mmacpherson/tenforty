@@ -4,6 +4,8 @@ import json
 
 import pytest
 
+pytest.importorskip("tenforty.graphlib")
+
 from tenforty.graphlib import Graph, GraphSet
 
 

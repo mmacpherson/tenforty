@@ -131,7 +131,8 @@ impl GraphSet {
             });
         }
 
-        for (source_form, graph) in &self.graphs {
+        for source_form in &self.insertion_order {
+            let graph = self.graphs.get(source_form).unwrap();
             let source_year = graph.meta.as_ref().and_then(|meta| meta.year);
             for import in &graph.imports {
                 if let Some(source_year) = source_year {
