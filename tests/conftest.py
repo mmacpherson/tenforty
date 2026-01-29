@@ -248,7 +248,73 @@ REGRESSION_SCENARIOS = [
     ),
 ]
 
-ALL_TAX_SCENARIOS = IRS_DIRECT_FILE_SCENARIOS + REGRESSION_SCENARIOS
+NY_SILVER_SCENARIOS = [
+    TaxScenario(
+        source="NY bracket computation (published rates)",
+        description="NY Single, $50k W2, bracket tax $2,145 on $42k taxable",
+        year=2024,
+        state="NY",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax_min=4000,
+        expected_federal_tax_max=4500,
+        expected_state_tax_min=2100,
+        expected_state_tax_max=2200,
+    ),
+    TaxScenario(
+        source="NY bracket computation (published rates)",
+        description="NY Single, $75k W2, bracket tax $3,520 on $67k taxable",
+        year=2024,
+        state="NY",
+        filing_status="Single",
+        w2_income=75000.0,
+        expected_federal_tax_min=8000,
+        expected_federal_tax_max=10000,
+        expected_state_tax_min=3450,
+        expected_state_tax_max=3600,
+    ),
+    TaxScenario(
+        source="NY bracket computation (published rates)",
+        description="NY Single, $100k W2, bracket tax $4,951.75 on $92k taxable",
+        year=2024,
+        state="NY",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax_min=13000,
+        expected_federal_tax_max=17000,
+        expected_state_tax_min=4850,
+        expected_state_tax_max=5050,
+    ),
+    TaxScenario(
+        source="NY bracket computation (published rates)",
+        description="NY MFJ, $100k W2, bracket tax $4,284.75 on $83,950 taxable",
+        year=2024,
+        state="NY",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax_min=7500,
+        expected_federal_tax_max=8500,
+        expected_state_tax_min=4200,
+        expected_state_tax_max=4400,
+    ),
+    TaxScenario(
+        source="NY bracket computation (published rates)",
+        description="NY Single, $60k W2 + $5k interest, bracket tax $2,970 on $57k taxable",
+        year=2024,
+        state="NY",
+        filing_status="Single",
+        w2_income=60000.0,
+        taxable_interest=5000.0,
+        expected_federal_tax_min=5500,
+        expected_federal_tax_max=7000,
+        expected_state_tax_min=2900,
+        expected_state_tax_max=3050,
+    ),
+]
+
+ALL_TAX_SCENARIOS = (
+    IRS_DIRECT_FILE_SCENARIOS + REGRESSION_SCENARIOS + NY_SILVER_SCENARIOS
+)
 
 
 def scenario_id(scenario: TaxScenario) -> str:

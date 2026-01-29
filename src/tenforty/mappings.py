@@ -44,6 +44,7 @@ FILING_STATUS_MAP = {
 
 STATE_FORM_NAMES = {
     OTSState.CA: "ca_540",
+    OTSState.NY: "ny_it201",
 }
 
 STATE_NATURAL_TO_NODE = {
@@ -52,6 +53,7 @@ STATE_NATURAL_TO_NODE = {
         "num_dependents": "ca_ftb_3514_L2_num_children",
         "state_adjustment": "ca_schedule_ca_A22_24",
     },
+    OTSState.NY: {},
 }
 
 STATE_OUTPUT_LINES = {
@@ -59,5 +61,10 @@ STATE_OUTPUT_LINES = {
         "L17_ca_agi": "state_adjusted_gross_income",
         "L19_ca_taxable_income": "state_taxable_income",
         "L64_ca_total_tax": "state_total_tax",
+    },
+    OTSState.NY: {
+        "L33_ny_agi": "state_adjusted_gross_income",
+        "L37_ny_taxable_income": "state_taxable_income",
+        "L46_ny_total_state_tax": "state_total_tax",
     },
 }

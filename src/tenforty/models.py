@@ -314,6 +314,17 @@ _NATURAL_FORM_CONFIG = [
             "L46": "total_tax",
         },
     },
+    # 2025
+    {
+        "year": 2025,
+        "form_id": "NY_IT201",
+        "input_map": {},
+        "output_map": {
+            "L33": "adjusted_gross_income",
+            "L37": "taxable_income",
+            "L46": "total_tax",
+        },
+    },
     # 2023
     {
         "year": 2023,
