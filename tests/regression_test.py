@@ -295,6 +295,7 @@ def test_ca_tax_increases_with_income():
         )
 
 
+@pytest.mark.requires_graph
 @pytest.mark.parametrize(
     "scenario",
     PA_SCENARIOS,
@@ -329,6 +330,7 @@ def test_pa_tax_ranges(scenario):
     )
 
 
+@pytest.mark.requires_graph
 def test_pa_tax_increases_with_income():
     """Verify that PA state tax increases monotonically with income (graph backend)."""
     incomes = [50000, 100000, 150000, 200000]

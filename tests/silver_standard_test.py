@@ -22,10 +22,22 @@ from .fixtures.scenarios import (
 )
 
 
+def _graph_backend_available() -> bool:
+    try:
+        import tenforty.graphlib  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
 def run_tax_scenario(scenario: TaxScenario):
     """Execute a tax scenario and verify against expected values."""
     if scenario.known_failure:
         pytest.xfail(scenario.known_failure)
+
+    if scenario.backend == "graph" and not _graph_backend_available():
+        pytest.skip("graph backend not available (Rust extension not built)")
 
     kwargs = dict(
         year=scenario.year,
