@@ -282,6 +282,7 @@ impl Graph {
             &mut scenarios,
         );
 
+        #[cfg(feature = "jit")]
         let graph = &self.inner;
 
         #[cfg(feature = "jit")]
