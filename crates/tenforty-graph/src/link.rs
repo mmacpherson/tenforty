@@ -21,6 +21,26 @@ pub enum LinkError {
     DuplicateFormId(String),
     #[error("Circular dependency detected: {0:?}")]
     CircularDependency(Vec<String>),
+    #[error(
+        "Import year mismatch: source '{source_form}' imports '{form}:{line}' for year {actual}, but source year is {expected}"
+    )]
+    ImportSourceYearMismatch {
+        source_form: String,
+        form: String,
+        line: String,
+        expected: u16,
+        actual: u16,
+    },
+    #[error(
+        "Import year mismatch: source '{source_form}' imports '{form}:{line}' for year {actual}, but target year is {expected}"
+    )]
+    ImportTargetYearMismatch {
+        source_form: String,
+        form: String,
+        line: String,
+        expected: u16,
+        actual: u16,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -109,6 +129,37 @@ impl GraphSet {
                 outputs: Vec::new(),
                 invariants: Vec::new(),
             });
+        }
+
+        for (source_form, graph) in &self.graphs {
+            let source_year = graph.meta.as_ref().and_then(|meta| meta.year);
+            for import in &graph.imports {
+                if let Some(source_year) = source_year {
+                    if import.year != source_year {
+                        return Err(LinkError::ImportSourceYearMismatch {
+                            source_form: source_form.clone(),
+                            form: import.form.clone(),
+                            line: import.line.clone(),
+                            expected: source_year,
+                            actual: import.year,
+                        });
+                    }
+                }
+
+                if let Some(target_graph) = self.graphs.get(&import.form) {
+                    if let Some(target_year) = target_graph.meta.as_ref().and_then(|m| m.year) {
+                        if import.year != target_year {
+                            return Err(LinkError::ImportTargetYearMismatch {
+                                source_form: source_form.clone(),
+                                form: import.form.clone(),
+                                line: import.line.clone(),
+                                expected: target_year,
+                                actual: import.year,
+                            });
+                        }
+                    }
+                }
+            }
         }
 
         // Calculate node ID offsets for each graph
@@ -606,6 +657,10 @@ mod tests {
     use crate::graph::Import;
 
     fn simple_graph(prefix: &str) -> Graph {
+        simple_graph_with_year(prefix, 2024)
+    }
+
+    fn simple_graph_with_year(prefix: &str, year: u16) -> Graph {
         let mut nodes = HashMap::new();
         nodes.insert(
             0,
@@ -635,7 +690,7 @@ mod tests {
         Graph {
             meta: Some(GraphMeta {
                 form_id: Some(prefix.to_string()),
-                year: Some(2024),
+                year: Some(year),
                 generated_by: None,
             }),
             nodes,
@@ -648,6 +703,10 @@ mod tests {
     }
 
     fn importing_graph() -> Graph {
+        importing_graph_with_year(2024, 2024)
+    }
+
+    fn importing_graph_with_year(import_year: u16, source_year: u16) -> Graph {
         let mut nodes = HashMap::new();
         nodes.insert(
             0,
@@ -656,7 +715,7 @@ mod tests {
                 op: Op::Import {
                     form: "form_a".to_string(),
                     line: "taxable".to_string(),
-                    year: 2024,
+                    year: import_year,
                 },
                 name: Some("imported_taxable".to_string()),
             },
@@ -681,14 +740,14 @@ mod tests {
         Graph {
             meta: Some(GraphMeta {
                 form_id: Some("form_b".to_string()),
-                year: Some(2024),
+                year: Some(source_year),
                 generated_by: None,
             }),
             nodes,
             imports: vec![Import {
                 form: "form_a".to_string(),
                 line: "taxable".to_string(),
-                year: 2024,
+                year: import_year,
             }],
             tables: HashMap::new(),
             inputs: vec![0],
@@ -752,6 +811,50 @@ mod tests {
         assert_eq!(unresolved.len(), 1);
         assert_eq!(unresolved[0].form, "form_a");
         assert_eq!(unresolved[0].line, "taxable");
+    }
+
+    #[test]
+    fn test_import_year_mismatch_source_year() {
+        let gs = GraphSet::new()
+            .add("form_a", simple_graph_with_year("form_a", 2024))
+            .add("form_b", importing_graph_with_year(2025, 2024));
+
+        let err = gs.link().unwrap_err();
+        match err {
+            LinkError::ImportSourceYearMismatch {
+                source_form,
+                expected,
+                actual,
+                ..
+            } => {
+                assert_eq!(source_form, "form_b");
+                assert_eq!(expected, 2024);
+                assert_eq!(actual, 2025);
+            }
+            other => panic!("Expected ImportSourceYearMismatch, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_import_year_mismatch_target_year() {
+        let gs = GraphSet::new()
+            .add("form_a", simple_graph_with_year("form_a", 2025))
+            .add("form_b", importing_graph_with_year(2024, 2024));
+
+        let err = gs.link().unwrap_err();
+        match err {
+            LinkError::ImportTargetYearMismatch {
+                source_form,
+                expected,
+                actual,
+                ..
+            } => {
+                assert_eq!(source_form, "form_b");
+                assert_eq!(expected, 2025);
+                assert_eq!(actual, 2024);
+            }
+            other => panic!("Expected ImportTargetYearMismatch, got {other:?}"),
+        }
     }
 
     #[test]
