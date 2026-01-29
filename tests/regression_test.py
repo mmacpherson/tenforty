@@ -57,6 +57,49 @@ NY_SCENARIOS = [
     },
 ]
 
+MI_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 4000,
+        "expected_federal_max": 4500,
+        "expected_state_min": 1800,
+        "expected_state_max": 1950,
+    },
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2850,
+        "expected_state_max": 3050,
+    },
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 6050,
+        "expected_state_max": 6250,
+    },
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 30000,
+        "expected_state_min": 7900,
+        "expected_state_max": 8150,
+    },
+]
+
 MA_SCENARIOS = [
     {
         "year": 2024,
@@ -99,6 +142,39 @@ MA_SCENARIOS = [
         "expected_state_max": 6000,
     },
 ]
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    MI_SCENARIOS,
+    ids=lambda s: f"MI-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_mi_tax_scenarios(scenario):
+    """Test MI state tax calculations against expected ranges."""
+    result = evaluate_return(
+        year=scenario["year"],
+        state=scenario["state"],
+        filing_status=scenario["filing_status"],
+        w2_income=scenario["w2_income"],
+    )
+
+    assert (
+        scenario["expected_federal_min"]
+        <= result.federal_total_tax
+        <= scenario["expected_federal_max"]
+    ), (
+        f"Federal tax {result.federal_total_tax} not in expected range "
+        f"[{scenario['expected_federal_min']}, {scenario['expected_federal_max']}]"
+    )
+
+    assert (
+        scenario["expected_state_min"]
+        <= result.state_total_tax
+        <= scenario["expected_state_max"]
+    ), (
+        f"State tax {result.state_total_tax} not in expected range "
+        f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
+    )
 
 
 @pytest.mark.parametrize(
@@ -234,6 +310,21 @@ def test_ma_tax_increases_with_income():
     incomes = [50000, 100000, 150000, 200000]
     results = [
         evaluate_return(year=2024, state="MA", filing_status="Single", w2_income=income)
+        for income in incomes
+    ]
+
+    for i in range(len(results) - 1):
+        assert results[i].state_total_tax < results[i + 1].state_total_tax, (
+            f"State tax did not increase: {results[i].state_total_tax} >= {results[i + 1].state_total_tax} "
+            f"for incomes {incomes[i]} vs {incomes[i + 1]}"
+        )
+
+
+def test_mi_tax_increases_with_income():
+    """Verify that MI state tax increases monotonically with income."""
+    incomes = [50000, 100000, 150000, 200000]
+    results = [
+        evaluate_return(year=2024, state="MI", filing_status="Single", w2_income=income)
         for income in incomes
     ]
 

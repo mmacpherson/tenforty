@@ -115,6 +115,7 @@ class OTSState(Enum):
 
     CA = "CA"
     MA = "MA"
+    MI = "MI"
     NY = "NY"
 
     # No income-tax states are easy to support! :)
@@ -132,6 +133,7 @@ STATE_TO_FORM = {
     #
     OTSState.CA: "CA_540",
     OTSState.MA: "MA_1",
+    OTSState.MI: "MI_1040",
     OTSState.NY: "NY_IT201",
     # No income-tax states
     OTSState.AK: None,
@@ -302,6 +304,18 @@ _NATURAL_FORM_CONFIG = [
             "L21": "taxable_income",
             "AGI": "adjusted_gross_income",
             "L28": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "MI_1040",
+        "input_map": {
+            "num_dependents": "L9c",
+        },
+        "output_map": {
+            "L13": "adjusted_gross_income",
+            "L15": "taxable_income",
+            "L21": "total_tax",
         },
     },
     {

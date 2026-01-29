@@ -140,6 +140,141 @@ IRS_DIRECT_FILE_SCENARIOS = [
     ),
 ]
 
+# SILVER_STANDARD_MI_SCENARIOS: Formula-derived from Michigan's published flat
+# rate (4.25%) and personal exemption ($5,600 per person for 2024).
+# Source: Michigan Department of Treasury, Form 446, michigan.gov/taxes
+#
+# Michigan computation (W2-only, no additions/subtractions):
+#   MI taxable = max(0, federal_AGI - num_exemptions × $5,600)
+#   MI tax = MI_taxable × 4.25%
+#
+# Exemptions: Single=1 (self), MFJ=2 (self+spouse), +1 per dependent.
+# No gold-standard (IRS Direct File) scenarios are available for Michigan.
+SILVER_STANDARD_MI_SCENARIOS = [
+    # Single, $50,000: MI tax = ($50,000 - $5,600) × 4.25% = $1,887
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI Single, $50,000 W2 income",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax_min=4000,
+        expected_federal_tax_max=4500,
+        expected_state_tax_min=1870,
+        expected_state_tax_max=1905,
+        expected_federal_agi_min=50000,
+        expected_federal_agi_max=50000,
+    ),
+    # Single, $75,000: MI tax = ($75,000 - $5,600) × 4.25% = $2,949.50
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI Single, $75,000 W2 income",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=75000.0,
+        expected_federal_tax_min=8000,
+        expected_federal_tax_max=10000,
+        expected_state_tax_min=2930,
+        expected_state_tax_max=2970,
+        expected_federal_agi_min=75000,
+        expected_federal_agi_max=75000,
+    ),
+    # Single, $150,000: MI tax = ($150,000 - $5,600) × 4.25% = $6,137
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI Single, $150,000 W2 income",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_federal_tax_min=24000,
+        expected_federal_tax_max=28000,
+        expected_state_tax_min=6115,
+        expected_state_tax_max=6160,
+        expected_federal_agi_min=150000,
+        expected_federal_agi_max=150000,
+    ),
+    # MFJ, $100,000: MI tax = ($100,000 - 2×$5,600) × 4.25% = $3,774
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI MFJ, $100,000 W2 income, no dependents",
+        year=2024,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax_min=7500,
+        expected_federal_tax_max=8500,
+        expected_state_tax_min=3755,
+        expected_state_tax_max=3795,
+        expected_federal_agi_min=100000,
+        expected_federal_agi_max=100000,
+    ),
+    # MFJ, $200,000: MI tax = ($200,000 - 2×$5,600) × 4.25% = $8,024
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI MFJ, $200,000 W2 income, no dependents",
+        year=2024,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=200000.0,
+        expected_federal_tax_min=27000,
+        expected_federal_tax_max=30000,
+        expected_state_tax_min=8000,
+        expected_state_tax_max=8050,
+        expected_federal_agi_min=200000,
+        expected_federal_agi_max=200000,
+    ),
+    # MFJ, $200,000, 2 dependents: MI tax = ($200,000 - 4×$5,600) × 4.25% = $7,548
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI MFJ, $200,000 W2 income, 2 dependents",
+        year=2024,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=200000.0,
+        num_dependents=2,
+        expected_federal_tax_min=27000,
+        expected_federal_tax_max=30000,
+        expected_state_tax_min=7525,
+        expected_state_tax_max=7575,
+        expected_federal_agi_min=200000,
+        expected_federal_agi_max=200000,
+    ),
+    # Single, low income near exemption: $10,000
+    # MI tax = ($10,000 - $5,600) × 4.25% = $187
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI Single, $10,000 W2 income (near exemption)",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=10000.0,
+        expected_federal_tax_min=0,
+        expected_federal_tax_max=500,
+        expected_state_tax_min=175,
+        expected_state_tax_max=200,
+        expected_federal_agi_min=10000,
+        expected_federal_agi_max=10000,
+    ),
+    # Single, income at exemption level: $5,600 -> MI tax = $0
+    TaxScenario(
+        source="MI 2024 Flat Tax (computed: 4.25%, $5,600 exemption)",
+        description="MI Single, $5,600 W2 income (at exemption, zero MI tax)",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=5600.0,
+        expected_federal_tax_min=0,
+        expected_federal_tax_max=100,
+        expected_state_tax_min=0,
+        expected_state_tax_max=5,
+        expected_federal_agi_min=5600,
+        expected_federal_agi_max=5600,
+    ),
+]
+
 # REGRESSION_SCENARIOS: These are NOT validated against external sources.
 # They capture current library output to detect unexpected changes.
 # Wide ranges (~10-15% variance) are intentional because:
@@ -248,7 +383,9 @@ REGRESSION_SCENARIOS = [
     ),
 ]
 
-ALL_TAX_SCENARIOS = IRS_DIRECT_FILE_SCENARIOS + REGRESSION_SCENARIOS
+ALL_TAX_SCENARIOS = (
+    IRS_DIRECT_FILE_SCENARIOS + SILVER_STANDARD_MI_SCENARIOS + REGRESSION_SCENARIOS
+)
 
 
 def scenario_id(scenario: TaxScenario) -> str:

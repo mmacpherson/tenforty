@@ -44,6 +44,7 @@ FILING_STATUS_MAP = {
 
 STATE_FORM_NAMES = {
     OTSState.CA: "ca_540",
+    OTSState.MI: "mi_1040",
 }
 
 STATE_NATURAL_TO_NODE = {
@@ -52,6 +53,9 @@ STATE_NATURAL_TO_NODE = {
         "num_dependents": "ca_ftb_3514_L2_num_children",
         "state_adjustment": "ca_schedule_ca_A22_24",
     },
+    OTSState.MI: {
+        "num_dependents": "mi_1040_L9c_dependents",
+    },
 }
 
 STATE_OUTPUT_LINES = {
@@ -59,5 +63,10 @@ STATE_OUTPUT_LINES = {
         "L17_ca_agi": "state_adjusted_gross_income",
         "L19_ca_taxable_income": "state_taxable_income",
         "L64_ca_total_tax": "state_total_tax",
+    },
+    OTSState.MI: {
+        "L14_mi_income_subject_to_tax": "state_adjusted_gross_income",
+        "L16_mi_taxable_income": "state_taxable_income",
+        "L21_mi_total_tax": "state_total_tax",
     },
 }
