@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Control.Monad (unless, forM_)
+import Control.Monad (forM_, unless)
 import Data.Aeson.Encode.Pretty qualified as AP
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Lazy.Char8 qualified as BL8
@@ -137,7 +137,7 @@ main = do
     if formName == "all"
         then do
             -- 1. Check if any individual form failed its own validation
-            let failures = [ (fp, err) | (fp, Left err) <- allForms ]
+            let failures = [(fp, err) | (fp, Left err) <- allForms]
             unless (null failures) $ do
                 hPutStrLn stderr "Individual form validation failed:"
                 forM_ failures $ \(fp, err) ->
@@ -145,7 +145,7 @@ main = do
                 exitFailure
 
             -- 2. Validate the set as a whole (cross-form imports)
-            let forms = [ f | (_, Right f) <- allForms ]
+            let forms = [f | (_, Right f) <- allForms]
                 setErrors = validateFormSet forms
 
             unless (null setErrors) $ do
@@ -155,7 +155,7 @@ main = do
                 exitFailure
 
             -- 3. Write output files
-            forM_ allForms $ \(fp, res) -> compileToFile opts fp res
+            forM_ allForms $ uncurry (compileToFile opts)
         else do
             let filename = T.unpack formName ++ ".json"
             case lookup filename allForms of

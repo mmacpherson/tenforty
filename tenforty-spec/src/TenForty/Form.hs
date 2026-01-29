@@ -342,17 +342,15 @@ checkFormImports year availableExports sourceForm =
                     }
                 ]
             Just exports ->
-                if Set.member targetLid exports
-                    then []
-                    else
-                        [ UnresolvedImport
-                            { fsErrorYear = year
-                            , fsErrorSourceForm = formId srcForm
-                            , fsErrorSourceLine = srcLid
-                            , fsErrorTargetForm = targetFid
-                            , fsErrorTargetLine = targetLid
-                            }
-                        ]
+                [ UnresolvedImport
+                    { fsErrorYear = year
+                    , fsErrorSourceForm = formId srcForm
+                    , fsErrorSourceLine = srcLid
+                    , fsErrorTargetForm = targetFid
+                    , fsErrorTargetLine = targetLid
+                    }
+                | not (Set.member targetLid exports)
+                ]
 
 lineImports :: Line -> Set (FormId, LineId)
 lineImports ln = case lineType ln of
