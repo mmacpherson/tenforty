@@ -44,6 +44,7 @@ FILING_STATUS_MAP = {
 
 STATE_FORM_NAMES = {
     OTSState.CA: "ca_540",
+    OTSState.PA: "pa_40",
 }
 
 STATE_NATURAL_TO_NODE = {
@@ -52,6 +53,11 @@ STATE_NATURAL_TO_NODE = {
         "num_dependents": "ca_ftb_3514_L2_num_children",
         "state_adjustment": "ca_schedule_ca_A22_24",
     },
+    OTSState.PA: {
+        "w2_income": "pa_40_L1a_gross_compensation",
+        "taxable_interest": "pa_40_L2_interest_income",
+        "ordinary_dividends": "pa_40_L3_dividend_income",
+    },
 }
 
 STATE_OUTPUT_LINES = {
@@ -59,5 +65,10 @@ STATE_OUTPUT_LINES = {
         "L17_ca_agi": "state_adjusted_gross_income",
         "L19_ca_taxable_income": "state_taxable_income",
         "L64_ca_total_tax": "state_total_tax",
+    },
+    OTSState.PA: {
+        "L9_total_pa_taxable_income": "state_adjusted_gross_income",
+        "L11_adjusted_pa_taxable_income": "state_taxable_income",
+        "L12_pa_tax_liability": "state_total_tax",
     },
 }

@@ -61,6 +61,8 @@ executable tenforty-compile
     CAFTB3514_2025
     CAScheduleCA_2024
     CAScheduleCA_2025
+    PA40_2024
+    PA40_2025
     Tables2024
     Tables2025
     TablesCA2024
@@ -137,6 +139,8 @@ test-suite tenforty-spec-test
     CAFTB3514_2025
     CAScheduleCA_2024
     CAScheduleCA_2025
+    PA40_2024
+    PA40_2025
     Tables2024
     Tables2025
     TablesCA2024
