@@ -211,7 +211,8 @@ The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-
 | California | 2024 | Single | 6 | Brackets 1%-9.3% |
 | Massachusetts | 2024 | Single, MFJ | 4 | Flat 5% rate |
 | New York | 2024 | Single, MFJ | 6 | Brackets 4%-6.85% |
-| **Total Silver** | | | **36** | |
+| Pennsylvania | 2024 | Single | 5 | Flat 3.07% rate (graph backend) |
+| **Total Silver** | | | **41** | |
 
 ### OTS Baseline (Regression Only)
 
@@ -226,9 +227,9 @@ The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-
 | Tier | Scenarios | Purpose |
 |------|-----------|---------|
 | Gold Standard | 4 | IRS-validated correctness |
-| Silver Standard | 36 | Formula-derived validation |
+| Silver Standard | 41 | Formula-derived validation |
 | OTS Baseline | 8 | Regression detection |
-| **Total** | **48** | |
+| **Total** | **53** | |
 
 ## State Tax Bracket Reference
 
@@ -266,11 +267,21 @@ Personal exemption credit: $149 (Single), $298 (MFJ)
 Standard deduction: $8,000 (Single), $16,050 (MFJ)
 Household credit: Up to $75 (Single), $180 (MFJ) depending on FAGI
 
+### Pennsylvania 2024
+
+- Flat 3.07% rate on total PA taxable income
+- No standard deduction, no personal exemption
+- Income classes (wages, interest, dividends, business, property, rental, estate/trust, gambling) are floored at zero independently before summing
+- Losses in one class cannot offset gains in another
+- Note: OTS PA_40 backend crashes (segfault); PA scenarios use graph backend
+
 ## Future Work
 
 1. **More gold-standard sources**: Find official state tax worked examples
 2. **Credits implementation**: Add EITC/CTC computation to enable more MeF ATS scenarios
 3. **Additional states**: Expand silver-standard coverage to more states
+4. **PA OTS crash**: Investigate OTS PA_40 segfault so PA can use the OTS backend; currently graph-backend only
+5. **PA gold standard**: PA joined IRS Direct File for 2025; future test fixtures may become available
 
 ## Test Implementation
 
@@ -279,7 +290,7 @@ Scenarios are defined in `tests/fixtures/scenarios.py` and split across test fil
 | File | Purpose | Scenarios |
 |------|---------|-----------|
 | `gold_standard_test.py` | IRS Direct File validation | 4 |
-| `silver_standard_test.py` | Formula-derived validation | 36 |
+| `silver_standard_test.py` | Formula-derived validation | 41 |
 | `regression_test.py` | OTS baseline + sanity checks | 8 + range/monotonicity |
 
 Run all tests:

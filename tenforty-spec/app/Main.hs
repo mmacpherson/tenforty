@@ -14,13 +14,13 @@ import System.IO (hPutStrLn, stderr)
 import CA540_2024
 import CA540_2025
 import CAFTB3506_2024
-import PA40_2024
-import PA40_2025
 import CAFTB3506_2025
 import CAFTB3514_2024
 import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
+import PA40_2024
+import PA40_2025
 import TenForty
 import US1040_2024
 import US1040_2025
@@ -108,7 +108,7 @@ optionsParser =
     Options
         <$> strArgument
             ( metavar "FORM"
-                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, ca_540_2024, ca_540_2025, all)"
+                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, ca_540_2024, ca_540_2025, pa_40_2024, pa_40_2025, all)"
             )
         <*> optional
             ( strOption

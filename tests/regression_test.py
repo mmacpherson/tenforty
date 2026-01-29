@@ -61,6 +61,40 @@ NY_SCENARIOS = [
     },
 ]
 
+# PA scenarios use graph backend since OTS PA_40 crashes.
+PA_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "PA",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2000,
+        "expected_state_max": 2700,
+    },
+    {
+        "year": 2024,
+        "state": "PA",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 4000,
+        "expected_state_max": 5200,
+    },
+    {
+        "year": 2024,
+        "state": "PA",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 5500,
+        "expected_state_max": 6800,
+    },
+]
+
 MA_SCENARIOS = [
     {
         "year": 2024,
@@ -251,6 +285,61 @@ def test_ca_tax_increases_with_income():
     incomes = [50000, 100000, 150000, 200000]
     results = [
         evaluate_return(year=2024, state="CA", filing_status="Single", w2_income=income)
+        for income in incomes
+    ]
+
+    for i in range(len(results) - 1):
+        assert results[i].state_total_tax < results[i + 1].state_total_tax, (
+            f"State tax did not increase: {results[i].state_total_tax} >= {results[i + 1].state_total_tax} "
+            f"for incomes {incomes[i]} vs {incomes[i + 1]}"
+        )
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    PA_SCENARIOS,
+    ids=lambda s: f"PA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_pa_tax_ranges(scenario):
+    """Sanity check: PA tax falls within expected ranges (graph backend)."""
+    result = evaluate_return(
+        year=scenario["year"],
+        state=scenario["state"],
+        filing_status=scenario["filing_status"],
+        w2_income=scenario["w2_income"],
+        backend="graph",
+    )
+
+    assert (
+        scenario["expected_federal_min"]
+        <= result.federal_total_tax
+        <= scenario["expected_federal_max"]
+    ), (
+        f"Federal tax {result.federal_total_tax} not in expected range "
+        f"[{scenario['expected_federal_min']}, {scenario['expected_federal_max']}]"
+    )
+
+    assert (
+        scenario["expected_state_min"]
+        <= result.state_total_tax
+        <= scenario["expected_state_max"]
+    ), (
+        f"State tax {result.state_total_tax} not in expected range "
+        f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
+    )
+
+
+def test_pa_tax_increases_with_income():
+    """Verify that PA state tax increases monotonically with income (graph backend)."""
+    incomes = [50000, 100000, 150000, 200000]
+    results = [
+        evaluate_return(
+            year=2024,
+            state="PA",
+            filing_status="Single",
+            w2_income=income,
+            backend="graph",
+        )
         for income in incomes
     ]
 

@@ -27,7 +27,7 @@ def run_tax_scenario(scenario: TaxScenario):
     if scenario.known_failure:
         pytest.xfail(scenario.known_failure)
 
-    result = evaluate_return(
+    kwargs = dict(
         year=scenario.year,
         state=scenario.state,
         filing_status=scenario.filing_status,
@@ -39,6 +39,9 @@ def run_tax_scenario(scenario: TaxScenario):
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
     )
+    if scenario.backend:
+        kwargs["backend"] = scenario.backend
+    result = evaluate_return(**kwargs)
 
     if scenario.expected_federal_tax is not None:
         assert result.federal_total_tax == pytest.approx(

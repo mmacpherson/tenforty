@@ -39,6 +39,7 @@ class TaxScenario:
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
     known_failure: str | None = None  # If set, test is marked xfail with this reason
+    backend: str | None = None  # If set, use this backend instead of default
 
 
 def scenario_id(scenario: TaxScenario) -> str:
@@ -572,6 +573,93 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=9961.0,
         expected_state_tax=5167.5,
         known_failure="OTS computes state=$5,223.36 (+$55.86) - Unknown reason (not household credit).",
+    ),
+    # ========== PENNSYLVANIA SCENARIOS ==========
+    # PA 2024: Flat 3.07% rate, no standard deduction, no personal exemption
+    # PA tax = sum(max(0, income_class_i)) * 0.0307
+    # These use graph backend (OTS PA_40 crashes).
+    # Federal tax values are exact formula (not Tax Table) since graph backend
+    # computes federal tax via formula rather than OTS's table lookup.
+    #
+    # PA Single, $50,000 W2 only
+    # PA taxable: $50,000, PA tax: $50,000 x 0.0307 = $1,535
+    # Federal taxable: $35,400, Federal tax: $1,160 + ($35,400 - $11,600) * 0.12 = $4,016
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $50,000 W2 only",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1535.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # PA Single, $100,000 W2 only
+    # PA taxable: $100,000, PA tax: $100,000 x 0.0307 = $3,070
+    # Federal taxable: $85,400, Federal tax: $5,426 + ($85,400 - $47,150) * 0.22 = $13,841
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $100,000 W2 only",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=3070.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # PA Single, $75,000 W2 + $5,000 interest
+    # PA taxable: $80,000, PA tax: $80,000 x 0.0307 = $2,456
+    # Federal taxable: $65,400, Federal tax: $5,426 + ($65,400 - $47,150) * 0.22 = $9,441
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $75,000 W2 + $5,000 interest",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=75000.0,
+        taxable_interest=5000.0,
+        expected_federal_tax=9441.0,
+        expected_state_tax=2456.0,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # PA Single, $60,000 W2 + $3,000 dividends
+    # PA taxable: $63,000, PA tax: $63,000 x 0.0307 = $1,934.10
+    # Federal: uses preferential rates for qualified dividends
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $60,000 W2 + $3,000 dividends",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=60000.0,
+        qualified_dividends=3000.0,
+        ordinary_dividends=3000.0,
+        expected_federal_tax=5701.0,
+        expected_state_tax=1934.1,
+        expected_federal_agi=63000.0,
+        backend="graph",
+    ),
+    # PA Single, $80,000 W2 + $2,000 interest + $1,000 dividends
+    # PA taxable: $83,000, PA tax: $83,000 x 0.0307 = $2,548.10
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $80,000 W2 + $2,000 interest + $1,000 dividends",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=80000.0,
+        taxable_interest=2000.0,
+        qualified_dividends=1000.0,
+        ordinary_dividends=1000.0,
+        expected_federal_tax=10101.0,
+        expected_state_tax=2548.1,
+        expected_federal_agi=83000.0,
+        backend="graph",
     ),
 ]
 
