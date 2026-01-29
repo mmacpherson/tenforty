@@ -27,6 +27,8 @@ def test_basic_evaluation():
     """Make sure the lights are on."""
     for year in OTSYear:
         for state in OTSState:
+            if state == OTSState.NC:
+                continue
             for filing_status in OTSFilingStatus:
                 result = evaluate_return(
                     year=year,

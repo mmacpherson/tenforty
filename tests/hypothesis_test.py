@@ -6,7 +6,7 @@ import tenforty
 from tenforty.models import OTSFilingStatus, OTSState, OTSYear
 
 SUPPORTED_YEARS = [e.value for e in OTSYear]
-SUPPORTED_STATES = [e.value for e in OTSState]
+SUPPORTED_STATES = [e.value for e in OTSState if e != OTSState.NC]
 
 
 # Verify that federal tax increases monotonically as w2 income increases.

@@ -32,6 +32,7 @@ classifiers = [
 ]
 dependencies = [
   "pandas>=2.0",
+  "polars>=0.20",
   "pyarrow",  # To quiet pandas deprecation warning
   "pydantic>=2",
   "python-dotenv"
@@ -50,6 +51,9 @@ dev = [
   "pytest-cov",
   "ruff>=0.2.0",
   "pre-commit"
+]
+graph-dev = [
+  "maturin>=1.0"
 ]
 jupyter = [
   "jupyter",
