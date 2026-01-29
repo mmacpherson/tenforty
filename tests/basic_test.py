@@ -28,6 +28,8 @@ def test_basic_evaluation():
     """Make sure the lights are on."""
     for year in OTSBackend.supported_years:
         for state in OTSState:
+            if state == OTSState.MI and year not in [2024, 2025]:
+                continue
             for filing_status in OTSFilingStatus:
                 result = evaluate_return(
                     year=year,

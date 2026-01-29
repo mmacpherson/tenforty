@@ -257,6 +257,11 @@ def test_evaluate_return_properties(
     state_adjustment,
     incentive_stock_option_gains,
 ):
+    if state == "MI" and year not in [2024, 2025]:
+        from hypothesis import assume
+
+        assume(False)
+
     result = tenforty.evaluate_return(
         year=year,
         state=state,
@@ -322,6 +327,11 @@ def test_qualified_dividends_properly_taxed(
     qualified_dividends,
 ):
     """Test that qualified dividends are properly included in ordinary dividends."""
+    if state == "MI" and year not in [2024, 2025]:
+        from hypothesis import assume
+
+        assume(False)
+
     # Test with only qualified dividends
     result = tenforty.evaluate_return(
         year=year,

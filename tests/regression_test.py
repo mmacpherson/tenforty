@@ -149,6 +149,7 @@ MA_SCENARIOS = [
     MI_SCENARIOS,
     ids=lambda s: f"MI-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
+@pytest.mark.requires_graph
 def test_mi_tax_scenarios(scenario):
     """Test MI state tax calculations against expected ranges."""
     result = evaluate_return(
@@ -247,6 +248,12 @@ def test_ma_tax_scenarios(scenario):
 @pytest.mark.parametrize("scenario", ALL_TAX_SCENARIOS, ids=scenario_id)
 def test_all_tax_scenarios(scenario: TaxScenario):
     """Test against IRS gold-standard and regression baseline scenarios."""
+    if scenario.backend == "graph":
+        from tenforty.backends.graph import GraphBackend
+
+        if not GraphBackend().is_available():
+            pytest.skip("graphlib backend not available (Rust extension not built)")
+
     result = evaluate_return(
         year=scenario.year,
         state=scenario.state,
@@ -322,6 +329,7 @@ def test_ma_tax_increases_with_income():
         )
 
 
+@pytest.mark.requires_graph
 def test_mi_tax_increases_with_income():
     """Verify that MI state tax increases monotonically with income."""
     incomes = [50000, 100000, 150000, 200000]
