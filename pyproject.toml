@@ -11,6 +11,9 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit"
 ]
+graph-dev = [
+  "maturin>=1.0"
+]
 
 [project]
 authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
@@ -31,8 +34,7 @@ classifiers = [
   "Topic :: Office/Business :: Financial :: Accounting"
 ]
 dependencies = [
-  "pandas>=2.0",
-  "pyarrow",  # To quiet pandas deprecation warning
+  "polars>=1.0",
   "pydantic>=2",
   "python-dotenv"
 ]
@@ -51,14 +53,23 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit"
 ]
+graph-dev = [
+  "maturin>=1.0"
+]
 jupyter = [
   "jupyter",
   "seaborn",
+  "pyarrow",  # For seaborn's dataframe interchange protocol with polars
   "ipykernel"
 ]
 
 [tool.cython]
 language_level = "3"
+
+[tool.maturin]
+features = ["python"]
+manifest-path = "crates/tenforty-graph/Cargo.toml"
+module-name = "tenforty.graphlib"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -111,7 +122,8 @@ ext-modules = [
   {name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"]}
 ]
 package-dir = {"" = "src"}
-packages = ["tenforty", "tenforty.otslib"]
+packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.graphlib"]
 
 [tool.setuptools.package-data]
+tenforty = ["forms/*.json"]
 "tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]

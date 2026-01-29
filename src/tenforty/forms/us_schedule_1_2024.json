@@ -1,0 +1,895 @@
+{
+    "imports": [
+        {
+            "form": "us_schedule_se",
+            "line": "L11",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+    ],
+    "meta": {
+        "form_id": "us_schedule_1",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1_taxable_refunds",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L2a_alimony_received",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L8c_cancellation_of_debt",
+            "op": {
+                "type": "input"
+            }
+        },
+        "100": {
+            "id": 100,
+            "op": {
+                "left": 99,
+                "right": 35,
+                "type": "add"
+            }
+        },
+        "101": {
+            "id": 101,
+            "op": {
+                "left": 100,
+                "right": 36,
+                "type": "add"
+            }
+        },
+        "102": {
+            "id": 102,
+            "op": {
+                "left": 101,
+                "right": 37,
+                "type": "add"
+            }
+        },
+        "103": {
+            "id": 103,
+            "op": {
+                "left": 102,
+                "right": 38,
+                "type": "add"
+            }
+        },
+        "104": {
+            "id": 104,
+            "op": {
+                "left": 103,
+                "right": 39,
+                "type": "add"
+            }
+        },
+        "105": {
+            "id": 105,
+            "op": {
+                "left": 104,
+                "right": 40,
+                "type": "add"
+            }
+        },
+        "106": {
+            "id": 106,
+            "op": {
+                "left": 105,
+                "right": 41,
+                "type": "add"
+            }
+        },
+        "107": {
+            "id": 107,
+            "name": "L26_total_adjustments",
+            "op": {
+                "left": 106,
+                "right": 92,
+                "type": "add"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L8d_foreign_earned_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L8e_taxable_hsa",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L8f_alaska_pfd",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L8g_jury_pay",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L8h_prizes_awards",
+            "op": {
+                "type": "input"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L8i_activity_not_for_profit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L8j_stock_options",
+            "op": {
+                "type": "input"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L8k_income_from_form_8814",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L8l_income_from_form_4797",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L2b_alimony_received_date",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L8m_rental_personal_property",
+            "op": {
+                "type": "input"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L8n_olympic_medal",
+            "op": {
+                "type": "input"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L8o_sec_951_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L8p_sec_951a_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L8q_sec_461l_excess",
+            "op": {
+                "type": "input"
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L8r_taxable_scholarship",
+            "op": {
+                "type": "input"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "L8s_nec_1099_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L8z_other_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L11_educator_expenses",
+            "op": {
+                "type": "input"
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "L12_business_expenses_reservists",
+            "op": {
+                "type": "input"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L3_business_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "L13_hsa_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L14_moving_expenses_military",
+            "op": {
+                "type": "input"
+            }
+        },
+        "32": {
+            "id": 32,
+            "name": "L16_sep_simple_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L17_self_employed_health",
+            "op": {
+                "type": "input"
+            }
+        },
+        "34": {
+            "id": 34,
+            "name": "L18_early_withdrawal_penalty",
+            "op": {
+                "type": "input"
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L19a_alimony_paid",
+            "op": {
+                "type": "input"
+            }
+        },
+        "36": {
+            "id": 36,
+            "name": "L19b_alimony_recipient_ssn",
+            "op": {
+                "type": "input"
+            }
+        },
+        "37": {
+            "id": 37,
+            "name": "L19c_alimony_divorce_date",
+            "op": {
+                "type": "input"
+            }
+        },
+        "38": {
+            "id": 38,
+            "name": "L20_ira_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "39": {
+            "id": 39,
+            "name": "L21_student_loan_interest",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L4_other_gains",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "name": "L22_reserved_future",
+            "op": {
+                "type": "input"
+            }
+        },
+        "41": {
+            "id": 41,
+            "name": "L23_archer_msa",
+            "op": {
+                "type": "input"
+            }
+        },
+        "42": {
+            "id": 42,
+            "name": "L24a_jury_duty_remitted",
+            "op": {
+                "type": "input"
+            }
+        },
+        "43": {
+            "id": 43,
+            "name": "L24b_deductible_expenses_rental",
+            "op": {
+                "type": "input"
+            }
+        },
+        "44": {
+            "id": 44,
+            "name": "L24c_nol_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "45": {
+            "id": 45,
+            "name": "L24d_reforestation_amortization",
+            "op": {
+                "type": "input"
+            }
+        },
+        "46": {
+            "id": 46,
+            "name": "L24e_repayment_supplemental_unemployment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "47": {
+            "id": 47,
+            "name": "L24f_contributions_408p",
+            "op": {
+                "type": "input"
+            }
+        },
+        "48": {
+            "id": 48,
+            "name": "L24g_contributions_govt_def_comp",
+            "op": {
+                "type": "input"
+            }
+        },
+        "49": {
+            "id": 49,
+            "name": "L24h_attorney_fees_whistleblower",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L5_rental_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "50": {
+            "id": 50,
+            "name": "L24i_attorney_fees_discrimination",
+            "op": {
+                "type": "input"
+            }
+        },
+        "51": {
+            "id": 51,
+            "name": "L24j_housing_deduction_clergy",
+            "op": {
+                "type": "input"
+            }
+        },
+        "52": {
+            "id": 52,
+            "name": "L24k_excess_deductions_estate",
+            "op": {
+                "type": "input"
+            }
+        },
+        "53": {
+            "id": 53,
+            "name": "L24z_other_adjustments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "left": 8,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "left": 54,
+                "right": 10,
+                "type": "add"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "left": 55,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "left": 56,
+                "right": 12,
+                "type": "add"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "left": 57,
+                "right": 13,
+                "type": "add"
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 58,
+                "right": 14,
+                "type": "add"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L6_farm_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "op": {
+                "left": 59,
+                "right": 15,
+                "type": "add"
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "left": 60,
+                "right": 16,
+                "type": "add"
+            }
+        },
+        "62": {
+            "id": 62,
+            "op": {
+                "left": 61,
+                "right": 17,
+                "type": "add"
+            }
+        },
+        "63": {
+            "id": 63,
+            "op": {
+                "left": 62,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "64": {
+            "id": 64,
+            "op": {
+                "left": 63,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "left": 64,
+                "right": 20,
+                "type": "add"
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "left": 65,
+                "right": 21,
+                "type": "add"
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "left": 66,
+                "right": 22,
+                "type": "add"
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "left": 67,
+                "right": 23,
+                "type": "add"
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "left": 68,
+                "right": 24,
+                "type": "add"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L7_unemployment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "70": {
+            "id": 70,
+            "op": {
+                "left": 69,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "71": {
+            "id": 71,
+            "op": {
+                "left": 70,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "72": {
+            "id": 72,
+            "name": "L9_other_income_total",
+            "op": {
+                "left": 71,
+                "right": 27,
+                "type": "add"
+            }
+        },
+        "73": {
+            "id": 73,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "74": {
+            "id": 74,
+            "op": {
+                "left": 73,
+                "right": 2,
+                "type": "add"
+            }
+        },
+        "75": {
+            "id": 75,
+            "op": {
+                "left": 74,
+                "right": 3,
+                "type": "add"
+            }
+        },
+        "76": {
+            "id": 76,
+            "op": {
+                "left": 75,
+                "right": 4,
+                "type": "add"
+            }
+        },
+        "77": {
+            "id": 77,
+            "op": {
+                "left": 76,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "78": {
+            "id": 78,
+            "op": {
+                "left": 77,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "left": 78,
+                "right": 7,
+                "type": "add"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L8a_net_operating_loss",
+            "op": {
+                "type": "input"
+            }
+        },
+        "80": {
+            "id": 80,
+            "name": "L10_additional_income",
+            "op": {
+                "left": 79,
+                "right": 72,
+                "type": "add"
+            }
+        },
+        "81": {
+            "id": 81,
+            "name": "L15_self_employment_tax_deduction",
+            "op": {
+                "form": "us_schedule_se",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "left": 42,
+                "right": 43,
+                "type": "add"
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "left": 82,
+                "right": 44,
+                "type": "add"
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "left": 83,
+                "right": 45,
+                "type": "add"
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "left": 84,
+                "right": 46,
+                "type": "add"
+            }
+        },
+        "86": {
+            "id": 86,
+            "op": {
+                "left": 85,
+                "right": 47,
+                "type": "add"
+            }
+        },
+        "87": {
+            "id": 87,
+            "op": {
+                "left": 86,
+                "right": 48,
+                "type": "add"
+            }
+        },
+        "88": {
+            "id": 88,
+            "op": {
+                "left": 87,
+                "right": 49,
+                "type": "add"
+            }
+        },
+        "89": {
+            "id": 89,
+            "op": {
+                "left": 88,
+                "right": 50,
+                "type": "add"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L8b_gambling_income",
+            "op": {
+                "type": "input"
+            }
+        },
+        "90": {
+            "id": 90,
+            "op": {
+                "left": 89,
+                "right": 51,
+                "type": "add"
+            }
+        },
+        "91": {
+            "id": 91,
+            "op": {
+                "left": 90,
+                "right": 52,
+                "type": "add"
+            }
+        },
+        "92": {
+            "id": 92,
+            "name": "L25_other_adjustments_total",
+            "op": {
+                "left": 91,
+                "right": 53,
+                "type": "add"
+            }
+        },
+        "93": {
+            "id": 93,
+            "op": {
+                "left": 28,
+                "right": 29,
+                "type": "add"
+            }
+        },
+        "94": {
+            "id": 94,
+            "op": {
+                "left": 93,
+                "right": 30,
+                "type": "add"
+            }
+        },
+        "95": {
+            "id": 95,
+            "op": {
+                "left": 94,
+                "right": 31,
+                "type": "add"
+            }
+        },
+        "96": {
+            "id": 96,
+            "op": {
+                "left": 95,
+                "right": 81,
+                "type": "add"
+            }
+        },
+        "97": {
+            "id": 97,
+            "op": {
+                "left": 96,
+                "right": 32,
+                "type": "add"
+            }
+        },
+        "98": {
+            "id": 98,
+            "op": {
+                "left": 97,
+                "right": 33,
+                "type": "add"
+            }
+        },
+        "99": {
+            "id": 99,
+            "op": {
+                "left": 98,
+                "right": 34,
+                "type": "add"
+            }
+        }
+    },
+    "outputs": [
+        80,
+        92,
+        107,
+        72
+    ],
+    "tables": {}
+}
