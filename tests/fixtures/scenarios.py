@@ -746,6 +746,85 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=120000.0,
         backend="graph",
     ),
+    # ========== WISCONSIN SCENARIOS ==========
+    # WI 2024 Single: Standard deduction max $9,930 (sliding scale)
+    # Brackets: 3.5% ($0-$14,320), 4.4% ($14,320-$28,640),
+    #           5.3% ($28,640-$315,310), 7.65% ($315,310+)
+    # Exemptions: $700 per person + $250 if 65+
+    # WI 2024 MFJ: Standard deduction max $17,880 (sliding scale)
+    # Brackets: 3.5% ($0-$19,090), 4.4% ($19,090-$38,190),
+    #           5.3% ($38,190-$420,420), 7.65% ($420,420+)
+    #
+    # WI Single in 3.5%/4.4% bracket
+    # Federal AGI: $20,000, WI AGI: $20,000 (no additions/subtractions)
+    # Note: Std deduction and exemptions are 0 (not mapped in graph backend)
+    # WI taxable: $20,000
+    # WI tax: $14,320 x 0.035 + ($20,000 - $14,320) x 0.044 = $751.12
+    # Federal taxable: $5,400, Federal tax: $540 (Formula)
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $20k income",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_federal_tax=540.0,
+        expected_state_tax=751.12,
+        expected_federal_agi=20000.0,
+        backend="graph",
+    ),
+    # WI Single in 5.3% bracket
+    # Federal AGI: $50,000, WI AGI: $50,000
+    # WI taxable: $50,000 (no deductions/exemptions)
+    # WI tax: $501.20 + $630.08 + ($50,000 - $28,640) x 0.053 = $2,263.36
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $50k income",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2263.36,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # WI Single in 5.3% bracket (high income)
+    # Federal AGI: $100,000, WI AGI: $100,000
+    # WI taxable: $100,000 (no deductions/exemptions)
+    # WI tax: $501.20 + $630.08 + ($100,000 - $28,640) x 0.053 = $4,913.36
+    # Federal taxable: $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $100k income",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4913.36,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # WI MFJ in 5.3% bracket
+    # Federal AGI: $60,000, WI AGI: $60,000
+    # WI taxable: $60,000 (no deductions/exemptions)
+    # WI tax: $19,090 x 0.035 + ($38,190 - $19,090) x 0.044 + ($60,000 - $38,190) x 0.053
+    #       = $668.15 + $840.40 + $1,155.93 = $2,664.48
+    # Federal taxable: $30,800, Federal tax: $2,320 + ($30,800 - $23,200) * 0.12 = $3,232
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI MFJ, $60k income",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=60000.0,
+        expected_federal_tax=3232.0,
+        expected_state_tax=2664.48,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
 ]
 
 IRS_DIRECT_FILE_SCENARIOS = [

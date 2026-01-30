@@ -220,6 +220,7 @@ def test_pa_tax_ranges(scenario):
         ("NY", None),
         ("MA", None),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
     ],
 )
 def test_state_tax_increases_with_income(state, backend):

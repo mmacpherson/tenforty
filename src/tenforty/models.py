@@ -117,6 +117,7 @@ class OTSState(Enum):
     MA = "MA"
     NY = "NY"
     PA = "PA"
+    WI = "WI"
 
     # No income-tax states are easy to support! :)
     AK = "AK"
@@ -135,6 +136,7 @@ STATE_TO_FORM = {
     OTSState.MA: "MA_1",
     OTSState.NY: "NY_IT201",
     OTSState.PA: "PA_40",
+    OTSState.WI: "WI_Form1",
     # No income-tax states
     OTSState.AK: None,
     OTSState.FL: None,
