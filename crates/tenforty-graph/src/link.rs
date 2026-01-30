@@ -125,6 +125,9 @@ impl GraphSet {
         }
 
         // Build import resolution map: (form, line) -> remapped node ID
+        // Note: cross-year imports are allowed by design. The linker resolves by
+        // (form, line) without checking year fields, since the GraphSet caller is
+        // responsible for assembling a consistent set of forms.
         let mut import_targets: HashMap<(String, String), NodeId> = HashMap::new();
 
         for form_id in &self.insertion_order {

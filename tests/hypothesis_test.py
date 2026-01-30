@@ -5,30 +5,14 @@ from hypothesis import strategies as st
 import tenforty
 from tenforty.backends import OTSBackend
 from tenforty.models import (
-    NATURAL_FORM_CONFIG,
-    STATE_TO_FORM,
     OTSFilingStatus,
     OTSState,
 )
 
+from .fixtures.helpers import is_state_supported
+
 SUPPORTED_YEARS = list(OTSBackend.supported_years)
 SUPPORTED_STATES = [e.value for e in OTSState]
-
-
-_OTS_CRASH_FORMS = {"PA_40"}
-
-
-def is_state_supported(year: int, state: str | None) -> bool:
-    """Return True if the state/year combo is supported by OTS forms."""
-    if state is None:
-        return True
-    state_enum = OTSState(state)
-    form_id = STATE_TO_FORM.get(state_enum)
-    if form_id is None:
-        return True
-    if form_id in _OTS_CRASH_FORMS:
-        return False
-    return (year, form_id) in NATURAL_FORM_CONFIG
 
 
 # Verify that federal tax increases monotonically as w2 income increases.

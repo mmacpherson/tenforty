@@ -3,24 +3,11 @@ from tenforty import evaluate_return
 from tenforty.backends import OTSBackend
 from tenforty.core import prefix_keys
 from tenforty.models import (
-    NATURAL_FORM_CONFIG,
-    STATE_TO_FORM,
     OTSFilingStatus,
     OTSState,
 )
 
-_OTS_CRASH_FORMS = {"PA_40"}
-
-
-def is_state_supported(year: int, state: OTSState) -> bool:
-    if state == OTSState.NONE:
-        return True
-    form_id = STATE_TO_FORM.get(state)
-    if form_id is None:
-        return True
-    if form_id in _OTS_CRASH_FORMS:
-        return False
-    return (year, form_id) in NATURAL_FORM_CONFIG
+from .fixtures.helpers import is_state_supported
 
 
 def test_prefix_keys():

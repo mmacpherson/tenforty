@@ -65,7 +65,7 @@ impl<'g> JitRuntime<'g> {
         let node_id = self
             .graph
             .node_id_by_name(name)
-            .ok_or(EvalError::NodeNotFound(0))?;
+            .ok_or_else(|| EvalError::NodeNameNotFound(name.to_string()))?;
         self.eval_node(node_id)
     }
 
@@ -83,7 +83,7 @@ impl<'g> JitRuntime<'g> {
         let output_id = self
             .graph
             .node_id_by_name(output_name)
-            .ok_or(EvalError::NodeNotFound(0))?;
+            .ok_or_else(|| EvalError::NodeNameNotFound(output_name.to_string()))?;
         let input_id = self
             .graph
             .node_id_by_name(input_name)
@@ -106,7 +106,7 @@ impl<'g> JitRuntime<'g> {
         let output_id = self
             .graph
             .node_id_by_name(output_name)
-            .ok_or(EvalError::NodeNotFound(0))?;
+            .ok_or_else(|| EvalError::NodeNameNotFound(output_name.to_string()))?;
         let input_id = self
             .graph
             .node_id_by_name(input_name)
@@ -191,7 +191,7 @@ impl<'g> JitBatchRuntime<'g> {
         let node_id = self
             .graph
             .node_id_by_name(name)
-            .ok_or(EvalError::NodeNotFound(0))?;
+            .ok_or_else(|| EvalError::NodeNameNotFound(name.to_string()))?;
         self.eval_batch_node(node_id)
     }
 

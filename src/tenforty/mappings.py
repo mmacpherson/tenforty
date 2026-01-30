@@ -71,6 +71,8 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NY: StateGraphConfig(
+        # NY IT-201 derives all inputs from the federal return via graph imports,
+        # so no direct natural-to-node mappings are needed.
         natural_to_node={},
         output_lines={
             "L33_ny_agi": "state_adjusted_gross_income",
