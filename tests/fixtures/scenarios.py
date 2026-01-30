@@ -807,6 +807,26 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # WI Single in 7.65% bracket (top bracket)
+    # Federal AGI: $400,000, WI AGI: $400,000
+    # WI taxable: $400,000 (no deductions/exemptions)
+    # WI tax: $14,320 x 0.035 + $14,320 x 0.044 + $286,670 x 0.053 + $84,690 x 0.0765
+    #       = $501.20 + $630.08 + $15,193.51 + $6,478.785 = $22,803.575
+    # Federal taxable: $385,400 ($400K - $14.6K std ded), in 35% bracket
+    # Federal tax: $1,160 + $4,266 + $11,742.50 + $21,942 + $16,568 + $49,586.25
+    #            = $105,264.75
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $400k income (7.65% top bracket)",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=400000.0,
+        expected_federal_tax=105264.75,
+        expected_state_tax=22803.575,
+        expected_federal_agi=400000.0,
+        backend="graph",
+    ),
     # WI MFJ in 5.3% bracket
     # Federal AGI: $60,000, WI AGI: $60,000
     # WI taxable: $60,000 (no deductions/exemptions)
