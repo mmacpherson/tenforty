@@ -8,7 +8,8 @@ import TenForty
 
 pa40_2025 :: Either FormError Form
 pa40_2025 = form "pa_40" 2025 $ do
-    -- Pennsylvania uses a flat tax rate of 3.07%
+    -- Pennsylvania uses a flat tax rate of 3.07%, unchanged for 2025.
+    -- See PA-40 instructions (rev. 2025).
     let paFlatRate = 0.0307
 
     -- Income lines (L1-L8)

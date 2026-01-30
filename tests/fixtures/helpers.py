@@ -4,6 +4,15 @@ from tenforty.models import NATURAL_FORM_CONFIG, STATE_TO_FORM, OTSState
 _OTS_CRASH_FORMS = {"PA_40"}
 
 
+def graph_backend_available() -> bool:
+    try:
+        import tenforty.graphlib  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
 def is_state_supported(year: int, state: OTSState | str | None) -> bool:
     if state is None:
         return True

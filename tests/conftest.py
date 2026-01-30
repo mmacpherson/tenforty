@@ -6,6 +6,8 @@ See tests/fixtures/scenarios.py for test data definitions.
 import pytest
 from hypothesis import HealthCheck, settings
 
+from .fixtures.helpers import graph_backend_available
+
 
 def pytest_configure(config):
     """Register custom markers."""
@@ -17,10 +19,7 @@ def pytest_configure(config):
 def pytest_runtest_setup(item):
     """Skip tests marked with requires_graph if graphlib is not available."""
     if any(item.iter_markers(name="requires_graph")):
-        try:
-            # Try to import the Rust extension module directly
-            import tenforty.graphlib  # noqa: F401
-        except ImportError:
+        if not graph_backend_available():
             pytest.skip("graphlib backend not available (Rust extension not built)")
 
 

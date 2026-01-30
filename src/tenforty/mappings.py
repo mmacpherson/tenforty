@@ -79,6 +79,9 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.PA: StateGraphConfig(
+        # These fields intentionally duplicate federal NATURAL_TO_NODE entries.
+        # PA requires income on both the federal 1040 and the state PA-40,
+        # and _create_evaluator applies both mappings when a field appears in each.
         natural_to_node={
             "w2_income": "pa_40_L1a_gross_compensation",
             "taxable_interest": "pa_40_L2_interest_income",

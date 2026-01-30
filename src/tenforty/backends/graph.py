@@ -29,8 +29,8 @@ _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
     if form_id is not None and s not in STATE_GRAPH_CONFIGS
 }
 if _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG:
-    logger.warning(
-        "States with income tax forms but no StateGraphConfig: %s",
+    logger.debug(
+        "States with income tax forms but no StateGraphConfig (will use OTS backend): %s",
         _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG,
     )
 

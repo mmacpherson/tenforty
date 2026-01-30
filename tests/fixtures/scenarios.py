@@ -22,10 +22,12 @@ import pytest
 
 from tenforty import evaluate_return
 
+from .helpers import graph_backend_available
+
 
 @dataclass
 class TaxScenario:
-    """A gold-standard tax test scenario."""
+    """A tax test scenario with expected outputs."""
 
     source: str
     description: str
@@ -52,21 +54,9 @@ def scenario_id(scenario: TaxScenario) -> str:
     return f"{state_part}-{scenario.year}-{scenario.filing_status}-{int(scenario.w2_income)}"
 
 
-def _graph_backend_available() -> bool:
-    try:
-        import tenforty.graphlib  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
-
-
 def run_tax_scenario(scenario: TaxScenario):
     """Execute a tax scenario and verify against expected values."""
-    if scenario.known_failure:
-        pytest.xfail(scenario.known_failure)
-
-    if scenario.backend == "graph" and not _graph_backend_available():
+    if scenario.backend == "graph" and not graph_backend_available():
         pytest.skip("graph backend not available (Rust extension not built)")
 
     kwargs = dict(
@@ -85,29 +75,46 @@ def run_tax_scenario(scenario: TaxScenario):
         kwargs["backend"] = scenario.backend
     result = evaluate_return(**kwargs)
 
+    failures: list[str] = []
+
     if scenario.expected_federal_tax is not None:
-        assert result.federal_total_tax == pytest.approx(
+        if result.federal_total_tax != pytest.approx(
             scenario.expected_federal_tax, abs=0.01
-        ), (
-            f"[{scenario.source}] Federal tax {result.federal_total_tax} != "
-            f"expected {scenario.expected_federal_tax}"
-        )
+        ):
+            failures.append(
+                f"[{scenario.source}] Federal tax {result.federal_total_tax} != "
+                f"expected {scenario.expected_federal_tax}"
+            )
 
     if scenario.expected_state_tax is not None:
-        assert result.state_total_tax == pytest.approx(
+        if result.state_total_tax != pytest.approx(
             scenario.expected_state_tax, abs=0.01
-        ), (
-            f"[{scenario.source}] State tax {result.state_total_tax} != "
-            f"expected {scenario.expected_state_tax}"
-        )
+        ):
+            failures.append(
+                f"[{scenario.source}] State tax {result.state_total_tax} != "
+                f"expected {scenario.expected_state_tax}"
+            )
 
     if scenario.expected_federal_agi is not None:
-        assert result.federal_adjusted_gross_income == pytest.approx(
+        if result.federal_adjusted_gross_income != pytest.approx(
             scenario.expected_federal_agi, abs=0.01
-        ), (
-            f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} != "
-            f"expected {scenario.expected_federal_agi}"
-        )
+        ):
+            failures.append(
+                f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} != "
+                f"expected {scenario.expected_federal_agi}"
+            )
+
+    if scenario.known_failure:
+        if failures:
+            pytest.xfail(scenario.known_failure)
+        else:
+            pytest.fail(
+                f"XPASS: expected failure ({scenario.known_failure}) but test passed. "
+                "Remove known_failure from this scenario."
+            )
+
+    if failures:
+        pytest.fail("\n".join(failures))
 
 
 # SILVER_STANDARD_FEDERAL_SCENARIOS: Formula-derived from published tax brackets.
