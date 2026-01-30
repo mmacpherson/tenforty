@@ -42,8 +42,15 @@ No federal AGI import needed.
 ### AGI-import states (NY)
 State form starts from federal AGI (imported from US 1040 L11), then applies
 state-specific additions, subtractions, deductions, and bracket rates.
-The `natural_to_node` mapping is typically empty since all state inputs flow
+The `natural_to_node` mapping is typically minimal since most state inputs flow
 through the federal return.
+
+**Note on `natural_to_node` limitations**: The graph backend passes
+`TaxReturnInput` field values directly to graph nodes without arithmetic
+transformation. This means `num_dependents` (a count) cannot map to
+state form inputs that expect dollar amounts (e.g., NY L36 expects
+$1,000 per dependent, not the count). Use `itemized_deductions` and
+other dollar-valued fields where possible.
 
 ### Multi-form states (CA)
 Imports federal AGI plus uses state sub-forms (schedules, credits). The CA

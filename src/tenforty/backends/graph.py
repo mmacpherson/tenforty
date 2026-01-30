@@ -12,15 +12,27 @@ from ..mappings import (
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
     STATE_FORM_NAMES,
+    STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
     STATE_OUTPUT_LINES,
 )
-from ..models import InterpretedTaxReturn, OTSState, TaxReturnInput
+from ..models import STATE_TO_FORM, InterpretedTaxReturn, OTSState, TaxReturnInput
 
 _STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
 _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 
 logger = logging.getLogger(__name__)
+
+_INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
+    s
+    for s, form_id in STATE_TO_FORM.items()
+    if form_id is not None and s not in STATE_GRAPH_CONFIGS
+}
+if _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG:
+    logger.warning(
+        "States with income tax forms but no StateGraphConfig: %s",
+        _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG,
+    )
 
 
 def _forms_dir() -> pathlib.Path:

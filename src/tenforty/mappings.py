@@ -44,12 +44,6 @@ FILING_STATUS_MAP = {
     OTSFilingStatus.WIDOW_WIDOWER: "qualifying_widow",
 }
 
-_ALL_STATE_FORM_NAMES = {
-    state: form_id.lower()
-    for state, form_id in STATE_TO_FORM.items()
-    if form_id is not None
-}
-
 
 @dataclass
 class StateGraphConfig:  # noqa: D101
@@ -71,9 +65,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NY: StateGraphConfig(
-        # NY IT-201 derives all inputs from the federal return via graph imports,
-        # so no direct natural-to-node mappings are needed.
-        natural_to_node={},
+        # NY IT-201 derives most inputs from the federal return via graph imports.
+        # num_dependents cannot be mapped here because the graph backend passes
+        # values directly (no arithmetic): num_dependents is a count (e.g. 2)
+        # but L36 expects a dollar amount ($2,000 = 2 * $1,000/dependent).
+        natural_to_node={
+            "itemized_deductions": "ny_it201_L34_itemized",
+        },
         output_lines={
             "L33_ny_agi": "state_adjusted_gross_income",
             "L37_ny_taxable_income": "state_taxable_income",
@@ -87,6 +85,8 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "ordinary_dividends": "pa_40_L3_dividend_income",
         },
         output_lines={
+            # PA has no AGI concept. L9 is the sum of zero-floored income
+            # classes, used here as the closest equivalent.
             "L9_total_pa_taxable_income": "state_adjusted_gross_income",
             "L11_adjusted_pa_taxable_income": "state_taxable_income",
             "L12_pa_tax_liability": "state_total_tax",
@@ -94,6 +94,10 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
 }
 
-STATE_FORM_NAMES = {s: _ALL_STATE_FORM_NAMES[s] for s in STATE_GRAPH_CONFIGS}
+STATE_FORM_NAMES = {
+    s: STATE_TO_FORM[s].lower()
+    for s in STATE_GRAPH_CONFIGS
+    if STATE_TO_FORM.get(s) is not None
+}
 STATE_NATURAL_TO_NODE = {s: c.natural_to_node for s, c in STATE_GRAPH_CONFIGS.items()}
 STATE_OUTPUT_LINES = {s: c.output_lines for s, c in STATE_GRAPH_CONFIGS.items()}

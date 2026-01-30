@@ -723,6 +723,22 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=83000.0,
         backend="graph",
     ),
+    # PA MFJ, $120,000 W2 only
+    # PA taxable: $120,000, PA tax: $120,000 x 0.0307 = $3,684
+    # Federal MFJ: taxable $90,800 ($120K - $29.2K std ded), in 12% bracket
+    # Federal tax: $2,320 + ($90,800 - $23,200) * 0.12 = $10,432
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA MFJ, $120,000 W2 only",
+        year=2024,
+        state="PA",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10432.0,
+        expected_state_tax=3684.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
 ]
 
 IRS_DIRECT_FILE_SCENARIOS = [
