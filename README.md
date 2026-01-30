@@ -81,7 +81,7 @@ Here are all arguments available for those two functions:
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
 | `year`                       | int                      | 2024                | 2018-2024 inclusive                |
-| `state`                      | str \| None               | None                | "CA", "NY", "MA" + "AK", "FL", "NV", "SD", "TX", "WA", "WY" |
+| `state`                      | str \| None               | None                | Two-letter state code, e.g. "CA", "NY". Several income-tax states supported; no-income-tax states (e.g. "TX", "WA") also accepted. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
 | `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
@@ -334,12 +334,10 @@ df = (
 - Medicare and Net Investment Income Tax are not automatically computed on
   capital gains, so if those apply to your situation the output tax will be
   underestimated.
-- Although Open Tax Solver includes support for more, `tenforty` only supports
-  California, Massachusetts and New York. (It also supports all the
-  no-income-tax states like Texas and Nevada. :) ) Furthermore, only California
-  has been tested against any tax returns prepared independently by professional
-  tax software, so the Massachusetts and New York support is especially
-  provisional.
+- State income tax is supported for a growing number of states, with more being
+  added. No-income-tax states (e.g. Texas, Nevada) are also accepted. Only
+  California has been tested against tax returns prepared independently by
+  professional tax software; support for other states is provisional.
 
 
 ## Development & Contributing

@@ -95,6 +95,19 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_pa_tax_liability": "state_total_tax",
         },
     ),
+    OTSState.WI: StateGraphConfig(
+        # WI Form 1 imports federal AGI and uses simplified Schedule I inputs.
+        # Standard deduction and exemptions are accepted as total inputs due to
+        # complexity (sliding-scale deduction, age-based exemptions).
+        natural_to_node={
+            "itemized_deductions": "wi_form1_L23_itemized",
+        },
+        output_lines={
+            "L22_wi_agi": "state_adjusted_gross_income",
+            "L39_wi_taxable_income": "state_taxable_income",
+            "L45_wi_total_tax": "state_total_tax",
+        },
+    ),
 }
 
 STATE_FORM_NAMES = {
