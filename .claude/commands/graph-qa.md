@@ -8,7 +8,7 @@ Prerequisites:
 1. Format Haskell code: `make spec-fmt`
    - May alphabetize imports or reformat code
    - Note any formatting changes for staging
-2. Lint Haskell code: `make spec-lint`
+2. Lint Haskell code: `make spec-lint-strict`
    - Should report "No hints"
    - Fix any hints before proceeding
 3. Generate JSON graphs: `make spec-graphs`
