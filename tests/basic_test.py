@@ -9,16 +9,17 @@ from tenforty.models import (
     OTSState,
 )
 
+_OTS_CRASH_FORMS = {"PA_40"}
+
 
 def is_state_supported(year: int, state: OTSState) -> bool:
     if state == OTSState.NONE:
         return True
-    if state == OTSState.PA:
-        # OTS PA_40 crashes (segfault); exclude from smoke tests.
-        return False
     form_id = STATE_TO_FORM.get(state)
     if form_id is None:
         return True
+    if form_id in _OTS_CRASH_FORMS:
+        return False
     return (year, form_id) in NATURAL_FORM_CONFIG
 
 

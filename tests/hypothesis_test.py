@@ -15,17 +15,19 @@ SUPPORTED_YEARS = list(OTSBackend.supported_years)
 SUPPORTED_STATES = [e.value for e in OTSState]
 
 
+_OTS_CRASH_FORMS = {"PA_40"}
+
+
 def is_state_supported(year: int, state: str | None) -> bool:
     """Return True if the state/year combo is supported by OTS forms."""
     if state is None:
         return True
     state_enum = OTSState(state)
-    if state_enum == OTSState.PA:
-        # OTS PA_40 crashes under property-based tests; exclude for now.
-        return False
     form_id = STATE_TO_FORM.get(state_enum)
     if form_id is None:
         return True
+    if form_id in _OTS_CRASH_FORMS:
+        return False
     return (year, form_id) in NATURAL_FORM_CONFIG
 
 
