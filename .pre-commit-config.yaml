@@ -31,6 +31,7 @@ repos:
     args: [--fix=lf]
   - id: name-tests-test
     args: [--pytest]
+    exclude: ^tests/fixtures/
   - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.14.14

@@ -1,10 +1,15 @@
 # ruff: noqa: D100, D103
-from hypothesis import example, given, settings
+from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
 import tenforty
 from tenforty.backends import OTSBackend
-from tenforty.models import OTSFilingStatus, OTSState
+from tenforty.models import (
+    OTSFilingStatus,
+    OTSState,
+)
+
+from .fixtures.helpers import is_state_supported
 
 SUPPORTED_YEARS = list(OTSBackend.supported_years)
 SUPPORTED_STATES = [e.value for e in OTSState]
@@ -257,6 +262,7 @@ def test_evaluate_return_properties(
     state_adjustment,
     incentive_stock_option_gains,
 ):
+    assume(is_state_supported(year, state))
     result = tenforty.evaluate_return(
         year=year,
         state=state,
@@ -322,6 +328,7 @@ def test_qualified_dividends_properly_taxed(
     qualified_dividends,
 ):
     """Test that qualified dividends are properly included in ordinary dividends."""
+    assume(is_state_supported(year, state))
     # Test with only qualified dividends
     result = tenforty.evaluate_return(
         year=year,

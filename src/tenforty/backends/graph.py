@@ -12,12 +12,27 @@ from ..mappings import (
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
     STATE_FORM_NAMES,
+    STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
     STATE_OUTPUT_LINES,
 )
-from ..models import InterpretedTaxReturn, OTSState, TaxReturnInput
+from ..models import STATE_TO_FORM, InterpretedTaxReturn, OTSState, TaxReturnInput
+
+_STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
+_ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 
 logger = logging.getLogger(__name__)
+
+_INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
+    s
+    for s, form_id in STATE_TO_FORM.items()
+    if form_id is not None and s not in STATE_GRAPH_CONFIGS
+}
+if _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG:
+    logger.debug(
+        "States with income tax forms but no StateGraphConfig (will use OTS backend): %s",
+        _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG,
+    )
 
 
 def _forms_dir() -> pathlib.Path:
@@ -367,7 +382,7 @@ class GraphBackend:
 
         Prefers federal vs state mappings based on the output node namespace.
         """
-        if isinstance(var, str) and var.startswith(("us_", "ca_")):
+        if isinstance(var, str) and var.startswith(_ALL_KNOWN_PREFIXES):
             return var
 
         state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
@@ -376,7 +391,7 @@ class GraphBackend:
 
         if output_node and output_node.startswith("us_"):
             input_node = federal_node or state_node
-        elif output_node and output_node.startswith("ca_"):
+        elif output_node and output_node.startswith(_STATE_PREFIXES):
             input_node = state_node or federal_node
         else:
             input_node = state_node or federal_node
@@ -387,7 +402,7 @@ class GraphBackend:
         input_node = var
         if not isinstance(input_node, str):
             input_node = str(input_node)
-        if not input_node.startswith(("us_", "ca_")):
+        if not input_node.startswith(_ALL_KNOWN_PREFIXES):
             input_node = f"us_1040_{input_node}"
         return input_node
 
@@ -400,7 +415,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        if output.startswith(("us_", "ca_")):
+        if output.startswith(_ALL_KNOWN_PREFIXES):
             output_node = output
         else:
             output_node = None
@@ -437,7 +452,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
 
-        if output.startswith(("us_", "ca_")):
+        if output.startswith(_ALL_KNOWN_PREFIXES):
             output_node = output
         else:
             output_node = None

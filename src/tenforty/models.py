@@ -116,6 +116,7 @@ class OTSState(Enum):
     CA = "CA"
     MA = "MA"
     NY = "NY"
+    PA = "PA"
 
     # No income-tax states are easy to support! :)
     AK = "AK"
@@ -133,6 +134,7 @@ STATE_TO_FORM = {
     OTSState.CA: "CA_540",
     OTSState.MA: "MA_1",
     OTSState.NY: "NY_IT201",
+    OTSState.PA: "PA_40",
     # No income-tax states
     OTSState.AK: None,
     OTSState.FL: None,
@@ -312,6 +314,68 @@ _NATURAL_FORM_CONFIG = [
             "L33": "adjusted_gross_income",
             "L37": "taxable_income",
             "L46": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "PA_40",
+        "input_map": {
+            "w2_income": "L1a",
+            "taxable_interest": "L2",
+            "ordinary_dividends": "L3",
+        },
+        "output_map": {
+            "L9": "adjusted_gross_income",
+            "L11": "taxable_income",
+            "L12": "total_tax",
+        },
+    },
+    # 2025
+    {
+        "year": 2025,
+        "form_id": "US_1040",
+        "input_map": {
+            "filing_status": "Status",
+            "num_dependents": "Dependents",
+            "w2_income": "L1a",
+            "taxable_interest": "L2b",
+            "qualified_dividends": "L3a",
+            "ordinary_dividends": "L3b",
+            "short_term_capital_gains": partial(capital_gains, "short"),
+            "long_term_capital_gains": partial(capital_gains, "long"),
+            "schedule_1_income": "S1_8z",
+            "itemized_deductions": "A6",
+            "incentive_stock_option_gains": "AMTws3",
+        },
+        "output_map": {
+            "L11": "adjusted_gross_income",
+            "L15": "taxable_income",
+            "L24": "total_tax",
+            "Your Alternative Minimum Tax": "amt",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "NY_IT201",
+        "input_map": {},
+        "output_map": {
+            "L33": "adjusted_gross_income",
+            "L37": "taxable_income",
+            "L46": "total_tax",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "PA_40",
+        "input_map": {
+            "w2_income": "L1a",
+            "taxable_interest": "L2",
+            "ordinary_dividends": "L3",
+        },
+        "output_map": {
+            "L9": "adjusted_gross_income",
+            "L11": "taxable_income",
+            "L12": "total_tax",
         },
     },
     # 2023

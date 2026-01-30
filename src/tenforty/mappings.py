@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from .models import OTSFilingStatus, OTSState
+from dataclasses import dataclass
+
+from .models import STATE_TO_FORM, OTSFilingStatus, OTSState
 
 NATURAL_TO_NODE = {
     # Federal (1040)
@@ -13,9 +15,9 @@ NATURAL_TO_NODE = {
     # Schedule D (capital gains/losses)
     "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
     "long_term_capital_gains": "us_schedule_d_L8a_long_term_totals",
-    # Schedule 1 (approximation): map aggregate values into “other” buckets.
+    # Schedule 1 (approximation): map aggregate values into "other" buckets.
     "schedule_1_income": "us_schedule_1_L8z_other_income",
-    # Schedule A (approximation): map aggregate value into “other deductions”.
+    # Schedule A (approximation): map aggregate value into "other deductions".
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
     # AMT (Form 6251)
     "incentive_stock_option_gains": "us_form_6251_L2k_iso_adjustment",
@@ -42,22 +44,63 @@ FILING_STATUS_MAP = {
     OTSFilingStatus.WIDOW_WIDOWER: "qualifying_widow",
 }
 
+
+@dataclass
+class StateGraphConfig:  # noqa: D101
+    natural_to_node: dict[str, str]
+    output_lines: dict[str, str]
+
+
+STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
+    OTSState.CA: StateGraphConfig(
+        natural_to_node={
+            "itemized_deductions": "ca_540_L18_itemized",
+            "num_dependents": "ca_ftb_3514_L2_num_children",
+            "state_adjustment": "ca_schedule_ca_A22_24",
+        },
+        output_lines={
+            "L17_ca_agi": "state_adjusted_gross_income",
+            "L19_ca_taxable_income": "state_taxable_income",
+            "L64_ca_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NY: StateGraphConfig(
+        # NY IT-201 derives most inputs from the federal return via graph imports.
+        # num_dependents cannot be mapped here because the graph backend passes
+        # values directly (no arithmetic): num_dependents is a count (e.g. 2)
+        # but L36 expects a dollar amount ($2,000 = 2 * $1,000/dependent).
+        natural_to_node={
+            "itemized_deductions": "ny_it201_L34_itemized",
+        },
+        output_lines={
+            "L33_ny_agi": "state_adjusted_gross_income",
+            "L37_ny_taxable_income": "state_taxable_income",
+            "L46_ny_total_state_tax": "state_total_tax",
+        },
+    ),
+    OTSState.PA: StateGraphConfig(
+        # These fields intentionally duplicate federal NATURAL_TO_NODE entries.
+        # PA requires income on both the federal 1040 and the state PA-40,
+        # and _create_evaluator applies both mappings when a field appears in each.
+        natural_to_node={
+            "w2_income": "pa_40_L1a_gross_compensation",
+            "taxable_interest": "pa_40_L2_interest_income",
+            "ordinary_dividends": "pa_40_L3_dividend_income",
+        },
+        output_lines={
+            # PA has no AGI concept. L9 is the sum of zero-floored income
+            # classes, used here as the closest equivalent.
+            "L9_total_pa_taxable_income": "state_adjusted_gross_income",
+            "L11_adjusted_pa_taxable_income": "state_taxable_income",
+            "L12_pa_tax_liability": "state_total_tax",
+        },
+    ),
+}
+
 STATE_FORM_NAMES = {
-    OTSState.CA: "ca_540",
+    s: STATE_TO_FORM[s].lower()
+    for s in STATE_GRAPH_CONFIGS
+    if STATE_TO_FORM.get(s) is not None
 }
-
-STATE_NATURAL_TO_NODE = {
-    OTSState.CA: {
-        "itemized_deductions": "ca_540_L18_itemized",
-        "num_dependents": "ca_ftb_3514_L2_num_children",
-        "state_adjustment": "ca_schedule_ca_A22_24",
-    },
-}
-
-STATE_OUTPUT_LINES = {
-    OTSState.CA: {
-        "L17_ca_agi": "state_adjusted_gross_income",
-        "L19_ca_taxable_income": "state_taxable_income",
-        "L64_ca_total_tax": "state_total_tax",
-    },
-}
+STATE_NATURAL_TO_NODE = {s: c.natural_to_node for s, c in STATE_GRAPH_CONFIGS.items()}
+STATE_OUTPUT_LINES = {s: c.output_lines for s, c in STATE_GRAPH_CONFIGS.items()}

@@ -7,9 +7,10 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/tenforty.svg)](https://pypi.org/project/tenforty/)
 [![Downloads](https://img.shields.io/pypi/dm/tenforty.svg)](https://pypi.org/project/tenforty/)
 
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License](https://img.shields.io/github/license/mmacpherson/tenforty.svg)](https://github.com/mmacpherson/tenforty/blob/main/LICENSE.txt)
 [![Operating System](https://img.shields.io/badge/OS-Linux_%7C_macOS-blue)](https://pypi.org/project/tenforty/)
+[![Built with uv](https://img.shields.io/badge/Built%20with-uv-purple.svg)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 
 ## Overview
@@ -343,15 +344,12 @@ df = (
 
 ## Development & Contributing
 
-If you're interested to learn more about how the package works, please see
-[docs/develop.md](./docs/develop.md).
+Contributions are welcome! See our [Contributing Guidelines](CONTRIBUTING.md) for the development process and coding standards.
 
-Additional documentation:
-- [Error Handling](./docs/error-handling.md) - Configuring `on_error` modes and exception types
-
-Contributions to `tenforty` are welcome! If you have suggestions for
-improvements or encounter any issues, please feel free to open an issue or
-submit a pull request.
+Documentation for developers:
+- [Development Guide](./docs/develop.md) - Package internals, Cython extensions, and environment setup
+- [Error Handling](./docs/error-handling.md) - Configuring `on_error` policies and exception types
+- [IRS Validation](./docs/irs-validation.md) - Testing methodology against official IRS and state sources
 
 
 ## License
