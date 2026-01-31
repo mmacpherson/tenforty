@@ -115,6 +115,7 @@ class OTSState(Enum):
 
     CA = "CA"
     MA = "MA"
+    NC = "NC"
     NY = "NY"
     PA = "PA"
     WI = "WI"
@@ -134,6 +135,7 @@ STATE_TO_FORM = {
     #
     OTSState.CA: "CA_540",
     OTSState.MA: "MA_1",
+    OTSState.NC: "NC_D400",
     OTSState.NY: "NY_IT201",
     OTSState.PA: "PA_40",
     OTSState.WI: "WI_Form1",
