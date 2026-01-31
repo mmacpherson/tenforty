@@ -118,6 +118,7 @@ class OTSState(Enum):
     MI = "MI"
     NC = "NC"
     NY = "NY"
+    OH = "OH"
     PA = "PA"
     WI = "WI"
 
@@ -139,6 +140,7 @@ STATE_TO_FORM = {
     OTSState.MI: "MI_1040",
     OTSState.NC: "NC_D400",
     OTSState.NY: "NY_IT201",
+    OTSState.OH: "OH_IT1040",
     OTSState.PA: "PA_40",
     OTSState.WI: "WI_Form1",
     # No income-tax states

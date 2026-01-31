@@ -25,6 +25,8 @@ import NCFormD400_2024
 import NCFormD400_2025
 import NYIT201_2024
 import NYIT201_2025
+import OHIT1040_2024
+import OHIT1040_2025
 import PA40_2024
 import PA40_2025
 import TenForty
@@ -111,6 +113,8 @@ allForms =
     , ("mi_1040_2025.json", mi1040_2025)
     , ("nc_d400_2024.json", ncFormD400_2024)
     , ("nc_d400_2025.json", ncFormD400_2025)
+    , ("oh_it1040_2024.json", ohIT1040_2024)
+    , ("oh_it1040_2025.json", ohIT1040_2025)
     , ("pa_40_2024.json", pa40_2024)
     , ("pa_40_2025.json", pa40_2025)
     , ("wi_form1_2024.json", wiForm1_2024)
@@ -128,7 +132,7 @@ optionsParser =
     Options
         <$> strArgument
             ( metavar "FORM"
-                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, us_schedule_eic_2024, us_schedule_eic_2025, ca_540_2024, ca_540_2025, ny_it201_2024, ny_it201_2025, mi_1040_2024, mi_1040_2025, nc_d400_2024, nc_d400_2025, pa_40_2024, pa_40_2025, wi_form1_2024, wi_form1_2025, all)"
+                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, us_schedule_eic_2024, us_schedule_eic_2025, ca_540_2024, ca_540_2025, ny_it201_2024, ny_it201_2025, mi_1040_2024, mi_1040_2025, nc_d400_2024, nc_d400_2025, oh_it1040_2024, oh_it1040_2025, pa_40_2024, pa_40_2025, wi_form1_2024, wi_form1_2025, all)"
             )
         <*> optional
             ( strOption
@@ -186,7 +190,7 @@ main = do
                 Just res -> compileAndOutput opts res
                 Nothing -> do
                     hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
-                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, ny_it201, mi_1040, nc_d400, pa_40, wi_form1 (append _2024 or _2025), all"
+                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, ny_it201, mi_1040, nc_d400, oh_it1040, pa_40, wi_form1 (append _2024 or _2025), all"
                     exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()
