@@ -140,6 +140,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L46_nj_total_tax": "state_total_tax",
         },
     ),
+    OTSState.OH: StateGraphConfig(
+        # OH IT-1040 imports federal AGI and applies state additions/deductions.
+        # Personal exemptions are income-based (tiered by MAGI) and must be
+        # calculated by user, so they are accepted as total input.
+        # Ohio has no standard deduction system.
+        natural_to_node={},
+        output_lines={
+            "L4_oh_agi": "state_adjusted_gross_income",
+            "L9_oh_taxable_nonbusiness_income": "state_taxable_income",
+            "L25_total_tax_liability": "state_total_tax",
+        },
+    ),
     OTSState.WI: StateGraphConfig(
         # WI Form 1 imports federal AGI and uses simplified Schedule I inputs.
         # Standard deduction and exemptions are accepted as total inputs due to
