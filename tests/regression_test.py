@@ -96,6 +96,39 @@ PA_SCENARIOS = [
     },
 ]
 
+MI_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2900,
+        "expected_state_max": 3400,
+    },
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 6000,
+        "expected_state_max": 6700,
+    },
+    {
+        "year": 2024,
+        "state": "MI",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 8000,
+        "expected_state_max": 9000,
+    },
+]
+
 MA_SCENARIOS = [
     {
         "year": 2024,
@@ -213,12 +246,25 @@ def test_pa_tax_ranges(scenario):
     _run_range_scenario(scenario_with_backend)
 
 
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    MI_SCENARIOS,
+    ids=lambda s: f"MI-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_mi_tax_ranges(scenario):
+    """Sanity check: MI tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
 @pytest.mark.parametrize(
     "state,backend",
     [
         ("CA", None),
         ("NY", None),
         ("MA", None),
+        pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
