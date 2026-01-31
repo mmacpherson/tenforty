@@ -34,7 +34,7 @@ mi1040_2025 = form "mi_1040" 2025 $ do
             l9 `subtractNotBelowZero` l10
 
     -- Line 12: Exemptions (personal exemptions)
-    -- $5,800 per person for 2025 (taxpayer + spouse if MFJ + dependents)
+    -- \$5,800 per person for 2025 (taxpayer + spouse if MFJ + dependents)
     -- Additional exemptions for disabled, veterans, etc.
     -- Accepted as total input due to complexity
     l12 <- keyInput "L12" "total_exemptions" "Total Michigan personal exemptions"
