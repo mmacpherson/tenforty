@@ -4,8 +4,8 @@ max_iterations: 3
 image: claude-runner-tenforty
 checks:
   - "make spec-graphs && make forms-sync"
-  - "make test-full"
-  - "make run-hooks-all-files"
+  - ".venv/bin/pytest"
+  - ".venv/bin/pre-commit run --all-files || .venv/bin/pre-commit run --all-files"
   - "make spec-lint"
 setup:
   commands:
@@ -33,6 +33,13 @@ Read these files before starting:
 8. `tests/fixtures/scenarios.py` — silver standard scenario format
 9. `tests/regression_test.py` — monotonicity test parametrize list
 
+## Test Details
+
+Key test functions and how to run them:
+- Silver standard state tests: `.venv/bin/pytest tests/silver_standard_test.py -k "test_silver_state" -v`
+- Monotonicity tests: `.venv/bin/pytest tests/regression_test.py -k "test_state_tax_increases" -v`
+- All tests: `.venv/bin/pytest`
+
 ## Success Criteria
 
 - `make spec-graphs` — Haskell specs compile and JSON graphs are generated
@@ -53,7 +60,7 @@ Read these files before starting:
 - Create the form spec file(s) for 2024 and 2025
 - Register modules in `tenforty-spec.cabal` (both executable and test-suite sections)
 - Register in `app/Main.hs` (imports, allForms entries, help text)
-- Verify: `make spec-graphs` (compiles Haskell and generates JSON)
+- Run all verification commands (see Verification Commands section)
 
 ### Iteration 2: Python Integration
 - Run `make forms-sync` to copy JSON into Python package
@@ -62,7 +69,7 @@ Read these files before starting:
 - Add `StateGraphConfig` in `src/tenforty/mappings.py`
 - Add silver standard scenarios to `tests/fixtures/scenarios.py`
 - Add monotonicity test tuple to `tests/regression_test.py`
-- Verify: `make test-full`
+- Run all verification commands (see Verification Commands section)
 
 ### Iteration 3: Polish and Verification
 - Fix any test failures or lint issues
@@ -94,3 +101,15 @@ Read these files before starting:
 - Follow existing module naming: form files are `{ST}{FormName}_{year}.hs`, tables are `Tables{ST}{year}.hs`
 - The `natural_to_node` limitation applies: `num_dependents` cannot map to dollar-amount fields
 - Do not add new Python dependencies
+- Compute each scenario's expected values from scratch using the state's published brackets — do not copy values from other states' scenarios
+
+## Verification Commands
+
+The Docker container has no PyPI access. `make test-full` and
+`make run-hooks-all-files` will fail because they run `uv sync`.
+Use these direct commands instead:
+
+- **Haskell compilation**: `make spec-graphs && make forms-sync`
+- **Python tests**: `.venv/bin/pytest`
+- **Pre-commit hooks**: `.venv/bin/pre-commit run --all-files || .venv/bin/pre-commit run --all-files`
+- **Haskell lint**: `make spec-lint`
