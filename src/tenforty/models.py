@@ -185,7 +185,7 @@ OTS_FORM_CONFIG = dict(
 
 
 class TaxReturnInput(BaseModel):
-    year: OTSYear = OTSYear.YEAR_2024
+    year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
     num_dependents: int = 0
@@ -358,6 +358,34 @@ _NATURAL_FORM_CONFIG = [
             "L15": "taxable_income",
             "L24": "total_tax",
             "Your Alternative Minimum Tax": "amt",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "CA_540",
+        "input_map": {
+            "num_dependents": "L10",
+            "state_adjustment": "CA540_P2_Add_6",
+        },
+        "output_map": {
+            "L13": "adjusted_gross_income",
+            "L19": "taxable_income",
+            "L64": "total_tax",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "MA_1",
+        "input_map": {
+            "w2_income": "L3",
+            "_FED_L9": "La",
+            "_FED_L11": "Lb",
+            "num_dependents": "Dependents",
+        },
+        "output_map": {
+            "L21": "taxable_income",
+            "AGI": "adjusted_gross_income",
+            "L28": "total_tax",
         },
     },
     {
