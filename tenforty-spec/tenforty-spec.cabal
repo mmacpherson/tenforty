@@ -67,6 +67,8 @@ executable tenforty-compile
     MI1040_2025
     NCFormD400_2024
     NCFormD400_2025
+    NJ1040_2024
+    NJ1040_2025
     NYIT201_2024
     NYIT201_2025
     PA40_2024
@@ -81,6 +83,8 @@ executable tenforty-compile
     TablesMI2025
     TablesNC2024
     TablesNC2025
+    TablesNJ2024
+    TablesNJ2025
     TablesNY2024
     TablesNY2025
     TablesWI2024
@@ -165,6 +169,8 @@ test-suite tenforty-spec-test
     MI1040_2025
     NCFormD400_2024
     NCFormD400_2025
+    NJ1040_2024
+    NJ1040_2025
     NYIT201_2024
     NYIT201_2025
     PA40_2024
@@ -179,6 +185,8 @@ test-suite tenforty-spec-test
     TablesMI2025
     TablesNC2024
     TablesNC2025
+    TablesNJ2024
+    TablesNJ2025
     TablesNY2024
     TablesNY2025
     TablesWI2024

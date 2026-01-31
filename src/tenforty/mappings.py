@@ -128,6 +128,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_pa_tax_liability": "state_total_tax",
         },
     ),
+    OTSState.NJ: StateGraphConfig(
+        # NJ-1040 imports federal AGI and applies exemptions/deductions.
+        # Personal exemptions and dependent exemptions are accepted as total inputs
+        # (num_dependents cannot map to dollar amounts, and dependent exemptions
+        # are income-phased in NJ).
+        natural_to_node={},
+        output_lines={
+            "L14_federal_agi": "state_adjusted_gross_income",
+            "L39_nj_taxable_income": "state_taxable_income",
+            "L46_nj_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.WI: StateGraphConfig(
         # WI Form 1 imports federal AGI and uses simplified Schedule I inputs.
         # Standard deduction and exemptions are accepted as total inputs due to

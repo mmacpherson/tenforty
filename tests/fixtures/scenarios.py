@@ -906,6 +906,108 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=120000.0,
         backend="graph",
     ),
+    # ========== NEW JERSEY SCENARIOS ==========
+    # NJ 2024/2025: Progressive brackets (rates and thresholds unchanged)
+    # Personal exemptions: $1,000 per taxpayer
+    # Dependent exemptions: income-phased ($1,500, $1,000, $500, $0)
+    # Single/MFS: 7 brackets: 1.4% ($0-$20k), 1.75% ($20k-$35k),
+    #   2.45% ($35k-$40k), 3.5% ($40k-$75k), 5.525% ($75k-$500k),
+    #   6.37% ($500k-$1M), 8.97% ($1M+)
+    # MFJ/HoH/QW: 8 brackets: 1.4% ($0-$20k), 1.75% ($20k-$50k),
+    #   2.45% ($50k-$70k), 3.5% ($70k-$80k), 5.525% ($80k-$150k),
+    #   6.37% ($150k-$500k), 8.97% ($500k-$1M), 10.75% ($1M+)
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # NJ 2024 Single in 1.75% bracket
+    # Federal AGI: $30,000, NJ taxable: $30,000 (no exemptions)
+    # NJ tax: $20,000 x 0.014 + ($30,000 - $20,000) x 0.0175
+    #       = $280 + $175 = $455
+    # Federal taxable: $15,400 (AGI - $14,600 std ded)
+    # Federal tax (graph backend): $1,616
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ Single, $30k income (1.75% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_federal_tax=1616.0,
+        expected_state_tax=455.0,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # NJ 2024 Single in 3.5% bracket
+    # Federal AGI: $60,000, NJ taxable: $60,000 (no exemptions)
+    # NJ tax: $280 + $262.50 + $122.50 + ($60,000 - $40,000) x 0.035
+    #       = $280 + $262.50 + $122.50 + $700 = $1,365
+    # Federal taxable: $45,400 (AGI - $14,600 std ded)
+    # Federal tax (graph backend): $5,216
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ Single, $60k income (3.5% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5216.0,
+        expected_state_tax=1365.0,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # NJ 2024 MFJ in 2.45% bracket
+    # Federal AGI: $65,000, NJ taxable: $65,000 (no exemptions)
+    # NJ tax: $280 + ($50,000 - $20,000) x 0.0175 + ($65,000 - $50,000) x 0.0245
+    #       = $280 + $525 + $367.50 = $1,172.50
+    # Federal taxable: $35,800 (AGI - $29,200 std ded)
+    # Federal tax (graph backend): $3,832
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ MFJ, $65k income (2.45% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Married/Joint",
+        w2_income=65000.0,
+        expected_federal_tax=3832.0,
+        expected_state_tax=1172.5,
+        expected_federal_agi=65000.0,
+        backend="graph",
+    ),
+    # NJ 2024 Head of Household in 5.525% bracket
+    # Federal AGI: $100,000, NJ taxable: $100,000 (no exemptions)
+    # NJ tax: $280 + $525 + $490 + $350 + ($100,000 - $80,000) x 0.05525
+    #       = $280 + $525 + $490 + $350 + $1,105 = $2,750
+    # Federal taxable: $78,100 (AGI - $21,900 std ded)
+    # Federal tax (Over $100k, exact formula): $7,241 + ($78,100 - $63,100) * 0.22 = $10,541
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ HoH, $100k income (5.525% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Head_of_House",
+        w2_income=100000.0,
+        expected_federal_tax=10541.0,
+        expected_state_tax=2750.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # NJ 2025 Single in 3.5% bracket (verify rates unchanged)
+    # Federal AGI: $50,000, NJ taxable: $50,000 (no exemptions)
+    # NJ tax: $280 + $262.50 + $122.50 + ($50,000 - $40,000) x 0.035
+    #       = $280 + $262.50 + $122.50 + $350 = $1,015
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="NJ 2025 Tax Brackets (computed)",
+        description="NJ Single, $50k income (2025, rates unchanged)",
+        year=2025,
+        state="NJ",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=1015.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
     # ========== MICHIGAN SCENARIOS ==========
     # MI 2024: Flat 4.25% rate, Personal exemption $5,600
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800

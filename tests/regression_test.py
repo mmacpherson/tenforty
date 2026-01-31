@@ -129,6 +129,39 @@ MI_SCENARIOS = [
     },
 ]
 
+NJ_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 9000,
+        "expected_state_min": 1800,
+        "expected_state_max": 2000,
+    },
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 5900,
+        "expected_state_max": 6200,
+    },
+    {
+        "year": 2024,
+        "state": "NJ",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 8500,
+        "expected_state_max": 9000,
+    },
+]
+
 NC_SCENARIOS = [
     {
         "year": 2024,
@@ -360,6 +393,18 @@ def test_mi_tax_ranges(scenario):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize(
     "scenario",
+    NJ_SCENARIOS,
+    ids=lambda s: f"NJ-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_nj_tax_ranges(scenario):
+    """Sanity check: NJ tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
     NC_SCENARIOS,
     ids=lambda s: f"NC-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
@@ -401,6 +446,7 @@ def test_il_tax_ranges(scenario):
         ("MA", None),
         pytest.param("IL", "graph", marks=pytest.mark.requires_graph),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("NJ", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
