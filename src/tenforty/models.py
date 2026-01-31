@@ -322,20 +322,6 @@ _NATURAL_FORM_CONFIG = [
             "L46": "total_tax",
         },
     },
-    {
-        "year": 2024,
-        "form_id": "PA_40",
-        "input_map": {
-            "w2_income": "L1a",
-            "taxable_interest": "L2",
-            "ordinary_dividends": "L3",
-        },
-        "output_map": {
-            "L9": "adjusted_gross_income",
-            "L11": "taxable_income",
-            "L12": "total_tax",
-        },
-    },
     # 2025
     {
         "year": 2025,
@@ -354,7 +340,8 @@ _NATURAL_FORM_CONFIG = [
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
-            "L11": "adjusted_gross_income",
+            # OTS 2025 output uses L11a/L11b; L11b is AGI after adjustments.
+            "L11b": "adjusted_gross_income",
             "L15": "taxable_income",
             "L24": "total_tax",
             "Your Alternative Minimum Tax": "amt",
