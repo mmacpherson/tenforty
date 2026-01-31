@@ -64,6 +64,17 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L64_ca_total_tax": "state_total_tax",
         },
     ),
+    OTSState.GA: StateGraphConfig(
+        natural_to_node={
+            "itemized_deductions": "ga_500_L5_itemized",
+            "dependent_exemptions": "ga_500_L6_dependent_exemptions",
+        },
+        output_lines={
+            "L4_ga_agi": "state_adjusted_gross_income",
+            "L7_ga_taxable_income": "state_taxable_income",
+            "L12_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.IL: StateGraphConfig(
         # IL-1040 imports federal AGI and applies additions/subtractions.
         # Exemptions are accepted as total input (num_dependents cannot map to
