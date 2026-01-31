@@ -906,6 +906,84 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=120000.0,
         backend="graph",
     ),
+    # ========== VIRGINIA SCENARIOS ==========
+    # VA 2024: Progressive brackets (2%, 3%, 5%, 5.75%)
+    # Standard Deduction: Single $8,500, MFJ $17,000
+    # Brackets (same for all filing statuses):
+    #   2% on first $3,000
+    #   3% on next $2,000 ($3,001-$5,000)
+    #   5% on next $12,000 ($5,001-$17,000)
+    #   5.75% on $17,001+
+    # VA 2025: Same brackets, increased std deduction: Single $8,750, MFJ $17,500
+    #
+    # VA 2024 Single, $50,000 W2 only
+    # Federal AGI: $50,000, VA AGI: $50,000, VA taxable: $50,000 - $8,500 = $41,500
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($24,500 x 0.0575)
+    #       = $60 + $60 + $600 + $1,408.75 = $2,128.75
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="VA 2024 Tax Brackets (computed)",
+        description="VA Single, $50,000 W2 only",
+        year=2024,
+        state="VA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2128.75,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # VA 2024 MFJ, $100,000 W2 only
+    # Federal AGI: $100,000, VA AGI: $100,000, VA taxable: $100,000 - $17,000 = $83,000
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($66,000 x 0.0575)
+    #       = $60 + $60 + $600 + $3,795 = $4,515.00
+    # Federal taxable: $70,800, Federal tax: $8,032
+    TaxScenario(
+        source="VA 2024 Tax Brackets (computed)",
+        description="VA MFJ, $100,000 W2 only",
+        year=2024,
+        state="VA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4515.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # VA 2025 Single, $25,000 W2 only
+    # Federal AGI: $25,000, VA AGI: $25,000, VA taxable: $25,000 - $8,750 = $16,250
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($11,250 x 0.05)
+    #       = $60 + $60 + $562.50 = $682.50
+    # Federal taxable: $10,000, Federal tax: $1,000 (2025 brackets)
+    TaxScenario(
+        source="VA 2025 Tax Brackets (computed)",
+        description="VA Single, $25,000 W2 only (2025 std deduction)",
+        year=2025,
+        state="VA",
+        filing_status="Single",
+        w2_income=25000.0,
+        expected_federal_tax=1000.0,
+        expected_state_tax=682.50,
+        expected_federal_agi=25000.0,
+        backend="graph",
+    ),
+    # VA 2025 MFJ, $120,000 W2 only
+    # Federal AGI: $120,000, VA AGI: $120,000, VA taxable: $120,000 - $17,500 = $102,500
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($85,500 x 0.0575)
+    #       = $60 + $60 + $600 + $4,916.25 = $5,636.25
+    # Federal taxable: $90,000, Federal tax (2025 MFJ): $10,323
+    TaxScenario(
+        source="VA 2025 Tax Brackets (computed)",
+        description="VA MFJ, $120,000 W2 only (2025 std deduction)",
+        year=2025,
+        state="VA",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5636.25,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
     # ========== MICHIGAN SCENARIOS ==========
     # MI 2024: Flat 4.25% rate, Personal exemption $5,600
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800

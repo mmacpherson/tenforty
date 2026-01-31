@@ -238,6 +238,39 @@ MA_SCENARIOS = [
     },
 ]
 
+VA_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "VA",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 3500,
+        "expected_state_max": 3600,
+    },
+    {
+        "year": 2024,
+        "state": "VA",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 7000,
+        "expected_state_max": 8500,
+    },
+    {
+        "year": 2024,
+        "state": "VA",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 9500,
+        "expected_state_max": 11000,
+    },
+]
+
 
 @pytest.mark.parametrize("scenario", REGRESSION_SCENARIOS, ids=scenario_id)
 def test_ots_baseline(scenario: TaxScenario):
@@ -339,6 +372,18 @@ def test_nc_tax_ranges(scenario):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize(
     "scenario",
+    VA_SCENARIOS,
+    ids=lambda s: f"VA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_va_tax_ranges(scenario):
+    """Sanity check: VA tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
     WI_SCENARIOS,
     ids=lambda s: f"WI-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
@@ -356,6 +401,7 @@ def test_wi_tax_ranges(scenario):
         ("MA", None),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("VA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
     ],
