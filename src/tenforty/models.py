@@ -122,6 +122,7 @@ class OTSState(Enum):
     NONE = None
 
     CA = "CA"
+    IL = "IL"
     MA = "MA"
     MI = "MI"
     NC = "NC"
@@ -143,6 +144,7 @@ STATE_TO_FORM = {
     OTSState.NONE: None,
     #
     OTSState.CA: "CA_540",
+    OTSState.IL: "IL_1040",
     OTSState.MA: "MA_1",
     OTSState.MI: "MI_1040",
     OTSState.NC: "NC_D400",

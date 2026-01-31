@@ -1030,6 +1030,125 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # ========== ILLINOIS SCENARIOS ==========
+    # IL 2024: Flat 4.95% rate, Personal exemption $2,775
+    # IL 2025: Flat 4.95% rate (unchanged), Personal exemption $2,850
+    # No standard deduction (uses personal exemptions instead)
+    # Exemption phase-out: $250k (Single/MFS/HoH/QW), $500k (MFJ)
+    # IL tax = (Federal AGI - exemptions) * 0.0495
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # IL 2024 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000
+    # IL Base Income: $50,000 (no additions/subtractions)
+    # IL Net Income: $50,000 (exemption = $0)
+    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL Single, $50,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2475.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # IL 2024 Single, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000
+    # IL Base Income: $100,000
+    # IL Net Income: $100,000 (exemption = $0)
+    # IL Tax: $100,000 * 0.0495 = $4,950.00
+    # Federal taxable: $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL Single, $100,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4950.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # IL 2024 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000
+    # IL Base Income: $120,000
+    # IL Net Income: $120,000 (exemption = $0)
+    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # Federal taxable: $90,800, Federal tax: $10,432
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL MFJ, $120,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10432.0,
+        expected_state_tax=5940.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # IL 2024 Head_of_House, $75,000 W2 only, no exemptions
+    # Federal AGI: $75,000
+    # IL Base Income: $75,000
+    # IL Net Income: $75,000 (exemption = $0)
+    # IL Tax: $75,000 * 0.0495 = $3,712.50
+    # Federal taxable: $53,100 ($75K - $21.9K std ded)
+    # Federal tax (HoH 2024): $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL HoH, $75,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=3712.5,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # IL 2025 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000
+    # IL Base Income: $50,000
+    # IL Net Income: $50,000 (exemption = $0)
+    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="IL 2025 Tax Rate (computed)",
+        description="IL Single, $50,000 W2 only (2025)",
+        year=2025,
+        state="IL",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=2475.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # IL 2025 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000
+    # IL Base Income: $120,000
+    # IL Net Income: $120,000 (exemption = $0)
+    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # Federal taxable: $90,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 * 0.10 + $66,150 * 0.12 = $2,385 + $7,938 = $10,323
+    TaxScenario(
+        source="IL 2025 Tax Rate (computed)",
+        description="IL MFJ, $120,000 W2 only (2025)",
+        year=2025,
+        state="IL",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5940.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
     # ========== NORTH CAROLINA SCENARIOS ==========
     # NC 2024: Flat 4.5% rate
     # Standard Deduction: Single $12,750, MFJ $25,500

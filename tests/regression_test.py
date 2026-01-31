@@ -238,6 +238,39 @@ MA_SCENARIOS = [
     },
 ]
 
+IL_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "IL",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 3500,
+        "expected_state_max": 3900,
+    },
+    {
+        "year": 2024,
+        "state": "IL",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 7000,
+        "expected_state_max": 7700,
+    },
+    {
+        "year": 2024,
+        "state": "IL",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 9500,
+        "expected_state_max": 10300,
+    },
+]
+
 
 @pytest.mark.parametrize("scenario", REGRESSION_SCENARIOS, ids=scenario_id)
 def test_ots_baseline(scenario: TaxScenario):
@@ -348,12 +381,25 @@ def test_wi_tax_ranges(scenario):
     _run_range_scenario(scenario_with_backend)
 
 
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    IL_SCENARIOS,
+    ids=lambda s: f"IL-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_il_tax_ranges(scenario):
+    """Sanity check: IL tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
 @pytest.mark.parametrize(
     "state,backend",
     [
         ("CA", None),
         ("NY", None),
         ("MA", None),
+        pytest.param("IL", "graph", marks=pytest.mark.requires_graph),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
