@@ -881,6 +881,27 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # NC 2025: Flat 4.25% rate (reduced from 4.5%)
+    # Standard Deduction: Single $12,750 (unchanged from 2024)
+    #
+    # NC Single, $50,000 W2
+    # Fed AGI: $50,000
+    # NC Taxable: $50,000 - $12,750 = $37,250
+    # NC Tax: $37,250 * 0.0425 = $1,583.125
+    # Federal: $15,000 std ded, taxable $35,000
+    # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="NC 2025 Tax Brackets (computed)",
+        description="NC Single, $50,000 income (2025, 4.25% rate)",
+        year=2025,
+        state="NC",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1583.125,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
 ]
 
 IRS_DIRECT_FILE_SCENARIOS = [

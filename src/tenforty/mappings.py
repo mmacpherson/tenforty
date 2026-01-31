@@ -64,19 +64,6 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L64_ca_total_tax": "state_total_tax",
         },
     ),
-    OTSState.MA: StateGraphConfig(
-        natural_to_node={
-            "w2_income": "ma_1_L3_wages",
-            "_FED_L9": "ma_1_La_fed_total_income",
-            "_FED_L11": "ma_1_Lb_fed_agi",
-            "num_dependents": "ma_1_Dependents_count",
-        },
-        output_lines={
-            "L21_taxable_income": "state_taxable_income",
-            "AGI": "state_adjusted_gross_income",
-            "L28_total_tax": "state_total_tax",
-        },
-    ),
     OTSState.NC: StateGraphConfig(
         natural_to_node={
             "itemized_deductions": "nc_d400_L10_itemized",
