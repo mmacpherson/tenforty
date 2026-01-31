@@ -398,20 +398,6 @@ _NATURAL_FORM_CONFIG = [
             "L46": "total_tax",
         },
     },
-    {
-        "year": 2025,
-        "form_id": "PA_40",
-        "input_map": {
-            "w2_income": "L1a",
-            "taxable_interest": "L2",
-            "ordinary_dividends": "L3",
-        },
-        "output_map": {
-            "L9": "adjusted_gross_income",
-            "L11": "taxable_income",
-            "L12": "total_tax",
-        },
-    },
     # 2023
     {
         "year": 2023,
