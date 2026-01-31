@@ -24,9 +24,11 @@ Checklist for adding a new state form to the tenforty graph backend.
    - `natural_to_node`: maps natural input names to graph node names for state-specific inputs
    - `output_lines`: maps graph output line names to result field names
 
-7. **Add silver standard scenarios** to `tests/fixtures/scenarios.py` — formula-derived expected values from published state tax brackets.
+7. **Add silver standard scenarios** to `tests/fixtures/scenarios.py` — formula-derived expected values from published state tax brackets. Include at least one 2025 scenario if rates change between years.
 
 8. **Add monotonicity test tuple** to `tests/regression_test.py` `test_state_tax_increases_with_income` parametrize list.
+
+8b. **Add range-based sanity tests** to `tests/regression_test.py` — `{ST}_SCENARIOS` list and `test_{st}_tax_ranges` function (follow `PA_SCENARIOS` / `test_pa_tax_ranges` pattern).
 
 9. **Optionally add `_NATURAL_FORM_CONFIG` entries** in `src/tenforty/models.py` for OTS backend support (requires the state's OTS solver to work).
 
