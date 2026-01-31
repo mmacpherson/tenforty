@@ -9,9 +9,6 @@ import TenForty
 
 mi1040_2025 :: Either FormError Form
 mi1040_2025 = form "mi_1040" 2025 $ do
-    -- Michigan uses a flat tax rate of 4.25%
-    let miTaxRate = 0.0425
-
     -- Line 7: Federal adjusted gross income (imported from US 1040)
     let federalAgi = importForm "us_1040" "L11"
     l7 <- keyOutput "L7" "federal_agi" "Federal adjusted gross income" federalAgi
@@ -50,7 +47,7 @@ mi1040_2025 = form "mi_1040" 2025 $ do
     -- Line 14: Michigan income tax (flat 4.25% rate)
     l14 <-
         keyOutput "L14" "mi_income_tax" "Michigan income tax" $
-            l13 .*. rate miTaxRate
+            l13 .*. rate miTaxRate2025
 
     -- Line 15: Credits (various Michigan credits)
     l15 <- keyInput "L15" "mi_credits" "Total Michigan nonrefundable credits"

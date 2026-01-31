@@ -934,6 +934,41 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=50000.0,
         backend="graph",
     ),
+    # MI 2025 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000, MI AGI: $120,000, MI taxable: $120,000
+    # MI tax: $120,000 x 0.0425 = $5,100.00
+    # Federal taxable: $90,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 x 0.10 + $66,150 x 0.12 = $2,385 + $7,938 = $10,323
+    TaxScenario(
+        source="MI 2025 Tax Brackets (computed)",
+        description="MI MFJ, $120,000 W2 only",
+        year=2025,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5100.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # MI 2025 Single, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000, MI AGI: $100,000, MI taxable: $100,000
+    # MI tax: $100,000 x 0.0425 = $4,250.00
+    # Federal taxable: $85,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $36,550 x 0.12 + $36,525 x 0.22
+    #   = $1,192.50 + $4,386 + $8,035.50 = $13,614
+    TaxScenario(
+        source="MI 2025 Tax Brackets (computed)",
+        description="MI Single, $100,000 W2 only",
+        year=2025,
+        state="MI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13614.0,
+        expected_state_tax=4250.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
     # ========== NORTH CAROLINA SCENARIOS ==========
     # NC 2024: Flat 4.5% rate
     # Standard Deduction: Single $12,750, MFJ $25,500
