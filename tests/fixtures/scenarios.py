@@ -41,6 +41,7 @@ class TaxScenario:
     long_term_capital_gains: float = 0.0
     short_term_capital_gains: float = 0.0
     num_dependents: int = 0
+    dependent_exemptions: float = 0.0
     expected_federal_tax: float | None = None
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
@@ -70,6 +71,7 @@ def run_tax_scenario(scenario: TaxScenario):
         long_term_capital_gains=scenario.long_term_capital_gains,
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
+        dependent_exemptions=scenario.dependent_exemptions,
     )
     if scenario.backend:
         kwargs["backend"] = scenario.backend
@@ -1085,6 +1087,129 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=3961.50,
         expected_state_tax=1583.125,
         expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # ========== GEORGIA SCENARIOS ==========
+    # GA 2024: Flat 5.39% rate
+    # Standard Deduction: Single $12,000, MFJ $24,000
+    # Dependent Exemption: $4,000 per dependent
+    #
+    # GA Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000
+    # GA AGI: $50,000 (no additions/subtractions)
+    # GA Taxable: $50,000 - $12,000 = $38,000
+    # GA Tax: $38,000 * 0.0539 = $2,048.20
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA Single, $50,000 income, no dependents",
+        year=2024,
+        state="GA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2048.20,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # GA Single, $100,000 W2, 2 dependents ($8,000 exemptions)
+    # Fed AGI: $100,000
+    # GA AGI: $100,000
+    # GA Taxable: $100,000 - $12,000 - $8,000 = $80,000
+    # GA Tax: $80,000 * 0.0539 = $4,312.00
+    # Federal taxable: $100,000 - $14,600 = $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA Single, $100,000 income, $8,000 exemptions",
+        year=2024,
+        state="GA",
+        filing_status="Single",
+        w2_income=100000.0,
+        dependent_exemptions=8000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4312.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # GA MFJ, $100,000 W2, no dependents
+    # Fed AGI: $100,000
+    # GA AGI: $100,000
+    # GA Taxable: $100,000 - $24,000 = $76,000
+    # GA Tax: $76,000 * 0.0539 = $4,096.40
+    # Federal taxable: $70,800, Federal tax: $8,032
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA MFJ, $100,000 income, no dependents",
+        year=2024,
+        state="GA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4096.40,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # GA Head of Household, $75,000 W2, $4,000 exemptions
+    # Fed AGI: $75,000
+    # GA AGI: $75,000
+    # GA Taxable: $75,000 - $12,000 - $4,000 = $59,000
+    # GA Tax: $59,000 * 0.0539 = $3,180.10
+    # Federal taxable: $75,000 - $21,600 = $53,400
+    # Federal tax: $16,550 x 0.10 + $36,850 x 0.12 = $1,655 + $4,422 = $6,077 (OTS rounds to $6,041)
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA HoH, $75,000 income, $4,000 exemptions",
+        year=2024,
+        state="GA",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        dependent_exemptions=4000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=3180.10,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # GA 2025: Flat 5.19% rate (reduced from 5.39%)
+    # Standard Deduction: Single $12,000, MFJ $24,000 (unchanged from 2024)
+    # Dependent Exemption: $4,000 per dependent (unchanged from 2024)
+    #
+    # GA Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000
+    # GA AGI: $50,000
+    # GA Taxable: $50,000 - $12,000 = $38,000
+    # GA Tax: $38,000 * 0.0519 = $1,972.20
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="GA 2025 Tax Brackets (computed)",
+        description="GA Single, $50,000 income (2025, 5.19% rate)",
+        year=2025,
+        state="GA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1972.20,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # GA MFJ, $100,000 W2, $8,000 exemptions (2025)
+    # Fed AGI: $100,000
+    # GA AGI: $100,000
+    # GA Taxable: $100,000 - $24,000 - $8,000 = $68,000
+    # GA Tax: $68,000 * 0.0519 = $3,529.20
+    # Federal taxable: $70,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 x 0.10 + $46,150 x 0.12 = $2,385 + $5,538 = $7,923
+    TaxScenario(
+        source="GA 2025 Tax Brackets (computed)",
+        description="GA MFJ, $100,000 income, $8,000 exemptions (2025, 5.19% rate)",
+        year=2025,
+        state="GA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        dependent_exemptions=8000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=3529.20,
+        expected_federal_agi=100000.0,
         backend="graph",
     ),
 ]

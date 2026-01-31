@@ -62,6 +62,40 @@ NY_SCENARIOS = [
     },
 ]
 
+# GA scenarios use graph backend (flat 5.39% rate for 2024).
+GA_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "GA",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3800,
+        "expected_federal_max": 4200,
+        "expected_state_min": 1900,
+        "expected_state_max": 2200,
+    },
+    {
+        "year": 2024,
+        "state": "GA",
+        "filing_status": "Single",
+        "w2_income": 100000,
+        "expected_federal_min": 13500,
+        "expected_federal_max": 14200,
+        "expected_state_min": 4700,
+        "expected_state_max": 5400,
+    },
+    {
+        "year": 2024,
+        "state": "GA",
+        "filing_status": "Married/Joint",
+        "w2_income": 150000,
+        "expected_federal_min": 16500,
+        "expected_federal_max": 17000,
+        "expected_state_min": 6700,
+        "expected_state_max": 7300,
+    },
+]
+
 # PA scenarios use graph backend since OTS PA_40 crashes.
 PA_SCENARIOS = [
     {
@@ -303,6 +337,18 @@ def test_ma_tax_ranges(scenario):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize(
     "scenario",
+    GA_SCENARIOS,
+    ids=lambda s: f"GA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_ga_tax_ranges(scenario):
+    """Sanity check: GA tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
     PA_SCENARIOS,
     ids=lambda s: f"PA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
@@ -354,6 +400,7 @@ def test_wi_tax_ranges(scenario):
         ("CA", None),
         ("NY", None),
         ("MA", None),
+        pytest.param("GA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
