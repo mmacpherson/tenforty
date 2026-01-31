@@ -845,6 +845,95 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=60000.0,
         backend="graph",
     ),
+    # ========== MICHIGAN SCENARIOS ==========
+    # MI 2024: Flat 4.25% rate, Personal exemption $5,600
+    # MI 2025: Flat 4.25% rate, Personal exemption $5,800
+    # No standard deduction for most taxpayers (only age-based for 67+)
+    # MI tax = (Federal AGI - exemptions) * 0.0425
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # MI 2024 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000, MI AGI: $50,000, MI taxable: $50,000
+    # MI tax: $50,000 x 0.0425 = $2,125.00
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI Single, $50,000 W2 only",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2125.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MI 2024 Single, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000, MI AGI: $100,000, MI taxable: $100,000
+    # MI tax: $100,000 x 0.0425 = $4,250.00
+    # Federal taxable: $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI Single, $100,000 W2 only",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4250.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MI 2024 Single, $75,000 W2 + $5,000 interest, no exemptions
+    # Federal AGI: $80,000, MI AGI: $80,000, MI taxable: $80,000
+    # MI tax: $80,000 x 0.0425 = $3,400.00
+    # Federal taxable: $65,400, Federal tax: $9,441
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI Single, $75,000 W2 + $5,000 interest",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=75000.0,
+        taxable_interest=5000.0,
+        expected_federal_tax=9441.0,
+        expected_state_tax=3400.0,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # MI 2024 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000, MI AGI: $120,000, MI taxable: $120,000
+    # MI tax: $120,000 x 0.0425 = $5,100.00
+    # Federal taxable: $90,800, Federal tax: $10,432
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI MFJ, $120,000 W2 only",
+        year=2024,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10432.0,
+        expected_state_tax=5100.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # MI 2025 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000, MI AGI: $50,000, MI taxable: $50,000
+    # MI tax: $50,000 x 0.0425 = $2,125.00
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $1,192.50 (10% on $11,925) + $2,769.00 (12% on $23,075) = $3,961.50
+    TaxScenario(
+        source="MI 2025 Tax Brackets (computed)",
+        description="MI Single, $50,000 W2 only",
+        year=2025,
+        state="MI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=2125.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
     # ========== NORTH CAROLINA SCENARIOS ==========
     # NC 2024: Flat 4.5% rate
     # Standard Deduction: Single $12,750, MFJ $25,500

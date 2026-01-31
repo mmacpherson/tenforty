@@ -64,6 +64,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L64_ca_total_tax": "state_total_tax",
         },
     ),
+    OTSState.MI: StateGraphConfig(
+        # MI-1040 imports federal AGI and applies additions/subtractions.
+        # Exemptions are accepted as total input (num_dependents cannot map to
+        # dollar amounts). Michigan has no itemized deduction system for most
+        # taxpayers (only age-based standard deductions for 67+).
+        natural_to_node={},
+        output_lines={
+            "L11_mi_agi": "state_adjusted_gross_income",
+            "L13_mi_taxable_income": "state_taxable_income",
+            "L18_mi_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.NC: StateGraphConfig(
         natural_to_node={
             "itemized_deductions": "nc_d400_L10_itemized",

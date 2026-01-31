@@ -219,6 +219,7 @@ def test_pa_tax_ranges(scenario):
         ("CA", None),
         ("NY", None),
         ("MA", None),
+        pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
