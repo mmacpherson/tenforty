@@ -63,12 +63,16 @@ executable tenforty-compile
     CAScheduleCA_2025
     NYIT201_2024
     NYIT201_2025
+    NCFormD400_2024
+    NCFormD400_2025
     PA40_2024
     PA40_2025
     Tables2024
     Tables2025
     TablesCA2024
     TablesCA2025
+    TablesNC2024
+    TablesNC2025
     TablesNY2024
     TablesNY2025
     TablesWI2024
@@ -149,12 +153,16 @@ test-suite tenforty-spec-test
     CAScheduleCA_2025
     NYIT201_2024
     NYIT201_2025
+    NCFormD400_2024
+    NCFormD400_2025
     PA40_2024
     PA40_2025
     Tables2024
     Tables2025
     TablesCA2024
     TablesCA2025
+    TablesNC2024
+    TablesNC2025
     TablesNY2024
     TablesNY2025
     TablesWI2024

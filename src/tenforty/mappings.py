@@ -64,9 +64,19 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L64_ca_total_tax": "state_total_tax",
         },
     ),
+    OTSState.NC: StateGraphConfig(
+        natural_to_node={
+            "itemized_deductions": "nc_d400_L10_itemized",
+        },
+        output_lines={
+            "L6_federal_agi": "state_adjusted_gross_income",
+            "L11_nc_taxable_income": "state_taxable_income",
+            "L12_nc_tax": "state_total_tax",
+        },
+    ),
     OTSState.NY: StateGraphConfig(
-        # NY IT-201 derives most inputs from the federal return via graph imports.
-        # num_dependents cannot be mapped here because the graph backend passes
+        # NY IT-201 exemptions involve age and dependent count; natural_to_node
+        # cannot map these correctly because the graph expects dollar
         # values directly (no arithmetic): num_dependents is a count (e.g. 2)
         # but L36 expects a dollar amount ($2,000 = 2 * $1,000/dependent).
         natural_to_node={
