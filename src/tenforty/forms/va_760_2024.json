@@ -1,0 +1,495 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+    ],
+    "meta": {
+        "form_id": "va_760",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L2_va_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L4_social_security",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L20_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L21_extension_payment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L1_federal_agi",
+            "op": {
+                "left": 12,
+                "right": 13,
+                "type": "add"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L3_fagi_plus_additions",
+            "op": {
+                "left": 14,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 2,
+                "right": 3,
+                "type": "add"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L7_total_adjustments",
+            "op": {
+                "left": 1,
+                "right": 16,
+                "type": "add"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L8_va_agi",
+            "op": {
+                "left": 15,
+                "right": 17,
+                "type": "add"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 8500
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L5_state_tax_refund",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "type": "literal",
+                "value": 17000
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "type": "literal",
+                "value": 8500
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "type": "literal",
+                "value": 12850
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "type": "literal",
+                "value": 17000
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L9_std",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 22,
+                    "married_joint": 20,
+                    "married_separate": 21,
+                    "qualifying_widow": 23,
+                    "single": 19
+                }
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L9_deduction",
+            "op": {
+                "left": 4,
+                "right": 24,
+                "type": "max"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 5,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L12_total_deductions_exemptions",
+            "op": {
+                "left": 25,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 18,
+                "right": 27,
+                "type": "sub"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L6_va_subtractions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "L13_va_taxable_income",
+            "op": {
+                "left": 28,
+                "right": 29,
+                "type": "max"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L14_va_tax",
+            "op": {
+                "income": 30,
+                "table": "va_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "left": 31,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "34": {
+            "id": 34,
+            "name": "L16_tax_after_credits",
+            "op": {
+                "left": 32,
+                "right": 33,
+                "type": "max"
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L18_total_tax",
+            "op": {
+                "left": 34,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 10,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "37": {
+            "id": 37,
+            "name": "L22_total_payments",
+            "op": {
+                "left": 9,
+                "right": 36,
+                "type": "add"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 37,
+                "right": 35,
+                "type": "sub"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "left": 37,
+                "right": 35,
+                "type": "sub"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L9_itemized",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "41": {
+            "id": 41,
+            "name": "L23_overpayment",
+            "op": {
+                "cond": 38,
+                "otherwise": 40,
+                "then": 39,
+                "type": "if_positive"
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "43": {
+            "id": 43,
+            "op": {
+                "left": 35,
+                "right": 37,
+                "type": "sub"
+            }
+        },
+        "44": {
+            "id": 44,
+            "name": "L24_amount_owed",
+            "op": {
+                "left": 42,
+                "right": 43,
+                "type": "max"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L10_personal_exemptions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L11_age_blind_exemptions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L15_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L17_other_taxes",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L19_va_withholding",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        14,
+        30,
+        31,
+        35,
+        37,
+        41,
+        44,
+        18
+    ],
+    "tables": {
+        "va_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 5000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 17000
+                    },
+                    {
+                        "rate": 5.75e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 5000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 17000
+                    },
+                    {
+                        "rate": 5.75e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 5000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 17000
+                    },
+                    {
+                        "rate": 5.75e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 5000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 17000
+                    },
+                    {
+                        "rate": 5.75e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 5000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 17000
+                    },
+                    {
+                        "rate": 5.75e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}

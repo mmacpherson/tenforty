@@ -163,6 +163,19 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L25_total_tax_liability": "state_total_tax",
         },
     ),
+    OTSState.VA: StateGraphConfig(
+        # VA Form 760 imports federal AGI and applies additions/subtractions.
+        # Personal exemptions and age/blind exemptions are accepted as dollar-amount
+        # inputs (num_dependents cannot map to dollar amounts).
+        natural_to_node={
+            "itemized_deductions": "va_760_L9_itemized",
+        },
+        output_lines={
+            "L8_va_agi": "state_adjusted_gross_income",
+            "L13_va_taxable_income": "state_taxable_income",
+            "L18_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.WI: StateGraphConfig(
         # WI Form 1 imports federal AGI and uses simplified Schedule I inputs.
         # Standard deduction and exemptions are accepted as total inputs due to

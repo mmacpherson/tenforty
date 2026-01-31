@@ -79,6 +79,8 @@ executable tenforty-compile
     PA40_2025
     Tables2024
     Tables2025
+    VAForm760_2024
+    VAForm760_2025
     TablesCA2024
     TablesCA2025
     TablesGA2024
@@ -95,6 +97,8 @@ executable tenforty-compile
     TablesNY2025
     TablesOH2024
     TablesOH2025
+    TablesVA2024
+    TablesVA2025
     TablesWI2024
     TablesWI2025
     US1040_2024
@@ -189,6 +193,8 @@ test-suite tenforty-spec-test
     PA40_2025
     Tables2024
     Tables2025
+    VAForm760_2024
+    VAForm760_2025
     TablesCA2024
     TablesCA2025
     TablesGA2024
@@ -205,6 +211,8 @@ test-suite tenforty-spec-test
     TablesNY2025
     TablesOH2024
     TablesOH2025
+    TablesVA2024
+    TablesVA2025
     TablesWI2024
     TablesWI2025
     US1040_2024
