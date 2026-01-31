@@ -845,6 +845,67 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=60000.0,
         backend="graph",
     ),
+    # ========== WISCONSIN 2025 SCENARIOS ==========
+    # WI 2025: Expanded 4.4% bracket (Single: $14,320-$50,480, MFJ: $19,090-$67,300)
+    # Other brackets unchanged: 3.5% ($0-$14,320/$19,090),
+    #   5.3% ($50,480/$67,300-$315,310/$420,420), 7.65% above
+    # New retirement income exclusion (age 67+) - not tested here (no age input)
+    #
+    # WI 2025 Single, $50,000 W2 only
+    # Federal AGI: $50,000, WI AGI: $50,000, WI taxable: $50,000
+    # WI tax: $14,320 x 0.035 + ($50,000 - $14,320) x 0.044
+    #       = $501.20 + $1,569.92 = $2,071.12
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="WI 2025 Tax Brackets (computed)",
+        description="WI Single, $50k income (2025 expanded 4.4% bracket)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=2071.12,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # WI 2025 Single, $100,000 W2 only
+    # Federal AGI: $100,000, WI AGI: $100,000, WI taxable: $100,000
+    # WI tax: $14,320 x 0.035 + ($50,480 - $14,320) x 0.044 + ($100,000 - $50,480) x 0.053
+    #       = $501.20 + $1,591.04 + $2,624.56 = $4,716.80
+    # Federal taxable: $85,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $36,550 x 0.12 + $36,525 x 0.22
+    #   = $1,192.50 + $4,386 + $8,035.50 = $13,614
+    TaxScenario(
+        source="WI 2025 Tax Brackets (computed)",
+        description="WI Single, $100k income (2025 expanded 4.4% bracket)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13614.0,
+        expected_state_tax=4716.80,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # WI 2025 MFJ, $120,000 W2 only
+    # Federal AGI: $120,000, WI AGI: $120,000, WI taxable: $120,000
+    # WI tax: $19,090 x 0.035 + ($67,300 - $19,090) x 0.044 + ($120,000 - $67,300) x 0.053
+    #       = $668.15 + $2,121.24 + $2,793.10 = $5,582.49
+    # Federal taxable: $90,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 x 0.10 + $66,150 x 0.12 = $2,385 + $7,938 = $10,323
+    TaxScenario(
+        source="WI 2025 Tax Brackets (computed)",
+        description="WI MFJ, $120k income (2025 expanded 4.4% bracket)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5582.49,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
     # ========== MICHIGAN SCENARIOS ==========
     # MI 2024: Flat 4.25% rate, Personal exemption $5,600
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800

@@ -129,6 +129,72 @@ MI_SCENARIOS = [
     },
 ]
 
+NC_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "NC",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2500,
+        "expected_state_max": 3100,
+    },
+    {
+        "year": 2024,
+        "state": "NC",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 5800,
+        "expected_state_max": 6500,
+    },
+    {
+        "year": 2024,
+        "state": "NC",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 7500,
+        "expected_state_max": 8200,
+    },
+]
+
+WI_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "WI",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 3200,
+        "expected_state_max": 4000,
+    },
+    {
+        "year": 2024,
+        "state": "WI",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 7000,
+        "expected_state_max": 8000,
+    },
+    {
+        "year": 2024,
+        "state": "WI",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 9500,
+        "expected_state_max": 10800,
+    },
+]
+
 MA_SCENARIOS = [
     {
         "year": 2024,
@@ -254,6 +320,30 @@ def test_pa_tax_ranges(scenario):
 )
 def test_mi_tax_ranges(scenario):
     """Sanity check: MI tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    NC_SCENARIOS,
+    ids=lambda s: f"NC-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_nc_tax_ranges(scenario):
+    """Sanity check: NC tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    WI_SCENARIOS,
+    ids=lambda s: f"WI-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_wi_tax_ranges(scenario):
+    """Sanity check: WI tax falls within expected ranges (graph backend)."""
     scenario_with_backend = {**scenario, "backend": "graph"}
     _run_range_scenario(scenario_with_backend)
 
