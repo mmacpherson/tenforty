@@ -18,10 +18,16 @@ Three tiers of test scenarios:
 
 from dataclasses import dataclass
 
+import pytest
+
+from tenforty import evaluate_return
+
+from .helpers import graph_backend_available
+
 
 @dataclass
 class TaxScenario:
-    """A gold-standard tax test scenario."""
+    """A tax test scenario with expected outputs."""
 
     source: str
     description: str
@@ -39,12 +45,76 @@ class TaxScenario:
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
     known_failure: str | None = None  # If set, test is marked xfail with this reason
+    backend: str | None = None  # If set, use this backend instead of default
 
 
 def scenario_id(scenario: TaxScenario) -> str:
     """Generate a pytest test ID from a scenario."""
     state_part = scenario.state or "FED"
     return f"{state_part}-{scenario.year}-{scenario.filing_status}-{int(scenario.w2_income)}"
+
+
+def run_tax_scenario(scenario: TaxScenario):
+    """Execute a tax scenario and verify against expected values."""
+    if scenario.backend == "graph" and not graph_backend_available():
+        pytest.skip("graph backend not available (Rust extension not built)")
+
+    kwargs = dict(
+        year=scenario.year,
+        state=scenario.state,
+        filing_status=scenario.filing_status,
+        w2_income=scenario.w2_income,
+        taxable_interest=scenario.taxable_interest,
+        qualified_dividends=scenario.qualified_dividends,
+        ordinary_dividends=scenario.ordinary_dividends,
+        long_term_capital_gains=scenario.long_term_capital_gains,
+        short_term_capital_gains=scenario.short_term_capital_gains,
+        num_dependents=scenario.num_dependents,
+    )
+    if scenario.backend:
+        kwargs["backend"] = scenario.backend
+    result = evaluate_return(**kwargs)
+
+    failures: list[str] = []
+
+    if scenario.expected_federal_tax is not None:
+        if result.federal_total_tax != pytest.approx(
+            scenario.expected_federal_tax, abs=0.01
+        ):
+            failures.append(
+                f"[{scenario.source}] Federal tax {result.federal_total_tax} != "
+                f"expected {scenario.expected_federal_tax}"
+            )
+
+    if scenario.expected_state_tax is not None:
+        if result.state_total_tax != pytest.approx(
+            scenario.expected_state_tax, abs=0.01
+        ):
+            failures.append(
+                f"[{scenario.source}] State tax {result.state_total_tax} != "
+                f"expected {scenario.expected_state_tax}"
+            )
+
+    if scenario.expected_federal_agi is not None:
+        if result.federal_adjusted_gross_income != pytest.approx(
+            scenario.expected_federal_agi, abs=0.01
+        ):
+            failures.append(
+                f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} != "
+                f"expected {scenario.expected_federal_agi}"
+            )
+
+    if scenario.known_failure:
+        if failures:
+            pytest.xfail(scenario.known_failure)
+        else:
+            pytest.fail(
+                f"XPASS: expected failure ({scenario.known_failure}) but test passed. "
+                "Remove known_failure from this scenario."
+            )
+
+    if failures:
+        pytest.fail("\n".join(failures))
 
 
 # SILVER_STANDARD_FEDERAL_SCENARIOS: Formula-derived from published tax brackets.
@@ -572,6 +642,450 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=9961.0,
         expected_state_tax=5167.5,
         known_failure="OTS computes state=$5,223.36 (+$55.86) - Unknown reason (not household credit).",
+    ),
+    # ========== PENNSYLVANIA SCENARIOS ==========
+    # PA 2024: Flat 3.07% rate, no standard deduction, no personal exemption
+    # PA tax = sum(max(0, income_class_i)) * 0.0307
+    # These use graph backend (OTS PA_40 crashes).
+    # Federal tax values are exact formula (not Tax Table) since graph backend
+    # computes federal tax via formula rather than OTS's table lookup.
+    #
+    # PA Single, $50,000 W2 only
+    # PA taxable: $50,000, PA tax: $50,000 x 0.0307 = $1,535
+    # Federal taxable: $35,400, Federal tax: $1,160 + ($35,400 - $11,600) * 0.12 = $4,016
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $50,000 W2 only",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1535.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # PA Single, $100,000 W2 only
+    # PA taxable: $100,000, PA tax: $100,000 x 0.0307 = $3,070
+    # Federal taxable: $85,400, Federal tax: $5,426 + ($85,400 - $47,150) * 0.22 = $13,841
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $100,000 W2 only",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=3070.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # PA Single, $75,000 W2 + $5,000 interest
+    # PA taxable: $80,000, PA tax: $80,000 x 0.0307 = $2,456
+    # Federal taxable: $65,400, Federal tax: $5,426 + ($65,400 - $47,150) * 0.22 = $9,441
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $75,000 W2 + $5,000 interest",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=75000.0,
+        taxable_interest=5000.0,
+        expected_federal_tax=9441.0,
+        expected_state_tax=2456.0,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # PA Single, $60,000 W2 + $3,000 dividends
+    # PA taxable: $63,000, PA tax: $63,000 x 0.0307 = $1,934.10
+    # Federal: uses preferential rates for qualified dividends
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $60,000 W2 + $3,000 dividends",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=60000.0,
+        qualified_dividends=3000.0,
+        ordinary_dividends=3000.0,
+        expected_federal_tax=5701.0,
+        expected_state_tax=1934.1,
+        expected_federal_agi=63000.0,
+        backend="graph",
+    ),
+    # PA Single, $80,000 W2 + $2,000 interest + $1,000 dividends
+    # PA taxable: $83,000, PA tax: $83,000 x 0.0307 = $2,548.10
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA Single, $80,000 W2 + $2,000 interest + $1,000 dividends",
+        year=2024,
+        state="PA",
+        filing_status="Single",
+        w2_income=80000.0,
+        taxable_interest=2000.0,
+        qualified_dividends=1000.0,
+        ordinary_dividends=1000.0,
+        expected_federal_tax=10101.0,
+        expected_state_tax=2548.1,
+        expected_federal_agi=83000.0,
+        backend="graph",
+    ),
+    # PA MFJ, $120,000 W2 only
+    # PA taxable: $120,000, PA tax: $120,000 x 0.0307 = $3,684
+    # Federal MFJ: taxable $90,800 ($120K - $29.2K std ded), in 12% bracket
+    # Federal tax: $2,320 + ($90,800 - $23,200) * 0.12 = $10,432
+    TaxScenario(
+        source="PA 2024 Tax Brackets (computed)",
+        description="PA MFJ, $120,000 W2 only",
+        year=2024,
+        state="PA",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10432.0,
+        expected_state_tax=3684.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # ========== WISCONSIN SCENARIOS ==========
+    # WI 2024 Single: Standard deduction max $9,930 (sliding scale)
+    # Brackets: 3.5% ($0-$14,320), 4.4% ($14,320-$28,640),
+    #           5.3% ($28,640-$315,310), 7.65% ($315,310+)
+    # Exemptions: $700 per person + $250 if 65+
+    # WI 2024 MFJ: Standard deduction max $17,880 (sliding scale)
+    # Brackets: 3.5% ($0-$19,090), 4.4% ($19,090-$38,190),
+    #           5.3% ($38,190-$420,420), 7.65% ($420,420+)
+    #
+    # WI Single in 3.5%/4.4% bracket
+    # Federal AGI: $20,000, WI AGI: $20,000 (no additions/subtractions)
+    # Note: Std deduction and exemptions are 0 (not mapped in graph backend)
+    # WI taxable: $20,000
+    # WI tax: $14,320 x 0.035 + ($20,000 - $14,320) x 0.044 = $751.12
+    # Federal taxable: $5,400, Federal tax: $540 (Formula)
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $20k income",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_federal_tax=540.0,
+        expected_state_tax=751.12,
+        expected_federal_agi=20000.0,
+        backend="graph",
+    ),
+    # WI Single in 5.3% bracket
+    # Federal AGI: $50,000, WI AGI: $50,000
+    # WI taxable: $50,000 (no deductions/exemptions)
+    # WI tax: $501.20 + $630.08 + ($50,000 - $28,640) x 0.053 = $2,263.36
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $50k income",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2263.36,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # WI Single in 5.3% bracket (high income)
+    # Federal AGI: $100,000, WI AGI: $100,000
+    # WI taxable: $100,000 (no deductions/exemptions)
+    # WI tax: $501.20 + $630.08 + ($100,000 - $28,640) x 0.053 = $4,913.36
+    # Federal taxable: $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $100k income",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4913.36,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # WI Single in 7.65% bracket (top bracket)
+    # Federal AGI: $400,000, WI AGI: $400,000
+    # WI taxable: $400,000 (no deductions/exemptions)
+    # WI tax: $14,320 x 0.035 + $14,320 x 0.044 + $286,670 x 0.053 + $84,690 x 0.0765
+    #       = $501.20 + $630.08 + $15,193.51 + $6,478.785 = $22,803.575
+    # Federal taxable: $385,400 ($400K - $14.6K std ded), in 35% bracket
+    # Federal tax: $1,160 + $4,266 + $11,742.50 + $21,942 + $16,568 + $49,586.25
+    #            = $105,264.75
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI Single, $400k income (7.65% top bracket)",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=400000.0,
+        expected_federal_tax=105264.75,
+        expected_state_tax=22803.575,
+        expected_federal_agi=400000.0,
+        backend="graph",
+    ),
+    # WI MFJ in 5.3% bracket
+    # Federal AGI: $60,000, WI AGI: $60,000
+    # WI taxable: $60,000 (no deductions/exemptions)
+    # WI tax: $19,090 x 0.035 + ($38,190 - $19,090) x 0.044 + ($60,000 - $38,190) x 0.053
+    #       = $668.15 + $840.40 + $1,155.93 = $2,664.48
+    # Federal taxable: $30,800, Federal tax: $2,320 + ($30,800 - $23,200) * 0.12 = $3,232
+    TaxScenario(
+        source="WI 2024 Tax Brackets (computed)",
+        description="WI MFJ, $60k income",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=60000.0,
+        expected_federal_tax=3232.0,
+        expected_state_tax=2664.48,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # ========== WISCONSIN 2025 SCENARIOS ==========
+    # WI 2025: Expanded 4.4% bracket (Single: $14,320-$50,480, MFJ: $19,090-$67,300)
+    # Other brackets unchanged: 3.5% ($0-$14,320/$19,090),
+    #   5.3% ($50,480/$67,300-$315,310/$420,420), 7.65% above
+    # New retirement income exclusion (age 67+) - not tested here (no age input)
+    #
+    # WI 2025 Single, $50,000 W2 only
+    # Federal AGI: $50,000, WI AGI: $50,000, WI taxable: $50,000
+    # WI tax: $14,320 x 0.035 + ($50,000 - $14,320) x 0.044
+    #       = $501.20 + $1,569.92 = $2,071.12
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="WI 2025 Tax Brackets (computed)",
+        description="WI Single, $50k income (2025 expanded 4.4% bracket)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=2071.12,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # WI 2025 Single, $100,000 W2 only
+    # Federal AGI: $100,000, WI AGI: $100,000, WI taxable: $100,000
+    # WI tax: $14,320 x 0.035 + ($50,480 - $14,320) x 0.044 + ($100,000 - $50,480) x 0.053
+    #       = $501.20 + $1,591.04 + $2,624.56 = $4,716.80
+    # Federal taxable: $85,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $36,550 x 0.12 + $36,525 x 0.22
+    #   = $1,192.50 + $4,386 + $8,035.50 = $13,614
+    TaxScenario(
+        source="WI 2025 Tax Brackets (computed)",
+        description="WI Single, $100k income (2025 expanded 4.4% bracket)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13614.0,
+        expected_state_tax=4716.80,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # WI 2025 MFJ, $120,000 W2 only
+    # Federal AGI: $120,000, WI AGI: $120,000, WI taxable: $120,000
+    # WI tax: $19,090 x 0.035 + ($67,300 - $19,090) x 0.044 + ($120,000 - $67,300) x 0.053
+    #       = $668.15 + $2,121.24 + $2,793.10 = $5,582.49
+    # Federal taxable: $90,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 x 0.10 + $66,150 x 0.12 = $2,385 + $7,938 = $10,323
+    TaxScenario(
+        source="WI 2025 Tax Brackets (computed)",
+        description="WI MFJ, $120k income (2025 expanded 4.4% bracket)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5582.49,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # ========== MICHIGAN SCENARIOS ==========
+    # MI 2024: Flat 4.25% rate, Personal exemption $5,600
+    # MI 2025: Flat 4.25% rate, Personal exemption $5,800
+    # No standard deduction for most taxpayers (only age-based for 67+)
+    # MI tax = (Federal AGI - exemptions) * 0.0425
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # MI 2024 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000, MI AGI: $50,000, MI taxable: $50,000
+    # MI tax: $50,000 x 0.0425 = $2,125.00
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI Single, $50,000 W2 only",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2125.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MI 2024 Single, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000, MI AGI: $100,000, MI taxable: $100,000
+    # MI tax: $100,000 x 0.0425 = $4,250.00
+    # Federal taxable: $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI Single, $100,000 W2 only",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4250.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MI 2024 Single, $75,000 W2 + $5,000 interest, no exemptions
+    # Federal AGI: $80,000, MI AGI: $80,000, MI taxable: $80,000
+    # MI tax: $80,000 x 0.0425 = $3,400.00
+    # Federal taxable: $65,400, Federal tax: $9,441
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI Single, $75,000 W2 + $5,000 interest",
+        year=2024,
+        state="MI",
+        filing_status="Single",
+        w2_income=75000.0,
+        taxable_interest=5000.0,
+        expected_federal_tax=9441.0,
+        expected_state_tax=3400.0,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # MI 2024 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000, MI AGI: $120,000, MI taxable: $120,000
+    # MI tax: $120,000 x 0.0425 = $5,100.00
+    # Federal taxable: $90,800, Federal tax: $10,432
+    TaxScenario(
+        source="MI 2024 Tax Brackets (computed)",
+        description="MI MFJ, $120,000 W2 only",
+        year=2024,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10432.0,
+        expected_state_tax=5100.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # MI 2025 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000, MI AGI: $50,000, MI taxable: $50,000
+    # MI tax: $50,000 x 0.0425 = $2,125.00
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $1,192.50 (10% on $11,925) + $2,769.00 (12% on $23,075) = $3,961.50
+    TaxScenario(
+        source="MI 2025 Tax Brackets (computed)",
+        description="MI Single, $50,000 W2 only",
+        year=2025,
+        state="MI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=2125.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MI 2025 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000, MI AGI: $120,000, MI taxable: $120,000
+    # MI tax: $120,000 x 0.0425 = $5,100.00
+    # Federal taxable: $90,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 x 0.10 + $66,150 x 0.12 = $2,385 + $7,938 = $10,323
+    TaxScenario(
+        source="MI 2025 Tax Brackets (computed)",
+        description="MI MFJ, $120,000 W2 only",
+        year=2025,
+        state="MI",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5100.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # MI 2025 Single, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000, MI AGI: $100,000, MI taxable: $100,000
+    # MI tax: $100,000 x 0.0425 = $4,250.00
+    # Federal taxable: $85,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $36,550 x 0.12 + $36,525 x 0.22
+    #   = $1,192.50 + $4,386 + $8,035.50 = $13,614
+    TaxScenario(
+        source="MI 2025 Tax Brackets (computed)",
+        description="MI Single, $100,000 W2 only",
+        year=2025,
+        state="MI",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13614.0,
+        expected_state_tax=4250.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # ========== NORTH CAROLINA SCENARIOS ==========
+    # NC 2024: Flat 4.5% rate
+    # Standard Deduction: Single $12,750, MFJ $25,500
+    #
+    # NC Single, $50,000 W2
+    # Fed AGI: $50,000
+    # NC Taxable: $50,000 - $12,750 = $37,250
+    # NC Tax: $37,250 * 0.045 = $1,676.25
+    TaxScenario(
+        source="NC 2024 Tax Brackets (computed)",
+        description="NC Single, $50,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1676.25,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # NC MFJ, $100,000 W2
+    # Fed AGI: $100,000
+    # NC Taxable: $100,000 - $25,500 = $74,500
+    # NC Tax: $74,500 * 0.045 = $3,352.50
+    TaxScenario(
+        source="NC 2024 Tax Brackets (computed)",
+        description="NC MFJ, $100,000 income",
+        year=2024,
+        state="NC",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3352.50,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # NC 2025: Flat 4.25% rate (reduced from 4.5%)
+    # Standard Deduction: Single $12,750 (unchanged from 2024)
+    #
+    # NC Single, $50,000 W2
+    # Fed AGI: $50,000
+    # NC Taxable: $50,000 - $12,750 = $37,250
+    # NC Tax: $37,250 * 0.0425 = $1,583.125
+    # Federal: $15,000 std ded, taxable $35,000
+    # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="NC 2025 Tax Brackets (computed)",
+        description="NC Single, $50,000 income (2025, 4.25% rate)",
+        year=2025,
+        state="NC",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1583.125,
+        expected_federal_agi=50000.0,
+        backend="graph",
     ),
 ]
 

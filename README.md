@@ -41,7 +41,7 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 
 - Compute US federal taxes, as well as taxes for several US states.
 - Explore how taxes vary as a function of income, state, filing status, and year.
-- Easily integrate with data analysis and visualization tools in Python with `pandas` support.
+- Easily integrate with data analysis and visualization tools in Python with `polars` support.
 - Evaluate "what if" tax scenarios efficiently and reproducibly.
 
 
@@ -80,8 +80,8 @@ Here are all arguments available for those two functions:
 
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
-| `year`                       | int                      | 2024                | 2018-2024 inclusive                |
-| `state`                      | str \| None               | None                | "CA", "NY", "MA" + "AK", "FL", "NV", "SD", "TX", "WA", "WY" |
+| `year`                       | int                      | 2025                | 2018-2025 inclusive                |
+| `state`                      | str \| None               | None                | Two-letter state code, e.g. "CA", "NY". Several income-tax states supported; no-income-tax states (e.g. "TX", "WA") also accepted. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
 | `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
@@ -149,7 +149,7 @@ This results in the following:
  'state_effective_tax_rate': 0.0}
 ```
 
-No `year=` argument was specified here, so the current tax year, 2024, was used.
+No `year=` argument was specified here, so the current tax year, 2025, was used.
 The output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary.
 
@@ -179,7 +179,7 @@ evaluate_returns(
 ]
 ```
 
-This results in a `pandas.DataFrame`:
+This results in a `polars.DataFrame` (use `.to_pandas()` if you need pandas compatibility):
 
 |   w2_income |   federal_effective_tax_rate |   federal_tax_bracket |   state_effective_tax_rate |   state_tax_bracket |
 |------------:|-----------------------------:|----------------------:|---------------------------:|--------------------:|
@@ -221,9 +221,11 @@ moment `tenforty` supports back to the 2018 tax year. Here we show the federal
 tax on $100K of W2 income for the past five years.
 
 ``` python
+import polars as pl
+
 df = evaluate_returns(
-    year=[2018, 2019, 2020, 2021, 2022, 2023, 2024], w2_income=100_000
-).astype({"year": "category"})
+    year=[2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], w2_income=100_000
+).cast({"year": pl.Utf8})
 
 (
     so.Plot(df, x="year", y="total_tax")
@@ -252,16 +254,18 @@ appreciated stock this year, and show the breakdown between state and federal
 taxes:
 
 ``` python
+import polars as pl
+
 df = (
     evaluate_returns(
         w2_income=75_000,
         state="CA",
         long_term_capital_gains=list(range(0, 125_001, 5000)),
     )
-    .loc[:, ["long_term_capital_gains", "state_total_tax", "federal_total_tax"]]
-    .melt("long_term_capital_gains", var_name="Type", value_name="tax")
-    .assign(
-        Type=lambda f: f.Type.map(
+    .select(["long_term_capital_gains", "state_total_tax", "federal_total_tax"])
+    .unpivot(index="long_term_capital_gains", variable_name="Type", value_name="tax")
+    .with_columns(
+        pl.col("Type").replace(
             {"state_total_tax": "State", "federal_total_tax": "Federal"}
         )
     )
@@ -291,14 +295,16 @@ money in taxes on paper gains, via the alternative minimum tax. With
 
 
 ``` python
+import polars as pl
+
 df = (
     tenforty.evaluate_returns(
         w2_income=100_000, incentive_stock_option_gains=list(range(0, 100_001, 2500))
     )
-    .loc[:, ["incentive_stock_option_gains", "federal_total_tax", "federal_amt"]]
-    .melt("incentive_stock_option_gains", var_name="Type", value_name="tax")
-    .assign(
-        Type=lambda f: f.Type.map(
+    .select(["incentive_stock_option_gains", "federal_total_tax", "federal_amt"])
+    .unpivot(index="incentive_stock_option_gains", variable_name="Type", value_name="tax")
+    .with_columns(
+        pl.col("Type").replace(
             {"federal_amt": "AMT", "federal_total_tax": '"Regular" Tax'}
         )
     )
@@ -328,12 +334,10 @@ df = (
 - Medicare and Net Investment Income Tax are not automatically computed on
   capital gains, so if those apply to your situation the output tax will be
   underestimated.
-- Although Open Tax Solver includes support for more, `tenforty` only supports
-  California, Massachusetts and New York. (It also supports all the
-  no-income-tax states like Texas and Nevada. :) ) Furthermore, only California
-  has been tested against any tax returns prepared independently by professional
-  tax software, so the Massachusetts and New York support is especially
-  provisional.
+- State income tax is supported for a growing number of states, with more being
+  added. No-income-tax states (e.g. Texas, Nevada) are also accepted. Only
+  California has been tested against tax returns prepared independently by
+  professional tax software; support for other states is provisional.
 
 
 ## Development & Contributing

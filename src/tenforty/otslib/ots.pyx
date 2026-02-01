@@ -124,6 +124,30 @@ cimport ots_2024_VA_760
 cimport ots_2024_f2210
 cimport ots_2024_MI_1040
 cimport ots_2024_OR_40
+cimport ots_2025_OR_40
+cimport ots_2025_MA_1
+cimport ots_2025_VA_760
+cimport ots_2025_f8812
+cimport ots_2025_US_1040_Sched_SE
+cimport ots_2025_f8829
+cimport ots_2025_CA_5805
+cimport ots_2025_f8959
+cimport ots_2025_f8960
+cimport ots_2025_MI_1040
+cimport ots_2025_US_1040
+cimport ots_2025_NC_D400
+cimport ots_2025_NY_IT201
+cimport ots_2025_f8606
+cimport ots_2025_HSA_f8889
+cimport ots_2025_US_1040_Sched_E_brokerage_royalties
+cimport ots_2025_f8995
+cimport ots_2025_CA_540
+cimport ots_2025_NJ_1040
+cimport ots_2025_OH_IT1040
+cimport ots_2025_US_1040_Sched_1_A
+cimport ots_2025_f2210
+cimport ots_2025_PA_40
+cimport ots_2025_US_1040_Sched_C
 
 _OTS_KEY_TO_INDEX = {
     (2018, "MA_1"): 0,
@@ -238,6 +262,30 @@ _OTS_KEY_TO_INDEX = {
     (2024, "f2210"): 109,
     (2024, "MI_1040"): 110,
     (2024, "OR_40"): 111,
+    (2025, "OR_40"): 112,
+    (2025, "MA_1"): 113,
+    (2025, "VA_760"): 114,
+    (2025, "f8812"): 115,
+    (2025, "US_1040_Sched_SE"): 116,
+    (2025, "f8829"): 117,
+    (2025, "CA_5805"): 118,
+    (2025, "f8959"): 119,
+    (2025, "f8960"): 120,
+    (2025, "MI_1040"): 121,
+    (2025, "US_1040"): 122,
+    (2025, "NC_D400"): 123,
+    (2025, "NY_IT201"): 124,
+    (2025, "f8606"): 125,
+    (2025, "HSA_f8889"): 126,
+    (2025, "US_1040_Sched_E_brokerage_royalties"): 127,
+    (2025, "f8995"): 128,
+    (2025, "CA_540"): 129,
+    (2025, "NJ_1040"): 130,
+    (2025, "OH_IT1040"): 131,
+    (2025, "US_1040_Sched_1_A"): 132,
+    (2025, "f2210"): 133,
+    (2025, "PA_40"): 134,
+    (2025, "US_1040_Sched_C"): 135,
 }
 
 cdef f_type _ots_get_function(int index):
@@ -465,6 +513,54 @@ cdef f_type _ots_get_function(int index):
         return ots_2024_MI_1040.main
     elif index == 111:
         return ots_2024_OR_40.main
+    elif index == 112:
+        return ots_2025_OR_40.main
+    elif index == 113:
+        return ots_2025_MA_1.main
+    elif index == 114:
+        return ots_2025_VA_760.main
+    elif index == 115:
+        return ots_2025_f8812.main
+    elif index == 116:
+        return ots_2025_US_1040_Sched_SE.main
+    elif index == 117:
+        return ots_2025_f8829.main
+    elif index == 118:
+        return ots_2025_CA_5805.main
+    elif index == 119:
+        return ots_2025_f8959.main
+    elif index == 120:
+        return ots_2025_f8960.main
+    elif index == 121:
+        return ots_2025_MI_1040.main
+    elif index == 122:
+        return ots_2025_US_1040.main
+    elif index == 123:
+        return ots_2025_NC_D400.main
+    elif index == 124:
+        return ots_2025_NY_IT201.main
+    elif index == 125:
+        return ots_2025_f8606.main
+    elif index == 126:
+        return ots_2025_HSA_f8889.main
+    elif index == 127:
+        return ots_2025_US_1040_Sched_E_brokerage_royalties.main
+    elif index == 128:
+        return ots_2025_f8995.main
+    elif index == 129:
+        return ots_2025_CA_540.main
+    elif index == 130:
+        return ots_2025_NJ_1040.main
+    elif index == 131:
+        return ots_2025_OH_IT1040.main
+    elif index == 132:
+        return ots_2025_US_1040_Sched_1_A.main
+    elif index == 133:
+        return ots_2025_f2210.main
+    elif index == 134:
+        return ots_2025_PA_40.main
+    elif index == 135:
+        return ots_2025_US_1040_Sched_C.main
     return NULL
 
 cdef f_type lookup_ots_call(int year, str form):

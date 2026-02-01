@@ -1,0 +1,304 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "meta": {
+        "form_id": "nc_d400",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L7_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L8_deductions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 12750
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "type": "literal",
+                "value": 25500
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "type": "literal",
+                "value": 12750
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "type": "literal",
+                "value": 19125
+            }
+        },
+        "14": {
+            "id": 14,
+            "op": {
+                "type": "literal",
+                "value": 25500
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L10_std",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 13,
+                    "married_joint": 11,
+                    "married_separate": 12,
+                    "qualifying_widow": 14,
+                    "single": 10
+                }
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L10_deduction_amount",
+            "op": {
+                "left": 3,
+                "right": 15,
+                "type": "max"
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "18": {
+            "id": 18,
+            "op": {
+                "left": 9,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "left": 2,
+                "right": 16,
+                "type": "add"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L9_child_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "left": 1,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "left": 18,
+                "right": 20,
+                "type": "sub"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L11_nc_taxable_income",
+            "op": {
+                "left": 17,
+                "right": 21,
+                "type": "max"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "type": "literal",
+                "value": 4.25e-2
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L12_nc_tax",
+            "op": {
+                "left": 22,
+                "right": 23,
+                "type": "mul"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 5,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "L16_total_payments",
+            "op": {
+                "left": 4,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 24,
+                "right": 26,
+                "type": "sub"
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "L17_tax_due",
+            "op": {
+                "left": 27,
+                "right": 28,
+                "type": "max"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L10_itemized",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "left": 26,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "left": 26,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L18_overpayment",
+            "op": {
+                "cond": 30,
+                "otherwise": 32,
+                "then": 31,
+                "type": "if_positive"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L13_nc_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L14_other_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L15_tax_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L6_federal_agi",
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        }
+    },
+    "outputs": [
+        22,
+        24,
+        26,
+        29,
+        33,
+        9
+    ],
+    "tables": {}
+}

@@ -142,6 +142,25 @@ be run automatically on every attempted commit.
 There are some other hook-related recipes in the Makefile; type a bare `make` to
 see them in the help documentation.
 
+#### Haskell source-of-truth (`tenforty-spec/`)
+
+`tenforty-spec/` is a Haskell DSL intended to be the **source of truth** for the
+tax logic used by the graph backend. The JSON graphs under `src/tenforty/forms/`
+are generated artifacts and should not be edited by hand.
+
+Local developer workflow:
+
+- `make spec-fmt` formats `tenforty-spec/` (`fourmolu` for `*.hs`, `cabal-fmt` for `*.cabal`).
+- `make spec-lint` runs `hlint` and prints suggestions (non-blocking).
+- `make spec-lint-strict` runs `hlint` and fails on any hints.
+
+Generating and syncing graphs:
+
+- `make spec-graphs` compiles graphs into `tenforty-spec/forms/*.json`.
+- `make spec-graphs` also validates cross-form imports for each year and fails fast on missing targets (form/line/year).
+- `make forms-sync` syncs those graphs into `src/tenforty/forms/`.
+- These Haskell checks are local-dev only; CI remains agnostic to `tenforty-spec/`.
+
 ### Logging
 
 In the author's experience, one generally needs to review the underlying generated OTS text files

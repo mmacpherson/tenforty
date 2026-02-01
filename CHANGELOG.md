@@ -1,3 +1,18 @@
+## [2025.1] - 2026-01-31
+### Added
+- OTS 2025 tax year support (v23.01)
+- 2025 form mappings for US_1040, CA_540, MA_1, NY_IT201
+- Cython bindings for all OTS 2025 forms
+- Polars DataFrame output (replaced pandas)
+- Configurable error handling (`on_error` parameter)
+
+### Changed
+- Default tax year updated to 2025
+- Federal 1040 AGI output key changed from L11 to L11b for 2025+
+- `federal_1040_output_fields` converted to year-aware factory function
+- Removed dead `_FED_L9`/`_FED_L11` keys from MA_1 input maps
+- Removed PA_40 natural form config (OTS backend segfaults)
+
 ## [2024.6] - 2026-01-25
 ### Added
 - Python 3.14 support for CI and wheel builds
