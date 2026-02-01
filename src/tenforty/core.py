@@ -431,6 +431,7 @@ def evaluate_return(
     #
     filing_status: str = "Single",
     num_dependents: int = 0,
+    dependent_exemptions: float = 0.0,
     standard_or_itemized: str = "Standard",
     w2_income: float = 0.0,
     taxable_interest: float = 0.0,
@@ -451,6 +452,7 @@ def evaluate_return(
         state=state,
         filing_status=filing_status,
         num_dependents=num_dependents,
+        dependent_exemptions=dependent_exemptions,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
@@ -500,6 +502,7 @@ def evaluate_returns(
     state: list[str | None] | str | None = None,
     filing_status: list[str] | str = "Single",
     num_dependents: list[int] | int = 0,
+    dependent_exemptions: list[float] | float = 0.0,
     standard_or_itemized: list[str] | str = "Standard",
     w2_income: list[float] | float = 0.0,
     taxable_interest: list[float] | float = 0.0,
@@ -535,6 +538,7 @@ def evaluate_returns(
     states_of_residence = ensure_list(state)
     filing_statuses = ensure_list(filing_status)
     num_dependents = ensure_list(num_dependents)
+    dependent_exemptions = ensure_list(dependent_exemptions)
     standard_or_itemized = ensure_list(standard_or_itemized)
     w2_incomes = ensure_list(w2_income)
     taxable_interests = ensure_list(taxable_interest)
@@ -552,6 +556,7 @@ def evaluate_returns(
         states_of_residence,
         filing_statuses,
         num_dependents,
+        dependent_exemptions,
         standard_or_itemized,
         w2_incomes,
         taxable_interests,
@@ -570,6 +575,7 @@ def evaluate_returns(
         "state",
         "filing_status",
         "num_dependents",
+        "dependent_exemptions",
         "standard_or_itemized",
         "w2_income",
         "taxable_interest",
@@ -617,6 +623,7 @@ def evaluate_returns(
                             "state_adjustment": state_adjustments,
                             "incentive_stock_option_gains": incentive_stock_option_gains,
                             "num_dependents": [nd],
+                            "dependent_exemptions": dependent_exemptions,
                         }
                         batch_results = graph_backend.evaluate_batch(
                             y,
