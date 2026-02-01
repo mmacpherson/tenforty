@@ -65,8 +65,7 @@ class OutputFieldSpec(BaseModel):
     max_value: float | None = None
 
 
-FEDERAL_1040_OUTPUT_FIELDS = [
-    OutputFieldSpec(name="agi", ots_key="L11", required=True, min_value=0),
+_BASE_1040_OUTPUT_FIELDS = [
     OutputFieldSpec(name="taxable_income", ots_key="L15", required=True, min_value=0),
     OutputFieldSpec(name="total_tax", ots_key="L24", required=True, min_value=0),
     OutputFieldSpec(
@@ -84,6 +83,15 @@ FEDERAL_1040_OUTPUT_FIELDS = [
         max_value=100,
     ),
 ]
+
+
+def federal_1040_output_fields(year: int) -> list[OutputFieldSpec]:
+    """Return 1040 output field specs with the correct AGI key for the given year."""
+    agi_key = "L11b" if year >= 2025 else "L11"
+    return [
+        OutputFieldSpec(name="agi", ots_key=agi_key, required=True, min_value=0),
+        *_BASE_1040_OUTPUT_FIELDS,
+    ]
 
 
 class OTSYear(Enum):
@@ -185,7 +193,7 @@ OTS_FORM_CONFIG = dict(
 
 
 class TaxReturnInput(BaseModel):
-    year: OTSYear = OTSYear.YEAR_2024
+    year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
     num_dependents: int = 0
@@ -302,8 +310,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -320,20 +326,6 @@ _NATURAL_FORM_CONFIG = [
             "L33": "adjusted_gross_income",
             "L37": "taxable_income",
             "L46": "total_tax",
-        },
-    },
-    {
-        "year": 2024,
-        "form_id": "PA_40",
-        "input_map": {
-            "w2_income": "L1a",
-            "taxable_interest": "L2",
-            "ordinary_dividends": "L3",
-        },
-        "output_map": {
-            "L9": "adjusted_gross_income",
-            "L11": "taxable_income",
-            "L12": "total_tax",
         },
     },
     # 2025
@@ -354,10 +346,37 @@ _NATURAL_FORM_CONFIG = [
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
-            "L11": "adjusted_gross_income",
+            # OTS 2025 output uses L11a/L11b; L11b is AGI after adjustments.
+            "L11b": "adjusted_gross_income",
             "L15": "taxable_income",
             "L24": "total_tax",
             "Your Alternative Minimum Tax": "amt",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "CA_540",
+        "input_map": {
+            "num_dependents": "L10",
+            "state_adjustment": "CA540_P2_Add_6",
+        },
+        "output_map": {
+            "L13": "adjusted_gross_income",
+            "L19": "taxable_income",
+            "L64": "total_tax",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "MA_1",
+        "input_map": {
+            "w2_income": "L3",
+            "num_dependents": "Dependents",
+        },
+        "output_map": {
+            "L21": "taxable_income",
+            "AGI": "adjusted_gross_income",
+            "L28": "total_tax",
         },
     },
     {
@@ -368,20 +387,6 @@ _NATURAL_FORM_CONFIG = [
             "L33": "adjusted_gross_income",
             "L37": "taxable_income",
             "L46": "total_tax",
-        },
-    },
-    {
-        "year": 2025,
-        "form_id": "PA_40",
-        "input_map": {
-            "w2_income": "L1a",
-            "taxable_interest": "L2",
-            "ordinary_dividends": "L3",
-        },
-        "output_map": {
-            "L9": "adjusted_gross_income",
-            "L11": "taxable_income",
-            "L12": "total_tax",
         },
     },
     # 2023
@@ -426,8 +431,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -488,8 +491,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -550,8 +551,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -612,8 +611,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -674,8 +671,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -736,8 +731,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {

@@ -163,6 +163,7 @@ def process_ots_tarball(
                     case r"/src/taxsolve.*\.c":
                         tar.extract(item, path=tmpdirname)
                         outer_namespace, inner_namespace = parse_srcname(item.name)
+                        inner_namespace = inner_namespace.replace("-", "_")
                         with open(f"{tmpdirname}/{item.name}") as fp:
                             source = fp.read()
                         source_group[inner_namespace] = group_lines(source)

@@ -61,7 +61,7 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
     l36 <- keyInput "L36" "dependent_exemptions" "Dependent exemptions"
 
     -- Line 37: New York taxable income
-    l37 <-
+    _l37 <-
         keyOutput "L37" "ny_taxable_income" "New York State taxable income" $
             l35 `subtractNotBelowZero` l36
 
@@ -122,7 +122,7 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
 
     l53 <- keyInput "L53" "nyc_nonrefundable_credits" "NYC nonrefundable credits"
 
-    l54 <-
+    _l54 <-
         interior "L54" "nyc_tax_after_all_credits" $
             l52 `subtractNotBelowZero` l53
 
@@ -135,7 +135,7 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
     l60 <- keyInput "L60" "voluntary_gifts" "Voluntary gift contributions"
 
     -- Line 61: Total (state + NYC + sales + gifts)
-    l61 <-
+    _l61 <-
         interior "L61" "total_all_taxes" $
             sumOf [l46, l58, l59, l60]
 
