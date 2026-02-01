@@ -496,7 +496,7 @@ def evaluate_return(
 
 
 def evaluate_returns(
-    year: list[int] | int = 2023,
+    year: list[int] | int = 2025,
     state: list[str | None] | str | None = None,
     filing_status: list[str] | str = "Single",
     num_dependents: list[int] | int = 0,
@@ -658,7 +658,7 @@ def evaluate_returns(
 
 
 def marginal_rate(
-    year: int = 2024,
+    year: int = 2025,
     state: str | None = None,
     filing_status: str = "Single",
     num_dependents: int = 0,
@@ -714,7 +714,7 @@ def marginal_rate(
 
 def solve_for_income(
     target_tax: float,
-    year: int = 2024,
+    year: int = 2025,
     state: str | None = None,
     filing_status: str = "Single",
     num_dependents: int = 0,
