@@ -182,6 +182,34 @@ def test_validate_parsed_fields_custom_spec():
     assert "above maximum" in warnings[0]
 
 
+def test_federal_1040_output_fields_2025_uses_l11b():
+    """Verify 2025+ returns L11b as the AGI key instead of L11."""
+    specs = federal_1040_output_fields(year=2025)
+    agi_spec = next(s for s in specs if s.name == "agi")
+    assert agi_spec.ots_key == "L11b"
+
+
+def test_federal_1040_output_fields_2024_uses_l11():
+    """Verify pre-2025 returns L11 as the AGI key."""
+    specs = federal_1040_output_fields(year=2024)
+    agi_spec = next(s for s in specs if s.name == "agi")
+    assert agi_spec.ots_key == "L11"
+
+
+def test_validate_parsed_fields_2025_l11b():
+    """Verify validation passes when 2025 output uses L11b for AGI."""
+    fields = {"L11b": 75000, "L15": 60000, "L24": 8000, "tax_bracket": 22.0}
+    warnings = validate_parsed_fields(fields, federal_1040_output_fields(year=2025))
+    assert warnings == []
+
+
+def test_validate_parsed_fields_2025_missing_l11b():
+    """Verify validation warns when 2025 output is missing L11b."""
+    fields = {"L11": 75000, "L15": 60000, "L24": 8000}
+    warnings = validate_parsed_fields(fields, federal_1040_output_fields(year=2025))
+    assert any("L11b" in w and "Missing" in w for w in warnings)
+
+
 # --- Regression Tests with Captured OTS Output ---
 
 
