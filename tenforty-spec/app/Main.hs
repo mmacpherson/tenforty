@@ -19,13 +19,10 @@ import CAFTB3514_2024
 import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
-<<<<<<< HEAD
-import IL1040_2024
-import IL1040_2025
-=======
 import GAForm500_2024
 import GAForm500_2025
->>>>>>> c524c3a (feat: add Georgia GA-500 state tax support)
+import IL1040_2024
+import IL1040_2025
 import MI1040_2024
 import MI1040_2025
 import NCFormD400_2024
@@ -118,26 +115,20 @@ allForms =
     , ("ca_ftb_3506_2025.json", caFTB3506_2025)
     , ("ca_ftb_3514_2024.json", caFTB3514_2024)
     , ("ca_ftb_3514_2025.json", caFTB3514_2025)
-<<<<<<< HEAD
-    , ("il_1040_2024.json", il1040_2024)
-    , ("il_1040_2025.json", il1040_2025)
-=======
     , ("ga_500_2024.json", gaForm500_2024)
     , ("ga_500_2025.json", gaForm500_2025)
->>>>>>> c524c3a (feat: add Georgia GA-500 state tax support)
+    , ("il_1040_2024.json", il1040_2024)
+    , ("il_1040_2025.json", il1040_2025)
     , ("ny_it201_2024.json", nyIT201_2024)
     , ("ny_it201_2025.json", nyIT201_2025)
     , ("mi_1040_2024.json", mi1040_2024)
     , ("mi_1040_2025.json", mi1040_2025)
     , ("nc_d400_2024.json", ncFormD400_2024)
     , ("nc_d400_2025.json", ncFormD400_2025)
-<<<<<<< HEAD
     , ("nj_1040_2024.json", nj1040_2024)
     , ("nj_1040_2025.json", nj1040_2025)
-=======
     , ("oh_it1040_2024.json", ohIT1040_2024)
     , ("oh_it1040_2025.json", ohIT1040_2025)
->>>>>>> 795e032 (feat: add Ohio IT-1040 state tax support)
     , ("pa_40_2024.json", pa40_2024)
     , ("pa_40_2025.json", pa40_2025)
     , ("va_760_2024.json", vaForm760_2024)

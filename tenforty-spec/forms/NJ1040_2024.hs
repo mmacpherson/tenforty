@@ -9,7 +9,8 @@ import TenForty
 
 nj1040_2024 :: Either FormError Form
 nj1040_2024 = form "nj_1040" 2024 $ do
-    defineTable njBracketsTable2024
+    defineTable njBracketsSingleTable2024
+    defineTable njBracketsMfjTable2024
 
     -- Line 14: Federal adjusted gross income (imported from US 1040 L11)
     -- Note: NJ form technically builds from gross income, but for graph backend
@@ -48,9 +49,16 @@ nj1040_2024 = form "nj_1040" 2024 $ do
             l29 `subtractNotBelowZero` l38
 
     -- Line 40: New Jersey tax from brackets
+    -- Single and MFS use different brackets than MFJ, HoH, and QW
     l40 <-
         keyOutput "L40" "nj_bracket_tax" "Tax from New Jersey tax rate schedule" $
-            bracketTax "nj_brackets_2024" l39
+            byStatusE $
+                byStatus
+                    (bracketTax "nj_single_brackets_2024" l39) -- Single
+                    (bracketTax "nj_mfj_brackets_2024" l39) -- MFJ
+                    (bracketTax "nj_single_brackets_2024" l39) -- MFS
+                    (bracketTax "nj_mfj_brackets_2024" l39) -- HoH
+                    (bracketTax "nj_mfj_brackets_2024" l39) -- QW
 
     -- Property tax deduction/credit (complex calculation based on income thresholds)
     l41 <- keyInput "L41" "property_tax_credit" "Property tax deduction/credit"

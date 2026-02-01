@@ -171,8 +171,8 @@ NJ_SCENARIOS = [
         "w2_income": 75000,
         "expected_federal_min": 8000,
         "expected_federal_max": 9000,
-        "expected_state_min": 1800,
-        "expected_state_max": 2000,
+        "expected_state_min": 2500,
+        "expected_state_max": 2800,
     },
     {
         "year": 2024,
@@ -181,8 +181,8 @@ NJ_SCENARIOS = [
         "w2_income": 150000,
         "expected_federal_min": 24000,
         "expected_federal_max": 28000,
-        "expected_state_min": 5900,
-        "expected_state_max": 6200,
+        "expected_state_min": 7200,
+        "expected_state_max": 7600,
     },
     {
         "year": 2024,
@@ -548,8 +548,6 @@ def test_va_tax_ranges(scenario):
     """Sanity check: VA tax falls within expected ranges (graph backend)."""
     scenario_with_backend = {**scenario, "backend": "graph"}
     _run_range_scenario(scenario_with_backend)
-    scenario_with_backend = {**scenario, "backend": "graph"}
-    _run_range_scenario(scenario_with_backend)
 
 
 @pytest.mark.requires_graph
@@ -584,7 +582,6 @@ def test_il_tax_ranges(scenario):
         ("MA", None),
         pytest.param("GA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("IL", "graph", marks=pytest.mark.requires_graph),
-        pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NJ", "graph", marks=pytest.mark.requires_graph),

@@ -1,7 +1,9 @@
 module TablesNJ2024 (
     -- * New Jersey Income Tax Brackets
-    njBrackets2024,
-    njBracketsTable2024,
+    njBracketsSingle2024,
+    njBracketsSingleTable2024,
+    njBracketsMfj2024,
+    njBracketsMfjTable2024,
 
     -- * Personal Exemptions
     njPersonalExemption2024,
@@ -13,13 +15,10 @@ import Data.List.NonEmpty (NonEmpty (..))
 import TenForty.Table
 import TenForty.Types
 
-{- | 2024 New Jersey income tax brackets
-Order: Single, MFJ, MFS, HoH, QW
+{- | 2024 New Jersey income tax brackets for Single and MFS filers
 Source: New Jersey Division of Taxation, NJ-1040 Instructions (2024)
-Single/MFS: 7 brackets from 1.4% to 10.75%
-MFJ/HoH/QW: 8 brackets from 1.4% to 10.75% (additional 2.45% bracket)
+7 brackets from 1.4% to 10.75%
 
-Single/MFS brackets:
   $0 - $20,000: 1.4%
   $20,001 - $35,000: 1.75%
   $35,001 - $40,000: 3.5%
@@ -27,8 +26,28 @@ Single/MFS brackets:
   $75,001 - $500,000: 6.37%
   $500,001 - $1,000,000: 8.97%
   Over $1,000,000: 10.75%
+-}
+njBracketsSingle2024 :: NonEmpty Bracket
+njBracketsSingle2024 =
+    Bracket (byStatus 20000 20000 20000 20000 20000) 0.014
+        :| [ Bracket (byStatus 35000 35000 35000 35000 35000) 0.0175
+           , Bracket (byStatus 40000 40000 40000 40000 40000) 0.035
+           , Bracket (byStatus 75000 75000 75000 75000 75000) 0.05525
+           , Bracket (byStatus 500000 500000 500000 500000 500000) 0.0637
+           , Bracket (byStatus 1000000 1000000 1000000 1000000 1000000) 0.0897
+           , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.1075
+           ]
 
-MFJ/HoH/QW brackets:
+njBracketsSingleTable2024 :: Table
+njBracketsSingleTable2024 =
+    case mkBracketTable njBracketsSingle2024 of
+        Right bt -> TableBracket "nj_single_brackets_2024" bt
+        Left err -> error $ "Invalid New Jersey Single brackets: " ++ err
+
+{- | 2024 New Jersey income tax brackets for MFJ, HoH, and QW filers
+Source: New Jersey Division of Taxation, NJ-1040 Instructions (2024)
+8 brackets from 1.4% to 10.75% (includes additional 2.45% bracket)
+
   $0 - $20,000: 1.4%
   $20,001 - $50,000: 1.75%
   $50,001 - $70,000: 2.45%
@@ -38,23 +57,23 @@ MFJ/HoH/QW brackets:
   $500,001 - $1,000,000: 8.97%
   Over $1,000,000: 10.75%
 -}
-njBrackets2024 :: NonEmpty Bracket
-njBrackets2024 =
+njBracketsMfj2024 :: NonEmpty Bracket
+njBracketsMfj2024 =
     Bracket (byStatus 20000 20000 20000 20000 20000) 0.014
-        :| [ Bracket (byStatus 35000 50000 35000 50000 50000) 0.0175
-           , Bracket (byStatus 40000 70000 40000 70000 70000) 0.0245
-           , Bracket (byStatus 75000 80000 75000 80000 80000) 0.035
-           , Bracket (byStatus 500000 150000 500000 150000 150000) 0.05525
-           , Bracket (byStatus 1000000 500000 1000000 500000 500000) 0.0637
-           , Bracket (byStatus 1e12 1000000 1e12 1000000 1000000) 0.0897
+        :| [ Bracket (byStatus 50000 50000 50000 50000 50000) 0.0175
+           , Bracket (byStatus 70000 70000 70000 70000 70000) 0.0245
+           , Bracket (byStatus 80000 80000 80000 80000 80000) 0.035
+           , Bracket (byStatus 150000 150000 150000 150000 150000) 0.05525
+           , Bracket (byStatus 500000 500000 500000 500000 500000) 0.0637
+           , Bracket (byStatus 1000000 1000000 1000000 1000000 1000000) 0.0897
            , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.1075
            ]
 
-njBracketsTable2024 :: Table
-njBracketsTable2024 =
-    case mkBracketTable njBrackets2024 of
-        Right bt -> TableBracket "nj_brackets_2024" bt
-        Left err -> error $ "Invalid New Jersey brackets: " ++ err
+njBracketsMfjTable2024 :: Table
+njBracketsMfjTable2024 =
+    case mkBracketTable njBracketsMfj2024 of
+        Right bt -> TableBracket "nj_mfj_brackets_2024" bt
+        Left err -> error $ "Invalid New Jersey MFJ brackets: " ++ err
 
 {- | 2024 New Jersey personal exemption amount
 Source: New Jersey Revised Statutes Section 54A:3-1

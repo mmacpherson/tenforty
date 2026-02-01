@@ -938,21 +938,21 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=30000.0,
         backend="graph",
     ),
-    # NJ 2024 Single in 3.5% bracket
+    # NJ 2024 Single in 5.525% bracket
     # Federal AGI: $60,000, NJ taxable: $60,000 (no exemptions)
-    # NJ tax: $280 + $262.50 + $122.50 + ($60,000 - $40,000) x 0.035
-    #       = $280 + $262.50 + $122.50 + $700 = $1,365
+    # NJ tax: $280 + $262.50 + $175 + ($60,000 - $40,000) x 0.05525
+    #       = $280 + $262.50 + $175 + $1,105 = $1,822.50
     # Federal taxable: $45,400 (AGI - $14,600 std ded)
     # Federal tax (graph backend): $5,216
     TaxScenario(
         source="NJ 2024 Tax Brackets (computed)",
-        description="NJ Single, $60k income (3.5% bracket)",
+        description="NJ Single, $60k income (5.525% bracket)",
         year=2024,
         state="NJ",
         filing_status="Single",
         w2_income=60000.0,
         expected_federal_tax=5216.0,
-        expected_state_tax=1365.0,
+        expected_state_tax=1822.5,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -992,10 +992,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
-    # NJ 2025 Single in 3.5% bracket (verify rates unchanged)
+    # NJ 2025 Single in 5.525% bracket (verify rates unchanged)
     # Federal AGI: $50,000, NJ taxable: $50,000 (no exemptions)
-    # NJ tax: $280 + $262.50 + $122.50 + ($50,000 - $40,000) x 0.035
-    #       = $280 + $262.50 + $122.50 + $350 = $1,015
+    # NJ tax: $280 + $262.50 + $175 + ($50,000 - $40,000) x 0.05525
+    #       = $280 + $262.50 + $175 + $552.50 = $1,270
     # Federal taxable: $35,000 (AGI - $15,000 std ded)
     # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
     TaxScenario(
@@ -1006,7 +1006,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3961.5,
-        expected_state_tax=1015.0,
+        expected_state_tax=1270.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
