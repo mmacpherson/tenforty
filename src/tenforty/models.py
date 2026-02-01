@@ -65,8 +65,7 @@ class OutputFieldSpec(BaseModel):
     max_value: float | None = None
 
 
-FEDERAL_1040_OUTPUT_FIELDS = [
-    OutputFieldSpec(name="agi", ots_key="L11", required=True, min_value=0),
+_BASE_1040_OUTPUT_FIELDS = [
     OutputFieldSpec(name="taxable_income", ots_key="L15", required=True, min_value=0),
     OutputFieldSpec(name="total_tax", ots_key="L24", required=True, min_value=0),
     OutputFieldSpec(
@@ -84,6 +83,15 @@ FEDERAL_1040_OUTPUT_FIELDS = [
         max_value=100,
     ),
 ]
+
+
+def federal_1040_output_fields(year: int) -> list[OutputFieldSpec]:
+    """Return 1040 output field specs with the correct AGI key for the given year."""
+    agi_key = "L11b" if year >= 2025 else "L11"
+    return [
+        OutputFieldSpec(name="agi", ots_key=agi_key, required=True, min_value=0),
+        *_BASE_1040_OUTPUT_FIELDS,
+    ]
 
 
 class OTSYear(Enum):
@@ -302,8 +310,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -365,8 +371,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -427,8 +431,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -489,8 +491,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -551,8 +551,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -613,8 +611,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -675,8 +671,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -737,8 +731,6 @@ _NATURAL_FORM_CONFIG = [
         "form_id": "MA_1",
         "input_map": {
             "w2_income": "L3",
-            "_FED_L9": "La",
-            "_FED_L11": "Lb",
             "num_dependents": "Dependents",
         },
         "output_map": {
