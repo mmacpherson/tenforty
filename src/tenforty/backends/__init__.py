@@ -6,9 +6,13 @@ import platform
 from functools import lru_cache
 from typing import Literal
 
-from .graph import GraphBackend
 from .ots import OTSBackend
 from .protocol import TaxBackend
+
+try:
+    from .graph import GraphBackend
+except ImportError:
+    GraphBackend = None
 
 __all__ = [
     "GraphBackend",
@@ -25,7 +29,9 @@ def _ots_backend() -> OTSBackend:
 
 
 @lru_cache(maxsize=1)
-def _graph_backend() -> GraphBackend:
+def _graph_backend() -> GraphBackend | None:
+    if GraphBackend is None:
+        return None
     return GraphBackend()
 
 
@@ -34,7 +40,8 @@ def available_backends() -> list[str]:
     backends = []
     if _ots_backend().is_available():
         backends.append("ots")
-    if _graph_backend().is_available():
+    graph = _graph_backend()
+    if graph is not None and graph.is_available():
         backends.append("graph")
     return backends
 
@@ -69,7 +76,7 @@ def get_backend(
 
     if backend == "graph":
         graph = _graph_backend()
-        if not graph.is_available():
+        if graph is None or not graph.is_available():
             raise RuntimeError("Graph backend is not available")
         return graph
 

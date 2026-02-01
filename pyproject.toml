@@ -121,9 +121,9 @@ unfixable = []
 ext-modules = [
   {name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"]}
 ]
+include-package-data = false
 package-dir = {"" = "src"}
-packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.graphlib"]
+packages = ["tenforty", "tenforty.otslib", "tenforty.backends"]
 
 [tool.setuptools.package-data]
-tenforty = ["forms/*.json"]
 "tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]
