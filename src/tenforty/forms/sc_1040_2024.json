@@ -115,7 +115,11 @@
             }
         }
     },
-    "outputs": [],
+    "outputs": [
+        5,
+        10,
+        11
+    ],
     "tables": {
         "sc_brackets_2024": {
             "brackets": {

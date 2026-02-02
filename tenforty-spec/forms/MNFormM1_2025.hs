@@ -60,4 +60,4 @@ mnFormM1_2025 = form "mn_m1" 2025 $ do
         keyOutput "L10" "mn_tax" "Tax from Minnesota tax rate schedule" $
             bracketTax "mn_brackets_2025" l9
 
-    pure ()
+    outputs ["L1", "L9", "L10"]

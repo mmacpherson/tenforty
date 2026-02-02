@@ -33,7 +33,7 @@ scForm1040_2024 = form "sc_1040" 2024 $ do
     -- Most are complex schedules; we'll model the key ones
 
     -- Line w: Dependent exemptions
-    -- $4,790 per dependent claimed on federal return
+    -- \$4,790 per dependent claimed on federal return
     -- Cannot map num_dependents to dollar amount due to natural_to_node limitation
     -- Accept as input (user can calculate: num_dependents * 4790)
     l_exemptions <- keyInput "Lw" "dependent_exemptions" "Dependent exemptions"
@@ -56,4 +56,4 @@ scForm1040_2024 = form "sc_1040" 2024 $ do
         keyOutput "L6" "sc_tax" "Tax on South Carolina taxable income" $
             bracketTax "sc_brackets_2024" l5
 
-    pure ()
+    outputs ["L1", "L5", "L6"]

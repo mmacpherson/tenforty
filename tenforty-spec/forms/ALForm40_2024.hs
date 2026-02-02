@@ -53,4 +53,4 @@ alForm40_2024 = form "al_40" 2024 $ do
         keyOutput "L15" "al_tax" "Tax on Alabama taxable income" $
             bracketTax "al_brackets_2024" l14
 
-    pure ()
+    outputs ["L8", "L10", "L14", "L15"]

@@ -58,7 +58,7 @@ laStandardDeduction2024 = byStatus 4500 9000 4500 4500 9000
 
 {- | 2024 Louisiana dependent exemption amount ($1,000 per exemption over base)
 Source: Louisiana Form IT-540 (2024) Instructions page 4 and tax table header
-$1,000 for each exemption over one (Single/MFS/HoH) or over two (MFJ/QW)
+\$1,000 for each exemption over one (Single/MFS/HoH) or over two (MFJ/QW)
 -}
 laDependentExemption2024 :: Amount Dollars
 laDependentExemption2024 = 1000

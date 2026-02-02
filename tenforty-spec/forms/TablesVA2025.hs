@@ -59,14 +59,14 @@ vaStandardDeduction2025 = byStatus 8750 17500 8750 8750 17500
 
 {- | 2025 Virginia personal exemption amount
 Source: Virginia Form 760 Instructions (2025)
-$930 per person (unchanged from 2024)
+\$930 per person (unchanged from 2024)
 -}
 vaPersonalExemption2025 :: Amount Dollars
 vaPersonalExemption2025 = 930
 
 {- | 2025 Virginia age 65 or older / blind exemption amount
 Source: Virginia Form 760 Instructions (2025)
-$800 per person per qualifying condition (unchanged from 2024)
+\$800 per person per qualifying condition (unchanged from 2024)
 -}
 vaAge65OrBlindExemption2025 :: Amount Dollars
 vaAge65OrBlindExemption2025 = 800

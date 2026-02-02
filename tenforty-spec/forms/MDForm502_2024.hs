@@ -119,7 +119,8 @@ mdForm502_2024 = form "md_502" 2024 $ do
 
     l21 <-
         keyOutput "L21" "md_state_tax" "Maryland State tax" $
-            byStatusE $ ByStatus taxSingle taxJoint taxSingle taxJoint taxJoint
+            byStatusE $
+                ByStatus taxSingle taxJoint taxSingle taxJoint taxJoint
 
     -- Line 21a: Local income tax (calculated separately, accept as input)
     l21a <- keyInput "L21a" "local_tax" "Maryland local income tax"

@@ -59,14 +59,14 @@ executable tenforty-compile
     AZForm140_2025
     CA540_2024
     CA540_2025
-    COForm104_2024
-    COForm104_2025
     CAFTB3506_2024
     CAFTB3506_2025
     CAFTB3514_2024
     CAFTB3514_2025
     CAScheduleCA_2024
     CAScheduleCA_2025
+    COForm104_2024
+    COForm104_2025
     GAForm500_2024
     GAForm500_2025
     IL1040_2024
@@ -103,12 +103,10 @@ executable tenforty-compile
     TablesAL2025
     TablesAZ2024
     TablesAZ2025
-    TablesCO2024
-    TablesCO2025
-    VAForm760_2024
-    VAForm760_2025
     TablesCA2024
     TablesCA2025
+    TablesCO2024
+    TablesCO2025
     TablesGA2024
     TablesGA2025
     TablesIL2024
@@ -173,6 +171,8 @@ executable tenforty-compile
     USScheduleEIC_2025
     USScheduleSE_2024
     USScheduleSE_2025
+    VAForm760_2024
+    VAForm760_2025
     WIForm1_2024
     WIForm1_2025
 
@@ -213,14 +213,14 @@ test-suite tenforty-spec-test
     AZForm140_2025
     CA540_2024
     CA540_2025
-    COForm104_2024
-    COForm104_2025
     CAFTB3506_2024
     CAFTB3506_2025
     CAFTB3514_2024
     CAFTB3514_2025
     CAScheduleCA_2024
     CAScheduleCA_2025
+    COForm104_2024
+    COForm104_2025
     GAForm500_2024
     GAForm500_2025
     IL1040_2024
@@ -249,32 +249,34 @@ test-suite tenforty-spec-test
     OHIT1040_2025
     PA40_2024
     PA40_2025
+    SCForm1040_2024
+    SCForm1040_2025
     Tables2024
     Tables2025
     TablesAL2024
     TablesAL2025
     TablesAZ2024
     TablesAZ2025
+    TablesCA2024
+    TablesCA2025
     TablesCO2024
     TablesCO2025
+    TablesGA2024
+    TablesGA2025
+    TablesIL2024
+    TablesIL2025
     TablesIN2024
     TablesIN2025
     TablesKY2024
     TablesKY2025
     TablesLA2024
     TablesLA2025
-    VAForm760_2024
-    VAForm760_2025
-    TablesCA2024
-    TablesCA2025
-    TablesGA2024
-    TablesGA2025
-    TablesIL2024
-    TablesIL2025
     TablesMD2024
     TablesMD2025
     TablesMI2024
     TablesMI2025
+    TablesMN2024
+    TablesMN2025
     TablesMO2024
     TablesMO2025
     TablesNC2024
@@ -323,6 +325,8 @@ test-suite tenforty-spec-test
     USScheduleEIC_2025
     USScheduleSE_2024
     USScheduleSE_2025
+    VAForm760_2024
+    VAForm760_2025
     WIForm1_2024
     WIForm1_2025
 

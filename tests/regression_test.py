@@ -696,6 +696,8 @@ def _run_range_scenario(scenario):
     )
     if scenario.get("state_adjustment"):
         kwargs["state_adjustment"] = scenario["state_adjustment"]
+    if scenario.get("dependent_exemptions"):
+        kwargs["dependent_exemptions"] = scenario["dependent_exemptions"]
     if scenario.get("backend"):
         kwargs["backend"] = scenario["backend"]
     result = evaluate_return(**kwargs)

@@ -205,7 +205,11 @@
             }
         }
     },
-    "outputs": [],
+    "outputs": [
+        7,
+        22,
+        21
+    ],
     "tables": {
         "mn_brackets_2025": {
             "brackets": {

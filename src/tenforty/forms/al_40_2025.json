@@ -162,7 +162,12 @@
             }
         }
     },
-    "outputs": [],
+    "outputs": [
+        9,
+        16,
+        17,
+        6
+    ],
     "tables": {
         "al_brackets_2025": {
             "brackets": {
