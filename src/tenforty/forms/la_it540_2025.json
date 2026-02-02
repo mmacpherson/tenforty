@@ -1,0 +1,289 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4
+    ],
+    "meta": {
+        "form_id": "la_it540",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L8_itemized",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L11_priority1_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 12500
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "type": "literal",
+                "value": 25000
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "type": "literal",
+                "value": 25000
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L8_std",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 11,
+                    "married_joint": 9,
+                    "married_separate": 10,
+                    "qualifying_widow": 12,
+                    "single": 8
+                }
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L8_deduction_amount",
+            "op": {
+                "left": 0,
+                "right": 13,
+                "type": "max"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 7,
+                "right": 14,
+                "type": "sub"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L9_la_taxable_income",
+            "op": {
+                "left": 15,
+                "right": 16,
+                "type": "max"
+            }
+        },
+        "18": {
+            "id": 18,
+            "op": {
+                "type": "literal",
+                "value": 3.0e-2
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L10_la_tax",
+            "op": {
+                "left": 17,
+                "right": 18,
+                "type": "mul"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L13_la_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "left": 19,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L12_tax_after_credits",
+            "op": {
+                "left": 20,
+                "right": 21,
+                "type": "max"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 3,
+                "right": 4,
+                "type": "add"
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L16_total_payments",
+            "op": {
+                "left": 2,
+                "right": 23,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 22,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L17_tax_due",
+            "op": {
+                "left": 25,
+                "right": 26,
+                "type": "max"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 24,
+                "right": 22,
+                "type": "sub"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 24,
+                "right": 22,
+                "type": "sub"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L14_other_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L18_overpayment",
+            "op": {
+                "cond": 28,
+                "otherwise": 30,
+                "then": 29,
+                "type": "if_positive"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L15_refundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "6": {
+            "id": 6,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L7_federal_agi",
+            "op": {
+                "left": 5,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "type": "literal",
+                "value": 12500
+            }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "type": "literal",
+                "value": 25000
+            }
+        }
+    },
+    "outputs": [
+        19,
+        22,
+        24,
+        27,
+        31,
+        7,
+        17
+    ],
+    "tables": {}
+}

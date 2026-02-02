@@ -52,6 +52,23 @@ class StateGraphConfig:  # noqa: D101
 
 
 STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
+    OTSState.AL: StateGraphConfig(
+        # AL Form 40 imports federal total income (US 1040 L9), subtracts adjustments
+        # to get AL AGI, then subtracts standard deduction or itemized deductions.
+        # The standard deduction phases out based on AL AGI using a complex chart;
+        # we map state_adjustment to standard_deduction input. AL uses 3-bracket system:
+        # 2% up to $500 (Single/MFS/HoH) or $1,000 (MFJ/QW), 4% to $3,000/$6,000, 5% over.
+        natural_to_node={
+            "itemized_deductions": "al_40_L12_itemized",
+            "state_adjustment": "al_40_L12_std",  # Standard deduction amount
+        },
+        output_lines={
+            "L8_total_income": "state_gross_income",
+            "L10_al_agi": "state_adjusted_gross_income",
+            "L14_al_taxable_income": "state_taxable_income",
+            "L15_al_tax": "state_total_tax",
+        },
+    ),
     OTSState.AZ: StateGraphConfig(
         # AZ Form 140 imports federal AGI and applies state-specific adjustments.
         # Exemptions are accepted as total dollar inputs (num_dependents cannot map
@@ -132,6 +149,38 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_ky_tax": "state_total_tax",
         },
     ),
+    OTSState.LA: StateGraphConfig(
+        # LA Form IT-540 imports federal AGI and applies Louisiana-specific
+        # adjustments. For 2024: progressive 3-bracket system (1.85%, 3.5%, 4.25%)
+        # with combined personal exemption-standard deduction ($4,500 Single,
+        # $9,000 MFJ) plus $1,000 per additional exemption. For 2025: flat 3% tax
+        # with standard deduction ($12,500 Single, $25,000 MFJ/HoH) and no
+        # dependent exemptions. Itemized deductions and exemption amounts are
+        # accepted as total input (num_dependents cannot map to dollar amounts).
+        natural_to_node={
+            "itemized_deductions": "la_it540_L8_itemized",
+            "dependent_exemptions": "la_it540_L6F_amount",
+        },
+        output_lines={
+            "L10_la_tax": "state_total_tax",
+        },
+    ),
+    OTSState.MD: StateGraphConfig(
+        # MD Form 502 imports federal AGI and applies Maryland-specific
+        # additions/subtractions. Deductions (standard or itemized) and personal
+        # exemptions are accepted as total input. Maryland uses a progressive
+        # bracket system with two different schedules: Schedule I (Single/MFS/Dep)
+        # and Schedule II (MFJ/HoH/QSS).
+        natural_to_node={
+            "itemized_deductions": "md_502_L17_itemized",
+            "dependent_exemptions": "md_502_L19_personal_exemptions",
+        },
+        output_lines={
+            "L16_md_agi": "state_adjusted_gross_income",
+            "L20_md_taxable_income": "state_taxable_income",
+            "L32_md_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.MI: StateGraphConfig(
         # MI-1040 imports federal AGI and applies additions/subtractions.
         # Exemptions are accepted as total input (num_dependents cannot map to
@@ -142,6 +191,36 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L11_mi_agi": "state_adjusted_gross_income",
             "L13_mi_taxable_income": "state_taxable_income",
             "L18_mi_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.MN: StateGraphConfig(
+        # MN Form M1 imports federal AGI and applies Minnesota-specific
+        # additions/subtractions. Minnesota uses a progressive bracket system
+        # (4 brackets: 5.35%, 6.80%, 7.85%, 9.85%) with different thresholds per
+        # filing status. Standard or itemized deductions are applied, and exemptions
+        # are accepted as total dollar input (num_dependents cannot map to exemptions).
+        natural_to_node={
+            "itemized_deductions": "mn_m1_L4_itemized",
+        },
+        output_lines={
+            "L1_federal_agi": "state_adjusted_gross_income",
+            "L9_mn_taxable_income": "state_taxable_income",
+            "L10_mn_tax": "state_total_tax",
+        },
+    ),
+    OTSState.MO: StateGraphConfig(
+        # MO Form 1040 imports federal AGI and applies Missouri-specific
+        # additions/subtractions. Missouri allows a deduction for federal taxes paid
+        # (accepted as input). Standard or itemized deductions are applied, and
+        # exemptions are accepted as total dollar input. Missouri uses a single
+        # progressive bracket schedule (8 brackets, same for all filing statuses).
+        natural_to_node={
+            "itemized_deductions": "mo_1040_L19_itemized",
+        },
+        output_lines={
+            "L16_mo_agi": "state_adjusted_gross_income",
+            "L22_mo_taxable_income": "state_taxable_income",
+            "L32_mo_total_tax": "state_total_tax",
         },
     ),
     OTSState.NC: StateGraphConfig(
@@ -183,6 +262,19 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L9_total_pa_taxable_income": "state_adjusted_gross_income",
             "L11_adjusted_pa_taxable_income": "state_taxable_income",
             "L12_pa_tax_liability": "state_total_tax",
+        },
+    ),
+    OTSState.SC: StateGraphConfig(
+        # SC Form 1040 imports federal taxable income (not AGI) and applies
+        # additions/subtractions. Dependent exemptions are accepted as total input
+        # (num_dependents cannot map to dollar amounts). SC uses same tax brackets
+        # for all filing statuses: 0% up to $3,560, 3% from $3,560-$17,830,
+        # 6.2% over $17,830 (2024) / 6% over $17,830 (2025).
+        natural_to_node={},
+        output_lines={
+            "L1_federal_taxable_income": "state_adjusted_gross_income",
+            "L5_sc_taxable_income": "state_taxable_income",
+            "L6_sc_tax": "state_total_tax",
         },
     ),
     OTSState.NJ: StateGraphConfig(

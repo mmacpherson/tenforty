@@ -121,6 +121,7 @@ class OTSDeductionType(StrEnum):
 class OTSState(Enum):
     NONE = None
 
+    AL = "AL"
     AZ = "AZ"
     CA = "CA"
     CO = "CO"
@@ -128,13 +129,18 @@ class OTSState(Enum):
     IL = "IL"
     IN = "IN"
     KY = "KY"
+    LA = "LA"
     MA = "MA"
+    MD = "MD"
     MI = "MI"
+    MN = "MN"
+    MO = "MO"
     NC = "NC"
     NJ = "NJ"
     NY = "NY"
     OH = "OH"
     PA = "PA"
+    SC = "SC"
     VA = "VA"
     WI = "WI"
 
@@ -151,6 +157,7 @@ class OTSState(Enum):
 STATE_TO_FORM = {
     OTSState.NONE: None,
     #
+    OTSState.AL: "AL_40",
     OTSState.AZ: "AZ_140",
     OTSState.CA: "CA_540",
     OTSState.CO: "CO_Form104",
@@ -158,13 +165,18 @@ STATE_TO_FORM = {
     OTSState.IL: "IL_1040",
     OTSState.IN: "IN_IT40",
     OTSState.KY: "KY_740",
+    OTSState.LA: "LA_IT540",
     OTSState.MA: "MA_1",
+    OTSState.MD: "MD_502",
     OTSState.MI: "MI_1040",
+    OTSState.MN: "MN_M1",
+    OTSState.MO: "MO_1040",
     OTSState.NC: "NC_D400",
     OTSState.NJ: "NJ_1040",
     OTSState.NY: "NY_IT201",
     OTSState.OH: "OH_IT1040",
     OTSState.PA: "PA_40",
+    OTSState.SC: "SC_1040",
     OTSState.VA: "VA_760",
     OTSState.WI: "WI_Form1",
     # No income-tax states
