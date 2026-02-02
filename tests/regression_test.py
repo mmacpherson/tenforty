@@ -62,6 +62,40 @@ NY_SCENARIOS = [
     },
 ]
 
+# AZ scenarios use graph backend (flat 2.5% rate for 2024 and 2025).
+AZ_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "AZ",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 1400,
+        "expected_state_max": 1600,
+    },
+    {
+        "year": 2024,
+        "state": "AZ",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 3200,
+        "expected_state_max": 3500,
+    },
+    {
+        "year": 2024,
+        "state": "AZ",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 4100,
+        "expected_state_max": 4400,
+    },
+]
+
 # GA scenarios use graph backend (flat 5.39% rate for 2024).
 GA_SCENARIOS = [
     {
@@ -371,6 +405,39 @@ IL_SCENARIOS = [
     },
 ]
 
+IN_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "IN",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2100,
+        "expected_state_max": 2400,
+    },
+    {
+        "year": 2024,
+        "state": "IN",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 4300,
+        "expected_state_max": 4800,
+    },
+    {
+        "year": 2024,
+        "state": "IN",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 5800,
+        "expected_state_max": 6300,
+    },
+]
+
 VA_SCENARIOS = [
     {
         "year": 2024,
@@ -444,6 +511,18 @@ def _run_range_scenario(scenario):
         f"State tax {result.state_total_tax} not in expected range "
         f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
     )
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    AZ_SCENARIOS,
+    ids=lambda s: f"AZ-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_az_tax_ranges(scenario):
+    """Sanity check: AZ tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
 
 
 @pytest.mark.parametrize(
@@ -574,14 +653,122 @@ def test_il_tax_ranges(scenario):
     _run_range_scenario(scenario_with_backend)
 
 
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    IN_SCENARIOS,
+    ids=lambda s: f"IN-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_in_tax_ranges(scenario):
+    """Sanity check: IN tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+CO_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "CO",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2400,
+        "expected_state_max": 2700,
+    },
+    {
+        "year": 2024,
+        "state": "CO",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 5500,
+        "expected_state_max": 6000,
+    },
+    {
+        "year": 2024,
+        "state": "CO",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 6700,
+        "expected_state_max": 7500,
+    },
+]
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    CO_SCENARIOS,
+    ids=lambda s: f"CO-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_co_tax_ranges(scenario):
+    """Sanity check: CO tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+KY_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "KY",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 8000,
+        "expected_federal_max": 10000,
+        "expected_state_min": 2600,
+        "expected_state_max": 3100,
+    },
+    {
+        "year": 2024,
+        "state": "KY",
+        "filing_status": "Single",
+        "w2_income": 150000,
+        "expected_federal_min": 24000,
+        "expected_federal_max": 28000,
+        "expected_state_min": 5600,
+        "expected_state_max": 6200,
+    },
+    {
+        "year": 2024,
+        "state": "KY",
+        "filing_status": "Married/Joint",
+        "w2_income": 200000,
+        "expected_federal_min": 27000,
+        "expected_federal_max": 29000,
+        "expected_state_min": 7500,
+        "expected_state_max": 8200,
+    },
+]
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    KY_SCENARIOS,
+    ids=lambda s: f"KY-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_ky_tax_ranges(scenario):
+    """Sanity check: KY tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
 @pytest.mark.parametrize(
     "state,backend",
     [
+        pytest.param("AZ", "graph", marks=pytest.mark.requires_graph),
         ("CA", None),
+        pytest.param("CO", "graph", marks=pytest.mark.requires_graph),
         ("NY", None),
         ("MA", None),
         pytest.param("GA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("IL", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("IN", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("KY", "graph", marks=pytest.mark.requires_graph),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NJ", "graph", marks=pytest.mark.requires_graph),

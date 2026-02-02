@@ -121,9 +121,13 @@ class OTSDeductionType(StrEnum):
 class OTSState(Enum):
     NONE = None
 
+    AZ = "AZ"
     CA = "CA"
+    CO = "CO"
     GA = "GA"
     IL = "IL"
+    IN = "IN"
+    KY = "KY"
     MA = "MA"
     MI = "MI"
     NC = "NC"
@@ -147,9 +151,13 @@ class OTSState(Enum):
 STATE_TO_FORM = {
     OTSState.NONE: None,
     #
+    OTSState.AZ: "AZ_140",
     OTSState.CA: "CA_540",
+    OTSState.CO: "CO_Form104",
     OTSState.GA: "GA_500",
     OTSState.IL: "IL_1040",
+    OTSState.IN: "IN_IT40",
+    OTSState.KY: "KY_740",
     OTSState.MA: "MA_1",
     OTSState.MI: "MI_1040",
     OTSState.NC: "NC_D400",
