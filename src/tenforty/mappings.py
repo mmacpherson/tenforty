@@ -52,6 +52,19 @@ class StateGraphConfig:  # noqa: D101
 
 
 STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
+    OTSState.AZ: StateGraphConfig(
+        # AZ Form 140 imports federal AGI and applies state-specific adjustments.
+        # Exemptions are accepted as total dollar inputs (num_dependents cannot map
+        # to dollar amounts due to natural_to_node limitation).
+        natural_to_node={
+            "itemized_deductions": "az_140_L43_itemized",
+        },
+        output_lines={
+            "L42_az_agi": "state_adjusted_gross_income",
+            "L45_az_taxable_income": "state_taxable_income",
+            "L52_tax_after_credits": "state_total_tax",
+        },
+    ),
     OTSState.CA: StateGraphConfig(
         natural_to_node={
             "itemized_deductions": "ca_540_L18_itemized",
@@ -62,6 +75,17 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L17_ca_agi": "state_adjusted_gross_income",
             "L19_ca_taxable_income": "state_taxable_income",
             "L64_ca_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.CO: StateGraphConfig(
+        # CO Form 104 starts from federal taxable income (not AGI) and applies
+        # additions and subtractions. Colorado uses a flat tax rate (4.25% for 2024,
+        # 4.4% for 2025).
+        natural_to_node={},
+        output_lines={
+            "L1_federal_taxable_income": "state_adjusted_gross_income",
+            "L11_co_taxable_income": "state_taxable_income",
+            "L12_co_income_tax": "state_total_tax",
         },
     ),
     OTSState.GA: StateGraphConfig(
@@ -84,6 +108,28 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L9_il_base_income": "state_adjusted_gross_income",
             "L11_il_net_income": "state_taxable_income",
             "L12_il_tax": "state_total_tax",
+        },
+    ),
+    OTSState.IN: StateGraphConfig(
+        # IN IT-40 imports federal AGI and applies add-backs/deductions.
+        # Exemptions are accepted as total input (num_dependents cannot map to
+        # dollar amounts due to natural_to_node limitation).
+        # Indiana AGI is the taxable income (no separate standard deduction).
+        natural_to_node={},
+        output_lines={
+            "L7_in_agi": "state_adjusted_gross_income",
+            "L9_in_state_tax": "state_total_tax",
+        },
+    ),
+    OTSState.KY: StateGraphConfig(
+        # KY Form 740 imports federal AGI and applies Kentucky-specific
+        # additions/subtractions. Deductions (standard or itemized) are accepted
+        # as total input. Kentucky uses a flat 4% tax rate on taxable income.
+        natural_to_node={},
+        output_lines={
+            "L9_ky_agi": "state_adjusted_gross_income",
+            "L11_ky_taxable_income": "state_taxable_income",
+            "L12_ky_tax": "state_total_tax",
         },
     ),
     OTSState.MI: StateGraphConfig(

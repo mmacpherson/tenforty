@@ -413,6 +413,89 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
 
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
 SILVER_STANDARD_STATE_SCENARIOS = [
+    # ========== ARIZONA SCENARIOS ==========
+    # AZ 2024: Flat 2.5% rate
+    # Standard Deduction: Single $14,600, MFJ $29,200, HoH $21,900
+    #
+    # AZ Single, $50,000 W2
+    # Fed AGI: $50,000
+    # AZ AGI: $50,000 (assuming no exemptions/additions/subtractions)
+    # AZ Taxable: $50,000 - $14,600 = $35,400
+    # AZ Tax: $35,400 * 0.025 = $885.00
+    # Federal taxable: $50,000 - $14,600 = $35,400
+    # Federal tax: $11,925 x 0.10 + $23,475 x 0.12 = $1,192.50 + $2,817 = $4,009.50 -> $4016
+    TaxScenario(
+        source="AZ 2024 Tax Brackets (computed)",
+        description="AZ Single, $50,000 income",
+        year=2024,
+        state="AZ",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=885.00,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # AZ MFJ, $100,000 W2
+    # Fed AGI: $100,000
+    # AZ AGI: $100,000
+    # AZ Taxable: $100,000 - $29,200 = $70,800
+    # AZ Tax: $70,800 * 0.025 = $1,770.00
+    # Federal taxable: $100,000 - $29,200 = $70,800
+    # Federal tax: $23,850 x 0.10 + $46,950 x 0.12 = $2,385 + $5,634 = $8,019 -> $8032
+    TaxScenario(
+        source="AZ 2024 Tax Brackets (computed)",
+        description="AZ MFJ, $100,000 income",
+        year=2024,
+        state="AZ",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=1770.00,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # AZ HoH, $75,000 W2
+    # Fed AGI: $75,000
+    # AZ AGI: $75,000
+    # AZ Taxable: $75,000 - $21,900 = $53,100
+    # AZ Tax: $53,100 * 0.025 = $1,327.50
+    # Federal taxable: $75,000 - $21,900 = $53,100
+    # Federal tax: $6,041 (OTS calculation)
+    TaxScenario(
+        source="AZ 2024 Tax Brackets (computed)",
+        description="AZ HoH, $75,000 income",
+        year=2024,
+        state="AZ",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=1327.50,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # AZ 2025: Flat 2.5% rate (unchanged from 2024)
+    # Standard Deduction: Single $15,750, MFJ $31,500, HoH $23,625
+    #
+    # AZ Single, $50,000 W2
+    # Fed AGI: $50,000
+    # AZ AGI: $50,000
+    # AZ Taxable: $50,000 - $15,750 = $34,250
+    # AZ Tax: $34,250 * 0.025 = $856.25
+    # Federal 2025: Std ded $15,000, taxable $35,000
+    # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="AZ 2025 Tax Brackets (computed)",
+        description="AZ Single, $50,000 income (2025, increased std ded)",
+        year=2025,
+        state="AZ",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=856.25,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
     # ========== CALIFORNIA SCENARIOS ==========
     # CA 2024: Standard deduction $5,540, Personal exemption credit $149
     # Brackets: 1% ($0-$10,756), 2% ($10,756-$25,499), 4% ($25,499-$40,245),
@@ -1329,6 +1412,249 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=10323.0,
         expected_state_tax=5940.0,
         expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # ========== INDIANA SCENARIOS ==========
+    # IN 2024: Flat 3.05% rate, Personal exemption $1,000 per person
+    # IN 2025: Flat 3.00% rate, Personal exemption $1,000 per person
+    # No standard deduction (uses personal exemptions instead)
+    # IN tax = (Federal AGI - exemptions) * rate
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # IN 2024 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000
+    # IN AGI: $50,000 (no add-backs/deductions/exemptions)
+    # IN State Tax: $50,000 * 0.0305 = $1,525.00
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="IN 2024 Tax Rate (computed)",
+        description="IN Single, $50,000 W2 only",
+        year=2024,
+        state="IN",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1525.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # IN 2024 MFJ, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000
+    # IN AGI: $100,000
+    # IN State Tax: $100,000 * 0.0305 = $3,050.00
+    # Federal taxable: $70,800, Federal tax: $8,032
+    TaxScenario(
+        source="IN 2024 Tax Rate (computed)",
+        description="IN MFJ, $100,000 W2 only",
+        year=2024,
+        state="IN",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3050.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # IN 2024 Head_of_House, $75,000 W2 only, no exemptions
+    # Federal AGI: $75,000
+    # IN AGI: $75,000
+    # IN State Tax: $75,000 * 0.0305 = $2,287.50
+    # Federal taxable: $53,100, Federal tax: $6,041
+    TaxScenario(
+        source="IN 2024 Tax Rate (computed)",
+        description="IN HoH, $75,000 W2 only",
+        year=2024,
+        state="IN",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2287.5,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # IN 2025 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000
+    # IN AGI: $50,000
+    # IN State Tax: $50,000 * 0.03 = $1,500.00
+    # Federal taxable: $35,000, Federal tax: $3,961.50
+    TaxScenario(
+        source="IN 2025 Tax Rate (computed)",
+        description="IN Single, $50,000 W2 only (2025)",
+        year=2025,
+        state="IN",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1500.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # ========== COLORADO SCENARIOS ==========
+    # CO 2024: Flat 4.25% rate, starts from federal taxable income
+    # CO 2025: Flat 4.4% rate, starts from federal taxable income
+    # Colorado uses federal taxable income (US 1040 L15) as starting point,
+    # not federal AGI.
+    #
+    # CO 2024 Single, $50,000 W2
+    # Federal AGI: $50,000
+    # Federal standard deduction (2024 Single): $14,600
+    # Federal taxable income: $50,000 - $14,600 = $35,400
+    # CO starting point (L1): $35,400
+    # CO taxable income (L11, assuming no additions/subtractions): $35,400
+    # CO tax (L12): $35,400 * 0.0425 = $1,504.50
+    # Federal tax: $4,016
+    TaxScenario(
+        source="CO 2024 Tax Rate (computed)",
+        description="CO Single, $50,000 W2 only",
+        year=2024,
+        state="CO",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1504.50,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # CO 2024 MFJ, $100,000 W2
+    # Federal AGI: $100,000
+    # Federal standard deduction (2024 MFJ): $29,200
+    # Federal taxable income: $100,000 - $29,200 = $70,800
+    # CO starting point (L1): $70,800
+    # CO taxable income (L11): $70,800
+    # CO tax (L12): $70,800 * 0.0425 = $3,009.00
+    # Federal tax: $8,032
+    TaxScenario(
+        source="CO 2024 Tax Rate (computed)",
+        description="CO MFJ, $100,000 W2 only",
+        year=2024,
+        state="CO",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3009.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # CO 2024 HoH, $75,000 W2
+    # Federal AGI: $75,000
+    # Federal standard deduction (2024 HoH): $21,900
+    # Federal taxable income: $75,000 - $21,900 = $53,100
+    # CO starting point (L1): $53,100
+    # CO taxable income (L11): $53,100
+    # CO tax (L12): $53,100 * 0.0425 = $2,256.75
+    # Federal tax: $6,041
+    TaxScenario(
+        source="CO 2024 Tax Rate (computed)",
+        description="CO HoH, $75,000 W2 only",
+        year=2024,
+        state="CO",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2256.75,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # CO 2025 Single, $50,000 W2
+    # Federal AGI: $50,000
+    # Federal standard deduction (2025 Single): $15,000
+    # Federal taxable income: $50,000 - $15,000 = $35,000
+    # CO starting point (L1): $35,000
+    # CO taxable income (L11): $35,000
+    # CO tax (L12): $35,000 * 0.044 = $1,540.00
+    # Federal tax: $3,961.50
+    TaxScenario(
+        source="CO 2025 Tax Rate (computed)",
+        description="CO Single, $50,000 W2 only (2025)",
+        year=2025,
+        state="CO",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1540.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # ========== KENTUCKY SCENARIOS ==========
+    # KY uses a flat 4% tax rate on taxable income.
+    # Standard deduction: $3,160 for 2024, $3,270 for 2025
+    # Kentucky starts from federal AGI and applies state-specific additions/subtractions
+    # to arrive at Kentucky AGI, then subtracts deductions to get taxable income.
+    #
+    # KY 2024 Single, $50,000 W2 only, no add-backs/subtractions
+    # Federal AGI: $50,000
+    # KY AGI (L9): $50,000 (no additions or subtractions)
+    # KY standard deduction: $3,160
+    # KY taxable income (L11): $50,000 - $3,160 = $46,840
+    # KY tax (L12): $46,840 * 0.04 = $1,873.60
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="KY 2024 Tax Rate (computed)",
+        description="KY Single, $50,000 W2 only",
+        year=2024,
+        state="KY",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1873.6,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # KY 2024 MFJ, $100,000 W2 only, no add-backs/subtractions
+    # Federal AGI: $100,000
+    # KY AGI (L9): $100,000
+    # KY standard deduction: $3,160 (single deduction for joint filers)
+    # KY taxable income (L11): $100,000 - $3,160 = $96,840
+    # KY tax (L12): $96,840 * 0.04 = $3,873.60
+    # Federal taxable: $70,800, Federal tax: $8,032
+    TaxScenario(
+        source="KY 2024 Tax Rate (computed)",
+        description="KY MFJ, $100,000 W2 only",
+        year=2024,
+        state="KY",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3873.6,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # KY 2024 Head_of_House, $75,000 W2 only, no add-backs/subtractions
+    # Federal AGI: $75,000
+    # KY AGI (L9): $75,000
+    # KY standard deduction: $3,160
+    # KY taxable income (L11): $75,000 - $3,160 = $71,840
+    # KY tax (L12): $71,840 * 0.04 = $2,873.60
+    # Federal taxable: $53,100, Federal tax: $6,041
+    TaxScenario(
+        source="KY 2024 Tax Rate (computed)",
+        description="KY HoH, $75,000 W2 only",
+        year=2024,
+        state="KY",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2873.6,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # KY 2025 Single, $50,000 W2 only, no add-backs/subtractions
+    # Federal AGI: $50,000
+    # KY AGI (L9): $50,000
+    # KY standard deduction (2025): $3,270
+    # KY taxable income (L11): $50,000 - $3,270 = $46,730
+    # KY tax (L12): $46,730 * 0.04 = $1,869.20
+    # Federal taxable: $35,000, Federal tax: $3,961.50
+    TaxScenario(
+        source="KY 2025 Tax Rate (computed)",
+        description="KY Single, $50,000 W2 only (2025)",
+        year=2025,
+        state="KY",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1869.2,
+        expected_federal_agi=50000.0,
         backend="graph",
     ),
     # ========== NORTH CAROLINA SCENARIOS ==========
