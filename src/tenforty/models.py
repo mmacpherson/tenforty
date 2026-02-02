@@ -122,10 +122,13 @@ class OTSState(Enum):
     NONE = None
 
     AL = "AL"
+    AR = "AR"
     AZ = "AZ"
     CA = "CA"
     CO = "CO"
     GA = "GA"
+    IA = "IA"
+    ID = "ID"
     IL = "IL"
     IN = "IN"
     KY = "KY"
@@ -133,14 +136,17 @@ class OTSState(Enum):
     MA = "MA"
     MD = "MD"
     MI = "MI"
+    MS = "MS"
     MN = "MN"
     MO = "MO"
     NC = "NC"
     NJ = "NJ"
     NY = "NY"
     OH = "OH"
+    OK = "OK"
     PA = "PA"
     SC = "SC"
+    UT = "UT"
     VA = "VA"
     WI = "WI"
 
@@ -158,10 +164,13 @@ STATE_TO_FORM = {
     OTSState.NONE: None,
     #
     OTSState.AL: "AL_40",
+    OTSState.AR: "AR_AR1000F",
     OTSState.AZ: "AZ_140",
     OTSState.CA: "CA_540",
     OTSState.CO: "CO_Form104",
     OTSState.GA: "GA_500",
+    OTSState.IA: "IA_IA1040",
+    OTSState.ID: "ID_FORM40",
     OTSState.IL: "IL_1040",
     OTSState.IN: "IN_IT40",
     OTSState.KY: "KY_740",
@@ -169,14 +178,17 @@ STATE_TO_FORM = {
     OTSState.MA: "MA_1",
     OTSState.MD: "MD_502",
     OTSState.MI: "MI_1040",
+    OTSState.MS: "MS_80105",
     OTSState.MN: "MN_M1",
     OTSState.MO: "MO_1040",
     OTSState.NC: "NC_D400",
     OTSState.NJ: "NJ_1040",
     OTSState.NY: "NY_IT201",
     OTSState.OH: "OH_IT1040",
+    OTSState.OK: "OK_511",
     OTSState.PA: "PA_40",
     OTSState.SC: "SC_1040",
+    OTSState.UT: "UT_TC40",
     OTSState.VA: "VA_760",
     OTSState.WI: "WI_Form1",
     # No income-tax states

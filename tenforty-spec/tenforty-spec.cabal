@@ -55,6 +55,8 @@ executable tenforty-compile
   other-modules:
     ALForm40_2024
     ALForm40_2025
+    ARAR1000F_2024
+    ARAR1000F_2025
     AZForm140_2024
     AZForm140_2025
     CA540_2024
@@ -81,6 +83,8 @@ executable tenforty-compile
     MDForm502_2025
     MI1040_2024
     MI1040_2025
+    MS80105_2024
+    MS80105_2025
     MNFormM1_2024
     MNFormM1_2025
     MOForm1040_2024
@@ -91,6 +95,8 @@ executable tenforty-compile
     NJ1040_2025
     NYIT201_2024
     NYIT201_2025
+    OK511_2024
+    OK511_2025
     OHIT1040_2024
     OHIT1040_2025
     PA40_2024
@@ -99,8 +105,16 @@ executable tenforty-compile
     SCForm1040_2025
     Tables2024
     Tables2025
+    IAIA1040_2024
+    IAIA1040_2025
+    IDFORM40_2024
+    IDFORM40_2025
+    UTTC40_2024
+    UTTC40_2025
     TablesAL2024
     TablesAL2025
+    TablesAR2024
+    TablesAR2025
     TablesAZ2024
     TablesAZ2025
     TablesCA2024
@@ -109,6 +123,10 @@ executable tenforty-compile
     TablesCO2025
     TablesGA2024
     TablesGA2025
+    TablesIA2024
+    TablesIA2025
+    TablesID2024
+    TablesID2025
     TablesIL2024
     TablesIL2025
     TablesIN2024
@@ -121,6 +139,8 @@ executable tenforty-compile
     TablesMD2025
     TablesMI2024
     TablesMI2025
+    TablesMS2024
+    TablesMS2025
     TablesMN2024
     TablesMN2025
     TablesMO2024
@@ -131,10 +151,14 @@ executable tenforty-compile
     TablesNJ2025
     TablesNY2024
     TablesNY2025
+    TablesOK2024
+    TablesOK2025
     TablesOH2024
     TablesOH2025
     TablesSC2024
     TablesSC2025
+    TablesUT2024
+    TablesUT2025
     TablesVA2024
     TablesVA2025
     TablesWI2024
@@ -235,6 +259,8 @@ test-suite tenforty-spec-test
     MDForm502_2025
     MI1040_2024
     MI1040_2025
+    MS80105_2024
+    MS80105_2025
     MNFormM1_2024
     MNFormM1_2025
     MOForm1040_2024
@@ -245,6 +271,8 @@ test-suite tenforty-spec-test
     NJ1040_2025
     NYIT201_2024
     NYIT201_2025
+    OK511_2024
+    OK511_2025
     OHIT1040_2024
     OHIT1040_2025
     PA40_2024
@@ -253,8 +281,16 @@ test-suite tenforty-spec-test
     SCForm1040_2025
     Tables2024
     Tables2025
+    IAIA1040_2024
+    IAIA1040_2025
+    IDFORM40_2024
+    IDFORM40_2025
+    UTTC40_2024
+    UTTC40_2025
     TablesAL2024
     TablesAL2025
+    TablesAR2024
+    TablesAR2025
     TablesAZ2024
     TablesAZ2025
     TablesCA2024
@@ -263,6 +299,10 @@ test-suite tenforty-spec-test
     TablesCO2025
     TablesGA2024
     TablesGA2025
+    TablesIA2024
+    TablesIA2025
+    TablesID2024
+    TablesID2025
     TablesIL2024
     TablesIL2025
     TablesIN2024
@@ -275,6 +315,8 @@ test-suite tenforty-spec-test
     TablesMD2025
     TablesMI2024
     TablesMI2025
+    TablesMS2024
+    TablesMS2025
     TablesMN2024
     TablesMN2025
     TablesMO2024
@@ -285,10 +327,14 @@ test-suite tenforty-spec-test
     TablesNJ2025
     TablesNY2024
     TablesNY2025
+    TablesOK2024
+    TablesOK2025
     TablesOH2024
     TablesOH2025
     TablesSC2024
     TablesSC2025
+    TablesUT2024
+    TablesUT2025
     TablesVA2024
     TablesVA2025
     TablesWI2024

@@ -1,0 +1,364 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        },
+        {
+            "form": "us_1040",
+            "line": "L12Final",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ],
+    "meta": {
+        "form_id": "ut_tc40",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L5_ut_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L7_state_tax_refund",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L4_federal_agi",
+            "op": {
+                "left": 9,
+                "right": 10,
+                "type": "add"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L6_total_income",
+            "op": {
+                "left": 11,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "left": 12,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L9_ut_taxable_income_initial",
+            "op": {
+                "left": 13,
+                "right": 2,
+                "type": "sub"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 4.55e-2
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L10_ut_tax_initial",
+            "op": {
+                "left": 14,
+                "right": 15,
+                "type": "mul"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L12_federal_deductions",
+            "op": {
+                "form": "us_1040",
+                "line": "L12Final",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L13_total_exemptions_deductions",
+            "op": {
+                "left": 3,
+                "right": 17,
+                "type": "add"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L8_ut_subtractions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "left": 18,
+                "right": 4,
+                "type": "sub"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L15_net_deductions",
+            "op": {
+                "left": 19,
+                "right": 20,
+                "type": "max"
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "type": "literal",
+                "value": 6.0e-2
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L16_nonrefundable_credits",
+            "op": {
+                "left": 21,
+                "right": 22,
+                "type": "mul"
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 16,
+                "right": 23,
+                "type": "sub"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "L17_ut_tax_after_credits",
+            "op": {
+                "left": 24,
+                "right": 25,
+                "type": "max"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L19_total_nonrefundable_credits",
+            "op": {
+                "left": 23,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 16,
+                "right": 27,
+                "type": "sub"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L11_personal_exemption",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "L20_ut_total_tax",
+            "op": {
+                "left": 28,
+                "right": 29,
+                "type": "max"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L23_total_payments",
+            "op": {
+                "left": 6,
+                "right": 7,
+                "type": "add"
+            }
+        },
+        "32": {
+            "id": 32,
+            "name": "L25_total_payments_and_credits",
+            "op": {
+                "left": 31,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "left": 30,
+                "right": 32,
+                "type": "sub"
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L26_tax_due",
+            "op": {
+                "left": 33,
+                "right": 34,
+                "type": "max"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 32,
+                "right": 30,
+                "type": "sub"
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 32,
+                "right": 30,
+                "type": "sub"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "39": {
+            "id": 39,
+            "name": "L27_overpayment",
+            "op": {
+                "cond": 36,
+                "otherwise": 38,
+                "then": 37,
+                "type": "if_positive"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L14_state_tax_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L18_other_nonrefundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L21_ut_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L22_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L24_refundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        }
+    },
+    "outputs": [
+        26,
+        30,
+        31,
+        32,
+        35,
+        39,
+        11,
+        14
+    ],
+    "tables": {}
+}

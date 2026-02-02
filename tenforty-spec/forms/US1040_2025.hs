@@ -73,7 +73,7 @@ us1040_2025 = form "us_1040" 2025 $ do
             baseStdDed .+. additionalStdDed
 
     l12Final <-
-        interior "L12Final" "deduction_amount" $
+        keyOutput "L12Final" "deduction_amount" "Standard or itemized deduction" $
             ifPos l12 l12 stdDed
 
     -- Taxable income before the QBI deduction (used by Form 8995). This avoids
@@ -167,6 +167,7 @@ us1040_2025 = form "us_1040" 2025 $ do
         [ "L1z"
         , "L9"
         , "L11"
+        , "L12Final"
         , "L14"
         , "L15_pre_qbi"
         , "L15"

@@ -1628,6 +1628,389 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=75000.0,
         backend="graph",
     ),
+    # ========== UTAH SCENARIOS ==========
+    # UT 2024: Flat 4.55% rate, Personal exemption $2,046 per dependent
+    # UT 2025: Flat 4.5% rate, Personal exemption $2,111 per dependent
+    # Utah tax = (Fed AGI - additions + subtractions) * rate
+    # Then subtract 6% credit on (personal exemptions + federal deductions - state tax deduction)
+    # These scenarios assume no additions/subtractions, no state tax deduction.
+    #
+    # UT 2024 Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000, Fed std ded: $14,600, Fed taxable: $35,400
+    # Fed tax (formula): $11,600 * 0.10 + $23,800 * 0.12 = $1,160 + $2,856 = $4,016
+    # UT taxable: $50,000 (no adjustments)
+    # UT tax initial: $50,000 * 0.0455 = $2,275.00
+    # Personal exemptions: $0, Federal deductions: $14,600
+    # Credit: ($0 + $14,600 - $0) * 0.06 = $876.00
+    # UT tax: $2,275.00 - $876.00 = $1,399.00
+    TaxScenario(
+        source="UT 2024 Tax Brackets (computed)",
+        description="UT Single, $50,000 W2, no dependents",
+        year=2024,
+        state="UT",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1399.00,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # UT 2024 MFJ, $100,000 W2, no dependents
+    # Fed AGI: $100,000, Fed std ded: $29,200, Fed taxable: $70,800
+    # Fed tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
+    # UT taxable: $100,000
+    # UT tax initial: $100,000 * 0.0455 = $4,550.00
+    # Credit: ($0 + $29,200 - $0) * 0.06 = $1,752.00
+    # UT tax: $4,550.00 - $1,752.00 = $2,798.00
+    TaxScenario(
+        source="UT 2024 Tax Brackets (computed)",
+        description="UT MFJ, $100,000 W2, no dependents",
+        year=2024,
+        state="UT",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=2798.00,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # UT 2025 Single, $50,000 W2, no dependents
+    # Fed std ded 2025: $15,000, Fed taxable: $35,000
+    # Fed tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # UT taxable: $50,000
+    # UT tax initial: $50,000 * 0.045 = $2,250.00
+    # Credit: ($0 + $15,000 - $0) * 0.06 = $900.00
+    # UT tax: $2,250.00 - $900.00 = $1,350.00
+    TaxScenario(
+        source="UT 2025 Tax Brackets (computed)",
+        description="UT Single, $50,000 W2, no dependents (2025)",
+        year=2025,
+        state="UT",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1350.00,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # UT 2025 MFJ, $75,000 W2, no dependents
+    # Fed std ded 2025: $30,000, Fed taxable: $45,000
+    # Fed tax: $23,850 * 0.10 + $21,150 * 0.12 = $2,385 + $2,538 = $4,923
+    # UT taxable: $75,000
+    # UT tax initial: $75,000 * 0.045 = $3,375.00
+    # Credit: ($0 + $30,000 - $0) * 0.06 = $1,800.00
+    # UT tax: $3,375.00 - $1,800.00 = $1,575.00
+    TaxScenario(
+        source="UT 2025 Tax Brackets (computed)",
+        description="UT MFJ, $75,000 W2, no dependents (2025)",
+        year=2025,
+        state="UT",
+        filing_status="Married/Joint",
+        w2_income=75000.0,
+        expected_federal_tax=4923.0,
+        expected_state_tax=1575.00,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # ========== IOWA SCENARIOS ==========
+    # IA 2024: Progressive brackets (4.4%, 4.82%, 5.7%)
+    # Single: 0-6,210: 4.4%, 6,210-31,050: 4.82%, 31,050+: 5.7%
+    # MFJ: 0-12,420: 4.4%, 12,420-62,100: 4.82%, 62,100+: 5.7%
+    # IA 2025: Flat 3.8% rate
+    # IA taxable income = Federal taxable income + Iowa modifications
+    #
+    # IA 2024 Single, $40,000 W2, no dependents
+    # Fed AGI: $40,000, Fed std ded: $14,600, Fed taxable: $25,400
+    # Fed tax: $11,600 * 0.10 + $13,800 * 0.12 = $1,160 + $1,656 = $2,816
+    # IA taxable: $25,400 (assuming no Iowa modifications)
+    # IA tax: $6,210 * 0.044 + ($25,400 - $6,210) * 0.0482
+    #       = $273.24 + $19,190 * 0.0482
+    #       = $273.24 + $924.96 = $1,198.20
+    TaxScenario(
+        source="IA 2024 Tax Brackets (computed)",
+        description="IA Single, $40,000 W2, no dependents",
+        year=2024,
+        state="IA",
+        filing_status="Single",
+        w2_income=40000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=1198.20,
+        expected_federal_agi=40000.0,
+        backend="graph",
+    ),
+    # IA 2024 MFJ, $80,000 W2, no dependents
+    # Fed AGI: $80,000, Fed std ded: $29,200, Fed taxable: $50,800
+    # Fed tax: $23,200 * 0.10 + $27,600 * 0.12 = $2,320 + $3,312 = $5,632
+    # IA taxable: $50,800 (assuming no Iowa modifications)
+    # IA tax: $12,420 * 0.044 + ($50,800 - $12,420) * 0.0482
+    #       = $546.48 + $38,380 * 0.0482
+    #       = $546.48 + $1,849.92 = $2,396.40
+    TaxScenario(
+        source="IA 2024 Tax Brackets (computed)",
+        description="IA MFJ, $80,000 W2, no dependents",
+        year=2024,
+        state="IA",
+        filing_status="Married/Joint",
+        w2_income=80000.0,
+        expected_federal_tax=5632.0,
+        expected_state_tax=2396.40,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # IA 2024 Single, $35,000 W2, no dependents (higher bracket)
+    # Fed AGI: $35,000, Fed std ded: $14,600, Fed taxable: $20,400
+    # Fed tax: $11,600 * 0.10 + $8,800 * 0.12 = $1,160 + $1,056 = $2,216
+    # IA taxable: $20,400 (assuming no Iowa modifications)
+    # IA tax: $6,210 * 0.044 + ($20,400 - $6,210) * 0.0482
+    #       = $273.24 + $14,190 * 0.0482
+    #       = $273.24 + $683.96 = $957.20
+    TaxScenario(
+        source="IA 2024 Tax Brackets (computed)",
+        description="IA Single, $35,000 W2, no dependents",
+        year=2024,
+        state="IA",
+        filing_status="Single",
+        w2_income=35000.0,
+        expected_federal_tax=2216.0,
+        expected_state_tax=957.20,
+        expected_federal_agi=35000.0,
+        backend="graph",
+    ),
+    # IA 2025 Single, $50,000 W2, no dependents (flat tax)
+    # Fed AGI: $50,000, Fed std ded 2025: $15,000, Fed taxable: $35,000
+    # Fed tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # IA taxable: $35,000 (assuming no Iowa modifications)
+    # IA tax: $35,000 * 0.038 = $1,330.00
+    TaxScenario(
+        source="IA 2025 Tax Brackets (computed)",
+        description="IA Single, $50,000 W2, no dependents (2025 flat tax)",
+        year=2025,
+        state="IA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1330.00,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # IA 2025 MFJ, $100,000 W2, no dependents (flat tax)
+    # Fed AGI: $100,000, Fed std ded 2025: $30,000, Fed taxable: $70,000
+    # Fed tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923
+    # IA taxable: $70,000 (assuming no Iowa modifications)
+    # IA tax: $70,000 * 0.038 = $2,660.00
+    TaxScenario(
+        source="IA 2025 Tax Brackets (computed)",
+        description="IA MFJ, $100,000 W2, no dependents (2025 flat tax)",
+        year=2025,
+        state="IA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=2660.00,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # ========== IDAHO SCENARIOS ==========
+    # ID 2024: 5.695% on income above $4,673 (single) or $9,346 (MFJ/HoH/QW)
+    # ID 2025: 5.3% on income above $4,811 (single) or $9,622 (MFJ/HoH/QW)
+    # Standard deduction: Single $14,600 (2024), $15,000 (2025)
+    #                    MFJ $29,200 (2024), $30,000 (2025)
+    #                    HoH $21,900 (2024), $22,500 (2025)
+    # ID taxable income = ID adjusted income - std ded - QBI deduction
+    # ID tax = max(0, (ID taxable - threshold) * rate)
+    #
+    # ID 2024 Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000, Fed std ded: $14,600, Fed taxable: $35,400
+    # Fed tax: $11,600 * 0.10 + $23,800 * 0.12 = $1,160 + $2,856 = $4,016
+    # ID adjusted income: $50,000 (imports from federal)
+    # ID std ded: $14,600, ID taxable: $50,000 - $14,600 = $35,400
+    # ID tax: ($35,400 - $4,673) * 0.05695 = $30,727 * 0.05695 = $1,749.90
+    TaxScenario(
+        source="ID 2024 Tax Rate Schedule (computed)",
+        description="ID Single, $50,000 W2, no dependents",
+        year=2024,
+        state="ID",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1749.90,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # ID 2024 MFJ, $100,000 W2, no dependents
+    # Fed AGI: $100,000, Fed std ded: $29,200, Fed taxable: $70,800
+    # Fed tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
+    # ID adjusted income: $100,000
+    # ID std ded: $29,200, ID taxable: $100,000 - $29,200 = $70,800
+    # ID tax: ($70,800 - $9,346) * 0.05695 = $61,454 * 0.05695 = $3,499.81
+    TaxScenario(
+        source="ID 2024 Tax Rate Schedule (computed)",
+        description="ID MFJ, $100,000 W2, no dependents",
+        year=2024,
+        state="ID",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3499.81,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # ID 2024 HoH, $75,000 W2, no dependents
+    # Fed AGI: $75,000, Fed std ded: $21,900, Fed taxable: $53,100
+    # Fed tax: $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
+    # ID adjusted income: $75,000
+    # ID std ded: $21,900, ID taxable: $75,000 - $21,900 = $53,100
+    # ID tax: ($53,100 - $9,346) * 0.05695 = $43,754 * 0.05695 = $2,491.80
+    TaxScenario(
+        source="ID 2024 Tax Rate Schedule (computed)",
+        description="ID HoH, $75,000 W2, no dependents",
+        year=2024,
+        state="ID",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2491.80,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # ID 2025 Single, $60,000 W2, no dependents (reduced rate)
+    # Fed AGI: $60,000, Fed std ded 2025: $15,000, Fed taxable: $45,000
+    # Fed tax: $11,925 * 0.10 + $33,075 * 0.12 = $1,192.50 + $3,969 = $5,161.50
+    # ID adjusted income: $60,000
+    # ID std ded: $15,000, ID taxable: $60,000 - $15,000 = $45,000
+    # ID tax: ($45,000 - $4,811) * 0.053 = $40,189 * 0.053 = $2,130.02
+    TaxScenario(
+        source="ID 2025 Tax Rate Schedule (computed)",
+        description="ID Single, $60,000 W2, no dependents (2025 reduced rate)",
+        year=2025,
+        state="ID",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5161.50,
+        expected_state_tax=2130.02,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # ID 2025 MFJ, $120,000 W2, no dependents (reduced rate)
+    # Fed AGI: $120,000, Fed std ded 2025: $30,000, Fed taxable: $90,000
+    # Fed tax: $23,850 * 0.10 + $66,150 * 0.12 = $2,385 + $7,938 = $10,323
+    # ID adjusted income: $120,000
+    # ID std ded: $30,000, ID taxable: $120,000 - $30,000 = $90,000
+    # ID tax: ($90,000 - $9,622) * 0.053 = $80,378 * 0.053 = $4,260.03
+    TaxScenario(
+        source="ID 2025 Tax Rate Schedule (computed)",
+        description="ID MFJ, $120,000 W2, no dependents (2025 reduced rate)",
+        year=2025,
+        state="ID",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=4260.03,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # ========== MISSISSIPPI SCENARIOS ==========
+    # MS 2024: 0% on first $10,000, then 4.7% above
+    # MS 2025: 0% on first $10,000, then 4.4% above
+    # Personal exemption: Single $6,000, MFJ $12,000, HoH $8,000
+    # Standard deduction: Single $2,300, MFJ $4,600
+    # MS taxable income = MS AGI - exemptions - deductions
+    #
+    # MS 2024 Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000, Fed std ded: $14,600, Fed taxable: $35,400
+    # Fed tax: $11,600 * 0.10 + $23,800 * 0.12 = $1,160 + $2,856 = $4,016
+    # MS AGI: $50,000 (imports from federal)
+    # MS exemption: $6,000, MS std ded: $2,300
+    # MS taxable: $50,000 - $6,000 - $2,300 = $41,700
+    # MS tax: ($41,700 - $10,000) * 0.047 = $31,700 * 0.047 = $1,489.90
+    TaxScenario(
+        source="MS 2024 Tax Rate Schedule (computed)",
+        description="MS Single, $50,000 W2, no dependents",
+        year=2024,
+        state="MS",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1489.90,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MS 2024 MFJ, $100,000 W2, no dependents
+    # Fed AGI: $100,000, Fed std ded: $29,200, Fed taxable: $70,800
+    # Fed tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
+    # MS AGI: $100,000
+    # MS exemption: $12,000, MS std ded: $4,600
+    # MS taxable: $100,000 - $12,000 - $4,600 = $83,400
+    # MS tax: ($83,400 - $10,000) * 0.047 = $73,400 * 0.047 = $3,449.80
+    TaxScenario(
+        source="MS 2024 Tax Rate Schedule (computed)",
+        description="MS MFJ, $100,000 W2, no dependents",
+        year=2024,
+        state="MS",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3449.80,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MS 2024 Head of Household, $70,000 W2, no dependents
+    # Fed AGI: $70,000, Fed std ded: $21,900, Fed taxable: $48,100
+    # Fed tax: $16,550 * 0.10 + $31,550 * 0.12 = $1,655 + $3,786 = $5,441
+    # MS AGI: $70,000
+    # MS exemption: $8,000, MS std ded: $4,600
+    # MS taxable: $70,000 - $8,000 - $4,600 = $57,400
+    # MS tax: ($57,400 - $10,000) * 0.047 = $47,400 * 0.047 = $2,227.80
+    TaxScenario(
+        source="MS 2024 Tax Rate Schedule (computed)",
+        description="MS HoH, $70,000 W2, no dependents",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=70000.0,
+        expected_federal_tax=5441.0,
+        expected_state_tax=2227.80,
+        expected_federal_agi=70000.0,
+        backend="graph",
+    ),
+    # MS 2025 Single, $60,000 W2, no dependents (reduced rate)
+    # Fed AGI: $60,000, Fed std ded 2025: $15,000, Fed taxable: $45,000
+    # Fed tax: $11,925 * 0.10 + $33,075 * 0.12 = $1,192.50 + $3,969 = $5,161.50
+    # MS AGI: $60,000
+    # MS exemption: $6,000, MS std ded: $2,300
+    # MS taxable: $60,000 - $6,000 - $2,300 = $51,700
+    # MS tax: ($51,700 - $10,000) * 0.044 = $41,700 * 0.044 = $1,834.80
+    TaxScenario(
+        source="MS 2025 Tax Rate Schedule (computed)",
+        description="MS Single, $60,000 W2, no dependents (2025 reduced rate)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5161.50,
+        expected_state_tax=1834.80,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # MS 2025 MFJ, $120,000 W2, no dependents (reduced rate)
+    # Fed AGI: $120,000, Fed std ded 2025: $30,000, Fed taxable: $90,000
+    # Fed tax: $23,850 * 0.10 + $66,150 * 0.12 = $2,385 + $7,938 = $10,323
+    # MS AGI: $120,000
+    # MS exemption: $12,000, MS std ded: $4,600
+    # MS taxable: $120,000 - $12,000 - $4,600 = $103,400
+    # MS tax: ($103,400 - $10,000) * 0.044 = $93,400 * 0.044 = $4,109.60
+    TaxScenario(
+        source="MS 2025 Tax Rate Schedule (computed)",
+        description="MS MFJ, $120,000 W2, no dependents (2025 reduced rate)",
+        year=2025,
+        state="MS",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=4109.60,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
     # ========== MICHIGAN SCENARIOS ==========
     # MI 2024: Flat 4.25% rate, Personal exemption $5,600
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800
@@ -2181,6 +2564,238 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=4923.0,
         expected_state_tax=1688.125,
         expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # ========== OKLAHOMA SCENARIOS ==========
+    # OK 2024 & 2025: 6-bracket progressive system (0.25%, 0.75%, 1.75%, 2.75%, 3.75%, 4.75%)
+    # Single/MFS: 0-1,000: 0.25%, 1,001-2,500: 0.75%, 2,501-3,750: 1.75%,
+    #             3,751-4,900: 2.75%, 4,901-7,200: 3.75%, 7,201+: 4.75%
+    # MFJ/HoH/QW: 0-2,000: 0.25%, 2,001-5,000: 0.75%, 5,001-7,500: 1.75%,
+    #             7,501-9,800: 2.75%, 9,801-12,200: 3.75%, 12,201+: 4.75%
+    # Standard deduction: Single $6,350, MFJ $12,700, HoH $9,350
+    # OK taxable income = OK AGI - standard deduction
+    # Rates and deductions unchanged between 2024 and 2025
+    #
+    # OK 2024 Single, $40,000 W2, no dependents
+    # Fed AGI: $40,000, Fed std ded: $14,600, Fed taxable: $25,400
+    # Fed tax: $11,600 * 0.10 + $13,800 * 0.12 = $1,160 + $1,656 = $2,816
+    # OK AGI: $40,000 (imports from federal, no additions/subtractions)
+    # OK std ded: $6,350, OK taxable: $40,000 - $6,350 = $33,650
+    # OK tax: $1,000 * 0.0025 + ($2,500 - $1,000) * 0.0075 + ($3,750 - $2,500) * 0.0175
+    #       + ($4,900 - $3,750) * 0.0275 + ($7,200 - $4,900) * 0.0375
+    #       + ($33,650 - $7,200) * 0.0475
+    #       = $2.50 + $11.25 + $21.875 + $31.625 + $86.25 + $1,256.375
+    #       = $1,409.875
+    TaxScenario(
+        source="OK 2024 Tax Brackets (computed)",
+        description="OK Single, $40,000 W2, no dependents",
+        year=2024,
+        state="OK",
+        filing_status="Single",
+        w2_income=40000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=1409.875,
+        expected_federal_agi=40000.0,
+        backend="graph",
+    ),
+    # OK 2024 MFJ, $80,000 W2, no dependents
+    # Fed AGI: $80,000, Fed std ded: $29,200, Fed taxable: $50,800
+    # Fed tax: $23,200 * 0.10 + $27,600 * 0.12 = $2,320 + $3,312 = $5,632
+    # OK AGI: $80,000
+    # OK std ded: $12,700, OK taxable: $80,000 - $12,700 = $67,300
+    # OK tax: $2,000 * 0.0025 + ($5,000 - $2,000) * 0.0075 + ($7,500 - $5,000) * 0.0175
+    #       + ($9,800 - $7,500) * 0.0275 + ($12,200 - $9,800) * 0.0375
+    #       + ($67,300 - $12,200) * 0.0475
+    #       = $5.00 + $22.50 + $43.75 + $63.25 + $90.00 + $2,617.25
+    #       = $2,841.75
+    TaxScenario(
+        source="OK 2024 Tax Brackets (computed)",
+        description="OK MFJ, $80,000 W2, no dependents",
+        year=2024,
+        state="OK",
+        filing_status="Married/Joint",
+        w2_income=80000.0,
+        expected_federal_tax=5632.0,
+        expected_state_tax=2841.75,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # OK 2024 HoH, $60,000 W2, no dependents
+    # Fed AGI: $60,000, Fed std ded: $21,900, Fed taxable: $38,100
+    # Fed tax: $16,550 * 0.10 + $21,550 * 0.12 = $1,655 + $2,586 = $4,241
+    # OK AGI: $60,000
+    # OK std ded: $9,350, OK taxable: $60,000 - $9,350 = $50,650
+    # OK tax (HoH follows MFJ brackets):
+    # $2,000 * 0.0025 + ($5,000 - $2,000) * 0.0075 + ($7,500 - $5,000) * 0.0175
+    #       + ($9,800 - $7,500) * 0.0275 + ($12,200 - $9,800) * 0.0375
+    #       + ($50,650 - $12,200) * 0.0475
+    #       = $5.00 + $22.50 + $43.75 + $63.25 + $90.00 + $1,826.38
+    #       = $2,050.88
+    TaxScenario(
+        source="OK 2024 Tax Brackets (computed)",
+        description="OK HoH, $60,000 W2, no dependents",
+        year=2024,
+        state="OK",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_federal_tax=4241.0,
+        expected_state_tax=2050.88,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # OK 2025 Single, $50,000 W2, no dependents (same rates as 2024)
+    # Fed AGI: $50,000, Fed std ded 2025: $15,000, Fed taxable: $35,000
+    # Fed tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # OK AGI: $50,000
+    # OK std ded: $6,350, OK taxable: $50,000 - $6,350 = $43,650
+    # OK tax: $1,000 * 0.0025 + ($2,500 - $1,000) * 0.0075 + ($3,750 - $2,500) * 0.0175
+    #       + ($4,900 - $3,750) * 0.0275 + ($7,200 - $4,900) * 0.0375
+    #       + ($43,650 - $7,200) * 0.0475
+    #       = $2.50 + $11.25 + $21.875 + $31.625 + $86.25 + $1,731.375
+    #       = $1,884.875
+    TaxScenario(
+        source="OK 2025 Tax Brackets (computed)",
+        description="OK Single, $50,000 W2, no dependents (2025, same rates as 2024)",
+        year=2025,
+        state="OK",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1884.875,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # OK 2025 MFJ, $100,000 W2, no dependents (same rates as 2024)
+    # Fed AGI: $100,000, Fed std ded 2025: $30,000, Fed taxable: $70,000
+    # Fed tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923
+    # OK AGI: $100,000
+    # OK std ded: $12,700, OK taxable: $100,000 - $12,700 = $87,300
+    # OK tax: $2,000 * 0.0025 + ($5,000 - $2,000) * 0.0075 + ($7,500 - $5,000) * 0.0175
+    #       + ($9,800 - $7,500) * 0.0275 + ($12,200 - $9,800) * 0.0375
+    #       + ($87,300 - $12,200) * 0.0475
+    #       = $5.00 + $22.50 + $43.75 + $63.25 + $90.00 + $3,567.25
+    #       = $3,791.75
+    TaxScenario(
+        source="OK 2025 Tax Brackets (computed)",
+        description="OK MFJ, $100,000 W2, no dependents (2025, same rates as 2024)",
+        year=2025,
+        state="OK",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=3791.75,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # ========== ARKANSAS SCENARIOS ==========
+    # AR uses 5-bracket progressive tax:
+    # All filing statuses: 0-5,499: 0%, 5,500-10,899: 2%, 10,900-15,599: 3%,
+    #                      15,600-25,699: 3.4%, 25,700+: 3.9%
+    # Standard Deduction: Single/MFS/HoH $2,410, MFJ/QW $4,820
+    #
+    # AR 2024 Single, $40,000 W2, no dependents
+    # Fed AGI: $40,000, Fed std ded: $14,600, Fed taxable: $25,400
+    # Fed tax: $11,600 * 0.10 + $13,800 * 0.12 = $1,160 + $1,656 = $2,816
+    # AR AGI: $40,000 (no additions/subtractions)
+    # AR std ded: $2,410, AR taxable: $40,000 - $2,410 = $37,590
+    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
+    #       + ($25,699 - $15,599) * 0.034 + ($37,590 - $25,699) * 0.039
+    #       = $0 + $108.00 + $141.00 + $343.40 + $463.749
+    #       = $1,056.149
+    TaxScenario(
+        source="AR 2024 Tax Brackets (computed)",
+        description="AR Single, $40,000 W2, no dependents",
+        year=2024,
+        state="AR",
+        filing_status="Single",
+        w2_income=40000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=1056.149,
+        expected_federal_agi=40000.0,
+        backend="graph",
+    ),
+    # AR 2024 MFJ, $80,000 W2, no dependents
+    # Fed AGI: $80,000, Fed std ded: $29,200, Fed taxable: $50,800
+    # Fed tax: $23,200 * 0.10 + $27,600 * 0.12 = $2,320 + $3,312 = $5,632
+    # AR AGI: $80,000
+    # AR std ded: $4,820, AR taxable: $80,000 - $4,820 = $75,180
+    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
+    #       + ($25,699 - $15,599) * 0.034 + ($75,180 - $25,699) * 0.039
+    #       = $0 + $108.00 + $141.00 + $343.40 + $1,929.759
+    #       = $2,522.159
+    TaxScenario(
+        source="AR 2024 Tax Brackets (computed)",
+        description="AR MFJ, $80,000 W2, no dependents",
+        year=2024,
+        state="AR",
+        filing_status="Married/Joint",
+        w2_income=80000.0,
+        expected_federal_tax=5632.0,
+        expected_state_tax=2522.159,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # AR 2024 HoH, $60,000 W2, no dependents
+    # Fed AGI: $60,000, Fed std ded: $21,900, Fed taxable: $38,100
+    # Fed tax: $16,550 * 0.10 + $21,550 * 0.12 = $1,655 + $2,586 = $4,241
+    # AR AGI: $60,000
+    # AR std ded: $2,410, AR taxable: $60,000 - $2,410 = $57,590
+    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
+    #       + ($25,699 - $15,599) * 0.034 + ($57,590 - $25,699) * 0.039
+    #       = $0 + $108.00 + $141.00 + $343.40 + $1,243.749
+    #       = $1,836.149
+    TaxScenario(
+        source="AR 2024 Tax Brackets (computed)",
+        description="AR HoH, $60,000 W2, no dependents",
+        year=2024,
+        state="AR",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_federal_tax=4241.0,
+        expected_state_tax=1836.149,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # AR 2025 Single, $50,000 W2, no dependents (same rates/brackets as 2024)
+    # Fed AGI: $50,000, Fed std ded 2025: $15,000, Fed taxable: $35,000
+    # Fed tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # AR AGI: $50,000
+    # AR std ded: $2,410, AR taxable: $50,000 - $2,410 = $47,590
+    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
+    #       + ($25,699 - $15,599) * 0.034 + ($47,590 - $25,699) * 0.039
+    #       = $0 + $108.00 + $141.00 + $343.40 + $853.749
+    #       = $1,446.149
+    TaxScenario(
+        source="AR 2025 Tax Brackets (computed)",
+        description="AR Single, $50,000 W2, no dependents (2025, same rates as 2024)",
+        year=2025,
+        state="AR",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1446.149,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # AR 2025 MFJ, $100,000 W2, no dependents (same rates/brackets as 2024)
+    # Fed AGI: $100,000, Fed std ded 2025: $30,000, Fed taxable: $70,000
+    # Fed tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923
+    # AR AGI: $100,000
+    # AR std ded: $4,820, AR taxable: $100,000 - $4,820 = $95,180
+    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
+    #       + ($25,699 - $15,599) * 0.034 + ($95,180 - $25,699) * 0.039
+    #       = $0 + $108.00 + $141.00 + $343.40 + $2,709.759
+    #       = $3,302.159
+    TaxScenario(
+        source="AR 2025 Tax Brackets (computed)",
+        description="AR MFJ, $100,000 W2, no dependents (2025, same rates as 2024)",
+        year=2025,
+        state="AR",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=3302.159,
+        expected_federal_agi=100000.0,
         backend="graph",
     ),
     # ========== GEORGIA SCENARIOS ==========
