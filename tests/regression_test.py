@@ -94,6 +94,17 @@ AZ_SCENARIOS = [
         "expected_state_min": 4100,
         "expected_state_max": 4400,
     },
+    # 2025: Rate unchanged at 2.5%, but standard deduction increased (conforms to federal)
+    {
+        "year": 2025,
+        "state": "AZ",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 9800,
+        "expected_state_min": 1350,
+        "expected_state_max": 1550,
+    },
 ]
 
 # GA scenarios use graph backend (flat 5.39% rate for 2024).
@@ -436,6 +447,17 @@ IN_SCENARIOS = [
         "expected_state_min": 5800,
         "expected_state_max": 6300,
     },
+    # 2025: Rate decreased from 3.05% to 3.00%
+    {
+        "year": 2025,
+        "state": "IN",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 9800,
+        "expected_state_min": 2050,
+        "expected_state_max": 2350,
+    },
 ]
 
 VA_SCENARIOS = [
@@ -696,6 +718,17 @@ CO_SCENARIOS = [
         "expected_state_min": 6700,
         "expected_state_max": 7500,
     },
+    # 2025: Rate increased from 4.25% to 4.4% (TABOR refund expired)
+    {
+        "year": 2025,
+        "state": "CO",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 9800,
+        "expected_state_min": 2480,
+        "expected_state_max": 2800,
+    },
 ]
 
 
@@ -741,6 +774,17 @@ KY_SCENARIOS = [
         "expected_federal_max": 29000,
         "expected_state_min": 7500,
         "expected_state_max": 8200,
+    },
+    # 2025: Rate unchanged at 4%, standard deduction increased from $3,160 to $3,270
+    {
+        "year": 2025,
+        "state": "KY",
+        "filing_status": "Single",
+        "w2_income": 75000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 9800,
+        "expected_state_min": 2595,
+        "expected_state_max": 3095,
     },
 ]
 
