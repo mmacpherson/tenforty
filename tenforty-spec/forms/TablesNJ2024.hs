@@ -77,17 +77,17 @@ njBracketsMfjTable2024 =
 
 {- | 2024 New Jersey personal exemption amount
 Source: New Jersey Revised Statutes Section 54A:3-1
-$1,000 personal exemption per taxpayer (plus additional $1,000 for age 65+ or blind)
+\$1,000 personal exemption per taxpayer (plus additional $1,000 for age 65+ or blind)
 -}
 njPersonalExemption2024 :: Amount Dollars
 njPersonalExemption2024 = 1000
 
 {- | 2024 New Jersey dependent exemption amounts (income-phased)
 Source: New Jersey Division of Taxation, NJ-1040 Instructions (2024)
-$1,500 per dependent for AGI ≤ $50,000
-$1,000 per dependent for $50,000 < AGI ≤ $100,000
-$500 per dependent for $100,000 < AGI ≤ $125,000
-$0 per dependent for AGI > $125,000
+\$1,500 per dependent for AGI ≤ $50,000
+\$1,000 per dependent for $50,000 < AGI ≤ $100,000
+\$500 per dependent for $100,000 < AGI ≤ $125,000
+\$0 per dependent for AGI > $125,000
 
 Note: This is income-phased and cannot be represented as a simple constant.
 Form spec will need to use keyInput for dependent exemption amount.

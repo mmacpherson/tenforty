@@ -1,0 +1,247 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L9",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3
+    ],
+    "meta": {
+        "form_id": "al_40",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L9_adjustments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L11_income_modifications",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L12_deduction",
+            "op": {
+                "left": 2,
+                "right": 3,
+                "type": "max"
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "left": 9,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "left": 12,
+                "right": 10,
+                "type": "sub"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L13_income_after_deduction",
+            "op": {
+                "left": 11,
+                "right": 13,
+                "type": "max"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L14_al_taxable_income",
+            "op": {
+                "left": 14,
+                "right": 15,
+                "type": "add"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L15_al_tax",
+            "op": {
+                "income": 16,
+                "table": "al_brackets_2025",
+                "type": "bracket_tax"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L12_std",
+            "op": {
+                "type": "input"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L12_itemized",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "op": {
+                "form": "us_1040",
+                "line": "L9",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "5": {
+            "id": 5,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L8_total_income",
+            "op": {
+                "left": 4,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "7": {
+            "id": 7,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "left": 6,
+                "right": 0,
+                "type": "sub"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L10_al_agi",
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "max"
+            }
+        }
+    },
+    "outputs": [
+        9,
+        16,
+        17,
+        6
+    ],
+    "tables": {
+        "al_brackets_2025": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 500
+                    },
+                    {
+                        "rate": 4.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 1000
+                    },
+                    {
+                        "rate": 4.0e-2,
+                        "threshold": 6000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 500
+                    },
+                    {
+                        "rate": 4.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 1000
+                    },
+                    {
+                        "rate": 4.0e-2,
+                        "threshold": 6000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 500
+                    },
+                    {
+                        "rate": 4.0e-2,
+                        "threshold": 3000
+                    },
+                    {
+                        "rate": 5.0e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}

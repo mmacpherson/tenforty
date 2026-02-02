@@ -19,6 +19,53 @@ from .fixtures.scenarios import (
 )
 
 # Range-based sanity check scenarios (not exact values, just reasonable ranges)
+AL_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "AL",
+        "filing_status": "Single",
+        "w2_income": 25000,
+        "state_adjustment": 3000.0,  # Standard deduction from AL chart
+        "expected_federal_min": 900,
+        "expected_federal_max": 1200,
+        "expected_state_min": 950,
+        "expected_state_max": 1150,
+    },
+    {
+        "year": 2024,
+        "state": "AL",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "state_adjustment": 2500.0,  # Standard deduction minimum (high AGI)
+        "expected_federal_min": 3900,
+        "expected_federal_max": 4100,
+        "expected_state_min": 2200,
+        "expected_state_max": 2450,
+    },
+    {
+        "year": 2024,
+        "state": "AL",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        "state_adjustment": 5000.0,  # Standard deduction minimum (high AGI)
+        "expected_federal_min": 7800,
+        "expected_federal_max": 8200,
+        "expected_state_min": 4550,
+        "expected_state_max": 4800,
+    },
+    {
+        "year": 2025,
+        "state": "AL",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "state_adjustment": 2500.0,  # Standard deduction minimum (high AGI)
+        "expected_federal_min": 3850,
+        "expected_federal_max": 4050,
+        "expected_state_min": 2200,
+        "expected_state_max": 2450,
+    },
+]
+
 NY_SCENARIOS = [
     {
         "year": 2024,
@@ -141,6 +188,108 @@ GA_SCENARIOS = [
     },
 ]
 
+MD_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "MD",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "dependent_exemptions": 3200,
+        "expected_federal_min": 3900,
+        "expected_federal_max": 4100,
+        "expected_state_min": 1900,
+        "expected_state_max": 2200,
+    },
+    {
+        "year": 2024,
+        "state": "MD",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        "dependent_exemptions": 6400,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 8200,
+        "expected_state_min": 4200,
+        "expected_state_max": 4700,
+    },
+    {
+        "year": 2025,
+        "state": "MD",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "dependent_exemptions": 3200,
+        "expected_federal_min": 3850,
+        "expected_federal_max": 4050,
+        "expected_state_min": 1900,
+        "expected_state_max": 2200,
+    },
+]
+
+MO_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "MO",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3900,
+        "expected_federal_max": 4100,
+        "expected_state_min": 1400,
+        "expected_state_max": 1600,
+    },
+    {
+        "year": 2024,
+        "state": "MO",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 8200,
+        "expected_state_min": 3100,
+        "expected_state_max": 3400,
+    },
+    {
+        "year": 2025,
+        "state": "MO",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3850,
+        "expected_federal_max": 4050,
+        "expected_state_min": 1350,
+        "expected_state_max": 1550,
+    },
+]
+
+MN_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "MN",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3900,
+        "expected_federal_max": 4100,
+        "expected_state_min": 1850,
+        "expected_state_max": 2050,
+    },
+    {
+        "year": 2024,
+        "state": "MN",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 8200,
+        "expected_state_min": 4000,
+        "expected_state_max": 4300,
+    },
+    {
+        "year": 2025,
+        "state": "MN",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3850,
+        "expected_federal_max": 4050,
+        "expected_state_min": 1800,
+        "expected_state_max": 2000,
+    },
+]
+
 # PA scenarios use graph backend since OTS PA_40 crashes.
 PA_SCENARIOS = [
     {
@@ -172,6 +321,39 @@ PA_SCENARIOS = [
         "expected_federal_max": 29000,
         "expected_state_min": 5500,
         "expected_state_max": 6800,
+    },
+]
+
+SC_SCENARIOS = [
+    {
+        "year": 2024,
+        "state": "SC",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3900,
+        "expected_federal_max": 4100,
+        "expected_state_min": 1400,
+        "expected_state_max": 1600,
+    },
+    {
+        "year": 2024,
+        "state": "SC",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        "expected_federal_min": 7800,
+        "expected_federal_max": 8200,
+        "expected_state_min": 3600,
+        "expected_state_max": 3900,
+    },
+    {
+        "year": 2025,
+        "state": "SC",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "expected_federal_min": 3800,
+        "expected_federal_max": 4000,
+        "expected_state_min": 1350,
+        "expected_state_max": 1550,
     },
 ]
 
@@ -512,6 +694,10 @@ def _run_range_scenario(scenario):
         filing_status=scenario["filing_status"],
         w2_income=scenario["w2_income"],
     )
+    if scenario.get("state_adjustment"):
+        kwargs["state_adjustment"] = scenario["state_adjustment"]
+    if scenario.get("dependent_exemptions"):
+        kwargs["dependent_exemptions"] = scenario["dependent_exemptions"]
     if scenario.get("backend"):
         kwargs["backend"] = scenario["backend"]
     result = evaluate_return(**kwargs)
@@ -533,6 +719,18 @@ def _run_range_scenario(scenario):
         f"State tax {result.state_total_tax} not in expected range "
         f"[{scenario['expected_state_min']}, {scenario['expected_state_max']}]"
     )
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    AL_SCENARIOS,
+    ids=lambda s: f"AL-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_al_tax_ranges(scenario):
+    """Sanity check: AL tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
 
 
 @pytest.mark.requires_graph
@@ -582,11 +780,59 @@ def test_ga_tax_ranges(scenario):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize(
     "scenario",
+    MD_SCENARIOS,
+    ids=lambda s: f"MD-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_md_tax_ranges(scenario):
+    """Sanity check: MD tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    MO_SCENARIOS,
+    ids=lambda s: f"MO-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_mo_tax_ranges(scenario):
+    """Sanity check: MO tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    MN_SCENARIOS,
+    ids=lambda s: f"MN-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_mn_tax_ranges(scenario):
+    """Sanity check: MN tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
     PA_SCENARIOS,
     ids=lambda s: f"PA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
 def test_pa_tax_ranges(scenario):
     """Sanity check: PA tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    SC_SCENARIOS,
+    ids=lambda s: f"SC-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_sc_tax_ranges(scenario):
+    """Sanity check: SC tax falls within expected ranges (graph backend)."""
     scenario_with_backend = {**scenario, "backend": "graph"}
     _run_range_scenario(scenario_with_backend)
 
@@ -788,6 +1034,70 @@ KY_SCENARIOS = [
     },
 ]
 
+LA_SCENARIOS = [
+    # 2024: Progressive 3-bracket system (1.85%, 3.5%, 4.25%)
+    # Note: No exemptions provided in range tests (would require dependent_exemptions param)
+    {
+        "year": 2024,
+        "state": "LA",
+        "filing_status": "Single",
+        "w2_income": 25000,
+        # Tax: $12,500 * 0.0185 + $12,500 * 0.035 = $231.25 + $437.50 = $668.75
+        "expected_federal_min": 900,
+        "expected_federal_max": 1200,
+        "expected_state_min": 600,
+        "expected_state_max": 750,
+    },
+    {
+        "year": 2024,
+        "state": "LA",
+        "filing_status": "Single",
+        "w2_income": 60000,
+        # Tax: $12,500 * 0.0185 + $37,500 * 0.035 + $10,000 * 0.0425
+        #    = $231.25 + $1,312.50 + $425 = $1,968.75
+        "expected_federal_min": 4800,
+        "expected_federal_max": 5400,
+        "expected_state_min": 1850,
+        "expected_state_max": 2100,
+    },
+    {
+        "year": 2024,
+        "state": "LA",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        # Tax: $25,000 * 0.0185 + $75,000 * 0.035 = $462.50 + $2,625 = $3,087.50
+        "expected_federal_min": 7500,
+        "expected_federal_max": 8500,
+        "expected_state_min": 2900,
+        "expected_state_max": 3300,
+    },
+    # 2025: Flat 3% tax with standard deduction ($12,500 Single, $25,000 MFJ)
+    {
+        "year": 2025,
+        "state": "LA",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        # Taxable: $50,000 - $12,500 = $37,500
+        # Tax: $37,500 * 0.03 = $1,125
+        "expected_federal_min": 3500,
+        "expected_federal_max": 4400,
+        "expected_state_min": 1000,
+        "expected_state_max": 1250,
+    },
+    {
+        "year": 2025,
+        "state": "LA",
+        "filing_status": "Married/Joint",
+        "w2_income": 100000,
+        # Taxable: $100,000 - $25,000 = $75,000
+        # Tax: $75,000 * 0.03 = $2,250
+        "expected_federal_min": 7200,
+        "expected_federal_max": 8700,
+        "expected_state_min": 2000,
+        "expected_state_max": 2500,
+    },
+]
+
 
 @pytest.mark.requires_graph
 @pytest.mark.parametrize(
@@ -801,9 +1111,22 @@ def test_ky_tax_ranges(scenario):
     _run_range_scenario(scenario_with_backend)
 
 
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    LA_SCENARIOS,
+    ids=lambda s: f"LA-{s['year']}-{s['filing_status']}-{s['w2_income']}",
+)
+def test_la_tax_ranges(scenario):
+    """Sanity check: LA tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
 @pytest.mark.parametrize(
     "state,backend",
     [
+        pytest.param("AL", "graph", marks=pytest.mark.requires_graph),
         pytest.param("AZ", "graph", marks=pytest.mark.requires_graph),
         ("CA", None),
         pytest.param("CO", "graph", marks=pytest.mark.requires_graph),
@@ -813,11 +1136,16 @@ def test_ky_tax_ranges(scenario):
         pytest.param("IL", "graph", marks=pytest.mark.requires_graph),
         pytest.param("IN", "graph", marks=pytest.mark.requires_graph),
         pytest.param("KY", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("LA", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("MD", "graph", marks=pytest.mark.requires_graph),
         pytest.param("MI", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("MN", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("MO", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NC", "graph", marks=pytest.mark.requires_graph),
         pytest.param("NJ", "graph", marks=pytest.mark.requires_graph),
         pytest.param("OH", "graph", marks=pytest.mark.requires_graph),
         pytest.param("PA", "graph", marks=pytest.mark.requires_graph),
+        pytest.param("SC", "graph", marks=pytest.mark.requires_graph),
         pytest.param("VA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("WI", "graph", marks=pytest.mark.requires_graph),
     ],

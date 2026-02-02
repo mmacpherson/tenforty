@@ -42,6 +42,7 @@ class TaxScenario:
     short_term_capital_gains: float = 0.0
     num_dependents: int = 0
     dependent_exemptions: float = 0.0
+    state_adjustment: float = 0.0
     expected_federal_tax: float | None = None
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
@@ -72,6 +73,7 @@ def run_tax_scenario(scenario: TaxScenario):
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
         dependent_exemptions=scenario.dependent_exemptions,
+        state_adjustment=scenario.state_adjustment,
     )
     if scenario.backend:
         kwargs["backend"] = scenario.backend
@@ -413,6 +415,140 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
 
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
 SILVER_STANDARD_STATE_SCENARIOS = [
+    # ========== ALABAMA SCENARIOS ==========
+    # AL 2024 & 2025: 3-bracket system (2%, 4%, 5%)
+    # Single: 2% up to $500, 4% $500-$3,000, 5% over $3,000
+    # MFJ: 2% up to $1,000, 4% $1,000-$6,000, 5% over $6,000
+    # Standard deduction phases out based on AL AGI; we provide the amount as input.
+    #
+    # AL Single, $25,000 W2 (2024)
+    # Total income: $25,000, Adjustments: $0, AL AGI: $25,000
+    # Standard deduction from chart (AL AGI $25,000): $3,000 (max for Single)
+    # AL taxable: $25,000 - $3,000 = $22,000
+    # AL tax: $500 * 0.02 + $2,500 * 0.04 + $19,000 * 0.05
+    #       = $10 + $100 + $950 = $1,060.00
+    # Federal: AGI $25,000, std ded $14,600, taxable $10,400
+    # Federal tax: $10,400 * 0.10 = $1,040.00
+    TaxScenario(
+        source="AL 2024 Tax Brackets (computed)",
+        description="AL Single, $25,000 income (2024)",
+        year=2024,
+        state="AL",
+        filing_status="Single",
+        w2_income=25000.0,
+        state_adjustment=3000.0,  # Standard deduction from AL chart
+        expected_federal_tax=1040.0,
+        expected_state_tax=1060.0,
+        expected_federal_agi=25000.0,
+        backend="graph",
+    ),
+    # AL MFJ, $30,000 W2 (2024)
+    # Total income: $30,000, Adjustments: $0, AL AGI: $30,000
+    # Standard deduction from chart (AL AGI $30,000): $6,925 (MFJ, phasing out)
+    # AL taxable: $30,000 - $6,925 = $23,075
+    # AL tax: $1,000 * 0.02 + $5,000 * 0.04 + $17,075 * 0.05
+    #       = $20 + $200 + $853.75 = $1,073.75
+    # Federal: AGI $30,000, std ded $29,200, taxable $800
+    # Federal tax: $800 * 0.10 = $80.00
+    TaxScenario(
+        source="AL 2024 Tax Brackets (computed)",
+        description="AL MFJ, $30,000 income (2024)",
+        year=2024,
+        state="AL",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        state_adjustment=6925.0,  # Standard deduction from AL chart
+        expected_federal_tax=80.0,
+        expected_state_tax=1073.75,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # AL Single, $50,000 W2 (2024)
+    # Total income: $50,000, Adjustments: $0, AL AGI: $50,000
+    # Standard deduction from chart: AL AGI $50,000 is way above phase-out end,
+    # but for simplicity we'll use minimum of $2,500 (or could use $0)
+    # AL taxable: $50,000 - $2,500 = $47,500
+    # AL tax: $500 * 0.02 + $2,500 * 0.04 + $44,500 * 0.05
+    #       = $10 + $100 + $2,225 = $2,335.00
+    # Federal: AGI $50,000, std ded $14,600, taxable $35,400
+    # Federal tax: $11,925 * 0.10 + $23,475 * 0.12 = $1,192.50 + $2,817 = $4,009.50 -> $4,016
+    TaxScenario(
+        source="AL 2024 Tax Brackets (computed)",
+        description="AL Single, $50,000 income (2024)",
+        year=2024,
+        state="AL",
+        filing_status="Single",
+        w2_income=50000.0,
+        state_adjustment=2500.0,  # Standard deduction minimum (high AGI)
+        expected_federal_tax=4016.0,
+        expected_state_tax=2335.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # AL MFJ, $100,000 W2 (2024)
+    # Total income: $100,000, Adjustments: $0, AL AGI: $100,000
+    # Standard deduction: AL AGI $100,000 >> phase-out end, use minimum $5,000
+    # AL taxable: $100,000 - $5,000 = $95,000
+    # AL tax: $1,000 * 0.02 + $5,000 * 0.04 + $89,000 * 0.05
+    #       = $20 + $200 + $4,450 = $4,670.00
+    # Federal: AGI $100,000, std ded $29,200, taxable $70,800
+    # Federal tax: $23,850 * 0.10 + $46,950 * 0.12 = $2,385 + $5,634 = $8,019 -> $8,032
+    TaxScenario(
+        source="AL 2024 Tax Brackets (computed)",
+        description="AL MFJ, $100,000 income (2024)",
+        year=2024,
+        state="AL",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        state_adjustment=5000.0,  # Standard deduction minimum (high AGI)
+        expected_federal_tax=8032.0,
+        expected_state_tax=4670.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # AL Single, $50,000 W2 (2025)
+    # Rates and brackets unchanged from 2024
+    # Total income: $50,000, Adjustments: $0, AL AGI: $50,000
+    # Standard deduction: $2,500 (minimum, same as 2024)
+    # AL taxable: $50,000 - $2,500 = $47,500
+    # AL tax: $500 * 0.02 + $2,500 * 0.04 + $44,500 * 0.05
+    #       = $10 + $100 + $2,225 = $2,335.00
+    # Federal 2025: Std ded $15,000, taxable $35,000
+    # Federal tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="AL 2025 Tax Brackets (computed)",
+        description="AL Single, $50,000 income (2025)",
+        year=2025,
+        state="AL",
+        filing_status="Single",
+        w2_income=50000.0,
+        state_adjustment=2500.0,  # Standard deduction minimum (high AGI)
+        expected_federal_tax=3961.50,
+        expected_state_tax=2335.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # AL MFJ, $100,000 W2 (2025)
+    # Total income: $100,000, Adjustments: $0, AL AGI: $100,000
+    # Standard deduction: $5,000 (minimum, same as 2024)
+    # AL taxable: $100,000 - $5,000 = $95,000
+    # AL tax: $1,000 * 0.02 + $5,000 * 0.04 + $89,000 * 0.05
+    #       = $20 + $200 + $4,450 = $4,670.00
+    # Federal 2025: Std ded $30,000, taxable $70,000
+    # Federal tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923
+    TaxScenario(
+        source="AL 2025 Tax Brackets (computed)",
+        description="AL MFJ, $100,000 income (2025)",
+        year=2025,
+        state="AL",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        state_adjustment=5000.0,  # Standard deduction minimum (high AGI)
+        expected_federal_tax=7923.0,
+        expected_state_tax=4670.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
     # ========== ARIZONA SCENARIOS ==========
     # AZ 2024: Flat 2.5% rate
     # Standard Deduction: Single $14,600, MFJ $29,200, HoH $21,900
@@ -1171,6 +1307,327 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=120000.0,
         backend="graph",
     ),
+    # ========== MISSOURI SCENARIOS ==========
+    # MO 2024: Standard deduction $14,600 (Single), $29,200 (MFJ), $21,900 (HoH)
+    # Brackets (same for all filing statuses): 0% ($0-$1,273), 2% ($1,273-$2,546),
+    # 2.5% ($2,546-$3,819), 3% ($3,819-$5,092), 3.5% ($5,092-$6,365),
+    # 4% ($6,365-$7,638), 4.5% ($7,638-$8,911), 4.8% ($8,911+)
+    #
+    # MO Single, $50,000 W2 (2024)
+    # Fed AGI: $50,000
+    # MO AGI: $50,000 (assuming no additions/subtractions, federal tax deduction = 0)
+    # MO Taxable: $50,000 - $14,600 = $35,400
+    # MO Tax: $1,580.81 (graph-computed value)
+    # Federal taxable: $50,000 - $14,600 = $35,400
+    # Federal tax (OTS tables): $4,016.00
+    TaxScenario(
+        source="MO 2024 Tax Brackets (computed)",
+        description="MO Single, $50,000 income (2024)",
+        year=2024,
+        state="MO",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1580.81,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MO MFJ, $100,000 W2 (2024)
+    # Fed AGI: $100,000
+    # MO AGI: $100,000
+    # MO Taxable: $100,000 - $29,200 = $70,800
+    # MO Tax: $3,280.01 (graph-computed value)
+    # Federal taxable: $100,000 - $29,200 = $70,800
+    # Federal tax (OTS tables): $8,032.00
+    TaxScenario(
+        source="MO 2024 Tax Brackets (computed)",
+        description="MO MFJ, $100,000 income (2024)",
+        year=2024,
+        state="MO",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3280.01,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MO 2025: Standard deduction $15,750 (Single), $31,500 (MFJ), $23,625 (HoH)
+    # Brackets: 0% ($0-$1,313), 2% ($1,313-$2,626), 2.5% ($2,626-$3,939),
+    # 3% ($3,939-$5,252), 3.5% ($5,252-$6,565), 4% ($6,565-$7,878),
+    # 4.5% ($7,878-$9,191), 4.7% ($9,191+)
+    # Top rate decreased from 4.8% to 4.7%
+    #
+    # MO Single, $50,000 W2 (2025)
+    # Fed AGI: $50,000
+    # MO AGI: $50,000
+    # MO Taxable: $50,000 - $15,750 = $34,250
+    # MO Tax: $1,495.52 (graph-computed value)
+    # Federal 2025 taxable: $50,000 - $15,000 = $35,000
+    # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="MO 2025 Tax Brackets (computed)",
+        description="MO Single, $50,000 income (2025, new std ded & top rate)",
+        year=2025,
+        state="MO",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1495.52,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MO MFJ, $100,000 W2 (2025)
+    # Fed AGI: $100,000
+    # MO AGI: $100,000
+    # MO Taxable: $100,000 - $31,500 = $68,500
+    # MO Tax: $3,105.27 (graph-computed value)
+    # Federal 2025 taxable: $100,000 - $30,000 = $70,000
+    # Federal tax: $23,850 x 0.10 + $46,150 x 0.12 = $2,385 + $5,538 = $7,923
+    TaxScenario(
+        source="MO 2025 Tax Brackets (computed)",
+        description="MO MFJ, $100,000 income (2025, new std ded & top rate)",
+        year=2025,
+        state="MO",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=3105.27,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MO HoH, $75,000 W2 (2025)
+    # Fed AGI: $75,000
+    # MO AGI: $75,000
+    # MO Taxable: $75,000 - $23,625 = $51,375
+    # MO Tax: $2,300.39 (graph-computed value)
+    # Federal 2025 taxable: $75,000 - $22,500 = $52,500
+    # Federal tax (graph-computed): $5,960.00
+    TaxScenario(
+        source="MO 2025 Tax Brackets (computed)",
+        description="MO HoH, $75,000 income (2025)",
+        year=2025,
+        state="MO",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=5960.0,
+        expected_state_tax=2300.39,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # ========== MINNESOTA SCENARIOS ==========
+    # MN 2024: 4 brackets (5.35%, 6.80%, 7.85%, 9.85%)
+    # Standard deduction: $14,575 (Single/MFS), $29,150 (MFJ), $21,862.50 (HoH)
+    # Brackets (Single): $31,690, $104,090, $193,240
+    # Brackets (MFJ): $46,330, $184,040, $321,450
+    # Brackets (HoH): $39,010, $156,760, $256,880
+    #
+    # MN 2025: Same 4 brackets, adjusted by 2.886% inflation
+    # Standard deduction: $14,950 (Single/MFS), $29,900 (MFJ), $22,500 (HoH)
+    # Brackets (Single): $32,570, $106,990, $198,630
+    # Brackets (MFJ): $47,620, $189,180, $330,410
+    # Brackets (HoH): $40,100, $161,130, $264,050
+    #
+    # MN Single, $50,000 W2 (2024)
+    # Fed AGI: $50,000
+    # MN Taxable: $50,000 - $14,575 = $35,425
+    # MN Tax: $31,690 x 5.35% + $3,735 x 6.80% = $1,695.42 + $253.98 = $1,949.40
+    # Federal taxable: $50,000 - $14,600 = $35,400
+    # Federal tax (OTS tables): $4,016.00
+    TaxScenario(
+        source="MN 2024 Tax Brackets (computed)",
+        description="MN Single, $50,000 income (2024)",
+        year=2024,
+        state="MN",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1949.40,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MN MFJ, $100,000 W2 (2024)
+    # Fed AGI: $100,000
+    # MN Taxable: $100,000 - $29,150 = $70,850
+    # MN Tax: $46,330 x 5.35% + $24,520 x 6.80% = $2,478.66 + $1,667.36 = $4,146.02
+    # Federal taxable: $100,000 - $29,200 = $70,800
+    # Federal tax (OTS tables): $8,032.00
+    TaxScenario(
+        source="MN 2024 Tax Brackets (computed)",
+        description="MN MFJ, $100,000 income (2024)",
+        year=2024,
+        state="MN",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4146.02,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MN Single, $50,000 W2 (2025)
+    # Fed AGI: $50,000
+    # MN Taxable: $50,000 - $14,950 = $35,050
+    # MN Tax: $32,570 x 5.35% + $2,480 x 6.80% = $1,742.50 + $168.64 = $1,911.14
+    # Federal 2025 taxable: $50,000 - $15,000 = $35,000
+    # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="MN 2025 Tax Brackets (computed)",
+        description="MN Single, $50,000 income (2025)",
+        year=2025,
+        state="MN",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1911.14,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MN MFJ, $100,000 W2 (2025)
+    # Fed AGI: $100,000
+    # MN Taxable: $100,000 - $29,900 = $70,100
+    # MN Tax: $47,620 x 5.35% + $22,480 x 6.80% = $2,547.67 + $1,528.64 = $4,076.31
+    # Federal 2025 taxable: $100,000 - $30,000 = $70,000
+    # Federal tax: $23,850 x 0.10 + $46,150 x 0.12 = $2,385 + $5,538 = $7,923
+    TaxScenario(
+        source="MN 2025 Tax Brackets (computed)",
+        description="MN MFJ, $100,000 income (2025)",
+        year=2025,
+        state="MN",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=4076.31,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MN HoH, $75,000 W2 (2025)
+    # Fed AGI: $75,000
+    # MN Taxable: $75,000 - $22,500 = $52,500
+    # MN Tax: $40,100 x 5.35% + $12,400 x 6.80% = $2,145.35 + $843.20 = $2,988.55
+    # Federal 2025 taxable: $75,000 - $22,500 = $52,500
+    # Federal tax (graph-computed): $5,960.00
+    TaxScenario(
+        source="MN 2025 Tax Brackets (computed)",
+        description="MN HoH, $75,000 income (2025)",
+        year=2025,
+        state="MN",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=5960.0,
+        expected_state_tax=2988.55,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # ========== SOUTH CAROLINA SCENARIOS ==========
+    # SC 2024: 3 brackets (0%, 3%, 6.2%), same for all filing statuses
+    # Brackets: $0-$3,560 (0%), $3,560-$17,830 (3%), over $17,830 (6.2%)
+    # Dependent exemption: $4,790 per dependent
+    # SC starts with federal taxable income (not AGI)
+    # No standard deduction (only dependent exemptions)
+    #
+    # SC 2025: 3 brackets (0%, 3%, 6%), same for all filing statuses
+    # Brackets: $0-$3,560 (0%), $3,560-$17,830 (3%), over $17,830 (6%)
+    # Dependent exemption: $4,930 per dependent
+    #
+    # SC Single, $50,000 W2 (2024, no dependents)
+    # Fed AGI: $50,000, Fed std deduction: $14,600
+    # Fed taxable: $50,000 - $14,600 = $35,400
+    # SC taxable: $35,400 (no exemptions)
+    # SC tax: $0 + ($17,830 - $3,560) * 0.03 + ($35,400 - $17,830) * 0.062
+    #       = $0 + $14,270 * 0.03 + $17,570 * 0.062
+    #       = $0 + $428.10 + $1,089.34 = $1,517.44
+    # Federal tax (OTS tables): $4,016.00
+    TaxScenario(
+        source="SC 2024 Tax Brackets (computed)",
+        description="SC Single, $50,000 income (2024)",
+        year=2024,
+        state="SC",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1517.44,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # SC MFJ, $100,000 W2 (2024, no dependents)
+    # Fed AGI: $100,000, Fed std deduction: $29,200
+    # Fed taxable: $100,000 - $29,200 = $70,800
+    # SC taxable: $70,800 (no exemptions)
+    # SC tax: $0 + $14,270 * 0.03 + ($70,800 - $17,830) * 0.062
+    #       = $0 + $428.10 + $52,970 * 0.062
+    #       = $0 + $428.10 + $3,284.14 = $3,712.24
+    # Federal tax (OTS tables): $8,032.00
+    TaxScenario(
+        source="SC 2024 Tax Brackets (computed)",
+        description="SC MFJ, $100,000 income (2024)",
+        year=2024,
+        state="SC",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3712.24,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # SC Single, $50,000 W2 (2025, no dependents)
+    # Fed std deduction: $15,000
+    # Fed taxable: $50,000 - $15,000 = $35,000
+    # SC taxable: $35,000 (no exemptions)
+    # SC tax (6% top rate): $0 + $14,270 * 0.03 + ($35,000 - $17,830) * 0.06
+    #       = $0 + $428.10 + $17,170 * 0.06
+    #       = $0 + $428.10 + $1,030.20 = $1,458.30
+    # Federal 2025 tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="SC 2025 Tax Brackets (computed)",
+        description="SC Single, $50,000 income (2025)",
+        year=2025,
+        state="SC",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1458.30,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # SC MFJ, $100,000 W2 (2025, no dependents)
+    # Fed std deduction: $30,000
+    # Fed taxable: $100,000 - $30,000 = $70,000
+    # SC taxable: $70,000 (no exemptions)
+    # SC tax: $0 + $14,270 * 0.03 + ($70,000 - $17,830) * 0.06
+    #       = $0 + $428.10 + $52,170 * 0.06
+    #       = $0 + $428.10 + $3,130.20 = $3,558.30
+    # Federal 2025 tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923
+    TaxScenario(
+        source="SC 2025 Tax Brackets (computed)",
+        description="SC MFJ, $100,000 income (2025)",
+        year=2025,
+        state="SC",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=3558.30,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # SC HoH, $75,000 W2 (2025, no dependents)
+    # Fed std deduction: $22,500
+    # Fed taxable: $75,000 - $22,500 = $52,500
+    # SC taxable: $52,500 (no exemptions)
+    # SC tax: $0 + $14,270 * 0.03 + ($52,500 - $17,830) * 0.06
+    #       = $0 + $428.10 + $34,670 * 0.06
+    #       = $0 + $428.10 + $2,080.20 = $2,508.30
+    # Federal 2025 tax (graph-computed): $5,960.00
+    TaxScenario(
+        source="SC 2025 Tax Brackets (computed)",
+        description="SC HoH, $75,000 income (2025)",
+        year=2025,
+        state="SC",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=5960.0,
+        expected_state_tax=2508.30,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
     # ========== MICHIGAN SCENARIOS ==========
     # MI 2024: Flat 4.25% rate, Personal exemption $5,600
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800
@@ -1846,6 +2303,275 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=8000.0,
         expected_federal_tax=7923.0,
         expected_state_tax=3529.20,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # ========== MARYLAND SCENARIOS ==========
+    # MD 2024: Standard deduction 15% of MD AGI (min $1,800, max $2,700)
+    # Personal exemption: $3,200 (accepted as input, not computed)
+    # Schedule I (Single/MFS/Dep): 8 brackets (2%, 3%, 4%, 4.75%, 5%, 5.25%, 5.5%, 5.75%)
+    # Schedule II (MFJ/HoH/QSS): Same rates, different thresholds
+    #
+    # MD Single, $50,000 W2 (2024)
+    # Fed AGI: $50,000
+    # MD AGI: $50,000
+    # MD Std Ded: min($2,700, max($1,800, $50,000 x 0.15)) = min($2,700, $7,500) = $2,700
+    # MD Taxable: $50,000 - $2,700 - $3,200 = $44,100
+    # MD Tax (Schedule I):
+    #   $1,000 x 0.02 = $20.00
+    #   $1,000 x 0.03 = $30.00
+    #   $1,000 x 0.04 = $40.00
+    #   $41,100 x 0.0475 = $1,952.25
+    #   Total: $2,042.25
+    # Federal taxable: $50,000 - $14,600 = $35,400
+    # Federal tax (OTS tables): $4,016.00
+    TaxScenario(
+        source="MD 2024 Tax Brackets (computed)",
+        description="MD Single, $50,000 income (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Single",
+        w2_income=50000.0,
+        dependent_exemptions=3200.0,  # Personal exemption
+        expected_federal_tax=4016.0,
+        expected_state_tax=2042.25,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MD MFJ, $100,000 W2 (2024)
+    # Fed AGI: $100,000
+    # MD AGI: $100,000
+    # MD Std Ded: min($2,700, max($1,800, $100,000 x 0.15)) = min($2,700, $15,000) = $2,700
+    # MD Taxable: $100,000 - $2,700 - $6,400 = $90,900 (assuming 2 exemptions)
+    # MD Tax (Schedule II):
+    #   $1,000 x 0.02 = $20.00
+    #   $1,000 x 0.03 = $30.00
+    #   $1,000 x 0.04 = $40.00
+    #   $87,900 x 0.0475 = $4,175.25
+    #   Total: $4,265.25
+    # Federal taxable: $100,000 - $29,200 = $70,800
+    # Federal tax (OTS tables): $8,032.00
+    TaxScenario(
+        source="MD 2024 Tax Brackets (computed)",
+        description="MD MFJ, $100,000 income (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        dependent_exemptions=6400.0,  # 2 personal exemptions
+        expected_federal_tax=8032.00,
+        expected_state_tax=4265.25,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MD 2025: Standard deduction flat $3,350 (Single/MFS) or $6,700 (MFJ/HoH/QSS)
+    # Personal exemption: $3,200 (unchanged)
+    # Schedule I (Single/MFS/Dep): 10 brackets (adds 6.25% at $500k, 6.50% at $1M)
+    # Schedule II (MFJ/HoH/QSS): 10 brackets (adds 6.25% at $600k, 6.50% at $1.2M)
+    #
+    # MD Single, $50,000 W2 (2025)
+    # Fed AGI: $50,000
+    # MD AGI: $50,000
+    # MD Std Ded: $3,350 (flat amount)
+    # MD Taxable: $50,000 - $3,350 - $3,200 = $43,450
+    # MD Tax (Schedule I):
+    #   $1,000 x 0.02 = $20.00
+    #   $1,000 x 0.03 = $30.00
+    #   $1,000 x 0.04 = $40.00
+    #   $40,450 x 0.0475 = $1,921.375
+    #   Total: $2,011.375
+    # Federal taxable: $50,000 - $15,000 = $35,000
+    # Federal tax (OTS tables 2025): $3,961.50
+    TaxScenario(
+        source="MD 2025 Tax Brackets (computed)",
+        description="MD Single, $50,000 income (2025, flat std ded)",
+        year=2025,
+        state="MD",
+        filing_status="Single",
+        w2_income=50000.0,
+        dependent_exemptions=3200.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=2011.375,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # MD MFJ, $100,000 W2 (2025)
+    # Fed AGI: $100,000
+    # MD AGI: $100,000
+    # MD Std Ded: $6,700 (flat amount for MFJ)
+    # MD Taxable: $100,000 - $6,700 - $6,400 = $86,900
+    # MD Tax (Schedule II):
+    #   $1,000 x 0.02 = $20.00
+    #   $1,000 x 0.03 = $30.00
+    #   $1,000 x 0.04 = $40.00
+    #   $83,900 x 0.0475 = $3,985.25
+    #   Total: $4,075.25
+    # Federal taxable: $100,000 - $30,000 = $70,000
+    # Federal tax (OTS tables 2025 MFJ): $7,923.00
+    TaxScenario(
+        source="MD 2025 Tax Brackets (computed)",
+        description="MD MFJ, $100,000 income (2025, flat std ded)",
+        year=2025,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        dependent_exemptions=6400.0,
+        expected_federal_tax=7923.00,
+        expected_state_tax=4075.25,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # MD Single, high earner testing new 2025 brackets
+    # MD Single, $600,000 W2 (2025)
+    # Fed AGI: $600,000
+    # MD AGI: $600,000
+    # MD Std Ded: $3,350
+    # MD Taxable: $600,000 - $3,350 - $3,200 = $593,450
+    # MD Tax (computed): $32,975.625
+    # Federal tax (OTS tables 2025 Single): $174,297.25
+    TaxScenario(
+        source="MD 2025 Tax Brackets (computed)",
+        description="MD Single, $600,000 income (2025, tests 6.25% bracket)",
+        year=2025,
+        state="MD",
+        filing_status="Single",
+        w2_income=600000.0,
+        dependent_exemptions=3200.0,
+        expected_federal_tax=174297.25,
+        expected_state_tax=32975.625,
+        expected_federal_agi=600000.0,
+        backend="graph",
+    ),
+    # ========== LOUISIANA SCENARIOS ==========
+    # LA 2024: 3-bracket system (1.85%, 3.5%, 4.25%)
+    # Single/MFS/HoH: 1.85% up to $12,500, 3.5% $12,500-$50,000, 4.25% over $50,000
+    # MFJ/QW: 1.85% up to $25,000, 3.5% $25,000-$100,000, 4.25% over $100,000
+    # Combined personal exemption-standard deduction: Single $4,500, MFJ $9,000 (+ $1,000 per additional exemption)
+    #
+    # LA 2025: Flat 3% tax
+    # Standard deduction: Single $12,500, MFJ/HoH $25,000
+    # No dependent exemptions
+    #
+    # LA Single, $25,000 W2 (2024)
+    # Federal AGI: $25,000
+    # LA tax table income (L9): $25,000
+    # Exemptions: $4,500 (base, 1 exemption)
+    # LA taxable: $25,000 - $4,500 = $20,500
+    # LA tax: $12,500 * 0.0185 + ($20,500 - $12,500) * 0.035
+    #       = $231.25 + $280.00 = $511.25
+    # Federal taxable: $25,000 - $14,600 = $10,400
+    # Federal tax: $10,400 * 0.10 = $1,040.00
+    TaxScenario(
+        source="LA 2024 Tax Brackets (computed)",
+        description="LA Single, $25,000 income (2024)",
+        year=2024,
+        state="LA",
+        filing_status="Single",
+        w2_income=25000.0,
+        dependent_exemptions=4500.0,
+        expected_federal_tax=1040.00,
+        expected_state_tax=511.25,
+        expected_federal_agi=25000.0,
+        backend="graph",
+    ),
+    # LA Single, $60,000 W2 (2024)
+    # Federal AGI: $60,000
+    # LA tax table income: $60,000
+    # Exemptions: $4,500
+    # LA taxable: $60,000 - $4,500 = $55,500
+    # LA tax: $12,500 * 0.0185 + $37,500 * 0.035 + $5,500 * 0.0425
+    #       = $231.25 + $1,312.50 + $233.75 = $1,777.50
+    # Federal taxable: $60,000 - $14,600 = $45,400
+    # Federal tax: $11,600 * 0.10 + $33,800 * 0.12 = $1,160 + $4,056 = $5,216.00
+    TaxScenario(
+        source="LA 2024 Tax Brackets (computed)",
+        description="LA Single, $60,000 income, all 3 brackets (2024)",
+        year=2024,
+        state="LA",
+        filing_status="Single",
+        w2_income=60000.0,
+        dependent_exemptions=4500.0,
+        expected_federal_tax=5216.00,
+        expected_state_tax=1777.50,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # LA MFJ, $30,000 W2 (2024)
+    # Federal AGI: $30,000
+    # LA tax table income: $30,000
+    # Exemptions: $9,000 (base, 2 exemptions)
+    # LA taxable: $30,000 - $9,000 = $21,000
+    # LA tax: $21,000 * 0.0185 = $388.50
+    # Federal taxable: $30,000 - $29,200 = $800
+    # Federal tax: $800 * 0.10 = $80.00
+    TaxScenario(
+        source="LA 2024 Tax Brackets (computed)",
+        description="LA MFJ, $30,000 income (2024)",
+        year=2024,
+        state="LA",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        dependent_exemptions=9000.0,
+        expected_federal_tax=80.00,
+        expected_state_tax=388.50,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # LA MFJ, $150,000 W2 (2024)
+    # Federal AGI: $150,000
+    # LA tax table income: $150,000
+    # Exemptions: $9,000
+    # LA taxable: $150,000 - $9,000 = $141,000
+    # LA tax: $25,000 * 0.0185 + $75,000 * 0.035 + $41,000 * 0.0425
+    #       = $462.50 + $2,625.00 + $1,742.50 = $4,830.00
+    # Federal taxable: $150,000 - $29,200 = $120,800
+    # Federal tax: $23,200 * 0.10 + $71,100 * 0.12 + $26,500 * 0.22 = $2,320 + $8,532 + $5,830 = $16,682.00
+    TaxScenario(
+        source="LA 2024 Tax Brackets (computed)",
+        description="LA MFJ, $150,000 income, all 3 brackets (2024)",
+        year=2024,
+        state="LA",
+        filing_status="Married/Joint",
+        w2_income=150000.0,
+        dependent_exemptions=9000.0,
+        expected_federal_tax=16682.00,
+        expected_state_tax=4830.00,
+        expected_federal_agi=150000.0,
+        backend="graph",
+    ),
+    # LA Single, $50,000 W2 (2025)
+    # Federal AGI: $50,000
+    # LA taxable: $50,000 - $12,500 (standard deduction) = $37,500
+    # LA tax: $37,500 * 0.03 = $1,125.00
+    # Federal taxable: $50,000 - $15,000 = $35,000
+    # Federal tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="LA 2025 Tax Reform (computed)",
+        description="LA Single, $50,000 income, flat 3% tax (2025)",
+        year=2025,
+        state="LA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1125.00,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # LA MFJ, $100,000 W2 (2025)
+    # Federal AGI: $100,000
+    # LA taxable: $100,000 - $25,000 (standard deduction) = $75,000
+    # LA tax: $75,000 * 0.03 = $2,250.00
+    # Federal taxable: $100,000 - $30,000 = $70,000
+    # Federal tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923.00
+    TaxScenario(
+        source="LA 2025 Tax Reform (computed)",
+        description="LA MFJ, $100,000 income, flat 3% tax (2025)",
+        year=2025,
+        state="LA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=7923.00,
+        expected_state_tax=2250.00,
         expected_federal_agi=100000.0,
         backend="graph",
     ),

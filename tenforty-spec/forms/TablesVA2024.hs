@@ -56,14 +56,14 @@ vaStandardDeduction2024 = byStatus 8500 17000 8500 8500 17000
 
 {- | 2024 Virginia personal exemption amount
 Source: Virginia Form 760 Instructions (2024)
-$930 per person (taxpayer, spouse if filing jointly)
+\$930 per person (taxpayer, spouse if filing jointly)
 -}
 vaPersonalExemption2024 :: Amount Dollars
 vaPersonalExemption2024 = 930
 
 {- | 2024 Virginia age 65 or older / blind exemption amount
 Source: Virginia Form 760 Instructions (2024)
-$800 per person per qualifying condition
+\$800 per person per qualifying condition
 -}
 vaAge65OrBlindExemption2024 :: Amount Dollars
 vaAge65OrBlindExemption2024 = 800
