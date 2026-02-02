@@ -913,8 +913,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Personal exemptions: $1,000 per taxpayer
     # Dependent exemptions: income-phased ($1,500, $1,000, $500, $0)
     # Single/MFS: 7 brackets: 1.4% ($0-$20k), 1.75% ($20k-$35k),
-    #   2.45% ($35k-$40k), 3.5% ($40k-$75k), 5.525% ($75k-$500k),
-    #   6.37% ($500k-$1M), 8.97% ($1M+)
+    #   3.5% ($35k-$40k), 5.525% ($40k-$75k), 6.37% ($75k-$500k),
+    #   8.97% ($500k-$1M), 10.75% ($1M+)
     # MFJ/HoH/QW: 8 brackets: 1.4% ($0-$20k), 1.75% ($20k-$50k),
     #   2.45% ($50k-$70k), 3.5% ($70k-$80k), 5.525% ($80k-$150k),
     #   6.37% ($150k-$500k), 8.97% ($500k-$1M), 10.75% ($1M+)
@@ -1396,7 +1396,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=75000.0,
         expected_federal_tax=4923.0,
-        expected_state_tax=1346.125,
+        expected_state_tax=1688.125,
         expected_federal_agi=75000.0,
         backend="graph",
     ),
@@ -1465,8 +1465,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # GA AGI: $75,000
     # GA Taxable: $75,000 - $12,000 - $4,000 = $59,000
     # GA Tax: $59,000 * 0.0539 = $3,180.10
-    # Federal taxable: $75,000 - $21,600 = $53,400
-    # Federal tax: $16,550 x 0.10 + $36,850 x 0.12 = $1,655 + $4,422 = $6,077 (OTS rounds to $6,041)
+    # Federal taxable: $75,000 - $21,900 = $53,100
+    # Federal tax: $16,550 x 0.10 + $36,550 x 0.12 = $1,655 + $4,386 = $6,041
     TaxScenario(
         source="GA 2024 Tax Brackets (computed)",
         description="GA HoH, $75,000 income, $4,000 exemptions",

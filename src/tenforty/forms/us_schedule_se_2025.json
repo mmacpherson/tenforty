@@ -1,1 +1,218 @@
-{"imports":[],"inputs":[0,1,2,3,4],"meta":{"form_id":"us_schedule_se","generated_by":"tenforty-dsl","year":2025},"nodes":{"0":{"id":0,"name":"L1a_farm_profit","op":{"type":"input"}},"1":{"id":1,"name":"L1b_ss_benefits_received","op":{"type":"input"}},"10":{"id":10,"op":{"left":8,"right":3,"type":"add"}},"11":{"id":11,"name":"L4c_total_se_earnings","op":{"left":9,"right":10,"type":"max"}},"12":{"id":12,"name":"L6_ss_wage_base","op":{"type":"literal","value":176100}},"13":{"id":13,"op":{"type":"literal","value":0}},"14":{"id":14,"op":{"left":12,"right":4,"type":"sub"}},"15":{"id":15,"name":"L7_remaining_wage_base","op":{"left":13,"right":14,"type":"max"}},"16":{"id":16,"name":"L8a_ss_taxable_se","op":{"left":11,"right":15,"type":"min"}},"17":{"id":17,"op":{"type":"literal","value":0.124}},"18":{"id":18,"name":"L8b_ss_tax","op":{"left":16,"right":17,"type":"mul"}},"19":{"id":19,"op":{"type":"literal","value":2.9e-2}},"2":{"id":2,"name":"L2_business_profit","op":{"type":"input"}},"20":{"id":20,"name":"L9_medicare_tax","op":{"left":11,"right":19,"type":"mul"}},"21":{"id":21,"name":"L10_se_tax","op":{"left":18,"right":20,"type":"add"}},"22":{"id":22,"op":{"type":"literal","value":0.5}},"23":{"id":23,"name":"L11_se_tax_deduction","op":{"left":21,"right":22,"type":"mul"}},"3":{"id":3,"name":"L4b_optional_method","op":{"type":"input"}},"4":{"id":4,"name":"L5_w2_ss_wages","op":{"type":"input"}},"5":{"id":5,"op":{"left":0,"right":1,"type":"add"}},"6":{"id":6,"name":"L3_net_se_earnings","op":{"left":5,"right":2,"type":"add"}},"7":{"id":7,"op":{"type":"literal","value":0.9235}},"8":{"id":8,"name":"L4a_adjusted_se_earnings","op":{"left":6,"right":7,"type":"mul"}},"9":{"id":9,"op":{"type":"literal","value":0}}},"outputs":[21,23,6,8,11,16,18,20],"tables":{}}
+{
+    "imports": [],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4
+    ],
+    "meta": {
+        "form_id": "us_schedule_se",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1a_farm_profit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L1b_ss_benefits_received",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "left": 8,
+                "right": 3,
+                "type": "add"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L4c_total_se_earnings",
+            "op": {
+                "left": 9,
+                "right": 10,
+                "type": "max"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L6_ss_wage_base",
+            "op": {
+                "type": "literal",
+                "value": 176100
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "14": {
+            "id": 14,
+            "op": {
+                "left": 12,
+                "right": 4,
+                "type": "sub"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L7_remaining_wage_base",
+            "op": {
+                "left": 13,
+                "right": 14,
+                "type": "max"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L8a_ss_taxable_se",
+            "op": {
+                "left": 11,
+                "right": 15,
+                "type": "min"
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "type": "literal",
+                "value": 0.124
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L8b_ss_tax",
+            "op": {
+                "left": 16,
+                "right": 17,
+                "type": "mul"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 2.9e-2
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L2_business_profit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L9_medicare_tax",
+            "op": {
+                "left": 11,
+                "right": 19,
+                "type": "mul"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L10_se_tax",
+            "op": {
+                "left": 18,
+                "right": 20,
+                "type": "add"
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "type": "literal",
+                "value": 0.5
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L11_se_tax_deduction",
+            "op": {
+                "left": 21,
+                "right": 22,
+                "type": "mul"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L4b_optional_method",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L5_w2_ss_wages",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L3_net_se_earnings",
+            "op": {
+                "left": 5,
+                "right": 2,
+                "type": "add"
+            }
+        },
+        "7": {
+            "id": 7,
+            "op": {
+                "type": "literal",
+                "value": 0.9235
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L4a_adjusted_se_earnings",
+            "op": {
+                "left": 6,
+                "right": 7,
+                "type": "mul"
+            }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        }
+    },
+    "outputs": [
+        21,
+        23,
+        6,
+        8,
+        11,
+        16,
+        18,
+        20
+    ],
+    "tables": {}
+}

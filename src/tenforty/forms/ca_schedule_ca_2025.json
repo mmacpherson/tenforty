@@ -1,1 +1,517 @@
-{"imports":[{"form":"us_form_8995","line":"L16","year":2025}],"inputs":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],"meta":{"form_id":"ca_schedule_ca","generated_by":"tenforty-dsl","year":2025},"nodes":{"0":{"id":0,"name":"S7","op":{"type":"input"}},"1":{"id":1,"name":"S8","op":{"type":"input"}},"10":{"id":10,"name":"S20a","op":{"type":"input"}},"11":{"id":11,"name":"S21","op":{"type":"input"}},"12":{"id":12,"name":"S22_24","op":{"type":"input"}},"13":{"id":13,"name":"A7","op":{"type":"input"}},"14":{"id":14,"name":"A8","op":{"type":"input"}},"15":{"id":15,"name":"A9","op":{"type":"input"}},"16":{"id":16,"name":"A10","op":{"type":"input"}},"17":{"id":17,"name":"A11","op":{"type":"input"}},"18":{"id":18,"name":"A12","op":{"type":"input"}},"19":{"id":19,"name":"A13","op":{"type":"input"}},"2":{"id":2,"name":"S9","op":{"type":"input"}},"20":{"id":20,"name":"A14","op":{"type":"input"}},"21":{"id":21,"name":"A15a","op":{"type":"input"}},"22":{"id":22,"name":"A16a","op":{"type":"input"}},"23":{"id":23,"name":"A17_19","op":{"type":"input"}},"24":{"id":24,"name":"A22_24","op":{"type":"input"}},"25":{"id":25,"name":"ADJ_EDUCATOR","op":{"type":"input"}},"26":{"id":26,"name":"ADJ_HSA","op":{"type":"input"}},"27":{"id":27,"name":"ADJ_SE","op":{"type":"input"}},"28":{"id":28,"name":"ADJ_STUDENT","op":{"type":"input"}},"29":{"id":29,"name":"ADJ_IRA","op":{"type":"input"}},"3":{"id":3,"name":"S11","op":{"type":"input"}},"30":{"id":30,"name":"ADJ_OTHER","op":{"type":"input"}},"31":{"id":31,"op":{"left":11,"right":12,"type":"add"}},"32":{"id":32,"op":{"left":10,"right":31,"type":"add"}},"33":{"id":33,"op":{"left":9,"right":32,"type":"add"}},"34":{"id":34,"op":{"left":8,"right":33,"type":"add"}},"35":{"id":35,"op":{"left":7,"right":34,"type":"add"}},"36":{"id":36,"op":{"left":6,"right":35,"type":"add"}},"37":{"id":37,"op":{"left":5,"right":36,"type":"add"}},"38":{"id":38,"op":{"left":4,"right":37,"type":"add"}},"39":{"id":39,"op":{"left":3,"right":38,"type":"add"}},"4":{"id":4,"name":"S12","op":{"type":"input"}},"40":{"id":40,"op":{"left":2,"right":39,"type":"add"}},"41":{"id":41,"op":{"left":1,"right":40,"type":"add"}},"42":{"id":42,"name":"TOTAL_SUB","op":{"left":0,"right":41,"type":"add"}},"43":{"id":43,"name":"A_QBI","op":{"form":"us_form_8995","line":"L16","type":"import","year":2025}},"44":{"id":44,"op":{"left":43,"right":24,"type":"add"}},"45":{"id":45,"op":{"left":23,"right":44,"type":"add"}},"46":{"id":46,"op":{"left":22,"right":45,"type":"add"}},"47":{"id":47,"op":{"left":21,"right":46,"type":"add"}},"48":{"id":48,"op":{"left":20,"right":47,"type":"add"}},"49":{"id":49,"op":{"left":19,"right":48,"type":"add"}},"5":{"id":5,"name":"S13","op":{"type":"input"}},"50":{"id":50,"op":{"left":18,"right":49,"type":"add"}},"51":{"id":51,"op":{"left":17,"right":50,"type":"add"}},"52":{"id":52,"op":{"left":16,"right":51,"type":"add"}},"53":{"id":53,"op":{"left":15,"right":52,"type":"add"}},"54":{"id":54,"op":{"left":14,"right":53,"type":"add"}},"55":{"id":55,"name":"TOTAL_ADD","op":{"left":13,"right":54,"type":"add"}},"56":{"id":56,"op":{"left":25,"right":26,"type":"add"}},"57":{"id":57,"op":{"left":56,"right":27,"type":"add"}},"58":{"id":58,"op":{"left":57,"right":28,"type":"add"}},"59":{"id":59,"op":{"left":58,"right":29,"type":"add"}},"6":{"id":6,"name":"S14","op":{"type":"input"}},"60":{"id":60,"name":"NET_ADJ","op":{"left":59,"right":30,"type":"add"}},"7":{"id":7,"name":"S15a","op":{"type":"input"}},"8":{"id":8,"name":"S16a","op":{"type":"input"}},"9":{"id":9,"name":"S17_19","op":{"type":"input"}}},"outputs":[60,55,42],"tables":{}}
+{
+    "imports": [
+        {
+            "form": "us_form_8995",
+            "line": "L16",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+    ],
+    "meta": {
+        "form_id": "ca_schedule_ca",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "S7",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "S8",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "S20a",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "S21",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "S22_24",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "A7",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "A8",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "A9",
+            "op": {
+                "type": "input"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "A10",
+            "op": {
+                "type": "input"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "A11",
+            "op": {
+                "type": "input"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "A12",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "A13",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "S9",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "A14",
+            "op": {
+                "type": "input"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "A15a",
+            "op": {
+                "type": "input"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "A16a",
+            "op": {
+                "type": "input"
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "A17_19",
+            "op": {
+                "type": "input"
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "A22_24",
+            "op": {
+                "type": "input"
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "ADJ_EDUCATOR",
+            "op": {
+                "type": "input"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "ADJ_HSA",
+            "op": {
+                "type": "input"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "ADJ_SE",
+            "op": {
+                "type": "input"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "ADJ_STUDENT",
+            "op": {
+                "type": "input"
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "ADJ_IRA",
+            "op": {
+                "type": "input"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "S11",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "ADJ_OTHER",
+            "op": {
+                "type": "input"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "left": 11,
+                "right": 12,
+                "type": "add"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "left": 10,
+                "right": 31,
+                "type": "add"
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "left": 9,
+                "right": 32,
+                "type": "add"
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "left": 8,
+                "right": 33,
+                "type": "add"
+            }
+        },
+        "35": {
+            "id": 35,
+            "op": {
+                "left": 7,
+                "right": 34,
+                "type": "add"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 6,
+                "right": 35,
+                "type": "add"
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 5,
+                "right": 36,
+                "type": "add"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 4,
+                "right": 37,
+                "type": "add"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "left": 3,
+                "right": 38,
+                "type": "add"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "S12",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "left": 2,
+                "right": 39,
+                "type": "add"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "left": 1,
+                "right": 40,
+                "type": "add"
+            }
+        },
+        "42": {
+            "id": 42,
+            "name": "TOTAL_SUB",
+            "op": {
+                "left": 0,
+                "right": 41,
+                "type": "add"
+            }
+        },
+        "43": {
+            "id": 43,
+            "name": "A_QBI",
+            "op": {
+                "form": "us_form_8995",
+                "line": "L16",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 43,
+                "right": 24,
+                "type": "add"
+            }
+        },
+        "45": {
+            "id": 45,
+            "op": {
+                "left": 23,
+                "right": 44,
+                "type": "add"
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "left": 22,
+                "right": 45,
+                "type": "add"
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "left": 21,
+                "right": 46,
+                "type": "add"
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "left": 20,
+                "right": 47,
+                "type": "add"
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "left": 19,
+                "right": 48,
+                "type": "add"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "S13",
+            "op": {
+                "type": "input"
+            }
+        },
+        "50": {
+            "id": 50,
+            "op": {
+                "left": 18,
+                "right": 49,
+                "type": "add"
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "left": 17,
+                "right": 50,
+                "type": "add"
+            }
+        },
+        "52": {
+            "id": 52,
+            "op": {
+                "left": 16,
+                "right": 51,
+                "type": "add"
+            }
+        },
+        "53": {
+            "id": 53,
+            "op": {
+                "left": 15,
+                "right": 52,
+                "type": "add"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "left": 14,
+                "right": 53,
+                "type": "add"
+            }
+        },
+        "55": {
+            "id": 55,
+            "name": "TOTAL_ADD",
+            "op": {
+                "left": 13,
+                "right": 54,
+                "type": "add"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "left": 25,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "left": 56,
+                "right": 27,
+                "type": "add"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "left": 57,
+                "right": 28,
+                "type": "add"
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 58,
+                "right": 29,
+                "type": "add"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "S14",
+            "op": {
+                "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "name": "NET_ADJ",
+            "op": {
+                "left": 59,
+                "right": 30,
+                "type": "add"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "S15a",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "S16a",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "S17_19",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        60,
+        55,
+        42
+    ],
+    "tables": {}
+}

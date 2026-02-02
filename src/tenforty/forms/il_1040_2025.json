@@ -1,1 +1,297 @@
-{"imports":[{"form":"us_1040","line":"L11","year":2025}],"inputs":[0,1,2,3,4,5,6,7,8],"meta":{"form_id":"il_1040","generated_by":"tenforty-dsl","year":2025},"nodes":{"0":{"id":0,"name":"L2_tax_exempt_interest","op":{"type":"input"}},"1":{"id":1,"name":"L3_other_additions","op":{"type":"input"}},"10":{"id":10,"op":{"type":"literal","value":0}},"11":{"id":11,"name":"L1_federal_agi","op":{"left":9,"right":10,"type":"add"}},"12":{"id":12,"op":{"left":0,"right":1,"type":"add"}},"13":{"id":13,"name":"L4_total_income","op":{"left":11,"right":12,"type":"add"}},"14":{"id":14,"op":{"left":3,"right":4,"type":"add"}},"15":{"id":15,"name":"L8_total_subtractions","op":{"left":2,"right":14,"type":"add"}},"16":{"id":16,"op":{"type":"literal","value":0}},"17":{"id":17,"op":{"left":13,"right":15,"type":"sub"}},"18":{"id":18,"name":"L9_il_base_income","op":{"left":16,"right":17,"type":"max"}},"19":{"id":19,"op":{"type":"literal","value":0}},"2":{"id":2,"name":"L5_retirement_subtraction","op":{"type":"input"}},"20":{"id":20,"op":{"left":18,"right":5,"type":"sub"}},"21":{"id":21,"name":"L11_il_net_income","op":{"left":19,"right":20,"type":"max"}},"22":{"id":22,"op":{"type":"literal","value":4.95e-2}},"23":{"id":23,"name":"L12_il_tax","op":{"left":21,"right":22,"type":"mul"}},"24":{"id":24,"op":{"left":7,"right":8,"type":"add"}},"25":{"id":25,"name":"L16_total_payments","op":{"left":6,"right":24,"type":"add"}},"26":{"id":26,"op":{"type":"literal","value":0}},"27":{"id":27,"op":{"left":23,"right":25,"type":"sub"}},"28":{"id":28,"name":"L17_tax_due","op":{"left":26,"right":27,"type":"max"}},"29":{"id":29,"op":{"left":25,"right":23,"type":"sub"}},"3":{"id":3,"name":"L6_il_tax_refund","op":{"type":"input"}},"30":{"id":30,"op":{"left":25,"right":23,"type":"sub"}},"31":{"id":31,"op":{"type":"literal","value":0}},"32":{"id":32,"name":"L18_overpayment","op":{"cond":29,"otherwise":31,"then":30,"type":"if_positive"}},"4":{"id":4,"name":"L7_other_subtractions","op":{"type":"input"}},"5":{"id":5,"name":"L10_exemption_allowance","op":{"type":"input"}},"6":{"id":6,"name":"L13_il_tax_withheld","op":{"type":"input"}},"7":{"id":7,"name":"L14_estimated_payments","op":{"type":"input"}},"8":{"id":8,"name":"L15_other_credits","op":{"type":"input"}},"9":{"id":9,"op":{"form":"us_1040","line":"L11","type":"import","year":2025}}},"outputs":[11,21,23,25,28,32,18],"tables":{}}
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ],
+    "meta": {
+        "form_id": "il_1040",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L2_tax_exempt_interest",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L3_other_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L1_federal_agi",
+            "op": {
+                "left": 9,
+                "right": 10,
+                "type": "add"
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L4_total_income",
+            "op": {
+                "left": 11,
+                "right": 12,
+                "type": "add"
+            }
+        },
+        "14": {
+            "id": 14,
+            "op": {
+                "left": 3,
+                "right": 4,
+                "type": "add"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L8_total_subtractions",
+            "op": {
+                "left": 2,
+                "right": 14,
+                "type": "add"
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "left": 13,
+                "right": 15,
+                "type": "sub"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L9_il_base_income",
+            "op": {
+                "left": 16,
+                "right": 17,
+                "type": "max"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L5_retirement_subtraction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "left": 18,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L11_il_net_income",
+            "op": {
+                "left": 19,
+                "right": 20,
+                "type": "max"
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "type": "literal",
+                "value": 4.95e-2
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L12_il_tax",
+            "op": {
+                "left": 21,
+                "right": 22,
+                "type": "mul"
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L16_total_payments",
+            "op": {
+                "left": 6,
+                "right": 24,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 23,
+                "right": 25,
+                "type": "sub"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L17_tax_due",
+            "op": {
+                "left": 26,
+                "right": 27,
+                "type": "max"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 25,
+                "right": 23,
+                "type": "sub"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L6_il_tax_refund",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "left": 25,
+                "right": 23,
+                "type": "sub"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "32": {
+            "id": 32,
+            "name": "L18_overpayment",
+            "op": {
+                "cond": 29,
+                "otherwise": 31,
+                "then": 30,
+                "type": "if_positive"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L7_other_subtractions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L10_exemption_allowance",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L13_il_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L14_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L15_other_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2025
+            }
+        }
+    },
+    "outputs": [
+        11,
+        21,
+        23,
+        25,
+        28,
+        32,
+        18
+    ],
+    "tables": {}
+}

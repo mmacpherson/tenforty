@@ -1,1 +1,348 @@
-{"imports":[],"inputs":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],"meta":{"form_id":"us_schedule_b","generated_by":"tenforty-dsl","year":2024},"nodes":{"0":{"id":0,"name":"L1a_interest_1","op":{"type":"input"}},"1":{"id":1,"name":"L1b_interest_2","op":{"type":"input"}},"10":{"id":10,"name":"L5a_dividend_1","op":{"type":"input"}},"11":{"id":11,"name":"L5b_dividend_2","op":{"type":"input"}},"12":{"id":12,"name":"L5c_dividend_3","op":{"type":"input"}},"13":{"id":13,"name":"L5d_dividend_4","op":{"type":"input"}},"14":{"id":14,"name":"L5e_dividend_5","op":{"type":"input"}},"15":{"id":15,"name":"L5f_dividend_6","op":{"type":"input"}},"16":{"id":16,"name":"L5g_dividend_7","op":{"type":"input"}},"17":{"id":17,"name":"L5h_dividend_8","op":{"type":"input"}},"18":{"id":18,"name":"L5i_dividend_other","op":{"type":"input"}},"19":{"id":19,"name":"L7a_foreign_account","op":{"type":"input"}},"2":{"id":2,"name":"L1c_interest_3","op":{"type":"input"}},"20":{"id":20,"name":"L7b_foreign_country","op":{"type":"input"}},"21":{"id":21,"name":"L8_foreign_trust","op":{"type":"input"}},"22":{"id":22,"op":{"left":7,"right":8,"type":"add"}},"23":{"id":23,"op":{"left":6,"right":22,"type":"add"}},"24":{"id":24,"op":{"left":5,"right":23,"type":"add"}},"25":{"id":25,"op":{"left":4,"right":24,"type":"add"}},"26":{"id":26,"op":{"left":3,"right":25,"type":"add"}},"27":{"id":27,"op":{"left":2,"right":26,"type":"add"}},"28":{"id":28,"op":{"left":1,"right":27,"type":"add"}},"29":{"id":29,"name":"L2_total_interest_listed","op":{"left":0,"right":28,"type":"add"}},"3":{"id":3,"name":"L1d_interest_4","op":{"type":"input"}},"30":{"id":30,"op":{"type":"literal","value":0}},"31":{"id":31,"op":{"left":29,"right":9,"type":"sub"}},"32":{"id":32,"name":"L4_taxable_interest","op":{"left":30,"right":31,"type":"max"}},"33":{"id":33,"op":{"left":17,"right":18,"type":"add"}},"34":{"id":34,"op":{"left":16,"right":33,"type":"add"}},"35":{"id":35,"op":{"left":15,"right":34,"type":"add"}},"36":{"id":36,"op":{"left":14,"right":35,"type":"add"}},"37":{"id":37,"op":{"left":13,"right":36,"type":"add"}},"38":{"id":38,"op":{"left":12,"right":37,"type":"add"}},"39":{"id":39,"op":{"left":11,"right":38,"type":"add"}},"4":{"id":4,"name":"L1e_interest_5","op":{"type":"input"}},"40":{"id":40,"name":"L6_ordinary_dividends","op":{"left":10,"right":39,"type":"add"}},"5":{"id":5,"name":"L1f_interest_6","op":{"type":"input"}},"6":{"id":6,"name":"L1g_interest_7","op":{"type":"input"}},"7":{"id":7,"name":"L1h_interest_8","op":{"type":"input"}},"8":{"id":8,"name":"L1i_interest_other","op":{"type":"input"}},"9":{"id":9,"name":"L3_excludable_bond_interest","op":{"type":"input"}}},"outputs":[29,32,40],"tables":{}}
+{
+    "imports": [],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+    ],
+    "meta": {
+        "form_id": "us_schedule_b",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1a_interest_1",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L1b_interest_2",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L5a_dividend_1",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L5b_dividend_2",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L5c_dividend_3",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L5d_dividend_4",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L5e_dividend_5",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L5f_dividend_6",
+            "op": {
+                "type": "input"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L5g_dividend_7",
+            "op": {
+                "type": "input"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L5h_dividend_8",
+            "op": {
+                "type": "input"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L5i_dividend_other",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L7a_foreign_account",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L1c_interest_3",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L7b_foreign_country",
+            "op": {
+                "type": "input"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L8_foreign_trust",
+            "op": {
+                "type": "input"
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 6,
+                "right": 22,
+                "type": "add"
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 5,
+                "right": 23,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 4,
+                "right": 24,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 3,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 2,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 1,
+                "right": 27,
+                "type": "add"
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "L2_total_interest_listed",
+            "op": {
+                "left": 0,
+                "right": 28,
+                "type": "add"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L1d_interest_4",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "left": 29,
+                "right": 9,
+                "type": "sub"
+            }
+        },
+        "32": {
+            "id": 32,
+            "name": "L4_taxable_interest",
+            "op": {
+                "left": 30,
+                "right": 31,
+                "type": "max"
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "left": 17,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "left": 16,
+                "right": 33,
+                "type": "add"
+            }
+        },
+        "35": {
+            "id": 35,
+            "op": {
+                "left": 15,
+                "right": 34,
+                "type": "add"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 14,
+                "right": 35,
+                "type": "add"
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 13,
+                "right": 36,
+                "type": "add"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 12,
+                "right": 37,
+                "type": "add"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "left": 11,
+                "right": 38,
+                "type": "add"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L1e_interest_5",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "name": "L6_ordinary_dividends",
+            "op": {
+                "left": 10,
+                "right": 39,
+                "type": "add"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L1f_interest_6",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L1g_interest_7",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L1h_interest_8",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L1i_interest_other",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L3_excludable_bond_interest",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        29,
+        32,
+        40
+    ],
+    "tables": {}
+}

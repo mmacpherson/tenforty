@@ -52,9 +52,14 @@ ohIT1040_2025 = form "oh_it1040" 2025 $ do
             l7 `subtractNotBelowZero` l8
 
     -- Line 10: Ohio nonbusiness income tax (from tax rate schedule)
+    -- Base tax of $342 applies to income above $26,050 (2025)
+    ohBaseTax <-
+        interior "oh_base_tax" "ohio_base_tax" $
+            ifPos (l9 .-. dollars 26050) (dollars 342) (dollars 0)
+
     l10 <-
         keyOutput "L10" "oh_nonbusiness_tax" "Ohio nonbusiness income tax" $
-            bracketTax "oh_brackets_2025" l9
+            bracketTax "oh_brackets_2025" l9 .+. ohBaseTax
 
     -- Line 11: Business income tax (3% flat rate on business income)
     let businessTaxRate = 0.03

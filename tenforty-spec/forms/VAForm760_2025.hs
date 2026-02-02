@@ -25,7 +25,7 @@ vaForm760_2025 = form "va_760" 2025 $ do
         interior "L3" "fagi_plus_additions" $
             l1 .+. l2
 
-    -- Lines 4-8: Items added to income
+    -- Lines 4-8: Subtractions from income
     l4 <- keyInput "L4" "social_security" "Social Security benefits"
     l5 <- keyInput "L5" "state_tax_refund" "State income tax refund"
     l6 <- keyInput "L6" "va_subtractions" "Virginia subtractions from Schedule ADJ"
@@ -37,7 +37,7 @@ vaForm760_2025 = form "va_760" 2025 $ do
     -- Line 8: Virginia adjusted gross income
     l8 <-
         keyOutput "L8" "va_agi" "Virginia adjusted gross income" $
-            l3 .+. l7
+            l3 `subtractNotBelowZero` l7
 
     -- Line 9: Standard deduction or itemized deductions
     l9_itemized <- keyInput "L9_itemized" "va_itemized" "Virginia itemized deductions"

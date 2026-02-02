@@ -1,1 +1,253 @@
-{"imports":[],"inputs":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],"meta":{"form_id":"us_schedule_d","generated_by":"tenforty-dsl","year":2024},"nodes":{"0":{"id":0,"name":"L1a_short_term_totals","op":{"type":"input"}},"1":{"id":1,"name":"L1b_short_term_basis_reported","op":{"type":"input"}},"10":{"id":10,"name":"L10_long_term_8949_box_f","op":{"type":"input"}},"11":{"id":11,"name":"L11_long_term_from_k1","op":{"type":"input"}},"12":{"id":12,"name":"L12_long_term_carryover","op":{"type":"input"}},"13":{"id":13,"name":"L13_capital_gain_distributions","op":{"type":"input"}},"14":{"id":14,"name":"L14_long_term_other","op":{"type":"input"}},"15":{"id":15,"op":{"left":5,"right":6,"type":"add"}},"16":{"id":16,"op":{"left":4,"right":15,"type":"add"}},"17":{"id":17,"op":{"left":3,"right":16,"type":"add"}},"18":{"id":18,"op":{"left":2,"right":17,"type":"add"}},"19":{"id":19,"op":{"left":1,"right":18,"type":"add"}},"2":{"id":2,"name":"L2_short_term_8949_box_b","op":{"type":"input"}},"20":{"id":20,"name":"L7_net_short_term","op":{"left":0,"right":19,"type":"add"}},"21":{"id":21,"op":{"left":13,"right":14,"type":"add"}},"22":{"id":22,"op":{"left":12,"right":21,"type":"add"}},"23":{"id":23,"op":{"left":11,"right":22,"type":"add"}},"24":{"id":24,"op":{"left":10,"right":23,"type":"add"}},"25":{"id":25,"op":{"left":9,"right":24,"type":"add"}},"26":{"id":26,"op":{"left":8,"right":25,"type":"add"}},"27":{"id":27,"name":"L15_net_long_term","op":{"left":7,"right":26,"type":"add"}},"28":{"id":28,"name":"L16_net_capital_gain_loss","op":{"left":20,"right":27,"type":"add"}},"3":{"id":3,"name":"L3_short_term_8949_box_c","op":{"type":"input"}},"4":{"id":4,"name":"L4_short_term_from_k1","op":{"type":"input"}},"5":{"id":5,"name":"L5_short_term_carryover","op":{"type":"input"}},"6":{"id":6,"name":"L6_short_term_other","op":{"type":"input"}},"7":{"id":7,"name":"L8a_long_term_totals","op":{"type":"input"}},"8":{"id":8,"name":"L8b_long_term_basis_reported","op":{"type":"input"}},"9":{"id":9,"name":"L9_long_term_8949_box_e","op":{"type":"input"}}},"outputs":[27,28,20],"tables":{}}
+{
+    "imports": [],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+    ],
+    "meta": {
+        "form_id": "us_schedule_d",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1a_short_term_totals",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L1b_short_term_basis_reported",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L10_long_term_8949_box_f",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L11_long_term_from_k1",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L12_long_term_carryover",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L13_capital_gain_distributions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L14_long_term_other",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "left": 5,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 4,
+                "right": 15,
+                "type": "add"
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "left": 3,
+                "right": 16,
+                "type": "add"
+            }
+        },
+        "18": {
+            "id": 18,
+            "op": {
+                "left": 2,
+                "right": 17,
+                "type": "add"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "left": 1,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L2_short_term_8949_box_b",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L7_net_short_term",
+            "op": {
+                "left": 0,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "left": 13,
+                "right": 14,
+                "type": "add"
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "left": 12,
+                "right": 21,
+                "type": "add"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 11,
+                "right": 22,
+                "type": "add"
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 10,
+                "right": 23,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 9,
+                "right": 24,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 8,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L15_net_long_term",
+            "op": {
+                "left": 7,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L16_net_capital_gain_loss",
+            "op": {
+                "left": 20,
+                "right": 27,
+                "type": "add"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L3_short_term_8949_box_c",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L4_short_term_from_k1",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L5_short_term_carryover",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L6_short_term_other",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L8a_long_term_totals",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L8b_long_term_basis_reported",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L9_long_term_8949_box_e",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        27,
+        28,
+        20
+    ],
+    "tables": {}
+}

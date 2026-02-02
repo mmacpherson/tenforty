@@ -48,13 +48,14 @@ Source: Virginia Form 760 Instructions (2025)
 https://www.tax.virginia.gov/sites/default/files/vatax-pdf/2025-760-instructions.pdf
 Virginia DOR: New Virginia Tax Laws for July 1, 2025
 https://www.tax.virginia.gov/news/new-virginia-tax-laws-july-1-2025
+Note: Virginia has no Head of Household filing status. Federal HoH filers use Single rates.
+https://www.tax.virginia.gov/deductions
 
-Single/MFS: $8,750 (increased from $8,500)
+Single/MFS/HoH: $8,750 (increased from $8,500)
 MFJ/QW: $17,500 (increased from $17,000)
-HoH: $13,100 (increased from $12,850)
 -}
 vaStandardDeduction2025 :: ByStatus (Amount Dollars)
-vaStandardDeduction2025 = byStatus 8750 17500 8750 13100 17500
+vaStandardDeduction2025 = byStatus 8750 17500 8750 8750 17500
 
 {- | 2025 Virginia personal exemption amount
 Source: Virginia Form 760 Instructions (2025)

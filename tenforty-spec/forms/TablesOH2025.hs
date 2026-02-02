@@ -16,7 +16,9 @@ import TenForty.Types
 All filing statuses use the same brackets.
 Source: Ohio Department of Taxation, 2025 IT-1040 Instructions
 https://dam.assets.ohio.gov/image/upload/v1767095693/tax.ohio.gov/forms/ohio_individual/individual/2025/it1040-booklet.pdf
+
 Rates: 0% on income $0-$26,050; 2.75% on $26,051-$100,000; 3.125% on income over $100,000
+Base tax: $342 for income above $26,050 (added to bracket tax computation)
 Top bracket rate reduced from 3.5% (2024) to 3.125% (2025) per HB 33 (2024-2025 biennial budget).
 -}
 ohioBrackets2025 :: NonEmpty Bracket

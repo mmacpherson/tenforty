@@ -16,7 +16,9 @@ import TenForty.Types
 All filing statuses use the same brackets.
 Source: Ohio Department of Taxation, 2024 IT-1040 Instructions
 https://dam.assets.ohio.gov/image/upload/v1735920104/tax.ohio.gov/forms/ohio_individual/individual/2024/it1040-booklet.pdf
+
 Rates: 0% on income $0-$26,050; 2.75% on $26,051-$100,000; 3.5% on income over $100,000
+Base tax: $360.69 for income above $26,050 (added to bracket tax computation)
 -}
 ohioBrackets2024 :: NonEmpty Bracket
 ohioBrackets2024 =
