@@ -40,6 +40,18 @@ Read these files before starting:
 9. `tests/fixtures/scenarios.py` — silver standard scenario format
 10. `tests/regression_test.py` — monotonicity test parametrize list
 
+## Research Safety
+
+- Prefer WebSearch and WebFetch (HTML) for initial research
+- If you download a PDF, **do not** use the Read tool on it — the Read tool
+  base64-encodes PDFs and can blow past the context window
+- Instead, extract text with: `pdftotext <file.pdf> - | head -500`
+  or search within it: `pdftotext <file.pdf> - | grep -i "tax rate"`
+- For very large documents, extract only the pages you need:
+  `pdftotext -f 3 -l 5 <file.pdf> -` (pages 3–5)
+- Always be mindful of context size — if a file is large, extract only
+  the specific sections you need rather than reading it in full
+
 ## Test Details
 
 Key test functions and how to run them:
