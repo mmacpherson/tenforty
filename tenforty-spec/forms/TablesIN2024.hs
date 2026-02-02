@@ -1,6 +1,5 @@
 module TablesIN2024 (
     inTaxRate2024,
-    inPersonalExemption2024,
 ) where
 
 import TenForty.Types
@@ -17,6 +16,9 @@ inTaxRate2024 = 0.0305
 Source: Indiana Form IT-40 Instructions (2024)
 Indiana allows $1,000 per exemption (personal, spouse, and each dependent).
 Additional exemptions of $1,500 are available for qualifying dependent children.
+
+Note: Not exported as the form spec accepts total exemptions as a dollar input (L6).
+Kept for reference/validation purposes.
 -}
 inPersonalExemption2024 :: Amount Dollars
 inPersonalExemption2024 = 1000

@@ -56,11 +56,6 @@ kyForm740_2025 = form "ky_740" 2025 $ do
     -- Line 13: Family size tax credit
     l13 <- keyInput "L13" "family_size_credit" "Family size tax credit"
 
-    -- Line 14: Tax after family size credit
-    _ <-
-        interior "L14" "tax_after_family_credit" $
-            l12 `subtractNotBelowZero` l13
-
     -- Line 15: Other nonrefundable credits
     l15 <- keyInput "L15" "other_nonrefundable_credits" "Other nonrefundable credits"
 
