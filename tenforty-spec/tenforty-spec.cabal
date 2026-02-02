@@ -61,24 +61,44 @@ executable tenforty-compile
     CAFTB3514_2025
     CAScheduleCA_2024
     CAScheduleCA_2025
+    GAForm500_2024
+    GAForm500_2025
+    IL1040_2024
+    IL1040_2025
     MI1040_2024
     MI1040_2025
     NCFormD400_2024
     NCFormD400_2025
+    NJ1040_2024
+    NJ1040_2025
     NYIT201_2024
     NYIT201_2025
+    OHIT1040_2024
+    OHIT1040_2025
     PA40_2024
     PA40_2025
     Tables2024
     Tables2025
+    VAForm760_2024
+    VAForm760_2025
     TablesCA2024
     TablesCA2025
+    TablesGA2024
+    TablesGA2025
+    TablesIL2024
+    TablesIL2025
     TablesMI2024
     TablesMI2025
     TablesNC2024
     TablesNC2025
+    TablesNJ2024
+    TablesNJ2025
     TablesNY2024
     TablesNY2025
+    TablesOH2024
+    TablesOH2025
+    TablesVA2024
+    TablesVA2025
     TablesWI2024
     TablesWI2025
     US1040_2024
@@ -155,24 +175,44 @@ test-suite tenforty-spec-test
     CAFTB3514_2025
     CAScheduleCA_2024
     CAScheduleCA_2025
+    GAForm500_2024
+    GAForm500_2025
+    IL1040_2024
+    IL1040_2025
     MI1040_2024
     MI1040_2025
     NCFormD400_2024
     NCFormD400_2025
+    NJ1040_2024
+    NJ1040_2025
     NYIT201_2024
     NYIT201_2025
+    OHIT1040_2024
+    OHIT1040_2025
     PA40_2024
     PA40_2025
     Tables2024
     Tables2025
+    VAForm760_2024
+    VAForm760_2025
     TablesCA2024
     TablesCA2025
+    TablesGA2024
+    TablesGA2025
+    TablesIL2024
+    TablesIL2025
     TablesMI2024
     TablesMI2025
     TablesNC2024
     TablesNC2025
+    TablesNJ2024
+    TablesNJ2025
     TablesNY2024
     TablesNY2025
+    TablesOH2024
+    TablesOH2025
+    TablesVA2024
+    TablesVA2025
     TablesWI2024
     TablesWI2025
     US1040_2024

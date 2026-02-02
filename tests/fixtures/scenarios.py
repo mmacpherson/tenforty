@@ -41,6 +41,7 @@ class TaxScenario:
     long_term_capital_gains: float = 0.0
     short_term_capital_gains: float = 0.0
     num_dependents: int = 0
+    dependent_exemptions: float = 0.0
     expected_federal_tax: float | None = None
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
@@ -70,6 +71,7 @@ def run_tax_scenario(scenario: TaxScenario):
         long_term_capital_gains=scenario.long_term_capital_gains,
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
+        dependent_exemptions=scenario.dependent_exemptions,
     )
     if scenario.backend:
         kwargs["backend"] = scenario.backend
@@ -906,6 +908,186 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=120000.0,
         backend="graph",
     ),
+    # ========== NEW JERSEY SCENARIOS ==========
+    # NJ 2024/2025: Progressive brackets (rates and thresholds unchanged)
+    # Personal exemptions: $1,000 per taxpayer
+    # Dependent exemptions: income-phased ($1,500, $1,000, $500, $0)
+    # Single/MFS: 7 brackets: 1.4% ($0-$20k), 1.75% ($20k-$35k),
+    #   3.5% ($35k-$40k), 5.525% ($40k-$75k), 6.37% ($75k-$500k),
+    #   8.97% ($500k-$1M), 10.75% ($1M+)
+    # MFJ/HoH/QW: 8 brackets: 1.4% ($0-$20k), 1.75% ($20k-$50k),
+    #   2.45% ($50k-$70k), 3.5% ($70k-$80k), 5.525% ($80k-$150k),
+    #   6.37% ($150k-$500k), 8.97% ($500k-$1M), 10.75% ($1M+)
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # NJ 2024 Single in 1.75% bracket
+    # Federal AGI: $30,000, NJ taxable: $30,000 (no exemptions)
+    # NJ tax: $20,000 x 0.014 + ($30,000 - $20,000) x 0.0175
+    #       = $280 + $175 = $455
+    # Federal taxable: $15,400 (AGI - $14,600 std ded)
+    # Federal tax (graph backend): $1,616
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ Single, $30k income (1.75% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_federal_tax=1616.0,
+        expected_state_tax=455.0,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # NJ 2024 Single in 5.525% bracket
+    # Federal AGI: $60,000, NJ taxable: $60,000 (no exemptions)
+    # NJ tax: $280 + $262.50 + $175 + ($60,000 - $40,000) x 0.05525
+    #       = $280 + $262.50 + $175 + $1,105 = $1,822.50
+    # Federal taxable: $45,400 (AGI - $14,600 std ded)
+    # Federal tax (graph backend): $5,216
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ Single, $60k income (5.525% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5216.0,
+        expected_state_tax=1822.5,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # NJ 2024 MFJ in 2.45% bracket
+    # Federal AGI: $65,000, NJ taxable: $65,000 (no exemptions)
+    # NJ tax: $280 + ($50,000 - $20,000) x 0.0175 + ($65,000 - $50,000) x 0.0245
+    #       = $280 + $525 + $367.50 = $1,172.50
+    # Federal taxable: $35,800 (AGI - $29,200 std ded)
+    # Federal tax (graph backend): $3,832
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ MFJ, $65k income (2.45% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Married/Joint",
+        w2_income=65000.0,
+        expected_federal_tax=3832.0,
+        expected_state_tax=1172.5,
+        expected_federal_agi=65000.0,
+        backend="graph",
+    ),
+    # NJ 2024 Head of Household in 5.525% bracket
+    # Federal AGI: $100,000, NJ taxable: $100,000 (no exemptions)
+    # NJ tax: $280 + $525 + $490 + $350 + ($100,000 - $80,000) x 0.05525
+    #       = $280 + $525 + $490 + $350 + $1,105 = $2,750
+    # Federal taxable: $78,100 (AGI - $21,900 std ded)
+    # Federal tax (Over $100k, exact formula): $7,241 + ($78,100 - $63,100) * 0.22 = $10,541
+    TaxScenario(
+        source="NJ 2024 Tax Brackets (computed)",
+        description="NJ HoH, $100k income (5.525% bracket)",
+        year=2024,
+        state="NJ",
+        filing_status="Head_of_House",
+        w2_income=100000.0,
+        expected_federal_tax=10541.0,
+        expected_state_tax=2750.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # NJ 2025 Single in 5.525% bracket (verify rates unchanged)
+    # Federal AGI: $50,000, NJ taxable: $50,000 (no exemptions)
+    # NJ tax: $280 + $262.50 + $175 + ($50,000 - $40,000) x 0.05525
+    #       = $280 + $262.50 + $175 + $552.50 = $1,270
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="NJ 2025 Tax Brackets (computed)",
+        description="NJ Single, $50k income (2025, rates unchanged)",
+        year=2025,
+        state="NJ",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=1270.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # ========== VIRGINIA SCENARIOS ==========
+    # VA 2024: Progressive brackets (2%, 3%, 5%, 5.75%)
+    # Standard Deduction: Single $8,500, MFJ $17,000
+    # Brackets (same for all filing statuses):
+    #   2% on first $3,000
+    #   3% on next $2,000 ($3,001-$5,000)
+    #   5% on next $12,000 ($5,001-$17,000)
+    #   5.75% on $17,001+
+    # VA 2025: Same brackets, increased std deduction: Single $8,750, MFJ $17,500
+    #
+    # VA 2024 Single, $50,000 W2 only
+    # Federal AGI: $50,000, VA AGI: $50,000, VA taxable: $50,000 - $8,500 = $41,500
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($24,500 x 0.0575)
+    #       = $60 + $60 + $600 + $1,408.75 = $2,128.75
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="VA 2024 Tax Brackets (computed)",
+        description="VA Single, $50,000 W2 only",
+        year=2024,
+        state="VA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2128.75,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # VA 2024 MFJ, $100,000 W2 only
+    # Federal AGI: $100,000, VA AGI: $100,000, VA taxable: $100,000 - $17,000 = $83,000
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($66,000 x 0.0575)
+    #       = $60 + $60 + $600 + $3,795 = $4,515.00
+    # Federal taxable: $70,800, Federal tax: $8,032
+    TaxScenario(
+        source="VA 2024 Tax Brackets (computed)",
+        description="VA MFJ, $100,000 W2 only",
+        year=2024,
+        state="VA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4515.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # VA 2025 Single, $25,000 W2 only
+    # Federal AGI: $25,000, VA AGI: $25,000, VA taxable: $25,000 - $8,750 = $16,250
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($11,250 x 0.05)
+    #       = $60 + $60 + $562.50 = $682.50
+    # Federal taxable: $10,000, Federal tax: $1,000 (2025 brackets)
+    TaxScenario(
+        source="VA 2025 Tax Brackets (computed)",
+        description="VA Single, $25,000 W2 only (2025 std deduction)",
+        year=2025,
+        state="VA",
+        filing_status="Single",
+        w2_income=25000.0,
+        expected_federal_tax=1000.0,
+        expected_state_tax=682.50,
+        expected_federal_agi=25000.0,
+        backend="graph",
+    ),
+    # VA 2025 MFJ, $120,000 W2 only
+    # Federal AGI: $120,000, VA AGI: $120,000, VA taxable: $120,000 - $17,500 = $102,500
+    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($85,500 x 0.0575)
+    #       = $60 + $60 + $600 + $4,916.25 = $5,636.25
+    # Federal taxable: $90,000, Federal tax (2025 MFJ): $10,323
+    TaxScenario(
+        source="VA 2025 Tax Brackets (computed)",
+        description="VA MFJ, $120,000 W2 only (2025 std deduction)",
+        year=2025,
+        state="VA",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5636.25,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
     # ========== MICHIGAN SCENARIOS ==========
     # MI 2024: Flat 4.25% rate, Personal exemption $5,600
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800
@@ -1030,6 +1212,125 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # ========== ILLINOIS SCENARIOS ==========
+    # IL 2024: Flat 4.95% rate, Personal exemption $2,775
+    # IL 2025: Flat 4.95% rate (unchanged), Personal exemption $2,850
+    # No standard deduction (uses personal exemptions instead)
+    # Exemption phase-out: $250k (Single/MFS/HoH/QW), $500k (MFJ)
+    # IL tax = (Federal AGI - exemptions) * 0.0495
+    # These use graph backend with exemptions set to 0 (not auto-computed).
+    #
+    # IL 2024 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000
+    # IL Base Income: $50,000 (no additions/subtractions)
+    # IL Net Income: $50,000 (exemption = $0)
+    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL Single, $50,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2475.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # IL 2024 Single, $100,000 W2 only, no exemptions
+    # Federal AGI: $100,000
+    # IL Base Income: $100,000
+    # IL Net Income: $100,000 (exemption = $0)
+    # IL Tax: $100,000 * 0.0495 = $4,950.00
+    # Federal taxable: $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL Single, $100,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4950.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # IL 2024 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000
+    # IL Base Income: $120,000
+    # IL Net Income: $120,000 (exemption = $0)
+    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # Federal taxable: $90,800, Federal tax: $10,432
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL MFJ, $120,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10432.0,
+        expected_state_tax=5940.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # IL 2024 Head_of_House, $75,000 W2 only, no exemptions
+    # Federal AGI: $75,000
+    # IL Base Income: $75,000
+    # IL Net Income: $75,000 (exemption = $0)
+    # IL Tax: $75,000 * 0.0495 = $3,712.50
+    # Federal taxable: $53,100 ($75K - $21.9K std ded)
+    # Federal tax (HoH 2024): $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
+    TaxScenario(
+        source="IL 2024 Tax Rate (computed)",
+        description="IL HoH, $75,000 W2 only",
+        year=2024,
+        state="IL",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=3712.5,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # IL 2025 Single, $50,000 W2 only, no exemptions
+    # Federal AGI: $50,000
+    # IL Base Income: $50,000
+    # IL Net Income: $50,000 (exemption = $0)
+    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="IL 2025 Tax Rate (computed)",
+        description="IL Single, $50,000 W2 only (2025)",
+        year=2025,
+        state="IL",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=2475.0,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # IL 2025 MFJ, $120,000 W2 only, no exemptions
+    # Federal AGI: $120,000
+    # IL Base Income: $120,000
+    # IL Net Income: $120,000 (exemption = $0)
+    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # Federal taxable: $90,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 * 0.10 + $66,150 * 0.12 = $2,385 + $7,938 = $10,323
+    TaxScenario(
+        source="IL 2025 Tax Rate (computed)",
+        description="IL MFJ, $120,000 W2 only (2025)",
+        year=2025,
+        state="IL",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_federal_tax=10323.0,
+        expected_state_tax=5940.0,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
     # ========== NORTH CAROLINA SCENARIOS ==========
     # NC 2024: Flat 4.5% rate
     # Standard Deduction: Single $12,750, MFJ $25,500
@@ -1085,6 +1386,141 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=3961.50,
         expected_state_tax=1583.125,
         expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="OH 2025 Tax Brackets (computed)",
+        description="OH MFJ, $75,000 income (2025, middle bracket)",
+        year=2025,
+        state="OH",
+        filing_status="Married/Joint",
+        w2_income=75000.0,
+        expected_federal_tax=4923.0,
+        expected_state_tax=1688.125,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # ========== GEORGIA SCENARIOS ==========
+    # GA 2024: Flat 5.39% rate
+    # Standard Deduction: Single $12,000, MFJ $24,000
+    # Dependent Exemption: $4,000 per dependent
+    #
+    # GA Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000
+    # GA AGI: $50,000 (no additions/subtractions)
+    # GA Taxable: $50,000 - $12,000 = $38,000
+    # GA Tax: $38,000 * 0.0539 = $2,048.20
+    # Federal taxable: $35,400, Federal tax: $4,016
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA Single, $50,000 income, no dependents",
+        year=2024,
+        state="GA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2048.20,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # GA Single, $100,000 W2, 2 dependents ($8,000 exemptions)
+    # Fed AGI: $100,000
+    # GA AGI: $100,000
+    # GA Taxable: $100,000 - $12,000 - $8,000 = $80,000
+    # GA Tax: $80,000 * 0.0539 = $4,312.00
+    # Federal taxable: $100,000 - $14,600 = $85,400, Federal tax: $13,841
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA Single, $100,000 income, $8,000 exemptions",
+        year=2024,
+        state="GA",
+        filing_status="Single",
+        w2_income=100000.0,
+        dependent_exemptions=8000.0,
+        expected_federal_tax=13841.0,
+        expected_state_tax=4312.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # GA MFJ, $100,000 W2, no dependents
+    # Fed AGI: $100,000
+    # GA AGI: $100,000
+    # GA Taxable: $100,000 - $24,000 = $76,000
+    # GA Tax: $76,000 * 0.0539 = $4,096.40
+    # Federal taxable: $70,800, Federal tax: $8,032
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA MFJ, $100,000 income, no dependents",
+        year=2024,
+        state="GA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4096.40,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # GA Head of Household, $75,000 W2, $4,000 exemptions
+    # Fed AGI: $75,000
+    # GA AGI: $75,000
+    # GA Taxable: $75,000 - $12,000 - $4,000 = $59,000
+    # GA Tax: $59,000 * 0.0539 = $3,180.10
+    # Federal taxable: $75,000 - $21,900 = $53,100
+    # Federal tax: $16,550 x 0.10 + $36,550 x 0.12 = $1,655 + $4,386 = $6,041
+    TaxScenario(
+        source="GA 2024 Tax Brackets (computed)",
+        description="GA HoH, $75,000 income, $4,000 exemptions",
+        year=2024,
+        state="GA",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        dependent_exemptions=4000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=3180.10,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # GA 2025: Flat 5.19% rate (reduced from 5.39%)
+    # Standard Deduction: Single $12,000, MFJ $24,000 (unchanged from 2024)
+    # Dependent Exemption: $4,000 per dependent (unchanged from 2024)
+    #
+    # GA Single, $50,000 W2, no dependents
+    # Fed AGI: $50,000
+    # GA AGI: $50,000
+    # GA Taxable: $50,000 - $12,000 = $38,000
+    # GA Tax: $38,000 * 0.0519 = $1,972.20
+    # Federal taxable: $35,000 (AGI - $15,000 std ded)
+    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    TaxScenario(
+        source="GA 2025 Tax Brackets (computed)",
+        description="GA Single, $50,000 income (2025, 5.19% rate)",
+        year=2025,
+        state="GA",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.50,
+        expected_state_tax=1972.20,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # GA MFJ, $100,000 W2, $8,000 exemptions (2025)
+    # Fed AGI: $100,000
+    # GA AGI: $100,000
+    # GA Taxable: $100,000 - $24,000 - $8,000 = $68,000
+    # GA Tax: $68,000 * 0.0519 = $3,529.20
+    # Federal taxable: $70,000 (AGI - $30,000 std ded)
+    # Federal tax (2025 MFJ): $23,850 x 0.10 + $46,150 x 0.12 = $2,385 + $5,538 = $7,923
+    TaxScenario(
+        source="GA 2025 Tax Brackets (computed)",
+        description="GA MFJ, $100,000 income, $8,000 exemptions (2025, 5.19% rate)",
+        year=2025,
+        state="GA",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        dependent_exemptions=8000.0,
+        expected_federal_tax=7923.0,
+        expected_state_tax=3529.20,
+        expected_federal_agi=100000.0,
         backend="graph",
     ),
 ]

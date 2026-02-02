@@ -64,6 +64,28 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L64_ca_total_tax": "state_total_tax",
         },
     ),
+    OTSState.GA: StateGraphConfig(
+        natural_to_node={
+            "itemized_deductions": "ga_500_L5_itemized",
+            "dependent_exemptions": "ga_500_L6_dependent_exemptions",
+        },
+        output_lines={
+            "L4_ga_agi": "state_adjusted_gross_income",
+            "L7_ga_taxable_income": "state_taxable_income",
+            "L12_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.IL: StateGraphConfig(
+        # IL-1040 imports federal AGI and applies additions/subtractions.
+        # Exemptions are accepted as total input (num_dependents cannot map to
+        # dollar amounts due to natural_to_node limitation).
+        natural_to_node={},
+        output_lines={
+            "L9_il_base_income": "state_adjusted_gross_income",
+            "L11_il_net_income": "state_taxable_income",
+            "L12_il_tax": "state_total_tax",
+        },
+    ),
     OTSState.MI: StateGraphConfig(
         # MI-1040 imports federal AGI and applies additions/subtractions.
         # Exemptions are accepted as total input (num_dependents cannot map to
@@ -115,6 +137,43 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L9_total_pa_taxable_income": "state_adjusted_gross_income",
             "L11_adjusted_pa_taxable_income": "state_taxable_income",
             "L12_pa_tax_liability": "state_total_tax",
+        },
+    ),
+    OTSState.NJ: StateGraphConfig(
+        # NJ-1040 imports federal AGI and applies exemptions/deductions.
+        # Personal exemptions and dependent exemptions are accepted as total inputs
+        # (num_dependents cannot map to dollar amounts, and dependent exemptions
+        # are income-phased in NJ).
+        natural_to_node={},
+        output_lines={
+            "L14_federal_agi": "state_adjusted_gross_income",
+            "L39_nj_taxable_income": "state_taxable_income",
+            "L46_nj_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.OH: StateGraphConfig(
+        # OH IT-1040 imports federal AGI and applies state additions/deductions.
+        # Personal exemptions are income-based (tiered by MAGI) and must be
+        # calculated by user, so they are accepted as total input.
+        # Ohio has no standard deduction system.
+        natural_to_node={},
+        output_lines={
+            "L4_oh_agi": "state_adjusted_gross_income",
+            "L9_oh_taxable_nonbusiness_income": "state_taxable_income",
+            "L25_total_tax_liability": "state_total_tax",
+        },
+    ),
+    OTSState.VA: StateGraphConfig(
+        # VA Form 760 imports federal AGI and applies additions/subtractions.
+        # Personal exemptions and age/blind exemptions are accepted as dollar-amount
+        # inputs (num_dependents cannot map to dollar amounts).
+        natural_to_node={
+            "itemized_deductions": "va_760_L9_itemized",
+        },
+        output_lines={
+            "L8_va_agi": "state_adjusted_gross_income",
+            "L13_va_taxable_income": "state_taxable_income",
+            "L18_total_tax": "state_total_tax",
         },
     ),
     OTSState.WI: StateGraphConfig(

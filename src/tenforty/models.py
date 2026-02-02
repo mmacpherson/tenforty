@@ -122,11 +122,16 @@ class OTSState(Enum):
     NONE = None
 
     CA = "CA"
+    GA = "GA"
+    IL = "IL"
     MA = "MA"
     MI = "MI"
     NC = "NC"
+    NJ = "NJ"
     NY = "NY"
+    OH = "OH"
     PA = "PA"
+    VA = "VA"
     WI = "WI"
 
     # No income-tax states are easy to support! :)
@@ -143,11 +148,16 @@ STATE_TO_FORM = {
     OTSState.NONE: None,
     #
     OTSState.CA: "CA_540",
+    OTSState.GA: "GA_500",
+    OTSState.IL: "IL_1040",
     OTSState.MA: "MA_1",
     OTSState.MI: "MI_1040",
     OTSState.NC: "NC_D400",
+    OTSState.NJ: "NJ_1040",
     OTSState.NY: "NY_IT201",
+    OTSState.OH: "OH_IT1040",
     OTSState.PA: "PA_40",
+    OTSState.VA: "VA_760",
     OTSState.WI: "WI_Form1",
     # No income-tax states
     OTSState.AK: None,
@@ -208,6 +218,7 @@ class TaxReturnInput(BaseModel):
     itemized_deductions: float = 0.0
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
+    dependent_exemptions: float = 0.0
 
     @model_validator(mode="after")
     def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
