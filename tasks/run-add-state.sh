@@ -38,4 +38,4 @@ trap 'rm -f "$TASK_FILE"' EXIT
 echo "States: ${STATES_STR}  Model: $MODEL  Iterations: $MAX_ITERATIONS"
 echo "Task file: $TASK_FILE"
 
-claude-runner run --no-firewall --base-ref main-2025 -v -f "$TASK_FILE" "$REPO_DIR"
+claude-runner run --no-firewall --base-ref main -v -f "$TASK_FILE" "$REPO_DIR"
