@@ -1,6 +1,6 @@
 ---
 model: opus
-max_iterations: 3
+max_iterations: {MAX_ITERATIONS}
 image: claude-runner-tenforty
 checks:
   - "make spec-graphs && make forms-sync"
@@ -15,7 +15,13 @@ setup:
 
 # Goal
 
-Add 2024 and 2025 state income tax support for {STATE} to the tenforty graph backend.
+Add 2024 and 2025 state income tax support for the following states
+to the tenforty graph backend, one state per iteration: {STATES}
+
+Process states **in the order listed**. Complete all work for a state
+(Haskell specs, Python integration, tests, commit) before moving to the next.
+After finishing each state, run all verification commands and commit before
+moving on.
 
 Follow the checklist in `docs/adding-a-state.md` exactly. All steps must be completed.
 
@@ -44,6 +50,8 @@ Key test functions and how to run them:
 
 ## Success Criteria
 
+For **each** state added:
+
 - `make spec-graphs` — Haskell specs compile and JSON graphs are generated
 - `make forms-sync` — JSON synced to Python package
 - `make test-full` — all Python tests pass (includes graph backend)
@@ -55,36 +63,32 @@ Key test functions and how to run them:
 
 ## Iteration Guide
 
-### Iteration 1: Research and Haskell Specs
-- Research {STATE}'s income tax structure: brackets, standard deduction, personal exemptions, credits
-- Use WebSearch and WebFetch to find official tax instructions and rate schedules
-- Determine architecture pattern (AGI-import like NY, no-import like PA, or multi-form like CA)
-- Determine Tables content: flat-tax states export rate + standard deduction (see `TablesNC2024.hs`); bracket-tax states export brackets + deductions + exemptions (see `TablesNY2024.hs`). Only export values that the form spec will actually consume — exemptions are typically accepted as user input via `keyInput`, not hard-coded in Tables.
-- Create `Tables{ST}2024.hs` and `Tables{ST}2025.hs` with cited sources
-- Create the form spec file(s) for 2024 and 2025
-- Register modules in `tenforty-spec.cabal` (both executable and test-suite sections)
-- Register in `app/Main.hs` (imports, allForms entries, help text)
-- Run all verification commands (see Verification Commands section)
+Use **one iteration per state**. Within each iteration, complete all steps
+for that state before committing.
 
-### Iteration 2: Python Integration
-- Run `make forms-sync` to copy JSON into Python package
-- Add `OTSState.XX` enum value in `src/tenforty/models.py`
-- Add `STATE_TO_FORM` entry in `src/tenforty/models.py`
-- Add `StateGraphConfig` in `src/tenforty/mappings.py`
-- Add silver standard scenarios to `tests/fixtures/scenarios.py` — must include at least one 2025 scenario if the state's rate or brackets change between 2024 and 2025
-- Add monotonicity test tuple to `tests/regression_test.py` parametrize list
-- Add range-based sanity check scenarios (`{ST}_SCENARIOS` list) and `test_{st}_tax_ranges` function to `tests/regression_test.py` — follow the `PA_SCENARIOS` / `test_pa_tax_ranges` pattern
-- Run all verification commands (see Verification Commands section)
+### Per-State Workflow
 
-### Iteration 3: Polish and Verification
-- Fix any test failures or lint issues
-- Run `make spec-fmt` and `make run-hooks-all-files`
-- Run `make spec-lint`
-- Verify all checks pass
+1. **Research** — WebSearch/WebFetch for official tax instructions, rate
+   schedules, and bracket tables. Determine pattern (bracket-tax AGI-import
+   like NY, flat-tax AGI-import like NC, or no-import like PA).
+2. **Haskell specs** — Create Tables and Form modules for 2024 and 2025.
+   Register in `tenforty-spec.cabal` and `app/Main.hs`. Run
+   `make spec-graphs && make forms-sync` and `make spec-lint`.
+3. **Python integration** — Add enum, STATE_TO_FORM, StateGraphConfig,
+   silver-standard scenarios, monotonicity test, and range-based sanity test.
+4. **Verify & commit** — Run all verification commands. Fix failures.
+   Run `make spec-fmt` and `.venv/bin/pre-commit run --all-files`.
+   Commit with descriptive message.
+5. **Move to next state.**
+
+### Final Iteration (if needed)
+
+If all states are done before iterations run out, use the remaining
+iteration for cross-state polish or to fix any lingering failures.
 
 ## Research Guidance
 
-- Use WebSearch and WebFetch to find official {STATE} tax rate schedules, instructions, and forms
+- Use WebSearch and WebFetch to find official tax rate schedules, instructions, and forms for the current state
 - Look for gold standard test data: official worked examples from the state DOR
 - For silver standard scenarios, compute expected values from published bracket rates and show formula derivation in comments (see existing CA, NY, PA examples)
 - Only perform read operations — do not submit forms, create accounts, or write data anywhere
@@ -99,6 +103,7 @@ Key test functions and how to run them:
 
 ## Constraints
 
+- Complete each state fully and commit before starting the next. Do not intermix work from multiple states in a single commit.
 - Cite official sources in table comments with full attribution (e.g., "Source: WI Form 1 instructions, pg 42"). Both 2024 and 2025 Tables modules require equally specific citations
 - If 2025 values are unchanged from 2024, document that with a comment citing the 2025 source that confirms they are unchanged (see TablesNY2025.hs)
 - Use `backend="graph"` for all silver standard scenarios
@@ -108,7 +113,7 @@ Key test functions and how to run them:
 - Do not add new Python dependencies
 - Compute each scenario's expected values from scratch using the state's published brackets — do not copy values from other states' scenarios
 - Every Tables export must be consumed by the corresponding form spec. Do not export values the form does not reference
-- Only add `StateGraphConfig` entries for {STATE}. Do not add configs for other states
+- Only add `StateGraphConfig` entries for the current state. Do not add configs for other states
 
 ## Verification Commands
 
