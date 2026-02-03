@@ -169,13 +169,10 @@ executable tenforty-compile
     TablesNY2025
     TablesOH2024
     TablesOH2025
-<<<<<<< HEAD
-    TablesOR2024
-    TablesOR2025
-=======
     TablesOK2024
     TablesOK2025
->>>>>>> af621c5 (fix: correct MS MFS exemption and eliminate compiler warnings)
+    TablesOR2024
+    TablesOR2025
     TablesSC2024
     TablesSC2025
     TablesUT2024
@@ -370,13 +367,10 @@ test-suite tenforty-spec-test
     TablesNY2025
     TablesOH2024
     TablesOH2025
-<<<<<<< HEAD
-    TablesOR2024
-    TablesOR2025
-=======
     TablesOK2024
     TablesOK2025
->>>>>>> af621c5 (fix: correct MS MFS exemption and eliminate compiler warnings)
+    TablesOR2024
+    TablesOR2025
     TablesSC2024
     TablesSC2025
     TablesUT2024

@@ -380,7 +380,11 @@
             }
         }
     },
-    "outputs": [],
+    "outputs": [
+        9,
+        44,
+        30
+    ],
     "tables": {
         "ct_brackets_2025": {
             "brackets": {

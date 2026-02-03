@@ -36,7 +36,7 @@ orForm40_2025 = form "or_40" 2025 $ do
     -- The phaseout is linear: $8,500 at AGI $0-$125k (Single/MFS) or $0-$250k (MFJ/HoH/QW),
     -- then reduces by $1,700 per $5,000 of AGI until $0 at $145k (Single/MFS) or $290k (MFJ/HoH/QW).
     -- This is a 20% reduction per $5,000 increment: rate = $1,700 / $5,000 = 0.34
-    let federalTaxFromReturn = importForm "us_1040" "L22"
+    let _federalTaxFromReturn = importForm "us_1040" "L22"
     let fedTaxPhaseoutSpec =
             PhaseOutSpec
                 { poBase = 8500
@@ -45,7 +45,7 @@ orForm40_2025 = form "or_40" 2025 $ do
                 , poFloor = 0
                 , poRoundTo = Nothing
                 }
-    fedTaxSubAllowable <-
+    _fedTaxSubAllowable <-
         interior "L18_allowable" "federal_tax_subtraction_allowable" $
             applyPhaseOut fedTaxPhaseoutSpec federalAgi
     l18 <-

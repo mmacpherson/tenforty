@@ -85,4 +85,8 @@ ctForm1_2025 = form "ct_1" 2025 $ do
         keyOutput "L18" "ct_total_tax" "Total Connecticut income tax" $
             l16 .+. l17
 
-    pure ()
+    outputs
+        [ "L1"
+        , "L3"
+        , "L18"
+        ]

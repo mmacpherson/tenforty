@@ -15,7 +15,7 @@ maForm1_2025 = form "ma_1" 2025 $ do
     -- Line 10: Total income (approximated by federal AGI for this implementation)
     let federalAgi = importForm "us_1040" "L11"
     l10 <-
-        keyOutput "L10" "ma_total_income" "Total Massachusetts income" $
+        keyOutput "L10" "ma_total_income" "Total Massachusetts income"
             federalAgi
 
     -- Lines 11-16: Deductions (Social Security, alimony, rental deduction, etc.)
@@ -150,7 +150,7 @@ maForm1_2025 = form "ma_1" 2025 $ do
     l38 <- keyInput "L38" "estimated_payments" "Estimated tax payments"
     l39 <- keyInput "L39" "refundable_credits" "Refundable credits"
 
-    l40 <-
+    _l40 <-
         interior "L40" "total_payments" $
             sumOf [l37, l38, l39]
 

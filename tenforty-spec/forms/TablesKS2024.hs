@@ -48,7 +48,8 @@ Note: MFJ gets $18,320; all other filing statuses get $9,160
 ksPersonalExemption2024 :: ByStatus (Amount Dollars)
 ksPersonalExemption2024 = byStatus 9160 18320 9160 9160 18320
 
--- | 2024 Kansas dependent exemption ($2,320 per dependent)
--- Source: Kansas 2024 Individual Income Tax Booklet (Rev. 7-24), page 2 - Important Information
+{- | 2024 Kansas dependent exemption ($2,320 per dependent)
+Source: Kansas 2024 Individual Income Tax Booklet (Rev. 7-24), page 2 - Important Information
+-}
 ksDependentExemption2024 :: Amount Dollars
 ksDependentExemption2024 = 2320

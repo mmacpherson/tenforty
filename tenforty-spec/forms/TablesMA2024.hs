@@ -69,14 +69,14 @@ maDependentExemption2024 = 1000
 
 {- | 2024 Massachusetts age 65 or over exemption amount
 Source: MA Form 1 Instructions (2024), pg 8, Line 2c
-$700 for each taxpayer who is 65 or over before the end of the tax year.
+\$700 for each taxpayer who is 65 or over before the end of the tax year.
 -}
 maAge65Exemption2024 :: Amount Dollars
 maAge65Exemption2024 = 700
 
 {- | 2024 Massachusetts blindness exemption amount
 Source: MA Form 1 Instructions (2024), pg 9, Line 2d
-$2,200 for each taxpayer who is legally blind.
+\$2,200 for each taxpayer who is legally blind.
 -}
 maBlindnessExemption2024 :: Amount Dollars
 maBlindnessExemption2024 = 2200

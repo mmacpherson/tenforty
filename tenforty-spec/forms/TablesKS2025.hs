@@ -51,8 +51,9 @@ Note: Values unchanged from 2024. MFJ gets $18,320; all other filing statuses ge
 ksPersonalExemption2025 :: ByStatus (Amount Dollars)
 ksPersonalExemption2025 = byStatus 9160 18320 9160 9160 18320
 
--- | 2025 Kansas dependent exemption ($2,320 per dependent)
--- Source: Tax Foundation 2025 State Income Tax Rates and Brackets
--- Note: Value unchanged from 2024
+{- | 2025 Kansas dependent exemption ($2,320 per dependent)
+Source: Tax Foundation 2025 State Income Tax Rates and Brackets
+Note: Value unchanged from 2024
+-}
 ksDependentExemption2025 :: Amount Dollars
 ksDependentExemption2025 = 2320
