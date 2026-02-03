@@ -1,0 +1,338 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "meta": {
+        "form_id": "ne_1040n",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L7_federal_itemized",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L8_state_local_income_tax",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 12250
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "type": "literal",
+                "value": 16700
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L6_ne_std_deduction",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 10,
+                    "married_joint": 8,
+                    "married_separate": 9,
+                    "qualifying_widow": 11,
+                    "single": 7
+                }
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L9_ne_itemized",
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L10_deduction",
+            "op": {
+                "left": 12,
+                "right": 13,
+                "type": "max"
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 6,
+                "right": 14,
+                "type": "sub"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L11_ne_income_before_adj",
+            "op": {
+                "left": 15,
+                "right": 16,
+                "type": "max"
+            }
+        },
+        "18": {
+            "id": 18,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "left": 17,
+                "right": 2,
+                "type": "add"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L12_adjustments_increasing_agi",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "left": 19,
+                "right": 3,
+                "type": "sub"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L14_ne_taxable_income",
+            "op": {
+                "left": 18,
+                "right": 20,
+                "type": "max"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L15_ne_tax",
+            "op": {
+                "income": 21,
+                "table": "ne_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 22,
+                "right": 4,
+                "type": "sub"
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L17_tax_after_credits",
+            "op": {
+                "left": 23,
+                "right": 24,
+                "type": "max"
+            }
+        },
+        "26": {
+            "id": 26,
+            "name": "L19_total_ne_tax",
+            "op": {
+                "left": 25,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L13_adjustments_decreasing_agi",
+            "op": {
+                "type": "input"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L16_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L18_other_taxes",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L5_federal_agi",
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "7": {
+            "id": 7,
+            "op": {
+                "type": "literal",
+                "value": 8350
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "type": "literal",
+                "value": 16700
+            }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "type": "literal",
+                "value": 8350
+            }
+        }
+    },
+    "outputs": [],
+    "tables": {
+        "ne_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 2.46e-2,
+                        "threshold": 7270
+                    },
+                    {
+                        "rate": 3.51e-2,
+                        "threshold": 37400
+                    },
+                    {
+                        "rate": 5.01e-2,
+                        "threshold": 55850
+                    },
+                    {
+                        "rate": 5.84e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 2.46e-2,
+                        "threshold": 7790
+                    },
+                    {
+                        "rate": 3.51e-2,
+                        "threshold": 46760
+                    },
+                    {
+                        "rate": 5.01e-2,
+                        "threshold": 75340
+                    },
+                    {
+                        "rate": 5.84e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 2.46e-2,
+                        "threshold": 3900
+                    },
+                    {
+                        "rate": 3.51e-2,
+                        "threshold": 23370
+                    },
+                    {
+                        "rate": 5.01e-2,
+                        "threshold": 37670
+                    },
+                    {
+                        "rate": 5.84e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 2.46e-2,
+                        "threshold": 7790
+                    },
+                    {
+                        "rate": 3.51e-2,
+                        "threshold": 46760
+                    },
+                    {
+                        "rate": 5.01e-2,
+                        "threshold": 75340
+                    },
+                    {
+                        "rate": 5.84e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 2.46e-2,
+                        "threshold": 3900
+                    },
+                    {
+                        "rate": 3.51e-2,
+                        "threshold": 23370
+                    },
+                    {
+                        "rate": 5.01e-2,
+                        "threshold": 37670
+                    },
+                    {
+                        "rate": 5.84e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}

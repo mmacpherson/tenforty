@@ -1,0 +1,405 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ],
+    "meta": {
+        "form_id": "wv_it140",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L2_wv_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L3_wv_subtractions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "left": 9,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "left": 11,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L4_wv_agi",
+            "op": {
+                "left": 10,
+                "right": 12,
+                "type": "max"
+            }
+        },
+        "14": {
+            "id": 14,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "left": 2,
+                "right": 3,
+                "type": "add"
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "left": 13,
+                "right": 15,
+                "type": "sub"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L7_wv_taxable_income",
+            "op": {
+                "left": 14,
+                "right": 16,
+                "type": "max"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L8_wv_tax",
+            "op": {
+                "income": 17,
+                "table": "wv_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L5_low_income_exclusion",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "left": 18,
+                "right": 4,
+                "type": "sub"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L10_tax_after_ftc",
+            "op": {
+                "left": 19,
+                "right": 20,
+                "type": "max"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L12_total_tax",
+            "op": {
+                "left": 21,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "24": {
+            "id": 24,
+            "name": "L16_total_payments",
+            "op": {
+                "left": 6,
+                "right": 23,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 24,
+                "right": 22,
+                "type": "sub"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 24,
+                "right": 22,
+                "type": "sub"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "28": {
+            "id": 28,
+            "name": "L17_refund",
+            "op": {
+                "cond": 25,
+                "otherwise": 27,
+                "then": 26,
+                "type": "if_positive"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L6_total_exemptions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "left": 22,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L18_tax_due",
+            "op": {
+                "left": 29,
+                "right": 30,
+                "type": "max"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L9_family_tax_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L11_use_tax",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L13_wv_withholding",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L14_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L15_other_payments_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L1_federal_agi",
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        }
+    },
+    "outputs": [
+        9,
+        22,
+        28,
+        31,
+        13,
+        17,
+        18
+    ],
+    "tables": {
+        "wv_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 2.36e-2,
+                        "threshold": 10000
+                    },
+                    {
+                        "rate": 3.15e-2,
+                        "threshold": 25000
+                    },
+                    {
+                        "rate": 3.54e-2,
+                        "threshold": 40000
+                    },
+                    {
+                        "rate": 4.72e-2,
+                        "threshold": 60000
+                    },
+                    {
+                        "rate": 5.12e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 2.36e-2,
+                        "threshold": 10000
+                    },
+                    {
+                        "rate": 3.15e-2,
+                        "threshold": 25000
+                    },
+                    {
+                        "rate": 3.54e-2,
+                        "threshold": 40000
+                    },
+                    {
+                        "rate": 4.72e-2,
+                        "threshold": 60000
+                    },
+                    {
+                        "rate": 5.12e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 2.36e-2,
+                        "threshold": 5000
+                    },
+                    {
+                        "rate": 3.15e-2,
+                        "threshold": 12500
+                    },
+                    {
+                        "rate": 3.54e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 4.72e-2,
+                        "threshold": 30000
+                    },
+                    {
+                        "rate": 5.12e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 2.36e-2,
+                        "threshold": 10000
+                    },
+                    {
+                        "rate": 3.15e-2,
+                        "threshold": 25000
+                    },
+                    {
+                        "rate": 3.54e-2,
+                        "threshold": 40000
+                    },
+                    {
+                        "rate": 4.72e-2,
+                        "threshold": 60000
+                    },
+                    {
+                        "rate": 5.12e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 2.36e-2,
+                        "threshold": 10000
+                    },
+                    {
+                        "rate": 3.15e-2,
+                        "threshold": 25000
+                    },
+                    {
+                        "rate": 3.54e-2,
+                        "threshold": 40000
+                    },
+                    {
+                        "rate": 4.72e-2,
+                        "threshold": 60000
+                    },
+                    {
+                        "rate": 5.12e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}
