@@ -3736,6 +3736,475 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # ========== NEW MEXICO SCENARIOS ==========
+    # NM 2024 Single, middle income
+    # Federal AGI: $40,000
+    # Federal std deduction (2024): $14,600
+    # NM taxable: $40,000 - $14,600 = $25,400
+    # NM tax:
+    #   First $5,500 @ 1.7%: $93.50
+    #   $5,501-$11,000 ($5,500) @ 3.2%: $176.00
+    #   $11,001-$16,000 ($5,000) @ 4.7%: $235.00
+    #   $16,001-$25,400 ($9,400) @ 4.9%: $460.60
+    #   Total: $965.10
+    # Federal taxable: $25,400, Federal tax: $2,816 (formula)
+    TaxScenario(
+        source="NM 2024 Tax Brackets (computed)",
+        description="NM Single, $40,000 income (2024)",
+        year=2024,
+        state="NM",
+        filing_status="Single",
+        w2_income=40000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=965.10,
+        backend="graph",
+    ),
+    # NM 2024 Married/Joint, higher income
+    # Federal AGI: $100,000
+    # Federal std deduction (2024): $29,200
+    # NM taxable: $100,000 - $29,200 = $70,800
+    # NM tax:
+    #   First $8,000 @ 1.7%: $136.00
+    #   $8,001-$16,000 ($8,000) @ 3.2%: $256.00
+    #   $16,001-$24,000 ($8,000) @ 4.7%: $376.00
+    #   $24,001-$70,800 ($46,800) @ 4.9%: $2,293.20
+    #   Total: $3,061.20
+    # Federal taxable: $70,800, Federal tax: $8,032 (formula, graph backend)
+    TaxScenario(
+        source="NM 2024 Tax Brackets (computed)",
+        description="NM MFJ, $100,000 income (2024)",
+        year=2024,
+        state="NM",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3061.20,
+        backend="graph",
+    ),
+    # NM 2024 Head_of_House, middle income
+    # Federal AGI: $75,000
+    # Federal std deduction (2024): $21,900
+    # NM taxable: $75,000 - $21,900 = $53,100
+    # NM tax:
+    #   First $8,000 @ 1.7%: $136.00
+    #   $8,001-$16,000 ($8,000) @ 3.2%: $256.00
+    #   $16,001-$24,000 ($8,000) @ 4.7%: $376.00
+    #   $24,001-$53,100 ($29,100) @ 4.9%: $1,425.90
+    #   Total: $2,193.90
+    # Federal taxable: $53,100, Federal tax: $6,041 (formula, graph backend)
+    TaxScenario(
+        source="NM 2024 Tax Brackets (computed)",
+        description="NM HoH, $75,000 income (2024)",
+        year=2024,
+        state="NM",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2193.90,
+        backend="graph",
+    ),
+    # NM 2024 Single, high income
+    # Federal AGI: $250,000
+    # Federal std deduction (2024): $14,600
+    # NM taxable: $250,000 - $14,600 = $235,400
+    # NM tax:
+    #   First $5,500 @ 1.7%: $93.50
+    #   $5,501-$11,000 ($5,500) @ 3.2%: $176.00
+    #   $11,001-$16,000 ($5,000) @ 4.7%: $235.00
+    #   $16,001-$210,000 ($194,000) @ 4.9%: $9,506.00
+    #   $210,001-$235,400 ($25,400) @ 5.9%: $1,498.60
+    #   Total: $11,509.10
+    # Federal taxable: $235,400, Federal tax: $53,014.50 (formula, graph backend)
+    TaxScenario(
+        source="NM 2024 Tax Brackets (computed)",
+        description="NM Single, $250,000 income (2024)",
+        year=2024,
+        state="NM",
+        filing_status="Single",
+        w2_income=250000.0,
+        expected_federal_tax=53014.5,
+        expected_state_tax=11509.10,
+        backend="graph",
+    ),
+    # NM 2025 Single, middle income (new 6-bracket structure)
+    # Federal AGI: $50,000
+    # Federal std deduction (2025): $15,000
+    # NM taxable: $50,000 - $15,000 = $35,000
+    # NM tax:
+    #   First $5,500 @ 1.5%: $82.50
+    #   $5,501-$16,500 ($11,000) @ 3.2%: $352.00
+    #   $16,501-$33,500 ($17,000) @ 4.3%: $731.00
+    #   $33,501-$35,000 ($1,500) @ 4.7%: $70.50
+    #   Total: $1,236.00
+    # Federal taxable: $35,000, Federal tax: $3,961.50
+    TaxScenario(
+        source="NM 2025 Tax Brackets (computed)",
+        description="NM Single, $50,000 income (2025)",
+        year=2025,
+        state="NM",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=1236.0,
+        backend="graph",
+    ),
+    # NE 2024 Single, moderate income
+    # Federal AGI: $40,000
+    # NE std deduction (2024): $8,350
+    # NE taxable: $40,000 - $8,350 = $31,650
+    # NE tax:
+    #   First $3,900 @ 2.46%: $95.94
+    #   $3,901-$23,370 ($19,470) @ 3.51%: $683.40
+    #   $23,371-$31,650 ($8,280) @ 5.01%: $414.83
+    #   Total: $1,194.17
+    TaxScenario(
+        source="NE 2024 Tax Brackets (computed)",
+        description="NE Single, $40,000 income (2024)",
+        year=2024,
+        state="NE",
+        filing_status="Single",
+        w2_income=40000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=1194.17,
+        backend="graph",
+    ),
+    # NE 2024 Married/Joint, higher income
+    # Federal AGI: $100,000
+    # NE std deduction (2024): $16,700
+    # NE taxable: $100,000 - $16,700 = $83,300
+    # NE tax:
+    #   First $7,790 @ 2.46%: $191.63
+    #   $7,791-$46,760 ($38,970) @ 3.51%: $1,367.85
+    #   $46,761-$75,340 ($28,580) @ 5.01%: $1,431.86
+    #   $75,341-$83,300 ($7,960) @ 5.84%: $464.86
+    #   Total: $3,456.20
+    TaxScenario(
+        source="NE 2024 Tax Brackets (computed)",
+        description="NE MFJ, $100,000 income (2024)",
+        year=2024,
+        state="NE",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=3456.20,
+        backend="graph",
+    ),
+    # NE 2024 Head_of_House, middle income
+    # Federal AGI: $75,000
+    # NE std deduction (2024): $12,250
+    # NE taxable: $75,000 - $12,250 = $62,750
+    # NE tax:
+    #   First $7,270 @ 2.46%: $178.84
+    #   $7,271-$37,400 ($30,130) @ 3.51%: $1,057.56
+    #   $37,401-$55,850 ($18,450) @ 5.01%: $924.35
+    #   $55,851-$62,750 ($6,900) @ 5.84%: $402.96
+    #   Total: $2,563.71
+    TaxScenario(
+        source="NE 2024 Tax Brackets (computed)",
+        description="NE HoH, $75,000 income (2024)",
+        year=2024,
+        state="NE",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2563.71,
+        backend="graph",
+    ),
+    # NE 2024 Married/Separate, moderate income
+    # Federal AGI: $50,000
+    # NE std deduction (2024): $8,350
+    # NE taxable: $50,000 - $8,350 = $41,650
+    # NE tax:
+    #   First $3,900 @ 2.46%: $95.94
+    #   $3,901-$23,370 ($19,470) @ 3.51%: $683.40
+    #   $23,371-$37,670 ($14,300) @ 5.01%: $716.43
+    #   $37,671-$41,650 ($3,980) @ 5.84%: $232.43
+    #   Total: $1,728.20
+    TaxScenario(
+        source="NE 2024 Tax Brackets (computed)",
+        description="NE MFS, $50,000 income (2024)",
+        year=2024,
+        state="NE",
+        filing_status="Married/Sep",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=1728.20,
+        backend="graph",
+    ),
+    # NE 2025 Single, moderate income (test 2025 rate reduction)
+    # Federal AGI: $50,000
+    # NE std deduction (2025): $8,600
+    # NE taxable: $50,000 - $8,600 = $41,400
+    # NE tax:
+    #   First $4,030 @ 2.46%: $99.14
+    #   $4,031-$24,120 ($20,090) @ 3.51%: $705.16
+    #   $24,121-$38,870 ($14,750) @ 5.01%: $738.98
+    #   $38,871-$41,400 ($2,530) @ 5.20%: $131.56
+    #   Total: $1,674.84
+    TaxScenario(
+        source="NE 2025 Tax Brackets (computed)",
+        description="NE Single, $50,000 income (2025)",
+        year=2025,
+        state="NE",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=1674.84,
+        backend="graph",
+    ),
+    # WV 2024 Single, middle income
+    # Federal AGI: $40,000
+    # Federal std deduction (2024): $14,600
+    # WV AGI: $40,000
+    # WV Taxable: $40,000 - $4,000 (2 exemptions @ $2,000) = $36,000
+    # WV tax:
+    #   First $10,000 @ 2.36%: $236.00
+    #   $10,001-$25,000 ($15,000) @ 3.15%: $472.50
+    #   $25,001-$36,000 ($11,000) @ 3.54%: $389.40
+    #   Total: $1,097.90
+    # Federal taxable: $25,400, Federal tax: $2,816 (formula)
+    TaxScenario(
+        source="WV 2024 Tax Brackets (computed)",
+        description="WV Single, $40,000 income (2024)",
+        year=2024,
+        state="WV",
+        filing_status="Single",
+        w2_income=40000.0,
+        dependent_exemptions=4000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=1097.90,
+        backend="graph",
+    ),
+    # WV 2024 Married/Joint, higher income
+    # Federal AGI: $100,000
+    # Federal std deduction (2024): $29,200
+    # WV AGI: $100,000
+    # WV Taxable: $100,000 - $4,000 (2 exemptions @ $2,000) = $96,000
+    # WV tax:
+    #   First $10,000 @ 2.36%: $236.00
+    #   $10,001-$25,000 ($15,000) @ 3.15%: $472.50
+    #   $25,001-$40,000 ($15,000) @ 3.54%: $531.00
+    #   $40,001-$60,000 ($20,000) @ 4.72%: $944.00
+    #   $60,001-$96,000 ($36,000) @ 5.12%: $1,843.20
+    #   Total: $4,026.70
+    # Federal taxable: $70,800, Federal tax: $8,032 (formula, graph backend)
+    TaxScenario(
+        source="WV 2024 Tax Brackets (computed)",
+        description="WV MFJ, $100,000 income (2024)",
+        year=2024,
+        state="WV",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        dependent_exemptions=4000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4026.70,
+        backend="graph",
+    ),
+    # WV 2024 Married/Sep, middle income
+    # Federal AGI: $45,000
+    # Federal std deduction (2024): $14,600
+    # WV AGI: $45,000
+    # WV Taxable: $45,000 - $2,000 (1 exemption @ $2,000) = $43,000
+    # WV tax (MFS uses half brackets):
+    #   First $5,000 @ 2.36%: $118.00
+    #   $5,001-$12,500 ($7,500) @ 3.15%: $236.25
+    #   $12,501-$20,000 ($7,500) @ 3.54%: $265.50
+    #   $20,001-$30,000 ($10,000) @ 4.72%: $472.00
+    #   $30,001-$43,000 ($13,000) @ 5.12%: $665.60
+    #   Total: $1,757.35
+    # Federal taxable: $30,400, Federal tax: $3,416 (formula: $1,160 + $2,256)
+    TaxScenario(
+        source="WV 2024 Tax Brackets (computed)",
+        description="WV MFS, $45,000 income (2024)",
+        year=2024,
+        state="WV",
+        filing_status="Married/Sep",
+        w2_income=45000.0,
+        dependent_exemptions=2000.0,
+        expected_federal_tax=3416.0,
+        expected_state_tax=1757.35,
+        backend="graph",
+    ),
+    # WV 2024 Head_of_House, middle income
+    # Federal AGI: $75,000
+    # Federal std deduction (2024): $21,900
+    # WV AGI: $75,000
+    # WV Taxable: $75,000 - $6,000 (3 exemptions @ $2,000) = $69,000
+    # WV tax:
+    #   First $10,000 @ 2.36%: $236.00
+    #   $10,001-$25,000 ($15,000) @ 3.15%: $472.50
+    #   $25,001-$40,000 ($15,000) @ 3.54%: $531.00
+    #   $40,001-$60,000 ($20,000) @ 4.72%: $944.00
+    #   $60,001-$69,000 ($9,000) @ 5.12%: $460.80
+    #   Total: $2,644.30
+    # Federal taxable: $53,100, Federal tax: $6,041 (formula, graph backend)
+    TaxScenario(
+        source="WV 2024 Tax Brackets (computed)",
+        description="WV HoH, $75,000 income (2024)",
+        year=2024,
+        state="WV",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        dependent_exemptions=6000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2644.30,
+        backend="graph",
+    ),
+    # WV 2025 Single, middle income (reduced rates per SB 2033)
+    # Federal AGI: $50,000
+    # Federal std deduction (2025): $15,000
+    # WV AGI: $50,000
+    # WV Taxable: $50,000 - $4,000 (2 exemptions @ $2,000) = $46,000
+    # WV tax:
+    #   First $10,000 @ 2.22%: $222.00
+    #   $10,001-$25,000 ($15,000) @ 2.96%: $444.00
+    #   $25,001-$40,000 ($15,000) @ 3.33%: $499.50
+    #   $40,001-$46,000 ($6,000) @ 4.44%: $266.40
+    #   Total: $1,431.90
+    # Federal taxable: $35,000, Federal tax: $3,961.50 (formula, graph backend)
+    TaxScenario(
+        source="WV 2025 Tax Brackets (computed)",
+        description="WV Single, $50,000 income (2025)",
+        year=2025,
+        state="WV",
+        filing_status="Single",
+        w2_income=50000.0,
+        dependent_exemptions=4000.0,
+        expected_federal_tax=3961.5,
+        expected_state_tax=1431.90,
+        backend="graph",
+    ),
+    # Hawaii state scenarios
+    TaxScenario(
+        source="HI 2024 Tax Brackets (computed)",
+        description="HI Single, $60,000 income (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5216.0,
+        expected_state_tax=3840.60,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="HI 2024 Tax Brackets (computed)",
+        description="HI MFJ, $100,000 income (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=6048.00,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="HI 2024 Tax Brackets (computed)",
+        description="HI HoH, $75,000 income (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=4549.90,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="HI 2024 Tax Brackets (computed)",
+        description="HI Single, $200,000 income (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Single",
+        w2_income=200000.0,
+        expected_federal_tax=37538.5,
+        expected_state_tax=15938.60,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="HI 2025 Tax Brackets (computed)",
+        description="HI Single, $60,000 income (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5161.5,
+        expected_state_tax=3116.80,
+        backend="graph",
+    ),
+    # Maine state scenarios
+    # ME 2024 brackets: $26,050 @ 5.8%, $61,600 @ 6.75%, above @ 7.15%
+    # ME 2025 brackets: $26,800 @ 5.8%, $63,450 @ 6.75%, above @ 7.15%
+    # Personal exemption: $5,000 (2024), $5,150 (2025)
+    # Note: Like HI scenarios, exemptions not provided (defaults to 0)
+    TaxScenario(
+        source="ME 2024 Tax Brackets (computed)",
+        description="ME Single, $60,000 income (2024)",
+        year=2024,
+        state="ME",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5216.0,
+        # Taxable: $60,000 - $14,600 std = $45,400 (no exemption provided)
+        # Tax: $26,050 x 5.8% = $1,510.90 + ($45,400 - $26,050) x 6.75% = $1,306.125
+        # Total: $2,817.025
+        expected_state_tax=2817.025,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="ME 2024 Tax Brackets (computed)",
+        description="ME MFJ, $100,000 income (2024)",
+        year=2024,
+        state="ME",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        # Taxable: $100,000 - $29,200 std = $70,800 (no exemption provided)
+        # Tax: $52,100 x 5.8% = $3,021.80 + ($70,800 - $52,100) x 6.75% = $1,262.25
+        # Total: $4,284.05
+        expected_state_tax=4284.05,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="ME 2024 Tax Brackets (computed)",
+        description="ME HoH, $75,000 income (2024)",
+        year=2024,
+        state="ME",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        # Taxable: $75,000 - $21,900 std = $53,100 (no exemption provided)
+        # Tax: $39,050 x 5.8% = $2,264.90 + ($53,100 - $39,050) x 6.75% = $948.38
+        # Total: $3,213.28
+        expected_state_tax=3213.28,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="ME 2024 Tax Brackets (computed)",
+        description="ME Single, $150,000 income (2024)",
+        year=2024,
+        state="ME",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_federal_tax=25538.5,
+        # Taxable: $150,000 - $14,600 = $135,400 (no exemption provided)
+        # Tax: $26,050 x 5.8% + ($61,600 - $26,050) x 6.75% + ($135,400 - $61,600) x 7.15%
+        # = $1,510.90 + $2,399.63 + $5,276.70 = $9,187.23
+        expected_state_tax=9187.23,
+        backend="graph",
+    ),
+    TaxScenario(
+        source="ME 2025 Tax Brackets (computed)",
+        description="ME Single, $60,000 income (2025)",
+        year=2025,
+        state="ME",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5161.5,
+        # Taxable: $60,000 - $15,000 std = $45,000 (no exemption provided)
+        # Tax: $26,800 x 5.8% = $1,554.40 + ($45,000 - $26,800) x 6.75% = $1,228.50
+        # Total: $2,782.90
+        expected_state_tax=2782.90,
+        backend="graph",
+    ),
 ]
 
 IRS_DIRECT_FILE_SCENARIOS = [

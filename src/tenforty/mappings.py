@@ -162,6 +162,22 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_total_tax": "state_total_tax",
         },
     ),
+    OTSState.HI: StateGraphConfig(
+        # HI Form N-11 imports federal AGI and applies additions/subtractions.
+        # Personal exemptions are $1,144 per exemption and are accepted as total
+        # dollar input (num_dependents cannot map to dollar amounts).
+        # 2024 has 12 brackets (1.4%-11%), 2025 brackets widened under GAP II
+        # (Green Affordability Plan II, Act 46 SLH 2024).
+        natural_to_node={
+            "dependent_exemptions": "hi_n11_L24_total_exemptions",
+            "itemized_deductions": "hi_n11_L19_itemized",
+        },
+        output_lines={
+            "L18_hi_agi": "state_adjusted_gross_income",
+            "L25_hi_taxable_income": "state_taxable_income",
+            "L33_hi_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.IA: StateGraphConfig(
         # IA IA-1040 imports federal AGI and federal taxable income. Iowa uses
         # progressive brackets for 2024 (4.4%, 4.82%, 5.7%) and a flat 3.8% tax
@@ -289,6 +305,23 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L32_md_total_tax": "state_total_tax",
         },
     ),
+    OTSState.ME: StateGraphConfig(
+        # ME Form 1040ME imports federal AGI and applies Maine-specific
+        # additions/subtractions. Deductions (standard or itemized) and personal
+        # exemptions are accepted as total input. Maine uses a progressive
+        # three-bracket system (5.8%, 6.75%, 7.15%) with COLA-adjusted thresholds.
+        # 2024: personal exemption $5,000; 2025: $5,150 (COLA 1.25).
+        # Standard deductions equal federal amounts.
+        natural_to_node={
+            "itemized_deductions": "me_1040me_L17_itemized",
+            "dependent_exemptions": "me_1040me_L21_total_exemptions",
+        },
+        output_lines={
+            "L16_me_agi": "state_adjusted_gross_income",
+            "L22_me_taxable_income": "state_taxable_income",
+            "L32_me_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.MI: StateGraphConfig(
         # MI-1040 imports federal AGI and applies additions/subtractions.
         # Exemptions are accepted as total input (num_dependents cannot map to
@@ -355,6 +388,45 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_nc_tax": "state_total_tax",
         },
     ),
+    OTSState.NE: StateGraphConfig(
+        # NE 1040N imports federal AGI and applies larger of state standard
+        # deduction or itemized (federal itemized minus state/local income tax).
+        # State adjustments from Schedule I are accepted as total inputs.
+        # 2024 has 4 brackets (2.46%, 3.51%, 5.01%, 5.84%).
+        # 2025 top rate reduced to 5.20% per LB754 (2023).
+        natural_to_node={},
+        output_lines={
+            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L14_ne_taxable_income": "state_taxable_income",
+            "L19_total_ne_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NJ: StateGraphConfig(
+        # NJ-1040 imports federal AGI and applies exemptions/deductions.
+        # Personal exemptions and dependent exemptions are accepted as total inputs
+        # (num_dependents cannot map to dollar amounts, and dependent exemptions
+        # are income-phased in NJ).
+        natural_to_node={},
+        output_lines={
+            "L14_federal_agi": "state_adjusted_gross_income",
+            "L39_nj_taxable_income": "state_taxable_income",
+            "L46_nj_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NM: StateGraphConfig(
+        # NM PIT-1 imports federal AGI and applies state-specific deductions and
+        # exemptions. NM uses federal standard/itemized deductions. 2024 has 5
+        # brackets (1.7%-5.9%). 2025 adds a sixth bracket (4.3%) and lowers the
+        # lowest rate to 1.5%. Low- and middle-income exemption ($2,500 per
+        # exemption, subject to income limits) and other adjustments are accepted
+        # as total inputs (num_dependents cannot map to dollar amounts).
+        natural_to_node={},
+        output_lines={
+            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L17_nm_taxable_income": "state_taxable_income",
+            "L22_net_nm_tax": "state_total_tax",
+        },
+    ),
     OTSState.NY: StateGraphConfig(
         # NY IT-201 exemptions involve age and dependent count; natural_to_node
         # cannot map these correctly because the graph expects dollar
@@ -413,18 +485,6 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L20_ut_total_tax": "state_total_tax",
         },
     ),
-    OTSState.NJ: StateGraphConfig(
-        # NJ-1040 imports federal AGI and applies exemptions/deductions.
-        # Personal exemptions and dependent exemptions are accepted as total inputs
-        # (num_dependents cannot map to dollar amounts, and dependent exemptions
-        # are income-phased in NJ).
-        natural_to_node={},
-        output_lines={
-            "L14_federal_agi": "state_adjusted_gross_income",
-            "L39_nj_taxable_income": "state_taxable_income",
-            "L46_nj_total_tax": "state_total_tax",
-        },
-    ),
     OTSState.OH: StateGraphConfig(
         # OH IT-1040 imports federal AGI and applies state additions/deductions.
         # Personal exemptions are income-based (tiered by MAGI) and must be
@@ -475,6 +535,21 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L8_va_agi": "state_adjusted_gross_income",
             "L13_va_taxable_income": "state_taxable_income",
             "L18_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.WV: StateGraphConfig(
+        # WV Form IT-140 imports federal AGI and applies additions/subtractions
+        # from Schedule M. Personal exemptions are $2,000 per exemption and are
+        # accepted as total dollar input (num_dependents cannot map to dollar amounts).
+        # 2024 has 5 brackets (2.36%-5.12%), 2025 reduced to (2.22%-4.82%) per SB 2033.
+        # MFS uses half the bracket thresholds of other filing statuses.
+        natural_to_node={
+            "dependent_exemptions": "wv_it140_L6_total_exemptions",
+        },
+        output_lines={
+            "L4_wv_agi": "state_adjusted_gross_income",
+            "L7_wv_taxable_income": "state_taxable_income",
+            "L12_total_tax": "state_total_tax",
         },
     ),
     OTSState.WI: StateGraphConfig(

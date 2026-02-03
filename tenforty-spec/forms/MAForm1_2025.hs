@@ -15,7 +15,10 @@ maForm1_2025 = form "ma_1" 2025 $ do
     -- Line 10: Total income (approximated by federal AGI for this implementation)
     let federalAgi = importForm "us_1040" "L11"
     l10 <-
-        keyOutput "L10" "ma_total_income" "Total Massachusetts income"
+        keyOutput
+            "L10"
+            "ma_total_income"
+            "Total Massachusetts income"
             federalAgi
 
     -- Lines 11-16: Deductions (Social Security, alimony, rental deduction, etc.)

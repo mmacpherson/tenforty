@@ -1,0 +1,637 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2024
+        },
+        {
+            "form": "us_1040",
+            "line": "L12Final",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+    ],
+    "meta": {
+        "form_id": "nm_pit1",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L10_state_local_tax_addback",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L11_nm_additions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "name": "L25_working_families_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "11": {
+            "id": 11,
+            "name": "L26_refundable_business_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "12": {
+            "id": 12,
+            "name": "L27_nm_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "13": {
+            "id": 13,
+            "name": "L28_oil_gas_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "14": {
+            "id": 14,
+            "name": "L29_entity_tax_withheld",
+            "op": {
+                "type": "input"
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L30_estimated_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "16": {
+            "id": 16,
+            "name": "L31_other_payments",
+            "op": {
+                "type": "input"
+            }
+        },
+        "17": {
+            "id": 17,
+            "name": "L34_underpayment_penalty",
+            "op": {
+                "type": "input"
+            }
+        },
+        "18": {
+            "id": 18,
+            "name": "L36_penalty",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L37_interest",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L13_dependent_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "name": "L40_voluntary_contributions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "21": {
+            "id": 21,
+            "name": "L41_applied_to_next_year",
+            "op": {
+                "type": "input"
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L9_federal_agi",
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "23": {
+            "id": 23,
+            "name": "L12_federal_deduction",
+            "op": {
+                "form": "us_1040",
+                "line": "L12Final",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 22,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 4,
+                "right": 5,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 3,
+                "right": 27,
+                "type": "add"
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 2,
+                "right": 28,
+                "type": "add"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L14_low_middle_income_exemption",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "left": 23,
+                "right": 29,
+                "type": "add"
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "left": 26,
+                "right": 30,
+                "type": "sub"
+            }
+        },
+        "32": {
+            "id": 32,
+            "name": "L17_nm_taxable_income",
+            "op": {
+                "left": 24,
+                "right": 31,
+                "type": "max"
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L18_nm_tax",
+            "op": {
+                "income": 32,
+                "table": "nm_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "35": {
+            "id": 35,
+            "op": {
+                "left": 33,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 35,
+                "right": 36,
+                "type": "sub"
+            }
+        },
+        "38": {
+            "id": 38,
+            "name": "L22_net_nm_tax",
+            "op": {
+                "left": 34,
+                "right": 37,
+                "type": "max"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "left": 15,
+                "right": 16,
+                "type": "add"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L15_nm_deductions_exemptions",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "left": 14,
+                "right": 39,
+                "type": "add"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "left": 13,
+                "right": 40,
+                "type": "add"
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "left": 12,
+                "right": 41,
+                "type": "add"
+            }
+        },
+        "43": {
+            "id": 43,
+            "op": {
+                "left": 11,
+                "right": 42,
+                "type": "add"
+            }
+        },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 10,
+                "right": 43,
+                "type": "add"
+            }
+        },
+        "45": {
+            "id": 45,
+            "name": "L32_total_payments_credits",
+            "op": {
+                "left": 9,
+                "right": 44,
+                "type": "add"
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "left": 38,
+                "right": 45,
+                "type": "sub"
+            }
+        },
+        "48": {
+            "id": 48,
+            "name": "L33_tax_due",
+            "op": {
+                "left": 46,
+                "right": 47,
+                "type": "max"
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "left": 18,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L16_medical_care_deduction",
+            "op": {
+                "type": "input"
+            }
+        },
+        "50": {
+            "id": 50,
+            "op": {
+                "left": 17,
+                "right": 49,
+                "type": "add"
+            }
+        },
+        "51": {
+            "id": 51,
+            "name": "L38_total_due",
+            "op": {
+                "left": 48,
+                "right": 50,
+                "type": "add"
+            }
+        },
+        "52": {
+            "id": 52,
+            "op": {
+                "left": 45,
+                "right": 38,
+                "type": "sub"
+            }
+        },
+        "53": {
+            "id": 53,
+            "op": {
+                "left": 45,
+                "right": 38,
+                "type": "sub"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "55": {
+            "id": 55,
+            "name": "L39_overpayment",
+            "op": {
+                "cond": 52,
+                "otherwise": 54,
+                "then": 53,
+                "type": "if_positive"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "left": 20,
+                "right": 21,
+                "type": "add"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "left": 55,
+                "right": 57,
+                "type": "sub"
+            }
+        },
+        "59": {
+            "id": 59,
+            "name": "L42_refund_amount",
+            "op": {
+                "left": 56,
+                "right": 58,
+                "type": "max"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L19_lump_sum_tax",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L20_other_state_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L21_business_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L24_rebate_credits",
+            "op": {
+                "type": "input"
+            }
+        }
+    },
+    "outputs": [
+        32,
+        33,
+        38,
+        45,
+        48,
+        55,
+        59,
+        22
+    ],
+    "tables": {
+        "nm_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 1.7e-2,
+                        "threshold": 8000
+                    },
+                    {
+                        "rate": 3.2e-2,
+                        "threshold": 16000
+                    },
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 24000
+                    },
+                    {
+                        "rate": 4.9e-2,
+                        "threshold": 315000
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 1.7e-2,
+                        "threshold": 8000
+                    },
+                    {
+                        "rate": 3.2e-2,
+                        "threshold": 16000
+                    },
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 24000
+                    },
+                    {
+                        "rate": 4.9e-2,
+                        "threshold": 315000
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 1.7e-2,
+                        "threshold": 4000
+                    },
+                    {
+                        "rate": 3.2e-2,
+                        "threshold": 8000
+                    },
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 12000
+                    },
+                    {
+                        "rate": 4.9e-2,
+                        "threshold": 157500
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 1.7e-2,
+                        "threshold": 8000
+                    },
+                    {
+                        "rate": 3.2e-2,
+                        "threshold": 16000
+                    },
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 24000
+                    },
+                    {
+                        "rate": 4.9e-2,
+                        "threshold": 315000
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 1.7e-2,
+                        "threshold": 5500
+                    },
+                    {
+                        "rate": 3.2e-2,
+                        "threshold": 11000
+                    },
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 16000
+                    },
+                    {
+                        "rate": 4.9e-2,
+                        "threshold": 210000
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}

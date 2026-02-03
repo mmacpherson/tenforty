@@ -129,6 +129,7 @@ class OTSState(Enum):
     CT = "CT"
     DE = "DE"
     GA = "GA"
+    HI = "HI"
     IA = "IA"
     ID = "ID"
     IL = "IL"
@@ -138,12 +139,15 @@ class OTSState(Enum):
     LA = "LA"
     MA = "MA"
     MD = "MD"
+    ME = "ME"
     MI = "MI"
     MS = "MS"
     MN = "MN"
     MO = "MO"
     NC = "NC"
+    NE = "NE"
     NJ = "NJ"
+    NM = "NM"
     NY = "NY"
     OH = "OH"
     OK = "OK"
@@ -152,6 +156,7 @@ class OTSState(Enum):
     SC = "SC"
     UT = "UT"
     VA = "VA"
+    WV = "WV"
     WI = "WI"
 
     # No income-tax states are easy to support! :)
@@ -175,6 +180,7 @@ STATE_TO_FORM = {
     OTSState.CT: "CT_1",
     OTSState.DE: "DE_PIT_RES",
     OTSState.GA: "GA_500",
+    OTSState.HI: "HI_N11",
     OTSState.IA: "IA_IA1040",
     OTSState.ID: "ID_FORM40",
     OTSState.IL: "IL_1040",
@@ -184,12 +190,15 @@ STATE_TO_FORM = {
     OTSState.LA: "LA_IT540",
     OTSState.MA: "MA_1",
     OTSState.MD: "MD_502",
+    OTSState.ME: "ME_1040ME",
     OTSState.MI: "MI_1040",
     OTSState.MS: "MS_80105",
     OTSState.MN: "MN_M1",
     OTSState.MO: "MO_1040",
     OTSState.NC: "NC_D400",
+    OTSState.NE: "NE_1040N",
     OTSState.NJ: "NJ_1040",
+    OTSState.NM: "NM_PIT1",
     OTSState.NY: "NY_IT201",
     OTSState.OH: "OH_IT1040",
     OTSState.OK: "OK_511",
@@ -198,6 +207,7 @@ STATE_TO_FORM = {
     OTSState.SC: "SC_1040",
     OTSState.UT: "UT_TC40",
     OTSState.VA: "VA_760",
+    OTSState.WV: "WV_IT140",
     OTSState.WI: "WI_Form1",
     # No income-tax states
     OTSState.AK: None,
