@@ -71,6 +71,8 @@ executable tenforty-compile
     COForm104_2025
     CTForm1_2024
     CTForm1_2025
+    DCFormD40_2024
+    DCFormD40_2025
     DEFormPITRES_2024
     DEFormPITRES_2025
     GAForm500_2024
@@ -103,10 +105,14 @@ executable tenforty-compile
     MNFormM1_2025
     MOForm1040_2024
     MOForm1040_2025
+    MTForm2_2024
+    MTForm2_2025
     MS80105_2024
     MS80105_2025
     NCFormD400_2024
     NCFormD400_2025
+    NDForm1_2024
+    NDForm1_2025
     NEForm1040N_2024
     NEForm1040N_2025
     NJ1040_2024
@@ -123,6 +129,8 @@ executable tenforty-compile
     ORForm40_2025
     PA40_2024
     PA40_2025
+    RIForm1040_2024
+    RIForm1040_2025
     SCForm1040_2024
     SCForm1040_2025
     Tables2024
@@ -139,6 +147,8 @@ executable tenforty-compile
     TablesCO2025
     TablesCT2024
     TablesCT2025
+    TablesDC2024
+    TablesDC2025
     TablesDE2024
     TablesDE2025
     TablesGA2024
@@ -171,10 +181,14 @@ executable tenforty-compile
     TablesMN2025
     TablesMO2024
     TablesMO2025
+    TablesMT2024
+    TablesMT2025
     TablesMS2024
     TablesMS2025
     TablesNC2024
     TablesNC2025
+    TablesND2024
+    TablesND2025
     TablesNE2024
     TablesNE2025
     TablesNJ2024
@@ -189,16 +203,20 @@ executable tenforty-compile
     TablesOK2025
     TablesOR2024
     TablesOR2025
+    TablesRI2024
+    TablesRI2025
     TablesSC2024
     TablesSC2025
     TablesUT2024
     TablesUT2025
     TablesVA2024
     TablesVA2025
-    TablesWI2024
-    TablesWI2025
+    TablesVT2024
+    TablesVT2025
     TablesWV2024
     TablesWV2025
+    TablesWI2024
+    TablesWI2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -235,10 +253,12 @@ executable tenforty-compile
     UTTC40_2025
     VAForm760_2024
     VAForm760_2025
-    WIForm1_2024
-    WIForm1_2025
+    VTIN111_2024
+    VTIN111_2025
     WVIT140_2024
     WVIT140_2025
+    WIForm1_2024
+    WIForm1_2025
 
   build-depends:
     , aeson
@@ -289,6 +309,8 @@ test-suite tenforty-spec-test
     COForm104_2025
     CTForm1_2024
     CTForm1_2025
+    DCFormD40_2024
+    DCFormD40_2025
     DEFormPITRES_2024
     DEFormPITRES_2025
     GAForm500_2024
@@ -321,10 +343,14 @@ test-suite tenforty-spec-test
     MNFormM1_2025
     MOForm1040_2024
     MOForm1040_2025
+    MTForm2_2024
+    MTForm2_2025
     MS80105_2024
     MS80105_2025
     NCFormD400_2024
     NCFormD400_2025
+    NDForm1_2024
+    NDForm1_2025
     NEForm1040N_2024
     NEForm1040N_2025
     NJ1040_2024
@@ -341,6 +367,8 @@ test-suite tenforty-spec-test
     ORForm40_2025
     PA40_2024
     PA40_2025
+    RIForm1040_2024
+    RIForm1040_2025
     SCForm1040_2024
     SCForm1040_2025
     Tables2024
@@ -357,6 +385,8 @@ test-suite tenforty-spec-test
     TablesCO2025
     TablesCT2024
     TablesCT2025
+    TablesDC2024
+    TablesDC2025
     TablesDE2024
     TablesDE2025
     TablesGA2024
@@ -389,10 +419,14 @@ test-suite tenforty-spec-test
     TablesMN2025
     TablesMO2024
     TablesMO2025
+    TablesMT2024
+    TablesMT2025
     TablesMS2024
     TablesMS2025
     TablesNC2024
     TablesNC2025
+    TablesND2024
+    TablesND2025
     TablesNE2024
     TablesNE2025
     TablesNJ2024
@@ -407,16 +441,20 @@ test-suite tenforty-spec-test
     TablesOK2025
     TablesOR2024
     TablesOR2025
+    TablesRI2024
+    TablesRI2025
     TablesSC2024
     TablesSC2025
     TablesUT2024
     TablesUT2025
     TablesVA2024
     TablesVA2025
-    TablesWI2024
-    TablesWI2025
+    TablesVT2024
+    TablesVT2025
     TablesWV2024
     TablesWV2025
+    TablesWI2024
+    TablesWI2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -453,10 +491,12 @@ test-suite tenforty-spec-test
     UTTC40_2025
     VAForm760_2024
     VAForm760_2025
-    WIForm1_2024
-    WIForm1_2025
+    VTIN111_2024
+    VTIN111_2025
     WVIT140_2024
     WVIT140_2025
+    WIForm1_2024
+    WIForm1_2025
 
   default-language:   GHC2021
   default-extensions: OverloadedStrings

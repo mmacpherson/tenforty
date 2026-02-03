@@ -135,6 +135,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L18_ct_total_tax": "state_total_tax",
         },
     ),
+    OTSState.DC: StateGraphConfig(
+        # DC Form D-40 imports federal AGI. District of Columbia has 7
+        # progressive tax brackets (4%-10.75%) with uniform thresholds across
+        # all filing statuses. Standard deduction varies by filing status.
+        # Additions and subtractions from federal AGI accepted as keyInputs.
+        natural_to_node={},
+        output_lines={
+            "L4_dc_adjusted_gross_income": "state_adjusted_gross_income",
+            "L6_dc_taxable_income": "state_taxable_income",
+            "L11_dc_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.DE: StateGraphConfig(
         # DE Form PIT-RES imports federal AGI. Delaware has 7 progressive tax
         # brackets (0%-6.6%) with the same thresholds for all filing statuses.
@@ -378,6 +390,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L32_mo_total_tax": "state_total_tax",
         },
     ),
+    OTSState.MT: StateGraphConfig(
+        # MT Form 2 imports federal taxable income and applies Montana-specific
+        # adjustments (Schedule I additions/subtractions accepted as single input).
+        # Montana taxes ordinary income and capital gains separately at different rates.
+        # Uses 2-bracket progressive schedule for each income type.
+        natural_to_node={},
+        output_lines={
+            "L1_mt_taxable_income": "state_adjusted_gross_income",
+            "L4_mt_ordinary_income": "state_taxable_income",
+            "L13_mt_total_resident_tax": "state_total_tax",
+        },
+    ),
     OTSState.NC: StateGraphConfig(
         natural_to_node={
             "itemized_deductions": "nc_d400_L10_itemized",
@@ -386,6 +410,14 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L6_federal_agi": "state_adjusted_gross_income",
             "L11_nc_taxable_income": "state_taxable_income",
             "L12_nc_tax": "state_total_tax",
+        },
+    ),
+    OTSState.ND: StateGraphConfig(
+        natural_to_node={},
+        output_lines={
+            "L3_nd_adjusted_gross_income": "state_adjusted_gross_income",
+            "L5_nd_taxable_income": "state_taxable_income",
+            "L16_nd_total_tax": "state_total_tax",
         },
     ),
     OTSState.NE: StateGraphConfig(
@@ -456,6 +488,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L9_total_pa_taxable_income": "state_adjusted_gross_income",
             "L11_adjusted_pa_taxable_income": "state_taxable_income",
             "L12_pa_tax_liability": "state_total_tax",
+        },
+    ),
+    OTSState.RI: StateGraphConfig(
+        # RI Form 1040 imports federal AGI and applies RI-specific modifications
+        # (RI Schedule M additions/subtractions accepted as single input).
+        # Uses 3-bracket progressive schedule (3.75%, 4.75%, 5.99%).
+        # Standard deduction and personal exemptions reduce AGI to taxable income.
+        natural_to_node={},
+        output_lines={
+            "L3_ri_modified_agi": "state_adjusted_gross_income",
+            "L7_ri_taxable_income": "state_taxable_income",
+            "L13a_ri_total_tax": "state_total_tax",
         },
     ),
     OTSState.SC: StateGraphConfig(
@@ -535,6 +579,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L8_va_agi": "state_adjusted_gross_income",
             "L13_va_taxable_income": "state_taxable_income",
             "L18_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.VT: StateGraphConfig(
+        # VT Form IN-111 imports federal AGI and applies additions/subtractions.
+        # Itemized deductions are accepted as dollar-amount input.
+        natural_to_node={
+            "itemized_deductions": "vt_in111_L6_vt_itemized_deductions",
+        },
+        output_lines={
+            "L4_vt_agi": "state_adjusted_gross_income",
+            "L8_vt_taxable_income": "state_taxable_income",
+            "L15_vt_total_tax": "state_total_tax",
         },
     ),
     OTSState.WV: StateGraphConfig(
