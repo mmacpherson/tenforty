@@ -185,6 +185,8 @@ executable tenforty-compile
     TablesMT2025
     TablesMS2024
     TablesMS2025
+    TablesMT2024
+    TablesMT2025
     TablesNC2024
     TablesNC2025
     TablesND2024
@@ -427,6 +429,8 @@ test-suite tenforty-spec-test
     TablesMT2025
     TablesMS2024
     TablesMS2025
+    TablesMT2024
+    TablesMT2025
     TablesNC2024
     TablesNC2025
     TablesND2024
