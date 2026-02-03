@@ -327,6 +327,8 @@ test-suite tenforty-spec-test
 
   hs-source-dirs:     test forms
   other-modules:
+    ReferenceEvaluator
+    ExprProperties
     AKNoTax_2024
     AKNoTax_2025
     ALForm40_2024
