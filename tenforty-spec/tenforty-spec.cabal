@@ -233,6 +233,8 @@ test-suite tenforty-spec-test
   other-modules:
     ALForm40_2024
     ALForm40_2025
+    ARAR1000F_2024
+    ARAR1000F_2025
     AZForm140_2024
     AZForm140_2025
     CA540_2024

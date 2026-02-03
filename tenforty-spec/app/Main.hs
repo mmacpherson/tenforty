@@ -270,7 +270,7 @@ main = do
                 Just res -> compileAndOutput opts res
                 Nothing -> do
                     hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
-                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, al_40, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ga_500, il_1040, in_it40, ky_740, la_it540, md_502, mi_1040, mn_m1, mo_1040, nc_d400, nj_1040, ny_it201, oh_it1040, pa_40, sc_1040, ut_tc40, va_760, wi_form1 (append _2024 or _2025), all"
+                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ga_500, ia_ia1040, id_form40, il_1040, in_it40, ky_740, la_it540, md_502, mi_1040, ms_80105, mn_m1, mo_1040, nc_d400, nj_1040, ny_it201, oh_it1040, ok_511, pa_40, sc_1040, ut_tc40, va_760, wi_form1 (append _2024 or _2025), all"
                     exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()

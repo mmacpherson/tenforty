@@ -375,10 +375,8 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # Progressive tax brackets (6 brackets, 0.25% to 4.75%).
         natural_to_node={},
         output_lines={
-            "L7_federal_agi": "state_adjusted_gross_income",
             "L11_ok_agi": "state_adjusted_gross_income",
             "L13_ok_taxable_income": "state_taxable_income",
-            "L14_ok_tax_from_brackets": "state_income_tax",
             "L22_tax_after_credits": "state_total_tax",
         },
     ),
