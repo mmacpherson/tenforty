@@ -115,10 +115,14 @@ executable tenforty-compile
     NDForm1_2025
     NEForm1040N_2024
     NEForm1040N_2025
+    NHDP10_2024
+    NHDP10_2025
     NJ1040_2024
     NJ1040_2025
     NMPIT1_2024
     NMPIT1_2025
+    TNNoTax_2024
+    TNNoTax_2025
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -193,10 +197,14 @@ executable tenforty-compile
     TablesND2025
     TablesNE2024
     TablesNE2025
+    TablesNH2024
+    TablesNH2025
     TablesNJ2024
     TablesNJ2025
     TablesNM2024
     TablesNM2025
+    TablesTN2024
+    TablesTN2025
     TablesNY2024
     TablesNY2025
     TablesOH2024
@@ -359,10 +367,14 @@ test-suite tenforty-spec-test
     NDForm1_2025
     NEForm1040N_2024
     NEForm1040N_2025
+    NHDP10_2024
+    NHDP10_2025
     NJ1040_2024
     NJ1040_2025
     NMPIT1_2024
     NMPIT1_2025
+    TNNoTax_2024
+    TNNoTax_2025
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -437,10 +449,14 @@ test-suite tenforty-spec-test
     TablesND2025
     TablesNE2024
     TablesNE2025
+    TablesNH2024
+    TablesNH2025
     TablesNJ2024
     TablesNJ2025
     TablesNM2024
     TablesNM2025
+    TablesTN2024
+    TablesTN2025
     TablesNY2024
     TablesNY2025
     TablesOH2024
