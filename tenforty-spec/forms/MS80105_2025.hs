@@ -23,7 +23,7 @@ ms80105_2025 = form "ms_80105" 2025 $ do
             byStatusE (fmap lit msExemption2025)
 
     -- Line 10: Total Additional Exemptions
-    -- $1,500 per dependent, age 65+, or blind person
+    -- \$1,500 per dependent, age 65+, or blind person
     -- For simple scenarios with no additional exemptions, defaults to $0
     l10 <-
         keyInput "L10" "additional_exemptions" "Total additional exemptions (Line 9 × $1,500)"

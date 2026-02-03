@@ -119,6 +119,38 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_co_income_tax": "state_total_tax",
         },
     ),
+    OTSState.CT: StateGraphConfig(
+        # CT Form 1 imports federal AGI. Connecticut has 7 progressive tax
+        # brackets (2%-6.99%) and a personal exemption that phases out with
+        # income. Exemption base: Single $15k, MFJ $24k, MFS $12k, HoH $19k;
+        # phases out starting at Single $30k, MFJ $48k, MFS $24k, HoH $38k at
+        # a rate of $1 per $1 of excess income. No standard deduction. Credits
+        # and adjustments accepted as keyInputs.
+        # Note: L1_ct_agi is an import node that gets resolved during graph
+        # linking, so we use the federal AGI node directly.
+        natural_to_node={},
+        output_lines={
+            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L3_ct_taxable_income": "state_taxable_income",
+            "L18_ct_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.DE: StateGraphConfig(
+        # DE Form PIT-RES imports federal AGI. Delaware has 7 progressive tax
+        # brackets (0%-6.6%) with the same thresholds for all filing statuses.
+        # Standard deduction: Single/MFS/HoH $3,250, MFJ $6,500. Additional std
+        # deduction: $2,500 per qualifying condition (age 65+/blind). Personal
+        # exemption is a $110 tax credit per exemption (not a deduction). Credits
+        # and adjustments accepted as keyInputs.
+        natural_to_node={
+            "itemized_deductions": "de_pit_res_L20a_itemized",
+        },
+        output_lines={
+            "L5_de_agi": "state_adjusted_gross_income",
+            "L21_de_taxable_income": "state_taxable_income",
+            "L30_de_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.GA: StateGraphConfig(
         natural_to_node={
             "itemized_deductions": "ga_500_L5_itemized",
@@ -178,6 +210,24 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L9_in_state_tax": "state_total_tax",
         },
     ),
+    OTSState.KS: StateGraphConfig(
+        # KS K-40 imports federal AGI and applies Kansas modifications.
+        # Standard deduction auto-computed by filing status (Single: $3,605, MFJ: $8,240,
+        # MFS: $4,120, HoH: $6,180). Personal exemptions: MFJ $18,320, others $9,160.
+        # Dependent exemption: $2,320 per dependent. Exemptions accepted as total input
+        # (num_dependents cannot map to dollar amounts due to natural_to_node limitation).
+        # Uses 2-bracket progressive tax: 5.2% up to $23,000 (Single/MFS/HoH) or $46,000 (MFJ),
+        # then 5.58% on income above those thresholds.
+        natural_to_node={
+            "itemized_deductions": "ks_k40_L4_itemized",
+            "dependent_exemptions": "ks_k40_L5_total_exemptions",
+        },
+        output_lines={
+            "L3_ks_agi": "state_adjusted_gross_income",
+            "L7_ks_taxable_income": "state_taxable_income",
+            "L19_ks_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.KY: StateGraphConfig(
         # KY Form 740 imports federal AGI and applies Kentucky-specific
         # additions/subtractions. Deductions (standard or itemized) are accepted
@@ -203,6 +253,24 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
         output_lines={
             "L10_la_tax": "state_total_tax",
+        },
+    ),
+    OTSState.MA: StateGraphConfig(
+        # MA Form 1 imports federal AGI and applies Massachusetts-specific
+        # exemptions. Massachusetts uses a flat 5% base rate on most income
+        # plus a 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025).
+        # Also applies 8.5% rate on short-term capital gains and 12% on long-term
+        # collectibles. Exemptions are filing-status based (Single: $4,400,
+        # MFJ: $8,800, HoH: $6,800) plus $1,000 per dependent, $700 for age 65+,
+        # and $2,200 for blindness. All exemptions are accepted as total input
+        # (num_dependents cannot map to dollar amounts).
+        # Note: L10 is an import node (imports federal AGI) so we use L17
+        # (income after deductions) as state AGI proxy.
+        natural_to_node={},
+        output_lines={
+            "L17_ma_income_after_deductions": "state_adjusted_gross_income",
+            "L19_ma_taxable_income": "state_taxable_income",
+            "L28_ma_total_tax": "state_total_tax",
         },
     ),
     OTSState.MD: StateGraphConfig(
@@ -378,6 +446,22 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L11_ok_agi": "state_adjusted_gross_income",
             "L13_ok_taxable_income": "state_taxable_income",
             "L22_tax_after_credits": "state_total_tax",
+        },
+    ),
+    OTSState.OR: StateGraphConfig(
+        # OR Form 40 imports federal AGI and applies additions/subtractions.
+        # Oregon allows a federal tax subtraction with AGI-based phaseout
+        # ($8,250/$8,500 limit for 2024/2025, phases out above $125k/$250k AGI).
+        # Standard deduction is filing-status based (Single: $2,745/$2,835,
+        # MFJ: $5,495/$5,670, HoH: $4,420/$4,560 for 2024/2025).
+        # Progressive tax brackets (4 brackets, 4.75% to 9.9%).
+        # Note: L7 is an import node (imports federal AGI) so we use L21
+        # (income before deductions) as state AGI proxy.
+        natural_to_node={},
+        output_lines={
+            "L21_or_income_before_deductions": "state_adjusted_gross_income",
+            "L23_or_taxable_income": "state_taxable_income",
+            "L32_or_total_tax": "state_total_tax",
         },
     ),
     OTSState.VA: StateGraphConfig(

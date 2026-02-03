@@ -371,7 +371,13 @@ class GraphBackend:
         output_map = STATE_OUTPUT_LINES.get(state, {})
 
         for line_name, result_key in output_map.items():
-            result[result_key] = evaluator.eval(f"{form_name}_{line_name}")
+            # If line_name already contains a form prefix (e.g., "us_1040_L11_agi"),
+            # use it directly. Otherwise, prepend the state's form_name.
+            if "_" in line_name and not line_name.startswith("L"):
+                node_name = line_name
+            else:
+                node_name = f"{form_name}_{line_name}"
+            result[result_key] = evaluator.eval(node_name)
 
         return result
 

@@ -126,11 +126,14 @@ class OTSState(Enum):
     AZ = "AZ"
     CA = "CA"
     CO = "CO"
+    CT = "CT"
+    DE = "DE"
     GA = "GA"
     IA = "IA"
     ID = "ID"
     IL = "IL"
     IN = "IN"
+    KS = "KS"
     KY = "KY"
     LA = "LA"
     MA = "MA"
@@ -144,6 +147,7 @@ class OTSState(Enum):
     NY = "NY"
     OH = "OH"
     OK = "OK"
+    OR = "OR"
     PA = "PA"
     SC = "SC"
     UT = "UT"
@@ -168,11 +172,14 @@ STATE_TO_FORM = {
     OTSState.AZ: "AZ_140",
     OTSState.CA: "CA_540",
     OTSState.CO: "CO_Form104",
+    OTSState.CT: "CT_1",
+    OTSState.DE: "DE_PIT_RES",
     OTSState.GA: "GA_500",
     OTSState.IA: "IA_IA1040",
     OTSState.ID: "ID_FORM40",
     OTSState.IL: "IL_1040",
     OTSState.IN: "IN_IT40",
+    OTSState.KS: "KS_K40",
     OTSState.KY: "KY_740",
     OTSState.LA: "LA_IT540",
     OTSState.MA: "MA_1",
@@ -186,6 +193,7 @@ STATE_TO_FORM = {
     OTSState.NY: "NY_IT201",
     OTSState.OH: "OH_IT1040",
     OTSState.OK: "OK_511",
+    OTSState.OR: "OR_40",
     OTSState.PA: "PA_40",
     OTSState.SC: "SC_1040",
     OTSState.UT: "UT_TC40",

@@ -24,7 +24,7 @@ Using 2024 amounts pending official 2025 form release.
 Source: Extrapolated from 2024 Mississippi DOR Form 80-100 instructions
 -}
 msExemption2025 :: ByStatus (Amount Dollars)
-msExemption2025 = byStatus 6000 12000 12000 8000 12000
+msExemption2025 = byStatus 6000 12000 6000 8000 12000
 
 {- | 2025 Mississippi standard deduction amounts
 Order: Single, MFJ, MFS, HoH, QW
