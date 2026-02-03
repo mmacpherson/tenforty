@@ -53,6 +53,8 @@ executable tenforty-compile
   import:             warnings
   main-is:            Main.hs
   other-modules:
+    AKNoTax_2024
+    AKNoTax_2025
     ALForm40_2024
     ALForm40_2025
     ARAR1000F_2024
@@ -75,6 +77,8 @@ executable tenforty-compile
     DCFormD40_2025
     DEFormPITRES_2024
     DEFormPITRES_2025
+    FLNoTax_2024
+    FLNoTax_2025
     GAForm500_2024
     GAForm500_2025
     HIHIN11_2024
@@ -105,20 +109,24 @@ executable tenforty-compile
     MNFormM1_2025
     MOForm1040_2024
     MOForm1040_2025
-    MTForm2_2024
-    MTForm2_2025
     MS80105_2024
     MS80105_2025
+    MTForm2_2024
+    MTForm2_2025
     NCFormD400_2024
     NCFormD400_2025
     NDForm1_2024
     NDForm1_2025
     NEForm1040N_2024
     NEForm1040N_2025
+    NHDP10_2024
+    NHDP10_2025
     NJ1040_2024
     NJ1040_2025
     NMPIT1_2024
     NMPIT1_2025
+    NVNoTax_2024
+    NVNoTax_2025
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -133,8 +141,12 @@ executable tenforty-compile
     RIForm1040_2025
     SCForm1040_2024
     SCForm1040_2025
+    SDNoTax_2024
+    SDNoTax_2025
     Tables2024
     Tables2025
+    TablesAK2024
+    TablesAK2025
     TablesAL2024
     TablesAL2025
     TablesAR2024
@@ -151,6 +163,8 @@ executable tenforty-compile
     TablesDC2025
     TablesDE2024
     TablesDE2025
+    TablesFL2024
+    TablesFL2025
     TablesGA2024
     TablesGA2025
     TablesHI2024
@@ -181,8 +195,6 @@ executable tenforty-compile
     TablesMN2025
     TablesMO2024
     TablesMO2025
-    TablesMT2024
-    TablesMT2025
     TablesMS2024
     TablesMS2025
     TablesMT2024
@@ -193,10 +205,14 @@ executable tenforty-compile
     TablesND2025
     TablesNE2024
     TablesNE2025
+    TablesNH2024
+    TablesNH2025
     TablesNJ2024
     TablesNJ2025
     TablesNM2024
     TablesNM2025
+    TablesNV2024
+    TablesNV2025
     TablesNY2024
     TablesNY2025
     TablesOH2024
@@ -209,18 +225,30 @@ executable tenforty-compile
     TablesRI2025
     TablesSC2024
     TablesSC2025
+    TablesSD2024
+    TablesSD2025
+    TablesTN2024
+    TablesTN2025
+    TablesTX2024
+    TablesTX2025
     TablesUT2024
     TablesUT2025
     TablesVA2024
     TablesVA2025
     TablesVT2024
     TablesVT2025
-    TablesWV2024
-    TablesWV2025
+    TablesWA2024
+    TablesWA2025
     TablesWI2024
     TablesWI2025
     TablesWV2024
     TablesWV2025
+    TablesWY2024
+    TablesWY2025
+    TNNoTax_2024
+    TNNoTax_2025
+    TXNoTax_2024
+    TXNoTax_2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -259,12 +287,14 @@ executable tenforty-compile
     VAForm760_2025
     VTIN111_2024
     VTIN111_2025
-    WVIT140_2024
-    WVIT140_2025
+    WANoTax_2024
+    WANoTax_2025
     WIForm1_2024
     WIForm1_2025
     WVIT140_2024
     WVIT140_2025
+    WYNoTax_2024
+    WYNoTax_2025
 
   build-depends:
     , aeson
@@ -297,6 +327,8 @@ test-suite tenforty-spec-test
 
   hs-source-dirs:     test forms
   other-modules:
+    AKNoTax_2024
+    AKNoTax_2025
     ALForm40_2024
     ALForm40_2025
     ARAR1000F_2024
@@ -319,6 +351,8 @@ test-suite tenforty-spec-test
     DCFormD40_2025
     DEFormPITRES_2024
     DEFormPITRES_2025
+    FLNoTax_2024
+    FLNoTax_2025
     GAForm500_2024
     GAForm500_2025
     HIHIN11_2024
@@ -349,20 +383,24 @@ test-suite tenforty-spec-test
     MNFormM1_2025
     MOForm1040_2024
     MOForm1040_2025
-    MTForm2_2024
-    MTForm2_2025
     MS80105_2024
     MS80105_2025
+    MTForm2_2024
+    MTForm2_2025
     NCFormD400_2024
     NCFormD400_2025
     NDForm1_2024
     NDForm1_2025
     NEForm1040N_2024
     NEForm1040N_2025
+    NHDP10_2024
+    NHDP10_2025
     NJ1040_2024
     NJ1040_2025
     NMPIT1_2024
     NMPIT1_2025
+    NVNoTax_2024
+    NVNoTax_2025
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -377,8 +415,12 @@ test-suite tenforty-spec-test
     RIForm1040_2025
     SCForm1040_2024
     SCForm1040_2025
+    SDNoTax_2024
+    SDNoTax_2025
     Tables2024
     Tables2025
+    TablesAK2024
+    TablesAK2025
     TablesAL2024
     TablesAL2025
     TablesAR2024
@@ -395,6 +437,8 @@ test-suite tenforty-spec-test
     TablesDC2025
     TablesDE2024
     TablesDE2025
+    TablesFL2024
+    TablesFL2025
     TablesGA2024
     TablesGA2025
     TablesHI2024
@@ -425,8 +469,6 @@ test-suite tenforty-spec-test
     TablesMN2025
     TablesMO2024
     TablesMO2025
-    TablesMT2024
-    TablesMT2025
     TablesMS2024
     TablesMS2025
     TablesMT2024
@@ -437,10 +479,14 @@ test-suite tenforty-spec-test
     TablesND2025
     TablesNE2024
     TablesNE2025
+    TablesNH2024
+    TablesNH2025
     TablesNJ2024
     TablesNJ2025
     TablesNM2024
     TablesNM2025
+    TablesNV2024
+    TablesNV2025
     TablesNY2024
     TablesNY2025
     TablesOH2024
@@ -453,18 +499,30 @@ test-suite tenforty-spec-test
     TablesRI2025
     TablesSC2024
     TablesSC2025
+    TablesSD2024
+    TablesSD2025
+    TablesTN2024
+    TablesTN2025
+    TablesTX2024
+    TablesTX2025
     TablesUT2024
     TablesUT2025
     TablesVA2024
     TablesVA2025
     TablesVT2024
     TablesVT2025
-    TablesWV2024
-    TablesWV2025
+    TablesWA2024
+    TablesWA2025
     TablesWI2024
     TablesWI2025
     TablesWV2024
     TablesWV2025
+    TablesWY2024
+    TablesWY2025
+    TNNoTax_2024
+    TNNoTax_2025
+    TXNoTax_2024
+    TXNoTax_2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -503,8 +561,8 @@ test-suite tenforty-spec-test
     VAForm760_2025
     VTIN111_2024
     VTIN111_2025
-    WVIT140_2024
-    WVIT140_2025
+    WANoTax_2024
+    WANoTax_2025
     WIForm1_2024
     WIForm1_2025
     WVIT140_2024

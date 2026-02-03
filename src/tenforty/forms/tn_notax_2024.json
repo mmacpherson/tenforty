@@ -1,0 +1,23 @@
+{
+    "imports": [],
+    "inputs": [],
+    "meta": {
+        "form_id": "tn_notax",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1_tn_tax",
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        }
+    },
+    "outputs": [
+        0
+    ],
+    "tables": {}
+}

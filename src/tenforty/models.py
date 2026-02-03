@@ -149,6 +149,7 @@ class OTSState(Enum):
     NC = "NC"
     ND = "ND"
     NE = "NE"
+    NH = "NH"
     NJ = "NJ"
     NM = "NM"
     NY = "NY"
@@ -169,6 +170,7 @@ class OTSState(Enum):
     FL = "FL"
     NV = "NV"
     SD = "SD"
+    TN = "TN"
     TX = "TX"
     WA = "WA"
     WY = "WY"
@@ -205,6 +207,7 @@ STATE_TO_FORM = {
     OTSState.NC: "NC_D400",
     OTSState.ND: "ND_1",
     OTSState.NE: "NE_1040N",
+    OTSState.NH: "NH_DP10",
     OTSState.NJ: "NJ_1040",
     OTSState.NM: "NM_PIT1",
     OTSState.NY: "NY_IT201",
@@ -224,6 +227,7 @@ STATE_TO_FORM = {
     OTSState.FL: None,
     OTSState.NV: None,
     OTSState.SD: None,
+    OTSState.TN: None,
     OTSState.TX: None,
     OTSState.WA: None,
     OTSState.WY: None,

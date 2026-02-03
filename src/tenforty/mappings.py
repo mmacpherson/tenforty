@@ -49,6 +49,7 @@ FILING_STATUS_MAP = {
 class StateGraphConfig:  # noqa: D101
     natural_to_node: dict[str, str]
     output_lines: dict[str, str]
+    form_name: str | None = None
 
 
 STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
@@ -433,6 +434,21 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L19_total_ne_tax": "state_total_tax",
         },
     ),
+    OTSState.NH: StateGraphConfig(
+        # NH DP-10 taxes interest and dividends only (not W2 income).
+        # These fields duplicate federal NATURAL_TO_NODE entries; _create_evaluator
+        # applies both mappings when a field appears in each. (Same pattern as PA.)
+        natural_to_node={
+            "taxable_interest": "nh_dp10_L1_interest_income",
+            "ordinary_dividends": "nh_dp10_L2_dividend_income",
+        },
+        output_lines={
+            # NH has no AGI concept; L3 (total I&D income) is the closest equivalent.
+            "L3_total_id_income": "state_adjusted_gross_income",
+            "L7_taxable_id_income": "state_taxable_income",
+            "L8_nh_tax": "state_total_tax",
+        },
+    ),
     OTSState.NJ: StateGraphConfig(
         # NJ-1040 imports federal AGI and applies exemptions/deductions.
         # Personal exemptions and dependent exemptions are accepted as total inputs
@@ -621,12 +637,68 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L45_wi_total_tax": "state_total_tax",
         },
     ),
+    OTSState.TN: StateGraphConfig(
+        form_name="tn_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_tn_tax": "state_total_tax",
+        },
+    ),
+    OTSState.AK: StateGraphConfig(
+        form_name="ak_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_ak_tax": "state_total_tax",
+        },
+    ),
+    OTSState.FL: StateGraphConfig(
+        form_name="fl_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_fl_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NV: StateGraphConfig(
+        form_name="nv_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_nv_tax": "state_total_tax",
+        },
+    ),
+    OTSState.SD: StateGraphConfig(
+        form_name="sd_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_sd_tax": "state_total_tax",
+        },
+    ),
+    OTSState.TX: StateGraphConfig(
+        form_name="tx_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_tx_tax": "state_total_tax",
+        },
+    ),
+    OTSState.WA: StateGraphConfig(
+        form_name="wa_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_wa_tax": "state_total_tax",
+        },
+    ),
+    OTSState.WY: StateGraphConfig(
+        form_name="wy_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_wy_tax": "state_total_tax",
+        },
+    ),
 }
 
 STATE_FORM_NAMES = {
-    s: STATE_TO_FORM[s].lower()
-    for s in STATE_GRAPH_CONFIGS
-    if STATE_TO_FORM.get(s) is not None
+    s: c.form_name or STATE_TO_FORM[s].lower()
+    for s, c in STATE_GRAPH_CONFIGS.items()
+    if c.form_name or STATE_TO_FORM.get(s) is not None
 }
 STATE_NATURAL_TO_NODE = {s: c.natural_to_node for s, c in STATE_GRAPH_CONFIGS.items()}
 STATE_OUTPUT_LINES = {s: c.output_lines for s, c in STATE_GRAPH_CONFIGS.items()}

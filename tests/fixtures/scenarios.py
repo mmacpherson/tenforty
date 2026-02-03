@@ -4417,6 +4417,67 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=1674.84,
         backend="graph",
     ),
+    # ========== NEW HAMPSHIRE SCENARIOS ==========
+    # NH DP-10 taxes interest and dividends only (not W2 income)
+    # 2024: 3% flat rate on I&D income above exemption
+    # 2025: Tax repealed (0% rate)
+    # Exemption: Single $2,400, MFJ $4,800
+    #
+    # NH 2024 Single, $50,000 W2, $10,000 interest, no dividends
+    # NH taxable I&D: $10,000 - $2,400 = $7,600
+    # NH tax: $7,600 * 0.03 = $228.00
+    # Federal: AGI $60,000, std ded $14,600, taxable $45,400
+    # Federal tax: $11,925 * 0.10 + $33,475 * 0.12 = $1,192.50 + $4,017 = $5,209.50 -> $5,216
+    TaxScenario(
+        source="NH 2024 DP-10 (computed)",
+        description="NH Single, $50,000 W2 + $10,000 interest (2024)",
+        year=2024,
+        state="NH",
+        filing_status="Single",
+        w2_income=50000.0,
+        taxable_interest=10000.0,
+        expected_federal_tax=5216.0,
+        expected_state_tax=228.0,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # NH 2024 MFJ, $80,000 W2, $20,000 interest, $5,000 dividends
+    # NH taxable I&D: ($20,000 + $5,000) - $4,800 = $20,200
+    # NH tax: $20,200 * 0.03 = $606.00
+    # Federal: AGI $105,000, std ded $29,200, taxable $75,800
+    # Federal tax: $23,850 * 0.10 + $51,950 * 0.12 = $2,385 + $6,234 = $8,619 -> $8,632
+    TaxScenario(
+        source="NH 2024 DP-10 (computed)",
+        description="NH MFJ, $80,000 W2 + $25,000 I&D (2024)",
+        year=2024,
+        state="NH",
+        filing_status="Married/Joint",
+        w2_income=80000.0,
+        taxable_interest=20000.0,
+        ordinary_dividends=5000.0,
+        expected_federal_tax=8632.0,
+        expected_state_tax=606.0,
+        expected_federal_agi=105000.0,
+        backend="graph",
+    ),
+    # NH 2025 Single, $50,000 W2, $10,000 interest (tax repealed)
+    # NH taxable I&D: $10,000 - $2,400 = $7,600
+    # NH tax: $7,600 * 0.00 = $0.00 (repealed)
+    # Federal: AGI $60,000, std ded $15,000, taxable $45,000
+    # Federal tax: $11,925 * 0.10 + $33,075 * 0.12 = $1,192.50 + $3,969 = $5,161.50
+    TaxScenario(
+        source="NH 2025 DP-10 (computed)",
+        description="NH Single, $50,000 W2 + $10,000 interest (2025, repealed)",
+        year=2025,
+        state="NH",
+        filing_status="Single",
+        w2_income=50000.0,
+        taxable_interest=10000.0,
+        expected_federal_tax=5161.5,
+        expected_state_tax=0.0,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
     # WV 2024 Single, middle income
     # Federal AGI: $40,000
     # Federal std deduction (2024): $14,600

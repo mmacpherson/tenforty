@@ -41,7 +41,7 @@ repos:
     args: [--fix, --exit-non-zero-on-fix]
   - id: ruff-format
 - repo: https://github.com/crate-ci/typos
-  rev: v1
+  rev: v1.43.1
   hooks:
   - id: typos
     # Only *check* spelling in prose; avoid rewriting identifiers in code.
