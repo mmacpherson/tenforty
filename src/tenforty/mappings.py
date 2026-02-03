@@ -644,6 +644,55 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L1_tn_tax": "state_total_tax",
         },
     ),
+    OTSState.AK: StateGraphConfig(
+        form_name="ak_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_ak_tax": "state_total_tax",
+        },
+    ),
+    OTSState.FL: StateGraphConfig(
+        form_name="fl_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_fl_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NV: StateGraphConfig(
+        form_name="nv_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_nv_tax": "state_total_tax",
+        },
+    ),
+    OTSState.SD: StateGraphConfig(
+        form_name="sd_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_sd_tax": "state_total_tax",
+        },
+    ),
+    OTSState.TX: StateGraphConfig(
+        form_name="tx_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_tx_tax": "state_total_tax",
+        },
+    ),
+    OTSState.WA: StateGraphConfig(
+        form_name="wa_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_wa_tax": "state_total_tax",
+        },
+    ),
+    OTSState.WY: StateGraphConfig(
+        form_name="wy_notax",
+        natural_to_node={},
+        output_lines={
+            "L1_wy_tax": "state_total_tax",
+        },
+    ),
 }
 
 STATE_FORM_NAMES = {

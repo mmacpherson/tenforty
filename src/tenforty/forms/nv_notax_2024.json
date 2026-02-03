@@ -1,0 +1,1 @@
+{"imports":[],"inputs":[],"meta":{"form_id":"nv_notax","generated_by":"tenforty-dsl","year":2024},"nodes":{"0":{"id":0,"name":"L1_nv_tax","op":{"type":"literal","value":0}}},"outputs":[0],"tables":{}}

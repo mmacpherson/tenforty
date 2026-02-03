@@ -11,6 +11,8 @@ import System.Directory (createDirectoryIfMissing)
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
+import AKNoTax_2024
+import AKNoTax_2025
 import ALForm40_2024
 import ALForm40_2025
 import ARAR1000F_2024
@@ -33,6 +35,8 @@ import DCFormD40_2024
 import DCFormD40_2025
 import DEFormPITRES_2024
 import DEFormPITRES_2025
+import FLNoTax_2024
+import FLNoTax_2025
 import GAForm500_2024
 import GAForm500_2025
 import HIHIN11_2024
@@ -79,8 +83,12 @@ import NJ1040_2024
 import NJ1040_2025
 import NMPIT1_2024
 import NMPIT1_2025
+import NVNoTax_2024
+import NVNoTax_2025
 import TNNoTax_2024
 import TNNoTax_2025
+import TXNoTax_2024
+import TXNoTax_2025
 import NYIT201_2024
 import NYIT201_2025
 import OHIT1040_2024
@@ -95,6 +103,8 @@ import RIForm1040_2024
 import RIForm1040_2025
 import SCForm1040_2024
 import SCForm1040_2025
+import SDNoTax_2024
+import SDNoTax_2025
 import TenForty
 import US1040_2024
 import US1040_2025
@@ -132,18 +142,24 @@ import UTTC40_2024
 import UTTC40_2025
 import VAForm760_2024
 import VAForm760_2025
+import WANoTax_2024
+import WANoTax_2025
 import VTIN111_2024
 import VTIN111_2025
 import WVIT140_2024
 import WVIT140_2025
 import WIForm1_2024
 import WIForm1_2025
+import WYNoTax_2024
+import WYNoTax_2025
 import WVIT140_2024
 import WVIT140_2025
 
 allForms :: [(FilePath, Either FormError Form)]
 allForms =
-    [ ("us_1040_2024.json", us1040_2024)
+    [ ("ak_notax_2024.json", akNoTax_2024)
+    , ("ak_notax_2025.json", akNoTax_2025)
+    , ("us_1040_2024.json", us1040_2024)
     , ("us_1040_2025.json", us1040_2025)
     , ("us_schedule_1_2024.json", usSchedule1_2024)
     , ("us_schedule_1_2025.json", usSchedule1_2025)
@@ -197,6 +213,8 @@ allForms =
     , ("dc_d40_2025.json", dcFormD40_2025)
     , ("de_pit_res_2024.json", deFormPITRES_2024)
     , ("de_pit_res_2025.json", deFormPITRES_2025)
+    , ("fl_notax_2024.json", flNoTax_2024)
+    , ("fl_notax_2025.json", flNoTax_2025)
     , ("ga_500_2024.json", gaForm500_2024)
     , ("ga_500_2025.json", gaForm500_2025)
     , ("hi_n11_2024.json", hihiN11_2024)
@@ -243,8 +261,12 @@ allForms =
     , ("nj_1040_2025.json", nj1040_2025)
     , ("nm_pit1_2024.json", nmPIT1_2024)
     , ("nm_pit1_2025.json", nmPIT1_2025)
+    , ("nv_notax_2024.json", nvNoTax_2024)
+    , ("nv_notax_2025.json", nvNoTax_2025)
     , ("tn_notax_2024.json", tnNoTax_2024)
     , ("tn_notax_2025.json", tnNoTax_2025)
+    , ("tx_notax_2024.json", txNoTax_2024)
+    , ("tx_notax_2025.json", txNoTax_2025)
     , ("ny_it201_2024.json", nyIT201_2024)
     , ("ny_it201_2025.json", nyIT201_2025)
     , ("oh_it1040_2024.json", ohIT1040_2024)
@@ -259,16 +281,22 @@ allForms =
     , ("ri_1040_2025.json", riRI1040_2025)
     , ("sc_1040_2024.json", scForm1040_2024)
     , ("sc_1040_2025.json", scForm1040_2025)
+    , ("sd_notax_2024.json", sdNoTax_2024)
+    , ("sd_notax_2025.json", sdNoTax_2025)
     , ("ut_tc40_2024.json", utTC40_2024)
     , ("ut_tc40_2025.json", utTC40_2025)
     , ("va_760_2024.json", vaForm760_2024)
     , ("va_760_2025.json", vaForm760_2025)
+    , ("wa_notax_2024.json", waNoTax_2024)
+    , ("wa_notax_2025.json", waNoTax_2025)
     , ("vt_in111_2024.json", vtIN111_2024)
     , ("vt_in111_2025.json", vtIN111_2025)
     , ("wv_it140_2024.json", wvIT140_2024)
     , ("wv_it140_2025.json", wvIT140_2025)
     , ("wi_form1_2024.json", wiForm1_2024)
     , ("wi_form1_2025.json", wiForm1_2025)
+    , ("wy_notax_2024.json", wyNoTax_2024)
+    , ("wy_notax_2025.json", wyNoTax_2025)
     ]
 
 data Options = Options
