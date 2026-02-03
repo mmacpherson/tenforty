@@ -29,6 +29,8 @@ import COForm104_2024
 import COForm104_2025
 import CTForm1_2024
 import CTForm1_2025
+import DCFormD40_2024
+import DCFormD40_2025
 import DEFormPITRES_2024
 import DEFormPITRES_2025
 import GAForm500_2024
@@ -61,10 +63,14 @@ import MNFormM1_2024
 import MNFormM1_2025
 import MOForm1040_2024
 import MOForm1040_2025
+import MTForm2_2024
+import MTForm2_2025
 import MS80105_2024
 import MS80105_2025
 import NCFormD400_2024
 import NCFormD400_2025
+import NDForm1_2024
+import NDForm1_2025
 import NEForm1040N_2024
 import NEForm1040N_2025
 import NJ1040_2024
@@ -81,6 +87,8 @@ import ORForm40_2024
 import ORForm40_2025
 import PA40_2024
 import PA40_2025
+import RIForm1040_2024
+import RIForm1040_2025
 import SCForm1040_2024
 import SCForm1040_2025
 import TenForty
@@ -120,6 +128,10 @@ import UTTC40_2024
 import UTTC40_2025
 import VAForm760_2024
 import VAForm760_2025
+import VTIN111_2024
+import VTIN111_2025
+import WVIT140_2024
+import WVIT140_2025
 import WIForm1_2024
 import WIForm1_2025
 import WVIT140_2024
@@ -177,6 +189,8 @@ allForms =
     , ("co_form104_2025.json", coForm104_2025)
     , ("ct_1_2024.json", ctForm1_2024)
     , ("ct_1_2025.json", ctForm1_2025)
+    , ("dc_d40_2024.json", dcFormD40_2024)
+    , ("dc_d40_2025.json", dcFormD40_2025)
     , ("de_pit_res_2024.json", deFormPITRES_2024)
     , ("de_pit_res_2025.json", deFormPITRES_2025)
     , ("ga_500_2024.json", gaForm500_2024)
@@ -211,30 +225,38 @@ allForms =
     , ("mn_m1_2025.json", mnFormM1_2025)
     , ("mo_1040_2024.json", moForm1040_2024)
     , ("mo_1040_2025.json", moForm1040_2025)
-    , ("ny_it201_2024.json", nyIT201_2024)
-    , ("ny_it201_2025.json", nyIT201_2025)
+    , ("mt_form2_2024.json", mtForm2_2024)
+    , ("mt_form2_2025.json", mtForm2_2025)
     , ("nc_d400_2024.json", ncFormD400_2024)
     , ("nc_d400_2025.json", ncFormD400_2025)
+    , ("nd_1_2024.json", ndForm1_2024)
+    , ("nd_1_2025.json", ndForm1_2025)
     , ("ne_1040n_2024.json", neForm1040N_2024)
     , ("ne_1040n_2025.json", neForm1040N_2025)
     , ("nj_1040_2024.json", nj1040_2024)
     , ("nj_1040_2025.json", nj1040_2025)
     , ("nm_pit1_2024.json", nmPIT1_2024)
     , ("nm_pit1_2025.json", nmPIT1_2025)
-    , ("ok_511_2024.json", ok511_2024)
-    , ("ok_511_2025.json", ok511_2025)
+    , ("ny_it201_2024.json", nyIT201_2024)
+    , ("ny_it201_2025.json", nyIT201_2025)
     , ("oh_it1040_2024.json", ohIT1040_2024)
     , ("oh_it1040_2025.json", ohIT1040_2025)
+    , ("ok_511_2024.json", ok511_2024)
+    , ("ok_511_2025.json", ok511_2025)
     , ("or_40_2024.json", orForm40_2024)
     , ("or_40_2025.json", orForm40_2025)
     , ("pa_40_2024.json", pa40_2024)
     , ("pa_40_2025.json", pa40_2025)
+    , ("ri_1040_2024.json", riForm1040_2024)
+    , ("ri_1040_2025.json", riForm1040_2025)
     , ("sc_1040_2024.json", scForm1040_2024)
     , ("sc_1040_2025.json", scForm1040_2025)
     , ("ut_tc40_2024.json", utTC40_2024)
     , ("ut_tc40_2025.json", utTC40_2025)
     , ("va_760_2024.json", vaForm760_2024)
     , ("va_760_2025.json", vaForm760_2025)
+    , ("vt_in111_2024.json", vtIN111_2024)
+    , ("vt_in111_2025.json", vtIN111_2025)
     , ("wv_it140_2024.json", wvIT140_2024)
     , ("wv_it140_2025.json", wvIT140_2025)
     , ("wi_form1_2024.json", wiForm1_2024)
@@ -252,7 +274,7 @@ optionsParser =
     Options
         <$> strArgument
             ( metavar "FORM"
-                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, us_schedule_eic_2024, us_schedule_eic_2025, al_40_2024, al_40_2025, ar_ar1000f_2024, ar_ar1000f_2025, az_140_2024, az_140_2025, ca_540_2024, ca_540_2025, co_form104_2024, co_form104_2025, ct_1_2024, ct_1_2025, de_pit_res_2024, de_pit_res_2025, ga_500_2024, ga_500_2025, hi_n11_2024, hi_n11_2025, ia_ia1040_2024, ia_ia1040_2025, id_form40_2024, id_form40_2025, il_1040_2024, il_1040_2025, in_it40_2024, in_it40_2025, ks_k40_2024, ks_k40_2025, ky_740_2024, ky_740_2025, la_it540_2024, la_it540_2025, ma_1_2024, ma_1_2025, md_502_2024, md_502_2025, me_1040me_2024, me_1040me_2025, mi_1040_2024, mi_1040_2025, mn_m1_2024, mn_m1_2025, mo_1040_2024, mo_1040_2025, ms_80105_2024, ms_80105_2025, nc_d400_2024, nc_d400_2025, ne_1040n_2024, ne_1040n_2025, nj_1040_2024, nj_1040_2025, nm_pit1_2024, nm_pit1_2025, ny_it201_2024, ny_it201_2025, oh_it1040_2024, oh_it1040_2025, ok_511_2024, ok_511_2025, or_40_2024, or_40_2025, pa_40_2024, pa_40_2025, sc_1040_2024, sc_1040_2025, ut_tc40_2024, ut_tc40_2025, va_760_2024, va_760_2025, wv_it140_2024, wv_it140_2025, wi_form1_2024, wi_form1_2025, all)"
+                <> help "Form to compile (us_1040_2024, us_1040_2025, us_schedule_1_2024, us_schedule_1_2025, us_schedule_2_2024, us_schedule_2_2025, us_schedule_3_2024, us_schedule_3_2025, us_schedule_a_2024, us_schedule_a_2025, us_schedule_d_2024, us_schedule_d_2025, us_schedule_eic_2024, us_schedule_eic_2025, al_40_2024, al_40_2025, ar_ar1000f_2024, ar_ar1000f_2025, az_140_2024, az_140_2025, ca_540_2024, ca_540_2025, co_form104_2024, co_form104_2025, ct_1_2024, ct_1_2025, dc_d40_2024, dc_d40_2025, de_pit_res_2024, de_pit_res_2025, ga_500_2024, ga_500_2025, hi_n11_2024, hi_n11_2025, ia_ia1040_2024, ia_ia1040_2025, id_form40_2024, id_form40_2025, il_1040_2024, il_1040_2025, in_it40_2024, in_it40_2025, ks_k40_2024, ks_k40_2025, ky_740_2024, ky_740_2025, la_it540_2024, la_it540_2025, ma_1_2024, ma_1_2025, md_502_2024, md_502_2025, me_1040me_2024, me_1040me_2025, mi_1040_2024, mi_1040_2025, mn_m1_2024, mn_m1_2025, mo_1040_2024, mo_1040_2025, mt_form2_2024, mt_form2_2025, ms_80105_2024, ms_80105_2025, nc_d400_2024, nc_d400_2025, nd_1_2024, nd_1_2025, ne_1040n_2024, ne_1040n_2025, nj_1040_2024, nj_1040_2025, nm_pit1_2024, nm_pit1_2025, ny_it201_2024, ny_it201_2025, oh_it1040_2024, oh_it1040_2025, ok_511_2024, ok_511_2025, or_40_2024, or_40_2025, pa_40_2024, pa_40_2025, ri_1040_2024, ri_1040_2025, sc_1040_2024, sc_1040_2025, ut_tc40_2024, ut_tc40_2025, va_760_2024, va_760_2025, vt_in111_2024, vt_in111_2025, wv_it140_2024, wv_it140_2025, wi_form1_2024, wi_form1_2025, all)"
             )
         <*> optional
             ( strOption
@@ -310,7 +332,7 @@ main = do
                 Just res -> compileAndOutput opts res
                 Nothing -> do
                     hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
-                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ct_1, de_pit_res, ga_500, hi_n11, ia_ia1040, id_form40, il_1040, in_it40, ks_k40, ky_740, la_it540, ma_1, md_502, me_1040me, mi_1040, ms_80105, mn_m1, mo_1040, nc_d400, ne_1040n, nj_1040, nm_pit1, ny_it201, oh_it1040, ok_511, or_40, pa_40, sc_1040, ut_tc40, va_760, wv_it140, wi_form1 (append _2024 or _2025), all"
+                    hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ct_1, dc_d40, de_pit_res, ga_500, hi_n11, ia_ia1040, id_form40, il_1040, in_it40, ks_k40, ky_740, la_it540, ma_1, md_502, me_1040me, mi_1040, ms_80105, mn_m1, mo_1040, mt_form2, nc_d400, nd_1, ne_1040n, nj_1040, nm_pit1, ny_it201, oh_it1040, ok_511, or_40, pa_40, ri_1040, sc_1040, ut_tc40, va_760, vt_in111, wv_it140, wi_form1 (append _2024 or _2025), all"
                     exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()

@@ -1,0 +1,221 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L15",
+            "year": 2024
+        }
+    ],
+    "inputs": [
+        0,
+        1
+    ],
+    "meta": {
+        "form_id": "mt_form2",
+        "generated_by": "tenforty-dsl",
+        "year": 2024
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L_Schedule_I",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L2_net_long_term_capital_gains",
+            "op": {
+                "type": "input"
+            }
+        },
+        "2": {
+            "id": 2,
+            "op": {
+                "form": "us_1040",
+                "line": "L15",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L1_mt_taxable_income",
+            "op": {
+                "left": 2,
+                "right": 0,
+                "type": "add"
+            }
+        },
+        "4": {
+            "id": 4,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "5": {
+            "id": 5,
+            "op": {
+                "left": 3,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L4_mt_ordinary_income",
+            "op": {
+                "left": 4,
+                "right": 5,
+                "type": "max"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L11_mt_capital_gains_tax",
+            "op": {
+                "income": 1,
+                "table": "mt_capital_gains_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L12_mt_ordinary_income_tax",
+            "op": {
+                "income": 6,
+                "table": "mt_ordinary_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L13_mt_total_resident_tax",
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        }
+    },
+    "outputs": [
+        3,
+        7,
+        8,
+        9,
+        1,
+        6
+    ],
+    "tables": {
+        "mt_capital_gains_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 30750
+                    },
+                    {
+                        "rate": 4.1e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 41000
+                    },
+                    {
+                        "rate": 4.1e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 20500
+                    },
+                    {
+                        "rate": 4.1e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 41000
+                    },
+                    {
+                        "rate": 4.1e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 3.0e-2,
+                        "threshold": 20500
+                    },
+                    {
+                        "rate": 4.1e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        },
+        "mt_ordinary_brackets_2024": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 30750
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 41000
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 20500
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 41000
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 4.7e-2,
+                        "threshold": 20500
+                    },
+                    {
+                        "rate": 5.9e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}

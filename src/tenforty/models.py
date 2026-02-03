@@ -127,6 +127,7 @@ class OTSState(Enum):
     CA = "CA"
     CO = "CO"
     CT = "CT"
+    DC = "DC"
     DE = "DE"
     GA = "GA"
     HI = "HI"
@@ -144,7 +145,9 @@ class OTSState(Enum):
     MS = "MS"
     MN = "MN"
     MO = "MO"
+    MT = "MT"
     NC = "NC"
+    ND = "ND"
     NE = "NE"
     NJ = "NJ"
     NM = "NM"
@@ -153,9 +156,11 @@ class OTSState(Enum):
     OK = "OK"
     OR = "OR"
     PA = "PA"
+    RI = "RI"
     SC = "SC"
     UT = "UT"
     VA = "VA"
+    VT = "VT"
     WV = "WV"
     WI = "WI"
 
@@ -178,6 +183,7 @@ STATE_TO_FORM = {
     OTSState.CA: "CA_540",
     OTSState.CO: "CO_Form104",
     OTSState.CT: "CT_1",
+    OTSState.DC: "DC_D40",
     OTSState.DE: "DE_PIT_RES",
     OTSState.GA: "GA_500",
     OTSState.HI: "HI_N11",
@@ -195,7 +201,9 @@ STATE_TO_FORM = {
     OTSState.MS: "MS_80105",
     OTSState.MN: "MN_M1",
     OTSState.MO: "MO_1040",
+    OTSState.MT: "MT_Form2",
     OTSState.NC: "NC_D400",
+    OTSState.ND: "ND_1",
     OTSState.NE: "NE_1040N",
     OTSState.NJ: "NJ_1040",
     OTSState.NM: "NM_PIT1",
@@ -204,9 +212,11 @@ STATE_TO_FORM = {
     OTSState.OK: "OK_511",
     OTSState.OR: "OR_40",
     OTSState.PA: "PA_40",
+    OTSState.RI: "RI_1040",
     OTSState.SC: "SC_1040",
     OTSState.UT: "UT_TC40",
     OTSState.VA: "VA_760",
+    OTSState.VT: "VT_IN111",
     OTSState.WV: "WV_IT140",
     OTSState.WI: "WI_Form1",
     # No income-tax states
