@@ -69,6 +69,20 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L15_al_tax": "state_total_tax",
         },
     ),
+    OTSState.AR: StateGraphConfig(
+        # AR Form AR1000F imports federal AGI and applies state additions/subtractions.
+        # Standard deduction auto-computed based on filing status (Single/MFS/HoH $2,410,
+        # MFJ/QW $4,820). Uses 5-bracket progressive tax: 0% up to $5,499, 2% to $10,899,
+        # 3% to $15,599, 3.4% to $25,699, 3.9% over $25,700.
+        natural_to_node={
+            "itemized_deductions": "ar_ar1000f_L6a_itemized_deduction",
+        },
+        output_lines={
+            "L5_ar_income": "state_adjusted_gross_income",
+            "L9_ar_taxable_income": "state_taxable_income",
+            "L14_balance_after_credits": "state_total_tax",
+        },
+    ),
     OTSState.AZ: StateGraphConfig(
         # AZ Form 140 imports federal AGI and applies state-specific adjustments.
         # Exemptions are accepted as total dollar inputs (num_dependents cannot map
@@ -114,6 +128,32 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L4_ga_agi": "state_adjusted_gross_income",
             "L7_ga_taxable_income": "state_taxable_income",
             "L12_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.IA: StateGraphConfig(
+        # IA IA-1040 imports federal AGI and federal taxable income. Iowa uses
+        # progressive brackets for 2024 (4.4%, 4.82%, 5.7%) and a flat 3.8% tax
+        # rate for 2025. Exemptions and credits are accepted as total inputs
+        # (num_dependents cannot map to dollar amounts due to natural_to_node
+        # limitation).
+        natural_to_node={},
+        output_lines={
+            "L1c_federal_agi": "state_adjusted_gross_income",
+            "L4_ia_taxable_income": "state_taxable_income",
+            "L20_total_state_and_local_tax": "state_total_tax",
+        },
+    ),
+    OTSState.ID: StateGraphConfig(
+        # ID Form 40 imports federal AGI and QBI deduction. Idaho uses a flat tax
+        # rate on income above a threshold: 2024: 5.695% above $4,673 (single)
+        # or $9,346 (MFJ/HoH/QW); 2025: 5.3% above $4,811 (single) or $9,622
+        # (MFJ/HoH/QW). Standard deductions auto-computed by filing status.
+        # Credits are accepted as total input.
+        natural_to_node={},
+        output_lines={
+            "L11_id_adjusted_income": "state_adjusted_gross_income",
+            "L19_id_taxable_income": "state_taxable_income",
+            "L42_total_tax_plus_donations": "state_total_tax",
         },
     ),
     OTSState.IL: StateGraphConfig(
@@ -191,6 +231,20 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L11_mi_agi": "state_adjusted_gross_income",
             "L13_mi_taxable_income": "state_taxable_income",
             "L18_mi_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.MS: StateGraphConfig(
+        # MS Form 80-105 imports federal AGI. Mississippi uses a two-bracket system:
+        # 0% on first $10,000 of taxable income, then a flat rate above that
+        # (4.7% for 2024, 4.4% for 2025). Personal exemptions and additional
+        # exemptions (dependents, age 65+, blind) are accepted as total inputs
+        # (num_dependents cannot map to dollar amounts due to natural_to_node
+        # limitation). Standard or itemized deductions are also accepted as total input.
+        natural_to_node={},
+        output_lines={
+            "L13_ms_agi": "state_adjusted_gross_income",
+            "L16_ms_taxable_income": "state_taxable_income",
+            "L21_tax_after_credits": "state_total_tax",
         },
     ),
     OTSState.MN: StateGraphConfig(
@@ -277,6 +331,20 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L6_sc_tax": "state_total_tax",
         },
     ),
+    OTSState.UT: StateGraphConfig(
+        # UT TC-40 imports federal AGI and applies additions/subtractions. Utah
+        # uses a flat tax rate (4.55% for 2024, 4.5% for 2025). Personal exemptions
+        # ($2,046 for 2024, $2,111 for 2025) and federal deductions are accepted as
+        # total inputs (num_dependents cannot map to dollar amounts due to
+        # natural_to_node limitation). A 6% credit is applied to the sum of
+        # personal exemptions and federal deductions (minus state tax deductions).
+        natural_to_node={},
+        output_lines={
+            "L4_federal_agi": "state_adjusted_gross_income",
+            "L9_ut_taxable_income_initial": "state_taxable_income",
+            "L20_ut_total_tax": "state_total_tax",
+        },
+    ),
     OTSState.NJ: StateGraphConfig(
         # NJ-1040 imports federal AGI and applies exemptions/deductions.
         # Personal exemptions and dependent exemptions are accepted as total inputs
@@ -299,6 +367,17 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L4_oh_agi": "state_adjusted_gross_income",
             "L9_oh_taxable_nonbusiness_income": "state_taxable_income",
             "L25_total_tax_liability": "state_total_tax",
+        },
+    ),
+    OTSState.OK: StateGraphConfig(
+        # OK Form 511 imports federal AGI and applies additions/subtractions.
+        # Standard deduction is auto-computed based on filing status, or itemized.
+        # Progressive tax brackets (6 brackets, 0.25% to 4.75%).
+        natural_to_node={},
+        output_lines={
+            "L11_ok_agi": "state_adjusted_gross_income",
+            "L13_ok_taxable_income": "state_taxable_income",
+            "L22_tax_after_credits": "state_total_tax",
         },
     ),
     OTSState.VA: StateGraphConfig(
