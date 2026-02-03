@@ -170,7 +170,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # (Green Affordability Plan II, Act 46 SLH 2024).
         natural_to_node={
             "dependent_exemptions": "hi_n11_L24_total_exemptions",
-            "itemized_deductions": "hi_n11_L19_itemized_hi_itemized",
+            "itemized_deductions": "hi_n11_L19_itemized",
         },
         output_lines={
             "L18_hi_agi": "state_adjusted_gross_income",
@@ -313,7 +313,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # 2024: personal exemption $5,000; 2025: $5,150 (COLA 1.25).
         # Standard deductions equal federal amounts.
         natural_to_node={
-            "itemized_deductions": "me_1040me_L17_itemized_me_itemized",
+            "itemized_deductions": "me_1040me_L17_itemized",
             "dependent_exemptions": "me_1040me_L21_total_exemptions",
         },
         output_lines={

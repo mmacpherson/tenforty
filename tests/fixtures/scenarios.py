@@ -3829,14 +3829,14 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # NM 2025 Single, middle income (new 6-bracket structure)
     # Federal AGI: $50,000
     # Federal std deduction (2025): $15,000
-    # NM taxable: $50,000 - $15,750 = $34,250
+    # NM taxable: $50,000 - $15,000 = $35,000
     # NM tax:
     #   First $5,500 @ 1.5%: $82.50
     #   $5,501-$16,500 ($11,000) @ 3.2%: $352.00
     #   $16,501-$33,500 ($17,000) @ 4.3%: $731.00
-    #   $33,501-$34,250 ($750) @ 4.7%: $35.25
-    #   Total: $1,200.75
-    # Federal taxable: $34,250, Federal tax: $3,847 (formula, graph backend)
+    #   $33,501-$35,000 ($1,500) @ 4.7%: $70.50
+    #   Total: $1,236.00
+    # Federal taxable: $35,000, Federal tax: $3,961.50
     TaxScenario(
         source="NM 2025 Tax Brackets (computed)",
         description="NM Single, $50,000 income (2025)",
