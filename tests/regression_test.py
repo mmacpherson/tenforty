@@ -389,6 +389,44 @@ ND_SCENARIOS = [
     },
 ]
 
+NH_SCENARIOS = [
+    # NH taxes interest and dividends only (not W2 income)
+    {
+        "year": 2024,
+        "state": "NH",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "taxable_interest": 10000,
+        "expected_federal_min": 5100,
+        "expected_federal_max": 5300,
+        "expected_state_min": 200,
+        "expected_state_max": 250,
+    },
+    {
+        "year": 2024,
+        "state": "NH",
+        "filing_status": "Married/Joint",
+        "w2_income": 80000,
+        "taxable_interest": 20000,
+        "ordinary_dividends": 5000,
+        "expected_federal_min": 8500,
+        "expected_federal_max": 8750,
+        "expected_state_min": 580,
+        "expected_state_max": 630,
+    },
+    {
+        "year": 2025,
+        "state": "NH",
+        "filing_status": "Single",
+        "w2_income": 50000,
+        "taxable_interest": 10000,
+        "expected_federal_min": 5050,
+        "expected_federal_max": 5250,
+        "expected_state_min": 0,
+        "expected_state_max": 0,
+    },
+]
+
 MN_SCENARIOS = [
     {
         "year": 2024,
@@ -863,6 +901,10 @@ def _run_range_scenario(scenario):
         kwargs["state_adjustment"] = scenario["state_adjustment"]
     if scenario.get("dependent_exemptions"):
         kwargs["dependent_exemptions"] = scenario["dependent_exemptions"]
+    if scenario.get("taxable_interest"):
+        kwargs["taxable_interest"] = scenario["taxable_interest"]
+    if scenario.get("ordinary_dividends"):
+        kwargs["ordinary_dividends"] = scenario["ordinary_dividends"]
     if scenario.get("backend"):
         kwargs["backend"] = scenario["backend"]
     result = evaluate_return(**kwargs)
@@ -1000,6 +1042,18 @@ def test_ri_tax_ranges(scenario):
 )
 def test_nd_tax_ranges(scenario):
     """Sanity check: ND tax falls within expected ranges (graph backend)."""
+    scenario_with_backend = {**scenario, "backend": "graph"}
+    _run_range_scenario(scenario_with_backend)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize(
+    "scenario",
+    NH_SCENARIOS,
+    ids=lambda s: f"NH-{s['year']}-{s['filing_status']}-{s['w2_income']}-{s.get('taxable_interest', 0)}",
+)
+def test_nh_tax_ranges(scenario):
+    """Sanity check: NH tax falls within expected ranges (graph backend)."""
     scenario_with_backend = {**scenario, "backend": "graph"}
     _run_range_scenario(scenario_with_backend)
 
@@ -2144,4 +2198,24 @@ def test_state_tax_increases_with_income(state, backend):
         assert results[i].state_total_tax < results[i + 1].state_total_tax, (
             f"{state} tax did not increase: {results[i].state_total_tax} >= "
             f"{results[i + 1].state_total_tax} for incomes {incomes[i]} vs {incomes[i + 1]}"
+        )
+
+
+@pytest.mark.requires_graph
+def test_nh_tax_increases_with_interest():
+    """Verify that NH tax increases monotonically with interest income (2024 only)."""
+    interest_amounts = [5000, 10000, 20000, 40000]
+    kwargs_base = dict(
+        year=2024, state="NH", filing_status="Single", w2_income=50000, backend="graph"
+    )
+
+    results = [
+        evaluate_return(taxable_interest=interest, **kwargs_base)
+        for interest in interest_amounts
+    ]
+
+    for i in range(len(results) - 1):
+        assert results[i].state_total_tax < results[i + 1].state_total_tax, (
+            f"NH tax did not increase: {results[i].state_total_tax} >= "
+            f"{results[i + 1].state_total_tax} for interest {interest_amounts[i]} vs {interest_amounts[i + 1]}"
         )
