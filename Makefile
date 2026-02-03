@@ -22,6 +22,7 @@ DEFAULT_GOAL: help
 .PHONY: help clean env env-full env-graph-only jupyter-env test test-full hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs forms-sync
 .PHONY: spec-fmt spec-lint spec-lint-strict
+.PHONY: runner-image
 
 check-uv: ## Check if uv is installed
 	@if [ -z "$(UV_CHECK)" ]; then \
@@ -124,6 +125,10 @@ spec-lint-strict: ## Lint tenforty-spec (hlint, fails on hints)
 
 forms-sync: ## Sync tenforty-spec/*.json into src/tenforty/forms/
 	python3 scripts/forms_sync.py
+
+## Claude runner targets
+runner-image: ## Build claude-runner-tenforty Docker image
+	docker build -f Dockerfile.tenforty -t claude-runner-tenforty .
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

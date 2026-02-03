@@ -1,0 +1,88 @@
+FROM claude-runner:latest AS base
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+  build-essential python3-dev libffi-dev libgmp-dev libncurses-dev pkg-config poppler-utils \
+  && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# Stage: Rust toolchain + crate prefetch (parallel)
+# ============================================================
+FROM base AS rust
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV RUSTUP_HOME=/opt/rust/rustup \
+  CARGO_HOME=/opt/rust/cargo \
+  PATH="/opt/rust/cargo/bin:$PATH"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+  sh -s -- -y --default-toolchain stable
+COPY Cargo.toml Cargo.lock /tmp/rust-deps/
+COPY crates/tenforty-graph/Cargo.toml /tmp/rust-deps/crates/tenforty-graph/
+RUN mkdir -p /tmp/rust-deps/crates/tenforty-graph/src \
+  /tmp/rust-deps/crates/tenforty-graph/benches \
+  /tmp/rust-deps/crates/tenforty-graph/examples \
+  && echo "pub fn stub() {}" > /tmp/rust-deps/crates/tenforty-graph/src/lib.rs \
+  && touch /tmp/rust-deps/crates/tenforty-graph/benches/jit_bench.rs \
+  /tmp/rust-deps/crates/tenforty-graph/examples/throughput_bench.rs \
+  && cd /tmp/rust-deps && cargo fetch \
+  && rm -rf /tmp/rust-deps
+
+# ============================================================
+# Stage: Haskell toolchain + library deps (parallel)
+# ============================================================
+FROM base AS haskell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV LANG=C.UTF-8 \
+  GHCUP_INSTALL_BASE_PREFIX=/opt/haskell \
+  CABAL_DIR=/opt/haskell/cabal \
+  PATH="/opt/haskell/.ghcup/bin:/opt/haskell/bin:$PATH"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | \
+  BOOTSTRAP_HASKELL_NONINTERACTIVE=1 \
+  BOOTSTRAP_HASKELL_GHC_VERSION=9.8.4 \
+  BOOTSTRAP_HASKELL_CABAL_VERSION=latest \
+  sh
+RUN cabal update \
+  && cabal install -j --install-method=copy --installdir=/opt/haskell/bin --overwrite-policy=always hlint \
+  && cabal install -j --install-method=copy --installdir=/opt/haskell/bin --overwrite-policy=always fourmolu \
+  && cabal install -j --install-method=copy --installdir=/opt/haskell/bin --overwrite-policy=always cabal-fmt
+COPY tenforty-spec/tenforty-spec.cabal tenforty-spec/cabal.project /tmp/haskell-deps/
+RUN cd /tmp/haskell-deps \
+  && cabal build -j --only-dependencies all \
+  && rm -rf /tmp/haskell-deps
+
+# ============================================================
+# Stage: Python/uv cache + pre-commit hooks (parallel)
+# ============================================================
+FROM base AS python
+ENV UV_TOOL_DIR=/opt/uv/tools \
+  UV_TOOL_BIN_DIR=/opt/uv/bin \
+  UV_CACHE_DIR=/opt/cache/uv \
+  PRE_COMMIT_HOME=/opt/cache/pre-commit \
+  PATH="/opt/uv/bin:$PATH"
+RUN uv tool install pre-commit
+COPY pyproject.toml uv.lock /tmp/python-deps/
+RUN cd /tmp/python-deps \
+  && uv sync --no-install-project --extra graph-dev \
+  && rm -rf /tmp/python-deps
+COPY .pre-commit-config.yaml /tmp/hooks/
+RUN cd /tmp/hooks && git init \
+  && pre-commit install-hooks \
+  && rm -rf /tmp/hooks
+
+# ============================================================
+# Final: merge all stages
+# ============================================================
+FROM base
+ENV RUSTUP_HOME=/opt/rust/rustup \
+  CARGO_HOME=/opt/rust/cargo \
+  GHCUP_INSTALL_BASE_PREFIX=/opt/haskell \
+  CABAL_DIR=/opt/haskell/cabal \
+  UV_TOOL_DIR=/opt/uv/tools \
+  UV_TOOL_BIN_DIR=/opt/uv/bin \
+  UV_CACHE_DIR=/opt/cache/uv \
+  PRE_COMMIT_HOME=/opt/cache/pre-commit \
+  PATH="/opt/rust/cargo/bin:/opt/haskell/.ghcup/bin:/opt/haskell/bin:/opt/uv/bin:$PATH"
+COPY --from=python /opt/uv /opt/uv
+COPY --from=python /opt/cache /opt/cache
+COPY --from=rust /opt/rust /opt/rust
+COPY --from=haskell /opt/haskell /opt/haskell
+RUN chmod -R a+rX /opt \
+  && chmod -R a+w /opt/cache /opt/haskell/cabal /opt/rust/cargo
