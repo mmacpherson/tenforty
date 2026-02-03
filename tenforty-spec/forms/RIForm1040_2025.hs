@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module RIRI1040_2025 (
+module RIForm1040_2025 (
     riRI1040_2025,
 ) where
 
