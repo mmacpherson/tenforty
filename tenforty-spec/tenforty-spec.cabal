@@ -217,6 +217,8 @@ executable tenforty-compile
     TablesWV2025
     TablesWI2024
     TablesWI2025
+    TablesWV2024
+    TablesWV2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -259,6 +261,8 @@ executable tenforty-compile
     WVIT140_2025
     WIForm1_2024
     WIForm1_2025
+    WVIT140_2024
+    WVIT140_2025
 
   build-depends:
     , aeson
@@ -455,6 +459,8 @@ test-suite tenforty-spec-test
     TablesWV2025
     TablesWI2024
     TablesWI2025
+    TablesWV2024
+    TablesWV2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -497,6 +503,8 @@ test-suite tenforty-spec-test
     WVIT140_2025
     WIForm1_2024
     WIForm1_2025
+    WVIT140_2024
+    WVIT140_2025
 
   default-language:   GHC2021
   default-extensions: OverloadedStrings

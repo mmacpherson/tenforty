@@ -134,6 +134,8 @@ import WVIT140_2024
 import WVIT140_2025
 import WIForm1_2024
 import WIForm1_2025
+import WVIT140_2024
+import WVIT140_2025
 
 allForms :: [(FilePath, Either FormError Form)]
 allForms =
