@@ -4061,7 +4061,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #   $25,001-$40,000 ($15,000) @ 3.33%: $499.50
     #   $40,001-$46,000 ($6,000) @ 4.44%: $266.40
     #   Total: $1,431.90
-    # Federal taxable: $34,250, Federal tax: $3,847 (formula, graph backend)
+    # Federal taxable: $35,000, Federal tax: $3,961.50 (formula, graph backend)
     TaxScenario(
         source="WV 2025 Tax Brackets (computed)",
         description="WV Single, $50,000 income (2025)",
