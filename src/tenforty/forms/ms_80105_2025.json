@@ -37,7 +37,7 @@
             "id": 10,
             "op": {
                 "type": "literal",
-                "value": 12000
+                "value": 6000
             }
         },
         "11": {

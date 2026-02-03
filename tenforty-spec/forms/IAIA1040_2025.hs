@@ -11,7 +11,7 @@ iaIA1040_2025 :: Either FormError Form
 iaIA1040_2025 = form "ia_ia1040" 2025 $ do
     -- Line 1c: Federal AGI (imported from US 1040 Line 11)
     let federalAgi = importForm "us_1040" "L11"
-    l1c <-
+    _ <-
         keyOutput "L1c" "federal_agi" "Federal adjusted gross income" $
             federalAgi .+. dollars 0
 

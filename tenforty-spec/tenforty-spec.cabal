@@ -75,6 +75,10 @@ executable tenforty-compile
     DEFormPITRES_2025
     GAForm500_2024
     GAForm500_2025
+    IAIA1040_2024
+    IAIA1040_2025
+    IDFORM40_2024
+    IDFORM40_2025
     IL1040_2024
     IL1040_2025
     INFormIT40_2024
@@ -91,22 +95,22 @@ executable tenforty-compile
     MDForm502_2025
     MI1040_2024
     MI1040_2025
-    MS80105_2024
-    MS80105_2025
     MNFormM1_2024
     MNFormM1_2025
     MOForm1040_2024
     MOForm1040_2025
+    MS80105_2024
+    MS80105_2025
     NCFormD400_2024
     NCFormD400_2025
     NJ1040_2024
     NJ1040_2025
     NYIT201_2024
     NYIT201_2025
-    OK511_2024
-    OK511_2025
     OHIT1040_2024
     OHIT1040_2025
+    OK511_2024
+    OK511_2025
     ORForm40_2024
     ORForm40_2025
     PA40_2024
@@ -115,12 +119,6 @@ executable tenforty-compile
     SCForm1040_2025
     Tables2024
     Tables2025
-    IAIA1040_2024
-    IAIA1040_2025
-    IDFORM40_2024
-    IDFORM40_2025
-    UTTC40_2024
-    UTTC40_2025
     TablesAL2024
     TablesAL2025
     TablesAR2024
@@ -157,24 +155,27 @@ executable tenforty-compile
     TablesMD2025
     TablesMI2024
     TablesMI2025
-    TablesMS2024
-    TablesMS2025
     TablesMN2024
     TablesMN2025
     TablesMO2024
     TablesMO2025
+    TablesMS2024
+    TablesMS2025
     TablesNC2024
     TablesNC2025
     TablesNJ2024
     TablesNJ2025
     TablesNY2024
     TablesNY2025
-    TablesOK2024
-    TablesOK2025
     TablesOH2024
     TablesOH2025
+<<<<<<< HEAD
     TablesOR2024
     TablesOR2025
+=======
+    TablesOK2024
+    TablesOK2025
+>>>>>>> af621c5 (fix: correct MS MFS exemption and eliminate compiler warnings)
     TablesSC2024
     TablesSC2025
     TablesUT2024
@@ -215,6 +216,8 @@ executable tenforty-compile
     USScheduleEIC_2025
     USScheduleSE_2024
     USScheduleSE_2025
+    UTTC40_2024
+    UTTC40_2025
     VAForm760_2024
     VAForm760_2025
     WIForm1_2024
@@ -273,6 +276,10 @@ test-suite tenforty-spec-test
     DEFormPITRES_2025
     GAForm500_2024
     GAForm500_2025
+    IAIA1040_2024
+    IAIA1040_2025
+    IDFORM40_2024
+    IDFORM40_2025
     IL1040_2024
     IL1040_2025
     INFormIT40_2024
@@ -289,22 +296,22 @@ test-suite tenforty-spec-test
     MDForm502_2025
     MI1040_2024
     MI1040_2025
-    MS80105_2024
-    MS80105_2025
     MNFormM1_2024
     MNFormM1_2025
     MOForm1040_2024
     MOForm1040_2025
+    MS80105_2024
+    MS80105_2025
     NCFormD400_2024
     NCFormD400_2025
     NJ1040_2024
     NJ1040_2025
     NYIT201_2024
     NYIT201_2025
-    OK511_2024
-    OK511_2025
     OHIT1040_2024
     OHIT1040_2025
+    OK511_2024
+    OK511_2025
     ORForm40_2024
     ORForm40_2025
     PA40_2024
@@ -313,12 +320,6 @@ test-suite tenforty-spec-test
     SCForm1040_2025
     Tables2024
     Tables2025
-    IAIA1040_2024
-    IAIA1040_2025
-    IDFORM40_2024
-    IDFORM40_2025
-    UTTC40_2024
-    UTTC40_2025
     TablesAL2024
     TablesAL2025
     TablesAR2024
@@ -355,24 +356,27 @@ test-suite tenforty-spec-test
     TablesMD2025
     TablesMI2024
     TablesMI2025
-    TablesMS2024
-    TablesMS2025
     TablesMN2024
     TablesMN2025
     TablesMO2024
     TablesMO2025
+    TablesMS2024
+    TablesMS2025
     TablesNC2024
     TablesNC2025
     TablesNJ2024
     TablesNJ2025
     TablesNY2024
     TablesNY2025
-    TablesOK2024
-    TablesOK2025
     TablesOH2024
     TablesOH2025
+<<<<<<< HEAD
     TablesOR2024
     TablesOR2025
+=======
+    TablesOK2024
+    TablesOK2025
+>>>>>>> af621c5 (fix: correct MS MFS exemption and eliminate compiler warnings)
     TablesSC2024
     TablesSC2025
     TablesUT2024
@@ -413,6 +417,8 @@ test-suite tenforty-spec-test
     USScheduleEIC_2025
     USScheduleSE_2024
     USScheduleSE_2025
+    UTTC40_2024
+    UTTC40_2025
     VAForm760_2024
     VAForm760_2025
     WIForm1_2024

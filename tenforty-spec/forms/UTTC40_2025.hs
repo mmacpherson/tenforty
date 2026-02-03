@@ -66,7 +66,7 @@ utTC40_2025 = form "ut_tc40" 2025 $ do
             l15 .*. rate 0.06
 
     -- Line 17: Utah tax after credits
-    l17 <-
+    _ <-
         keyOutput "L17" "ut_tax_after_credits" "Utah tax after credits" $
             l10 `subtractNotBelowZero` l16
 

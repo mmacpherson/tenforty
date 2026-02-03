@@ -20,12 +20,12 @@ Order: Single, MFJ, MFS, HoH, QW
 Source: Mississippi DOR Form 80-100 instructions (2024), page 11
 Line 5: Single - $6,000
 Line 1: Married - Joint or Combined Return - $12,000
-Line 2: Married - Filing Separate Returns - $12,000
+Line 2: Married - Filing Separate Returns - $6,000
 Line 4: Head of Family - $8,000
 Line 3: Married - Spouse Died 2024 - $12,000 (treated as QW)
 -}
 msExemption2024 :: ByStatus (Amount Dollars)
-msExemption2024 = byStatus 6000 12000 12000 8000 12000
+msExemption2024 = byStatus 6000 12000 6000 8000 12000
 
 {- | 2024 Mississippi standard deduction amounts
 Order: Single, MFJ, MFS, HoH, QW
