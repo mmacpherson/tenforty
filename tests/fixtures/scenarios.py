@@ -716,60 +716,606 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=5693.0,  # OTS rounds to nearest dollar ($5693.36 -> $5693)
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
-    # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ)
+    # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
+    # 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025)
+    # Also: 8.5% on short-term capital gains, 12% on long-term collectibles
+    # Source: MA DOR Form 1 instructions 2024/2025
     #
-    # MA Single, low income
-    # MA taxable: $20,000 - $4,400 = $15,600, MA tax: $15,600 x 0.05 = $780
-    # Federal taxable: $5,400, Federal tax: $540 (Formula) -> $543 (Table)
+    # MA Single, low income (2024)
+    # Federal AGI: $20,000
+    # MA total income: $20,000 (imports federal AGI)
+    # MA income after deductions: $20,000 (no deductions)
+    # Personal exemption: $4,400
+    # MA taxable: $20,000 - $4,400 = $15,600
+    # MA tax: $15,600 x 0.05 = $780
+    # Federal taxable: $5,400, Federal tax: $540 (formula, graph backend)
     TaxScenario(
         source="MA 2024 Tax Brackets (computed)",
-        description="MA Single, $20,000 income",
+        description="MA Single, $20,000 income (2024)",
         year=2024,
         state="MA",
         filing_status="Single",
         w2_income=20000.0,
-        expected_federal_tax=543.0,
-        expected_state_tax=781.0,  # OTS computes $781 (+$1 rounding/artifact?)
+        expected_federal_tax=540.0,
+        expected_state_tax=780.0,
+        backend="graph",
     ),
-    # MA Single, middle income
-    # MA taxable: $50,000 - $4,400 = $45,600, MA tax: $45,600 x 0.05 = $2,280
-    # Federal taxable: $35,400, Federal tax: $4,016 (Formula) -> $4,019 (Table)
+    # MA Single, middle income (2024)
+    # Federal AGI: $50,000
+    # MA total income: $50,000
+    # Personal exemption: $4,400
+    # MA taxable: $50,000 - $4,400 = $45,600
+    # MA tax: $45,600 x 0.05 = $2,280
+    # Federal taxable: $35,400, Federal tax: $4,016 (formula, graph backend)
     TaxScenario(
         source="MA 2024 Tax Brackets (computed)",
-        description="MA Single, $50,000 income",
+        description="MA Single, $50,000 income (2024)",
         year=2024,
         state="MA",
         filing_status="Single",
         w2_income=50000.0,
-        expected_federal_tax=4019.0,
+        expected_federal_tax=4016.0,
         expected_state_tax=2280.0,
+        backend="graph",
     ),
-    # MA Single, higher income
-    # MA taxable: $100,000 - $4,400 = $95,600, MA tax: $95,600 x 0.05 = $4,780
-    # Federal taxable: $85,400, Federal tax: $13,841 (Formula) -> $13,847 (Table)
+    # MA Single, higher income (2024)
+    # Federal AGI: $100,000
+    # MA total income: $100,000
+    # Personal exemption: $4,400
+    # MA taxable: $100,000 - $4,400 = $95,600
+    # MA tax: $95,600 x 0.05 = $4,780
+    # Federal taxable: $85,400, Federal tax: $13,841 (formula, graph backend)
     TaxScenario(
         source="MA 2024 Tax Brackets (computed)",
-        description="MA Single, $100,000 income",
+        description="MA Single, $100,000 income (2024)",
         year=2024,
         state="MA",
         filing_status="Single",
         w2_income=100000.0,
-        expected_federal_tax=13847.0,
+        expected_federal_tax=13841.0,
         expected_state_tax=4780.0,
+        backend="graph",
     ),
-    # MA MFJ, middle income
-    # MA taxable: $100,000 - $8,800 = $91,200, MA tax: $91,200 x 0.05 = $4,560
-    # Federal taxable: $70,800, Federal tax: $8,032 (Formula) -> $8,035 (Table)
+    # MA MFJ, middle income (2024)
+    # Federal AGI: $100,000
+    # MA total income: $100,000
+    # Personal exemption: $8,800
+    # MA taxable: $100,000 - $8,800 = $91,200
+    # MA tax: $91,200 x 0.05 = $4,560
+    # Federal taxable: $70,800, Federal tax: $8,032 (formula, graph backend)
     TaxScenario(
         source="MA 2024 Tax Brackets (computed)",
-        description="MA MFJ, $100,000 income",
+        description="MA MFJ, $100,000 income (2024)",
         year=2024,
         state="MA",
         filing_status="Married/Joint",
         w2_income=100000.0,
-        expected_federal_tax=8035.0,
+        expected_federal_tax=8032.0,
         expected_state_tax=4560.0,
-        known_failure="OTS computes $4,780 (used Single exemption $4,400). Bug: tenforty input map missing filing status.",
+        backend="graph",
+    ),
+    # MA Head_of_House, middle income (2024)
+    # Federal AGI: $75,000
+    # MA total income: $75,000
+    # Personal exemption: $6,800
+    # MA taxable: $75,000 - $6,800 = $68,200
+    # MA tax: $68,200 x 0.05 = $3,410
+    # Federal taxable: $53,100, Federal tax: $6,041 (formula, graph backend)
+    TaxScenario(
+        source="MA 2024 Tax Brackets (computed)",
+        description="MA HoH, $75,000 income (2024)",
+        year=2024,
+        state="MA",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=3410.0,
+        backend="graph",
+    ),
+    # MA Single, surtax income (2025)
+    # Federal AGI: $1,200,000
+    # MA total income: $1,200,000
+    # Personal exemption: $4,400
+    # MA taxable: $1,200,000 - $4,400 = $1,195,600
+    # MA base tax: $1,195,600 x 0.05 = $59,780
+    # Surtaxable income: $1,195,600 - $1,083,150 = $112,450
+    # MA surtax: $112,450 x 0.04 = $4,498
+    # MA total tax: $59,780 + $4,498 = $64,278
+    # Federal taxable: $1,184,400 (2025 std ded $15,600)
+    # Federal tax (2025): $395,470.25 (formula, graph backend)
+    TaxScenario(
+        source="MA 2025 Tax Brackets (computed)",
+        description="MA Single, $1.2M income with surtax (2025)",
+        year=2025,
+        state="MA",
+        filing_status="Single",
+        w2_income=1200000.0,
+        expected_federal_tax=395470.25,
+        expected_state_tax=64278.0,
+        backend="graph",
+    ),
+    # ========== CONNECTICUT SCENARIOS ==========
+    # CT 2024 Single, low income (no exemption phaseout)
+    # Federal AGI: $20,000
+    # CT personal exemption: $15,000 (no phaseout, AGI < $30,000 threshold)
+    # CT taxable: $20,000 - $15,000 = $5,000
+    # CT tax: $5,000 * 0.02 = $100
+    # Federal standard deduction (2024): $14,600
+    # Federal taxable: $20,000 - $14,600 = $5,400
+    # Federal tax: $5,400 * 0.10 = $540
+    TaxScenario(
+        source="CT 2024 Tax Brackets (computed)",
+        description="CT Single, $20,000 income (2024)",
+        year=2024,
+        state="CT",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_federal_tax=540.0,
+        expected_state_tax=100.0,
+        expected_federal_agi=20000.0,
+        backend="graph",
+    ),
+    # CT 2024 Single, middle income (partial exemption phaseout)
+    # Federal AGI: $40,000
+    # CT personal exemption: Base $15,000, phaseout starts at $30,000
+    #   Excess AGI = $40,000 - $30,000 = $10,000
+    #   Exemption = $15,000 - $10,000 = $5,000
+    # CT taxable: $40,000 - $5,000 = $35,000
+    # CT tax: $10,000 * 0.02 + $25,000 * 0.045 = $200 + $1,125 = $1,325
+    # Federal taxable: $40,000 - $14,600 = $25,400
+    # Federal tax: $11,600 * 0.10 + $13,800 * 0.12 = $1,160 + $1,656 = $2,816
+    TaxScenario(
+        source="CT 2024 Tax Brackets (computed)",
+        description="CT Single, $40,000 income, partial exemption (2024)",
+        year=2024,
+        state="CT",
+        filing_status="Single",
+        w2_income=40000.0,
+        expected_federal_tax=2816.0,
+        expected_state_tax=1325.0,
+        expected_federal_agi=40000.0,
+        backend="graph",
+    ),
+    # CT 2024 MFJ, middle income (complete exemption phaseout)
+    # Federal AGI: $100,000
+    # CT personal exemption: Base $24,000, phaseout starts at $48,000
+    #   Excess AGI = $100,000 - $48,000 = $52,000
+    #   Exemption = max(0, $24,000 - $52,000) = $0
+    # CT taxable: $100,000 - $0 = $100,000
+    # CT tax: $20,000 * 0.02 + $80,000 * 0.045 = $400 + $3,600 = $4,000
+    # Federal standard deduction (MFJ 2024): $29,200
+    # Federal taxable: $100,000 - $29,200 = $70,800
+    # Federal tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
+    TaxScenario(
+        source="CT 2024 Tax Brackets (computed)",
+        description="CT MFJ, $100,000 income, no exemption (2024)",
+        year=2024,
+        state="CT",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=4000.0,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # CT 2024 HoH, middle income (complete exemption phaseout)
+    # Federal AGI: $75,000
+    # CT personal exemption: Base $19,000, phaseout starts at $38,000
+    #   Excess AGI = $75,000 - $38,000 = $37,000
+    #   Exemption = max(0, $19,000 - $37,000) = $0
+    # CT taxable: $75,000 - $0 = $75,000
+    # CT tax: $16,000 * 0.02 + $59,000 * 0.045 = $320 + $2,655 = $2,975
+    # Federal standard deduction (HoH 2024): $21,900
+    # Federal taxable: $75,000 - $21,900 = $53,100
+    # Federal tax: $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
+    TaxScenario(
+        source="CT 2024 Tax Brackets (computed)",
+        description="CT HoH, $75,000 income, no exemption (2024)",
+        year=2024,
+        state="CT",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=2975.0,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # CT 2025 Single, higher income (no exemption, 3rd bracket)
+    # Federal AGI: $90,000
+    # CT personal exemption: Base $15,000, phaseout starts at $30,000
+    #   Excess AGI = $90,000 - $30,000 = $60,000
+    #   Exemption = max(0, $15,000 - $60,000) = $0
+    # CT taxable: $90,000 - $0 = $90,000
+    # CT tax: $10,000 * 0.02 + $40,000 * 0.045 + $40,000 * 0.055
+    #       = $200 + $1,800 + $2,200 = $4,200
+    # Federal standard deduction (2025): $15,000
+    # Federal taxable: $90,000 - $15,000 = $75,000
+    # Federal tax: $11,925 * 0.10 + $36,550 * 0.12 + $26,525 * 0.22
+    #       = $1,192.50 + $4,386 + $5,835.50 = $11,414
+    TaxScenario(
+        source="CT 2025 Tax Brackets (computed)",
+        description="CT Single, $90,000 income, 3rd bracket (2025)",
+        year=2025,
+        state="CT",
+        filing_status="Single",
+        w2_income=90000.0,
+        expected_federal_tax=11414.0,
+        expected_state_tax=4200.0,
+        expected_federal_agi=90000.0,
+        backend="graph",
+    ),
+    # ========== DELAWARE SCENARIOS ==========
+    # DE 2024 & 2025: 7-bracket progressive system (0%, 2.2%, 3.9%, 4.8%, 5.2%, 5.55%, 6.6%)
+    # Brackets are the same for all filing statuses.
+    # Standard deduction: Single/MFS/HoH $3,250, MFJ $6,500
+    # Additional std deduction: $2,500 if 65+ or blind
+    # Personal exemption credit: $110 per exemption (applied after tax computation)
+    #
+    # DE Single, $30,000 W2 (2024) - tests multiple brackets
+    # Federal AGI: $30,000
+    # DE AGI: $30,000 (no additions/subtractions)
+    # DE Standard deduction: $3,250
+    # DE Taxable: $30,000 - $3,250 = $26,750
+    # DE Tax: $0-$2k: $0, $2k-$5k: $3k*0.022=$66, $5k-$10k: $5k*0.039=$195,
+    #         $10k-$20k: $10k*0.048=$480, $20k-$25k: $5k*0.052=$260,
+    #         $25k-$26,750: $1,750*0.0555=$97.13
+    #         Total: $1,098.13
+    # Federal: Std ded $14,600, taxable $15,400
+    # Federal tax: $11,925 * 0.10 + $3,475 * 0.12 = $1,609.50
+    TaxScenario(
+        source="DE 2024 Tax Brackets (computed)",
+        description="DE Single, $30,000 income (2024)",
+        year=2024,
+        state="DE",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_federal_tax=1616.0,
+        expected_state_tax=1098.13,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # DE Single, $50,000 W2 (2024) - tests 6th bracket
+    # Federal AGI: $50,000
+    # DE AGI: $50,000
+    # DE Standard deduction: $3,250
+    # DE Taxable: $50,000 - $3,250 = $46,750
+    # DE Tax: $0-$2k: $0, $2k-$5k: $66, $5k-$10k: $195, $10k-$20k: $480,
+    #         $20k-$25k: $260, $25k-$60k: $21,750*0.0555=$1,207.13
+    #         Total: $0 + $66 + $195 + $480 + $260 + $1,207.13 = $2,208.13
+    # Federal: Std ded $14,600, taxable $35,400
+    # Federal tax: $11,925 * 0.10 + $23,475 * 0.12 = $4,009.50
+    TaxScenario(
+        source="DE 2024 Tax Brackets (computed)",
+        description="DE Single, $50,000 income, 6th bracket (2024)",
+        year=2024,
+        state="DE",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4016.0,
+        expected_state_tax=2208.13,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # DE MFJ, $100,000 W2 (2024) - tests 7th bracket (top rate)
+    # Federal AGI: $100,000
+    # DE AGI: $100,000
+    # DE Standard deduction: $6,500
+    # DE Taxable: $100,000 - $6,500 = $93,500
+    # DE Tax: $0-$2k: $0, $2k-$5k: $66, $5k-$10k: $195, $10k-$20k: $480,
+    #         $20k-$25k: $260, $25k-$60k: $35k*0.0555=$1,942.50,
+    #         $60k-$93,500: $33,500*0.066=$2,211
+    #         Total: $0 + $66 + $195 + $480 + $260 + $1,942.50 + $2,211 = $5,154.50
+    # Federal: Std ded $29,200, taxable $70,800
+    # Federal tax: $23,850 * 0.10 + $46,950 * 0.12 = $2,385 + $5,634 = $8,019
+    TaxScenario(
+        source="DE 2024 Tax Brackets (computed)",
+        description="DE Married/Joint, $100,000 income, 7th bracket (2024)",
+        year=2024,
+        state="DE",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=5154.50,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # DE Head of Household, $60,000 W2 (2024) - tests HoH filing status and 7th bracket
+    # Federal AGI: $60,000
+    # DE AGI: $60,000
+    # DE Standard deduction: $3,250 (HoH uses same as Single)
+    # DE Taxable: $60,000 - $3,250 = $56,750
+    # DE Tax: $0-$2k: $0, $2k-$5k: $66, $5k-$10k: $195, $10k-$20k: $480,
+    #         $20k-$25k: $260, $25k-$60k: $35k*0.0555=$1,942.50,
+    #         $60k-$56,750: -$3,250 (doesn't reach 7th bracket)
+    # Wait, $56,750 < $60,000, so we're still in 6th bracket
+    # DE Tax: $0-$2k: $0, $2k-$5k: $66, $5k-$10k: $195, $10k-$20k: $480,
+    #         $20k-$25k: $260, $25k-$56,750: $31,750*0.0555=$1,762.13
+    #         Total: $0 + $66 + $195 + $480 + $260 + $1,762.13 = $2,763.13
+    # Federal: Std ded $21,900, taxable $38,100
+    # Federal tax: $17,850 * 0.10 + $20,250 * 0.12 = $1,785 + $2,430 = $4,215
+    TaxScenario(
+        source="DE 2024 Tax Brackets (computed)",
+        description="DE Head_of_House, $60,000 income (2024)",
+        year=2024,
+        state="DE",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_federal_tax=4241.0,
+        expected_state_tax=2763.13,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # DE Single, $80,000 W2 (2025) - tests 2025 values and 7th bracket
+    # Federal AGI: $80,000
+    # DE AGI: $80,000
+    # DE Standard deduction: $3,250 (unchanged in 2025)
+    # DE Taxable: $80,000 - $3,250 = $76,750
+    # DE Tax: $0-$2k: $0, $2k-$5k: $66, $5k-$10k: $195, $10k-$20k: $480,
+    #         $20k-$25k: $260, $25k-$60k: $35k*0.0555=$1,942.50,
+    #         $60k-$76,750: $16,750*0.066=$1,105.50
+    #         Total: $0 + $66 + $195 + $480 + $260 + $1,942.50 + $1,105.50 = $4,049.50
+    # Federal: Std ded $15,000, taxable $65,000
+    # Federal tax: $11,925 * 0.10 + $36,550 * 0.12 + $16,525 * 0.22
+    #       = $1,192.50 + $4,386 + $3,635.50 = $9,214
+    TaxScenario(
+        source="DE 2025 Tax Brackets (computed)",
+        description="DE Single, $80,000 income, 7th bracket (2025)",
+        year=2025,
+        state="DE",
+        filing_status="Single",
+        w2_income=80000.0,
+        expected_federal_tax=9214.0,
+        expected_state_tax=4049.0,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # ========== KANSAS SCENARIOS ==========
+    # KS 2024 & 2025: 2-bracket progressive system (5.2%, 5.58%)
+    # Single/MFS/HoH: 5.2% up to $23,000, then 5.58% above
+    # MFJ: 5.2% up to $46,000, then 5.58% above
+    # Standard deductions: Single $3,605, MFJ $8,240, MFS $4,120, HoH $6,180
+    # Personal exemptions: MFJ $18,320, others $9,160
+    # Dependent exemption: $2,320 per dependent
+    #
+    # KS Single, $30,000 W2 (2024)
+    # Federal AGI: $30,000
+    # KS AGI: $30,000 (no modifications)
+    # KS Standard deduction: $3,605
+    # KS Personal exemption: $9,160
+    # KS Taxable: $30,000 - $3,605 - $9,160 = $17,235
+    # KS Tax: $17,235 * 0.052 = $896.22
+    # Federal: Std ded $14,600, taxable $15,400
+    # Federal tax: $11,925 * 0.10 + $3,475 * 0.12 = $1,192.50 + $417 = $1,609.50
+    TaxScenario(
+        source="KS 2024 Tax Brackets (computed)",
+        description="KS Single, $30,000 income (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Single",
+        w2_income=30000.0,
+        dependent_exemptions=9160.0,  # Personal exemption only (std deduction auto-computed)
+        expected_federal_tax=1616.0,
+        expected_state_tax=896.22,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # KS Single, $50,000 W2 (2024) - tests 2nd bracket
+    # Federal AGI: $50,000
+    # KS AGI: $50,000
+    # KS Standard deduction: $3,605
+    # KS Personal exemption: $9,160
+    # KS Taxable: $50,000 - $3,605 - $9,160 = $37,235
+    # KS Tax: $23,000 * 0.052 + $14,235 * 0.0558 = $1,196 + $794.31 = $1,990.31
+    # Federal: Std ded $14,600, taxable $35,400
+    # Federal tax: $11,925 * 0.10 + $23,475 * 0.12 = $1,192.50 + $2,817 = $4,009.50
+    TaxScenario(
+        source="KS 2024 Tax Brackets (computed)",
+        description="KS Single, $50,000 income, 2nd bracket (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Single",
+        w2_income=50000.0,
+        dependent_exemptions=9160.0,  # Personal exemption only (std deduction auto-computed)
+        expected_federal_tax=4016.0,
+        expected_state_tax=1990.31,
+        expected_federal_agi=50000.0,
+        backend="graph",
+    ),
+    # KS MFJ, $100,000 W2 (2024) - tests MFJ brackets
+    # Federal AGI: $100,000
+    # KS AGI: $100,000
+    # KS Standard deduction: $8,240
+    # KS Personal exemption: $18,320
+    # KS Taxable: $100,000 - $8,240 - $18,320 = $73,440
+    # KS Tax: $46,000 * 0.052 + $27,440 * 0.0558 = $2,392 + $1,531.15 = $3,923.15
+    # Federal: Std ded $29,200, taxable $70,800
+    # Federal tax: $23,850 * 0.10 + $46,950 * 0.12 = $2,385 + $5,634 = $8,019
+    TaxScenario(
+        source="KS 2024 Tax Brackets (computed)",
+        description="KS MFJ, $100,000 income (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        dependent_exemptions=18320.0,  # Personal exemption only (std deduction auto-computed)
+        expected_federal_tax=8032.0,
+        expected_state_tax=3923.15,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # KS HoH, $60,000 W2 (2024) - tests HoH filing status
+    # Federal AGI: $60,000
+    # KS AGI: $60,000
+    # KS Standard deduction: $6,180
+    # KS Personal exemption: $9,160
+    # KS Taxable: $60,000 - $6,180 - $9,160 = $44,660
+    # KS Tax: $23,000 * 0.052 + $21,660 * 0.0558 = $1,196 + $1,208.63 = $2,404.63
+    # Federal: Std ded $21,900, taxable $38,100
+    # Federal tax: $16,550 * 0.10 + $21,550 * 0.12 = $1,655 + $2,586 = $4,241
+    TaxScenario(
+        source="KS 2024 Tax Brackets (computed)",
+        description="KS HoH, $60,000 income (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        dependent_exemptions=9160.0,  # Personal exemption only (std deduction auto-computed)
+        expected_federal_tax=4241.0,
+        expected_state_tax=2404.63,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # KS Single, $80,000 W2 (2025) - tests 2025 with same rates as 2024
+    # Federal AGI: $80,000
+    # KS AGI: $80,000
+    # KS Standard deduction: $3,605 (unchanged from 2024)
+    # KS Personal exemption: $9,160 (unchanged from 2024)
+    # KS Taxable: $80,000 - $3,605 - $9,160 = $67,235
+    # KS Tax: $23,000 * 0.052 + $44,235 * 0.0558 = $1,196 + $2,468.31 = $3,664.31
+    # Federal 2025: Std ded $15,000, taxable $65,000
+    # Federal tax: $11,925 * 0.10 + $36,550 * 0.12 + $16,525 * 0.22
+    #           = $1,192.50 + $4,386 + $3,635.50 = $9,214
+    TaxScenario(
+        source="KS 2025 Tax Brackets (computed)",
+        description="KS Single, $80,000 income (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Single",
+        w2_income=80000.0,
+        dependent_exemptions=9160.0,  # Personal exemption only (std deduction auto-computed)
+        expected_federal_tax=9214.0,
+        expected_state_tax=3664.31,
+        expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # ========== OREGON SCENARIOS ==========
+    # OR 2024 Single, low income (2024)
+    # Federal AGI: $30,000
+    # OR additions: $0, OR subtractions: $0
+    # OR income before deductions: $30,000
+    # OR standard deduction: $2,745
+    # OR taxable: $30,000 - $2,745 = $27,255
+    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($27,255 - $11,050) * 0.0875
+    #       = $209 + $448.875 + $1,417.9375 = $2,075.8125
+    # Federal standard deduction (2024): $14,600
+    # Federal taxable: $30,000 - $14,600 = $15,400
+    # Federal tax: $11,600 * 0.10 + $3,800 * 0.12 = $1,160 + $456 = $1,616
+    TaxScenario(
+        source="OR 2024 Tax Brackets (computed)",
+        description="OR Single, $30,000 income (2024)",
+        year=2024,
+        state="OR",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_federal_tax=1616.0,
+        expected_state_tax=2075.81,
+        expected_federal_agi=30000.0,
+        backend="graph",
+    ),
+    # OR Single, middle income (2024)
+    # Federal AGI: $60,000
+    # OR income before deductions: $60,000
+    # OR standard deduction: $2,745
+    # OR taxable: $60,000 - $2,745 = $57,255
+    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($57,255 - $11,050) * 0.0875
+    #       = $209 + $448.875 + $4,042.9375 = $4,700.8125
+    # Federal taxable: $60,000 - $14,600 = $45,400
+    # Federal tax: $11,600 * 0.10 + $33,800 * 0.12 = $1,160 + $4,056 = $5,216
+    TaxScenario(
+        source="OR 2024 Tax Brackets (computed)",
+        description="OR Single, $60,000 income (2024)",
+        year=2024,
+        state="OR",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_federal_tax=5216.0,
+        expected_state_tax=4700.81,
+        expected_federal_agi=60000.0,
+        backend="graph",
+    ),
+    # OR Single, high income - top bracket (2024)
+    # Federal AGI: $150,000
+    # OR income before deductions: $150,000
+    # OR standard deduction: $2,745
+    # OR taxable: $150,000 - $2,745 = $147,255
+    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($125,000 - $11,050) * 0.0875 + ($147,255 - $125,000) * 0.099
+    #       = $209 + $448.875 + $9,970.625 + $2,203.245 = $12,831.745
+    # Federal taxable: $150,000 - $14,600 = $135,400
+    # Federal tax (formula, graph backend): $25,538.50
+    TaxScenario(
+        source="OR 2024 Tax Brackets (computed)",
+        description="OR Single, $150,000 income, top bracket (2024)",
+        year=2024,
+        state="OR",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_federal_tax=25538.50,
+        expected_state_tax=12831.75,
+        expected_federal_agi=150000.0,
+        backend="graph",
+    ),
+    # OR MFJ, middle income (2024)
+    # Federal AGI: $100,000
+    # OR income before deductions: $100,000
+    # OR standard deduction (MFJ): $5,495
+    # OR taxable: $100,000 - $5,495 = $94,505
+    # OR tax: $8,800 * 0.0475 + ($22,100 - $8,800) * 0.0675 + ($94,505 - $22,100) * 0.0875
+    #       = $418 + $897.75 + $6,335.4375 = $7,651.1875
+    # Federal taxable: $100,000 - $29,200 = $70,800
+    # Federal tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
+    TaxScenario(
+        source="OR 2024 Tax Brackets (computed)",
+        description="OR MFJ, $100,000 income (2024)",
+        year=2024,
+        state="OR",
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8032.0,
+        expected_state_tax=7651.19,
+        expected_federal_agi=100000.0,
+        backend="graph",
+    ),
+    # OR HoH, middle income (2024)
+    # Federal AGI: $75,000
+    # OR income before deductions: $75,000
+    # OR standard deduction (HoH): $4,420
+    # OR taxable: $75,000 - $4,420 = $70,580
+    # OR tax: $8,600 * 0.0475 + ($21,500 - $8,600) * 0.0675 + ($70,580 - $21,500) * 0.0875
+    #       = $408.50 + $870.75 + $4,294.50 = $5,573.75
+    # Federal taxable: $75,000 - $21,900 = $53,100
+    # Federal tax: $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
+    TaxScenario(
+        source="OR 2024 Tax Brackets (computed)",
+        description="OR HoH, $75,000 income (2024)",
+        year=2024,
+        state="OR",
+        filing_status="Head_of_House",
+        w2_income=75000.0,
+        expected_federal_tax=6041.0,
+        expected_state_tax=5573.75,
+        expected_federal_agi=75000.0,
+        backend="graph",
+    ),
+    # OR Single, 2025 with increased standard deduction
+    # Federal AGI: $80,000
+    # OR income before deductions: $80,000
+    # OR standard deduction (2025): $2,835
+    # OR taxable: $80,000 - $2,835 = $77,165
+    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($77,165 - $11,050) * 0.0875
+    #       = $209 + $448.875 + $5,785.0625 = $6,442.9375
+    # Federal taxable (2025): $80,000 - $15,000 = $65,000
+    # Federal tax (formula, graph backend): $9,214.00
+    TaxScenario(
+        source="OR 2025 Tax Brackets (computed)",
+        description="OR Single, $80,000 income (2025)",
+        year=2025,
+        state="OR",
+        filing_status="Single",
+        w2_income=80000.0,
+        expected_federal_tax=9214.0,
+        expected_state_tax=6442.94,
+        expected_federal_agi=80000.0,
+        backend="graph",
     ),
     # ========== NEW YORK SCENARIOS ==========
     # NY 2024 Single: Standard deduction $8,000

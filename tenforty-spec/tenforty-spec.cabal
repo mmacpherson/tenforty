@@ -69,16 +69,24 @@ executable tenforty-compile
     CAScheduleCA_2025
     COForm104_2024
     COForm104_2025
+    CTForm1_2024
+    CTForm1_2025
+    DEFormPITRES_2024
+    DEFormPITRES_2025
     GAForm500_2024
     GAForm500_2025
     IL1040_2024
     IL1040_2025
     INFormIT40_2024
     INFormIT40_2025
+    KSFormK40_2024
+    KSFormK40_2025
     KYForm740_2024
     KYForm740_2025
     LAIT540_2024
     LAIT540_2025
+    MAForm1_2024
+    MAForm1_2025
     MDForm502_2024
     MDForm502_2025
     MI1040_2024
@@ -99,6 +107,8 @@ executable tenforty-compile
     OK511_2025
     OHIT1040_2024
     OHIT1040_2025
+    ORForm40_2024
+    ORForm40_2025
     PA40_2024
     PA40_2025
     SCForm1040_2024
@@ -121,6 +131,10 @@ executable tenforty-compile
     TablesCA2025
     TablesCO2024
     TablesCO2025
+    TablesCT2024
+    TablesCT2025
+    TablesDE2024
+    TablesDE2025
     TablesGA2024
     TablesGA2025
     TablesIA2024
@@ -131,10 +145,14 @@ executable tenforty-compile
     TablesIL2025
     TablesIN2024
     TablesIN2025
+    TablesKS2024
+    TablesKS2025
     TablesKY2024
     TablesKY2025
     TablesLA2024
     TablesLA2025
+    TablesMA2024
+    TablesMA2025
     TablesMD2024
     TablesMD2025
     TablesMI2024
@@ -155,6 +173,8 @@ executable tenforty-compile
     TablesOK2025
     TablesOH2024
     TablesOH2025
+    TablesOR2024
+    TablesOR2025
     TablesSC2024
     TablesSC2025
     TablesUT2024
@@ -247,16 +267,24 @@ test-suite tenforty-spec-test
     CAScheduleCA_2025
     COForm104_2024
     COForm104_2025
+    CTForm1_2024
+    CTForm1_2025
+    DEFormPITRES_2024
+    DEFormPITRES_2025
     GAForm500_2024
     GAForm500_2025
     IL1040_2024
     IL1040_2025
     INFormIT40_2024
     INFormIT40_2025
+    KSFormK40_2024
+    KSFormK40_2025
     KYForm740_2024
     KYForm740_2025
     LAIT540_2024
     LAIT540_2025
+    MAForm1_2024
+    MAForm1_2025
     MDForm502_2024
     MDForm502_2025
     MI1040_2024
@@ -277,6 +305,8 @@ test-suite tenforty-spec-test
     OK511_2025
     OHIT1040_2024
     OHIT1040_2025
+    ORForm40_2024
+    ORForm40_2025
     PA40_2024
     PA40_2025
     SCForm1040_2024
@@ -299,6 +329,10 @@ test-suite tenforty-spec-test
     TablesCA2025
     TablesCO2024
     TablesCO2025
+    TablesCT2024
+    TablesCT2025
+    TablesDE2024
+    TablesDE2025
     TablesGA2024
     TablesGA2025
     TablesIA2024
@@ -309,10 +343,14 @@ test-suite tenforty-spec-test
     TablesIL2025
     TablesIN2024
     TablesIN2025
+    TablesKS2024
+    TablesKS2025
     TablesKY2024
     TablesKY2025
     TablesLA2024
     TablesLA2025
+    TablesMA2024
+    TablesMA2025
     TablesMD2024
     TablesMD2025
     TablesMI2024
@@ -333,6 +371,8 @@ test-suite tenforty-spec-test
     TablesOK2025
     TablesOH2024
     TablesOH2025
+    TablesOR2024
+    TablesOR2025
     TablesSC2024
     TablesSC2025
     TablesUT2024

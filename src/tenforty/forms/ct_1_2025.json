@@ -1,0 +1,540 @@
+{
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2025
+        }
+    ],
+    "inputs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ],
+    "meta": {
+        "form_id": "ct_1",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L5_ct_phaseout_addback",
+            "op": {
+                "type": "input"
+            }
+        },
+        "1": {
+            "id": 1,
+            "name": "L6_ct_tax_recapture",
+            "op": {
+                "type": "input"
+            }
+        },
+        "10": {
+            "id": 10,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "11": {
+            "id": 11,
+            "op": {
+                "type": "literal",
+                "value": 15000
+            }
+        },
+        "12": {
+            "id": 12,
+            "op": {
+                "type": "literal",
+                "value": 24000
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "type": "literal",
+                "value": 12000
+            }
+        },
+        "14": {
+            "id": 14,
+            "op": {
+                "type": "literal",
+                "value": 19000
+            }
+        },
+        "15": {
+            "id": 15,
+            "op": {
+                "type": "literal",
+                "value": 24000
+            }
+        },
+        "16": {
+            "id": 16,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 14,
+                    "married_joint": 12,
+                    "married_separate": 13,
+                    "qualifying_widow": 15,
+                    "single": 11
+                }
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "18": {
+            "id": 18,
+            "op": {
+                "type": "literal",
+                "value": 30000
+            }
+        },
+        "19": {
+            "id": 19,
+            "op": {
+                "type": "literal",
+                "value": 48000
+            }
+        },
+        "2": {
+            "id": 2,
+            "name": "L8_ct_property_tax_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "20": {
+            "id": 20,
+            "op": {
+                "type": "literal",
+                "value": 24000
+            }
+        },
+        "21": {
+            "id": 21,
+            "op": {
+                "type": "literal",
+                "value": 38000
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "type": "literal",
+                "value": 48000
+            }
+        },
+        "23": {
+            "id": 23,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 21,
+                    "married_joint": 19,
+                    "married_separate": 20,
+                    "qualifying_widow": 22,
+                    "single": 18
+                }
+            }
+        },
+        "24": {
+            "id": 24,
+            "op": {
+                "left": 9,
+                "right": 23,
+                "type": "sub"
+            }
+        },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 17,
+                "right": 24,
+                "type": "max"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "left": 16,
+                "right": 25,
+                "type": "sub"
+            }
+        },
+        "27": {
+            "id": 27,
+            "name": "L2_ct_personal_exemption",
+            "op": {
+                "left": 10,
+                "right": 26,
+                "type": "max"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "29": {
+            "id": 29,
+            "op": {
+                "left": 9,
+                "right": 27,
+                "type": "sub"
+            }
+        },
+        "3": {
+            "id": 3,
+            "name": "L9_ct_earned_income_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "name": "L3_ct_taxable_income",
+            "op": {
+                "left": 28,
+                "right": 29,
+                "type": "max"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L4_ct_initial_tax",
+            "op": {
+                "income": 30,
+                "table": "ct_brackets_2025",
+                "type": "bracket_tax"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "left": 0,
+                "right": 1,
+                "type": "add"
+            }
+        },
+        "33": {
+            "id": 33,
+            "name": "L7_ct_tax_before_credits",
+            "op": {
+                "left": 31,
+                "right": 32,
+                "type": "add"
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "left": 5,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "35": {
+            "id": 35,
+            "op": {
+                "left": 4,
+                "right": 34,
+                "type": "add"
+            }
+        },
+        "36": {
+            "id": 36,
+            "op": {
+                "left": 3,
+                "right": 35,
+                "type": "add"
+            }
+        },
+        "37": {
+            "id": 37,
+            "name": "L13_ct_total_credits",
+            "op": {
+                "left": 2,
+                "right": 36,
+                "type": "add"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "left": 33,
+                "right": 37,
+                "type": "sub"
+            }
+        },
+        "4": {
+            "id": 4,
+            "name": "L10_ct_child_tax_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "name": "L14_ct_tax_after_credits",
+            "op": {
+                "left": 38,
+                "right": 39,
+                "type": "max"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "left": 40,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "43": {
+            "id": 43,
+            "name": "L16_ct_tax_after_all_credits",
+            "op": {
+                "left": 41,
+                "right": 42,
+                "type": "max"
+            }
+        },
+        "44": {
+            "id": 44,
+            "name": "L18_ct_total_tax",
+            "op": {
+                "left": 43,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "5": {
+            "id": 5,
+            "name": "L11_ct_eitc",
+            "op": {
+                "type": "input"
+            }
+        },
+        "6": {
+            "id": 6,
+            "name": "L12_ct_other_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
+            "name": "L15_ct_pass_through_credit",
+            "op": {
+                "type": "input"
+            }
+        },
+        "8": {
+            "id": 8,
+            "name": "L17_ct_other_taxes",
+            "op": {
+                "type": "input"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L1_ct_agi",
+            "op": {
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2025
+            }
+        }
+    },
+    "outputs": [],
+    "tables": {
+        "ct_brackets_2025": {
+            "brackets": {
+                "head_of_household": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 16000
+                    },
+                    {
+                        "rate": 4.5e-2,
+                        "threshold": 80000
+                    },
+                    {
+                        "rate": 5.5e-2,
+                        "threshold": 160000
+                    },
+                    {
+                        "rate": 6.0e-2,
+                        "threshold": 320000
+                    },
+                    {
+                        "rate": 6.5e-2,
+                        "threshold": 400000
+                    },
+                    {
+                        "rate": 6.9e-2,
+                        "threshold": 800000
+                    },
+                    {
+                        "rate": 6.99e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_joint": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 4.5e-2,
+                        "threshold": 100000
+                    },
+                    {
+                        "rate": 5.5e-2,
+                        "threshold": 200000
+                    },
+                    {
+                        "rate": 6.0e-2,
+                        "threshold": 400000
+                    },
+                    {
+                        "rate": 6.5e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 6.9e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 6.99e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "married_separate": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 10000
+                    },
+                    {
+                        "rate": 4.5e-2,
+                        "threshold": 50000
+                    },
+                    {
+                        "rate": 5.5e-2,
+                        "threshold": 100000
+                    },
+                    {
+                        "rate": 6.0e-2,
+                        "threshold": 200000
+                    },
+                    {
+                        "rate": 6.5e-2,
+                        "threshold": 250000
+                    },
+                    {
+                        "rate": 6.9e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 6.99e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "qualifying_widow": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 20000
+                    },
+                    {
+                        "rate": 4.5e-2,
+                        "threshold": 100000
+                    },
+                    {
+                        "rate": 5.5e-2,
+                        "threshold": 200000
+                    },
+                    {
+                        "rate": 6.0e-2,
+                        "threshold": 400000
+                    },
+                    {
+                        "rate": 6.5e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 6.9e-2,
+                        "threshold": 1000000
+                    },
+                    {
+                        "rate": 6.99e-2,
+                        "threshold": 1000000000000
+                    }
+                ],
+                "single": [
+                    {
+                        "rate": 2.0e-2,
+                        "threshold": 10000
+                    },
+                    {
+                        "rate": 4.5e-2,
+                        "threshold": 50000
+                    },
+                    {
+                        "rate": 5.5e-2,
+                        "threshold": 100000
+                    },
+                    {
+                        "rate": 6.0e-2,
+                        "threshold": 200000
+                    },
+                    {
+                        "rate": 6.5e-2,
+                        "threshold": 250000
+                    },
+                    {
+                        "rate": 6.9e-2,
+                        "threshold": 500000
+                    },
+                    {
+                        "rate": 6.99e-2,
+                        "threshold": 1000000000000
+                    }
+                ]
+            }
+        }
+    }
+}
