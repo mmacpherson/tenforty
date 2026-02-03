@@ -1,1 +1,23 @@
-{"imports":[],"inputs":[],"meta":{"form_id":"sd_notax","generated_by":"tenforty-dsl","year":2025},"nodes":{"0":{"id":0,"name":"L1_sd_tax","op":{"type":"literal","value":0}}},"outputs":[0],"tables":{}}
+{
+    "imports": [],
+    "inputs": [],
+    "meta": {
+        "form_id": "sd_notax",
+        "generated_by": "tenforty-dsl",
+        "year": 2025
+    },
+    "nodes": {
+        "0": {
+            "id": 0,
+            "name": "L1_sd_tax",
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        }
+    },
+    "outputs": [
+        0
+    ],
+    "tables": {}
+}
