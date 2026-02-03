@@ -107,12 +107,12 @@ executable tenforty-compile
     MS80105_2025
     NCFormD400_2024
     NCFormD400_2025
+    NEForm1040N_2024
+    NEForm1040N_2025
     NJ1040_2024
     NJ1040_2025
     NMPIT1_2024
     NMPIT1_2025
-    NEForm1040N_2024
-    NEForm1040N_2025
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -175,12 +175,12 @@ executable tenforty-compile
     TablesMS2025
     TablesNC2024
     TablesNC2025
+    TablesNE2024
+    TablesNE2025
     TablesNJ2024
     TablesNJ2025
     TablesNM2024
     TablesNM2025
-    TablesNE2024
-    TablesNE2025
     TablesNY2024
     TablesNY2025
     TablesOH2024
@@ -195,10 +195,10 @@ executable tenforty-compile
     TablesUT2025
     TablesVA2024
     TablesVA2025
-    TablesWV2024
-    TablesWV2025
     TablesWI2024
     TablesWI2025
+    TablesWV2024
+    TablesWV2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -235,10 +235,10 @@ executable tenforty-compile
     UTTC40_2025
     VAForm760_2024
     VAForm760_2025
-    WVIT140_2024
-    WVIT140_2025
     WIForm1_2024
     WIForm1_2025
+    WVIT140_2024
+    WVIT140_2025
 
   build-depends:
     , aeson
@@ -325,12 +325,12 @@ test-suite tenforty-spec-test
     MS80105_2025
     NCFormD400_2024
     NCFormD400_2025
+    NEForm1040N_2024
+    NEForm1040N_2025
     NJ1040_2024
     NJ1040_2025
     NMPIT1_2024
     NMPIT1_2025
-    NEForm1040N_2024
-    NEForm1040N_2025
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -393,12 +393,12 @@ test-suite tenforty-spec-test
     TablesMS2025
     TablesNC2024
     TablesNC2025
+    TablesNE2024
+    TablesNE2025
     TablesNJ2024
     TablesNJ2025
     TablesNM2024
     TablesNM2025
-    TablesNE2024
-    TablesNE2025
     TablesNY2024
     TablesNY2025
     TablesOH2024
@@ -413,10 +413,10 @@ test-suite tenforty-spec-test
     TablesUT2025
     TablesVA2024
     TablesVA2025
-    TablesWV2024
-    TablesWV2025
     TablesWI2024
     TablesWI2025
+    TablesWV2024
+    TablesWV2025
     US1040_2024
     US1040_2025
     USForm2441_2024
@@ -453,10 +453,10 @@ test-suite tenforty-spec-test
     UTTC40_2025
     VAForm760_2024
     VAForm760_2025
-    WVIT140_2024
-    WVIT140_2025
     WIForm1_2024
     WIForm1_2025
+    WVIT140_2024
+    WVIT140_2025
 
   default-language:   GHC2021
   default-extensions: OverloadedStrings

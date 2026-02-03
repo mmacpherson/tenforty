@@ -238,7 +238,12 @@
             }
         }
     },
-    "outputs": [],
+    "outputs": [
+        21,
+        22,
+        26,
+        6
+    ],
     "tables": {
         "ne_brackets_2025": {
             "brackets": {

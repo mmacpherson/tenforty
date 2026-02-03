@@ -72,4 +72,4 @@ neForm1040N_2024 = form "ne_1040n" 2024 $ do
         keyOutput "L19" "total_ne_tax" "Total Nebraska tax" $
             l17 .+. l18
 
-    pure ()
+    outputs ["L5", "L14", "L15", "L19"]

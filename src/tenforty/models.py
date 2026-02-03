@@ -145,9 +145,9 @@ class OTSState(Enum):
     MN = "MN"
     MO = "MO"
     NC = "NC"
+    NE = "NE"
     NJ = "NJ"
     NM = "NM"
-    NE = "NE"
     NY = "NY"
     OH = "OH"
     OK = "OK"
@@ -196,9 +196,9 @@ STATE_TO_FORM = {
     OTSState.MN: "MN_M1",
     OTSState.MO: "MO_1040",
     OTSState.NC: "NC_D400",
+    OTSState.NE: "NE_1040N",
     OTSState.NJ: "NJ_1040",
     OTSState.NM: "NM_PIT1",
-    OTSState.NE: "NE_1040N",
     OTSState.NY: "NY_IT201",
     OTSState.OH: "OH_IT1040",
     OTSState.OK: "OK_511",

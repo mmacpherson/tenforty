@@ -49,7 +49,8 @@ Standard deductions doubled under Act 45, SLH 2024
 hiStandardDeduction2024 :: ByStatus (Amount Dollars)
 hiStandardDeduction2024 = byStatus 4400 8800 4400 6424 8800
 
--- | 2024 Hawaii personal exemption amount ($1,144 per exemption)
--- Source: Hawaii Form N-11 Instructions 2024, pg 20
+{- | 2024 Hawaii personal exemption amount ($1,144 per exemption)
+Source: Hawaii Form N-11 Instructions 2024, pg 20
+-}
 hiPersonalExemption2024 :: Amount Dollars
 hiPersonalExemption2024 = 1144

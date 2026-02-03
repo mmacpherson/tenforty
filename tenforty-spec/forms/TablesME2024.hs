@@ -38,12 +38,13 @@ maineBracketsTable2024 =
 Order: Single, MFJ, MFS, HoH, QW
 Source: Maine Revenue Services, Individual Income Tax 2024 Rates
 Standard deduction equals federal standard deduction for 2024:
-$14,600 (Single/MFS), $29,200 (MFJ), $21,900 (HoH)
+\$14,600 (Single/MFS), $29,200 (MFJ), $21,900 (HoH)
 -}
 meStandardDeduction2024 :: ByStatus (Amount Dollars)
 meStandardDeduction2024 = byStatus 14600 29200 14600 21900 29200
 
--- | 2024 Maine personal exemption amount ($5,000 per exemption)
--- Source: Maine Revenue Services, Individual Income Tax 2024 Rates
+{- | 2024 Maine personal exemption amount ($5,000 per exemption)
+Source: Maine Revenue Services, Individual Income Tax 2024 Rates
+-}
 mePersonalExemption2024 :: Amount Dollars
 mePersonalExemption2024 = 5000

@@ -111,7 +111,7 @@ nmPIT1_2025 = form "nm_pit1" 2025 $ do
     l36 <- keyInput "L36" "penalty" "Penalty"
     l37 <- keyInput "L37" "interest" "Interest"
 
-    l38 <-
+    _l38 <-
         interior "L38" "total_due" $
             sumOf [l33, l34, l36, l37]
 

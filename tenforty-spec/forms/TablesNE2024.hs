@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module TablesNE2024 (
     nebraskaBrackets2024,
     nebraskaBracketsTable2024,

@@ -3814,7 +3814,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #   $16,001-$210,000 ($194,000) @ 4.9%: $9,506.00
     #   $210,001-$235,400 ($25,400) @ 5.9%: $1,498.60
     #   Total: $11,509.10
-    # Federal taxable: $235,400, Federal tax: $50,617 (formula, graph backend)
+    # Federal taxable: $235,400, Federal tax: $53,014.50 (formula, graph backend)
     TaxScenario(
         source="NM 2024 Tax Brackets (computed)",
         description="NM Single, $250,000 income (2024)",
@@ -3828,7 +3828,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     ),
     # NM 2025 Single, middle income (new 6-bracket structure)
     # Federal AGI: $50,000
-    # Federal std deduction (2025): $15,750
+    # Federal std deduction (2025): $15,000
     # NM taxable: $50,000 - $15,750 = $34,250
     # NM tax:
     #   First $5,500 @ 1.5%: $82.50
@@ -4052,7 +4052,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     ),
     # WV 2025 Single, middle income (reduced rates per SB 2033)
     # Federal AGI: $50,000
-    # Federal std deduction (2025): $15,750
+    # Federal std deduction (2025): $15,000
     # WV AGI: $50,000
     # WV Taxable: $50,000 - $4,000 (2 exemptions @ $2,000) = $46,000
     # WV tax:

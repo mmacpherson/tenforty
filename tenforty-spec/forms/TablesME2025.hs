@@ -39,13 +39,14 @@ maineBracketsTable2025 =
 Order: Single, MFJ, MFS, HoH, QW
 Source: Maine Revenue Services, Individual Income Tax 2025 Rates
 Standard deduction equals federal standard deduction for 2025:
-$15,000 (Single/MFS), $30,000 (MFJ), $22,500 (HoH)
+\$15,000 (Single/MFS), $30,000 (MFJ), $22,500 (HoH)
 -}
 meStandardDeduction2025 :: ByStatus (Amount Dollars)
 meStandardDeduction2025 = byStatus 15000 30000 15000 22500 30000
 
--- | 2025 Maine personal exemption amount ($5,150 per exemption)
--- Source: Maine Revenue Services, Individual Income Tax 2025 Rates
--- COLA adjustment: 1.25 × $4,120 (base amount) = $5,150
+{- | 2025 Maine personal exemption amount ($5,150 per exemption)
+Source: Maine Revenue Services, Individual Income Tax 2025 Rates
+COLA adjustment: 1.25 × $4,120 (base amount) = $5,150
+-}
 mePersonalExemption2025 :: Amount Dollars
 mePersonalExemption2025 = 5150

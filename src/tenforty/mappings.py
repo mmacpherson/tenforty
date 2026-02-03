@@ -173,7 +173,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "itemized_deductions": "hi_n11_L19_itemized_hi_itemized",
         },
         output_lines={
-            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L18_hi_agi": "state_adjusted_gross_income",
             "L25_hi_taxable_income": "state_taxable_income",
             "L33_hi_total_tax": "state_total_tax",
         },
@@ -388,6 +388,45 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L12_nc_tax": "state_total_tax",
         },
     ),
+    OTSState.NE: StateGraphConfig(
+        # NE 1040N imports federal AGI and applies larger of state standard
+        # deduction or itemized (federal itemized minus state/local income tax).
+        # State adjustments from Schedule I are accepted as total inputs.
+        # 2024 has 4 brackets (2.46%, 3.51%, 5.01%, 5.84%).
+        # 2025 top rate reduced to 5.20% per LB754 (2023).
+        natural_to_node={},
+        output_lines={
+            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L14_ne_taxable_income": "state_taxable_income",
+            "L19_total_ne_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NJ: StateGraphConfig(
+        # NJ-1040 imports federal AGI and applies exemptions/deductions.
+        # Personal exemptions and dependent exemptions are accepted as total inputs
+        # (num_dependents cannot map to dollar amounts, and dependent exemptions
+        # are income-phased in NJ).
+        natural_to_node={},
+        output_lines={
+            "L14_federal_agi": "state_adjusted_gross_income",
+            "L39_nj_taxable_income": "state_taxable_income",
+            "L46_nj_total_tax": "state_total_tax",
+        },
+    ),
+    OTSState.NM: StateGraphConfig(
+        # NM PIT-1 imports federal AGI and applies state-specific deductions and
+        # exemptions. NM uses federal standard/itemized deductions. 2024 has 5
+        # brackets (1.7%-5.9%). 2025 adds a sixth bracket (4.3%) and lowers the
+        # lowest rate to 1.5%. Low- and middle-income exemption ($2,500 per
+        # exemption, subject to income limits) and other adjustments are accepted
+        # as total inputs (num_dependents cannot map to dollar amounts).
+        natural_to_node={},
+        output_lines={
+            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L17_nm_taxable_income": "state_taxable_income",
+            "L22_net_nm_tax": "state_total_tax",
+        },
+    ),
     OTSState.NY: StateGraphConfig(
         # NY IT-201 exemptions involve age and dependent count; natural_to_node
         # cannot map these correctly because the graph expects dollar
@@ -444,45 +483,6 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "L4_federal_agi": "state_adjusted_gross_income",
             "L9_ut_taxable_income_initial": "state_taxable_income",
             "L20_ut_total_tax": "state_total_tax",
-        },
-    ),
-    OTSState.NJ: StateGraphConfig(
-        # NJ-1040 imports federal AGI and applies exemptions/deductions.
-        # Personal exemptions and dependent exemptions are accepted as total inputs
-        # (num_dependents cannot map to dollar amounts, and dependent exemptions
-        # are income-phased in NJ).
-        natural_to_node={},
-        output_lines={
-            "L14_federal_agi": "state_adjusted_gross_income",
-            "L39_nj_taxable_income": "state_taxable_income",
-            "L46_nj_total_tax": "state_total_tax",
-        },
-    ),
-    OTSState.NM: StateGraphConfig(
-        # NM PIT-1 imports federal AGI and applies state-specific deductions and
-        # exemptions. NM uses federal standard/itemized deductions. 2024 has 5
-        # brackets (1.7%-5.9%). 2025 adds a sixth bracket (4.3%) and lowers the
-        # lowest rate to 1.5%. Low- and middle-income exemption ($2,500 per
-        # exemption, subject to income limits) and other adjustments are accepted
-        # as total inputs (num_dependents cannot map to dollar amounts).
-        natural_to_node={},
-        output_lines={
-            "us_1040_L11_agi": "state_adjusted_gross_income",
-            "L17_nm_taxable_income": "state_taxable_income",
-            "L22_net_nm_tax": "state_total_tax",
-        },
-    ),
-    OTSState.NE: StateGraphConfig(
-        # NE 1040N imports federal AGI and applies larger of state standard
-        # deduction or itemized (federal itemized minus state/local income tax).
-        # State adjustments from Schedule I are accepted as total inputs.
-        # 2024 has 4 brackets (2.46%, 3.51%, 5.01%, 5.84%).
-        # 2025 top rate reduced to 5.20% per LB754 (2023).
-        natural_to_node={},
-        output_lines={
-            "us_1040_L11_agi": "state_adjusted_gross_income",
-            "L14_ne_taxable_income": "state_taxable_income",
-            "L19_total_ne_tax": "state_total_tax",
         },
     ),
     OTSState.OH: StateGraphConfig(
@@ -547,7 +547,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
             "dependent_exemptions": "wv_it140_L6_total_exemptions",
         },
         output_lines={
-            "us_1040_L11_agi": "state_adjusted_gross_income",
+            "L4_wv_agi": "state_adjusted_gross_income",
             "L7_wv_taxable_income": "state_taxable_income",
             "L12_total_tax": "state_total_tax",
         },

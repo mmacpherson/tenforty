@@ -36,7 +36,7 @@ westVirginiaBracketsTable2024 =
 {- | 2024 West Virginia personal exemption amount
 Source: WV Form IT-140 instructions 2024, page 24
 https://tax.wv.gov/Documents/PIT/2024/it140.PersonalIncomeTaxFormsAndInstructions.2024.pdf
-$2,000 per allowable exemption ($500 if claimed as dependent on another return)
+\$2,000 per allowable exemption ($500 if claimed as dependent on another return)
 -}
 wvPersonalExemption2024 :: Amount Dollars
 wvPersonalExemption2024 = 2000

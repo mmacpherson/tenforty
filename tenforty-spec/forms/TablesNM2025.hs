@@ -2,13 +2,6 @@ module TablesNM2025 (
     -- * New Mexico Income Tax Brackets
     newMexicoBrackets2025,
     newMexicoBracketsTable2025,
-
-    -- * Standard Deduction
-    nmStandardDeduction2025,
-
-    -- * Low- and Middle-Income Exemption
-    nmLowMiddleIncomeExemption2025,
-    nmLowMiddleIncomeThresholds2025,
 ) where
 
 import Data.List.NonEmpty (NonEmpty (..))
@@ -38,25 +31,3 @@ newMexicoBracketsTable2025 =
     case mkBracketTable newMexicoBrackets2025 of
         Right bt -> TableBracket "nm_brackets_2025" bt
         Left err -> error $ "Invalid New Mexico brackets: " ++ err
-
-{- | 2025 New Mexico standard deduction amounts
-Order: Single, MFJ, MFS, HoH, QW
-Source: Federal standard deduction amounts for 2025 (NM matches federal)
-https://www.visaverge.com/taxes/new-mexico-state-income-tax-rates-and-brackets-for-2025/
--}
-nmStandardDeduction2025 :: ByStatus (Amount Dollars)
-nmStandardDeduction2025 = byStatus 15750 31500 15750 23750 31500
-
-{- | 2025 New Mexico low- and middle-income exemption amount
-Source: NM Statute 7-2-5.8, $2,500 per qualified exemption (unchanged from 2024)
-https://law.justia.com/codes/new-mexico/chapter-7/article-2/section-7-2-5-8/
--}
-nmLowMiddleIncomeExemption2025 :: Amount Dollars
-nmLowMiddleIncomeExemption2025 = 2500
-
-{- | 2025 Income thresholds for low- and middle-income exemption
-Order: Single, MFJ, MFS, HoH, QW
-Source: NM Statute 7-2-5.8 (unchanged from 2024)
--}
-nmLowMiddleIncomeThresholds2025 :: ByStatus (Amount Dollars)
-nmLowMiddleIncomeThresholds2025 = byStatus 36667 55000 27500 55000 55000

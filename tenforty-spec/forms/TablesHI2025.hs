@@ -50,8 +50,9 @@ Standard deduction amounts unchanged from 2024
 hiStandardDeduction2025 :: ByStatus (Amount Dollars)
 hiStandardDeduction2025 = byStatus 4400 8800 4400 6424 8800
 
--- | 2025 Hawaii personal exemption amount ($1,144 per exemption)
--- Source: Hawaii Form N-11 Instructions 2025, pg 20
--- Personal exemption unchanged from 2024
+{- | 2025 Hawaii personal exemption amount ($1,144 per exemption)
+Source: Hawaii Form N-11 Instructions 2025, pg 20
+Personal exemption unchanged from 2024
+-}
 hiPersonalExemption2025 :: Amount Dollars
 hiPersonalExemption2025 = 1144
