@@ -35,10 +35,13 @@ fn backprop(
     op: &Op,
     _node_id: NodeId,
     adj: f64,
-    values: &HashMap<NodeId, f64>,
+    values: &[Option<f64>],
     runtime: &Runtime,
     adjoints: &mut HashMap<NodeId, f64>,
 ) -> Result<(), EvalError> {
+    let get_val =
+        |id: &NodeId| -> f64 { values.get(*id as usize).copied().flatten().unwrap_or(0.0) };
+
     match op {
         Op::Input | Op::Literal { .. } | Op::Import { .. } => {}
 
@@ -53,15 +56,15 @@ fn backprop(
         }
 
         Op::Mul { left, right } => {
-            let l = values.get(left).copied().unwrap_or(0.0);
-            let r = values.get(right).copied().unwrap_or(0.0);
+            let l = get_val(left);
+            let r = get_val(right);
             *adjoints.entry(*left).or_insert(0.0) += adj * r;
             *adjoints.entry(*right).or_insert(0.0) += adj * l;
         }
 
         Op::Div { left, right } => {
-            let l = values.get(left).copied().unwrap_or(0.0);
-            let r = values.get(right).copied().unwrap_or(0.0);
+            let l = get_val(left);
+            let r = get_val(right);
             if r != 0.0 {
                 *adjoints.entry(*left).or_insert(0.0) += adj / r;
                 *adjoints.entry(*right).or_insert(0.0) -= adj * l / (r * r);
@@ -69,8 +72,8 @@ fn backprop(
         }
 
         Op::Max { left, right } => {
-            let l = values.get(left).copied().unwrap_or(0.0);
-            let r = values.get(right).copied().unwrap_or(0.0);
+            let l = get_val(left);
+            let r = get_val(right);
             if l >= r {
                 *adjoints.entry(*left).or_insert(0.0) += adj;
             } else {
@@ -79,8 +82,8 @@ fn backprop(
         }
 
         Op::Min { left, right } => {
-            let l = values.get(left).copied().unwrap_or(0.0);
-            let r = values.get(right).copied().unwrap_or(0.0);
+            let l = get_val(left);
+            let r = get_val(right);
             if l <= r {
                 *adjoints.entry(*left).or_insert(0.0) += adj;
             } else {
@@ -97,13 +100,13 @@ fn backprop(
         }
 
         Op::Abs { arg } => {
-            let v = values.get(arg).copied().unwrap_or(0.0);
+            let v = get_val(arg);
             let sign = if v >= 0.0 { 1.0 } else { -1.0 };
             *adjoints.entry(*arg).or_insert(0.0) += adj * sign;
         }
 
         Op::Clamp { arg, min, max } => {
-            let v = values.get(arg).copied().unwrap_or(0.0);
+            let v = get_val(arg);
             if v > *min && v < *max {
                 *adjoints.entry(*arg).or_insert(0.0) += adj;
             }
@@ -115,7 +118,7 @@ fn backprop(
                 None => return Ok(()),
             };
             let brackets = table.brackets.get(runtime.filing_status());
-            let inc = values.get(income).copied().unwrap_or(0.0);
+            let inc = get_val(income);
             let rate = primitives::marginal_rate(brackets, inc);
             *adjoints.entry(*income).or_insert(0.0) += adj * rate;
         }
@@ -127,7 +130,7 @@ fn backprop(
             agi,
         } => {
             let thresh = *threshold.get(runtime.filing_status());
-            let agi_val = values.get(agi).copied().unwrap_or(0.0);
+            let agi_val = get_val(agi);
             let grad = primitives::phase_out_gradient(*base, thresh, *rate, agi_val);
             *adjoints.entry(*agi).or_insert(0.0) += adj * grad;
         }
@@ -142,7 +145,7 @@ fn backprop(
             then,
             otherwise,
         } => {
-            let c = values.get(cond).copied().unwrap_or(0.0);
+            let c = get_val(cond);
             if c > 0.0 {
                 *adjoints.entry(*then).or_insert(0.0) += adj;
             } else {
@@ -161,7 +164,12 @@ pub fn numerical_gradient(
     input: NodeId,
     epsilon: f64,
 ) -> Result<f64, EvalError> {
-    let original = runtime.get_all_values().get(&input).copied().unwrap_or(0.0);
+    let original = runtime
+        .get_all_values()
+        .get(input as usize)
+        .copied()
+        .flatten()
+        .unwrap_or(0.0);
 
     runtime.set_by_id(input, original + epsilon);
     let f_plus = runtime.eval_node(output)?;

@@ -28,18 +28,20 @@ pub struct Runtime<'g> {
     graph: &'g Graph,
     filing_status: FilingStatus,
     inputs: HashMap<NodeId, f64>,
-    cache: HashMap<NodeId, f64>,
+    cache: Vec<Option<f64>>,
     visiting: HashSet<NodeId>,
     stack: Vec<NodeId>,
 }
 
 impl<'g> Runtime<'g> {
     pub fn new(graph: &'g Graph, filing_status: FilingStatus) -> Self {
+        let max_id = graph.nodes.keys().max().copied().unwrap_or(0);
+        let size = (max_id + 1) as usize;
         Runtime {
             graph,
             filing_status,
             inputs: HashMap::new(),
-            cache: HashMap::new(),
+            cache: vec![None; size],
             visiting: HashSet::new(),
             stack: Vec::new(),
         }
@@ -51,13 +53,19 @@ impl<'g> Runtime<'g> {
             .node_id_by_name(name)
             .ok_or_else(|| EvalError::InputNotSet(name.to_string()))?;
         self.inputs.insert(node_id, value);
-        self.cache.clear();
+        self.reset_cache();
         Ok(())
     }
 
     pub fn set_by_id(&mut self, node_id: NodeId, value: f64) {
         self.inputs.insert(node_id, value);
-        self.cache.clear();
+        self.reset_cache();
+    }
+
+    fn reset_cache(&mut self) {
+        for val in self.cache.iter_mut() {
+            *val = None;
+        }
     }
 
     pub fn eval(&mut self, name: &str) -> Result<f64, EvalError> {
@@ -71,7 +79,11 @@ impl<'g> Runtime<'g> {
     }
 
     pub fn eval_node(&mut self, node_id: NodeId) -> Result<f64, EvalError> {
-        if let Some(&cached) = self.cache.get(&node_id) {
+        let idx = node_id as usize;
+        if idx >= self.cache.len() {
+            return Err(EvalError::NodeNotFound(node_id));
+        }
+        if let Some(cached) = self.cache[idx] {
             return Ok(cached);
         }
 
@@ -106,7 +118,7 @@ impl<'g> Runtime<'g> {
         self.visiting.remove(&node_id);
 
         let value = result?;
-        self.cache.insert(node_id, value);
+        self.cache[idx] = Some(value);
         Ok(value)
     }
 
@@ -221,7 +233,7 @@ impl<'g> Runtime<'g> {
         }
     }
 
-    pub fn get_all_values(&self) -> &HashMap<NodeId, f64> {
+    pub fn get_all_values(&self) -> &[Option<f64>] {
         &self.cache
     }
 
