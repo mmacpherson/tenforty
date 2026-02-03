@@ -41,7 +41,7 @@ Source: RI Division of Taxation Advisory 2024-01, page 1
 https://tax.ri.gov/sites/g/files/xkgbur541/files/2024-01/ADV_2024_01_Inflation_Adjustments_0.pdf
 -}
 riStandardDeduction2024 :: ByStatus (Amount Dollars)
-riStandardDeduction2024 = byStatus 10550 21150 10575 15850 21150
+riStandardDeduction2024 = byStatus 10550 21150 10550 15850 21150
 
 {- | Rhode Island 2024 personal exemption amount
 Source: RI Division of Taxation Advisory 2024-01, page 1

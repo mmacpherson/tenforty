@@ -1006,7 +1006,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=70000.0,
         backend="graph",
     ),
-    # DC Single, $70,000 W2 (2024) - reaches into 4th bracket (8.5%)
+    # DC Single, $70,000 W2 (2024) - 3rd bracket (6.5%)
     # Federal: AGI=$70k, Std Ded=$14,600, Taxable=$55,400
     # DC: AGI=$70k, Std Ded=$14,600, Taxable=$55,400
     # DC tax: $0-$10k: $10k*0.04=$400, $10k-$40k: $30k*0.06=$1,800,
@@ -1017,7 +1017,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #         Total: $400 + $1,800 + $1,001 = $3,201
     TaxScenario(
         source="DC 2024 Tax Rate Schedules (computed)",
-        description="DC Single, $70,000 W2 (higher bracket)",
+        description="DC Single, $70,000 W2 (3rd bracket)",
         year=2024,
         state="DC",
         filing_status="Single",
@@ -4549,6 +4549,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=60000.0,
         expected_federal_tax=5216.0,
         expected_state_tax=3840.60,
+        expected_federal_agi=60000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4560,6 +4561,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=100000.0,
         expected_federal_tax=8032.0,
         expected_state_tax=6048.00,
+        expected_federal_agi=100000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4571,6 +4573,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=75000.0,
         expected_federal_tax=6041.0,
         expected_state_tax=4549.90,
+        expected_federal_agi=75000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4582,6 +4585,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=200000.0,
         expected_federal_tax=37538.5,
         expected_state_tax=15938.60,
+        expected_federal_agi=200000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4593,6 +4597,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=60000.0,
         expected_federal_tax=5161.5,
         expected_state_tax=3116.80,
+        expected_federal_agi=60000.0,
         backend="graph",
     ),
     # Maine state scenarios
@@ -4612,6 +4617,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         # Tax: $26,050 x 5.8% = $1,510.90 + ($45,400 - $26,050) x 6.75% = $1,306.125
         # Total: $2,817.025
         expected_state_tax=2817.025,
+        expected_federal_agi=60000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4626,6 +4632,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         # Tax: $52,100 x 5.8% = $3,021.80 + ($70,800 - $52,100) x 6.75% = $1,262.25
         # Total: $4,284.05
         expected_state_tax=4284.05,
+        expected_federal_agi=100000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4640,6 +4647,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         # Tax: $39,050 x 5.8% = $2,264.90 + ($53,100 - $39,050) x 6.75% = $948.38
         # Total: $3,213.28
         expected_state_tax=3213.28,
+        expected_federal_agi=75000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4654,6 +4662,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         # Tax: $26,050 x 5.8% + ($61,600 - $26,050) x 6.75% + ($135,400 - $61,600) x 7.15%
         # = $1,510.90 + $2,399.63 + $5,276.70 = $9,187.23
         expected_state_tax=9187.23,
+        expected_federal_agi=150000.0,
         backend="graph",
     ),
     TaxScenario(
@@ -4668,6 +4677,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         # Tax: $26,800 x 5.8% = $1,554.40 + ($45,000 - $26,800) x 6.75% = $1,228.50
         # Total: $2,782.90
         expected_state_tax=2782.90,
+        expected_federal_agi=60000.0,
         backend="graph",
     ),
 ]
