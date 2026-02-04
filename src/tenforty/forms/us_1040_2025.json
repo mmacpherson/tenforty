@@ -6,6 +6,11 @@
             "year": 2025
         },
         {
+            "form": "us_schedule_d",
+            "line": "L15",
+            "year": 2025
+        },
+        {
             "form": "us_schedule_1",
             "line": "L10",
             "year": 2025
@@ -590,9 +595,10 @@
             "id": 65,
             "name": "L16_tax",
             "op": {
-                "income": 64,
-                "table": "federal_brackets_2025",
-                "type": "bracket_tax"
+                "cond": 131,
+                "otherwise": 129,
+                "then": 130,
+                "type": "if_positive"
             }
         },
         "66": {
@@ -867,7 +873,163 @@
                 "right": 93,
                 "type": "max"
             }
-        }
+        },
+        "95": {
+            "id": 95,
+            "name": "L15_sched_d_net_long_term",
+            "op": {
+                "form": "us_schedule_d",
+                "line": "L15",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "100": { "id": 100, "op": { "type": "literal", "value": 0 } },
+        "101": {
+            "id": 101, "name": "qcgws_1",
+            "op": { "left": 64, "right": 64, "type": "max" }
+        },
+        "102": {
+            "id": 102, "name": "qcgws_2",
+            "op": { "left": 11, "right": 11, "type": "max" }
+        },
+        "103": {
+            "id": 103, "name": "qcgws_3_raw",
+            "op": { "left": 95, "right": 37, "type": "min" }
+        },
+        "104": {
+            "id": 104, "name": "qcgws_3",
+            "op": { "left": 100, "right": 103, "type": "max" }
+        },
+        "105": {
+            "id": 105, "name": "qcgws_4",
+            "op": { "left": 102, "right": 104, "type": "add" }
+        },
+        "106": {
+            "id": 106, "name": "qcgws_5_raw",
+            "op": { "left": 101, "right": 105, "type": "sub" }
+        },
+        "107": {
+            "id": 107, "name": "qcgws_5",
+            "op": { "left": 100, "right": 106, "type": "max" }
+        },
+                "108": {
+                    "id": 108,
+                    "name": "qcgws_6",
+                    "op": {
+                        "type": "by_status",
+                        "values": {
+                            "single": 140, "married_separate": 140,
+                            "married_joint": 141, "qualifying_widow": 141,
+                            "head_of_household": 142
+                        }
+                    }
+                },
+                "109": {
+                    "id": 109, "name": "qcgws_7",
+                    "op": { "left": 101, "right": 108, "type": "min" }
+                },
+                "110": {
+                    "id": 110, "name": "qcgws_8",
+                    "op": { "left": 107, "right": 109, "type": "min" }
+                },
+                "111": {
+                    "id": 111, "name": "qcgws_9",
+                    "op": { "left": 109, "right": 110, "type": "sub" }
+                },
+                "112": {
+                    "id": 112, "name": "qcgws_10",
+                    "op": { "left": 101, "right": 105, "type": "min" }
+                },
+                "113": {
+                    "id": 113, "name": "qcgws_12",
+                    "op": { "left": 112, "right": 111, "type": "sub" }
+                },
+                "114": {
+                    "id": 114, "name": "qcgws_13",
+                    "op": {
+                        "type": "by_status",
+                        "values": {
+                            "single": 143, "married_separate": 144,
+                            "married_joint": 145, "qualifying_widow": 145,
+                            "head_of_household": 146
+                        }
+                    }
+                },
+        "115": {
+            "id": 115, "name": "qcgws_14",
+            "op": { "left": 101, "right": 114, "type": "min" }
+        },
+        "116": {
+            "id": 116, "name": "qcgws_15",
+            "op": { "left": 107, "right": 111, "type": "add" }
+        },
+        "117": {
+            "id": 117, "name": "qcgws_16_raw",
+            "op": { "left": 115, "right": 116, "type": "sub" }
+        },
+        "118": {
+            "id": 118, "name": "qcgws_16",
+            "op": { "left": 100, "right": 117, "type": "max" }
+        },
+        "119": {
+            "id": 119, "name": "qcgws_17",
+            "op": { "left": 113, "right": 118, "type": "min" }
+        },
+        "120": {
+            "id": 120, "op": { "type": "literal", "value": 0.15 }
+        },
+        "121": {
+            "id": 121, "name": "qcgws_18",
+            "op": { "left": 119, "right": 120, "type": "mul" }
+        },
+        "122": {
+            "id": 122, "name": "qcgws_19",
+            "op": { "left": 111, "right": 119, "type": "add" }
+        },
+        "123": {
+            "id": 123, "name": "qcgws_20",
+            "op": { "left": 112, "right": 122, "type": "sub" }
+        },
+        "124": {
+            "id": 124, "op": { "type": "literal", "value": 0.20 }
+        },
+        "125": {
+            "id": 125, "name": "qcgws_21",
+            "op": { "left": 123, "right": 124, "type": "mul" }
+        },
+        "126": {
+            "id": 126, "name": "qcgws_22",
+            "op": { "income": 107, "table": "federal_brackets_2025", "type": "bracket_tax" }
+        },
+        "127": {
+            "id": 127, "name": "qcgws_23_sum",
+            "op": { "left": 121, "right": 125, "type": "add" }
+        },
+        "128": {
+            "id": 128, "name": "qcgws_23",
+            "op": { "left": 127, "right": 126, "type": "add" }
+        },
+        "129": {
+            "id": 129, "name": "qcgws_24",
+            "op": { "income": 101, "table": "federal_brackets_2025", "type": "bracket_tax" }
+        },
+        "130": {
+            "id": 130, "name": "qcgws_25",
+            "op": { "left": 128, "right": 129, "type": "min" }
+        },
+                "131": {
+                    "id": 131,
+                    "name": "total_preferential_income",
+                    "op": { "left": 102, "right": 104, "type": "add" }
+                },
+                "140": { "id": 140, "op": { "type": "literal", "value": 48350 } },
+                "141": { "id": 141, "op": { "type": "literal", "value": 96700 } },
+                "142": { "id": 142, "op": { "type": "literal", "value": 64750 } },
+                "143": { "id": 143, "op": { "type": "literal", "value": 533400 } },
+                "144": { "id": 144, "op": { "type": "literal", "value": 266700 } },
+                "145": { "id": 145, "op": { "type": "literal", "value": 600050 } },
+                "146": { "id": 146, "op": { "type": "literal", "value": 566700 } }
     },
     "outputs": [
         47,
