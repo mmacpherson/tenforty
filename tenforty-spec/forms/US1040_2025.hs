@@ -156,7 +156,7 @@ us1040_2025 = form "us_1040" 2025 $ do
     qcgws24 <- interior "qcgws_24" "work_l24" $ bracketTax "federal_brackets_2025" qcgws1
     qcgws25 <- interior "qcgws_25" "work_l25" $ minE qcgws23 qcgws24
 
-    hasPreferential <- interior "has_preferential_income" "Has preferential income" $ qcgws4
+    hasPreferential <- interior "has_preferential_income" "Has preferential income" qcgws4
 
     l16 <-
         keyOutput "L16" "tax" "Tax from tax tables or Schedule D" $
