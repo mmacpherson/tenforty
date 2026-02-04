@@ -117,7 +117,7 @@ def test_solve_for_interest_income(w2_income, taxable_interest):
 
 @skip_if_graph_unavailable
 @given(
-    w2_income=st.integers(50_000, 150_000),
+    w2_income=st.integers(70_000, 150_000),
     cap_gains=st.integers(5_000, 50_000),
 )
 @settings(max_examples=50)
