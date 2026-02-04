@@ -30,7 +30,7 @@ us1040_2025 = form "us_1040" 2025 $ do
     _l2a <- keyInput "L2a" "tax_exempt_interest" "Tax-exempt interest (informational only)"
     l2b <- keyInput "L2b" "taxable_interest" "Taxable interest from 1099-INT"
 
-    _l3a <- keyInput "L3a" "qualified_dividends" "Qualified dividends (for preferential rates)"
+    l3a <- keyInput "L3a" "qualified_dividends" "Qualified dividends (for preferential rates)"
     l3b <- keyInput "L3b" "ordinary_dividends" "Ordinary dividends from 1099-DIV"
 
     _l4a <- keyInput "L4a" "ira_distributions_gross" "Total IRA distributions received"
@@ -95,9 +95,72 @@ us1040_2025 = form "us_1040" 2025 $ do
             l11 `subtractNotBelowZero` l14
 
     -- Lines 16-18: Tax Computation
+
+    -- Qualified Dividends and Capital Gain Tax Worksheet
+    -- See 2025 Instructions for Form 1040, Line 16.
+    l15SchedD <- interior "L15_sched_d_net_long_term" "Net long-term capital gain" $ importForm "us_schedule_d" "L15"
+
+    let qcgws1 = l15
+    let qcgws2 = l3a
+
+    -- Line 3: If Sched D used, smaller of D15 or D16. If not, L7.
+    qcgws3 <- interior "qcgws_3" "work_l3" $ ifPos l15SchedD (minE l15SchedD l7) l7
+
+    qcgws4 <- interior "qcgws_4" "work_l4" $ qcgws2 .+. qcgws3
+    qcgws5 <- interior "qcgws_5" "work_l5" $ qcgws1 `subtractNotBelowZero` qcgws4
+
+    -- Line 6 Thresholds (0% bracket)
+    qcgws6 <-
+        interior "qcgws_6" "work_l6" $
+            byStatusE $
+                ByStatus
+                    { bsSingle = lit 48350
+                    , bsMarriedSeparate = lit 48350
+                    , bsMarriedJoint = lit 96700
+                    , bsQualifyingWidow = lit 96700
+                    , bsHeadOfHousehold = lit 64750
+                    }
+
+    qcgws7 <- interior "qcgws_7" "work_l7" $ minE qcgws1 qcgws6
+    qcgws8 <- interior "qcgws_8" "work_l8" $ minE qcgws5 qcgws7
+    qcgws9 <- interior "qcgws_9" "work_l9" $ qcgws7 .-. qcgws8 -- Taxed at 0%
+    qcgws10 <- interior "qcgws_10" "work_l10" $ minE qcgws1 qcgws4
+    let qcgws11 = qcgws9
+    qcgws12 <- interior "qcgws_12" "work_l12" $ qcgws10 .-. qcgws11
+
+    -- Line 13 Thresholds (15% bracket)
+    qcgws13 <-
+        interior "qcgws_13" "work_l13" $
+            byStatusE $
+                ByStatus
+                    { bsSingle = lit 533400
+                    , bsMarriedSeparate = lit 266700
+                    , bsMarriedJoint = lit 600050
+                    , bsQualifyingWidow = lit 600050
+                    , bsHeadOfHousehold = lit 566700
+                    }
+
+    qcgws14 <- interior "qcgws_14" "work_l14" $ minE qcgws1 qcgws13
+    qcgws15 <- interior "qcgws_15" "work_l15" $ qcgws5 .+. qcgws9
+    qcgws16 <- interior "qcgws_16" "work_l16" $ qcgws14 `subtractNotBelowZero` qcgws15
+    qcgws17 <- interior "qcgws_17" "work_l17" $ minE qcgws12 qcgws16
+
+    qcgws18 <- interior "qcgws_18" "work_l18" $ qcgws17 .*. lit 0.15
+
+    qcgws19 <- interior "qcgws_19" "work_l19" $ qcgws9 .+. qcgws17
+    qcgws20 <- interior "qcgws_20" "work_l20" $ qcgws10 .-. qcgws19
+    qcgws21 <- interior "qcgws_21" "work_l21" $ qcgws20 .*. lit 0.20
+
+    qcgws22 <- interior "qcgws_22" "work_l22" $ bracketTax "federal_brackets_2025" qcgws5
+    qcgws23 <- interior "qcgws_23" "work_l23" $ qcgws18 .+. qcgws21 .+. qcgws22
+    qcgws24 <- interior "qcgws_24" "work_l24" $ bracketTax "federal_brackets_2025" qcgws1
+    qcgws25 <- interior "qcgws_25" "work_l25" $ minE qcgws23 qcgws24
+
+    hasPreferential <- interior "has_preferential_income" "Has preferential income" qcgws4
+
     l16 <-
         keyOutput "L16" "tax" "Tax from tax tables or Schedule D" $
-            bracketTax "federal_brackets_2025" l15
+            ifPos hasPreferential qcgws25 qcgws24
 
     l17 <- interior "L17" "schedule_2_tax" $ importForm "us_schedule_2" "L3"
 

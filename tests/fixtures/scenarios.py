@@ -1662,7 +1662,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=60000.0,
         qualified_dividends=3000.0,
         ordinary_dividends=3000.0,
-        expected_federal_tax=5701.0,
+        expected_federal_tax=5422.25,
         expected_state_tax=1934.1,
         expected_federal_agi=63000.0,
         backend="graph",
@@ -1679,7 +1679,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         taxable_interest=2000.0,
         qualified_dividends=1000.0,
         ordinary_dividends=1000.0,
-        expected_federal_tax=10101.0,
+        expected_federal_tax=10031.0,
         expected_state_tax=2548.1,
         expected_federal_agi=83000.0,
         backend="graph",
@@ -2805,7 +2805,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # MT Single, $40,000 W2 + $5,000 LT capital gains (2024)
-    # Federal: AGI=$45k, Std Ded=$14,600, Taxable=$30,400, Tax=$3,416
+    # Federal: AGI=$45k, Std Ded=$14,600, Taxable=$30,400, Tax=$3,416 -> $2,816 (QDCGT)
     # MT: Imports fed taxable=$30,400, treats all as ordinary income
     # (Note: Capital gains split not yet implemented in graph backend)
     # MT tax: $20,500 * 0.047 + ($30,400 - $20,500) * 0.059 = $963.50 + $584.10 = $1,547.60
@@ -2817,7 +2817,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=40000.0,
         long_term_capital_gains=5000.0,
-        expected_federal_tax=3416.0,
+        expected_federal_tax=2816.0,
         expected_state_tax=1547.60,
         expected_federal_agi=45000.0,
         backend="graph",
