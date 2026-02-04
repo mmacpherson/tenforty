@@ -145,3 +145,15 @@ class TestGraphBackend:
 
         # Verify result is sane (tax should include tax on gains)
         assert result.federal_total_tax > 0
+
+    def test_graph_backend_batch_rejects_unsupported_nonzero_inputs(self):
+        """Batch evaluation should be as strict as single-scenario evaluation."""
+        from tenforty import evaluate_returns
+
+        with pytest.raises(NotImplementedError, match="Unsupported inputs"):
+            evaluate_returns(
+                year=2024,
+                w2_income=[100_000],
+                dependent_exemptions=[100.0],
+                backend="graph",
+            )
