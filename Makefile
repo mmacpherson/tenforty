@@ -39,15 +39,12 @@ env: check-uv ## Install package and dependencies
 	uv sync
 
 env-full: check-uv ## Install with graph backend (requires Rust toolchain)
-	uv sync --extra graph-dev
-	uv run maturin develop --features python -m crates/tenforty-graph/Cargo.toml
-	@cp $(VENV)/lib/python*/site-packages/graphlib/graphlib.*.so src/tenforty/graphlib/ 2>/dev/null || true
+	uv pip install setuptools-rust>=1.7
+	uv pip install -e ".[dev]"
 
 env-graph-only: check-uv ## Graph backend only (Windows compatible, no OTS)
-	uv sync --extra graph-dev
-	uv run maturin develop --features python -m crates/tenforty-graph/Cargo.toml
-	@cp $(VENV)/lib/python*/site-packages/graphlib/graphlib.*.so src/tenforty/graphlib/ 2>/dev/null || true
-	TENFORTY_GRAPH_ONLY=1 uv sync --extra graph-dev
+	uv pip install setuptools-rust>=1.7
+	TENFORTY_GRAPH_ONLY=1 uv pip install -e "."
 
 jupyter-env: check-uv ## Install Jupyter kernel
 	uv sync --extra jupyter

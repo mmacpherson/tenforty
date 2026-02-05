@@ -11,9 +11,6 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit"
 ]
-graph-dev = [
-  "maturin>=1.0"
-]
 
 [project]
 authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
@@ -53,9 +50,6 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit"
 ]
-graph-dev = [
-  "maturin>=1.0"
-]
 jupyter = [
   "jupyter",
   "seaborn",
@@ -65,11 +59,6 @@ jupyter = [
 
 [tool.cython]
 language_level = "3"
-
-[tool.maturin]
-features = ["python"]
-manifest-path = "crates/tenforty-graph/Cargo.toml"
-module-name = "tenforty.graphlib"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
