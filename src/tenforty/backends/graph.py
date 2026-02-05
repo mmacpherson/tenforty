@@ -313,16 +313,17 @@ class GraphBackend:
         input_names = set(graph.input_names())
 
         for natural_name, values in inputs.items():
-            node_name = None
+            node_names = []
             if natural_name in NATURAL_TO_NODE:
-                node_name = NATURAL_TO_NODE[natural_name]
-            elif natural_name in state_mapping:
-                node_name = state_mapping[natural_name]
+                node_names.append(NATURAL_TO_NODE[natural_name])
+            if natural_name in state_mapping:
+                node_names.append(state_mapping[natural_name])
 
-            if node_name:
+            for node_name in node_names:
                 if node_name not in input_names:
                     raise RuntimeError(
                         "Graph backend mapping error: expected input node not found.\n"
+                        f"State: {state.value if state else None}\n"
                         f"Natural field: {natural_name}\n"
                         f"Expected node: {node_name}"
                     )
