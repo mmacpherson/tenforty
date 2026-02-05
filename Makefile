@@ -39,11 +39,11 @@ env: check-uv ## Install package and dependencies
 	uv sync
 
 env-full: check-uv ## Install with graph backend (requires Rust toolchain)
-	uv pip install setuptools-rust>=1.7
+	uv pip install "setuptools-rust>=1.7"
 	uv pip install -e ".[dev]"
 
 env-graph-only: check-uv ## Graph backend only (Windows compatible, no OTS)
-	uv pip install setuptools-rust>=1.7
+	uv pip install "setuptools-rust>=1.7"
 	TENFORTY_GRAPH_ONLY=1 uv pip install -e "."
 
 jupyter-env: check-uv ## Install Jupyter kernel
