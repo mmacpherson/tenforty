@@ -3,6 +3,7 @@ harness = false
 name = "jit_bench"
 
 [dependencies]
+ouroboros = {version = "0.18", optional = true}
 rayon = {version = "1.10", optional = true}
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0"
@@ -46,7 +47,7 @@ proptest = "1.0"
 default = ["parallel"]
 jit = ["cranelift", "cranelift-jit", "cranelift-module", "cranelift-native"]
 parallel = ["rayon"]
-python = ["pyo3", "parallel"]
+python = ["pyo3", "ouroboros", "parallel"]
 wasm = ["wasm-bindgen", "js-sys"]
 
 [lib]

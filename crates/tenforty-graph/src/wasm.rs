@@ -109,43 +109,69 @@ pub struct Runtime {
     inner: RefCell<RsRuntime<'static>>,
 }
 
+/// Create an RsRuntime with a 'static borrow of the graph data inside an Rc.
+///
+/// # Safety
+/// The returned RsRuntime borrows the RsGraph with a 'static lifetime, but the
+/// actual lifetime is tied to the Rc. The caller must ensure that the Rc is kept
+/// alive for as long as the RsRuntime exists. In practice, both are stored in the
+/// same `Runtime` struct, so the Rc cannot be dropped while the RsRuntime is alive.
+fn make_runtime(graph_rc: &Rc<RsGraph>, filing_status: RsFilingStatus) -> RsRuntime<'static> {
+    let graph_ptr: *const RsGraph = Rc::as_ptr(graph_rc);
+    // SAFETY: graph_ptr points to heap-allocated data owned by the Rc.
+    // The Rc is stored alongside this runtime and will not be dropped first.
+    // The RsGraph is not mutated through the Rc (no interior mutability).
+    let graph_ref: &'static RsGraph = unsafe { &*graph_ptr };
+    RsRuntime::new(graph_ref, filing_status)
+}
+
 #[wasm_bindgen]
 impl Runtime {
     #[wasm_bindgen(constructor)]
     pub fn new(graph: &Graph, filing_status: &FilingStatus) -> Self {
         let graph_rc = Rc::clone(&graph.inner);
-        let graph_ref: &'static RsGraph = unsafe { &*(Rc::as_ptr(&graph_rc) as *const RsGraph) };
+        let rt = make_runtime(&graph_rc, filing_status.0);
         Runtime {
             graph: graph_rc,
-            inner: RefCell::new(RsRuntime::new(graph_ref, filing_status.0)),
+            inner: RefCell::new(rt),
         }
     }
 
     pub fn set(&self, name: &str, value: f64) -> Result<(), JsError> {
         self.inner
-            .borrow_mut()
+            .try_borrow_mut()
+            .map_err(|_| JsError::new("Runtime is already borrowed"))?
             .set(name, value)
             .map_err(|e| JsError::new(&format!("{}", e)))
     }
 
     pub fn eval(&self, name: &str) -> Result<f64, JsError> {
         self.inner
-            .borrow_mut()
+            .try_borrow_mut()
+            .map_err(|_| JsError::new("Runtime is already borrowed"))?
             .eval(name)
             .map_err(|e| JsError::new(&format!("{}", e)))
     }
 
     pub fn gradient(&self, output: &str, input: &str) -> Result<f64, JsError> {
-        let graph_ref: &RsGraph = unsafe { &*(Rc::as_ptr(&self.graph) as *const RsGraph) };
-        let output_id = graph_ref
+        let output_id = self
+            .graph
             .node_id_by_name(output)
             .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
-        let input_id = graph_ref
+        let input_id = self
+            .graph
             .node_id_by_name(input)
             .ok_or_else(|| JsError::new(&format!("Node not found: {}", input)))?;
 
-        autodiff::gradient(&mut self.inner.borrow_mut(), output_id, input_id)
-            .map_err(|e| JsError::new(&format!("{}", e)))
+        autodiff::gradient(
+            &mut *self
+                .inner
+                .try_borrow_mut()
+                .map_err(|_| JsError::new("Runtime is already borrowed"))?,
+            output_id,
+            input_id,
+        )
+        .map_err(|e| JsError::new(&format!("{}", e)))
     }
 
     pub fn solve(
@@ -155,18 +181,22 @@ impl Runtime {
         for_input: &str,
         initial_guess: Option<f64>,
     ) -> Result<f64, JsError> {
-        let graph_ref: &RsGraph = unsafe { &*(Rc::as_ptr(&self.graph) as *const RsGraph) };
-        let output_id = graph_ref
+        let output_id = self
+            .graph
             .node_id_by_name(output)
             .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
-        let input_id = graph_ref
+        let input_id = self
+            .graph
             .node_id_by_name(for_input)
             .ok_or_else(|| JsError::new(&format!("Node not found: {}", for_input)))?;
 
         let guess = initial_guess.unwrap_or(target);
 
         solver::solve(
-            &mut self.inner.borrow_mut(),
+            &mut *self
+                .inner
+                .try_borrow_mut()
+                .map_err(|_| JsError::new("Runtime is already borrowed"))?,
             output_id,
             target,
             input_id,

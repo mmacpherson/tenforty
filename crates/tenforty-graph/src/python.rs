@@ -1,5 +1,6 @@
 #[cfg(feature = "jit")]
 use crate::jit::{JitCompiler, BATCH_SIZE};
+use ouroboros::self_referencing;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -483,10 +484,17 @@ impl Graph {
     }
 }
 
+#[self_referencing]
+struct OwnedRuntime {
+    graph: Arc<RsGraph>,
+    #[borrows(graph)]
+    #[covariant]
+    runtime: RsRuntime<'this>,
+}
+
 #[pyclass]
 pub struct Runtime {
-    graph: Arc<RsGraph>,
-    inner: RsRuntime<'static>,
+    inner: OwnedRuntime,
 }
 
 #[pymethods]
@@ -494,36 +502,46 @@ impl Runtime {
     #[new]
     fn new(graph: &Graph, filing_status: &FilingStatus) -> Self {
         let graph_arc = Arc::clone(&graph.inner);
-        let graph_ref: &'static RsGraph = unsafe { &*(Arc::as_ptr(&graph_arc) as *const RsGraph) };
+        let status = filing_status.0;
         Runtime {
-            graph: graph_arc,
-            inner: RsRuntime::new(graph_ref, filing_status.0),
+            inner: OwnedRuntimeBuilder {
+                graph: graph_arc,
+                runtime_builder: |graph: &Arc<RsGraph>| RsRuntime::new(graph, status),
+            }
+            .build(),
         }
     }
 
     fn set(&mut self, name: &str, value: f64) -> PyResult<()> {
-        self.inner
-            .set(name, value)
-            .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        self.inner.with_runtime_mut(|rt| {
+            rt.set(name, value)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
     }
 
     fn eval(&mut self, name: &str) -> PyResult<f64> {
-        self.inner
-            .eval(name)
-            .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        self.inner.with_runtime_mut(|rt| {
+            rt.eval(name)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
     }
 
     fn gradient(&mut self, output: &str, input: &str) -> PyResult<f64> {
-        let graph_ref: &RsGraph = unsafe { &*(Arc::as_ptr(&self.graph) as *const RsGraph) };
-        let output_id = graph_ref
-            .node_id_by_name(output)
-            .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output)))?;
-        let input_id = graph_ref
-            .node_id_by_name(input)
-            .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", input)))?;
+        let output_str = output.to_string();
+        let input_str = input.to_string();
+        self.inner.with_runtime_mut(|rt| {
+            let output_id = rt
+                .graph()
+                .node_id_by_name(&output_str)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output_str)))?;
+            let input_id = rt
+                .graph()
+                .node_id_by_name(&input_str)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", input_str)))?;
 
-        autodiff::gradient(&mut self.inner, output_id, input_id)
-            .map_err(|e| PyValueError::new_err(format!("{}", e)))
+            autodiff::gradient(rt, output_id, input_id)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
     }
 
     #[pyo3(signature = (output, target, for_input, initial_guess=None))]
@@ -534,18 +552,22 @@ impl Runtime {
         for_input: &str,
         initial_guess: Option<f64>,
     ) -> PyResult<f64> {
-        let graph_ref: &RsGraph = unsafe { &*(Arc::as_ptr(&self.graph) as *const RsGraph) };
-        let output_id = graph_ref
-            .node_id_by_name(output)
-            .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output)))?;
-        let input_id = graph_ref
-            .node_id_by_name(for_input)
-            .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", for_input)))?;
-
         let guess = initial_guess.unwrap_or(target);
+        let output_str = output.to_string();
+        let for_input_str = for_input.to_string();
 
-        solver::solve(&mut self.inner, output_id, target, input_id, guess)
-            .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        self.inner.with_runtime_mut(|rt| {
+            let graph = rt.graph();
+            let output_id = graph
+                .node_id_by_name(&output_str)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output_str)))?;
+            let input_id = graph.node_id_by_name(&for_input_str).ok_or_else(|| {
+                PyValueError::new_err(format!("Node not found: {}", for_input_str))
+            })?;
+
+            solver::solve(rt, output_id, target, input_id, guess)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
     }
 }
 

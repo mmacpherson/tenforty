@@ -43,6 +43,62 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 - Explore how taxes vary as a function of income, state, filing status, and year.
 - Easily integrate with data analysis and visualization tools in Python with `polars` support.
 - Evaluate "what if" tax scenarios efficiently and reproducibly.
+- **Graph backend**: Optional Rust-based computation engine with automatic differentiation for exact marginal rates and Newton's method inverse solving.
+
+
+## Graph Backend
+
+`tenforty` includes an optional graph-based computation backend built in Rust,
+offering automatic differentiation (autodiff) and inverse solving capabilities.
+
+To use the graph backend, pass `backend="graph"` to `evaluate_return` or
+`evaluate_returns`:
+
+``` python
+from tenforty import evaluate_return
+
+evaluate_return(w2_income=100_000, backend="graph")
+```
+
+The graph backend currently supports tax years 2024-2025 and a subset of states
+(California, New York, and all no-income-tax states).
+
+### Marginal Tax Rate (Autodiff)
+
+The `marginal_rate` function computes exact marginal tax rates using automatic
+differentiation -- no finite-difference approximation needed:
+
+``` python
+from tenforty import marginal_rate
+
+# Federal marginal rate on wages
+marginal_rate(w2_income=100_000)  # => 0.22
+
+# Marginal rate on long-term capital gains
+marginal_rate(w2_income=100_000, long_term_capital_gains=50_000, wrt="long_term_capital_gains")
+
+# Combined federal + state marginal rate
+marginal_rate(w2_income=100_000, state="CA")
+```
+
+### Inverse Solver
+
+The `solve_for_income` function uses Newton's method with autodiff gradients to
+find the input value that produces a target tax amount:
+
+``` python
+from tenforty import solve_for_income
+
+# What wages produce $15,000 in federal tax?
+solve_for_income(target_tax=15_000)  # => ~$82,000
+```
+
+### Interactive Demo
+
+An interactive WebAssembly demo of the graph backend is available at
+[mmacpherson.github.io/tenforty](https://mmacpherson.github.io/tenforty/),
+featuring real-time tax curve visualization, bracket breakdowns, gradient
+sensitivity analysis, and the inverse solver.
 
 
 ## Disclaimer
