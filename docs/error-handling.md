@@ -1,5 +1,8 @@
 # Error Handling
 
+This document covers OTS backend error handling. The graph backend uses
+different error semantics; see `src/tenforty/backends/graph.py`.
+
 `tenforty` provides configurable error handling for dealing with OTS processing
 issues. This document covers the `on_error` parameter and the exception types
 available.

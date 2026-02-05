@@ -4,7 +4,9 @@
 
 | Date | Category | Input | OTS | Graph | Diff | Status |
 |------|----------|-------|-----|-------|------|--------|
-| 2025-01-24 | CA State Tax | w2=$100k, Single | $5,182 | $5,438 | $256 | Investigating |
+| 2025-01-24 | CA State Tax | w2=$100k, Single | $5,182 | $5,438 | $256 | Known (exemption credit) |
+| 2026-02-05 | NY State Tax (low income) | w2=$25k, MFJ | $324 | $358 | $34 | Known (household credit) |
+| 2026-02-05 | NY State Tax (high income) | w2=$150k, Single | $8,433 | $7,952 | $481 | Known (supplemental tax) |
 
 ## Verified Matches
 
@@ -15,6 +17,8 @@
 - Schedule 1 income: AGI matches exactly
 - Itemized deductions: Taxable income matches exactly
 - CA state AGI and taxable income: Matches exactly between OTS and Graph
+- NY state AGI: Matches exactly between OTS and Graph
+- NY state tax ($35k-$100k): Matches within $2 rounding tolerance
 
 ## 2025 Support
 
@@ -33,11 +37,18 @@
 - `NATURAL_TO_LINE` didn't map `short_term_capital_gains` or `long_term_capital_gains`
 - Fix: Add explicit mappings and combine in `_create_runtime()`
 
-### CA State Tax Discrepancy - INVESTIGATING
-- Graph returns ~$256 higher CA state tax than OTS
-- Likely cause: Graph not applying CA exemption credits (L32)
-- OTS appears to automatically apply personal exemption credits
+### CA State Tax Discrepancy
+- Graph returns ~$256-520 higher CA state tax than OTS (varies by filing status/income)
+- Cause: Graph does not apply CA exemption credits (L32); OTS applies them automatically
 - Graph requires explicit L32 input which defaults to 0
+- MFJ credit is larger (~$300) vs Single (~$256); credit phases out at higher incomes
+
+### NY State Tax Discrepancy
+- **Low income (<$35k)**: Graph returns $20-49 more tax; OTS auto-applies household credit (L40)
+- **Mid income ($35k-$100k)**: Parity within $2 rounding tolerance
+- **High income (>$120k)**: Graph returns significantly less tax; OTS implements NY supplemental
+  tax (income recapture) which the graph spec does not yet implement
+- NY IT-201 import fix: Added L6b and schedule_1:L1 as outputs in federal specs (2026-02-05)
 
 ## Implementation Notes
 

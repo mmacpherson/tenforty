@@ -228,6 +228,7 @@ us1040_2024 = form "us_1040" 2024 $ do
 
     outputs
         [ "L1z"
+        , "L6b"
         , "L9"
         , "L11"
         , "L12Final"

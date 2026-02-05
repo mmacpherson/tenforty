@@ -48,7 +48,7 @@ default = ["parallel"]
 jit = ["cranelift", "cranelift-jit", "cranelift-module", "cranelift-native"]
 parallel = ["rayon"]
 python = ["pyo3", "ouroboros", "parallel"]
-wasm = ["wasm-bindgen", "js-sys"]
+wasm = ["wasm-bindgen", "js-sys", "ouroboros"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]

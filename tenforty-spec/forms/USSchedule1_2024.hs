@@ -132,4 +132,4 @@ usSchedule1_2024 = form "us_schedule_1" 2024 $ do
                 .+. l23
                 .+. l25
 
-    outputs ["L9", "L10", "L25", "L26"]
+    outputs ["L1", "L9", "L10", "L25", "L26"]
