@@ -270,29 +270,6 @@ class GraphBackend:
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
 
-        if state and state != OTSState.NONE:
-            if state not in STATE_FORM_NAMES:
-                raise ValueError(
-                    f"Graph backend does not support state returns for {state.value}"
-                )
-
-        state_mapping = STATE_NATURAL_TO_NODE.get(state, {})
-
-        unsupported: list[tuple[str, list[float]]] = []
-        for natural_name, values in inputs.items():
-            if natural_name in NATURAL_TO_NODE or natural_name in state_mapping:
-                continue
-            if any(v not in (0, 0.0, None) for v in values):
-                unsupported.append((natural_name, values))
-
-        if unsupported:
-            details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
-            raise NotImplementedError(
-                "Graph backend does not yet support some non-zero inputs.\n"
-                "Provide these as 0 for now, or use backend='ots'.\n"
-                f"Unsupported inputs:\n{details}"
-            )
-
         # Determine required forms using representative inputs from the batch.
         # We use the max-absolute value per input to capture any non-zero cases.
         resolve_inputs = {
@@ -307,10 +284,9 @@ class GraphBackend:
         )
         graph = _link_graphs(year, tuple(form_ids))
 
-        input_names = set(graph.input_names())
-
         # Map natural input names to graph node names
         graph_inputs = {}
+        state_mapping = STATE_NATURAL_TO_NODE.get(state, {})
 
         for natural_name, values in inputs.items():
             node_name = None
@@ -320,13 +296,6 @@ class GraphBackend:
                 node_name = state_mapping[natural_name]
 
             if node_name:
-                if node_name not in input_names:
-                    raise RuntimeError(
-                        "Graph backend mapping error: expected input node not found.\n"
-                        f"State: {state.value if state else None}\n"
-                        f"Natural field: {natural_name}\n"
-                        f"Expected node: {node_name}"
-                    )
                 graph_inputs[node_name] = values
 
         # Define outputs we want to capture

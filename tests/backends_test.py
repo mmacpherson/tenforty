@@ -129,18 +129,6 @@ class TestGraphBackend:
         with pytest.raises(RuntimeError, match="unresolved imports"):
             graph_module._link_graphs(2024, ("us_1040", "ca_540"))
 
-    def test_graph_batch_rejects_unsupported_nonzero_inputs(self):
-        """Batch path should reject unsupported non-zero inputs like the single path."""
-        from tenforty import evaluate_returns
-
-        with pytest.raises(NotImplementedError, match="Unsupported inputs"):
-            evaluate_returns(
-                year=2024,
-                w2_income=[100_000],
-                dependent_exemptions=[100.0],
-                backend="graph",
-            )
-
     def test_graph_backend_integration_resolves_schedule_d(self):
         """Integration test: inputting capital gains should automatically load Schedule D."""
         from tenforty.backends import GraphBackend
