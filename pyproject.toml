@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=68.0", "wheel", "Cython>=3.0"]
+requires = ["setuptools>=68.0", "wheel", "Cython>=3.0", "setuptools-rust>=1.7"]
 
 # For uv users: uv sync (dev syncs by default)
 [dependency-groups]

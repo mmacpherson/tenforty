@@ -56,6 +56,11 @@ const STATE_FORMS = {
   new_york: ["ny_it201"],
 };
 
+const STATE_TAX_NODES = {
+  california: "ca_540_L64_ca_total_tax",
+  new_york: "ny_it201_L46_ny_total_state_tax",
+};
+
 const YEAR = 2024;
 
 function formatCurrency(value) {
@@ -175,6 +180,10 @@ function showState() {
   return getStateKey() !== "none";
 }
 
+function getStateTaxNode() {
+  return STATE_TAX_NODES[getStateKey()] || null;
+}
+
 function updateResults() {
   if (!graph || !runtime) return;
 
@@ -193,7 +202,8 @@ function updateResults() {
     const medicareTax = safeEval("us_form_8959_additional_medicare_tax");
     const amt = safeEval("us_form_6251_amt");
     const federalTax = safeEval("us_1040_federal_tax");
-    const stateTax = stateActive ? safeEval("ca_540_ca_state_tax") : 0;
+    const stateTaxNode = getStateTaxNode();
+    const stateTax = stateTaxNode ? safeEval(stateTaxNode) : 0;
     const totalTax = federalTax + stateTax;
     const effectiveRate =
       grossIncome > 0 ? (federalTax / grossIncome) * 100 : 0;
@@ -284,15 +294,31 @@ function updateResults() {
 }
 
 function updateSensitivity() {
-  const stateActive = showState();
-  const taxNode = stateActive ? "us_1040_federal_tax" : "us_1040_federal_tax";
+  const stateTaxNode = getStateTaxNode();
 
-  const wagesGrad = safeGradient(taxNode, "us_1040_wages");
-  const interestGrad = safeGradient(taxNode, "us_1040_interest");
-  const ltcgGrad = safeGradient(
-    taxNode,
+  const federalWagesGrad = safeGradient("us_1040_federal_tax", "us_1040_wages");
+  const federalInterestGrad = safeGradient(
+    "us_1040_federal_tax",
+    "us_1040_interest",
+  );
+  const federalLtcgGrad = safeGradient(
+    "us_1040_federal_tax",
     "us_schedule_d_long_term_capital_gains",
   );
+
+  const stateWagesGrad = stateTaxNode
+    ? safeGradient(stateTaxNode, "us_1040_wages")
+    : 0;
+  const stateInterestGrad = stateTaxNode
+    ? safeGradient(stateTaxNode, "us_1040_interest")
+    : 0;
+  const stateLtcgGrad = stateTaxNode
+    ? safeGradient(stateTaxNode, "us_schedule_d_long_term_capital_gains")
+    : 0;
+
+  const wagesGrad = federalWagesGrad + stateWagesGrad;
+  const interestGrad = federalInterestGrad + stateInterestGrad;
+  const ltcgGrad = federalLtcgGrad + stateLtcgGrad;
 
   document.getElementById("sens-wages").textContent =
     "+" + formatCurrency(wagesGrad * 1000);
@@ -421,7 +447,7 @@ function computeTaxCurve(overrideValues = null) {
   const numPoints = 100;
   const maxIncome = 500000;
   const values = overrideValues || getInputValues();
-  const stateActive = showState();
+  const stateTaxNode = getStateTaxNode();
 
   taxCurveData = [];
   stackedCurveData = [];
@@ -445,7 +471,7 @@ function computeTaxCurve(overrideValues = null) {
       amt: safeEval("us_form_6251_amt"),
       niit: safeEval("us_form_8960_niit"),
       medicare: safeEval("us_form_8959_additional_medicare_tax"),
-      state: stateActive ? safeEval("ca_540_ca_state_tax") : 0,
+      state: stateTaxNode ? safeEval(stateTaxNode) : 0,
     });
   }
 
@@ -857,10 +883,20 @@ function setupCollapsibles() {
 
 function showError(message) {
   const loading = document.getElementById("loading");
-  loading.innerHTML = `
-    <p style="color: #e74c3c;">Failed to load: ${message}</p>
-    <p>Make sure to run: <code>make wasm-dev</code></p>
-  `;
+  loading.textContent = "";
+
+  const errorP = document.createElement("p");
+  errorP.style.color = "#e74c3c";
+  errorP.textContent = "Failed to load: " + message;
+
+  const helpP = document.createElement("p");
+  helpP.textContent = "Make sure to run: ";
+  const code = document.createElement("code");
+  code.textContent = "make wasm-dev";
+  helpP.appendChild(code);
+
+  loading.appendChild(errorP);
+  loading.appendChild(helpP);
 }
 
 async function main() {
