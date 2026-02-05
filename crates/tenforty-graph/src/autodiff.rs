@@ -104,7 +104,7 @@ fn backprop(
 
         Op::Clamp { arg, min, max } => {
             let v = values.get(arg).copied().unwrap_or(0.0);
-            if v > *min && v < *max {
+            if v >= *min && v <= *max {
                 *adjoints.entry(*arg).or_insert(0.0) += adj;
             }
         }

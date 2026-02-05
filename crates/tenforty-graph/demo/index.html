@@ -35,6 +35,7 @@
                 <select id="state">
                   <option value="none">Federal Only</option>
                   <option value="california">California</option>
+                  <option value="new_york">New York</option>
                 </select>
               </div>
             </div>
@@ -250,7 +251,7 @@
                 id="state-tax-row"
                 style="display: none"
               >
-                <span class="label">California State Tax</span>
+                <span class="label" id="state-tax-label">State Tax</span>
                 <span class="value" id="state-tax">$0</span>
               </div>
               <div
@@ -435,7 +436,14 @@
       </main>
 
       <footer>
-        <p>2024 Tax Brackets | Graph-based computation with autodiff</p>
+        <p>
+          2024 Tax Year | Graph-based computation with autodiff | Powered by
+          <a
+            href="https://github.com/mmacpherson/tenforty"
+            style="color: #7f8c8d"
+            >tenforty</a
+          >
+        </p>
       </footer>
     </div>
 

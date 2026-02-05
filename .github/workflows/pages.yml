@@ -1,0 +1,63 @@
+name: Deploy WASM Demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+    - crates/tenforty-graph/src/**
+    - crates/tenforty-graph/demo/**
+    - src/tenforty/forms/**
+    - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Install wasm-pack
+      run: curl --proto '=https' --tlsv1.2 https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Build WASM module
+      run: |
+        wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
+        ln -sfn ../pkg crates/tenforty-graph/demo/pkg
+
+    - name: Copy form data to demo
+      run: |
+        mkdir -p crates/tenforty-graph/demo/forms
+        cp src/tenforty/forms/*.json crates/tenforty-graph/demo/forms/
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: crates/tenforty-graph/demo
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

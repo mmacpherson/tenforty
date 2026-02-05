@@ -19,8 +19,8 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env env-full env-graph-only jupyter-env test test-full hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
-.PHONY: spec-graphs forms-sync
+.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: spec-graphs spec-test forms-sync
 .PHONY: spec-fmt spec-lint spec-lint-strict
 .PHONY: runner-image
 
@@ -39,15 +39,12 @@ env: check-uv ## Install package and dependencies
 	uv sync
 
 env-full: check-uv ## Install with graph backend (requires Rust toolchain)
-	uv sync --extra graph-dev
-	uv run maturin develop --features python -m crates/tenforty-graph/Cargo.toml
-	@cp $(VENV)/lib/python*/site-packages/graphlib/graphlib.*.so src/tenforty/graphlib/ 2>/dev/null || true
+	uv pip install "setuptools-rust>=1.7"
+	uv pip install -e ".[dev]"
 
 env-graph-only: check-uv ## Graph backend only (Windows compatible, no OTS)
-	uv sync --extra graph-dev
-	uv run maturin develop --features python -m crates/tenforty-graph/Cargo.toml
-	@cp $(VENV)/lib/python*/site-packages/graphlib/graphlib.*.so src/tenforty/graphlib/ 2>/dev/null || true
-	TENFORTY_GRAPH_ONLY=1 uv sync --extra graph-dev
+	uv pip install "setuptools-rust>=1.7"
+	TENFORTY_GRAPH_ONLY=1 uv pip install -e "."
 
 jupyter-env: check-uv ## Install Jupyter kernel
 	uv sync --extra jupyter
@@ -60,6 +57,9 @@ test: check-uv ## Run tests
 test-full: check-uv ## Run tests with graph backend
 	$(MAKE) env-full
 	uv run pytest
+
+test-all: test-full graph-test spec-test ## Run all tests (Python + Rust + Haskell)
+	@echo "All tests passed."
 
 hooks: check-uv ## Install pre-commit hooks
 	uv sync
@@ -111,6 +111,9 @@ wasm-serve: wasm-dev ## Serve demo locally
 	python3 -m http.server 8080 -d crates/tenforty-graph/demo
 
 ## tenforty-spec (Haskell) targets (local dev only; CI does not run these)
+spec-test: ## Run tenforty-spec tests
+	$(MAKE) -C tenforty-spec test
+
 spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.json
 	cd tenforty-spec && cabal run tenforty-compile -- all -p
 

@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=68.0", "wheel", "Cython>=3.0"]
+requires = ["setuptools>=68.0", "wheel", "Cython>=3.0", "setuptools-rust>=1.7"]
 
 # For uv users: uv sync (dev syncs by default)
 [dependency-groups]
@@ -10,9 +10,6 @@ dev = [
   "pytest-cov",
   "ruff>=0.2.0",
   "pre-commit"
-]
-graph-dev = [
-  "maturin>=1.0"
 ]
 
 [project]
@@ -53,9 +50,6 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit"
 ]
-graph-dev = [
-  "maturin>=1.0"
-]
 jupyter = [
   "jupyter",
   "seaborn",
@@ -65,11 +59,6 @@ jupyter = [
 
 [tool.cython]
 language_level = "3"
-
-[tool.maturin]
-features = ["python"]
-manifest-path = "crates/tenforty-graph/Cargo.toml"
-module-name = "tenforty.graphlib"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -123,7 +112,8 @@ ext-modules = [
 ]
 include-package-data = false
 package-dir = {"" = "src"}
-packages = ["tenforty", "tenforty.otslib", "tenforty.backends"]
+packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.forms", "tenforty.graphlib"]
 
 [tool.setuptools.package-data]
+"tenforty.forms" = ["*.json", "*.md"]
 "tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]

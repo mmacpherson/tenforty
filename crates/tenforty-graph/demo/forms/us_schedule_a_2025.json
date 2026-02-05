@@ -1,0 +1,409 @@
+{
+  "imports": [
+    {
+      "form": "us_1040",
+      "line": "L11",
+      "year": 2025
+    }
+  ],
+  "inputs": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  "meta": {
+    "form_id": "us_schedule_a",
+    "generated_by": "tenforty-dsl",
+    "year": 2025
+  },
+  "nodes": {
+    "0": {
+      "id": 0,
+      "name": "L1_medical_dental",
+      "op": {
+        "type": "input"
+      }
+    },
+    "1": {
+      "id": 1,
+      "name": "L5a_state_local_income_or_sales",
+      "op": {
+        "type": "input"
+      }
+    },
+    "10": {
+      "id": 10,
+      "name": "L11_charity_cash",
+      "op": {
+        "type": "input"
+      }
+    },
+    "11": {
+      "id": 11,
+      "name": "L12_charity_noncash",
+      "op": {
+        "type": "input"
+      }
+    },
+    "12": {
+      "id": 12,
+      "name": "L13_charity_carryover",
+      "op": {
+        "type": "input"
+      }
+    },
+    "13": {
+      "id": 13,
+      "name": "L15_casualty_theft",
+      "op": {
+        "type": "input"
+      }
+    },
+    "14": {
+      "id": 14,
+      "name": "L16_other_deductions",
+      "op": {
+        "type": "input"
+      }
+    },
+    "15": {
+      "id": 15,
+      "name": "L2_agi_amount",
+      "op": {
+        "form": "us_1040",
+        "line": "L11",
+        "type": "import",
+        "year": 2025
+      }
+    },
+    "16": {
+      "id": 16,
+      "op": {
+        "type": "literal",
+        "value": 7.5e-2
+      }
+    },
+    "17": {
+      "id": 17,
+      "name": "L3_medical_threshold",
+      "op": {
+        "left": 15,
+        "right": 16,
+        "type": "mul"
+      }
+    },
+    "18": {
+      "id": 18,
+      "op": {
+        "type": "literal",
+        "value": 0
+      }
+    },
+    "19": {
+      "id": 19,
+      "op": {
+        "left": 0,
+        "right": 17,
+        "type": "sub"
+      }
+    },
+    "2": {
+      "id": 2,
+      "name": "L5b_state_local_real_estate",
+      "op": {
+        "type": "input"
+      }
+    },
+    "20": {
+      "id": 20,
+      "name": "L4_medical_deduction",
+      "op": {
+        "left": 18,
+        "right": 19,
+        "type": "max"
+      }
+    },
+    "21": {
+      "id": 21,
+      "op": {
+        "left": 1,
+        "right": 2,
+        "type": "add"
+      }
+    },
+    "22": {
+      "id": 22,
+      "name": "L5d_salt_total",
+      "op": {
+        "left": 21,
+        "right": 3,
+        "type": "add"
+      }
+    },
+    "23": {
+      "id": 23,
+      "op": {
+        "type": "literal",
+        "value": 10000
+      }
+    },
+    "24": {
+      "id": 24,
+      "op": {
+        "type": "literal",
+        "value": 10000
+      }
+    },
+    "25": {
+      "id": 25,
+      "op": {
+        "type": "literal",
+        "value": 5000
+      }
+    },
+    "26": {
+      "id": 26,
+      "op": {
+        "type": "literal",
+        "value": 10000
+      }
+    },
+    "27": {
+      "id": 27,
+      "op": {
+        "type": "literal",
+        "value": 10000
+      }
+    },
+    "28": {
+      "id": 28,
+      "name": "SALTCap",
+      "op": {
+        "type": "by_status",
+        "values": {
+          "head_of_household": 26,
+          "married_joint": 24,
+          "married_separate": 25,
+          "qualifying_widow": 27,
+          "single": 23
+        }
+      }
+    },
+    "29": {
+      "id": 29,
+      "name": "L5e_salt_limited",
+      "op": {
+        "left": 22,
+        "right": 28,
+        "type": "min"
+      }
+    },
+    "3": {
+      "id": 3,
+      "name": "L5c_state_local_personal_property",
+      "op": {
+        "type": "input"
+      }
+    },
+    "30": {
+      "id": 30,
+      "name": "L7_total_taxes",
+      "op": {
+        "left": 29,
+        "right": 4,
+        "type": "add"
+      }
+    },
+    "31": {
+      "id": 31,
+      "op": {
+        "left": 5,
+        "right": 6,
+        "type": "add"
+      }
+    },
+    "32": {
+      "id": 32,
+      "op": {
+        "left": 31,
+        "right": 7,
+        "type": "add"
+      }
+    },
+    "33": {
+      "id": 33,
+      "name": "L8e_home_interest_total",
+      "op": {
+        "left": 32,
+        "right": 8,
+        "type": "add"
+      }
+    },
+    "34": {
+      "id": 34,
+      "name": "L10_total_interest",
+      "op": {
+        "left": 33,
+        "right": 9,
+        "type": "add"
+      }
+    },
+    "35": {
+      "id": 35,
+      "op": {
+        "left": 10,
+        "right": 11,
+        "type": "add"
+      }
+    },
+    "36": {
+      "id": 36,
+      "name": "L14_total_charity",
+      "op": {
+        "left": 35,
+        "right": 12,
+        "type": "add"
+      }
+    },
+    "37": {
+      "id": 37,
+      "op": {
+        "type": "literal",
+        "value": 0
+      }
+    },
+    "38": {
+      "id": 38,
+      "op": {
+        "left": 0,
+        "right": 17,
+        "type": "sub"
+      }
+    },
+    "39": {
+      "id": 39,
+      "name": "L4_ref",
+      "op": {
+        "left": 37,
+        "right": 38,
+        "type": "max"
+      }
+    },
+    "4": {
+      "id": 4,
+      "name": "L6_other_taxes",
+      "op": {
+        "type": "input"
+      }
+    },
+    "40": {
+      "id": 40,
+      "name": "L7_ref",
+      "op": {
+        "left": 29,
+        "right": 4,
+        "type": "add"
+      }
+    },
+    "41": {
+      "id": 41,
+      "name": "L10_ref",
+      "op": {
+        "left": 33,
+        "right": 9,
+        "type": "add"
+      }
+    },
+    "42": {
+      "id": 42,
+      "op": {
+        "left": 10,
+        "right": 11,
+        "type": "add"
+      }
+    },
+    "43": {
+      "id": 43,
+      "name": "L14_ref",
+      "op": {
+        "left": 42,
+        "right": 12,
+        "type": "add"
+      }
+    },
+    "44": {
+      "id": 44,
+      "op": {
+        "left": 39,
+        "right": 40,
+        "type": "add"
+      }
+    },
+    "45": {
+      "id": 45,
+      "op": {
+        "left": 44,
+        "right": 41,
+        "type": "add"
+      }
+    },
+    "46": {
+      "id": 46,
+      "op": {
+        "left": 45,
+        "right": 43,
+        "type": "add"
+      }
+    },
+    "47": {
+      "id": 47,
+      "op": {
+        "left": 46,
+        "right": 13,
+        "type": "add"
+      }
+    },
+    "48": {
+      "id": 48,
+      "name": "L17_total_itemized",
+      "op": {
+        "left": 47,
+        "right": 14,
+        "type": "add"
+      }
+    },
+    "5": {
+      "id": 5,
+      "name": "L8a_home_mortgage_1098",
+      "op": {
+        "type": "input"
+      }
+    },
+    "6": {
+      "id": 6,
+      "name": "L8b_home_mortgage_not_1098",
+      "op": {
+        "type": "input"
+      }
+    },
+    "7": {
+      "id": 7,
+      "name": "L8c_points_not_1098",
+      "op": {
+        "type": "input"
+      }
+    },
+    "8": {
+      "id": 8,
+      "name": "L8d_mortgage_insurance",
+      "op": {
+        "type": "input"
+      }
+    },
+    "9": {
+      "id": 9,
+      "name": "L9_investment_interest",
+      "op": {
+        "type": "input"
+      }
+    }
+  },
+  "outputs": [34, 36, 48, 20, 30],
+  "tables": {}
+}

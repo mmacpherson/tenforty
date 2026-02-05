@@ -1,4 +1,9 @@
-import init, { FilingStatus, Graph, Runtime } from "./pkg/graphlib.js";
+import init, {
+  FilingStatus,
+  Graph,
+  GraphSet,
+  Runtime,
+} from "./pkg/graphlib.js";
 
 let graph = null;
 let runtime = null;
@@ -27,7 +32,36 @@ const BRACKET_COLORS = [
   "#c0392b",
   "#8e44ad",
 ];
-const BRACKET_RATES = [0.1, 0.12, 0.22, 0.24, 0.32, 0.35, 0.37];
+
+const FEDERAL_FORMS = [
+  "us_1040",
+  "us_schedule_d",
+  "us_schedule_1",
+  "us_schedule_a",
+  "us_form_8995",
+  "us_schedule_2",
+  "us_form_8812",
+  "us_schedule_3",
+  "us_form_8863",
+  "us_schedule_se",
+  "us_form_6251",
+  "us_form_8959",
+  "us_form_8960",
+  "us_form_2441",
+];
+
+const STATE_FORMS = {
+  none: [],
+  california: ["ca_540", "ca_schedule_ca", "ca_ftb_3514"],
+  new_york: ["ny_it201"],
+};
+
+const STATE_TAX_NODES = {
+  california: "ca_540_L64_ca_total_tax",
+  new_york: "ny_it201_L46_ny_total_state_tax",
+};
+
+const YEAR = 2024;
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("en-US", {
@@ -59,55 +93,39 @@ function getFilingStatus(value) {
   }
 }
 
-function getBrackets(filingStatus) {
-  const brackets = {
-    single: [
-      { threshold: 11600, rate: 0.1 },
-      { threshold: 47150, rate: 0.12 },
-      { threshold: 100525, rate: 0.22 },
-      { threshold: 191950, rate: 0.24 },
-      { threshold: 243725, rate: 0.32 },
-      { threshold: 609350, rate: 0.35 },
-      { threshold: Infinity, rate: 0.37 },
-    ],
-    married_joint: [
-      { threshold: 23200, rate: 0.1 },
-      { threshold: 94300, rate: 0.12 },
-      { threshold: 201050, rate: 0.22 },
-      { threshold: 383900, rate: 0.24 },
-      { threshold: 487450, rate: 0.32 },
-      { threshold: 731200, rate: 0.35 },
-      { threshold: Infinity, rate: 0.37 },
-    ],
-    married_separate: [
-      { threshold: 11600, rate: 0.1 },
-      { threshold: 47150, rate: 0.12 },
-      { threshold: 100525, rate: 0.22 },
-      { threshold: 191950, rate: 0.24 },
-      { threshold: 243725, rate: 0.32 },
-      { threshold: 365600, rate: 0.35 },
-      { threshold: Infinity, rate: 0.37 },
-    ],
-    head_of_household: [
-      { threshold: 16550, rate: 0.1 },
-      { threshold: 63100, rate: 0.12 },
-      { threshold: 100500, rate: 0.22 },
-      { threshold: 191950, rate: 0.24 },
-      { threshold: 243700, rate: 0.32 },
-      { threshold: 609350, rate: 0.35 },
-      { threshold: Infinity, rate: 0.37 },
-    ],
-    qualifying_widow: [
-      { threshold: 23200, rate: 0.1 },
-      { threshold: 94300, rate: 0.12 },
-      { threshold: 201050, rate: 0.22 },
-      { threshold: 383900, rate: 0.24 },
-      { threshold: 487450, rate: 0.32 },
-      { threshold: 731200, rate: 0.35 },
-      { threshold: Infinity, rate: 0.37 },
-    ],
-  };
-  return brackets[filingStatus] || brackets["single"];
+async function loadFormGraph(formId) {
+  const url = `forms/${formId}_${YEAR}.json`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load ${url}: ${response.status}`);
+  }
+  const json = await response.text();
+  return Graph.fromJson(json);
+}
+
+async function buildLinkedGraph(stateKey) {
+  const gs = new GraphSet();
+
+  for (const formId of FEDERAL_FORMS) {
+    const g = await loadFormGraph(formId);
+    gs.add(formId, g);
+  }
+
+  const stateForms = STATE_FORMS[stateKey] || [];
+  for (const formId of stateForms) {
+    const g = await loadFormGraph(formId);
+    gs.add(formId, g);
+  }
+
+  const unresolved = gs.unresolvedImports();
+  if (unresolved.length > 0) {
+    console.warn(
+      "Unresolved imports after linking:",
+      unresolved.map((u) => `${u.form}:${u.line} (${u.year})`),
+    );
+  }
+
+  return gs.link();
 }
 
 function createRuntime() {
@@ -128,12 +146,12 @@ function getInputValues() {
 }
 
 function setRuntimeInputs(values) {
-  runtime.set("wages", values.wages);
-  runtime.set("interest", values.interest);
-  runtime.set("dividends", values.dividends);
-  runtime.set("short_term_capital_gains", values.stcg);
-  runtime.set("long_term_capital_gains", values.ltcg);
-  runtime.set("iso_exercise_gains", values.iso);
+  runtime.set("us_1040_wages", values.wages);
+  runtime.set("us_1040_interest", values.interest);
+  runtime.set("us_1040_dividends", values.dividends);
+  runtime.set("us_schedule_d_short_term_capital_gains", values.stcg);
+  runtime.set("us_schedule_d_long_term_capital_gains", values.ltcg);
+  runtime.set("us_form_6251_iso_exercise_gains", values.iso);
 }
 
 function safeEval(nodeName) {
@@ -154,29 +172,43 @@ function safeGradient(output, input) {
   }
 }
 
+function getStateKey() {
+  return document.getElementById("state").value;
+}
+
+function showState() {
+  return getStateKey() !== "none";
+}
+
+function getStateTaxNode() {
+  return STATE_TAX_NODES[getStateKey()] || null;
+}
+
 function updateResults() {
   if (!graph || !runtime) return;
 
   const values = getInputValues();
-  const showState = document.getElementById("state").value === "california";
+  const stateActive = showState();
 
   try {
     setRuntimeInputs(values);
 
-    const grossIncome = safeEval("gross_income");
-    const stdDeduction = safeEval("standard_deduction");
-    const taxableIncome = safeEval("taxable_ordinary_income");
-    const ordinaryTax = safeEval("ordinary_income_tax");
-    const ltcgTax = safeEval("ltcg_tax");
-    const niit = safeEval("niit");
-    const medicareTax = safeEval("additional_medicare_tax");
-    const amt = safeEval("amt");
-    const federalTax = safeEval("federal_tax");
-    const stateTax = safeEval("ca_state_tax");
-    const totalTax = safeEval("total_tax");
+    const grossIncome = safeEval("us_1040_gross_income");
+    const stdDeduction = safeEval("us_1040_standard_deduction");
+    const taxableIncome = safeEval("us_1040_taxable_ordinary_income");
+    const ordinaryTax = safeEval("us_1040_ordinary_income_tax");
+    const ltcgTax = safeEval("us_1040_ltcg_tax");
+    const niit = safeEval("us_form_8960_niit");
+    const medicareTax = safeEval("us_form_8959_additional_medicare_tax");
+    const amt = safeEval("us_form_6251_amt");
+    const federalTax = safeEval("us_1040_federal_tax");
+    const stateTaxNode = getStateTaxNode();
+    const stateTax = stateTaxNode ? safeEval(stateTaxNode) : 0;
+    const totalTax = federalTax + stateTax;
     const effectiveRate =
-      grossIncome > 0 ? safeEval("federal_effective_rate") : 0;
-    const marginalRate = safeGradient("federal_tax", "wages") * 100;
+      grossIncome > 0 ? (federalTax / grossIncome) * 100 : 0;
+    const marginalRate =
+      safeGradient("us_1040_federal_tax", "us_1040_wages") * 100;
 
     document.getElementById("gross-income").textContent =
       formatCurrency(grossIncome);
@@ -200,8 +232,8 @@ function updateResults() {
     document.getElementById("medicare-tax").textContent =
       formatCurrency(medicareTax);
 
-    const federalBeforeAmt = safeEval("federal_before_amt");
-    const tentativeMinTax = safeEval("tentative_minimum_tax");
+    const federalBeforeAmt = safeEval("us_1040_federal_before_amt");
+    const tentativeMinTax = safeEval("us_form_6251_tentative_minimum_tax");
     const amtCushion = federalBeforeAmt - tentativeMinTax;
 
     const amtRow = document.getElementById("amt-row");
@@ -229,11 +261,21 @@ function updateResults() {
 
     const stateRow = document.getElementById("state-tax-row");
     const totalRow = document.getElementById("total-row");
-    stateRow.style.display = showState ? "flex" : "none";
-    totalRow.style.display = showState ? "flex" : "none";
+    const stateTaxLabel = document.getElementById("state-tax-label");
+    stateRow.style.display = stateActive ? "flex" : "none";
+    totalRow.style.display = stateActive ? "flex" : "none";
+    if (stateTaxLabel) {
+      const stateKey = getStateKey();
+      const stateNames = {
+        california: "California",
+        new_york: "New York",
+      };
+      stateTaxLabel.textContent =
+        (stateNames[stateKey] || "State") + " State Tax";
+    }
     document.getElementById("state-tax").textContent = formatCurrency(stateTax);
     document.getElementById("total-tax").textContent = formatCurrency(
-      showState ? totalTax : federalTax,
+      stateActive ? totalTax : federalTax,
     );
 
     document.getElementById("effective-rate").textContent =
@@ -244,7 +286,7 @@ function updateResults() {
     updateSensitivity();
     updateBracketVisualization(taxableIncome);
     const isStacked = document.getElementById("stacked-toggle").checked;
-    const chartTax = showState && isStacked ? totalTax : federalTax;
+    const chartTax = stateActive && isStacked ? totalTax : federalTax;
     updateTaxCurve(values.wages, chartTax);
   } catch (e) {
     console.error("Evaluation error:", e);
@@ -252,12 +294,31 @@ function updateResults() {
 }
 
 function updateSensitivity() {
-  const showState = document.getElementById("state").value === "california";
-  const taxNode = showState ? "total_tax" : "federal_tax";
+  const stateTaxNode = getStateTaxNode();
 
-  const wagesGrad = safeGradient(taxNode, "wages");
-  const interestGrad = safeGradient(taxNode, "interest");
-  const ltcgGrad = safeGradient(taxNode, "long_term_capital_gains");
+  const federalWagesGrad = safeGradient("us_1040_federal_tax", "us_1040_wages");
+  const federalInterestGrad = safeGradient(
+    "us_1040_federal_tax",
+    "us_1040_interest",
+  );
+  const federalLtcgGrad = safeGradient(
+    "us_1040_federal_tax",
+    "us_schedule_d_long_term_capital_gains",
+  );
+
+  const stateWagesGrad = stateTaxNode
+    ? safeGradient(stateTaxNode, "us_1040_wages")
+    : 0;
+  const stateInterestGrad = stateTaxNode
+    ? safeGradient(stateTaxNode, "us_1040_interest")
+    : 0;
+  const stateLtcgGrad = stateTaxNode
+    ? safeGradient(stateTaxNode, "us_schedule_d_long_term_capital_gains")
+    : 0;
+
+  const wagesGrad = federalWagesGrad + stateWagesGrad;
+  const interestGrad = federalInterestGrad + stateInterestGrad;
+  const ltcgGrad = federalLtcgGrad + stateLtcgGrad;
 
   document.getElementById("sens-wages").textContent =
     "+" + formatCurrency(wagesGrad * 1000);
@@ -279,10 +340,11 @@ function updateSensitivity() {
 }
 
 function updateBracketVisualization(taxableIncome) {
-  const filingStatus = document.getElementById("filing-status").value;
-  const brackets = getBrackets(filingStatus);
   const bracketBar = document.getElementById("bracket-bar");
   const bracketLegend = document.getElementById("bracket-legend");
+
+  // Read brackets from graph by evaluating at known income levels
+  const brackets = readBracketsFromGraph();
 
   const maxIncome = Math.max(taxableIncome * 1.5, 250000);
   let prevThreshold = 0;
@@ -315,7 +377,7 @@ function updateBracketVisualization(taxableIncome) {
       "legend-item" + (i === currentBracketIndex ? " current" : "");
     legendItem.innerHTML = `
             <span class="legend-color" style="background: ${
-              BRACKET_COLORS[i]
+              BRACKET_COLORS[i % BRACKET_COLORS.length]
             }"></span>
             <span>${bracket.rate * 100}%: ${formatCurrency(prevThreshold)} - ${
               bracket.threshold === Infinity
@@ -329,46 +391,89 @@ function updateBracketVisualization(taxableIncome) {
   });
 }
 
+function readBracketsFromGraph() {
+  // Probe the marginal rate at various income levels to detect bracket boundaries.
+  // This works by evaluating the gradient at many points and detecting rate changes.
+  const probePoints = [];
+  for (let i = 0; i <= 100; i++) {
+    probePoints.push(i * 10000);
+  }
+
+  const brackets = [];
+  let lastRate = -1;
+
+  for (const income of probePoints) {
+    runtime.set("us_1040_wages", income);
+    // Zero out other inputs for bracket probing
+    runtime.set("us_1040_interest", 0);
+    runtime.set("us_1040_dividends", 0);
+    runtime.set("us_schedule_d_short_term_capital_gains", 0);
+    runtime.set("us_schedule_d_long_term_capital_gains", 0);
+    runtime.set("us_form_6251_iso_exercise_gains", 0);
+
+    const rate = safeGradient("us_1040_ordinary_income_tax", "us_1040_wages");
+    const roundedRate = Math.round(rate * 10000) / 10000;
+
+    if (roundedRate !== lastRate && roundedRate > 0) {
+      if (brackets.length > 0) {
+        brackets[brackets.length - 1].threshold = income;
+      }
+      brackets.push({ threshold: Infinity, rate: roundedRate });
+      lastRate = roundedRate;
+    }
+  }
+
+  // Restore actual inputs
+  const values = getInputValues();
+  setRuntimeInputs(values);
+
+  if (brackets.length === 0) {
+    // Fallback: hardcoded 2024 single brackets
+    return [
+      { threshold: 11600, rate: 0.1 },
+      { threshold: 47150, rate: 0.12 },
+      { threshold: 100525, rate: 0.22 },
+      { threshold: 191950, rate: 0.24 },
+      { threshold: 243725, rate: 0.32 },
+      { threshold: 609350, rate: 0.35 },
+      { threshold: Infinity, rate: 0.37 },
+    ];
+  }
+
+  return brackets;
+}
+
 function computeTaxCurve(overrideValues = null) {
   const numPoints = 100;
   const maxIncome = 500000;
   const values = overrideValues || getInputValues();
-  const showState = document.getElementById("state").value === "california";
-
-  console.log("Computing curve with ISO:", values.iso, "LTCG:", values.ltcg);
+  const stateTaxNode = getStateTaxNode();
 
   taxCurveData = [];
   stackedCurveData = [];
 
   for (let i = 0; i <= numPoints; i++) {
     const income = (i / numPoints) * maxIncome;
-    runtime.set("wages", income);
-    runtime.set("interest", values.interest);
-    runtime.set("dividends", values.dividends);
-    runtime.set("short_term_capital_gains", values.stcg);
-    runtime.set("long_term_capital_gains", values.ltcg);
-    runtime.set("iso_exercise_gains", values.iso);
+    runtime.set("us_1040_wages", income);
+    runtime.set("us_1040_interest", values.interest);
+    runtime.set("us_1040_dividends", values.dividends);
+    runtime.set("us_schedule_d_short_term_capital_gains", values.stcg);
+    runtime.set("us_schedule_d_long_term_capital_gains", values.ltcg);
+    runtime.set("us_form_6251_iso_exercise_gains", values.iso);
 
-    const tax = safeEval("federal_tax");
+    const tax = safeEval("us_1040_federal_tax");
     taxCurveData.push({ income, tax });
 
     stackedCurveData.push({
       income,
-      ordinary: safeEval("ordinary_income_tax"),
-      ltcg: safeEval("ltcg_tax"),
-      amt: safeEval("amt"),
-      niit: safeEval("niit"),
-      medicare: safeEval("additional_medicare_tax"),
-      state: showState ? safeEval("ca_state_tax") : 0,
+      ordinary: safeEval("us_1040_ordinary_income_tax"),
+      ltcg: safeEval("us_1040_ltcg_tax"),
+      amt: safeEval("us_form_6251_amt"),
+      niit: safeEval("us_form_8960_niit"),
+      medicare: safeEval("us_form_8959_additional_medicare_tax"),
+      state: stateTaxNode ? safeEval(stateTaxNode) : 0,
     });
   }
-
-  console.log(
-    "Curve at wages=0:",
-    taxCurveData[0].tax,
-    "at wages=200K:",
-    taxCurveData[40].tax,
-  );
 
   setRuntimeInputs(values);
 }
@@ -378,7 +483,7 @@ function updateTaxCurve(currentIncome, currentTax) {
   const width = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
   const height = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
   const isStacked = document.getElementById("stacked-toggle").checked;
-  const showState = document.getElementById("state").value === "california";
+  const stateActive = showState();
 
   if (taxCurveData.length === 0) {
     computeTaxCurve();
@@ -386,11 +491,10 @@ function updateTaxCurve(currentIncome, currentTax) {
 
   const maxIncome = 500000;
 
-  // For stacked, compute max as sum of all components; otherwise use total tax
   let maxTax;
   if (isStacked && stackedCurveData.length > 0) {
     const componentKeys = TAX_COMPONENTS.filter(
-      (c) => c.key !== "state" || showState,
+      (c) => c.key !== "state" || stateActive,
     ).map((c) => c.key);
     maxTax =
       Math.max(
@@ -406,7 +510,6 @@ function updateTaxCurve(currentIncome, currentTax) {
   const xScale = (val) => CHART_PADDING.left + (val / maxIncome) * width;
   const yScale = (val) => CHART_PADDING.top + height - (val / maxTax) * height;
 
-  // Draw grid
   const gridGroup = svg.querySelector(".grid");
   gridGroup.innerHTML = "";
 
@@ -430,7 +533,6 @@ function updateTaxCurve(currentIncome, currentTax) {
     gridGroup.appendChild(line);
   }
 
-  // Draw axis labels
   const labelsGroup = svg.querySelector(".axis-labels");
   labelsGroup.innerHTML = "";
 
@@ -445,7 +547,6 @@ function updateTaxCurve(currentIncome, currentTax) {
     labelsGroup.appendChild(text);
   }
 
-  // X axis label
   const xLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
   xLabel.setAttribute("x", CHART_PADDING.left + width / 2);
   xLabel.setAttribute("y", CHART_HEIGHT - 2);
@@ -466,7 +567,6 @@ function updateTaxCurve(currentIncome, currentTax) {
     labelsGroup.appendChild(text);
   }
 
-  // Handle stacked vs simple mode
   const stackedGroup = svg.querySelector(".stacked-areas");
   const simpleCurve = svg.querySelector(".tax-curve");
   const simpleArea = svg.querySelector(".tax-area");
@@ -475,19 +575,16 @@ function updateTaxCurve(currentIncome, currentTax) {
   stackedGroup.innerHTML = "";
 
   if (isStacked && stackedCurveData.length > 0) {
-    // Hide simple curve, show stacked
     simpleCurve.style.display = "none";
     simpleArea.style.display = "none";
     legendDiv.style.display = "flex";
 
-    // Filter components to show (exclude state if not selected)
     const activeComponents = TAX_COMPONENTS.filter(
-      (c) => c.key !== "state" || showState,
+      (c) => c.key !== "state" || stateActive,
     );
 
-    // Build cumulative stacks
     const stacks = activeComponents.map((comp, idx) => {
-      return stackedCurveData.map((d, i) => {
+      return stackedCurveData.map((d) => {
         const baseY = activeComponents
           .slice(0, idx)
           .reduce((sum, c) => sum + (d[c.key] || 0), 0);
@@ -496,17 +593,14 @@ function updateTaxCurve(currentIncome, currentTax) {
       });
     });
 
-    // Draw stacked areas (bottom to top)
     stacks.forEach((stack, idx) => {
       const comp = activeComponents[idx];
       let areaPath = `M ${xScale(0)} ${yScale(stack[0].baseY)}`;
 
-      // Top edge (left to right)
       stack.forEach((pt) => {
         areaPath += ` L ${xScale(pt.income)} ${yScale(pt.topY)}`;
       });
 
-      // Bottom edge (right to left)
       for (let i = stack.length - 1; i >= 0; i--) {
         areaPath += ` L ${xScale(stack[i].income)} ${yScale(stack[i].baseY)}`;
       }
@@ -521,7 +615,6 @@ function updateTaxCurve(currentIncome, currentTax) {
       stackedGroup.appendChild(path);
     });
 
-    // Update legend
     legendDiv.innerHTML = activeComponents
       .map(
         (c) =>
@@ -532,7 +625,6 @@ function updateTaxCurve(currentIncome, currentTax) {
       )
       .join("");
   } else {
-    // Show simple curve
     simpleCurve.style.display = "";
     simpleArea.style.display = "";
     legendDiv.style.display = "none";
@@ -558,7 +650,6 @@ function updateTaxCurve(currentIncome, currentTax) {
     simpleArea.setAttribute("d", areaD);
   }
 
-  // Position current point
   const currentX = xScale(Math.min(currentIncome, maxIncome));
   const currentY = yScale(currentTax);
 
@@ -600,11 +691,11 @@ function handleSolve() {
   animationDiv.style.display = "block";
   resultDiv.style.display = "none";
 
-  runtime.set("interest", values.interest);
-  runtime.set("dividends", values.dividends);
-  runtime.set("short_term_capital_gains", values.stcg);
-  runtime.set("long_term_capital_gains", values.ltcg);
-  runtime.set("iso_exercise_gains", values.iso);
+  runtime.set("us_1040_interest", values.interest);
+  runtime.set("us_1040_dividends", values.dividends);
+  runtime.set("us_schedule_d_short_term_capital_gains", values.stcg);
+  runtime.set("us_schedule_d_long_term_capital_gains", values.ltcg);
+  runtime.set("us_form_6251_iso_exercise_gains", values.iso);
 
   animateSolver(targetTax, values.wages).then((result) => {
     btn.disabled = false;
@@ -638,8 +729,8 @@ async function animateSolver(targetTax, initialGuess) {
   const curvePoints = [];
   for (let i = 0; i <= 50; i++) {
     const w = (i / 50) * maxWages;
-    runtime.set("wages", w);
-    const tax = safeEval("federal_tax");
+    runtime.set("us_1040_wages", w);
+    const tax = safeEval("us_1040_federal_tax");
     curvePoints.push({ wages: w, tax });
   }
 
@@ -671,9 +762,9 @@ async function animateSolver(targetTax, initialGuess) {
   const tolerance = 1;
 
   for (let iter = 0; iter < maxIter; iter++) {
-    runtime.set("wages", currentWages);
-    const tax = safeEval("federal_tax");
-    const gradient = safeGradient("federal_tax", "wages");
+    runtime.set("us_1040_wages", currentWages);
+    const tax = safeEval("us_1040_federal_tax");
+    const gradient = safeGradient("us_1040_federal_tax", "us_1040_wages");
     const error = tax - targetTax;
 
     iterations.push({
@@ -714,7 +805,6 @@ async function animateSolver(targetTax, initialGuess) {
     currentCircle.setAttribute("cy", y);
 
     if (iter.gradient !== 0 && i < iterations.length - 1) {
-      const nextWages = iter.wages - iter.error / iter.gradient;
       const tangentX1 = Math.max(xScale(iter.wages - 20000), padding.left);
       const tangentX2 = Math.min(
         xScale(iter.wages + 20000),
@@ -791,16 +881,33 @@ function setupCollapsibles() {
   });
 }
 
-async function loadGraph() {
-  const response = await fetch("graph_source.json");
-  const json = await response.text();
-  graph = Graph.fromJson(json);
+function showError(message) {
+  const loading = document.getElementById("loading");
+  loading.textContent = "";
+
+  const errorP = document.createElement("p");
+  errorP.style.color = "#e74c3c";
+  errorP.textContent = "Failed to load: " + message;
+
+  const helpP = document.createElement("p");
+  helpP.textContent = "Make sure to run: ";
+  const code = document.createElement("code");
+  code.textContent = "make wasm-dev";
+  helpP.appendChild(code);
+
+  loading.appendChild(errorP);
+  loading.appendChild(helpP);
 }
 
 async function main() {
   try {
     await init();
-    await loadGraph();
+
+    document.getElementById("loading").querySelector("p").textContent =
+      "Loading tax forms...";
+
+    const stateKey = getStateKey();
+    graph = await buildLinkedGraph(stateKey);
 
     createRuntime();
     syncSliders();
@@ -815,10 +922,22 @@ async function main() {
       updateResults();
     });
 
-    document.getElementById("state").addEventListener("change", () => {
-      taxCurveData = [];
-      computeTaxCurve();
-      updateResults();
+    document.getElementById("state").addEventListener("change", async () => {
+      const newState = getStateKey();
+      document.getElementById("loading").style.display = "flex";
+      document.getElementById("loading").querySelector("p").textContent =
+        "Switching state...";
+      try {
+        graph = await buildLinkedGraph(newState);
+        createRuntime();
+        taxCurveData = [];
+        computeTaxCurve();
+        updateResults();
+      } catch (e) {
+        console.error("Failed to load state:", e);
+        showError(e.message);
+      }
+      document.getElementById("loading").style.display = "none";
     });
 
     document
@@ -833,10 +952,7 @@ async function main() {
     document.getElementById("loading").style.display = "none";
   } catch (e) {
     console.error("Initialization error:", e);
-    document.getElementById("loading").innerHTML = `
-            <p style="color: #e74c3c;">Failed to load: ${e.message}</p>
-            <p>Make sure to run: <code>make wasm-dev</code></p>
-        `;
+    showError(e.message);
   }
 }
 
