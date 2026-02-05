@@ -29,6 +29,8 @@ import Tables2024
 import Tables2025
 import TablesCA2024
 import TablesCA2025
+import ExprProperties qualified
+import ReferenceEvaluator (evalGraph, evalGraphDetailed)
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
 import TenForty.Expr (extractLineRefs, extractTableRefs)
@@ -103,6 +105,8 @@ main = do
 
 spec :: Int -> Spec
 spec n = do
+    ExprProperties.spec
+
     describe "FilingStatus" $ do
         it "has exactly 5 values" $
             length allFilingStatuses `shouldBe` 5
@@ -1115,116 +1119,3 @@ isImportOp :: Node -> Bool
 isImportOp node = case nodeOp node of
     JSON.OpImport{} -> True
     _ -> False
-
-evalGraph :: ComputationGraph -> FilingStatus -> Double -> Double
-evalGraph graph status wages =
-    let (_, _, tax) = evalGraphDetailed graph status wages
-     in tax
-
-evalGraphDetailed :: ComputationGraph -> FilingStatus -> Double -> (Double, Double, Double)
-evalGraphDetailed graph status wages =
-    let nodeMap = cgNodes graph
-        tables = cgTables graph
-
-        findNodeByName :: String -> Maybe Int
-        findNodeByName name =
-            let target = T.pack name
-                matches nm = nm == target || (target <> "_") `T.isPrefixOf` nm
-             in case [ nodeId n
-                     | n <- Map.elems nodeMap
-                     , Just nm <- [nodeName n]
-                     , matches nm
-                     ] of
-                    (nid : _) -> Just nid
-                    [] -> Nothing
-
-        -- Build evaluated map strictly by evaluating nodes in order (by ID)
-        -- Since graph was compiled in topological order, node IDs are already sorted
-        evaluated :: Map.Map Int Double
-        evaluated = foldl' evalAndInsert Map.empty (Map.toAscList nodeMap)
-
-        evalAndInsert :: Map.Map Int Double -> (Int, Node) -> Map.Map Int Double
-        evalAndInsert acc (nid, n) =
-            let !v = evalOp acc nid (nodeOp n)
-             in Map.insert nid v acc
-
-        evalOp :: Map.Map Int Double -> Int -> Op -> Double
-        evalOp acc nid = \case
-            OpInput ->
-                case nodeName (nodeMap Map.! nid) of
-                    Just nm
-                        | nm == "L1a" || "L1a_" `T.isPrefixOf` nm -> wages
-                    _ -> 0
-            OpImport{} -> 0 -- Imports from other forms treated as 0 in tests
-            OpLiteral v -> v
-            OpAdd l r -> lkp l + lkp r
-            OpSub l r -> lkp l - lkp r
-            OpMul l r -> lkp l * lkp r
-            OpDiv l r -> let rv = lkp r in if rv == 0 then 0 else lkp l / rv
-            OpNeg a -> negate (lkp a)
-            OpAbs a -> abs (lkp a)
-            OpMax l r -> max (lkp l) (lkp r)
-            OpMin l r -> min (lkp l) (lkp r)
-            OpFloor a -> fromIntegral (floor (lkp a) :: Int)
-            OpClamp a lo hi -> max lo (min hi (lkp a))
-            OpIfPositive c t e -> if lkp c > 0 then lkp t else lkp e
-            OpBracketTax tblId incomeNode ->
-                evalBracketTaxFromTable tables tblId status (lkp incomeNode)
-            OpPhaseOut base threshold phaseRate agiNode ->
-                let agiVal = lkp agiNode
-                    thresholdVal = getStatusValue status threshold
-                    excess = max 0 (agiVal - thresholdVal)
-                    reduction = excess * phaseRate
-                 in max 0 (base - reduction)
-            OpByStatus sn -> lkp (getStatusNodeId status sn)
-          where
-            lkp i = fromMaybe 0 (Map.lookup i acc)
-
-        evalBracketTaxFromTable :: Map.Map T.Text JSON.BracketTable -> T.Text -> FilingStatus -> Double -> Double
-        evalBracketTaxFromTable tbls tid fs inc =
-            case Map.lookup tid tbls of
-                Nothing -> 0
-                Just bt ->
-                    let brackets = getStatusBrackets fs (JSON.btBrackets bt)
-                     in computeBracketTax brackets inc
-
-        getStatusBrackets :: FilingStatus -> JSON.StatusBrackets -> [JSON.Bracket]
-        getStatusBrackets fs sb = case fs of
-            Single -> JSON.sbSingle sb
-            MarriedJoint -> JSON.sbMarriedJoint sb
-            MarriedSeparate -> JSON.sbMarriedSeparate sb
-            HeadOfHousehold -> JSON.sbHeadOfHousehold sb
-            QualifyingWidow -> JSON.sbQualifyingWidow sb
-
-        computeBracketTax :: [JSON.Bracket] -> Double -> Double
-        computeBracketTax brackets inc = go 0 0 brackets
-          where
-            go !acc _ [] = acc
-            go !acc prevThresh (b : bs) =
-                let thresh = JSON.brThreshold b
-                    bracketRate = JSON.brRate b
-                    taxableInBracket = min inc thresh - prevThresh
-                 in if inc <= prevThresh
-                        then acc
-                        else go (acc + max 0 taxableInBracket * bracketRate) thresh bs
-
-        getStatusValue :: FilingStatus -> JSON.StatusValues -> Double
-        getStatusValue fs sv = case fs of
-            Single -> JSON.svSingle sv
-            MarriedJoint -> JSON.svMarriedJoint sv
-            MarriedSeparate -> JSON.svMarriedSeparate sv
-            HeadOfHousehold -> JSON.svHeadOfHousehold sv
-            QualifyingWidow -> JSON.svQualifyingWidow sv
-
-        getStatusNodeId :: FilingStatus -> JSON.StatusNodeIds -> Int
-        getStatusNodeId fs sn = case fs of
-            Single -> JSON.snSingle sn
-            MarriedJoint -> JSON.snMarriedJoint sn
-            MarriedSeparate -> JSON.snMarriedSeparate sn
-            HeadOfHousehold -> JSON.snHeadOfHousehold sn
-            QualifyingWidow -> JSON.snQualifyingWidow sn
-
-        agi = fromMaybe 0 $ findNodeByName "L11" >>= flip Map.lookup evaluated
-        taxableIncome = fromMaybe 0 $ findNodeByName "L15" >>= flip Map.lookup evaluated
-        tax = fromMaybe 0 $ findNodeByName "L16" >>= flip Map.lookup evaluated
-     in (agi, taxableIncome, tax)
