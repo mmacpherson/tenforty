@@ -145,17 +145,15 @@ impl Runtime {
     }
 
     pub fn gradient(&mut self, output: &str, input: &str) -> Result<f64, JsError> {
-        let output_str = output.to_string();
-        let input_str = input.to_string();
         self.inner.with_runtime_mut(|rt| {
             let output_id = rt
                 .graph()
-                .node_id_by_name(&output_str)
-                .ok_or_else(|| JsError::new(&format!("Node not found: {}", output_str)))?;
+                .node_id_by_name(output)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
             let input_id = rt
                 .graph()
-                .node_id_by_name(&input_str)
-                .ok_or_else(|| JsError::new(&format!("Node not found: {}", input_str)))?;
+                .node_id_by_name(input)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", input)))?;
             autodiff::gradient(rt, output_id, input_id).map_err(|e| JsError::new(&format!("{}", e)))
         })
     }
@@ -167,18 +165,16 @@ impl Runtime {
         for_input: &str,
         initial_guess: Option<f64>,
     ) -> Result<f64, JsError> {
-        let output_str = output.to_string();
-        let input_str = for_input.to_string();
         let guess = initial_guess.unwrap_or(target);
         self.inner.with_runtime_mut(|rt| {
             let output_id = rt
                 .graph()
-                .node_id_by_name(&output_str)
-                .ok_or_else(|| JsError::new(&format!("Node not found: {}", output_str)))?;
+                .node_id_by_name(output)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
             let input_id = rt
                 .graph()
-                .node_id_by_name(&input_str)
-                .ok_or_else(|| JsError::new(&format!("Node not found: {}", input_str)))?;
+                .node_id_by_name(for_input)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", for_input)))?;
             solver::solve(rt, output_id, target, input_id, guess)
                 .map_err(|e| JsError::new(&format!("{}", e)))
         })
