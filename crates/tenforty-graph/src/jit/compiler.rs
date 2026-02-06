@@ -264,11 +264,16 @@ impl CompiledGraph {
     /// - `outputs` must point to a valid, mutable array of at least `num_slots()` f64 values
     /// - The arrays must remain valid for the duration of the call
     pub unsafe fn call(&self, inputs: *const f64, outputs: *mut f64) {
+        // SAFETY: func_ptr was produced by Cranelift with the target's default calling convention
+        // and signature (i64, i64) -> void matching (ptr, ptr). _module keeps the backing code
+        // memory alive.
         let func: unsafe extern "C" fn(*const f64, *mut f64) = std::mem::transmute(self.func_ptr);
         func(inputs, outputs);
     }
 }
 
+// SAFETY: The JIT code pointed to by func_ptr is immutable after compilation and _module
+// prevents deallocation. No interior mutability; all mutation is via the caller's arrays.
 unsafe impl Send for CompiledGraph {}
 unsafe impl Sync for CompiledGraph {}
 
@@ -312,10 +317,15 @@ impl CompiledBatchGraph {
     /// - The arrays must remain valid for the duration of the call
     /// - Memory layout is SoA: [input0×4][input1×4]... and [output0×4][output1×4]...
     pub unsafe fn call(&self, inputs: *const f64, outputs: *mut f64) {
+        // SAFETY: func_ptr was produced by Cranelift with the target's default calling convention
+        // and signature (i64, i64) -> void matching (ptr, ptr). _module keeps the backing code
+        // memory alive.
         let func: unsafe extern "C" fn(*const f64, *mut f64) = std::mem::transmute(self.func_ptr);
         func(inputs, outputs);
     }
 }
 
+// SAFETY: The JIT code pointed to by func_ptr is immutable after compilation and _module
+// prevents deallocation. No interior mutability; all mutation is via the caller's arrays.
 unsafe impl Send for CompiledBatchGraph {}
 unsafe impl Sync for CompiledBatchGraph {}

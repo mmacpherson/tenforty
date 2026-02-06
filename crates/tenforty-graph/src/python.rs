@@ -527,17 +527,15 @@ impl Runtime {
     }
 
     fn gradient(&mut self, output: &str, input: &str) -> PyResult<f64> {
-        let output_str = output.to_string();
-        let input_str = input.to_string();
         self.inner.with_runtime_mut(|rt| {
             let output_id = rt
                 .graph()
-                .node_id_by_name(&output_str)
-                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output_str)))?;
+                .node_id_by_name(output)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output)))?;
             let input_id = rt
                 .graph()
-                .node_id_by_name(&input_str)
-                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", input_str)))?;
+                .node_id_by_name(input)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", input)))?;
 
             autodiff::gradient(rt, output_id, input_id)
                 .map_err(|e| PyValueError::new_err(format!("{}", e)))
@@ -553,17 +551,14 @@ impl Runtime {
         initial_guess: Option<f64>,
     ) -> PyResult<f64> {
         let guess = initial_guess.unwrap_or(target);
-        let output_str = output.to_string();
-        let for_input_str = for_input.to_string();
-
         self.inner.with_runtime_mut(|rt| {
             let graph = rt.graph();
             let output_id = graph
-                .node_id_by_name(&output_str)
-                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output_str)))?;
-            let input_id = graph.node_id_by_name(&for_input_str).ok_or_else(|| {
-                PyValueError::new_err(format!("Node not found: {}", for_input_str))
-            })?;
+                .node_id_by_name(output)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output)))?;
+            let input_id = graph
+                .node_id_by_name(for_input)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", for_input)))?;
 
             solver::solve(rt, output_id, target, input_id, guess)
                 .map_err(|e| PyValueError::new_err(format!("{}", e)))

@@ -1,6 +1,7 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
+
+use ouroboros::self_referencing;
 
 use crate::eval::Runtime as RsRuntime;
 use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
@@ -103,26 +104,17 @@ impl Graph {
     }
 }
 
-#[wasm_bindgen]
-pub struct Runtime {
+#[self_referencing]
+struct OwnedRuntime {
     graph: Rc<RsGraph>,
-    inner: RefCell<RsRuntime<'static>>,
+    #[borrows(graph)]
+    #[covariant]
+    runtime: RsRuntime<'this>,
 }
 
-/// Create an RsRuntime with a 'static borrow of the graph data inside an Rc.
-///
-/// # Safety
-/// The returned RsRuntime borrows the RsGraph with a 'static lifetime, but the
-/// actual lifetime is tied to the Rc. The caller must ensure that the Rc is kept
-/// alive for as long as the RsRuntime exists. In practice, both are stored in the
-/// same `Runtime` struct, so the Rc cannot be dropped while the RsRuntime is alive.
-fn make_runtime(graph_rc: &Rc<RsGraph>, filing_status: RsFilingStatus) -> RsRuntime<'static> {
-    let graph_ptr: *const RsGraph = Rc::as_ptr(graph_rc);
-    // SAFETY: graph_ptr points to heap-allocated data owned by the Rc.
-    // The Rc is stored alongside this runtime and will not be dropped first.
-    // The RsGraph is not mutated through the Rc (no interior mutability).
-    let graph_ref: &'static RsGraph = unsafe { &*graph_ptr };
-    RsRuntime::new(graph_ref, filing_status)
+#[wasm_bindgen]
+pub struct Runtime {
+    inner: OwnedRuntime,
 }
 
 #[wasm_bindgen]
@@ -130,79 +122,62 @@ impl Runtime {
     #[wasm_bindgen(constructor)]
     pub fn new(graph: &Graph, filing_status: &FilingStatus) -> Self {
         let graph_rc = Rc::clone(&graph.inner);
-        let rt = make_runtime(&graph_rc, filing_status.0);
+        let status = filing_status.0;
         Runtime {
-            graph: graph_rc,
-            inner: RefCell::new(rt),
+            inner: OwnedRuntimeBuilder {
+                graph: graph_rc,
+                runtime_builder: |graph: &Rc<RsGraph>| RsRuntime::new(graph, status),
+            }
+            .build(),
         }
     }
 
-    pub fn set(&self, name: &str, value: f64) -> Result<(), JsError> {
-        self.inner
-            .try_borrow_mut()
-            .map_err(|_| JsError::new("Runtime is already borrowed"))?
-            .set(name, value)
-            .map_err(|e| JsError::new(&format!("{}", e)))
+    pub fn set(&mut self, name: &str, value: f64) -> Result<(), JsError> {
+        self.inner.with_runtime_mut(|rt| {
+            rt.set(name, value)
+                .map_err(|e| JsError::new(&format!("{}", e)))
+        })
     }
 
-    pub fn eval(&self, name: &str) -> Result<f64, JsError> {
+    pub fn eval(&mut self, name: &str) -> Result<f64, JsError> {
         self.inner
-            .try_borrow_mut()
-            .map_err(|_| JsError::new("Runtime is already borrowed"))?
-            .eval(name)
-            .map_err(|e| JsError::new(&format!("{}", e)))
+            .with_runtime_mut(|rt| rt.eval(name).map_err(|e| JsError::new(&format!("{}", e))))
     }
 
-    pub fn gradient(&self, output: &str, input: &str) -> Result<f64, JsError> {
-        let output_id = self
-            .graph
-            .node_id_by_name(output)
-            .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
-        let input_id = self
-            .graph
-            .node_id_by_name(input)
-            .ok_or_else(|| JsError::new(&format!("Node not found: {}", input)))?;
-
-        autodiff::gradient(
-            &mut *self
-                .inner
-                .try_borrow_mut()
-                .map_err(|_| JsError::new("Runtime is already borrowed"))?,
-            output_id,
-            input_id,
-        )
-        .map_err(|e| JsError::new(&format!("{}", e)))
+    pub fn gradient(&mut self, output: &str, input: &str) -> Result<f64, JsError> {
+        self.inner.with_runtime_mut(|rt| {
+            let output_id = rt
+                .graph()
+                .node_id_by_name(output)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
+            let input_id = rt
+                .graph()
+                .node_id_by_name(input)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", input)))?;
+            autodiff::gradient(rt, output_id, input_id).map_err(|e| JsError::new(&format!("{}", e)))
+        })
     }
 
     pub fn solve(
-        &self,
+        &mut self,
         output: &str,
         target: f64,
         for_input: &str,
         initial_guess: Option<f64>,
     ) -> Result<f64, JsError> {
-        let output_id = self
-            .graph
-            .node_id_by_name(output)
-            .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
-        let input_id = self
-            .graph
-            .node_id_by_name(for_input)
-            .ok_or_else(|| JsError::new(&format!("Node not found: {}", for_input)))?;
-
         let guess = initial_guess.unwrap_or(target);
-
-        solver::solve(
-            &mut *self
-                .inner
-                .try_borrow_mut()
-                .map_err(|_| JsError::new("Runtime is already borrowed"))?,
-            output_id,
-            target,
-            input_id,
-            guess,
-        )
-        .map_err(|e| JsError::new(&format!("{}", e)))
+        self.inner.with_runtime_mut(|rt| {
+            let output_id = rt
+                .graph()
+                .node_id_by_name(output)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", output)))?;
+            let input_id = rt
+                .graph()
+                .node_id_by_name(for_input)
+                .ok_or_else(|| JsError::new(&format!("Node not found: {}", for_input)))?;
+            solver::solve(rt, output_id, target, input_id, guess)
+                .map_err(|e| JsError::new(&format!("{}", e)))
+        })
     }
 }
 
