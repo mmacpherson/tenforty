@@ -144,7 +144,6 @@ cimport ots_2025_f8995
 cimport ots_2025_CA_540
 cimport ots_2025_NJ_1040
 cimport ots_2025_OH_IT1040
-cimport ots_2025_US_1040_Sched_1_A
 cimport ots_2025_f2210
 cimport ots_2025_PA_40
 cimport ots_2025_US_1040_Sched_C
@@ -282,10 +281,9 @@ _OTS_KEY_TO_INDEX = {
     (2025, "CA_540"): 129,
     (2025, "NJ_1040"): 130,
     (2025, "OH_IT1040"): 131,
-    (2025, "US_1040_Sched_1_A"): 132,
-    (2025, "f2210"): 133,
-    (2025, "PA_40"): 134,
-    (2025, "US_1040_Sched_C"): 135,
+    (2025, "f2210"): 132,
+    (2025, "PA_40"): 133,
+    (2025, "US_1040_Sched_C"): 134,
 }
 
 cdef f_type _ots_get_function(int index):
@@ -554,12 +552,10 @@ cdef f_type _ots_get_function(int index):
     elif index == 131:
         return ots_2025_OH_IT1040.main
     elif index == 132:
-        return ots_2025_US_1040_Sched_1_A.main
-    elif index == 133:
         return ots_2025_f2210.main
-    elif index == 134:
+    elif index == 133:
         return ots_2025_PA_40.main
-    elif index == 135:
+    elif index == 134:
         return ots_2025_US_1040_Sched_C.main
     return NULL
 
