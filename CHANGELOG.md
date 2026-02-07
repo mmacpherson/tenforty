@@ -1,3 +1,7 @@
+## [2025.2] - 2026-02-07
+### Changed
+- Updated OTS 2025 tax year release from 23.01 to 23.02
+
 ## [2025.1] - 2026-01-31
 ### Added
 - OTS 2025 tax year support (v23.01)
