@@ -46,8 +46,17 @@ ca540_2024 = form "ca_540" 2024 $ do
         keyOutput "L31" "ca_bracket_tax" "Tax from California tax brackets" $
             bracketTax "ca_brackets_2024" l19
 
-    -- Line 32: Exemption credits (simplified as input; phaseout is complex)
-    l32 <- keyInput "L32" "exemption_credits" "Exemption credits"
+    -- Line 32: Exemption credits (personal only; blind/senior/dependent not yet modeled)
+    -- Phase-out: credit reduced by $6 per $2,500 excess AGI per exemption
+    let exemptionBase = byStatusE (fmap lit caPersonalExemptionCredit2024)
+    let exemptionThreshold = byStatusE (fmap lit caExemptionPhaseoutThreshold2024)
+    let exemptionRate = byStatusE (fmap lit caExemptionPhaseoutRate2024)
+    exemptionExcess <- interior "L32_excess" "exemption_excess_agi" $
+        max0 (l17 .-. exemptionThreshold)
+    exemptionReduction <- interior "L32_reduction" "exemption_reduction" $
+        exemptionExcess .*. exemptionRate
+    l32 <- interior "L32" "exemption_credits" $
+        max0 (exemptionBase .-. exemptionReduction)
 
     -- Line 33: Tax after exemption credits
     l33 <-

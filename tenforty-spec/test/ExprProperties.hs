@@ -106,6 +106,15 @@ spec = describe "Expr Properties" $ do
             expected = if valA >= valB then evalExpr t else evalExpr e
          in res `shouldApproxEq` expected
 
+    it "ifGte returns then-branch when a > b" $
+        evalExpr (ifGte (dollars 10) (dollars 5) (dollars 100) (dollars 200)) `shouldBe` 100
+
+    it "ifGte returns then-branch when a == b" $
+        evalExpr (ifGte (dollars 5) (dollars 5) (dollars 100) (dollars 200)) `shouldBe` 100
+
+    it "ifGte returns else-branch when a < b" $
+        evalExpr (ifGte (dollars 5) (dollars 10) (dollars 100) (dollars 200)) `shouldBe` 200
+
     it "eval (a ./. b) == safe division" $ property $ \a b ->
         let res = evalRate (a ./. b)
             va = evalExpr a
