@@ -601,6 +601,8 @@ def test_oh_state_parity(w2_income):
     Ohio has no standard deduction. Personal exemptions are income-tiered
     and must be passed explicitly; without them, parity is within $20
     due to minor rounding differences.
+
+    Ohio income tax is filing-status-independent, so only Single is tested.
     """
     ots = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="ots")
     graph = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="graph")
@@ -646,7 +648,7 @@ def test_nc_state_agi_parity(w2_income, filing_status):
 
 
 @pytest.mark.xfail(
-    reason="OTS auto-applies child deduction for MFJ at low income; graph leaves as zero",
+    reason="OTS auto-applies $2,000 child deduction for MFJ; graph leaves child deduction as zero input",
     strict=True,
 )
 @skip_if_backends_unavailable
@@ -656,7 +658,7 @@ def test_nc_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_nc_state_tax_parity(w2_income, filing_status):
-    """NC total tax differs because OTS auto-applies child deduction."""
+    """NC total tax differs because OTS auto-applies child deduction for MFJ."""
     ots = evaluate_return(
         year=2025,
         state="NC",
