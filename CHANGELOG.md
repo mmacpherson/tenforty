@@ -1,3 +1,13 @@
+## [2025.3] - 2026-02-08
+### Added
+- OTS 2025 state support for AZ, MI, NC, NJ, OH, PA, VA
+- Property-based parity tests for new OTS states
+- Enumerated supported states in README
+
+### Changed
+- Refactored CA/NY/MA parity tests to xfail paradigm
+- Removed unreleased graph backend section from README
+
 ## [2025.2] - 2026-02-07
 ### Changed
 - Updated OTS 2025 tax year release from 23.01 to 23.02
