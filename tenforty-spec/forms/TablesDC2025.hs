@@ -49,10 +49,10 @@ Order: Single, MFJ, MFS, HoH, QW
 Source: 2025 D-40ES Estimated Tax Booklet, Worksheet 2, Line 2b
 https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/publication/attachments/2025_D40ES_Booklet_121824.pdf
 
-Standard deductions for tax year 2025 (increased from 2024 per federal conformity adjustments):
-- Single/MFS: $15,000 (up from $14,600)
-- MFJ/QW: $30,000 (up from $29,200)
-- HoH: $22,500 (up from $21,900)
+Standard deductions for tax year 2025 (OBBBA, per federal conformity):
+- Single/MFS: $15,750
+- MFJ/QW: $31,500
+- HoH: $23,625
 -}
 dcStandardDeduction2025 :: ByStatus (Amount Dollars)
-dcStandardDeduction2025 = byStatus 15000 30000 15000 22500 30000
+dcStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500

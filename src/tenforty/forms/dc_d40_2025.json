@@ -47,35 +47,35 @@
             "id": 11,
             "op": {
                 "type": "literal",
-                "value": 15000
+                "value": 15750
             }
         },
         "12": {
             "id": 12,
             "op": {
                 "type": "literal",
-                "value": 30000
+                "value": 31500
             }
         },
         "13": {
             "id": 13,
             "op": {
                 "type": "literal",
-                "value": 15000
+                "value": 15750
             }
         },
         "14": {
             "id": 14,
             "op": {
                 "type": "literal",
-                "value": 22500
+                "value": 23625
             }
         },
         "15": {
             "id": 15,
             "op": {
                 "type": "literal",
-                "value": 30000
+                "value": 31500
             }
         },
         "16": {

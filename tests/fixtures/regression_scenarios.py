@@ -1,0 +1,92 @@
+"""Regression baseline scenarios: captured OTS library output (no external validation)."""
+
+from .tax_scenario import TaxScenario
+
+# REGRESSION_SCENARIOS: These are NOT validated against external sources.
+# They capture current OTS library output to detect unexpected changes.
+# Values are exact OTS outputs as of the last update.
+REGRESSION_SCENARIOS = [
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="Single filer, $50,000 W2 income, standard deduction",
+        year=2024,
+        state=None,
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_federal_tax=4019.0,
+        expected_federal_agi=50000.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="Married filing jointly, $100,000 W2 income",
+        year=2024,
+        state=None,
+        filing_status="Married/Joint",
+        w2_income=100000.0,
+        expected_federal_tax=8035.0,
+        expected_federal_agi=100000.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="Single filer with qualified dividends",
+        year=2024,
+        state=None,
+        filing_status="Single",
+        w2_income=60000.0,
+        qualified_dividends=5000.0,
+        ordinary_dividends=5000.0,
+        expected_federal_tax=5725.25,
+        expected_federal_agi=65000.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="Single filer with long-term capital gains",
+        year=2024,
+        state=None,
+        filing_status="Single",
+        w2_income=80000.0,
+        long_term_capital_gains=20000.0,
+        expected_federal_tax=12447.0,
+        expected_federal_agi=100000.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="CA Single filer, $75,000 W2 income",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=75000.0,
+        expected_federal_tax=8347.0,
+        expected_state_tax=2871.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="CA Single filer, $150,000 W2 income",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_federal_tax=25538.5,
+        expected_state_tax=9828.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="CA Married/Joint, $200,000 W2 income",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=200000.0,
+        expected_federal_tax=27682.0,
+        expected_state_tax=10356.0,
+    ),
+    TaxScenario(
+        source="OTS baseline (no external validation)",
+        description="CA Single filer, $100,000 W2 income (2023)",
+        year=2023,
+        state="CA",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_federal_tax=14266.0,
+        expected_state_tax=5307.0,
+    ),
+]
