@@ -974,14 +974,14 @@ spec n = do
         it "2024 Head of Household is $21,900" $
             forStatus standardDeduction2024 HeadOfHousehold `shouldBe` 21900
 
-        it "2025 Single is $15,000" $
-            forStatus standardDeduction2025 Single `shouldBe` 15000
+        it "2025 Single is $15,750" $
+            forStatus standardDeduction2025 Single `shouldBe` 15750
 
-        it "2025 Married Filing Jointly is $30,000" $
-            forStatus standardDeduction2025 MarriedJoint `shouldBe` 30000
+        it "2025 Married Filing Jointly is $31,500" $
+            forStatus standardDeduction2025 MarriedJoint `shouldBe` 31500
 
-        it "2025 Head of Household is $22,500" $
-            forStatus standardDeduction2025 HeadOfHousehold `shouldBe` 22500
+        it "2025 Head of Household is $23,625" $
+            forStatus standardDeduction2025 HeadOfHousehold `shouldBe` 23625
 
     describe "California standard deduction" $ do
         it "2024 Single is $5,540" $

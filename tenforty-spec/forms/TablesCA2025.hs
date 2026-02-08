@@ -42,14 +42,14 @@ Source: FTB Tax Rate Schedules
 -}
 californiaBrackets2025 :: NonEmpty Bracket
 californiaBrackets2025 =
-    Bracket (byStatus 10756 21512 10756 21527 21512) 0.01
-        :| [ Bracket (byStatus 25499 50998 25499 51001 50998) 0.02
-           , Bracket (byStatus 40245 80490 40245 80493 80490) 0.04
-           , Bracket (byStatus 55866 111732 55866 111734 111732) 0.06
-           , Bracket (byStatus 70606 141212 70606 141214 141212) 0.08
-           , Bracket (byStatus 360659 721318 360659 721324 721318) 0.093
-           , Bracket (byStatus 432787 865574 432787 865578 865574) 0.103
-           , Bracket (byStatus 721314 1442628 721314 1442636 1442628) 0.113
+    Bracket (byStatus 11079 22158 11079 22173 22158) 0.01
+        :| [ Bracket (byStatus 26264 52528 26264 52530 52528) 0.02
+           , Bracket (byStatus 41452 82904 41452 67716 82904) 0.04
+           , Bracket (byStatus 57542 115084 57542 83805 115084) 0.06
+           , Bracket (byStatus 72724 145448 72724 98990 145448) 0.08
+           , Bracket (byStatus 371479 742958 371479 505208 742958) 0.093
+           , Bracket (byStatus 445771 891542 445771 606251 891542) 0.103
+           , Bracket (byStatus 742953 1485906 742953 1010417 1485906) 0.113
            , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.123
            ]
 

@@ -101,7 +101,7 @@ federalBracketsTable2025 =
         Left err -> error $ "Invalid federal brackets: " ++ err
 
 standardDeduction2025 :: ByStatus (Amount Dollars)
-standardDeduction2025 = byStatus 15000 30000 15000 22500 30000
+standardDeduction2025 = byStatus 15750 31500 15750 23625 31500
 
 qualifiedDividendBrackets2025 :: NonEmpty Bracket
 qualifiedDividendBrackets2025 =

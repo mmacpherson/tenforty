@@ -18,12 +18,12 @@ idTaxRate2025 = 0.053
 {- | 2025 Idaho standard deduction amounts
 Order: Single, MFJ, MFS, HoH, QW
 Source: Idaho Form 40 Instructions (2025)
-Single or Married Filing Separately: $15,000
-Married Filing Jointly or Qualifying Surviving Spouse: $30,000
-Head of Household: $22,500
+Single or Married Filing Separately: $15,750
+Married Filing Jointly or Qualifying Surviving Spouse: $31,500
+Head of Household: $23,625
 -}
 idStandardDeduction2025 :: ByStatus (Amount Dollars)
-idStandardDeduction2025 = byStatus 15000 30000 15000 22500 30000
+idStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500
 
 {- | 2025 Idaho tax threshold - income below this is taxed at 0%
 Order: Single, MFJ, MFS, HoH, QW

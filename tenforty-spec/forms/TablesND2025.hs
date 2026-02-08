@@ -40,11 +40,11 @@ ndBracketsTable2025 =
 {- | North Dakota 2025 standard deduction by filing status
 Order: Single, MFJ, MFS, HoH, QW
 Source: Web research and 2025 withholding instructions
-Single: $15,000
-Married Filing Jointly: $30,000
-Married Filing Separately: $15,000
-Head of Household: $22,500
-Qualifying Surviving Spouse: $30,000
+Single: $15,750
+Married Filing Jointly: $31,500
+Married Filing Separately: $15,750
+Head of Household: $23,625
+Qualifying Surviving Spouse: $31,500
 -}
 ndStandardDeduction2025 :: ByStatus (Amount Dollars)
-ndStandardDeduction2025 = byStatus 15000 30000 15000 22500 30000
+ndStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500
