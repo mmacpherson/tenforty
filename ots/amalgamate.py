@@ -676,18 +676,21 @@ def build_fields(source: str) -> list[dict[str, Any]]:
 
         if _fields[-1] == ";":
             terminator = "semicolon"
-            _fields = _fields[-1]
+            _fields = _fields[:-1]
         else:
             terminator = "newline"
 
+        fed_filename_keys = ("FileName", "FedReturn", "FileName1040:")
         if len(_fields) > 1:
             # Handle special cases
             if key == "Title:":
                 default = " ".join(_fields[1:])
-            elif key == "FileName":
+            elif key in fed_filename_keys:
                 default = FED_FILENAME
             else:
                 default = _fields[1]
+        elif key in fed_filename_keys:
+            default = FED_FILENAME
         else:
             default = ""
 

@@ -43,62 +43,6 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 - Explore how taxes vary as a function of income, state, filing status, and year.
 - Easily integrate with data analysis and visualization tools in Python with `polars` support.
 - Evaluate "what if" tax scenarios efficiently and reproducibly.
-- **Graph backend**: Optional Rust-based computation engine with automatic differentiation for exact marginal rates and Newton's method inverse solving.
-
-
-## Graph Backend
-
-`tenforty` includes an optional graph-based computation backend built in Rust,
-offering automatic differentiation (autodiff) and inverse solving capabilities.
-
-To use the graph backend, pass `backend="graph"` to `evaluate_return` or
-`evaluate_returns`:
-
-``` python
-from tenforty import evaluate_return
-
-evaluate_return(w2_income=100_000, backend="graph")
-```
-
-The graph backend currently supports tax years 2024-2025 and a subset of states
-(California, New York, and all no-income-tax states).
-
-### Marginal Tax Rate (Autodiff)
-
-The `marginal_rate` function computes exact marginal tax rates using automatic
-differentiation -- no finite-difference approximation needed:
-
-``` python
-from tenforty import marginal_rate
-
-# Federal marginal rate on wages
-marginal_rate(w2_income=100_000)  # => 0.22
-
-# Marginal rate on long-term capital gains
-marginal_rate(w2_income=100_000, long_term_capital_gains=50_000, wrt="long_term_capital_gains")
-
-# Combined federal + state marginal rate
-marginal_rate(w2_income=100_000, state="CA")
-```
-
-### Inverse Solver
-
-The `solve_for_income` function uses Newton's method with autodiff gradients to
-find the input value that produces a target tax amount:
-
-``` python
-from tenforty import solve_for_income
-
-# What wages produce $15,000 in federal tax?
-solve_for_income(target_tax=15_000)  # => ~$82,000
-```
-
-### Interactive Demo
-
-An interactive WebAssembly demo of the graph backend is available at
-[mmacpherson.github.io/tenforty](https://mmacpherson.github.io/tenforty/),
-featuring real-time tax curve visualization, bracket breakdowns, gradient
-sensitivity analysis, and the inverse solver.
 
 
 ## Disclaimer
@@ -137,7 +81,7 @@ Here are all arguments available for those two functions:
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
-| `state`                      | str \| None               | None                | Two-letter state code, e.g. "CA", "NY". Several income-tax states supported; no-income-tax states (e.g. "TX", "WA") also accepted. |
+| `state`                      | str \| None               | None                | Two-letter state code. Income-tax states with OTS support: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. Other states unsupported for now. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
 | `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
@@ -393,7 +337,8 @@ df = (
 - State income tax is supported for a growing number of states, with more being
   added. No-income-tax states (e.g. Texas, Nevada) are also accepted. Only
   California has been tested against tax returns prepared independently by
-  professional tax software; support for other states is provisional.
+  professional tax software; other states have formula-derived and property-based
+  testing. See [IRS Validation](./docs/irs-validation.md) for details.
 
 
 ## Development & Contributing
