@@ -35,8 +35,8 @@
         "10": {
             "id": 10,
             "op": {
-                "left": 0,
-                "right": 9,
+                "left": 9,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -57,8 +57,8 @@
         "13": {
             "id": 13,
             "op": {
-                "left": 0,
-                "right": 12,
+                "left": 12,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -80,8 +80,8 @@
             "id": 16,
             "op": {
                 "cond": 13,
-                "otherwise": 15,
-                "then": 14,
+                "otherwise": 14,
+                "then": 15,
                 "type": "if_positive"
             }
         },
@@ -89,8 +89,8 @@
             "id": 17,
             "op": {
                 "cond": 10,
-                "otherwise": 16,
-                "then": 11,
+                "otherwise": 11,
+                "then": 16,
                 "type": "if_positive"
             }
         },
@@ -99,8 +99,8 @@
             "name": "L8_income_limit",
             "op": {
                 "cond": 7,
-                "otherwise": 17,
-                "then": 8,
+                "otherwise": 8,
+                "then": 17,
                 "type": "if_positive"
             }
         },
@@ -145,8 +145,8 @@
         "23": {
             "id": 23,
             "op": {
-                "left": 0,
-                "right": 22,
+                "left": 22,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -169,8 +169,8 @@
             "name": "L10_phasein",
             "op": {
                 "cond": 23,
-                "otherwise": 25,
-                "then": 24,
+                "otherwise": 24,
+                "then": 25,
                 "type": "if_positive"
             }
         },
@@ -215,8 +215,8 @@
         "31": {
             "id": 31,
             "op": {
-                "left": 0,
-                "right": 30,
+                "left": 30,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -239,8 +239,8 @@
             "name": "L12_phaseout_start",
             "op": {
                 "cond": 31,
-                "otherwise": 33,
-                "then": 32,
+                "otherwise": 32,
+                "then": 33,
                 "type": "if_positive"
             }
         },
@@ -303,8 +303,8 @@
         "41": {
             "id": 41,
             "op": {
-                "left": 0,
-                "right": 40,
+                "left": 40,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -325,8 +325,8 @@
         "44": {
             "id": 44,
             "op": {
-                "left": 0,
-                "right": 43,
+                "left": 43,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -347,8 +347,8 @@
         "47": {
             "id": 47,
             "op": {
-                "left": 0,
-                "right": 46,
+                "left": 46,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -380,8 +380,8 @@
             "id": 50,
             "op": {
                 "cond": 47,
-                "otherwise": 49,
-                "then": 48,
+                "otherwise": 48,
+                "then": 49,
                 "type": "if_positive"
             }
         },
@@ -389,8 +389,8 @@
             "id": 51,
             "op": {
                 "cond": 44,
-                "otherwise": 50,
-                "then": 45,
+                "otherwise": 45,
+                "then": 50,
                 "type": "if_positive"
             }
         },
@@ -399,8 +399,8 @@
             "name": "L15_max",
             "op": {
                 "cond": 41,
-                "otherwise": 51,
-                "then": 42,
+                "otherwise": 42,
+                "then": 51,
                 "type": "if_positive"
             }
         },
@@ -447,8 +447,8 @@
         "58": {
             "id": 58,
             "op": {
-                "left": 21,
-                "right": 57,
+                "left": 57,
+                "right": 21,
                 "type": "sub"
             }
         },
@@ -471,16 +471,16 @@
             "name": "L18_ca_eitc",
             "op": {
                 "cond": 58,
-                "otherwise": 56,
-                "then": 59,
+                "otherwise": 59,
+                "then": 56,
                 "type": "if_positive"
             }
         },
         "7": {
             "id": 7,
             "op": {
-                "left": 0,
-                "right": 6,
+                "left": 6,
+                "right": 0,
                 "type": "sub"
             }
         },

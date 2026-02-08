@@ -14,11 +14,6 @@ KNOWN_ISSUES = {
     # OTS ots_2024.cpp:11028 has HOH threshold $191,150; IRS correct value is
     # $191,950. Max impact $64 for HOH filers with taxable income > $191,950.
     "hoh_bracket": 64.0,
-    # Graph returns ~$256-300 higher CA state tax than OTS (varies by filing
-    # status and income level). Cause: graph does not apply CA exemption credits
-    # (L32) which OTS applies automatically. Graph requires explicit L32 input
-    # which defaults to 0. MFJ credit is larger (~$300) vs Single (~$256).
-    "ca_exemption_credit": 310.0,
 }
 
 
@@ -340,11 +335,10 @@ def test_all_federal_outputs_parity(w2_income):
 def test_ca_state_parity(w2_income, filing_status):
     """Compare CA state tax between OTS and Graph for 2024.
 
-    Known discrepancy: graph returns higher CA tax than OTS because the graph
-    does not automatically apply the CA personal exemption credit (L32). OTS
-    applies this credit implicitly. The gap scales with income (~$256-520
-    depending on filing status and income level due to phase-outs). We use a
-    percentage tolerance to accommodate this. See parity_log.md.
+    Exemption credits (L32) are now auto-computed in the graph spec. Remaining
+    differences come from OTS rounding tax amounts to whole dollars and minor
+    bracket computation differences. Graph computes exact bracket tax per the
+    FTB rate schedule; OTS rounds intermediate results.
     """
     ots = evaluate_return(
         year=2024,
@@ -367,9 +361,7 @@ def test_ca_state_parity(w2_income, filing_status):
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    ca_tolerance = KNOWN_ISSUES["ca_exemption_credit"] + max(
-        ACCEPTABLE_TOLERANCE, w2_income * 0.005
-    )
+    ca_tolerance = max(STATE_TOLERANCE, w2_income * 0.002)
     assert tax_diff <= ca_tolerance, (
         f"CA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income} "
         f"(tolerance=${ca_tolerance:.2f})"

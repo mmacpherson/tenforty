@@ -446,10 +446,10 @@ compileExpr mname = \case
     IfGte a b t e -> do
         aid <- compileExpr Nothing a
         bid <- compileExpr Nothing b
-        diffId <- emitAnonymousNode (OpSub aid bid)
+        diffId <- emitAnonymousNode (OpSub bid aid)
         tid <- compileExpr Nothing t
         eid <- compileExpr Nothing e
-        emitNode mname (OpIfPositive diffId tid eid)
+        emitNode mname (OpIfPositive diffId eid tid)
     Floor a -> do
         aid <- compileExpr Nothing a
         emitNode mname (OpFloor aid)

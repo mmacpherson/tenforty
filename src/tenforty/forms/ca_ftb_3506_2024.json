@@ -47,8 +47,8 @@
             "name": "L3_expense_limit",
             "op": {
                 "cond": 8,
-                "otherwise": 10,
-                "then": 9,
+                "otherwise": 9,
+                "then": 10,
                 "type": "if_positive"
             }
         },
@@ -386,8 +386,8 @@
         "8": {
             "id": 8,
             "op": {
-                "left": 0,
-                "right": 7,
+                "left": 7,
+                "right": 0,
                 "type": "sub"
             }
         },

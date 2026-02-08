@@ -520,8 +520,8 @@
         "67": {
             "id": 67,
             "op": {
-                "left": 0,
-                "right": 66,
+                "left": 66,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -535,8 +535,8 @@
         "69": {
             "id": 69,
             "op": {
-                "left": 0,
-                "right": 68,
+                "left": 68,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -557,8 +557,8 @@
         "71": {
             "id": 71,
             "op": {
-                "left": 0,
-                "right": 70,
+                "left": 70,
+                "right": 0,
                 "type": "sub"
             }
         },
@@ -566,8 +566,8 @@
             "id": 72,
             "op": {
                 "cond": 71,
-                "otherwise": 29,
-                "then": 43,
+                "otherwise": 43,
+                "then": 29,
                 "type": "if_positive"
             }
         },
@@ -575,8 +575,8 @@
             "id": 73,
             "op": {
                 "cond": 69,
-                "otherwise": 72,
-                "then": 54,
+                "otherwise": 54,
+                "then": 72,
                 "type": "if_positive"
             }
         },
@@ -585,8 +585,8 @@
             "name": "CREDIT_BY_QC",
             "op": {
                 "cond": 67,
-                "otherwise": 73,
-                "then": 65,
+                "otherwise": 65,
+                "then": 73,
                 "type": "if_positive"
             }
         },
