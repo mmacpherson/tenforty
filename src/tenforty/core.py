@@ -261,6 +261,7 @@ def evaluate_form(
     federal_form_values: dict[str, Any] | None = None,
     state_form_values: dict[str, Any] | None = None,
     on_error: str = "raise",
+    fed_import_map: dict[str, str] | None = None,
 ) -> dict[str, dict[str, Any] | None]:
     """Evaluate an OTS form and return parsed values.
 
@@ -274,6 +275,8 @@ def evaluate_form(
         federal_form_values: Input form values.
         state_form_values: Input form values.
         on_error: Error handling policy ("raise", "warn", or "ignore").
+        fed_import_map: Maps federal output keys to state input keys,
+            e.g. ``{"L11b": "L1"}`` to inject federal AGI into VA L1.
 
     Returns:
     -------
@@ -309,8 +312,13 @@ def evaluate_form(
     if state_form_config is None:
         raise ValueError(f"No form available under key: [{key}]")
 
+    fed_values = {f"_FED_{k}": v for k, v in federal_return.items()}
+    if fed_import_map:
+        for fed_key, state_key in fed_import_map.items():
+            if fed_key in federal_return:
+                fed_values[state_key] = federal_return[fed_key]
     state_form_text = generate_ots_return(
-        state_form_values | {f"_FED_{k}": v for k, v in federal_return.items()},
+        state_form_values | fed_values,
         state_form_config,
     )
     logger.debug(f"Raw State OTS Input:\n{state_form_text}")
@@ -394,6 +402,9 @@ def evaluate_natural_input_form(
         )
     logger.debug(f"{state_form_values=}")
 
+    fed_import_map = (
+        state_natural_config.fed_import_map if state_natural_config else None
+    )
     ots_output = evaluate_form(
         year.value,
         federal_form_id,
@@ -401,6 +412,7 @@ def evaluate_natural_input_form(
         federal_form_values,
         state_form_values,
         on_error=on_error,
+        fed_import_map=fed_import_map or None,
     )
 
     federal_natural_output = map_ots_to_natural_output(

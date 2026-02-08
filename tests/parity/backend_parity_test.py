@@ -409,6 +409,296 @@ def test_ny_state_parity(w2_income, filing_status):
     )
 
 
+# === State Parity Tests (2025) ===
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_pa_state_parity(w2_income, filing_status):
+    """Compare PA state tax between OTS and Graph for 2025.
+
+    PA uses a flat 3.07% tax on taxable income with no standard deduction
+    or personal exemptions, so OTS and graph produce identical results.
+    """
+    ots = evaluate_return(
+        year=2025,
+        state="PA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="PA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"PA AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"PA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_mi_state_parity(w2_income, filing_status):
+    """Compare MI state tax between OTS and Graph for 2025.
+
+    MI uses a flat 4.25% tax on taxable income. Personal exemptions must
+    be passed explicitly to both backends; with no exemptions, parity
+    is exact.
+    """
+    ots = evaluate_return(
+        year=2025,
+        state="MI",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="MI",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"MI AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"MI tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(w2_income=st.integers(0, 500_000))
+@settings(max_examples=100)
+def test_oh_state_parity(w2_income):
+    """Compare OH state tax between OTS and Graph for 2025.
+
+    Ohio has no standard deduction. Personal exemptions are income-tiered
+    and must be passed explicitly; without them, parity is within $20
+    due to minor rounding differences.
+    """
+    ots = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="ots")
+    graph = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="graph")
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"OH AGI diff ${agi_diff:.2f} for w2=${w2_income}"
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= STATE_TOLERANCE, (
+        f"OH tax diff ${tax_diff:.2f} for w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_nc_state_agi_parity(w2_income, filing_status):
+    """NC AGI matches exactly — child deduction doesn't affect AGI."""
+    ots = evaluate_return(
+        year=2025,
+        state="NC",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="NC",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"NC AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@pytest.mark.xfail(
+    reason="OTS auto-applies child deduction for MFJ at low income; graph leaves as zero",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_nc_state_tax_parity(w2_income, filing_status):
+    """NC total tax differs because OTS auto-applies child deduction."""
+    ots = evaluate_return(
+        year=2025,
+        state="NC",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="NC",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"NC tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_nj_state_agi_parity(w2_income, filing_status):
+    """NJ AGI matches exactly — personal exemption doesn't affect AGI."""
+    ots = evaluate_return(
+        year=2025,
+        state="NJ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="NJ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"NJ AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@pytest.mark.xfail(
+    reason="OTS auto-applies $1,000 NJ personal exemption; graph leaves as zero input",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_nj_state_tax_parity(w2_income, filing_status):
+    """NJ total tax differs because OTS auto-applies personal exemption."""
+    ots = evaluate_return(
+        year=2025,
+        state="NJ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="NJ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"NJ tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_va_state_agi_parity(w2_income, filing_status):
+    """VA AGI matches exactly — exemptions don't affect AGI."""
+    ots = evaluate_return(
+        year=2025,
+        state="VA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="VA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"VA AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@pytest.mark.xfail(
+    reason="OTS auto-applies $930 personal exemption + $8,000 standard deduction; graph leaves as zero",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_va_state_tax_parity(w2_income, filing_status):
+    """VA total tax differs because OTS auto-applies personal exemption + standard deduction."""
+    ots = evaluate_return(
+        year=2025,
+        state="VA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="VA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"VA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
 # === CA State (Graph Strictness) ===
 
 
