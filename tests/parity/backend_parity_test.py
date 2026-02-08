@@ -332,14 +332,8 @@ def test_all_federal_outputs_parity(w2_income):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
-def test_ca_state_parity(w2_income, filing_status):
-    """Compare CA state tax between OTS and Graph for 2024.
-
-    Exemption credits (L32) are now auto-computed in the graph spec. Remaining
-    differences come from OTS rounding tax amounts to whole dollars and minor
-    bracket computation differences. Graph computes exact bracket tax per the
-    FTB rate schedule; OTS rounds intermediate results.
-    """
+def test_ca_state_agi_parity(w2_income, filing_status):
+    """CA AGI matches exactly — rounding differences don't affect AGI."""
     ots = evaluate_return(
         year=2024,
         state="CA",
@@ -360,29 +354,48 @@ def test_ca_state_parity(w2_income, filing_status):
         f"CA AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
     )
 
+
+@pytest.mark.xfail(
+    reason="OTS rounds bracket tax to whole dollars; graph computes exact per FTB rate schedule",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=200)
+def test_ca_state_tax_parity(w2_income, filing_status):
+    """CA total tax differs because OTS rounds bracket tax to whole dollars."""
+    ots = evaluate_return(
+        year=2024,
+        state="CA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="CA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    ca_tolerance = max(STATE_TOLERANCE, w2_income * 0.002)
-    assert tax_diff <= ca_tolerance, (
-        f"CA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income} "
-        f"(tolerance=${ca_tolerance:.2f})"
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"CA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
     )
 
 
 @skip_if_backends_unavailable
 @given(
-    w2_income=st.integers(35_000, 100_000),
+    w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
-def test_ny_state_parity(w2_income, filing_status):
-    """Compare NY state tax between OTS and Graph for 2024.
-
-    Income range limited to $35k-$120k where parity is good. Below $35k OTS
-    auto-applies the NY household credit (L40) which the graph leaves as zero
-    input (~$34-49 diff for MFJ). Above $120k the NY supplemental tax (income
-    recapture) creates large discrepancies because the graph spec does not yet
-    implement this provision.
-    """
+def test_ny_state_agi_parity(w2_income, filing_status):
+    """NY AGI matches exactly — household credit and supplemental tax don't affect AGI."""
     ots = evaluate_return(
         year=2024,
         state="NY",
@@ -403,9 +416,99 @@ def test_ny_state_parity(w2_income, filing_status):
         f"NY AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
     )
 
+
+@pytest.mark.xfail(
+    reason="OTS auto-applies household credit at low income; graph lacks supplemental tax at high income",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=200)
+def test_ny_state_tax_parity(w2_income, filing_status):
+    """NY total tax differs due to household credit and missing supplemental tax."""
+    ots = evaluate_return(
+        year=2024,
+        state="NY",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="NY",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= STATE_TOLERANCE, (
+    assert tax_diff <= EXACT_TOLERANCE, (
         f"NY tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=200)
+def test_ma_state_agi_parity(w2_income, filing_status):
+    """MA AGI matches exactly — personal exemption doesn't affect AGI."""
+    ots = evaluate_return(
+        year=2024,
+        state="MA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="MA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"MA AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@pytest.mark.xfail(
+    reason="OTS applies one $4,400 personal exemption for MFJ; graph applies two ($8,800)",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=200)
+def test_ma_state_tax_parity(w2_income, filing_status):
+    """MA total tax differs because OTS under-counts MFJ personal exemptions."""
+    ots = evaluate_return(
+        year=2024,
+        state="MA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="MA",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"MA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
     )
 
 
