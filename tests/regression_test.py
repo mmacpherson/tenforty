@@ -1050,7 +1050,9 @@ def test_nd_tax_ranges(scenario):
 @pytest.mark.parametrize(
     "scenario",
     NH_SCENARIOS,
-    ids=lambda s: f"NH-{s['year']}-{s['filing_status']}-{s['w2_income']}-{s.get('taxable_interest', 0)}",
+    ids=lambda s: (
+        f"NH-{s['year']}-{s['filing_status']}-{s['w2_income']}-{s.get('taxable_interest', 0)}"
+    ),
 )
 def test_nh_tax_ranges(scenario):
     """Sanity check: NH tax falls within expected ranges (graph backend)."""
