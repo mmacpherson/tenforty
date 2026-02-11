@@ -22,7 +22,7 @@ DEFAULT_GOAL: help
 .PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs spec-test forms-sync
 .PHONY: spec-fmt spec-lint spec-lint-strict
-.PHONY: runner-image
+.PHONY: runner-image bench-zip-mode
 
 check-uv: ## Check if uv is installed
 	@if [ -z "$(UV_CHECK)" ]; then \
@@ -132,6 +132,25 @@ forms-sync: ## Sync tenforty-spec/*.json into src/tenforty/forms/
 ## Claude runner targets
 runner-image: ## Build claude-runner-tenforty Docker image
 	docker build -f Dockerfile.tenforty -t claude-runner-tenforty .
+
+BENCH_CORES := 1,2,4,$$(nproc)
+BENCH_N_OTS := 1000
+BENCH_N_GRAPH := 100000
+PYTHON_EXT_SUFFIX := $(shell python3 -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
+
+bench-zip-mode: ## Benchmark evaluate_returns(mode="zip") across backends and core counts
+	@echo "=== OTS (n=$(BENCH_N_OTS)) ==="
+	python scripts/bench_zip_mode.py --backend ots --label ots --n $(BENCH_N_OTS) --output /tmp/bench_ots.json
+	@echo "=== Graph interpreter (n=$(BENCH_N_GRAPH)) ==="
+	cargo build -p tenforty-graph --release --features "python parallel"
+	cp target/release/libgraphlib.so src/tenforty/graphlib/graphlib$(PYTHON_EXT_SUFFIX)
+	python scripts/bench_zip_mode.py --backend graph --label graph --n $(BENCH_N_GRAPH) --cores $(BENCH_CORES) --output /tmp/bench_interp.json
+	@echo "=== Graph JIT (n=$(BENCH_N_GRAPH)) ==="
+	cargo build -p tenforty-graph --release --features "python jit parallel"
+	cp target/release/libgraphlib.so src/tenforty/graphlib/graphlib$(PYTHON_EXT_SUFFIX)
+	python scripts/bench_zip_mode.py --backend graph --label graph-jit --n $(BENCH_N_GRAPH) --cores $(BENCH_CORES) --output /tmp/bench_jit.json
+	python scripts/bench_zip_mode.py --combine /tmp/bench_ots.json /tmp/bench_interp.json /tmp/bench_jit.json --html bench_results.html
+	@echo "Results: bench_results.html"
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

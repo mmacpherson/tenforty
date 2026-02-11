@@ -3,8 +3,12 @@ ots/generated/**
 scratch/
 SHARED_TASK_NOTES.md
 .claude/*.json
+.beads/
 # This is a library, not an application.
 uv.lock
+
+# Benchmark outputs
+bench_results.html
 
 # tenforty-graph build outputs
 crates/tenforty-graph/pkg/

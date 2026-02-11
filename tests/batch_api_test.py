@@ -275,3 +275,38 @@ class TestEdgeCases:
         assert len(result) == len(statuses)
         for row in result.iter_rows(named=True):
             assert row["federal_total_tax"] > 0
+
+
+class TestExplicitCrossMode:
+    """Tests with explicit mode='cross' parameter."""
+
+    def test_explicit_cross_matches_default(self):
+        """mode='cross' should produce same results as default (no mode)."""
+        default_result = evaluate_returns(
+            year=2024,
+            state="NY",
+            w2_income=[50000.0, 100000.0],
+        )
+        explicit_result = evaluate_returns(
+            year=2024,
+            state="NY",
+            w2_income=[50000.0, 100000.0],
+            mode="cross",
+        )
+
+        assert default_result.shape == explicit_result.shape
+        assert (
+            default_result["federal_total_tax"].to_list()
+            == explicit_result["federal_total_tax"].to_list()
+        )
+
+    def test_explicit_cross_cartesian_product(self):
+        """mode='cross' should produce Cartesian product."""
+        result = evaluate_returns(
+            year=[2023, 2024],
+            state="NY",
+            w2_income=[50000.0, 100000.0],
+            mode="cross",
+        )
+
+        assert len(result) == 4
