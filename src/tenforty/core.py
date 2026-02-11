@@ -5,6 +5,7 @@ import logging
 import os
 import pathlib
 import re
+from collections import defaultdict
 from typing import Any, Literal
 
 import dotenv
@@ -528,59 +529,190 @@ def evaluate_returns(
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
     backend: Literal["ots", "graph"] = "ots",
+    mode: Literal["cross", "zip"] = "cross",
 ) -> pl.DataFrame:
-    """Evaluate tax returns for a grid of inputs.
+    """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
 
-    This function generalizes `evaluate_return` to handle vector-valued inputs,
-    computing the outer product of all input vectors, and applying `evaluate_return` to each combination.
-    The results are then compiled into a polars DataFrame.
+    Pass ``mode="cross"`` (default) for Cartesian product or ``mode="zip"``
+    for element-wise evaluation with scalar broadcasting.
 
     Example:
     -------
         >>> evaluate_returns(year=[2021, 2022], filing_status=["Single", "Married/Joint"], w2_income=[50000, 100000])
-        # Returns a DataFrame with the results for each combination of year, filing status, and w2_income.
+        # mode="cross": 2x2x2 = 8 rows  (Cartesian product)
+        # mode="zip":   2 rows           (element-wise)
 
     """
 
     def ensure_list(x):
         return x if isinstance(x, list) else [x]
 
-    # Convert all inputs to lists
     years = ensure_list(year)
     states_of_residence = ensure_list(state)
     filing_statuses = ensure_list(filing_status)
-    num_dependents = ensure_list(num_dependents)
-    dependent_exemptions = ensure_list(dependent_exemptions)
-    standard_or_itemized = ensure_list(standard_or_itemized)
+    nums_dependents = ensure_list(num_dependents)
+    dep_exemptions = ensure_list(dependent_exemptions)
+    std_or_items = ensure_list(standard_or_itemized)
     w2_incomes = ensure_list(w2_income)
     taxable_interests = ensure_list(taxable_interest)
-    qualified_dividends = ensure_list(qualified_dividends)
-    ordinary_dividends = ensure_list(ordinary_dividends)
-    short_term_capital_gains = ensure_list(short_term_capital_gains)
-    long_term_capital_gains = ensure_list(long_term_capital_gains)
-    schedule_1_incomes = ensure_list(schedule_1_income)
-    itemized_deductions = ensure_list(itemized_deductions)
-    state_adjustments = ensure_list(state_adjustment)
-    incentive_stock_option_gains = ensure_list(incentive_stock_option_gains)
+    qual_dividends = ensure_list(qualified_dividends)
+    ord_dividends = ensure_list(ordinary_dividends)
+    st_cap_gains = ensure_list(short_term_capital_gains)
+    lt_cap_gains = ensure_list(long_term_capital_gains)
+    sched1_incomes = ensure_list(schedule_1_income)
+    item_deductions = ensure_list(itemized_deductions)
+    state_adjs = ensure_list(state_adjustment)
+    iso_gains = ensure_list(incentive_stock_option_gains)
 
-    combinations = itertools.product(
-        years,
-        states_of_residence,
-        filing_statuses,
-        num_dependents,
-        dependent_exemptions,
-        standard_or_itemized,
-        w2_incomes,
-        taxable_interests,
-        qualified_dividends,
-        ordinary_dividends,
-        short_term_capital_gains,
-        long_term_capital_gains,
-        schedule_1_incomes,
-        itemized_deductions,
-        state_adjustments,
-        incentive_stock_option_gains,
-    )
+    if mode == "zip":
+        all_lists = [
+            ("year", years),
+            ("state", states_of_residence),
+            ("filing_status", filing_statuses),
+            ("num_dependents", nums_dependents),
+            ("dependent_exemptions", dep_exemptions),
+            ("standard_or_itemized", std_or_items),
+            ("w2_income", w2_incomes),
+            ("taxable_interest", taxable_interests),
+            ("qualified_dividends", qual_dividends),
+            ("ordinary_dividends", ord_dividends),
+            ("short_term_capital_gains", st_cap_gains),
+            ("long_term_capital_gains", lt_cap_gains),
+            ("schedule_1_income", sched1_incomes),
+            ("itemized_deductions", item_deductions),
+            ("state_adjustment", state_adjs),
+            ("incentive_stock_option_gains", iso_gains),
+        ]
+        lengths = {name: len(vals) for name, vals in all_lists if len(vals) > 1}
+        if lengths:
+            unique_lengths = set(lengths.values())
+            if len(unique_lengths) > 1:
+                detail = ", ".join(f"{k}={v}" for k, v in sorted(lengths.items()))
+                raise ValueError(
+                    f"All list inputs must have the same length, got: {detail}"
+                )
+            n = unique_lengths.pop()
+        else:
+            n = 1
+
+        def broadcast(vals):
+            return vals * n if len(vals) == 1 else vals
+
+        years = broadcast(years)
+        states_of_residence = broadcast(states_of_residence)
+        filing_statuses = broadcast(filing_statuses)
+        nums_dependents = broadcast(nums_dependents)
+        dep_exemptions = broadcast(dep_exemptions)
+        std_or_items = broadcast(std_or_items)
+        w2_incomes = broadcast(w2_incomes)
+        taxable_interests = broadcast(taxable_interests)
+        qual_dividends = broadcast(qual_dividends)
+        ord_dividends = broadcast(ord_dividends)
+        st_cap_gains = broadcast(st_cap_gains)
+        lt_cap_gains = broadcast(lt_cap_gains)
+        sched1_incomes = broadcast(sched1_incomes)
+        item_deductions = broadcast(item_deductions)
+        state_adjs = broadcast(state_adjs)
+        iso_gains = broadcast(iso_gains)
+
+    if backend == "graph":
+        from .backends.graph import GraphBackend
+
+        graph_backend = GraphBackend()
+        if graph_backend.is_available():
+            try:
+                results = []
+                if mode == "cross":
+                    for y, s in itertools.product(years, states_of_residence):
+                        for nd, soi in itertools.product(nums_dependents, std_or_items):
+                            batch_inputs = {
+                                "w2_income": w2_incomes,
+                                "taxable_interest": taxable_interests,
+                                "qualified_dividends": qual_dividends,
+                                "ordinary_dividends": ord_dividends,
+                                "short_term_capital_gains": st_cap_gains,
+                                "long_term_capital_gains": lt_cap_gains,
+                                "schedule_1_income": sched1_incomes,
+                                "itemized_deductions": item_deductions,
+                                "state_adjustment": state_adjs,
+                                "incentive_stock_option_gains": iso_gains,
+                                "num_dependents": [nd],
+                                "dependent_exemptions": dep_exemptions,
+                            }
+                            batch_results = graph_backend.evaluate_batch(
+                                y,
+                                OTSState(s) if s else OTSState.NONE,
+                                batch_inputs,
+                                filing_statuses,
+                            )
+                            batch_size = len(next(iter(batch_results.values())))
+                            for i in range(batch_size):
+                                row = {k: v[i] for k, v in batch_results.items()}
+                                row["year"] = y
+                                row["state"] = s
+                                row["num_dependents"] = nd
+                                row["standard_or_itemized"] = soi
+                                results.append(row)
+                else:
+                    groups: dict[tuple, list[int]] = defaultdict(list)
+                    for i in range(n):
+                        groups[(years[i], states_of_residence[i])].append(i)
+                    results_indexed: list[dict | None] = [None] * n
+                    for (y, s), indices in groups.items():
+                        group_inputs = {
+                            "w2_income": [w2_incomes[i] for i in indices],
+                            "taxable_interest": [taxable_interests[i] for i in indices],
+                            "qualified_dividends": [qual_dividends[i] for i in indices],
+                            "ordinary_dividends": [ord_dividends[i] for i in indices],
+                            "short_term_capital_gains": [
+                                st_cap_gains[i] for i in indices
+                            ],
+                            "long_term_capital_gains": [
+                                lt_cap_gains[i] for i in indices
+                            ],
+                            "schedule_1_income": [sched1_incomes[i] for i in indices],
+                            "itemized_deductions": [
+                                item_deductions[i] for i in indices
+                            ],
+                            "state_adjustment": [state_adjs[i] for i in indices],
+                            "incentive_stock_option_gains": [
+                                iso_gains[i] for i in indices
+                            ],
+                            "num_dependents": [
+                                float(nums_dependents[i]) for i in indices
+                            ],
+                            "dependent_exemptions": [
+                                dep_exemptions[i] for i in indices
+                            ],
+                        }
+                        group_statuses = [filing_statuses[i] for i in indices]
+                        batch_results = graph_backend.evaluate_batch(
+                            y,
+                            OTSState(s) if s else OTSState.NONE,
+                            group_inputs,
+                            group_statuses,
+                            mode="zip",
+                        )
+                        batch_size = len(next(iter(batch_results.values())))
+                        for j in range(batch_size):
+                            idx = indices[j]
+                            row = {k: v[j] for k, v in batch_results.items()}
+                            row["year"] = y
+                            row["state"] = s
+                            row["num_dependents"] = nums_dependents[idx]
+                            row["standard_or_itemized"] = std_or_items[idx]
+                            results_indexed[idx] = row
+                    results = results_indexed
+
+                return pl.DataFrame(results).cast({"state": pl.Utf8})
+            except Exception:
+                if on_error == "raise":
+                    raise
+                if on_error == "warn":
+                    logger.warning(
+                        "Graph batch evaluation failed; falling back to per-scenario evaluation.",
+                        exc_info=True,
+                    )
 
     parameter_names = [
         "year",
@@ -600,78 +732,45 @@ def evaluate_returns(
         "state_adjustment",
         "incentive_stock_option_gains",
     ]
+    all_vals = [
+        years,
+        states_of_residence,
+        filing_statuses,
+        nums_dependents,
+        dep_exemptions,
+        std_or_items,
+        w2_incomes,
+        taxable_interests,
+        qual_dividends,
+        ord_dividends,
+        st_cap_gains,
+        lt_cap_gains,
+        sched1_incomes,
+        item_deductions,
+        state_adjs,
+        iso_gains,
+    ]
 
-    if backend == "graph":
-        from .backends.graph import GraphBackend
-
-        graph_backend = GraphBackend()
-        if graph_backend.is_available():
-            try:
-                # For graph backend, we can optimize by using the batch API.
-                # We group by (year, state) since linking depends on those.
-                results = []
-                for y, s in itertools.product(years, states_of_residence):
-                    # We can't batch everything if standard_or_itemized or num_dependents vary
-                    # because they are currently handled as single values in evaluate_batch
-                    # if they affect the graph logic outside of simple input nodes.
-                    # Actually, num_dependents is an input node.
-                    # standard_or_itemized is a bit trickier but usually just affects which inputs are used.
-
-                    # Simplified: only batch if only statuses and numeric inputs vary.
-                    # If everything else is constant, we use evaluate_batch.
-                    # For now, let's group by (y, s, num_dep, std_or_item) too to be safe.
-                    for nd, soi in itertools.product(
-                        num_dependents, standard_or_itemized
-                    ):
-                        batch_inputs = {
-                            "w2_income": w2_incomes,
-                            "taxable_interest": taxable_interests,
-                            "qualified_dividends": qualified_dividends,
-                            "ordinary_dividends": ordinary_dividends,
-                            "short_term_capital_gains": short_term_capital_gains,
-                            "long_term_capital_gains": long_term_capital_gains,
-                            "schedule_1_income": schedule_1_incomes,
-                            "itemized_deductions": itemized_deductions,
-                            "state_adjustment": state_adjustments,
-                            "incentive_stock_option_gains": incentive_stock_option_gains,
-                            "num_dependents": [nd],
-                            "dependent_exemptions": dependent_exemptions,
-                        }
-                        batch_results = graph_backend.evaluate_batch(
-                            y,
-                            OTSState(s) if s else OTSState.NONE,
-                            batch_inputs,
-                            filing_statuses,
-                        )
-
-                        # evaluate_batch returns a dict of columns. We need to add constant columns
-                        # and then convert to a list of dicts.
-                        batch_size = len(next(iter(batch_results.values())))
-                        for i in range(batch_size):
-                            row = {k: v[i] for k, v in batch_results.items()}
-                            row["year"] = y
-                            row["state"] = s
-                            row["num_dependents"] = nd
-                            row["standard_or_itemized"] = soi
-                            results.append(row)
-
-                return pl.DataFrame(results).cast({"state": pl.Utf8})
-            except Exception:
-                if on_error == "raise":
-                    raise
-                if on_error == "warn":
-                    logger.warning(
-                        "Graph batch evaluation failed; falling back to per-scenario evaluation.",
-                        exc_info=True,
-                    )
-
-    results = []
-    for combo in combinations:
-        combo_map = dict(zip(parameter_names, combo, strict=False))
-        result = evaluate_return(
-            **combo_map, on_error=on_error, backend=backend
-        ).model_dump()
-        results.append(combo_map | result)
+    if mode == "cross":
+        combinations = itertools.product(*all_vals)
+        results = []
+        for combo in combinations:
+            combo_map = dict(zip(parameter_names, combo, strict=False))
+            result = evaluate_return(
+                **combo_map, on_error=on_error, backend=backend
+            ).model_dump()
+            results.append(combo_map | result)
+    else:
+        results = []
+        for i in range(n):
+            params = {
+                name: vals[i]
+                for name, vals in zip(parameter_names, all_vals, strict=False)
+            }
+            result = evaluate_return(
+                **params, on_error=on_error, backend=backend
+            ).model_dump()
+            results.append(params | result)
 
     return pl.DataFrame(results).cast({"state": pl.Utf8})
 

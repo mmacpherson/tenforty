@@ -265,8 +265,13 @@ class GraphBackend:
         state: OTSState | None,
         inputs: dict[str, list[float]],
         statuses: list[str],
+        mode: str = "cross",
     ) -> dict[str, list[float]]:
-        """Evaluate multiple scenarios efficiently using graph batch API."""
+        """Evaluate multiple scenarios efficiently using graph batch API.
+
+        With mode="cross" (default), computes Cartesian product of inputs x statuses.
+        With mode="zip", evaluates pre-formed scenarios by zipping input columns.
+        """
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
 
@@ -345,7 +350,8 @@ class GraphBackend:
 
         # Call the batch API
         graph_statuses = [FILING_STATUS_MAP.get(s, s) for s in statuses]
-        status_col, input_cols, output_cols = graph.eval_scenarios(
+        eval_fn = graph.eval_scenarios_zip if mode == "zip" else graph.eval_scenarios
+        status_col, input_cols, output_cols = eval_fn(
             graph_inputs, graph_statuses, list(output_map.keys())
         )
 
