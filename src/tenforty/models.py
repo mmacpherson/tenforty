@@ -404,6 +404,80 @@ _NATURAL_FORM_CONFIG = [
             "L46": "total_tax",
         },
     },
+    {
+        "year": 2024,
+        "form_id": "NC_D400",
+        "input_map": {
+            "filing_status": "Status",
+        },
+        "output_map": {
+            "L6": "adjusted_gross_income",
+            "L14": "taxable_income",
+            "L15": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "NJ_1040",
+        "input_map": {
+            "w2_income": "L15",
+            "taxable_interest": "L16a",
+            "ordinary_dividends": "L17",
+        },
+        "output_map": {
+            "L29": "adjusted_gross_income",
+            "L39": "taxable_income",
+            "L54": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "PA_40",
+        "input_map": {
+            "filing_status": "Status",
+            "w2_income": "L1a",
+            "taxable_interest": "L2",
+            "ordinary_dividends": "L3",
+        },
+        "output_map": {
+            "L9": "adjusted_gross_income",
+            "L11": "taxable_income",
+            "L12": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "VA_760",
+        "input_map": {},
+        "fed_import_map": {"L11": "L1"},
+        "output_map": {
+            "L9": "adjusted_gross_income",
+            "L15": "taxable_income",
+            "L18": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "OH_IT1040",
+        "input_map": {},
+        "fed_import_map": {"L11": "L1"},
+        "output_map": {
+            "L3": "adjusted_gross_income",
+            "L5": "taxable_income",
+            "L13": "total_tax",
+        },
+    },
+    {
+        "year": 2024,
+        "form_id": "MI_1040",
+        "input_map": {},
+        "fed_import_map": {"L11": "L10"},
+        "output_map": {
+            "L14": "adjusted_gross_income",
+            "L16": "taxable_income",
+            "L17": "total_tax",
+        },
+    },
     # 2025
     {
         "year": 2025,
