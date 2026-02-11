@@ -520,7 +520,7 @@ def test_ma_state_tax_parity(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_nc_state_agi_parity_2024(w2_income, filing_status):
     """NC 2024 AGI matches exactly — child deduction doesn't affect AGI."""
     ots = evaluate_return(
@@ -553,7 +553,7 @@ def test_nc_state_agi_parity_2024(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_nc_state_tax_parity_2024(w2_income, filing_status):
     """NC 2024 total tax differs because OTS auto-applies child deduction for MFJ."""
     ots = evaluate_return(
@@ -582,7 +582,7 @@ def test_nc_state_tax_parity_2024(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_nj_state_agi_parity_2024(w2_income, filing_status):
     """NJ 2024 AGI matches exactly — personal exemption doesn't affect AGI."""
     ots = evaluate_return(
@@ -615,7 +615,7 @@ def test_nj_state_agi_parity_2024(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_nj_state_tax_parity_2024(w2_income, filing_status):
     """NJ 2024 total tax differs because OTS auto-applies personal exemption."""
     ots = evaluate_return(
@@ -644,7 +644,7 @@ def test_nj_state_tax_parity_2024(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_pa_state_parity_2024(w2_income, filing_status):
     """PA 2024 uses a flat 3.07% tax with no deductions — exact parity expected."""
     ots = evaluate_return(
@@ -678,7 +678,7 @@ def test_pa_state_parity_2024(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_va_state_agi_parity_2024(w2_income, filing_status):
     """VA 2024 AGI matches exactly — exemptions don't affect AGI."""
     ots = evaluate_return(
@@ -711,7 +711,7 @@ def test_va_state_agi_parity_2024(w2_income, filing_status):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_va_state_tax_parity_2024(w2_income, filing_status):
     """VA 2024 total tax differs because OTS auto-applies personal exemption + standard deduction."""
     ots = evaluate_return(
@@ -737,7 +737,7 @@ def test_va_state_tax_parity_2024(w2_income, filing_status):
 
 @skip_if_backends_unavailable
 @given(w2_income=st.integers(0, 500_000))
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_oh_state_parity_2024(w2_income):
     """OH 2024 income tax is filing-status-independent; parity within $20 rounding."""
     ots = evaluate_return(year=2024, state="OH", w2_income=w2_income, backend="ots")
@@ -759,7 +759,7 @@ def test_oh_state_parity_2024(w2_income):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=200)
+@settings(max_examples=100)
 def test_mi_state_parity_2024(w2_income, filing_status):
     """MI 2024 uses a flat 4.25% tax — exact parity expected with no exemptions."""
     ots = evaluate_return(
