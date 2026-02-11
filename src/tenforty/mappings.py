@@ -17,11 +17,35 @@ NATURAL_TO_NODE = {
     "long_term_capital_gains": "us_schedule_d_L8a_long_term_totals",
     # Schedule 1 (approximation): map aggregate values into "other" buckets.
     "schedule_1_income": "us_schedule_1_L8z_other_income",
+    "self_employment_income": "us_schedule_1_L3_business_income",
+    "rental_income": "us_schedule_1_L5_rental_income",
     # Schedule A (approximation): map aggregate value into "other deductions".
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
     # AMT (Form 6251)
     "incentive_stock_option_gains": "us_form_6251_L2k_iso_adjustment",
 }
+
+_SUBORDINATE_NODES: dict[str, list[str]] = {
+    "w2_income": [
+        "us_schedule_se_L5_w2_ss_wages",
+        "us_form_8959_L1_medicare_wages",
+    ],
+    "self_employment_income": [
+        "us_schedule_se_L2_business_profit",
+    ],
+    "taxable_interest": ["us_form_8960_L1_taxable_interest"],
+    "ordinary_dividends": ["us_form_8960_L2_ordinary_dividends"],
+    "long_term_capital_gains": ["us_form_8960_L5a_net_gain_disposition"],
+    "rental_income": ["us_form_8960_L4a_rental_royalty_income"],
+}
+
+NATURAL_TO_NODES: dict[str, list[str]] = {
+    name: [primary, *_SUBORDINATE_NODES.get(name, [])]
+    for name, primary in NATURAL_TO_NODE.items()
+}
+for name, nodes in _SUBORDINATE_NODES.items():
+    if name not in NATURAL_TO_NODES:
+        NATURAL_TO_NODES[name] = list(nodes)
 
 CAPITAL_GAINS_FIELDS = {"short_term_capital_gains", "long_term_capital_gains"}
 

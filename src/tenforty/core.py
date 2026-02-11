@@ -453,6 +453,8 @@ def evaluate_return(
     ordinary_dividends: float = 0.0,
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
+    self_employment_income: float = 0.0,
+    rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
     state_adjustment: float = 0.0,
@@ -474,6 +476,8 @@ def evaluate_return(
         ordinary_dividends=ordinary_dividends,
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
+        self_employment_income=self_employment_income,
+        rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
@@ -524,6 +528,8 @@ def evaluate_returns(
     ordinary_dividends: list[float] | float = 0.0,
     short_term_capital_gains: list[float] | float = 0.0,
     long_term_capital_gains: list[float] | float = 0.0,
+    self_employment_income: list[float] | float = 0.0,
+    rental_income: list[float] | float = 0.0,
     schedule_1_income: list[float] | float = 0.0,
     itemized_deductions: list[float] | float = 0.0,
     state_adjustment: list[float] | float = 0.0,
@@ -560,6 +566,8 @@ def evaluate_returns(
     ord_dividends = ensure_list(ordinary_dividends)
     st_cap_gains = ensure_list(short_term_capital_gains)
     lt_cap_gains = ensure_list(long_term_capital_gains)
+    se_incomes = ensure_list(self_employment_income)
+    rental_incomes = ensure_list(rental_income)
     sched1_incomes = ensure_list(schedule_1_income)
     item_deductions = ensure_list(itemized_deductions)
     state_adjs = ensure_list(state_adjustment)
@@ -579,6 +587,8 @@ def evaluate_returns(
             ("ordinary_dividends", ord_dividends),
             ("short_term_capital_gains", st_cap_gains),
             ("long_term_capital_gains", lt_cap_gains),
+            ("self_employment_income", se_incomes),
+            ("rental_income", rental_incomes),
             ("schedule_1_income", sched1_incomes),
             ("itemized_deductions", item_deductions),
             ("state_adjustment", state_adjs),
@@ -611,6 +621,8 @@ def evaluate_returns(
         ord_dividends = broadcast(ord_dividends)
         st_cap_gains = broadcast(st_cap_gains)
         lt_cap_gains = broadcast(lt_cap_gains)
+        se_incomes = broadcast(se_incomes)
+        rental_incomes = broadcast(rental_incomes)
         sched1_incomes = broadcast(sched1_incomes)
         item_deductions = broadcast(item_deductions)
         state_adjs = broadcast(state_adjs)
@@ -633,6 +645,8 @@ def evaluate_returns(
                                 "ordinary_dividends": ord_dividends,
                                 "short_term_capital_gains": st_cap_gains,
                                 "long_term_capital_gains": lt_cap_gains,
+                                "self_employment_income": se_incomes,
+                                "rental_income": rental_incomes,
                                 "schedule_1_income": sched1_incomes,
                                 "itemized_deductions": item_deductions,
                                 "state_adjustment": state_adjs,
@@ -671,6 +685,8 @@ def evaluate_returns(
                             "long_term_capital_gains": [
                                 lt_cap_gains[i] for i in indices
                             ],
+                            "self_employment_income": [se_incomes[i] for i in indices],
+                            "rental_income": [rental_incomes[i] for i in indices],
                             "schedule_1_income": [sched1_incomes[i] for i in indices],
                             "itemized_deductions": [
                                 item_deductions[i] for i in indices
@@ -728,6 +744,8 @@ def evaluate_returns(
         "ordinary_dividends",
         "short_term_capital_gains",
         "long_term_capital_gains",
+        "self_employment_income",
+        "rental_income",
         "schedule_1_income",
         "itemized_deductions",
         "state_adjustment",
@@ -746,6 +764,8 @@ def evaluate_returns(
         ord_dividends,
         st_cap_gains,
         lt_cap_gains,
+        se_incomes,
+        rental_incomes,
         sched1_incomes,
         item_deductions,
         state_adjs,
@@ -788,6 +808,8 @@ def marginal_rate(
     ordinary_dividends: float = 0.0,
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
+    self_employment_income: float = 0.0,
+    rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
     state_adjustment: float = 0.0,
@@ -812,6 +834,8 @@ def marginal_rate(
         ordinary_dividends=ordinary_dividends,
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
+        self_employment_income=self_employment_income,
+        rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
@@ -844,6 +868,8 @@ def solve_for_income(
     ordinary_dividends: float = 0.0,
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
+    self_employment_income: float = 0.0,
+    rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
     state_adjustment: float = 0.0,
@@ -865,6 +891,8 @@ def solve_for_income(
         ordinary_dividends=ordinary_dividends,
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
+        self_employment_income=self_employment_income,
+        rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,

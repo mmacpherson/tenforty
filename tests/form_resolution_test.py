@@ -5,14 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from tenforty.form_resolution import INPUT_TO_FORM, _get_form_imports, resolve_forms
+from tenforty.form_resolution import INPUT_TO_FORMS, _get_form_imports, resolve_forms
 
 
-def test_input_to_form_mapping():
+def test_input_to_forms_mapping():
     """Verify that input mapping is reasonable."""
-    assert INPUT_TO_FORM["w2_income"] == "us_1040"
-    assert INPUT_TO_FORM["taxable_interest"] == "us_1040"
-    assert INPUT_TO_FORM["short_term_capital_gains"] == "us_schedule_d"
+    assert "us_1040" in INPUT_TO_FORMS["w2_income"]
+    assert "us_1040" in INPUT_TO_FORMS["taxable_interest"]
+    assert "us_schedule_d" in INPUT_TO_FORMS["short_term_capital_gains"]
 
 
 def test_resolve_forms_basic():

@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from .mappings import NATURAL_TO_NODE, STATE_FORM_NAMES, STATE_NATURAL_TO_NODE
+from .mappings import NATURAL_TO_NODES, STATE_FORM_NAMES, STATE_NATURAL_TO_NODE
 
 
 def _form_id_from_node_name(node_name: str) -> str | None:
@@ -29,17 +29,15 @@ def _form_id_from_node_name(node_name: str) -> str | None:
     return "_".join(parts[:split_idx])
 
 
-# Map from natural input name to the form ID that accepts it.
+# Map from natural input name to the set of form IDs that accept it.
 # Derived from mapping prefixes (e.g., "us_1040_L1a" -> "us_1040").
-INPUT_TO_FORM: dict[str, str] = {}
+INPUT_TO_FORMS: dict[str, set[str]] = {}
 
-for natural_name, node_name in NATURAL_TO_NODE.items():
-    form_id = _form_id_from_node_name(node_name)
-    if form_id:
-        INPUT_TO_FORM[natural_name] = form_id
-
-# Manually add any missing ones or overrides if needed
-# (NATURAL_TO_NODE covers most inputs)
+for natural_name, node_names in NATURAL_TO_NODES.items():
+    for node_name in node_names:
+        form_id = _form_id_from_node_name(node_name)
+        if form_id:
+            INPUT_TO_FORMS.setdefault(natural_name, set()).add(form_id)
 
 
 @lru_cache(maxsize=128)
@@ -93,8 +91,8 @@ def resolve_forms(
     # Add forms based on inputs
     for field, value in inputs.items():
         if value and value != 0:
-            if field in INPUT_TO_FORM:
-                needed.add(INPUT_TO_FORM[field])
+            if field in INPUT_TO_FORMS:
+                needed.update(INPUT_TO_FORMS[field])
 
     # Add state form
     if state:
