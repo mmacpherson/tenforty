@@ -575,11 +575,9 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # Standard deduction is filing-status based (Single: $2,745/$2,835,
         # MFJ: $5,495/$5,670, HoH: $4,420/$4,560 for 2024/2025).
         # Progressive tax brackets (4 brackets, 4.75% to 9.9%).
-        # Note: L7 is an import node (imports federal AGI) so we use L21
-        # (income before deductions) as state AGI proxy.
         natural_to_node={},
         output_lines={
-            "L21_or_income_before_deductions": "state_adjusted_gross_income",
+            "us_1040_L11_agi": "state_adjusted_gross_income",
             "L23_or_taxable_income": "state_taxable_income",
             "L32_or_total_tax": "state_total_tax",
         },

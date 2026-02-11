@@ -160,11 +160,12 @@ def parse_ots_return(
 
     def parse_value(val: str) -> int | float | str:
         """Parse string value into number if you can."""
+        cleaned = val.replace(",", "")
         try:
-            return int(val)
+            return int(cleaned)
         except ValueError:
             try:
-                return float(val)
+                return float(cleaned)
             except ValueError:
                 logger.debug(
                     f"Couldn't parse value as number, leaving as string: [{val}]"

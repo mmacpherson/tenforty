@@ -478,6 +478,16 @@ _NATURAL_FORM_CONFIG = [
             "L17": "total_tax",
         },
     },
+    {
+        "year": 2024,
+        "form_id": "OR_40",
+        "input_map": {},
+        "output_map": {
+            "L7": "adjusted_gross_income",
+            "L19": "taxable_income",
+            "L31": "total_tax",
+        },
+    },
     # 2025
     {
         "year": 2025,
@@ -611,6 +621,16 @@ _NATURAL_FORM_CONFIG = [
             "L14": "adjusted_gross_income",
             "L16": "taxable_income",
             "L17": "total_tax",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "OR_40",
+        "input_map": {},
+        "output_map": {
+            "L7": "adjusted_gross_income",
+            "L19": "taxable_income",
+            "L31": "total_tax",
         },
     },
     # 2023
