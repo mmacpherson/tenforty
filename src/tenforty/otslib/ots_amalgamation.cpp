@@ -987,6 +987,7 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -1010,7 +1011,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -1018,15 +1019,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -1055,7 +1056,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -1307,7 +1308,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -1501,6 +1502,7 @@ float thisversion=16.02;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -1519,7 +1521,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -1527,15 +1529,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -1911,6 +1913,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -1928,7 +1931,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -1936,14 +1939,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -1974,7 +1977,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -1996,7 +1999,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -2029,7 +2032,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -2140,7 +2143,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILLING_SEPARAT:  std_ded = 3000.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -2353,6 +2356,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -2373,7 +2377,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -2381,14 +2385,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -2420,7 +2424,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -3183,6 +3187,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10;
  double min2file=0.0, sched540[MAX_LINES], sched540b[MAX_LINES], sched540c[MAX_LINES],
 	threshA=0, std_ded=0;
@@ -3204,7 +3209,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -3212,16 +3217,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -4017,6 +4022,7 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], *infname=0, outfname[4000];
  int status=0;
@@ -4039,7 +4045,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -4047,14 +4053,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -4094,7 +4100,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -4582,6 +4588,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2000], *infname=0, outfname[1500];
  time_t now;
@@ -4599,7 +4606,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -4607,15 +4614,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -4642,7 +4649,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -6119,6 +6126,7 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -6144,7 +6152,7 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -6152,15 +6160,15 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -6201,7 +6209,7 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -6335,7 +6343,7 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
     {
      printf("ERROR1: Found '%s' when expecting 'S1_32 or AlimRecipSSN: or AlimRecipName:'\n", labelx );
      fprintf(outfile,"ERROR1: Found '%s' when expecting 'S1_32 or AlimRecipSSN: or AlimRecipName:'\n", labelx );
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
     }
   }
 
@@ -6520,7 +6528,7 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"(Assuming no one is claiming your or your joint-spouse as a dependent.)\n");
   }
@@ -6536,7 +6544,7 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 8) not handled.\n"); fprintf(outfile,"Case (Line 8) not handled.\n"); exit(1);
+   default:  printf("Case (Line 8) not handled.\n"); fprintf(outfile,"Case (Line 8) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[8] <= std_deduc)
@@ -6641,7 +6649,7 @@ int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
     {
      printf("ERROR1: Found '%s' when expecting 'S2_46 or AMTwsXX or B7a'\n", labelx );
      fprintf(outfile,"ERROR1: Found '%s' when expecting 'S2_46 or AMTwsXX'\n", labelx );
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
     }
   }
 
@@ -7634,6 +7642,7 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -7654,7 +7663,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -7662,14 +7671,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -7699,7 +7708,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -8369,6 +8378,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -8393,7 +8403,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -8406,7 +8416,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -8414,7 +8424,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -8423,7 +8433,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -8464,7 +8474,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -8509,7 +8519,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -9653,6 +9663,7 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -9676,7 +9687,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -9684,15 +9695,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -9721,7 +9732,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -9973,7 +9984,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -10908,6 +10919,7 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -10928,7 +10940,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -10936,14 +10948,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -10973,7 +10985,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -11546,6 +11558,7 @@ float thisversion=17.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -11564,7 +11577,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -11572,15 +11585,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -11956,6 +11969,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -11973,7 +11987,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -11981,14 +11995,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -12019,7 +12033,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -12041,7 +12055,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -12074,7 +12088,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -12183,7 +12197,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILLING_SEPARAT:  std_ded = 4500.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -12390,6 +12404,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -12410,7 +12425,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -12418,14 +12433,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -12458,7 +12473,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -12829,6 +12844,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2000], *infname=0, outfname[1500];
  time_t now;
@@ -12846,7 +12862,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -12854,15 +12870,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -12889,7 +12905,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -14411,6 +14427,7 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2019. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -14437,7 +14454,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -14445,15 +14462,15 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -14492,7 +14509,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -14789,7 +14806,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"(Assuming no one is claiming your or your joint-spouse as a dependent.)\n");
   }
@@ -14805,7 +14822,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 8) not handled.\n"); fprintf(outfile,"Case (Line 8) not handled.\n"); exit(1);
+   default:  printf("Case (Line 8) not handled.\n"); fprintf(outfile,"Case (Line 8) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[9] <= std_deduc)
@@ -14913,7 +14930,7 @@ int main( int argc, char *argv[] )						/* Updated for 2019. */
     {
      printf("ERROR1: Found '%s' when expecting 'S2_2 or AMTwsXX or B7a'\n", labelx );
      fprintf(outfile,"ERROR1: Found '%s' when expecting 'S2_2 or AMTwsXX'\n", labelx );
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
     }
   }
 
@@ -15243,6 +15260,7 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], *infname=0, outfname[4000];
  int status=0;
@@ -15265,7 +15283,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -15273,14 +15291,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -15319,7 +15337,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -15893,6 +15911,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -15917,7 +15936,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -15930,7 +15949,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -15938,7 +15957,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -15947,7 +15966,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -15988,7 +16007,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -16033,7 +16052,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -16673,6 +16692,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -16698,7 +16718,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -16706,16 +16726,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -18709,6 +18729,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -18729,7 +18750,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -18737,14 +18758,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -18777,7 +18798,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -19240,6 +19261,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -19267,7 +19289,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -19280,7 +19302,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -19288,7 +19310,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -19297,7 +19319,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -19338,7 +19360,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -19387,7 +19409,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -20983,6 +21005,7 @@ void Calculate_Schedule_A( )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2020. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -21010,7 +21033,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -21018,15 +21041,15 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -21066,7 +21089,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -21266,7 +21289,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
   {
    printf("Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A5b", &localtax[2] );	/* State and local real estate taxes. */	/* Optionally read-in just above. */
  GetLine( "A5c", &localtax[3] );	/* State and local personal property (eg. automobile) taxes. */
@@ -21291,7 +21314,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
   {
    printf("Error: Found '%s' when expecteding A8d,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A8d,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A9", &SchedA[9] );	/* Investment interest. Attach Form 4952*/	/* Optionally read-in just above. */
  GetLine( "A11", &SchedA[11] );	/* Charity contributions by cash or check.*/
@@ -21318,7 +21341,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
   {
    printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -21361,7 +21384,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"  (Assuming no one is claiming you, or your joint-spouse, as a dependent.)\n");
   }
@@ -21377,7 +21400,7 @@ int main( int argc, char *argv[] )						/* Updated for 2020. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); exit(1);
+   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -22588,6 +22611,7 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -22610,7 +22634,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -22618,14 +22642,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -22655,7 +22679,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -23226,6 +23250,7 @@ float thisversion=18.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -23243,7 +23268,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -23251,15 +23276,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -23421,6 +23446,7 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -23444,7 +23470,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -23452,15 +23478,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -23489,7 +23515,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -23741,7 +23767,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -23960,6 +23986,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -23977,7 +24004,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -23985,14 +24012,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -24023,7 +24050,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -24045,7 +24072,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -24078,7 +24105,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -24187,7 +24214,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILLING_SEPARAT:  std_ded = 4500.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -24324,6 +24351,7 @@ float thisversion = 1.00;
 
 int main(int argc, char *argv[])
 {
+ do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -24344,7 +24372,7 @@ int main(int argc, char *argv[])
       infile = fopen(infname, "r");
       if (infile == 0) {
         printf("ERROR: Parameter file '%s' could not be opened.\n", infname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       k = 2;
       /* Base name of output file on input file. */
@@ -24359,18 +24387,18 @@ int main(int argc, char *argv[])
       outfile = fopen(outfname, "w");
       if (outfile == 0) {
         printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       printf("Writing results to file:  %s\n", outfname);
     } else {
       printf("Unknown command-line parameter '%s'\n", argv[i]);
-      exit(1);
+      { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
   }
   if (infile == 0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
   }
 
   /* Pre-initialize all lines to zeros. */
@@ -24718,6 +24746,7 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -24741,7 +24770,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -24749,14 +24778,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -24795,7 +24824,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -25293,6 +25322,7 @@ float thisversion=18.01;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -25319,7 +25349,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -25327,15 +25357,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -25757,6 +25787,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2000], *infname=0, outfname[1500];
  time_t now;
@@ -25774,7 +25805,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -25782,15 +25813,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -25817,7 +25848,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -26465,6 +26496,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -26491,7 +26523,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -26499,16 +26531,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -28713,6 +28745,7 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -28736,7 +28769,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -28744,14 +28777,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -28791,7 +28824,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -29311,6 +29344,7 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -29327,7 +29361,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -29335,14 +29369,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -29459,6 +29493,7 @@ float thisversion = 1.01;
 
 int main(int argc, char *argv[])
 {
+ do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -29479,7 +29514,7 @@ int main(int argc, char *argv[])
       infile = fopen(infname, "r");
       if (infile == 0) {
         printf("ERROR: Parameter file '%s' could not be opened.\n", infname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       k = 2;
       /* Base name of output file on input file. */
@@ -29494,18 +29529,18 @@ int main(int argc, char *argv[])
       outfile = fopen(outfname, "w");
       if (outfile == 0) {
         printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       printf("Writing results to file:  %s\n", outfname);
     } else {
       printf("Unknown command-line parameter '%s'\n", argv[i]);
-      exit(1);
+      { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
   }
   if (infile == 0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
   }
 
   /* Pre-initialize all lines to zeros. */
@@ -30412,6 +30447,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -30443,7 +30479,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -30451,16 +30487,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -31454,6 +31490,7 @@ float thisversion=19.02;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -31471,7 +31508,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -31479,15 +31516,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -31665,6 +31702,7 @@ void check_if_yes( char *label )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -31688,7 +31726,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -31696,15 +31734,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -31734,7 +31772,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -31917,7 +31955,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Expected 'L14', but found '%s'. Exiting.\n", word );
    fprintf(outfile,"Error: Expected 'L14', but found  '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 #endif
 
@@ -32008,7 +32046,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -32322,6 +32360,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -32349,7 +32388,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -32362,7 +32401,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -32370,7 +32409,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -32379,7 +32418,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -32420,7 +32459,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -32469,7 +32508,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -33828,6 +33867,7 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -33852,7 +33892,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -33860,14 +33900,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -33898,7 +33938,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -34744,6 +34784,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -34765,7 +34806,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -34773,14 +34814,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -34814,7 +34855,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -35209,6 +35250,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -35226,7 +35268,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -35234,15 +35276,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -35270,7 +35312,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
  fprintf(outfile," Check_R_PennResident X\n");
@@ -36983,6 +37025,7 @@ void Calc_StudentLoan_Sched1L21()		/* Page 94 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2021. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -37014,7 +37057,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -37022,15 +37065,15 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -37071,7 +37114,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -37172,7 +37215,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
   {
    printf("Error: Found '%s' when expecteding CharityCC or L13.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding CharityCC or L13.\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  GetLine( "L19", &L[19] );	/* Child tax credit/credit for other dependents. */
@@ -37235,7 +37278,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"  (Assuming no one is claiming you, or your joint-spouse, as a dependent.)\n");
   }
@@ -37251,7 +37294,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); exit(1);
+   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -37401,7 +37444,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
   {
    printf("Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A5b", &localtax[2] );	/* State and local real estate taxes. */	/* Optionally read-in just above. */
  GetLine( "A5c", &localtax[3] );	/* State and local personal property (eg. automobile) taxes. */
@@ -37426,7 +37469,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
   {
    printf("Error: Found '%s' when expecteding A8d,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A8d,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A9", &SchedA[9] );	/* Investment interest. Attach Form 4952*/	/* Optionally read-in just above. */
 
@@ -37464,7 +37507,7 @@ int main( int argc, char *argv[] )						/* Updated for 2021. */
   {
    printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  L[11] = L[9] - L[10];
@@ -38094,6 +38137,7 @@ float thisversion=19.01;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -38120,7 +38164,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -38128,15 +38172,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -38276,7 +38320,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
    fprintf(outfile,"Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  else
   {
@@ -38592,6 +38636,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -38609,7 +38654,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -38617,14 +38662,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -38656,7 +38701,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -38678,7 +38723,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -38711,7 +38756,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -38820,7 +38865,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILING_SEPARAT:  std_ded = 4500.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -39069,6 +39114,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -39109,7 +39155,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -39117,14 +39163,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -39215,7 +39261,7 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  if((entity == ESTATE) && (status != SINGLE)){
@@ -39288,7 +39334,7 @@ else if (strncasecmp(word,"No",2)==0){
 
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
-  exit(1);
+  { if (outfile) fflush(outfile); return 1; };
 
  }
 
@@ -39307,11 +39353,11 @@ else if (strncasecmp(word,"No",2)==0){
  showline( 4 );
  if((L[4] < 250.00) && (status == MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is \"Married Filing Separately\" and line 4 is less than $250.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
  else if((L[4] < 500.00) && (status != MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is not \"Married Filing Separately\" and line 4 is less than $500.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
   GetLineF( "L5", &L[5] );
 
@@ -39343,7 +39389,7 @@ showline( 6 );
 
 		if(L[10] <= 0){
 			fprintf(outfile, "Line 10 is zero or less.  Stop here.  You do not owe the penalty.\nDo not file form FTB 5805.\n");
-			exit(0);
+			{ if (outfile) fflush(outfile); return 0; };
 		}
 
 		L[11] = L[10] * 0.02121370;
@@ -39889,6 +39935,7 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -39913,7 +39960,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -39921,14 +39968,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -40005,7 +40052,7 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -40494,6 +40541,7 @@ float thisversion=2.01;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -40518,7 +40566,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -40526,14 +40574,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -40582,7 +40630,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -40731,6 +40779,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -40749,7 +40798,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -40757,14 +40806,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -40814,7 +40863,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -42344,6 +42393,7 @@ float thisversion=20.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -42361,7 +42411,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -42369,15 +42419,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -42555,6 +42605,7 @@ void check_if_yes( char *label )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -42578,7 +42629,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -42586,15 +42637,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -42624,7 +42675,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -42862,7 +42913,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -43186,6 +43237,7 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -43209,7 +43261,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -43217,14 +43269,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -43264,7 +43316,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -43779,6 +43831,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -43797,7 +43850,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -43805,14 +43858,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -43861,7 +43914,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -44007,6 +44060,7 @@ float thisversion=3.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -44031,7 +44085,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -44039,14 +44093,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -44095,7 +44149,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -44254,6 +44308,7 @@ float thisversion = 2.00;
 
 int main(int argc, char *argv[])
 {
+ do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -44274,7 +44329,7 @@ int main(int argc, char *argv[])
       infile = fopen(infname, "r");
       if (infile == 0) {
         printf("ERROR: Parameter file '%s' could not be opened.\n", infname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       k = 2;
       /* Base name of output file on input file. */
@@ -44289,18 +44344,18 @@ int main(int argc, char *argv[])
       outfile = fopen(outfname, "w");
       if (outfile == 0) {
         printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       printf("Writing results to file:  %s\n", outfname);
     } else {
       printf("Unknown command-line parameter '%s'\n", argv[i]);
-      exit(1);
+      { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
   }
   if (infile == 0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
   }
 
   /* Pre-initialize all lines to zeros. */
@@ -45245,6 +45300,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -45282,7 +45338,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -45290,16 +45346,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -46470,6 +46526,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -46510,7 +46567,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -46518,14 +46575,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -46617,7 +46674,7 @@ for(i = 0; i <= 13; i++){
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  if((entity == ESTATE) && (status != SINGLE)){
@@ -46690,7 +46747,7 @@ else if (strncasecmp(word,"No",2)==0){
 
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
-  exit(1);
+  { if (outfile) fflush(outfile); return 1; };
 
  }
 
@@ -46709,11 +46766,11 @@ else if (strncasecmp(word,"No",2)==0){
  showline( 4 );
  if((L[4] < 250.00) && (status == MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is \"Married Filing Separately\" and line 4 is less than $250.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
  else if((L[4] < 500.00) && (status != MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is not \"Married Filing Separately\" and line 4 is less than $500.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
   GetLineF( "L5", &L[5] );
 
@@ -46745,7 +46802,7 @@ showline( 6 );
 
 		if(L[10] <= 0){
 			fprintf(outfile, "Line 10 is zero or less.  Stop here.  You do not owe the penalty.\nDo not file form FTB 5805.\n");
-			exit(0);
+			{ if (outfile) fflush(outfile); return 0; };
 		}
 
 		L[11] = L[10] * line_11_multiplier;
@@ -47347,6 +47404,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -47374,7 +47432,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -47387,7 +47445,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -47395,7 +47453,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -47404,7 +47462,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -47445,7 +47503,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -47494,7 +47552,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -48715,6 +48773,7 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -48739,7 +48798,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -48747,14 +48806,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -48785,7 +48844,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -49631,6 +49690,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -49652,7 +49712,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -49660,14 +49720,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -49701,7 +49761,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -50076,6 +50136,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -50093,7 +50154,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -50101,15 +50162,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -50137,7 +50198,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
  fprintf(outfile," Check_R_PennResident X\n");
@@ -52035,6 +52096,7 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 93 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2022. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -52065,7 +52127,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -52073,15 +52135,15 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -52122,7 +52184,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -52255,7 +52317,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"  (Assuming no one is claiming you, or your joint-spouse, as a dependent.)\n");
   }
@@ -52271,7 +52333,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); exit(1);
+   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -52431,7 +52493,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
   {
    printf("Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A5b", &localtax[2] );	/* State and local real estate taxes. */	/* Optionally read-in just above. */
  GetLine( "A5c", &localtax[3] );	/* State and local personal property (eg. automobile) taxes. */
@@ -52456,7 +52518,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
   {
    printf("Error: Found '%s' when expecteding A8d,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A8d,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A9", &SchedA[9] );	/* Investment interest. Attach Form 4952*/	/* Optionally read-in just above. */
 
@@ -52491,7 +52553,7 @@ int main( int argc, char *argv[] )						/* Updated for 2022. */
   {
    printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  L[11] = L[9] - L[10];
@@ -53099,6 +53161,7 @@ float thisversion=20.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -53126,7 +53189,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -53134,15 +53197,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -53282,7 +53345,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
    fprintf(outfile,"Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  else
   {
@@ -53579,6 +53642,7 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -53595,7 +53659,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -53603,14 +53667,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -53776,6 +53840,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -53793,7 +53858,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -53801,14 +53866,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -53840,7 +53905,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -53862,7 +53927,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -53895,7 +53960,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -54004,7 +54069,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILING_SEPARAT:  std_ded = 8000.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -54229,6 +54294,7 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -54253,7 +54319,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -54261,14 +54327,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -54345,7 +54411,7 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -54865,6 +54931,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -54884,7 +54951,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -54892,14 +54959,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -55263,6 +55330,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -55280,7 +55348,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -55288,14 +55356,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -55334,7 +55402,7 @@ int main( int argc, char *argv[] )
      fprintf( outfile, "INFO: f1040i.YourSocSec#: -- %s\n", f1040i.YourSocSec);
  } else {
      fprintf( outfile, "ERROR: --- No Imported 1040 Form Data : no filename provided ---\n");
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
  }
 
  char *f_sch_c_filename = GetTextLine( "FileNameSchC") ;
@@ -57037,6 +57105,7 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -57060,7 +57129,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -57068,14 +57137,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -57115,7 +57184,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -57632,6 +57701,7 @@ float thisversion=21.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -57658,7 +57728,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -57666,15 +57736,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -57814,7 +57884,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
    fprintf(outfile,"Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  else
   {
@@ -58116,6 +58186,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -58135,7 +58206,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -58143,14 +58214,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -58474,6 +58545,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -58492,7 +58564,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -58500,14 +58572,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -58556,7 +58628,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -58702,6 +58774,7 @@ float thisversion=3.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -58726,7 +58799,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -58734,14 +58807,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -58790,7 +58863,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -58995,6 +59068,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -59012,7 +59086,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -59020,14 +59094,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -59066,7 +59140,7 @@ int main( int argc, char *argv[] )
      fprintf( outfile, "INFO: f1040i.YourSocSec#: -- %s\n", f1040i.YourSocSec);
  } else {
      fprintf( outfile, "ERROR: --- No Imported 1040 Form Data : no filename provided ---\n");
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
  }
 
  char *f_sch_c_filename = GetTextLine( "FileNameSchC") ;
@@ -59280,6 +59354,7 @@ float thisversion = 2.00;
 
 int main(int argc, char *argv[])
 {
+ do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -59300,7 +59375,7 @@ int main(int argc, char *argv[])
       infile = fopen(infname, "r");
       if (infile == 0) {
         printf("ERROR: Parameter file '%s' could not be opened.\n", infname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       k = 2;
       /* Base name of output file on input file. */
@@ -59315,18 +59390,18 @@ int main(int argc, char *argv[])
       outfile = fopen(outfname, "w");
       if (outfile == 0) {
         printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       printf("Writing results to file:  %s\n", outfname);
     } else {
       printf("Unknown command-line parameter '%s'\n", argv[i]);
-      exit(1);
+      { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
   }
   if (infile == 0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
   }
 
   /* Pre-initialize all lines to zeros. */
@@ -60271,6 +60346,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -60308,7 +60384,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -60316,16 +60392,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -61375,6 +61451,7 @@ float thisversion=21.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -61392,7 +61469,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -61400,15 +61477,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -61586,6 +61663,7 @@ void check_if_yes( char *label )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -61611,7 +61689,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -61619,15 +61697,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -61657,7 +61735,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -61926,7 +62004,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -62247,6 +62325,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -62274,7 +62353,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -62287,7 +62366,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -62295,7 +62374,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -62304,7 +62383,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -62345,7 +62424,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -62394,7 +62473,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -63615,6 +63694,7 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -63640,7 +63720,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -63648,14 +63728,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -63686,7 +63766,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -64534,6 +64614,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -64553,7 +64634,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -64561,14 +64642,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -64602,7 +64683,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -64958,6 +65039,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -64975,7 +65057,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -64983,15 +65065,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -65019,7 +65101,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
  fprintf(outfile," Check_R_PennResident X\n");
@@ -66921,6 +67003,7 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 96 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2023. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -66951,7 +67034,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -66959,15 +67042,15 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -67009,7 +67092,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -67150,7 +67233,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"  (Assuming no one is claiming you, or your joint-spouse, as a dependent.)\n");
   }
@@ -67166,7 +67249,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); exit(1);
+   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -67326,7 +67409,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
   {
    printf("Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A5b", &localtax[2] );	/* State and local real estate taxes. */	/* Optionally read-in just above. */
  GetLine( "A5c", &localtax[3] );	/* State and local personal property (eg. automobile) taxes. */
@@ -67352,7 +67435,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
   {
    printf("Error: Found '%s' when expecteding A8d,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A8d,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A9", &SchedA[9] );	/* Investment interest. Attach Form 4952*/	/* Optionally read-in just above. */
 
@@ -67387,7 +67470,7 @@ int main( int argc, char *argv[] )						/* Updated for 2023. */
   {
    printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  L[11] = L[9] - L[10];
@@ -68006,6 +68089,7 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -68022,7 +68106,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -68030,14 +68114,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -68203,6 +68287,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -68220,7 +68305,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -68228,14 +68313,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -68267,7 +68352,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -68289,7 +68374,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -68322,7 +68407,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -68431,7 +68516,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILING_SEPARAT:  std_ded = 8000.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -68664,6 +68749,7 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -68688,7 +68774,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -68696,14 +68782,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -68780,7 +68866,7 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -69273,6 +69359,7 @@ float thisversion=2.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -69299,7 +69386,7 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -69307,14 +69394,14 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -69665,6 +69752,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -69705,7 +69793,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -69713,14 +69801,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -69812,7 +69900,7 @@ for(i = 0; i <= 13; i++){
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  if((entity == ESTATE) && (status != SINGLE)){
@@ -69885,7 +69973,7 @@ else if (strncasecmp(word,"No",2)==0){
 
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
-  exit(1);
+  { if (outfile) fflush(outfile); return 1; };
 
  }
 
@@ -69904,11 +69992,11 @@ else if (strncasecmp(word,"No",2)==0){
  showline( 4 );
  if((L[4] < 250.00) && (status == MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is \"Married Filing Separately\" and line 4 is less than $250.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
  else if((L[4] < 500.00) && (status != MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is not \"Married Filing Separately\" and line 4 is less than $500.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
   GetLineF( "L5", &L[5] );
 
@@ -69940,7 +70028,7 @@ showline( 6 );
 
 		if(L[10] <= 0){
 			fprintf(outfile, "Line 10 is zero or less.  Stop here.  You do not owe the penalty.\nDo not file form FTB 5805.\n");
-			exit(0);
+			{ if (outfile) fflush(outfile); return 0; };
 		}
 
 		L[11] = L[10] * line_11_multiplier;
@@ -70446,6 +70534,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -70464,7 +70553,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -70472,14 +70561,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++) { L[j] = 0.0; }
@@ -70518,7 +70607,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -72282,6 +72371,7 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -72305,7 +72395,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -72313,14 +72403,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -72360,7 +72450,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -72860,6 +72950,7 @@ float thisversion=2.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -72886,7 +72977,7 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -72894,14 +72985,14 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -73135,6 +73226,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -73153,7 +73245,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -73161,14 +73253,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++) { L[j] = 0.0; }
@@ -73207,7 +73299,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -73468,6 +73560,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -73487,7 +73580,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -73495,14 +73588,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -73826,6 +73919,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -73844,7 +73938,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -73852,14 +73946,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -73908,7 +74002,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -74054,6 +74148,7 @@ float thisversion=3.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -74078,7 +74173,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -74086,14 +74181,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -74142,7 +74237,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -74347,6 +74442,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -74364,7 +74460,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -74372,14 +74468,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -74418,7 +74514,7 @@ int main( int argc, char *argv[] )
      fprintf( outfile, "INFO: f1040i.YourSocSec#: -- %s\n", f1040i.YourSocSec);
  } else {
      fprintf( outfile, "ERROR: --- No Imported 1040 Form Data : no filename provided ---\n");
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
  }
 
  char *f_sch_c_filename = GetTextLine( "FileNameSchC") ;
@@ -74643,6 +74739,7 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, stop=0;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -74659,7 +74756,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -74667,14 +74764,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -74819,6 +74916,7 @@ float thisversion = 3.00;
 
 int main(int argc, char *argv[])
 {
+ do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -74839,7 +74937,7 @@ int main(int argc, char *argv[])
       infile = fopen(infname, "r");
       if (infile == 0) {
         printf("ERROR: Parameter file '%s' could not be opened.\n", infname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       k = 2;
       /* Base name of output file on input file. */
@@ -74854,18 +74952,18 @@ int main(int argc, char *argv[])
       outfile = fopen(outfname, "w");
       if (outfile == 0) {
         printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       printf("Writing results to file:  %s\n", outfname);
     } else {
       printf("Unknown command-line parameter '%s'\n", argv[i]);
-      exit(1);
+      { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
   }
   if (infile == 0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
   }
 
   /* Pre-initialize all lines to zeros. */
@@ -75810,6 +75908,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -75849,7 +75948,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -75857,16 +75956,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -76722,7 +76821,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -77086,6 +77185,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -77126,7 +77226,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -77134,14 +77234,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -77240,7 +77340,7 @@ for(i = 0; i <= 13; i++){
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  if((entity == ESTATE) && (status != SINGLE)){
@@ -77313,7 +77413,7 @@ else if (strncasecmp(word,"No",2)==0){
 
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
-  exit(1);
+  { if (outfile) fflush(outfile); return 1; };
 
  }
 
@@ -77332,11 +77432,11 @@ else if (strncasecmp(word,"No",2)==0){
  showline( 4 );
  if((L[4] < 250.00) && (status == MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is \"Married Filing Separately\" and line 4 is less than $250.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
  else if((L[4] < 500.00) && (status != MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is not \"Married Filing Separately\" and line 4 is less than $500.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
   GetLineF( "L5", &L[5] );
 
@@ -77368,7 +77468,7 @@ showline( 6 );
 
 		if(L[10] <= 0){
 			fprintf(outfile, "Line 10 is zero or less.  Stop here.  You do not owe the penalty.\nDo not file form FTB 5805.\n");
-			exit(0);
+			{ if (outfile) fflush(outfile); return 0; };
 		}
 
 		L[11] = L[10] * line_11_multiplier;
@@ -77874,6 +77974,7 @@ float thisversion=22.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -77891,7 +77992,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -77899,15 +78000,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -78073,6 +78174,7 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -78098,7 +78200,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -78106,15 +78208,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -78144,7 +78246,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -78386,7 +78488,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -78707,6 +78809,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -78734,7 +78837,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -78747,7 +78850,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -78755,7 +78858,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -78764,7 +78867,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -78805,7 +78908,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -78854,7 +78957,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -80087,6 +80190,7 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -80112,7 +80216,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -80120,14 +80224,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -80158,7 +80262,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -81004,6 +81108,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -81023,7 +81128,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -81031,14 +81136,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -81072,7 +81177,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -81436,6 +81541,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -81453,7 +81559,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -81461,15 +81567,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -81497,7 +81603,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
  fprintf(outfile," Check_R_PennResident X\n");
@@ -83450,6 +83556,7 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 96 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2024. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -83480,7 +83587,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -83488,15 +83595,15 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -83538,7 +83645,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -83679,7 +83786,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"  (Assuming no one is claiming you, or your joint-spouse, as a dependent.)\n");
   }
@@ -83695,7 +83802,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); exit(1);
+   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -83858,7 +83965,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
   {
    printf("Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding CheckBoxA5a or A5b,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A5b", &localtax[2] );	/* State and local real estate taxes. */	/* Optionally read-in just above. */
  GetLine( "A5c", &localtax[3] );	/* State and local personal property (eg. automobile) taxes. */
@@ -83884,7 +83991,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
   {
    printf("Error: Found '%s' when expecteding A8d,\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A8d,\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  // GetLine( "A9", &SchedA[9] );	/* Investment interest. Attach Form 4952*/	/* Optionally read-in just above. */
 
@@ -83919,7 +84026,7 @@ int main( int argc, char *argv[] )						/* Updated for 2024. */
   {
    printf("Error: Found '%s' when expecteding A18 or B7a.\n", labelx );
    fprintf(outfile,"Error: Found '%s' when expecteding A18 or B7a\n", labelx );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  L[11] = L[9] - L[10];
@@ -84571,6 +84678,7 @@ float thisversion=22.02;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -84597,7 +84705,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -84605,15 +84713,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -84753,7 +84861,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
    fprintf(outfile,"Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  else
   {
@@ -85073,6 +85181,7 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -85090,7 +85199,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -85098,14 +85207,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -85137,7 +85246,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -85159,7 +85268,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -85192,7 +85301,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -85301,7 +85410,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILING_SEPARAT:  std_ded = 8500.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -85536,6 +85645,7 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -85560,7 +85670,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -85568,14 +85678,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -85652,7 +85762,7 @@ get_parameter( infile, 's', word, "Status" );	/* Single, Married/joint, Married/
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -86161,6 +86271,7 @@ double flat_tax_rate = 0.0425;		/* Updated for 2024. */
 /* ------------------- Main -------------------------------------- */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[500], labelx[1000];
  time_t now;
@@ -86187,7 +86298,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -86200,7 +86311,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -86208,7 +86319,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -86217,7 +86328,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -86250,7 +86361,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep/\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -86878,7 +86989,7 @@ void show_fname_init_or_40(char *combined_name, char *first_name_label, char *in
     initial = strdup(combined_name);
 
     // Look for second to last character is a space, and last character is not a space;
-    if ((*(combined_name + comb_len - 2) == ' ') && (*(combined_name + comb_len - 1) != ' ')) {
+    if (comb_len >= 2 && (*(combined_name + comb_len - 2) == ' ') && (*(combined_name + comb_len - 1) != ' ')) {
         *initial = *(combined_name + comb_len - 1);
         *(initial + 1) = '\0';
         // printf("show_fname_init_or_40: '%s'\n", initial);
@@ -86920,6 +87031,7 @@ void show_ssn_or_40(char *label, char *ssn) {
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -86937,7 +87049,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -86945,14 +87057,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -87036,7 +87148,7 @@ int main( int argc, char *argv[] )
         fprintf( outfile, "INFO: f1040i.Dep3SocSec: -- %s\n", f1040i.Dep3SocSec);
     } else {
         fprintf( outfile, "ERROR: --- No Imported 1040 Form Data : no filename provided ---\n");
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
     //====== Page 1 ======
@@ -87100,7 +87212,7 @@ int main( int argc, char *argv[] )
 
     if (p_cfg == NULL) {
         fprintf(outfile,"Error: unrecognized filing status '%s'. Check form1040 imported info. Exiting.\n", f1040i.Status);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
     fprintf(outfile, "INFO: filing_status: '%s'\n", p_cfg->status_label);
@@ -87134,7 +87246,7 @@ int main( int argc, char *argv[] )
 
     if (b6aRegular && b6aDependent) {
         fprintf( outfile, "ERROR: --- Only one of L6a 'Regular' and 'Dependent' checkboxes may be selected ---\n");
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
 
@@ -87160,7 +87272,7 @@ int main( int argc, char *argv[] )
 
     if (b6bRegular && b6bDependent) {
         fprintf( outfile, "ERROR: --- Only one of L6b 'Regular' and 'Dependent' checkboxes may be selected ---\n");
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
     //=== Dependents ===
@@ -89420,6 +89532,7 @@ IMPORT_STATUS ImportReturnData(char *return_filename, P_FORM_IMPORT_DEF p_form_i
     ret_stat.value = 0.0;
     ret_stat.string = "";
     ret_stat.desc = "";
+    ret_stat.err = IMPORT_ERR_SUCCESS;
 
     // Zero all values, and set all strings to "". This ensures reasonable
     // values, whether or not the file exists, and whether or not the fields exist.
@@ -90200,6 +90313,7 @@ void show_ssn_or_40(char *label, char *ssn) {
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -90217,7 +90331,7 @@ while (i < argc) {
         infile = fopen(infname,"r");
         if (infile==0) {
             printf("ERROR: Parameter file '%s' could not be opened.\n", infname );
-            exit(1);
+            { if (outfile) fflush(outfile); return 1; };
         }
         k = 2;
         /* Base name of output file on input file. */
@@ -90235,18 +90349,18 @@ while (i < argc) {
         outfile = fopen(outfname,"w");
         if (outfile==0) {
             printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-            exit(1);
+            { if (outfile) fflush(outfile); return 1; };
         }
         printf("Writing results to file:  %s\n", outfname);
     } else {
         printf("Unknown command-line parameter '%s'\n", argv[i]);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
 }
 if (infile==0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
 }
 
  /* Pre-initialize all lines to zeros. */
@@ -90300,7 +90414,7 @@ if (infile==0) {
 
         if (imp_stat.err != IMPORT_ERR_SUCCESS) {
             ImportPrintStatus(outfile, "Form 1040", imp_stat);
-            exit(1);
+            { if (outfile) fflush(outfile); return 1; };
         }
 
         int d;
@@ -90343,7 +90457,7 @@ if (infile==0) {
         fprintf( outfile, "INFO: f1040i.Dep3SocSec:  = '%s'\n", f1040i.Dep3SocSec);
     } else {
         fprintf( outfile, "ERROR: --- No Imported 1040 Form Data : no filename provided ---\n");
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
     //====== Page 1 ======
@@ -90407,7 +90521,7 @@ if (infile==0) {
 
     if (p_cfg == NULL) {
         fprintf(outfile,"ERROR: unrecognized filing status '%s'. Check form1040 imported info. Exiting.\n", f1040i.Status);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
     fprintf(outfile, "INFO: filing_status: '%s'\n", p_cfg->status_label);
@@ -90441,7 +90555,7 @@ if (infile==0) {
 
     if (b6aRegular && b6aDependent) {
         fprintf( outfile, "ERROR: --- Only one of L6a 'Regular' and 'Dependent' checkboxes may be selected ---\n");
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
 
@@ -90467,7 +90581,7 @@ if (infile==0) {
 
     if (b6bRegular && b6bDependent) {
         fprintf( outfile, "ERROR: --- Only one of L6b 'Regular' and 'Dependent' checkboxes may be selected ---\n");
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
     }
 
     //=== Dependents ===
@@ -91383,6 +91497,7 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -91417,7 +91532,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -91425,15 +91540,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -91463,7 +91578,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -91705,7 +91820,7 @@ int main( int argc, char *argv[] )
 		threshB = 28700.0 + 1750.0 * ndep;
 		break;
 	default: fprintf(outfile,"Bad filing status.\n");
-		printf("Bad filing status.\n");  exit(1); break;
+		printf("Bad filing status.\n");  { if (outfile) fflush(outfile); return 1; }; break;
       }
      if (AGI <= threshA)
       {
@@ -92000,6 +92115,7 @@ void Age65_and_Older_Deduction_Worksheet( double FAGI, double L5 )	   /* Updated
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  time_t now;
@@ -92017,7 +92133,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -92025,14 +92141,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -92064,7 +92180,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s\n", word );
  fprintf(outfile," FilingStatus: %d\n", status );
@@ -92086,7 +92202,7 @@ int main( int argc, char *argv[] )
    datestr = strdup( "1 / 1 / 2000");	/* Pressume under 65. */
   }
  if (interpret_date( datestr, &(yourDOB.month), &(yourDOB.day), &(yourDOB.year), "Bad YourDOB" ) != 1)
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
  twrd = format_mmddyyyy( yourDOB.month, yourDOB.day, yourDOB.year );
  fprintf(outfile,"YourDOB: %s\n", twrd );
  writeout_line = 1;
@@ -92119,7 +92235,7 @@ int main( int argc, char *argv[] )
      datestr = strdup( "1 / 1 / 2000");   /* Pressume under 65. */
     }
    if (interpret_date( datestr, &(spouseDOB.month), &(spouseDOB.day), &(spouseDOB.year), "Bad SpouseDOB" ) != 1)
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
   twrd = format_mmddyyyy( spouseDOB.month, spouseDOB.day, spouseDOB.year );
   fprintf(outfile,"SpouseDOB: %s\n", twrd );
  }
@@ -92233,7 +92349,7 @@ int main( int argc, char *argv[] )
    case MARRIED_FILING_SEPARAT:  std_ded = 8750.0;  min2file = 11950.0;  break;
    default:  printf("Unexpected status.\n");
 	     fprintf(outfile,"Unexpected status.\n");
-	     exit(1);
+	     { if (outfile) fflush(outfile); return 1; };
 	break;
   }
 
@@ -92404,6 +92520,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -92422,7 +92539,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -92430,14 +92547,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++) { L[j] = 0.0; }
@@ -92476,7 +92593,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -92734,6 +92851,7 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, stop=0, CkMinister=0;
  char word[8000], outfname[8000], *infname=0;
  double L1a=0.0, L1b=0.0;
@@ -92751,7 +92869,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -92759,14 +92877,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -92949,6 +93067,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -92968,7 +93087,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -92976,14 +93095,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -93021,7 +93140,7 @@ int main( int argc, char *argv[] )
 
      if (imp_stat.err != IMPORT_ERR_SUCCESS) {
         ImportPrintStatus(outfile, "Schedule C", imp_stat);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
      }
 
      fprintf( outfile, "INFO: --- Imported Sch C Data from file '%s' ---\n", f_sch_c_filename);
@@ -93430,6 +93549,7 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -93470,7 +93590,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -93478,14 +93598,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -93584,7 +93704,7 @@ for(i = 0; i <= 13; i++){
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  if((entity == ESTATE) && (status != SINGLE)){
@@ -93657,7 +93777,7 @@ else if (strncasecmp(word,"No",2)==0){
 
 	fprintf(outfile, "Estates and grantor trusts, which receive the residue of the decedent's estate,\nare required to make estimated income tax payments for any year ending two or\nmore years after the date of the decedent's death. If you answer \"Yes\" to\nPart I, Question 4, complete Part I only and attach form FTB 5805 to the\nback of your tax return.\n");
 
-  exit(1);
+  { if (outfile) fflush(outfile); return 1; };
 
  }
 
@@ -93676,11 +93796,11 @@ else if (strncasecmp(word,"No",2)==0){
  showline( 4 );
  if((L[4] < 250.00) && (status == MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is \"Married Filing Separately\" and line 4 is less than $250.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
  else if((L[4] < 500.00) && (status != MARRIED_FILING_SEPARAT)){
 		fprintf(outfile, "Status is not \"Married Filing Separately\" and line 4 is less than $500.  Stop here.\nYou do not owe the penalty. Do not file form FTB 5805.\n");
-		exit(0);
+		{ if (outfile) fflush(outfile); return 0; };
  }
   GetLineF( "L5", &L[5] );
 
@@ -93712,7 +93832,7 @@ showline( 6 );
 
 		if(L[10] <= 0){
 			fprintf(outfile, "Line 10 is zero or less.  Stop here.  You do not owe the penalty.\nDo not file form FTB 5805.\n");
-			exit(0);
+			{ if (outfile) fflush(outfile); return 0; };
 		}
 
 		L[11] = L[10] * line_11_multiplier;
@@ -94218,6 +94338,7 @@ int status;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -94236,7 +94357,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -94244,14 +94365,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -94297,7 +94418,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -94443,6 +94564,7 @@ float thisversion=4.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -94467,7 +94589,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -94475,14 +94597,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -94531,7 +94653,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -94698,6 +94820,7 @@ double flat_tax_rate = 0.0425;		/* Updated for 2025. */
 /* ------------------- Main -------------------------------------- */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[500], labelx[1000];
  time_t now;
@@ -94734,7 +94857,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -94747,7 +94870,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -94755,7 +94878,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -94764,7 +94887,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -94797,7 +94920,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep/\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -96962,6 +97085,7 @@ void sched_1A( double s1A_L2a )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2025. */
 {
+ do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[MAXSTRLEN], outfname[MAXSTRLEN], *infname="", labelx[1024]="";
  time_t now;
@@ -96992,7 +97116,7 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
    {
     infname = strdup( argv[argk] );
     infile = fopen( infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname, infname);
@@ -97000,15 +97124,15 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -97059,7 +97183,7 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -97238,7 +97362,7 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
 	break;
       default:  fprintf(outfile,"Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
 		printf("Error: StdDedChart_NumBoxesChecked (%d) not equal to 1, 2, 3, or 4.\n", StdDedChart_NumBoxesChecked );
-		exit(1);
+		{ if (outfile) fflush(outfile); return 1; };
      }
     fprintf(outfile,"  (Assuming no one is claiming you, or your joint-spouse, as a dependent.)\n");
   }
@@ -97254,7 +97378,7 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
 		std_deduc = MFJ_STD_DEDUC;	break;
    case HEAD_OF_HOUSEHOLD:
 		std_deduc = HH_STD_DEDUC;	break;
-   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); exit(1);
+   default:  printf("Case (Line 12) not handled.\n"); fprintf(outfile,"Case (Line 12) not handled.\n"); { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -97412,7 +97536,7 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
   {
    printf("ERROR1: Found '%s' when expecting 'S1A_2a' or 'A1'.\n", word );
    fprintf(outfile,"ERROR1: Found '%s' when expecting 'S1A_2a' or 'A1'.\n", word );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -98228,6 +98352,7 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -98255,7 +98380,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
 	fprintf(outfile,"ERROR: Parameter file '%s' could not be opened.\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     k = 2;
     /* Base name of output file on input file. */
@@ -98268,7 +98393,7 @@ int main( int argc, char *argv[] )
      {
 	printf("ERROR: Output file '%s' could not be opened.\n", outfname);
 	fprintf(outfile,"ERROR: Output file '%s' could not be opened.\n", outfname);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
      }
     printf("Writing results to file:  %s\n", outfname);
    }
@@ -98276,7 +98401,7 @@ int main( int argc, char *argv[] )
    {
 	printf("Unknown command-line parameter '%s'\n", argv[jj]);
 	fprintf(outfile,"Unknown command-line parameter '%s'\n", argv[jj]);
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
    }
   jj++;
  }
@@ -98285,7 +98410,7 @@ int main( int argc, char *argv[] )
   {
 	printf("Error: No input file on command line.\n");
 	fprintf(outfile,"Error: No input file on command line.\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
 
@@ -98326,7 +98451,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -98375,7 +98500,7 @@ int main( int argc, char *argv[] )
 	break;
    default:
 	stdded = 0;  printf("Unknown status\n");  fprintf(outfile,"Unknown status\n");
-	exit(1);
+	{ if (outfile) fflush(outfile); return 1; };
   }
 
  if (L[6] <= min2file)
@@ -99584,6 +99709,7 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -99619,7 +99745,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -99627,14 +99753,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[argk]);  { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -99665,7 +99791,7 @@ int main( int argc, char *argv[] )
    fclose(infile);
    fclose(outfile);
    Display_File( outfname );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
 
  answ = GetTextLine( "YourDOB" );
@@ -100480,6 +100606,7 @@ float thisversion = 3.00;
 
 int main(int argc, char *argv[])
 {
+ do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -100500,7 +100627,7 @@ int main(int argc, char *argv[])
       infile = fopen(infname, "r");
       if (infile == 0) {
         printf("ERROR: Parameter file '%s' could not be opened.\n", infname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       k = 2;
       /* Base name of output file on input file. */
@@ -100515,18 +100642,18 @@ int main(int argc, char *argv[])
       outfile = fopen(outfname, "w");
       if (outfile == 0) {
         printf("ERROR: Output file '%s' could not be opened.\n", outfname);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
       }
       printf("Writing results to file:  %s\n", outfname);
     } else {
       printf("Unknown command-line parameter '%s'\n", argv[i]);
-      exit(1);
+      { if (outfile) fflush(outfile); return 1; };
     }
     i = i + 1;
   }
   if (infile == 0) {
     printf("Error: No input file on command line.\n");
-    exit(1);
+    { if (outfile) fflush(outfile); return 1; };
   }
 
   /* Pre-initialize all lines to zeros. */
@@ -100775,6 +100902,7 @@ float thisversion=22.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -100792,7 +100920,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -100800,15 +100928,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -100930,6 +101058,7 @@ float thisversion=2.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -100956,7 +101085,7 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -100964,14 +101093,14 @@ add_pdf_markup( "NotReady", 1, 240, 40, 17, 1, 1.0, 0, 0, "\"This program is NOT
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -101244,6 +101373,7 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -101261,7 +101391,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -101269,14 +101399,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -101306,7 +101436,7 @@ int main( int argc, char *argv[] )
 
      if (imp_stat.err != IMPORT_ERR_SUCCESS) {
         ImportPrintStatus(outfile, "Form 1040", imp_stat);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
      }
 
      fprintf( outfile, "INFO: --- Imported 1040 Data from file '%s' ---\n", f1040_filename);
@@ -101321,7 +101451,7 @@ int main( int argc, char *argv[] )
      fprintf( outfile, "INFO: f1040i.YourSocSec#: -- %s\n", f1040i.YourSocSec);
  } else {
      fprintf( outfile, "ERROR: --- No Imported 1040 Form Data : no filename provided ---\n");
-     exit(1);
+     { if (outfile) fflush(outfile); return 1; };
  }
 
  char *f_sch_c_filename = GetTextLine( "FileNameSchC") ;
@@ -101332,7 +101462,7 @@ int main( int argc, char *argv[] )
 
      if (imp_stat.err != IMPORT_ERR_SUCCESS) {
         ImportPrintStatus(outfile, "Schedule C", imp_stat);
-        exit(1);
+        { if (outfile) fflush(outfile); return 1; };
      }
 
      fprintf( outfile, "INFO: --- Imported Schedule C Data from file '%s' ---\n", f_sch_c_filename);
@@ -102191,6 +102321,7 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -102230,7 +102361,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[argk]);
     infile = fopen(argv[argk],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[argk]);
@@ -102238,16 +102369,16 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[argk]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[argk]); { if (outfile) fflush(outfile); return 1; };}
   argk = argk + 1;
  }
  // test_tax_function();
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (j=0; j<MAX_LINES; j++)
@@ -103430,6 +103561,7 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -103453,7 +103585,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -103461,14 +103593,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++)
@@ -103508,7 +103640,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house, Widow(er)\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  switch (status)
  {
@@ -104070,6 +104202,7 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -104099,7 +104232,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[mm]);
     infile = fopen(argv[mm],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[mm]);  { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[mm]);
@@ -104107,14 +104240,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname);  { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
-  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); exit(1);}
+  else {printf("Unknown command-line parameter '%s'\n", argv[mm]); { if (outfile) fflush(outfile); return 1; };}
   mm++;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n");  exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n");  { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (mm=0; mm<MAX_LINES; mm++)
@@ -104148,7 +104281,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Must be: Single, Married/joint, Married/sep, Head_of_house.\nExiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -104569,6 +104702,7 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -104593,7 +104727,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -104601,14 +104735,14 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
 
@@ -104685,7 +104819,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
 
@@ -105203,6 +105337,7 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -105230,7 +105365,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(argv[i],"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,argv[i]);
@@ -105238,15 +105373,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) L[i] = 0.0;
@@ -105274,7 +105409,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: unrecognized status '%s'. Exiting.\n", word);
    fprintf(outfile,"Error: unrecognized status '%s'. Exiting.\n", word);
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  fprintf(outfile,"Status = %s (%d)\n", word, status);
  fprintf(outfile," Check_R_PennResident X\n");
@@ -105483,6 +105618,7 @@ float thisversion=23.00;
 
 int main( int argc, char *argv[] )
 {
+ do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -105509,7 +105645,7 @@ int main( int argc, char *argv[] )
    {
     infname = strdup(argv[i]);
     infile = fopen(infname,"r");
-    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); exit(1);}
+    if (infile==0) {printf("ERROR: Parameter file '%s' could not be opened.\n", infname ); { if (outfile) fflush(outfile); return 1; };}
     k = 2;
     /* Base name of output file on input file. */
     strcpy(outfname,infname);
@@ -105517,15 +105653,15 @@ int main( int argc, char *argv[] )
     while ((j>=0) && (outfname[j]!='.')) j--;
     if (j<0) strcat(outfname,"_out.txt"); else strcpy(&(outfname[j]),"_out.txt");
     outfile = fopen(outfname,"w");
-    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); exit(1);}
+    if (outfile==0) {printf("ERROR: Output file '%s' could not be opened.\n", outfname); { if (outfile) fflush(outfile); return 1; };}
     printf("Writing results to file:  %s\n", outfname);
    }
   else
-   {printf("Unknown command-line parameter '%s'\n", argv[i]); exit(1);}
+   {printf("Unknown command-line parameter '%s'\n", argv[i]); { if (outfile) fflush(outfile); return 1; };}
   i = i + 1;
  }
 
- if (infile==0) {printf("Error: No input file on command line.\n"); exit(1);}
+ if (infile==0) {printf("Error: No input file on command line.\n"); { if (outfile) fflush(outfile); return 1; };}
 
  /* Pre-initialize all lines to zeros. */
  for (i=0; i<MAX_LINES; i++) { L[i] = 0.0; }
@@ -105665,7 +105801,7 @@ int main( int argc, char *argv[] )
   {
    printf("Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
    fprintf(outfile,"Error: Unexpected answer for Line-32a (Y/N) = '%s'.  Exiting.\n", word );
-   exit(1);
+   { if (outfile) fflush(outfile); return 1; };
   }
  else
   {

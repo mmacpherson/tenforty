@@ -1359,6 +1359,136 @@ def test_va_state_tax_parity(w2_income, filing_status):
     )
 
 
+# === OR State Parity Tests (2024) ===
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_or_state_agi_parity_2024(w2_income, filing_status):
+    """OR 2024 AGI matches exactly — exemption credits don't affect AGI."""
+    ots = evaluate_return(
+        year=2024,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"OR AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@pytest.mark.xfail(
+    reason="OTS auto-applies $249 exemption credits; graph leaves credits as zero input",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_or_state_tax_parity_2024(w2_income, filing_status):
+    """OR 2024 total tax differs because OTS auto-applies exemption credits."""
+    ots = evaluate_return(
+        year=2024,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"OR tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+# === OR State Parity Tests (2025) ===
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_or_state_agi_parity(w2_income, filing_status):
+    """OR 2025 AGI matches exactly — exemption credits don't affect AGI."""
+    ots = evaluate_return(
+        year=2025,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"OR AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@pytest.mark.xfail(
+    reason="OTS auto-applies $249 exemption credits; graph leaves credits as zero input",
+    strict=True,
+)
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_or_state_tax_parity(w2_income, filing_status):
+    """OR 2025 total tax differs because OTS auto-applies exemption credits."""
+    ots = evaluate_return(
+        year=2025,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="OR",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"OR tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
 # === CA State (Graph Strictness) ===
 
 
