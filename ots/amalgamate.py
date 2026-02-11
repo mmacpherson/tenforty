@@ -401,6 +401,109 @@ def generate_lookup_switch(import_map: dict[int, dict[str, str]]) -> str:
     return "\n".join(out)
 
 
+def patch_exit_to_return(lines: list[str]) -> list[str]:
+    """Replace exit(N) with return N inside main() so errors don't kill the Python process.
+
+    Each OTS form has an ``int main(...)`` entry point.  The original C code
+    calls ``exit(1)`` on various error paths, which terminates the *entire*
+    host process — including the calling Python interpreter.  By converting
+    these to ``return 1`` the form simply returns a non-zero exit code that
+    the Cython wrapper can handle gracefully.
+
+    Only lines inside the ``main`` function body (tracked by brace depth) are
+    patched so that helper-function semantics are left untouched.
+
+    We also flush ``outfile`` before returning, because the original
+    ``exit()`` would flush all stdio streams automatically, but a plain
+    ``return`` from what is now just a regular C++ function does not.
+    """
+    start_ix = None
+    for i, line in enumerate(lines):
+        if re.match(r"\s*int\s+main\s*\(", line):
+            start_ix = i
+            break
+
+    if start_ix is None:
+        return lines
+
+    depth = 0
+    in_main = False
+    for i in range(start_ix, len(lines)):
+        for ch in lines[i]:
+            if ch == "{":
+                depth += 1
+                in_main = True
+            elif ch == "}":
+                depth -= 1
+                if in_main and depth == 0:
+                    return lines
+
+        if in_main and depth > 0:
+            lines[i] = re.sub(
+                r"\bexit\s*\(\s*(\d+)\s*\)",
+                r"{ if (outfile) fflush(outfile); return \1; }",
+                lines[i],
+            )
+
+    return lines
+
+
+def patch_reset_globals(lines: list[str]) -> list[str]:
+    """Reset shared globals at the start of each form's main().
+
+    Some state forms (NC, OH) set ``do_all_caps = 1`` to uppercase imported
+    names.  The flag is never cleared, so subsequent forms in the same process
+    read file paths as uppercased strings, which fails on case-sensitive
+    filesystems.  Inserting a reset at the top of every form's main() ensures
+    a clean slate.
+    """
+    start_ix = None
+    for i, line in enumerate(lines):
+        if re.match(r"\s*int\s+main\s*\(", line):
+            start_ix = i
+            break
+    if start_ix is None:
+        return lines
+    # Find the opening brace of main()
+    for i in range(start_ix, min(start_ix + 5, len(lines))):
+        if "{" in lines[i]:
+            lines.insert(i + 1, " do_all_caps = 0;")
+            break
+    return lines
+
+
+def patch_import_status_init(lines: list[str]) -> list[str]:
+    """Fix uninitialized IMPORT_STATUS.err in ImportReturnData.
+
+    The OTS 2025 taxsolve_routines ``ImportReturnData`` allocates a local
+    ``IMPORT_STATUS ret_stat`` but never initialises ``ret_stat.err``.  When
+    the import loop completes without error the field contains garbage,
+    causing callers that check ``imp_stat.err != IMPORT_ERR_SUCCESS`` to
+    wrongly take the error path.
+    """
+    for i, line in enumerate(lines):
+        if 'ret_stat.desc = ""' in line and "IMPORT" not in lines[i - 1]:
+            lines.insert(i + 1, "    ret_stat.err = IMPORT_ERR_SUCCESS;")
+            break
+    return lines
+
+
+def patch_show_fname_init_or_40(lines: list[str]) -> list[str]:
+    """Guard the comb_len-2 access in show_fname_init_or_40 against short names.
+
+    The original code accesses ``combined_name[comb_len - 2]`` without
+    checking that the string is long enough, causing undefined behaviour
+    when names are empty or single-character strings.
+    """
+    for i, line in enumerate(lines):
+        if "comb_len - 2" in line and "combined_name" in line and "if" in line:
+            lines[i] = line.replace(
+                "if ((*(combined_name + comb_len - 2)",
+                "if (comb_len >= 2 && (*(combined_name + comb_len - 2)",
+            )
+    return lines
+
+
 def patch_add_pdf_markup(lines: list[str]) -> list[str]:
     """Patch the 'add_pdf_markup' function in the source code to avoid compilation errors.
 
@@ -468,6 +571,12 @@ def postprocess_source_groups(
         match (outer_key, inner_key):
             case (_, "taxsolve_routines"):
                 group["source"] = patch_add_pdf_markup(group["source"])
+                group["source"] = patch_import_status_init(group["source"])
+            case _:
+                group["source"] = patch_exit_to_return(group["source"])
+                group["source"] = patch_reset_globals(group["source"])
+                if "OR_40" in inner_key:
+                    group["source"] = patch_show_fname_init_or_40(group["source"])
 
     return (outer_key, source_group)
 
