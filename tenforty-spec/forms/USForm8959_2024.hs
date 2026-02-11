@@ -31,7 +31,7 @@ usForm8959_2024 = form "us_form_8959" 2024 $ do
             l6 .*. lit 0.009
 
     -- Part II: Additional Medicare Tax on Self-Employment Income
-    l8 <- keyInput "L8" "se_income" "Self-employment income from Schedule SE, Part I, line 6"
+    l8 <- interior "L8" "se_income" $ importForm "us_schedule_se" "L4a"
 
     l9 <-
         interior "L9" "threshold_se" $

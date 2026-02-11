@@ -47,7 +47,7 @@ usForm8960_2025 = form "us_form_8960" 2025 $ do
             l8 `subtractNotBelowZero` l11
 
     -- Modified AGI - for most taxpayers this equals AGI
-    l13 <- keyInput "L13" "modified_agi" "Modified adjusted gross income"
+    l13 <- interior "L13" "modified_agi" $ importForm "us_1040" "L11"
 
     l14 <-
         interior "L14" "niit_threshold" $

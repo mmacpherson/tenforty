@@ -1,13 +1,18 @@
 {
-    "imports": [],
+    "imports": [
+        {
+            "form": "us_schedule_se",
+            "line": "L4a",
+            "year": 2024
+        }
+    ],
     "inputs": [
         0,
         1,
         2,
         3,
         4,
-        5,
-        6
+        5
     ],
     "meta": {
         "form_id": "us_form_8959",
@@ -33,82 +38,85 @@
             "id": 10,
             "op": {
                 "type": "literal",
-                "value": 250000
+                "value": 125000
             }
         },
         "11": {
             "id": 11,
             "op": {
                 "type": "literal",
-                "value": 125000
+                "value": 200000
             }
         },
         "12": {
             "id": 12,
             "op": {
                 "type": "literal",
-                "value": 200000
+                "value": 250000
             }
         },
         "13": {
             "id": 13,
-            "op": {
-                "type": "literal",
-                "value": 250000
-            }
-        },
-        "14": {
-            "id": 14,
             "name": "L5_threshold",
             "op": {
                 "type": "by_status",
                 "values": {
-                    "head_of_household": 12,
-                    "married_joint": 10,
-                    "married_separate": 11,
-                    "qualifying_widow": 13,
-                    "single": 9
+                    "head_of_household": 11,
+                    "married_joint": 9,
+                    "married_separate": 10,
+                    "qualifying_widow": 12,
+                    "single": 8
                 }
             }
         },
-        "15": {
-            "id": 15,
+        "14": {
+            "id": 14,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "15": {
+            "id": 15,
+            "op": {
+                "left": 7,
+                "right": 13,
+                "type": "sub"
+            }
+        },
         "16": {
             "id": 16,
+            "name": "L6_excess_wages",
             "op": {
-                "left": 8,
-                "right": 14,
-                "type": "sub"
+                "left": 14,
+                "right": 15,
+                "type": "max"
             }
         },
         "17": {
             "id": 17,
-            "name": "L6_excess_wages",
-            "op": {
-                "left": 15,
-                "right": 16,
-                "type": "max"
-            }
-        },
-        "18": {
-            "id": 18,
             "op": {
                 "type": "literal",
                 "value": 9.0e-3
             }
         },
-        "19": {
-            "id": 19,
+        "18": {
+            "id": 18,
             "name": "L7_additional_medicare_wages",
             "op": {
-                "left": 17,
-                "right": 18,
+                "left": 16,
+                "right": 17,
                 "type": "mul"
+            }
+        },
+        "19": {
+            "id": 19,
+            "name": "L8_se_income",
+            "op": {
+                "form": "us_schedule_se",
+                "line": "L4a",
+                "type": "import",
+                "year": 2024
             }
         },
         "2": {
@@ -178,7 +186,7 @@
             "id": 27,
             "op": {
                 "left": 25,
-                "right": 8,
+                "right": 7,
                 "type": "sub"
             }
         },
@@ -195,14 +203,14 @@
             "id": 29,
             "name": "L12_se_subject_to_tax",
             "op": {
-                "left": 3,
+                "left": 19,
                 "right": 28,
                 "type": "min"
             }
         },
         "3": {
             "id": 3,
-            "name": "L8_se_income",
+            "name": "L14_rrta_compensation",
             "op": {
                 "type": "input"
             }
@@ -282,14 +290,14 @@
         "39": {
             "id": 39,
             "op": {
-                "left": 4,
+                "left": 3,
                 "right": 37,
                 "type": "sub"
             }
         },
         "4": {
             "id": 4,
-            "name": "L14_rrta_compensation",
+            "name": "L19_medicare_withheld",
             "op": {
                 "type": "input"
             }
@@ -322,7 +330,7 @@
         "43": {
             "id": 43,
             "op": {
-                "left": 19,
+                "left": 18,
                 "right": 31,
                 "type": "add"
             }
@@ -362,7 +370,7 @@
         "48": {
             "id": 48,
             "op": {
-                "left": 5,
+                "left": 4,
                 "right": 46,
                 "type": "sub"
             }
@@ -378,7 +386,7 @@
         },
         "5": {
             "id": 5,
-            "name": "L19_medicare_withheld",
+            "name": "L22_rrta_withheld",
             "op": {
                 "type": "input"
             }
@@ -388,39 +396,39 @@
             "name": "L23_total_withheld",
             "op": {
                 "left": 49,
-                "right": 6,
+                "right": 5,
                 "type": "add"
             }
         },
         "6": {
             "id": 6,
-            "name": "L22_rrta_withheld",
-            "op": {
-                "type": "input"
-            }
-        },
-        "7": {
-            "id": 7,
             "op": {
                 "left": 0,
                 "right": 1,
                 "type": "add"
             }
         },
-        "8": {
-            "id": 8,
+        "7": {
+            "id": 7,
             "name": "L4_total_medicare_wages",
             "op": {
-                "left": 7,
+                "left": 6,
                 "right": 2,
                 "type": "add"
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "type": "literal",
+                "value": 200000
             }
         },
         "9": {
             "id": 9,
             "op": {
                 "type": "literal",
-                "value": 200000
+                "value": 250000
             }
         }
     },
@@ -431,8 +439,8 @@
         44,
         49,
         50,
-        8,
-        19
+        7,
+        18
     ],
     "tables": {}
 }
