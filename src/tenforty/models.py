@@ -279,6 +279,8 @@ class TaxReturnInput(BaseModel):
     ordinary_dividends: float = 0.0
     short_term_capital_gains: float = 0.0
     long_term_capital_gains: float = 0.0
+    self_employment_income: float = 0.0
+    rental_income: float = 0.0
     schedule_1_income: float = 0.0
     itemized_deductions: float = 0.0
     state_adjustment: float = 0.0
@@ -306,6 +308,9 @@ class InterpretedTaxReturn(BaseModel):
     federal_tax_bracket: float = 0.0
     federal_taxable_income: float = 0.0
     federal_amt: float = 0.0
+    federal_se_tax: float = 0.0
+    federal_niit: float = 0.0
+    federal_additional_medicare_tax: float = 0.0
     federal_total_tax: float = 0.0
 
     state_adjusted_gross_income: float = 0.0

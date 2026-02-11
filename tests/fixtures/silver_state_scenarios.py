@@ -411,7 +411,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # MA surtax: $112,450 x 0.04 = $4,498
     # MA total tax: $59,780 + $4,498 = $64,278
     # Federal taxable: $1,184,400 (2025 std ded $15,600)
-    # Federal tax (2025): $395,470.25 (formula, graph backend)
+    # Federal tax (2025): $395,192.75 (income tax)
+    #   + Additional Medicare Tax: ($1,200,000 - $200,000) * 0.009 = $9,000
+    #   = $404,192.75
     TaxScenario(
         source="MA 2025 Tax Brackets (computed)",
         description="MA Single, $1.2M income with surtax (2025)",
@@ -419,7 +421,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MA",
         filing_status="Single",
         w2_income=1200000.0,
-        expected_federal_tax=395192.75,
+        expected_federal_tax=404192.75,
         expected_state_tax=64278.0,
         backend="graph",
     ),
@@ -1358,6 +1360,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Federal taxable: $385,400 ($400K - $14.6K std ded), in 35% bracket
     # Federal tax: $1,160 + $4,266 + $11,742.50 + $21,942 + $16,568 + $49,586.25
     #            = $105,264.75
+    #   + Additional Medicare Tax: ($400,000 - $200,000) * 0.009 = $1,800
+    #   = $107,064.75
     TaxScenario(
         source="WI 2024 Tax Brackets (computed)",
         description="WI Single, $400k income (7.65% top bracket)",
@@ -1365,7 +1369,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="WI",
         filing_status="Single",
         w2_income=400000.0,
-        expected_federal_tax=105264.75,
+        expected_federal_tax=107064.75,
         expected_state_tax=22803.575,
         expected_federal_agi=400000.0,
         backend="graph",
@@ -3643,7 +3647,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # MD Std Ded: $3,350
     # MD Taxable: $600,000 - $3,350 - $3,200 = $593,450
     # MD Tax (computed): $32,975.625
-    # Federal tax (OTS tables 2025 Single): $174,297.25
+    # Federal tax (OTS tables 2025 Single): $174,034.75
+    #   + Additional Medicare Tax: ($600,000 - $200,000) * 0.009 = $3,600
+    #   = $177,634.75
     TaxScenario(
         source="MD 2025 Tax Brackets (computed)",
         description="MD Single, $600,000 income (2025, tests 6.25% bracket)",
@@ -3652,7 +3658,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=600000.0,
         dependent_exemptions=3200.0,
-        expected_federal_tax=174034.75,
+        expected_federal_tax=177634.75,
         expected_state_tax=32975.625,
         expected_federal_agi=600000.0,
         backend="graph",
@@ -3868,7 +3874,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #   $16,001-$210,000 ($194,000) @ 4.9%: $9,506.00
     #   $210,001-$235,400 ($25,400) @ 5.9%: $1,498.60
     #   Total: $11,509.10
-    # Federal taxable: $235,400, Federal tax: $53,014.50 (formula, graph backend)
+    # Federal taxable: $235,400, Federal tax: $53,014.50 (income tax)
+    #   + Additional Medicare Tax: ($250,000 - $200,000) * 0.009 = $450
+    #   = $53,464.50
     TaxScenario(
         source="NM 2024 Tax Brackets (computed)",
         description="NM Single, $250,000 income (2024)",
@@ -3876,7 +3884,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="NM",
         filing_status="Single",
         w2_income=250000.0,
-        expected_federal_tax=53014.5,
+        expected_federal_tax=53464.5,
         expected_state_tax=11509.10,
         backend="graph",
     ),

@@ -1,5 +1,11 @@
 {
-    "imports": [],
+    "imports": [
+        {
+            "form": "us_1040",
+            "line": "L11",
+            "year": 2025
+        }
+    ],
     "inputs": [
         0,
         1,
@@ -14,8 +20,7 @@
         10,
         11,
         12,
-        13,
-        14
+        13
     ],
     "meta": {
         "form_id": "us_form_8960",
@@ -67,13 +72,6 @@
         },
         "14": {
             "id": 14,
-            "name": "L13_modified_agi",
-            "op": {
-                "type": "input"
-            }
-        },
-        "15": {
-            "id": 15,
             "name": "L4c_net_rental_royalty",
             "op": {
                 "left": 3,
@@ -81,8 +79,8 @@
                 "type": "add"
             }
         },
-        "16": {
-            "id": 16,
+        "15": {
+            "id": 15,
             "name": "L5c_net_gain_adjusted",
             "op": {
                 "left": 5,
@@ -90,11 +88,19 @@
                 "type": "add"
             }
         },
-        "17": {
-            "id": 17,
+        "16": {
+            "id": 16,
             "op": {
                 "left": 0,
                 "right": 1,
+                "type": "add"
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "left": 16,
+                "right": 2,
                 "type": "add"
             }
         },
@@ -102,7 +108,7 @@
             "id": 18,
             "op": {
                 "left": 17,
-                "right": 2,
+                "right": 14,
                 "type": "add"
             }
         },
@@ -125,7 +131,7 @@
             "id": 20,
             "op": {
                 "left": 19,
-                "right": 16,
+                "right": 7,
                 "type": "add"
             }
         },
@@ -133,75 +139,77 @@
             "id": 21,
             "op": {
                 "left": 20,
-                "right": 7,
+                "right": 8,
                 "type": "add"
             }
         },
         "22": {
             "id": 22,
+            "name": "L8_total_investment_income",
             "op": {
                 "left": 21,
-                "right": 8,
+                "right": 9,
                 "type": "add"
             }
         },
         "23": {
             "id": 23,
-            "name": "L8_total_investment_income",
-            "op": {
-                "left": 22,
-                "right": 9,
-                "type": "add"
-            }
-        },
-        "24": {
-            "id": 24,
             "op": {
                 "left": 10,
                 "right": 11,
                 "type": "add"
             }
         },
-        "25": {
-            "id": 25,
+        "24": {
+            "id": 24,
             "name": "L9d_total_expenses_subtotal",
             "op": {
-                "left": 24,
+                "left": 23,
                 "right": 12,
+                "type": "add"
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L11_total_deductions",
+            "op": {
+                "left": 24,
+                "right": 13,
                 "type": "add"
             }
         },
         "26": {
             "id": 26,
-            "name": "L11_total_deductions",
-            "op": {
-                "left": 25,
-                "right": 13,
-                "type": "add"
-            }
-        },
-        "27": {
-            "id": 27,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 22,
+                "right": 25,
+                "type": "sub"
+            }
+        },
         "28": {
             "id": 28,
+            "name": "L12_net_investment_income",
             "op": {
-                "left": 23,
-                "right": 26,
-                "type": "sub"
+                "left": 26,
+                "right": 27,
+                "type": "max"
             }
         },
         "29": {
             "id": 29,
-            "name": "L12_net_investment_income",
+            "name": "L13_modified_agi",
             "op": {
-                "left": 27,
-                "right": 28,
-                "type": "max"
+                "form": "us_1040",
+                "line": "L11",
+                "type": "import",
+                "year": 2025
             }
         },
         "3": {
@@ -270,7 +278,7 @@
         "37": {
             "id": 37,
             "op": {
-                "left": 14,
+                "left": 29,
                 "right": 35,
                 "type": "sub"
             }
@@ -288,7 +296,7 @@
             "id": 39,
             "name": "L16_smaller_of_nii_or_excess",
             "op": {
-                "left": 29,
+                "left": 28,
                 "right": 38,
                 "type": "min"
             }
@@ -353,14 +361,14 @@
         }
     },
     "outputs": [
-        26,
-        29,
+        25,
+        28,
         38,
         39,
         41,
+        14,
         15,
-        16,
-        23
+        22
     ],
     "tables": {}
 }

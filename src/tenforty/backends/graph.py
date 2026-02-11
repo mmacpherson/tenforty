@@ -11,6 +11,7 @@ from ..mappings import (
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
+    NATURAL_TO_NODES,
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
@@ -165,21 +166,14 @@ class GraphBackend:
 
             handled = False
 
-            # 1. Check Federal mapping
-            if natural_name in NATURAL_TO_NODE:
-                node_name = NATURAL_TO_NODE[natural_name]
-                try:
-                    evaluator.set(node_name, float(value))
-                    handled = True
-                except Exception as exc:
-                    # It is possible the node is not in the graph if we didn't link that form
-                    # (though usually federal forms are always linked).
-                    # Re-raise for debugging transparency as per roadmap.
-                    raise RuntimeError(
-                        "Graph backend mapping error: expected input node not found.\n"
-                        f"Natural field: {natural_name}\n"
-                        f"Expected node: {node_name}"
-                    ) from exc
+            # 1. Check Federal mapping (primary + subordinate nodes)
+            if natural_name in NATURAL_TO_NODES:
+                for node_name in NATURAL_TO_NODES[natural_name]:
+                    try:
+                        evaluator.set(node_name, float(value))
+                        handled = True
+                    except Exception:
+                        pass  # subordinate form node may not be linked
 
             # 2. Check State mapping
             if natural_name in state_mapping:
@@ -244,6 +238,20 @@ class GraphBackend:
         except Exception as exc:
             logger.debug("AMT evaluation failed (Form 6251 may not be linked): %s", exc)
             result["federal_amt"] = 0.0
+
+        for node, field in [
+            ("us_schedule_se_L10_se_tax", "federal_se_tax"),
+            ("us_form_8960_L17_niit", "federal_niit"),
+            (
+                "us_form_8959_L18_total_additional_medicare",
+                "federal_additional_medicare_tax",
+            ),
+        ]:
+            try:
+                result[field] = evaluator.eval(node)
+            except Exception:
+                result[field] = 0.0
+
         result["state_adjusted_gross_income"] = 0.0
         result["state_taxable_income"] = 0.0
         result["state_total_tax"] = 0.0
@@ -285,7 +293,7 @@ class GraphBackend:
         state_mapping = STATE_NATURAL_TO_NODE.get(state, {})
         unsupported: list[tuple[str, object]] = []
         for natural_name, values in inputs.items():
-            if natural_name in NATURAL_TO_NODE or natural_name in state_mapping:
+            if natural_name in NATURAL_TO_NODES or natural_name in state_mapping:
                 continue
             if any(v not in (0, 0.0, None) for v in values):
                 sample = next((v for v in values if v not in (0, 0.0, None)), None)
@@ -319,8 +327,8 @@ class GraphBackend:
 
         for natural_name, values in inputs.items():
             node_names = []
-            if natural_name in NATURAL_TO_NODE:
-                node_names.append(NATURAL_TO_NODE[natural_name])
+            if natural_name in NATURAL_TO_NODES:
+                node_names.extend(NATURAL_TO_NODES[natural_name])
             if natural_name in state_mapping:
                 node_names.append(state_mapping[natural_name])
 
@@ -339,6 +347,9 @@ class GraphBackend:
             "us_1040_L11_agi": "federal_adjusted_gross_income",
             "us_1040_L15_taxable_income": "federal_taxable_income",
             "us_1040_L24_total_tax": "federal_total_tax",
+            "us_schedule_se_L10_se_tax": "federal_se_tax",
+            "us_form_8960_L17_niit": "federal_niit",
+            "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
         }
 
         if state and state != OTSState.NONE:
@@ -360,7 +371,10 @@ class GraphBackend:
         final_results = {"filing_status": [rev_fs_map.get(s, s) for s in status_col]}
 
         # Translate graph input names back to natural names if possible
-        rev_federal = {v: k for k, v in NATURAL_TO_NODE.items()}
+        rev_federal = {}
+        for nat, nodes in NATURAL_TO_NODES.items():
+            for node in nodes:
+                rev_federal.setdefault(node, nat)
         rev_state = {v: k for k, v in state_mapping.items()}
 
         for node_name, values in input_cols.items():
@@ -387,6 +401,9 @@ class GraphBackend:
         # Fill in missing expected fields with zeros
         for field in [
             "federal_amt",
+            "federal_se_tax",
+            "federal_niit",
+            "federal_additional_medicare_tax",
             "state_adjusted_gross_income",
             "state_taxable_income",
             "state_total_tax",
@@ -518,8 +535,8 @@ class GraphBackend:
         if current_val == 0:
             natural_var = var
             # Reverse lookup attempt
-            for nat, node in NATURAL_TO_NODE.items():
-                if node == var:
+            for nat, nodes in NATURAL_TO_NODES.items():
+                if var in nodes:
                     natural_var = nat
                     break
             current_val = natural_values.get(natural_var, 0)
