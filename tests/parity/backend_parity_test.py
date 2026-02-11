@@ -827,7 +827,7 @@ def test_nc_state_agi_parity_2023(w2_income, filing_status):
 
 @_skip_no_2023_graphs
 @pytest.mark.xfail(
-    reason="OTS auto-applies $2,000 child deduction for MFJ; graph leaves child deduction as zero input",
+    reason="OTS auto-applies income-dependent child deduction for MFJ; graph leaves child deduction as zero input",
     strict=True,
 )
 @skip_if_backends_unavailable
@@ -990,7 +990,7 @@ def test_va_state_agi_parity_2023(w2_income, filing_status):
 
 @_skip_no_2023_graphs
 @pytest.mark.xfail(
-    reason="OTS auto-applies $930 personal exemption + $8,000 standard deduction; graph leaves as zero",
+    reason="OTS auto-applies $930 personal exemption + $8,000/$16,000 standard deduction; graph leaves as zero",
     strict=True,
 )
 @skip_if_backends_unavailable
