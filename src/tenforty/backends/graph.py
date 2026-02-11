@@ -168,12 +168,18 @@ class GraphBackend:
 
             # 1. Check Federal mapping (primary + subordinate nodes)
             if natural_name in NATURAL_TO_NODES:
-                for node_name in NATURAL_TO_NODES[natural_name]:
+                node_names = NATURAL_TO_NODES[natural_name]
+                for i, node_name in enumerate(node_names):
                     try:
                         evaluator.set(node_name, float(value))
                         handled = True
-                    except Exception:
-                        pass  # subordinate form node may not be linked
+                    except Exception as exc:
+                        if i == 0:
+                            raise RuntimeError(
+                                "Graph backend mapping error: expected input node not found.\n"
+                                f"Natural field: {natural_name}\n"
+                                f"Expected node: {node_name}"
+                            ) from exc
 
             # 2. Check State mapping
             if natural_name in state_mapping:
@@ -332,14 +338,16 @@ class GraphBackend:
             if natural_name in state_mapping:
                 node_names.append(state_mapping[natural_name])
 
-            for node_name in node_names:
+            for i, node_name in enumerate(node_names):
                 if node_name not in input_names:
-                    raise RuntimeError(
-                        "Graph backend mapping error: expected input node not found.\n"
-                        f"State: {state.value if state else None}\n"
-                        f"Natural field: {natural_name}\n"
-                        f"Expected node: {node_name}"
-                    )
+                    if i == 0:
+                        raise RuntimeError(
+                            "Graph backend mapping error: expected input node not found.\n"
+                            f"State: {state.value if state else None}\n"
+                            f"Natural field: {natural_name}\n"
+                            f"Expected node: {node_name}"
+                        )
+                    continue
                 graph_inputs[node_name] = values
 
         # Define outputs we want to capture
