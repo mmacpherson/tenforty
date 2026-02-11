@@ -1457,7 +1457,7 @@ def test_or_state_agi_parity(w2_income, filing_status):
 
 
 @pytest.mark.xfail(
-    reason="OTS auto-applies $249 exemption credits; graph leaves credits as zero input",
+    reason="OTS auto-applies $256 exemption credits; graph leaves credits as zero input",
     strict=True,
 )
 @skip_if_backends_unavailable
