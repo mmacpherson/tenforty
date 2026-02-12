@@ -17,6 +17,27 @@ KNOWN_ISSUES = {
 }
 
 
+# NIIT thresholds by filing status (IRS Form 8960).
+# Graph backend computes this; OTS backend does not.
+_NIIT_THRESHOLDS = {
+    "Single": 200_000,
+    "Married/Joint": 250_000,
+    "Head_of_House": 200_000,
+    "Married/Sep": 125_000,
+    "Widow(er)": 250_000,
+}
+
+
+def _expected_niit(
+    w2_income: float,
+    investment_income: float,
+    filing_status: str,
+) -> float:
+    threshold = _NIIT_THRESHOLDS.get(filing_status, 200_000)
+    agi = w2_income + investment_income
+    return min(investment_income, max(0.0, agi - threshold)) * 0.038
+
+
 def backends_available():
     """Check if both backends are available for testing."""
     try:
@@ -180,6 +201,97 @@ def test_combined_capital_gains_parity(w2_income, short_term, long_term):
     assert ots_agi_diff <= EXACT_TOLERANCE, (
         f"OTS AGI ${ots_agi:.0f} != expected ${expected_agi} "
         f"(w2={w2_income}, st={short_term}, lt={long_term})"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(100_000, 500_000),
+    qualified_dividends=st.integers(0, 50_000),
+    long_term_cap_gains=st.integers(0, 50_000),
+    filing_status=st.sampled_from(
+        ["Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)"]
+    ),
+)
+@settings(max_examples=200)
+def test_amt_preferential_rates_parity(
+    w2_income, qualified_dividends, long_term_cap_gains, filing_status
+):
+    """AMT should use preferential rates for qualified dividends and LTCG.
+
+    Without Part III of Form 6251, the graph backend applies flat 26%/28%
+    AMT rates to all income including preferential income. This test verifies
+    the fix applies 0%/15%/20% capital gains rates within AMT.
+    """
+    ordinary_dividends = qualified_dividends
+
+    ots = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        long_term_capital_gains=long_term_cap_gains,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        long_term_capital_gains=long_term_cap_gains,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    investment_income = ordinary_dividends + long_term_cap_gains
+    expected_medicare = _expected_additional_medicare_tax(w2_income, filing_status)
+    expected_niit = _expected_niit(w2_income, investment_income, filing_status)
+    graph_adjusted = graph.federal_total_tax - expected_medicare - expected_niit
+    diff = abs(ots.federal_total_tax - graph_adjusted)
+
+    tolerance = ACCEPTABLE_TOLERANCE
+    if filing_status == "Head_of_House":
+        tolerance += KNOWN_ISSUES["hoh_bracket"] + 1
+
+    assert diff <= tolerance, (
+        f"AMT pref-rate tax diff ${diff:.2f} for {filing_status} "
+        f"w2=${w2_income}, qdiv=${qualified_dividends}, ltcg=${long_term_cap_gains}"
+    )
+
+
+@skip_if_backends_unavailable
+def test_amt_regression_mfj_466k():
+    """Pinned regression: MFJ ~$466K AGI should have $0 AMT (not $10,095)."""
+    ots = evaluate_return(
+        year=2024,
+        w2_income=400_000,
+        qualified_dividends=30_000,
+        ordinary_dividends=30_000,
+        long_term_capital_gains=36_000,
+        filing_status="Married/Joint",
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        w2_income=400_000,
+        qualified_dividends=30_000,
+        ordinary_dividends=30_000,
+        long_term_capital_gains=36_000,
+        filing_status="Married/Joint",
+        backend="graph",
+    )
+
+    investment_income = 30_000 + 36_000
+    expected_medicare = _expected_additional_medicare_tax(400_000, "Married/Joint")
+    expected_niit = _expected_niit(400_000, investment_income, "Married/Joint")
+    graph_adjusted = graph.federal_total_tax - expected_medicare - expected_niit
+    diff = abs(ots.federal_total_tax - graph_adjusted)
+
+    assert diff <= ACCEPTABLE_TOLERANCE, (
+        f"Regression: MFJ $466K tax diff ${diff:.2f} "
+        f"(OTS=${ots.federal_total_tax:.0f}, Graph=${graph.federal_total_tax:.0f}, "
+        f"adjusted=${graph_adjusted:.0f})"
     )
 
 
