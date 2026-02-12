@@ -358,7 +358,10 @@ def map_natural_to_ots_input(
                         out[ots_key] = v
             case _ if callable(ots_key):
                 _ots_key, _ots_value = ots_key(v)
-                out[_ots_key] = out.get(_ots_key, "") + "\n" + _ots_value
+                if _ots_key in out:
+                    out[_ots_key] = out[_ots_key] + "\n" + _ots_value
+                else:
+                    out[_ots_key] = _ots_value
             case _:
                 raise ValueError(f"Unexpected OTS key type: [{type(ots_key)}]")
 

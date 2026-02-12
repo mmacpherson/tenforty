@@ -332,6 +332,10 @@ def capital_gains(term: str, amount: float) -> str:
     )
 
 
+def _force_itemize(value):
+    return ("A18", "Y" if value == "Itemized" else "N")
+
+
 def capital_gains_pre2021(term: str, year: int, amount: int) -> str:
     """Generate OTS-compatible capital gains clause, for pre-2021 returns."""
     if term == "short":
@@ -364,6 +368,7 @@ _NATURAL_FORM_CONFIG = [
             "long_term_capital_gains": partial(capital_gains, "long"),
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
@@ -508,6 +513,7 @@ _NATURAL_FORM_CONFIG = [
             "long_term_capital_gains": partial(capital_gains, "long"),
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
@@ -653,6 +659,7 @@ _NATURAL_FORM_CONFIG = [
             "long_term_capital_gains": partial(capital_gains, "long"),
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
@@ -776,6 +783,7 @@ _NATURAL_FORM_CONFIG = [
             "long_term_capital_gains": partial(capital_gains, "long"),
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
@@ -836,6 +844,7 @@ _NATURAL_FORM_CONFIG = [
             "long_term_capital_gains": partial(capital_gains, "long"),
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
@@ -895,7 +904,8 @@ _NATURAL_FORM_CONFIG = [
             "short_term_capital_gains": partial(capital_gains_pre2021, "short", 2020),
             "long_term_capital_gains": partial(capital_gains_pre2021, "long", 2020),
             "schedule_1_income": "S1_8",  # This assumes 'schedule_1_income' consolidates all other income reported in Schedule 1
-            "itemized_deductions": "A6",  # Total itemized deductions if 'standard_or_itemized' is 'Itemized'
+            "itemized_deductions": "A6",
+            "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
