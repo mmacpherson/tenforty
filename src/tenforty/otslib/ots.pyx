@@ -98,6 +98,7 @@ cimport ots_2023_US_1040
 cimport ots_2023_US_1040_Sched_SE
 cimport ots_2023_VA_760
 cimport ots_2023_f2210
+cimport ots_2023_AZ_140
 cimport ots_2023_US_1040_Sched_E_brokerage_royalties
 cimport ots_2023_CA_5805
 cimport ots_2023_f8812
@@ -110,6 +111,7 @@ cimport ots_2024_f8960
 cimport ots_2024_f8995
 cimport ots_2024_US_1040_Sched_SE
 cimport ots_2024_f8606
+cimport ots_2024_AZ_140
 cimport ots_2024_CA_540
 cimport ots_2024_CA_5805
 cimport ots_2024_HSA_f8889
@@ -136,6 +138,7 @@ cimport ots_2025_f8960
 cimport ots_2025_MI_1040
 cimport ots_2025_US_1040
 cimport ots_2025_NC_D400
+cimport ots_2025_AZ_140
 cimport ots_2025_NY_IT201
 cimport ots_2025_f8606
 cimport ots_2025_HSA_f8889
@@ -235,55 +238,58 @@ _OTS_KEY_TO_INDEX = {
     (2023, "US_1040_Sched_SE"): 83,
     (2023, "VA_760"): 84,
     (2023, "f2210"): 85,
-    (2023, "US_1040_Sched_E_brokerage_royalties"): 86,
-    (2023, "CA_5805"): 87,
-    (2023, "f8812"): 88,
-    (2024, "NJ_1040"): 89,
-    (2024, "US_1040_Sched_E_brokerage_royalties"): 90,
-    (2024, "f8812"): 91,
-    (2024, "f8829"): 92,
-    (2024, "f8959"): 93,
-    (2024, "f8960"): 94,
-    (2024, "f8995"): 95,
-    (2024, "US_1040_Sched_SE"): 96,
-    (2024, "f8606"): 97,
-    (2024, "CA_540"): 98,
-    (2024, "CA_5805"): 99,
-    (2024, "HSA_f8889"): 100,
-    (2024, "MA_1"): 101,
-    (2024, "NC_D400"): 102,
-    (2024, "NY_IT201"): 103,
-    (2024, "OH_IT1040"): 104,
-    (2024, "PA_40"): 105,
-    (2024, "US_1040"): 106,
-    (2024, "US_1040_Sched_C"): 107,
-    (2024, "VA_760"): 108,
-    (2024, "f2210"): 109,
-    (2024, "MI_1040"): 110,
-    (2024, "OR_40"): 111,
-    (2025, "OR_40"): 112,
-    (2025, "MA_1"): 113,
-    (2025, "VA_760"): 114,
-    (2025, "f8812"): 115,
-    (2025, "US_1040_Sched_SE"): 116,
-    (2025, "f8829"): 117,
-    (2025, "CA_5805"): 118,
-    (2025, "f8959"): 119,
-    (2025, "f8960"): 120,
-    (2025, "MI_1040"): 121,
-    (2025, "US_1040"): 122,
-    (2025, "NC_D400"): 123,
-    (2025, "NY_IT201"): 124,
-    (2025, "f8606"): 125,
-    (2025, "HSA_f8889"): 126,
-    (2025, "US_1040_Sched_E_brokerage_royalties"): 127,
-    (2025, "f8995"): 128,
-    (2025, "CA_540"): 129,
-    (2025, "NJ_1040"): 130,
-    (2025, "OH_IT1040"): 131,
-    (2025, "f2210"): 132,
-    (2025, "PA_40"): 133,
-    (2025, "US_1040_Sched_C"): 134,
+    (2023, "AZ_140"): 86,
+    (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
+    (2023, "CA_5805"): 88,
+    (2023, "f8812"): 89,
+    (2024, "NJ_1040"): 90,
+    (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
+    (2024, "f8812"): 92,
+    (2024, "f8829"): 93,
+    (2024, "f8959"): 94,
+    (2024, "f8960"): 95,
+    (2024, "f8995"): 96,
+    (2024, "US_1040_Sched_SE"): 97,
+    (2024, "f8606"): 98,
+    (2024, "AZ_140"): 99,
+    (2024, "CA_540"): 100,
+    (2024, "CA_5805"): 101,
+    (2024, "HSA_f8889"): 102,
+    (2024, "MA_1"): 103,
+    (2024, "NC_D400"): 104,
+    (2024, "NY_IT201"): 105,
+    (2024, "OH_IT1040"): 106,
+    (2024, "PA_40"): 107,
+    (2024, "US_1040"): 108,
+    (2024, "US_1040_Sched_C"): 109,
+    (2024, "VA_760"): 110,
+    (2024, "f2210"): 111,
+    (2024, "MI_1040"): 112,
+    (2024, "OR_40"): 113,
+    (2025, "OR_40"): 114,
+    (2025, "MA_1"): 115,
+    (2025, "VA_760"): 116,
+    (2025, "f8812"): 117,
+    (2025, "US_1040_Sched_SE"): 118,
+    (2025, "f8829"): 119,
+    (2025, "CA_5805"): 120,
+    (2025, "f8959"): 121,
+    (2025, "f8960"): 122,
+    (2025, "MI_1040"): 123,
+    (2025, "US_1040"): 124,
+    (2025, "NC_D400"): 125,
+    (2025, "AZ_140"): 126,
+    (2025, "NY_IT201"): 127,
+    (2025, "f8606"): 128,
+    (2025, "HSA_f8889"): 129,
+    (2025, "US_1040_Sched_E_brokerage_royalties"): 130,
+    (2025, "f8995"): 131,
+    (2025, "CA_540"): 132,
+    (2025, "NJ_1040"): 133,
+    (2025, "OH_IT1040"): 134,
+    (2025, "f2210"): 135,
+    (2025, "PA_40"): 136,
+    (2025, "US_1040_Sched_C"): 137,
 }
 
 cdef f_type _ots_get_function(int index):
@@ -460,102 +466,108 @@ cdef f_type _ots_get_function(int index):
     elif index == 85:
         return ots_2023_f2210.main
     elif index == 86:
-        return ots_2023_US_1040_Sched_E_brokerage_royalties.main
+        return ots_2023_AZ_140.main
     elif index == 87:
-        return ots_2023_CA_5805.main
+        return ots_2023_US_1040_Sched_E_brokerage_royalties.main
     elif index == 88:
-        return ots_2023_f8812.main
+        return ots_2023_CA_5805.main
     elif index == 89:
-        return ots_2024_NJ_1040.main
+        return ots_2023_f8812.main
     elif index == 90:
-        return ots_2024_US_1040_Sched_E_brokerage_royalties.main
+        return ots_2024_NJ_1040.main
     elif index == 91:
-        return ots_2024_f8812.main
+        return ots_2024_US_1040_Sched_E_brokerage_royalties.main
     elif index == 92:
-        return ots_2024_f8829.main
+        return ots_2024_f8812.main
     elif index == 93:
-        return ots_2024_f8959.main
+        return ots_2024_f8829.main
     elif index == 94:
-        return ots_2024_f8960.main
+        return ots_2024_f8959.main
     elif index == 95:
-        return ots_2024_f8995.main
+        return ots_2024_f8960.main
     elif index == 96:
-        return ots_2024_US_1040_Sched_SE.main
+        return ots_2024_f8995.main
     elif index == 97:
-        return ots_2024_f8606.main
+        return ots_2024_US_1040_Sched_SE.main
     elif index == 98:
-        return ots_2024_CA_540.main
+        return ots_2024_f8606.main
     elif index == 99:
-        return ots_2024_CA_5805.main
+        return ots_2024_AZ_140.main
     elif index == 100:
-        return ots_2024_HSA_f8889.main
+        return ots_2024_CA_540.main
     elif index == 101:
-        return ots_2024_MA_1.main
+        return ots_2024_CA_5805.main
     elif index == 102:
-        return ots_2024_NC_D400.main
+        return ots_2024_HSA_f8889.main
     elif index == 103:
-        return ots_2024_NY_IT201.main
+        return ots_2024_MA_1.main
     elif index == 104:
-        return ots_2024_OH_IT1040.main
+        return ots_2024_NC_D400.main
     elif index == 105:
-        return ots_2024_PA_40.main
+        return ots_2024_NY_IT201.main
     elif index == 106:
-        return ots_2024_US_1040.main
+        return ots_2024_OH_IT1040.main
     elif index == 107:
-        return ots_2024_US_1040_Sched_C.main
+        return ots_2024_PA_40.main
     elif index == 108:
-        return ots_2024_VA_760.main
+        return ots_2024_US_1040.main
     elif index == 109:
-        return ots_2024_f2210.main
+        return ots_2024_US_1040_Sched_C.main
     elif index == 110:
-        return ots_2024_MI_1040.main
+        return ots_2024_VA_760.main
     elif index == 111:
-        return ots_2024_OR_40.main
+        return ots_2024_f2210.main
     elif index == 112:
-        return ots_2025_OR_40.main
+        return ots_2024_MI_1040.main
     elif index == 113:
-        return ots_2025_MA_1.main
+        return ots_2024_OR_40.main
     elif index == 114:
-        return ots_2025_VA_760.main
+        return ots_2025_OR_40.main
     elif index == 115:
-        return ots_2025_f8812.main
+        return ots_2025_MA_1.main
     elif index == 116:
-        return ots_2025_US_1040_Sched_SE.main
+        return ots_2025_VA_760.main
     elif index == 117:
-        return ots_2025_f8829.main
+        return ots_2025_f8812.main
     elif index == 118:
-        return ots_2025_CA_5805.main
+        return ots_2025_US_1040_Sched_SE.main
     elif index == 119:
-        return ots_2025_f8959.main
+        return ots_2025_f8829.main
     elif index == 120:
-        return ots_2025_f8960.main
+        return ots_2025_CA_5805.main
     elif index == 121:
-        return ots_2025_MI_1040.main
+        return ots_2025_f8959.main
     elif index == 122:
-        return ots_2025_US_1040.main
+        return ots_2025_f8960.main
     elif index == 123:
-        return ots_2025_NC_D400.main
+        return ots_2025_MI_1040.main
     elif index == 124:
-        return ots_2025_NY_IT201.main
+        return ots_2025_US_1040.main
     elif index == 125:
-        return ots_2025_f8606.main
+        return ots_2025_NC_D400.main
     elif index == 126:
-        return ots_2025_HSA_f8889.main
+        return ots_2025_AZ_140.main
     elif index == 127:
-        return ots_2025_US_1040_Sched_E_brokerage_royalties.main
+        return ots_2025_NY_IT201.main
     elif index == 128:
-        return ots_2025_f8995.main
+        return ots_2025_f8606.main
     elif index == 129:
-        return ots_2025_CA_540.main
+        return ots_2025_HSA_f8889.main
     elif index == 130:
-        return ots_2025_NJ_1040.main
+        return ots_2025_US_1040_Sched_E_brokerage_royalties.main
     elif index == 131:
-        return ots_2025_OH_IT1040.main
+        return ots_2025_f8995.main
     elif index == 132:
-        return ots_2025_f2210.main
+        return ots_2025_CA_540.main
     elif index == 133:
-        return ots_2025_PA_40.main
+        return ots_2025_NJ_1040.main
     elif index == 134:
+        return ots_2025_OH_IT1040.main
+    elif index == 135:
+        return ots_2025_f2210.main
+    elif index == 136:
+        return ots_2025_PA_40.main
+    elif index == 137:
         return ots_2025_US_1040_Sched_C.main
     return NULL
 
