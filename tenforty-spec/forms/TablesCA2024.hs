@@ -79,14 +79,16 @@ caDependentExemption2024 = 461
 caExemptionPhaseoutThreshold2024 :: ByStatus (Amount Dollars)
 caExemptionPhaseoutThreshold2024 = byStatus 244857 489714 244857 367290 489714
 
--- | 2024 total personal exemption credit by filing status
--- Single/MFS/HoH: 1 × $149 = $149; MFJ/QW: 2 × $149 = $298
+{- | 2024 total personal exemption credit by filing status
+Single/MFS/HoH: 1 × $149 = $149; MFJ/QW: 2 × $149 = $298
+-}
 caPersonalExemptionCredit2024 :: ByStatus (Amount Dollars)
 caPersonalExemptionCredit2024 = byStatus 149 298 149 149 298
 
--- | 2024 exemption credit phase-out rate per dollar of excess AGI
--- FTB: $6 per $2,500 excess per exemption ($6/$1,250 for MFS)
--- Single/HoH: 1 × $6/$2,500; MFJ/QW: 2 × $6/$2,500; MFS: 1 × $6/$1,250
+{- | 2024 exemption credit phase-out rate per dollar of excess AGI
+FTB: $6 per $2,500 excess per exemption ($6/$1,250 for MFS)
+Single/HoH: 1 × $6/$2,500; MFJ/QW: 2 × $6/$2,500; MFS: 1 × $6/$1,250
+-}
 caExemptionPhaseoutRate2024 :: ByStatus (Amount Rate)
 caExemptionPhaseoutRate2024 = byStatus 0.0024 0.0048 0.0048 0.0024 0.0048
 

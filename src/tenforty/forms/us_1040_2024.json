@@ -826,10 +826,9 @@
             "id": 56,
             "name": "L12Final_deduction_amount",
             "op": {
-                "cond": 48,
-                "otherwise": 55,
-                "then": 48,
-                "type": "if_positive"
+                "left": 48,
+                "right": 55,
+                "type": "max"
             }
         },
         "57": {

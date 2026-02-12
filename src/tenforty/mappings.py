@@ -32,6 +32,7 @@ _SUBORDINATE_NODES: dict[str, list[str]] = {
     ],
     "self_employment_income": [
         "us_schedule_se_L2_business_profit",
+        "us_form_8995_L1_qbi_business_1",
     ],
     "taxable_interest": ["us_form_8960_L1_taxable_interest"],
     "ordinary_dividends": ["us_form_8960_L2_ordinary_dividends"],

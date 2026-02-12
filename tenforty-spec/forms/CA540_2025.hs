@@ -51,12 +51,15 @@ ca540_2025 = form "ca_540" 2025 $ do
     let exemptionBase = byStatusE (fmap lit caPersonalExemptionCredit2025)
     let exemptionThreshold = byStatusE (fmap lit caExemptionPhaseoutThreshold2025)
     let exemptionRate = byStatusE (fmap lit caExemptionPhaseoutRate2025)
-    exemptionExcess <- interior "L32_excess" "exemption_excess_agi" $
-        max0 (l17 .-. exemptionThreshold)
-    exemptionReduction <- interior "L32_reduction" "exemption_reduction" $
-        exemptionExcess .*. exemptionRate
-    l32 <- interior "L32" "exemption_credits" $
-        max0 (exemptionBase .-. exemptionReduction)
+    exemptionExcess <-
+        interior "L32_excess" "exemption_excess_agi" $
+            max0 (l17 .-. exemptionThreshold)
+    exemptionReduction <-
+        interior "L32_reduction" "exemption_reduction" $
+            exemptionExcess .*. exemptionRate
+    l32 <-
+        interior "L32" "exemption_credits" $
+            max0 (exemptionBase .-. exemptionReduction)
 
     -- Line 33: Tax after exemption credits
     l33 <-

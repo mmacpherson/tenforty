@@ -313,6 +313,71 @@ def test_itemized_deductions_parity(w2_income, itemized_deductions):
 
 
 @skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(80_000, 300_000),
+    itemized_deductions=st.integers(5_000, 28_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=200)
+def test_mfj_deduction_selection_parity(w2_income, itemized_deductions, filing_status):
+    """Test deduction selection when itemized is below standard deduction.
+
+    MFJ standard deduction (~$29,200) often exceeds low itemized amounts.
+    Catches bug where Graph picked itemized whenever positive, even when
+    standard deduction was larger.
+    """
+    ots = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        itemized_deductions=itemized_deductions,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        itemized_deductions=itemized_deductions,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    taxable_diff = abs(ots.federal_taxable_income - graph.federal_taxable_income)
+    assert taxable_diff <= EXACT_TOLERANCE, (
+        f"Taxable income diff ${taxable_diff:.2f} for {filing_status} "
+        f"w2=${w2_income}, itemized=${itemized_deductions}"
+    )
+
+
+@skip_if_graph_unavailable
+@given(self_employment_income=st.integers(10_000, 100_000))
+@settings(max_examples=50)
+def test_graph_se_income_produces_qbi_deduction(self_employment_income):
+    """Verify Graph backend computes a non-zero QBI deduction from SE income.
+
+    Catches bug where self_employment_income didn't flow to Form 8995,
+    resulting in QBI deduction = $0. The QBI deduction (20% of QBI) should
+    reduce taxable income below (AGI - standard deduction).
+    """
+    result = evaluate_return(
+        year=2024,
+        w2_income=100_000,
+        self_employment_income=self_employment_income,
+        backend="graph",
+    )
+
+    standard_deduction = 14_600
+    taxable_without_qbi = result.federal_adjusted_gross_income - standard_deduction
+    qbi_deduction = taxable_without_qbi - result.federal_taxable_income
+
+    assert qbi_deduction > 0, (
+        f"QBI deduction should be positive with SE income ${self_employment_income}: "
+        f"AGI={result.federal_adjusted_gross_income:.0f}, "
+        f"taxable={result.federal_taxable_income:.0f}, "
+        f"implied QBI deduction={qbi_deduction:.0f}"
+    )
+
+
+@skip_if_backends_unavailable
 @given(w2_income=st.integers(50_000, 200_000))
 @settings(max_examples=50)
 def test_all_federal_outputs_parity(w2_income):

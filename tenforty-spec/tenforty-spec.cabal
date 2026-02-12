@@ -327,8 +327,6 @@ test-suite tenforty-spec-test
 
   hs-source-dirs:     test forms
   other-modules:
-    ReferenceEvaluator
-    ExprProperties
     AKNoTax_2024
     AKNoTax_2025
     ALForm40_2024
@@ -353,6 +351,7 @@ test-suite tenforty-spec-test
     DCFormD40_2025
     DEFormPITRES_2024
     DEFormPITRES_2025
+    ExprProperties
     FLNoTax_2024
     FLNoTax_2025
     GAForm500_2024
@@ -413,6 +412,7 @@ test-suite tenforty-spec-test
     ORForm40_2025
     PA40_2024
     PA40_2025
+    ReferenceEvaluator
     RIForm1040_2024
     RIForm1040_2025
     SCForm1040_2024
