@@ -142,7 +142,7 @@ niitThreshold2024 = byStatus 200000 250000 125000 200000 250000
 
 -- | 2024 Additional Medicare Tax threshold
 additionalMedicareThreshold2024 :: ByStatus (Amount Dollars)
-additionalMedicareThreshold2024 = byStatus 200000 250000 125000 200000 250000
+additionalMedicareThreshold2024 = byStatus 200000 250000 125000 200000 200000
 
 {- | 2024 AMT 26%/28% rate threshold (above this, 28% applies)
 Order: Single, MFJ, MFS, HoH, QW

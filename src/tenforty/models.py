@@ -261,6 +261,18 @@ class NaturalFormMapping(BaseModel):
     fed_import_map: dict[str, str] = {}
 
 
+class SubordinateFormConfig(BaseModel):
+    year: int
+    form_id: str
+    phase: int
+    input_map: dict[str, str]
+    export_map: dict[str, str] = {}
+    fed_import_map: dict[str, str] = {}
+    output_map: dict[str, str] = {}
+    total_tax_key: str | None = None
+    defaults: dict[str, str] = {}
+
+
 OTS_FORM_CONFIG = dict(
     ((form.year, form.form_id), form)
     for form in (OTSForm(**e) for e in _ots_form_models.OTS_FORM_CONFIG)
@@ -1114,3 +1126,100 @@ NATURAL_FORM_CONFIG = dict(
     ((form.year, form.form_id), form)
     for form in (NaturalFormMapping(**e) for e in _NATURAL_FORM_CONFIG)
 )
+
+
+_SUBORDINATE_FORM_CONFIG = [
+    # 2024 Schedule SE — Phase 1 (no federal dependency)
+    {
+        "year": 2024,
+        "form_id": "US_1040_Sched_SE",
+        "phase": 1,
+        "input_map": {"self_employment_income": "L2"},
+        "export_map": {"L12": "S2_4", "L13": "S1_15"},
+        "output_map": {"L12": "se_tax"},
+    },
+    # 2024 Form 8959 — Phase 1 (no federal dependency)
+    {
+        "year": 2024,
+        "form_id": "Form_8959",
+        "phase": 1,
+        "input_map": {"w2_income": "L1", "filing_status": "Status"},
+        "export_map": {"L18": "S2_11"},
+        "output_map": {"L18": "additional_medicare_tax"},
+    },
+    # 2024 Form 8960 — Phase 3 (needs AGI from 1040)
+    {
+        "year": 2024,
+        "form_id": "Form_8960",
+        "phase": 3,
+        "input_map": {
+            "taxable_interest": "L1",
+            "ordinary_dividends": "L2",
+            "rental_income": "L4a",
+            "long_term_capital_gains": "L5a",
+            "filing_status": "Status",
+        },
+        "fed_import_map": {"L11": "L13"},
+        "output_map": {"L17": "niit"},
+        "total_tax_key": "L17",
+        "defaults": {
+            "Entity": "Individual",
+            "Sec6013g": "No",
+            "Sec6013h": "No",
+            "Sec1141_10g": "No",
+        },
+    },
+    # 2025 Schedule SE — Phase 1
+    {
+        "year": 2025,
+        "form_id": "US_1040_Sched_SE",
+        "phase": 1,
+        "input_map": {"self_employment_income": "L2"},
+        "export_map": {"L12": "S2_4", "L13": "S1_15"},
+        "output_map": {"L12": "se_tax"},
+    },
+    # 2025 Form 8959 — Phase 1
+    {
+        "year": 2025,
+        "form_id": "Form_8959",
+        "phase": 1,
+        "input_map": {"w2_income": "L1", "filing_status": "Status"},
+        "export_map": {"L18": "S2_11"},
+        "output_map": {"L18": "additional_medicare_tax"},
+    },
+    # 2025 Form 8960 — Phase 3
+    {
+        "year": 2025,
+        "form_id": "Form_8960",
+        "phase": 3,
+        "input_map": {
+            "taxable_interest": "L1",
+            "ordinary_dividends": "L2",
+            "rental_income": "L4a",
+            "long_term_capital_gains": "L5a",
+            "filing_status": "Status",
+        },
+        "fed_import_map": {"L11b": "L13"},
+        "output_map": {"L17": "niit"},
+        "total_tax_key": "L17",
+        "defaults": {
+            "Entity": "Individual",
+            "Sec6013g": "No",
+            "Sec6013h": "No",
+            "Sec1141_10g": "No",
+        },
+    },
+]
+
+
+def _build_subordinate_config() -> dict[int, list[SubordinateFormConfig]]:
+    configs = [SubordinateFormConfig(**e) for e in _SUBORDINATE_FORM_CONFIG]
+    result: dict[int, list[SubordinateFormConfig]] = {}
+    for cfg in configs:
+        result.setdefault(cfg.year, []).append(cfg)
+    for year in result:
+        result[year].sort(key=lambda c: c.phase)
+    return result
+
+
+SUBORDINATE_FORM_CONFIG = _build_subordinate_config()

@@ -302,3 +302,90 @@ def test_new_fields_default_zero():
     assert r.federal_se_tax == 0.0
     assert r.federal_niit == 0.0
     assert r.federal_additional_medicare_tax == 0.0
+
+
+# === OTS Backend Tests ===
+
+
+def test_ots_se_tax_fires():
+    """OTS: Self-employment income should produce SE tax."""
+    r = evaluate_return(
+        year=2024,
+        self_employment_income=100_000,
+        filing_status="Single",
+        backend="ots",
+    )
+    assert r.federal_se_tax > 0, f"Expected SE tax > 0, got {r.federal_se_tax}"
+    assert 13_000 < r.federal_se_tax < 16_000, (
+        f"SE tax ${r.federal_se_tax:.0f} outside expected range for $100K SE income"
+    )
+
+
+def test_ots_additional_medicare_fires():
+    """OTS: Additional Medicare Tax should fire for high-wage earner."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=250_000,
+        filing_status="Single",
+        backend="ots",
+    )
+    assert r.federal_additional_medicare_tax > 0, (
+        f"Expected Additional Medicare Tax > 0, got {r.federal_additional_medicare_tax}"
+    )
+    # Threshold for Single: $200K; Excess: $50K * 0.009 = $450
+    assert abs(r.federal_additional_medicare_tax - 450) < 10, (
+        f"Expected ~$450, got ${r.federal_additional_medicare_tax:.2f}"
+    )
+
+
+def test_ots_niit_fires_high_income():
+    """OTS: NIIT should fire for high-income filer with investment income."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=200_000,
+        ordinary_dividends=100_000,
+        filing_status="Single",
+        backend="ots",
+    )
+    assert r.federal_niit > 0, f"Expected NIIT > 0, got {r.federal_niit}"
+    # NIIT: min($100K NII, $100K excess over $200K threshold) * 0.038 = $3,800
+    assert abs(r.federal_niit - 3_800) < 10, (
+        f"Expected NIIT ~$3,800, got ${r.federal_niit:.2f}"
+    )
+
+
+def test_ots_all_subordinate_taxes_fire():
+    """OTS: A high-income return should show all three subordinate taxes."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=250_000,
+        self_employment_income=100_000,
+        ordinary_dividends=50_000,
+        taxable_interest=20_000,
+        filing_status="Single",
+        backend="ots",
+    )
+    assert r.federal_se_tax > 0, "SE tax should fire"
+    assert r.federal_niit > 0, "NIIT should fire"
+    assert r.federal_additional_medicare_tax > 0, "Additional Medicare Tax should fire"
+    assert r.federal_total_tax > (
+        r.federal_se_tax + r.federal_niit + r.federal_additional_medicare_tax
+    ), "Total tax should exceed sum of subordinate taxes (includes income tax too)"
+
+
+def test_ots_subordinate_both_years():
+    """OTS: Subordinate taxes should work for both 2024 and 2025."""
+    for year in (2024, 2025):
+        r = evaluate_return(
+            year=year,
+            w2_income=300_000,
+            self_employment_income=80_000,
+            ordinary_dividends=50_000,
+            filing_status="Single",
+            backend="ots",
+        )
+        assert r.federal_se_tax > 0, f"SE tax should fire for {year}"
+        assert r.federal_additional_medicare_tax > 0, (
+            f"Additional Medicare Tax should fire for {year}"
+        )
+        assert r.federal_niit > 0, f"NIIT should fire for {year}"

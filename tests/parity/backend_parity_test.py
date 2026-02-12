@@ -16,21 +16,6 @@ KNOWN_ISSUES = {
     "hoh_bracket": 64.0,
 }
 
-# Additional Medicare Tax thresholds by filing status (IRS Form 8959).
-# Graph backend now correctly computes this; OTS backend does not.
-_ADDITIONAL_MEDICARE_THRESHOLDS = {
-    "Single": 200_000,
-    "Married/Joint": 250_000,
-    "Head_of_House": 200_000,
-    "Married/Sep": 125_000,
-    "Widow(er)": 250_000,
-}
-
-
-def _expected_additional_medicare_tax(w2_income: float, filing_status: str) -> float:
-    threshold = _ADDITIONAL_MEDICARE_THRESHOLDS.get(filing_status, 200_000)
-    return max(0.0, (w2_income - threshold) * 0.009)
-
 
 def backends_available():
     """Check if both backends are available for testing."""
@@ -78,7 +63,6 @@ def test_basic_w2_parity(w2_income, filing_status):
     Known issues:
     - HOH filers may see up to $64 difference due to OTS bug at
       ots_2024.cpp:11028 (threshold $191,150 vs IRS-correct $191,950).
-    - Graph backend includes Additional Medicare Tax (Form 8959); OTS does not.
     """
     ots = evaluate_return(
         year=2024, w2_income=w2_income, filing_status=filing_status, backend="ots"
@@ -87,10 +71,7 @@ def test_basic_w2_parity(w2_income, filing_status):
         year=2024, w2_income=w2_income, filing_status=filing_status, backend="graph"
     )
 
-    # Graph backend correctly computes Additional Medicare Tax; OTS does not.
-    # Subtract the expected amount before comparing.
-    expected_amt = _expected_additional_medicare_tax(w2_income, filing_status)
-    diff = abs(ots.federal_total_tax - (graph.federal_total_tax - expected_amt))
+    diff = abs(ots.federal_total_tax - graph.federal_total_tax)
 
     if filing_status == "Head_of_House" and diff <= KNOWN_ISSUES["hoh_bracket"] + 1:
         return
@@ -331,18 +312,13 @@ def test_all_federal_outputs_parity(w2_income):
         f"Taxable mismatch: OTS={ots.federal_taxable_income}, Graph={graph.federal_taxable_income}"
     )
 
-    # Graph backend includes Additional Medicare Tax; OTS does not.
-    expected_amt = _expected_additional_medicare_tax(w2_income, "Single")
-    assert (
-        abs(ots.federal_total_tax - (graph.federal_total_tax - expected_amt)) <= 10
-    ), (
+    assert abs(ots.federal_total_tax - graph.federal_total_tax) <= 10, (
         f"Total tax mismatch: OTS={ots.federal_total_tax}, Graph={graph.federal_total_tax}"
     )
 
     if ots.federal_adjusted_gross_income > 0:
-        graph_tax_comparable = graph.federal_total_tax - expected_amt
         ots_rate = ots.federal_total_tax / ots.federal_adjusted_gross_income
-        graph_rate = graph_tax_comparable / graph.federal_adjusted_gross_income
+        graph_rate = graph.federal_total_tax / graph.federal_adjusted_gross_income
         assert abs(ots_rate - graph_rate) < 0.01, (
             f"Effective rate mismatch: OTS={ots_rate:.4f}, Graph={graph_rate:.4f}"
         )
