@@ -27,7 +27,6 @@ NATURAL_TO_NODE = {
 
 _SUBORDINATE_NODES: dict[str, list[str]] = {
     "w2_income": [
-        "us_schedule_se_L5_w2_ss_wages",
         "us_form_8959_L1_medicare_wages",
     ],
     "self_employment_income": [
