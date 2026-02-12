@@ -153,13 +153,6 @@ def process_ots_tarball(
         with tempfile.TemporaryDirectory() as tmpdirname:
             for item in tar:
                 match regex_in(item.name):
-                    case (
-                        r"/src/taxsolve_AZ_.*\.c"
-                        | r"/src/taxsolve_get_fed_return_data\.c"
-                    ):
-                        # Exclude Arizona and its unusual include structure
-                        # until we care to support it.
-                        print(f"Ignoring file: [{item.name}]")
                     case r"/src/taxsolve.*\.c":
                         tar.extract(item, path=tmpdirname)
                         outer_namespace, inner_namespace = parse_srcname(item.name)
@@ -195,6 +188,22 @@ def process_ots_tarball(
     assert len(outer_namespace) > 0
     assert len(outer_namespaces) == 1
 
+    # Inline taxsolve_get_fed_return_data into each AZ form's namespace.
+    # AZ is the only state that uses this intermediate include file.  Rather
+    # than trying to place it at the year level (where it would clash with
+    # taxsolve_routines' own defines), we prepend its defines+source directly
+    # into each AZ form's source block, bracketed by matching #undefs.
+    fed_key = "taxsolve_get_fed_return_data"
+    if fed_key in source_group:
+        fed = source_group.pop(fed_key)
+        fed_defines = fed["defines"]
+        fed_undefs = [define_to_undef(d) for d in fed_defines]
+        for key in list(source_group):
+            if "AZ" not in key or key == "taxsolve_routines":
+                continue
+            grp = source_group[key]
+            grp["source"] = fed_defines + fed["source"] + grp["source"] + fed_undefs
+
     return {outer_namespace: source_group}, configs
 
 
@@ -218,10 +227,10 @@ def find_all_includes(source_groups: dict[str, dict[str, Any]]) -> list[str]:
         for group in source_group.values():
             includes |= set(group["includes"])
 
-    # Except, don't include the OTS-supplied library of routines, because we're
-    # going to inline it ONCE in each year's namespace so all the
-    # return-generating routines can use it.
-    includes.remove('#include "taxsolve_routines.c"')
+    # Except, don't include OTS-internal .c files that are inlined into
+    # namespaces rather than emitted as top-level #includes.
+    includes.discard('#include "taxsolve_routines.c"')
+    includes.discard('#include "taxsolve_get_fed_return_data.c"')
 
     return list(sorted(includes))
 

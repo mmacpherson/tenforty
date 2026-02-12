@@ -1489,6 +1489,128 @@ def test_or_state_tax_parity(w2_income, filing_status):
     )
 
 
+# === AZ State Parity Tests (2024) ===
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_az_state_agi_parity_2024(w2_income, filing_status):
+    """AZ 2024 AGI matches exactly — exemptions don't affect AGI."""
+    ots = evaluate_return(
+        year=2024,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"AZ AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_az_state_tax_parity_2024(w2_income, filing_status):
+    """AZ 2024 total tax matches — flat 2.5% rate, no exemption divergence."""
+    ots = evaluate_return(
+        year=2024,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"AZ tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+# === AZ State Parity Tests (2025) ===
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_az_state_agi_parity(w2_income, filing_status):
+    """AZ 2025 AGI matches exactly — exemptions don't affect AGI."""
+    ots = evaluate_return(
+        year=2025,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
+    assert agi_diff <= EXACT_TOLERANCE, (
+        f"AZ AGI diff ${agi_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
+@skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
+@settings(max_examples=100)
+def test_az_state_tax_parity(w2_income, filing_status):
+    """AZ 2025 total tax matches — flat 2.5% rate, no exemption divergence."""
+    ots = evaluate_return(
+        year=2025,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2025,
+        state="AZ",
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
+    assert tax_diff <= EXACT_TOLERANCE, (
+        f"AZ tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
+    )
+
+
 # === CA State (Graph Strictness) ===
 
 

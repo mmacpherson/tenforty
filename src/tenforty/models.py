@@ -498,6 +498,16 @@ _NATURAL_FORM_CONFIG = [
             "L31": "total_tax",
         },
     },
+    {
+        "year": 2024,
+        "form_id": "AZ_140",
+        "input_map": {},
+        "output_map": {
+            "L42": "adjusted_gross_income",
+            "L45": "taxable_income",
+            "L52": "total_tax",
+        },
+    },
     # 2025
     {
         "year": 2025,
@@ -642,6 +652,16 @@ _NATURAL_FORM_CONFIG = [
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",
             "L31": "total_tax",
+        },
+    },
+    {
+        "year": 2025,
+        "form_id": "AZ_140",
+        "input_map": {},
+        "output_map": {
+            "L42": "adjusted_gross_income",
+            "L45": "taxable_income",
+            "L52": "total_tax",
         },
     },
     # 2023
