@@ -17,27 +17,6 @@ KNOWN_ISSUES = {
 }
 
 
-# NIIT thresholds by filing status (IRS Form 8960).
-# Graph backend computes this; OTS backend does not.
-_NIIT_THRESHOLDS = {
-    "Single": 200_000,
-    "Married/Joint": 250_000,
-    "Head_of_House": 200_000,
-    "Married/Sep": 125_000,
-    "Widow(er)": 250_000,
-}
-
-
-def _expected_niit(
-    w2_income: float,
-    investment_income: float,
-    filing_status: str,
-) -> float:
-    threshold = _NIIT_THRESHOLDS.get(filing_status, 200_000)
-    agi = w2_income + investment_income
-    return min(investment_income, max(0.0, agi - threshold)) * 0.038
-
-
 def backends_available():
     """Check if both backends are available for testing."""
     try:
@@ -244,11 +223,7 @@ def test_amt_preferential_rates_parity(
         backend="graph",
     )
 
-    investment_income = ordinary_dividends + long_term_cap_gains
-    expected_medicare = _expected_additional_medicare_tax(w2_income, filing_status)
-    expected_niit = _expected_niit(w2_income, investment_income, filing_status)
-    graph_adjusted = graph.federal_total_tax - expected_medicare - expected_niit
-    diff = abs(ots.federal_total_tax - graph_adjusted)
+    diff = abs(ots.federal_total_tax - graph.federal_total_tax)
 
     tolerance = ACCEPTABLE_TOLERANCE
     if filing_status == "Head_of_House":
@@ -282,16 +257,11 @@ def test_amt_regression_mfj_466k():
         backend="graph",
     )
 
-    investment_income = 30_000 + 36_000
-    expected_medicare = _expected_additional_medicare_tax(400_000, "Married/Joint")
-    expected_niit = _expected_niit(400_000, investment_income, "Married/Joint")
-    graph_adjusted = graph.federal_total_tax - expected_medicare - expected_niit
-    diff = abs(ots.federal_total_tax - graph_adjusted)
+    diff = abs(ots.federal_total_tax - graph.federal_total_tax)
 
     assert diff <= ACCEPTABLE_TOLERANCE, (
         f"Regression: MFJ $466K tax diff ${diff:.2f} "
-        f"(OTS=${ots.federal_total_tax:.0f}, Graph=${graph.federal_total_tax:.0f}, "
-        f"adjusted=${graph_adjusted:.0f})"
+        f"(OTS=${ots.federal_total_tax:.0f}, Graph=${graph.federal_total_tax:.0f})"
     )
 
 
