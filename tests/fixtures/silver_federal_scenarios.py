@@ -164,7 +164,9 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
     ),
     # MFJ in 24% bracket
     # Taxable income: $300,000 (Over $100k, use exact formula)
-    # Tax: $58,085
+    # Income tax: $58,085
+    # Additional Medicare Tax: ($329,200 - $250,000) * 0.009 = $712.80
+    # Total: $58,797.80
     TaxScenario(
         source="IRS 2024 Tax Brackets (computed)",
         description="MFJ in 24% bracket, taxable income $300,000",
@@ -172,12 +174,14 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         state=None,
         filing_status="Married/Joint",
         w2_income=329200.0,  # $300,000 + $29,200 standard deduction
-        expected_federal_tax=58085.0,
+        expected_federal_tax=58797.8,
         expected_federal_agi=329200.0,
     ),
     # Single at top of 24% bracket
     # Taxable income: $191,950 (Over $100k, use exact formula)
-    # Tax: $39,110.50
+    # Income tax: $39,110.50
+    # Additional Medicare Tax: ($206,550 - $200,000) * 0.009 = $58.95
+    # Total: $39,169.45
     TaxScenario(
         source="IRS 2024 Tax Brackets (computed)",
         description="Single at top of 24% bracket, taxable income $191,950",
@@ -185,12 +189,14 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         state=None,
         filing_status="Single",
         w2_income=206550.0,  # $191,950 + $14,600 standard deduction
-        expected_federal_tax=39110.5,
+        expected_federal_tax=39169.45,
         expected_federal_agi=206550.0,
     ),
     # Single in 32% bracket
     # Taxable income: $220,000 (Over $100k, use exact formula)
-    # Tax: $48,086.50
+    # Income tax: $48,086.50
+    # Additional Medicare Tax: ($234,600 - $200,000) * 0.009 = $311.40
+    # Total: $48,397.90
     TaxScenario(
         source="IRS 2024 Tax Brackets (computed)",
         description="Single in 32% bracket, taxable income $220,000",
@@ -198,7 +204,7 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         state=None,
         filing_status="Single",
         w2_income=234600.0,  # $220,000 + $14,600 standard deduction
-        expected_federal_tax=48086.5,
+        expected_federal_tax=48397.9,
         expected_federal_agi=234600.0,
     ),
     # Head_of_House at top of 10% bracket
