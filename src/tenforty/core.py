@@ -16,6 +16,7 @@ from .models import (
     NATURAL_FORM_CONFIG,
     OTS_FORM_CONFIG,
     STATE_TO_FORM,
+    SUBORDINATE_FORM_CONFIG,
     InterpretedTaxReturn,
     OTSFieldTerminator,
     OTSForm,
@@ -338,6 +339,31 @@ def evaluate_form(
     return {"federal": federal_return, "state": state_return}
 
 
+_FORM_DISPATCH_ALIASES = {
+    "Form_8959": "f8959",
+    "Form_8960": "f8960",
+}
+
+
+def _evaluate_subordinate(
+    year: int,
+    form_id: str,
+    form_values: dict[str, Any],
+    on_error: str = "raise",
+) -> dict[str, Any]:
+    """Evaluate a single subordinate form (Schedule SE, Form 8959, etc.)."""
+    key = (year, form_id)
+    form_config = OTS_FORM_CONFIG.get(key)
+    if form_config is None:
+        raise ValueError(f"No form available under key: [{key}]")
+    form_text = generate_ots_return(form_values, form_config)
+    logger.debug(f"Raw {form_id} OTS Input:\n{form_text}")
+    dispatch_id = _FORM_DISPATCH_ALIASES.get(form_id, form_id)
+    ots_output = otslib._evaluate_form(year, dispatch_id, form_text, on_error=on_error)
+    logger.debug(f"Raw {form_id} OTS Output:\n{ots_output}")
+    return parse_ots_return(ots_output, year=year, form_id=form_id)
+
+
 ## LEVEL 1: Map from natural description, eg "w2_income", to OTS line-level
 ##          description, eg "L1a", and back.
 def map_natural_to_ots_input(
@@ -394,6 +420,45 @@ def evaluate_natural_input_form(
         natural_form_values, federal_natural_config.input_map
     )
 
+    subordinate_configs = SUBORDINATE_FORM_CONFIG.get(year.value, [])
+    subordinate_natural_outputs: dict[str, Any] = {}
+
+    # Phase 1: Evaluate subordinate forms that don't need federal results.
+    for sub_cfg in subordinate_configs:
+        if sub_cfg.phase != 1:
+            continue
+        if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
+            continue
+        sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
+            natural_form_values, sub_cfg.input_map
+        )
+        if not any(
+            isinstance(v, (int, float)) and v != 0 for v in sub_form_values.values()
+        ):
+            continue
+        try:
+            sub_result = _evaluate_subordinate(
+                year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
+            )
+        except Exception:
+            if on_error == "raise":
+                raise
+            if on_error == "warn":
+                logger.warning(
+                    "Subordinate form %s/%s failed; skipping.",
+                    year.value,
+                    sub_cfg.form_id,
+                    exc_info=True,
+                )
+            continue
+        for sub_key, fed_key in sub_cfg.export_map.items():
+            if sub_key in sub_result:
+                federal_form_values[fed_key] = sub_result[sub_key]
+        for ots_key, natural_name in sub_cfg.output_map.items():
+            if ots_key in sub_result:
+                subordinate_natural_outputs[natural_name] = sub_result[ots_key]
+
+    # State setup.
     state_form_id = STATE_TO_FORM.get(state)
     if state_form_id is None:
         state_natural_config = None
@@ -407,6 +472,7 @@ def evaluate_natural_input_form(
         )
     logger.debug(f"{state_form_values=}")
 
+    # Phase 2: Evaluate 1040 (and state) with injected subordinate results.
     fed_import_map = (
         state_natural_config.fed_import_map if state_natural_config else None
     )
@@ -420,6 +486,49 @@ def evaluate_natural_input_form(
         fed_import_map=fed_import_map or None,
     )
 
+    # Phase 3: Evaluate subordinate forms that need federal results.
+    for sub_cfg in subordinate_configs:
+        if sub_cfg.phase != 3:
+            continue
+        if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
+            continue
+        sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
+            natural_form_values, sub_cfg.input_map
+        )
+        if not any(
+            isinstance(v, (int, float)) and v != 0 for v in sub_form_values.values()
+        ):
+            continue
+        federal_return = ots_output["federal"]
+        for fed_key, sub_key in sub_cfg.fed_import_map.items():
+            if fed_key in federal_return:
+                sub_form_values[sub_key] = federal_return[fed_key]
+        try:
+            sub_result = _evaluate_subordinate(
+                year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
+            )
+        except Exception:
+            if on_error == "raise":
+                raise
+            if on_error == "warn":
+                logger.warning(
+                    "Subordinate form %s/%s failed; skipping.",
+                    year.value,
+                    sub_cfg.form_id,
+                    exc_info=True,
+                )
+            continue
+        for ots_key, natural_name in sub_cfg.output_map.items():
+            if ots_key in sub_result:
+                subordinate_natural_outputs[natural_name] = sub_result[ots_key]
+        if sub_cfg.total_tax_key and sub_cfg.total_tax_key in sub_result:
+            tax_amount = sub_result[sub_cfg.total_tax_key]
+            if isinstance(tax_amount, (int, float)) and tax_amount > 0:
+                ots_output["federal"]["L24"] = (
+                    ots_output["federal"].get("L24", 0) + tax_amount
+                )
+
+    # Map outputs to natural names.
     federal_natural_output = map_ots_to_natural_output(
         ots_output["federal"], federal_natural_config.output_map
     )
@@ -433,6 +542,7 @@ def evaluate_natural_input_form(
 
     return (
         prefix_keys(federal_natural_output, "federal")
+        | prefix_keys(subordinate_natural_outputs, "federal")
         | prefix_keys(state_natural_output, "state")
         | {
             "total_tax": federal_natural_output["total_tax"]

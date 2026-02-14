@@ -126,7 +126,7 @@ niitThreshold2025 :: ByStatus (Amount Dollars)
 niitThreshold2025 = byStatus 200000 250000 125000 200000 250000
 
 additionalMedicareThreshold2025 :: ByStatus (Amount Dollars)
-additionalMedicareThreshold2025 = byStatus 200000 250000 125000 200000 250000
+additionalMedicareThreshold2025 = byStatus 200000 250000 125000 200000 200000
 
 {- | 2025 AMT 26%/28% rate threshold (above this, 28% applies)
 Order: Single, MFJ, MFS, HoH, QW
