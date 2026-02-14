@@ -1,3 +1,19 @@
+## [2025.4] - 2026-02-14
+### Added
+- OTS state support for 6 states in tax year 2024 (NC, NJ, PA, VA, OH, MI)
+- OTS state support for 5 states in tax year 2023 (NC, NJ, PA, VA, OH)
+- OTS AZ_140 (Arizona) amalgamation support
+- OTS OR_40 (Oregon) amalgamation support with amalgamation safety patches
+- Force-itemize via `standard_or_itemized="Itemized"` (maps to OTS A18)
+- `evaluate_returns(mode="zip")` for element-wise multi-return evaluation
+- Subordinate form support: `self_employment_income` and `rental_income` inputs
+  now feed SE tax, NIIT, and Additional Medicare Tax into L24
+
+### Changed
+- Updated OTS 2025 tax year release from 23.02 to 23.03
+  - Fixed MFS Schedule 1-A: Parts II-V deductions now properly excluded
+  - Fixed CA 540 SALT cap: raised from $10K/$5K to $40K/$20K (non-MFS/MFS)
+
 ## [2025.3] - 2026-02-08
 ### Added
 - OTS 2025 state support for AZ, MI, NC, NJ, OH, PA, VA
