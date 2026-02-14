@@ -74,7 +74,7 @@ us1040_2024 = form "us_1040" 2024 $ do
 
     l12Final <-
         keyOutput "L12Final" "deduction_amount" "Standard or itemized deduction" $
-            ifPos l12 l12 stdDed
+            greaterOf l12 stdDed
 
     -- Taxable income before the QBI deduction (used by Form 8995). This avoids
     -- a cross-form cycle where 1040 imports the QBI deduction from 8995 while

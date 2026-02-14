@@ -117,8 +117,7 @@ evaluateGraph graph status wages =
             MarriedSeparate -> snMarriedSeparate sn
             HeadOfHousehold -> snHeadOfHousehold sn
             QualifyingWidow -> snQualifyingWidow sn
-
-    in evaluated
+     in evaluated
 
 evalGraphDetailed :: ComputationGraph -> FilingStatus -> Double -> (Double, Double, Double)
 evalGraphDetailed graph status wages =

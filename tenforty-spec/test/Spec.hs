@@ -25,12 +25,12 @@ import CAFTB3514_2024
 import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
+import ExprProperties qualified
+import ReferenceEvaluator (evalGraph, evalGraphDetailed)
 import Tables2024
 import Tables2025
 import TablesCA2024
 import TablesCA2025
-import ExprProperties qualified
-import ReferenceEvaluator (evalGraph, evalGraphDetailed)
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
 import TenForty.Expr (extractLineRefs, extractTableRefs)
