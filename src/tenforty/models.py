@@ -366,6 +366,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains, "short"),
             "long_term_capital_gains": partial(capital_gains, "long"),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
             "standard_or_itemized": _force_itemize,
@@ -521,6 +523,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains, "short"),
             "long_term_capital_gains": partial(capital_gains, "long"),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
             "standard_or_itemized": _force_itemize,
@@ -677,6 +681,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains, "short"),
             "long_term_capital_gains": partial(capital_gains, "long"),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
             "standard_or_itemized": _force_itemize,
@@ -801,6 +807,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains, "short"),
             "long_term_capital_gains": partial(capital_gains, "long"),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
             "standard_or_itemized": _force_itemize,
@@ -862,6 +870,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains, "short"),
             "long_term_capital_gains": partial(capital_gains, "long"),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
             "standard_or_itemized": _force_itemize,
@@ -923,6 +933,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains_pre2021, "short", 2020),
             "long_term_capital_gains": partial(capital_gains_pre2021, "long", 2020),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # This assumes 'schedule_1_income' consolidates all other income reported in Schedule 1
             "itemized_deductions": "A6",
             "standard_or_itemized": _force_itemize,
@@ -984,6 +996,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",
             "short_term_capital_gains": partial(capital_gains_pre2021, "short", 2019),
             "long_term_capital_gains": partial(capital_gains_pre2021, "long", 2019),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # Assumes 'schedule_1_income' consolidates all Schedule 1 income types
             "itemized_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
             "incentive_stock_option_gains": "AMTws3",
@@ -1044,6 +1058,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",  # Ordinary Dividends
             "short_term_capital_gains": partial(capital_gains_pre2021, "short", 2018),
             "long_term_capital_gains": partial(capital_gains_pre2021, "long", 2018),
+            "self_employment_income": "S1_3",
+            "rental_income": "S1_5",
             "schedule_1_income": "S1_21",  # Assuming 'Other income' covers Schedule 1 income types
             "itemized_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
             "incentive_stock_option_gains": "AMTws3",  # Other adjustments under AMT
