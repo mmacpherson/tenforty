@@ -184,6 +184,88 @@ def test_combined_capital_gains_parity(w2_income, short_term, long_term):
 
 
 @skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(100_000, 500_000),
+    qualified_dividends=st.integers(0, 50_000),
+    long_term_cap_gains=st.integers(0, 50_000),
+    filing_status=st.sampled_from(
+        ["Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)"]
+    ),
+)
+@settings(max_examples=200)
+def test_amt_preferential_rates_parity(
+    w2_income, qualified_dividends, long_term_cap_gains, filing_status
+):
+    """AMT should use preferential rates for qualified dividends and LTCG.
+
+    Without Part III of Form 6251, the graph backend applies flat 26%/28%
+    AMT rates to all income including preferential income. This test verifies
+    the fix applies 0%/15%/20% capital gains rates within AMT.
+    """
+    ordinary_dividends = qualified_dividends
+
+    ots = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        long_term_capital_gains=long_term_cap_gains,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        long_term_capital_gains=long_term_cap_gains,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    diff = abs(ots.federal_total_tax - graph.federal_total_tax)
+
+    tolerance = ACCEPTABLE_TOLERANCE
+    if filing_status == "Head_of_House":
+        tolerance += KNOWN_ISSUES["hoh_bracket"] + 1
+
+    assert diff <= tolerance, (
+        f"AMT pref-rate tax diff ${diff:.2f} for {filing_status} "
+        f"w2=${w2_income}, qdiv=${qualified_dividends}, ltcg=${long_term_cap_gains}"
+    )
+
+
+@skip_if_backends_unavailable
+def test_amt_regression_mfj_466k():
+    """Pinned regression: MFJ ~$466K AGI should have $0 AMT (not $10,095)."""
+    ots = evaluate_return(
+        year=2024,
+        w2_income=400_000,
+        qualified_dividends=30_000,
+        ordinary_dividends=30_000,
+        long_term_capital_gains=36_000,
+        filing_status="Married/Joint",
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        w2_income=400_000,
+        qualified_dividends=30_000,
+        ordinary_dividends=30_000,
+        long_term_capital_gains=36_000,
+        filing_status="Married/Joint",
+        backend="graph",
+    )
+
+    diff = abs(ots.federal_total_tax - graph.federal_total_tax)
+
+    assert diff <= ACCEPTABLE_TOLERANCE, (
+        f"Regression: MFJ $466K tax diff ${diff:.2f} "
+        f"(OTS=${ots.federal_total_tax:.0f}, Graph=${graph.federal_total_tax:.0f})"
+    )
+
+
+@skip_if_backends_unavailable
 def test_federal_only_can_use_graph():
     """Verify federal-only returns can use graph backend."""
     from tenforty.backends import GraphBackend, get_backend

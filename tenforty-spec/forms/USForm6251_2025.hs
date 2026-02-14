@@ -159,10 +159,82 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
         interior "L7d" "amt_28_tax" $
             l7c .*. lit 0.28
 
-    -- Line 7: Total tentative minimum tax (before capital gains adjustment)
+    -- Simple 26%/28% tax (before capital gains adjustment)
+    simpleTax <-
+        interior "L7_simple" "tentative_min_tax_flat" $
+            l7b .+. l7d
+
+    -- Part III: Tax Computation Using Maximum Capital Gains Rates
+    preferentialIncome <- interior "P3_pref_income" "preferential_income" $
+        importForm "us_1040" "qcgws_4"
+    ordinaryTaxableIncome <- interior "P3_ord_taxable" "ordinary_taxable_income" $
+        importForm "us_1040" "qcgws_5"
+
+    -- Split AMT taxable income into ordinary and preferential portions
+    prefInAmt <- interior "P3_pref_in_amt" "amt_preferential" $
+        smallerOf l6 preferentialIncome
+    ordinaryAmt <- interior "P3_ord_amt" "amt_ordinary" $
+        l6 `subtractNotBelowZero` prefInAmt
+
+    -- 26%/28% tax on ordinary portion
+    ordTaxAt26 <- interior "P3_ord_26" "amt_ord_26_taxable" $
+        smallerOf ordinaryAmt l7Threshold
+    ordTaxAt28 <- interior "P3_ord_28" "amt_ord_28_taxable" $
+        ordinaryAmt `subtractNotBelowZero` l7Threshold
+    ordTax <- interior "P3_ord_tax" "amt_ord_tax" $
+        (ordTaxAt26 .*. lit 0.26) .+. (ordTaxAt28 .*. lit 0.28)
+
+    -- 0% bracket for preferential income
+    zeroBracket <-
+        interior "P3_zero_bracket" "amt_cg_zero_bracket" $
+            byStatusE $
+                ByStatus
+                    { bsSingle = lit 48350
+                    , bsMarriedSeparate = lit 48350
+                    , bsMarriedJoint = lit 96700
+                    , bsQualifyingWidow = lit 96700
+                    , bsHeadOfHousehold = lit 64750
+                    }
+    zeroRoom <- interior "P3_zero_room" "amt_cg_zero_room" $
+        zeroBracket `subtractNotBelowZero` ordinaryTaxableIncome
+    zeroAmt <- interior "P3_zero_amt" "amt_cg_zero_amt" $
+        smallerOf zeroRoom prefInAmt
+
+    -- 15% bracket for preferential income
+    fifteenBracket <-
+        interior "P3_15_bracket" "amt_cg_15_bracket" $
+            byStatusE $
+                ByStatus
+                    { bsSingle = lit 533400
+                    , bsMarriedSeparate = lit 266700
+                    , bsMarriedJoint = lit 600050
+                    , bsQualifyingWidow = lit 600050
+                    , bsHeadOfHousehold = lit 566700
+                    }
+    afterZero <- interior "P3_after_zero" "amt_cg_after_zero" $
+        prefInAmt `subtractNotBelowZero` zeroAmt
+    fifteenUsed <- interior "P3_15_used" "amt_cg_15_used" $
+        zeroRoom .+. ordinaryTaxableIncome
+    fifteenRoom <- interior "P3_15_room" "amt_cg_15_room" $
+        fifteenBracket `subtractNotBelowZero` fifteenUsed
+    fifteenAmt <- interior "P3_15_amt" "amt_cg_15_amt" $
+        smallerOf afterZero fifteenRoom
+    fifteenTax <- interior "P3_15_tax" "amt_cg_15_tax" $
+        fifteenAmt .*. lit 0.15
+
+    -- 20% on remainder
+    twentyAmt <- interior "P3_20_amt" "amt_cg_20_amt" $
+        prefInAmt `subtractNotBelowZero` (zeroAmt .+. fifteenAmt)
+    twentyTax <- interior "P3_20_tax" "amt_cg_20_tax" $
+        twentyAmt .*. lit 0.20
+
+    -- Use preferential-rate computation if applicable, else flat 26/28
+    prefRateTax <- interior "P3_pref_tax" "amt_pref_rate_tax" $
+        ordTax .+. fifteenTax .+. twentyTax
+
     l7 <-
         interior "L7" "tentative_min_tax_before_cg" $
-            l7b .+. l7d
+            ifPos preferentialIncome (smallerOf prefRateTax simpleTax) simpleTax
 
     -- Line 8: Alternative minimum tax foreign tax credit
     l8 <- keyInput "L8" "amt_ftc" "Alternative minimum tax foreign tax credit"
