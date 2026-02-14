@@ -97883,7 +97883,7 @@ namespace taxsolve_US_1040_2025 {
 /* Aston Roberts 1-5-2026	aston_roberts@yahoo.com			*/
 /************************************************************************/
 
-float thisversion=23.02;
+float thisversion=23.03;
 
 
 
@@ -99616,9 +99616,7 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 99 */
 }
 
 
-int got_Sched_1A=0;
-
-void sched_1A( double s1A_L2a )
+void sched_1A( double s1A_L2a )		/* Do the Schedule 1-A Form. */
 { /*sched_1-A*/
  int j;
  double sched1A_L[100]={0.0};
@@ -99642,124 +99640,134 @@ void sched_1A( double s1A_L2a )
  sched1A_L[3] = sched1A_L[1] + sched1A_L[2];
  showline_wlabelnz( "S1A_3", sched1A_L[3] );
 
- /* Part II */
+ /* Part II */				/* First get the remaining lines in the Sched. 1-A. */
  GetLineF( "S1A_4a", &sched1A_L4a );
  GetLineF( "S1A_4b", &sched1A_L4b );
- sched1A_L[4] = LargerOf( sched1A_L4a, sched1A_L4b );
- showline_wlabelnz( "S1A_4c", sched1A_L[4] );
  GetLineF( "S1A_5", &sched1A_L[5] );
- sched1A_L[6] = sched1A_L[4] + sched1A_L[5];
- showline_wlabelnz( "S1A_6", sched1A_L[6] );
- sched1A_L[7] = SmallerOf( sched1A_L[6], 25000.0 );
- showline_wlabelnz( "S1A_7", sched1A_L[7] );
- sched1A_L[8] = sched1A_L[3];
- showline_wlabelnz( "S1A_8", sched1A_L[8] );
- if (status == MARRIED_FILING_JOINTLY)
-  sched1A_L[9] = 300000.0;
- else
-  sched1A_L[9] = 150000.0;
- showline_wlabelnz( "S1A_9", sched1A_L[9] );
- sched1A_L[10] = NotLessThanZero( sched1A_L[8] - sched1A_L[9] );
- showline_wlabelnz( "S1A_10", sched1A_L[10] );
- j = sched1A_L[10] / 1000.0;
- sched1A_L[11] = j;
- fprintf(outfile, "S1A_11 = %d\n", j );
- sched1A_L[12] = 100.0 * sched1A_L[11];
- showline_wlabelnz( "S1A_12", sched1A_L[12] );
- sched1A_L[13] = NotLessThanZero( sched1A_L[7] - sched1A_L[12] );
- showline_wlabelnz( "S1A_13", sched1A_L[13] );
 
  /* Part III */
  GetLineF( "S1A_14a", &sched1A_L14a );
  GetLineF( "S1A_14b", &sched1A_L14b );
- sched1A_L[14] = sched1A_L14a + sched1A_L14b;
- showline_wlabelnz( "S1A_14c", sched1A_L[14] );
- if (status == MARRIED_FILING_JOINTLY)
-  sched1A_L[15] = SmallerOf( sched1A_L[14], 25000.0 );
- else
-  sched1A_L[15] = SmallerOf( sched1A_L[14], 12500.0 );
- showline_wlabelnz( "S1A_15", sched1A_L[15] );
- sched1A_L[16] = sched1A_L[3];
- showline_wlabelnz( "S1A_16", sched1A_L[16] );
- if (status == MARRIED_FILING_JOINTLY)
-  sched1A_L[17] = 300000.0;
- else
-  sched1A_L[17] = 150000.0;
- showline_wlabelnz( "S1A_17", sched1A_L[17] );
- sched1A_L[18] = NotLessThanZero( sched1A_L[16] - sched1A_L[17] );
- showline_wlabelnz( "S1A_18", sched1A_L[18] );
- j = sched1A_L[18] / 1000.0;
- sched1A_L[19] = j;
- fprintf(outfile, "S1A_19 = %d\n", j );
- sched1A_L[20] = 100.0 * sched1A_L[19];
- showline_wlabelnz( "S1A_20", sched1A_L[20] );
- sched1A_L[21] = NotLessThanZero( sched1A_L[15] - sched1A_L[20] );
- showline_wlabelnz( "S1A_21", sched1A_L[21] );
- // fprintf(outfile,"EndPDFpage.\n");
 
  /* Part IV */
- // fprintf(outfile,"PDFpage: 18\n");
  GetTextLineF( "S1A_22a" );
  GetLineF( "S1A_22aii", &sched1A_L22aii );
  GetLineF( "S1A_22aiii", &sched1A_L22aiii );
  GetTextLineF( "S1A_22b" );
  GetLineF( "S1A_22bii", &sched1A_L22bii );
  GetLineF( "S1A_22biii", &sched1A_L22biii );
- sched1A_L[23] = sched1A_L22aiii + sched1A_L22biii;
- showline_wlabelnz( "S1A_23", sched1A_L[23] );
- sched1A_L[24] = SmallerOf( sched1A_L[23], 10000.0 );
- showline_wlabelnz( "S1A_24", sched1A_L[24] );
- sched1A_L[25] = sched1A_L[3];
- showline_wlabelnz( "S1A_25", sched1A_L[25] );
- if (status == MARRIED_FILING_JOINTLY)
-  sched1A_L[26] = 200000.0;
- else
-  sched1A_L[26] = 100000.0;
- showline_wlabelnz( "S1A_26", sched1A_L[26] );
- sched1A_L[27] = NotLessThanZero( sched1A_L[25] - sched1A_L[26] );
- showline_wlabelnz( "S1A_27", sched1A_L[27] );
- j = sched1A_L[27] / 1000.0;
- sched1A_L[28] = j;
- fprintf(outfile, "S1A_28 = %d\n", j );
- sched1A_L[29] = 300.0 * sched1A_L[28];
- showline_wlabelnz( "S1A_20", sched1A_L[20] );
- sched1A_L[30] = NotLessThanZero( sched1A_L[24] - sched1A_L[29] );
- showline_wlabelnz( "S1A_30", sched1A_L[30] );
 
- /* Part V */
- sched1A_L[31] = sched1A_L[3];
- showline_wlabelnz( "S1A_31", sched1A_L[31] );
- if (status == MARRIED_FILING_JOINTLY)
-  sched1A_L[32] = 150000.0;
- else
-  sched1A_L[32] = 75000.0;
- showline_wlabelnz( "S1A_32", sched1A_L[32] );
- sched1A_L[33] = NotLessThanZero( sched1A_L[31] - sched1A_L[32] );
- showline_wlabelnz( "S1A_33", sched1A_L[33] );
- sched1A_L[34] = 0.06 * sched1A_L[33];
- showline_wlabelnz( "S1A_34", sched1A_L[34] );
- sched1A_L[35] = NotLessThanZero( 6000.0 - sched1A_L[34] );
- showline_wlabelnz( "S1A_35", sched1A_L[35] );
- if (over65you)
-  {
-   sched1A_L36a = sched1A_L[35];
-   showline_wlabel( "S1A_36a", sched1A_L36a );
-  }
- if ((status == MARRIED_FILING_JOINTLY) && (over65spouse))
-  {
-   sched1A_L36b = sched1A_L[35];
-   showline_wlabel( "S1A_36b", sched1A_L36b );
-  }
- sched1A_L[37] = sched1A_L36a + sched1A_L36b;
- showline_wlabelnz( "S1A_37", sched1A_L[37] );
+ if (status != MARRIED_FILING_SEPARAT)	/* Now do the Part II-V calculations only if not MFS. */
+  { /*Sched1-A_part_II_through_V*/
+
+    /* Part II */
+    sched1A_L[4] = LargerOf( sched1A_L4a, sched1A_L4b );
+    showline_wlabelnz( "S1A_4c", sched1A_L[4] );
+    sched1A_L[6] = sched1A_L[4] + sched1A_L[5];
+    showline_wlabelnz( "S1A_6", sched1A_L[6] );
+    sched1A_L[7] = SmallerOf( sched1A_L[6], 25000.0 );
+    showline_wlabelnz( "S1A_7", sched1A_L[7] );
+    sched1A_L[8] = sched1A_L[3];
+    showline_wlabelnz( "S1A_8", sched1A_L[8] );
+    if (status == MARRIED_FILING_JOINTLY)
+     sched1A_L[9] = 300000.0;
+    else
+     sched1A_L[9] = 150000.0;
+    showline_wlabelnz( "S1A_9", sched1A_L[9] );
+    sched1A_L[10] = NotLessThanZero( sched1A_L[8] - sched1A_L[9] );
+    showline_wlabelnz( "S1A_10", sched1A_L[10] );
+    j = sched1A_L[10] / 1000.0;
+    sched1A_L[11] = j;
+    fprintf(outfile, "S1A_11 = %d\n", j );
+    sched1A_L[12] = 100.0 * sched1A_L[11];
+    showline_wlabelnz( "S1A_12", sched1A_L[12] );
+    sched1A_L[13] = NotLessThanZero( sched1A_L[7] - sched1A_L[12] );
+    showline_wlabelnz( "S1A_13", sched1A_L[13] );
+
+    /* Part III */
+    sched1A_L[14] = sched1A_L14a + sched1A_L14b;
+    showline_wlabelnz( "S1A_14c", sched1A_L[14] );
+    if (status == MARRIED_FILING_JOINTLY)
+     sched1A_L[15] = SmallerOf( sched1A_L[14], 25000.0 );
+    else
+     sched1A_L[15] = SmallerOf( sched1A_L[14], 12500.0 );
+    showline_wlabelnz( "S1A_15", sched1A_L[15] );
+    sched1A_L[16] = sched1A_L[3];
+    showline_wlabelnz( "S1A_16", sched1A_L[16] );
+    if (status == MARRIED_FILING_JOINTLY)
+     sched1A_L[17] = 300000.0;
+    else
+     sched1A_L[17] = 150000.0;
+    showline_wlabelnz( "S1A_17", sched1A_L[17] );
+    sched1A_L[18] = NotLessThanZero( sched1A_L[16] - sched1A_L[17] );
+    showline_wlabelnz( "S1A_18", sched1A_L[18] );
+    j = sched1A_L[18] / 1000.0;
+    sched1A_L[19] = j;
+    fprintf(outfile, "S1A_19 = %d\n", j );
+    sched1A_L[20] = 100.0 * sched1A_L[19];
+    showline_wlabelnz( "S1A_20", sched1A_L[20] );
+    sched1A_L[21] = NotLessThanZero( sched1A_L[15] - sched1A_L[20] );
+    showline_wlabelnz( "S1A_21", sched1A_L[21] );
+
+    /* Part IV */
+    sched1A_L[23] = sched1A_L22aiii + sched1A_L22biii;
+    showline_wlabelnz( "S1A_23", sched1A_L[23] );
+    sched1A_L[24] = SmallerOf( sched1A_L[23], 10000.0 );
+    showline_wlabelnz( "S1A_24", sched1A_L[24] );
+    sched1A_L[25] = sched1A_L[3];
+    showline_wlabelnz( "S1A_25", sched1A_L[25] );
+    if (status == MARRIED_FILING_JOINTLY)
+     sched1A_L[26] = 200000.0;
+    else
+     sched1A_L[26] = 100000.0;
+    showline_wlabelnz( "S1A_26", sched1A_L[26] );
+    sched1A_L[27] = NotLessThanZero( sched1A_L[25] - sched1A_L[26] );
+    showline_wlabelnz( "S1A_27", sched1A_L[27] );
+    j = sched1A_L[27] / 1000.0;
+    sched1A_L[28] = j;
+    fprintf(outfile, "S1A_28 = %d\n", j );
+    sched1A_L[29] = 300.0 * sched1A_L[28];
+    showline_wlabelnz( "S1A_20", sched1A_L[20] );
+    sched1A_L[30] = NotLessThanZero( sched1A_L[24] - sched1A_L[29] );
+    showline_wlabelnz( "S1A_30", sched1A_L[30] );
+
+    /* Part V */
+    sched1A_L[31] = sched1A_L[3];
+    showline_wlabelnz( "S1A_31", sched1A_L[31] );
+    if (status == MARRIED_FILING_JOINTLY)
+     sched1A_L[32] = 150000.0;
+    else
+     sched1A_L[32] = 75000.0;
+    showline_wlabelnz( "S1A_32", sched1A_L[32] );
+    sched1A_L[33] = NotLessThanZero( sched1A_L[31] - sched1A_L[32] );
+    showline_wlabelnz( "S1A_33", sched1A_L[33] );
+    sched1A_L[34] = 0.06 * sched1A_L[33];
+    showline_wlabelnz( "S1A_34", sched1A_L[34] );
+    sched1A_L[35] = NotLessThanZero( 6000.0 - sched1A_L[34] );
+    showline_wlabelnz( "S1A_35", sched1A_L[35] );
+    if (over65you)
+     {
+      sched1A_L36a = sched1A_L[35];
+      showline_wlabel( "S1A_36a", sched1A_L36a );
+     }
+    if ((status == MARRIED_FILING_JOINTLY) && (over65spouse))
+     {
+      sched1A_L36b = sched1A_L[35];
+      showline_wlabel( "S1A_36b", sched1A_L36b );
+     }
+    sched1A_L[37] = sched1A_L36a + sched1A_L36b;
+    showline_wlabelnz( "S1A_37", sched1A_L[37] );
+
+  } /*Sched1-A_part_II_through_V*/
 
  /* Part VI */
  sched1A_L[38] = sched1A_L[13] + sched1A_L[21] + sched1A_L[30] + sched1A_L[37];
  showline_wlabelnz( "S1A_38", sched1A_L[38] );
- // fprintf(outfile,"EndPDFpage.\n\n");
- fprintf(outfile,"n");
+ if (sched1A_L[38] == 0.0)
+  fprintf(outfile,"You do NOT need to file the Schedule 1-A Form.\n (Displaying Sched 1-A for your informational purposes only.)\n");
+ fprintf(outfile,"\n");
  L13b = sched1A_L[38];
- got_Sched_1A = 1;
+
 } /*sched_1-A*/
 
 
@@ -99979,7 +99987,6 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
  GetLineF( "L6a", &L6a );	/* Social Security benefits.  Forms SSA-1099 box-5. */
 
  GetLine( "L13a", &L[13] );	/* Qualified business income deduction. */
- // if (!got_Sched_1A)
  // GetLine( "L13b", &L13b );	/* Additional deductions from Schedule 1-A, Line 38. */
  GetLine( "L19", &L[19] );	/* Child tax credit/credit for other dependents. */
 
@@ -100345,6 +100352,7 @@ int main( int argc, char *argv[] )						/* Updated for 2025. */
    printf("  (Itemizations < Std-Deduction, %6.2f < %6.2f)\n", SchedA[17], std_deduc );
    fprintf(outfile,"  (Itemizations < Std-Deduction, %6.2f < %6.2f)\n", SchedA[17], std_deduc );
    fprintf(outfile,"Use standard deduction.\n");
+   fprintf(outfile," (Schedule A is being displayed for your informational purposes only.)\n");
   } /*Select_to_use_StdDeduction*/
 
 
@@ -105661,7 +105669,7 @@ namespace taxsolve_CA_540_2025 {
 /* Aston Roberts 1-2-2026	aston_roberts@yahoo.com			*/
 /************************************************************************/
 
-float thisversion=23.01;
+float thisversion=23.02;
 
 
 
@@ -106894,9 +106902,9 @@ int main( int argc, char *argv[] )
  sched540part2_5c = PrelimFedReturn.schedA5c;
  sched540part2_5d = sched540part2_5a + sched540part2_5b + sched540part2_5c;
  if (status != MARRIED_FILING_SEPARAT)
-  sched540part2[5] = smallerof( sched540part2_5d, 10000.0 );	/* Will be Line 5e. */
+  sched540part2[5] = smallerof( sched540part2_5d, 40000.0 );	/* Will be Line 5e. */
  else
-  sched540part2[5] = smallerof( sched540part2_5d, 5000.0 );
+  sched540part2[5] = smallerof( sched540part2_5d, 20000.0 );
 
  GetLine("CA540_P2_Sub_5a", &(sched540part2_sub[5]) );
  sched540part2_sub[5] = sched540part2_5a;
