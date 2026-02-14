@@ -113,6 +113,48 @@ def test_se_tax_both_years():
         assert r.federal_se_tax > 0, f"SE tax should fire for {year}"
 
 
+@skip_if_graph_unavailable
+def test_se_tax_mfj_w2_above_ss_base():
+    """MFJ with W-2 above SS wage base should still compute full SE tax.
+
+    Regression: w2_income was being fed to Schedule SE L5 (W-2 SS wages),
+    but w2_income is a household aggregate. For MFJ with combined W-2
+    exceeding the SS wage base ($168,600), this zeroed out the remaining
+    base and killed the SS portion of SE tax entirely.
+    """
+    r = evaluate_return(
+        year=2024,
+        w2_income=181_408,
+        self_employment_income=53_272,
+        filing_status="Married/Joint",
+        backend="graph",
+    )
+    assert r.federal_se_tax > 5_000, (
+        f"SE tax ${r.federal_se_tax:.0f} should include SS portion (> $5K) "
+        f"for MFJ with $181K W-2 + $53K SE income"
+    )
+
+
+@skip_if_graph_unavailable
+def test_se_tax_single_w2_and_se():
+    """Single filer with W-2 and SE income should compute full SE tax."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=50_000,
+        self_employment_income=100_000,
+        filing_status="Single",
+        backend="graph",
+    )
+    # $100K * 0.9235 = $92,350
+    # SS: $92,350 * 0.124 = $11,451
+    # Medicare: $92,350 * 0.029 = $2,678
+    # Total: ~$14,130
+    assert r.federal_se_tax > 13_000, (
+        f"SE tax ${r.federal_se_tax:.0f} should include both SS and Medicare "
+        f"portions (> $13K) for Single with $50K W-2 + $100K SE income"
+    )
+
+
 # === NIIT Tests ===
 
 
