@@ -513,6 +513,26 @@ def patch_show_fname_init_or_40(lines: list[str]) -> list[str]:
     return lines
 
 
+def patch_sched1a_line29_label(lines: list[str]) -> list[str]:
+    """Fix mis-labeled showline in Schedule 1-A Part IV.
+
+    After computing ``sched1A_L[29] = 300.0 * sched1A_L[28]``, the upstream
+    code writes ``showline_wlabelnz( "S1A_20", sched1A_L[20] )`` — but it
+    should be ``"S1A_29", sched1A_L[29]``.
+    """
+    for i, line in enumerate(lines):
+        if (
+            'showline_wlabelnz( "S1A_20", sched1A_L[20] )' in line
+            and i > 0
+            and "sched1A_L[29]" in lines[i - 1]
+        ):
+            lines[i] = line.replace(
+                'showline_wlabelnz( "S1A_20", sched1A_L[20] )',
+                'showline_wlabelnz( "S1A_29", sched1A_L[29] )',
+            )
+    return lines
+
+
 def patch_add_pdf_markup(lines: list[str]) -> list[str]:
     """Patch the 'add_pdf_markup' function in the source code to avoid compilation errors.
 
@@ -586,6 +606,8 @@ def postprocess_source_groups(
                 group["source"] = patch_reset_globals(group["source"])
                 if "OR_40" in inner_key:
                     group["source"] = patch_show_fname_init_or_40(group["source"])
+                if "US_1040" in inner_key:
+                    group["source"] = patch_sched1a_line29_label(group["source"])
 
     return (outer_key, source_group)
 

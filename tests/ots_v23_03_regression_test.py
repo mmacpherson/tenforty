@@ -140,3 +140,20 @@ class TestCASALTCap:
         ca = result["state"]
         ca_salt = ca.get("SchedCA540_Part2_5ea", 0)
         assert ca_salt == 40_000
+
+    def test_ca_salt_mfs_capped_at_20k(self):
+        """SALT above $20K should still be capped for MFS."""
+        result = evaluate_form(
+            year=2025,
+            federal_form_id="US_1040",
+            state_form_id="CA_540",
+            federal_form_values={
+                "Status": "Married/Sep",
+                "L1a": 300_000,
+                "A5a": 25_000,
+                "A18": "Y",
+            },
+        )
+        ca = result["state"]
+        ca_salt = ca.get("SchedCA540_Part2_5ea", 0)
+        assert ca_salt == 20_000
