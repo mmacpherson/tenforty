@@ -1,3 +1,14 @@
+## [2025.6] - 2026-02-15
+### Added
+- New `federal_income_tax` field on `InterpretedTaxReturn`: income tax + AMT only,
+  excluding SE tax, NIIT, and Additional Medicare Tax (the pre-v2025.5 semantics)
+- Decomposition invariant: `federal_income_tax + federal_se_tax + federal_niit +
+  federal_additional_medicare_tax == federal_total_tax`
+
+### Fixed
+- Form 8959 now includes SE income on Line 8 (net SE earnings * 0.9235), fixing
+  Additional Medicare Tax under-computation for self-employed filers
+
 ## [2025.5] - 2026-02-14
 ### Added
 - OTS subordinate form orchestration: Schedule SE, Form 8959 (Additional Medicare Tax),

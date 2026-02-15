@@ -412,6 +412,7 @@ class GraphBackend:
             "federal_se_tax",
             "federal_niit",
             "federal_additional_medicare_tax",
+            "federal_income_tax",
             "state_adjusted_gross_income",
             "state_taxable_income",
             "state_total_tax",
@@ -420,6 +421,18 @@ class GraphBackend:
         ]:
             if field not in final_results:
                 final_results[field] = [0.0] * count
+
+        # Compute federal_income_tax = total_tax - subordinate taxes
+        final_results["federal_income_tax"] = [
+            ft - se - niit - admed
+            for ft, se, niit, admed in zip(
+                final_results["federal_total_tax"],
+                final_results["federal_se_tax"],
+                final_results["federal_niit"],
+                final_results["federal_additional_medicare_tax"],
+                strict=True,
+            )
+        ]
 
         return final_results
 

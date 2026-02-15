@@ -106,7 +106,11 @@ The functions output these fields:
 | federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
 | federal_taxable_income          | Income subject to federal tax after deductions        |
 | federal_amt                     | Federal Alternative Minimum Tax                       |
-| federal_total_tax               | Total federal tax liability                           |
+| federal_income_tax              | Federal income tax + AMT (excludes SE tax, NIIT, Additional Medicare Tax) |
+| federal_se_tax                  | Federal self-employment tax (Schedule SE)             |
+| federal_niit                    | Net Investment Income Tax (Form 8960)                 |
+| federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
+| federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |
 | state_total_tax                 | Total state tax liability                             |
@@ -141,6 +145,10 @@ This results in the following:
  'federal_tax_bracket': 12.0,
  'federal_taxable_income': 74100.0,
  'federal_amt': 0.0,
+ 'federal_income_tax': 8484.0,
+ 'federal_se_tax': 0.0,
+ 'federal_niit': 0.0,
+ 'federal_additional_medicare_tax': 0.0,
  'federal_total_tax': 8484.0,
  'state_adjusted_gross_income': 0.0,
  'state_taxable_income': 0.0,
