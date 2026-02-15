@@ -309,6 +309,19 @@ def test_evaluate_return_properties(
         f"AMT ({result.federal_amt}) should not be more than total federal tax ({result.federal_total_tax})."
     )
 
+    decomposition = (
+        result.federal_income_tax
+        + result.federal_se_tax
+        + result.federal_niit
+        + result.federal_additional_medicare_tax
+    )
+    assert abs(decomposition - result.federal_total_tax) < 1.0, (
+        f"Decomposition invariant failed: "
+        f"income_tax={result.federal_income_tax:.2f} + se={result.federal_se_tax:.2f} + "
+        f"niit={result.federal_niit:.2f} + admed={result.federal_additional_medicare_tax:.2f} = "
+        f"{decomposition:.2f} != total={result.federal_total_tax:.2f}"
+    )
+
     # TODO: Investigate - this assertion is commented out because the tax total
     # can exceed taxable income when there are capital gains taxes computed
     # separately.

@@ -265,7 +265,7 @@ class SubordinateFormConfig(BaseModel):
     year: int
     form_id: str
     phase: int
-    input_map: dict[str, str]
+    input_map: dict[str, Callable | str]
     export_map: dict[str, str] = {}
     fed_import_map: dict[str, str] = {}
     output_map: dict[str, str] = {}
@@ -320,6 +320,7 @@ class InterpretedTaxReturn(BaseModel):
     federal_tax_bracket: float = 0.0
     federal_taxable_income: float = 0.0
     federal_amt: float = 0.0
+    federal_income_tax: float = 0.0
     federal_se_tax: float = 0.0
     federal_niit: float = 0.0
     federal_additional_medicare_tax: float = 0.0
@@ -330,6 +331,17 @@ class InterpretedTaxReturn(BaseModel):
     state_total_tax: float = 0.0
     state_tax_bracket: float = 0.0
     state_effective_tax_rate: float = 0.0
+
+    @model_validator(mode="after")
+    def compute_federal_income_tax(self) -> "InterpretedTaxReturn":  # noqa: D102
+        if self.federal_income_tax == 0.0 and self.federal_total_tax > 0.0:
+            self.federal_income_tax = (
+                self.federal_total_tax
+                - self.federal_se_tax
+                - self.federal_niit
+                - self.federal_additional_medicare_tax
+            )
+        return self
 
 
 def capital_gains(term: str, amount: float) -> str:
@@ -1128,6 +1140,10 @@ NATURAL_FORM_CONFIG = dict(
 )
 
 
+def _se_income_to_8959_l8(se_income):
+    return ("L8", str(round(se_income * 0.9235)))
+
+
 _SUBORDINATE_FORM_CONFIG = [
     # 2024 Schedule SE — Phase 1 (no federal dependency)
     {
@@ -1143,7 +1159,11 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2024,
         "form_id": "Form_8959",
         "phase": 1,
-        "input_map": {"w2_income": "L1", "filing_status": "Status"},
+        "input_map": {
+            "w2_income": "L1",
+            "filing_status": "Status",
+            "self_employment_income": _se_income_to_8959_l8,
+        },
         "export_map": {"L18": "S2_11"},
         "output_map": {"L18": "additional_medicare_tax"},
     },
@@ -1183,7 +1203,11 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2025,
         "form_id": "Form_8959",
         "phase": 1,
-        "input_map": {"w2_income": "L1", "filing_status": "Status"},
+        "input_map": {
+            "w2_income": "L1",
+            "filing_status": "Status",
+            "self_employment_income": _se_income_to_8959_l8,
+        },
         "export_map": {"L18": "S2_11"},
         "output_map": {"L18": "additional_medicare_tax"},
     },

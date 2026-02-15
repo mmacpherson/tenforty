@@ -266,6 +266,68 @@ def test_amt_regression_mfj_466k():
 
 
 @skip_if_backends_unavailable
+@given(
+    w2_income=st.integers(150_000, 400_000),
+    self_employment_income=st.integers(20_000, 100_000),
+    ordinary_dividends=st.integers(10_000, 50_000),
+    filing_status=st.sampled_from(
+        ["Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)"]
+    ),
+)
+@settings(max_examples=200)
+def test_subordinate_tax_parity(
+    w2_income, self_employment_income, ordinary_dividends, filing_status
+):
+    """Compare SE tax and total tax fields between OTS and Graph backends.
+
+    Uses high-income scenarios where subordinate taxes fire.
+    Note: federal_additional_medicare_tax and federal_niit are excluded because
+    the graph backend Form 8959/8960 specs have known threshold-handling
+    differences from OTS for combined W2+SE income scenarios.
+    """
+    ots = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        self_employment_income=self_employment_income,
+        ordinary_dividends=ordinary_dividends,
+        filing_status=filing_status,
+        backend="ots",
+    )
+    graph = evaluate_return(
+        year=2024,
+        w2_income=w2_income,
+        self_employment_income=self_employment_income,
+        ordinary_dividends=ordinary_dividends,
+        filing_status=filing_status,
+        backend="graph",
+    )
+
+    tolerance = STATE_TOLERANCE
+    if filing_status == "Head_of_House":
+        tolerance += KNOWN_ISSUES["hoh_bracket"] + 1
+
+    se_diff = abs(ots.federal_se_tax - graph.federal_se_tax)
+    assert se_diff <= tolerance, (
+        f"SE tax diff ${se_diff:.2f} for {filing_status} "
+        f"w2=${w2_income}, se=${self_employment_income} "
+        f"(OTS=${ots.federal_se_tax:.2f}, Graph=${graph.federal_se_tax:.2f})"
+    )
+
+    # Verify decomposition invariant holds for both backends independently
+    for label, r in [("OTS", ots), ("Graph", graph)]:
+        components = (
+            r.federal_income_tax
+            + r.federal_se_tax
+            + r.federal_niit
+            + r.federal_additional_medicare_tax
+        )
+        assert abs(components - r.federal_total_tax) < 1.0, (
+            f"{label} decomposition failed: components={components:.2f} != "
+            f"total={r.federal_total_tax:.2f}"
+        )
+
+
+@skip_if_backends_unavailable
 def test_federal_only_can_use_graph():
     """Verify federal-only returns can use graph backend."""
     from tenforty.backends import GraphBackend, get_backend

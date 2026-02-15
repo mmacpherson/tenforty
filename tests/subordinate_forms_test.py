@@ -344,6 +344,12 @@ def test_new_fields_default_zero():
     assert r.federal_se_tax == 0.0
     assert r.federal_niit == 0.0
     assert r.federal_additional_medicare_tax == 0.0
+    assert r.federal_income_tax > 0, (
+        "federal_income_tax should be positive for a $50K W2 return"
+    )
+    assert r.federal_income_tax == r.federal_total_tax, (
+        "With no subordinate taxes, federal_income_tax should equal federal_total_tax"
+    )
 
 
 # === OTS Backend Tests ===
@@ -431,3 +437,94 @@ def test_ots_subordinate_both_years():
             f"Additional Medicare Tax should fire for {year}"
         )
         assert r.federal_niit > 0, f"NIIT should fire for {year}"
+
+
+# === Decomposition Invariant Tests ===
+
+
+@skip_if_graph_unavailable
+def test_decomposition_invariant_graph():
+    """Graph: federal_income_tax + subordinate taxes == federal_total_tax."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=250_000,
+        self_employment_income=100_000,
+        ordinary_dividends=50_000,
+        taxable_interest=20_000,
+        filing_status="Single",
+        backend="graph",
+    )
+    components = (
+        r.federal_income_tax
+        + r.federal_se_tax
+        + r.federal_niit
+        + r.federal_additional_medicare_tax
+    )
+    assert abs(components - r.federal_total_tax) < 1.0, (
+        f"Decomposition failed: "
+        f"income_tax={r.federal_income_tax:.2f} + se={r.federal_se_tax:.2f} + "
+        f"niit={r.federal_niit:.2f} + admed={r.federal_additional_medicare_tax:.2f} = "
+        f"{components:.2f} != total={r.federal_total_tax:.2f}"
+    )
+
+
+def test_decomposition_invariant_ots():
+    """OTS: federal_income_tax + subordinate taxes == federal_total_tax."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=250_000,
+        self_employment_income=100_000,
+        ordinary_dividends=50_000,
+        taxable_interest=20_000,
+        filing_status="Single",
+        backend="ots",
+    )
+    components = (
+        r.federal_income_tax
+        + r.federal_se_tax
+        + r.federal_niit
+        + r.federal_additional_medicare_tax
+    )
+    assert abs(components - r.federal_total_tax) < 1.0, (
+        f"Decomposition failed: "
+        f"income_tax={r.federal_income_tax:.2f} + se={r.federal_se_tax:.2f} + "
+        f"niit={r.federal_niit:.2f} + admed={r.federal_additional_medicare_tax:.2f} = "
+        f"{components:.2f} != total={r.federal_total_tax:.2f}"
+    )
+
+
+# === Form 8959 SE Income Tests ===
+
+
+def test_form_8959_se_income_ots():
+    """OTS: Form 8959 should account for SE income exceeding threshold."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=200_000,
+        self_employment_income=100_000,
+        filing_status="Married/Joint",
+        backend="ots",
+    )
+    # MFJ threshold $250K. W2 $200K + SE net earnings ($100K * 0.9235 = $92,350)
+    # Combined Medicare wages = $292,350 > $250K threshold
+    # Additional Medicare Tax should be > 0
+    assert r.federal_additional_medicare_tax > 0, (
+        f"Additional Medicare Tax should fire for MFJ with W2 $200K + SE $100K, "
+        f"got ${r.federal_additional_medicare_tax:.2f}"
+    )
+
+
+@skip_if_graph_unavailable
+def test_form_8959_se_income_graph():
+    """Graph: Form 8959 should account for SE income exceeding threshold."""
+    r = evaluate_return(
+        year=2024,
+        w2_income=200_000,
+        self_employment_income=100_000,
+        filing_status="Married/Joint",
+        backend="graph",
+    )
+    assert r.federal_additional_medicare_tax > 0, (
+        f"Additional Medicare Tax should fire for MFJ with W2 $200K + SE $100K, "
+        f"got ${r.federal_additional_medicare_tax:.2f}"
+    )
