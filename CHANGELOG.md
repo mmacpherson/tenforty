@@ -1,3 +1,12 @@
+## [2025.5] - 2026-02-14
+### Added
+- OTS subordinate form orchestration: Schedule SE, Form 8959 (Additional Medicare Tax),
+  and Form 8960 (NIIT) evaluated in dependency order with results injected into 1040
+- New output fields: `federal_se_tax`, `federal_additional_medicare_tax`, `federal_niit`
+
+### Fixed
+- Widow(er) Additional Medicare Tax threshold: $250K → $200K (was incorrectly using MFJ threshold)
+
 ## [2025.4] - 2026-02-14
 ### Added
 - OTS state support for 6 states in tax year 2024 (NC, NJ, PA, VA, OH, MI)
@@ -6,8 +15,6 @@
 - OTS OR_40 (Oregon) amalgamation support with amalgamation safety patches
 - Force-itemize via `standard_or_itemized="Itemized"` (maps to OTS A18)
 - `evaluate_returns(mode="zip")` for element-wise multi-return evaluation
-- Subordinate form support: `self_employment_income` and `rental_income` inputs
-  now feed SE tax, NIIT, and Additional Medicare Tax into L24
 
 ### Changed
 - Updated OTS 2025 tax year release from 23.02 to 23.03
