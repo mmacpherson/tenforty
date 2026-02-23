@@ -1,3 +1,9 @@
+## [2025.7] - 2026-02-23
+### Changed
+- Updated OTS 2025 tax year release from 23.03 to 23.04
+  - Fixed OR_40 federal tax liability subtraction: Line 10 now uses the lesser
+    of computed federal tax and the table limit, instead of always using the limit
+
 ## [2025.6] - 2026-02-15
 ### Added
 - New `federal_income_tax` field on `InterpretedTaxReturn`: income tax + AMT only,

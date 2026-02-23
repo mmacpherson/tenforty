@@ -92555,7 +92555,7 @@ namespace taxsolve_OR_40_2025 {
 // NOTE: Search for TAXYEAR_DEPENDENT to find likely entries
 // which need to be updated for each tax year.
 
-float thisversion=2.00;
+float thisversion=2.01;
 
 
 
@@ -93780,7 +93780,7 @@ if (infile==0) {
     }
 
     // Federal tax liability allowed for subtraction, from line 11 of worksheet.
-    L[10] = ftw_L[11];
+    L[10] = ftw_L[12];
     shownum_or_40(10);
 
     // Taxable social security amount
@@ -99727,7 +99727,7 @@ void sched_1A( double s1A_L2a )		/* Do the Schedule 1-A Form. */
     sched1A_L[28] = j;
     fprintf(outfile, "S1A_28 = %d\n", j );
     sched1A_L[29] = 300.0 * sched1A_L[28];
-    showline_wlabelnz( "S1A_20", sched1A_L[20] );
+    showline_wlabelnz( "S1A_29", sched1A_L[29] );
     sched1A_L[30] = NotLessThanZero( sched1A_L[24] - sched1A_L[29] );
     showline_wlabelnz( "S1A_30", sched1A_L[30] );
 
