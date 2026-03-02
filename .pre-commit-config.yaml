@@ -7,6 +7,10 @@ ci:
   autoupdate_branch: ''
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
   autoupdate_schedule: weekly
+  # typos publishes a moving `v1` tag that autoupdate resolves as "latest",
+  # reverting our semver pin every week. Freeze it here; bump manually.
+  autoupdate_exclude:
+  - https://github.com/crate-ci/typos
   # Hooks that require local toolchains (Rust/Haskell/etc) should generally be
   # skipped on pre-commit.ci, and enforced via dedicated CI jobs instead.
   skip: [cargo-clippy, cargo-fmt]
