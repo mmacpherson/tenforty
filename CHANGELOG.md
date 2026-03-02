@@ -1,3 +1,13 @@
+## [2025.8] - 2026-03-02
+### Changed
+- Updated OTS 2025 tax year release from 23.04 to 23.05
+  - Fixed MI_1040 line number shift: owe/refund amounts were on wrong output
+    lines (L35/L38 instead of L36/L39)
+  - Added Form 6781 (Section 1256 Contracts and Straddles)
+  - f8995 QBI: L13b now subtracted in Line 11 calculation
+  - f8606: negative fractional rounding fix
+  - US_1040: expanded Schedule D trigger conditions; removed QCD output line
+
 ## [2025.7] - 2026-02-23
 ### Changed
 - Updated OTS 2025 tax year release from 23.03 to 23.04
