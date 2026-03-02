@@ -533,6 +533,41 @@ def patch_sched1a_line29_label(lines: list[str]) -> list[str]:
     return lines
 
 
+def patch_restrict_keyword(lines: list[str]) -> list[str]:
+    """Translate C99 ``restrict`` to the GCC/Clang ``__restrict__`` extension.
+
+    The v23.05 taxsolve_routines adds ``date_rec_to_str`` whose signature
+    uses ``char *restrict str`` and ``const struct date_rec *restrict drec``.
+    C++ does not recognise ``restrict`` (it is a C99/C11 keyword), causing
+    compilation failures.  ``__restrict__`` is the equivalent compiler
+    extension supported by GCC and Clang.
+    """
+    return [line.replace("*restrict ", "*__restrict__ ") for line in lines]
+
+
+def patch_f6781_cpp_compat(lines: list[str]) -> list[str]:
+    """Fix C-isms in the user-contributed Form 6781 that break under C++.
+
+    1. ``malloc`` returns ``void*`` which does not implicitly convert to
+       ``char*`` in C++.  Add an explicit cast.
+    2. ``Show_String_wLabel("BoxA:", BoxA ? "X" : "")`` — the ternary
+       expression evaluates to ``const char*`` which cannot convert to
+       the ``char*`` parameter.  Cast the result.
+    """
+    out = []
+    for line in lines:
+        if "= malloc(" in line and "outfname" in line:
+            line = line.replace("= malloc(", "= (char*)malloc(")
+        if "Show_String_wLabel(" in line and '? "X"' in line:
+            line = re.sub(
+                r"(Box\w+) \? \"X\" : \"\"",
+                r'(char*)(\1 ? "X" : "")',
+                line,
+            )
+        out.append(line)
+    return out
+
+
 def patch_add_pdf_markup(lines: list[str]) -> list[str]:
     """Patch the 'add_pdf_markup' function in the source code to avoid compilation errors.
 
@@ -601,6 +636,7 @@ def postprocess_source_groups(
             case (_, "taxsolve_routines"):
                 group["source"] = patch_add_pdf_markup(group["source"])
                 group["source"] = patch_import_status_init(group["source"])
+                group["source"] = patch_restrict_keyword(group["source"])
             case _:
                 group["source"] = patch_exit_to_return(group["source"])
                 group["source"] = patch_reset_globals(group["source"])
@@ -608,6 +644,8 @@ def postprocess_source_groups(
                     group["source"] = patch_show_fname_init_or_40(group["source"])
                 if "US_1040" in inner_key:
                     group["source"] = patch_sched1a_line29_label(group["source"])
+                if "f6781" in inner_key:
+                    group["source"] = patch_f6781_cpp_compat(group["source"])
 
     return (outer_key, source_group)
 

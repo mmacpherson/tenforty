@@ -142,6 +142,7 @@ cimport ots_2025_AZ_140
 cimport ots_2025_NY_IT201
 cimport ots_2025_f8606
 cimport ots_2025_HSA_f8889
+cimport ots_2025_f6781
 cimport ots_2025_US_1040_Sched_E_brokerage_royalties
 cimport ots_2025_f8995
 cimport ots_2025_CA_540
@@ -282,14 +283,15 @@ _OTS_KEY_TO_INDEX = {
     (2025, "NY_IT201"): 127,
     (2025, "f8606"): 128,
     (2025, "HSA_f8889"): 129,
-    (2025, "US_1040_Sched_E_brokerage_royalties"): 130,
-    (2025, "f8995"): 131,
-    (2025, "CA_540"): 132,
-    (2025, "NJ_1040"): 133,
-    (2025, "OH_IT1040"): 134,
-    (2025, "f2210"): 135,
-    (2025, "PA_40"): 136,
-    (2025, "US_1040_Sched_C"): 137,
+    (2025, "f6781"): 130,
+    (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
+    (2025, "f8995"): 132,
+    (2025, "CA_540"): 133,
+    (2025, "NJ_1040"): 134,
+    (2025, "OH_IT1040"): 135,
+    (2025, "f2210"): 136,
+    (2025, "PA_40"): 137,
+    (2025, "US_1040_Sched_C"): 138,
 }
 
 cdef f_type _ots_get_function(int index):
@@ -554,20 +556,22 @@ cdef f_type _ots_get_function(int index):
     elif index == 129:
         return ots_2025_HSA_f8889.main
     elif index == 130:
-        return ots_2025_US_1040_Sched_E_brokerage_royalties.main
+        return ots_2025_f6781.main
     elif index == 131:
-        return ots_2025_f8995.main
+        return ots_2025_US_1040_Sched_E_brokerage_royalties.main
     elif index == 132:
-        return ots_2025_CA_540.main
+        return ots_2025_f8995.main
     elif index == 133:
-        return ots_2025_NJ_1040.main
+        return ots_2025_CA_540.main
     elif index == 134:
-        return ots_2025_OH_IT1040.main
+        return ots_2025_NJ_1040.main
     elif index == 135:
-        return ots_2025_f2210.main
+        return ots_2025_OH_IT1040.main
     elif index == 136:
-        return ots_2025_PA_40.main
+        return ots_2025_f2210.main
     elif index == 137:
+        return ots_2025_PA_40.main
+    elif index == 138:
         return ots_2025_US_1040_Sched_C.main
     return NULL
 

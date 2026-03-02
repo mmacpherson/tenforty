@@ -340,6 +340,7 @@ def evaluate_form(
 
 
 _FORM_DISPATCH_ALIASES = {
+    "Form_6781": "f6781",
     "Form_8959": "f8959",
     "Form_8960": "f8960",
 }
