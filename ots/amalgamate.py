@@ -1,4 +1,4 @@
-"""Plocess, transform, and amalgamated source code from OTS releases.
+"""Process, transform, and amalgamate source code from OTS releases.
 
 Includes a variety of functions for parsing and manipulating source code from
 OpenTaxSolver (OTS), handling file operations, and generating Cython interfaces
