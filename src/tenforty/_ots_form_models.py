@@ -9333,6 +9333,36 @@ OTS_FORM_CONFIG = [
     },
     {
         "year": 2025,
+        "form_id": "Form_6781",
+        "fields": [
+            {
+                "key": "Title:",
+                "default": "Form 6781 - Gains and Losses From Section 1256 Contracts and Straddles",
+                "terminator": "newline",
+            },
+            {"key": "YourName:", "default": "", "terminator": "newline"},
+            {"key": "YourSocSec#:", "default": "", "terminator": "newline"},
+            {"key": "BoxA", "default": "N", "terminator": "newline"},
+            {"key": "BoxB", "default": "N", "terminator": "newline"},
+            {"key": "BoxC", "default": "N", "terminator": "newline"},
+            {"key": "BoxD", "default": "N", "terminator": "newline"},
+            {"key": "L1", "default": "-300.99", "terminator": "semicolon"},
+            {"key": "L4", "default": "", "terminator": "semicolon"},
+            {"key": "L6", "default": "", "terminator": "semicolon"},
+            {"key": "L10", "default": "1-2-23", "terminator": "newline"},
+            {"key": "1000", "default": "1100", "terminator": "newline"},
+            {"key": "35.87", "default": "", "terminator": "semicolon"},
+            {"key": "L11a", "default": "", "terminator": "semicolon"},
+            {"key": "L11b", "default": "", "terminator": "semicolon"},
+            {"key": "L12", "default": "1-2-23", "terminator": "newline"},
+            {"key": "900", "default": "780", "terminator": "semicolon"},
+            {"key": "L13a", "default": "", "terminator": "semicolon"},
+            {"key": "L13b", "default": "", "terminator": "semicolon"},
+            {"key": "L14", "default": "12-1-24", "terminator": "semicolon"},
+        ],
+    },
+    {
+        "year": 2025,
         "form_id": "VA_760",
         "fields": [
             {
