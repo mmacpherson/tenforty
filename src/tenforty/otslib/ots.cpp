@@ -2718,6 +2718,8 @@ static int __Pyx_State_RemoveModule(void*);
 
 /* Module declarations from "ots_2025_NJ_1040" */
 
+/* Module declarations from "ots_2025_f2441" */
+
 /* Module declarations from "ots_2025_OH_IT1040" */
 
 /* Module declarations from "ots_2025_f2210" */
@@ -2765,10 +2767,10 @@ typedef struct {
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_items;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_pop;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_values;
-  PyObject *__pyx_tuple[141];
+  PyObject *__pyx_tuple[142];
   PyObject *__pyx_codeobj_tab[1];
-  PyObject *__pyx_string_tab[91];
-  PyObject *__pyx_number_tab[147];
+  PyObject *__pyx_string_tab[92];
+  PyObject *__pyx_number_tab[148];
 /* #### Code section: module_state_contents ### */
 /* CommonTypesMetaclass.module_state_decls */
 PyTypeObject *__pyx_CommonTypesMetaclassType;
@@ -2850,56 +2852,57 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_n_u_evaluate_form __pyx_string_tab[38]
 #define __pyx_n_u_exit __pyx_string_tab[39]
 #define __pyx_n_u_f2210 __pyx_string_tab[40]
-#define __pyx_n_u_f6781 __pyx_string_tab[41]
-#define __pyx_n_u_f8606 __pyx_string_tab[42]
-#define __pyx_n_u_f8812 __pyx_string_tab[43]
-#define __pyx_n_u_f8829 __pyx_string_tab[44]
-#define __pyx_n_u_f8959 __pyx_string_tab[45]
-#define __pyx_n_u_f8960 __pyx_string_tab[46]
-#define __pyx_n_u_f8995 __pyx_string_tab[47]
-#define __pyx_n_u_fed_form_text __pyx_string_tab[48]
-#define __pyx_n_u_ff_path __pyx_string_tab[49]
-#define __pyx_n_u_file __pyx_string_tab[50]
-#define __pyx_n_u_file_path_bytes __pyx_string_tab[51]
-#define __pyx_n_u_form __pyx_string_tab[52]
-#define __pyx_n_u_form_text __pyx_string_tab[53]
-#define __pyx_n_u_fp __pyx_string_tab[54]
-#define __pyx_n_u_func __pyx_string_tab[55]
-#define __pyx_n_u_is_coroutine __pyx_string_tab[56]
-#define __pyx_n_u_items __pyx_string_tab[57]
-#define __pyx_n_u_main __pyx_string_tab[58]
-#define __pyx_n_u_module __pyx_string_tab[59]
-#define __pyx_n_u_name __pyx_string_tab[60]
-#define __pyx_n_u_on_error __pyx_string_tab[61]
-#define __pyx_n_u_open __pyx_string_tab[62]
-#define __pyx_n_u_os __pyx_string_tab[63]
-#define __pyx_n_u_ots_form_function __pyx_string_tab[64]
-#define __pyx_n_u_pop __pyx_string_tab[65]
-#define __pyx_n_u_print __pyx_string_tab[66]
-#define __pyx_n_u_program_name __pyx_string_tab[67]
-#define __pyx_n_u_qualname __pyx_string_tab[68]
-#define __pyx_n_u_raise __pyx_string_tab[69]
-#define __pyx_n_u_read __pyx_string_tab[70]
-#define __pyx_n_u_replace __pyx_string_tab[71]
-#define __pyx_n_u_result __pyx_string_tab[72]
-#define __pyx_n_u_result_code __pyx_string_tab[73]
-#define __pyx_n_u_returnfile __pyx_string_tab[74]
-#define __pyx_n_u_returnfile_completed __pyx_string_tab[75]
-#define __pyx_n_u_set_name __pyx_string_tab[76]
-#define __pyx_n_u_setdefault __pyx_string_tab[77]
-#define __pyx_n_u_sys __pyx_string_tab[78]
-#define __pyx_n_u_tempfile __pyx_string_tab[79]
-#define __pyx_n_u_tenforty_models __pyx_string_tab[80]
-#define __pyx_n_u_tenforty_otslib __pyx_string_tab[81]
-#define __pyx_n_u_test __pyx_string_tab[82]
-#define __pyx_n_u_tmpdir __pyx_string_tab[83]
-#define __pyx_n_u_values __pyx_string_tab[84]
-#define __pyx_n_u_w __pyx_string_tab[85]
-#define __pyx_n_u_warn __pyx_string_tab[86]
-#define __pyx_n_u_warnings __pyx_string_tab[87]
-#define __pyx_n_u_year __pyx_string_tab[88]
-#define __pyx_kp_b_iso88591_a_O1F_A_j_6_a_F_b_Qixq_QoU_y_Q __pyx_string_tab[89]
-#define __pyx_n_b_ots __pyx_string_tab[90]
+#define __pyx_n_u_f2441 __pyx_string_tab[41]
+#define __pyx_n_u_f6781 __pyx_string_tab[42]
+#define __pyx_n_u_f8606 __pyx_string_tab[43]
+#define __pyx_n_u_f8812 __pyx_string_tab[44]
+#define __pyx_n_u_f8829 __pyx_string_tab[45]
+#define __pyx_n_u_f8959 __pyx_string_tab[46]
+#define __pyx_n_u_f8960 __pyx_string_tab[47]
+#define __pyx_n_u_f8995 __pyx_string_tab[48]
+#define __pyx_n_u_fed_form_text __pyx_string_tab[49]
+#define __pyx_n_u_ff_path __pyx_string_tab[50]
+#define __pyx_n_u_file __pyx_string_tab[51]
+#define __pyx_n_u_file_path_bytes __pyx_string_tab[52]
+#define __pyx_n_u_form __pyx_string_tab[53]
+#define __pyx_n_u_form_text __pyx_string_tab[54]
+#define __pyx_n_u_fp __pyx_string_tab[55]
+#define __pyx_n_u_func __pyx_string_tab[56]
+#define __pyx_n_u_is_coroutine __pyx_string_tab[57]
+#define __pyx_n_u_items __pyx_string_tab[58]
+#define __pyx_n_u_main __pyx_string_tab[59]
+#define __pyx_n_u_module __pyx_string_tab[60]
+#define __pyx_n_u_name __pyx_string_tab[61]
+#define __pyx_n_u_on_error __pyx_string_tab[62]
+#define __pyx_n_u_open __pyx_string_tab[63]
+#define __pyx_n_u_os __pyx_string_tab[64]
+#define __pyx_n_u_ots_form_function __pyx_string_tab[65]
+#define __pyx_n_u_pop __pyx_string_tab[66]
+#define __pyx_n_u_print __pyx_string_tab[67]
+#define __pyx_n_u_program_name __pyx_string_tab[68]
+#define __pyx_n_u_qualname __pyx_string_tab[69]
+#define __pyx_n_u_raise __pyx_string_tab[70]
+#define __pyx_n_u_read __pyx_string_tab[71]
+#define __pyx_n_u_replace __pyx_string_tab[72]
+#define __pyx_n_u_result __pyx_string_tab[73]
+#define __pyx_n_u_result_code __pyx_string_tab[74]
+#define __pyx_n_u_returnfile __pyx_string_tab[75]
+#define __pyx_n_u_returnfile_completed __pyx_string_tab[76]
+#define __pyx_n_u_set_name __pyx_string_tab[77]
+#define __pyx_n_u_setdefault __pyx_string_tab[78]
+#define __pyx_n_u_sys __pyx_string_tab[79]
+#define __pyx_n_u_tempfile __pyx_string_tab[80]
+#define __pyx_n_u_tenforty_models __pyx_string_tab[81]
+#define __pyx_n_u_tenforty_otslib __pyx_string_tab[82]
+#define __pyx_n_u_test __pyx_string_tab[83]
+#define __pyx_n_u_tmpdir __pyx_string_tab[84]
+#define __pyx_n_u_values __pyx_string_tab[85]
+#define __pyx_n_u_w __pyx_string_tab[86]
+#define __pyx_n_u_warn __pyx_string_tab[87]
+#define __pyx_n_u_warnings __pyx_string_tab[88]
+#define __pyx_n_u_year __pyx_string_tab[89]
+#define __pyx_kp_b_iso88591_a_O1F_A_j_6_a_F_b_Qixq_QoU_y_Q __pyx_string_tab[90]
+#define __pyx_n_b_ots __pyx_string_tab[91]
 #define __pyx_int_0 __pyx_number_tab[0]
 #define __pyx_int_1 __pyx_number_tab[1]
 #define __pyx_int_2 __pyx_number_tab[2]
@@ -3039,14 +3042,15 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_int_136 __pyx_number_tab[136]
 #define __pyx_int_137 __pyx_number_tab[137]
 #define __pyx_int_138 __pyx_number_tab[138]
-#define __pyx_int_2018 __pyx_number_tab[139]
-#define __pyx_int_2019 __pyx_number_tab[140]
-#define __pyx_int_2020 __pyx_number_tab[141]
-#define __pyx_int_2021 __pyx_number_tab[142]
-#define __pyx_int_2022 __pyx_number_tab[143]
-#define __pyx_int_2023 __pyx_number_tab[144]
-#define __pyx_int_2024 __pyx_number_tab[145]
-#define __pyx_int_2025 __pyx_number_tab[146]
+#define __pyx_int_139 __pyx_number_tab[139]
+#define __pyx_int_2018 __pyx_number_tab[140]
+#define __pyx_int_2019 __pyx_number_tab[141]
+#define __pyx_int_2020 __pyx_number_tab[142]
+#define __pyx_int_2021 __pyx_number_tab[143]
+#define __pyx_int_2022 __pyx_number_tab[144]
+#define __pyx_int_2023 __pyx_number_tab[145]
+#define __pyx_int_2024 __pyx_number_tab[146]
+#define __pyx_int_2025 __pyx_number_tab[147]
 /* #### Code section: module_state_clear ### */
 #if CYTHON_USE_MODULE_STATE
 static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
@@ -3061,10 +3065,10 @@ static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   __Pyx_State_RemoveModule(NULL);
   #endif
-  for (int i=0; i<141; ++i) { Py_CLEAR(clear_module_state->__pyx_tuple[i]); }
+  for (int i=0; i<142; ++i) { Py_CLEAR(clear_module_state->__pyx_tuple[i]); }
   for (int i=0; i<1; ++i) { Py_CLEAR(clear_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<91; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
-  for (int i=0; i<147; ++i) { Py_CLEAR(clear_module_state->__pyx_number_tab[i]); }
+  for (int i=0; i<92; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<148; ++i) { Py_CLEAR(clear_module_state->__pyx_number_tab[i]); }
 /* #### Code section: module_state_clear_contents ### */
 /* CommonTypesMetaclass.module_state_clear */
 Py_CLEAR(clear_module_state->__pyx_CommonTypesMetaclassType);
@@ -3087,10 +3091,10 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_tuple);
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_bytes);
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_unicode);
-  for (int i=0; i<141; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_tuple[i]); }
+  for (int i=0; i<142; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_tuple[i]); }
   for (int i=0; i<1; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<91; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
-  for (int i=0; i<147; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_number_tab[i]); }
+  for (int i=0; i<92; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<148; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_number_tab[i]); }
 /* #### Code section: module_state_traverse_contents ### */
 /* CommonTypesMetaclass.module_state_traverse */
 Py_VISIT(traverse_module_state->__pyx_CommonTypesMetaclassType);
@@ -3104,7 +3108,7 @@ return 0;
 #endif
 /* #### Code section: module_code ### */
 
-/* "src/tenforty/otslib/ots.pyx":297
+/* "src/tenforty/otslib/ots.pyx":299
  * }
  *
  * cdef f_type _ots_get_function(int index):             # <<<<<<<<<<<<<<
@@ -3115,7 +3119,7 @@ return 0;
 static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_function(int __pyx_v_index) {
   __pyx_t_8tenforty_6otslib_f_type __pyx_r;
 
-  /* "src/tenforty/otslib/ots.pyx":298
+  /* "src/tenforty/otslib/ots.pyx":300
  *
  * cdef f_type _ots_get_function(int index):
  *     if index == 0:             # <<<<<<<<<<<<<<
@@ -3125,7 +3129,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
   switch (__pyx_v_index) {
     case 0:
 
-    /* "src/tenforty/otslib/ots.pyx":299
+    /* "src/tenforty/otslib/ots.pyx":301
  * cdef f_type _ots_get_function(int index):
  *     if index == 0:
  *         return ots_2018_MA_1.main             # <<<<<<<<<<<<<<
@@ -3135,7 +3139,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_MA_1_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":298
+    /* "src/tenforty/otslib/ots.pyx":300
  *
  * cdef f_type _ots_get_function(int index):
  *     if index == 0:             # <<<<<<<<<<<<<<
@@ -3145,7 +3149,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 1:
 
-    /* "src/tenforty/otslib/ots.pyx":301
+    /* "src/tenforty/otslib/ots.pyx":303
  *         return ots_2018_MA_1.main
  *     elif index == 1:
  *         return ots_2018_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -3155,7 +3159,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_US_1040_Sched_C_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":300
+    /* "src/tenforty/otslib/ots.pyx":302
  *     if index == 0:
  *         return ots_2018_MA_1.main
  *     elif index == 1:             # <<<<<<<<<<<<<<
@@ -3165,7 +3169,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 2:
 
-    /* "src/tenforty/otslib/ots.pyx":303
+    /* "src/tenforty/otslib/ots.pyx":305
  *         return ots_2018_US_1040_Sched_C.main
  *     elif index == 2:
  *         return ots_2018_VA_760.main             # <<<<<<<<<<<<<<
@@ -3175,7 +3179,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_VA_760_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":302
+    /* "src/tenforty/otslib/ots.pyx":304
  *     elif index == 1:
  *         return ots_2018_US_1040_Sched_C.main
  *     elif index == 2:             # <<<<<<<<<<<<<<
@@ -3185,7 +3189,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 3:
 
-    /* "src/tenforty/otslib/ots.pyx":305
+    /* "src/tenforty/otslib/ots.pyx":307
  *         return ots_2018_VA_760.main
  *     elif index == 3:
  *         return ots_2018_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3195,7 +3199,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_OH_IT1040_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":304
+    /* "src/tenforty/otslib/ots.pyx":306
  *     elif index == 2:
  *         return ots_2018_VA_760.main
  *     elif index == 3:             # <<<<<<<<<<<<<<
@@ -3205,7 +3209,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 4:
 
-    /* "src/tenforty/otslib/ots.pyx":307
+    /* "src/tenforty/otslib/ots.pyx":309
  *         return ots_2018_OH_IT1040.main
  *     elif index == 4:
  *         return ots_2018_CA_540.main             # <<<<<<<<<<<<<<
@@ -3215,7 +3219,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_CA_540_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":306
+    /* "src/tenforty/otslib/ots.pyx":308
  *     elif index == 3:
  *         return ots_2018_OH_IT1040.main
  *     elif index == 4:             # <<<<<<<<<<<<<<
@@ -3225,7 +3229,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 5:
 
-    /* "src/tenforty/otslib/ots.pyx":309
+    /* "src/tenforty/otslib/ots.pyx":311
  *         return ots_2018_CA_540.main
  *     elif index == 5:
  *         return ots_2018_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -3235,7 +3239,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_NJ_1040_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":308
+    /* "src/tenforty/otslib/ots.pyx":310
  *     elif index == 4:
  *         return ots_2018_CA_540.main
  *     elif index == 5:             # <<<<<<<<<<<<<<
@@ -3245,7 +3249,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 6:
 
-    /* "src/tenforty/otslib/ots.pyx":311
+    /* "src/tenforty/otslib/ots.pyx":313
  *         return ots_2018_NJ_1040.main
  *     elif index == 6:
  *         return ots_2018_PA_40.main             # <<<<<<<<<<<<<<
@@ -3255,7 +3259,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_PA_40_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":310
+    /* "src/tenforty/otslib/ots.pyx":312
  *     elif index == 5:
  *         return ots_2018_NJ_1040.main
  *     elif index == 6:             # <<<<<<<<<<<<<<
@@ -3265,7 +3269,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 7:
 
-    /* "src/tenforty/otslib/ots.pyx":313
+    /* "src/tenforty/otslib/ots.pyx":315
  *         return ots_2018_PA_40.main
  *     elif index == 7:
  *         return ots_2018_US_1040.main             # <<<<<<<<<<<<<<
@@ -3275,7 +3279,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_US_1040_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":312
+    /* "src/tenforty/otslib/ots.pyx":314
  *     elif index == 6:
  *         return ots_2018_PA_40.main
  *     elif index == 7:             # <<<<<<<<<<<<<<
@@ -3285,7 +3289,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 8:
 
-    /* "src/tenforty/otslib/ots.pyx":315
+    /* "src/tenforty/otslib/ots.pyx":317
  *         return ots_2018_US_1040.main
  *     elif index == 8:
  *         return ots_2018_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -3295,7 +3299,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_NY_IT201_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":314
+    /* "src/tenforty/otslib/ots.pyx":316
  *     elif index == 7:
  *         return ots_2018_US_1040.main
  *     elif index == 8:             # <<<<<<<<<<<<<<
@@ -3305,7 +3309,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 9:
 
-    /* "src/tenforty/otslib/ots.pyx":317
+    /* "src/tenforty/otslib/ots.pyx":319
  *         return ots_2018_NY_IT201.main
  *     elif index == 9:
  *         return ots_2018_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3315,7 +3319,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2018::taxsolve_NC_D400_2018::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":316
+    /* "src/tenforty/otslib/ots.pyx":318
  *     elif index == 8:
  *         return ots_2018_NY_IT201.main
  *     elif index == 9:             # <<<<<<<<<<<<<<
@@ -3325,7 +3329,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 10:
 
-    /* "src/tenforty/otslib/ots.pyx":319
+    /* "src/tenforty/otslib/ots.pyx":321
  *         return ots_2018_NC_D400.main
  *     elif index == 10:
  *         return ots_2019_MA_1.main             # <<<<<<<<<<<<<<
@@ -3335,7 +3339,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_MA_1_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":318
+    /* "src/tenforty/otslib/ots.pyx":320
  *     elif index == 9:
  *         return ots_2018_NC_D400.main
  *     elif index == 10:             # <<<<<<<<<<<<<<
@@ -3345,7 +3349,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 11:
 
-    /* "src/tenforty/otslib/ots.pyx":321
+    /* "src/tenforty/otslib/ots.pyx":323
  *         return ots_2019_MA_1.main
  *     elif index == 11:
  *         return ots_2019_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -3355,7 +3359,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_NY_IT201_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":320
+    /* "src/tenforty/otslib/ots.pyx":322
  *     elif index == 10:
  *         return ots_2019_MA_1.main
  *     elif index == 11:             # <<<<<<<<<<<<<<
@@ -3365,7 +3369,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 12:
 
-    /* "src/tenforty/otslib/ots.pyx":323
+    /* "src/tenforty/otslib/ots.pyx":325
  *         return ots_2019_NY_IT201.main
  *     elif index == 12:
  *         return ots_2019_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -3375,7 +3379,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_US_1040_Sched_C_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":322
+    /* "src/tenforty/otslib/ots.pyx":324
  *     elif index == 11:
  *         return ots_2019_NY_IT201.main
  *     elif index == 12:             # <<<<<<<<<<<<<<
@@ -3385,7 +3389,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 13:
 
-    /* "src/tenforty/otslib/ots.pyx":325
+    /* "src/tenforty/otslib/ots.pyx":327
  *         return ots_2019_US_1040_Sched_C.main
  *     elif index == 13:
  *         return ots_2019_VA_760.main             # <<<<<<<<<<<<<<
@@ -3395,7 +3399,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_VA_760_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":324
+    /* "src/tenforty/otslib/ots.pyx":326
  *     elif index == 12:
  *         return ots_2019_US_1040_Sched_C.main
  *     elif index == 13:             # <<<<<<<<<<<<<<
@@ -3405,7 +3409,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 14:
 
-    /* "src/tenforty/otslib/ots.pyx":327
+    /* "src/tenforty/otslib/ots.pyx":329
  *         return ots_2019_VA_760.main
  *     elif index == 14:
  *         return ots_2019_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3415,7 +3419,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_OH_IT1040_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":326
+    /* "src/tenforty/otslib/ots.pyx":328
  *     elif index == 13:
  *         return ots_2019_VA_760.main
  *     elif index == 14:             # <<<<<<<<<<<<<<
@@ -3425,7 +3429,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 15:
 
-    /* "src/tenforty/otslib/ots.pyx":329
+    /* "src/tenforty/otslib/ots.pyx":331
  *         return ots_2019_OH_IT1040.main
  *     elif index == 15:
  *         return ots_2019_PA_40.main             # <<<<<<<<<<<<<<
@@ -3435,7 +3439,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_PA_40_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":328
+    /* "src/tenforty/otslib/ots.pyx":330
  *     elif index == 14:
  *         return ots_2019_OH_IT1040.main
  *     elif index == 15:             # <<<<<<<<<<<<<<
@@ -3445,7 +3449,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 16:
 
-    /* "src/tenforty/otslib/ots.pyx":331
+    /* "src/tenforty/otslib/ots.pyx":333
  *         return ots_2019_PA_40.main
  *     elif index == 16:
  *         return ots_2019_US_1040.main             # <<<<<<<<<<<<<<
@@ -3455,7 +3459,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_US_1040_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":330
+    /* "src/tenforty/otslib/ots.pyx":332
  *     elif index == 15:
  *         return ots_2019_PA_40.main
  *     elif index == 16:             # <<<<<<<<<<<<<<
@@ -3465,7 +3469,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 17:
 
-    /* "src/tenforty/otslib/ots.pyx":333
+    /* "src/tenforty/otslib/ots.pyx":335
  *         return ots_2019_US_1040.main
  *     elif index == 17:
  *         return ots_2019_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -3475,7 +3479,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_NJ_1040_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":332
+    /* "src/tenforty/otslib/ots.pyx":334
  *     elif index == 16:
  *         return ots_2019_US_1040.main
  *     elif index == 17:             # <<<<<<<<<<<<<<
@@ -3485,7 +3489,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 18:
 
-    /* "src/tenforty/otslib/ots.pyx":335
+    /* "src/tenforty/otslib/ots.pyx":337
  *         return ots_2019_NJ_1040.main
  *     elif index == 18:
  *         return ots_2019_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3495,7 +3499,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_NC_D400_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":334
+    /* "src/tenforty/otslib/ots.pyx":336
  *     elif index == 17:
  *         return ots_2019_NJ_1040.main
  *     elif index == 18:             # <<<<<<<<<<<<<<
@@ -3505,7 +3509,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 19:
 
-    /* "src/tenforty/otslib/ots.pyx":337
+    /* "src/tenforty/otslib/ots.pyx":339
  *         return ots_2019_NC_D400.main
  *     elif index == 19:
  *         return ots_2019_CA_540.main             # <<<<<<<<<<<<<<
@@ -3515,7 +3519,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2019::taxsolve_CA_540_2019::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":336
+    /* "src/tenforty/otslib/ots.pyx":338
  *     elif index == 18:
  *         return ots_2019_NC_D400.main
  *     elif index == 19:             # <<<<<<<<<<<<<<
@@ -3525,7 +3529,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 20:
 
-    /* "src/tenforty/otslib/ots.pyx":339
+    /* "src/tenforty/otslib/ots.pyx":341
  *         return ots_2019_CA_540.main
  *     elif index == 20:
  *         return ots_2020_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3535,7 +3539,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_OH_IT1040_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":338
+    /* "src/tenforty/otslib/ots.pyx":340
  *     elif index == 19:
  *         return ots_2019_CA_540.main
  *     elif index == 20:             # <<<<<<<<<<<<<<
@@ -3545,7 +3549,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 21:
 
-    /* "src/tenforty/otslib/ots.pyx":341
+    /* "src/tenforty/otslib/ots.pyx":343
  *         return ots_2020_OH_IT1040.main
  *     elif index == 21:
  *         return ots_2020_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3555,7 +3559,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_NC_D400_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":340
+    /* "src/tenforty/otslib/ots.pyx":342
  *     elif index == 20:
  *         return ots_2020_OH_IT1040.main
  *     elif index == 21:             # <<<<<<<<<<<<<<
@@ -3565,7 +3569,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 22:
 
-    /* "src/tenforty/otslib/ots.pyx":343
+    /* "src/tenforty/otslib/ots.pyx":345
  *         return ots_2020_NC_D400.main
  *     elif index == 22:
  *         return ots_2020_US_1040.main             # <<<<<<<<<<<<<<
@@ -3575,7 +3579,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_US_1040_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":342
+    /* "src/tenforty/otslib/ots.pyx":344
  *     elif index == 21:
  *         return ots_2020_NC_D400.main
  *     elif index == 22:             # <<<<<<<<<<<<<<
@@ -3585,7 +3589,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 23:
 
-    /* "src/tenforty/otslib/ots.pyx":345
+    /* "src/tenforty/otslib/ots.pyx":347
  *         return ots_2020_US_1040.main
  *     elif index == 23:
  *         return ots_2020_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -3595,7 +3599,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_NY_IT201_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":344
+    /* "src/tenforty/otslib/ots.pyx":346
  *     elif index == 22:
  *         return ots_2020_US_1040.main
  *     elif index == 23:             # <<<<<<<<<<<<<<
@@ -3605,7 +3609,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 24:
 
-    /* "src/tenforty/otslib/ots.pyx":347
+    /* "src/tenforty/otslib/ots.pyx":349
  *         return ots_2020_NY_IT201.main
  *     elif index == 24:
  *         return ots_2020_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -3615,7 +3619,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":346
+    /* "src/tenforty/otslib/ots.pyx":348
  *     elif index == 23:
  *         return ots_2020_NY_IT201.main
  *     elif index == 24:             # <<<<<<<<<<<<<<
@@ -3625,7 +3629,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 25:
 
-    /* "src/tenforty/otslib/ots.pyx":349
+    /* "src/tenforty/otslib/ots.pyx":351
  *         return ots_2020_HSA_f8889.main
  *     elif index == 25:
  *         return ots_2020_MA_1.main             # <<<<<<<<<<<<<<
@@ -3635,7 +3639,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_MA_1_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":348
+    /* "src/tenforty/otslib/ots.pyx":350
  *     elif index == 24:
  *         return ots_2020_HSA_f8889.main
  *     elif index == 25:             # <<<<<<<<<<<<<<
@@ -3645,7 +3649,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 26:
 
-    /* "src/tenforty/otslib/ots.pyx":351
+    /* "src/tenforty/otslib/ots.pyx":353
  *         return ots_2020_MA_1.main
  *     elif index == 26:
  *         return ots_2020_VA_760.main             # <<<<<<<<<<<<<<
@@ -3655,7 +3659,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_VA_760_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":350
+    /* "src/tenforty/otslib/ots.pyx":352
  *     elif index == 25:
  *         return ots_2020_MA_1.main
  *     elif index == 26:             # <<<<<<<<<<<<<<
@@ -3665,7 +3669,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 27:
 
-    /* "src/tenforty/otslib/ots.pyx":353
+    /* "src/tenforty/otslib/ots.pyx":355
  *         return ots_2020_VA_760.main
  *     elif index == 27:
  *         return ots_2020_f8606.main             # <<<<<<<<<<<<<<
@@ -3675,7 +3679,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":352
+    /* "src/tenforty/otslib/ots.pyx":354
  *     elif index == 26:
  *         return ots_2020_VA_760.main
  *     elif index == 27:             # <<<<<<<<<<<<<<
@@ -3685,7 +3689,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 28:
 
-    /* "src/tenforty/otslib/ots.pyx":355
+    /* "src/tenforty/otslib/ots.pyx":357
  *         return ots_2020_f8606.main
  *     elif index == 28:
  *         return ots_2020_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -3695,7 +3699,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_NJ_1040_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":354
+    /* "src/tenforty/otslib/ots.pyx":356
  *     elif index == 27:
  *         return ots_2020_f8606.main
  *     elif index == 28:             # <<<<<<<<<<<<<<
@@ -3705,7 +3709,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 29:
 
-    /* "src/tenforty/otslib/ots.pyx":357
+    /* "src/tenforty/otslib/ots.pyx":359
  *         return ots_2020_NJ_1040.main
  *     elif index == 29:
  *         return ots_2020_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -3715,7 +3719,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_US_1040_Sched_C_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":356
+    /* "src/tenforty/otslib/ots.pyx":358
  *     elif index == 28:
  *         return ots_2020_NJ_1040.main
  *     elif index == 29:             # <<<<<<<<<<<<<<
@@ -3725,7 +3729,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 30:
 
-    /* "src/tenforty/otslib/ots.pyx":359
+    /* "src/tenforty/otslib/ots.pyx":361
  *         return ots_2020_US_1040_Sched_C.main
  *     elif index == 30:
  *         return ots_2020_PA_40.main             # <<<<<<<<<<<<<<
@@ -3735,7 +3739,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_PA_40_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":358
+    /* "src/tenforty/otslib/ots.pyx":360
  *     elif index == 29:
  *         return ots_2020_US_1040_Sched_C.main
  *     elif index == 30:             # <<<<<<<<<<<<<<
@@ -3745,7 +3749,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 31:
 
-    /* "src/tenforty/otslib/ots.pyx":361
+    /* "src/tenforty/otslib/ots.pyx":363
  *         return ots_2020_PA_40.main
  *     elif index == 31:
  *         return ots_2020_CA_540.main             # <<<<<<<<<<<<<<
@@ -3755,7 +3759,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2020::taxsolve_CA_540_2020::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":360
+    /* "src/tenforty/otslib/ots.pyx":362
  *     elif index == 30:
  *         return ots_2020_PA_40.main
  *     elif index == 31:             # <<<<<<<<<<<<<<
@@ -3765,7 +3769,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 32:
 
-    /* "src/tenforty/otslib/ots.pyx":363
+    /* "src/tenforty/otslib/ots.pyx":365
  *         return ots_2020_CA_540.main
  *     elif index == 32:
  *         return ots_2021_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -3775,7 +3779,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_NJ_1040_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":362
+    /* "src/tenforty/otslib/ots.pyx":364
  *     elif index == 31:
  *         return ots_2020_CA_540.main
  *     elif index == 32:             # <<<<<<<<<<<<<<
@@ -3785,7 +3789,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 33:
 
-    /* "src/tenforty/otslib/ots.pyx":365
+    /* "src/tenforty/otslib/ots.pyx":367
  *         return ots_2021_NJ_1040.main
  *     elif index == 33:
  *         return ots_2021_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -3795,7 +3799,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_US_1040_Sched_SE_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":364
+    /* "src/tenforty/otslib/ots.pyx":366
  *     elif index == 32:
  *         return ots_2021_NJ_1040.main
  *     elif index == 33:             # <<<<<<<<<<<<<<
@@ -3805,7 +3809,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 34:
 
-    /* "src/tenforty/otslib/ots.pyx":367
+    /* "src/tenforty/otslib/ots.pyx":369
  *         return ots_2021_US_1040_Sched_SE.main
  *     elif index == 34:
  *         return ots_2021_f8606.main             # <<<<<<<<<<<<<<
@@ -3815,7 +3819,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":366
+    /* "src/tenforty/otslib/ots.pyx":368
  *     elif index == 33:
  *         return ots_2021_US_1040_Sched_SE.main
  *     elif index == 34:             # <<<<<<<<<<<<<<
@@ -3825,7 +3829,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 35:
 
-    /* "src/tenforty/otslib/ots.pyx":369
+    /* "src/tenforty/otslib/ots.pyx":371
  *         return ots_2021_f8606.main
  *     elif index == 35:
  *         return ots_2021_CA_540.main             # <<<<<<<<<<<<<<
@@ -3835,7 +3839,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_CA_540_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":368
+    /* "src/tenforty/otslib/ots.pyx":370
  *     elif index == 34:
  *         return ots_2021_f8606.main
  *     elif index == 35:             # <<<<<<<<<<<<<<
@@ -3845,7 +3849,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 36:
 
-    /* "src/tenforty/otslib/ots.pyx":371
+    /* "src/tenforty/otslib/ots.pyx":373
  *         return ots_2021_CA_540.main
  *     elif index == 36:
  *         return ots_2021_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -3855,7 +3859,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":370
+    /* "src/tenforty/otslib/ots.pyx":372
  *     elif index == 35:
  *         return ots_2021_CA_540.main
  *     elif index == 36:             # <<<<<<<<<<<<<<
@@ -3865,7 +3869,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 37:
 
-    /* "src/tenforty/otslib/ots.pyx":373
+    /* "src/tenforty/otslib/ots.pyx":375
  *         return ots_2021_HSA_f8889.main
  *     elif index == 37:
  *         return ots_2021_MA_1.main             # <<<<<<<<<<<<<<
@@ -3875,7 +3879,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_MA_1_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":372
+    /* "src/tenforty/otslib/ots.pyx":374
  *     elif index == 36:
  *         return ots_2021_HSA_f8889.main
  *     elif index == 37:             # <<<<<<<<<<<<<<
@@ -3885,7 +3889,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 38:
 
-    /* "src/tenforty/otslib/ots.pyx":375
+    /* "src/tenforty/otslib/ots.pyx":377
  *         return ots_2021_MA_1.main
  *     elif index == 38:
  *         return ots_2021_NC_D400.main             # <<<<<<<<<<<<<<
@@ -3895,7 +3899,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_NC_D400_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":374
+    /* "src/tenforty/otslib/ots.pyx":376
  *     elif index == 37:
  *         return ots_2021_MA_1.main
  *     elif index == 38:             # <<<<<<<<<<<<<<
@@ -3905,7 +3909,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 39:
 
-    /* "src/tenforty/otslib/ots.pyx":377
+    /* "src/tenforty/otslib/ots.pyx":379
  *         return ots_2021_NC_D400.main
  *     elif index == 39:
  *         return ots_2021_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -3915,7 +3919,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_NY_IT201_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":376
+    /* "src/tenforty/otslib/ots.pyx":378
  *     elif index == 38:
  *         return ots_2021_NC_D400.main
  *     elif index == 39:             # <<<<<<<<<<<<<<
@@ -3925,7 +3929,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 40:
 
-    /* "src/tenforty/otslib/ots.pyx":379
+    /* "src/tenforty/otslib/ots.pyx":381
  *         return ots_2021_NY_IT201.main
  *     elif index == 40:
  *         return ots_2021_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -3935,7 +3939,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_OH_IT1040_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":378
+    /* "src/tenforty/otslib/ots.pyx":380
  *     elif index == 39:
  *         return ots_2021_NY_IT201.main
  *     elif index == 40:             # <<<<<<<<<<<<<<
@@ -3945,7 +3949,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 41:
 
-    /* "src/tenforty/otslib/ots.pyx":381
+    /* "src/tenforty/otslib/ots.pyx":383
  *         return ots_2021_OH_IT1040.main
  *     elif index == 41:
  *         return ots_2021_PA_40.main             # <<<<<<<<<<<<<<
@@ -3955,7 +3959,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_PA_40_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":380
+    /* "src/tenforty/otslib/ots.pyx":382
  *     elif index == 40:
  *         return ots_2021_OH_IT1040.main
  *     elif index == 41:             # <<<<<<<<<<<<<<
@@ -3965,7 +3969,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 42:
 
-    /* "src/tenforty/otslib/ots.pyx":383
+    /* "src/tenforty/otslib/ots.pyx":385
  *         return ots_2021_PA_40.main
  *     elif index == 42:
  *         return ots_2021_US_1040.main             # <<<<<<<<<<<<<<
@@ -3975,7 +3979,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_US_1040_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":382
+    /* "src/tenforty/otslib/ots.pyx":384
  *     elif index == 41:
  *         return ots_2021_PA_40.main
  *     elif index == 42:             # <<<<<<<<<<<<<<
@@ -3985,7 +3989,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 43:
 
-    /* "src/tenforty/otslib/ots.pyx":385
+    /* "src/tenforty/otslib/ots.pyx":387
  *         return ots_2021_US_1040.main
  *     elif index == 43:
  *         return ots_2021_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -3995,7 +3999,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_US_1040_Sched_C_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":384
+    /* "src/tenforty/otslib/ots.pyx":386
  *     elif index == 42:
  *         return ots_2021_US_1040.main
  *     elif index == 43:             # <<<<<<<<<<<<<<
@@ -4005,7 +4009,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 44:
 
-    /* "src/tenforty/otslib/ots.pyx":387
+    /* "src/tenforty/otslib/ots.pyx":389
  *         return ots_2021_US_1040_Sched_C.main
  *     elif index == 44:
  *         return ots_2021_VA_760.main             # <<<<<<<<<<<<<<
@@ -4015,7 +4019,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_VA_760_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":386
+    /* "src/tenforty/otslib/ots.pyx":388
  *     elif index == 43:
  *         return ots_2021_US_1040_Sched_C.main
  *     elif index == 44:             # <<<<<<<<<<<<<<
@@ -4025,7 +4029,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 45:
 
-    /* "src/tenforty/otslib/ots.pyx":389
+    /* "src/tenforty/otslib/ots.pyx":391
  *         return ots_2021_VA_760.main
  *     elif index == 45:
  *         return ots_2021_CA_5805.main             # <<<<<<<<<<<<<<
@@ -4035,7 +4039,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_CA_5805_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":388
+    /* "src/tenforty/otslib/ots.pyx":390
  *     elif index == 44:
  *         return ots_2021_VA_760.main
  *     elif index == 45:             # <<<<<<<<<<<<<<
@@ -4045,7 +4049,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 46:
 
-    /* "src/tenforty/otslib/ots.pyx":391
+    /* "src/tenforty/otslib/ots.pyx":393
  *         return ots_2021_CA_5805.main
  *     elif index == 46:
  *         return ots_2021_f2210.main             # <<<<<<<<<<<<<<
@@ -4055,7 +4059,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_f2210_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":390
+    /* "src/tenforty/otslib/ots.pyx":392
  *     elif index == 45:
  *         return ots_2021_CA_5805.main
  *     elif index == 46:             # <<<<<<<<<<<<<<
@@ -4065,7 +4069,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 47:
 
-    /* "src/tenforty/otslib/ots.pyx":393
+    /* "src/tenforty/otslib/ots.pyx":395
  *         return ots_2021_f2210.main
  *     elif index == 47:
  *         return ots_2021_f8960.main             # <<<<<<<<<<<<<<
@@ -4075,7 +4079,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_f8960_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":392
+    /* "src/tenforty/otslib/ots.pyx":394
  *     elif index == 46:
  *         return ots_2021_f2210.main
  *     elif index == 47:             # <<<<<<<<<<<<<<
@@ -4085,7 +4089,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 48:
 
-    /* "src/tenforty/otslib/ots.pyx":395
+    /* "src/tenforty/otslib/ots.pyx":397
  *         return ots_2021_f8960.main
  *     elif index == 48:
  *         return ots_2021_f8959.main             # <<<<<<<<<<<<<<
@@ -4095,7 +4099,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2021::taxsolve_f8959_2021::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":394
+    /* "src/tenforty/otslib/ots.pyx":396
  *     elif index == 47:
  *         return ots_2021_f8960.main
  *     elif index == 48:             # <<<<<<<<<<<<<<
@@ -4105,7 +4109,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 49:
 
-    /* "src/tenforty/otslib/ots.pyx":397
+    /* "src/tenforty/otslib/ots.pyx":399
  *         return ots_2021_f8959.main
  *     elif index == 49:
  *         return ots_2022_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -4115,7 +4119,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":396
+    /* "src/tenforty/otslib/ots.pyx":398
  *     elif index == 48:
  *         return ots_2021_f8959.main
  *     elif index == 49:             # <<<<<<<<<<<<<<
@@ -4125,7 +4129,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 50:
 
-    /* "src/tenforty/otslib/ots.pyx":399
+    /* "src/tenforty/otslib/ots.pyx":401
  *         return ots_2022_HSA_f8889.main
  *     elif index == 50:
  *         return ots_2022_MA_1.main             # <<<<<<<<<<<<<<
@@ -4135,7 +4139,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_MA_1_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":398
+    /* "src/tenforty/otslib/ots.pyx":400
  *     elif index == 49:
  *         return ots_2022_HSA_f8889.main
  *     elif index == 50:             # <<<<<<<<<<<<<<
@@ -4145,7 +4149,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 51:
 
-    /* "src/tenforty/otslib/ots.pyx":401
+    /* "src/tenforty/otslib/ots.pyx":403
  *         return ots_2022_MA_1.main
  *     elif index == 51:
  *         return ots_2022_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -4155,7 +4159,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_NJ_1040_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":400
+    /* "src/tenforty/otslib/ots.pyx":402
  *     elif index == 50:
  *         return ots_2022_MA_1.main
  *     elif index == 51:             # <<<<<<<<<<<<<<
@@ -4165,7 +4169,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 52:
 
-    /* "src/tenforty/otslib/ots.pyx":403
+    /* "src/tenforty/otslib/ots.pyx":405
  *         return ots_2022_NJ_1040.main
  *     elif index == 52:
  *         return ots_2022_f8959.main             # <<<<<<<<<<<<<<
@@ -4175,7 +4179,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_f8959_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":402
+    /* "src/tenforty/otslib/ots.pyx":404
  *     elif index == 51:
  *         return ots_2022_NJ_1040.main
  *     elif index == 52:             # <<<<<<<<<<<<<<
@@ -4185,7 +4189,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 53:
 
-    /* "src/tenforty/otslib/ots.pyx":405
+    /* "src/tenforty/otslib/ots.pyx":407
  *         return ots_2022_f8959.main
  *     elif index == 53:
  *         return ots_2022_f8960.main             # <<<<<<<<<<<<<<
@@ -4195,7 +4199,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_f8960_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":404
+    /* "src/tenforty/otslib/ots.pyx":406
  *     elif index == 52:
  *         return ots_2022_f8959.main
  *     elif index == 53:             # <<<<<<<<<<<<<<
@@ -4205,7 +4209,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 54:
 
-    /* "src/tenforty/otslib/ots.pyx":407
+    /* "src/tenforty/otslib/ots.pyx":409
  *         return ots_2022_f8960.main
  *     elif index == 54:
  *         return ots_2022_f8606.main             # <<<<<<<<<<<<<<
@@ -4215,7 +4219,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":406
+    /* "src/tenforty/otslib/ots.pyx":408
  *     elif index == 53:
  *         return ots_2022_f8960.main
  *     elif index == 54:             # <<<<<<<<<<<<<<
@@ -4225,7 +4229,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 55:
 
-    /* "src/tenforty/otslib/ots.pyx":409
+    /* "src/tenforty/otslib/ots.pyx":411
  *         return ots_2022_f8606.main
  *     elif index == 55:
  *         return ots_2022_CA_540.main             # <<<<<<<<<<<<<<
@@ -4235,7 +4239,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_CA_540_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":408
+    /* "src/tenforty/otslib/ots.pyx":410
  *     elif index == 54:
  *         return ots_2022_f8606.main
  *     elif index == 55:             # <<<<<<<<<<<<<<
@@ -4245,7 +4249,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 56:
 
-    /* "src/tenforty/otslib/ots.pyx":411
+    /* "src/tenforty/otslib/ots.pyx":413
  *         return ots_2022_CA_540.main
  *     elif index == 56:
  *         return ots_2022_CA_5805.main             # <<<<<<<<<<<<<<
@@ -4255,7 +4259,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_CA_5805_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":410
+    /* "src/tenforty/otslib/ots.pyx":412
  *     elif index == 55:
  *         return ots_2022_CA_540.main
  *     elif index == 56:             # <<<<<<<<<<<<<<
@@ -4265,7 +4269,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 57:
 
-    /* "src/tenforty/otslib/ots.pyx":413
+    /* "src/tenforty/otslib/ots.pyx":415
  *         return ots_2022_CA_5805.main
  *     elif index == 57:
  *         return ots_2022_NC_D400.main             # <<<<<<<<<<<<<<
@@ -4275,7 +4279,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_NC_D400_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":412
+    /* "src/tenforty/otslib/ots.pyx":414
  *     elif index == 56:
  *         return ots_2022_CA_5805.main
  *     elif index == 57:             # <<<<<<<<<<<<<<
@@ -4285,7 +4289,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 58:
 
-    /* "src/tenforty/otslib/ots.pyx":415
+    /* "src/tenforty/otslib/ots.pyx":417
  *         return ots_2022_NC_D400.main
  *     elif index == 58:
  *         return ots_2022_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -4295,7 +4299,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_NY_IT201_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":414
+    /* "src/tenforty/otslib/ots.pyx":416
  *     elif index == 57:
  *         return ots_2022_NC_D400.main
  *     elif index == 58:             # <<<<<<<<<<<<<<
@@ -4305,7 +4309,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 59:
 
-    /* "src/tenforty/otslib/ots.pyx":417
+    /* "src/tenforty/otslib/ots.pyx":419
  *         return ots_2022_NY_IT201.main
  *     elif index == 59:
  *         return ots_2022_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -4315,7 +4319,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_OH_IT1040_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":416
+    /* "src/tenforty/otslib/ots.pyx":418
  *     elif index == 58:
  *         return ots_2022_NY_IT201.main
  *     elif index == 59:             # <<<<<<<<<<<<<<
@@ -4325,7 +4329,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 60:
 
-    /* "src/tenforty/otslib/ots.pyx":419
+    /* "src/tenforty/otslib/ots.pyx":421
  *         return ots_2022_OH_IT1040.main
  *     elif index == 60:
  *         return ots_2022_PA_40.main             # <<<<<<<<<<<<<<
@@ -4335,7 +4339,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_PA_40_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":418
+    /* "src/tenforty/otslib/ots.pyx":420
  *     elif index == 59:
  *         return ots_2022_OH_IT1040.main
  *     elif index == 60:             # <<<<<<<<<<<<<<
@@ -4345,7 +4349,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 61:
 
-    /* "src/tenforty/otslib/ots.pyx":421
+    /* "src/tenforty/otslib/ots.pyx":423
  *         return ots_2022_PA_40.main
  *     elif index == 61:
  *         return ots_2022_US_1040.main             # <<<<<<<<<<<<<<
@@ -4355,7 +4359,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_US_1040_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":420
+    /* "src/tenforty/otslib/ots.pyx":422
  *     elif index == 60:
  *         return ots_2022_PA_40.main
  *     elif index == 61:             # <<<<<<<<<<<<<<
@@ -4365,7 +4369,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 62:
 
-    /* "src/tenforty/otslib/ots.pyx":423
+    /* "src/tenforty/otslib/ots.pyx":425
  *         return ots_2022_US_1040.main
  *     elif index == 62:
  *         return ots_2022_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -4375,7 +4379,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_US_1040_Sched_C_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":422
+    /* "src/tenforty/otslib/ots.pyx":424
  *     elif index == 61:
  *         return ots_2022_US_1040.main
  *     elif index == 62:             # <<<<<<<<<<<<<<
@@ -4385,7 +4389,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 63:
 
-    /* "src/tenforty/otslib/ots.pyx":425
+    /* "src/tenforty/otslib/ots.pyx":427
  *         return ots_2022_US_1040_Sched_C.main
  *     elif index == 63:
  *         return ots_2022_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -4395,7 +4399,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_US_1040_Sched_SE_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":424
+    /* "src/tenforty/otslib/ots.pyx":426
  *     elif index == 62:
  *         return ots_2022_US_1040_Sched_C.main
  *     elif index == 63:             # <<<<<<<<<<<<<<
@@ -4405,7 +4409,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 64:
 
-    /* "src/tenforty/otslib/ots.pyx":427
+    /* "src/tenforty/otslib/ots.pyx":429
  *         return ots_2022_US_1040_Sched_SE.main
  *     elif index == 64:
  *         return ots_2022_VA_760.main             # <<<<<<<<<<<<<<
@@ -4415,7 +4419,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_VA_760_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":426
+    /* "src/tenforty/otslib/ots.pyx":428
  *     elif index == 63:
  *         return ots_2022_US_1040_Sched_SE.main
  *     elif index == 64:             # <<<<<<<<<<<<<<
@@ -4425,7 +4429,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 65:
 
-    /* "src/tenforty/otslib/ots.pyx":429
+    /* "src/tenforty/otslib/ots.pyx":431
  *         return ots_2022_VA_760.main
  *     elif index == 65:
  *         return ots_2022_f2210.main             # <<<<<<<<<<<<<<
@@ -4435,7 +4439,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_f2210_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":428
+    /* "src/tenforty/otslib/ots.pyx":430
  *     elif index == 64:
  *         return ots_2022_VA_760.main
  *     elif index == 65:             # <<<<<<<<<<<<<<
@@ -4445,7 +4449,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 66:
 
-    /* "src/tenforty/otslib/ots.pyx":431
+    /* "src/tenforty/otslib/ots.pyx":433
  *         return ots_2022_f2210.main
  *     elif index == 66:
  *         return ots_2022_f8829.main             # <<<<<<<<<<<<<<
@@ -4455,7 +4459,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_f8829_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":430
+    /* "src/tenforty/otslib/ots.pyx":432
  *     elif index == 65:
  *         return ots_2022_f2210.main
  *     elif index == 66:             # <<<<<<<<<<<<<<
@@ -4465,7 +4469,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 67:
 
-    /* "src/tenforty/otslib/ots.pyx":433
+    /* "src/tenforty/otslib/ots.pyx":435
  *         return ots_2022_f8829.main
  *     elif index == 67:
  *         return ots_2022_f8995.main             # <<<<<<<<<<<<<<
@@ -4475,7 +4479,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2022::taxsolve_f8995_2022::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":432
+    /* "src/tenforty/otslib/ots.pyx":434
  *     elif index == 66:
  *         return ots_2022_f8829.main
  *     elif index == 67:             # <<<<<<<<<<<<<<
@@ -4485,7 +4489,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 68:
 
-    /* "src/tenforty/otslib/ots.pyx":435
+    /* "src/tenforty/otslib/ots.pyx":437
  *         return ots_2022_f8995.main
  *     elif index == 68:
  *         return ots_2023_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -4495,7 +4499,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_NJ_1040_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":434
+    /* "src/tenforty/otslib/ots.pyx":436
  *     elif index == 67:
  *         return ots_2022_f8995.main
  *     elif index == 68:             # <<<<<<<<<<<<<<
@@ -4505,7 +4509,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 69:
 
-    /* "src/tenforty/otslib/ots.pyx":437
+    /* "src/tenforty/otslib/ots.pyx":439
  *         return ots_2023_NJ_1040.main
  *     elif index == 69:
  *         return ots_2023_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -4515,7 +4519,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_Sched_C_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":436
+    /* "src/tenforty/otslib/ots.pyx":438
  *     elif index == 68:
  *         return ots_2023_NJ_1040.main
  *     elif index == 69:             # <<<<<<<<<<<<<<
@@ -4525,7 +4529,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 70:
 
-    /* "src/tenforty/otslib/ots.pyx":439
+    /* "src/tenforty/otslib/ots.pyx":441
  *         return ots_2023_US_1040_Sched_C.main
  *     elif index == 70:
  *         return ots_2023_f8829.main             # <<<<<<<<<<<<<<
@@ -4535,7 +4539,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f8829_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":438
+    /* "src/tenforty/otslib/ots.pyx":440
  *     elif index == 69:
  *         return ots_2023_US_1040_Sched_C.main
  *     elif index == 70:             # <<<<<<<<<<<<<<
@@ -4545,7 +4549,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 71:
 
-    /* "src/tenforty/otslib/ots.pyx":441
+    /* "src/tenforty/otslib/ots.pyx":443
  *         return ots_2023_f8829.main
  *     elif index == 71:
  *         return ots_2023_f8959.main             # <<<<<<<<<<<<<<
@@ -4555,7 +4559,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f8959_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":440
+    /* "src/tenforty/otslib/ots.pyx":442
  *     elif index == 70:
  *         return ots_2023_f8829.main
  *     elif index == 71:             # <<<<<<<<<<<<<<
@@ -4565,7 +4569,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 72:
 
-    /* "src/tenforty/otslib/ots.pyx":443
+    /* "src/tenforty/otslib/ots.pyx":445
  *         return ots_2023_f8959.main
  *     elif index == 72:
  *         return ots_2023_f8960.main             # <<<<<<<<<<<<<<
@@ -4575,7 +4579,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f8960_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":442
+    /* "src/tenforty/otslib/ots.pyx":444
  *     elif index == 71:
  *         return ots_2023_f8959.main
  *     elif index == 72:             # <<<<<<<<<<<<<<
@@ -4585,7 +4589,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 73:
 
-    /* "src/tenforty/otslib/ots.pyx":445
+    /* "src/tenforty/otslib/ots.pyx":447
  *         return ots_2023_f8960.main
  *     elif index == 73:
  *         return ots_2023_f8995.main             # <<<<<<<<<<<<<<
@@ -4595,7 +4599,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f8995_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":444
+    /* "src/tenforty/otslib/ots.pyx":446
  *     elif index == 72:
  *         return ots_2023_f8960.main
  *     elif index == 73:             # <<<<<<<<<<<<<<
@@ -4605,7 +4609,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 74:
 
-    /* "src/tenforty/otslib/ots.pyx":447
+    /* "src/tenforty/otslib/ots.pyx":449
  *         return ots_2023_f8995.main
  *     elif index == 74:
  *         return ots_2023_f8606.main             # <<<<<<<<<<<<<<
@@ -4615,7 +4619,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":446
+    /* "src/tenforty/otslib/ots.pyx":448
  *     elif index == 73:
  *         return ots_2023_f8995.main
  *     elif index == 74:             # <<<<<<<<<<<<<<
@@ -4625,7 +4629,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 75:
 
-    /* "src/tenforty/otslib/ots.pyx":449
+    /* "src/tenforty/otslib/ots.pyx":451
  *         return ots_2023_f8606.main
  *     elif index == 75:
  *         return ots_2023_CA_540.main             # <<<<<<<<<<<<<<
@@ -4635,7 +4639,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_CA_540_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":448
+    /* "src/tenforty/otslib/ots.pyx":450
  *     elif index == 74:
  *         return ots_2023_f8606.main
  *     elif index == 75:             # <<<<<<<<<<<<<<
@@ -4645,7 +4649,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 76:
 
-    /* "src/tenforty/otslib/ots.pyx":451
+    /* "src/tenforty/otslib/ots.pyx":453
  *         return ots_2023_CA_540.main
  *     elif index == 76:
  *         return ots_2023_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -4655,7 +4659,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":450
+    /* "src/tenforty/otslib/ots.pyx":452
  *     elif index == 75:
  *         return ots_2023_CA_540.main
  *     elif index == 76:             # <<<<<<<<<<<<<<
@@ -4665,7 +4669,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 77:
 
-    /* "src/tenforty/otslib/ots.pyx":453
+    /* "src/tenforty/otslib/ots.pyx":455
  *         return ots_2023_HSA_f8889.main
  *     elif index == 77:
  *         return ots_2023_MA_1.main             # <<<<<<<<<<<<<<
@@ -4675,7 +4679,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_MA_1_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":452
+    /* "src/tenforty/otslib/ots.pyx":454
  *     elif index == 76:
  *         return ots_2023_HSA_f8889.main
  *     elif index == 77:             # <<<<<<<<<<<<<<
@@ -4685,7 +4689,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 78:
 
-    /* "src/tenforty/otslib/ots.pyx":455
+    /* "src/tenforty/otslib/ots.pyx":457
  *         return ots_2023_MA_1.main
  *     elif index == 78:
  *         return ots_2023_NC_D400.main             # <<<<<<<<<<<<<<
@@ -4695,7 +4699,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_NC_D400_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":454
+    /* "src/tenforty/otslib/ots.pyx":456
  *     elif index == 77:
  *         return ots_2023_MA_1.main
  *     elif index == 78:             # <<<<<<<<<<<<<<
@@ -4705,7 +4709,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 79:
 
-    /* "src/tenforty/otslib/ots.pyx":457
+    /* "src/tenforty/otslib/ots.pyx":459
  *         return ots_2023_NC_D400.main
  *     elif index == 79:
  *         return ots_2023_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -4715,7 +4719,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_NY_IT201_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":456
+    /* "src/tenforty/otslib/ots.pyx":458
  *     elif index == 78:
  *         return ots_2023_NC_D400.main
  *     elif index == 79:             # <<<<<<<<<<<<<<
@@ -4725,7 +4729,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 80:
 
-    /* "src/tenforty/otslib/ots.pyx":459
+    /* "src/tenforty/otslib/ots.pyx":461
  *         return ots_2023_NY_IT201.main
  *     elif index == 80:
  *         return ots_2023_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -4735,7 +4739,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_OH_IT1040_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":458
+    /* "src/tenforty/otslib/ots.pyx":460
  *     elif index == 79:
  *         return ots_2023_NY_IT201.main
  *     elif index == 80:             # <<<<<<<<<<<<<<
@@ -4745,7 +4749,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 81:
 
-    /* "src/tenforty/otslib/ots.pyx":461
+    /* "src/tenforty/otslib/ots.pyx":463
  *         return ots_2023_OH_IT1040.main
  *     elif index == 81:
  *         return ots_2023_PA_40.main             # <<<<<<<<<<<<<<
@@ -4755,7 +4759,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_PA_40_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":460
+    /* "src/tenforty/otslib/ots.pyx":462
  *     elif index == 80:
  *         return ots_2023_OH_IT1040.main
  *     elif index == 81:             # <<<<<<<<<<<<<<
@@ -4765,7 +4769,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 82:
 
-    /* "src/tenforty/otslib/ots.pyx":463
+    /* "src/tenforty/otslib/ots.pyx":465
  *         return ots_2023_PA_40.main
  *     elif index == 82:
  *         return ots_2023_US_1040.main             # <<<<<<<<<<<<<<
@@ -4775,7 +4779,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":462
+    /* "src/tenforty/otslib/ots.pyx":464
  *     elif index == 81:
  *         return ots_2023_PA_40.main
  *     elif index == 82:             # <<<<<<<<<<<<<<
@@ -4785,7 +4789,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 83:
 
-    /* "src/tenforty/otslib/ots.pyx":465
+    /* "src/tenforty/otslib/ots.pyx":467
  *         return ots_2023_US_1040.main
  *     elif index == 83:
  *         return ots_2023_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -4795,7 +4799,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_Sched_SE_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":464
+    /* "src/tenforty/otslib/ots.pyx":466
  *     elif index == 82:
  *         return ots_2023_US_1040.main
  *     elif index == 83:             # <<<<<<<<<<<<<<
@@ -4805,7 +4809,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 84:
 
-    /* "src/tenforty/otslib/ots.pyx":467
+    /* "src/tenforty/otslib/ots.pyx":469
  *         return ots_2023_US_1040_Sched_SE.main
  *     elif index == 84:
  *         return ots_2023_VA_760.main             # <<<<<<<<<<<<<<
@@ -4815,7 +4819,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_VA_760_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":466
+    /* "src/tenforty/otslib/ots.pyx":468
  *     elif index == 83:
  *         return ots_2023_US_1040_Sched_SE.main
  *     elif index == 84:             # <<<<<<<<<<<<<<
@@ -4825,7 +4829,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 85:
 
-    /* "src/tenforty/otslib/ots.pyx":469
+    /* "src/tenforty/otslib/ots.pyx":471
  *         return ots_2023_VA_760.main
  *     elif index == 85:
  *         return ots_2023_f2210.main             # <<<<<<<<<<<<<<
@@ -4835,7 +4839,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f2210_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":468
+    /* "src/tenforty/otslib/ots.pyx":470
  *     elif index == 84:
  *         return ots_2023_VA_760.main
  *     elif index == 85:             # <<<<<<<<<<<<<<
@@ -4845,7 +4849,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 86:
 
-    /* "src/tenforty/otslib/ots.pyx":471
+    /* "src/tenforty/otslib/ots.pyx":473
  *         return ots_2023_f2210.main
  *     elif index == 86:
  *         return ots_2023_AZ_140.main             # <<<<<<<<<<<<<<
@@ -4855,7 +4859,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_AZ_140_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":470
+    /* "src/tenforty/otslib/ots.pyx":472
  *     elif index == 85:
  *         return ots_2023_f2210.main
  *     elif index == 86:             # <<<<<<<<<<<<<<
@@ -4865,7 +4869,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 87:
 
-    /* "src/tenforty/otslib/ots.pyx":473
+    /* "src/tenforty/otslib/ots.pyx":475
  *         return ots_2023_AZ_140.main
  *     elif index == 87:
  *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main             # <<<<<<<<<<<<<<
@@ -4875,7 +4879,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_US_1040_Sched_E_brokerage_royalties_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":472
+    /* "src/tenforty/otslib/ots.pyx":474
  *     elif index == 86:
  *         return ots_2023_AZ_140.main
  *     elif index == 87:             # <<<<<<<<<<<<<<
@@ -4885,7 +4889,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 88:
 
-    /* "src/tenforty/otslib/ots.pyx":475
+    /* "src/tenforty/otslib/ots.pyx":477
  *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
  *     elif index == 88:
  *         return ots_2023_CA_5805.main             # <<<<<<<<<<<<<<
@@ -4895,7 +4899,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_CA_5805_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":474
+    /* "src/tenforty/otslib/ots.pyx":476
  *     elif index == 87:
  *         return ots_2023_US_1040_Sched_E_brokerage_royalties.main
  *     elif index == 88:             # <<<<<<<<<<<<<<
@@ -4905,7 +4909,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 89:
 
-    /* "src/tenforty/otslib/ots.pyx":477
+    /* "src/tenforty/otslib/ots.pyx":479
  *         return ots_2023_CA_5805.main
  *     elif index == 89:
  *         return ots_2023_f8812.main             # <<<<<<<<<<<<<<
@@ -4915,7 +4919,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2023::taxsolve_f8812_2023::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":476
+    /* "src/tenforty/otslib/ots.pyx":478
  *     elif index == 88:
  *         return ots_2023_CA_5805.main
  *     elif index == 89:             # <<<<<<<<<<<<<<
@@ -4925,7 +4929,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 90:
 
-    /* "src/tenforty/otslib/ots.pyx":479
+    /* "src/tenforty/otslib/ots.pyx":481
  *         return ots_2023_f8812.main
  *     elif index == 90:
  *         return ots_2024_NJ_1040.main             # <<<<<<<<<<<<<<
@@ -4935,7 +4939,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_NJ_1040_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":478
+    /* "src/tenforty/otslib/ots.pyx":480
  *     elif index == 89:
  *         return ots_2023_f8812.main
  *     elif index == 90:             # <<<<<<<<<<<<<<
@@ -4945,7 +4949,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 91:
 
-    /* "src/tenforty/otslib/ots.pyx":481
+    /* "src/tenforty/otslib/ots.pyx":483
  *         return ots_2024_NJ_1040.main
  *     elif index == 91:
  *         return ots_2024_US_1040_Sched_E_brokerage_royalties.main             # <<<<<<<<<<<<<<
@@ -4955,7 +4959,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_US_1040_Sched_E_brokerage_royalties_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":480
+    /* "src/tenforty/otslib/ots.pyx":482
  *     elif index == 90:
  *         return ots_2024_NJ_1040.main
  *     elif index == 91:             # <<<<<<<<<<<<<<
@@ -4965,7 +4969,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 92:
 
-    /* "src/tenforty/otslib/ots.pyx":483
+    /* "src/tenforty/otslib/ots.pyx":485
  *         return ots_2024_US_1040_Sched_E_brokerage_royalties.main
  *     elif index == 92:
  *         return ots_2024_f8812.main             # <<<<<<<<<<<<<<
@@ -4975,7 +4979,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f8812_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":482
+    /* "src/tenforty/otslib/ots.pyx":484
  *     elif index == 91:
  *         return ots_2024_US_1040_Sched_E_brokerage_royalties.main
  *     elif index == 92:             # <<<<<<<<<<<<<<
@@ -4985,7 +4989,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 93:
 
-    /* "src/tenforty/otslib/ots.pyx":485
+    /* "src/tenforty/otslib/ots.pyx":487
  *         return ots_2024_f8812.main
  *     elif index == 93:
  *         return ots_2024_f8829.main             # <<<<<<<<<<<<<<
@@ -4995,7 +4999,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f8829_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":484
+    /* "src/tenforty/otslib/ots.pyx":486
  *     elif index == 92:
  *         return ots_2024_f8812.main
  *     elif index == 93:             # <<<<<<<<<<<<<<
@@ -5005,7 +5009,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 94:
 
-    /* "src/tenforty/otslib/ots.pyx":487
+    /* "src/tenforty/otslib/ots.pyx":489
  *         return ots_2024_f8829.main
  *     elif index == 94:
  *         return ots_2024_f8959.main             # <<<<<<<<<<<<<<
@@ -5015,7 +5019,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f8959_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":486
+    /* "src/tenforty/otslib/ots.pyx":488
  *     elif index == 93:
  *         return ots_2024_f8829.main
  *     elif index == 94:             # <<<<<<<<<<<<<<
@@ -5025,7 +5029,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 95:
 
-    /* "src/tenforty/otslib/ots.pyx":489
+    /* "src/tenforty/otslib/ots.pyx":491
  *         return ots_2024_f8959.main
  *     elif index == 95:
  *         return ots_2024_f8960.main             # <<<<<<<<<<<<<<
@@ -5035,7 +5039,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f8960_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":488
+    /* "src/tenforty/otslib/ots.pyx":490
  *     elif index == 94:
  *         return ots_2024_f8959.main
  *     elif index == 95:             # <<<<<<<<<<<<<<
@@ -5045,7 +5049,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 96:
 
-    /* "src/tenforty/otslib/ots.pyx":491
+    /* "src/tenforty/otslib/ots.pyx":493
  *         return ots_2024_f8960.main
  *     elif index == 96:
  *         return ots_2024_f8995.main             # <<<<<<<<<<<<<<
@@ -5055,7 +5059,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f8995_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":490
+    /* "src/tenforty/otslib/ots.pyx":492
  *     elif index == 95:
  *         return ots_2024_f8960.main
  *     elif index == 96:             # <<<<<<<<<<<<<<
@@ -5065,7 +5069,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 97:
 
-    /* "src/tenforty/otslib/ots.pyx":493
+    /* "src/tenforty/otslib/ots.pyx":495
  *         return ots_2024_f8995.main
  *     elif index == 97:
  *         return ots_2024_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -5075,7 +5079,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_US_1040_Sched_SE_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":492
+    /* "src/tenforty/otslib/ots.pyx":494
  *     elif index == 96:
  *         return ots_2024_f8995.main
  *     elif index == 97:             # <<<<<<<<<<<<<<
@@ -5085,7 +5089,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 98:
 
-    /* "src/tenforty/otslib/ots.pyx":495
+    /* "src/tenforty/otslib/ots.pyx":497
  *         return ots_2024_US_1040_Sched_SE.main
  *     elif index == 98:
  *         return ots_2024_f8606.main             # <<<<<<<<<<<<<<
@@ -5095,7 +5099,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":494
+    /* "src/tenforty/otslib/ots.pyx":496
  *     elif index == 97:
  *         return ots_2024_US_1040_Sched_SE.main
  *     elif index == 98:             # <<<<<<<<<<<<<<
@@ -5105,7 +5109,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 99:
 
-    /* "src/tenforty/otslib/ots.pyx":497
+    /* "src/tenforty/otslib/ots.pyx":499
  *         return ots_2024_f8606.main
  *     elif index == 99:
  *         return ots_2024_AZ_140.main             # <<<<<<<<<<<<<<
@@ -5115,7 +5119,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_AZ_140_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":496
+    /* "src/tenforty/otslib/ots.pyx":498
  *     elif index == 98:
  *         return ots_2024_f8606.main
  *     elif index == 99:             # <<<<<<<<<<<<<<
@@ -5125,7 +5129,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x64:
 
-    /* "src/tenforty/otslib/ots.pyx":499
+    /* "src/tenforty/otslib/ots.pyx":501
  *         return ots_2024_AZ_140.main
  *     elif index == 100:
  *         return ots_2024_CA_540.main             # <<<<<<<<<<<<<<
@@ -5135,7 +5139,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_CA_540_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":498
+    /* "src/tenforty/otslib/ots.pyx":500
  *     elif index == 99:
  *         return ots_2024_AZ_140.main
  *     elif index == 100:             # <<<<<<<<<<<<<<
@@ -5145,7 +5149,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x65:
 
-    /* "src/tenforty/otslib/ots.pyx":501
+    /* "src/tenforty/otslib/ots.pyx":503
  *         return ots_2024_CA_540.main
  *     elif index == 101:
  *         return ots_2024_CA_5805.main             # <<<<<<<<<<<<<<
@@ -5155,7 +5159,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_CA_5805_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":500
+    /* "src/tenforty/otslib/ots.pyx":502
  *     elif index == 100:
  *         return ots_2024_CA_540.main
  *     elif index == 101:             # <<<<<<<<<<<<<<
@@ -5165,7 +5169,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x66:
 
-    /* "src/tenforty/otslib/ots.pyx":503
+    /* "src/tenforty/otslib/ots.pyx":505
  *         return ots_2024_CA_5805.main
  *     elif index == 102:
  *         return ots_2024_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -5175,7 +5179,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":502
+    /* "src/tenforty/otslib/ots.pyx":504
  *     elif index == 101:
  *         return ots_2024_CA_5805.main
  *     elif index == 102:             # <<<<<<<<<<<<<<
@@ -5185,7 +5189,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x67:
 
-    /* "src/tenforty/otslib/ots.pyx":505
+    /* "src/tenforty/otslib/ots.pyx":507
  *         return ots_2024_HSA_f8889.main
  *     elif index == 103:
  *         return ots_2024_MA_1.main             # <<<<<<<<<<<<<<
@@ -5195,7 +5199,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_MA_1_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":504
+    /* "src/tenforty/otslib/ots.pyx":506
  *     elif index == 102:
  *         return ots_2024_HSA_f8889.main
  *     elif index == 103:             # <<<<<<<<<<<<<<
@@ -5205,7 +5209,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x68:
 
-    /* "src/tenforty/otslib/ots.pyx":507
+    /* "src/tenforty/otslib/ots.pyx":509
  *         return ots_2024_MA_1.main
  *     elif index == 104:
  *         return ots_2024_NC_D400.main             # <<<<<<<<<<<<<<
@@ -5215,7 +5219,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_NC_D400_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":506
+    /* "src/tenforty/otslib/ots.pyx":508
  *     elif index == 103:
  *         return ots_2024_MA_1.main
  *     elif index == 104:             # <<<<<<<<<<<<<<
@@ -5225,7 +5229,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x69:
 
-    /* "src/tenforty/otslib/ots.pyx":509
+    /* "src/tenforty/otslib/ots.pyx":511
  *         return ots_2024_NC_D400.main
  *     elif index == 105:
  *         return ots_2024_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -5235,7 +5239,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_NY_IT201_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":508
+    /* "src/tenforty/otslib/ots.pyx":510
  *     elif index == 104:
  *         return ots_2024_NC_D400.main
  *     elif index == 105:             # <<<<<<<<<<<<<<
@@ -5245,7 +5249,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x6A:
 
-    /* "src/tenforty/otslib/ots.pyx":511
+    /* "src/tenforty/otslib/ots.pyx":513
  *         return ots_2024_NY_IT201.main
  *     elif index == 106:
  *         return ots_2024_OH_IT1040.main             # <<<<<<<<<<<<<<
@@ -5255,7 +5259,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_OH_IT1040_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":510
+    /* "src/tenforty/otslib/ots.pyx":512
  *     elif index == 105:
  *         return ots_2024_NY_IT201.main
  *     elif index == 106:             # <<<<<<<<<<<<<<
@@ -5265,7 +5269,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x6B:
 
-    /* "src/tenforty/otslib/ots.pyx":513
+    /* "src/tenforty/otslib/ots.pyx":515
  *         return ots_2024_OH_IT1040.main
  *     elif index == 107:
  *         return ots_2024_PA_40.main             # <<<<<<<<<<<<<<
@@ -5275,7 +5279,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_PA_40_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":512
+    /* "src/tenforty/otslib/ots.pyx":514
  *     elif index == 106:
  *         return ots_2024_OH_IT1040.main
  *     elif index == 107:             # <<<<<<<<<<<<<<
@@ -5285,7 +5289,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x6C:
 
-    /* "src/tenforty/otslib/ots.pyx":515
+    /* "src/tenforty/otslib/ots.pyx":517
  *         return ots_2024_PA_40.main
  *     elif index == 108:
  *         return ots_2024_US_1040.main             # <<<<<<<<<<<<<<
@@ -5295,7 +5299,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_US_1040_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":514
+    /* "src/tenforty/otslib/ots.pyx":516
  *     elif index == 107:
  *         return ots_2024_PA_40.main
  *     elif index == 108:             # <<<<<<<<<<<<<<
@@ -5305,7 +5309,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x6D:
 
-    /* "src/tenforty/otslib/ots.pyx":517
+    /* "src/tenforty/otslib/ots.pyx":519
  *         return ots_2024_US_1040.main
  *     elif index == 109:
  *         return ots_2024_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
@@ -5315,7 +5319,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_US_1040_Sched_C_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":516
+    /* "src/tenforty/otslib/ots.pyx":518
  *     elif index == 108:
  *         return ots_2024_US_1040.main
  *     elif index == 109:             # <<<<<<<<<<<<<<
@@ -5325,7 +5329,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x6E:
 
-    /* "src/tenforty/otslib/ots.pyx":519
+    /* "src/tenforty/otslib/ots.pyx":521
  *         return ots_2024_US_1040_Sched_C.main
  *     elif index == 110:
  *         return ots_2024_VA_760.main             # <<<<<<<<<<<<<<
@@ -5335,7 +5339,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_VA_760_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":518
+    /* "src/tenforty/otslib/ots.pyx":520
  *     elif index == 109:
  *         return ots_2024_US_1040_Sched_C.main
  *     elif index == 110:             # <<<<<<<<<<<<<<
@@ -5345,7 +5349,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x6F:
 
-    /* "src/tenforty/otslib/ots.pyx":521
+    /* "src/tenforty/otslib/ots.pyx":523
  *         return ots_2024_VA_760.main
  *     elif index == 111:
  *         return ots_2024_f2210.main             # <<<<<<<<<<<<<<
@@ -5355,7 +5359,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_f2210_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":520
+    /* "src/tenforty/otslib/ots.pyx":522
  *     elif index == 110:
  *         return ots_2024_VA_760.main
  *     elif index == 111:             # <<<<<<<<<<<<<<
@@ -5365,7 +5369,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x70:
 
-    /* "src/tenforty/otslib/ots.pyx":523
+    /* "src/tenforty/otslib/ots.pyx":525
  *         return ots_2024_f2210.main
  *     elif index == 112:
  *         return ots_2024_MI_1040.main             # <<<<<<<<<<<<<<
@@ -5375,7 +5379,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_MI_1040_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":522
+    /* "src/tenforty/otslib/ots.pyx":524
  *     elif index == 111:
  *         return ots_2024_f2210.main
  *     elif index == 112:             # <<<<<<<<<<<<<<
@@ -5385,7 +5389,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x71:
 
-    /* "src/tenforty/otslib/ots.pyx":525
+    /* "src/tenforty/otslib/ots.pyx":527
  *         return ots_2024_MI_1040.main
  *     elif index == 113:
  *         return ots_2024_OR_40.main             # <<<<<<<<<<<<<<
@@ -5395,7 +5399,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2024::taxsolve_OR_40_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":524
+    /* "src/tenforty/otslib/ots.pyx":526
  *     elif index == 112:
  *         return ots_2024_MI_1040.main
  *     elif index == 113:             # <<<<<<<<<<<<<<
@@ -5405,7 +5409,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x72:
 
-    /* "src/tenforty/otslib/ots.pyx":527
+    /* "src/tenforty/otslib/ots.pyx":529
  *         return ots_2024_OR_40.main
  *     elif index == 114:
  *         return ots_2025_OR_40.main             # <<<<<<<<<<<<<<
@@ -5415,7 +5419,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_OR_40_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":526
+    /* "src/tenforty/otslib/ots.pyx":528
  *     elif index == 113:
  *         return ots_2024_OR_40.main
  *     elif index == 114:             # <<<<<<<<<<<<<<
@@ -5425,7 +5429,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x73:
 
-    /* "src/tenforty/otslib/ots.pyx":529
+    /* "src/tenforty/otslib/ots.pyx":531
  *         return ots_2025_OR_40.main
  *     elif index == 115:
  *         return ots_2025_MA_1.main             # <<<<<<<<<<<<<<
@@ -5435,7 +5439,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_MA_1_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":528
+    /* "src/tenforty/otslib/ots.pyx":530
  *     elif index == 114:
  *         return ots_2025_OR_40.main
  *     elif index == 115:             # <<<<<<<<<<<<<<
@@ -5445,7 +5449,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x74:
 
-    /* "src/tenforty/otslib/ots.pyx":531
+    /* "src/tenforty/otslib/ots.pyx":533
  *         return ots_2025_MA_1.main
  *     elif index == 116:
  *         return ots_2025_VA_760.main             # <<<<<<<<<<<<<<
@@ -5455,7 +5459,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_VA_760_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":530
+    /* "src/tenforty/otslib/ots.pyx":532
  *     elif index == 115:
  *         return ots_2025_MA_1.main
  *     elif index == 116:             # <<<<<<<<<<<<<<
@@ -5465,7 +5469,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x75:
 
-    /* "src/tenforty/otslib/ots.pyx":533
+    /* "src/tenforty/otslib/ots.pyx":535
  *         return ots_2025_VA_760.main
  *     elif index == 117:
  *         return ots_2025_f8812.main             # <<<<<<<<<<<<<<
@@ -5475,7 +5479,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f8812_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":532
+    /* "src/tenforty/otslib/ots.pyx":534
  *     elif index == 116:
  *         return ots_2025_VA_760.main
  *     elif index == 117:             # <<<<<<<<<<<<<<
@@ -5485,7 +5489,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x76:
 
-    /* "src/tenforty/otslib/ots.pyx":535
+    /* "src/tenforty/otslib/ots.pyx":537
  *         return ots_2025_f8812.main
  *     elif index == 118:
  *         return ots_2025_US_1040_Sched_SE.main             # <<<<<<<<<<<<<<
@@ -5495,7 +5499,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_US_1040_Sched_SE_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":534
+    /* "src/tenforty/otslib/ots.pyx":536
  *     elif index == 117:
  *         return ots_2025_f8812.main
  *     elif index == 118:             # <<<<<<<<<<<<<<
@@ -5505,7 +5509,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x77:
 
-    /* "src/tenforty/otslib/ots.pyx":537
+    /* "src/tenforty/otslib/ots.pyx":539
  *         return ots_2025_US_1040_Sched_SE.main
  *     elif index == 119:
  *         return ots_2025_f8829.main             # <<<<<<<<<<<<<<
@@ -5515,7 +5519,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f8829_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":536
+    /* "src/tenforty/otslib/ots.pyx":538
  *     elif index == 118:
  *         return ots_2025_US_1040_Sched_SE.main
  *     elif index == 119:             # <<<<<<<<<<<<<<
@@ -5525,7 +5529,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x78:
 
-    /* "src/tenforty/otslib/ots.pyx":539
+    /* "src/tenforty/otslib/ots.pyx":541
  *         return ots_2025_f8829.main
  *     elif index == 120:
  *         return ots_2025_CA_5805.main             # <<<<<<<<<<<<<<
@@ -5535,7 +5539,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_CA_5805_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":538
+    /* "src/tenforty/otslib/ots.pyx":540
  *     elif index == 119:
  *         return ots_2025_f8829.main
  *     elif index == 120:             # <<<<<<<<<<<<<<
@@ -5545,7 +5549,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x79:
 
-    /* "src/tenforty/otslib/ots.pyx":541
+    /* "src/tenforty/otslib/ots.pyx":543
  *         return ots_2025_CA_5805.main
  *     elif index == 121:
  *         return ots_2025_f8959.main             # <<<<<<<<<<<<<<
@@ -5555,7 +5559,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f8959_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":540
+    /* "src/tenforty/otslib/ots.pyx":542
  *     elif index == 120:
  *         return ots_2025_CA_5805.main
  *     elif index == 121:             # <<<<<<<<<<<<<<
@@ -5565,7 +5569,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x7A:
 
-    /* "src/tenforty/otslib/ots.pyx":543
+    /* "src/tenforty/otslib/ots.pyx":545
  *         return ots_2025_f8959.main
  *     elif index == 122:
  *         return ots_2025_f8960.main             # <<<<<<<<<<<<<<
@@ -5575,7 +5579,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f8960_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":542
+    /* "src/tenforty/otslib/ots.pyx":544
  *     elif index == 121:
  *         return ots_2025_f8959.main
  *     elif index == 122:             # <<<<<<<<<<<<<<
@@ -5585,7 +5589,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x7B:
 
-    /* "src/tenforty/otslib/ots.pyx":545
+    /* "src/tenforty/otslib/ots.pyx":547
  *         return ots_2025_f8960.main
  *     elif index == 123:
  *         return ots_2025_MI_1040.main             # <<<<<<<<<<<<<<
@@ -5595,7 +5599,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_MI_1040_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":544
+    /* "src/tenforty/otslib/ots.pyx":546
  *     elif index == 122:
  *         return ots_2025_f8960.main
  *     elif index == 123:             # <<<<<<<<<<<<<<
@@ -5605,7 +5609,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x7C:
 
-    /* "src/tenforty/otslib/ots.pyx":547
+    /* "src/tenforty/otslib/ots.pyx":549
  *         return ots_2025_MI_1040.main
  *     elif index == 124:
  *         return ots_2025_US_1040.main             # <<<<<<<<<<<<<<
@@ -5615,7 +5619,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_US_1040_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":546
+    /* "src/tenforty/otslib/ots.pyx":548
  *     elif index == 123:
  *         return ots_2025_MI_1040.main
  *     elif index == 124:             # <<<<<<<<<<<<<<
@@ -5625,7 +5629,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x7D:
 
-    /* "src/tenforty/otslib/ots.pyx":549
+    /* "src/tenforty/otslib/ots.pyx":551
  *         return ots_2025_US_1040.main
  *     elif index == 125:
  *         return ots_2025_NC_D400.main             # <<<<<<<<<<<<<<
@@ -5635,7 +5639,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_NC_D400_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":548
+    /* "src/tenforty/otslib/ots.pyx":550
  *     elif index == 124:
  *         return ots_2025_US_1040.main
  *     elif index == 125:             # <<<<<<<<<<<<<<
@@ -5645,7 +5649,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x7E:
 
-    /* "src/tenforty/otslib/ots.pyx":551
+    /* "src/tenforty/otslib/ots.pyx":553
  *         return ots_2025_NC_D400.main
  *     elif index == 126:
  *         return ots_2025_AZ_140.main             # <<<<<<<<<<<<<<
@@ -5655,7 +5659,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_AZ_140_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":550
+    /* "src/tenforty/otslib/ots.pyx":552
  *     elif index == 125:
  *         return ots_2025_NC_D400.main
  *     elif index == 126:             # <<<<<<<<<<<<<<
@@ -5665,7 +5669,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x7F:
 
-    /* "src/tenforty/otslib/ots.pyx":553
+    /* "src/tenforty/otslib/ots.pyx":555
  *         return ots_2025_AZ_140.main
  *     elif index == 127:
  *         return ots_2025_NY_IT201.main             # <<<<<<<<<<<<<<
@@ -5675,7 +5679,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_NY_IT201_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":552
+    /* "src/tenforty/otslib/ots.pyx":554
  *     elif index == 126:
  *         return ots_2025_AZ_140.main
  *     elif index == 127:             # <<<<<<<<<<<<<<
@@ -5685,7 +5689,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x80:
 
-    /* "src/tenforty/otslib/ots.pyx":555
+    /* "src/tenforty/otslib/ots.pyx":557
  *         return ots_2025_NY_IT201.main
  *     elif index == 128:
  *         return ots_2025_f8606.main             # <<<<<<<<<<<<<<
@@ -5695,7 +5699,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f8606::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":554
+    /* "src/tenforty/otslib/ots.pyx":556
  *     elif index == 127:
  *         return ots_2025_NY_IT201.main
  *     elif index == 128:             # <<<<<<<<<<<<<<
@@ -5705,7 +5709,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x81:
 
-    /* "src/tenforty/otslib/ots.pyx":557
+    /* "src/tenforty/otslib/ots.pyx":559
  *         return ots_2025_f8606.main
  *     elif index == 129:
  *         return ots_2025_HSA_f8889.main             # <<<<<<<<<<<<<<
@@ -5715,7 +5719,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_HSA_f8889::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":556
+    /* "src/tenforty/otslib/ots.pyx":558
  *     elif index == 128:
  *         return ots_2025_f8606.main
  *     elif index == 129:             # <<<<<<<<<<<<<<
@@ -5725,7 +5729,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x82:
 
-    /* "src/tenforty/otslib/ots.pyx":559
+    /* "src/tenforty/otslib/ots.pyx":561
  *         return ots_2025_HSA_f8889.main
  *     elif index == 130:
  *         return ots_2025_f6781.main             # <<<<<<<<<<<<<<
@@ -5735,7 +5739,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f6781_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":558
+    /* "src/tenforty/otslib/ots.pyx":560
  *     elif index == 129:
  *         return ots_2025_HSA_f8889.main
  *     elif index == 130:             # <<<<<<<<<<<<<<
@@ -5745,7 +5749,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x83:
 
-    /* "src/tenforty/otslib/ots.pyx":561
+    /* "src/tenforty/otslib/ots.pyx":563
  *         return ots_2025_f6781.main
  *     elif index == 131:
  *         return ots_2025_US_1040_Sched_E_brokerage_royalties.main             # <<<<<<<<<<<<<<
@@ -5755,7 +5759,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_US_1040_Sched_E_brokerage_royalties_2024::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":560
+    /* "src/tenforty/otslib/ots.pyx":562
  *     elif index == 130:
  *         return ots_2025_f6781.main
  *     elif index == 131:             # <<<<<<<<<<<<<<
@@ -5765,7 +5769,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x84:
 
-    /* "src/tenforty/otslib/ots.pyx":563
+    /* "src/tenforty/otslib/ots.pyx":565
  *         return ots_2025_US_1040_Sched_E_brokerage_royalties.main
  *     elif index == 132:
  *         return ots_2025_f8995.main             # <<<<<<<<<<<<<<
@@ -5775,7 +5779,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_f8995_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":562
+    /* "src/tenforty/otslib/ots.pyx":564
  *     elif index == 131:
  *         return ots_2025_US_1040_Sched_E_brokerage_royalties.main
  *     elif index == 132:             # <<<<<<<<<<<<<<
@@ -5785,7 +5789,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x85:
 
-    /* "src/tenforty/otslib/ots.pyx":565
+    /* "src/tenforty/otslib/ots.pyx":567
  *         return ots_2025_f8995.main
  *     elif index == 133:
  *         return ots_2025_CA_540.main             # <<<<<<<<<<<<<<
@@ -5795,7 +5799,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_CA_540_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":564
+    /* "src/tenforty/otslib/ots.pyx":566
  *     elif index == 132:
  *         return ots_2025_f8995.main
  *     elif index == 133:             # <<<<<<<<<<<<<<
@@ -5805,17 +5809,17 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x86:
 
-    /* "src/tenforty/otslib/ots.pyx":567
+    /* "src/tenforty/otslib/ots.pyx":569
  *         return ots_2025_CA_540.main
  *     elif index == 134:
  *         return ots_2025_NJ_1040.main             # <<<<<<<<<<<<<<
  *     elif index == 135:
- *         return ots_2025_OH_IT1040.main
+ *         return ots_2025_f2441.main
 */
     __pyx_r = OpenTaxSolver2025::taxsolve_NJ_1040_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":566
+    /* "src/tenforty/otslib/ots.pyx":568
  *     elif index == 133:
  *         return ots_2025_CA_540.main
  *     elif index == 134:             # <<<<<<<<<<<<<<
@@ -5825,69 +5829,89 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     break;
     case 0x87:
 
-    /* "src/tenforty/otslib/ots.pyx":569
+    /* "src/tenforty/otslib/ots.pyx":571
  *         return ots_2025_NJ_1040.main
  *     elif index == 135:
- *         return ots_2025_OH_IT1040.main             # <<<<<<<<<<<<<<
+ *         return ots_2025_f2441.main             # <<<<<<<<<<<<<<
  *     elif index == 136:
- *         return ots_2025_f2210.main
+ *         return ots_2025_OH_IT1040.main
 */
-    __pyx_r = OpenTaxSolver2025::taxsolve_OH_IT1040_2025::main;
+    __pyx_r = OpenTaxSolver2025::taxsolve_f2441_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":568
+    /* "src/tenforty/otslib/ots.pyx":570
  *     elif index == 134:
  *         return ots_2025_NJ_1040.main
  *     elif index == 135:             # <<<<<<<<<<<<<<
- *         return ots_2025_OH_IT1040.main
+ *         return ots_2025_f2441.main
  *     elif index == 136:
 */
     break;
     case 0x88:
 
-    /* "src/tenforty/otslib/ots.pyx":571
- *         return ots_2025_OH_IT1040.main
+    /* "src/tenforty/otslib/ots.pyx":573
+ *         return ots_2025_f2441.main
  *     elif index == 136:
- *         return ots_2025_f2210.main             # <<<<<<<<<<<<<<
+ *         return ots_2025_OH_IT1040.main             # <<<<<<<<<<<<<<
  *     elif index == 137:
- *         return ots_2025_PA_40.main
+ *         return ots_2025_f2210.main
 */
-    __pyx_r = OpenTaxSolver2025::taxsolve_f2210_2025::main;
+    __pyx_r = OpenTaxSolver2025::taxsolve_OH_IT1040_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":570
+    /* "src/tenforty/otslib/ots.pyx":572
  *     elif index == 135:
- *         return ots_2025_OH_IT1040.main
+ *         return ots_2025_f2441.main
  *     elif index == 136:             # <<<<<<<<<<<<<<
- *         return ots_2025_f2210.main
+ *         return ots_2025_OH_IT1040.main
  *     elif index == 137:
 */
     break;
     case 0x89:
 
-    /* "src/tenforty/otslib/ots.pyx":573
- *         return ots_2025_f2210.main
+    /* "src/tenforty/otslib/ots.pyx":575
+ *         return ots_2025_OH_IT1040.main
  *     elif index == 137:
- *         return ots_2025_PA_40.main             # <<<<<<<<<<<<<<
+ *         return ots_2025_f2210.main             # <<<<<<<<<<<<<<
  *     elif index == 138:
- *         return ots_2025_US_1040_Sched_C.main
+ *         return ots_2025_PA_40.main
 */
-    __pyx_r = OpenTaxSolver2025::taxsolve_PA_40_2025::main;
+    __pyx_r = OpenTaxSolver2025::taxsolve_f2210_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":572
+    /* "src/tenforty/otslib/ots.pyx":574
  *     elif index == 136:
- *         return ots_2025_f2210.main
+ *         return ots_2025_OH_IT1040.main
  *     elif index == 137:             # <<<<<<<<<<<<<<
- *         return ots_2025_PA_40.main
+ *         return ots_2025_f2210.main
  *     elif index == 138:
 */
     break;
     case 0x8A:
 
-    /* "src/tenforty/otslib/ots.pyx":575
- *         return ots_2025_PA_40.main
+    /* "src/tenforty/otslib/ots.pyx":577
+ *         return ots_2025_f2210.main
  *     elif index == 138:
+ *         return ots_2025_PA_40.main             # <<<<<<<<<<<<<<
+ *     elif index == 139:
+ *         return ots_2025_US_1040_Sched_C.main
+*/
+    __pyx_r = OpenTaxSolver2025::taxsolve_PA_40_2025::main;
+    goto __pyx_L0;
+
+    /* "src/tenforty/otslib/ots.pyx":576
+ *     elif index == 137:
+ *         return ots_2025_f2210.main
+ *     elif index == 138:             # <<<<<<<<<<<<<<
+ *         return ots_2025_PA_40.main
+ *     elif index == 139:
+*/
+    break;
+    case 0x8B:
+
+    /* "src/tenforty/otslib/ots.pyx":579
+ *         return ots_2025_PA_40.main
+ *     elif index == 139:
  *         return ots_2025_US_1040_Sched_C.main             # <<<<<<<<<<<<<<
  *     return NULL
  *
@@ -5895,10 +5919,10 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     __pyx_r = OpenTaxSolver2025::taxsolve_US_1040_Sched_C_2025::main;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":574
- *     elif index == 137:
+    /* "src/tenforty/otslib/ots.pyx":578
+ *     elif index == 138:
  *         return ots_2025_PA_40.main
- *     elif index == 138:             # <<<<<<<<<<<<<<
+ *     elif index == 139:             # <<<<<<<<<<<<<<
  *         return ots_2025_US_1040_Sched_C.main
  *     return NULL
 */
@@ -5906,8 +5930,8 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
     default: break;
   }
 
-  /* "src/tenforty/otslib/ots.pyx":576
- *     elif index == 138:
+  /* "src/tenforty/otslib/ots.pyx":580
+ *     elif index == 139:
  *         return ots_2025_US_1040_Sched_C.main
  *     return NULL             # <<<<<<<<<<<<<<
  *
@@ -5916,7 +5940,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
   __pyx_r = NULL;
   goto __pyx_L0;
 
-  /* "src/tenforty/otslib/ots.pyx":297
+  /* "src/tenforty/otslib/ots.pyx":299
  * }
  *
  * cdef f_type _ots_get_function(int index):             # <<<<<<<<<<<<<<
@@ -5929,7 +5953,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib__ots_get_funct
   return __pyx_r;
 }
 
-/* "src/tenforty/otslib/ots.pyx":578
+/* "src/tenforty/otslib/ots.pyx":582
  *     return NULL
  *
  * cdef f_type lookup_ots_call(int year, str form):             # <<<<<<<<<<<<<<
@@ -5951,58 +5975,58 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("lookup_ots_call", 0);
 
-  /* "src/tenforty/otslib/ots.pyx":579
+  /* "src/tenforty/otslib/ots.pyx":583
  *
  * cdef f_type lookup_ots_call(int year, str form):
  *     cdef tuple key = (year, form)             # <<<<<<<<<<<<<<
  *     if key in _OTS_KEY_TO_INDEX:
  *         return _ots_get_function(_OTS_KEY_TO_INDEX[key])
 */
-  __pyx_t_1 = __Pyx_PyLong_From_int(__pyx_v_year); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 579, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyLong_From_int(__pyx_v_year); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 583, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 579, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 583, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1) != (0)) __PYX_ERR(0, 579, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1) != (0)) __PYX_ERR(0, 583, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_form);
   __Pyx_GIVEREF(__pyx_v_form);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_form) != (0)) __PYX_ERR(0, 579, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_form) != (0)) __PYX_ERR(0, 583, __pyx_L1_error);
   __pyx_t_1 = 0;
   __pyx_v_key = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "src/tenforty/otslib/ots.pyx":580
+  /* "src/tenforty/otslib/ots.pyx":584
  * cdef f_type lookup_ots_call(int year, str form):
  *     cdef tuple key = (year, form)
  *     if key in _OTS_KEY_TO_INDEX:             # <<<<<<<<<<<<<<
  *         return _ots_get_function(_OTS_KEY_TO_INDEX[key])
  *     return NULL
 */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_OTS_KEY_TO_INDEX); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 580, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_OTS_KEY_TO_INDEX); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 584, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_v_key, __pyx_t_2, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 580, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_v_key, __pyx_t_2, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 584, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
 
-    /* "src/tenforty/otslib/ots.pyx":581
+    /* "src/tenforty/otslib/ots.pyx":585
  *     cdef tuple key = (year, form)
  *     if key in _OTS_KEY_TO_INDEX:
  *         return _ots_get_function(_OTS_KEY_TO_INDEX[key])             # <<<<<<<<<<<<<<
  *     return NULL
  *
 */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_OTS_KEY_TO_INDEX); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 581, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_OTS_KEY_TO_INDEX); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 585, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 581, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_key); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 585, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_4 = __Pyx_PyLong_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyLong_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 585, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __pyx_f_8tenforty_6otslib__ots_get_function(__pyx_t_4); if (unlikely(__pyx_t_5 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_8tenforty_6otslib__ots_get_function(__pyx_t_4); if (unlikely(__pyx_t_5 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 585, __pyx_L1_error)
     __pyx_r = __pyx_t_5;
     goto __pyx_L0;
 
-    /* "src/tenforty/otslib/ots.pyx":580
+    /* "src/tenforty/otslib/ots.pyx":584
  * cdef f_type lookup_ots_call(int year, str form):
  *     cdef tuple key = (year, form)
  *     if key in _OTS_KEY_TO_INDEX:             # <<<<<<<<<<<<<<
@@ -6011,7 +6035,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
 */
   }
 
-  /* "src/tenforty/otslib/ots.pyx":582
+  /* "src/tenforty/otslib/ots.pyx":586
  *     if key in _OTS_KEY_TO_INDEX:
  *         return _ots_get_function(_OTS_KEY_TO_INDEX[key])
  *     return NULL             # <<<<<<<<<<<<<<
@@ -6021,7 +6045,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   __pyx_r = NULL;
   goto __pyx_L0;
 
-  /* "src/tenforty/otslib/ots.pyx":578
+  /* "src/tenforty/otslib/ots.pyx":582
  *     return NULL
  *
  * cdef f_type lookup_ots_call(int year, str form):             # <<<<<<<<<<<<<<
@@ -6041,7 +6065,7 @@ static __pyx_t_8tenforty_6otslib_f_type __pyx_f_8tenforty_6otslib_lookup_ots_cal
   return __pyx_r;
 }
 
-/* "src/tenforty/otslib/ots.pyx":585
+/* "src/tenforty/otslib/ots.pyx":589
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
@@ -6093,56 +6117,56 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_year,&__pyx_mstate_global->__pyx_n_u_form,&__pyx_mstate_global->__pyx_n_u_form_text,&__pyx_mstate_global->__pyx_n_u_fed_form_text,&__pyx_mstate_global->__pyx_n_u_on_error,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 585, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 589, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "_evaluate_form", 0) < (0)) __PYX_ERR(0, 585, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "_evaluate_form", 0) < (0)) __PYX_ERR(0, 589, __pyx_L3_error)
       if (!values[3]) values[3] = __Pyx_NewRef(((PyObject *)Py_None));
       if (!values[4]) values[4] = __Pyx_NewRef(((PyObject *)((PyObject*)__pyx_mstate_global->__pyx_n_u_raise)));
       for (Py_ssize_t i = __pyx_nargs; i < 3; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 5, i); __PYX_ERR(0, 585, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 5, i); __PYX_ERR(0, 589, __pyx_L3_error) }
       }
     } else {
       switch (__pyx_nargs) {
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 589, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 589, __pyx_L3_error)
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 589, __pyx_L3_error)
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 585, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 589, __pyx_L3_error)
         break;
         default: goto __pyx_L5_argtuple_error;
       }
@@ -6157,7 +6181,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 5, __pyx_nargs); __PYX_ERR(0, 585, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("_evaluate_form", 0, 3, 5, __pyx_nargs); __PYX_ERR(0, 589, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6226,35 +6250,35 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   __Pyx_RefNannySetupContext("_evaluate_form", 0);
   __Pyx_INCREF(__pyx_v_form_text);
 
-  /* "src/tenforty/otslib/ots.pyx":600
+  /* "src/tenforty/otslib/ots.pyx":604
  *     context.
  *     """
  *     import warnings             # <<<<<<<<<<<<<<
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
 */
-  __pyx_t_2 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_warnings, 0, 0, NULL, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 600, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_warnings, 0, 0, NULL, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 604, __pyx_L1_error)
   __pyx_t_1 = __pyx_t_2;
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_warnings = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "src/tenforty/otslib/ots.pyx":602
+  /* "src/tenforty/otslib/ots.pyx":606
  *     import warnings
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)             # <<<<<<<<<<<<<<
  *     if ots_form_function is NULL:
  *         raise ValueError(f"Unknown year/form combination: {year}/{form}")
 */
-  __pyx_t_3 = __Pyx_PyLong_As_int(__pyx_v_year); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 602, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyLong_As_int(__pyx_v_year); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 606, __pyx_L1_error)
   __pyx_t_1 = __pyx_v_form;
   __Pyx_INCREF(__pyx_t_1);
-  if (!(likely(PyUnicode_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None) || __Pyx_RaiseUnexpectedTypeError("str", __pyx_t_1))) __PYX_ERR(0, 602, __pyx_L1_error)
-  __pyx_t_4 = __pyx_f_8tenforty_6otslib_lookup_ots_call(__pyx_t_3, ((PyObject*)__pyx_t_1)); if (unlikely(__pyx_t_4 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 602, __pyx_L1_error)
+  if (!(likely(PyUnicode_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None) || __Pyx_RaiseUnexpectedTypeError("str", __pyx_t_1))) __PYX_ERR(0, 606, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_8tenforty_6otslib_lookup_ots_call(__pyx_t_3, ((PyObject*)__pyx_t_1)); if (unlikely(__pyx_t_4 == ((void *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 606, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_ots_form_function = __pyx_t_4;
 
-  /* "src/tenforty/otslib/ots.pyx":603
+  /* "src/tenforty/otslib/ots.pyx":607
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
  *     if ots_form_function is NULL:             # <<<<<<<<<<<<<<
@@ -6264,7 +6288,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   __pyx_t_5 = (__pyx_v_ots_form_function == NULL);
   if (unlikely(__pyx_t_5)) {
 
-    /* "src/tenforty/otslib/ots.pyx":604
+    /* "src/tenforty/otslib/ots.pyx":608
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
  *     if ots_form_function is NULL:
  *         raise ValueError(f"Unknown year/form combination: {year}/{form}")             # <<<<<<<<<<<<<<
@@ -6272,16 +6296,16 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
  *     cdef bytes program_name = b"ots"
 */
     __pyx_t_6 = NULL;
-    __pyx_t_7 = __Pyx_PyObject_FormatSimple(__pyx_v_year, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 604, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_FormatSimple(__pyx_v_year, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 608, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_FormatSimple(__pyx_v_form, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 604, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_FormatSimple(__pyx_v_form, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 608, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_9[0] = __pyx_mstate_global->__pyx_kp_u_Unknown_year_form_combination;
     __pyx_t_9[1] = __pyx_t_7;
     __pyx_t_9[2] = __pyx_mstate_global->__pyx_kp_u_;
     __pyx_t_9[3] = __pyx_t_8;
     __pyx_t_10 = __Pyx_PyUnicode_Join(__pyx_t_9, 4, 31 + __Pyx_PyUnicode_GET_LENGTH(__pyx_t_7) + 1 + __Pyx_PyUnicode_GET_LENGTH(__pyx_t_8), 127 | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_7) | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_8));
-    if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 604, __pyx_L1_error)
+    if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 608, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -6291,14 +6315,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_ValueError)), __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 604, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 608, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 604, __pyx_L1_error)
+    __PYX_ERR(0, 608, __pyx_L1_error)
 
-    /* "src/tenforty/otslib/ots.pyx":603
+    /* "src/tenforty/otslib/ots.pyx":607
  *
  *     cdef f_type ots_form_function = lookup_ots_call(year, form)
  *     if ots_form_function is NULL:             # <<<<<<<<<<<<<<
@@ -6307,7 +6331,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
   }
 
-  /* "src/tenforty/otslib/ots.pyx":606
+  /* "src/tenforty/otslib/ots.pyx":610
  *         raise ValueError(f"Unknown year/form combination: {year}/{form}")
  *
  *     cdef bytes program_name = b"ots"             # <<<<<<<<<<<<<<
@@ -6317,7 +6341,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
   __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_ots);
   __pyx_v_program_name = __pyx_mstate_global->__pyx_n_b_ots;
 
-  /* "src/tenforty/otslib/ots.pyx":608
+  /* "src/tenforty/otslib/ots.pyx":612
  *     cdef bytes program_name = b"ots"
  *     cdef bytes file_path_bytes
  *     cdef char** c_argv = NULL             # <<<<<<<<<<<<<<
@@ -6326,7 +6350,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
   __pyx_v_c_argv = NULL;
 
-  /* "src/tenforty/otslib/ots.pyx":611
+  /* "src/tenforty/otslib/ots.pyx":615
  *     cdef int result_code
  *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
@@ -6335,9 +6359,9 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
   /*with:*/ {
     __pyx_t_10 = NULL;
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_tempfile); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 611, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_tempfile); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 615, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_TemporaryDirectory); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 611, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_TemporaryDirectory); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 615, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_11 = 1;
@@ -6357,13 +6381,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_8, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 611, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 615, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
-    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 611, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 615, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_10 = NULL;
-    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 611, __pyx_L4_error)
+    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 615, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_11 = 1;
     #if CYTHON_UNPACK_METHODS
@@ -6382,7 +6406,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
       __pyx_t_8 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_6, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 611, __pyx_L4_error)
+      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 615, __pyx_L4_error)
       __Pyx_GOTREF(__pyx_t_8);
     }
     __pyx_t_6 = __pyx_t_8;
@@ -6400,7 +6424,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_v_tmpdir = __pyx_t_6;
           __pyx_t_6 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":614
+          /* "src/tenforty/otslib/ots.pyx":618
  *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
@@ -6410,22 +6434,22 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_5 = (__pyx_v_fed_form_text != Py_None);
           if (__pyx_t_5) {
 
-            /* "src/tenforty/otslib/ots.pyx":616
+            /* "src/tenforty/otslib/ots.pyx":620
  *         if fed_form_text is not None:
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"             # <<<<<<<<<<<<<<
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)
 */
-            __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 616, __pyx_L8_error)
+            __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 620, __pyx_L8_error)
             __Pyx_GOTREF(__pyx_t_6);
-            __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_fed_form_txt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 616, __pyx_L8_error)
+            __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_fed_form_txt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 620, __pyx_L8_error)
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
             __pyx_v_ff_path = ((PyObject*)__pyx_t_1);
             __pyx_t_1 = 0;
 
-            /* "src/tenforty/otslib/ots.pyx":617
+            /* "src/tenforty/otslib/ots.pyx":621
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6439,13 +6463,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 PyObject *__pyx_callargs[3] = {__pyx_t_6, __pyx_v_ff_path, __pyx_mstate_global->__pyx_n_u_w};
                 __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_11, (3-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                 __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-                if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 617, __pyx_L8_error)
+                if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 621, __pyx_L8_error)
                 __Pyx_GOTREF(__pyx_t_1);
               }
-              __pyx_t_15 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 617, __pyx_L8_error)
+              __pyx_t_15 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 621, __pyx_L8_error)
               __Pyx_GOTREF(__pyx_t_15);
               __pyx_t_8 = NULL;
-              __pyx_t_10 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 617, __pyx_L15_error)
+              __pyx_t_10 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 621, __pyx_L15_error)
               __Pyx_GOTREF(__pyx_t_10);
               __pyx_t_11 = 1;
               #if CYTHON_UNPACK_METHODS
@@ -6464,7 +6488,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __pyx_t_6 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_10, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-                if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 617, __pyx_L15_error)
+                if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 621, __pyx_L15_error)
                 __Pyx_GOTREF(__pyx_t_6);
               }
               __pyx_t_10 = __pyx_t_6;
@@ -6482,7 +6506,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __pyx_v_fp = __pyx_t_10;
                     __pyx_t_10 = 0;
 
-                    /* "src/tenforty/otslib/ots.pyx":618
+                    /* "src/tenforty/otslib/ots.pyx":622
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:
  *                 print(fed_form_text, file=fp)             # <<<<<<<<<<<<<<
@@ -6493,18 +6517,18 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __pyx_t_11 = 1;
                     {
                       PyObject *__pyx_callargs[2 + ((CYTHON_VECTORCALL) ? 1 : 0)] = {__pyx_t_1, __pyx_v_fed_form_text};
-                      __pyx_t_6 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 618, __pyx_L19_error)
+                      __pyx_t_6 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 622, __pyx_L19_error)
                       __Pyx_GOTREF(__pyx_t_6);
-                      if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_6, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 618, __pyx_L19_error)
+                      if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_6, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 622, __pyx_L19_error)
                       __pyx_t_10 = __Pyx_Object_Vectorcall_CallFromBuilder((PyObject*)__pyx_builtin_print, __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET), __pyx_t_6);
                       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
                       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-                      if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 618, __pyx_L19_error)
+                      if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 622, __pyx_L19_error)
                       __Pyx_GOTREF(__pyx_t_10);
                     }
                     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-                    /* "src/tenforty/otslib/ots.pyx":617
+                    /* "src/tenforty/otslib/ots.pyx":621
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6524,20 +6548,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                   /*except:*/ {
                     __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                    if (__Pyx_GetException(&__pyx_t_10, &__pyx_t_6, &__pyx_t_1) < 0) __PYX_ERR(0, 617, __pyx_L21_except_error)
+                    if (__Pyx_GetException(&__pyx_t_10, &__pyx_t_6, &__pyx_t_1) < 0) __PYX_ERR(0, 621, __pyx_L21_except_error)
                     __Pyx_XGOTREF(__pyx_t_10);
                     __Pyx_XGOTREF(__pyx_t_6);
                     __Pyx_XGOTREF(__pyx_t_1);
-                    __pyx_t_8 = PyTuple_Pack(3, __pyx_t_10, __pyx_t_6, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 617, __pyx_L21_except_error)
+                    __pyx_t_8 = PyTuple_Pack(3, __pyx_t_10, __pyx_t_6, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 621, __pyx_L21_except_error)
                     __Pyx_GOTREF(__pyx_t_8);
                     __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_t_8, NULL);
                     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
                     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                    if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 617, __pyx_L21_except_error)
+                    if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 621, __pyx_L21_except_error)
                     __Pyx_GOTREF(__pyx_t_19);
                     __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_19);
                     __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-                    if (__pyx_t_5 < (0)) __PYX_ERR(0, 617, __pyx_L21_except_error)
+                    if (__pyx_t_5 < (0)) __PYX_ERR(0, 621, __pyx_L21_except_error)
                     __pyx_t_20 = (!__pyx_t_5);
                     if (unlikely(__pyx_t_20)) {
                       __Pyx_GIVEREF(__pyx_t_10);
@@ -6545,7 +6569,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                       __Pyx_XGIVEREF(__pyx_t_1);
                       __Pyx_ErrRestoreWithState(__pyx_t_10, __pyx_t_6, __pyx_t_1);
                       __pyx_t_10 = 0;  __pyx_t_6 = 0;  __pyx_t_1 = 0;
-                      __PYX_ERR(0, 617, __pyx_L21_except_error)
+                      __PYX_ERR(0, 621, __pyx_L21_except_error)
                     }
                     __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
                     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6571,7 +6595,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   if (__pyx_t_15) {
                     __pyx_t_18 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_mstate_global->__pyx_tuple[0], NULL);
                     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-                    if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 617, __pyx_L8_error)
+                    if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 621, __pyx_L8_error)
                     __Pyx_GOTREF(__pyx_t_18);
                     __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
                   }
@@ -6586,7 +6610,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __pyx_L28:;
             }
 
-            /* "src/tenforty/otslib/ots.pyx":621
+            /* "src/tenforty/otslib/ots.pyx":625
  *
  *             # Update location of fed file in state form.
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)             # <<<<<<<<<<<<<<
@@ -6600,13 +6624,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[3] = {__pyx_t_6, __pyx_mstate_global->__pyx_n_u_FED_FILENAME, __pyx_v_ff_path};
               __pyx_t_1 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_replace, __pyx_callargs+__pyx_t_11, (3-__pyx_t_11) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 621, __pyx_L8_error)
+              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 625, __pyx_L8_error)
               __Pyx_GOTREF(__pyx_t_1);
             }
             __Pyx_DECREF_SET(__pyx_v_form_text, __pyx_t_1);
             __pyx_t_1 = 0;
 
-            /* "src/tenforty/otslib/ots.pyx":614
+            /* "src/tenforty/otslib/ots.pyx":618
  *
  *         # Run federal tax file first as needed.
  *         if fed_form_text is not None:             # <<<<<<<<<<<<<<
@@ -6615,22 +6639,22 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           }
 
-          /* "src/tenforty/otslib/ots.pyx":623
+          /* "src/tenforty/otslib/ots.pyx":627
  *             form_text= form_text.replace("__FED_FILENAME__", ff_path)
  *
  *         returnfile = f"{tmpdir}/form.txt"             # <<<<<<<<<<<<<<
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)
 */
-          __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 623, __pyx_L8_error)
+          __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_tmpdir, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 627, __pyx_L8_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_6 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_1, __pyx_mstate_global->__pyx_kp_u_form_txt); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 623, __pyx_L8_error)
+          __pyx_t_6 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_t_1, __pyx_mstate_global->__pyx_kp_u_form_txt); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 627, __pyx_L8_error)
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           __pyx_v_returnfile = ((PyObject*)__pyx_t_6);
           __pyx_t_6 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":624
+          /* "src/tenforty/otslib/ots.pyx":628
  *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6644,13 +6668,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[3] = {__pyx_t_1, __pyx_v_returnfile, __pyx_mstate_global->__pyx_n_u_w};
               __pyx_t_6 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_11, (3-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 624, __pyx_L8_error)
+              if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 628, __pyx_L8_error)
               __Pyx_GOTREF(__pyx_t_6);
             }
-            __pyx_t_15 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 624, __pyx_L8_error)
+            __pyx_t_15 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 628, __pyx_L8_error)
             __Pyx_GOTREF(__pyx_t_15);
             __pyx_t_10 = NULL;
-            __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 624, __pyx_L29_error)
+            __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 628, __pyx_L29_error)
             __Pyx_GOTREF(__pyx_t_8);
             __pyx_t_11 = 1;
             #if CYTHON_UNPACK_METHODS
@@ -6669,7 +6693,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_8, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 624, __pyx_L29_error)
+              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 628, __pyx_L29_error)
               __Pyx_GOTREF(__pyx_t_1);
             }
             __pyx_t_8 = __pyx_t_1;
@@ -6687,7 +6711,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_8);
                   __pyx_t_8 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":625
+                  /* "src/tenforty/otslib/ots.pyx":629
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:
  *             print(form_text, file=fp)             # <<<<<<<<<<<<<<
@@ -6698,18 +6722,18 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __pyx_t_11 = 1;
                   {
                     PyObject *__pyx_callargs[2 + ((CYTHON_VECTORCALL) ? 1 : 0)] = {__pyx_t_6, __pyx_v_form_text};
-                    __pyx_t_1 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 625, __pyx_L33_error)
+                    __pyx_t_1 = __Pyx_MakeVectorcallBuilderKwds(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 629, __pyx_L33_error)
                     __Pyx_GOTREF(__pyx_t_1);
-                    if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_1, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 625, __pyx_L33_error)
+                    if (__Pyx_VectorcallBuilder_AddArg(__pyx_mstate_global->__pyx_n_u_file, __pyx_v_fp, __pyx_t_1, __pyx_callargs+2, 0) < (0)) __PYX_ERR(0, 629, __pyx_L33_error)
                     __pyx_t_8 = __Pyx_Object_Vectorcall_CallFromBuilder((PyObject*)__pyx_builtin_print, __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET), __pyx_t_1);
                     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
                     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                    if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 625, __pyx_L33_error)
+                    if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 629, __pyx_L33_error)
                     __Pyx_GOTREF(__pyx_t_8);
                   }
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":624
+                  /* "src/tenforty/otslib/ots.pyx":628
  *
  *         returnfile = f"{tmpdir}/form.txt"
  *         with open(returnfile, "w") as fp:             # <<<<<<<<<<<<<<
@@ -6729,20 +6753,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_6) < 0) __PYX_ERR(0, 624, __pyx_L35_except_error)
+                  if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_6) < 0) __PYX_ERR(0, 628, __pyx_L35_except_error)
                   __Pyx_XGOTREF(__pyx_t_8);
                   __Pyx_XGOTREF(__pyx_t_1);
                   __Pyx_XGOTREF(__pyx_t_6);
-                  __pyx_t_10 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_6); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 624, __pyx_L35_except_error)
+                  __pyx_t_10 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_6); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 628, __pyx_L35_except_error)
                   __Pyx_GOTREF(__pyx_t_10);
                   __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_t_10, NULL);
                   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
                   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-                  if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 624, __pyx_L35_except_error)
+                  if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 628, __pyx_L35_except_error)
                   __Pyx_GOTREF(__pyx_t_19);
                   __pyx_t_20 = __Pyx_PyObject_IsTrue(__pyx_t_19);
                   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-                  if (__pyx_t_20 < (0)) __PYX_ERR(0, 624, __pyx_L35_except_error)
+                  if (__pyx_t_20 < (0)) __PYX_ERR(0, 628, __pyx_L35_except_error)
                   __pyx_t_5 = (!__pyx_t_20);
                   if (unlikely(__pyx_t_5)) {
                     __Pyx_GIVEREF(__pyx_t_8);
@@ -6750,7 +6774,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_XGIVEREF(__pyx_t_6);
                     __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_1, __pyx_t_6);
                     __pyx_t_8 = 0;  __pyx_t_1 = 0;  __pyx_t_6 = 0;
-                    __PYX_ERR(0, 624, __pyx_L35_except_error)
+                    __PYX_ERR(0, 628, __pyx_L35_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6776,7 +6800,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 if (__pyx_t_15) {
                   __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_mstate_global->__pyx_tuple[0], NULL);
                   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-                  if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 624, __pyx_L8_error)
+                  if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 628, __pyx_L8_error)
                   __Pyx_GOTREF(__pyx_t_16);
                   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
                 }
@@ -6791,19 +6815,19 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L42:;
           }
 
-          /* "src/tenforty/otslib/ots.pyx":627
+          /* "src/tenforty/otslib/ots.pyx":631
  *             print(form_text, file=fp)
  *
  *         file_path_bytes = returnfile.encode('utf-8')             # <<<<<<<<<<<<<<
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:
 */
-          __pyx_t_6 = PyUnicode_AsUTF8String(__pyx_v_returnfile); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 627, __pyx_L8_error)
+          __pyx_t_6 = PyUnicode_AsUTF8String(__pyx_v_returnfile); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 631, __pyx_L8_error)
           __Pyx_GOTREF(__pyx_t_6);
           __pyx_v_file_path_bytes = ((PyObject*)__pyx_t_6);
           __pyx_t_6 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":628
+          /* "src/tenforty/otslib/ots.pyx":632
  *
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator             # <<<<<<<<<<<<<<
@@ -6812,7 +6836,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           __pyx_v_c_argv = ((char **)malloc(((sizeof(char *)) * 3)));
 
-          /* "src/tenforty/otslib/ots.pyx":629
+          /* "src/tenforty/otslib/ots.pyx":633
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
@@ -6822,16 +6846,16 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
           __pyx_t_5 = (__pyx_v_c_argv == NULL);
           if (unlikely(__pyx_t_5)) {
 
-            /* "src/tenforty/otslib/ots.pyx":630
+            /* "src/tenforty/otslib/ots.pyx":634
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:
  *             raise MemoryError()             # <<<<<<<<<<<<<<
  *         try:
  *             c_argv[0] = program_name
 */
-            PyErr_NoMemory(); __PYX_ERR(0, 630, __pyx_L8_error)
+            PyErr_NoMemory(); __PYX_ERR(0, 634, __pyx_L8_error)
 
-            /* "src/tenforty/otslib/ots.pyx":629
+            /* "src/tenforty/otslib/ots.pyx":633
  *         file_path_bytes = returnfile.encode('utf-8')
  *         c_argv = <char**>malloc(sizeof(char*) * 3)  # +1 for NULL terminator
  *         if c_argv is NULL:             # <<<<<<<<<<<<<<
@@ -6840,7 +6864,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           }
 
-          /* "src/tenforty/otslib/ots.pyx":631
+          /* "src/tenforty/otslib/ots.pyx":635
  *         if c_argv is NULL:
  *             raise MemoryError()
  *         try:             # <<<<<<<<<<<<<<
@@ -6849,27 +6873,27 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
           /*try:*/ {
 
-            /* "src/tenforty/otslib/ots.pyx":632
+            /* "src/tenforty/otslib/ots.pyx":636
  *             raise MemoryError()
  *         try:
  *             c_argv[0] = program_name             # <<<<<<<<<<<<<<
  *             c_argv[1] = file_path_bytes
  *             c_argv[2] = NULL  # NULL-terminate argv
 */
-            __pyx_t_21 = __Pyx_PyBytes_AsWritableString(__pyx_v_program_name); if (unlikely((!__pyx_t_21) && PyErr_Occurred())) __PYX_ERR(0, 632, __pyx_L45_error)
+            __pyx_t_21 = __Pyx_PyBytes_AsWritableString(__pyx_v_program_name); if (unlikely((!__pyx_t_21) && PyErr_Occurred())) __PYX_ERR(0, 636, __pyx_L45_error)
             (__pyx_v_c_argv[0]) = __pyx_t_21;
 
-            /* "src/tenforty/otslib/ots.pyx":633
+            /* "src/tenforty/otslib/ots.pyx":637
  *         try:
  *             c_argv[0] = program_name
  *             c_argv[1] = file_path_bytes             # <<<<<<<<<<<<<<
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)
 */
-            __pyx_t_21 = __Pyx_PyBytes_AsWritableString(__pyx_v_file_path_bytes); if (unlikely((!__pyx_t_21) && PyErr_Occurred())) __PYX_ERR(0, 633, __pyx_L45_error)
+            __pyx_t_21 = __Pyx_PyBytes_AsWritableString(__pyx_v_file_path_bytes); if (unlikely((!__pyx_t_21) && PyErr_Occurred())) __PYX_ERR(0, 637, __pyx_L45_error)
             (__pyx_v_c_argv[1]) = __pyx_t_21;
 
-            /* "src/tenforty/otslib/ots.pyx":634
+            /* "src/tenforty/otslib/ots.pyx":638
  *             c_argv[0] = program_name
  *             c_argv[1] = file_path_bytes
  *             c_argv[2] = NULL  # NULL-terminate argv             # <<<<<<<<<<<<<<
@@ -6878,17 +6902,17 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
             (__pyx_v_c_argv[2]) = NULL;
 
-            /* "src/tenforty/otslib/ots.pyx":635
+            /* "src/tenforty/otslib/ots.pyx":639
  *             c_argv[1] = file_path_bytes
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)             # <<<<<<<<<<<<<<
  *             if result_code != 0:
  *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
 */
-            __pyx_t_3 = __pyx_v_ots_form_function(2, __pyx_v_c_argv); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 635, __pyx_L45_error)
+            __pyx_t_3 = __pyx_v_ots_form_function(2, __pyx_v_c_argv); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 639, __pyx_L45_error)
             __pyx_v_result_code = __pyx_t_3;
 
-            /* "src/tenforty/otslib/ots.pyx":636
+            /* "src/tenforty/otslib/ots.pyx":640
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:             # <<<<<<<<<<<<<<
@@ -6898,32 +6922,32 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_t_5 = (__pyx_v_result_code != 0);
             if (__pyx_t_5) {
 
-              /* "src/tenforty/otslib/ots.pyx":637
+              /* "src/tenforty/otslib/ots.pyx":641
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:
  *                 error_msg = f"OTS returned non-zero exit code: {result_code}"             # <<<<<<<<<<<<<<
  *                 if on_error == "raise":
  *                     from tenforty.models import OTSError
 */
-              __pyx_t_6 = __Pyx_PyUnicode_From_int(__pyx_v_result_code, 0, ' ', 'd'); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 637, __pyx_L45_error)
+              __pyx_t_6 = __Pyx_PyUnicode_From_int(__pyx_v_result_code, 0, ' ', 'd'); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 641, __pyx_L45_error)
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_1 = __Pyx_PyUnicode_Concat(__pyx_mstate_global->__pyx_kp_u_OTS_returned_non_zero_exit_code, __pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 637, __pyx_L45_error)
+              __pyx_t_1 = __Pyx_PyUnicode_Concat(__pyx_mstate_global->__pyx_kp_u_OTS_returned_non_zero_exit_code, __pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 641, __pyx_L45_error)
               __Pyx_GOTREF(__pyx_t_1);
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
               __pyx_v_error_msg = ((PyObject*)__pyx_t_1);
               __pyx_t_1 = 0;
 
-              /* "src/tenforty/otslib/ots.pyx":638
+              /* "src/tenforty/otslib/ots.pyx":642
  *             if result_code != 0:
  *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
  *                 if on_error == "raise":             # <<<<<<<<<<<<<<
  *                     from tenforty.models import OTSError
  *                     raise OTSError(result_code, year, form, error_msg)
 */
-              __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_on_error, __pyx_mstate_global->__pyx_n_u_raise, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 638, __pyx_L45_error)
+              __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_on_error, __pyx_mstate_global->__pyx_n_u_raise, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 642, __pyx_L45_error)
               if (__pyx_t_5) {
 
-                /* "src/tenforty/otslib/ots.pyx":639
+                /* "src/tenforty/otslib/ots.pyx":643
  *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
  *                 if on_error == "raise":
  *                     from tenforty.models import OTSError             # <<<<<<<<<<<<<<
@@ -6932,14 +6956,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
                 {
                   PyObject* const __pyx_imported_names[] = {__pyx_mstate_global->__pyx_n_u_OTSError};
-                  __pyx_t_15 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_tenforty_models, __pyx_imported_names, 1, NULL, 0); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 639, __pyx_L45_error)
+                  __pyx_t_15 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_tenforty_models, __pyx_imported_names, 1, NULL, 0); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 643, __pyx_L45_error)
                 }
                 __pyx_t_1 = __pyx_t_15;
                 __Pyx_GOTREF(__pyx_t_1);
                 {
                   PyObject* const __pyx_imported_names[] = {__pyx_mstate_global->__pyx_n_u_OTSError};
                   __pyx_t_22 = 0; {
-                    __pyx_t_6 = __Pyx_ImportFrom(__pyx_t_1, __pyx_imported_names[__pyx_t_22]); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 639, __pyx_L45_error)
+                    __pyx_t_6 = __Pyx_ImportFrom(__pyx_t_1, __pyx_imported_names[__pyx_t_22]); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 643, __pyx_L45_error)
                     __Pyx_GOTREF(__pyx_t_6);
                     switch (__pyx_t_22) {
                       case 0:
@@ -6953,7 +6977,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 }
                 __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-                /* "src/tenforty/otslib/ots.pyx":640
+                /* "src/tenforty/otslib/ots.pyx":644
  *                 if on_error == "raise":
  *                     from tenforty.models import OTSError
  *                     raise OTSError(result_code, year, form, error_msg)             # <<<<<<<<<<<<<<
@@ -6963,7 +6987,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __pyx_t_6 = NULL;
                 __Pyx_INCREF(__pyx_v_OTSError);
                 __pyx_t_8 = __pyx_v_OTSError;
-                __pyx_t_10 = __Pyx_PyLong_From_int(__pyx_v_result_code); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 640, __pyx_L45_error)
+                __pyx_t_10 = __Pyx_PyLong_From_int(__pyx_v_result_code); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 644, __pyx_L45_error)
                 __Pyx_GOTREF(__pyx_t_10);
                 __pyx_t_11 = 1;
                 #if CYTHON_UNPACK_METHODS
@@ -6983,14 +7007,14 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 640, __pyx_L45_error)
+                  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 644, __pyx_L45_error)
                   __Pyx_GOTREF(__pyx_t_1);
                 }
                 __Pyx_Raise(__pyx_t_1, 0, 0, 0);
                 __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                __PYX_ERR(0, 640, __pyx_L45_error)
+                __PYX_ERR(0, 644, __pyx_L45_error)
 
-                /* "src/tenforty/otslib/ots.pyx":638
+                /* "src/tenforty/otslib/ots.pyx":642
  *             if result_code != 0:
  *                 error_msg = f"OTS returned non-zero exit code: {result_code}"
  *                 if on_error == "raise":             # <<<<<<<<<<<<<<
@@ -6999,17 +7023,17 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
               }
 
-              /* "src/tenforty/otslib/ots.pyx":641
+              /* "src/tenforty/otslib/ots.pyx":645
  *                     from tenforty.models import OTSError
  *                     raise OTSError(result_code, year, form, error_msg)
  *                 elif on_error == "warn":             # <<<<<<<<<<<<<<
  *                     warnings.warn(error_msg, RuntimeWarning)
  *         finally:
 */
-              __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_on_error, __pyx_mstate_global->__pyx_n_u_warn, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 641, __pyx_L45_error)
+              __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_on_error, __pyx_mstate_global->__pyx_n_u_warn, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 645, __pyx_L45_error)
               if (__pyx_t_5) {
 
-                /* "src/tenforty/otslib/ots.pyx":642
+                /* "src/tenforty/otslib/ots.pyx":646
  *                     raise OTSError(result_code, year, form, error_msg)
  *                 elif on_error == "warn":
  *                     warnings.warn(error_msg, RuntimeWarning)             # <<<<<<<<<<<<<<
@@ -7023,12 +7047,12 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   PyObject *__pyx_callargs[3] = {__pyx_t_8, __pyx_v_error_msg, ((PyObject *)(((PyTypeObject*)PyExc_RuntimeWarning)))};
                   __pyx_t_1 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_warn, __pyx_callargs+__pyx_t_11, (3-__pyx_t_11) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-                  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 642, __pyx_L45_error)
+                  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 646, __pyx_L45_error)
                   __Pyx_GOTREF(__pyx_t_1);
                 }
                 __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-                /* "src/tenforty/otslib/ots.pyx":641
+                /* "src/tenforty/otslib/ots.pyx":645
  *                     from tenforty.models import OTSError
  *                     raise OTSError(result_code, year, form, error_msg)
  *                 elif on_error == "warn":             # <<<<<<<<<<<<<<
@@ -7037,7 +7061,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
 */
               }
 
-              /* "src/tenforty/otslib/ots.pyx":636
+              /* "src/tenforty/otslib/ots.pyx":640
  *             c_argv[2] = NULL  # NULL-terminate argv
  *             result_code = ots_form_function(2, c_argv)
  *             if result_code != 0:             # <<<<<<<<<<<<<<
@@ -7047,7 +7071,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             }
           }
 
-          /* "src/tenforty/otslib/ots.pyx":644
+          /* "src/tenforty/otslib/ots.pyx":648
  *                     warnings.warn(error_msg, RuntimeWarning)
  *         finally:
  *             free(c_argv)             # <<<<<<<<<<<<<<
@@ -7096,19 +7120,19 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L46:;
           }
 
-          /* "src/tenforty/otslib/ots.pyx":647
+          /* "src/tenforty/otslib/ots.pyx":651
  *
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")             # <<<<<<<<<<<<<<
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()
 */
-          __pyx_t_1 = PyUnicode_Replace(__pyx_v_returnfile, __pyx_mstate_global->__pyx_kp_u_txt, __pyx_mstate_global->__pyx_kp_u_out_txt, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 647, __pyx_L8_error)
+          __pyx_t_1 = PyUnicode_Replace(__pyx_v_returnfile, __pyx_mstate_global->__pyx_kp_u_txt, __pyx_mstate_global->__pyx_kp_u_out_txt, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 651, __pyx_L8_error)
           __Pyx_GOTREF(__pyx_t_1);
           __pyx_v_returnfile_completed = ((PyObject*)__pyx_t_1);
           __pyx_t_1 = 0;
 
-          /* "src/tenforty/otslib/ots.pyx":648
+          /* "src/tenforty/otslib/ots.pyx":652
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
@@ -7122,13 +7146,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_v_returnfile_completed};
               __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_builtin_open, __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 648, __pyx_L8_error)
+              if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 652, __pyx_L8_error)
               __Pyx_GOTREF(__pyx_t_1);
             }
-            __pyx_t_25 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_25)) __PYX_ERR(0, 648, __pyx_L8_error)
+            __pyx_t_25 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit); if (unlikely(!__pyx_t_25)) __PYX_ERR(0, 652, __pyx_L8_error)
             __Pyx_GOTREF(__pyx_t_25);
             __pyx_t_10 = NULL;
-            __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 648, __pyx_L51_error)
+            __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_enter); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 652, __pyx_L51_error)
             __Pyx_GOTREF(__pyx_t_6);
             __pyx_t_11 = 1;
             #if CYTHON_UNPACK_METHODS
@@ -7147,7 +7171,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
               __pyx_t_8 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_6, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
               __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-              if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 648, __pyx_L51_error)
+              if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 652, __pyx_L51_error)
               __Pyx_GOTREF(__pyx_t_8);
             }
             __pyx_t_6 = __pyx_t_8;
@@ -7165,7 +7189,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                   __Pyx_XDECREF_SET(__pyx_v_fp, __pyx_t_6);
                   __pyx_t_6 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":649
+                  /* "src/tenforty/otslib/ots.pyx":653
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:
  *             result = fp.read()             # <<<<<<<<<<<<<<
@@ -7179,13 +7203,13 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     PyObject *__pyx_callargs[2] = {__pyx_t_1, NULL};
                     __pyx_t_6 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_read, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
                     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-                    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 649, __pyx_L55_error)
+                    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 653, __pyx_L55_error)
                     __Pyx_GOTREF(__pyx_t_6);
                   }
                   __pyx_v_result = __pyx_t_6;
                   __pyx_t_6 = 0;
 
-                  /* "src/tenforty/otslib/ots.pyx":648
+                  /* "src/tenforty/otslib/ots.pyx":652
  *         # OTS generates an output file based on the name of the input file.
  *         returnfile_completed = returnfile.replace(".txt", "_out.txt")
  *         with open(returnfile_completed) as fp:             # <<<<<<<<<<<<<<
@@ -7205,20 +7229,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
                 /*except:*/ {
                   __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                  if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_1, &__pyx_t_8) < 0) __PYX_ERR(0, 648, __pyx_L57_except_error)
+                  if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_1, &__pyx_t_8) < 0) __PYX_ERR(0, 652, __pyx_L57_except_error)
                   __Pyx_XGOTREF(__pyx_t_6);
                   __Pyx_XGOTREF(__pyx_t_1);
                   __Pyx_XGOTREF(__pyx_t_8);
-                  __pyx_t_10 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 648, __pyx_L57_except_error)
+                  __pyx_t_10 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_1, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 652, __pyx_L57_except_error)
                   __Pyx_GOTREF(__pyx_t_10);
                   __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_25, __pyx_t_10, NULL);
                   __Pyx_DECREF(__pyx_t_25); __pyx_t_25 = 0;
                   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-                  if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 648, __pyx_L57_except_error)
+                  if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 652, __pyx_L57_except_error)
                   __Pyx_GOTREF(__pyx_t_16);
                   __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_16);
                   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-                  if (__pyx_t_5 < (0)) __PYX_ERR(0, 648, __pyx_L57_except_error)
+                  if (__pyx_t_5 < (0)) __PYX_ERR(0, 652, __pyx_L57_except_error)
                   __pyx_t_20 = (!__pyx_t_5);
                   if (unlikely(__pyx_t_20)) {
                     __Pyx_GIVEREF(__pyx_t_6);
@@ -7226,7 +7250,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                     __Pyx_XGIVEREF(__pyx_t_8);
                     __Pyx_ErrRestoreWithState(__pyx_t_6, __pyx_t_1, __pyx_t_8);
                     __pyx_t_6 = 0;  __pyx_t_1 = 0;  __pyx_t_8 = 0;
-                    __PYX_ERR(0, 648, __pyx_L57_except_error)
+                    __PYX_ERR(0, 652, __pyx_L57_except_error)
                   }
                   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7252,7 +7276,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
                 if (__pyx_t_25) {
                   __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_25, __pyx_mstate_global->__pyx_tuple[0], NULL);
                   __Pyx_DECREF(__pyx_t_25); __pyx_t_25 = 0;
-                  if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 648, __pyx_L8_error)
+                  if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 652, __pyx_L8_error)
                   __Pyx_GOTREF(__pyx_t_17);
                   __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
                 }
@@ -7267,7 +7291,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __pyx_L64:;
           }
 
-          /* "src/tenforty/otslib/ots.pyx":611
+          /* "src/tenforty/otslib/ots.pyx":615
  *     cdef int result_code
  *
  *     with tempfile.TemporaryDirectory() as tmpdir:             # <<<<<<<<<<<<<<
@@ -7287,20 +7311,20 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("tenforty.otslib._evaluate_form", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_6) < 0) __PYX_ERR(0, 611, __pyx_L10_except_error)
+          if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_6) < 0) __PYX_ERR(0, 615, __pyx_L10_except_error)
           __Pyx_XGOTREF(__pyx_t_8);
           __Pyx_XGOTREF(__pyx_t_1);
           __Pyx_XGOTREF(__pyx_t_6);
-          __pyx_t_10 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_6); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 611, __pyx_L10_except_error)
+          __pyx_t_10 = PyTuple_Pack(3, __pyx_t_8, __pyx_t_1, __pyx_t_6); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 615, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_10);
           __pyx_t_25 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_10, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-          if (unlikely(!__pyx_t_25)) __PYX_ERR(0, 611, __pyx_L10_except_error)
+          if (unlikely(!__pyx_t_25)) __PYX_ERR(0, 615, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_25);
           __pyx_t_20 = __Pyx_PyObject_IsTrue(__pyx_t_25);
           __Pyx_DECREF(__pyx_t_25); __pyx_t_25 = 0;
-          if (__pyx_t_20 < (0)) __PYX_ERR(0, 611, __pyx_L10_except_error)
+          if (__pyx_t_20 < (0)) __PYX_ERR(0, 615, __pyx_L10_except_error)
           __pyx_t_5 = (!__pyx_t_20);
           if (unlikely(__pyx_t_5)) {
             __Pyx_GIVEREF(__pyx_t_8);
@@ -7308,7 +7332,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
             __Pyx_XGIVEREF(__pyx_t_6);
             __Pyx_ErrRestoreWithState(__pyx_t_8, __pyx_t_1, __pyx_t_6);
             __pyx_t_8 = 0;  __pyx_t_1 = 0;  __pyx_t_6 = 0;
-            __PYX_ERR(0, 611, __pyx_L10_except_error)
+            __PYX_ERR(0, 615, __pyx_L10_except_error)
           }
           __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
           __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7334,7 +7358,7 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
         if (__pyx_t_2) {
           __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[0], NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 611, __pyx_L1_error)
+          if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 615, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_14);
           __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
         }
@@ -7349,19 +7373,19 @@ static PyObject *__pyx_pf_8tenforty_6otslib__evaluate_form(CYTHON_UNUSED PyObjec
     __pyx_L68:;
   }
 
-  /* "src/tenforty/otslib/ots.pyx":651
+  /* "src/tenforty/otslib/ots.pyx":655
  *             result = fp.read()
  *
  *     return result             # <<<<<<<<<<<<<<
  *
 */
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 651, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_result)) { __Pyx_RaiseUnboundLocalError("result"); __PYX_ERR(0, 655, __pyx_L1_error) }
   __Pyx_INCREF(__pyx_v_result);
   __pyx_r = __pyx_v_result;
   goto __pyx_L0;
 
-  /* "src/tenforty/otslib/ots.pyx":585
+  /* "src/tenforty/otslib/ots.pyx":589
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
@@ -7783,1275 +7807,1284 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_tempfile, __pyx_t_2) < (0)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/tenforty/otslib/ots.pyx":156
+  /* "src/tenforty/otslib/ots.pyx":157
  *
  * _OTS_KEY_TO_INDEX = {
  *     (2018, "MA_1"): 0,             # <<<<<<<<<<<<<<
  *     (2018, "US_1040_Sched_C"): 1,
  *     (2018, "VA_760"): 2,
 */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(139); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(140); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[1], __pyx_mstate_global->__pyx_int_0) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[1], __pyx_mstate_global->__pyx_int_0) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":157
+  /* "src/tenforty/otslib/ots.pyx":158
  * _OTS_KEY_TO_INDEX = {
  *     (2018, "MA_1"): 0,
  *     (2018, "US_1040_Sched_C"): 1,             # <<<<<<<<<<<<<<
  *     (2018, "VA_760"): 2,
  *     (2018, "OH_IT1040"): 3,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[2], __pyx_mstate_global->__pyx_int_1) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[2], __pyx_mstate_global->__pyx_int_1) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":158
+  /* "src/tenforty/otslib/ots.pyx":159
  *     (2018, "MA_1"): 0,
  *     (2018, "US_1040_Sched_C"): 1,
  *     (2018, "VA_760"): 2,             # <<<<<<<<<<<<<<
  *     (2018, "OH_IT1040"): 3,
  *     (2018, "CA_540"): 4,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[3], __pyx_mstate_global->__pyx_int_2) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[3], __pyx_mstate_global->__pyx_int_2) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":159
+  /* "src/tenforty/otslib/ots.pyx":160
  *     (2018, "US_1040_Sched_C"): 1,
  *     (2018, "VA_760"): 2,
  *     (2018, "OH_IT1040"): 3,             # <<<<<<<<<<<<<<
  *     (2018, "CA_540"): 4,
  *     (2018, "NJ_1040"): 5,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[4], __pyx_mstate_global->__pyx_int_3) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[4], __pyx_mstate_global->__pyx_int_3) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":160
+  /* "src/tenforty/otslib/ots.pyx":161
  *     (2018, "VA_760"): 2,
  *     (2018, "OH_IT1040"): 3,
  *     (2018, "CA_540"): 4,             # <<<<<<<<<<<<<<
  *     (2018, "NJ_1040"): 5,
  *     (2018, "PA_40"): 6,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[5], __pyx_mstate_global->__pyx_int_4) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[5], __pyx_mstate_global->__pyx_int_4) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":161
+  /* "src/tenforty/otslib/ots.pyx":162
  *     (2018, "OH_IT1040"): 3,
  *     (2018, "CA_540"): 4,
  *     (2018, "NJ_1040"): 5,             # <<<<<<<<<<<<<<
  *     (2018, "PA_40"): 6,
  *     (2018, "US_1040"): 7,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[6], __pyx_mstate_global->__pyx_int_5) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[6], __pyx_mstate_global->__pyx_int_5) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":162
+  /* "src/tenforty/otslib/ots.pyx":163
  *     (2018, "CA_540"): 4,
  *     (2018, "NJ_1040"): 5,
  *     (2018, "PA_40"): 6,             # <<<<<<<<<<<<<<
  *     (2018, "US_1040"): 7,
  *     (2018, "NY_IT201"): 8,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[7], __pyx_mstate_global->__pyx_int_6) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[7], __pyx_mstate_global->__pyx_int_6) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":163
+  /* "src/tenforty/otslib/ots.pyx":164
  *     (2018, "NJ_1040"): 5,
  *     (2018, "PA_40"): 6,
  *     (2018, "US_1040"): 7,             # <<<<<<<<<<<<<<
  *     (2018, "NY_IT201"): 8,
  *     (2018, "NC_D400"): 9,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[8], __pyx_mstate_global->__pyx_int_7) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[8], __pyx_mstate_global->__pyx_int_7) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":164
+  /* "src/tenforty/otslib/ots.pyx":165
  *     (2018, "PA_40"): 6,
  *     (2018, "US_1040"): 7,
  *     (2018, "NY_IT201"): 8,             # <<<<<<<<<<<<<<
  *     (2018, "NC_D400"): 9,
  *     (2019, "MA_1"): 10,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[9], __pyx_mstate_global->__pyx_int_8) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[9], __pyx_mstate_global->__pyx_int_8) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":165
+  /* "src/tenforty/otslib/ots.pyx":166
  *     (2018, "US_1040"): 7,
  *     (2018, "NY_IT201"): 8,
  *     (2018, "NC_D400"): 9,             # <<<<<<<<<<<<<<
  *     (2019, "MA_1"): 10,
  *     (2019, "NY_IT201"): 11,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[10], __pyx_mstate_global->__pyx_int_9) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[10], __pyx_mstate_global->__pyx_int_9) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":166
+  /* "src/tenforty/otslib/ots.pyx":167
  *     (2018, "NY_IT201"): 8,
  *     (2018, "NC_D400"): 9,
  *     (2019, "MA_1"): 10,             # <<<<<<<<<<<<<<
  *     (2019, "NY_IT201"): 11,
  *     (2019, "US_1040_Sched_C"): 12,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[11], __pyx_mstate_global->__pyx_int_10) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[11], __pyx_mstate_global->__pyx_int_10) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":167
+  /* "src/tenforty/otslib/ots.pyx":168
  *     (2018, "NC_D400"): 9,
  *     (2019, "MA_1"): 10,
  *     (2019, "NY_IT201"): 11,             # <<<<<<<<<<<<<<
  *     (2019, "US_1040_Sched_C"): 12,
  *     (2019, "VA_760"): 13,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[12], __pyx_mstate_global->__pyx_int_11) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[12], __pyx_mstate_global->__pyx_int_11) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":168
+  /* "src/tenforty/otslib/ots.pyx":169
  *     (2019, "MA_1"): 10,
  *     (2019, "NY_IT201"): 11,
  *     (2019, "US_1040_Sched_C"): 12,             # <<<<<<<<<<<<<<
  *     (2019, "VA_760"): 13,
  *     (2019, "OH_IT1040"): 14,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[13], __pyx_mstate_global->__pyx_int_12) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[13], __pyx_mstate_global->__pyx_int_12) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":169
+  /* "src/tenforty/otslib/ots.pyx":170
  *     (2019, "NY_IT201"): 11,
  *     (2019, "US_1040_Sched_C"): 12,
  *     (2019, "VA_760"): 13,             # <<<<<<<<<<<<<<
  *     (2019, "OH_IT1040"): 14,
  *     (2019, "PA_40"): 15,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[14], __pyx_mstate_global->__pyx_int_13) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[14], __pyx_mstate_global->__pyx_int_13) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":170
+  /* "src/tenforty/otslib/ots.pyx":171
  *     (2019, "US_1040_Sched_C"): 12,
  *     (2019, "VA_760"): 13,
  *     (2019, "OH_IT1040"): 14,             # <<<<<<<<<<<<<<
  *     (2019, "PA_40"): 15,
  *     (2019, "US_1040"): 16,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[15], __pyx_mstate_global->__pyx_int_14) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[15], __pyx_mstate_global->__pyx_int_14) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":171
+  /* "src/tenforty/otslib/ots.pyx":172
  *     (2019, "VA_760"): 13,
  *     (2019, "OH_IT1040"): 14,
  *     (2019, "PA_40"): 15,             # <<<<<<<<<<<<<<
  *     (2019, "US_1040"): 16,
  *     (2019, "NJ_1040"): 17,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[16], __pyx_mstate_global->__pyx_int_15) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[16], __pyx_mstate_global->__pyx_int_15) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":172
+  /* "src/tenforty/otslib/ots.pyx":173
  *     (2019, "OH_IT1040"): 14,
  *     (2019, "PA_40"): 15,
  *     (2019, "US_1040"): 16,             # <<<<<<<<<<<<<<
  *     (2019, "NJ_1040"): 17,
  *     (2019, "NC_D400"): 18,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[17], __pyx_mstate_global->__pyx_int_16) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[17], __pyx_mstate_global->__pyx_int_16) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":173
+  /* "src/tenforty/otslib/ots.pyx":174
  *     (2019, "PA_40"): 15,
  *     (2019, "US_1040"): 16,
  *     (2019, "NJ_1040"): 17,             # <<<<<<<<<<<<<<
  *     (2019, "NC_D400"): 18,
  *     (2019, "CA_540"): 19,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[18], __pyx_mstate_global->__pyx_int_17) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[18], __pyx_mstate_global->__pyx_int_17) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":174
+  /* "src/tenforty/otslib/ots.pyx":175
  *     (2019, "US_1040"): 16,
  *     (2019, "NJ_1040"): 17,
  *     (2019, "NC_D400"): 18,             # <<<<<<<<<<<<<<
  *     (2019, "CA_540"): 19,
  *     (2020, "OH_IT1040"): 20,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[19], __pyx_mstate_global->__pyx_int_18) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[19], __pyx_mstate_global->__pyx_int_18) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":175
+  /* "src/tenforty/otslib/ots.pyx":176
  *     (2019, "NJ_1040"): 17,
  *     (2019, "NC_D400"): 18,
  *     (2019, "CA_540"): 19,             # <<<<<<<<<<<<<<
  *     (2020, "OH_IT1040"): 20,
  *     (2020, "NC_D400"): 21,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[20], __pyx_mstate_global->__pyx_int_19) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[20], __pyx_mstate_global->__pyx_int_19) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":176
+  /* "src/tenforty/otslib/ots.pyx":177
  *     (2019, "NC_D400"): 18,
  *     (2019, "CA_540"): 19,
  *     (2020, "OH_IT1040"): 20,             # <<<<<<<<<<<<<<
  *     (2020, "NC_D400"): 21,
  *     (2020, "US_1040"): 22,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[21], __pyx_mstate_global->__pyx_int_20) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[21], __pyx_mstate_global->__pyx_int_20) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":177
+  /* "src/tenforty/otslib/ots.pyx":178
  *     (2019, "CA_540"): 19,
  *     (2020, "OH_IT1040"): 20,
  *     (2020, "NC_D400"): 21,             # <<<<<<<<<<<<<<
  *     (2020, "US_1040"): 22,
  *     (2020, "NY_IT201"): 23,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[22], __pyx_mstate_global->__pyx_int_21) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[22], __pyx_mstate_global->__pyx_int_21) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":178
+  /* "src/tenforty/otslib/ots.pyx":179
  *     (2020, "OH_IT1040"): 20,
  *     (2020, "NC_D400"): 21,
  *     (2020, "US_1040"): 22,             # <<<<<<<<<<<<<<
  *     (2020, "NY_IT201"): 23,
  *     (2020, "HSA_f8889"): 24,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[23], __pyx_mstate_global->__pyx_int_22) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[23], __pyx_mstate_global->__pyx_int_22) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":179
+  /* "src/tenforty/otslib/ots.pyx":180
  *     (2020, "NC_D400"): 21,
  *     (2020, "US_1040"): 22,
  *     (2020, "NY_IT201"): 23,             # <<<<<<<<<<<<<<
  *     (2020, "HSA_f8889"): 24,
  *     (2020, "MA_1"): 25,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[24], __pyx_mstate_global->__pyx_int_23) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[24], __pyx_mstate_global->__pyx_int_23) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":180
+  /* "src/tenforty/otslib/ots.pyx":181
  *     (2020, "US_1040"): 22,
  *     (2020, "NY_IT201"): 23,
  *     (2020, "HSA_f8889"): 24,             # <<<<<<<<<<<<<<
  *     (2020, "MA_1"): 25,
  *     (2020, "VA_760"): 26,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[25], __pyx_mstate_global->__pyx_int_24) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[25], __pyx_mstate_global->__pyx_int_24) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":181
+  /* "src/tenforty/otslib/ots.pyx":182
  *     (2020, "NY_IT201"): 23,
  *     (2020, "HSA_f8889"): 24,
  *     (2020, "MA_1"): 25,             # <<<<<<<<<<<<<<
  *     (2020, "VA_760"): 26,
  *     (2020, "f8606"): 27,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[26], __pyx_mstate_global->__pyx_int_25) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[26], __pyx_mstate_global->__pyx_int_25) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":182
+  /* "src/tenforty/otslib/ots.pyx":183
  *     (2020, "HSA_f8889"): 24,
  *     (2020, "MA_1"): 25,
  *     (2020, "VA_760"): 26,             # <<<<<<<<<<<<<<
  *     (2020, "f8606"): 27,
  *     (2020, "NJ_1040"): 28,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[27], __pyx_mstate_global->__pyx_int_26) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[27], __pyx_mstate_global->__pyx_int_26) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":183
+  /* "src/tenforty/otslib/ots.pyx":184
  *     (2020, "MA_1"): 25,
  *     (2020, "VA_760"): 26,
  *     (2020, "f8606"): 27,             # <<<<<<<<<<<<<<
  *     (2020, "NJ_1040"): 28,
  *     (2020, "US_1040_Sched_C"): 29,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[28], __pyx_mstate_global->__pyx_int_27) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[28], __pyx_mstate_global->__pyx_int_27) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":184
+  /* "src/tenforty/otslib/ots.pyx":185
  *     (2020, "VA_760"): 26,
  *     (2020, "f8606"): 27,
  *     (2020, "NJ_1040"): 28,             # <<<<<<<<<<<<<<
  *     (2020, "US_1040_Sched_C"): 29,
  *     (2020, "PA_40"): 30,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[29], __pyx_mstate_global->__pyx_int_28) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[29], __pyx_mstate_global->__pyx_int_28) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":185
+  /* "src/tenforty/otslib/ots.pyx":186
  *     (2020, "f8606"): 27,
  *     (2020, "NJ_1040"): 28,
  *     (2020, "US_1040_Sched_C"): 29,             # <<<<<<<<<<<<<<
  *     (2020, "PA_40"): 30,
  *     (2020, "CA_540"): 31,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[30], __pyx_mstate_global->__pyx_int_29) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[30], __pyx_mstate_global->__pyx_int_29) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":186
+  /* "src/tenforty/otslib/ots.pyx":187
  *     (2020, "NJ_1040"): 28,
  *     (2020, "US_1040_Sched_C"): 29,
  *     (2020, "PA_40"): 30,             # <<<<<<<<<<<<<<
  *     (2020, "CA_540"): 31,
  *     (2021, "NJ_1040"): 32,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[31], __pyx_mstate_global->__pyx_int_30) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[31], __pyx_mstate_global->__pyx_int_30) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":187
+  /* "src/tenforty/otslib/ots.pyx":188
  *     (2020, "US_1040_Sched_C"): 29,
  *     (2020, "PA_40"): 30,
  *     (2020, "CA_540"): 31,             # <<<<<<<<<<<<<<
  *     (2021, "NJ_1040"): 32,
  *     (2021, "US_1040_Sched_SE"): 33,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[32], __pyx_mstate_global->__pyx_int_31) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[32], __pyx_mstate_global->__pyx_int_31) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":188
+  /* "src/tenforty/otslib/ots.pyx":189
  *     (2020, "PA_40"): 30,
  *     (2020, "CA_540"): 31,
  *     (2021, "NJ_1040"): 32,             # <<<<<<<<<<<<<<
  *     (2021, "US_1040_Sched_SE"): 33,
  *     (2021, "f8606"): 34,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[33], __pyx_mstate_global->__pyx_int_32) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[33], __pyx_mstate_global->__pyx_int_32) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":189
+  /* "src/tenforty/otslib/ots.pyx":190
  *     (2020, "CA_540"): 31,
  *     (2021, "NJ_1040"): 32,
  *     (2021, "US_1040_Sched_SE"): 33,             # <<<<<<<<<<<<<<
  *     (2021, "f8606"): 34,
  *     (2021, "CA_540"): 35,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[34], __pyx_mstate_global->__pyx_int_33) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[34], __pyx_mstate_global->__pyx_int_33) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":190
+  /* "src/tenforty/otslib/ots.pyx":191
  *     (2021, "NJ_1040"): 32,
  *     (2021, "US_1040_Sched_SE"): 33,
  *     (2021, "f8606"): 34,             # <<<<<<<<<<<<<<
  *     (2021, "CA_540"): 35,
  *     (2021, "HSA_f8889"): 36,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[35], __pyx_mstate_global->__pyx_int_34) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[35], __pyx_mstate_global->__pyx_int_34) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":191
+  /* "src/tenforty/otslib/ots.pyx":192
  *     (2021, "US_1040_Sched_SE"): 33,
  *     (2021, "f8606"): 34,
  *     (2021, "CA_540"): 35,             # <<<<<<<<<<<<<<
  *     (2021, "HSA_f8889"): 36,
  *     (2021, "MA_1"): 37,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[36], __pyx_mstate_global->__pyx_int_35) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[36], __pyx_mstate_global->__pyx_int_35) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":192
+  /* "src/tenforty/otslib/ots.pyx":193
  *     (2021, "f8606"): 34,
  *     (2021, "CA_540"): 35,
  *     (2021, "HSA_f8889"): 36,             # <<<<<<<<<<<<<<
  *     (2021, "MA_1"): 37,
  *     (2021, "NC_D400"): 38,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[37], __pyx_mstate_global->__pyx_int_36) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[37], __pyx_mstate_global->__pyx_int_36) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":193
+  /* "src/tenforty/otslib/ots.pyx":194
  *     (2021, "CA_540"): 35,
  *     (2021, "HSA_f8889"): 36,
  *     (2021, "MA_1"): 37,             # <<<<<<<<<<<<<<
  *     (2021, "NC_D400"): 38,
  *     (2021, "NY_IT201"): 39,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[38], __pyx_mstate_global->__pyx_int_37) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[38], __pyx_mstate_global->__pyx_int_37) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":194
+  /* "src/tenforty/otslib/ots.pyx":195
  *     (2021, "HSA_f8889"): 36,
  *     (2021, "MA_1"): 37,
  *     (2021, "NC_D400"): 38,             # <<<<<<<<<<<<<<
  *     (2021, "NY_IT201"): 39,
  *     (2021, "OH_IT1040"): 40,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[39], __pyx_mstate_global->__pyx_int_38) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[39], __pyx_mstate_global->__pyx_int_38) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":195
+  /* "src/tenforty/otslib/ots.pyx":196
  *     (2021, "MA_1"): 37,
  *     (2021, "NC_D400"): 38,
  *     (2021, "NY_IT201"): 39,             # <<<<<<<<<<<<<<
  *     (2021, "OH_IT1040"): 40,
  *     (2021, "PA_40"): 41,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[40], __pyx_mstate_global->__pyx_int_39) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[40], __pyx_mstate_global->__pyx_int_39) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":196
+  /* "src/tenforty/otslib/ots.pyx":197
  *     (2021, "NC_D400"): 38,
  *     (2021, "NY_IT201"): 39,
  *     (2021, "OH_IT1040"): 40,             # <<<<<<<<<<<<<<
  *     (2021, "PA_40"): 41,
  *     (2021, "US_1040"): 42,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[41], __pyx_mstate_global->__pyx_int_40) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[41], __pyx_mstate_global->__pyx_int_40) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":197
+  /* "src/tenforty/otslib/ots.pyx":198
  *     (2021, "NY_IT201"): 39,
  *     (2021, "OH_IT1040"): 40,
  *     (2021, "PA_40"): 41,             # <<<<<<<<<<<<<<
  *     (2021, "US_1040"): 42,
  *     (2021, "US_1040_Sched_C"): 43,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[42], __pyx_mstate_global->__pyx_int_41) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[42], __pyx_mstate_global->__pyx_int_41) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":198
+  /* "src/tenforty/otslib/ots.pyx":199
  *     (2021, "OH_IT1040"): 40,
  *     (2021, "PA_40"): 41,
  *     (2021, "US_1040"): 42,             # <<<<<<<<<<<<<<
  *     (2021, "US_1040_Sched_C"): 43,
  *     (2021, "VA_760"): 44,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[43], __pyx_mstate_global->__pyx_int_42) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[43], __pyx_mstate_global->__pyx_int_42) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":199
+  /* "src/tenforty/otslib/ots.pyx":200
  *     (2021, "PA_40"): 41,
  *     (2021, "US_1040"): 42,
  *     (2021, "US_1040_Sched_C"): 43,             # <<<<<<<<<<<<<<
  *     (2021, "VA_760"): 44,
  *     (2021, "CA_5805"): 45,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[44], __pyx_mstate_global->__pyx_int_43) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[44], __pyx_mstate_global->__pyx_int_43) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":200
+  /* "src/tenforty/otslib/ots.pyx":201
  *     (2021, "US_1040"): 42,
  *     (2021, "US_1040_Sched_C"): 43,
  *     (2021, "VA_760"): 44,             # <<<<<<<<<<<<<<
  *     (2021, "CA_5805"): 45,
  *     (2021, "f2210"): 46,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[45], __pyx_mstate_global->__pyx_int_44) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[45], __pyx_mstate_global->__pyx_int_44) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":201
+  /* "src/tenforty/otslib/ots.pyx":202
  *     (2021, "US_1040_Sched_C"): 43,
  *     (2021, "VA_760"): 44,
  *     (2021, "CA_5805"): 45,             # <<<<<<<<<<<<<<
  *     (2021, "f2210"): 46,
  *     (2021, "f8960"): 47,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[46], __pyx_mstate_global->__pyx_int_45) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[46], __pyx_mstate_global->__pyx_int_45) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":202
+  /* "src/tenforty/otslib/ots.pyx":203
  *     (2021, "VA_760"): 44,
  *     (2021, "CA_5805"): 45,
  *     (2021, "f2210"): 46,             # <<<<<<<<<<<<<<
  *     (2021, "f8960"): 47,
  *     (2021, "f8959"): 48,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[47], __pyx_mstate_global->__pyx_int_46) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[47], __pyx_mstate_global->__pyx_int_46) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":203
+  /* "src/tenforty/otslib/ots.pyx":204
  *     (2021, "CA_5805"): 45,
  *     (2021, "f2210"): 46,
  *     (2021, "f8960"): 47,             # <<<<<<<<<<<<<<
  *     (2021, "f8959"): 48,
  *     (2022, "HSA_f8889"): 49,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[48], __pyx_mstate_global->__pyx_int_47) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[48], __pyx_mstate_global->__pyx_int_47) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":204
+  /* "src/tenforty/otslib/ots.pyx":205
  *     (2021, "f2210"): 46,
  *     (2021, "f8960"): 47,
  *     (2021, "f8959"): 48,             # <<<<<<<<<<<<<<
  *     (2022, "HSA_f8889"): 49,
  *     (2022, "MA_1"): 50,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[49], __pyx_mstate_global->__pyx_int_48) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[49], __pyx_mstate_global->__pyx_int_48) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":205
+  /* "src/tenforty/otslib/ots.pyx":206
  *     (2021, "f8960"): 47,
  *     (2021, "f8959"): 48,
  *     (2022, "HSA_f8889"): 49,             # <<<<<<<<<<<<<<
  *     (2022, "MA_1"): 50,
  *     (2022, "NJ_1040"): 51,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[50], __pyx_mstate_global->__pyx_int_49) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[50], __pyx_mstate_global->__pyx_int_49) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":206
+  /* "src/tenforty/otslib/ots.pyx":207
  *     (2021, "f8959"): 48,
  *     (2022, "HSA_f8889"): 49,
  *     (2022, "MA_1"): 50,             # <<<<<<<<<<<<<<
  *     (2022, "NJ_1040"): 51,
  *     (2022, "f8959"): 52,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[51], __pyx_mstate_global->__pyx_int_50) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[51], __pyx_mstate_global->__pyx_int_50) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":207
+  /* "src/tenforty/otslib/ots.pyx":208
  *     (2022, "HSA_f8889"): 49,
  *     (2022, "MA_1"): 50,
  *     (2022, "NJ_1040"): 51,             # <<<<<<<<<<<<<<
  *     (2022, "f8959"): 52,
  *     (2022, "f8960"): 53,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[52], __pyx_mstate_global->__pyx_int_51) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[52], __pyx_mstate_global->__pyx_int_51) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":208
+  /* "src/tenforty/otslib/ots.pyx":209
  *     (2022, "MA_1"): 50,
  *     (2022, "NJ_1040"): 51,
  *     (2022, "f8959"): 52,             # <<<<<<<<<<<<<<
  *     (2022, "f8960"): 53,
  *     (2022, "f8606"): 54,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[53], __pyx_mstate_global->__pyx_int_52) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[53], __pyx_mstate_global->__pyx_int_52) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":209
+  /* "src/tenforty/otslib/ots.pyx":210
  *     (2022, "NJ_1040"): 51,
  *     (2022, "f8959"): 52,
  *     (2022, "f8960"): 53,             # <<<<<<<<<<<<<<
  *     (2022, "f8606"): 54,
  *     (2022, "CA_540"): 55,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[54], __pyx_mstate_global->__pyx_int_53) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[54], __pyx_mstate_global->__pyx_int_53) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":210
+  /* "src/tenforty/otslib/ots.pyx":211
  *     (2022, "f8959"): 52,
  *     (2022, "f8960"): 53,
  *     (2022, "f8606"): 54,             # <<<<<<<<<<<<<<
  *     (2022, "CA_540"): 55,
  *     (2022, "CA_5805"): 56,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[55], __pyx_mstate_global->__pyx_int_54) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[55], __pyx_mstate_global->__pyx_int_54) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":211
+  /* "src/tenforty/otslib/ots.pyx":212
  *     (2022, "f8960"): 53,
  *     (2022, "f8606"): 54,
  *     (2022, "CA_540"): 55,             # <<<<<<<<<<<<<<
  *     (2022, "CA_5805"): 56,
  *     (2022, "NC_D400"): 57,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[56], __pyx_mstate_global->__pyx_int_55) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[56], __pyx_mstate_global->__pyx_int_55) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":212
+  /* "src/tenforty/otslib/ots.pyx":213
  *     (2022, "f8606"): 54,
  *     (2022, "CA_540"): 55,
  *     (2022, "CA_5805"): 56,             # <<<<<<<<<<<<<<
  *     (2022, "NC_D400"): 57,
  *     (2022, "NY_IT201"): 58,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[57], __pyx_mstate_global->__pyx_int_56) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[57], __pyx_mstate_global->__pyx_int_56) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":213
+  /* "src/tenforty/otslib/ots.pyx":214
  *     (2022, "CA_540"): 55,
  *     (2022, "CA_5805"): 56,
  *     (2022, "NC_D400"): 57,             # <<<<<<<<<<<<<<
  *     (2022, "NY_IT201"): 58,
  *     (2022, "OH_IT1040"): 59,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[58], __pyx_mstate_global->__pyx_int_57) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[58], __pyx_mstate_global->__pyx_int_57) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":214
+  /* "src/tenforty/otslib/ots.pyx":215
  *     (2022, "CA_5805"): 56,
  *     (2022, "NC_D400"): 57,
  *     (2022, "NY_IT201"): 58,             # <<<<<<<<<<<<<<
  *     (2022, "OH_IT1040"): 59,
  *     (2022, "PA_40"): 60,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[59], __pyx_mstate_global->__pyx_int_58) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[59], __pyx_mstate_global->__pyx_int_58) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":215
+  /* "src/tenforty/otslib/ots.pyx":216
  *     (2022, "NC_D400"): 57,
  *     (2022, "NY_IT201"): 58,
  *     (2022, "OH_IT1040"): 59,             # <<<<<<<<<<<<<<
  *     (2022, "PA_40"): 60,
  *     (2022, "US_1040"): 61,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[60], __pyx_mstate_global->__pyx_int_59) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[60], __pyx_mstate_global->__pyx_int_59) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":216
+  /* "src/tenforty/otslib/ots.pyx":217
  *     (2022, "NY_IT201"): 58,
  *     (2022, "OH_IT1040"): 59,
  *     (2022, "PA_40"): 60,             # <<<<<<<<<<<<<<
  *     (2022, "US_1040"): 61,
  *     (2022, "US_1040_Sched_C"): 62,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[61], __pyx_mstate_global->__pyx_int_60) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[61], __pyx_mstate_global->__pyx_int_60) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":217
+  /* "src/tenforty/otslib/ots.pyx":218
  *     (2022, "OH_IT1040"): 59,
  *     (2022, "PA_40"): 60,
  *     (2022, "US_1040"): 61,             # <<<<<<<<<<<<<<
  *     (2022, "US_1040_Sched_C"): 62,
  *     (2022, "US_1040_Sched_SE"): 63,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[62], __pyx_mstate_global->__pyx_int_61) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[62], __pyx_mstate_global->__pyx_int_61) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":218
+  /* "src/tenforty/otslib/ots.pyx":219
  *     (2022, "PA_40"): 60,
  *     (2022, "US_1040"): 61,
  *     (2022, "US_1040_Sched_C"): 62,             # <<<<<<<<<<<<<<
  *     (2022, "US_1040_Sched_SE"): 63,
  *     (2022, "VA_760"): 64,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[63], __pyx_mstate_global->__pyx_int_62) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[63], __pyx_mstate_global->__pyx_int_62) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":219
+  /* "src/tenforty/otslib/ots.pyx":220
  *     (2022, "US_1040"): 61,
  *     (2022, "US_1040_Sched_C"): 62,
  *     (2022, "US_1040_Sched_SE"): 63,             # <<<<<<<<<<<<<<
  *     (2022, "VA_760"): 64,
  *     (2022, "f2210"): 65,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[64], __pyx_mstate_global->__pyx_int_63) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[64], __pyx_mstate_global->__pyx_int_63) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":220
+  /* "src/tenforty/otslib/ots.pyx":221
  *     (2022, "US_1040_Sched_C"): 62,
  *     (2022, "US_1040_Sched_SE"): 63,
  *     (2022, "VA_760"): 64,             # <<<<<<<<<<<<<<
  *     (2022, "f2210"): 65,
  *     (2022, "f8829"): 66,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[65], __pyx_mstate_global->__pyx_int_64) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[65], __pyx_mstate_global->__pyx_int_64) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":221
+  /* "src/tenforty/otslib/ots.pyx":222
  *     (2022, "US_1040_Sched_SE"): 63,
  *     (2022, "VA_760"): 64,
  *     (2022, "f2210"): 65,             # <<<<<<<<<<<<<<
  *     (2022, "f8829"): 66,
  *     (2022, "f8995"): 67,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[66], __pyx_mstate_global->__pyx_int_65) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[66], __pyx_mstate_global->__pyx_int_65) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":222
+  /* "src/tenforty/otslib/ots.pyx":223
  *     (2022, "VA_760"): 64,
  *     (2022, "f2210"): 65,
  *     (2022, "f8829"): 66,             # <<<<<<<<<<<<<<
  *     (2022, "f8995"): 67,
  *     (2023, "NJ_1040"): 68,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[67], __pyx_mstate_global->__pyx_int_66) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[67], __pyx_mstate_global->__pyx_int_66) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":223
+  /* "src/tenforty/otslib/ots.pyx":224
  *     (2022, "f2210"): 65,
  *     (2022, "f8829"): 66,
  *     (2022, "f8995"): 67,             # <<<<<<<<<<<<<<
  *     (2023, "NJ_1040"): 68,
  *     (2023, "US_1040_Sched_C"): 69,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[68], __pyx_mstate_global->__pyx_int_67) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[68], __pyx_mstate_global->__pyx_int_67) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":224
+  /* "src/tenforty/otslib/ots.pyx":225
  *     (2022, "f8829"): 66,
  *     (2022, "f8995"): 67,
  *     (2023, "NJ_1040"): 68,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040_Sched_C"): 69,
  *     (2023, "f8829"): 70,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[69], __pyx_mstate_global->__pyx_int_68) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[69], __pyx_mstate_global->__pyx_int_68) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":225
+  /* "src/tenforty/otslib/ots.pyx":226
  *     (2022, "f8995"): 67,
  *     (2023, "NJ_1040"): 68,
  *     (2023, "US_1040_Sched_C"): 69,             # <<<<<<<<<<<<<<
  *     (2023, "f8829"): 70,
  *     (2023, "f8959"): 71,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[70], __pyx_mstate_global->__pyx_int_69) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[70], __pyx_mstate_global->__pyx_int_69) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":226
+  /* "src/tenforty/otslib/ots.pyx":227
  *     (2023, "NJ_1040"): 68,
  *     (2023, "US_1040_Sched_C"): 69,
  *     (2023, "f8829"): 70,             # <<<<<<<<<<<<<<
  *     (2023, "f8959"): 71,
  *     (2023, "f8960"): 72,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[71], __pyx_mstate_global->__pyx_int_70) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[71], __pyx_mstate_global->__pyx_int_70) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":227
+  /* "src/tenforty/otslib/ots.pyx":228
  *     (2023, "US_1040_Sched_C"): 69,
  *     (2023, "f8829"): 70,
  *     (2023, "f8959"): 71,             # <<<<<<<<<<<<<<
  *     (2023, "f8960"): 72,
  *     (2023, "f8995"): 73,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[72], __pyx_mstate_global->__pyx_int_71) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[72], __pyx_mstate_global->__pyx_int_71) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":228
+  /* "src/tenforty/otslib/ots.pyx":229
  *     (2023, "f8829"): 70,
  *     (2023, "f8959"): 71,
  *     (2023, "f8960"): 72,             # <<<<<<<<<<<<<<
  *     (2023, "f8995"): 73,
  *     (2023, "f8606"): 74,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[73], __pyx_mstate_global->__pyx_int_72) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[73], __pyx_mstate_global->__pyx_int_72) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":229
+  /* "src/tenforty/otslib/ots.pyx":230
  *     (2023, "f8959"): 71,
  *     (2023, "f8960"): 72,
  *     (2023, "f8995"): 73,             # <<<<<<<<<<<<<<
  *     (2023, "f8606"): 74,
  *     (2023, "CA_540"): 75,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[74], __pyx_mstate_global->__pyx_int_73) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[74], __pyx_mstate_global->__pyx_int_73) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":230
+  /* "src/tenforty/otslib/ots.pyx":231
  *     (2023, "f8960"): 72,
  *     (2023, "f8995"): 73,
  *     (2023, "f8606"): 74,             # <<<<<<<<<<<<<<
  *     (2023, "CA_540"): 75,
  *     (2023, "HSA_f8889"): 76,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[75], __pyx_mstate_global->__pyx_int_74) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[75], __pyx_mstate_global->__pyx_int_74) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":231
+  /* "src/tenforty/otslib/ots.pyx":232
  *     (2023, "f8995"): 73,
  *     (2023, "f8606"): 74,
  *     (2023, "CA_540"): 75,             # <<<<<<<<<<<<<<
  *     (2023, "HSA_f8889"): 76,
  *     (2023, "MA_1"): 77,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[76], __pyx_mstate_global->__pyx_int_75) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[76], __pyx_mstate_global->__pyx_int_75) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":232
+  /* "src/tenforty/otslib/ots.pyx":233
  *     (2023, "f8606"): 74,
  *     (2023, "CA_540"): 75,
  *     (2023, "HSA_f8889"): 76,             # <<<<<<<<<<<<<<
  *     (2023, "MA_1"): 77,
  *     (2023, "NC_D400"): 78,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[77], __pyx_mstate_global->__pyx_int_76) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[77], __pyx_mstate_global->__pyx_int_76) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":233
+  /* "src/tenforty/otslib/ots.pyx":234
  *     (2023, "CA_540"): 75,
  *     (2023, "HSA_f8889"): 76,
  *     (2023, "MA_1"): 77,             # <<<<<<<<<<<<<<
  *     (2023, "NC_D400"): 78,
  *     (2023, "NY_IT201"): 79,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[78], __pyx_mstate_global->__pyx_int_77) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[78], __pyx_mstate_global->__pyx_int_77) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":234
+  /* "src/tenforty/otslib/ots.pyx":235
  *     (2023, "HSA_f8889"): 76,
  *     (2023, "MA_1"): 77,
  *     (2023, "NC_D400"): 78,             # <<<<<<<<<<<<<<
  *     (2023, "NY_IT201"): 79,
  *     (2023, "OH_IT1040"): 80,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[79], __pyx_mstate_global->__pyx_int_78) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[79], __pyx_mstate_global->__pyx_int_78) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":235
+  /* "src/tenforty/otslib/ots.pyx":236
  *     (2023, "MA_1"): 77,
  *     (2023, "NC_D400"): 78,
  *     (2023, "NY_IT201"): 79,             # <<<<<<<<<<<<<<
  *     (2023, "OH_IT1040"): 80,
  *     (2023, "PA_40"): 81,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[80], __pyx_mstate_global->__pyx_int_79) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[80], __pyx_mstate_global->__pyx_int_79) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":236
+  /* "src/tenforty/otslib/ots.pyx":237
  *     (2023, "NC_D400"): 78,
  *     (2023, "NY_IT201"): 79,
  *     (2023, "OH_IT1040"): 80,             # <<<<<<<<<<<<<<
  *     (2023, "PA_40"): 81,
  *     (2023, "US_1040"): 82,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[81], __pyx_mstate_global->__pyx_int_80) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[81], __pyx_mstate_global->__pyx_int_80) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":237
+  /* "src/tenforty/otslib/ots.pyx":238
  *     (2023, "NY_IT201"): 79,
  *     (2023, "OH_IT1040"): 80,
  *     (2023, "PA_40"): 81,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040"): 82,
  *     (2023, "US_1040_Sched_SE"): 83,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[82], __pyx_mstate_global->__pyx_int_81) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[82], __pyx_mstate_global->__pyx_int_81) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":238
+  /* "src/tenforty/otslib/ots.pyx":239
  *     (2023, "OH_IT1040"): 80,
  *     (2023, "PA_40"): 81,
  *     (2023, "US_1040"): 82,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040_Sched_SE"): 83,
  *     (2023, "VA_760"): 84,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[83], __pyx_mstate_global->__pyx_int_82) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[83], __pyx_mstate_global->__pyx_int_82) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":239
+  /* "src/tenforty/otslib/ots.pyx":240
  *     (2023, "PA_40"): 81,
  *     (2023, "US_1040"): 82,
  *     (2023, "US_1040_Sched_SE"): 83,             # <<<<<<<<<<<<<<
  *     (2023, "VA_760"): 84,
  *     (2023, "f2210"): 85,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[84], __pyx_mstate_global->__pyx_int_83) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[84], __pyx_mstate_global->__pyx_int_83) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":240
+  /* "src/tenforty/otslib/ots.pyx":241
  *     (2023, "US_1040"): 82,
  *     (2023, "US_1040_Sched_SE"): 83,
  *     (2023, "VA_760"): 84,             # <<<<<<<<<<<<<<
  *     (2023, "f2210"): 85,
  *     (2023, "AZ_140"): 86,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[85], __pyx_mstate_global->__pyx_int_84) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[85], __pyx_mstate_global->__pyx_int_84) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":241
+  /* "src/tenforty/otslib/ots.pyx":242
  *     (2023, "US_1040_Sched_SE"): 83,
  *     (2023, "VA_760"): 84,
  *     (2023, "f2210"): 85,             # <<<<<<<<<<<<<<
  *     (2023, "AZ_140"): 86,
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[86], __pyx_mstate_global->__pyx_int_85) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[86], __pyx_mstate_global->__pyx_int_85) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":242
+  /* "src/tenforty/otslib/ots.pyx":243
  *     (2023, "VA_760"): 84,
  *     (2023, "f2210"): 85,
  *     (2023, "AZ_140"): 86,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
  *     (2023, "CA_5805"): 88,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[87], __pyx_mstate_global->__pyx_int_86) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[87], __pyx_mstate_global->__pyx_int_86) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":243
+  /* "src/tenforty/otslib/ots.pyx":244
  *     (2023, "f2210"): 85,
  *     (2023, "AZ_140"): 86,
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,             # <<<<<<<<<<<<<<
  *     (2023, "CA_5805"): 88,
  *     (2023, "f8812"): 89,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[88], __pyx_mstate_global->__pyx_int_87) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[88], __pyx_mstate_global->__pyx_int_87) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":244
+  /* "src/tenforty/otslib/ots.pyx":245
  *     (2023, "AZ_140"): 86,
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
  *     (2023, "CA_5805"): 88,             # <<<<<<<<<<<<<<
  *     (2023, "f8812"): 89,
  *     (2024, "NJ_1040"): 90,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[89], __pyx_mstate_global->__pyx_int_88) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[89], __pyx_mstate_global->__pyx_int_88) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":245
+  /* "src/tenforty/otslib/ots.pyx":246
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
  *     (2023, "CA_5805"): 88,
  *     (2023, "f8812"): 89,             # <<<<<<<<<<<<<<
  *     (2024, "NJ_1040"): 90,
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[90], __pyx_mstate_global->__pyx_int_89) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[90], __pyx_mstate_global->__pyx_int_89) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":246
+  /* "src/tenforty/otslib/ots.pyx":247
  *     (2023, "CA_5805"): 88,
  *     (2023, "f8812"): 89,
  *     (2024, "NJ_1040"): 90,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
  *     (2024, "f8812"): 92,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[91], __pyx_mstate_global->__pyx_int_90) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[91], __pyx_mstate_global->__pyx_int_90) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":247
+  /* "src/tenforty/otslib/ots.pyx":248
  *     (2023, "f8812"): 89,
  *     (2024, "NJ_1040"): 90,
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,             # <<<<<<<<<<<<<<
  *     (2024, "f8812"): 92,
  *     (2024, "f8829"): 93,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[92], __pyx_mstate_global->__pyx_int_91) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[92], __pyx_mstate_global->__pyx_int_91) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":248
+  /* "src/tenforty/otslib/ots.pyx":249
  *     (2024, "NJ_1040"): 90,
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
  *     (2024, "f8812"): 92,             # <<<<<<<<<<<<<<
  *     (2024, "f8829"): 93,
  *     (2024, "f8959"): 94,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[93], __pyx_mstate_global->__pyx_int_92) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[93], __pyx_mstate_global->__pyx_int_92) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":249
+  /* "src/tenforty/otslib/ots.pyx":250
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
  *     (2024, "f8812"): 92,
  *     (2024, "f8829"): 93,             # <<<<<<<<<<<<<<
  *     (2024, "f8959"): 94,
  *     (2024, "f8960"): 95,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[94], __pyx_mstate_global->__pyx_int_93) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[94], __pyx_mstate_global->__pyx_int_93) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":250
+  /* "src/tenforty/otslib/ots.pyx":251
  *     (2024, "f8812"): 92,
  *     (2024, "f8829"): 93,
  *     (2024, "f8959"): 94,             # <<<<<<<<<<<<<<
  *     (2024, "f8960"): 95,
  *     (2024, "f8995"): 96,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[95], __pyx_mstate_global->__pyx_int_94) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[95], __pyx_mstate_global->__pyx_int_94) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":251
+  /* "src/tenforty/otslib/ots.pyx":252
  *     (2024, "f8829"): 93,
  *     (2024, "f8959"): 94,
  *     (2024, "f8960"): 95,             # <<<<<<<<<<<<<<
  *     (2024, "f8995"): 96,
  *     (2024, "US_1040_Sched_SE"): 97,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[96], __pyx_mstate_global->__pyx_int_95) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[96], __pyx_mstate_global->__pyx_int_95) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":252
+  /* "src/tenforty/otslib/ots.pyx":253
  *     (2024, "f8959"): 94,
  *     (2024, "f8960"): 95,
  *     (2024, "f8995"): 96,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040_Sched_SE"): 97,
  *     (2024, "f8606"): 98,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[97], __pyx_mstate_global->__pyx_int_96) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[97], __pyx_mstate_global->__pyx_int_96) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":253
+  /* "src/tenforty/otslib/ots.pyx":254
  *     (2024, "f8960"): 95,
  *     (2024, "f8995"): 96,
  *     (2024, "US_1040_Sched_SE"): 97,             # <<<<<<<<<<<<<<
  *     (2024, "f8606"): 98,
  *     (2024, "AZ_140"): 99,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[98], __pyx_mstate_global->__pyx_int_97) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[98], __pyx_mstate_global->__pyx_int_97) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":254
+  /* "src/tenforty/otslib/ots.pyx":255
  *     (2024, "f8995"): 96,
  *     (2024, "US_1040_Sched_SE"): 97,
  *     (2024, "f8606"): 98,             # <<<<<<<<<<<<<<
  *     (2024, "AZ_140"): 99,
  *     (2024, "CA_540"): 100,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[99], __pyx_mstate_global->__pyx_int_98) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[99], __pyx_mstate_global->__pyx_int_98) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":255
+  /* "src/tenforty/otslib/ots.pyx":256
  *     (2024, "US_1040_Sched_SE"): 97,
  *     (2024, "f8606"): 98,
  *     (2024, "AZ_140"): 99,             # <<<<<<<<<<<<<<
  *     (2024, "CA_540"): 100,
  *     (2024, "CA_5805"): 101,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[100], __pyx_mstate_global->__pyx_int_99) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[100], __pyx_mstate_global->__pyx_int_99) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":256
+  /* "src/tenforty/otslib/ots.pyx":257
  *     (2024, "f8606"): 98,
  *     (2024, "AZ_140"): 99,
  *     (2024, "CA_540"): 100,             # <<<<<<<<<<<<<<
  *     (2024, "CA_5805"): 101,
  *     (2024, "HSA_f8889"): 102,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[101], __pyx_mstate_global->__pyx_int_100) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[101], __pyx_mstate_global->__pyx_int_100) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":257
+  /* "src/tenforty/otslib/ots.pyx":258
  *     (2024, "AZ_140"): 99,
  *     (2024, "CA_540"): 100,
  *     (2024, "CA_5805"): 101,             # <<<<<<<<<<<<<<
  *     (2024, "HSA_f8889"): 102,
  *     (2024, "MA_1"): 103,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[102], __pyx_mstate_global->__pyx_int_101) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[102], __pyx_mstate_global->__pyx_int_101) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":258
+  /* "src/tenforty/otslib/ots.pyx":259
  *     (2024, "CA_540"): 100,
  *     (2024, "CA_5805"): 101,
  *     (2024, "HSA_f8889"): 102,             # <<<<<<<<<<<<<<
  *     (2024, "MA_1"): 103,
  *     (2024, "NC_D400"): 104,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[103], __pyx_mstate_global->__pyx_int_102) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[103], __pyx_mstate_global->__pyx_int_102) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":259
+  /* "src/tenforty/otslib/ots.pyx":260
  *     (2024, "CA_5805"): 101,
  *     (2024, "HSA_f8889"): 102,
  *     (2024, "MA_1"): 103,             # <<<<<<<<<<<<<<
  *     (2024, "NC_D400"): 104,
  *     (2024, "NY_IT201"): 105,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[104], __pyx_mstate_global->__pyx_int_103) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[104], __pyx_mstate_global->__pyx_int_103) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":260
+  /* "src/tenforty/otslib/ots.pyx":261
  *     (2024, "HSA_f8889"): 102,
  *     (2024, "MA_1"): 103,
  *     (2024, "NC_D400"): 104,             # <<<<<<<<<<<<<<
  *     (2024, "NY_IT201"): 105,
  *     (2024, "OH_IT1040"): 106,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[105], __pyx_mstate_global->__pyx_int_104) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[105], __pyx_mstate_global->__pyx_int_104) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":261
+  /* "src/tenforty/otslib/ots.pyx":262
  *     (2024, "MA_1"): 103,
  *     (2024, "NC_D400"): 104,
  *     (2024, "NY_IT201"): 105,             # <<<<<<<<<<<<<<
  *     (2024, "OH_IT1040"): 106,
  *     (2024, "PA_40"): 107,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[106], __pyx_mstate_global->__pyx_int_105) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[106], __pyx_mstate_global->__pyx_int_105) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":262
+  /* "src/tenforty/otslib/ots.pyx":263
  *     (2024, "NC_D400"): 104,
  *     (2024, "NY_IT201"): 105,
  *     (2024, "OH_IT1040"): 106,             # <<<<<<<<<<<<<<
  *     (2024, "PA_40"): 107,
  *     (2024, "US_1040"): 108,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[107], __pyx_mstate_global->__pyx_int_106) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[107], __pyx_mstate_global->__pyx_int_106) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":263
+  /* "src/tenforty/otslib/ots.pyx":264
  *     (2024, "NY_IT201"): 105,
  *     (2024, "OH_IT1040"): 106,
  *     (2024, "PA_40"): 107,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040"): 108,
  *     (2024, "US_1040_Sched_C"): 109,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[108], __pyx_mstate_global->__pyx_int_107) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[108], __pyx_mstate_global->__pyx_int_107) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":264
+  /* "src/tenforty/otslib/ots.pyx":265
  *     (2024, "OH_IT1040"): 106,
  *     (2024, "PA_40"): 107,
  *     (2024, "US_1040"): 108,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040_Sched_C"): 109,
  *     (2024, "VA_760"): 110,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[109], __pyx_mstate_global->__pyx_int_108) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[109], __pyx_mstate_global->__pyx_int_108) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":265
+  /* "src/tenforty/otslib/ots.pyx":266
  *     (2024, "PA_40"): 107,
  *     (2024, "US_1040"): 108,
  *     (2024, "US_1040_Sched_C"): 109,             # <<<<<<<<<<<<<<
  *     (2024, "VA_760"): 110,
  *     (2024, "f2210"): 111,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[110], __pyx_mstate_global->__pyx_int_109) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[110], __pyx_mstate_global->__pyx_int_109) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":266
+  /* "src/tenforty/otslib/ots.pyx":267
  *     (2024, "US_1040"): 108,
  *     (2024, "US_1040_Sched_C"): 109,
  *     (2024, "VA_760"): 110,             # <<<<<<<<<<<<<<
  *     (2024, "f2210"): 111,
  *     (2024, "MI_1040"): 112,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[111], __pyx_mstate_global->__pyx_int_110) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[111], __pyx_mstate_global->__pyx_int_110) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":267
+  /* "src/tenforty/otslib/ots.pyx":268
  *     (2024, "US_1040_Sched_C"): 109,
  *     (2024, "VA_760"): 110,
  *     (2024, "f2210"): 111,             # <<<<<<<<<<<<<<
  *     (2024, "MI_1040"): 112,
  *     (2024, "OR_40"): 113,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[112], __pyx_mstate_global->__pyx_int_111) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[112], __pyx_mstate_global->__pyx_int_111) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":268
+  /* "src/tenforty/otslib/ots.pyx":269
  *     (2024, "VA_760"): 110,
  *     (2024, "f2210"): 111,
  *     (2024, "MI_1040"): 112,             # <<<<<<<<<<<<<<
  *     (2024, "OR_40"): 113,
  *     (2025, "OR_40"): 114,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[113], __pyx_mstate_global->__pyx_int_112) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[113], __pyx_mstate_global->__pyx_int_112) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":269
+  /* "src/tenforty/otslib/ots.pyx":270
  *     (2024, "f2210"): 111,
  *     (2024, "MI_1040"): 112,
  *     (2024, "OR_40"): 113,             # <<<<<<<<<<<<<<
  *     (2025, "OR_40"): 114,
  *     (2025, "MA_1"): 115,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[114], __pyx_mstate_global->__pyx_int_113) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[114], __pyx_mstate_global->__pyx_int_113) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":270
+  /* "src/tenforty/otslib/ots.pyx":271
  *     (2024, "MI_1040"): 112,
  *     (2024, "OR_40"): 113,
  *     (2025, "OR_40"): 114,             # <<<<<<<<<<<<<<
  *     (2025, "MA_1"): 115,
  *     (2025, "VA_760"): 116,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[115], __pyx_mstate_global->__pyx_int_114) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[115], __pyx_mstate_global->__pyx_int_114) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":271
+  /* "src/tenforty/otslib/ots.pyx":272
  *     (2024, "OR_40"): 113,
  *     (2025, "OR_40"): 114,
  *     (2025, "MA_1"): 115,             # <<<<<<<<<<<<<<
  *     (2025, "VA_760"): 116,
  *     (2025, "f8812"): 117,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[116], __pyx_mstate_global->__pyx_int_115) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[116], __pyx_mstate_global->__pyx_int_115) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":272
+  /* "src/tenforty/otslib/ots.pyx":273
  *     (2025, "OR_40"): 114,
  *     (2025, "MA_1"): 115,
  *     (2025, "VA_760"): 116,             # <<<<<<<<<<<<<<
  *     (2025, "f8812"): 117,
  *     (2025, "US_1040_Sched_SE"): 118,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[117], __pyx_mstate_global->__pyx_int_116) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[117], __pyx_mstate_global->__pyx_int_116) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":273
+  /* "src/tenforty/otslib/ots.pyx":274
  *     (2025, "MA_1"): 115,
  *     (2025, "VA_760"): 116,
  *     (2025, "f8812"): 117,             # <<<<<<<<<<<<<<
  *     (2025, "US_1040_Sched_SE"): 118,
  *     (2025, "f8829"): 119,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[118], __pyx_mstate_global->__pyx_int_117) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[118], __pyx_mstate_global->__pyx_int_117) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":274
+  /* "src/tenforty/otslib/ots.pyx":275
  *     (2025, "VA_760"): 116,
  *     (2025, "f8812"): 117,
  *     (2025, "US_1040_Sched_SE"): 118,             # <<<<<<<<<<<<<<
  *     (2025, "f8829"): 119,
  *     (2025, "CA_5805"): 120,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[119], __pyx_mstate_global->__pyx_int_118) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[119], __pyx_mstate_global->__pyx_int_118) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":275
+  /* "src/tenforty/otslib/ots.pyx":276
  *     (2025, "f8812"): 117,
  *     (2025, "US_1040_Sched_SE"): 118,
  *     (2025, "f8829"): 119,             # <<<<<<<<<<<<<<
  *     (2025, "CA_5805"): 120,
  *     (2025, "f8959"): 121,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[120], __pyx_mstate_global->__pyx_int_119) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[120], __pyx_mstate_global->__pyx_int_119) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":276
+  /* "src/tenforty/otslib/ots.pyx":277
  *     (2025, "US_1040_Sched_SE"): 118,
  *     (2025, "f8829"): 119,
  *     (2025, "CA_5805"): 120,             # <<<<<<<<<<<<<<
  *     (2025, "f8959"): 121,
  *     (2025, "f8960"): 122,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[121], __pyx_mstate_global->__pyx_int_120) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[121], __pyx_mstate_global->__pyx_int_120) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":277
+  /* "src/tenforty/otslib/ots.pyx":278
  *     (2025, "f8829"): 119,
  *     (2025, "CA_5805"): 120,
  *     (2025, "f8959"): 121,             # <<<<<<<<<<<<<<
  *     (2025, "f8960"): 122,
  *     (2025, "MI_1040"): 123,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[122], __pyx_mstate_global->__pyx_int_121) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[122], __pyx_mstate_global->__pyx_int_121) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":278
+  /* "src/tenforty/otslib/ots.pyx":279
  *     (2025, "CA_5805"): 120,
  *     (2025, "f8959"): 121,
  *     (2025, "f8960"): 122,             # <<<<<<<<<<<<<<
  *     (2025, "MI_1040"): 123,
  *     (2025, "US_1040"): 124,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[123], __pyx_mstate_global->__pyx_int_122) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[123], __pyx_mstate_global->__pyx_int_122) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":279
+  /* "src/tenforty/otslib/ots.pyx":280
  *     (2025, "f8959"): 121,
  *     (2025, "f8960"): 122,
  *     (2025, "MI_1040"): 123,             # <<<<<<<<<<<<<<
  *     (2025, "US_1040"): 124,
  *     (2025, "NC_D400"): 125,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[124], __pyx_mstate_global->__pyx_int_123) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[124], __pyx_mstate_global->__pyx_int_123) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":280
+  /* "src/tenforty/otslib/ots.pyx":281
  *     (2025, "f8960"): 122,
  *     (2025, "MI_1040"): 123,
  *     (2025, "US_1040"): 124,             # <<<<<<<<<<<<<<
  *     (2025, "NC_D400"): 125,
  *     (2025, "AZ_140"): 126,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[125], __pyx_mstate_global->__pyx_int_124) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[125], __pyx_mstate_global->__pyx_int_124) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":281
+  /* "src/tenforty/otslib/ots.pyx":282
  *     (2025, "MI_1040"): 123,
  *     (2025, "US_1040"): 124,
  *     (2025, "NC_D400"): 125,             # <<<<<<<<<<<<<<
  *     (2025, "AZ_140"): 126,
  *     (2025, "NY_IT201"): 127,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[126], __pyx_mstate_global->__pyx_int_125) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[126], __pyx_mstate_global->__pyx_int_125) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":282
+  /* "src/tenforty/otslib/ots.pyx":283
  *     (2025, "US_1040"): 124,
  *     (2025, "NC_D400"): 125,
  *     (2025, "AZ_140"): 126,             # <<<<<<<<<<<<<<
  *     (2025, "NY_IT201"): 127,
  *     (2025, "f8606"): 128,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[127], __pyx_mstate_global->__pyx_int_126) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[127], __pyx_mstate_global->__pyx_int_126) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":283
+  /* "src/tenforty/otslib/ots.pyx":284
  *     (2025, "NC_D400"): 125,
  *     (2025, "AZ_140"): 126,
  *     (2025, "NY_IT201"): 127,             # <<<<<<<<<<<<<<
  *     (2025, "f8606"): 128,
  *     (2025, "HSA_f8889"): 129,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[128], __pyx_mstate_global->__pyx_int_127) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[128], __pyx_mstate_global->__pyx_int_127) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":284
+  /* "src/tenforty/otslib/ots.pyx":285
  *     (2025, "AZ_140"): 126,
  *     (2025, "NY_IT201"): 127,
  *     (2025, "f8606"): 128,             # <<<<<<<<<<<<<<
  *     (2025, "HSA_f8889"): 129,
  *     (2025, "f6781"): 130,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[129], __pyx_mstate_global->__pyx_int_128) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[129], __pyx_mstate_global->__pyx_int_128) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":285
+  /* "src/tenforty/otslib/ots.pyx":286
  *     (2025, "NY_IT201"): 127,
  *     (2025, "f8606"): 128,
  *     (2025, "HSA_f8889"): 129,             # <<<<<<<<<<<<<<
  *     (2025, "f6781"): 130,
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[130], __pyx_mstate_global->__pyx_int_129) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[130], __pyx_mstate_global->__pyx_int_129) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":286
+  /* "src/tenforty/otslib/ots.pyx":287
  *     (2025, "f8606"): 128,
  *     (2025, "HSA_f8889"): 129,
  *     (2025, "f6781"): 130,             # <<<<<<<<<<<<<<
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
  *     (2025, "f8995"): 132,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[131], __pyx_mstate_global->__pyx_int_130) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[131], __pyx_mstate_global->__pyx_int_130) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":287
+  /* "src/tenforty/otslib/ots.pyx":288
  *     (2025, "HSA_f8889"): 129,
  *     (2025, "f6781"): 130,
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,             # <<<<<<<<<<<<<<
  *     (2025, "f8995"): 132,
  *     (2025, "CA_540"): 133,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[132], __pyx_mstate_global->__pyx_int_131) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[132], __pyx_mstate_global->__pyx_int_131) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":288
+  /* "src/tenforty/otslib/ots.pyx":289
  *     (2025, "f6781"): 130,
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
  *     (2025, "f8995"): 132,             # <<<<<<<<<<<<<<
  *     (2025, "CA_540"): 133,
  *     (2025, "NJ_1040"): 134,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[133], __pyx_mstate_global->__pyx_int_132) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[133], __pyx_mstate_global->__pyx_int_132) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":289
+  /* "src/tenforty/otslib/ots.pyx":290
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
  *     (2025, "f8995"): 132,
  *     (2025, "CA_540"): 133,             # <<<<<<<<<<<<<<
  *     (2025, "NJ_1040"): 134,
- *     (2025, "OH_IT1040"): 135,
+ *     (2025, "f2441"): 135,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[134], __pyx_mstate_global->__pyx_int_133) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[134], __pyx_mstate_global->__pyx_int_133) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
-  /* "src/tenforty/otslib/ots.pyx":290
+  /* "src/tenforty/otslib/ots.pyx":291
  *     (2025, "f8995"): 132,
  *     (2025, "CA_540"): 133,
  *     (2025, "NJ_1040"): 134,             # <<<<<<<<<<<<<<
- *     (2025, "OH_IT1040"): 135,
- *     (2025, "f2210"): 136,
+ *     (2025, "f2441"): 135,
+ *     (2025, "OH_IT1040"): 136,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[135], __pyx_mstate_global->__pyx_int_134) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
-
-  /* "src/tenforty/otslib/ots.pyx":291
- *     (2025, "CA_540"): 133,
- *     (2025, "NJ_1040"): 134,
- *     (2025, "OH_IT1040"): 135,             # <<<<<<<<<<<<<<
- *     (2025, "f2210"): 136,
- *     (2025, "PA_40"): 137,
-*/
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[136], __pyx_mstate_global->__pyx_int_135) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[135], __pyx_mstate_global->__pyx_int_134) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
   /* "src/tenforty/otslib/ots.pyx":292
+ *     (2025, "CA_540"): 133,
  *     (2025, "NJ_1040"): 134,
- *     (2025, "OH_IT1040"): 135,
- *     (2025, "f2210"): 136,             # <<<<<<<<<<<<<<
- *     (2025, "PA_40"): 137,
- *     (2025, "US_1040_Sched_C"): 138,
+ *     (2025, "f2441"): 135,             # <<<<<<<<<<<<<<
+ *     (2025, "OH_IT1040"): 136,
+ *     (2025, "f2210"): 137,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[137], __pyx_mstate_global->__pyx_int_136) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[136], __pyx_mstate_global->__pyx_int_135) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
   /* "src/tenforty/otslib/ots.pyx":293
- *     (2025, "OH_IT1040"): 135,
- *     (2025, "f2210"): 136,
- *     (2025, "PA_40"): 137,             # <<<<<<<<<<<<<<
- *     (2025, "US_1040_Sched_C"): 138,
- * }
+ *     (2025, "NJ_1040"): 134,
+ *     (2025, "f2441"): 135,
+ *     (2025, "OH_IT1040"): 136,             # <<<<<<<<<<<<<<
+ *     (2025, "f2210"): 137,
+ *     (2025, "PA_40"): 138,
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[138], __pyx_mstate_global->__pyx_int_137) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[137], __pyx_mstate_global->__pyx_int_136) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
 
   /* "src/tenforty/otslib/ots.pyx":294
- *     (2025, "f2210"): 136,
- *     (2025, "PA_40"): 137,
- *     (2025, "US_1040_Sched_C"): 138,             # <<<<<<<<<<<<<<
+ *     (2025, "f2441"): 135,
+ *     (2025, "OH_IT1040"): 136,
+ *     (2025, "f2210"): 137,             # <<<<<<<<<<<<<<
+ *     (2025, "PA_40"): 138,
+ *     (2025, "US_1040_Sched_C"): 139,
+*/
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[138], __pyx_mstate_global->__pyx_int_137) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
+
+  /* "src/tenforty/otslib/ots.pyx":295
+ *     (2025, "OH_IT1040"): 136,
+ *     (2025, "f2210"): 137,
+ *     (2025, "PA_40"): 138,             # <<<<<<<<<<<<<<
+ *     (2025, "US_1040_Sched_C"): 139,
+ * }
+*/
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[139], __pyx_mstate_global->__pyx_int_138) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
+
+  /* "src/tenforty/otslib/ots.pyx":296
+ *     (2025, "f2210"): 137,
+ *     (2025, "PA_40"): 138,
+ *     (2025, "US_1040_Sched_C"): 139,             # <<<<<<<<<<<<<<
  * }
  *
 */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[139], __pyx_mstate_global->__pyx_int_138) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_OTS_KEY_TO_INDEX, __pyx_t_2) < (0)) __PYX_ERR(0, 155, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[140], __pyx_mstate_global->__pyx_int_139) < (0)) __PYX_ERR(0, 157, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_OTS_KEY_TO_INDEX, __pyx_t_2) < (0)) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/tenforty/otslib/ots.pyx":585
+  /* "src/tenforty/otslib/ots.pyx":589
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8tenforty_6otslib_1_evaluate_form, 0, __pyx_mstate_global->__pyx_n_u_evaluate_form, NULL, __pyx_mstate_global->__pyx_n_u_tenforty_otslib, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 585, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_8tenforty_6otslib_1_evaluate_form, 0, __pyx_mstate_global->__pyx_n_u_evaluate_form, NULL, __pyx_mstate_global->__pyx_n_u_tenforty_otslib, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 589, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[140]);
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_evaluate_form, __pyx_t_2) < (0)) __PYX_ERR(0, 585, __pyx_L1_error)
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[141]);
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_evaluate_form, __pyx_t_2) < (0)) __PYX_ERR(0, 589, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "src/tenforty/otslib/ots.pyx":1
@@ -9100,8 +9133,8 @@ __Pyx_RefNannySetupContext("PyInit_otslib", 0);
 
 static int __Pyx_InitCachedBuiltins(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
-  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_open); if (!__pyx_builtin_open) __PYX_ERR(0, 617, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_print); if (!__pyx_builtin_print) __PYX_ERR(0, 618, __pyx_L1_error)
+  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_open); if (!__pyx_builtin_open) __PYX_ERR(0, 621, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_mstate->__pyx_n_u_print); if (!__pyx_builtin_print) __PYX_ERR(0, 622, __pyx_L1_error)
 
   /* Cached unbound methods */
   __pyx_mstate->__pyx_umethod_PyDict_Type_items.type = (PyObject*)&PyDict_Type;
@@ -9121,1560 +9154,1571 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "src/tenforty/otslib/ots.pyx":617
+  /* "src/tenforty/otslib/ots.pyx":621
  *             # Write out federal file to hardcoded location.
  *             ff_path = f"{tmpdir}/fed-form.txt"
  *             with open(ff_path, "w") as fp:             # <<<<<<<<<<<<<<
  *                 print(fed_form_text, file=fp)
  *
 */
-  __pyx_mstate_global->__pyx_tuple[0] = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 617, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[0] = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 621, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[0]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[0]);
 
-  /* "src/tenforty/otslib/ots.pyx":156
+  /* "src/tenforty/otslib/ots.pyx":157
  *
  * _OTS_KEY_TO_INDEX = {
  *     (2018, "MA_1"): 0,             # <<<<<<<<<<<<<<
  *     (2018, "US_1040_Sched_C"): 1,
  *     (2018, "VA_760"): 2,
 */
-  __pyx_mstate_global->__pyx_tuple[1] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[1] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[1]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[1]);
 
-  /* "src/tenforty/otslib/ots.pyx":157
+  /* "src/tenforty/otslib/ots.pyx":158
  * _OTS_KEY_TO_INDEX = {
  *     (2018, "MA_1"): 0,
  *     (2018, "US_1040_Sched_C"): 1,             # <<<<<<<<<<<<<<
  *     (2018, "VA_760"): 2,
  *     (2018, "OH_IT1040"): 3,
 */
-  __pyx_mstate_global->__pyx_tuple[2] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[2])) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[2] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[2])) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[2]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[2]);
 
-  /* "src/tenforty/otslib/ots.pyx":158
+  /* "src/tenforty/otslib/ots.pyx":159
  *     (2018, "MA_1"): 0,
  *     (2018, "US_1040_Sched_C"): 1,
  *     (2018, "VA_760"): 2,             # <<<<<<<<<<<<<<
  *     (2018, "OH_IT1040"): 3,
  *     (2018, "CA_540"): 4,
 */
-  __pyx_mstate_global->__pyx_tuple[3] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[3])) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[3] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[3])) __PYX_ERR(0, 159, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[3]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[3]);
 
-  /* "src/tenforty/otslib/ots.pyx":159
+  /* "src/tenforty/otslib/ots.pyx":160
  *     (2018, "US_1040_Sched_C"): 1,
  *     (2018, "VA_760"): 2,
  *     (2018, "OH_IT1040"): 3,             # <<<<<<<<<<<<<<
  *     (2018, "CA_540"): 4,
  *     (2018, "NJ_1040"): 5,
 */
-  __pyx_mstate_global->__pyx_tuple[4] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[4])) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[4] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[4])) __PYX_ERR(0, 160, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[4]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[4]);
 
-  /* "src/tenforty/otslib/ots.pyx":160
+  /* "src/tenforty/otslib/ots.pyx":161
  *     (2018, "VA_760"): 2,
  *     (2018, "OH_IT1040"): 3,
  *     (2018, "CA_540"): 4,             # <<<<<<<<<<<<<<
  *     (2018, "NJ_1040"): 5,
  *     (2018, "PA_40"): 6,
 */
-  __pyx_mstate_global->__pyx_tuple[5] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[5])) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[5] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[5])) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[5]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[5]);
 
-  /* "src/tenforty/otslib/ots.pyx":161
+  /* "src/tenforty/otslib/ots.pyx":162
  *     (2018, "OH_IT1040"): 3,
  *     (2018, "CA_540"): 4,
  *     (2018, "NJ_1040"): 5,             # <<<<<<<<<<<<<<
  *     (2018, "PA_40"): 6,
  *     (2018, "US_1040"): 7,
 */
-  __pyx_mstate_global->__pyx_tuple[6] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[6])) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[6] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[6])) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[6]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[6]);
 
-  /* "src/tenforty/otslib/ots.pyx":162
+  /* "src/tenforty/otslib/ots.pyx":163
  *     (2018, "CA_540"): 4,
  *     (2018, "NJ_1040"): 5,
  *     (2018, "PA_40"): 6,             # <<<<<<<<<<<<<<
  *     (2018, "US_1040"): 7,
  *     (2018, "NY_IT201"): 8,
 */
-  __pyx_mstate_global->__pyx_tuple[7] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[7])) __PYX_ERR(0, 162, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[7] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[7])) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[7]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[7]);
 
-  /* "src/tenforty/otslib/ots.pyx":163
+  /* "src/tenforty/otslib/ots.pyx":164
  *     (2018, "NJ_1040"): 5,
  *     (2018, "PA_40"): 6,
  *     (2018, "US_1040"): 7,             # <<<<<<<<<<<<<<
  *     (2018, "NY_IT201"): 8,
  *     (2018, "NC_D400"): 9,
 */
-  __pyx_mstate_global->__pyx_tuple[8] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[8])) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[8] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[8])) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[8]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[8]);
 
-  /* "src/tenforty/otslib/ots.pyx":164
+  /* "src/tenforty/otslib/ots.pyx":165
  *     (2018, "PA_40"): 6,
  *     (2018, "US_1040"): 7,
  *     (2018, "NY_IT201"): 8,             # <<<<<<<<<<<<<<
  *     (2018, "NC_D400"): 9,
  *     (2019, "MA_1"): 10,
 */
-  __pyx_mstate_global->__pyx_tuple[9] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[9])) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[9] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[9])) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[9]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[9]);
 
-  /* "src/tenforty/otslib/ots.pyx":165
+  /* "src/tenforty/otslib/ots.pyx":166
  *     (2018, "US_1040"): 7,
  *     (2018, "NY_IT201"): 8,
  *     (2018, "NC_D400"): 9,             # <<<<<<<<<<<<<<
  *     (2019, "MA_1"): 10,
  *     (2019, "NY_IT201"): 11,
 */
-  __pyx_mstate_global->__pyx_tuple[10] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[10])) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[10] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2018, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[10])) __PYX_ERR(0, 166, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[10]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[10]);
 
-  /* "src/tenforty/otslib/ots.pyx":166
+  /* "src/tenforty/otslib/ots.pyx":167
  *     (2018, "NY_IT201"): 8,
  *     (2018, "NC_D400"): 9,
  *     (2019, "MA_1"): 10,             # <<<<<<<<<<<<<<
  *     (2019, "NY_IT201"): 11,
  *     (2019, "US_1040_Sched_C"): 12,
 */
-  __pyx_mstate_global->__pyx_tuple[11] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[11])) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[11] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[11])) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[11]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[11]);
 
-  /* "src/tenforty/otslib/ots.pyx":167
+  /* "src/tenforty/otslib/ots.pyx":168
  *     (2018, "NC_D400"): 9,
  *     (2019, "MA_1"): 10,
  *     (2019, "NY_IT201"): 11,             # <<<<<<<<<<<<<<
  *     (2019, "US_1040_Sched_C"): 12,
  *     (2019, "VA_760"): 13,
 */
-  __pyx_mstate_global->__pyx_tuple[12] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[12])) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[12] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[12])) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[12]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[12]);
 
-  /* "src/tenforty/otslib/ots.pyx":168
+  /* "src/tenforty/otslib/ots.pyx":169
  *     (2019, "MA_1"): 10,
  *     (2019, "NY_IT201"): 11,
  *     (2019, "US_1040_Sched_C"): 12,             # <<<<<<<<<<<<<<
  *     (2019, "VA_760"): 13,
  *     (2019, "OH_IT1040"): 14,
 */
-  __pyx_mstate_global->__pyx_tuple[13] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[13])) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[13] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[13])) __PYX_ERR(0, 169, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[13]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[13]);
 
-  /* "src/tenforty/otslib/ots.pyx":169
+  /* "src/tenforty/otslib/ots.pyx":170
  *     (2019, "NY_IT201"): 11,
  *     (2019, "US_1040_Sched_C"): 12,
  *     (2019, "VA_760"): 13,             # <<<<<<<<<<<<<<
  *     (2019, "OH_IT1040"): 14,
  *     (2019, "PA_40"): 15,
 */
-  __pyx_mstate_global->__pyx_tuple[14] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[14])) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[14] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[14])) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[14]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[14]);
 
-  /* "src/tenforty/otslib/ots.pyx":170
+  /* "src/tenforty/otslib/ots.pyx":171
  *     (2019, "US_1040_Sched_C"): 12,
  *     (2019, "VA_760"): 13,
  *     (2019, "OH_IT1040"): 14,             # <<<<<<<<<<<<<<
  *     (2019, "PA_40"): 15,
  *     (2019, "US_1040"): 16,
 */
-  __pyx_mstate_global->__pyx_tuple[15] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[15])) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[15] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[15])) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[15]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[15]);
 
-  /* "src/tenforty/otslib/ots.pyx":171
+  /* "src/tenforty/otslib/ots.pyx":172
  *     (2019, "VA_760"): 13,
  *     (2019, "OH_IT1040"): 14,
  *     (2019, "PA_40"): 15,             # <<<<<<<<<<<<<<
  *     (2019, "US_1040"): 16,
  *     (2019, "NJ_1040"): 17,
 */
-  __pyx_mstate_global->__pyx_tuple[16] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[16])) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[16] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[16])) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[16]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[16]);
 
-  /* "src/tenforty/otslib/ots.pyx":172
+  /* "src/tenforty/otslib/ots.pyx":173
  *     (2019, "OH_IT1040"): 14,
  *     (2019, "PA_40"): 15,
  *     (2019, "US_1040"): 16,             # <<<<<<<<<<<<<<
  *     (2019, "NJ_1040"): 17,
  *     (2019, "NC_D400"): 18,
 */
-  __pyx_mstate_global->__pyx_tuple[17] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[17])) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[17] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[17])) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[17]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[17]);
 
-  /* "src/tenforty/otslib/ots.pyx":173
+  /* "src/tenforty/otslib/ots.pyx":174
  *     (2019, "PA_40"): 15,
  *     (2019, "US_1040"): 16,
  *     (2019, "NJ_1040"): 17,             # <<<<<<<<<<<<<<
  *     (2019, "NC_D400"): 18,
  *     (2019, "CA_540"): 19,
 */
-  __pyx_mstate_global->__pyx_tuple[18] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[18])) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[18] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[18])) __PYX_ERR(0, 174, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[18]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[18]);
 
-  /* "src/tenforty/otslib/ots.pyx":174
+  /* "src/tenforty/otslib/ots.pyx":175
  *     (2019, "US_1040"): 16,
  *     (2019, "NJ_1040"): 17,
  *     (2019, "NC_D400"): 18,             # <<<<<<<<<<<<<<
  *     (2019, "CA_540"): 19,
  *     (2020, "OH_IT1040"): 20,
 */
-  __pyx_mstate_global->__pyx_tuple[19] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[19])) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[19] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[19])) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[19]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[19]);
 
-  /* "src/tenforty/otslib/ots.pyx":175
+  /* "src/tenforty/otslib/ots.pyx":176
  *     (2019, "NJ_1040"): 17,
  *     (2019, "NC_D400"): 18,
  *     (2019, "CA_540"): 19,             # <<<<<<<<<<<<<<
  *     (2020, "OH_IT1040"): 20,
  *     (2020, "NC_D400"): 21,
 */
-  __pyx_mstate_global->__pyx_tuple[20] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[20])) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[20] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2019, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[20])) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[20]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[20]);
 
-  /* "src/tenforty/otslib/ots.pyx":176
+  /* "src/tenforty/otslib/ots.pyx":177
  *     (2019, "NC_D400"): 18,
  *     (2019, "CA_540"): 19,
  *     (2020, "OH_IT1040"): 20,             # <<<<<<<<<<<<<<
  *     (2020, "NC_D400"): 21,
  *     (2020, "US_1040"): 22,
 */
-  __pyx_mstate_global->__pyx_tuple[21] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[21])) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[21] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[21])) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[21]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[21]);
 
-  /* "src/tenforty/otslib/ots.pyx":177
+  /* "src/tenforty/otslib/ots.pyx":178
  *     (2019, "CA_540"): 19,
  *     (2020, "OH_IT1040"): 20,
  *     (2020, "NC_D400"): 21,             # <<<<<<<<<<<<<<
  *     (2020, "US_1040"): 22,
  *     (2020, "NY_IT201"): 23,
 */
-  __pyx_mstate_global->__pyx_tuple[22] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[22])) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[22] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[22])) __PYX_ERR(0, 178, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[22]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[22]);
 
-  /* "src/tenforty/otslib/ots.pyx":178
+  /* "src/tenforty/otslib/ots.pyx":179
  *     (2020, "OH_IT1040"): 20,
  *     (2020, "NC_D400"): 21,
  *     (2020, "US_1040"): 22,             # <<<<<<<<<<<<<<
  *     (2020, "NY_IT201"): 23,
  *     (2020, "HSA_f8889"): 24,
 */
-  __pyx_mstate_global->__pyx_tuple[23] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[23])) __PYX_ERR(0, 178, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[23] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[23])) __PYX_ERR(0, 179, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[23]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[23]);
 
-  /* "src/tenforty/otslib/ots.pyx":179
+  /* "src/tenforty/otslib/ots.pyx":180
  *     (2020, "NC_D400"): 21,
  *     (2020, "US_1040"): 22,
  *     (2020, "NY_IT201"): 23,             # <<<<<<<<<<<<<<
  *     (2020, "HSA_f8889"): 24,
  *     (2020, "MA_1"): 25,
 */
-  __pyx_mstate_global->__pyx_tuple[24] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[24])) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[24] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[24])) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[24]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[24]);
 
-  /* "src/tenforty/otslib/ots.pyx":180
+  /* "src/tenforty/otslib/ots.pyx":181
  *     (2020, "US_1040"): 22,
  *     (2020, "NY_IT201"): 23,
  *     (2020, "HSA_f8889"): 24,             # <<<<<<<<<<<<<<
  *     (2020, "MA_1"): 25,
  *     (2020, "VA_760"): 26,
 */
-  __pyx_mstate_global->__pyx_tuple[25] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[25])) __PYX_ERR(0, 180, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[25] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[25])) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[25]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[25]);
 
-  /* "src/tenforty/otslib/ots.pyx":181
+  /* "src/tenforty/otslib/ots.pyx":182
  *     (2020, "NY_IT201"): 23,
  *     (2020, "HSA_f8889"): 24,
  *     (2020, "MA_1"): 25,             # <<<<<<<<<<<<<<
  *     (2020, "VA_760"): 26,
  *     (2020, "f8606"): 27,
 */
-  __pyx_mstate_global->__pyx_tuple[26] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[26])) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[26] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[26])) __PYX_ERR(0, 182, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[26]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[26]);
 
-  /* "src/tenforty/otslib/ots.pyx":182
+  /* "src/tenforty/otslib/ots.pyx":183
  *     (2020, "HSA_f8889"): 24,
  *     (2020, "MA_1"): 25,
  *     (2020, "VA_760"): 26,             # <<<<<<<<<<<<<<
  *     (2020, "f8606"): 27,
  *     (2020, "NJ_1040"): 28,
 */
-  __pyx_mstate_global->__pyx_tuple[27] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[27])) __PYX_ERR(0, 182, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[27] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[27])) __PYX_ERR(0, 183, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[27]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[27]);
 
-  /* "src/tenforty/otslib/ots.pyx":183
+  /* "src/tenforty/otslib/ots.pyx":184
  *     (2020, "MA_1"): 25,
  *     (2020, "VA_760"): 26,
  *     (2020, "f8606"): 27,             # <<<<<<<<<<<<<<
  *     (2020, "NJ_1040"): 28,
  *     (2020, "US_1040_Sched_C"): 29,
 */
-  __pyx_mstate_global->__pyx_tuple[28] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[28])) __PYX_ERR(0, 183, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[28] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[28])) __PYX_ERR(0, 184, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[28]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[28]);
 
-  /* "src/tenforty/otslib/ots.pyx":184
+  /* "src/tenforty/otslib/ots.pyx":185
  *     (2020, "VA_760"): 26,
  *     (2020, "f8606"): 27,
  *     (2020, "NJ_1040"): 28,             # <<<<<<<<<<<<<<
  *     (2020, "US_1040_Sched_C"): 29,
  *     (2020, "PA_40"): 30,
 */
-  __pyx_mstate_global->__pyx_tuple[29] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[29])) __PYX_ERR(0, 184, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[29] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[29])) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[29]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[29]);
 
-  /* "src/tenforty/otslib/ots.pyx":185
+  /* "src/tenforty/otslib/ots.pyx":186
  *     (2020, "f8606"): 27,
  *     (2020, "NJ_1040"): 28,
  *     (2020, "US_1040_Sched_C"): 29,             # <<<<<<<<<<<<<<
  *     (2020, "PA_40"): 30,
  *     (2020, "CA_540"): 31,
 */
-  __pyx_mstate_global->__pyx_tuple[30] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[30])) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[30] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[30])) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[30]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[30]);
 
-  /* "src/tenforty/otslib/ots.pyx":186
+  /* "src/tenforty/otslib/ots.pyx":187
  *     (2020, "NJ_1040"): 28,
  *     (2020, "US_1040_Sched_C"): 29,
  *     (2020, "PA_40"): 30,             # <<<<<<<<<<<<<<
  *     (2020, "CA_540"): 31,
  *     (2021, "NJ_1040"): 32,
 */
-  __pyx_mstate_global->__pyx_tuple[31] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[31])) __PYX_ERR(0, 186, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[31] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[31])) __PYX_ERR(0, 187, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[31]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[31]);
 
-  /* "src/tenforty/otslib/ots.pyx":187
+  /* "src/tenforty/otslib/ots.pyx":188
  *     (2020, "US_1040_Sched_C"): 29,
  *     (2020, "PA_40"): 30,
  *     (2020, "CA_540"): 31,             # <<<<<<<<<<<<<<
  *     (2021, "NJ_1040"): 32,
  *     (2021, "US_1040_Sched_SE"): 33,
 */
-  __pyx_mstate_global->__pyx_tuple[32] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[32])) __PYX_ERR(0, 187, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[32] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2020, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[32])) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[32]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[32]);
 
-  /* "src/tenforty/otslib/ots.pyx":188
+  /* "src/tenforty/otslib/ots.pyx":189
  *     (2020, "PA_40"): 30,
  *     (2020, "CA_540"): 31,
  *     (2021, "NJ_1040"): 32,             # <<<<<<<<<<<<<<
  *     (2021, "US_1040_Sched_SE"): 33,
  *     (2021, "f8606"): 34,
 */
-  __pyx_mstate_global->__pyx_tuple[33] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[33])) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[33] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[33])) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[33]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[33]);
 
-  /* "src/tenforty/otslib/ots.pyx":189
+  /* "src/tenforty/otslib/ots.pyx":190
  *     (2020, "CA_540"): 31,
  *     (2021, "NJ_1040"): 32,
  *     (2021, "US_1040_Sched_SE"): 33,             # <<<<<<<<<<<<<<
  *     (2021, "f8606"): 34,
  *     (2021, "CA_540"): 35,
 */
-  __pyx_mstate_global->__pyx_tuple[34] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[34])) __PYX_ERR(0, 189, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[34] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[34])) __PYX_ERR(0, 190, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[34]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[34]);
 
-  /* "src/tenforty/otslib/ots.pyx":190
+  /* "src/tenforty/otslib/ots.pyx":191
  *     (2021, "NJ_1040"): 32,
  *     (2021, "US_1040_Sched_SE"): 33,
  *     (2021, "f8606"): 34,             # <<<<<<<<<<<<<<
  *     (2021, "CA_540"): 35,
  *     (2021, "HSA_f8889"): 36,
 */
-  __pyx_mstate_global->__pyx_tuple[35] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[35])) __PYX_ERR(0, 190, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[35] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[35])) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[35]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[35]);
 
-  /* "src/tenforty/otslib/ots.pyx":191
+  /* "src/tenforty/otslib/ots.pyx":192
  *     (2021, "US_1040_Sched_SE"): 33,
  *     (2021, "f8606"): 34,
  *     (2021, "CA_540"): 35,             # <<<<<<<<<<<<<<
  *     (2021, "HSA_f8889"): 36,
  *     (2021, "MA_1"): 37,
 */
-  __pyx_mstate_global->__pyx_tuple[36] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[36])) __PYX_ERR(0, 191, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[36] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[36])) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[36]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[36]);
 
-  /* "src/tenforty/otslib/ots.pyx":192
+  /* "src/tenforty/otslib/ots.pyx":193
  *     (2021, "f8606"): 34,
  *     (2021, "CA_540"): 35,
  *     (2021, "HSA_f8889"): 36,             # <<<<<<<<<<<<<<
  *     (2021, "MA_1"): 37,
  *     (2021, "NC_D400"): 38,
 */
-  __pyx_mstate_global->__pyx_tuple[37] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[37])) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[37] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[37])) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[37]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[37]);
 
-  /* "src/tenforty/otslib/ots.pyx":193
+  /* "src/tenforty/otslib/ots.pyx":194
  *     (2021, "CA_540"): 35,
  *     (2021, "HSA_f8889"): 36,
  *     (2021, "MA_1"): 37,             # <<<<<<<<<<<<<<
  *     (2021, "NC_D400"): 38,
  *     (2021, "NY_IT201"): 39,
 */
-  __pyx_mstate_global->__pyx_tuple[38] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[38])) __PYX_ERR(0, 193, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[38] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[38])) __PYX_ERR(0, 194, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[38]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[38]);
 
-  /* "src/tenforty/otslib/ots.pyx":194
+  /* "src/tenforty/otslib/ots.pyx":195
  *     (2021, "HSA_f8889"): 36,
  *     (2021, "MA_1"): 37,
  *     (2021, "NC_D400"): 38,             # <<<<<<<<<<<<<<
  *     (2021, "NY_IT201"): 39,
  *     (2021, "OH_IT1040"): 40,
 */
-  __pyx_mstate_global->__pyx_tuple[39] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[39])) __PYX_ERR(0, 194, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[39] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[39])) __PYX_ERR(0, 195, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[39]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[39]);
 
-  /* "src/tenforty/otslib/ots.pyx":195
+  /* "src/tenforty/otslib/ots.pyx":196
  *     (2021, "MA_1"): 37,
  *     (2021, "NC_D400"): 38,
  *     (2021, "NY_IT201"): 39,             # <<<<<<<<<<<<<<
  *     (2021, "OH_IT1040"): 40,
  *     (2021, "PA_40"): 41,
 */
-  __pyx_mstate_global->__pyx_tuple[40] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[40])) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[40] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[40])) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[40]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[40]);
 
-  /* "src/tenforty/otslib/ots.pyx":196
+  /* "src/tenforty/otslib/ots.pyx":197
  *     (2021, "NC_D400"): 38,
  *     (2021, "NY_IT201"): 39,
  *     (2021, "OH_IT1040"): 40,             # <<<<<<<<<<<<<<
  *     (2021, "PA_40"): 41,
  *     (2021, "US_1040"): 42,
 */
-  __pyx_mstate_global->__pyx_tuple[41] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[41])) __PYX_ERR(0, 196, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[41] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[41])) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[41]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[41]);
 
-  /* "src/tenforty/otslib/ots.pyx":197
+  /* "src/tenforty/otslib/ots.pyx":198
  *     (2021, "NY_IT201"): 39,
  *     (2021, "OH_IT1040"): 40,
  *     (2021, "PA_40"): 41,             # <<<<<<<<<<<<<<
  *     (2021, "US_1040"): 42,
  *     (2021, "US_1040_Sched_C"): 43,
 */
-  __pyx_mstate_global->__pyx_tuple[42] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[42])) __PYX_ERR(0, 197, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[42] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[42])) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[42]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[42]);
 
-  /* "src/tenforty/otslib/ots.pyx":198
+  /* "src/tenforty/otslib/ots.pyx":199
  *     (2021, "OH_IT1040"): 40,
  *     (2021, "PA_40"): 41,
  *     (2021, "US_1040"): 42,             # <<<<<<<<<<<<<<
  *     (2021, "US_1040_Sched_C"): 43,
  *     (2021, "VA_760"): 44,
 */
-  __pyx_mstate_global->__pyx_tuple[43] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[43])) __PYX_ERR(0, 198, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[43] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[43])) __PYX_ERR(0, 199, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[43]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[43]);
 
-  /* "src/tenforty/otslib/ots.pyx":199
+  /* "src/tenforty/otslib/ots.pyx":200
  *     (2021, "PA_40"): 41,
  *     (2021, "US_1040"): 42,
  *     (2021, "US_1040_Sched_C"): 43,             # <<<<<<<<<<<<<<
  *     (2021, "VA_760"): 44,
  *     (2021, "CA_5805"): 45,
 */
-  __pyx_mstate_global->__pyx_tuple[44] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[44])) __PYX_ERR(0, 199, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[44] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[44])) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[44]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[44]);
 
-  /* "src/tenforty/otslib/ots.pyx":200
+  /* "src/tenforty/otslib/ots.pyx":201
  *     (2021, "US_1040"): 42,
  *     (2021, "US_1040_Sched_C"): 43,
  *     (2021, "VA_760"): 44,             # <<<<<<<<<<<<<<
  *     (2021, "CA_5805"): 45,
  *     (2021, "f2210"): 46,
 */
-  __pyx_mstate_global->__pyx_tuple[45] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[45])) __PYX_ERR(0, 200, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[45] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[45])) __PYX_ERR(0, 201, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[45]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[45]);
 
-  /* "src/tenforty/otslib/ots.pyx":201
+  /* "src/tenforty/otslib/ots.pyx":202
  *     (2021, "US_1040_Sched_C"): 43,
  *     (2021, "VA_760"): 44,
  *     (2021, "CA_5805"): 45,             # <<<<<<<<<<<<<<
  *     (2021, "f2210"): 46,
  *     (2021, "f8960"): 47,
 */
-  __pyx_mstate_global->__pyx_tuple[46] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[46])) __PYX_ERR(0, 201, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[46] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[46])) __PYX_ERR(0, 202, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[46]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[46]);
 
-  /* "src/tenforty/otslib/ots.pyx":202
+  /* "src/tenforty/otslib/ots.pyx":203
  *     (2021, "VA_760"): 44,
  *     (2021, "CA_5805"): 45,
  *     (2021, "f2210"): 46,             # <<<<<<<<<<<<<<
  *     (2021, "f8960"): 47,
  *     (2021, "f8959"): 48,
 */
-  __pyx_mstate_global->__pyx_tuple[47] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[47])) __PYX_ERR(0, 202, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[47] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[47])) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[47]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[47]);
 
-  /* "src/tenforty/otslib/ots.pyx":203
+  /* "src/tenforty/otslib/ots.pyx":204
  *     (2021, "CA_5805"): 45,
  *     (2021, "f2210"): 46,
  *     (2021, "f8960"): 47,             # <<<<<<<<<<<<<<
  *     (2021, "f8959"): 48,
  *     (2022, "HSA_f8889"): 49,
 */
-  __pyx_mstate_global->__pyx_tuple[48] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[48])) __PYX_ERR(0, 203, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[48] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[48])) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[48]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[48]);
 
-  /* "src/tenforty/otslib/ots.pyx":204
+  /* "src/tenforty/otslib/ots.pyx":205
  *     (2021, "f2210"): 46,
  *     (2021, "f8960"): 47,
  *     (2021, "f8959"): 48,             # <<<<<<<<<<<<<<
  *     (2022, "HSA_f8889"): 49,
  *     (2022, "MA_1"): 50,
 */
-  __pyx_mstate_global->__pyx_tuple[49] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[49])) __PYX_ERR(0, 204, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[49] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2021, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[49])) __PYX_ERR(0, 205, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[49]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[49]);
 
-  /* "src/tenforty/otslib/ots.pyx":205
+  /* "src/tenforty/otslib/ots.pyx":206
  *     (2021, "f8960"): 47,
  *     (2021, "f8959"): 48,
  *     (2022, "HSA_f8889"): 49,             # <<<<<<<<<<<<<<
  *     (2022, "MA_1"): 50,
  *     (2022, "NJ_1040"): 51,
 */
-  __pyx_mstate_global->__pyx_tuple[50] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[50])) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[50] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[50])) __PYX_ERR(0, 206, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[50]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[50]);
 
-  /* "src/tenforty/otslib/ots.pyx":206
+  /* "src/tenforty/otslib/ots.pyx":207
  *     (2021, "f8959"): 48,
  *     (2022, "HSA_f8889"): 49,
  *     (2022, "MA_1"): 50,             # <<<<<<<<<<<<<<
  *     (2022, "NJ_1040"): 51,
  *     (2022, "f8959"): 52,
 */
-  __pyx_mstate_global->__pyx_tuple[51] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[51])) __PYX_ERR(0, 206, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[51] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[51])) __PYX_ERR(0, 207, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[51]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[51]);
 
-  /* "src/tenforty/otslib/ots.pyx":207
+  /* "src/tenforty/otslib/ots.pyx":208
  *     (2022, "HSA_f8889"): 49,
  *     (2022, "MA_1"): 50,
  *     (2022, "NJ_1040"): 51,             # <<<<<<<<<<<<<<
  *     (2022, "f8959"): 52,
  *     (2022, "f8960"): 53,
 */
-  __pyx_mstate_global->__pyx_tuple[52] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[52])) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[52] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[52])) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[52]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[52]);
 
-  /* "src/tenforty/otslib/ots.pyx":208
+  /* "src/tenforty/otslib/ots.pyx":209
  *     (2022, "MA_1"): 50,
  *     (2022, "NJ_1040"): 51,
  *     (2022, "f8959"): 52,             # <<<<<<<<<<<<<<
  *     (2022, "f8960"): 53,
  *     (2022, "f8606"): 54,
 */
-  __pyx_mstate_global->__pyx_tuple[53] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[53])) __PYX_ERR(0, 208, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[53] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[53])) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[53]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[53]);
 
-  /* "src/tenforty/otslib/ots.pyx":209
+  /* "src/tenforty/otslib/ots.pyx":210
  *     (2022, "NJ_1040"): 51,
  *     (2022, "f8959"): 52,
  *     (2022, "f8960"): 53,             # <<<<<<<<<<<<<<
  *     (2022, "f8606"): 54,
  *     (2022, "CA_540"): 55,
 */
-  __pyx_mstate_global->__pyx_tuple[54] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[54])) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[54] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[54])) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[54]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[54]);
 
-  /* "src/tenforty/otslib/ots.pyx":210
+  /* "src/tenforty/otslib/ots.pyx":211
  *     (2022, "f8959"): 52,
  *     (2022, "f8960"): 53,
  *     (2022, "f8606"): 54,             # <<<<<<<<<<<<<<
  *     (2022, "CA_540"): 55,
  *     (2022, "CA_5805"): 56,
 */
-  __pyx_mstate_global->__pyx_tuple[55] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[55])) __PYX_ERR(0, 210, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[55] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[55])) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[55]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[55]);
 
-  /* "src/tenforty/otslib/ots.pyx":211
+  /* "src/tenforty/otslib/ots.pyx":212
  *     (2022, "f8960"): 53,
  *     (2022, "f8606"): 54,
  *     (2022, "CA_540"): 55,             # <<<<<<<<<<<<<<
  *     (2022, "CA_5805"): 56,
  *     (2022, "NC_D400"): 57,
 */
-  __pyx_mstate_global->__pyx_tuple[56] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[56])) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[56] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[56])) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[56]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[56]);
 
-  /* "src/tenforty/otslib/ots.pyx":212
+  /* "src/tenforty/otslib/ots.pyx":213
  *     (2022, "f8606"): 54,
  *     (2022, "CA_540"): 55,
  *     (2022, "CA_5805"): 56,             # <<<<<<<<<<<<<<
  *     (2022, "NC_D400"): 57,
  *     (2022, "NY_IT201"): 58,
 */
-  __pyx_mstate_global->__pyx_tuple[57] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[57])) __PYX_ERR(0, 212, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[57] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[57])) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[57]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[57]);
 
-  /* "src/tenforty/otslib/ots.pyx":213
+  /* "src/tenforty/otslib/ots.pyx":214
  *     (2022, "CA_540"): 55,
  *     (2022, "CA_5805"): 56,
  *     (2022, "NC_D400"): 57,             # <<<<<<<<<<<<<<
  *     (2022, "NY_IT201"): 58,
  *     (2022, "OH_IT1040"): 59,
 */
-  __pyx_mstate_global->__pyx_tuple[58] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[58])) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[58] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[58])) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[58]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[58]);
 
-  /* "src/tenforty/otslib/ots.pyx":214
+  /* "src/tenforty/otslib/ots.pyx":215
  *     (2022, "CA_5805"): 56,
  *     (2022, "NC_D400"): 57,
  *     (2022, "NY_IT201"): 58,             # <<<<<<<<<<<<<<
  *     (2022, "OH_IT1040"): 59,
  *     (2022, "PA_40"): 60,
 */
-  __pyx_mstate_global->__pyx_tuple[59] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[59])) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[59] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[59])) __PYX_ERR(0, 215, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[59]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[59]);
 
-  /* "src/tenforty/otslib/ots.pyx":215
+  /* "src/tenforty/otslib/ots.pyx":216
  *     (2022, "NC_D400"): 57,
  *     (2022, "NY_IT201"): 58,
  *     (2022, "OH_IT1040"): 59,             # <<<<<<<<<<<<<<
  *     (2022, "PA_40"): 60,
  *     (2022, "US_1040"): 61,
 */
-  __pyx_mstate_global->__pyx_tuple[60] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[60])) __PYX_ERR(0, 215, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[60] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[60])) __PYX_ERR(0, 216, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[60]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[60]);
 
-  /* "src/tenforty/otslib/ots.pyx":216
+  /* "src/tenforty/otslib/ots.pyx":217
  *     (2022, "NY_IT201"): 58,
  *     (2022, "OH_IT1040"): 59,
  *     (2022, "PA_40"): 60,             # <<<<<<<<<<<<<<
  *     (2022, "US_1040"): 61,
  *     (2022, "US_1040_Sched_C"): 62,
 */
-  __pyx_mstate_global->__pyx_tuple[61] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[61])) __PYX_ERR(0, 216, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[61] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[61])) __PYX_ERR(0, 217, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[61]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[61]);
 
-  /* "src/tenforty/otslib/ots.pyx":217
+  /* "src/tenforty/otslib/ots.pyx":218
  *     (2022, "OH_IT1040"): 59,
  *     (2022, "PA_40"): 60,
  *     (2022, "US_1040"): 61,             # <<<<<<<<<<<<<<
  *     (2022, "US_1040_Sched_C"): 62,
  *     (2022, "US_1040_Sched_SE"): 63,
 */
-  __pyx_mstate_global->__pyx_tuple[62] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[62])) __PYX_ERR(0, 217, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[62] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[62])) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[62]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[62]);
 
-  /* "src/tenforty/otslib/ots.pyx":218
+  /* "src/tenforty/otslib/ots.pyx":219
  *     (2022, "PA_40"): 60,
  *     (2022, "US_1040"): 61,
  *     (2022, "US_1040_Sched_C"): 62,             # <<<<<<<<<<<<<<
  *     (2022, "US_1040_Sched_SE"): 63,
  *     (2022, "VA_760"): 64,
 */
-  __pyx_mstate_global->__pyx_tuple[63] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[63])) __PYX_ERR(0, 218, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[63] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[63])) __PYX_ERR(0, 219, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[63]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[63]);
 
-  /* "src/tenforty/otslib/ots.pyx":219
+  /* "src/tenforty/otslib/ots.pyx":220
  *     (2022, "US_1040"): 61,
  *     (2022, "US_1040_Sched_C"): 62,
  *     (2022, "US_1040_Sched_SE"): 63,             # <<<<<<<<<<<<<<
  *     (2022, "VA_760"): 64,
  *     (2022, "f2210"): 65,
 */
-  __pyx_mstate_global->__pyx_tuple[64] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[64])) __PYX_ERR(0, 219, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[64] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[64])) __PYX_ERR(0, 220, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[64]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[64]);
 
-  /* "src/tenforty/otslib/ots.pyx":220
+  /* "src/tenforty/otslib/ots.pyx":221
  *     (2022, "US_1040_Sched_C"): 62,
  *     (2022, "US_1040_Sched_SE"): 63,
  *     (2022, "VA_760"): 64,             # <<<<<<<<<<<<<<
  *     (2022, "f2210"): 65,
  *     (2022, "f8829"): 66,
 */
-  __pyx_mstate_global->__pyx_tuple[65] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[65])) __PYX_ERR(0, 220, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[65] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[65])) __PYX_ERR(0, 221, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[65]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[65]);
 
-  /* "src/tenforty/otslib/ots.pyx":221
+  /* "src/tenforty/otslib/ots.pyx":222
  *     (2022, "US_1040_Sched_SE"): 63,
  *     (2022, "VA_760"): 64,
  *     (2022, "f2210"): 65,             # <<<<<<<<<<<<<<
  *     (2022, "f8829"): 66,
  *     (2022, "f8995"): 67,
 */
-  __pyx_mstate_global->__pyx_tuple[66] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[66])) __PYX_ERR(0, 221, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[66] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[66])) __PYX_ERR(0, 222, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[66]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[66]);
 
-  /* "src/tenforty/otslib/ots.pyx":222
+  /* "src/tenforty/otslib/ots.pyx":223
  *     (2022, "VA_760"): 64,
  *     (2022, "f2210"): 65,
  *     (2022, "f8829"): 66,             # <<<<<<<<<<<<<<
  *     (2022, "f8995"): 67,
  *     (2023, "NJ_1040"): 68,
 */
-  __pyx_mstate_global->__pyx_tuple[67] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[67])) __PYX_ERR(0, 222, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[67] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[67])) __PYX_ERR(0, 223, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[67]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[67]);
 
-  /* "src/tenforty/otslib/ots.pyx":223
+  /* "src/tenforty/otslib/ots.pyx":224
  *     (2022, "f2210"): 65,
  *     (2022, "f8829"): 66,
  *     (2022, "f8995"): 67,             # <<<<<<<<<<<<<<
  *     (2023, "NJ_1040"): 68,
  *     (2023, "US_1040_Sched_C"): 69,
 */
-  __pyx_mstate_global->__pyx_tuple[68] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[68])) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[68] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2022, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[68])) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[68]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[68]);
 
-  /* "src/tenforty/otslib/ots.pyx":224
+  /* "src/tenforty/otslib/ots.pyx":225
  *     (2022, "f8829"): 66,
  *     (2022, "f8995"): 67,
  *     (2023, "NJ_1040"): 68,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040_Sched_C"): 69,
  *     (2023, "f8829"): 70,
 */
-  __pyx_mstate_global->__pyx_tuple[69] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[69])) __PYX_ERR(0, 224, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[69] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[69])) __PYX_ERR(0, 225, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[69]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[69]);
 
-  /* "src/tenforty/otslib/ots.pyx":225
+  /* "src/tenforty/otslib/ots.pyx":226
  *     (2022, "f8995"): 67,
  *     (2023, "NJ_1040"): 68,
  *     (2023, "US_1040_Sched_C"): 69,             # <<<<<<<<<<<<<<
  *     (2023, "f8829"): 70,
  *     (2023, "f8959"): 71,
 */
-  __pyx_mstate_global->__pyx_tuple[70] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[70])) __PYX_ERR(0, 225, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[70] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[70])) __PYX_ERR(0, 226, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[70]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[70]);
 
-  /* "src/tenforty/otslib/ots.pyx":226
+  /* "src/tenforty/otslib/ots.pyx":227
  *     (2023, "NJ_1040"): 68,
  *     (2023, "US_1040_Sched_C"): 69,
  *     (2023, "f8829"): 70,             # <<<<<<<<<<<<<<
  *     (2023, "f8959"): 71,
  *     (2023, "f8960"): 72,
 */
-  __pyx_mstate_global->__pyx_tuple[71] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[71])) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[71] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[71])) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[71]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[71]);
 
-  /* "src/tenforty/otslib/ots.pyx":227
+  /* "src/tenforty/otslib/ots.pyx":228
  *     (2023, "US_1040_Sched_C"): 69,
  *     (2023, "f8829"): 70,
  *     (2023, "f8959"): 71,             # <<<<<<<<<<<<<<
  *     (2023, "f8960"): 72,
  *     (2023, "f8995"): 73,
 */
-  __pyx_mstate_global->__pyx_tuple[72] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[72])) __PYX_ERR(0, 227, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[72] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[72])) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[72]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[72]);
 
-  /* "src/tenforty/otslib/ots.pyx":228
+  /* "src/tenforty/otslib/ots.pyx":229
  *     (2023, "f8829"): 70,
  *     (2023, "f8959"): 71,
  *     (2023, "f8960"): 72,             # <<<<<<<<<<<<<<
  *     (2023, "f8995"): 73,
  *     (2023, "f8606"): 74,
 */
-  __pyx_mstate_global->__pyx_tuple[73] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[73])) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[73] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[73])) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[73]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[73]);
 
-  /* "src/tenforty/otslib/ots.pyx":229
+  /* "src/tenforty/otslib/ots.pyx":230
  *     (2023, "f8959"): 71,
  *     (2023, "f8960"): 72,
  *     (2023, "f8995"): 73,             # <<<<<<<<<<<<<<
  *     (2023, "f8606"): 74,
  *     (2023, "CA_540"): 75,
 */
-  __pyx_mstate_global->__pyx_tuple[74] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[74])) __PYX_ERR(0, 229, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[74] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[74])) __PYX_ERR(0, 230, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[74]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[74]);
 
-  /* "src/tenforty/otslib/ots.pyx":230
+  /* "src/tenforty/otslib/ots.pyx":231
  *     (2023, "f8960"): 72,
  *     (2023, "f8995"): 73,
  *     (2023, "f8606"): 74,             # <<<<<<<<<<<<<<
  *     (2023, "CA_540"): 75,
  *     (2023, "HSA_f8889"): 76,
 */
-  __pyx_mstate_global->__pyx_tuple[75] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[75])) __PYX_ERR(0, 230, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[75] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[75])) __PYX_ERR(0, 231, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[75]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[75]);
 
-  /* "src/tenforty/otslib/ots.pyx":231
+  /* "src/tenforty/otslib/ots.pyx":232
  *     (2023, "f8995"): 73,
  *     (2023, "f8606"): 74,
  *     (2023, "CA_540"): 75,             # <<<<<<<<<<<<<<
  *     (2023, "HSA_f8889"): 76,
  *     (2023, "MA_1"): 77,
 */
-  __pyx_mstate_global->__pyx_tuple[76] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[76])) __PYX_ERR(0, 231, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[76] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[76])) __PYX_ERR(0, 232, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[76]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[76]);
 
-  /* "src/tenforty/otslib/ots.pyx":232
+  /* "src/tenforty/otslib/ots.pyx":233
  *     (2023, "f8606"): 74,
  *     (2023, "CA_540"): 75,
  *     (2023, "HSA_f8889"): 76,             # <<<<<<<<<<<<<<
  *     (2023, "MA_1"): 77,
  *     (2023, "NC_D400"): 78,
 */
-  __pyx_mstate_global->__pyx_tuple[77] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[77])) __PYX_ERR(0, 232, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[77] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[77])) __PYX_ERR(0, 233, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[77]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[77]);
 
-  /* "src/tenforty/otslib/ots.pyx":233
+  /* "src/tenforty/otslib/ots.pyx":234
  *     (2023, "CA_540"): 75,
  *     (2023, "HSA_f8889"): 76,
  *     (2023, "MA_1"): 77,             # <<<<<<<<<<<<<<
  *     (2023, "NC_D400"): 78,
  *     (2023, "NY_IT201"): 79,
 */
-  __pyx_mstate_global->__pyx_tuple[78] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[78])) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[78] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[78])) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[78]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[78]);
 
-  /* "src/tenforty/otslib/ots.pyx":234
+  /* "src/tenforty/otslib/ots.pyx":235
  *     (2023, "HSA_f8889"): 76,
  *     (2023, "MA_1"): 77,
  *     (2023, "NC_D400"): 78,             # <<<<<<<<<<<<<<
  *     (2023, "NY_IT201"): 79,
  *     (2023, "OH_IT1040"): 80,
 */
-  __pyx_mstate_global->__pyx_tuple[79] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[79])) __PYX_ERR(0, 234, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[79] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[79])) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[79]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[79]);
 
-  /* "src/tenforty/otslib/ots.pyx":235
+  /* "src/tenforty/otslib/ots.pyx":236
  *     (2023, "MA_1"): 77,
  *     (2023, "NC_D400"): 78,
  *     (2023, "NY_IT201"): 79,             # <<<<<<<<<<<<<<
  *     (2023, "OH_IT1040"): 80,
  *     (2023, "PA_40"): 81,
 */
-  __pyx_mstate_global->__pyx_tuple[80] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[80])) __PYX_ERR(0, 235, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[80] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[80])) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[80]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[80]);
 
-  /* "src/tenforty/otslib/ots.pyx":236
+  /* "src/tenforty/otslib/ots.pyx":237
  *     (2023, "NC_D400"): 78,
  *     (2023, "NY_IT201"): 79,
  *     (2023, "OH_IT1040"): 80,             # <<<<<<<<<<<<<<
  *     (2023, "PA_40"): 81,
  *     (2023, "US_1040"): 82,
 */
-  __pyx_mstate_global->__pyx_tuple[81] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[81])) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[81] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[81])) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[81]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[81]);
 
-  /* "src/tenforty/otslib/ots.pyx":237
+  /* "src/tenforty/otslib/ots.pyx":238
  *     (2023, "NY_IT201"): 79,
  *     (2023, "OH_IT1040"): 80,
  *     (2023, "PA_40"): 81,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040"): 82,
  *     (2023, "US_1040_Sched_SE"): 83,
 */
-  __pyx_mstate_global->__pyx_tuple[82] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[82])) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[82] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[82])) __PYX_ERR(0, 238, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[82]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[82]);
 
-  /* "src/tenforty/otslib/ots.pyx":238
+  /* "src/tenforty/otslib/ots.pyx":239
  *     (2023, "OH_IT1040"): 80,
  *     (2023, "PA_40"): 81,
  *     (2023, "US_1040"): 82,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040_Sched_SE"): 83,
  *     (2023, "VA_760"): 84,
 */
-  __pyx_mstate_global->__pyx_tuple[83] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[83])) __PYX_ERR(0, 238, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[83] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[83])) __PYX_ERR(0, 239, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[83]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[83]);
 
-  /* "src/tenforty/otslib/ots.pyx":239
+  /* "src/tenforty/otslib/ots.pyx":240
  *     (2023, "PA_40"): 81,
  *     (2023, "US_1040"): 82,
  *     (2023, "US_1040_Sched_SE"): 83,             # <<<<<<<<<<<<<<
  *     (2023, "VA_760"): 84,
  *     (2023, "f2210"): 85,
 */
-  __pyx_mstate_global->__pyx_tuple[84] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[84])) __PYX_ERR(0, 239, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[84] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[84])) __PYX_ERR(0, 240, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[84]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[84]);
 
-  /* "src/tenforty/otslib/ots.pyx":240
+  /* "src/tenforty/otslib/ots.pyx":241
  *     (2023, "US_1040"): 82,
  *     (2023, "US_1040_Sched_SE"): 83,
  *     (2023, "VA_760"): 84,             # <<<<<<<<<<<<<<
  *     (2023, "f2210"): 85,
  *     (2023, "AZ_140"): 86,
 */
-  __pyx_mstate_global->__pyx_tuple[85] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[85])) __PYX_ERR(0, 240, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[85] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[85])) __PYX_ERR(0, 241, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[85]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[85]);
 
-  /* "src/tenforty/otslib/ots.pyx":241
+  /* "src/tenforty/otslib/ots.pyx":242
  *     (2023, "US_1040_Sched_SE"): 83,
  *     (2023, "VA_760"): 84,
  *     (2023, "f2210"): 85,             # <<<<<<<<<<<<<<
  *     (2023, "AZ_140"): 86,
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
 */
-  __pyx_mstate_global->__pyx_tuple[86] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[86])) __PYX_ERR(0, 241, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[86] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[86])) __PYX_ERR(0, 242, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[86]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[86]);
 
-  /* "src/tenforty/otslib/ots.pyx":242
+  /* "src/tenforty/otslib/ots.pyx":243
  *     (2023, "VA_760"): 84,
  *     (2023, "f2210"): 85,
  *     (2023, "AZ_140"): 86,             # <<<<<<<<<<<<<<
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
  *     (2023, "CA_5805"): 88,
 */
-  __pyx_mstate_global->__pyx_tuple[87] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_AZ_140); if (unlikely(!__pyx_mstate_global->__pyx_tuple[87])) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[87] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_AZ_140); if (unlikely(!__pyx_mstate_global->__pyx_tuple[87])) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[87]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[87]);
 
-  /* "src/tenforty/otslib/ots.pyx":243
+  /* "src/tenforty/otslib/ots.pyx":244
  *     (2023, "f2210"): 85,
  *     (2023, "AZ_140"): 86,
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,             # <<<<<<<<<<<<<<
  *     (2023, "CA_5805"): 88,
  *     (2023, "f8812"): 89,
 */
-  __pyx_mstate_global->__pyx_tuple[88] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt); if (unlikely(!__pyx_mstate_global->__pyx_tuple[88])) __PYX_ERR(0, 243, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[88] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt); if (unlikely(!__pyx_mstate_global->__pyx_tuple[88])) __PYX_ERR(0, 244, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[88]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[88]);
 
-  /* "src/tenforty/otslib/ots.pyx":244
+  /* "src/tenforty/otslib/ots.pyx":245
  *     (2023, "AZ_140"): 86,
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
  *     (2023, "CA_5805"): 88,             # <<<<<<<<<<<<<<
  *     (2023, "f8812"): 89,
  *     (2024, "NJ_1040"): 90,
 */
-  __pyx_mstate_global->__pyx_tuple[89] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[89])) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[89] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[89])) __PYX_ERR(0, 245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[89]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[89]);
 
-  /* "src/tenforty/otslib/ots.pyx":245
+  /* "src/tenforty/otslib/ots.pyx":246
  *     (2023, "US_1040_Sched_E_brokerage_royalties"): 87,
  *     (2023, "CA_5805"): 88,
  *     (2023, "f8812"): 89,             # <<<<<<<<<<<<<<
  *     (2024, "NJ_1040"): 90,
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
 */
-  __pyx_mstate_global->__pyx_tuple[90] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8812); if (unlikely(!__pyx_mstate_global->__pyx_tuple[90])) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[90] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2023, __pyx_mstate_global->__pyx_n_u_f8812); if (unlikely(!__pyx_mstate_global->__pyx_tuple[90])) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[90]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[90]);
 
-  /* "src/tenforty/otslib/ots.pyx":246
+  /* "src/tenforty/otslib/ots.pyx":247
  *     (2023, "CA_5805"): 88,
  *     (2023, "f8812"): 89,
  *     (2024, "NJ_1040"): 90,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
  *     (2024, "f8812"): 92,
 */
-  __pyx_mstate_global->__pyx_tuple[91] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[91])) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[91] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[91])) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[91]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[91]);
 
-  /* "src/tenforty/otslib/ots.pyx":247
+  /* "src/tenforty/otslib/ots.pyx":248
  *     (2023, "f8812"): 89,
  *     (2024, "NJ_1040"): 90,
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,             # <<<<<<<<<<<<<<
  *     (2024, "f8812"): 92,
  *     (2024, "f8829"): 93,
 */
-  __pyx_mstate_global->__pyx_tuple[92] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt); if (unlikely(!__pyx_mstate_global->__pyx_tuple[92])) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[92] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt); if (unlikely(!__pyx_mstate_global->__pyx_tuple[92])) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[92]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[92]);
 
-  /* "src/tenforty/otslib/ots.pyx":248
+  /* "src/tenforty/otslib/ots.pyx":249
  *     (2024, "NJ_1040"): 90,
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
  *     (2024, "f8812"): 92,             # <<<<<<<<<<<<<<
  *     (2024, "f8829"): 93,
  *     (2024, "f8959"): 94,
 */
-  __pyx_mstate_global->__pyx_tuple[93] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8812); if (unlikely(!__pyx_mstate_global->__pyx_tuple[93])) __PYX_ERR(0, 248, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[93] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8812); if (unlikely(!__pyx_mstate_global->__pyx_tuple[93])) __PYX_ERR(0, 249, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[93]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[93]);
 
-  /* "src/tenforty/otslib/ots.pyx":249
+  /* "src/tenforty/otslib/ots.pyx":250
  *     (2024, "US_1040_Sched_E_brokerage_royalties"): 91,
  *     (2024, "f8812"): 92,
  *     (2024, "f8829"): 93,             # <<<<<<<<<<<<<<
  *     (2024, "f8959"): 94,
  *     (2024, "f8960"): 95,
 */
-  __pyx_mstate_global->__pyx_tuple[94] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[94])) __PYX_ERR(0, 249, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[94] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[94])) __PYX_ERR(0, 250, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[94]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[94]);
 
-  /* "src/tenforty/otslib/ots.pyx":250
+  /* "src/tenforty/otslib/ots.pyx":251
  *     (2024, "f8812"): 92,
  *     (2024, "f8829"): 93,
  *     (2024, "f8959"): 94,             # <<<<<<<<<<<<<<
  *     (2024, "f8960"): 95,
  *     (2024, "f8995"): 96,
 */
-  __pyx_mstate_global->__pyx_tuple[95] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[95])) __PYX_ERR(0, 250, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[95] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[95])) __PYX_ERR(0, 251, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[95]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[95]);
 
-  /* "src/tenforty/otslib/ots.pyx":251
+  /* "src/tenforty/otslib/ots.pyx":252
  *     (2024, "f8829"): 93,
  *     (2024, "f8959"): 94,
  *     (2024, "f8960"): 95,             # <<<<<<<<<<<<<<
  *     (2024, "f8995"): 96,
  *     (2024, "US_1040_Sched_SE"): 97,
 */
-  __pyx_mstate_global->__pyx_tuple[96] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[96])) __PYX_ERR(0, 251, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[96] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[96])) __PYX_ERR(0, 252, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[96]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[96]);
 
-  /* "src/tenforty/otslib/ots.pyx":252
+  /* "src/tenforty/otslib/ots.pyx":253
  *     (2024, "f8959"): 94,
  *     (2024, "f8960"): 95,
  *     (2024, "f8995"): 96,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040_Sched_SE"): 97,
  *     (2024, "f8606"): 98,
 */
-  __pyx_mstate_global->__pyx_tuple[97] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[97])) __PYX_ERR(0, 252, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[97] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[97])) __PYX_ERR(0, 253, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[97]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[97]);
 
-  /* "src/tenforty/otslib/ots.pyx":253
+  /* "src/tenforty/otslib/ots.pyx":254
  *     (2024, "f8960"): 95,
  *     (2024, "f8995"): 96,
  *     (2024, "US_1040_Sched_SE"): 97,             # <<<<<<<<<<<<<<
  *     (2024, "f8606"): 98,
  *     (2024, "AZ_140"): 99,
 */
-  __pyx_mstate_global->__pyx_tuple[98] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[98])) __PYX_ERR(0, 253, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[98] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[98])) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[98]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[98]);
 
-  /* "src/tenforty/otslib/ots.pyx":254
+  /* "src/tenforty/otslib/ots.pyx":255
  *     (2024, "f8995"): 96,
  *     (2024, "US_1040_Sched_SE"): 97,
  *     (2024, "f8606"): 98,             # <<<<<<<<<<<<<<
  *     (2024, "AZ_140"): 99,
  *     (2024, "CA_540"): 100,
 */
-  __pyx_mstate_global->__pyx_tuple[99] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[99])) __PYX_ERR(0, 254, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[99] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[99])) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[99]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[99]);
 
-  /* "src/tenforty/otslib/ots.pyx":255
+  /* "src/tenforty/otslib/ots.pyx":256
  *     (2024, "US_1040_Sched_SE"): 97,
  *     (2024, "f8606"): 98,
  *     (2024, "AZ_140"): 99,             # <<<<<<<<<<<<<<
  *     (2024, "CA_540"): 100,
  *     (2024, "CA_5805"): 101,
 */
-  __pyx_mstate_global->__pyx_tuple[100] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_AZ_140); if (unlikely(!__pyx_mstate_global->__pyx_tuple[100])) __PYX_ERR(0, 255, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[100] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_AZ_140); if (unlikely(!__pyx_mstate_global->__pyx_tuple[100])) __PYX_ERR(0, 256, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[100]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[100]);
 
-  /* "src/tenforty/otslib/ots.pyx":256
+  /* "src/tenforty/otslib/ots.pyx":257
  *     (2024, "f8606"): 98,
  *     (2024, "AZ_140"): 99,
  *     (2024, "CA_540"): 100,             # <<<<<<<<<<<<<<
  *     (2024, "CA_5805"): 101,
  *     (2024, "HSA_f8889"): 102,
 */
-  __pyx_mstate_global->__pyx_tuple[101] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[101])) __PYX_ERR(0, 256, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[101] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[101])) __PYX_ERR(0, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[101]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[101]);
 
-  /* "src/tenforty/otslib/ots.pyx":257
+  /* "src/tenforty/otslib/ots.pyx":258
  *     (2024, "AZ_140"): 99,
  *     (2024, "CA_540"): 100,
  *     (2024, "CA_5805"): 101,             # <<<<<<<<<<<<<<
  *     (2024, "HSA_f8889"): 102,
  *     (2024, "MA_1"): 103,
 */
-  __pyx_mstate_global->__pyx_tuple[102] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[102])) __PYX_ERR(0, 257, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[102] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[102])) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[102]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[102]);
 
-  /* "src/tenforty/otslib/ots.pyx":258
+  /* "src/tenforty/otslib/ots.pyx":259
  *     (2024, "CA_540"): 100,
  *     (2024, "CA_5805"): 101,
  *     (2024, "HSA_f8889"): 102,             # <<<<<<<<<<<<<<
  *     (2024, "MA_1"): 103,
  *     (2024, "NC_D400"): 104,
 */
-  __pyx_mstate_global->__pyx_tuple[103] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[103])) __PYX_ERR(0, 258, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[103] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[103])) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[103]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[103]);
 
-  /* "src/tenforty/otslib/ots.pyx":259
+  /* "src/tenforty/otslib/ots.pyx":260
  *     (2024, "CA_5805"): 101,
  *     (2024, "HSA_f8889"): 102,
  *     (2024, "MA_1"): 103,             # <<<<<<<<<<<<<<
  *     (2024, "NC_D400"): 104,
  *     (2024, "NY_IT201"): 105,
 */
-  __pyx_mstate_global->__pyx_tuple[104] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[104])) __PYX_ERR(0, 259, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[104] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[104])) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[104]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[104]);
 
-  /* "src/tenforty/otslib/ots.pyx":260
+  /* "src/tenforty/otslib/ots.pyx":261
  *     (2024, "HSA_f8889"): 102,
  *     (2024, "MA_1"): 103,
  *     (2024, "NC_D400"): 104,             # <<<<<<<<<<<<<<
  *     (2024, "NY_IT201"): 105,
  *     (2024, "OH_IT1040"): 106,
 */
-  __pyx_mstate_global->__pyx_tuple[105] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[105])) __PYX_ERR(0, 260, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[105] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[105])) __PYX_ERR(0, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[105]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[105]);
 
-  /* "src/tenforty/otslib/ots.pyx":261
+  /* "src/tenforty/otslib/ots.pyx":262
  *     (2024, "MA_1"): 103,
  *     (2024, "NC_D400"): 104,
  *     (2024, "NY_IT201"): 105,             # <<<<<<<<<<<<<<
  *     (2024, "OH_IT1040"): 106,
  *     (2024, "PA_40"): 107,
 */
-  __pyx_mstate_global->__pyx_tuple[106] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[106])) __PYX_ERR(0, 261, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[106] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[106])) __PYX_ERR(0, 262, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[106]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[106]);
 
-  /* "src/tenforty/otslib/ots.pyx":262
+  /* "src/tenforty/otslib/ots.pyx":263
  *     (2024, "NC_D400"): 104,
  *     (2024, "NY_IT201"): 105,
  *     (2024, "OH_IT1040"): 106,             # <<<<<<<<<<<<<<
  *     (2024, "PA_40"): 107,
  *     (2024, "US_1040"): 108,
 */
-  __pyx_mstate_global->__pyx_tuple[107] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[107])) __PYX_ERR(0, 262, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[107] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[107])) __PYX_ERR(0, 263, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[107]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[107]);
 
-  /* "src/tenforty/otslib/ots.pyx":263
+  /* "src/tenforty/otslib/ots.pyx":264
  *     (2024, "NY_IT201"): 105,
  *     (2024, "OH_IT1040"): 106,
  *     (2024, "PA_40"): 107,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040"): 108,
  *     (2024, "US_1040_Sched_C"): 109,
 */
-  __pyx_mstate_global->__pyx_tuple[108] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[108])) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[108] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[108])) __PYX_ERR(0, 264, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[108]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[108]);
 
-  /* "src/tenforty/otslib/ots.pyx":264
+  /* "src/tenforty/otslib/ots.pyx":265
  *     (2024, "OH_IT1040"): 106,
  *     (2024, "PA_40"): 107,
  *     (2024, "US_1040"): 108,             # <<<<<<<<<<<<<<
  *     (2024, "US_1040_Sched_C"): 109,
  *     (2024, "VA_760"): 110,
 */
-  __pyx_mstate_global->__pyx_tuple[109] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[109])) __PYX_ERR(0, 264, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[109] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[109])) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[109]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[109]);
 
-  /* "src/tenforty/otslib/ots.pyx":265
+  /* "src/tenforty/otslib/ots.pyx":266
  *     (2024, "PA_40"): 107,
  *     (2024, "US_1040"): 108,
  *     (2024, "US_1040_Sched_C"): 109,             # <<<<<<<<<<<<<<
  *     (2024, "VA_760"): 110,
  *     (2024, "f2210"): 111,
 */
-  __pyx_mstate_global->__pyx_tuple[110] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[110])) __PYX_ERR(0, 265, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[110] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[110])) __PYX_ERR(0, 266, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[110]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[110]);
 
-  /* "src/tenforty/otslib/ots.pyx":266
+  /* "src/tenforty/otslib/ots.pyx":267
  *     (2024, "US_1040"): 108,
  *     (2024, "US_1040_Sched_C"): 109,
  *     (2024, "VA_760"): 110,             # <<<<<<<<<<<<<<
  *     (2024, "f2210"): 111,
  *     (2024, "MI_1040"): 112,
 */
-  __pyx_mstate_global->__pyx_tuple[111] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[111])) __PYX_ERR(0, 266, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[111] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[111])) __PYX_ERR(0, 267, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[111]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[111]);
 
-  /* "src/tenforty/otslib/ots.pyx":267
+  /* "src/tenforty/otslib/ots.pyx":268
  *     (2024, "US_1040_Sched_C"): 109,
  *     (2024, "VA_760"): 110,
  *     (2024, "f2210"): 111,             # <<<<<<<<<<<<<<
  *     (2024, "MI_1040"): 112,
  *     (2024, "OR_40"): 113,
 */
-  __pyx_mstate_global->__pyx_tuple[112] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[112])) __PYX_ERR(0, 267, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[112] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[112])) __PYX_ERR(0, 268, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[112]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[112]);
 
-  /* "src/tenforty/otslib/ots.pyx":268
+  /* "src/tenforty/otslib/ots.pyx":269
  *     (2024, "VA_760"): 110,
  *     (2024, "f2210"): 111,
  *     (2024, "MI_1040"): 112,             # <<<<<<<<<<<<<<
  *     (2024, "OR_40"): 113,
  *     (2025, "OR_40"): 114,
 */
-  __pyx_mstate_global->__pyx_tuple[113] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_MI_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[113])) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[113] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_MI_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[113])) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[113]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[113]);
 
-  /* "src/tenforty/otslib/ots.pyx":269
+  /* "src/tenforty/otslib/ots.pyx":270
  *     (2024, "f2210"): 111,
  *     (2024, "MI_1040"): 112,
  *     (2024, "OR_40"): 113,             # <<<<<<<<<<<<<<
  *     (2025, "OR_40"): 114,
  *     (2025, "MA_1"): 115,
 */
-  __pyx_mstate_global->__pyx_tuple[114] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_OR_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[114])) __PYX_ERR(0, 269, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[114] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2024, __pyx_mstate_global->__pyx_n_u_OR_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[114])) __PYX_ERR(0, 270, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[114]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[114]);
 
-  /* "src/tenforty/otslib/ots.pyx":270
+  /* "src/tenforty/otslib/ots.pyx":271
  *     (2024, "MI_1040"): 112,
  *     (2024, "OR_40"): 113,
  *     (2025, "OR_40"): 114,             # <<<<<<<<<<<<<<
  *     (2025, "MA_1"): 115,
  *     (2025, "VA_760"): 116,
 */
-  __pyx_mstate_global->__pyx_tuple[115] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_OR_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[115])) __PYX_ERR(0, 270, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[115] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_OR_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[115])) __PYX_ERR(0, 271, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[115]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[115]);
 
-  /* "src/tenforty/otslib/ots.pyx":271
+  /* "src/tenforty/otslib/ots.pyx":272
  *     (2024, "OR_40"): 113,
  *     (2025, "OR_40"): 114,
  *     (2025, "MA_1"): 115,             # <<<<<<<<<<<<<<
  *     (2025, "VA_760"): 116,
  *     (2025, "f8812"): 117,
 */
-  __pyx_mstate_global->__pyx_tuple[116] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[116])) __PYX_ERR(0, 271, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[116] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_MA_1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[116])) __PYX_ERR(0, 272, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[116]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[116]);
 
-  /* "src/tenforty/otslib/ots.pyx":272
+  /* "src/tenforty/otslib/ots.pyx":273
  *     (2025, "OR_40"): 114,
  *     (2025, "MA_1"): 115,
  *     (2025, "VA_760"): 116,             # <<<<<<<<<<<<<<
  *     (2025, "f8812"): 117,
  *     (2025, "US_1040_Sched_SE"): 118,
 */
-  __pyx_mstate_global->__pyx_tuple[117] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[117])) __PYX_ERR(0, 272, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[117] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_VA_760); if (unlikely(!__pyx_mstate_global->__pyx_tuple[117])) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[117]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[117]);
 
-  /* "src/tenforty/otslib/ots.pyx":273
+  /* "src/tenforty/otslib/ots.pyx":274
  *     (2025, "MA_1"): 115,
  *     (2025, "VA_760"): 116,
  *     (2025, "f8812"): 117,             # <<<<<<<<<<<<<<
  *     (2025, "US_1040_Sched_SE"): 118,
  *     (2025, "f8829"): 119,
 */
-  __pyx_mstate_global->__pyx_tuple[118] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8812); if (unlikely(!__pyx_mstate_global->__pyx_tuple[118])) __PYX_ERR(0, 273, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[118] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8812); if (unlikely(!__pyx_mstate_global->__pyx_tuple[118])) __PYX_ERR(0, 274, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[118]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[118]);
 
-  /* "src/tenforty/otslib/ots.pyx":274
+  /* "src/tenforty/otslib/ots.pyx":275
  *     (2025, "VA_760"): 116,
  *     (2025, "f8812"): 117,
  *     (2025, "US_1040_Sched_SE"): 118,             # <<<<<<<<<<<<<<
  *     (2025, "f8829"): 119,
  *     (2025, "CA_5805"): 120,
 */
-  __pyx_mstate_global->__pyx_tuple[119] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[119])) __PYX_ERR(0, 274, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[119] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_SE); if (unlikely(!__pyx_mstate_global->__pyx_tuple[119])) __PYX_ERR(0, 275, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[119]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[119]);
 
-  /* "src/tenforty/otslib/ots.pyx":275
+  /* "src/tenforty/otslib/ots.pyx":276
  *     (2025, "f8812"): 117,
  *     (2025, "US_1040_Sched_SE"): 118,
  *     (2025, "f8829"): 119,             # <<<<<<<<<<<<<<
  *     (2025, "CA_5805"): 120,
  *     (2025, "f8959"): 121,
 */
-  __pyx_mstate_global->__pyx_tuple[120] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[120])) __PYX_ERR(0, 275, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[120] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8829); if (unlikely(!__pyx_mstate_global->__pyx_tuple[120])) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[120]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[120]);
 
-  /* "src/tenforty/otslib/ots.pyx":276
+  /* "src/tenforty/otslib/ots.pyx":277
  *     (2025, "US_1040_Sched_SE"): 118,
  *     (2025, "f8829"): 119,
  *     (2025, "CA_5805"): 120,             # <<<<<<<<<<<<<<
  *     (2025, "f8959"): 121,
  *     (2025, "f8960"): 122,
 */
-  __pyx_mstate_global->__pyx_tuple[121] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[121])) __PYX_ERR(0, 276, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[121] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_CA_5805); if (unlikely(!__pyx_mstate_global->__pyx_tuple[121])) __PYX_ERR(0, 277, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[121]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[121]);
 
-  /* "src/tenforty/otslib/ots.pyx":277
+  /* "src/tenforty/otslib/ots.pyx":278
  *     (2025, "f8829"): 119,
  *     (2025, "CA_5805"): 120,
  *     (2025, "f8959"): 121,             # <<<<<<<<<<<<<<
  *     (2025, "f8960"): 122,
  *     (2025, "MI_1040"): 123,
 */
-  __pyx_mstate_global->__pyx_tuple[122] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[122])) __PYX_ERR(0, 277, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[122] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8959); if (unlikely(!__pyx_mstate_global->__pyx_tuple[122])) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[122]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[122]);
 
-  /* "src/tenforty/otslib/ots.pyx":278
+  /* "src/tenforty/otslib/ots.pyx":279
  *     (2025, "CA_5805"): 120,
  *     (2025, "f8959"): 121,
  *     (2025, "f8960"): 122,             # <<<<<<<<<<<<<<
  *     (2025, "MI_1040"): 123,
  *     (2025, "US_1040"): 124,
 */
-  __pyx_mstate_global->__pyx_tuple[123] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[123])) __PYX_ERR(0, 278, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[123] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8960); if (unlikely(!__pyx_mstate_global->__pyx_tuple[123])) __PYX_ERR(0, 279, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[123]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[123]);
 
-  /* "src/tenforty/otslib/ots.pyx":279
+  /* "src/tenforty/otslib/ots.pyx":280
  *     (2025, "f8959"): 121,
  *     (2025, "f8960"): 122,
  *     (2025, "MI_1040"): 123,             # <<<<<<<<<<<<<<
  *     (2025, "US_1040"): 124,
  *     (2025, "NC_D400"): 125,
 */
-  __pyx_mstate_global->__pyx_tuple[124] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_MI_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[124])) __PYX_ERR(0, 279, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[124] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_MI_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[124])) __PYX_ERR(0, 280, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[124]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[124]);
 
-  /* "src/tenforty/otslib/ots.pyx":280
+  /* "src/tenforty/otslib/ots.pyx":281
  *     (2025, "f8960"): 122,
  *     (2025, "MI_1040"): 123,
  *     (2025, "US_1040"): 124,             # <<<<<<<<<<<<<<
  *     (2025, "NC_D400"): 125,
  *     (2025, "AZ_140"): 126,
 */
-  __pyx_mstate_global->__pyx_tuple[125] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[125])) __PYX_ERR(0, 280, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[125] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[125])) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[125]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[125]);
 
-  /* "src/tenforty/otslib/ots.pyx":281
+  /* "src/tenforty/otslib/ots.pyx":282
  *     (2025, "MI_1040"): 123,
  *     (2025, "US_1040"): 124,
  *     (2025, "NC_D400"): 125,             # <<<<<<<<<<<<<<
  *     (2025, "AZ_140"): 126,
  *     (2025, "NY_IT201"): 127,
 */
-  __pyx_mstate_global->__pyx_tuple[126] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[126])) __PYX_ERR(0, 281, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[126] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_NC_D400); if (unlikely(!__pyx_mstate_global->__pyx_tuple[126])) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[126]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[126]);
 
-  /* "src/tenforty/otslib/ots.pyx":282
+  /* "src/tenforty/otslib/ots.pyx":283
  *     (2025, "US_1040"): 124,
  *     (2025, "NC_D400"): 125,
  *     (2025, "AZ_140"): 126,             # <<<<<<<<<<<<<<
  *     (2025, "NY_IT201"): 127,
  *     (2025, "f8606"): 128,
 */
-  __pyx_mstate_global->__pyx_tuple[127] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_AZ_140); if (unlikely(!__pyx_mstate_global->__pyx_tuple[127])) __PYX_ERR(0, 282, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[127] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_AZ_140); if (unlikely(!__pyx_mstate_global->__pyx_tuple[127])) __PYX_ERR(0, 283, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[127]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[127]);
 
-  /* "src/tenforty/otslib/ots.pyx":283
+  /* "src/tenforty/otslib/ots.pyx":284
  *     (2025, "NC_D400"): 125,
  *     (2025, "AZ_140"): 126,
  *     (2025, "NY_IT201"): 127,             # <<<<<<<<<<<<<<
  *     (2025, "f8606"): 128,
  *     (2025, "HSA_f8889"): 129,
 */
-  __pyx_mstate_global->__pyx_tuple[128] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[128])) __PYX_ERR(0, 283, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[128] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_NY_IT201); if (unlikely(!__pyx_mstate_global->__pyx_tuple[128])) __PYX_ERR(0, 284, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[128]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[128]);
 
-  /* "src/tenforty/otslib/ots.pyx":284
+  /* "src/tenforty/otslib/ots.pyx":285
  *     (2025, "AZ_140"): 126,
  *     (2025, "NY_IT201"): 127,
  *     (2025, "f8606"): 128,             # <<<<<<<<<<<<<<
  *     (2025, "HSA_f8889"): 129,
  *     (2025, "f6781"): 130,
 */
-  __pyx_mstate_global->__pyx_tuple[129] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[129])) __PYX_ERR(0, 284, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[129] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8606); if (unlikely(!__pyx_mstate_global->__pyx_tuple[129])) __PYX_ERR(0, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[129]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[129]);
 
-  /* "src/tenforty/otslib/ots.pyx":285
+  /* "src/tenforty/otslib/ots.pyx":286
  *     (2025, "NY_IT201"): 127,
  *     (2025, "f8606"): 128,
  *     (2025, "HSA_f8889"): 129,             # <<<<<<<<<<<<<<
  *     (2025, "f6781"): 130,
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
 */
-  __pyx_mstate_global->__pyx_tuple[130] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[130])) __PYX_ERR(0, 285, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[130] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_HSA_f8889); if (unlikely(!__pyx_mstate_global->__pyx_tuple[130])) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[130]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[130]);
 
-  /* "src/tenforty/otslib/ots.pyx":286
+  /* "src/tenforty/otslib/ots.pyx":287
  *     (2025, "f8606"): 128,
  *     (2025, "HSA_f8889"): 129,
  *     (2025, "f6781"): 130,             # <<<<<<<<<<<<<<
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
  *     (2025, "f8995"): 132,
 */
-  __pyx_mstate_global->__pyx_tuple[131] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f6781); if (unlikely(!__pyx_mstate_global->__pyx_tuple[131])) __PYX_ERR(0, 286, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[131] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f6781); if (unlikely(!__pyx_mstate_global->__pyx_tuple[131])) __PYX_ERR(0, 287, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[131]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[131]);
 
-  /* "src/tenforty/otslib/ots.pyx":287
+  /* "src/tenforty/otslib/ots.pyx":288
  *     (2025, "HSA_f8889"): 129,
  *     (2025, "f6781"): 130,
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,             # <<<<<<<<<<<<<<
  *     (2025, "f8995"): 132,
  *     (2025, "CA_540"): 133,
 */
-  __pyx_mstate_global->__pyx_tuple[132] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt); if (unlikely(!__pyx_mstate_global->__pyx_tuple[132])) __PYX_ERR(0, 287, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[132] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_E_brokerage_royalt); if (unlikely(!__pyx_mstate_global->__pyx_tuple[132])) __PYX_ERR(0, 288, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[132]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[132]);
 
-  /* "src/tenforty/otslib/ots.pyx":288
+  /* "src/tenforty/otslib/ots.pyx":289
  *     (2025, "f6781"): 130,
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
  *     (2025, "f8995"): 132,             # <<<<<<<<<<<<<<
  *     (2025, "CA_540"): 133,
  *     (2025, "NJ_1040"): 134,
 */
-  __pyx_mstate_global->__pyx_tuple[133] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[133])) __PYX_ERR(0, 288, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[133] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f8995); if (unlikely(!__pyx_mstate_global->__pyx_tuple[133])) __PYX_ERR(0, 289, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[133]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[133]);
 
-  /* "src/tenforty/otslib/ots.pyx":289
+  /* "src/tenforty/otslib/ots.pyx":290
  *     (2025, "US_1040_Sched_E_brokerage_royalties"): 131,
  *     (2025, "f8995"): 132,
  *     (2025, "CA_540"): 133,             # <<<<<<<<<<<<<<
  *     (2025, "NJ_1040"): 134,
- *     (2025, "OH_IT1040"): 135,
+ *     (2025, "f2441"): 135,
 */
-  __pyx_mstate_global->__pyx_tuple[134] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[134])) __PYX_ERR(0, 289, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[134] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_CA_540); if (unlikely(!__pyx_mstate_global->__pyx_tuple[134])) __PYX_ERR(0, 290, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[134]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[134]);
 
-  /* "src/tenforty/otslib/ots.pyx":290
+  /* "src/tenforty/otslib/ots.pyx":291
  *     (2025, "f8995"): 132,
  *     (2025, "CA_540"): 133,
  *     (2025, "NJ_1040"): 134,             # <<<<<<<<<<<<<<
- *     (2025, "OH_IT1040"): 135,
- *     (2025, "f2210"): 136,
+ *     (2025, "f2441"): 135,
+ *     (2025, "OH_IT1040"): 136,
 */
-  __pyx_mstate_global->__pyx_tuple[135] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[135])) __PYX_ERR(0, 290, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[135] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_NJ_1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[135])) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[135]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[135]);
 
-  /* "src/tenforty/otslib/ots.pyx":291
+  /* "src/tenforty/otslib/ots.pyx":292
  *     (2025, "CA_540"): 133,
  *     (2025, "NJ_1040"): 134,
- *     (2025, "OH_IT1040"): 135,             # <<<<<<<<<<<<<<
- *     (2025, "f2210"): 136,
- *     (2025, "PA_40"): 137,
+ *     (2025, "f2441"): 135,             # <<<<<<<<<<<<<<
+ *     (2025, "OH_IT1040"): 136,
+ *     (2025, "f2210"): 137,
 */
-  __pyx_mstate_global->__pyx_tuple[136] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[136])) __PYX_ERR(0, 291, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[136] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f2441); if (unlikely(!__pyx_mstate_global->__pyx_tuple[136])) __PYX_ERR(0, 292, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[136]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[136]);
 
-  /* "src/tenforty/otslib/ots.pyx":292
+  /* "src/tenforty/otslib/ots.pyx":293
  *     (2025, "NJ_1040"): 134,
- *     (2025, "OH_IT1040"): 135,
- *     (2025, "f2210"): 136,             # <<<<<<<<<<<<<<
- *     (2025, "PA_40"): 137,
- *     (2025, "US_1040_Sched_C"): 138,
+ *     (2025, "f2441"): 135,
+ *     (2025, "OH_IT1040"): 136,             # <<<<<<<<<<<<<<
+ *     (2025, "f2210"): 137,
+ *     (2025, "PA_40"): 138,
 */
-  __pyx_mstate_global->__pyx_tuple[137] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[137])) __PYX_ERR(0, 292, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[137] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_OH_IT1040); if (unlikely(!__pyx_mstate_global->__pyx_tuple[137])) __PYX_ERR(0, 293, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[137]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[137]);
 
-  /* "src/tenforty/otslib/ots.pyx":293
- *     (2025, "OH_IT1040"): 135,
- *     (2025, "f2210"): 136,
- *     (2025, "PA_40"): 137,             # <<<<<<<<<<<<<<
- *     (2025, "US_1040_Sched_C"): 138,
- * }
+  /* "src/tenforty/otslib/ots.pyx":294
+ *     (2025, "f2441"): 135,
+ *     (2025, "OH_IT1040"): 136,
+ *     (2025, "f2210"): 137,             # <<<<<<<<<<<<<<
+ *     (2025, "PA_40"): 138,
+ *     (2025, "US_1040_Sched_C"): 139,
 */
-  __pyx_mstate_global->__pyx_tuple[138] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[138])) __PYX_ERR(0, 293, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[138] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_f2210); if (unlikely(!__pyx_mstate_global->__pyx_tuple[138])) __PYX_ERR(0, 294, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[138]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[138]);
 
-  /* "src/tenforty/otslib/ots.pyx":294
- *     (2025, "f2210"): 136,
- *     (2025, "PA_40"): 137,
- *     (2025, "US_1040_Sched_C"): 138,             # <<<<<<<<<<<<<<
+  /* "src/tenforty/otslib/ots.pyx":295
+ *     (2025, "OH_IT1040"): 136,
+ *     (2025, "f2210"): 137,
+ *     (2025, "PA_40"): 138,             # <<<<<<<<<<<<<<
+ *     (2025, "US_1040_Sched_C"): 139,
  * }
- *
 */
-  __pyx_mstate_global->__pyx_tuple[139] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[139])) __PYX_ERR(0, 294, __pyx_L1_error)
+  __pyx_mstate_global->__pyx_tuple[139] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_PA_40); if (unlikely(!__pyx_mstate_global->__pyx_tuple[139])) __PYX_ERR(0, 295, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[139]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[139]);
 
-  /* "src/tenforty/otslib/ots.pyx":585
+  /* "src/tenforty/otslib/ots.pyx":296
+ *     (2025, "f2210"): 137,
+ *     (2025, "PA_40"): 138,
+ *     (2025, "US_1040_Sched_C"): 139,             # <<<<<<<<<<<<<<
+ * }
+ *
+*/
+  __pyx_mstate_global->__pyx_tuple[140] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2025, __pyx_mstate_global->__pyx_n_u_US_1040_Sched_C); if (unlikely(!__pyx_mstate_global->__pyx_tuple[140])) __PYX_ERR(0, 296, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[140]);
+  __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[140]);
+
+  /* "src/tenforty/otslib/ots.pyx":589
  *
  *
  * def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):             # <<<<<<<<<<<<<<
  *     """Evaluate an OTS tax form given year, form, and form content.
  *
 */
-  __pyx_mstate_global->__pyx_tuple[140] = PyTuple_Pack(2, Py_None, ((PyObject*)__pyx_mstate_global->__pyx_n_u_raise)); if (unlikely(!__pyx_mstate_global->__pyx_tuple[140])) __PYX_ERR(0, 585, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[140]);
-  __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[140]);
+  __pyx_mstate_global->__pyx_tuple[141] = PyTuple_Pack(2, Py_None, ((PyObject*)__pyx_mstate_global->__pyx_n_u_raise)); if (unlikely(!__pyx_mstate_global->__pyx_tuple[141])) __PYX_ERR(0, 589, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[141]);
+  __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[141]);
   #if CYTHON_IMMORTAL_CONSTANTS
   {
     PyObject **table = __pyx_mstate->__pyx_tuple;
-    for (Py_ssize_t i=0; i<141; ++i) {
+    for (Py_ssize_t i=0; i<142; ++i) {
       #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
       #if PY_VERSION_HEX < 0x030E0000
       if (_Py_IsOwnedByCurrentThread(table[i]) && Py_REFCNT(table[i]) == 1)
@@ -10701,39 +10745,39 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
 static int __Pyx_InitConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   {
-    const struct { const unsigned int length: 9; } index[] = {{1},{33},{31},{1},{1},{13},{9},{8},{27},{4},{6},{6},{7},{16},{9},{4},{7},{7},{7},{8},{9},{5},{8},{17},{5},{20},{18},{7},{15},{35},{16},{6},{18},{6},{17},{18},{9},{9},{14},{8},{5},{5},{5},{5},{5},{5},{5},{5},{13},{7},{4},{15},{4},{9},{2},{8},{13},{5},{8},{10},{8},{8},{4},{2},{17},{3},{5},{12},{12},{5},{4},{7},{6},{11},{10},{20},{12},{10},{3},{8},{15},{15},{8},{6},{6},{1},{4},{8},{4},{358},{3}};
-    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (884 bytes) */
-const char* const cstring = "(\265/\375`\256\003U\033\000\006\363\257;\020\263s\000\000 \001\001D\200\002 \201\004\022\020@\215\002\004@\210\351\233\224\330-\362\352\364O\276\313!\233?\322\215\231\321\\2\332w]\277\275*\203\373\222\256\252\273\332\265\363\350\373\240\000\221\000\236\000\271\013{>\226#9\035\313\177\213%\3465\002;\371\330\354e^)\377:k\375\222\315\336%f\022\023C\324\354\344eP`a\3301\362.X\330\021\212\177\262\"~k\205\265Z\255\310o\311L\376_+-\330K\345\204\344G^$\377\251p\225\372\226+\354\020\177\246\225\323\241&Zin\236O:\216/?\215zs\\\376\023\317q\323F\355\222'\021\023\351\003\347\222[\\\322\316Sg\362\244\355\325\2210N\3066\370\205\364qky$\3612wIY\337\234\r\2341\251v\261\306\361\253I\262Y\354\024\377\373w\371\377#\306\221\377\350\276\\G\373k\226$\r\267\350\223$\317]^\273d\212\025\252R\254\025\311B\241\304\325\212T\205\252\025)\256<Td(\242P\344\377\377_nq\246\275\271o\333\247\276\034\337\177\233\321\322\356h5\177\\\376yy\311\257\355\367\266\346\370\177c\323\366\307}q\311qY\347\321\224\313\021\353\266\rU\036\337\202y\311\366-\271iuY\377\265Y}m\262\246\375\313\365\265K3\312^\366\242\323\231\217Wk\2533z\336\031y]x\r\340\n\366O\247\245\016\242\337G}\350!;\242\201\322\216D\255\000}\n\004\000\001=`\037\201~\266O\200~%\036\220G\325+\365>F\276O\257\3319\010\255\255\276\320G\002>\001\320Z\352\221\360D^L\255\000\375\014D\000\023=\266\027\202\341\303\000\360m\033.\261\26688\373\352\262\206\236|_\376\277\315\323\304\267n[\362\326\370\335\377\265\313\257\211\236\317M\334\036\255\211^]\263W\337]ZmZ\334\355\264\332\2265\312q\251Q4\243\233\347\235\361E3\316\247\305\327\304\325\362?.\355\031\233gq\247\000\364ku\234hU\360Y\360@\036\304.\247\223\300\364\223&\210~-\273\014\025T_]\202a\005\325\261O4\254\255\036\311\013\340\201\250%\325\242G0\204#\337\210a\275uWg\245\013\t\353\207\347\326\023\221\360I$\254\266st\235\035\004\321z\333\2712\"|\021\237\236JK\251\202h\035\010\255\006\242\265%\245H=v\nB\353\207G\333\035\250\267\356\320!Rp'\356JT\214\036\021\372\225\324\227\236!Z\255J\3235R0\005\r\326O\277\245.i""C\350\327\322\003\271\360}v!U\227B\030\274\2509a\275\251\271^\246-iN( \206He\304\035aY\224\263-\327\rW\304\254\216D\024r\3509\336\276v\363\031\031\244\234\236\007\252\343@\332\234\326\254\334G\2152\2714t\244c\325+= \024?\213\010J\205c\000<\t\367\311\001`\223,\204&\330\031!X\200\251\177\303\204CmK\206\3412\222\313(\355\276\235\233\201\335(\364\230\263\241\001\310\317W \030^\301\002\270\325\355=@#\010A\334\222\355\035\365\257\022\010\030\000\340\236JCu\345\037\322Y\244H\230\277\347\r^\331\210\342T;\362@$\030\202\004\020\315Q2\243\021\022\215#\314\272y\017";
-    PyObject *data = __Pyx_DecompressString(cstring, 884, 3);
+    const struct { const unsigned int length: 9; } index[] = {{1},{33},{31},{1},{1},{13},{9},{8},{27},{4},{6},{6},{7},{16},{9},{4},{7},{7},{7},{8},{9},{5},{8},{17},{5},{20},{18},{7},{15},{35},{16},{6},{18},{6},{17},{18},{9},{9},{14},{8},{5},{5},{5},{5},{5},{5},{5},{5},{5},{13},{7},{4},{15},{4},{9},{2},{8},{13},{5},{8},{10},{8},{8},{4},{2},{17},{3},{5},{12},{12},{5},{4},{7},{6},{11},{10},{20},{12},{10},{3},{8},{15},{15},{8},{6},{6},{1},{4},{8},{4},{358},{3}};
+    #if (CYTHON_COMPRESS_STRINGS) == 3 && __PYX_LIMITED_VERSION_HEX >= 0x030e0000 /* compression: zstd (889 bytes) */
+const char* const cstring = "(\265/\375`\263\003}\033\000\3662\260;\020\263s\000\000 \001\001D\200\002 \201\004\022\020@\215\002\004@\210\351\233\224\330-\362\352\364O\276\313!\233\027\351\306\314h.\031\355{_\277\275*\203\373\222\256\252\273\332\265\363\350\373\240\000\222\000\236\000\271\033{>\226\"9\335\312\277k%\006&\0223y\231\313\313\300P\376u\326\0326s\371\026Y\211L\014Q.&/s\022\013\303\224\310\277ba*\024\337DE|\227J\213\305b\221\357\232\225\374\303T\\1X\212\311\310\213\300F\376U!K\365\256W\230\022\177\306\225\323\241&Zin\236O:\216/?\215zs\\\376\023\317q\323F\355\222\247\020\023\311\003\347\222[\\\322\316Sg\362\244\355\325\2210N\3066\370\205\344qky$\3612wIY\337\234\r\2341\251v\261\306\361\253I3\027\331)\347\377\376]\376\377\210q\344?\272/\327\321\376\232%I\303-\372$\311s\227\253Z\341J\325b\221-\024J\\\205+\026)\262:V\244\230J\241\310PD\241\310\377\377\277\334\342L{s\337\266O}9\276\3776\243\245\335\321j\376\270\374\363\362\222_\333\357m\315\361\377\306\246\355\217\373\342\222\343\262\316\243)\227#\326m\033\256:\336\005\003\233\355[r\323\352\262\376k\263\372\332dM{\330\353k\227f\234\375\354E\2473\037\257\326Vg\364\274.\344m\341\001i\003\270\202\375\323i\251\203\350\367Q\037:\310\216h\240\264\033Q+@\237\002\001@@\017\330G\240\237\355\023\240_\211\007\344Y\365J=\217\221\357\323kv\016B\253\253/\364\221\200O\000\264\226z#<\221'S+@?\003\021\300D\217\355\201`\3700\000|\333\206K\254-\016\316\276\272\254\241'\337\227\377o\3634\361\255\333\226\2745~\367\177\355\362k\242\347s\023\267Gk\242W\327\354\325w\227V\233\026w;\255\266e\215r\\j\024\315\350\346yg|\321\214\363i\3615q\265\374\217K\033\233gq\247\000\364su\234hU\360Y\360@\036\304.\247\223\300\364\223&\210~,\273\014\025Ta]\202a\005\325\261O4\254\256\036\311\013\340}\250%\325\242G0\204#\337\210a\275\365Wo\245\013\t\353\207\347\326\013\221\360I$\254\266st\235\035\004\321z\333\2752\"|\021\237\256JK\251\202h\035\010\255\006\242\225%\245H;v\nB\353\207G\333\035\250\267\356\320!Rp'\356HT\214\036\021\372\225\324\227\236!Z\255J\3235R0\005\r\326O\277\245-iC""\350\307\322\373\270\360}v!U\227B\030\274\2509a\275\251\271^\246,\001P( \206HU\305\016aY\224\263-\327\rW\304,G\342\0139\364\034\357\257]|F\006)\247\347\201\3528\220\006\2477+\237\343G\231\\M^\351\274\212V\036\220\305\017G,\225\302\001\240\236\t\277\211\0010J\036B\025\354\236`L\300*\177\363\204G\355J\206\353Z\242\313\204v\217\035\036\202\331\350\364\316\355\276\001M\314W \230^\001\005\270+`Vo\243\001\033!r\023\324\342vo\357\250\177\225@\300\300\001\367T\232\252+\374\020\316\"E\302\374\275\336\360\225\2160N\266\013\017\204\202\tH\014\221\0355\263\032a\320X\302\254+\366";
+    PyObject *data = __Pyx_DecompressString(cstring, 889, 3);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (951 bytes) */
-const char* const cstring = "BZh91AY&SY\205*O\023\000\000S\177\377\345\377\377\365l\177\377\363\257\377\377p\277\377\377\364\000@@@@@@@@\000@@@\000@\000@\002\375\335\335\035\335%\233\21454D\364\232\217$4=\023i4\311\240\003OP4d\001\221\240\0002i\204\304\0003S\324\032\211\244\364mRzi=M\224\364\rL\206A\3512\003@\000\000\000\000\0004\001\220\0212e\031OS\024\310\364\214\215\006\200\000\000\000\000\000\000\000\0004\000\032i&S1S\320\324\365\001\246\232OHf\241\200\t\221\240\000\036\220\000\323\001\r\r\014L\214L#\313tq~\307\367\215@\345^O\3670\034\340H\372\255\001\241\323\212\345\252\326\026\224\004\320 \270\301\037#P\213\n`$@\363\240\\&D\306*9\246\340\t\313s\300\201%\262\344\004\252y\250:\224\204\024\206 \311\036\376U\272\370\253Kp\317\377\032R\316\205\337m\371n\205\246&\032$\210\355\3379`|\340\\&\221C\361\026Sjv\376\371\215C\205CO \001\324-yB\251\000\262\307\013\035\350\3421%>\257\241k\326\276x$H\005.\251\305In\261\355\311\251Ew\3151\224\002P\211\212N\330Z\341\246\337\216\356\207,\372\221\252V\356\026t\342\306\210v\303wHU\010\243$R\254\274\212\327\217\324\2728k\030\217]s\231,\036\264\212\231\027\260U \371C\370\0222\230\264\201$\320\241^\266\240Z\272Oh\0029\231\004\223e\266\316\036\216\254K\354\001\010\232\273\014X\212\007\242\276d\004\306Ii\005\007\007\321xr\346%\376\t\222\200\345\362\210\0169.\344\337\266\n\037\226\325\265Q\016C\316\206\213\000\336b\302\032$\023Q\034p,\326\020\233V'^\260!Q\200\222~\333J\022{\024$\0042\002U\370\027A<\247C-\\\320\020\327\005\0360\206\223q]\256'\231\013T\035RH\326\213c9D\360\341\221z\365\261\201@\005\323-\232\366\0062\267\006\322J\267 \367+E3\200\334\202E\303\355\022\277Y\017Y(\020\200\202\203\213\231\231'\250\310Zv\026\226\202\365DI\257\236\254$\342\362\326\222\237\203\3054\016\244\312\\d/=\023\322\363\023L{yC\005\026\206\004T\223\020\021\022\002\247K6hm\365\316\354\325\243~\316\205\260\030i\022E\356R\010\254\214!H\235\354\001\231>j\265\034EL\266\010\222\351),\207P\254\010\"dU\325\351\311r\n\347\003Z\311,\n)\222&JN\017,\000\262B\306q\210(\332\254\364U\004\236J\227\r6v""\316\301\321\031\242aPS\247Q\023\t\243\310&\333\234\263\216\265\365\324\0106\221\200\0019K\003:\t1B\020_<\013T\226\020\270\0164\\&\266\001\"\003\342\371\317\253%J4lT\025=p5\250,\024A\"\252\251\223\022\230\014\006\270\t\317r\312\256\235\004\252\344\260\005\t\315 \300\252#dP\220K4\306\025m\271\367\241\302`I\006!\033u\370Kk\032#o\231\310_\033\310Q\261f\227a\254\227Q\272\016=\215\347L{\220\365tn\017\206\277\246\233&\007x|\357\210z\003\233\264m\273\370\035\277\353\231\225nU\376\314\327gG\216\355r\321\343\333\372\351\252\273\320\307\030-\006\262z\036\307\203M\373\337l\264\324\365\362\375\342\367\261\275oY\032\0169\234|X\027\021TKg\223\365Q\014\202\304\252\254\035\007`\0325\244/\023\300)\376.\344\212p\241!\nT\236&";
-    PyObject *data = __Pyx_DecompressString(cstring, 951, 2);
+    #elif (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (963 bytes) */
+const char* const cstring = "BZh91AY&SY\354\307\335\202\000\000S\177\377\345\377\377\365l\177\377\363\257\377\377p\277\377\377\364\000@@@@@@@@\000@@@\000@\000@\002\375\335\335uwIe\306\032\232\232C\321C\3224f\246\236S&\2324\320\007\244\003@i\211\223A\2401\006C\324\304\320i\247\251\352\r@\247\3526\244=R~\231'\243S\312\230\032\231<\247\240'\251\200\214\004dh\320\000\302\007\242`\000j`\243)\247\244\232'\244\3644C\324\323\0040\002` \311\202h\300\214\203\0010\023M\000\324\364\223H\364j&\232\000\323L@4\000\000\000\0004\000\000\000\000h\026\252\303F\200\366\367\037?H\005\024\373\374\375\003\370\007\240\244`\014\017\307\024\245\210\305\226\025\002d\220J\201\2455q\023\316\3145!$\321I\324\315\357uKE\230\013T\232@\302\214,h\n~\031\226\226\265k8\236\237@r\377n\357\374n\313\n$\356EuF\031#\244\2260\253\342\263`\327x\357$=c\236\017\351.z7N\333\357i\323f\230\324h&i\344\000I2\333\323\025\310\004! \204\035\330\302)!\026\303\356\231\272\233\016Tb\001\214\324\024\0365\352\202\202\334\313h\224\322\\\326\230\240\022\242\032U\013!\213n\016M\013\372<\323\374\242\371X\356\r\353D\310a&C7\307xs\325\312\025\254+\036\306\n\211\337$\027\220Iy\252\223\245\211\360W\373\336S\262b\022)\357\222_G\225\005\313\252\325\247YC\370e>P\010\3358)]}Zx\222\266\030\201\004b\222\367\343\003\327\034\013O,\220\022\326$d\226\034+J\303\331\226\371HF|p\324\004\316\032k#\277/\266'?t. \352E\231$\323\366<,\217A?a\213Fi\226(\250'X!/\225\001\245\014\t2\351q,\223\327\211\020[\340\023{\003\026u[\030~\226\036 \263\324\016\362\230\263i\320G\324')i\020\\\022F;\230\350\345J\322\255\"\232\004\225U$\002\373R],\2415\031W1QR|&J\240-\244\007Dk\302\222\221\267\265\361V\213A\211\3144B\304?Y8\357\205_\345\215}V\\\024&\2217,\234,\225U\213\2310\"x\311\r`\317f\002\360\n\253\323!85\306R\352 \031\332*\000\340\201a\263b\266\3642\242~sd:\245s\254\000Y\247\017:\007\320\202$)d!\021\340X\013\266\327\244\210\371\021.\326\034K\357S\225\303nR\022\010j\2211\255\036\237\n>\3702%\222\260\202&QK\"HL\240\005\020R!z{\027\252\253\003A&\263X)9.K\311]:F\363g\267o\001+P\211P8y\326\305jx""\345J\244!`\360\005\253\220*\327k7\020\216\034\201\035E\346S\005\250\311:\243\301\263\tJU\267\2707SV\205*\356\267H\302\014O&b3\255mF\223\236\036\033\000T\006J}EM\001\365\022%\002\024v\260^\270Q\230B\210\0214T`v\t\035@A\240\210\2010F\230\240|\312\014\303/V\314W/\320U\365n\267a\233.\243SH{\232\317\200\270B\333\203\204|/\375\270i/\352\007\256x\207_\2652\255\347.\2071:\345\346\336\323\304\336\334rth\316y\224\252\\\037]5\325v\030\244\013Qy4\335\221\207\340\243\277k.\274\365s\256c\324\300\342\275\264}F\232\321J;\377\323\327\033+r\376<\020\310 \231\242ho\n\320\201\224\207 &\377\213\271\"\234(Hvc\356\301\000";
+    PyObject *data = __Pyx_DecompressString(cstring, 963, 2);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (874 bytes) */
-const char* const cstring = "x\332mSOO\033G\024\307\022JLcR\226@\n\010![\315!\205\306^S0\006)\211,c\032\332b\007l\252$\227\247\361z\326l\361\356\254g\306\301\216\372\001|\334\343\034\367\350\243\217>\362\021\366\270G\177\204|\204\276\301$Q\244\2564\357\375\336\237y\363\376m\256\326\250\2479\225=\356\321V\332c\336\213O\224\2634\355;2m\261\026=J_z\327\036\273\361\322\003Jx\316f\334E\275\333t<\"\035\346\035\245\263\257s6m\275\320\206\254\354\313\334\027\000\254'5\027\334\312I\352\241Z\016rL\212\216\323\324,\353\017\372\332\\\372\000\371=\263\\\202\375\031-\232\373\000'\225c89\375\253R-\235U\000\336\324K`\027\213\305\303\263\022\344\317N!o\356\231\3252\034\357\231f\365\217\231\364\036N\033\273f\276\366\006\271V\324.\000I\243^\341\234q@\000\177V\336C\243\006\247\325\343\312\273\267%\264\002\274\035\364\361\034;\226\204*\355\313\013j7\250\3533N8*9\265$\343\203\313\372\335\003\367\014\352\326\025mA\371{\261\002M\316\256)'m\n\234\rHG:T|\357R\257\374]\202\203\202I\304\300\263\034\226\265\030\307\3668\036\025\026\020\336\376\010`u\210\020\320\246\322\221\324\325\"\032\301\361@rb\321&\261\256\001\250')GvW\223+\332@?\222N\217H\n\272\347h\300\231\001\330\273\273y\323.\034\024\363v\261`\026\260q\371]$\273\207v\361p_\223\202\211\344p\037\2076\273'\261v\333\006\237\310+\333\351P}\356\004h\016$\025\332\345\233\233\217\361{\236\005\000\216\200\257E\350\224\005\200K0_\374\\\326\352a\014\374<\342\"g\336,g\346S\217\t\234\375\354]\035H\257\220\317|\237;\236\3649ks\342\336_\352\366Hg\2068q\004\345\224\2648\365;\330\014NE\257#g\024\364\212\316\266W\347\375\r\241\301\365;Tb\221 \250\274\017\212\250Em\202\027\305@`\322\276v\375\262\234Y\314\233v\304Wq\266\253\200\205\013l\253t\375\226\303u\303\251\270\271!\334\323\307\361\332B\377\026\321\334v\264\375jB>o\315\245\026\247\363\317\302\3328?>\231d\342\371\207\321\303u\365D\225\342\344\343\341?*\021\255\037M2\223\302\255q\233\231\316o)2\235_W\306\347\007s?,G\306\263\360d\224A\274\220\032\276R?\205\211i\352i\320T\te\304\306jp\0368\252\037v\343%\rYxy\347\271\270\026\014\302""\344(\021\375\362rr>M\256\006\027AW%\342E#0\202_\325UH\342\224\206;\3522\314L\223\033j;\374}\224\037a.F\260\246\236\252n\370x\324\034'\342\344\243\341A\360sp\036\247\026\343\344B\234Z\0162\301>\306\371\037\260\021m\354`\210\362\250\033\247~\034\376\253~S$^\332\2146_O\272\267\211x\351Ip\250\312\252\033\257\254G\353&F^\331P\317\303L\370r\374`lOJ\361\352\226\262B#^\331T\225\320\010wF\347\323\324R\220\010t\003\026\322\352\323hml\214\237c\327t\001\3212>\024\247tM=U\232\316?\032\346q \377\001ET\276\261";
-    PyObject *data = __Pyx_DecompressString(cstring, 874, 1);
+    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (880 bytes) */
+const char* const cstring = "x\332mS\301N\033I\020\305\022J\314\306d\031\002Y@\010\331\332\034\262\260\3013^06R\022Y`6\354.v\300f\225\344Rj\217{\314,\236\351qw;\330\321~\200\217s\354\343\034}\364\321G>\301\3079\372\023\362\t[\215I\242H;RW\275\352\252\256\256z]\223\255\326kiNe\227\373\264\231\366\231\377\342\023\345,M{\256L\333\254I\017\323\227\376\265\317n\374t\237\022\236u\030\367p\337k\270>\221.\363\017\323\273\257\263\016m\276\320\216]\331\223\331/\000XWj-\270\235\225\324\307m\331\3172)\332nC\253\335\240\337\323\356\322\007\260\366\314\243\022\354\317d\301\334\0078)\037\303\311\351_\345J\351\254\014\360\246V\002\247P(\024\317J`\235\235\202e\356\231\225#8\3363\315\312\0373\353=\234\326s\246U}\203ZoT/\000E\275V\346\234q@\000\177\226\337C\275\n\247\225\343\362\273\267%\364\002\274\355\367p\035\273\266\204\n\355\311\013\352\324\251\0270N8nrjK\306\373\227\265\273\013\356\025\324\354+\332\204\243\357\315248\273\246\234\264(p\326'm\351R\361}H\255\374w\t\016\362&\021}\337v\331\256\3158\322\343\372T\330@x\353#\200\335&B@\213JWRO\233\350\004\327\007\311\211M\033\304\276\006\240\276\244\034\325]O\236h\001\375H\332]\")h\316\321\201o\006\340\344r\226\351\344\366\366,'\177P\260\234B\336\314#{V\016E\256\350\024\212\373Z\344M\024\305}|\271\331a\211\0048\016\004D^9n\233\352ug@\243/\251\320!\337\302\002\274\244\353\333\000\340\n\370\332\211\256[\000x\004\213\306\317c\315.\346\300\317'\036j\346\317\ng\001\365\231\300\001\230\335\253\023\3519\nX\020p\327\227\001g-N\274\373C\235.i\317\020'\256\240\234\222&\247A\033\031\341Tt\333r&A\317\351l\204u\335\337\020:\274\240M%6\t\202\312\373\244\210\232\324!xP\364\005\026\035\350\320/\023\272\213u\323\266\370j\316\006\026\260q\201\334J/h\272\\\263N\305\315\r\341\276^\256\337\022\372\337\230\314mO\266_\215\311\347\255\271\324\342t\376YT\035Y\243\223q&\236\1778y\270\256\236\250R\234|<\370G%&\353\207\343\3148\177k\334f\246\363[\212L\347\327\225\361\371\301\334\017\313\023\343Yt2\314 ^H\r^\251\237\242\3044\3654l\250\2042bc5<\017]\325\213:\361\222\206,\272\274\213\\\\\013""\373Qr\230\230\374\362r|>M\256\206\027aG%\342E#4\302_\325UD\342\224\206;\3522\312L\223\033j;\372}h\r\261\026#\\SOU'z<l\214\022q\362\321\340 \3749<\217S\213qr!N-\207\231p\037\363\374\017\330\230l\354`\212\243a'N\3758\370W\375\246H\274\2649\331|=\356\334&\342\245'aQ\035\251N\274\262>Y71\363\312\206z\036e\242\227\243\007#g\\\212W\267\224\035\031\361\312\246*GF\2643<\237\246\226\302D\250\tXH\253O\303\265\2211z\216\254\351\006&\313xQ\234\322=uUi:\377h`\341\203\374\007\346\222\277\342";
+    PyObject *data = __Pyx_DecompressString(cstring, 880, 1);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #else /* compression: none (1198 bytes) */
-const char* const bytes = "/OTS returned non-zero exit code: Unknown year/form combination: .?/fed-form.txt/form.txt_out.txtsrc/tenforty/otslib/ots.pyx.txtAZ_140CA_540CA_5805__FED_FILENAME__HSA_f8889MA_1MI_1040NC_D400NJ_1040NY_IT201OH_IT1040OR_40OTSError_OTS_KEY_TO_INDEXPA_40__Pyx_PyDict_NextRefTemporaryDirectoryUS_1040US_1040_Sched_CUS_1040_Sched_E_brokerage_royaltiesUS_1040_Sched_SEVA_760asyncio.coroutinesc_argv__class_getitem__cline_in_traceback__enter__error_msg_evaluate_form__exit__f2210f6781f8606f8812f8829f8959f8960f8995fed_form_textff_pathfilefile_path_bytesformform_textfp__func___is_coroutineitems__main____module____name__on_erroropenosots_form_functionpopprintprogram_name__qualname__raisereadreplaceresultresult_codereturnfilereturnfile_completed__set_name__setdefaultsystempfiletenforty.modelstenforty.otslib__test__tmpdirvalueswwarnwarningsyear\320\000*\320*>\270a\360\036\000\014\r\340\004$\240O\2601\260F\270!\330\004\007\320\007\031\230\023\230A\330\010\016\210j\230\001\320\031:\270!\2706\300\021\300!\340\004\036\230a\340\004\031\230\021\360\006\000\n\022\320\021$\240F\250!\360\006\000\t\014\210>\230\027\240\001\340\014\026\220b\230\001\230\021\330\021\025\220Q\220i\230x\240q\330\020\025\220Q\220o\240U\250!\360\006\000\r\030\220y\240\010\250\001\320)=\270Q\340\010\025\220R\220q\230\001\330\r\021\220\021\220,\230h\240a\330\014\021\220\021\220+\230U\240!\340\010\032\230*\240G\2501\250A\330\010\021\220\030\230\026\230q\240\016\250b\260\001\330\010\013\2107\220#\220Q\330\014\r\330\010\t\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\032\320\032+\2501\250C\250q\330\014\017\210|\2303\230a\330\020\034\320\034?\270q\300\001\330\020\023\2209\230C\230q\330\024\031\320\0310\260\001\330\024\032\230(\240!\240=\260\006\260f\270A\330\025\036\230c\240\021\330\024\034\230E\240\021\240+\250Q\340\014\020\220\001\220\021\360\006\000\t \230z\250\030\260\021\260(\270!\330\r\021\220\021\320\022+\2501\330\014\025\220R\220u\230A\340\004\013\2101ots";
+    #else /* compression: none (1203 bytes) */
+const char* const bytes = "/OTS returned non-zero exit code: Unknown year/form combination: .?/fed-form.txt/form.txt_out.txtsrc/tenforty/otslib/ots.pyx.txtAZ_140CA_540CA_5805__FED_FILENAME__HSA_f8889MA_1MI_1040NC_D400NJ_1040NY_IT201OH_IT1040OR_40OTSError_OTS_KEY_TO_INDEXPA_40__Pyx_PyDict_NextRefTemporaryDirectoryUS_1040US_1040_Sched_CUS_1040_Sched_E_brokerage_royaltiesUS_1040_Sched_SEVA_760asyncio.coroutinesc_argv__class_getitem__cline_in_traceback__enter__error_msg_evaluate_form__exit__f2210f2441f6781f8606f8812f8829f8959f8960f8995fed_form_textff_pathfilefile_path_bytesformform_textfp__func___is_coroutineitems__main____module____name__on_erroropenosots_form_functionpopprintprogram_name__qualname__raisereadreplaceresultresult_codereturnfilereturnfile_completed__set_name__setdefaultsystempfiletenforty.modelstenforty.otslib__test__tmpdirvalueswwarnwarningsyear\320\000*\320*>\270a\360\036\000\014\r\340\004$\240O\2601\260F\270!\330\004\007\320\007\031\230\023\230A\330\010\016\210j\230\001\320\031:\270!\2706\300\021\300!\340\004\036\230a\340\004\031\230\021\360\006\000\n\022\320\021$\240F\250!\360\006\000\t\014\210>\230\027\240\001\340\014\026\220b\230\001\230\021\330\021\025\220Q\220i\230x\240q\330\020\025\220Q\220o\240U\250!\360\006\000\r\030\220y\240\010\250\001\320)=\270Q\340\010\025\220R\220q\230\001\330\r\021\220\021\220,\230h\240a\330\014\021\220\021\220+\230U\240!\340\010\032\230*\240G\2501\250A\330\010\021\220\030\230\026\230q\240\016\250b\260\001\330\010\013\2107\220#\220Q\330\014\r\330\010\t\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\022\220!\2205\230\001\330\014\032\320\032+\2501\250C\250q\330\014\017\210|\2303\230a\330\020\034\320\034?\270q\300\001\330\020\023\2209\230C\230q\330\024\031\320\0310\260\001\330\024\032\230(\240!\240=\260\006\260f\270A\330\025\036\230c\240\021\330\024\034\230E\240\021\240+\250Q\340\014\020\220\001\220\021\360\006\000\t \230z\250\030\260\021\260(\270!\330\r\021\220\021\320\022+\2501\330\014\025\220R\220u\230A\340\004\013\2101ots";
     PyObject *data = NULL;
     CYTHON_UNUSED_VAR(__Pyx_DecompressString);
     #endif
     PyObject **stringtab = __pyx_mstate->__pyx_string_tab;
     Py_ssize_t pos = 0;
-    for (int i = 0; i < 89; i++) {
+    for (int i = 0; i < 90; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyUnicode_DecodeUTF8(bytes + pos, bytes_length, NULL);
       if (likely(string) && i >= 10) PyUnicode_InternInPlace(&string);
@@ -10744,7 +10788,7 @@ const char* const bytes = "/OTS returned non-zero exit code: Unknown year/form c
       stringtab[i] = string;
       pos += bytes_length;
     }
-    for (int i = 89; i < 91; i++) {
+    for (int i = 90; i < 92; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyBytes_FromStringAndSize(bytes + pos, bytes_length);
       stringtab[i] = string;
@@ -10755,14 +10799,14 @@ const char* const bytes = "/OTS returned non-zero exit code: Unknown year/form c
       }
     }
     Py_XDECREF(data);
-    for (Py_ssize_t i = 0; i < 91; i++) {
+    for (Py_ssize_t i = 0; i < 92; i++) {
       if (unlikely(PyObject_Hash(stringtab[i]) == -1)) {
         __PYX_ERR(0, 1, __pyx_L1_error)
       }
     }
     #if CYTHON_IMMORTAL_CONSTANTS
     {
-      PyObject **table = stringtab + 89;
+      PyObject **table = stringtab + 90;
       for (Py_ssize_t i=0; i<2; ++i) {
         #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
         #if PY_VERSION_HEX < 0x030E0000
@@ -10783,8 +10827,8 @@ const char* const bytes = "/OTS returned non-zero exit code: Unknown year/form c
   {
     PyObject **numbertab = __pyx_mstate->__pyx_number_tab + 0;
     int8_t const cint_constants_1[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127};
-    int16_t const cint_constants_2[] = {128,129,130,131,132,133,134,135,136,137,138,2018,2019,2020,2021,2022,2023,2024,2025};
-    for (int i = 0; i < 147; i++) {
+    int16_t const cint_constants_2[] = {128,129,130,131,132,133,134,135,136,137,138,139,2018,2019,2020,2021,2022,2023,2024,2025};
+    for (int i = 0; i < 148; i++) {
       numbertab[i] = PyLong_FromLong((i < 128 ? cint_constants_1[i - 0] : cint_constants_2[i - 128]));
       if (unlikely(!numbertab[i])) __PYX_ERR(0, 1, __pyx_L1_error)
     }
@@ -10792,7 +10836,7 @@ const char* const bytes = "/OTS returned non-zero exit code: Unknown year/form c
   #if CYTHON_IMMORTAL_CONSTANTS
   {
     PyObject **table = __pyx_mstate->__pyx_number_tab;
-    for (Py_ssize_t i=0; i<147; ++i) {
+    for (Py_ssize_t i=0; i<148; ++i) {
       #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
       #if PY_VERSION_HEX < 0x030E0000
       if (_Py_IsOwnedByCurrentThread(table[i]) && Py_REFCNT(table[i]) == 1)
@@ -10836,7 +10880,7 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   PyObject* tuple_dedup_map = PyDict_New();
   if (unlikely(!tuple_dedup_map)) return -1;
   {
-    const __Pyx_PyCode_New_function_description descr = {5, 0, 0, 19, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 585};
+    const __Pyx_PyCode_New_function_description descr = {5, 0, 0, 19, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 589};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_year, __pyx_mstate->__pyx_n_u_form, __pyx_mstate->__pyx_n_u_form_text, __pyx_mstate->__pyx_n_u_fed_form_text, __pyx_mstate->__pyx_n_u_on_error, __pyx_mstate->__pyx_n_u_warnings, __pyx_mstate->__pyx_n_u_ots_form_function, __pyx_mstate->__pyx_n_u_program_name, __pyx_mstate->__pyx_n_u_file_path_bytes, __pyx_mstate->__pyx_n_u_c_argv, __pyx_mstate->__pyx_n_u_result_code, __pyx_mstate->__pyx_n_u_tmpdir, __pyx_mstate->__pyx_n_u_ff_path, __pyx_mstate->__pyx_n_u_fp, __pyx_mstate->__pyx_n_u_returnfile, __pyx_mstate->__pyx_n_u_error_msg, __pyx_mstate->__pyx_n_u_OTSError, __pyx_mstate->__pyx_n_u_returnfile_completed, __pyx_mstate->__pyx_n_u_result};
     __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_src_tenforty_otslib_ots_pyx, __pyx_mstate->__pyx_n_u_evaluate_form, __pyx_mstate->__pyx_kp_b_iso88591_a_O1F_A_j_6_a_F_b_Qixq_QoU_y_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
   }
