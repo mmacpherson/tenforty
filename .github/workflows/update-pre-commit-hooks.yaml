@@ -1,0 +1,142 @@
+name: Update Pre-commit Hooks
+
+on:
+  schedule:
+    # Run every Sunday at 11:00 AM UTC (4:00 AM Pacific)
+  - cron: 0 11 * * 0
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-hooks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+
+    - name: Update pre-commit hooks
+      run: |
+        # Store original config for comparison
+        cp .pre-commit-config.yaml .pre-commit-config.yaml.bak
+
+        # Update hooks (skip typos — uses moving v1 tag that reverts semver pin)
+        uv sync
+        uv run pre-commit autoupdate --skip https://github.com/crate-ci/typos
+
+        # Check if there are any changes
+        if ! diff -q .pre-commit-config.yaml .pre-commit-config.yaml.bak > /dev/null; then
+          echo "HOOKS_UPDATED=true" >> "$GITHUB_ENV"
+          echo "Pre-commit hooks have been updated"
+        else
+          echo "HOOKS_UPDATED=false" >> "$GITHUB_ENV"
+          echo "No pre-commit hook updates available"
+        fi
+
+    - name: Validate hook updates
+      if: env.HOOKS_UPDATED == 'true'
+      env:
+        # Skip Rust hooks — no toolchain in CI (enforced by dedicated CI jobs)
+        SKIP: cargo-clippy,cargo-fmt
+      run: |
+        echo "Running pre-commit hooks to validate updates..."
+
+        # First run - often fails but makes auto-fixes
+        if make run-hooks-all-files; then
+          echo "HOOKS_VALID=true" >> "$GITHUB_ENV"
+          echo "All pre-commit hooks passed validation on first run"
+        else
+          echo "Pre-commit hooks failed on first run (expected - likely auto-fixing)"
+
+          # Stage the pre-commit config
+          git add .pre-commit-config.yaml
+
+          # Second run - should pass after auto-fixes
+          if make run-hooks-all-files; then
+            echo "HOOKS_VALID=true" >> "$GITHUB_ENV"
+            echo "All pre-commit hooks passed validation on second run"
+          else
+            echo "HOOKS_VALID=false" >> "$GITHUB_ENV"
+            echo "Pre-commit hooks failed validation - manual intervention required"
+          fi
+        fi
+
+    - name: Create Pull Request
+      if: env.HOOKS_UPDATED == 'true' && env.HOOKS_VALID == 'true'
+      run: |
+        # Configure git
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Create a new branch
+        BRANCH_NAME="chore/update-precommit-hooks-$(date +%Y%m%d)"
+        git checkout -b "$BRANCH_NAME"
+
+        # Stage the pre-commit config file
+        git add .pre-commit-config.yaml
+
+        # Commit the changes
+        git commit -m "$(cat <<'EOF'
+        chore: update pre-commit hooks to latest versions
+
+        🤖 Generated with GitHub Actions
+        EOF
+        )"
+
+        # Push the branch
+        git push origin "$BRANCH_NAME"
+
+        # Create PR using gh CLI
+        gh pr create \
+          --title "chore: update pre-commit hooks to latest versions" \
+          --body "$(cat <<'EOF'
+        ## Summary
+        Weekly automated update of pre-commit hooks to their latest versions.
+
+        ## Changes
+        - Updated pre-commit hook versions in `.pre-commit-config.yaml`
+
+        ## Test plan
+        - [ ] Verify hooks pass locally: `make run-hooks-all-files`
+        EOF
+        )"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Summary
+      if: always()
+      run: |
+        {
+          echo "## Pre-commit Hook Update Summary"
+          echo "- **Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "- **Hooks Updated**: ${{ env.HOOKS_UPDATED }}"
+
+          if [ "${{ env.HOOKS_UPDATED }}" = "true" ]; then
+            echo "- **Hooks Valid**: ${{ env.HOOKS_VALID }}"
+            if [ "${{ env.HOOKS_VALID }}" = "true" ]; then
+              echo "- **Status**: PR created with hook updates"
+            else
+              echo "- **Status**: Hook updates failed validation"
+            fi
+          else
+            echo "- **Status**: All hooks already up to date"
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Clean up
+      if: always()
+      run: rm -f .pre-commit-config.yaml.bak
