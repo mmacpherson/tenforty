@@ -545,6 +545,21 @@ def patch_restrict_keyword(lines: list[str]) -> list[str]:
     return [line.replace("*restrict ", "*__restrict__ ") for line in lines]
 
 
+def patch_mystrndup_cpp_compat(lines: list[str]) -> list[str]:
+    """Cast ``memset(malloc(...), ...)`` to ``char*`` in ``mystrndup``.
+
+    The v23.06 taxsolve_routines adds ``mystrndup`` which assigns the
+    ``void*`` return of ``memset(malloc(...), ...)`` directly to a
+    ``char*``.  This is valid C but not C++.  Add an explicit cast.
+    """
+    return [
+        line.replace("= memset( malloc(", "= (char*)memset( malloc(")
+        if "= memset( malloc(" in line
+        else line
+        for line in lines
+    ]
+
+
 def patch_f6781_cpp_compat(lines: list[str]) -> list[str]:
     """Fix C-isms in the user-contributed Form 6781 that break under C++.
 
@@ -636,6 +651,7 @@ def postprocess_source_groups(
             case (_, "taxsolve_routines"):
                 group["source"] = patch_add_pdf_markup(group["source"])
                 group["source"] = patch_import_status_init(group["source"])
+                group["source"] = patch_mystrndup_cpp_compat(group["source"])
                 group["source"] = patch_restrict_keyword(group["source"])
             case _:
                 group["source"] = patch_exit_to_return(group["source"])

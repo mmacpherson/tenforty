@@ -1,3 +1,13 @@
+## [2025.9] - 2026-03-23
+### Changed
+- Updated OTS 2025 tax year release from 23.05 to 23.06
+  - Schedule A charity deduction AGI limits: cash/check (A11) capped at 60% of
+    AGI, non-cash (A12) capped at 30% of AGI
+  - VA_760: fixed line 34 sum to include line 33
+  - OR_40: fixed federal tax liability worksheet variable reference
+  - f8995 QBI: L13b now shown in import information display
+- Added `patch_mystrndup_cpp_compat` to amalgamate.py for v23.06 C++ compat
+
 ## [2025.8] - 2026-03-02
 ### Changed
 - Updated OTS 2025 tax year release from 23.04 to 23.05
