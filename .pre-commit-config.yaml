@@ -1,20 +1,3 @@
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit.com hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
-  # typos publishes a moving `v1` tag that autoupdate resolves as "latest",
-  # reverting our semver pin every week. Freeze it here; bump manually.
-  autoupdate_exclude:
-  - https://github.com/crate-ci/typos
-  # Hooks that require local toolchains (Rust/Haskell/etc) should generally be
-  # skipped on pre-commit.ci, and enforced via dedicated CI jobs instead.
-  skip: [cargo-clippy, cargo-fmt]
-  submodules: false
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0
