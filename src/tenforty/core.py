@@ -138,69 +138,6 @@ def generate_ots_return(form_values: dict[str, Any], form_config: OTSForm) -> st
     return "\n".join(form_lines)
 
 
-def parse_ots_return_legacy(
-    text: str,
-    year: int | None = None,
-    form_id: str | None = None,
-) -> dict[str, Any]:
-    """Parse an OTS return text into a dict of values.
-
-    Args:
-    ----
-        text: The OTS return text.
-        year: Optional tax year for context in error messages.
-        form_id: Optional form ID for context in error messages.
-
-    Returns:
-    -------
-        The parsed tax return values.
-
-    Raises:
-    ------
-        OTSParseError: If the output is empty or cannot be parsed.
-
-    """
-    if not text or not text.strip():
-        context = f" for {year}/{form_id}" if year and form_id else ""
-        raise OTSParseError(f"OTS output is empty{context}", raw_output=text)
-
-    def parse_value(val: str) -> int | float | str:
-        """Parse string value into number if you can."""
-        cleaned = val.replace(",", "")
-        try:
-            return int(cleaned)
-        except ValueError:
-            try:
-                return float(cleaned)
-            except ValueError:
-                logger.debug(
-                    f"Couldn't parse value as number, leaving as string: [{val}]"
-                )
-                return val
-
-    fields = {}
-    for line in text.split("\n"):
-        if amt_match := re.search(
-            r"Your Alternative Minimum Tax =\s*(\d+(\.\d+)?)", line
-        ):
-            fields["amt"] = parse_value(amt_match.group(1))
-        elif assignment_match := re.search(r"\s*(\S+)\s*=\s*(\S+)", line):
-            identifier, rhs = assignment_match.groups()
-            fields[identifier] = parse_value(rhs)
-        elif bracket_match := re.search(
-            r"You are in the (\d+(\.\d+)?)% marginal tax bracket", line
-        ):
-            fields["tax_bracket"] = parse_value(bracket_match.group(1))
-        elif effective_match := re.search(
-            r"you are paying an effective (\d+(\.\d+)?)% tax", line
-        ):
-            fields["effective_tax_rate"] = parse_value(effective_match.group(1))
-        else:
-            logger.debug(f"Uninterpreted line: [{line}]")
-
-    return fields
-
-
 def parse_ots_return(
     text: str,
     year: int | None = None,
@@ -386,10 +323,6 @@ def evaluate_form(
     )
     logger.debug(f"Raw Federal OTS Output:\n{ots_output}")
     federal_return = parse_ots_return(ots_output, year=year, form_id=federal_form_id)
-    federal_return_legacy = parse_ots_return_legacy(
-        ots_output, year=year, form_id=federal_form_id
-    )
-    assert federal_return == federal_return_legacy
     logger.debug(f"Completed Federal Form Values: {federal_return}")
 
     # Process state return.
@@ -420,10 +353,6 @@ def evaluate_form(
     )
     logger.debug(f"Raw State OTS Output:\n{state_output}")
     state_return = parse_ots_return(state_output, year=year, form_id=state_form_id)
-    state_return_legacy = parse_ots_return_legacy(
-        state_output, year=year, form_id=state_form_id
-    )
-    assert state_return == state_return_legacy
     logger.debug(f"Completed State Form Values:\n{state_return}")
 
     return {"federal": federal_return, "state": state_return}
@@ -452,10 +381,7 @@ def _evaluate_subordinate(
     dispatch_id = _FORM_DISPATCH_ALIASES.get(form_id, form_id)
     ots_output = otslib._evaluate_form(year, dispatch_id, form_text, on_error=on_error)
     logger.debug(f"Raw {form_id} OTS Output:\n{ots_output}")
-    res = parse_ots_return(ots_output, year=year, form_id=form_id)
-    res_legacy = parse_ots_return_legacy(ots_output, year=year, form_id=form_id)
-    assert res == res_legacy
-    return res
+    return parse_ots_return(ots_output, year=year, form_id=form_id)
 
 
 ## LEVEL 1: Map from natural description, eg "w2_income", to OTS line-level
