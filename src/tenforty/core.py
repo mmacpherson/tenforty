@@ -200,8 +200,8 @@ def parse_ots_return(
             before_stripped = before.strip()
             after_stripped = after.strip()
             if before_stripped and after_stripped:
-                identifier = before_stripped.rsplit(None, 1)[-1]
-                rhs = after_stripped.split(None, 1)[0]
+                identifier = before_stripped.split()[-1]
+                rhs = after_stripped.split()[0]
                 fields[identifier] = parse_value(rhs)
             else:
                 logger.debug(f"Uninterpreted line: [{line}]")
