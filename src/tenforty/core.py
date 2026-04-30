@@ -73,10 +73,10 @@ def get_logger(name: str = "tenforty") -> logging.Logger:
 
 logger = get_logger(__name__)
 
+_AMT_PREFIX = "Your Alternative Minimum Tax"
 _AMT_RE = re.compile(r"Your Alternative Minimum Tax =\s*(\d+(\.\d+)?)")
 _BRACKET_RE = re.compile(r"You are in the (\d+(\.\d+)?)% marginal tax bracket")
 _EFFECTIVE_RE = re.compile(r"you are paying an effective (\d+(\.\d+)?)% tax")
-_AMT_PREFIX = "Your Alternative Minimum Tax"
 
 
 ## LEVEL 0: Generate and parse OTS textfile format.
