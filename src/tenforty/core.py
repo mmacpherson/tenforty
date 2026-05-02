@@ -73,6 +73,11 @@ def get_logger(name: str = "tenforty") -> logging.Logger:
 
 logger = get_logger(__name__)
 
+_AMT_PREFIX = "Your Alternative Minimum Tax"
+_AMT_RE = re.compile(r"Your Alternative Minimum Tax =\s*(\d+(\.\d+)?)")
+_BRACKET_RE = re.compile(r"You are in the (\d+(\.\d+)?)% marginal tax bracket")
+_EFFECTIVE_RE = re.compile(r"you are paying an effective (\d+(\.\d+)?)% tax")
+
 
 ## LEVEL 0: Generate and parse OTS textfile format.
 def prefix_keys(m: dict[str, Any], prefix: str) -> dict[str, Any]:
@@ -162,6 +167,14 @@ def parse_ots_return(
     def parse_value(val: str) -> int | float | str:
         """Parse string value into number if you can."""
         cleaned = val.replace(",", "")
+        if "." in cleaned:
+            try:
+                return float(cleaned)
+            except ValueError:
+                logger.debug(
+                    f"Couldn't parse value as number, leaving as string: [{val}]"
+                )
+                return val
         try:
             return int(cleaned)
         except ValueError:
@@ -175,20 +188,26 @@ def parse_ots_return(
 
     fields = {}
     for line in text.split("\n"):
-        if amt_match := re.search(
-            r"Your Alternative Minimum Tax =\s*(\d+(\.\d+)?)", line
-        ):
-            fields["amt"] = parse_value(amt_match.group(1))
-        elif assignment_match := re.search(r"\s*(\S+)\s*=\s*(\S+)", line):
-            identifier, rhs = assignment_match.groups()
-            fields[identifier] = parse_value(rhs)
-        elif bracket_match := re.search(
-            r"You are in the (\d+(\.\d+)?)% marginal tax bracket", line
-        ):
+        if not line or line.isspace():
+            continue
+        if "=" in line:
+            if _AMT_PREFIX in line:
+                amt_match = _AMT_RE.search(line)
+                if amt_match:
+                    fields["amt"] = parse_value(amt_match.group(1))
+                    continue
+            before, _, after = line.partition("=")
+            before_stripped = before.strip()
+            after_stripped = after.strip()
+            if before_stripped and after_stripped:
+                identifier = before_stripped.split()[-1]
+                rhs = after_stripped.split()[0]
+                fields[identifier] = parse_value(rhs)
+            else:
+                logger.debug(f"Uninterpreted line: [{line}]")
+        elif bracket_match := _BRACKET_RE.search(line):
             fields["tax_bracket"] = parse_value(bracket_match.group(1))
-        elif effective_match := re.search(
-            r"you are paying an effective (\d+(\.\d+)?)% tax", line
-        ):
+        elif effective_match := _EFFECTIVE_RE.search(line):
             fields["effective_tax_rate"] = parse_value(effective_match.group(1))
         else:
             logger.debug(f"Uninterpreted line: [{line}]")
