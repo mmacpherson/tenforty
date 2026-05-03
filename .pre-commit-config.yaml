@@ -33,8 +33,6 @@ repos:
   rev: v1.46.0
   hooks:
   - id: typos
-    # Only *check* spelling in prose; avoid rewriting identifiers in code.
-    args: [--force-exclude]
     files: \.(md|txt)$
     exclude: ^(tests/fixtures/|CHANGELOG\.md$)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
