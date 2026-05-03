@@ -34,9 +34,14 @@ jobs:
         # Store original config for comparison
         cp .pre-commit-config.yaml .pre-commit-config.yaml.bak
 
-        # Update hooks (skip typos — uses moving v1 tag that reverts semver pin)
+        # Save typos rev before update (pinned — moving v1 tag reverts semver pin)
+        TYPOS_REV=$(awk '/crate-ci\/typos/{getline; print $2}' .pre-commit-config.yaml)
+
         uv sync
-        uv run pre-commit autoupdate --skip https://github.com/crate-ci/typos
+        uv run pre-commit autoupdate
+
+        # Restore pinned typos rev
+        sed -i "/crate-ci\/typos/{n;s/rev: .*/rev: $TYPOS_REV/}" .pre-commit-config.yaml
 
         # Check if there are any changes
         if ! diff -q .pre-commit-config.yaml .pre-commit-config.yaml.bak > /dev/null; then
