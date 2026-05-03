@@ -1,3 +1,12 @@
+## [2025.10] - 2026-05-03
+### Changed
+- Accelerated `parse_ots_return` for faster bulk estimate calculation
+  (thanks @zacswider, #257)
+
+### Fixed
+- Pre-commit update workflow: replaced removed `--skip` flag, bumped typos
+  to v1.46.0, dropped redundant `--force-exclude` arg (#258, #259, #260, #261)
+
 ## [2025.9] - 2026-03-23
 ### Changed
 - Updated OTS 2025 tax year release from 23.05 to 23.06
