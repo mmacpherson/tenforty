@@ -69916,7 +69916,7 @@ double getAZStdDedAmt()
 			{ 27700.0 },  /* Married, filing jointly. */
 			{ 13850.0 },  /* Married, filing separate. */
 			{ 20800.0 },  /* Head of Household. */
-			{ 27700.0 }   /* Widow(er) - same as MFJ. */
+			{ 20800.0 }   /* Widow(er) - AZ maps QW to HoH. */
 			     };
 	return azStdDedAmt[status][0];
 }
@@ -77099,7 +77099,7 @@ double getAZStdDedAmt()
 			{ 29200.0 },  /* Married, filing jointly. */
 			{ 14600.0 },  /* Married, filing separate. */
 			{ 21900.0 },  /* Head of Household. */
-			{ 29200.0 }   /* Widow(er) - same as MFJ. */
+			{ 21900.0 }   /* Widow(er) - AZ maps QW to HoH. */
 			     };
 	return azStdDedAmt[status][0];
 }
@@ -101993,7 +101993,7 @@ double getAZStdDedAmt()
 			{ 31500.0 },  /* Married, filing jointly. */
 			{ 15750.0 },  /* Married, filing separate. */
 			{ 23625.0 },  /* Head of Household. */
-			{ 31500.0 }   /* Widow(er) - same as MFJ. */
+			{ 23625.0 }   /* Widow(er) - AZ maps QW to HoH. */
 			     };
 	return azStdDedAmt[status][0];
 }

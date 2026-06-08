@@ -332,21 +332,26 @@ def test_evaluate_return_properties(
 
 
 def test_az_widow_standard_deduction():
-    """Regression: AZ Widow(er) used out-of-bounds array for standard deduction."""
+    """Regression: AZ Widow(er) used out-of-bounds array for standard deduction.
+
+    AZ Form 140 has no Widow(er) box; qualifying widow(er) files as
+    Head of Household and gets the HoH standard deduction.
+    """
     result = tenforty.evaluate_return(
         year=2024,
         state="AZ",
         filing_status="Widow(er)",
         w2_income=50000.0,
     )
-    mfj_result = tenforty.evaluate_return(
+    hoh_result = tenforty.evaluate_return(
         year=2024,
         state="AZ",
-        filing_status="Married/Joint",
+        filing_status="Head_of_House",
         w2_income=50000.0,
+        num_dependents=1,
     )
-    assert result.state_taxable_income == mfj_result.state_taxable_income
-    assert result.state_total_tax == mfj_result.state_total_tax
+    assert result.state_taxable_income == hoh_result.state_taxable_income
+    assert result.state_total_tax == hoh_result.state_total_tax
     assert result.state_taxable_income > 0
 
 
