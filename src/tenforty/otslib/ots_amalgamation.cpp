@@ -69910,12 +69910,13 @@ float thisversion = 2.01;
 
 double getAZStdDedAmt()
 {
-	double azStdDedAmt[5][1]={				/* Updated for 2023. */
+	double azStdDedAmt[6][1]={				/* Updated for 2023. */
 			{0.0},
 			{ 13850.0 },  /* Single */
 			{ 27700.0 },  /* Married, filing jointly. */
 			{ 13850.0 },  /* Married, filing separate. */
-			{ 20800.0 }   /* Head of Household. */
+			{ 20800.0 },  /* Head of Household. */
+			{ 20800.0 }   /* Widow(er) - AZ maps QW to HoH. */
 			     };
 	return azStdDedAmt[status][0];
 }
@@ -77092,12 +77093,13 @@ float thisversion = 3.01;
 
 double getAZStdDedAmt()
 {
-	double azStdDedAmt[5][1]={				/* Updated for 2024. */
+	double azStdDedAmt[6][1]={				/* Updated for 2024. */
 			{0.0},
 			{ 14600.0 },  /* Single */
 			{ 29200.0 },  /* Married, filing jointly. */
 			{ 14600.0 },  /* Married, filing separate. */
-			{ 21900.0 }   /* Head of Household. */
+			{ 21900.0 },  /* Head of Household. */
+			{ 21900.0 }   /* Widow(er) - AZ maps QW to HoH. */
 			     };
 	return azStdDedAmt[status][0];
 }
@@ -101985,12 +101987,13 @@ float thisversion = 4.00;
 
 double getAZStdDedAmt()
 {
-	double azStdDedAmt[5][1]={				/* Updated for 2025. */
+	double azStdDedAmt[6][1]={				/* Updated for 2025. */
 			{0.0},
 			{ 15750.0 },  /* Single */
 			{ 31500.0 },  /* Married, filing jointly. */
 			{ 15750.0 },  /* Married, filing separate. */
-			{ 23625.0 }   /* Head of Household. */
+			{ 23625.0 },  /* Head of Household. */
+			{ 23625.0 }   /* Widow(er) - AZ maps QW to HoH. */
 			     };
 	return azStdDedAmt[status][0];
 }
