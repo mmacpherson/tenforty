@@ -10,7 +10,7 @@ from collections.abc import Callable
 from enum import Enum
 from functools import partial
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, computed_field, model_validator
 
 from . import _ots_form_models
 
@@ -298,6 +298,31 @@ class TaxReturnInput(BaseModel):
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = 0.0
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_se_ss_wages(self) -> float:
+        """The filer's own W-2 social security wages, for Schedule SE line 8a.
+
+        Line 8a feeds line 9 — what is LEFT of the social security wage base ($168,600
+        in 2024) once the filer's own wages are counted — and line 9 caps the 12.4% OASDI
+        charge on line 10. Leaving 8a empty charges that 12.4% on self-employment earnings
+        the filer's wages have already carried past the base.
+
+        `w2_income` is a HOUSEHOLD aggregate, but Schedule SE is a per-person form. For
+        Married/Joint we cannot tell whose wages are whose, so this stays zero and the full
+        OASDI charge stands — the conservative reading, and the behaviour that
+        `test_se_tax_mfj_w2_above_ss_base` locks in. Every other filing status has exactly
+        one person, so the aggregate simply IS that person's wages.
+
+        Zero when there is no self-employment income, so that this never causes Schedule SE
+        to be resolved or evaluated for a return that would not otherwise have filed one.
+        """
+        if not self.self_employment_income:
+            return 0.0
+        if self.filing_status == OTSFilingStatus.MARRIED_JOINT:
+            return 0.0
+        return float(self.w2_income)
 
     @model_validator(mode="after")
     def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
@@ -1150,7 +1175,12 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2024,
         "form_id": "US_1040_Sched_SE",
         "phase": 1,
-        "input_map": {"self_employment_income": "L2"},
+        "input_map": {
+            "self_employment_income": "L2",
+            # Line 8a: the filer's own social security wages, which fill the wage base
+            # before self-employment earnings do. See TaxReturnInput.schedule_se_ss_wages.
+            "schedule_se_ss_wages": "L8a",
+        },
         "export_map": {"L12": "S2_4", "L13": "S1_15"},
         "output_map": {"L12": "se_tax"},
     },
@@ -1194,7 +1224,12 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2025,
         "form_id": "US_1040_Sched_SE",
         "phase": 1,
-        "input_map": {"self_employment_income": "L2"},
+        "input_map": {
+            "self_employment_income": "L2",
+            # Line 8a: the filer's own social security wages, which fill the wage base
+            # before self-employment earnings do. See TaxReturnInput.schedule_se_ss_wages.
+            "schedule_se_ss_wages": "L8a",
+        },
         "export_map": {"L12": "S2_4", "L13": "S1_15"},
         "output_map": {"L12": "se_tax"},
     },

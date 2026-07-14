@@ -29,6 +29,13 @@ _SUBORDINATE_NODES: dict[str, list[str]] = {
     "w2_income": [
         "us_form_8959_L1_medicare_wages",
     ],
+    # The filer's OWN social security wages, which fill the wage base before
+    # self-employment earnings do. Derived from w2_income and the filing status rather
+    # than taken raw, because Schedule SE is a per-person form while w2_income is a
+    # household aggregate. See TaxReturnInput.schedule_se_ss_wages.
+    "schedule_se_ss_wages": [
+        "us_schedule_se_L5_w2_ss_wages",
+    ],
     "self_employment_income": [
         "us_schedule_se_L2_business_profit",
         "us_form_8995_L1_qbi_business_1",
