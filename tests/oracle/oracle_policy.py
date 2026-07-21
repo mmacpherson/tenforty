@@ -93,6 +93,35 @@ def _f7_itemized_semantics(backend: str, case: dict) -> set[str]:
     return set()
 
 
+def _f12_itemized_category_amt(backend: str, case: dict) -> set[str]:
+    """F12: per-engine Schedule A category for the itemized aggregate.
+
+    OTS carries it as A6 "other taxes" (AMT add-back); graph as L16 "other
+    deductions"; the oracle adapter as charity. AMT legitimately diverges
+    whenever the amount is nonzero. API decision needed (categorized
+    deductions, input model v2).
+    """
+    if backend == "ots" and case.get("itemized", 0):
+        return {"amt", "income_tax", "total_tax"}
+    return set()
+
+
+def _f13_graph_2025_mfs_ltcg(backend: str, case: dict) -> set[str]:
+    """F13: graph 2025 Married/Sep long-term-gain thresholds diverge.
+
+    Roughly $1.4-1.7k above the OTS+taxcalc consensus. Suspect: 2025 MFS
+    preferential breakpoints in the spec. 2-vs-1 against graph.
+    """
+    if (
+        backend == "graph"
+        and case.get("year") == 2025
+        and case.get("status") == "Married/Sep"
+        and case.get("ltcg", 0)
+    ):
+        return {"income_tax", "total_tax"}
+    return set()
+
+
 SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f3_qbi,
     _f4_niit_stcg,
@@ -101,6 +130,8 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f7_itemized_semantics,
     _f10_graph_stcg_preferential,
     _f11_ots_hoh_bracket,
+    _f12_itemized_category_amt,
+    _f13_graph_2025_mfs_ltcg,
 ]
 
 

@@ -158,6 +158,49 @@ def test_ots_hoh_high_income_matches_consensus():
 
 
 @pytest.mark.xfail(
+    reason="F12: itemized_deductions category differs per engine, AMT diverges",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_itemized_category_amt_agrees_across_backends():
+    """Both backends must agree on AMT for an itemizing return.
+
+    They agree on taxable income but disagree on AMT because the aggregate
+    deduction lands in different Schedule A categories (F12). Flips when the
+    input model can express deduction categories.
+    """
+    kwargs = dict(
+        year=2024,
+        filing_status="Married/Sep",
+        w2_income=146_655,
+        short_term_capital_gains=41_443,
+        long_term_capital_gains=208_291,
+        taxable_interest=3_066,
+        itemized_deductions=33_410,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F13: graph 2025 MFS long-term-gain thresholds diverge from consensus",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_graph_2025_mfs_ltcg_matches_consensus():
+    """MFS 2025, $150k wages + $200k LTCG: income tax $56,779.50 per OTS+taxcalc."""
+    r = evaluate_return(
+        year=2025,
+        filing_status="Married/Sep",
+        w2_income=150_000,
+        long_term_capital_gains=200_000,
+        backend="graph",
+    )
+    assert r.federal_income_tax == pytest.approx(56_779.50, abs=2.0)
+
+
+@pytest.mark.xfail(
     reason="F7: backends disagree on 'Itemized' semantics",
     strict=True,
 )

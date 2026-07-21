@@ -135,6 +135,27 @@ for the three-way adjudication method: the oracle and the independent
 in-house engine outvoted the incumbent, and the revenue procedure confirmed
 the majority.
 
+### F12. NEW — itemized_deductions category ambiguity changes AMT
+
+Found by the adversarial hypothesis search (MFS, $250k of gains, $33,410
+itemized). All three engines take the same deduction and agree on taxable
+income — but OTS reports $1,634.46 of AMT where graph and taxcalc report
+none. Cause: the aggregate rides in a different Schedule A category per
+engine — OTS maps it to A6 ("other taxes", added back on Form 6251), graph
+to L16 ("other deductions", not added back), the oracle adapter to charity
+(not added back). None is wrong; the input model cannot say which kind of
+deduction it is. This is the categorized-deductions API gap made concrete,
+resolved by input model v2; until then the divergence is a documented
+assumption, excused by signature.
+
+### F13. NEW — graph 2025 Married/Sep long-term-gain thresholds diverge
+
+Six grid cases, 2025 + MFS + LTCG only: graph income tax is $1,377–$1,665
+above the OTS+taxcalc consensus. The pattern fits a preferential-rate
+breakpoint error for MFS in the 2025 spec parameters (MFS thresholds are
+not always half of Single). 2-vs-1 against the graph; fix and adjudicate in
+the spec bundle.
+
 ### F7. Itemization semantics diverge between backends
 
 With `standard_or_itemized="Itemized"` and deductions below the standard

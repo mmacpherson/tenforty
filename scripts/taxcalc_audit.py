@@ -97,7 +97,7 @@ def build_cases() -> list[dict]:
                         continue
                     add(year, "A_se", status=st, w2=w2, se=se)
 
-        for st in ("Single", "Married/Joint", "Head_of_House"):
+        for st in STATUSES:
             for w2 in (50_000, 150_000, 250_000, 400_000):
                 for stcg in (0, 25_000, 60_000):
                     for ltcg in (0, 25_000, 60_000, 200_000):
