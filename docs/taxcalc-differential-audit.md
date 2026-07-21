@@ -8,6 +8,29 @@ findings are burned into the suite as strict xfails in
 Oracle: [Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator) (`taxcalc` 6.7.2, CC0),
 federal only, tax year 2024.
 
+## Findings ledger
+
+Every disagreement class gets an ID here, a narrative section below, a
+strict-xfail burn-in in `tests/known_defects_test.py`, and an excusing
+signature in `tests/oracle/oracle_policy.py`. Fixes must flip the burn-in,
+delete the signature, and update this table in the same PR.
+
+| ID | Finding | At fault | Status | Found by |
+|----|---------|----------|--------|----------|
+| F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
+| F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
+| F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | open | @bg002h, #278 |
+| F4 | Form 8960 L5a omits short-term gains | mapping, both backends | open | mapping assessment + oracle sweep |
+| F5 | Graph Form 8959 omits SE earnings | graph mapping | open | mapping assessment + oracle sweep |
+| F6 | OTS 8959 never fires with zero wages | OTS activation semantics | open | oracle sweep |
+| F7 | "Itemized" force vs best-of divergence | API contract | open (owner decision) | oracle sweep |
+| F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
+| F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
+| F10 | Short-term gains taxed at preferential rates | graph spec | open | oracle grid |
+| F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending | oracle grid |
+| F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
+| F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | oracle grid |
+
 ## Method
 
 363 boundary-focused federal cases (SS wage base, NIIT/additional-Medicare
