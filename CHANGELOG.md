@@ -1,3 +1,17 @@
+## [2025.11] - 2026-07-21
+### Fixed
+- Schedule SE line 8a now receives the filer's own W-2 social security wages
+  for single-person filing statuses (Single, Head of Household,
+  Married/Separate, Widow(er)), so the 12.4% OASDI portion of self-employment
+  tax correctly respects the wage base already consumed by W-2 wages.
+  Previously SE tax was invariant to W-2 income: a Single filer with $168,600
+  of wages and $60,000 of Schedule C profit was overcharged $6,870.84.
+  Corrected figures verified independently against OpenTaxSolver driven
+  directly and against PSL Tax-Calculator. Married/Joint behavior is
+  intentionally unchanged pending per-spouse wage attribution, since
+  `w2_income` is a household aggregate and Schedule SE is a per-person form.
+  (thanks @bg002h, #278, #279)
+
 ## [2025.10] - 2026-05-03
 ### Changed
 - Accelerated `parse_ots_return` for faster bulk estimate calculation
