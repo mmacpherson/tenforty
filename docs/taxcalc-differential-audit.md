@@ -30,7 +30,8 @@ delete the signature, and update this table in the same PR.
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | differential grid |
-| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (suspect) | open, adjudication pending | H_amt stratum |
+| F14 | AMT std-deduction add-back divergence (ISO cases) | **taxcalc + graph (confirmed)** | adjudicated: OTS correct; fix graph, report taxcalc | H_amt stratum |
+| F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
 
 ## Method
@@ -194,6 +195,63 @@ defect found by the suite — shared by our own graph spec — and the excusing
 signature flips from OTS to graph, with an upstream report to PSL. The
 suspects agreeing to the penny is itself evidence of a shared modeling
 choice rather than independent correctness.
+
+**ADJUDICATED — OTS is right; taxcalc and the graph spec are both wrong.**
+This is the first confirmed defect in an oracle, found by the suite.
+
+Four independent lines of evidence, all agreeing:
+
+1. **Form 6251 walkthrough.** AGI $150,000; standard deduction $14,600;
+   regular taxable income $135,400. Line 2a adds the standard deduction back,
+   so AMTI = $135,400 + $14,600 + $200,000 = **$350,000** — equivalently
+   AGI + preference, which is the point of the add-back. Exemption $85,700
+   (no phase-out below $609,350), base $264,300, TMT = 26% x $232,600 +
+   28% x $31,700 = $69,352. Regular tax $25,538.50. AMT = **$43,813.50** —
+   exactly OTS.
+2. **IRS instructions for line 2a**, verbatim: *"If you aren't filing
+   Schedule A (Form 1040), then enter the standard deduction amount that you
+   reported on Form 1040 or 1040-SR, line 12e."* It is an addition in Part I.
+   (Line references shift by form year; the rule is long-standing.)
+3. **taxcalc source.** `calcfunctions.py` computes, for non-itemizers,
+   `c62100 = c00100 - e00700 - qbided - standard` — AGI less the standard
+   deduction, with no add-back. Reproduced directly: feeding `cmbtp=200000`
+   with the standard deduction yields AMTI $335,400 where $350,000 is
+   correct, short by exactly the $14,600 standard deduction, and AMT
+   $39,725.50.
+4. **Internal inconsistency in taxcalc itself.** Its *itemizer* branch
+   subtracts deductions and then adds back the AMT-disallowed ones (SALT,
+   misc, excess medical) — correct. Its non-itemizer branch subtracts the
+   standard deduction and adds back nothing, treating a 100%-disallowed
+   deduction as though it were allowed. Holding AGI and the preference fixed
+   and varying only the deduction makes the asymmetry plain: $30,000 of pure
+   charity (allowed for AMT) gives the correct AMTI $320,000, while the
+   $14,600 standard deduction gives $335,400 instead of $350,000.
+
+The correct fix upstream is to drop the `- standard` term, since the
+standard deduction is entirely disallowed for AMT:
+`c62100 = c00100 - e00700 - qbided`.
+
+Consequences: the excusing signature flips from `ots` to `graph`; the graph
+spec needs the add-back; goldens regenerate; and an upstream report goes to
+PSLmodels/Tax-Calculator (drafted in `docs/upstream-taxcalc-reports.md`).
+The two suspects agreeing to the penny was the tell, and it held up.
+
+### F16. NEW — the suite's taxcalc adapter drops `iso`, so taxcalc sees no AMT preference
+
+Found while adjudicating F14. `scripts/taxcalc_audit.py` — the probe that
+found F14 — correctly carries the ISO spread to taxcalc as `cmbtp`. The
+adapter that shipped into the suite, `taxcalc_batch` in
+`tests/oracle/taxcalc_differential_test.py`, does not: it builds its record
+without `cmbtp`, so taxcalc is handed no AMT preference at all. Through the
+suite, the F14 case returns taxcalc AMT `$0.00` rather than `$39,725.50`,
+and feeding `iso=200_000` or `iso=0` produces identical output.
+
+Currently **latent**: `_case_strategy()` does not generate `iso`, so no
+running test compares an AMT-preference case. That is exactly why it is
+dangerous — the moment AMT coverage is added (which `tenforty-y90` plans),
+every such case would compare tenforty *with* the preference against taxcalc
+*without* it, manufacturing large bogus divergences on both backends and
+burying any real one. Fix the adapter before adding the coverage.
 
 ### F7. Itemization semantics diverge between backends
 
