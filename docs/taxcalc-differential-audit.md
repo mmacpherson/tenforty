@@ -30,6 +30,7 @@ delete the signature, and update this table in the same PR.
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending | oracle grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | oracle grid |
+| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (suspect) | open, adjudication pending | H_amt stratum |
 
 ## Method
 
@@ -178,6 +179,20 @@ above the OTS+taxcalc consensus. The pattern fits a preferential-rate
 breakpoint error for MFS in the 2025 spec parameters (MFS thresholds are
 not always half of Single). 2-vs-1 against the graph; fix and adjudicate in
 the spec bundle.
+
+### F14. NEW — AMT standard-deduction add-back divergence
+
+Found by the first AMT-positive stratum (H_amt: ISO exercise spread carried
+to taxcalc as `cmbtp`). Single, $150k wages + $200k ISO: OTS computes AMT
+$43,813.50; taxcalc and the graph spec both compute $39,725.50 — agreeing
+to the penny — and the $4,088 gap is exactly 28% x $14,600, the standard
+deduction. Form 6251 line 2a instructs non-itemizers to add the standard
+deduction back into AMTI, which is what OTS does. If the form walkthrough
+and a TAXSIM cross-check confirm that reading, this is the first *oracle*
+defect found by the suite — shared by our own graph spec — and the excusing
+signature flips from OTS to graph, with an upstream report to PSL. The
+suspects agreeing to the penny is itself evidence of a shared modeling
+choice rather than independent correctness.
 
 ### F7. Itemization semantics diverge between backends
 

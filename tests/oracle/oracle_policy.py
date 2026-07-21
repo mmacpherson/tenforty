@@ -122,6 +122,23 @@ def _f13_graph_2025_mfs_ltcg(backend: str, case: dict) -> set[str]:
     return set()
 
 
+def _f14_amt_std_deduction_addback(backend: str, case: dict) -> set[str]:
+    """F14: AMT standard-deduction add-back divergence on AMT-preference cases.
+
+    OTS adds the standard deduction back into AMTI (Form 6251 line 2a for
+    non-itemizers); taxcalc and the graph spec do not, and agree to the
+    penny. Adjudication pending — if the form walkthrough holds, this is a
+    taxcalc AND graph defect and the excusal flips to the graph backend.
+    """
+    if (
+        backend == "ots"
+        and case.get("iso", 0)
+        and case.get("std_or_item") == "Standard"
+    ):
+        return {"amt", "income_tax", "total_tax"}
+    return set()
+
+
 SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f3_qbi,
     _f4_niit_stcg,
@@ -132,6 +149,7 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
     _f13_graph_2025_mfs_ltcg,
+    _f14_amt_std_deduction_addback,
 ]
 
 
@@ -198,6 +216,7 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
         ordinary_dividends=case["ord_div"],
         qualified_dividends=case["qual_div"],
         itemized_deductions=case["itemized"],
+        incentive_stock_option_gains=case.get("iso", 0.0),
         standard_or_itemized=case["std_or_item"],
     )
     return {

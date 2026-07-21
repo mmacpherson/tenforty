@@ -201,6 +201,29 @@ def test_graph_2025_mfs_ltcg_matches_consensus():
 
 
 @pytest.mark.xfail(
+    reason="F14: AMT std-deduction add-back divergence (adjudication pending)",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_amt_std_addback_agrees_across_backends():
+    """Single, $150k wages + $200k ISO spread: backends must agree on AMT.
+
+    OTS adds the standard deduction back into AMTI (Form 6251 line 2a);
+    graph (and taxcalc) do not. Whichever way adjudication lands, the
+    backends must converge (F14).
+    """
+    kwargs = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=150_000,
+        incentive_stock_option_gains=200_000,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=2.0)
+
+
+@pytest.mark.xfail(
     reason="F7: backends disagree on 'Itemized' semantics",
     strict=True,
 )

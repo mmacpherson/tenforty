@@ -83,6 +83,7 @@ def build_cases() -> list[dict]:
                 "ord_div": float(kw.pop("ord_div", 0.0)),
                 "qual_div": float(kw.pop("qual_div", 0.0)),
                 "itemized": float(kw.pop("itemized", 0.0)),
+                "iso": float(kw.pop("iso", 0.0)),
                 "std_or_item": kw.pop("std_or_item", "Standard"),
             }
         )
@@ -136,6 +137,60 @@ def build_cases() -> list[dict]:
                         std_or_item="Itemized",
                     )
 
+        # F_cliff: ordinary-bracket boundaries +-$1 of taxable income,
+        # derived from the oracle's parameter tables rather than hand-typed
+        # (transcribed bracket constants are how F11 happened upstream).
+        import taxcalc as tc
+
+        pol = tc.Policy()
+        pol.set_year(year)
+        mars_idx = {
+            "Single": 0,
+            "Married/Joint": 1,
+            "Married/Sep": 2,
+            "Head_of_House": 3,
+            "Widow(er)": 4,
+        }
+        std = pol.STD[0]
+        brackets = [getattr(pol, f"II_brk{i}")[0] for i in range(1, 7)]
+        for st, mi in mars_idx.items():
+            for brk in brackets:
+                for eps in (-1.0, 1.0):
+                    add(
+                        year,
+                        "F_cliff",
+                        status=st,
+                        w2=float(brk[mi]) + float(std[mi]) + eps,
+                    )
+            for eps in (-1.0, 1.0):
+                add(year, "F_cliff", status=st, w2=100_000.0 + float(std[mi]) + eps)
+
+        # G_high: 37% bracket and AMT exemption phase-out territory
+        for st in STATUSES:
+            for w2 in (750_000, 1_200_000):
+                add(year, "G_high", status=st, w2=w2)
+                add(year, "G_high", status=st, w2=w2, ltcg=200_000)
+
+        # H_amt: ISO exercise spread (AMT preference; taxcalc carrier: cmbtp)
+        for st in ("Single", "Married/Joint", "Married/Sep"):
+            for w2 in (150_000, 300_000):
+                for iso in (50_000, 200_000):
+                    add(year, "H_amt", status=st, w2=w2, iso=iso)
+
+        # I_straddle: per-status additional-Medicare and NIIT thresholds
+        amedt = pol.AMEDT_ec[0]
+        niit_thd = pol.NIIT_thd[0]
+        for st, mi in mars_idx.items():
+            for eps in (-1_000.0, 1_000.0):
+                add(year, "I_straddle", status=st, w2=float(amedt[mi]) + eps, se=30_000)
+                add(
+                    year,
+                    "I_straddle",
+                    status=st,
+                    w2=float(niit_thd[mi]) + eps,
+                    ltcg=30_000,
+                )
+
         for st in STATUSES:
             add(
                 year,
@@ -173,6 +228,7 @@ def run_tenforty(cases, backend):
                 ordinary_dividends=c["ord_div"],
                 qualified_dividends=c["qual_div"],
                 itemized_deductions=c["itemized"],
+                incentive_stock_option_gains=c["iso"],
                 standard_or_itemized=c["std_or_item"],
             )
             rows[c["case_id"]] = {
@@ -222,6 +278,7 @@ def run_taxcalc(cases, wage_attribution="primary"):
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
                     "e19800": c["itemized"],
+                    "cmbtp": c["iso"],
                 }
             )
         df = pd.DataFrame(recs)
