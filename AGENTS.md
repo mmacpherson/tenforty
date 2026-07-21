@@ -22,7 +22,6 @@ Python library for US federal and state tax computation. Two backends:
 
 - **Language**: Python 3.10+ with Cython extensions, Rust (graph runtime), Haskell (tax spec DSL)
 - **Build**: setuptools + Cython (OTS), cargo (Rust), cabal (Haskell)
-- **Dependencies**: pandas, pydantic, pyarrow
 - **Testing**: pytest + hypothesis (Python), proptest (Rust), QuickCheck (Haskell)
 - **Quality**: ruff (linting), pre-commit hooks
 
