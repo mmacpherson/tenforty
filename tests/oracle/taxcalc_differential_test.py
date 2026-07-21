@@ -1,28 +1,29 @@
 """Hypothesis-driven differential testing against PSL Tax-Calculator.
 
 Property: for any generated federal return, every tenforty component quantity
-matches taxcalc within tolerance.
+matches taxcalc within the shared tolerance policy, except disagreements
+attributable by signature to a known, tracked defect (oracle_policy.py) —
+so known bugs are excused by name and any novel disagreement fails the run.
 
-Two structural choices worth knowing about:
+Structural choices:
 
 - **Batched oracle calls.** taxcalc has ~13s of fixed per-invocation overhead
   (policy deepcopy and parameter expansion) but is vectorized over records, so
   each hypothesis example is a *list* of cases evaluated in one taxcalc call.
-  Shrinking naturally collapses a failing list to the single minimal failing
-  case, so counterexample quality is unchanged.
-- **target()-guided search.** Each quantity's absolute disagreement is fed to
-  hypothesis as an optimization target, so generation actively climbs toward
-  the largest divergence instead of sampling blindly.
+  Shrinking collapses a failing list to the single minimal failing case.
+- **target()-guided search.** Each quantity's worst UNEXCUSED disagreement is
+  fed to hypothesis as an optimization target, so generation climbs toward
+  novel divergence instead of re-finding tracked defects.
+- **@example anchors.** The audit's known counterexamples are pinned so every
+  run exercises them deterministically regardless of search luck.
+- **MFJ attribution bounds.** taxcalc requires per-spouse wages; tenforty's
+  w2_income is a household aggregate. MFJ cases run taxcalc under both
+  attributions and assert tenforty falls within the bounds. Bounds can
+  false-pass attribution-sensitive quantities — a known limit of the method,
+  not a guarantee.
 
 Requires the oracle dependency group: uv sync --group oracle
-
-Married/Joint is excluded: taxcalc requires per-spouse wage attribution and
-tenforty's w2_income is a household aggregate, so exact comparison is only
-defined for single-person statuses (see docs/taxcalc-differential-audit.md).
-
-The module is a non-strict xfail while the known mapping bugs stand (audit
-findings F1-F6). Once those are fixed, drop the marker: this becomes the
-standing adversarial guard against regressions and shared omissions.
+Slow: gated behind TENFORTY_ORACLE=1.
 """
 
 import os
@@ -31,124 +32,214 @@ import pytest
 
 if not os.environ.get("TENFORTY_ORACLE"):
     pytest.skip(
-        "oracle differential suite is slow (~5 min); set TENFORTY_ORACLE=1 to run",
+        "oracle differential suite is slow; set TENFORTY_ORACLE=1 to run",
         allow_module_level=True,
     )
 
 taxcalc = pytest.importorskip("taxcalc")
 pd = pytest.importorskip("pandas")
 
-from hypothesis import HealthCheck, given, settings, target  # noqa: E402
+from hypothesis import HealthCheck, example, given, settings, target  # noqa: E402
 from hypothesis import strategies as st  # noqa: E402
 
 import tenforty  # noqa: E402
 
-pytestmark = pytest.mark.xfail(
-    reason="known mapping bugs, docs/taxcalc-differential-audit.md F1-F6",
-    strict=False,
+from .oracle_policy import excused_quantities, tolerance  # noqa: E402
+
+MARS = {
+    "Single": 1,
+    "Married/Joint": 2,
+    "Married/Sep": 3,
+    "Head_of_House": 4,
+    "Widow(er)": 5,
+}
+
+QUANTITIES = (
+    "agi",
+    "taxable_income",
+    "se_tax",
+    "niit",
+    "addl_medicare",
+    "amt",
+    "income_tax",
+    "total_tax",
 )
 
-MARS = {"Single": 1, "Married/Sep": 3, "Head_of_House": 4, "Widow(er)": 5}
 
-SS_WAGE_BASE_2024 = 168_600
-BOUNDARY_DOLLARS = (0, 125_000, SS_WAGE_BASE_2024, 200_000, 250_000)
-
-dollars = st.one_of(
-    st.sampled_from(BOUNDARY_DOLLARS),
-    st.integers(min_value=0, max_value=400_000),
-).map(float)
-
-case_strategy = st.fixed_dictionaries(
-    {
-        "status": st.sampled_from(sorted(MARS)),
-        "w2": dollars,
-        "se": dollars,
-        "stcg": dollars,
-        "ltcg": dollars,
-    }
-)
-
-TAX_TABLE_TOL = 15.0  # OTS uses the $50-step 1040 tax tables; taxcalc is exact
-COMPONENT_TOL = 2.0
+def _normalize_case(case):
+    case = dict(case)
+    case["qual_div"] = round(case.pop("qual_frac") * case["ord_div"], 2)
+    return case
 
 
-def taxcalc_batch(cases):
-    """Evaluate a batch of cases in one vectorized taxcalc call."""
-    df = pd.DataFrame(
-        [
-            {
-                "RECID": i + 1,
-                "MARS": MARS[c["status"]],
-                "XTOT": 1,
-                "age_head": 40,
-                "e00200": c["w2"],
-                "e00200p": c["w2"],
-                "e00900": c["se"],
-                "e00900p": c["se"],
-                "p22250": c["stcg"],
-                "p23250": c["ltcg"],
-            }
-            for i, c in enumerate(cases)
-        ]
-    )
-    records = taxcalc.Records(data=df, start_year=2024, gfactors=None, weights=None)
-    calc = taxcalc.Calculator(policy=taxcalc.Policy(), records=records)
-    calc.calc_all()
-    arr = calc.array
-    return [
+def _case_strategy():
+    dollars = st.one_of(
+        st.sampled_from((0, 125_000, 168_600, 176_100, 200_000, 250_000)),
+        st.integers(min_value=0, max_value=400_000),
+    ).map(float)
+    small_dollars = st.one_of(st.just(0), st.integers(0, 60_000)).map(float)
+    return st.fixed_dictionaries(
         {
-            "agi": (float(arr("c00100")[i]), COMPONENT_TOL),
-            "taxable_income": (float(arr("c04800")[i]), COMPONENT_TOL),
-            "se_tax": (float(arr("setax")[i]), COMPONENT_TOL),
-            "niit": (float(arr("niit")[i]), COMPONENT_TOL),
-            "addl_medicare": (float(arr("ptax_amc")[i]), COMPONENT_TOL),
-            "total_tax": (
-                float(arr("iitax")[i] + arr("setax")[i] + arr("ptax_amc")[i]),
-                TAX_TABLE_TOL,
-            ),
+            "year": st.sampled_from((2024, 2025)),
+            "status": st.sampled_from(sorted(MARS)),
+            "w2": dollars,
+            "se": dollars,
+            "stcg": st.one_of(st.just(0), st.integers(0, 250_000)).map(float),
+            "ltcg": st.one_of(st.just(0), st.integers(0, 250_000)).map(float),
+            "interest": small_dollars,
+            "ord_div": small_dollars,
+            "qual_frac": st.sampled_from((0.0, 0.5, 1.0)),
+            "itemized": small_dollars,
+            "std_or_item": st.sampled_from(("Standard", "Itemized")),
         }
-        for i in range(len(cases))
-    ]
+    ).map(_normalize_case)
+
+
+def _anchor(**kw):
+    base = {
+        "year": 2024,
+        "status": "Single",
+        "w2": 0.0,
+        "se": 0.0,
+        "stcg": 0.0,
+        "ltcg": 0.0,
+        "interest": 0.0,
+        "ord_div": 0.0,
+        "qual_div": 0.0,
+        "itemized": 0.0,
+        "std_or_item": "Standard",
+    }
+    base.update(kw)
+    return base
+
+
+ANCHOR_NIIT_STCG = _anchor(w2=300_000.0, stcg=50_000.0)
+ANCHOR_SE_WAGE_BASE = _anchor(w2=168_600.0, se=60_000.0)
+ANCHOR_8959_NO_WAGES = _anchor(se=300_000.0)
+
+
+def taxcalc_batch(cases, wage_attribution="primary"):
+    """Evaluate a batch of cases in one vectorized taxcalc call per year."""
+    out = [None] * len(cases)
+    for year in sorted({c["year"] for c in cases}):
+        idx = [i for i, c in enumerate(cases) if c["year"] == year]
+        recs = []
+        for i in idx:
+            c = cases[i]
+            mars = MARS[c["status"]]
+            wages_on_spouse = wage_attribution == "spouse" and mars == 2
+            recs.append(
+                {
+                    "RECID": i + 1,
+                    "MARS": mars,
+                    "XTOT": 2 if mars == 2 else 1,
+                    "age_head": 40,
+                    "age_spouse": 40 if mars == 2 else 0,
+                    "e00200": c["w2"],
+                    "e00200p": 0.0 if wages_on_spouse else c["w2"],
+                    "e00200s": c["w2"] if wages_on_spouse else 0.0,
+                    "e00900": c["se"],
+                    "e00900p": c["se"],
+                    "e00900s": 0.0,
+                    "e00300": c["interest"],
+                    "e00600": max(c["ord_div"], c["qual_div"]),
+                    "e00650": c["qual_div"],
+                    "p22250": c["stcg"],
+                    "p23250": c["ltcg"],
+                    "e19800": c["itemized"],
+                }
+            )
+        df = pd.DataFrame(recs)
+        records = taxcalc.Records(data=df, start_year=year, gfactors=None, weights=None)
+        calc = taxcalc.Calculator(policy=taxcalc.Policy(), records=records)
+        calc.advance_to_year(year)
+        calc.calc_all()
+        arr = calc.array
+        for row, i in enumerate(idx):
+            iitax = float(arr("iitax")[row])
+            setax = float(arr("setax")[row])
+            amc = float(arr("ptax_amc")[row])
+            niit = float(arr("niit")[row])
+            out[i] = {
+                "agi": float(arr("c00100")[row]),
+                "taxable_income": float(arr("c04800")[row]),
+                "se_tax": setax,
+                "niit": niit,
+                "addl_medicare": amc,
+                "amt": float(arr("c09600")[row]),
+                # taxcalc iitax includes NIIT; tenforty federal_income_tax
+                # excludes it.
+                "income_tax": iitax - niit,
+                "total_tax": iitax + setax + amc,
+            }
+    return out
+
+
+def tenforty_components(case, backend):
+    """Evaluate one case on a tenforty backend, returning compared quantities."""
+    r = tenforty.evaluate_return(
+        year=case["year"],
+        filing_status=case["status"],
+        backend=backend,
+        w2_income=case["w2"],
+        self_employment_income=case["se"],
+        short_term_capital_gains=case["stcg"],
+        long_term_capital_gains=case["ltcg"],
+        taxable_interest=case["interest"],
+        ordinary_dividends=case["ord_div"],
+        qualified_dividends=case["qual_div"],
+        itemized_deductions=case["itemized"],
+        standard_or_itemized=case["std_or_item"],
+    )
+    return {
+        "agi": r.federal_adjusted_gross_income,
+        "taxable_income": r.federal_taxable_income,
+        "se_tax": r.federal_se_tax,
+        "niit": r.federal_niit,
+        "addl_medicare": r.federal_additional_medicare_tax,
+        "amt": r.federal_amt,
+        "income_tax": r.federal_income_tax,
+        "total_tax": r.federal_total_tax,
+    }
 
 
 @settings(
-    max_examples=10,
+    max_examples=50,
     deadline=None,
     suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large],
 )
-@given(cases=st.lists(case_strategy, min_size=1, max_size=40))
+@given(cases=st.lists(_case_strategy(), min_size=1, max_size=40))
+@example(cases=[ANCHOR_NIIT_STCG])
+@example(cases=[ANCHOR_SE_WAGE_BASE])
+@example(cases=[ANCHOR_8959_NO_WAGES])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
-    """Every tenforty component quantity matches taxcalc within tolerance."""
+    """Every quantity matches taxcalc within tolerance, unless excused by name."""
     oracle = taxcalc_batch(cases)
+    mfj_present = any(c["status"] == "Married/Joint" for c in cases)
+    oracle_alt = taxcalc_batch(cases, "spouse") if mfj_present else oracle
+
     failures = []
-    worst = {}
-    for case, expected_row in zip(cases, oracle, strict=True):
-        r = tenforty.evaluate_return(
-            year=2024,
-            filing_status=case["status"],
-            w2_income=case["w2"],
-            self_employment_income=case["se"],
-            short_term_capital_gains=case["stcg"],
-            long_term_capital_gains=case["ltcg"],
-            backend=backend,
-        )
-        ours = {
-            "agi": r.federal_adjusted_gross_income,
-            "taxable_income": r.federal_taxable_income,
-            "se_tax": r.federal_se_tax,
-            "niit": r.federal_niit,
-            "addl_medicare": r.federal_additional_medicare_tax,
-            "total_tax": r.federal_total_tax,
-        }
-        for quantity, (expected, tol) in expected_row.items():
-            diff = abs(ours[quantity] - expected)
-            worst[quantity] = max(worst.get(quantity, 0.0), diff)
+    worst = dict.fromkeys(QUANTITIES, 0.0)
+    for case, exp, exp_alt in zip(cases, oracle, oracle_alt, strict=True):
+        ours = tenforty_components(case, backend)
+        excused = excused_quantities(backend, case)
+        for quantity in QUANTITIES:
+            lo = min(exp[quantity], exp_alt[quantity])
+            hi = max(exp[quantity], exp_alt[quantity])
+            tol = tolerance(backend, quantity, exp["taxable_income"], case)
+            diff = max(lo - ours[quantity], ours[quantity] - hi, 0.0)
+            if quantity in excused:
+                continue
+            worst[quantity] = max(worst[quantity], diff)
             if diff > tol:
-                failures.append(f"{case}: {quantity} diff {diff:,.2f} > {tol}")
+                failures.append(
+                    f"{case}: {quantity} got={ours[quantity]:,.2f} "
+                    f"expected=[{lo:,.2f}, {hi:,.2f}] (diff {diff:,.2f} > {tol})"
+                )
     # target() accepts one observation per label per example, so feed it the
-    # batch maximum: hypothesis then steers toward batches containing the
-    # largest disagreement.
+    # batch maximum of unexcused disagreement: hypothesis steers toward novel
+    # divergence, not the already-tracked defects.
     for quantity, diff in worst.items():
         target(diff, label=quantity)
     assert not failures, "\n".join(failures[:5])
