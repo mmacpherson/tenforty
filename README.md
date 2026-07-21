@@ -45,6 +45,44 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 - Evaluate "what if" tax scenarios efficiently and reproducibly.
 
 
+## Related Projects
+
+If you've landed here while looking for open-source US tax computation, it's
+worth knowing the landscape — a few excellent projects approach this problem
+from different angles, and one of them may fit your task better:
+
+- **[Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator)** (Policy
+  Simulation Library) is a federal income and payroll tax microsimulation
+  model with a long pedigree in the policy-economics world. Its special power
+  is *counterfactual law*: every rate, bracket, and phase-out is a reformable
+  parameter, so it can answer "what would this filer (or the whole country)
+  pay under a proposed reform?" It models per-spouse income attribution and
+  has been validated against NBER's TAXSIM for years. If your question is
+  about policy analysis, revenue estimation, or distributional effects, start
+  there. `tenforty` uses Tax-Calculator as an independent validation oracle
+  for its own federal results — see
+  [docs/taxcalc-differential-audit.md](./docs/taxcalc-differential-audit.md).
+- **[TAXSIM](https://taxsim.nber.org/)** (NBER) is the long-standing academic
+  reference model for US federal and state income taxes, callable remotely.
+- **[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us)**
+  models federal and many state taxes alongside benefit programs, with a
+  policy-reform focus similar to Tax-Calculator's.
+
+What `tenforty` brings to this neighborhood: state returns computed locally,
+form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
+rates via automatic differentiation, an input solver, and a deliberately
+simple API. It's built for an individual interrogating *their own return* —
+sensitivity analysis, what-if sweeps, optimization — and the performance
+profile follows from that: a warm single-return evaluation takes
+milliseconds, and the Rust graph engine evaluates thousands of complete
+returns per second, so plotting your tax against a swept input is an
+interactive experience rather than a batch job. (Tax-Calculator makes the
+opposite — and for its purpose equally sensible — trade: a few seconds of
+fixed setup that amortize across population-scale record batches.) If your
+question is "what would *this return* look like, federal and state, and how
+does it change as inputs move?" — that's the job this package is built for.
+
+
 ## Disclaimer
 
 `tenforty` is an open-source tool intended for informational and educational
