@@ -4,18 +4,12 @@ Guidance for anyone working in this repo, human or AI coding agent. This is the
 canonical guide; `CLAUDE.md` is a symlink to this file so tool-specific loaders
 pick up the same content. It follows the [AGENTS.md](https://agents.md) convention.
 
-## Working in this repo (read first)
+## Working in this repo
 
-- **`main` is protected.** Never commit or push directly to `main`. Every change
-  lands through a pull request.
-- **Branch for each change.** Create a topic branch, commit there, and open a PR
-  against `main`.
-- **Git is a handoff action, not an automatic step.** Report status and the exact
-  commands you propose; let the maintainer authorize any commit, push, or merge.
-  Do not push or open a PR unless explicitly asked.
+- **`main` is protected** — changes land through a pull request, not direct pushes.
+- **Branch for each change**, and keep PRs focused.
 - **Never force-push** `main` or any branch with an open PR.
-- **Stage deliberately.** Add specific paths (`git add <paths>`); never `git add .`.
-- Keep changes focused, and run the relevant quality gates before requesting review.
+- Run the relevant quality gates before requesting review.
 
 ## Overview
 
