@@ -35,9 +35,18 @@ carry correctly in the rows above. It looks like a digit transposition
 
 Two details that support this reading:
 
-- The **same file's AMT worksheet** already uses `191950.0` for Head of
-  Household, so the release contradicts itself internally.
-- The **2025 table is correct**, so this is isolated to 2024.
+- **The same file already uses $191,950 for Head of Household elsewhere.** In
+  `sched_D_tax_worksheet()`, the step that caps income at the start of the 32%
+  bracket reads:
+
+  ```c
+  case HEAD_OF_HOUSEHOLD:                     ws[19] = smallerof( ws[1], 191950.0 );  break;
+  ```
+
+  (`taxsolve_US_1040_2024.c:1473`). So the release carries both figures for the
+  same boundary — the correct one in the worksheet, the transposed one in the
+  bracket table.
+- **The 2025 table is correct**, so this is isolated to 2024.
 
 **Effect:** a flat **$64.00** overcharge (32% − 24% = 8%, applied to the $800
 of income misclassified into the higher bracket) on every 2024
@@ -96,7 +105,7 @@ Correct result for that return is `$28,100.00` of state taxable income
 **Suggested fix:** add a sixth row carrying the Head-of-Household amount.
 Arizona Form 140 has no Widow(er) checkbox — AZ DOR instructions have a
 qualifying widow(er) file as Head of Household, and the form's own checkbox
-logic in the same file (`taxsolve_AZ_140_2024.c:193`) handles only MFJ, HoH,
+logic in the same file (`taxsolve_AZ_140_2024.c:194`) handles only MFJ, HoH,
 MFS and Single, with no Widow(er) branch. So Head of Household is both the
 in-bounds fix and the substantively correct figure:
 
