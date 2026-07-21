@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import logging
 import pathlib
 from functools import lru_cache
@@ -312,6 +313,27 @@ class GraphBackend:
                 "Provide these as 0 for now, or use backend='ots'.\n"
                 f"Unsupported inputs:\n{details}"
             )
+
+        if mode == "cross":
+            # A natural input fans out to several graph nodes, and the Rust
+            # cross API treats every node column as an independent axis — so
+            # the product must be taken here, at natural-name granularity,
+            # and evaluated as tied rows. Axis order matches the Rust cross:
+            # inputs outermost in dict order, statuses innermost.
+            axis_names = list(inputs.keys())
+            axis_values = [
+                list(values) if values else [0.0] for values in inputs.values()
+            ]
+            expanded: dict[str, list[float]] = {name: [] for name in axis_names}
+            expanded_statuses: list[str] = []
+            for combo in itertools.product(*axis_values):
+                for status in statuses:
+                    for name, value in zip(axis_names, combo, strict=True):
+                        expanded[name].append(value)
+                    expanded_statuses.append(status)
+            inputs = expanded
+            statuses = expanded_statuses
+            mode = "zip"
 
         # Determine required forms using representative inputs from the batch.
         # We use the max-absolute value per input to capture any non-zero cases.

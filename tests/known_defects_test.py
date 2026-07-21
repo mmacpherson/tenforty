@@ -119,10 +119,6 @@ def test_ots_additional_medicare_fires_without_wages():
     assert r.federal_additional_medicare_tax == pytest.approx(693.45, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F8/tenforty-i7n: graph cross mode explodes and misaligns the grid",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_cross_mode_grid_shape_and_alignment():
     """Three income points must produce three rows, each labeled with its own input."""
