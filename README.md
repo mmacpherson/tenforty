@@ -27,10 +27,11 @@ The package is built on top of the
 project, wrapping its
 functionality into a Python library.
 
-A GPT interface to `tenforty` is available with a ChatGPT+ account
-[here](https://chat.openai.com/g/g-jkF9Et8tT-tax-driver). This GPT, and the
-`tenforty` package itself, are discussed in a blog post
+The package and the ideas behind it are discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
+`tenforty` also works well driven by a coding agent (Claude Code, Codex, and
+friends) — the validated inputs and informative error messages make it a good
+tool-call target.
 
 You can try `tenforty` out immediately in your browser via the included Colab
 notebook: [![Try In
