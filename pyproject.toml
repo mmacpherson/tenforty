@@ -11,6 +11,12 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit"
 ]
+# Independent federal oracle for differential testing (scripts/taxcalc_audit.py,
+# tests/oracle/). Not synced by default: uv sync --group oracle
+oracle = [
+  "taxcalc>=6.7,<7",
+  "pandas>=2"
+]
 
 [project]
 authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
