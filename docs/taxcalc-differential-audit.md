@@ -92,7 +92,7 @@ mapping-layer assessment called out.
 
 ### F8. NEW — Graph cross-mode batch returns an exploded, misaligned grid
 
-Found incidentally while benchmarking, tracked as `tenforty-i7n` (P0).
+Found incidentally while benchmarking; priority-critical.
 `evaluate_returns(backend="graph", mode="cross")` — the default mode — returns
 `python_grid × rust_axis` rows instead of the grid (`w2_income=[10k,20k,30k]`
 → 9 rows; a 2×3 grid → 18), and the input columns cycle at a different rate
@@ -100,6 +100,37 @@ than the results, so rows pair wrong inputs with wrong outputs — only the
 diagonal is correct. OTS cross/zip and graph zip are all correct. Prior
 audits used one-row batch cases, where 1×1 = 1 row masks the explosion
 entirely — another instance of easy scenarios hiding a broken path.
+
+### F9. NEW — Graph batch path bypasses TaxReturnInput normalization
+
+Found by the oracle suite's batch-conformance tests (added post-audit).
+`GraphBackend.evaluate_batch` consumes raw input columns, skipping pydantic
+model validators and computed fields. Two confirmed symptoms: the
+qualified>ordinary dividend lift is not applied (Single, w2 $60k, qualified
+dividends $12k: scalar AGI $72,000, zip AGI $60,000; OTS zip correct), and
+the `schedule_se_ss_wages` derivation is absent (the batch xfail shipped
+with PR #279). Durable fix: route batch rows through `TaxReturnInput`, or
+move the derivations into the graph spec.
+
+### F10. NEW — Graph taxes short-term capital gains at preferential rates
+
+Caught by the widened oracle grid (48 flagged cases). With pure short-term
+gains the graph computes the long-term preferential rate: Single, $50k wages
++ $25k STCG gives income tax $6,022.25 vs the correct $8,341.00 (OTS and
+taxcalc agree). Short-term gains are ordinary income; the spec's Schedule D
+/ qualified-rate worksheet appears to treat all net gains as long-term.
+Form-calculation defect in the graph spec, not a mapping edge.
+
+### F11. NEW — OTS Head-of-House income tax $64 above consensus at high income
+
+For Head-of-House with taxable income above roughly $228k, OTS income tax is
+exactly $64.00 higher than taxcalc — constant across incomes and both years
+in the grid, the signature of a bracket-parameter divergence (8% x $800
+would fit a 24%→32% boundary shift). The graph backend agrees with taxcalc,
+making OTS the 2-vs-1 suspect — a candidate *upstream OpenTaxSolver* defect.
+Adjudication against the IRS revenue procedure is the deciding step; if OTS
+proves correct instead, this becomes a taxcalc/graph bug report and the
+excusing signature flips sides.
 
 ### F7. Itemization semantics diverge between backends
 

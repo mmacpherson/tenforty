@@ -13,8 +13,11 @@ dev = [
 ]
 # Independent federal oracle for differential testing (scripts/taxcalc_audit.py,
 # tests/oracle/). Not synced by default: uv sync --group oracle
+# Pinned exactly: golden fixtures and burn-in expected values are only
+# meaningful against a fixed oracle version. Upgrades are deliberate PRs that
+# regenerate fixtures.
 oracle = [
-  "taxcalc>=6.7,<7",
+  "taxcalc==6.7.2",
   "pandas>=2"
 ]
 
