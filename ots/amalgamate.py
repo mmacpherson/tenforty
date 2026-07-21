@@ -533,6 +533,47 @@ def patch_sched1a_line29_label(lines: list[str]) -> list[str]:
     return lines
 
 
+def patch_az_widow_std_deduction(lines: list[str]) -> list[str]:
+    """Extend ``getAZStdDedAmt``'s table so Widow(er) is in bounds.
+
+    ``azStdDedAmt`` is declared ``[5][1]`` and indexed by filing status, but
+    ``WIDOW`` is 5 — one past the end — so an AZ Widow(er) return reads
+    whatever follows the array. The result is undefined and platform-
+    dependent: 0.0 on one build (the standard deduction silently vanishes),
+    1.58e85 on another. Add a sixth row carrying the Head-of-Household
+    amount, which is the correct figure anyway: AZ Form 140 has no Widow(er)
+    box, and AZ DOR instructions have a qualifying widow(er) file as Head of
+    Household.
+
+    This is a memory-safety fix, not a tax-logic change — the same category
+    as the C99/C++ compatibility shims above, which also exist to make the
+    vendored source usable rather than to alter what it computes. It is a
+    deliberate, narrow exception to the rule that vendored OpenTaxSolver
+    source is never modified, and it is reported upstream (see
+    docs/upstream-ots-defects.md).
+
+    Applied by hand to the generated amalgamation in PR #268; reproduced here
+    so that regenerating the bindings does not silently revert it.
+    """
+    hoh_row = re.compile(r"^(\s*)\{ ([\d.]+) \}\s*(/\* Head of Household\. \*/)$")
+    out = []
+    in_short_table = False
+    for line in lines:
+        if "azStdDedAmt[5][1]" in line:
+            in_short_table = True
+            out.append(line.replace("azStdDedAmt[5][1]", "azStdDedAmt[6][1]"))
+            continue
+        match = hoh_row.match(line) if in_short_table else None
+        if match is None:
+            out.append(line)
+            continue
+        indent, amount, comment = match.groups()
+        out.append(f"{indent}{{ {amount} }},  {comment}")
+        out.append(f"{indent}{{ {amount} }}   /* Widow(er) - AZ maps QW to HoH. */")
+        in_short_table = False
+    return out
+
+
 def patch_restrict_keyword(lines: list[str]) -> list[str]:
     """Translate C99 ``restrict`` to the GCC/Clang ``__restrict__`` extension.
 
@@ -656,6 +697,8 @@ def postprocess_source_groups(
             case _:
                 group["source"] = patch_exit_to_return(group["source"])
                 group["source"] = patch_reset_globals(group["source"])
+                if "AZ_140" in inner_key:
+                    group["source"] = patch_az_widow_std_deduction(group["source"])
                 if "OR_40" in inner_key:
                     group["source"] = patch_show_fname_init_or_40(group["source"])
                 if "US_1040" in inner_key:

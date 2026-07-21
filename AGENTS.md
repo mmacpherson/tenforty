@@ -11,6 +11,43 @@ pick up the same content. It follows the [AGENTS.md](https://agents.md) conventi
 - **Never force-push** `main` or any branch with an open PR.
 - Run the relevant quality gates before requesting review.
 
+## Vendored OpenTaxSolver is not ours to edit
+
+We **vendor** OpenTaxSolver, we do not fork it. Never change what OTS computes —
+not the release tarballs, not the generated `ots_amalgamation.cpp`, and not
+through a patch function in `ots/amalgamate.py`. This holds even when the defect
+is proven and the fix is one character.
+
+When you find a defect in OTS's tax logic:
+
+1. Report it upstream. Stage the report in `docs/upstream-ots-defects.md`.
+2. Record it locally as a **strict-xfail** test plus a known-defect signature in
+   `tests/oracle/oracle_policy.py`. The xfail is the durable record and flips on
+   its own once a release carries the correction.
+
+Patching the vendored source instead would fork it invisibly: our tree would
+silently diverge from the upstream we claim to wrap, with nothing in the OTS
+release to show for it.
+
+**The narrow exception is portability and memory safety** — making the source
+compile and not read out of bounds, without changing any computed figure. The
+existing patch functions are of this kind: C99→C++ shims, and
+`patch_az_widow_std_deduction` for an out-of-bounds array read. Anything in this
+category still gets reported upstream, and the patch function carries a docstring
+saying why it qualifies.
+
+Before deciding a finding is upstream's, check whether it is actually **ours**:
+the mapping layer (`models.py` input maps, `core.py` activation and
+orchestration) is our code and gets fixed here.
+
+Two traps worth knowing:
+
+- `ots_amalgamation.cpp` is the only `.cpp` the generator emits and the only one
+  compiled — every `.pxd` points at it. The 114 per-year `ots_YYYY_*.cpp` files
+  are stale and carry unpatched sources; don't read them as live.
+- Editing a generated file without a matching patch function means the next
+  regeneration silently reverts you. Change `ots/amalgamate.py`, then regenerate.
+
 ## Overview
 
 Python library for US federal and state tax computation. Two backends:
