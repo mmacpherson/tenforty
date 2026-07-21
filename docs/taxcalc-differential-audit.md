@@ -8,6 +8,30 @@ findings are burned into the suite as strict xfails in
 Oracle: [Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator) (`taxcalc` 6.7.2, CC0),
 federal only, tax year 2024.
 
+## Findings ledger
+
+Every disagreement class gets an ID here, a narrative section below, a
+strict-xfail burn-in in `tests/known_defects_test.py`, and an excusing
+signature in `tests/oracle/oracle_policy.py`. Fixes must flip the burn-in,
+delete the signature, and update this table in the same PR.
+
+| ID | Finding | At fault | Status | Found by |
+|----|---------|----------|--------|----------|
+| F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
+| F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
+| F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | open | @bg002h, #278 |
+| F4 | Form 8960 L5a omits short-term gains | mapping, both backends | open | mapping assessment + oracle sweep |
+| F5 | Graph Form 8959 omits SE earnings | graph mapping | open | mapping assessment + oracle sweep |
+| F6 | OTS 8959 never fires with zero wages | OTS activation semantics | open | oracle sweep |
+| F7 | "Itemized" force vs best-of divergence | API contract | open (owner decision) | oracle sweep |
+| F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
+| F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
+| F10 | Short-term gains taxed at preferential rates | graph spec | open | oracle grid |
+| F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending | oracle grid |
+| F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
+| F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | oracle grid |
+| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (suspect) | open, adjudication pending | H_amt stratum |
+
 ## Method
 
 363 boundary-focused federal cases (SS wage base, NIIT/additional-Medicare
@@ -92,7 +116,7 @@ mapping-layer assessment called out.
 
 ### F8. NEW — Graph cross-mode batch returns an exploded, misaligned grid
 
-Found incidentally while benchmarking, tracked as `tenforty-i7n` (P0).
+Found incidentally while benchmarking; priority-critical.
 `evaluate_returns(backend="graph", mode="cross")` — the default mode — returns
 `python_grid × rust_axis` rows instead of the grid (`w2_income=[10k,20k,30k]`
 → 9 rows; a 2×3 grid → 18), and the input columns cycle at a different rate
@@ -100,6 +124,75 @@ than the results, so rows pair wrong inputs with wrong outputs — only the
 diagonal is correct. OTS cross/zip and graph zip are all correct. Prior
 audits used one-row batch cases, where 1×1 = 1 row masks the explosion
 entirely — another instance of easy scenarios hiding a broken path.
+
+### F9. NEW — Graph batch path bypasses TaxReturnInput normalization
+
+Found by the oracle suite's batch-conformance tests (added post-audit).
+`GraphBackend.evaluate_batch` consumes raw input columns, skipping pydantic
+model validators and computed fields. Two confirmed symptoms: the
+qualified>ordinary dividend lift is not applied (Single, w2 $60k, qualified
+dividends $12k: scalar AGI $72,000, zip AGI $60,000; OTS zip correct), and
+the `schedule_se_ss_wages` derivation is absent (the batch xfail shipped
+with PR #279). Durable fix: route batch rows through `TaxReturnInput`, or
+move the derivations into the graph spec.
+
+### F10. NEW — Graph taxes short-term capital gains at preferential rates
+
+Caught by the widened oracle grid (48 flagged cases). With pure short-term
+gains the graph computes the long-term preferential rate: Single, $50k wages
++ $25k STCG gives income tax $6,022.25 vs the correct $8,341.00 (OTS and
+taxcalc agree). Short-term gains are ordinary income; the spec's Schedule D
+/ qualified-rate worksheet appears to treat all net gains as long-term.
+Form-calculation defect in the graph spec, not a mapping edge.
+
+### F11. NEW, ADJUDICATED — upstream OTS 2024 Head-of-House bracket typo
+
+For 2024 Head-of-House filers, OTS begins the 32% bracket at taxable income
+**$191,150**; the IRS (Rev. Proc. 2023-34) says **$191,950** — taxcalc and
+the graph spec both carry the correct figure. Result: a flat $64.00
+overcharge (8% x $800) for every 2024 HoH return with taxable income at or
+above the true boundary. Bisection of OTS's marginal rate pinpoints the
+boundary exactly; the 2025 table is correct ($197,300), so this is an
+isolated one-digit transposition (191,150 vs 191,950) in the 2024 table —
+an *upstream OpenTaxSolver* defect, to be reported upstream. First catch
+for the three-way adjudication method: the oracle and the independent
+in-house engine outvoted the incumbent, and the revenue procedure confirmed
+the majority.
+
+### F12. NEW — itemized_deductions category ambiguity changes AMT
+
+Found by the adversarial hypothesis search (MFS, $250k of gains, $33,410
+itemized). All three engines take the same deduction and agree on taxable
+income — but OTS reports $1,634.46 of AMT where graph and taxcalc report
+none. Cause: the aggregate rides in a different Schedule A category per
+engine — OTS maps it to A6 ("other taxes", added back on Form 6251), graph
+to L16 ("other deductions", not added back), the oracle adapter to charity
+(not added back). None is wrong; the input model cannot say which kind of
+deduction it is. This is the categorized-deductions API gap made concrete,
+resolved by input model v2; until then the divergence is a documented
+assumption, excused by signature.
+
+### F13. NEW — graph 2025 Married/Sep long-term-gain thresholds diverge
+
+Six grid cases, 2025 + MFS + LTCG only: graph income tax is $1,377–$1,665
+above the OTS+taxcalc consensus. The pattern fits a preferential-rate
+breakpoint error for MFS in the 2025 spec parameters (MFS thresholds are
+not always half of Single). 2-vs-1 against the graph; fix and adjudicate in
+the spec bundle.
+
+### F14. NEW — AMT standard-deduction add-back divergence
+
+Found by the first AMT-positive stratum (H_amt: ISO exercise spread carried
+to taxcalc as `cmbtp`). Single, $150k wages + $200k ISO: OTS computes AMT
+$43,813.50; taxcalc and the graph spec both compute $39,725.50 — agreeing
+to the penny — and the $4,088 gap is exactly 28% x $14,600, the standard
+deduction. Form 6251 line 2a instructs non-itemizers to add the standard
+deduction back into AMTI, which is what OTS does. If the form walkthrough
+and a TAXSIM cross-check confirm that reading, this is the first *oracle*
+defect found by the suite — shared by our own graph spec — and the excusing
+signature flips from OTS to graph, with an upstream report to PSL. The
+suspects agreeing to the penny is itself evidence of a shared modeling
+choice rather than independent correctness.
 
 ### F7. Itemization semantics diverge between backends
 
