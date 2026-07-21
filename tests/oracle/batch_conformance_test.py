@@ -2,9 +2,9 @@
 
 The F8 grid-explosion bug survived every earlier audit because no oracle test
 touched the batch path — one-row batches masked the row explosion entirely.
-This suite runs a multi-row zip batch and (post-F8-fix) a cross grid, and
-asserts row-for-row agreement with the scalar path; the scalar path is
-separately held to the goldens, closing the loop to the oracle.
+This suite runs a multi-row zip batch and a cross grid, and asserts row-for-row
+agreement with the scalar path; the scalar path is separately held to the
+goldens, closing the loop to the oracle.
 
 No taxcalc dependency. Runs in the default suite.
 """
@@ -95,11 +95,6 @@ def test_zip_batch_matches_scalar(backend):
     assert not mismatches, "\n".join(mismatches[:5])
 
 
-@pytest.mark.xfail(
-    reason="F8: graph cross mode explodes and misaligns the grid; "
-    "flips when PR #287 lands",
-    strict=False,
-)
 @backends
 def test_cross_grid_matches_scalar(backend):
     """A 2-status x 3-income cross grid must contain exactly the 6 scalar results."""

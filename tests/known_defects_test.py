@@ -249,10 +249,6 @@ def test_itemized_semantics_agree_across_backends():
     )
 
 
-@pytest.mark.xfail(
-    reason="F8: graph cross mode explodes and misaligns the grid",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_cross_mode_grid_shape_and_alignment():
     """Three income points must produce three rows, each labeled with its own input."""
