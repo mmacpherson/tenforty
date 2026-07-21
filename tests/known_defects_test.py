@@ -62,7 +62,6 @@ def test_graph_qbi_uses_net_base():
     assert r.federal_taxable_income == pytest.approx(94_878.54, abs=1.0)
 
 
-@pytest.mark.xfail(reason="F4: 8960 L5a omits short-term gains (OTS)", strict=True)
 def test_ots_niit_includes_short_term_gains():
     """$300k wages + $50k STCG: NIIT is 3.8% of $50k = $1,900."""
     r = evaluate_return(
@@ -102,7 +101,6 @@ def test_graph_additional_medicare_includes_se_earnings():
     assert r.federal_additional_medicare_tax == pytest.approx(865.57, abs=1.0)
 
 
-@pytest.mark.xfail(reason="F6: OTS 8959 never fires with zero W-2 wages", strict=True)
 def test_ots_additional_medicare_fires_without_wages():
     """$300k SE profit, no wages: additional Medicare tax is $693.45, not $0."""
     r = evaluate_return(

@@ -1169,6 +1169,18 @@ def _se_income_to_8959_l8(se_income):
     return ("L8", str(round(se_income * 0.9235)))
 
 
+def _capital_gain_to_8960_l5a(gain):
+    """Contribute one capital-gain natural to Form 8960 line 5a.
+
+    Line 5a is net gain from property dispositions — holding period is
+    irrelevant to the net investment income tax, so short- and long-term
+    gains both belong there. Both naturals map through this callable so the
+    mapper appends them onto the same semicolon-terminated line, which OTS
+    reads as a sum.
+    """
+    return ("L5a", str(gain))
+
+
 _SUBORDINATE_FORM_CONFIG = [
     # 2024 Schedule SE — Phase 1 (no federal dependency)
     {
@@ -1206,7 +1218,8 @@ _SUBORDINATE_FORM_CONFIG = [
             "taxable_interest": "L1",
             "ordinary_dividends": "L2",
             "rental_income": "L4a",
-            "long_term_capital_gains": "L5a",
+            "long_term_capital_gains": _capital_gain_to_8960_l5a,
+            "short_term_capital_gains": _capital_gain_to_8960_l5a,
             "filing_status": "Status",
         },
         "fed_import_map": {"L11": "L13"},
@@ -1255,7 +1268,8 @@ _SUBORDINATE_FORM_CONFIG = [
             "taxable_interest": "L1",
             "ordinary_dividends": "L2",
             "rental_income": "L4a",
-            "long_term_capital_gains": "L5a",
+            "long_term_capital_gains": _capital_gain_to_8960_l5a,
+            "short_term_capital_gains": _capital_gain_to_8960_l5a,
             "filing_status": "Status",
         },
         "fed_import_map": {"L11b": "L13"},

@@ -45,7 +45,7 @@ INVENTORY = {
     ("form_8960", "ordinary_dividends"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "long_term_capital_gains"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "short_term_capital_gains"): {
-        "ots": "missing:F4",
+        "ots": "mapped",
         "graph": "missing:F4",
     },
     ("form_8995", "self_employment_income"): {
