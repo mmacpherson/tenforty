@@ -1,4 +1,5 @@
 # ruff: noqa: D100, D103
+import pytest
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
@@ -331,11 +332,25 @@ def test_evaluate_return_properties(
     #     ), "Federal total tax should not exceed taxable income"
 
 
+@pytest.mark.xfail(
+    reason="upstream OTS: getAZStdDedAmt() indexes a 5-element table with "
+    "WIDOW==5, reading past the end. Reported upstream; we vendor OTS "
+    "unmodified, so this flips when an OTS release carries the fix.",
+    strict=False,
+)
 def test_az_widow_standard_deduction():
-    """Regression: AZ Widow(er) used out-of-bounds array for standard deduction.
+    """Regression: AZ Widow(er) reads out of bounds for the standard deduction.
 
     AZ Form 140 has no Widow(er) box; qualifying widow(er) files as
     Head of Household and gets the HoH standard deduction.
+
+    `getAZStdDedAmt` declares ``azStdDedAmt[5][1]`` and indexes it by filing
+    status, but ``WIDOW`` is 5 — one past the end — so the AZ standard
+    deduction for a widow(er) is whatever happens to sit in that memory. This
+    was patched directly into the generated amalgamation by #268; that patch
+    is reverted here because we vendor OpenTaxSolver unmodified. Non-strict
+    xfail because the read is undefined behaviour: it may land on a plausible
+    value and pass by luck.
     """
     result = tenforty.evaluate_return(
         year=2024,
