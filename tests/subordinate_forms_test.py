@@ -155,6 +155,134 @@ def test_se_tax_single_w2_and_se():
     )
 
 
+# === Schedule SE line 8a: the filer's own W-2 social security wages ===
+#
+# Line 8a carries the filer's social security wages; line 9 is what remains of the
+# $168,600 (2024) wage base after them; line 10 charges 12.4% on the LESSER of that
+# remainder and net SE earnings. Omitting line 8a charges the 12.4% OASDI rate on
+# self-employment earnings the wage base has already absorbed.
+#
+# For Single there is one person, so w2_income unambiguously IS that person's wages.
+# For Married/Joint, w2_income is a household aggregate and Schedule SE is a per-person
+# form, so line 8a stays at zero -- see test_se_tax_mfj_w2_above_ss_base above.
+
+SE_60K_NET = 60_000 * 0.9235  # Schedule SE line 6: net earnings = 55,410
+
+
+def test_se_tax_single_no_w2_taxes_all_se_earnings():
+    """With no wages the whole wage base is free, so all net SE earnings bear the 12.4%."""
+    r = evaluate_return(
+        year=2024, filing_status="Single", self_employment_income=60_000
+    )
+    # line 9 = 168,600 - 0 = 168,600 > 55,410, so line 10 = 55,410 * 0.124 = 6,870.84
+    # line 11 = 55,410 * 0.029 = 1,606.89
+    expected = SE_60K_NET * 0.124 + SE_60K_NET * 0.029
+    assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
+
+
+def test_se_tax_single_w2_partially_consumes_ss_wage_base():
+    """Wages below the base leave a remainder; only that remainder bears the 12.4%."""
+    r = evaluate_return(
+        year=2024,
+        filing_status="Single",
+        w2_income=150_000,
+        self_employment_income=60_000,
+    )
+    # line 9 = 168,600 - 150,000 = 18,600, which is less than net earnings of 55,410,
+    # so line 10 = 18,600 * 0.124 = 2,306.40 (not 55,410 * 0.124 = 6,870.84)
+    expected = 18_600 * 0.124 + SE_60K_NET * 0.029
+    assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
+
+
+def test_se_tax_single_w2_fully_consumes_ss_wage_base():
+    """Wages at the base leave nothing; only the 2.9% Medicare portion remains."""
+    r = evaluate_return(
+        year=2024,
+        filing_status="Single",
+        w2_income=168_600,
+        self_employment_income=60_000,
+    )
+    # line 9 = 168,600 - 168,600 = 0, so line 10 = 0.00 and only line 11 survives.
+    expected = SE_60K_NET * 0.029
+    assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
+
+
+def test_se_tax_single_is_monotone_nonincreasing_in_w2():
+    """More of the filer's own wages can only shrink the OASDI slice, never grow it."""
+    taxes = [
+        evaluate_return(
+            year=2024,
+            filing_status="Single",
+            w2_income=w2,
+            self_employment_income=60_000,
+        ).federal_se_tax
+        for w2 in (0, 50_000, 120_000, 150_000, 168_600, 200_000)
+    ]
+    assert taxes == sorted(taxes, reverse=True)
+    assert taxes[0] > taxes[-1], "SE tax must fall once wages start filling the base"
+
+
+def test_se_tax_mfj_w2_aggregate_does_not_fill_one_spouses_wage_base():
+    """MFJ w2_income is a HOUSEHOLD aggregate and must not fill one spouse's line 8a.
+
+    Schedule SE is filed per person. Until the input model can attribute wages to a
+    spouse, Married/Joint leaves line 8a at zero. This guards the fix for the single-earner
+    statuses from being generalized into the regression that test_se_tax_mfj_w2_above_ss_base
+    documents.
+    """
+    r = evaluate_return(
+        year=2024,
+        filing_status="Married/Joint",
+        w2_income=181_408,
+        self_employment_income=53_272,
+    )
+    net = 53_272 * 0.9235
+    expected = net * 0.124 + net * 0.029  # full OASDI: the base is untouched
+    assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason=(
+        "The graph batch path does not apply the line 8a derivation. evaluate_return() "
+        "builds a TaxReturnInput, so it picks up the computed schedule_se_ss_wages field; "
+        "GraphBackend.evaluate_batch() takes raw input columns instead, and in cross mode "
+        "the filing-status axis is expanded inside the Rust graph, so a status-dependent "
+        "column cannot be derived on the Python side. The fix belongs in the graph spec, "
+        "which should compute the filer's own SS wages itself."
+    ),
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_se_tax_graph_batch_matches_single():
+    """Batch and single evaluation must agree on SE tax."""
+    from tenforty import evaluate_returns
+
+    kwargs = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=168_600,
+        self_employment_income=60_000,
+    )
+    single = evaluate_return(backend="graph", **kwargs).federal_se_tax
+    batch = evaluate_returns(backend="graph", **{k: [v] for k, v in kwargs.items()})
+    assert batch["federal_se_tax"][0] == pytest.approx(single, abs=0.01)
+
+
+def test_se_tax_single_w2_consumes_wage_base_in_2025_too():
+    """The 2025 config carries the same line 8a mapping."""
+    high = evaluate_return(
+        year=2025,
+        filing_status="Single",
+        w2_income=200_000,
+        self_employment_income=60_000,
+    ).federal_se_tax
+    none = evaluate_return(
+        year=2025, filing_status="Single", self_employment_income=60_000
+    ).federal_se_tax
+    assert high < none, "2025 wages above the base must still zero the OASDI portion"
+    assert high == pytest.approx(SE_60K_NET * 0.029, abs=0.01)
+
+
 # === NIIT Tests ===
 
 
