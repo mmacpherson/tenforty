@@ -73,12 +73,14 @@ form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
 rates via automatic differentiation, an input solver, and a deliberately
 simple API. It's built for an individual interrogating *their own return* —
 sensitivity analysis, what-if sweeps, optimization — and the performance
-profile follows from that: a warm single-return evaluation takes
-milliseconds, and the Rust graph engine evaluates thousands of complete
-returns per second, so plotting your tax against a swept input is an
-interactive experience rather than a batch job. (Tax-Calculator makes the
-opposite — and for its purpose equally sensible — trade: a few seconds of
-fixed setup that amortize across population-scale record batches.) If your
+profile follows from that: the Rust graph engine evaluates a return in about
+a microsecond interpreted, and on the order of a hundred nanoseconds
+JIT-compiled — millions of returns per second — with batch sweeps through
+the Python API running at thousands of returns per second end-to-end. Plotting
+your tax against a swept input is an interactive experience, not a batch job.
+(Tax-Calculator makes the opposite — and for its purpose equally sensible —
+trade: a few seconds of fixed setup that amortize across population-scale
+record batches.) If your
 question is "what would *this return* look like, federal and state, and how
 does it change as inputs move?" — that's the job this package is built for.
 
