@@ -1,6 +1,6 @@
-# Upstream OpenTaxSolver defect reports
+# Upstream OpenTaxSolver reports
 
-tenforty vendors OpenTaxSolver unmodified. When we find a defect in OTS itself
+tenforty vendors OpenTaxSolver unmodified. When we find an issue in OTS itself
 we report it upstream rather than patching our copy — see `AGENTS.md`. This
 file is the staging area for those reports: what we found, how we verified it,
 and the text to send.

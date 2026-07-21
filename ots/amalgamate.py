@@ -550,7 +550,7 @@ def patch_az_widow_std_deduction(lines: list[str]) -> list[str]:
     vendored source usable rather than to alter what it computes. It is a
     deliberate, narrow exception to the rule that vendored OpenTaxSolver
     source is never modified, and it is reported upstream (see
-    docs/upstream-ots-defects.md).
+    docs/upstream-ots-reports.md).
 
     Applied by hand to the generated amalgamation in PR #268; reproduced here
     so that regenerating the bindings does not silently revert it.
