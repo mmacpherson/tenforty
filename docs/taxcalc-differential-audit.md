@@ -121,16 +121,19 @@ taxcalc agree). Short-term gains are ordinary income; the spec's Schedule D
 / qualified-rate worksheet appears to treat all net gains as long-term.
 Form-calculation defect in the graph spec, not a mapping edge.
 
-### F11. NEW — OTS Head-of-House income tax $64 above consensus at high income
+### F11. NEW, ADJUDICATED — upstream OTS 2024 Head-of-House bracket typo
 
-For Head-of-House with taxable income above roughly $228k, OTS income tax is
-exactly $64.00 higher than taxcalc — constant across incomes and both years
-in the grid, the signature of a bracket-parameter divergence (8% x $800
-would fit a 24%→32% boundary shift). The graph backend agrees with taxcalc,
-making OTS the 2-vs-1 suspect — a candidate *upstream OpenTaxSolver* defect.
-Adjudication against the IRS revenue procedure is the deciding step; if OTS
-proves correct instead, this becomes a taxcalc/graph bug report and the
-excusing signature flips sides.
+For 2024 Head-of-House filers, OTS begins the 32% bracket at taxable income
+**$191,150**; the IRS (Rev. Proc. 2023-34) says **$191,950** — taxcalc and
+the graph spec both carry the correct figure. Result: a flat $64.00
+overcharge (8% x $800) for every 2024 HoH return with taxable income at or
+above the true boundary. Bisection of OTS's marginal rate pinpoints the
+boundary exactly; the 2025 table is correct ($197,300), so this is an
+isolated one-digit transposition (191,150 vs 191,950) in the 2024 table —
+an *upstream OpenTaxSolver* defect, to be reported upstream. First catch
+for the three-way adjudication method: the oracle and the independent
+in-house engine outvoted the incumbent, and the revenue procedure confirmed
+the majority.
 
 ### F7. Itemization semantics diverge between backends
 

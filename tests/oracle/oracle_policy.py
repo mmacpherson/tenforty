@@ -63,13 +63,17 @@ def _f10_graph_stcg_preferential(backend: str, case: dict) -> set[str]:
 
 
 def _f11_ots_hoh_bracket(backend: str, case: dict) -> set[str]:
-    """F11: OTS Head-of-House income tax $64 above the taxcalc+graph consensus.
+    """F11: upstream OTS 2024 HoH table starts the 32% bracket at $191,150.
 
-    Constant offset for taxable income above roughly $228k — a bracket
-    parameter divergence. Adjudication against the IRS revenue procedure is
-    pending; graph agrees with taxcalc, so OTS is the 2-vs-1 suspect.
+    The IRS figure (Rev. Proc. 2023-34) is $191,950; taxcalc and graph agree.
+    Flat $64 overcharge above the boundary, 2024 only — the 2025 table is
+    correct, so the signature is deliberately year-restricted.
     """
-    if backend != "ots" or case.get("status") != "Head_of_House":
+    if (
+        backend != "ots"
+        or case.get("status") != "Head_of_House"
+        or case.get("year") != 2024
+    ):
         return set()
     gross = sum(
         case.get(k, 0) for k in ("w2", "se", "stcg", "ltcg", "interest", "ord_div")

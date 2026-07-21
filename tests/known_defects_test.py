@@ -147,12 +147,12 @@ def test_graph_taxes_short_term_gains_as_ordinary():
 
 
 @pytest.mark.xfail(
-    reason="F11: OTS HoH income tax $64 above taxcalc+graph consensus "
-    "(adjudication pending; expectation flips if OTS proves correct)",
+    reason="F11: upstream OTS 2024 HoH table starts the 32% bracket at "
+    "$191,150; IRS Rev. Proc. 2023-34 says $191,950",
     strict=True,
 )
 def test_ots_hoh_high_income_matches_consensus():
-    """Head of House, $260k wages: income tax $52,185 per taxcalc and graph."""
+    """Head of House, $260k wages: income tax $52,185 per the IRS bracket table."""
     r = evaluate_return(year=2024, filing_status="Head_of_House", w2_income=260_000)
     assert r.federal_income_tax == pytest.approx(52_185.00, abs=2.0)
 
