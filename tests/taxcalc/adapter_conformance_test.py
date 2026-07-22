@@ -70,19 +70,39 @@ def test_iso_changes_the_taxcalc_result():
     )
 
 
+# Case keys that are legitimately not carried to taxcalc, with the reason.
+# Everything else in a case is swept, so a field added later comes under test
+# without anyone remembering to extend a list — which is how `iso` was missed.
+NOT_CARRIED = {
+    "year": "selects the tax year, not an amount to carry",
+    "status": "non-numeric; becomes MARS",
+    "std_or_item": "non-numeric; taxcalc always takes best-of",
+    "qual_frac": "consumed by _normalize_case into qual_div before the adapter",
+}
+
+
 def test_case_fields_all_reach_the_adapter():
     """Every numeric field of a case must change some taxcalc output.
 
     A silently dropped field is invisible until someone happens to write a case
-    that depends on it, so this sweeps them rather than trusting review.
+    that depends on it, so this sweeps them rather than trusting review. The
+    sweep is derived from the case itself rather than a hand-kept list: a list
+    is exactly what let `iso` go unmapped, and later let `qual_div` and
+    `itemized` sit outside a loop whose docstring claimed to cover them.
     """
+    swept = sorted(set(F14_CASE) - set(NOT_CARRIED))
+    assert swept, "no fields to sweep — did the case shape change?"
+
     baseline = taxcalc_batch([F14_CASE])[0]
     inert = []
-    for field in ("w2", "se", "stcg", "ltcg", "interest", "ord_div", "iso"):
+    for field in swept:
         bumped = {**F14_CASE, field: F14_CASE[field] + 25_000.0}
         if taxcalc_batch([bumped])[0] == baseline:
             inert.append(field)
-    assert not inert, f"case fields the adapter ignores: {', '.join(inert)}"
+    assert not inert, (
+        f"case fields the adapter ignores: {', '.join(inert)}. Either map them "
+        f"in taxcalc_batch or add them to NOT_CARRIED with a reason."
+    )
 
 
 @pytest.mark.xfail(
