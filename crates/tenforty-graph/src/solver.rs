@@ -1,4 +1,4 @@
-use crate::autodiff::gradient;
+use crate::autodiff::gradient_sum;
 use crate::eval::{EvalError, Runtime};
 use crate::graph::NodeId;
 use thiserror::Error;
@@ -44,11 +44,28 @@ pub fn solve(
     input: NodeId,
     initial_guess: f64,
 ) -> Result<f64, SolveError> {
+    solve_multi(runtime, output, target, &[input], initial_guess)
+}
+
+/// Solve for the value of a quantity that is written into several input nodes.
+///
+/// One natural input can feed more than one node — wage income reaches both
+/// the 1040 wage line and Form 8959's Medicare wages. Solving for such a
+/// quantity has to assign each trial value to every one of those nodes and
+/// step on their combined derivative; varying only the first would search
+/// along a slope the model does not actually have.
+pub fn solve_multi(
+    runtime: &mut Runtime,
+    output: NodeId,
+    target: f64,
+    inputs: &[NodeId],
+    initial_guess: f64,
+) -> Result<f64, SolveError> {
     solve_with_config(
         runtime,
         output,
         target,
-        input,
+        inputs,
         initial_guess,
         &SolverConfig::default(),
     )
@@ -58,14 +75,16 @@ pub fn solve_with_config(
     runtime: &mut Runtime,
     output: NodeId,
     target: f64,
-    input: NodeId,
+    inputs: &[NodeId],
     initial_guess: f64,
     config: &SolverConfig,
 ) -> Result<f64, SolveError> {
     let mut x = initial_guess;
 
     for _ in 0..config.max_iterations {
-        runtime.set_by_id(input, x);
+        for &input in inputs {
+            runtime.set_by_id(input, x);
+        }
         let y = runtime.eval_node(output)?;
         let error = y - target;
 
@@ -73,7 +92,7 @@ pub fn solve_with_config(
             return Ok(x);
         }
 
-        let grad = gradient(runtime, output, input)?;
+        let grad = gradient_sum(runtime, output, inputs)?;
 
         if grad.abs() < config.min_step {
             return Err(SolveError::ZeroGradient);
@@ -284,7 +303,7 @@ mod tests {
             lower_bound: Some(0.0),
             ..Default::default()
         };
-        let result = solve_with_config(&mut runtime, 4, 5.0, 0, 10.0, &config);
+        let result = solve_with_config(&mut runtime, 4, 5.0, &[0], 10.0, &config);
         // Should not converge since target is unreachable with x >= 0
         assert!(result.is_err());
     }

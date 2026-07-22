@@ -3,9 +3,12 @@ use crate::graph::{NodeId, Op};
 use crate::primitives;
 use std::collections::HashMap;
 
-/// Compute the gradient of an output node with respect to an input node.
-/// Uses reverse-mode automatic differentiation (backpropagation).
-pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
+/// Compute the adjoint of every node with respect to an output node.
+///
+/// One reverse-mode pass produces the partial derivative of `output` with
+/// respect to *every* node in the graph, so callers wanting several partials
+/// should take this map rather than calling [`gradient`] repeatedly.
+pub fn adjoints(runtime: &mut Runtime, output: NodeId) -> Result<HashMap<NodeId, f64>, EvalError> {
     runtime.eval_node(output)?;
 
     let order = runtime.graph().topological_order()?;
@@ -28,7 +31,36 @@ pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<
         backprop(&node.op, node_id, adj, values, runtime, &mut adjoints)?;
     }
 
-    Ok(*adjoints.get(&input).unwrap_or(&0.0))
+    Ok(adjoints)
+}
+
+/// Compute the gradient of an output node with respect to an input node.
+/// Uses reverse-mode automatic differentiation (backpropagation).
+pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
+    Ok(*adjoints(runtime, output)?.get(&input).unwrap_or(&0.0))
+}
+
+/// Compute the total derivative of an output with respect to a quantity that
+/// is written into several input nodes at once.
+///
+/// One natural input often feeds more than one node — wage income reaches both
+/// the 1040 wage line and Form 8959's Medicare wages. Setting such a quantity
+/// assigns the same value to every one of those nodes, so by the chain rule
+/// its total derivative is the sum of the individual partials. Taking only the
+/// first node silently omits whatever the others contribute.
+///
+/// Costs a single backward pass regardless of how many inputs are named.
+/// Nodes absent from the graph contribute nothing.
+pub fn gradient_sum(
+    runtime: &mut Runtime,
+    output: NodeId,
+    inputs: &[NodeId],
+) -> Result<f64, EvalError> {
+    let adjoints = adjoints(runtime, output)?;
+    Ok(inputs
+        .iter()
+        .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
+        .sum())
 }
 
 fn backprop(
