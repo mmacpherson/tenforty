@@ -621,6 +621,70 @@ impl Runtime {
         })
     }
 
+    /// Total derivative of `output` with respect to a quantity written into
+    /// several input nodes at once.
+    ///
+    /// A natural input such as wage income reaches more than one node, so its
+    /// derivative is the sum of the partials over every node it is written to.
+    /// Costs one backward pass regardless of how many are named. Nodes absent
+    /// from the graph contribute nothing, which lets callers pass the full
+    /// fan-out without first checking which forms were linked.
+    fn gradient_multi(&mut self, output: &str, inputs: Vec<String>) -> PyResult<f64> {
+        self.inner.with_runtime_mut(|rt| {
+            let output_id = rt
+                .graph()
+                .node_id_by_name(output)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output)))?;
+            let input_ids: Vec<_> = inputs
+                .iter()
+                .filter_map(|name| rt.graph().node_id_by_name(name))
+                .collect();
+            if input_ids.is_empty() {
+                return Err(PyValueError::new_err(format!(
+                    "None of the input nodes were found: {}",
+                    inputs.join(", ")
+                )));
+            }
+
+            autodiff::gradient_sum(rt, output_id, &input_ids)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
+    }
+
+    /// Solve for the value of a quantity written into several input nodes.
+    ///
+    /// Each Newton step assigns the trial value to every named node and steps
+    /// on their combined derivative. See `gradient_multi` for why.
+    #[pyo3(signature = (output, target, for_inputs, initial_guess=None))]
+    fn solve_multi(
+        &mut self,
+        output: &str,
+        target: f64,
+        for_inputs: Vec<String>,
+        initial_guess: Option<f64>,
+    ) -> PyResult<f64> {
+        let guess = initial_guess.unwrap_or(target);
+        self.inner.with_runtime_mut(|rt| {
+            let output_id = rt
+                .graph()
+                .node_id_by_name(output)
+                .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", output)))?;
+            let input_ids: Vec<_> = for_inputs
+                .iter()
+                .filter_map(|name| rt.graph().node_id_by_name(name))
+                .collect();
+            if input_ids.is_empty() {
+                return Err(PyValueError::new_err(format!(
+                    "None of the input nodes were found: {}",
+                    for_inputs.join(", ")
+                )));
+            }
+
+            solver::solve_multi(rt, output_id, target, &input_ids, guess)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
+    }
+
     #[pyo3(signature = (output, target, for_input, initial_guess=None))]
     fn solve(
         &mut self,

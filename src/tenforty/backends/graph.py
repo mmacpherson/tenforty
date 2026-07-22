@@ -509,6 +509,35 @@ class GraphBackend:
             input_node = f"us_1040_{input_node}"
         return input_node
 
+    def _input_nodes(
+        self, tax_input: TaxReturnInput, var: str, output_node: str | None = None
+    ) -> list[str]:
+        """Every graph node a natural input is written to.
+
+        `_create_evaluator` fans one natural input out to several nodes —
+        `w2_income` reaches both the 1040 wage line and Form 8959's Medicare
+        wages. A derivative or solve with respect to that natural input has to
+        account for all of them, so this returns the same set evaluation
+        writes; resolving a single "primary" node instead is what let the
+        derivative silently omit every subordinate form.
+
+        Federal and state nodes are both included. A node that cannot
+        influence the requested output simply contributes a zero partial, so
+        there is no need to guess which namespace the caller meant.
+        """
+        if isinstance(var, str) and var.startswith(_ALL_KNOWN_PREFIXES):
+            return [var]
+
+        nodes = list(NATURAL_TO_NODES.get(var, []))
+        state_node = STATE_NATURAL_TO_NODE.get(tax_input.state, {}).get(var)
+        if state_node and state_node not in nodes:
+            nodes.append(state_node)
+
+        if nodes:
+            return nodes
+
+        return [self._resolve_input_node(tax_input, var, output_node)]
+
     def gradient(
         self, tax_input: TaxReturnInput, output: str, wrt: str
     ) -> float | None:
@@ -531,9 +560,9 @@ class GraphBackend:
             else:
                 output_node = f"us_1040_{output_node}"
 
-        input_node = self._resolve_input_node(tax_input, wrt, output_node)
+        input_nodes = self._input_nodes(tax_input, wrt, output_node)
 
-        return evaluator.gradient(output_node, input_node)
+        return evaluator.gradient_multi(output_node, input_nodes)
 
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
@@ -568,7 +597,7 @@ class GraphBackend:
             else:
                 output_node = f"us_1040_{output_node}"
 
-        input_node = self._resolve_input_node(tax_input, var, output_node)
+        input_nodes = self._input_nodes(tax_input, var, output_node)
 
         natural_values = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
@@ -592,7 +621,9 @@ class GraphBackend:
             initial_guess = tax_estimate
 
         try:
-            return evaluator.solve(output_node, target, input_node, initial_guess)
+            return evaluator.solve_multi(
+                output_node, target, input_nodes, initial_guess
+            )
         except Exception as exc:
             msg = str(exc)
             if "Failed to converge" in msg or "Zero gradient" in msg:
