@@ -45,7 +45,7 @@ INVENTORY = {
     ("form_8960", "ordinary_dividends"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "long_term_capital_gains"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "short_term_capital_gains"): {
-        "ots": "missing:F4",
+        "ots": "mapped",
         "graph": "missing:F4",
     },
     ("form_8995", "self_employment_income"): {
@@ -60,7 +60,12 @@ def _ots_mapped(form_key: str, natural: str, year: int = 2024) -> bool:
     for cfg in SUBORDINATE_FORM_CONFIG.get(year, []):
         if cfg.form_id != form_id:
             continue
-        for input_key in cfg.input_map:
+        # A form consumes a natural either directly through `input_map` or
+        # indirectly through `fed_import_map`, in which case it declares the
+        # natural in `activation_naturals`. Both are real consumer edges; only
+        # counting the direct one would report Form 8960 as having lost its
+        # capital-gain edge when it was moved to the 1040 line 7 import.
+        for input_key in (*cfg.input_map, *cfg.activation_naturals):
             if input_key == natural or DERIVED_FROM.get(input_key) == natural:
                 return True
     return False

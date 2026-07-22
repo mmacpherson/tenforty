@@ -271,6 +271,12 @@ class SubordinateFormConfig(BaseModel):
     output_map: dict[str, str] = {}
     total_tax_key: str | None = None
     defaults: dict[str, str] = {}
+    # Naturals this form consumes through `fed_import_map` rather than directly.
+    # Activation is decided on the inputs a form consumes, and a value arriving
+    # from the federal return is invisible to `input_map` — so without this a
+    # filer whose only investment income is capital gains would never trigger
+    # Form 8960 at all.
+    activation_naturals: list[str] = []
 
 
 OTS_FORM_CONFIG = dict(
@@ -1206,10 +1212,24 @@ _SUBORDINATE_FORM_CONFIG = [
             "taxable_interest": "L1",
             "ordinary_dividends": "L2",
             "rental_income": "L4a",
-            "long_term_capital_gains": "L5a",
             "filing_status": "Status",
         },
-        "fed_import_map": {"L11": "L13"},
+        # L5a is "net gain from disposition of property" — Form 8960 takes it
+        # from Form 1040 line 7, which is the Schedule D result with the
+        # section 1211(b) $3,000 loss limitation already applied and both
+        # holding periods already netted. Importing it is what the form
+        # instructs; reconstructing it from the gain naturals would drop the
+        # limitation and have to re-net the two terms by hand.
+        #
+        # Line 5a intentionally carries ALL of line 7. Gain from property held
+        # in an active trade or business is excluded from net investment income
+        # on line 5b, not by filtering 5a. We map no 5b because no input can
+        # produce business-property gain; add both together if one ever does.
+        "fed_import_map": {"L11": "L13", "L7": "L5a"},
+        "activation_naturals": [
+            "short_term_capital_gains",
+            "long_term_capital_gains",
+        ],
         "output_map": {"L17": "niit"},
         "total_tax_key": "L17",
         "defaults": {
@@ -1255,10 +1275,17 @@ _SUBORDINATE_FORM_CONFIG = [
             "taxable_interest": "L1",
             "ordinary_dividends": "L2",
             "rental_income": "L4a",
-            "long_term_capital_gains": "L5a",
             "filing_status": "Status",
         },
-        "fed_import_map": {"L11b": "L13"},
+        # See the 2024 Form 8960 entry for why line 5a is imported from the
+        # 1040 rather than mapped from the gain naturals. The 2025 1040 splits
+        # the capital-gain line, so the gain is on L7a here, not L7 — the same
+        # year shift as L11 -> L11b for AGI.
+        "fed_import_map": {"L11b": "L13", "L7a": "L5a"},
+        "activation_naturals": [
+            "short_term_capital_gains",
+            "long_term_capital_gains",
+        ],
         "output_map": {"L17": "niit"},
         "total_tax_key": "L17",
         "defaults": {

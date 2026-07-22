@@ -20,9 +20,9 @@ delete the signature, and update this table in the same PR.
 | F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
 | F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
 | F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | open | @bg002h, #278 |
-| F4 | Form 8960 L5a omits short-term gains | mapping, both backends | open | mapping assessment + differential sweep |
+| F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed on OTS; open on graph | mapping assessment + differential sweep |
 | F5 | Graph Form 8959 omits SE earnings | graph mapping | open | mapping assessment + differential sweep |
-| F6 | OTS 8959 never fires with zero wages | OTS activation semantics | open | differential sweep |
+| F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
 | F7 | "Itemized" force vs best-of divergence | API contract | open (owner decision) | differential sweep |
 | F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
 | F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
@@ -97,6 +97,20 @@ property") is mapped from `long_term_capital_gains` only —
 `models.py` OTS input_map and `mappings.py` graph fan-out both lack
 `short_term_capital_gains`. Backend parity can never catch this class.
 
+**Fixed on OTS, at a different layer than first proposed.** Line 5a is not
+reconstructed from the gain naturals; it is imported from Form 1040 line 7 via
+`fed_import_map`, which is what Form 8960 instructs. Line 7 is the Schedule D
+result, so both holding periods are already netted and the section 1211(b)
+$3,000 loss limitation is already applied — an earlier attempt that summed the
+two gain naturals onto line 5a fixed the gains but silently dropped that
+limitation, understating NIIT by up to $1,786 on a net-loss case.
+
+Line 5a intentionally carries all of line 7. Gain from property held in an
+active trade or business leaves net investment income on line 5b, not by
+filtering 5a; we map no 5b because no input can produce business-property
+gain, pinned by a strict xfail. The graph half is still open, so the
+`_f4_niit_stcg` signature is narrowed to `backend == "graph"`.
+
 ### F5. Graph omits SE earnings from Form 8959 (additional Medicare tax)
 
 145 graph flags, every one with SE income > 0. OTS maps SE earnings via
@@ -114,6 +128,14 @@ no numeric value survives and the form is skipped. Missed tax up to $1,368
 (Married/Sep, SE $300k) in the grid. A formatting decision leaked into
 activation semantics — exactly the "activation" contract dimension the
 mapping-layer assessment called out.
+
+**Fixed.** Activation is decided by `subordinate_form_applies`, which tests
+the *natural* inputs a form consumes rather than the post-format OTS values, so
+a formatting decision can no longer decide whether a form runs. Naturals that
+reach a form indirectly through `fed_import_map` are declared in
+`activation_naturals` and counted too — without that, moving Form 8960 line 5a
+to the 1040 import would have stopped the form firing for a filer whose only
+investment income is capital gains.
 
 ### F8. NEW — Graph cross-mode batch returns an exploded, misaligned grid
 

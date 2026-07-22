@@ -35,8 +35,14 @@ def _f3_qbi(backend: str, case: dict) -> set[str]:
 
 
 def _f4_niit_stcg(backend: str, case: dict) -> set[str]:
-    """F4: Form 8960 L5a omits short-term gains, both backends."""
-    if case.get("stcg", 0):
+    """F4: Form 8960 L5a omits short-term gains.
+
+    Fixed on OTS, which now imports line 5a from Form 1040 line 7 rather than
+    reconstructing it from the gain naturals. The graph spec still carries the
+    defect, so the signature is narrowed rather than deleted. Delete it with
+    the graph fix.
+    """
+    if backend == "graph" and case.get("stcg", 0):
         return {"niit", "total_tax"}
     return set()
 
@@ -44,13 +50,6 @@ def _f4_niit_stcg(backend: str, case: dict) -> set[str]:
 def _f5_graph_8959(backend: str, case: dict) -> set[str]:
     """F5: graph Form 8959 omits SE earnings."""
     if backend == "graph" and case.get("se", 0):
-        return {"addl_medicare", "total_tax"}
-    return set()
-
-
-def _f6_ots_8959_activation(backend: str, case: dict) -> set[str]:
-    """F6: OTS Form 8959 never fires with zero W-2 wages."""
-    if backend == "ots" and not case.get("w2", 0) and case.get("se", 0):
         return {"addl_medicare", "total_tax"}
     return set()
 
@@ -176,7 +175,6 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f3_qbi,
     _f4_niit_stcg,
     _f5_graph_8959,
-    _f6_ots_8959_activation,
     _f7_itemized_semantics,
     _f10_graph_stcg_preferential,
     _f11_ots_hoh_bracket,
