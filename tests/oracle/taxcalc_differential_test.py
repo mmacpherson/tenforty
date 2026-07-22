@@ -91,6 +91,12 @@ def _case_strategy():
             "qual_frac": st.sampled_from((0.0, 0.5, 1.0)),
             "itemized": small_dollars,
             "std_or_item": st.sampled_from(("Standard", "Itemized")),
+            # No "iso" yet, deliberately. The adapter now carries it (see
+            # cmbtp above), but generating AMT-preference cases surfaces F14 on
+            # both engines at once, and the _f14 signature currently excuses
+            # the backend that turned out to be RIGHT. Flip that signature and
+            # fix the graph spec first (tenforty-8ik), then add iso here as
+            # part of the AMT coverage in tenforty-y90.
         }
     ).map(_normalize_case)
 
@@ -147,6 +153,11 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
                     "e19800": c["itemized"],
+                    # AMT preference income (ISO exercise spread). Without this
+                    # taxcalc is handed no preference at all and reports zero
+                    # AMT, so every AMT case would compare tenforty with the
+                    # preference against an oracle without it.
+                    "cmbtp": c.get("iso", 0.0),
                 }
             )
         df = pd.DataFrame(recs)

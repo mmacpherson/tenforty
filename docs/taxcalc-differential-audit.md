@@ -31,6 +31,7 @@ delete the signature, and update this table in the same PR.
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | oracle grid |
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (suspect) | open, adjudication pending | H_amt stratum |
+| F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | oracle sweep |
 
 ## Method
 
@@ -237,3 +238,27 @@ bugs are batch-path defects this scalar harness deliberately did not probe.
    as a scheduled/pre-release job. Parity catches divergence; only an
    independent oracle catches shared omissions (F4 was invisible to parity by
    construction).
+
+
+### F17. NEW — graph charges self-employment tax below the $400 floor
+
+Found by the differential sweep while fixing the oracle adapter, on a
+hypothesis draw of `se=128` alongside large other income. Small
+self-employment amounts are an unusual draw, and every hand-written case had
+used round, large figures — which is why this survived earlier passes.
+
+Schedule SE line 4c stops the computation when net earnings from
+self-employment are under $400 (IRC 1402(b)(2)). OTS and taxcalc both honour
+the floor; the graph spec charges 15.3% from the first dollar. The threshold
+applies to *adjusted* earnings, after the 92.35% factor:
+
+| SE income | net earnings | OTS `se_tax` | graph `se_tax` |
+|---|---|---|---|
+| 128 | 118.21 | 0.00 | 18.09 |
+| 400 | 369.40 | 0.00 | 56.52 |
+| 500 | 461.75 | 70.65 | 70.65 |
+
+Above the floor the two agree exactly, so the divergence is isolated to the
+de-minimis rule. Two engines against one, with the form instruction agreeing
+with the majority. The half-SE-tax adjustment reaches AGI, so `agi` diverged
+by exactly half the SE tax as well.

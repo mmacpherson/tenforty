@@ -83,6 +83,39 @@ def _f11_ots_hoh_bracket(backend: str, case: dict) -> set[str]:
     return set()
 
 
+def _f15_ots_itemized_taxable_income(backend: str, case: dict) -> set[str]:
+    """F15: OTS applies itemized deductions the caller did not ask for.
+
+    With a nonzero itemized aggregate, OTS deducts it whatever
+    `standard_or_itemized` says, while the oracle adapter carries the amount as
+    charity and so meets the 60%-of-AGI charitable ceiling. Taxable income
+    therefore diverges in both directions, and the deduction quantities
+    downstream of it follow.
+
+    The same category mismatch as F12, surfacing on taxable income rather than
+    AMT. Blocked on the Itemized-semantics decision (tenforty-ddj); tracked as
+    tenforty-z31.
+    """
+    if backend == "ots" and case.get("itemized", 0):
+        return {"taxable_income", "income_tax", "total_tax"}
+    return set()
+
+
+def _f17_graph_se_deminimis(backend: str, case: dict) -> set[str]:
+    """F17: graph charges SE tax below the $400 de-minimis floor.
+
+    Schedule SE line 4c: net earnings under $400 owe no self-employment tax
+    (IRC 1402(b)(2)). OTS and taxcalc both honour it. The floor is measured on
+    ADJUSTED earnings, after the 92.35% factor. The half-SE-tax adjustment
+    reaches AGI and taxable income, so those diverge too.
+    """
+    if backend != "graph":
+        return set()
+    if 0 < case.get("se", 0) * 0.9235 < 400:
+        return {"se_tax", "agi", "taxable_income", "income_tax", "total_tax"}
+    return set()
+
+
 def _f7_itemized_semantics(backend: str, case: dict) -> set[str]:
     """F7: OTS forces itemization; taxcalc and graph take best-of."""
     if backend != "ots" or case.get("std_or_item") != "Itemized":
@@ -149,6 +182,8 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
     _f13_graph_2025_mfs_ltcg,
+    _f15_ots_itemized_taxable_income,
+    _f17_graph_se_deminimis,
     _f14_amt_std_deduction_addback,
 ]
 
