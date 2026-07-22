@@ -27,7 +27,7 @@ delete the signature, and update this table in the same PR.
 | F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
 | F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
 | F10 | Short-term gains taxed at preferential rates | graph spec | open | differential grid |
-| F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending | differential grid |
+| F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | differential grid |
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (suspect) | open, adjudication pending | H_amt stratum |
@@ -181,6 +181,14 @@ an *upstream OpenTaxSolver* defect, to be reported upstream. First catch
 for the three-way adjudication method: taxcalc and the independent
 in-house engine outvoted the incumbent, and the revenue procedure confirmed
 the majority.
+
+**Not patched locally.** We vendor OpenTaxSolver unmodified — no edits to the
+release sources or to the generated amalgamation, and no correcting patch
+function in `ots/amalgamate.py`. The fix belongs in an OTS release. Until one
+carries it, the `_f11_ots_hoh_bracket` signature and its strict-xfail burn-in
+are the record; the xfail flips on its own once upstream corrects the table.
+(The same bad row is duplicated into Form 2210's copy of the 2024 rate table,
+which the upstream report should mention.)
 
 ### F12. NEW — itemized_deductions category ambiguity changes AMT
 

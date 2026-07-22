@@ -67,6 +67,11 @@ def _f11_ots_hoh_bracket(backend: str, case: dict) -> set[str]:
     The IRS figure (Rev. Proc. 2023-34) is $191,950; taxcalc and graph agree.
     Flat $64 overcharge above the boundary, 2024 only — the 2025 table is
     correct, so the signature is deliberately year-restricted.
+
+    This one is upstream, not ours. We vendor OpenTaxSolver unmodified, so the
+    fix belongs in an OTS release, not in a local patch to the vendored source.
+    This signature and its strict-xfail burn-in are the record until a release
+    carries the correction.
     """
     if (
         backend != "ots"
