@@ -27,10 +27,11 @@ The package is built on top of the
 project, wrapping its
 functionality into a Python library.
 
-A GPT interface to `tenforty` is available with a ChatGPT+ account
-[here](https://chat.openai.com/g/g-jkF9Et8tT-tax-driver). This GPT, and the
-`tenforty` package itself, are discussed in a blog post
+The package and the ideas behind it are discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
+`tenforty` also works well driven by a coding agent (Claude Code, Codex, and
+friends) — the validated inputs and informative error messages make it a good
+tool-call target.
 
 You can try `tenforty` out immediately in your browser via the included Colab
 notebook: [![Try In
@@ -43,6 +44,46 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 - Explore how taxes vary as a function of income, state, filing status, and year.
 - Easily integrate with data analysis and visualization tools in Python with `polars` support.
 - Evaluate "what if" tax scenarios efficiently and reproducibly.
+
+
+## Related Projects
+
+If you've landed here while looking for open-source US tax computation, it's
+worth knowing the landscape — a few excellent projects approach this problem
+from different angles, and one of them may fit your task better:
+
+- **[Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator)** (Policy
+  Simulation Library) is a federal income and payroll tax microsimulation
+  model with a long pedigree in the policy-economics world. Its special power
+  is *counterfactual law*: every rate, bracket, and phase-out is a reformable
+  parameter, so it can answer "what would this filer (or the whole country)
+  pay under a proposed reform?" It models per-spouse income attribution and
+  has been validated against NBER's TAXSIM for years. If your question is
+  about policy analysis, revenue estimation, or distributional effects, start
+  there. `tenforty` uses Tax-Calculator as an independent validation oracle
+  for its own federal results — see
+  [docs/taxcalc-differential-audit.md](./docs/taxcalc-differential-audit.md).
+- **[TAXSIM](https://taxsim.nber.org/)** (NBER) is the long-standing academic
+  reference model for US federal and state income taxes, callable remotely.
+- **[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us)**
+  models federal and many state taxes alongside benefit programs, with a
+  policy-reform focus similar to Tax-Calculator's.
+
+What `tenforty` brings to this neighborhood: state returns computed locally,
+form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
+rates via automatic differentiation, an input solver, and a deliberately
+simple API. It's built for an individual interrogating *their own return* —
+sensitivity analysis, what-if sweeps, optimization — and the performance
+profile follows from that: the Rust graph engine evaluates a return in about
+a microsecond interpreted, and on the order of a hundred nanoseconds
+JIT-compiled — millions of returns per second — with batch sweeps through
+the Python API running at thousands of returns per second end-to-end. Plotting
+your tax against a swept input is an interactive experience, not a batch job.
+(Tax-Calculator makes the opposite — and for its purpose equally sensible —
+trade: a few seconds of fixed setup that amortize across population-scale
+record batches.) If your
+question is "what would *this return* look like, federal and state, and how
+does it change as inputs move?" — that's the job this package is built for.
 
 
 ## Disclaimer
