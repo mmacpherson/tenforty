@@ -13,6 +13,7 @@ where noted, against OTS driven directly).
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
+from tenforty.models import SUBORDINATE_FORM_CONFIG
 
 
 def _graph_available() -> bool:
@@ -62,7 +63,6 @@ def test_graph_qbi_uses_net_base():
     assert r.federal_taxable_income == pytest.approx(94_878.54, abs=1.0)
 
 
-@pytest.mark.xfail(reason="F4: 8960 L5a omits short-term gains (OTS)", strict=True)
 def test_ots_niit_includes_short_term_gains():
     """$300k wages + $50k STCG: NIIT is 3.8% of $50k = $1,900."""
     r = evaluate_return(
@@ -88,6 +88,61 @@ def test_graph_niit_includes_short_term_gains():
     assert r.federal_niit == pytest.approx(1_900.0, abs=1.0)
 
 
+def test_ots_niit_honors_the_capital_loss_limitation():
+    """A net capital loss offsets net investment income by at most $3,000.
+
+    Form 8960 line 5a is the amount from Form 1040 line 7, which Schedule D
+    has already capped under section 1211(b). $100k of interest against a $50k
+    short-term loss leaves $97,000 of NII, so NIIT is 3.8% x $97,000.
+    """
+    for kind in ("short_term_capital_gains", "long_term_capital_gains"):
+        r = evaluate_return(
+            year=2024,
+            filing_status="Single",
+            w2_income=300_000,
+            taxable_interest=100_000,
+            **{kind: -50_000},
+        )
+        assert r.federal_niit == pytest.approx(3_686.0, abs=1.0), kind
+
+
+def test_ots_niit_fires_when_gains_are_the_only_investment_income():
+    """Form 8960 must run when capital gains are the sole investment income.
+
+    Line 5a arrives from the federal return rather than from `input_map`, so
+    the gain naturals are invisible to a purely direct activation test. They
+    are declared in `activation_naturals` for exactly this case.
+    """
+    r = evaluate_return(
+        year=2024,
+        filing_status="Single",
+        w2_income=300_000,
+        long_term_capital_gains=50_000,
+    )
+    assert r.federal_niit == pytest.approx(1_900.0, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="No input can express gain from property held in an active trade or "
+    "business, so Form 8960 line 5b is unmapped and all of Form 1040 line 7 "
+    "lands in net investment income",
+    strict=True,
+)
+def test_business_property_gain_can_be_excluded_from_nii():
+    """Line 5b is where non-NIIT gain leaves net investment income.
+
+    Line 5a intentionally carries all of Form 1040 line 7; gain from property
+    held in an active trade or business is then subtracted on line 5b, and OTS
+    computes L5d = L5a + L5b + L5c. We map no 5b because no natural input can
+    produce business-property gain — Form 4797 is not modelled. That makes the
+    omission harmless today and wrong the moment such an input is added, so
+    this pins the two changes together.
+    """
+    cfg = next(c for c in SUBORDINATE_FORM_CONFIG[2024] if c.form_id == "Form_8960")
+    wired = set(cfg.input_map.values()) | set(cfg.fed_import_map.values())
+    assert "L5b" in wired
+
+
 @pytest.mark.xfail(reason="F5: graph 8959 omits SE earnings", strict=True)
 @skip_if_graph_unavailable
 def test_graph_additional_medicare_includes_se_earnings():
@@ -102,7 +157,6 @@ def test_graph_additional_medicare_includes_se_earnings():
     assert r.federal_additional_medicare_tax == pytest.approx(865.57, abs=1.0)
 
 
-@pytest.mark.xfail(reason="F6: OTS 8959 never fires with zero W-2 wages", strict=True)
 def test_ots_additional_medicare_fires_without_wages():
     """$300k SE profit, no wages: additional Medicare tax is $693.45, not $0."""
     r = evaluate_return(

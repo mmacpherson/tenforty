@@ -25,6 +25,7 @@ from .models import (
     OTSYear,
     OutputFieldSpec,
     StrEnum,
+    SubordinateFormConfig,
     TaxReturnInput,
 )
 
@@ -386,6 +387,31 @@ def _evaluate_subordinate(
 
 ## LEVEL 1: Map from natural description, eg "w2_income", to OTS line-level
 ##          description, eg "L1a", and back.
+def subordinate_form_applies(
+    sub_cfg: SubordinateFormConfig, natural_input: dict[str, Any]
+) -> bool:
+    """Decide whether a subordinate form has any input worth evaluating.
+
+    Judged on the natural inputs the form consumes, not on the formatted OTS
+    values. A mapping expressed as a callable returns a preformatted string
+    that no numeric test can see: Form 8959 takes self-employment income that
+    way, so a filer with SE earnings and no W-2 wages used to look entirely
+    empty and the form never ran. Formatting must not decide whether a form
+    runs.
+
+    A form can also consume a natural indirectly, receiving it from the
+    federal return through `fed_import_map` — Form 8960 takes its net gain
+    from Form 1040 line 7 that way. Those naturals never appear in
+    `input_map`, so the form declares them in `activation_naturals`.
+    """
+    consumed = set(sub_cfg.input_map) | set(sub_cfg.activation_naturals)
+    return any(
+        isinstance(value, (int, float)) and value != 0
+        for key, value in natural_input.items()
+        if key in consumed
+    )
+
+
 def map_natural_to_ots_input(
     natural_input: dict[str, Any], natural_mapping: dict[str, str]
 ):
@@ -449,13 +475,11 @@ def evaluate_natural_input_form(
             continue
         if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
             continue
+        if not subordinate_form_applies(sub_cfg, natural_form_values):
+            continue
         sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
             natural_form_values, sub_cfg.input_map
         )
-        if not any(
-            isinstance(v, (int, float)) and v != 0 for v in sub_form_values.values()
-        ):
-            continue
         try:
             sub_result = _evaluate_subordinate(
                 year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
@@ -512,13 +536,11 @@ def evaluate_natural_input_form(
             continue
         if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
             continue
+        if not subordinate_form_applies(sub_cfg, natural_form_values):
+            continue
         sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
             natural_form_values, sub_cfg.input_map
         )
-        if not any(
-            isinstance(v, (int, float)) and v != 0 for v in sub_form_values.values()
-        ):
-            continue
         federal_return = ots_output["federal"]
         for fed_key, sub_key in sub_cfg.fed_import_map.items():
             if fed_key in federal_return:
