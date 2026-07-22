@@ -30,7 +30,7 @@ delete the signature, and update this table in the same PR.
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | differential grid |
-| F14 | AMT std-deduction add-back divergence (ISO cases) | **taxcalc + graph (confirmed)** | adjudicated: OTS correct; fix graph, report taxcalc | H_amt stratum |
+| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (both, apparently) | adjudicated: OTS matches the form; fix graph, ask taxcalc | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
 
@@ -190,16 +190,24 @@ $43,813.50; taxcalc and the graph spec both compute $39,725.50 — agreeing
 to the penny — and the $4,088 gap is exactly 28% x $14,600, the standard
 deduction. Form 6251 line 2a instructs non-itemizers to add the standard
 deduction back into AMTI, which is what OTS does. If the form walkthrough
+<<<<<<< HEAD
 and a TAXSIM cross-check confirm that reading, this is the first *reference-implementation*
 defect found by the suite — shared by our own graph spec — and the excusing
 signature flips from OTS to graph, with an upstream report to PSL. The
+=======
+and a TAXSIM cross-check support that reading, this would be the first time
+the suite has turned up something in an *oracle* — apparently shared by our
+own graph spec — and the excusing signature flips from OTS to graph, with a
+note raised upstream to PSL. The
+>>>>>>> 618afc8 (docs: soften the F14 write-up from verdict to question)
 suspects agreeing to the penny is itself evidence of a shared modeling
 choice rather than independent correctness.
 
-**ADJUDICATED — OTS is right; taxcalc and the graph spec are both wrong.**
-This is the first confirmed defect in an oracle, found by the suite.
+**ADJUDICATED — OTS appears to match Form 6251; taxcalc and our graph spec
+both appear to diverge from it.** As best we can tell this is the first time
+the suite has turned up something in an *oracle* rather than in us.
 
-Four independent lines of evidence, all agreeing:
+Four lines of evidence, which agree with each other:
 
 1. **Form 6251 walkthrough.** AGI $150,000; standard deduction $14,600;
    regular taxable income $135,400. Line 2a adds the standard deduction back,
@@ -212,29 +220,46 @@ Four independent lines of evidence, all agreeing:
    Schedule A (Form 1040), then enter the standard deduction amount that you
    reported on Form 1040 or 1040-SR, line 12e."* It is an addition in Part I.
    (Line references shift by form year; the rule is long-standing.)
-3. **taxcalc source.** `calcfunctions.py` computes, for non-itemizers,
+3. **taxcalc source.** For non-itemizers `calcfunctions.py` computes
    `c62100 = c00100 - e00700 - qbided - standard` — AGI less the standard
-   deduction, with no add-back. Reproduced directly: feeding `cmbtp=200000`
-   with the standard deduction yields AMTI $335,400 where $350,000 is
-   correct, short by exactly the $14,600 standard deduction, and AMT
-   $39,725.50.
-4. **Internal inconsistency in taxcalc itself.** Its *itemizer* branch
-   subtracts deductions and then adds back the AMT-disallowed ones (SALT,
-   misc, excess medical) — correct. Its non-itemizer branch subtracts the
-   standard deduction and adds back nothing, treating a 100%-disallowed
-   deduction as though it were allowed. Holding AGI and the preference fixed
-   and varying only the deduction makes the asymmetry plain: $30,000 of pure
-   charity (allowed for AMT) gives the correct AMTI $320,000, while the
-   $14,600 standard deduction gives $335,400 instead of $350,000.
+   deduction, with no add-back that we could find. Reproduced directly:
+   feeding `cmbtp=200000` with the standard deduction yields AMTI $335,400
+   against the $350,000 we expected, short by exactly the $14,600 standard
+   deduction, and AMT $39,725.50.
+4. **The two taxcalc branches seem inconsistent with each other.** The
+   *itemizer* branch subtracts deductions and then adds back the
+   AMT-disallowed ones (SALT, misc, excess medical), which matches our
+   reading of the form. The non-itemizer branch subtracts the standard
+   deduction and adds back nothing. Holding AGI and the preference fixed and
+   varying only the deduction shows the asymmetry: $30,000 of pure charity
+   (allowed for AMT) gives $320,000, matching expectation, while the $14,600
+   standard deduction gives $335,400 where we expected $350,000.
 
-The correct fix upstream is to drop the `- standard` term, since the
-standard deduction is entirely disallowed for AMT:
-`c62100 = c00100 - e00700 - qbided`.
+If our reading is right, the upstream change would be to drop the
+`- standard` term: `c62100 = c00100 - e00700 - qbided`.
 
-Consequences: the excusing signature flips from `ots` to `graph`; the graph
-spec needs the add-back; goldens regenerate; and an upstream report goes to
-PSLmodels/Tax-Calculator (drafted in `docs/upstream-taxcalc-reports.md`).
-The two suspects agreeing to the penny was the tell, and it held up.
+**What we have not established.** Whether any of this is unintended. The
+formula was translated from an older SAS implementation, and taxcalc issue
+#37 shows someone passing over this same line in 2014 and closing it as a
+false alarm — so it may be long-standing inherited behaviour rather than an
+oversight. More importantly, `cmbtp` is built in `taxdata` from PUF records;
+if it is derived from reported AMTI it may already absorb this, in which case
+the model and its data could be consistent in aggregate and a change to
+`calcfunctions.py` alone might make published results worse. We have no
+visibility into that. The upstream note is therefore framed as a question,
+not a bug report (`docs/upstream-taxcalc-reports.md`).
+
+**A correction to our own reasoning.** The original F14 entry treated taxcalc
+and our graph spec agreeing to the penny as the tell — two engines against
+one. On reflection that agreement is weak evidence: both appear to take the
+same shortcut (start from taxable income, add preferences, skip line 2a), so
+it looks like common-mode error rather than independent corroboration. The
+statute and the form instructions are what carry the argument, not the vote.
+
+Consequences for us: the excusing signature flips from `ots` to `graph`; the
+graph spec needs the add-back; goldens regenerate. We are changing our own
+engine regardless of how the upstream question lands, since we are claiming
+to compute the law rather than to match an aggregate.
 
 ### F16. NEW — the suite's taxcalc adapter drops `iso`, so taxcalc sees no AMT preference
 

@@ -1,68 +1,72 @@
 # Upstream Tax-Calculator reports
 
-Reports staged for [PSLmodels/Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator).
-Same convention as `docs/upstream-ots-reports.md`: what we found, how we
-verified it, and the text to file.
+Questions and observations staged for
+[PSLmodels/Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator). Same
+convention as `docs/upstream-ots-reports.md`: what we saw, how we checked it,
+and the text to file.
 
 **Status: drafted, not sent.** Filing is Mike's, in his own time.
 
 ---
 
-## 1. AMTI omits the Form 6251 line 2a standard-deduction add-back
+## 1. Question: is the standard deduction intentionally left in AMTI for non-itemizers?
 
-**Where:** `taxcalc/calcfunctions.py`, in the function that builds `c62100`
-(Form 6251 line 4).
+**Where:** `taxcalc/calcfunctions.py`, where `c62100` (Form 6251 line 4) is
+built.
+
+We have been using Tax-Calculator as an oracle while testing our own tax
+engines, and we ran into a difference we can't account for. We may well be
+misreading something — this is a question rather than a bug report.
+
+For a filer taking the standard deduction:
 
 ```python
 if standard > 0.0:
     c62100 = c00100 - e00700 - qbided - standard
 ```
 
-For a filer taking the standard deduction, AMTI is computed as AGI **less the
-standard deduction**. The standard deduction is not allowed against the
-alternative minimum tax, so it should not reduce AMTI.
+If we follow this correctly, AMTI comes out as AGI less the standard
+deduction. Our reading of Form 6251 is that the standard deduction should not
+reduce AMTI, so we expected the `- standard` term not to be there.
 
-Form 6251 Part I starts from regular taxable income and adds back the items
-the AMT disallows. Line 2a, per the IRS instructions:
+What we based that on:
 
-> If you aren't filing Schedule A (Form 1040), then enter the standard
-> deduction amount that you reported on Form 1040 or 1040-SR, line 12e.
+- **IRC §56(b)(1)(E)** — *"The standard deduction under section 63(c), the
+  deduction for personal exemptions under section 151, and the deduction under
+  section 642(b) shall not be allowed."*
+- **Form 6251 line 2a instructions** — *"If you aren't filing Schedule A (Form
+  1040), then enter the standard deduction amount that you reported on Form
+  1040 or 1040-SR, line 12e."* Line 1 starts from regular taxable income, which
+  already has the deduction subtracted, and 2a appears to add it back. (Line
+  references move between form years.)
 
-It is an addition in Part I. (The exact line reference moves between form
-years; the rule itself is long-standing.)
+So our expectation was `c62100 = c00100 - e00700 - qbided` for non-itemizers.
 
-**Suggested fix** — drop the `- standard` term, since the deduction is
-entirely disallowed:
+### What made us think it might be unintentional rather than a modeling choice
 
-```python
-if standard > 0.0:
-    c62100 = c00100 - e00700 - qbided
-```
-
-### The itemizer branch already gets this right
-
-The asymmetry is visible within the function itself. For itemizers:
+The itemizer branch just above handles the analogous situation the other way:
 
 ```python
 c62100 = (
     c00100 - e00700 - qbided - c04470 +
     c18300 +    # SALT add-back
-    c20800 -    # Sch A misc add-back
-    c21040 +
-    max(0., min(c17000, AMT_Medical_frt * c00100))
+    c20800 +    # Sch A misc add-back
+    ...
 )
 ```
 
 That subtracts itemized deductions and then adds back the AMT-disallowed
 components, leaving the allowed ones (charity, mortgage interest) subtracted —
-correct. The non-itemizer branch subtracts its deduction and adds back
-nothing, which treats a 100%-disallowed deduction as though it were fully
-allowed.
+which matches our reading of the form. The non-itemizer branch subtracts its
+deduction without a corresponding add-back, and the two branches seem
+inconsistent with each other. That asymmetry is really what prompted this
+question; if the non-itemizer treatment is deliberate, we couldn't find the
+reasoning and would be glad to understand it.
 
-### Reproduction
+### What we observed
 
-Single filer, 2024, $150,000 wages, $200,000 of AMT preference via `cmbtp`
-(an ISO exercise spread), taking the standard deduction:
+Single filer, 2024, $150,000 wages, $200,000 of AMT preference via `cmbtp` (an
+ISO exercise spread), taking the standard deduction:
 
 ```python
 rec = {"RECID": 1, "MARS": 1, "XTOT": 1, "age_head": 40, "age_spouse": 0,
@@ -70,43 +74,52 @@ rec = {"RECID": 1, "MARS": 1, "XTOT": 1, "age_head": 40, "age_spouse": 0,
        "cmbtp": 200000.0}
 ```
 
-| quantity | Tax-Calculator | correct |
+| quantity | Tax-Calculator | our reading of Form 6251 |
 |---|---|---|
 | AGI (`c00100`) | 150,000.00 | 150,000.00 |
 | regular taxable income | 135,400.00 | 135,400.00 |
-| **AMTI (`c62100`)** | **335,400.00** | **350,000.00** |
-| **AMT (`c09600`)** | **39,725.50** | **43,813.50** |
+| AMTI (`c62100`) | 335,400.00 | 350,000.00 |
+| AMT (`c09600`) | 39,725.50 | 43,813.50 |
 
-AMTI is short by exactly $14,600 — the 2024 single standard deduction — and
-the tax difference is $4,088 = 28% × $14,600.
+The AMTI difference is $14,600, the 2024 single standard deduction, and the tax
+difference is $4,088 = 28% × $14,600.
 
-Hand-check: taxable income $135,400 + standard deduction $14,600 + preference
-$200,000 = AMTI $350,000. Less the $85,700 exemption (no phase-out below
+Our hand-check: taxable income $135,400 + standard deduction $14,600 +
+preference $200,000 = $350,000. Less the $85,700 exemption (no phase-out below
 $609,350) = $264,300. TMT = 26% × $232,600 + 28% × $31,700 = $69,352. Regular
-tax $25,538.50. AMT = $43,813.50.
+tax $25,538.50, so AMT = $43,813.50.
 
-### Holding everything else fixed, only the deduction type
+### Varying only the deduction type
 
-Same AGI, same preference; vary only the deduction:
+Same AGI, same preference:
 
-| deduction | amount | `c62100` | correct |
+| deduction | amount | `c62100` | our expectation |
 |---|---|---|---|
-| standard (disallowed for AMT) | 14,600 | 335,400 | **350,000** |
-| itemized, pure charity (allowed for AMT) | 30,000 | 320,000 | 320,000 |
+| standard | 14,600 | 335,400 | 350,000 |
+| itemized, pure charity | 30,000 | 320,000 | 320,000 |
 
-The itemized case is right. The standard case understates AMTI by the full
-standard deduction. A filer taking the standard deduction should have *higher*
-AMTI than an otherwise-identical filer with allowed itemized deductions; here
-the standard-deduction filer is treated more favorably than the law permits.
+The itemized case matches what we expected. In the standard case, we would have
+expected the filer to end up with *higher* AMTI than the filer with $30,000 of
+allowed itemized deductions, since our reading is that the standard deduction
+doesn't carry over to AMT at all.
 
-### How this was found
+### One thing we could not check
 
-Three-way differential testing. [tenforty](https://github.com/mmacpherson/tenforty)
-runs OpenTaxSolver and its own independent graph engine against
-Tax-Calculator as an oracle. On AMT-preference cases OTS produced $43,813.50
-while Tax-Calculator and our graph engine both produced $39,725.50 — agreeing
-to the penny. Two engines agreeing exactly, against a third, turned out to
-indicate a shared modeling choice rather than independent confirmation. The
-Form 6251 walkthrough and the IRS instructions favor the outlier.
+`cmbtp` is an input built in `taxdata` rather than here. If it is derived from
+reported AMTI on PUF records, it may already absorb this, in which case the
+model and its data could be consistent in aggregate even though the formula
+read on its own doesn't match our expectation — and changing
+`calcfunctions.py` alone might make published results worse. We have no
+visibility into that, and it seems like the most likely explanation if this
+turns out to be deliberate.
 
-We are fixing the same defect in our own engine.
+### How this came up
+
+We run OpenTaxSolver and our own graph-based engine against Tax-Calculator as
+an oracle. On AMT-preference cases, OpenTaxSolver produced $43,813.50 while
+Tax-Calculator and our own engine both produced $39,725.50. We initially read
+the agreement as confirmation, but on looking at Form 6251 we think our engine
+and Tax-Calculator may simply be making the same shortcut — starting from
+taxable income and adding preferences without the line 2a step. We're changing
+our engine accordingly, and wanted to raise the question here in case it's
+relevant, or in case we've misunderstood the treatment.
