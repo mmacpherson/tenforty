@@ -185,3 +185,34 @@ def test_solve_through_derived_input_is_wrong():
         self_employment_income=60_000.0,
     )
     assert solved == pytest.approx(60_000.0, rel=1e-3)
+
+
+@pytest.mark.xfail(
+    reason="tenforty-gxk: schedule_se_ss_wages is a Python computed field derived "
+    "from w2_income, so it is invisible to the graph's dependency structure and "
+    "the wage-base path is missing from the derivative",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_w2_gradient_includes_schedule_se_wage_base():
+    """Wages displace self-employment earnings from the OASDI base.
+
+    Schedule SE line 9 is what remains of the social security wage base once
+    the filer's own wages are counted, so once wages and self-employment
+    earnings together exceed that base, another dollar of wages pushes a dollar
+    of SE earnings out of the 12.4% charge. Here 2024's $168,600 base leaves
+    $28,600 of room against $46,175 of SE earnings, so the true marginal rate
+    is 0.130880 while the derivative reports 0.240000 — nearly double.
+
+    Fan-out summing cannot reach this: the wage-base node is written from a
+    computed field rather than from any node w2_income is mapped to.
+    """
+    case = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=140_000.0,
+        self_employment_income=50_000.0,
+    )
+    assert _gradient("w2_income", **case) == pytest.approx(
+        _finite_difference("w2_income", **case), abs=1e-6
+    )
