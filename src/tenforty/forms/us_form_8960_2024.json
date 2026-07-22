@@ -1,6 +1,11 @@
 {
     "imports": [
         {
+            "form": "us_schedule_d",
+            "line": "L16",
+            "year": 2024
+        },
+        {
             "form": "us_1040",
             "line": "L11",
             "year": 2024
@@ -19,8 +24,7 @@
         9,
         10,
         11,
-        12,
-        13
+        12
     ],
     "meta": {
         "form_id": "us_form_8960",
@@ -44,34 +48,27 @@
         },
         "10": {
             "id": 10,
-            "name": "L9a_investment_interest",
+            "name": "L9b_state_local_taxes",
             "op": {
                 "type": "input"
             }
         },
         "11": {
             "id": 11,
-            "name": "L9b_state_local_taxes",
+            "name": "L9c_other_expenses",
             "op": {
                 "type": "input"
             }
         },
         "12": {
             "id": 12,
-            "name": "L9c_other_expenses",
+            "name": "L10_additional_modifications",
             "op": {
                 "type": "input"
             }
         },
         "13": {
             "id": 13,
-            "name": "L10_additional_modifications",
-            "op": {
-                "type": "input"
-            }
-        },
-        "14": {
-            "id": 14,
             "name": "L4c_net_rental_royalty",
             "op": {
                 "left": 3,
@@ -79,12 +76,22 @@
                 "type": "add"
             }
         },
+        "14": {
+            "id": 14,
+            "name": "L5a_net_gain_disposition",
+            "op": {
+                "form": "us_schedule_d",
+                "line": "L16",
+                "type": "import",
+                "year": 2024
+            }
+        },
         "15": {
             "id": 15,
             "name": "L5c_net_gain_adjusted",
             "op": {
-                "left": 5,
-                "right": 6,
+                "left": 14,
+                "right": 5,
                 "type": "add"
             }
         },
@@ -108,7 +115,7 @@
             "id": 18,
             "op": {
                 "left": 17,
-                "right": 14,
+                "right": 13,
                 "type": "add"
             }
         },
@@ -131,7 +138,7 @@
             "id": 20,
             "op": {
                 "left": 19,
-                "right": 7,
+                "right": 6,
                 "type": "add"
             }
         },
@@ -139,7 +146,7 @@
             "id": 21,
             "op": {
                 "left": 20,
-                "right": 8,
+                "right": 7,
                 "type": "add"
             }
         },
@@ -148,15 +155,15 @@
             "name": "L8_total_investment_income",
             "op": {
                 "left": 21,
-                "right": 9,
+                "right": 8,
                 "type": "add"
             }
         },
         "23": {
             "id": 23,
             "op": {
-                "left": 10,
-                "right": 11,
+                "left": 9,
+                "right": 10,
                 "type": "add"
             }
         },
@@ -165,7 +172,7 @@
             "name": "L9d_total_expenses_subtotal",
             "op": {
                 "left": 23,
-                "right": 12,
+                "right": 11,
                 "type": "add"
             }
         },
@@ -174,7 +181,7 @@
             "name": "L11_total_deductions",
             "op": {
                 "left": 24,
-                "right": 13,
+                "right": 12,
                 "type": "add"
             }
         },
@@ -326,35 +333,35 @@
         },
         "5": {
             "id": 5,
-            "name": "L5a_net_gain_disposition",
+            "name": "L5b_adjustment_disposition",
             "op": {
                 "type": "input"
             }
         },
         "6": {
             "id": 6,
-            "name": "L5b_adjustment_disposition",
+            "name": "L5d_net_gain_estate_trust",
             "op": {
                 "type": "input"
             }
         },
         "7": {
             "id": 7,
-            "name": "L5d_net_gain_estate_trust",
+            "name": "L6_cfc_pfic_adjustments",
             "op": {
                 "type": "input"
             }
         },
         "8": {
             "id": 8,
-            "name": "L6_cfc_pfic_adjustments",
+            "name": "L7_other_modifications",
             "op": {
                 "type": "input"
             }
         },
         "9": {
             "id": 9,
-            "name": "L7_other_modifications",
+            "name": "L9a_investment_interest",
             "op": {
                 "type": "input"
             }
@@ -366,7 +373,7 @@
         38,
         39,
         41,
-        14,
+        13,
         15,
         22
     ],

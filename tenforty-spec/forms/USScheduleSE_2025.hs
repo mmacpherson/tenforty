@@ -70,7 +70,9 @@ usScheduleSE_2025 = form "us_schedule_se" 2025 $ do
     -- Line 10: Total self-employment tax. Add lines 8b and 9
     l10 <-
         keyOutput "L10" "se_tax" "Self-employment tax" $
-            l8b .+. l9
+            -- No SE tax when net earnings (line 4c, after the 92.35% factor)
+            -- are under $400 (IRC 1402(b)(2), Schedule SE line 4c stop rule).
+            ifPos (l4c .-. lit 400) (l8b .+. l9) (dollars 0)
 
     -- Line 11: Deductible part of SE tax. Multiply line 10 by 50%
     _l11 <-
