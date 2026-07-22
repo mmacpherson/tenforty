@@ -121,6 +121,40 @@ def test_zero_gradient_is_not_silently_produced_for_unknown_node():
         )
 
 
+@skip_if_graph_unavailable
+def test_fanout_tables_name_each_node_once():
+    """No natural may name the same node twice — see the duplicate test below."""
+    for natural, nodes in NATURAL_TO_NODES.items():
+        assert len(nodes) == len(set(nodes)), (
+            f"{natural} names a node more than once: {nodes}"
+        )
+
+
+@skip_if_graph_unavailable
+def test_duplicate_fanout_entry_does_not_double_count(monkeypatch):
+    """A node named twice must contribute its partial once.
+
+    Evaluation is idempotent to a repeated node — assigning it twice leaves
+    the same value — but the derivative sums one adjoint per name, so a
+    duplicate would silently double that node's contribution. The mapping
+    tables are hand-maintained, so the asymmetry has to be closed in
+    `_input_nodes` rather than trusted not to arise.
+    """
+    from tenforty.backends import graph as graph_backend
+
+    case = dict(year=2024, filing_status="Single", w2_income=250_000.0)
+    expected = _gradient("w2_income", **case)
+
+    duplicated = dict(graph_backend.NATURAL_TO_NODES)
+    duplicated["w2_income"] = [*duplicated["w2_income"], duplicated["w2_income"][0]]
+    monkeypatch.setattr(graph_backend, "NATURAL_TO_NODES", duplicated)
+
+    assert _gradient("w2_income", **case) == pytest.approx(expected, abs=1e-9), (
+        "duplicating a fan-out entry changed the derivative; _input_nodes "
+        "must deduplicate before the adjoints are summed"
+    )
+
+
 def _solve_for(natural: str, **known) -> float:
     from tenforty.backends import GraphBackend
 

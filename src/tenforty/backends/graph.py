@@ -524,17 +524,23 @@ class GraphBackend:
         Federal and state nodes are both included. A node that cannot
         influence the requested output simply contributes a zero partial, so
         there is no need to guess which namespace the caller meant.
+
+        The result is deduplicated. Evaluation is idempotent to a repeated
+        node — assigning it twice leaves the same value — but `gradient_sum`
+        adds one adjoint per name, so a node named twice would have its
+        contribution counted twice. The mapping tables are maintained by hand,
+        so the two must not be allowed to disagree.
         """
         if isinstance(var, str) and var.startswith(_ALL_KNOWN_PREFIXES):
             return [var]
 
         nodes = list(NATURAL_TO_NODES.get(var, []))
         state_node = STATE_NATURAL_TO_NODE.get(tax_input.state, {}).get(var)
-        if state_node and state_node not in nodes:
+        if state_node:
             nodes.append(state_node)
 
         if nodes:
-            return nodes
+            return list(dict.fromkeys(nodes))
 
         return [self._resolve_input_node(tax_input, var, output_node)]
 
