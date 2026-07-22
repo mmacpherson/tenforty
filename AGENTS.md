@@ -22,7 +22,7 @@ When you find a defect in OTS's tax logic:
 
 1. Report it upstream. Stage the report in `docs/upstream-ots-reports.md`.
 2. Record it locally as a **strict-xfail** test plus a known-defect signature in
-   `tests/oracle/oracle_policy.py`. The xfail is the durable record and flips on
+   `tests/taxcalc/taxcalc_policy.py`. The xfail is the durable record and flips on
    its own once a release carries the correction.
 
 Patching the vendored source instead would fork it invisibly: our tree would

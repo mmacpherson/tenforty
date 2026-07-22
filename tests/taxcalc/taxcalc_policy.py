@@ -1,4 +1,4 @@
-"""Shared oracle policy: known-defect signatures and comparison tolerances.
+"""Shared taxcalc comparison policy: known-defect signatures and tolerances.
 
 Each signature maps a case (backend + inputs) to the set of compared
 quantities its defect is expected to corrupt. The differential suite excuses
@@ -87,7 +87,7 @@ def _f15_ots_itemized_taxable_income(backend: str, case: dict) -> set[str]:
     """F15: OTS applies itemized deductions the caller did not ask for.
 
     With a nonzero itemized aggregate, OTS deducts it whatever
-    `standard_or_itemized` says, while the oracle adapter carries the amount as
+    `standard_or_itemized` says, while the taxcalc adapter carries the amount as
     charity and so meets the 60%-of-AGI charitable ceiling. Taxable income
     therefore diverges in both directions, and the deduction quantities
     downstream of it follow.
@@ -130,7 +130,7 @@ def _f12_itemized_category_amt(backend: str, case: dict) -> set[str]:
     """F12: per-engine Schedule A category for the itemized aggregate.
 
     OTS carries it as A6 "other taxes" (AMT add-back); graph as L16 "other
-    deductions"; the oracle adapter as charity. AMT legitimately diverges
+    deductions"; the taxcalc adapter as charity. AMT legitimately diverges
     whenever the amount is nonzero. API decision needed (categorized
     deductions, input model v2).
     """
@@ -269,7 +269,7 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
 def unexcused_violations(
     case: dict, backend: str, expected: dict, expected_alt: dict | None
 ) -> list[str]:
-    """Compare one evaluated case against oracle expectations.
+    """Compare one evaluated case against taxcalc expectations.
 
     Returns human-readable violation strings for disagreements that exceed
     tolerance and are not attributable to a known defect signature. MFJ cases

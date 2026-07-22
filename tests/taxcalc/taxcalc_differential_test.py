@@ -2,12 +2,12 @@
 
 Property: for any generated federal return, every tenforty component quantity
 matches taxcalc within the shared tolerance policy, except disagreements
-attributable by signature to a known, tracked defect (oracle_policy.py) —
+attributable by signature to a known, tracked defect (taxcalc_policy.py) —
 so known bugs are excused by name and any novel disagreement fails the run.
 
 Structural choices:
 
-- **Batched oracle calls.** taxcalc has ~13s of fixed per-invocation overhead
+- **Batched taxcalc calls.** taxcalc has ~13s of fixed per-invocation overhead
   (policy deepcopy and parameter expansion) but is vectorized over records, so
   each hypothesis example is a *list* of cases evaluated in one taxcalc call.
   Shrinking collapses a failing list to the single minimal failing case.
@@ -22,17 +22,17 @@ Structural choices:
   false-pass attribution-sensitive quantities — a known limit of the method,
   not a guarantee.
 
-Requires the oracle dependency group: uv sync --group oracle
-Slow: gated behind TENFORTY_ORACLE=1.
+Requires the taxcalc dependency group: uv sync --group taxcalc
+Slow: gated behind TENFORTY_TAXCALC=1.
 """
 
 import os
 
 import pytest
 
-if not os.environ.get("TENFORTY_ORACLE"):
+if not os.environ.get("TENFORTY_TAXCALC"):
     pytest.skip(
-        "oracle differential suite is slow; set TENFORTY_ORACLE=1 to run",
+        "taxcalc differential suite is slow; set TENFORTY_TAXCALC=1 to run",
         allow_module_level=True,
     )
 
@@ -44,7 +44,7 @@ from hypothesis import strategies as st  # noqa: E402
 
 import tenforty  # noqa: E402
 
-from .oracle_policy import excused_quantities, tolerance  # noqa: E402
+from .taxcalc_policy import excused_quantities, tolerance  # noqa: E402
 
 MARS = {
     "Single": 1,
@@ -156,7 +156,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     # AMT preference income (ISO exercise spread). Without this
                     # taxcalc is handed no preference at all and reports zero
                     # AMT, so every AMT case would compare tenforty with the
-                    # preference against an oracle without it.
+                    # preference against taxcalc without it.
                     "cmbtp": c.get("iso", 0.0),
                 }
             )
@@ -226,13 +226,13 @@ def tenforty_components(case, backend):
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
     """Every quantity matches taxcalc within tolerance, unless excused by name."""
-    oracle = taxcalc_batch(cases)
+    expected = taxcalc_batch(cases)
     mfj_present = any(c["status"] == "Married/Joint" for c in cases)
-    oracle_alt = taxcalc_batch(cases, "spouse") if mfj_present else oracle
+    expected_alt = taxcalc_batch(cases, "spouse") if mfj_present else expected
 
     failures = []
     worst = dict.fromkeys(QUANTITIES, 0.0)
-    for case, exp, exp_alt in zip(cases, oracle, oracle_alt, strict=True):
+    for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
         excused = excused_quantities(backend, case)
         for quantity in QUANTITIES:

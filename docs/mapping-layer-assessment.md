@@ -165,7 +165,7 @@ income differs:
 | Graph | $249,148.18 | $16,000 deduction, exactly 20% of gross profit |
 
 Backend parity correctly reveals a disagreement here, but neither backend is
-an authoritative oracle for the other.
+authoritative for the other.
 
 ### Scope of PR #279
 

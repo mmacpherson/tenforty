@@ -1,10 +1,10 @@
 """Batch-path conformance: evaluate_returns must agree with scalar and goldens.
 
-The F8 grid-explosion bug survived every earlier audit because no oracle test
+The F8 grid-explosion bug survived every earlier audit because no differential test
 touched the batch path — one-row batches masked the row explosion entirely.
 This suite runs a multi-row zip batch and a cross grid, and asserts row-for-row
 agreement with the scalar path; the scalar path is separately held to the
-goldens, closing the loop to the oracle.
+goldens, closing the loop to taxcalc.
 
 No taxcalc dependency. Runs in the default suite.
 """
@@ -16,7 +16,7 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 
-from .oracle_policy import batch_input_gap_quantities, evaluate_components
+from .taxcalc_policy import batch_input_gap_quantities, evaluate_components
 
 FIXTURE = Path(__file__).parent / "fixtures" / "taxcalc_goldens.json"
 

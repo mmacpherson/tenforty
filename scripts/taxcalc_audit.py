@@ -3,9 +3,9 @@
 Modes:
     python scripts/taxcalc_audit.py results.csv
         Full three-way sweep, long-format CSV (as in the original audit).
-    python scripts/taxcalc_audit.py --goldens tests/oracle/fixtures/goldens.json
-        Compute oracle expectations only and write a committed golden fixture
-        (taxcalc version recorded; regenerate deliberately on oracle upgrades).
+    python scripts/taxcalc_audit.py --goldens tests/taxcalc/fixtures/goldens.json
+        Compute taxcalc expectations only and write a committed golden fixture
+        (taxcalc version recorded; regenerate deliberately on taxcalc upgrades).
     python scripts/taxcalc_audit.py --check
         Three-way sweep with a verdict: disagreements are measured against the
         shared tolerance policy, classified against known-defect signatures,
@@ -36,10 +36,10 @@ import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-_POLICY_PATH = Path(__file__).parent.parent / "tests" / "oracle" / "oracle_policy.py"
-_spec = importlib.util.spec_from_file_location("oracle_policy", _POLICY_PATH)
-oracle_policy = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(oracle_policy)
+_POLICY_PATH = Path(__file__).parent.parent / "tests" / "taxcalc" / "taxcalc_policy.py"
+_spec = importlib.util.spec_from_file_location("taxcalc_policy", _POLICY_PATH)
+taxcalc_policy = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(taxcalc_policy)
 
 STATUSES = ["Single", "Married/Joint", "Married/Sep", "Head_of_House", "Widow(er)"]
 MARS = {
@@ -138,7 +138,7 @@ def build_cases() -> list[dict]:
                     )
 
         # F_cliff: ordinary-bracket boundaries +-$1 of taxable income,
-        # derived from the oracle's parameter tables rather than hand-typed
+        # derived from taxcalc's parameter tables rather than hand-typed
         # (transcribed bracket constants are how F11 happened upstream).
         import taxcalc as tc
 
@@ -308,7 +308,7 @@ def run_taxcalc(cases, wage_attribution="primary"):
     return out
 
 
-def oracle_expectations(cases):
+def taxcalc_expectations(cases):
     """Primary-attribution expectations plus MFJ spouse-attribution bounds."""
     primary = run_taxcalc(cases, "primary")
     mfj = [c for c in cases if c["status"] == "Married/Joint"]
@@ -317,10 +317,10 @@ def oracle_expectations(cases):
 
 
 def write_goldens(cases, path):
-    """Write committed golden fixtures with oracle metadata."""
+    """Write committed golden fixtures with taxcalc metadata."""
     import taxcalc as tc
 
-    primary, spouse = oracle_expectations(cases)
+    primary, spouse = taxcalc_expectations(cases)
     payload = {
         "meta": {
             "taxcalc_version": tc.__version__,
@@ -348,7 +348,7 @@ def write_goldens(cases, path):
 
 def check(cases):
     """Three-way verdict run. Exit nonzero on any unclassified disagreement."""
-    primary, spouse = oracle_expectations(cases)
+    primary, spouse = taxcalc_expectations(cases)
     ots = run_tenforty(cases, "ots")
     graph = run_tenforty(cases, "graph")
 
@@ -362,9 +362,9 @@ def check(cases):
             if "error" in got:
                 errors.append((backend, c, got["error"]))
                 continue
-            excused = oracle_policy.excused_quantities(backend, c)
+            excused = taxcalc_policy.excused_quantities(backend, c)
             for q in QUANTITIES:
-                tol = oracle_policy.tolerance(backend, q, exp["taxable_income"], c)
+                tol = taxcalc_policy.tolerance(backend, q, exp["taxable_income"], c)
                 lo = hi = exp[q]
                 if exp_alt is not None:
                     lo, hi = min(lo, exp_alt[q]), max(hi, exp_alt[q])
@@ -401,7 +401,7 @@ def main():
     if args.check:
         return check(cases)
 
-    primary, spouse = oracle_expectations(cases)
+    primary, spouse = taxcalc_expectations(cases)
     ots = run_tenforty(cases, "ots")
     graph = run_tenforty(cases, "graph")
     rows = []
