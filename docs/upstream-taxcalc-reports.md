@@ -14,7 +14,7 @@ and the text to file.
 **Where:** `taxcalc/calcfunctions.py`, where `c62100` (Form 6251 line 4) is
 built.
 
-We have been using Tax-Calculator as an oracle while testing our own tax
+We have been using Tax-Calculator as a reference while testing our own tax
 engines, and we ran into a difference we can't account for. We may well be
 misreading something — this is a question rather than a bug report.
 
@@ -116,7 +116,7 @@ turns out to be deliberate.
 ### How this came up
 
 We run OpenTaxSolver and our own graph-based engine against Tax-Calculator as
-an oracle. On AMT-preference cases, OpenTaxSolver produced $43,813.50 while
+a reference. On AMT-preference cases, OpenTaxSolver produced $43,813.50 while
 Tax-Calculator and our own engine both produced $39,725.50. We initially read
 the agreement as confirmation, but on looking at Form 6251 we think our engine
 and Tax-Calculator may simply be making the same shortcut — starting from

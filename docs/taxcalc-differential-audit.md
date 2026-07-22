@@ -190,22 +190,16 @@ $43,813.50; taxcalc and the graph spec both compute $39,725.50 — agreeing
 to the penny — and the $4,088 gap is exactly 28% x $14,600, the standard
 deduction. Form 6251 line 2a instructs non-itemizers to add the standard
 deduction back into AMTI, which is what OTS does. If the form walkthrough
-<<<<<<< HEAD
-and a TAXSIM cross-check confirm that reading, this is the first *reference-implementation*
-defect found by the suite — shared by our own graph spec — and the excusing
-signature flips from OTS to graph, with an upstream report to PSL. The
-=======
 and a TAXSIM cross-check support that reading, this would be the first time
-the suite has turned up something in an *oracle* — apparently shared by our
-own graph spec — and the excusing signature flips from OTS to graph, with a
-note raised upstream to PSL. The
->>>>>>> 618afc8 (docs: soften the F14 write-up from verdict to question)
+the suite has turned up something in a *reference implementation* — apparently
+shared by our own graph spec — and the excusing signature flips from OTS to
+graph, with a note raised upstream to PSL. The
 suspects agreeing to the penny is itself evidence of a shared modeling
 choice rather than independent correctness.
 
 **ADJUDICATED — OTS appears to match Form 6251; taxcalc and our graph spec
 both appear to diverge from it.** As best we can tell this is the first time
-the suite has turned up something in an *oracle* rather than in us.
+the suite has turned up something in a *reference implementation* rather than in us.
 
 Four lines of evidence, which agree with each other:
 
@@ -266,7 +260,7 @@ to compute the law rather than to match an aggregate.
 Found while adjudicating F14. `scripts/taxcalc_audit.py` — the probe that
 found F14 — correctly carries the ISO spread to taxcalc as `cmbtp`. The
 adapter that shipped into the suite, `taxcalc_batch` in
-`tests/oracle/taxcalc_differential_test.py`, does not: it builds its record
+`tests/taxcalc/taxcalc_differential_test.py`, does not: it builds its record
 without `cmbtp`, so taxcalc is handed no AMT preference at all. Through the
 suite, the F14 case returns taxcalc AMT `$0.00` rather than `$39,725.50`,
 and feeding `iso=200_000` or `iso=0` produces identical output.
