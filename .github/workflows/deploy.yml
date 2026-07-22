@@ -30,6 +30,33 @@ jobs:
     - name: Run tests
       run: uv run pytest --hypothesis-profile=ci
 
+  # The taxcalc adapter conformance tests are gated behind TENFORTY_TAXCALC,
+  # which the job above never sets — so without this job they would never run
+  # anywhere. That is the same failure they exist to catch: F16 happened
+  # because nothing exercised the adapter. Only the conformance file runs here;
+  # the full differential sweep takes ~7 minutes and stays opt-in.
+  taxcalc-adapter:
+    name: taxcalc adapter conformance
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install deps with taxcalc
+      run: uv sync --group taxcalc
+
+    - name: Run adapter conformance
+      env:
+        TENFORTY_TAXCALC: '1'
+      run: uv run pytest tests/taxcalc/adapter_conformance_test.py -q
+
   # Build wheels and sdist only on pushes to main, and only if validation
   # succeeds
   build-wheels:

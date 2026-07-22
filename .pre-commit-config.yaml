@@ -21,7 +21,7 @@ repos:
     args: [--fix=lf]
   - id: name-tests-test
     args: [--pytest]
-    exclude: ^tests/(fixtures/|oracle/(oracle_policy|__init__)\.py)
+    exclude: ^tests/(fixtures/|taxcalc/(taxcalc_policy|__init__)\.py)
   - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.15.22

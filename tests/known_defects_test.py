@@ -264,3 +264,26 @@ def test_graph_cross_mode_grid_shape_and_alignment():
         df["w2_income"], df["federal_adjusted_gross_income"], strict=True
     ):
         assert agi == pytest.approx(w2, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F17: graph charges SE tax below the $400 Schedule SE de-minimis floor",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_graph_honors_se_deminimis_floor():
+    """Net self-employment earnings under $400 owe no SE tax.
+
+    Schedule SE line 4c stops the computation when adjusted net earnings are
+    below $400 (IRC 1402(b)(2)). $400 of gross self-employment income becomes
+    $369.40 after the 92.35% factor, so no tax is due. OTS and taxcalc agree;
+    the graph spec charges 15.3% from the first dollar.
+    """
+    r = evaluate_return(
+        year=2025,
+        filing_status="Single",
+        w2_income=125_000,
+        self_employment_income=400,
+        backend="graph",
+    )
+    assert r.federal_se_tax == pytest.approx(0.0, abs=0.01)
