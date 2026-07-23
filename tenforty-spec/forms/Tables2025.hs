@@ -1,5 +1,5 @@
-module Tables2025 (
-    -- * Federal Income Tax Brackets
+module Tables2025
+  ( -- * Federal Income Tax Brackets
     federalBrackets2025,
     federalBracketsTable2025,
 
@@ -76,29 +76,29 @@ module Tables2025 (
     eitcMaxCredit1QC2025,
     eitcMaxCredit2QC2025,
     eitcMaxCredit3PlusQC2025,
-) where
+  )
+where
 
 import Data.List.NonEmpty (NonEmpty (..))
-
 import TenForty.Table
 import TenForty.Types
 
 federalBrackets2025 :: NonEmpty Bracket
 federalBrackets2025 =
-    Bracket (byStatus 11925 23850 11925 17000 23850) 0.10
-        :| [ Bracket (byStatus 48475 96950 48475 64850 96950) 0.12
-           , Bracket (byStatus 103350 206700 103350 103350 206700) 0.22
-           , Bracket (byStatus 197300 394600 197300 197300 394600) 0.24
-           , Bracket (byStatus 250525 501050 250525 250500 501050) 0.32
-           , Bracket (byStatus 626350 751600 375800 626350 751600) 0.35
-           , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.37
-           ]
+  Bracket (byStatus 11925 23850 11925 17000 23850) 0.10
+    :| [ Bracket (byStatus 48475 96950 48475 64850 96950) 0.12,
+         Bracket (byStatus 103350 206700 103350 103350 206700) 0.22,
+         Bracket (byStatus 197300 394600 197300 197300 394600) 0.24,
+         Bracket (byStatus 250525 501050 250525 250500 501050) 0.32,
+         Bracket (byStatus 626350 751600 375800 626350 751600) 0.35,
+         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.37
+       ]
 
 federalBracketsTable2025 :: Table
 federalBracketsTable2025 =
-    case mkBracketTable federalBrackets2025 of
-        Right bt -> TableBracket "federal_brackets_2025" bt
-        Left err -> error $ "Invalid federal brackets: " ++ err
+  case mkBracketTable federalBrackets2025 of
+    Right bt -> TableBracket "federal_brackets_2025" bt
+    Left err -> error $ "Invalid federal brackets: " ++ err
 
 standardDeduction2025 :: ByStatus (Amount Dollars)
 standardDeduction2025 = byStatus 15750 31500 15750 23625 31500
@@ -125,9 +125,8 @@ niitThreshold2025 = byStatus 200000 250000 125000 200000 250000
 additionalMedicareThreshold2025 :: ByStatus (Amount Dollars)
 additionalMedicareThreshold2025 = byStatus 200000 250000 125000 200000 200000
 
-{- | 2025 AMT 26%/28% rate threshold (above this, 28% applies)
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 AMT 26%/28% rate threshold (above this, 28% applies)
+-- Order: Single, MFJ, MFS, HoH, QW
 amtRate1Threshold2025 :: ByStatus (Amount Dollars)
 amtRate1Threshold2025 = byStatus 239100 239100 119550 239100 239100
 
@@ -155,9 +154,8 @@ ctcPerChild2025 = 2000
 ctcOtherDependent2025 :: Amount Dollars
 ctcOtherDependent2025 = 500
 
-{- | 2025 CTC phase-out threshold
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 CTC phase-out threshold
+-- Order: Single, MFJ, MFS, HoH, QW
 ctcThreshold2025 :: ByStatus (Amount Dollars)
 ctcThreshold2025 = byStatus 200000 400000 200000 200000 400000
 
@@ -181,9 +179,8 @@ actcEarnedIncomeRate2025 = 0.15
 qbiDeductionRate2025 :: Amount Rate
 qbiDeductionRate2025 = 0.20
 
-{- | 2025 QBI simplified method threshold (above this, use Form 8995-A)
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 QBI simplified method threshold (above this, use Form 8995-A)
+-- Order: Single, MFJ, MFS, HoH, QW
 qbiThreshold2025 :: ByStatus (Amount Dollars)
 qbiThreshold2025 = byStatus 197300 394600 197300 197300 394600
 
@@ -195,9 +192,8 @@ aotcMaxCredit2025 = 2500
 aotcRefundableRate2025 :: Amount Rate
 aotcRefundableRate2025 = 0.40
 
-{- | 2025 AOTC phase-out threshold (start)
-Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
--}
+-- | 2025 AOTC phase-out threshold (start)
+-- Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
 aotcThreshold2025 :: ByStatus (Amount Dollars)
 aotcThreshold2025 = byStatus 80000 160000 0 80000 160000
 
@@ -217,9 +213,8 @@ llcExpenseLimit2025 = 10000
 llcRate2025 :: Amount Rate
 llcRate2025 = 0.20
 
-{- | 2025 LLC phase-out threshold (start)
-Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
--}
+-- | 2025 LLC phase-out threshold (start)
+-- Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
 llcThreshold2025 :: ByStatus (Amount Dollars)
 llcThreshold2025 = byStatus 80000 160000 0 80000 160000
 
@@ -255,9 +250,8 @@ dependentCarePercentStep2025 = 0.01
 dependentCareAGIFloor2025 :: Amount Dollars
 dependentCareAGIFloor2025 = 15000
 
-{- | 2025 EITC phase-in ends (earned income for max credit)
-Values inflation-adjusted from 2024
--}
+-- | 2025 EITC phase-in ends (earned income for max credit)
+-- Values inflation-adjusted from 2024
 eitcPhaseInEnds0QC2025 :: Amount Dollars
 eitcPhaseInEnds0QC2025 = 8490
 
@@ -290,9 +284,8 @@ eitcPhaseOutRate1QC2025 = 0.1598
 eitcPhaseOutRate2PlusQC2025 :: Amount Rate
 eitcPhaseOutRate2PlusQC2025 = 0.2106
 
-{- | 2025 EITC phase-out thresholds
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 EITC phase-out thresholds
+-- Order: Single, MFJ, MFS, HoH, QW
 eitcPhaseOutThreshold0QC2025 :: ByStatus (Amount Dollars)
 eitcPhaseOutThreshold0QC2025 = byStatus 10620 17730 10620 10620 10620
 

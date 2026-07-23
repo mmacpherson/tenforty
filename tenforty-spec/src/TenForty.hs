@@ -1,5 +1,5 @@
-module TenForty (
-    -- * DSL
+module TenForty
+  ( -- * DSL
     module TenForty.DSL,
 
     -- * Compilation
@@ -11,7 +11,8 @@ module TenForty (
     GraphMeta (..),
     Node (..),
     Op (..),
-) where
+  )
+where
 
 import TenForty.Compile.JSON
 import TenForty.DSL
