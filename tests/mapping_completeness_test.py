@@ -37,17 +37,11 @@ INVENTORY = {
     ("schedule_se", "self_employment_income"): {"ots": "mapped", "graph": "mapped"},
     ("schedule_se", "w2_income"): {"ots": "mapped", "graph": "mapped"},
     ("form_8959", "w2_income"): {"ots": "mapped", "graph": "mapped"},
-    ("form_8959", "self_employment_income"): {
-        "ots": "mapped",
-        "graph": "missing:F5",
-    },
+    ("form_8959", "self_employment_income"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "taxable_interest"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "ordinary_dividends"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "long_term_capital_gains"): {"ots": "mapped", "graph": "mapped"},
-    ("form_8960", "short_term_capital_gains"): {
-        "ots": "mapped",
-        "graph": "missing:F4",
-    },
+    ("form_8960", "short_term_capital_gains"): {"ots": "mapped", "graph": "mapped"},
     ("form_8995", "self_employment_income"): {
         "ots": "missing:F3",  # no Form 8995 config exists at all
         "graph": "mapped",
@@ -71,6 +65,52 @@ def _ots_mapped(form_key: str, natural: str, year: int = 2024) -> bool:
     return False
 
 
+# The output node whose derivative reveals whether a natural reaches a form,
+# and a base return that puts that output in its active region. Used when a
+# concept reaches a form through a spec-level `importForm` rather than a
+# mapping-table entry (Form 8960 line 5a imports the 1040 capital-gain line;
+# Form 8959 line 8 imports Schedule SE) — invisible to the mapping dict but a
+# real, differentiable edge.
+GRAPH_FORM_OUTPUT = {
+    "schedule_se": "us_schedule_se_L10_se_tax",
+    "form_8959": "us_form_8959_L18_total_additional_medicare",
+    "form_8960": "us_form_8960_L17_niit",
+    "form_8995": "us_form_8995_L16_qbi_deduction",
+}
+# High wages clear the NIIT and Additional-Medicare thresholds; the QBI forms
+# want self-employment income without the wage limitation biting.
+GRAPH_ACTIVE_BASE = {
+    "schedule_se": {"self_employment_income": 60_000.0},
+    "form_8959": {"w2_income": 250_000.0},
+    "form_8960": {"w2_income": 250_000.0},
+    "form_8995": {"self_employment_income": 60_000.0},
+}
+
+
+def _graph_flows(form_key: str, natural: str) -> bool:
+    """Report whether the form's output actually moves with the natural.
+
+    The derivative is the honest test of a consumer edge: it is nonzero
+    exactly when the concept reaches the form's computation, whether it
+    arrived by a mapping entry or a spec import, and it stays zero for a
+    wrong-destination wiring. Requires the graph backend and the fan-out-aware
+    autodiff from #294.
+    """
+    from tenforty.backends import GraphBackend
+    from tenforty.models import TaxReturnInput
+
+    backend = GraphBackend()
+    if not backend.is_available():
+        return _graph_mapped(form_key, natural)
+
+    case = {"year": 2024, "filing_status": "Single", **GRAPH_ACTIVE_BASE[form_key]}
+    case[natural] = case.get(natural, 0.0) + 100_000.0
+    gradient = backend.gradient(
+        TaxReturnInput(**case), GRAPH_FORM_OUTPUT[form_key], natural
+    )
+    return gradient is not None and abs(gradient) > 1e-9
+
+
 def _graph_mapped(form_key: str, natural: str) -> bool:
     prefix = GRAPH_PREFIXES[form_key]
     for natural_name, nodes in NATURAL_TO_NODES.items():
@@ -87,7 +127,7 @@ def test_consumer_edge_matches_inventory(form_key, natural):
     declared = INVENTORY[(form_key, natural)]
     actual = {
         "ots": _ots_mapped(form_key, natural),
-        "graph": _graph_mapped(form_key, natural),
+        "graph": _graph_mapped(form_key, natural) or _graph_flows(form_key, natural),
     }
     for backend, state in declared.items():
         expected = state == "mapped"

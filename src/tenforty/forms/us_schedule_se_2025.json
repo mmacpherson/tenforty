@@ -126,26 +126,57 @@
         },
         "21": {
             "id": 21,
-            "name": "L10_se_tax",
+            "op": {
+                "type": "literal",
+                "value": 400
+            }
+        },
+        "22": {
+            "id": 22,
+            "op": {
+                "left": 11,
+                "right": 21,
+                "type": "sub"
+            }
+        },
+        "23": {
+            "id": 23,
             "op": {
                 "left": 18,
                 "right": 20,
                 "type": "add"
             }
         },
-        "22": {
-            "id": 22,
+        "24": {
+            "id": 24,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "25": {
+            "id": 25,
+            "name": "L10_se_tax",
+            "op": {
+                "cond": 22,
+                "otherwise": 24,
+                "then": 23,
+                "type": "if_positive"
+            }
+        },
+        "26": {
+            "id": 26,
             "op": {
                 "type": "literal",
                 "value": 0.5
             }
         },
-        "23": {
-            "id": 23,
+        "27": {
+            "id": 27,
             "name": "L11_se_tax_deduction",
             "op": {
-                "left": 21,
-                "right": 22,
+                "left": 25,
+                "right": 26,
                 "type": "mul"
             }
         },
@@ -205,8 +236,8 @@
         }
     },
     "outputs": [
-        21,
-        23,
+        25,
+        27,
         6,
         8,
         11,

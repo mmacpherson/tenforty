@@ -42,7 +42,9 @@ _SUBORDINATE_NODES: dict[str, list[str]] = {
     ],
     "taxable_interest": ["us_form_8960_L1_taxable_interest"],
     "ordinary_dividends": ["us_form_8960_L2_ordinary_dividends"],
-    "long_term_capital_gains": ["us_form_8960_L5a_net_gain_disposition"],
+    # Form 8960 line 5a now imports the net capital gain from Schedule D
+    # line 16 (both holding periods), so neither
+    # gain natural is mapped here — see USForm8960_*.hs.
     "rental_income": ["us_form_8960_L4a_rental_royalty_income"],
 }
 

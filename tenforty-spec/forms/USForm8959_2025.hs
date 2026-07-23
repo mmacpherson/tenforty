@@ -45,7 +45,7 @@ usForm8959_2025 = form "us_form_8959" 2025 $ do
 
     l12 <-
         interior "L12" "se_subject_to_tax" $
-            smallerOf l8 l11
+            l8 `subtractNotBelowZero` l11
 
     l13 <-
         keyOutput "L13" "additional_medicare_se" "Additional Medicare Tax on self-employment income" $

@@ -104,7 +104,7 @@ us1040_2024 = form "us_1040" 2024 $ do
     let qcgws2 = l3a
 
     -- Line 3: If Sched D used, smaller of D15 or D16. If not, L7.
-    qcgws3 <- interior "qcgws_3" "work_l3" $ ifPos l15SchedD (minE l15SchedD l7) l7
+    qcgws3 <- interior "qcgws_3" "work_l3" $ max0 (minE l15SchedD l7)
 
     qcgws4 <- interior "qcgws_4" "work_l4" $ qcgws2 .+. qcgws3
     qcgws5 <- interior "qcgws_5" "work_l5" $ qcgws1 `subtractNotBelowZero` qcgws4

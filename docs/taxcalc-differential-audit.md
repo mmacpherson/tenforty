@@ -20,16 +20,16 @@ delete the signature, and update this table in the same PR.
 | F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
 | F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
 | F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | open | @bg002h, #278 |
-| F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed on OTS; open on graph | mapping assessment + differential sweep |
-| F5 | Graph Form 8959 omits SE earnings | graph mapping | open | mapping assessment + differential sweep |
+| F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed (OTS #296, graph: L5a imports Schedule D L16) | mapping assessment + differential sweep |
+| F5 | Graph Form 8959 Part II drops SE earnings (line 12 used min, not subtract) | graph spec | fixed | mapping assessment + differential sweep |
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
 | F7 | "Itemized" force vs best-of divergence | API contract | open (owner decision) | differential sweep |
 | F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
 | F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
-| F10 | Short-term gains taxed at preferential rates | graph spec | open | differential grid |
+| F10 | Short-term gains taxed at preferential rates (QCGWS line 3) | graph spec | fixed | differential grid |
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
-| F13 | 2025 MFS long-term-gain thresholds high | graph spec (suspect) | open | differential grid |
+| F13 | 2025 MFS 15%-rate ceiling wrong (266,700 vs 300,000), inline in 1040 not Tables | graph spec | fixed | differential grid |
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (both, apparently) | adjudicated: OTS matches the form; fix graph, ask taxcalc | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
@@ -369,3 +369,53 @@ Above the floor the two agree exactly, so the divergence is isolated to the
 de-minimis rule. Two engines against one, with the form instruction agreeing
 with the majority. The half-SE-tax adjustment reaches AGI, so `agi` diverged
 by exactly half the SE tax as well.
+
+
+### Graph spec bundle — corrected mechanisms (F5, F10, F13, F4-graph, F17)
+
+Five graph-side findings fixed together in the Haskell spec. Two of the
+mechanisms differed from what the tracking notes predicted; recording the
+real ones.
+
+**F5 was arithmetic, not a missing import.** Form 8959 line 8 already imported
+self-employment income from Schedule SE. Line 12 computed
+`smallerOf line8 line11` where the form subtracts (`line8 - line11`, not below
+zero). With wages above the threshold, line 11 is zero, so `min(SE, 0)` was
+zero and the whole SE Additional-Medicare charge vanished. Changed to
+`subtractNotBelowZero`. Single, $250k wages + $50k SE: $450 → $865.57.
+
+**F10 is the Qualified Dividends and Capital Gain Tax Worksheet, line 3.** It
+read `ifPos L15 (min L15 L16) L16` — when there was no long-term gain it fell
+through to L16 (the net total, including short-term), routing short-term gains
+to preferential rates. Replaced with `max0 (min L15 L16)`, the worksheet's
+"smaller of Schedule D line 15 or 16, else zero." Single, $50k wages + $25k
+STCG: income tax $6,022 → $8,341.
+
+**F13 was a single wrong constant, and not where expected.** The preferential
+breakpoints are inlined in `US1040_2025.hs`, not read from `Tables2025.hs`
+(whose `qualifiedDividendBrackets2025` is dead code). The 2025 MFS 15%-rate
+ceiling read $266,700; Rev. Proc. 2024-40 puts it at $300,000. The wrong value
+taxed $33,300 of gain at 20% instead of 15% — a flat $1,665 overcharge. 2024's
+MFS breakpoints were already correct.
+
+**F4-graph** now imports Form 8960 line 5a from Schedule D line 16 (both
+holding periods netted), mirroring #296's OTS fix and dropping the
+`long_term_capital_gains → L5a` mapping. Short-term gains reach NIIT; the
+long-term path is unchanged. Single, $300k wages + $50k STCG: NIIT $0 →
+$1,900.
+
+**F17** adds the Schedule SE $400 de-minimis floor (IRC 1402(b)(2)): line 10
+returns zero when line 4c is under $400. See the F17 entry above.
+
+The five known-defect signatures (`_f4_niit_stcg`, `_f5_graph_8959`,
+`_f10_graph_stcg_preferential`, `_f13_graph_2025_mfs_ltcg`,
+`_f17_graph_se_deminimis`) and their strict-xfail burn-ins are deleted; the
+differential sweep passes on the graph backend with none of them.
+
+Two things found and deliberately left for follow-up: `Tables2025.hs`'s
+`qualifiedDividendBrackets2025` (and the 2024 twin) is dead — the live
+breakpoints are inline in the 1040, so the two should be reconciled or the
+dead table removed. And graph Schedule D line 16 sums the net gain without the
+section 1211(b) $3,000 capital-loss limitation; harmless for the gain cases
+here but wrong for a net-loss return, on both the main tax and the imported
+8960 line 5a.

@@ -74,7 +74,6 @@ def test_ots_niit_includes_short_term_gains():
     assert r.federal_niit == pytest.approx(1_900.0, abs=1.0)
 
 
-@pytest.mark.xfail(reason="F4: 8960 L5a omits short-term gains (graph)", strict=True)
 @skip_if_graph_unavailable
 def test_graph_niit_includes_short_term_gains():
     """Same case on the graph backend: NIIT must include short-term gains."""
@@ -143,7 +142,6 @@ def test_business_property_gain_can_be_excluded_from_nii():
     assert "L5b" in wired
 
 
-@pytest.mark.xfail(reason="F5: graph 8959 omits SE earnings", strict=True)
 @skip_if_graph_unavailable
 def test_graph_additional_medicare_includes_se_earnings():
     """$250k wages + $50k SE profit: additional Medicare tax is $865.57, not $450."""
@@ -183,10 +181,6 @@ def test_graph_zip_applies_dividend_normalization():
     assert df["federal_adjusted_gross_income"][0] == pytest.approx(72_000.0, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F10: graph taxes short-term gains at preferential rates",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_taxes_short_term_gains_as_ordinary():
     """Single, $50k wages + $25k STCG: income tax $8,341 (STCG is ordinary income)."""
@@ -237,10 +231,6 @@ def test_itemized_category_amt_agrees_across_backends():
     assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F13: graph 2025 MFS long-term-gain thresholds diverge from consensus",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_2025_mfs_ltcg_matches_consensus():
     """MFS 2025, $150k wages + $200k LTCG: income tax $56,779.50 per OTS+taxcalc."""
@@ -320,10 +310,6 @@ def test_graph_cross_mode_grid_shape_and_alignment():
         assert agi == pytest.approx(w2, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F17: graph charges SE tax below the $400 Schedule SE de-minimis floor",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_honors_se_deminimis_floor():
     """Net self-employment earnings under $400 owe no SE tax.
