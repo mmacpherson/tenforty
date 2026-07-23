@@ -335,6 +335,29 @@ class GraphBackend:
             statuses = expanded_statuses
             mode = "zip"
 
+        # Normalize each materialized row through TaxReturnInput so the batch
+        # path applies the same validators (the qualified>ordinary dividend
+        # lift) and computed fields (schedule_se_ss_wages, Schedule SE line 8a)
+        # that evaluate_return() applies via the single-scenario model. Rows are
+        # concrete here — cross mode expanded to zip above — so each entry in
+        # `statuses` pairs with one value per column, and the status-dependent
+        # line-8a derivation can be done per row on the Python side.
+        model_fields = set(TaxReturnInput.model_fields)
+        scenario_fields = [name for name in inputs if name in model_fields]
+        normalized: dict[str, list[float]] = {}
+        for i, status in enumerate(statuses):
+            dumped = TaxReturnInput(
+                year=year,
+                state=state or OTSState.NONE,
+                filing_status=status,
+                **{name: inputs[name][i] for name in scenario_fields},
+            ).model_dump(
+                exclude={"year", "state", "filing_status", "standard_or_itemized"}
+            )
+            for name, value in dumped.items():
+                normalized.setdefault(name, []).append(float(value))
+        inputs = normalized
+
         # Determine required forms using representative inputs from the batch.
         # We use the max-absolute value per input to capture any non-zero cases.
         resolve_inputs = {
