@@ -241,20 +241,16 @@ def test_se_tax_mfj_w2_aggregate_does_not_fill_one_spouses_wage_base():
     assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
 
 
-@pytest.mark.xfail(
-    reason=(
-        "The graph batch path does not apply the line 8a derivation. evaluate_return() "
-        "builds a TaxReturnInput, so it picks up the computed schedule_se_ss_wages field; "
-        "GraphBackend.evaluate_batch() takes raw input columns instead, and in cross mode "
-        "the filing-status axis is expanded inside the Rust graph, so a status-dependent "
-        "column cannot be derived on the Python side. The fix belongs in the graph spec, "
-        "which should compute the filer's own SS wages itself."
-    ),
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_se_tax_graph_batch_matches_single():
-    """Batch and single evaluation must agree on SE tax."""
+    """Batch and single evaluation must agree on SE tax.
+
+    evaluate_batch() now normalizes each materialized row through TaxReturnInput
+    before mapping to graph nodes, so the computed schedule_se_ss_wages field
+    (Schedule SE line 8a) is derived per row on the Python side — cross mode
+    expands to zip in Python before the Rust call, so the filing status is known
+    for each row. Fixed by tenforty-tve (F9).
+    """
     from tenforty import evaluate_returns
 
     kwargs = dict(

@@ -16,7 +16,7 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 
-from .taxcalc_policy import batch_input_gap_quantities, evaluate_components
+from .taxcalc_policy import evaluate_components
 
 FIXTURE = Path(__file__).parent / "fixtures" / "taxcalc_goldens.json"
 
@@ -82,10 +82,7 @@ def test_zip_batch_matches_scalar(backend):
     mismatches = []
     for i, case in enumerate(cases):
         scalar = evaluate_components(case, backend)
-        excused = batch_input_gap_quantities(backend, case)
         for quantity, column in BATCH_QUANTITY_COLUMNS.items():
-            if quantity in excused:
-                continue
             batch_value = float(df[column][i])
             if abs(batch_value - scalar[quantity]) > 0.02:
                 mismatches.append(

@@ -19,13 +19,13 @@ delete the signature, and update this table in the same PR.
 |----|---------|----------|--------|----------|
 | F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
 | F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
-| F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | open | @bg002h, #278 |
+| F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | graph base fixed (tenforty-6hr); OTS omission + graph above-threshold open | @bg002h, #278 |
 | F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed (OTS #296, graph: L5a imports Schedule D L16) | mapping assessment + differential sweep |
 | F5 | Graph Form 8959 Part II drops SE earnings (line 12 used min, not subtract) | graph spec | fixed | mapping assessment + differential sweep |
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
 | F7 | "Itemized" force vs best-of divergence | API contract | open (owner decision) | differential sweep |
 | F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
-| F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
+| F9 | Batch path bypasses TaxReturnInput | graph batch path | fixed (tenforty-tve) | batch-conformance tests |
 | F10 | Short-term gains taxed at preferential rates (QCGWS line 3) | graph spec | fixed | differential grid |
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
@@ -77,13 +77,16 @@ everything downstream of them.
   AGI shift — the decomposition closes to within $2 in **all 145** SE-income
   cases. Pure missing orchestration: no Form 8995 config exists.
 - Graph: the spec **does** implement the 20%-of-taxable-income limitation
-  (a first-pass read of this audit said otherwise). Its sole defect is the
-  base: Form 8995 L1 receives *gross* Schedule C profit instead of profit
+  (a first-pass read of this audit said otherwise). Its sole defect was the
+  base: Form 8995 L1 received *gross* Schedule C profit instead of profit
   net of the §164(f) half-SE deduction. When the base term binds the error
-  is 20% × the half-SE deduction (e.g., $1,130.36 at Single w2 $50k /
-  SE $80k); when the cap binds (the grid's 20 `w2=0` cases) the graph is
-  exactly correct. The 125-case "20% of gross" fit and the up-to-$70,453
-  taxable understatement are the base-bound cases.
+  was 20% × the half-SE deduction (e.g., $1,130.36 at Single w2 $50k /
+  SE $80k); when the cap binds (the grid's 20 `w2=0` cases) the graph was
+  already exactly correct. **Fixed (tenforty-6hr):** Form 8995 now imports
+  Schedule SE line 11 and nets it out before the 20%, so below the §199A
+  threshold the graph agrees with taxcalc to the cent (verified at both the
+  base-bound Single w2 $50k / SE $80k → taxable $94,878.54 and the cap-bound
+  MFJ SE $80k → taxable $36,118.54).
 - Above the §199A thresholds the correct deduction additionally depends on
   business W-2 wages / UBIA / SSTB status — concepts absent from tenforty's
   API (taxcalc assumes zero business wages, phasing the deduction to zero
@@ -149,16 +152,26 @@ diagonal is correct. OTS cross/zip and graph zip are all correct. Prior
 audits used one-row batch cases, where 1×1 = 1 row masks the explosion
 entirely — another instance of easy scenarios hiding a broken path.
 
-### F9. NEW — Graph batch path bypasses TaxReturnInput normalization
+### F9. FIXED — Graph batch path bypasses TaxReturnInput normalization
 
 Found by the differential suite's batch-conformance tests (added post-audit).
-`GraphBackend.evaluate_batch` consumes raw input columns, skipping pydantic
+`GraphBackend.evaluate_batch` consumed raw input columns, skipping pydantic
 model validators and computed fields. Two confirmed symptoms: the
-qualified>ordinary dividend lift is not applied (Single, w2 $60k, qualified
+qualified>ordinary dividend lift was not applied (Single, w2 $60k, qualified
 dividends $12k: scalar AGI $72,000, zip AGI $60,000; OTS zip correct), and
-the `schedule_se_ss_wages` derivation is absent (the batch xfail shipped
-with PR #279). Durable fix: route batch rows through `TaxReturnInput`, or
-move the derivations into the graph spec.
+the `schedule_se_ss_wages` derivation was absent (the batch xfail shipped
+with PR #279).
+
+Fixed by routing each materialized batch row through `TaxReturnInput` inside
+`evaluate_batch`, right after cross mode expands to zip on the Python side —
+so the status-dependent line-8a derivation is available per row — and taking
+the same `model_dump` (excluding year/state/filing_status/standard_or_itemized)
+the single-scenario path uses. Batch now reproduces scalar row-for-row; the
+`batch_input_gap_quantities` excuser is deleted and batch conformance passes
+unexcused. The two strict-xfail burn-ins
+(`test_graph_zip_applies_dividend_normalization`,
+`test_se_tax_graph_batch_matches_single`) flip to passing guards. Closed by
+`tenforty-tve`.
 
 ### F10. NEW — Graph taxes short-term capital gains at preferential rates
 

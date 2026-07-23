@@ -40,18 +40,15 @@ def test_ots_qbi_deduction_reaches_1040():
     assert r.federal_taxable_income == pytest.approx(36_118.54, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F3: graph QBI base is gross profit, not net of half-SE",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_qbi_uses_net_base():
     """Single, $50k wages + $80k SE: QBI base must be net of the half-SE deduction.
 
     Correct deduction is 20% of net profit ($14,869.64), not 20% of gross
     ($16,000). The graph's taxable-income limitation is already correct; only
-    the base is wrong, so this case makes the base term bind (taxable income
-    stays below both the cap and the §199A threshold).
+    the base was wrong, so this case makes the base term bind (taxable income
+    stays below both the cap and the §199A threshold). Form 8995 now imports
+    Schedule SE line 11 and nets it out before the 20%. Fixed by tenforty-6hr.
     """
     r = evaluate_return(
         year=2024,
@@ -213,10 +210,6 @@ def test_ots_additional_medicare_fires_without_wages():
     assert r.federal_additional_medicare_tax == pytest.approx(693.45, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F9: graph batch bypasses TaxReturnInput normalization",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_zip_applies_dividend_normalization():
     """Zip batch must lift ordinary dividends to cover qualified, like scalar."""
