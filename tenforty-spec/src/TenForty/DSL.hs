@@ -1,5 +1,5 @@
-module TenForty.DSL (
-    -- * Form Construction
+module TenForty.DSL
+  ( -- * Form Construction
     form,
     defineTable,
     outputs,
@@ -63,13 +63,13 @@ module TenForty.DSL (
     module TenForty.Table,
     module TenForty.PhaseOut,
     Expr,
-) where
+  )
+where
 
 import Control.Monad.State.Strict
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
-
 import TenForty.Expr
 import TenForty.Form hiding (compute, input, worksheet)
 import TenForty.Form qualified as F
@@ -82,15 +82,15 @@ form = buildForm
 
 defineTable :: Table -> FormBuilder ()
 defineTable tbl = modify' $ \s ->
-    s
-        { bsTables = Map.insert (tableId tbl) tbl (bsTables s)
-        }
+  s
+    { bsTables = Map.insert (tableId tbl) tbl (bsTables s)
+    }
 
 outputs :: [LineId] -> FormBuilder ()
 outputs lids = modify' $ \s ->
-    s
-        { bsOutputs = Set.union (Set.fromList lids) (bsOutputs s)
-        }
+  s
+    { bsOutputs = Set.union (Set.fromList lids) (bsOutputs s)
+    }
 
 -- | Full API: define an input with all metadata
 input :: LineId -> Text -> Text -> LineImportance -> FormBuilder (Expr Dollars)
@@ -104,30 +104,27 @@ compute = F.compute
 worksheet :: LineId -> Text -> Text -> LineImportance -> [(LineId, Text, Expr Dollars)] -> FormBuilder (Expr Dollars)
 worksheet = F.worksheet
 
-{- | Define an important user-provided input
-
-Example:
-> wages <- keyInput "L1a" "wages" "Total wages, salaries, tips from W-2 box 1"
--}
+-- | Define an important user-provided input
+--
+-- Example:
+-- > wages <- keyInput "L1a" "wages" "Total wages, salaries, tips from W-2 box 1"
 keyInput :: LineId -> Text -> Text -> FormBuilder (Expr Dollars)
 keyInput lid name desc = F.input lid name desc KeyInput
 
-{- | Define an important computed output (AGI, tax liability, refund, etc.)
-
-Example:
-> agi <- keyOutput "L11" "agi" "Adjusted gross income" $
->          totalIncome .-. adjustments
--}
+-- | Define an important computed output (AGI, tax liability, refund, etc.)
+--
+-- Example:
+-- > agi <- keyOutput "L11" "agi" "Adjusted gross income" $
+-- >          totalIncome .-. adjustments
 keyOutput :: LineId -> Text -> Text -> Expr Dollars -> FormBuilder (Expr Dollars)
 keyOutput lid name desc = F.compute lid name desc KeyOutput
 
-{- | Define an intermediate calculation (carrier node)
-These are internal steps that don't need detailed descriptions.
-
-Example:
-> subtotal <- interior "L9" "total_income" $
->               wages .+. interest .+. dividends
--}
+-- | Define an intermediate calculation (carrier node)
+-- These are internal steps that don't need detailed descriptions.
+--
+-- Example:
+-- > subtotal <- interior "L9" "total_income" $
+-- >               wages .+. interest .+. dividends
 interior :: LineId -> Text -> Expr Dollars -> FormBuilder (Expr Dollars)
 interior lid name = F.compute lid name "" Interior
 
