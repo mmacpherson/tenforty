@@ -75,7 +75,9 @@ the source of truth for reproducibility, and `main` always builds against it.
   `tenforty-spec` is unpublished) → exact `tenforty-spec/cabal.project.freeze` at a
   pinned `index-state`, compiler pinned via `with-compiler`; bump with
   `cabal update` → bump `index-state` → `cabal freeze`. GHC: the latest stable the
-  pinned deps build against.
+  pinned deps **and the dev toolchain** build against — hlint/ormolu track GHC via
+  `ghc-lib-parser` and lag it, so the linter sets the practical ceiling (currently
+  9.12.x). This keeps one compiler for the project and all dev tools.
 
 If a newest combination breaks the build or tests, pin that one package back in the
 freeze rather than rolling the whole tree back.
