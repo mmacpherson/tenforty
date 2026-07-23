@@ -1,16 +1,14 @@
 name: spec (Haskell)
 
 # Promotes the tenforty-spec local gates (build, test, lint, generated-JSON sync)
-# into CI. Path-filtered so it only runs when the Haskell specs — or the JSON they
-# generate — change, and cached on the cabal.project.freeze hash so warm runs only
-# recompile tenforty-spec's own modules.
+# into CI. Runs on every push — NOT path-filtered — so it can be a *required*
+# status check: a path-filtered workflow never reports on PRs that don't touch it,
+# which leaves a required check stuck "Expected" and blocks the merge. Kept cheap
+# instead by caching on the cabal.project.freeze hash: on a push that doesn't touch
+# tenforty-spec the cache is a full hit, so build/compile are up-to-date no-ops and
+# the job finishes in a couple of minutes.
 
-on:
-  push:
-    paths:
-    - tenforty-spec/**
-    - src/tenforty/forms/**
-    - .github/workflows/spec-haskell.yml
+on: push
 
 concurrency:
   group: spec-haskell-${{ github.ref }}
