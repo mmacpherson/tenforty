@@ -1,9 +1,4 @@
-import init, {
-  FilingStatus,
-  Graph,
-  GraphSet,
-  Runtime,
-} from "./pkg/graphlib.js";
+import init, { FilingStatus, Graph, Runtime } from "./pkg/graphlib.js";
 
 let graph = null;
 let runtime = null;
@@ -32,29 +27,6 @@ const BRACKET_COLORS = [
   "#c0392b",
   "#8e44ad",
 ];
-
-const FEDERAL_FORMS = [
-  "us_1040",
-  "us_schedule_d",
-  "us_schedule_1",
-  "us_schedule_a",
-  "us_form_8995",
-  "us_schedule_2",
-  "us_form_8812",
-  "us_schedule_3",
-  "us_form_8863",
-  "us_schedule_se",
-  "us_form_6251",
-  "us_form_8959",
-  "us_form_8960",
-  "us_form_2441",
-];
-
-const STATE_FORMS = {
-  none: [],
-  california: ["ca_540", "ca_schedule_ca", "ca_ftb_3514"],
-  new_york: ["ny_it201"],
-};
 
 const STATE_TAX_NODES = {
   california: "ca_540_L64_ca_total_tax",
@@ -93,39 +65,22 @@ function getFilingStatus(value) {
   }
 }
 
-async function loadFormGraph(formId) {
-  const url = `forms/${formId}_${YEAR}.json`;
+let resolvedGraph = null;
+
+async function loadResolvedGraph() {
+  // One graph per year — federal plus every state, cross-form imports already
+  // resolved at build time. Eval is demand-driven, so a single load serves
+  // every state; switching state only re-reads different output nodes.
+  if (resolvedGraph) {
+    return resolvedGraph;
+  }
+  const url = `forms/us_tax_graph_${YEAR}.json`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to load ${url}: ${response.status}`);
   }
-  const json = await response.text();
-  return Graph.fromJson(json);
-}
-
-async function buildLinkedGraph(stateKey) {
-  const gs = new GraphSet();
-
-  for (const formId of FEDERAL_FORMS) {
-    const g = await loadFormGraph(formId);
-    gs.add(formId, g);
-  }
-
-  const stateForms = STATE_FORMS[stateKey] || [];
-  for (const formId of stateForms) {
-    const g = await loadFormGraph(formId);
-    gs.add(formId, g);
-  }
-
-  const unresolved = gs.unresolvedImports();
-  if (unresolved.length > 0) {
-    console.warn(
-      "Unresolved imports after linking:",
-      unresolved.map((u) => `${u.form}:${u.line} (${u.year})`),
-    );
-  }
-
-  return gs.link();
+  resolvedGraph = Graph.fromJson(await response.text());
+  return resolvedGraph;
 }
 
 function createRuntime() {
@@ -907,7 +862,7 @@ async function main() {
       "Loading tax forms...";
 
     const stateKey = getStateKey();
-    graph = await buildLinkedGraph(stateKey);
+    graph = await loadResolvedGraph();
 
     createRuntime();
     syncSliders();
@@ -928,7 +883,7 @@ async function main() {
       document.getElementById("loading").querySelector("p").textContent =
         "Switching state...";
       try {
-        graph = await buildLinkedGraph(newState);
+        graph = await loadResolvedGraph();
         createRuntime();
         taxCurveData = [];
         computeTaxCurve();

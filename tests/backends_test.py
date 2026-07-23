@@ -116,31 +116,18 @@ class TestGraphBackend:
         assert result is not None
         assert result > 0
 
-    def test_graph_backend_missing_dependency_fails(self, monkeypatch):
-        """Graph backend should fail loudly when a required form graph is missing."""
-        from tenforty.backends import graph as graph_module
-
-        # Clear cache to ensure clean state
-        graph_module._load_graph.cache_clear()
-        graph_module._link_graphs.cache_clear()
-
-        # Call _link_graphs with a list that is missing a dependency
-        # ca_540 imports ca_schedule_ca (and others), so omitting them should trigger the check
-        with pytest.raises(RuntimeError, match="unresolved imports"):
-            graph_module._link_graphs(2024, ("us_1040", "ca_540"))
-
     def test_graph_backend_integration_resolves_schedule_d(self):
-        """Integration test: inputting capital gains should automatically load Schedule D."""
+        """Integration test: capital gains flow through Schedule D in the resolved graph."""
         from tenforty.backends import GraphBackend
 
         backend = GraphBackend()
-        # Providing capital gains requires us_schedule_d
+        # Providing capital gains routes through us_schedule_d
         tax_input = TaxReturnInput(
             year=2024, w2_income=100_000, short_term_capital_gains=5000
         )
 
-        # This will fail if resolve_forms doesn't find Schedule D,
-        # because us_1040 has an import for it that would otherwise be unresolved.
+        # The resolved per-year graph already wires Schedule D into us_1040, so
+        # the gains must reach total tax.
         result = backend.evaluate(tax_input)
 
         # Verify result is sane (tax should include tax on gains)

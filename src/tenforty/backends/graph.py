@@ -44,21 +44,6 @@ def _forms_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent.parent.parent / "forms"
 
 
-@lru_cache(maxsize=8)
-def _load_graph(form_id: str, year: int):
-    """Load a graph for a given form and year."""
-    try:
-        from ..graphlib import Graph
-    except ImportError:
-        raise ImportError("Graph backend requires tenforty.graphlib module") from None
-
-    form_path = _forms_dir() / f"{form_id}_{year}.json"
-    if not form_path.exists():
-        return None
-
-    return Graph.from_json(form_path.read_text())
-
-
 @lru_cache(maxsize=4)
 def _load_resolved_graph(year: int):
     """Load the pre-resolved one-graph-per-year (federal + all states).
@@ -71,56 +56,6 @@ def _load_resolved_graph(year: int):
     from ..graphlib import Graph
 
     return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
-
-
-@lru_cache(maxsize=16)
-def _link_graphs(year: int, form_ids: tuple[str, ...]):
-    """Link a specific set of graphs for a given year."""
-    try:
-        from ..graphlib import GraphSet
-    except ImportError:
-        raise ImportError("Graph backend requires tenforty.graphlib module") from None
-
-    gs = GraphSet()
-
-    for form_id in form_ids:
-        graph = _load_graph(form_id, year)
-        if graph is None:
-            raise ValueError(f"Required graph not found: {form_id}_{year}")
-        gs.add(form_id, graph)
-
-    # Verify no unresolved imports remain (should be handled by resolve_forms,
-    # but strictly enforced here).
-    unresolved = gs.unresolved_imports()
-    if unresolved:
-        mismatched_years = sorted({u.year for u in unresolved if u.year != year})
-        if mismatched_years:
-            mismatches = sorted(
-                {(u.form, u.line, u.year) for u in unresolved if u.year != year}
-            )
-            mismatch_lines = "\n".join(
-                f"- {form}:{line} ({imp_year})" for form, line, imp_year in mismatches
-            )
-            raise RuntimeError(
-                "Graph backend does not support linking mixed-year graphs.\n"
-                f"Requested year: {year}\n"
-                "Mismatched imports:\n"
-                f"{mismatch_lines}"
-            )
-
-        missing = sorted({(u.form, u.line, u.year) for u in unresolved})
-        missing_lines = "\n".join(
-            f"- {form}:{line} ({imp_year})" for form, line, imp_year in missing
-        )
-        loaded = ", ".join(gs.forms())
-        raise RuntimeError(
-            "Graph backend cannot link required forms: unresolved imports remain.\n"
-            f"Loaded forms: {loaded}\n"
-            "Unresolved imports:\n"
-            f"{missing_lines}"
-        )
-
-    return gs.link()
 
 
 class GraphBackend:

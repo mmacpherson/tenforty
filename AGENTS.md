@@ -106,7 +106,9 @@ QA sequence (Claude Code exposes it as the `/graph-qa` slash command):
 6. `make run-hooks` — Run pre-commit hooks
 7. `uv run pytest tests/ -q --tb=line` — Run the test suite
 
-If `graphlib_link_year_test.py` fails, the `.so` is out of sync — run `make env-full`.
+If the graph backend tests in `tests/backends_test.py` fail to load the compiled
+module (or `evaluate` raises on a fresh graph), the `.so` is out of sync — run
+`make env-full`.
 Never bypass pre-commit hooks with `--no-verify`; fix the underlying issue instead.
 
 ## Python Style
