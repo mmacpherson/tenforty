@@ -1027,7 +1027,7 @@ spec n = do
                             Left _ -> False
 
             it ("tax is monotonically increasing with wages (" ++ yr ++ ")") $
-                withMaxSuccess n $
+                withNumTests n $
                     property $
                         \(Positive base) (Positive extra) ->
                             forAll (elements allFilingStatuses) $ \status ->
@@ -1040,7 +1040,7 @@ spec n = do
                                     Left _ -> False
 
             it ("taxable income <= AGI (" ++ yr ++ ")") $
-                withMaxSuccess n $
+                withNumTests n $
                     property $
                         \(Positive wages) ->
                             forAll (elements allFilingStatuses) $ \status ->
@@ -1052,7 +1052,7 @@ spec n = do
                                     Left _ -> False
 
             it ("tax <= taxable income (" ++ yr ++ ")") $
-                withMaxSuccess n $
+                withNumTests n $
                     property $
                         \(Positive wages) ->
                             forAll (elements allFilingStatuses) $ \status ->
@@ -1064,7 +1064,7 @@ spec n = do
                                     Left _ -> False
 
             it ("effective rate <= 37% top marginal rate (" ++ yr ++ ")") $
-                withMaxSuccess n $
+                withNumTests n $
                     property $
                         forAll (choose (1, 10_000_000)) $ \wages ->
                             forAll (elements allFilingStatuses) $ \status ->
@@ -1077,7 +1077,7 @@ spec n = do
                                     Left _ -> False
 
             it ("all outputs non-negative (" ++ yr ++ ")") $
-                withMaxSuccess n $
+                withNumTests n $
                     property $
                         \(Positive wages) ->
                             forAll (elements allFilingStatuses) $ \status ->
@@ -1089,7 +1089,7 @@ spec n = do
                                     Left _ -> False
 
             it ("MFJ tax <= Single tax for same income (" ++ yr ++ ")") $
-                withMaxSuccess (n `div` 2) $
+                withNumTests (n `div` 2) $
                     property $
                         forAll (choose (50_000, 500_000)) $ \wages ->
                             case tyForm ty of
