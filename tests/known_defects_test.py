@@ -105,6 +105,33 @@ def test_ots_niit_honors_the_capital_loss_limitation():
         assert r.federal_niit == pytest.approx(3_686.0, abs=1.0), kind
 
 
+@pytest.mark.xfail(
+    reason="F18: graph Schedule D line 16 omits the section 1211(b) $3,000 "
+    "capital-loss limitation, so the full net loss flows to Form 8960 line 5a "
+    "(tenforty-kf4)",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_graph_niit_honors_the_capital_loss_limitation():
+    """Same case on the graph backend: a net capital loss offsets NII by $3,000.
+
+    Line 5a imports Schedule D line 16, which the graph does not cap under
+    section 1211(b). $100k of interest against a $50k loss must leave $97,000
+    of NII (NIIT = 3.8% x $97,000 = $3,686), not the uncapped $50,000 offset
+    the graph currently applies. Fixed by tenforty-kf4 (Schedule D line 21).
+    """
+    for kind in ("short_term_capital_gains", "long_term_capital_gains"):
+        r = evaluate_return(
+            year=2024,
+            filing_status="Single",
+            w2_income=300_000,
+            taxable_interest=100_000,
+            backend="graph",
+            **{kind: -50_000},
+        )
+        assert r.federal_niit == pytest.approx(3_686.0, abs=1.0), kind
+
+
 def test_ots_niit_fires_when_gains_are_the_only_investment_income():
     """Form 8960 must run when capital gains are the sole investment income.
 

@@ -415,7 +415,22 @@ differential sweep passes on the graph backend with none of them.
 Two things found and deliberately left for follow-up: `Tables2025.hs`'s
 `qualifiedDividendBrackets2025` (and the 2024 twin) is dead — the live
 breakpoints are inline in the 1040, so the two should be reconciled or the
-dead table removed. And graph Schedule D line 16 sums the net gain without the
-section 1211(b) $3,000 capital-loss limitation; harmless for the gain cases
-here but wrong for a net-loss return, on both the main tax and the imported
-8960 line 5a.
+dead table removed (`tenforty-db5`). And the F18 capital-loss limitation below.
+
+### F18. NEW — graph omits the section 1211(b) $3,000 capital-loss limitation
+
+Graph Schedule D line 16 sums the net gain or loss without the section 1211(b)
+$3,000 cap ($1,500 MFS). 1040 line 7 imports that uncapped figure, so a
+net-loss return understates AGI and taxable income; and F4-graph now imports
+Form 8960 line 5a from the same node, so the uncapped loss also understates
+NIIT — e.g. $300k wages + $100k interest + a $50k short-term loss yields graph
+NIIT on the full $50k offset rather than the $3,000 the statute allows ($3,686
+correct). Harmless for the gain cases the sweep exercises; the sweep does not
+appear to emit net-loss cases, which is why F18 is hand-found rather than
+signature-surfaced.
+
+The fix is structural, not a cap on line 16 (the QCGWS line-3 smaller-of test
+genuinely wants the uncapped net): introduce Schedule D line 21 with the
+$3,000/$1,500-MFS cap, and route 1040 line 7 and 8960 line 5a through line 21
+while leaving the worksheet on line 16. Tracked as `tenforty-kf4`; recorded as
+the strict-xfail `test_graph_niit_honors_the_capital_loss_limitation`.
