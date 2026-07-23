@@ -165,24 +165,31 @@ usForm6251_2024 = form "us_form_6251" 2024 $ do
             l7b .+. l7d
 
     -- Part III: Tax Computation Using Maximum Capital Gains Rates
-    preferentialIncome <- interior "P3_pref_income" "preferential_income" $
-        importForm "us_1040" "qcgws_4"
-    ordinaryTaxableIncome <- interior "P3_ord_taxable" "ordinary_taxable_income" $
-        importForm "us_1040" "qcgws_5"
+    preferentialIncome <-
+        interior "P3_pref_income" "preferential_income" $
+            importForm "us_1040" "qcgws_4"
+    ordinaryTaxableIncome <-
+        interior "P3_ord_taxable" "ordinary_taxable_income" $
+            importForm "us_1040" "qcgws_5"
 
     -- Split AMT taxable income into ordinary and preferential portions
-    prefInAmt <- interior "P3_pref_in_amt" "amt_preferential" $
-        smallerOf l6 preferentialIncome
-    ordinaryAmt <- interior "P3_ord_amt" "amt_ordinary" $
-        l6 `subtractNotBelowZero` prefInAmt
+    prefInAmt <-
+        interior "P3_pref_in_amt" "amt_preferential" $
+            smallerOf l6 preferentialIncome
+    ordinaryAmt <-
+        interior "P3_ord_amt" "amt_ordinary" $
+            l6 `subtractNotBelowZero` prefInAmt
 
     -- 26%/28% tax on ordinary portion
-    ordTaxAt26 <- interior "P3_ord_26" "amt_ord_26_taxable" $
-        smallerOf ordinaryAmt l7Threshold
-    ordTaxAt28 <- interior "P3_ord_28" "amt_ord_28_taxable" $
-        ordinaryAmt `subtractNotBelowZero` l7Threshold
-    ordTax <- interior "P3_ord_tax" "amt_ord_tax" $
-        (ordTaxAt26 .*. lit 0.26) .+. (ordTaxAt28 .*. lit 0.28)
+    ordTaxAt26 <-
+        interior "P3_ord_26" "amt_ord_26_taxable" $
+            smallerOf ordinaryAmt l7Threshold
+    ordTaxAt28 <-
+        interior "P3_ord_28" "amt_ord_28_taxable" $
+            ordinaryAmt `subtractNotBelowZero` l7Threshold
+    ordTax <-
+        interior "P3_ord_tax" "amt_ord_tax" $
+            (ordTaxAt26 .*. lit 0.26) .+. (ordTaxAt28 .*. lit 0.28)
 
     -- 0% bracket for preferential income
     zeroBracket <-
@@ -195,10 +202,12 @@ usForm6251_2024 = form "us_form_6251" 2024 $ do
                     , bsQualifyingWidow = lit 94050
                     , bsHeadOfHousehold = lit 63000
                     }
-    zeroRoom <- interior "P3_zero_room" "amt_cg_zero_room" $
-        zeroBracket `subtractNotBelowZero` ordinaryTaxableIncome
-    zeroAmt <- interior "P3_zero_amt" "amt_cg_zero_amt" $
-        smallerOf zeroRoom prefInAmt
+    zeroRoom <-
+        interior "P3_zero_room" "amt_cg_zero_room" $
+            zeroBracket `subtractNotBelowZero` ordinaryTaxableIncome
+    zeroAmt <-
+        interior "P3_zero_amt" "amt_cg_zero_amt" $
+            smallerOf zeroRoom prefInAmt
 
     -- 15% bracket for preferential income
     fifteenBracket <-
@@ -211,26 +220,34 @@ usForm6251_2024 = form "us_form_6251" 2024 $ do
                     , bsQualifyingWidow = lit 583750
                     , bsHeadOfHousehold = lit 551350
                     }
-    afterZero <- interior "P3_after_zero" "amt_cg_after_zero" $
-        prefInAmt `subtractNotBelowZero` zeroAmt
-    fifteenUsed <- interior "P3_15_used" "amt_cg_15_used" $
-        zeroRoom .+. ordinaryTaxableIncome
-    fifteenRoom <- interior "P3_15_room" "amt_cg_15_room" $
-        fifteenBracket `subtractNotBelowZero` fifteenUsed
-    fifteenAmt <- interior "P3_15_amt" "amt_cg_15_amt" $
-        smallerOf afterZero fifteenRoom
-    fifteenTax <- interior "P3_15_tax" "amt_cg_15_tax" $
-        fifteenAmt .*. lit 0.15
+    afterZero <-
+        interior "P3_after_zero" "amt_cg_after_zero" $
+            prefInAmt `subtractNotBelowZero` zeroAmt
+    fifteenUsed <-
+        interior "P3_15_used" "amt_cg_15_used" $
+            zeroRoom .+. ordinaryTaxableIncome
+    fifteenRoom <-
+        interior "P3_15_room" "amt_cg_15_room" $
+            fifteenBracket `subtractNotBelowZero` fifteenUsed
+    fifteenAmt <-
+        interior "P3_15_amt" "amt_cg_15_amt" $
+            smallerOf afterZero fifteenRoom
+    fifteenTax <-
+        interior "P3_15_tax" "amt_cg_15_tax" $
+            fifteenAmt .*. lit 0.15
 
     -- 20% on remainder
-    twentyAmt <- interior "P3_20_amt" "amt_cg_20_amt" $
-        prefInAmt `subtractNotBelowZero` (zeroAmt .+. fifteenAmt)
-    twentyTax <- interior "P3_20_tax" "amt_cg_20_tax" $
-        twentyAmt .*. lit 0.20
+    twentyAmt <-
+        interior "P3_20_amt" "amt_cg_20_amt" $
+            prefInAmt `subtractNotBelowZero` (zeroAmt .+. fifteenAmt)
+    twentyTax <-
+        interior "P3_20_tax" "amt_cg_20_tax" $
+            twentyAmt .*. lit 0.20
 
     -- Use preferential-rate computation if applicable, else flat 26/28
-    prefRateTax <- interior "P3_pref_tax" "amt_pref_rate_tax" $
-        ordTax .+. fifteenTax .+. twentyTax
+    prefRateTax <-
+        interior "P3_pref_tax" "amt_pref_rate_tax" $
+            ordTax .+. fifteenTax .+. twentyTax
 
     l7 <-
         interior "L7" "tentative_min_tax_before_cg" $
