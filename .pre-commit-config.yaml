@@ -51,6 +51,11 @@ repos:
     files: ^crates/tenforty-graph/demo/.*\.(css|html|js|json)$
 - repo: local
   hooks:
+  - id: fourmolu
+    name: fourmolu (haskell format check)
+    language: system
+    entry: fourmolu --mode check
+    files: ^tenforty-spec/.*\.hs$
   - id: cargo-fmt
     name: cargo fmt
     language: system

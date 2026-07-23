@@ -1,11 +1,11 @@
 .DEFAULT_GOAL := help
-.PHONY: build test compile-all install clean fmt lint lint-strict help
+.PHONY: build test compile-all install clean fmt fmt-check lint lint-strict help
 
 define HASKELL_FMT_INSTALL_MSG
 Missing formatting tools. Install with:
 
     cabal install -j --install-method=copy --installdir "$$HOME/.local/bin" \
-        --overwrite-policy=always -w ghc-9.6 fourmolu cabal-fmt
+        --overwrite-policy=always -w ghc-9.6 fourmolu-0.15.0.0 cabal-fmt
 endef
 export HASKELL_FMT_INSTALL_MSG
 
@@ -33,6 +33,13 @@ fmt: ## Format Haskell (fourmolu) and .cabal (cabal-fmt)
 	fi
 	@find app src forms test -type f -name '*.hs' -print0 | xargs -0 fourmolu -i
 	@find . -maxdepth 1 -type f -name '*.cabal' -print0 | xargs -0 cabal-fmt -i
+
+fmt-check: ## Check Haskell formatting (fourmolu, fails if unformatted)
+	@if ! command -v fourmolu >/dev/null 2>&1; then \
+		echo "$$HASKELL_FMT_INSTALL_MSG"; \
+		exit 1; \
+	fi
+	@find app src forms test -type f -name '*.hs' -print0 | xargs -0 fourmolu --mode check
 
 lint: ## Lint Haskell (hlint, non-blocking)
 	@if ! command -v hlint >/dev/null 2>&1; then \

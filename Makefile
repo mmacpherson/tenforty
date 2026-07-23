@@ -21,7 +21,7 @@ export UV_INSTALL_MSG
 DEFAULT_GOAL: help
 .PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs spec-test forms-sync
-.PHONY: spec-fmt spec-lint spec-lint-strict
+.PHONY: spec-fmt spec-fmt-check spec-lint spec-lint-strict
 .PHONY: runner-image bench-zip-mode
 
 check-uv: ## Check if uv is installed
@@ -119,6 +119,9 @@ spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.jso
 
 spec-fmt: ## Format tenforty-spec (fourmolu, cabal-fmt)
 	$(MAKE) -C tenforty-spec fmt
+
+spec-fmt-check: ## Check tenforty-spec formatting (fourmolu, fails if unformatted)
+	$(MAKE) -C tenforty-spec fmt-check
 
 spec-lint: ## Lint tenforty-spec (hlint, non-blocking)
 	$(MAKE) -C tenforty-spec lint
