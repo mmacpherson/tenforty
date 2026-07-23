@@ -412,10 +412,12 @@ The five known-defect signatures (`_f4_niit_stcg`, `_f5_graph_8959`,
 `_f17_graph_se_deminimis`) and their strict-xfail burn-ins are deleted; the
 differential sweep passes on the graph backend with none of them.
 
-Two things found and deliberately left for follow-up: `Tables2025.hs`'s
-`qualifiedDividendBrackets2025` (and the 2024 twin) is dead — the live
-breakpoints are inline in the 1040, so the two should be reconciled or the
-dead table removed (`tenforty-db5`). And the F18 capital-loss limitation below.
+Two things found and left for follow-up, both since closed: the dead
+`qualifiedDividendBrackets2025` table (and the 2024 twin) that duplicated the
+inline 1040 breakpoints has been replaced by a single `qualifiedDividend0PctMax`
+/ `qualifiedDividend15PctMax` `ByStatus` source the worksheet reads via
+`byStatusE` — the F13 smell removed (`tenforty-db5`). And the F18 capital-loss
+limitation below.
 
 ### F18. NEW — graph omits the section 1211(b) $3,000 capital-loss limitation
 

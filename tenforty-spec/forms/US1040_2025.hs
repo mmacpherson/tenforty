@@ -112,14 +112,7 @@ us1040_2025 = form "us_1040" 2025 $ do
     -- Line 6 Thresholds (0% bracket)
     qcgws6 <-
         interior "qcgws_6" "work_l6" $
-            byStatusE $
-                ByStatus
-                    { bsSingle = lit 48350
-                    , bsMarriedSeparate = lit 48350
-                    , bsMarriedJoint = lit 96700
-                    , bsQualifyingWidow = lit 96700
-                    , bsHeadOfHousehold = lit 64750
-                    }
+            byStatusE (fmap lit qualifiedDividend0PctMax2025)
 
     qcgws7 <- interior "qcgws_7" "work_l7" $ minE qcgws1 qcgws6
     qcgws8 <- interior "qcgws_8" "work_l8" $ minE qcgws5 qcgws7
@@ -131,14 +124,7 @@ us1040_2025 = form "us_1040" 2025 $ do
     -- Line 13 Thresholds (15% bracket)
     qcgws13 <-
         interior "qcgws_13" "work_l13" $
-            byStatusE $
-                ByStatus
-                    { bsSingle = lit 533400
-                    , bsMarriedSeparate = lit 300000
-                    , bsMarriedJoint = lit 600050
-                    , bsQualifyingWidow = lit 600050
-                    , bsHeadOfHousehold = lit 566700
-                    }
+            byStatusE (fmap lit qualifiedDividend15PctMax2025)
 
     qcgws14 <- interior "qcgws_14" "work_l14" $ minE qcgws1 qcgws13
     qcgws15 <- interior "qcgws_15" "work_l15" $ qcgws5 .+. qcgws9

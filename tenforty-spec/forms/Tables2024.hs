@@ -7,8 +7,8 @@ module Tables2024 (
     standardDeduction2024,
 
     -- * Qualified Dividends / Long-Term Capital Gains
-    qualifiedDividendBrackets2024,
-    qualifiedDividendTable2024,
+    qualifiedDividend0PctMax2024,
+    qualifiedDividend15PctMax2024,
 
     -- * AMT Exemptions and Thresholds
     amtExemption2024,
@@ -110,21 +110,15 @@ Order: Single, MFJ, MFS, HoH, QW
 standardDeduction2024 :: ByStatus (Amount Dollars)
 standardDeduction2024 = byStatus 14600 29200 14600 21900 29200
 
-{- | 2024 Qualified dividends / long-term capital gains brackets
-0% up to these thresholds, 15% to next threshold, 20% above
--}
-qualifiedDividendBrackets2024 :: NonEmpty Bracket
-qualifiedDividendBrackets2024 =
-    Bracket (byStatus 47025 94050 47025 63000 94050) 0.00
-        :| [ Bracket (byStatus 518900 583750 291850 551350 583750) 0.15
-           , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.20
-           ]
+-- Qualified Dividends and Capital Gain Tax Worksheet, lines 6 and 13: the
+-- maximum taxable income taxed at the 0% and 15% preferential rates. Above the
+-- 15% ceiling the rate is 20%. These are the single source for the worksheet's
+-- breakpoints in US1040_2024.
+qualifiedDividend0PctMax2024 :: ByStatus (Amount Dollars)
+qualifiedDividend0PctMax2024 = byStatus 47025 94050 47025 63000 94050
 
-qualifiedDividendTable2024 :: Table
-qualifiedDividendTable2024 =
-    case mkBracketTable qualifiedDividendBrackets2024 of
-        Right bt -> TableBracket "qualified_dividend_brackets_2024" bt
-        Left err -> error $ "Invalid qualified dividend brackets: " ++ err
+qualifiedDividend15PctMax2024 :: ByStatus (Amount Dollars)
+qualifiedDividend15PctMax2024 = byStatus 518900 583750 291850 551350 583750
 
 {- | 2024 AMT exemption amounts
 Order: Single, MFJ, MFS, HoH, QW
