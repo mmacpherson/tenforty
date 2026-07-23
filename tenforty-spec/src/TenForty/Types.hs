@@ -26,6 +26,7 @@ module TenForty.Types
   )
 where
 
+import Data.Kind (Type)
 import Data.String (IsString (..))
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -47,7 +48,7 @@ data Rate
 
 data Count
 
-newtype Amount (u :: *) = Amount {unAmount :: Double}
+newtype Amount (u :: Type) = Amount {unAmount :: Double}
   deriving stock (Show, Read)
   deriving newtype (Eq, Ord)
 

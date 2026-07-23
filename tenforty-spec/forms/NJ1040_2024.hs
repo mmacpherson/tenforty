@@ -17,7 +17,7 @@ nj1040_2024 = form "nj_1040" 2024 $ do
   -- Note: NJ form technically builds from gross income, but for graph backend
   -- we simplify by starting from federal AGI as a reasonable approximation
   let federalAgi = importForm "us_1040" "L11"
-  l14 <-
+  _l14 <-
     keyOutput "L14" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0
 

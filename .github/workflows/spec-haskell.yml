@@ -1,0 +1,70 @@
+name: spec (Haskell)
+
+# Promotes the tenforty-spec local gates (build, test, lint, generated-JSON sync)
+# into CI. Runs on every push — NOT path-filtered — so it can be a *required*
+# status check: a path-filtered workflow never reports on PRs that don't touch it,
+# which leaves a required check stuck "Expected" and blocks the merge. Kept cheap
+# instead by caching on the cabal.project.freeze hash: on a push that doesn't touch
+# tenforty-spec the cache is a full hit, so build/compile are up-to-date no-ops and
+# the job finishes in a couple of minutes.
+
+on: push
+
+concurrency:
+  group: spec-haskell-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spec:
+    name: spec (build · test · lint · json-sync)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+      # GHC is the single source of truth in cabal.project; keep this in step with
+      # its `with-compiler` line (see AGENTS.md — the tool ceiling sets it).
+    - name: Set up GHC + cabal
+      id: setup
+      uses: haskell-actions/setup@v2
+      with:
+        ghc-version: 9.12.4
+        cabal-version: latest
+
+    - name: Cache cabal store + dist-newstyle
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.setup.outputs.cabal-store }}
+          tenforty-spec/dist-newstyle
+        key: spec-${{ runner.os }}-ghc-9.12.4-${{ hashFiles('tenforty-spec/cabal.project.freeze') }}
+        restore-keys: |
+          spec-${{ runner.os }}-ghc-9.12.4-
+
+    - name: Build
+      working-directory: tenforty-spec
+      run: cabal build all
+
+    - name: Test
+      working-directory: tenforty-spec
+      run: cabal test
+
+      # The graph backend loads the committed JSON in src/tenforty/forms, so a spec
+      # change that isn't regenerated leaves the backend stale. Regenerate and fail
+      # if the working tree moves.
+    - name: Generated JSON is in sync with the specs
+      run: |
+        make spec-graphs
+        make forms-sync
+        if ! git diff --quiet -- src/tenforty/forms; then
+          echo "::error::Committed graph JSON is stale — run 'make spec-graphs && make forms-sync' and commit the result."
+          git --no-pager diff --stat -- src/tenforty/forms
+          exit 1
+        fi
+
+    - name: Set up hlint
+      uses: haskell-actions/hlint-setup@v2
+      with:
+        version: '3.8'
+
+    - name: Lint (hlint, fails on hints)
+      run: hlint tenforty-spec/app tenforty-spec/src tenforty-spec/forms tenforty-spec/test

@@ -12,7 +12,7 @@ import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
 import Control.Monad (void)
-import Data.Foldable (foldl', forM_)
+import Data.Foldable (forM_)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)
