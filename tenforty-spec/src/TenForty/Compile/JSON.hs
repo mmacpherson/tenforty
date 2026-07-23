@@ -4,6 +4,8 @@ module TenForty.Compile.JSON
   ( -- * Compilation
     compileForm,
     compileFormToJSON,
+    resolveForms,
+    unresolvedImports,
 
     -- * Graph Types
     ComputationGraph (..),
@@ -336,6 +338,144 @@ getTableId tbl = unTableId (T.tableId tbl)
 
 compileFormToJSON :: Form -> ByteString
 compileFormToJSON = Aeson.encode . compileForm
+
+-- | Cross-form imports that do not resolve against the given form set, as
+-- (source form, imported form, imported line). Non-empty means a bad
+-- @importForm@ reference: the compile driver fails the build on it, turning what
+-- would be a runtime "node not found" into a compile-time error (tenforty-ovz).
+unresolvedImports :: [ComputationGraph] -> [(Text, Text, Text)]
+unresolvedImports cgs =
+  [ (gmFormId (cgMeta cg), tf, tl)
+  | cg <- cgs,
+    n <- Map.elems (cgNodes cg),
+    OpImport tf tl _ <- [nodeOp n],
+    Map.notMember (tf, tl) resKeys
+  ]
+  where
+    -- (formId, key) present, key = full name and lid base (matches resolveForms)
+    resKeys :: Map (Text, Text) ()
+    resKeys =
+      Map.fromList $
+        concat
+          [ case nodeName n of
+              Nothing -> []
+              Just nm -> [((gmFormId (cgMeta cg), nm), ()), ((gmFormId (cgMeta cg), T.takeWhile (/= '_') nm), ())]
+          | cg <- cgs,
+            n <- Map.elems (cgNodes cg)
+          ]
+
+-- | Resolve a set of per-form compiled graphs into ONE graph (tenforty-ovz,
+-- Stage 2). Assign fresh global node ids by traversal, resolve every cross-form
+-- Import to a direct node reference, and prefix node names + table ids by form.
+-- The result carries no imports: the runtime just loads and evaluates it, with
+-- no linker and no positional-id coupling.
+resolveForms :: [ComputationGraph] -> ComputationGraph
+resolveForms [] = ComputationGraph (GraphMeta "resolved" 0 "resolveForms") Map.empty Map.empty [] [] []
+resolveForms cgs@(cg0 : _) =
+  ComputationGraph
+    { cgMeta = GraphMeta "resolved" (gmYear (cgMeta cg0)) "resolveForms",
+      cgNodes = mergedNodes,
+      cgTables = mergedTables,
+      cgInputs = mergedInputs,
+      cgOutputs = mergedOutputs,
+      cgImports = []
+    }
+  where
+    formOf cg = gmFormId (cgMeta cg)
+
+    -- every (formId, local node) flattened, form order then node-id order
+    flat :: [(Text, Node)]
+    flat = [(formOf cg, n) | cg <- cgs, n <- Map.elems (cgNodes cg)]
+
+    -- fresh global id per node, assigned by traversal
+    gidOf :: Map (Text, Int) Int
+    gidOf = Map.fromList [((f, nodeId n), g) | ((f, n), g) <- zip flat [0 ..]]
+
+    global :: Text -> Int -> Int
+    global f localId = gidOf Map.! (f, localId)
+
+    -- (formId, key) -> global id for named nodes; key is the full name and the
+    -- lid base (before the first '_'). OUTPUT nodes are registered first so they
+    -- win the base key — mirrors the linker: import "L15" must hit the L15 output,
+    -- not an interior L15_pre_qbi / L15_sched_d that happens to emit earlier.
+    outputNodes :: [(Text, Node)]
+    outputNodes =
+      [(formOf cg, n) | cg <- cgs, oid <- cgOutputs cg, Just n <- [Map.lookup oid (cgNodes cg)]]
+
+    resMap :: Map (Text, Text) Int
+    resMap = foldl' ins Map.empty (outputNodes ++ flat)
+      where
+        ins m (f, n) = case nodeName n of
+          Nothing -> m
+          Just nm ->
+            let g = global f (nodeId n)
+                base = T.takeWhile (/= '_') nm
+                keep = Map.insertWith (\_ old -> old)
+             in keep (f, base) g (keep (f, nm) g m)
+
+    -- global id of each import node -> resolved target global id
+    importRedirect :: Map Int Int
+    importRedirect =
+      Map.fromList
+        [ (global f (nodeId n), tgt)
+        | (f, n) <- flat,
+          OpImport tf tl _ <- [nodeOp n],
+          Just tgt <- [Map.lookup (tf, tl) resMap]
+        ]
+
+    -- a form-local operand -> its global id, following import redirects
+    ref :: Text -> Int -> Int
+    ref f localId = let g = global f localId in Map.findWithDefault g g importRedirect
+
+    isImport op = case op of OpImport {} -> True; _ -> False
+
+    remapOp :: Text -> Op -> Op
+    remapOp f op = case op of
+      OpInput -> OpInput
+      OpLiteral d -> OpLiteral d
+      OpImport {} -> op
+      OpAdd a b -> OpAdd (ref f a) (ref f b)
+      OpSub a b -> OpSub (ref f a) (ref f b)
+      OpMul a b -> OpMul (ref f a) (ref f b)
+      OpDiv a b -> OpDiv (ref f a) (ref f b)
+      OpNeg a -> OpNeg (ref f a)
+      OpAbs a -> OpAbs (ref f a)
+      OpFloor a -> OpFloor (ref f a)
+      OpMax a b -> OpMax (ref f a) (ref f b)
+      OpMin a b -> OpMin (ref f a) (ref f b)
+      OpClamp a lo hi -> OpClamp (ref f a) lo hi
+      OpIfPositive c t e -> OpIfPositive (ref f c) (ref f t) (ref f e)
+      OpBracketTax tbl inc -> OpBracketTax (f <> "__" <> tbl) (ref f inc)
+      OpPhaseOut base sv rate agi -> OpPhaseOut base sv rate (ref f agi)
+      OpByStatus (StatusNodeIds a b c d e) ->
+        OpByStatus (StatusNodeIds (ref f a) (ref f b) (ref f c) (ref f d) (ref f e))
+
+    mergedNodes :: Map Int Node
+    mergedNodes =
+      Map.fromList
+        [ ( g,
+            Node
+              { nodeId = g,
+                nodeName = ((f <> "_") <>) <$> nodeName n,
+                nodeOp = remapOp f (nodeOp n)
+              }
+          )
+        | (f, n) <- flat,
+          not (isImport (nodeOp n)),
+          let g = global f (nodeId n)
+        ]
+
+    mergedTables :: Map Text BracketTable
+    mergedTables =
+      Map.fromList
+        [ (formOf cg <> "__" <> tn, t) | cg <- cgs, (tn, t) <- Map.toList (cgTables cg)
+        ]
+
+    mergedInputs :: [Int]
+    mergedInputs = [global (formOf cg) i | cg <- cgs, i <- cgInputs cg]
+
+    mergedOutputs :: [Int]
+    mergedOutputs = [ref (formOf cg) o | cg <- cgs, o <- cgOutputs cg]
 
 compileLines :: Form -> Compile [Int]
 compileLines frm = do

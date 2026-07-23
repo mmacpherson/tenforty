@@ -28,6 +28,7 @@ import DEFormPITRES_2025
 import Data.Aeson.Encode.Pretty qualified as AP
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Lazy.Char8 qualified as BL8
+import Data.Either (rights)
 import Data.Text (Text)
 import Data.Text qualified as T
 import FLNoTax_2024
@@ -359,14 +360,39 @@ main = do
 
       -- 3. Write output files
       forM_ allForms $ uncurry (compileToFile opts)
-    else do
-      let filename = T.unpack formName ++ ".json"
-      case lookup filename allForms of
-        Just res -> compileAndOutput opts res
-        Nothing -> do
-          hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
-          hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ak_notax, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ct_1, dc_d40, de_pit_res, fl_notax, ga_500, hi_n11, ia_ia1040, id_form40, il_1040, in_it40, ks_k40, ky_740, la_it540, ma_1, md_502, me_1040me, mi_1040, ms_80105, mn_m1, mo_1040, mt_form2, nc_d400, nd_1, ne_1040n, nh_dp10, nj_1040, nm_pit1, nv_notax, ny_it201, oh_it1040, ok_511, or_40, pa_40, ri_1040, sc_1040, sd_notax, tn_notax, tx_notax, ut_tc40, va_760, vt_in111, wa_notax, wv_it140, wi_form1, wy_notax (append _2024 or _2025), all"
-          exitFailure
+    else
+      if "resolve_" `T.isPrefixOf` formName
+        then case T.splitOn "_" (T.drop 8 formName) of
+          (yr : states) -> do
+            -- resolve_<year>          -> ALL forms for the year (one graph per year)
+            -- resolve_<year>_<state>  -> federal + those states (focused subset)
+            let suffix = "_" <> yr <> ".json"
+                forYear = [(T.pack fp, res) | (fp, res) <- allForms, suffix `T.isSuffixOf` T.pack fp]
+                wanted =
+                  if null states
+                    then map snd forYear
+                    else [res | (fpt, res) <- forYear, any (\p -> (p <> "_") `T.isPrefixOf` fpt) ("us" : states)]
+                forms = rights wanted
+                cgs = map compileForm forms
+                badImports = unresolvedImports cgs
+                outPath = T.unpack formName ++ ".json"
+            unless (null badImports) $ do
+              hPutStrLn stderr "resolve: unresolved cross-form imports (fix the importForm reference):"
+              forM_ badImports $ \(src, tf, tl) ->
+                hPutStrLn stderr $ "  " ++ T.unpack src ++ " imports " ++ T.unpack tf ++ ":" ++ T.unpack tl
+              exitFailure
+            BL.writeFile outPath (AP.encodePretty (resolveForms cgs) <> BL8.pack "\n")
+            putStrLn $
+              "Wrote " ++ outPath ++ " (" ++ show (length forms) ++ " forms -> one resolved graph)"
+          [] -> hPutStrLn stderr "resolve: missing year" >> exitFailure
+        else do
+          let filename = T.unpack formName ++ ".json"
+          case lookup filename allForms of
+            Just res -> compileAndOutput opts res
+            Nothing -> do
+              hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
+              hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ak_notax, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ct_1, dc_d40, de_pit_res, fl_notax, ga_500, hi_n11, ia_ia1040, id_form40, il_1040, in_it40, ks_k40, ky_740, la_it540, ma_1, md_502, me_1040me, mi_1040, ms_80105, mn_m1, mo_1040, mt_form2, nc_d400, nd_1, ne_1040n, nh_dp10, nj_1040, nm_pit1, nv_notax, ny_it201, oh_it1040, ok_511, or_40, pa_40, ri_1040, sc_1040, sd_notax, tn_notax, tx_notax, ut_tc40, va_760, vt_in111, wa_notax, wv_it140, wi_form1, wy_notax (append _2024 or _2025), all"
+              exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()
 compileAndOutput opts formResult =
