@@ -66,7 +66,7 @@ nmPIT1_2025 = form "nm_pit1" 2025 $ do
   l21 <- keyInput "L21" "business_credits" "Business-related income tax credits applied"
 
   -- Line 22: Net New Mexico Income Tax
-  l22 <-
+  _l22 <-
     keyOutput "L22" "net_nm_tax" "Net New Mexico income tax" $
       (l18 .+. l19) `subtractNotBelowZero` (l20 .+. l21)
 

@@ -22,7 +22,6 @@ module TenForty.Table
   )
 where
 
-import Data.List (sortBy)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import Data.Ord (comparing)
@@ -127,7 +126,7 @@ marginalRate (BracketTable brackets) status income =
   where
     go :: Amount Dollars -> [Bracket] -> Amount Rate
     go _ [] = 0
-    go prevThreshold (b : bs) =
+    go _prevThreshold (b : bs) =
       let threshold = forStatus (bracketThreshold b) status
        in if income <= threshold
             then bracketRate b

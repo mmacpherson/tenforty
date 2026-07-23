@@ -46,7 +46,7 @@ usScheduleD_2024 = form "us_schedule_d" 2024 $ do
   -- deduction at the cap. This capped figure is what flows to Form 1040
   -- line 7 (and thence Form 8960 line 5a). Line 16 stays the true net for
   -- the Qualified Dividends worksheet's smaller-of-15-or-16 test.
-  l21 <-
+  _l21 <-
     keyOutput "L21" "allowable_capital_loss" "Allowable capital gain or (loss) after the section 1211(b) limitation" $
       maxE l16 $
         byStatusE $

@@ -1,5 +1,6 @@
 module TablesIN2025
   ( inTaxRate2025,
+    inPersonalExemption2025,
   )
 where
 

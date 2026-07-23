@@ -10,7 +10,6 @@ module ReferenceEvaluator
   )
 where
 
-import Data.List (foldl')
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)
 import Data.Text qualified as T

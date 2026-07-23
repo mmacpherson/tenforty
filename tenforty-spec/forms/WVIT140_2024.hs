@@ -76,12 +76,12 @@ wvIT140_2024 = form "wv_it140" 2024 $ do
       sumOf [l13, l14, l15]
 
   -- Line 17: Refund
-  l17 <-
+  _l17 <-
     keyOutput "L17" "refund" "Refund" $
       l16 `excessOf` l12
 
   -- Line 18: Tax due
-  l18 <-
+  _l18 <-
     keyOutput "L18" "tax_due" "Tax due" $
       l12 `subtractNotBelowZero` l16
 
