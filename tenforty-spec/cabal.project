@@ -1,2 +1,9 @@
 packages: .
 tests: True
+
+-- Reproducibility: pin the compiler and the Hackage index snapshot, and commit
+-- cabal.project.freeze (the exact-version lock, refreshed with `cabal freeze`).
+-- This is the cabal analog of uv.lock / Cargo.lock. Bump index-state + refreeze
+-- deliberately to move to a newer snapshot; do not let versions float.
+with-compiler: ghc-9.10.1
+index-state: 2026-07-23T15:30:43Z
