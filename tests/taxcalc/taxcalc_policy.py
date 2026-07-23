@@ -230,27 +230,3 @@ def unexcused_violations(
                 f"expected=[{lo:,.2f}, {hi:,.2f}] (diff {diff:,.2f} > {tol})"
             )
     return violations
-
-
-def batch_input_gap_quantities(backend: str, case: dict) -> set[str]:
-    """F9: graph batch consumes raw columns, bypassing TaxReturnInput.
-
-    Two confirmed symptoms, excused only for batch-vs-scalar conformance:
-    the schedule_se_ss_wages derivation (PR #279's batch xfail) and the
-    qualified>ordinary dividend lift, each cascading through AGI.
-    """
-    if backend != "graph":
-        return set()
-    excused: set[str] = set()
-    if case.get("w2", 0) and case.get("se", 0):
-        excused |= {
-            "se_tax",
-            "agi",
-            "taxable_income",
-            "income_tax",
-            "total_tax",
-            "niit",
-        }
-    if case.get("qual_div", 0) > case.get("ord_div", 0):
-        excused |= {"agi", "taxable_income", "income_tax", "total_tax", "niit"}
-    return excused

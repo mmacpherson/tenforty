@@ -25,7 +25,7 @@ delete the signature, and update this table in the same PR.
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
 | F7 | "Itemized" force vs best-of divergence | API contract | open (owner decision) | differential sweep |
 | F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
-| F9 | Batch path bypasses TaxReturnInput | graph batch path | open | batch-conformance tests |
+| F9 | Batch path bypasses TaxReturnInput | graph batch path | fixed (tenforty-tve) | batch-conformance tests |
 | F10 | Short-term gains taxed at preferential rates (QCGWS line 3) | graph spec | fixed | differential grid |
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
@@ -149,16 +149,26 @@ diagonal is correct. OTS cross/zip and graph zip are all correct. Prior
 audits used one-row batch cases, where 1×1 = 1 row masks the explosion
 entirely — another instance of easy scenarios hiding a broken path.
 
-### F9. NEW — Graph batch path bypasses TaxReturnInput normalization
+### F9. FIXED — Graph batch path bypasses TaxReturnInput normalization
 
 Found by the differential suite's batch-conformance tests (added post-audit).
-`GraphBackend.evaluate_batch` consumes raw input columns, skipping pydantic
+`GraphBackend.evaluate_batch` consumed raw input columns, skipping pydantic
 model validators and computed fields. Two confirmed symptoms: the
-qualified>ordinary dividend lift is not applied (Single, w2 $60k, qualified
+qualified>ordinary dividend lift was not applied (Single, w2 $60k, qualified
 dividends $12k: scalar AGI $72,000, zip AGI $60,000; OTS zip correct), and
-the `schedule_se_ss_wages` derivation is absent (the batch xfail shipped
-with PR #279). Durable fix: route batch rows through `TaxReturnInput`, or
-move the derivations into the graph spec.
+the `schedule_se_ss_wages` derivation was absent (the batch xfail shipped
+with PR #279).
+
+Fixed by routing each materialized batch row through `TaxReturnInput` inside
+`evaluate_batch`, right after cross mode expands to zip on the Python side —
+so the status-dependent line-8a derivation is available per row — and taking
+the same `model_dump` (excluding year/state/filing_status/standard_or_itemized)
+the single-scenario path uses. Batch now reproduces scalar row-for-row; the
+`batch_input_gap_quantities` excuser is deleted and batch conformance passes
+unexcused. The two strict-xfail burn-ins
+(`test_graph_zip_applies_dividend_normalization`,
+`test_se_tax_graph_batch_matches_single`) flip to passing guards. Closed by
+`tenforty-tve`.
 
 ### F10. NEW — Graph taxes short-term capital gains at preferential rates
 
