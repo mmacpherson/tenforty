@@ -180,11 +180,12 @@ class GraphBackend:
         )
 
         result["federal_tax_bracket"] = 0.0
-        try:
-            result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
-        except Exception as exc:
-            logger.debug("AMT evaluation failed (Form 6251 may not be linked): %s", exc)
-            result["federal_amt"] = 0.0
+        # The resolved per-year graph always carries the full federal return, and
+        # unset inputs read as 0, so these nodes are always present and always
+        # evaluate — a missing one is a real graph defect and should surface, not
+        # be swallowed to 0. (The old try/except guarded the retired runtime
+        # linker's "form may not be linked" case, which no longer exists.)
+        result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
 
         for node, field in [
             ("us_schedule_se_L10_se_tax", "federal_se_tax"),
@@ -194,10 +195,7 @@ class GraphBackend:
                 "federal_additional_medicare_tax",
             ),
         ]:
-            try:
-                result[field] = evaluator.eval(node)
-            except Exception:
-                result[field] = 0.0
+            result[field] = evaluator.eval(node)
 
         result["state_adjusted_gross_income"] = 0.0
         result["state_taxable_income"] = 0.0

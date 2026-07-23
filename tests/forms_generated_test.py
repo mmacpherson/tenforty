@@ -126,6 +126,13 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
                         f"{filename}: node {node.get('name')} references non-existent node {ref}"
                     )
 
+        # 6. Integrity: inputs/outputs id lists point at real nodes
+        for kind in ("inputs", "outputs"):
+            for ref in data.get(kind, []):
+                assert str(ref) in nodes, (
+                    f"{filename}: {kind} references non-existent node {ref}"
+                )
+
 
 def test_resolved_tax_graph_integrity() -> None:
     """The resolved per-year graph (us_tax_graph_<year>) has no imports, no dangling edges."""
@@ -150,3 +157,9 @@ def test_resolved_tax_graph_integrity() -> None:
             for ref in _operand_refs(node.get("op", {})):
                 if ref is not None:
                     assert str(ref) in nodes, f"{filename}: dangling edge -> {ref}"
+
+        for kind in ("inputs", "outputs"):
+            for ref in data.get(kind, []):
+                assert str(ref) in nodes, (
+                    f"{filename}: {kind} references non-existent node {ref}"
+                )
