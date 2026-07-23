@@ -62,6 +62,24 @@ Python library for US federal and state tax computation. Two backends:
 - **Testing**: pytest + hypothesis (Python), proptest (Rust), QuickCheck (Haskell)
 - **Quality**: ruff (linting), pre-commit hooks
 
+## Dependency & toolchain versions
+
+All three toolchains follow one rule: track newest-compatible versions, pin them
+in a lockfile, bump deliberately, on the latest stable compiler. The lockfile is
+the source of truth for reproducibility, and `main` always builds against it.
+
+- **Python (uv)**: loose `pyproject.toml` constraints → exact `uv.lock`; bump with
+  `uv lock --upgrade`.
+- **Rust (cargo)**: semver `Cargo.toml` → exact `Cargo.lock`; bump with `cargo update`.
+- **Haskell (cabal)**: lower-bounds-only `.cabal` (no PVP upper bounds —
+  `tenforty-spec` is unpublished) → exact `tenforty-spec/cabal.project.freeze` at a
+  pinned `index-state`, compiler pinned via `with-compiler`; bump with
+  `cabal update` → bump `index-state` → `cabal freeze`. GHC: the latest stable the
+  pinned deps build against.
+
+If a newest combination breaks the build or tests, pin that one package back in the
+freeze rather than rolling the whole tree back.
+
 ## Development Commands
 
 - `pip install -e ".[dev]"` — Install in dev mode
