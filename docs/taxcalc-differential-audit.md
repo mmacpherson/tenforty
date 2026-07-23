@@ -417,20 +417,24 @@ Two things found and deliberately left for follow-up: `Tables2025.hs`'s
 breakpoints are inline in the 1040, so the two should be reconciled or the
 dead table removed (`tenforty-db5`). And the F18 capital-loss limitation below.
 
-### F18. NEW — graph omits the section 1211(b) $3,000 capital-loss limitation
+### F18. FIXED — graph omits the section 1211(b) $3,000 capital-loss limitation
 
-Graph Schedule D line 16 sums the net gain or loss without the section 1211(b)
-$3,000 cap ($1,500 MFS). 1040 line 7 imports that uncapped figure, so a
-net-loss return understates AGI and taxable income; and F4-graph now imports
-Form 8960 line 5a from the same node, so the uncapped loss also understates
-NIIT — e.g. $300k wages + $100k interest + a $50k short-term loss yields graph
+Graph Schedule D line 16 summed the net gain or loss without the section
+1211(b) $3,000 cap ($1,500 MFS). 1040 line 7 imported that uncapped figure, so
+a net-loss return understated AGI and taxable income; and F4-graph imported
+Form 8960 line 5a from the same node, so the uncapped loss also understated
+NIIT — e.g. $300k wages + $100k interest + a $50k short-term loss yielded graph
 NIIT on the full $50k offset rather than the $3,000 the statute allows ($3,686
 correct). Harmless for the gain cases the sweep exercises; the sweep does not
-appear to emit net-loss cases, which is why F18 is hand-found rather than
+appear to emit net-loss cases, which is why F18 was hand-found rather than
 signature-surfaced.
 
 The fix is structural, not a cap on line 16 (the QCGWS line-3 smaller-of test
-genuinely wants the uncapped net): introduce Schedule D line 21 with the
-$3,000/$1,500-MFS cap, and route 1040 line 7 and 8960 line 5a through line 21
-while leaving the worksheet on line 16. Tracked as `tenforty-kf4`; recorded as
-the strict-xfail `test_graph_niit_honors_the_capital_loss_limitation`.
+genuinely wants the uncapped net): Schedule D now computes line 21 as
+`maxE line16 (byStatus -3000/-1500-MFS)` — a gain passes through, a loss is
+floored at the cap — and 1040 line 7 and 8960 line 5a import line 21 while the
+worksheet stays on line 16. Verified against OTS to the penny across STCG/LTCG
+losses, the MFS half-cap, sub-cap losses, and gain cases (unchanged); AGI on a
+net-loss return now falls by at most the cap. The strict-xfail
+`test_graph_niit_honors_the_capital_loss_limitation` flipped to a passing
+guard. Closed by `tenforty-kf4`.

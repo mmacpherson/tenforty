@@ -2,7 +2,7 @@
     "imports": [
         {
             "form": "us_schedule_d",
-            "line": "L16",
+            "line": "L21",
             "year": 2025
         },
         {
@@ -656,7 +656,7 @@
             "name": "L7_capital_gain_loss",
             "op": {
                 "form": "us_schedule_d",
-                "line": "L16",
+                "line": "L21",
                 "type": "import",
                 "year": 2025
             }
