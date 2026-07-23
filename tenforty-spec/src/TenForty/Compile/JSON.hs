@@ -5,6 +5,7 @@ module TenForty.Compile.JSON
     compileForm,
     compileFormToJSON,
     resolveForms,
+    unresolvedImports,
 
     -- * Graph Types
     ComputationGraph (..),
@@ -337,6 +338,31 @@ getTableId tbl = unTableId (T.tableId tbl)
 
 compileFormToJSON :: Form -> ByteString
 compileFormToJSON = Aeson.encode . compileForm
+
+-- | Cross-form imports that do not resolve against the given form set, as
+-- (source form, imported form, imported line). Non-empty means a bad
+-- @importForm@ reference: the compile driver fails the build on it, turning what
+-- would be a runtime "node not found" into a compile-time error (tenforty-ovz).
+unresolvedImports :: [ComputationGraph] -> [(Text, Text, Text)]
+unresolvedImports cgs =
+  [ (gmFormId (cgMeta cg), tf, tl)
+  | cg <- cgs,
+    n <- Map.elems (cgNodes cg),
+    OpImport tf tl _ <- [nodeOp n],
+    Map.notMember (tf, tl) resKeys
+  ]
+  where
+    -- (formId, key) present, key = full name and lid base (matches resolveForms)
+    resKeys :: Map (Text, Text) ()
+    resKeys =
+      Map.fromList $
+        concat
+          [ case nodeName n of
+              Nothing -> []
+              Just nm -> [((gmFormId (cgMeta cg), nm), ()), ((gmFormId (cgMeta cg), T.takeWhile (/= '_') nm), ())]
+          | cg <- cgs,
+            n <- Map.elems (cgNodes cg)
+          ]
 
 -- | Resolve a set of per-form compiled graphs into ONE graph (tenforty-ovz,
 -- Stage 2). Assign fresh global node ids by traversal, resolve every cross-form

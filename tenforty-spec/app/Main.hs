@@ -364,20 +364,24 @@ main = do
       if "resolve_" `T.isPrefixOf` formName
         then case T.splitOn "_" (T.drop 8 formName) of
           (yr : states) -> do
-            -- resolve_<year>[_<state>...]: federal + requested states, one graph
-            let prefixes = "us" : states
-                suffix = "_" <> yr <> ".json"
+            -- resolve_<year>          -> ALL forms for the year (one graph per year)
+            -- resolve_<year>_<state>  -> federal + those states (focused subset)
+            let suffix = "_" <> yr <> ".json"
+                forYear = [(T.pack fp, res) | (fp, res) <- allForms, suffix `T.isSuffixOf` T.pack fp]
                 wanted =
-                  [ res
-                  | (fp, res) <- allForms,
-                    let fpt = T.pack fp,
-                    suffix `T.isSuffixOf` fpt,
-                    any (\p -> (p <> "_") `T.isPrefixOf` fpt) prefixes
-                  ]
+                  if null states
+                    then map snd forYear
+                    else [res | (fpt, res) <- forYear, any (\p -> (p <> "_") `T.isPrefixOf` fpt) ("us" : states)]
                 forms = rights wanted
-                resolved = resolveForms (map compileForm forms)
+                cgs = map compileForm forms
+                badImports = unresolvedImports cgs
                 outPath = T.unpack formName ++ ".json"
-            BL.writeFile outPath (AP.encodePretty resolved <> BL8.pack "\n")
+            unless (null badImports) $ do
+              hPutStrLn stderr "resolve: unresolved cross-form imports (fix the importForm reference):"
+              forM_ badImports $ \(src, tf, tl) ->
+                hPutStrLn stderr $ "  " ++ T.unpack src ++ " imports " ++ T.unpack tf ++ ":" ++ T.unpack tl
+              exitFailure
+            BL.writeFile outPath (AP.encodePretty (resolveForms cgs) <> BL8.pack "\n")
             putStrLn $
               "Wrote " ++ outPath ++ " (" ++ show (length forms) ++ " forms -> one resolved graph)"
           [] -> hPutStrLn stderr "resolve: missing year" >> exitFailure

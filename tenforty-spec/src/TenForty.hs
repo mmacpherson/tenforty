@@ -6,6 +6,7 @@ module TenForty
     compileForm,
     compileFormToJSON,
     resolveForms,
+    unresolvedImports,
 
     -- * Graph Types (JSON output)
     ComputationGraph (..),
