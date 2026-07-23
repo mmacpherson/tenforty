@@ -2,7 +2,7 @@
     "imports": [
         {
             "form": "us_schedule_d",
-            "line": "L16",
+            "line": "L21",
             "year": 2025
         },
         {
@@ -81,7 +81,7 @@
             "name": "L5a_net_gain_disposition",
             "op": {
                 "form": "us_schedule_d",
-                "line": "L16",
+                "line": "L21",
                 "type": "import",
                 "year": 2025
             }

@@ -42,7 +42,7 @@ us1040_2024 = form "us_1040" 2024 $ do
     _l6a <- keyInput "L6a" "social_security_gross" "Total Social Security benefits received"
     l6b <- keyInput "L6b" "social_security_taxable" "Taxable Social Security benefits"
 
-    l7 <- interior "L7" "capital_gain_loss" $ importForm "us_schedule_d" "L16"
+    l7 <- interior "L7" "capital_gain_loss" $ importForm "us_schedule_d" "L21"
 
     l8 <- interior "L8" "schedule_1_income" $ importForm "us_schedule_1" "L10"
 

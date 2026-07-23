@@ -194,11 +194,68 @@
                 "type": "add"
             }
         },
+        "29": {
+            "id": 29,
+            "op": {
+                "type": "literal",
+                "value": -3000
+            }
+        },
         "3": {
             "id": 3,
             "name": "L3_short_term_8949_box_c",
             "op": {
                 "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "type": "literal",
+                "value": -3000
+            }
+        },
+        "31": {
+            "id": 31,
+            "op": {
+                "type": "literal",
+                "value": -1500
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "type": "literal",
+                "value": -3000
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "type": "literal",
+                "value": -3000
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 32,
+                    "married_joint": 30,
+                    "married_separate": 31,
+                    "qualifying_widow": 33,
+                    "single": 29
+                }
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L21_allowable_capital_loss",
+            "op": {
+                "left": 28,
+                "right": 34,
+                "type": "max"
             }
         },
         "4": {
@@ -247,6 +304,7 @@
     "outputs": [
         27,
         28,
+        35,
         20
     ],
     "tables": {}

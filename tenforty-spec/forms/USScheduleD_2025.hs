@@ -34,8 +34,27 @@ usScheduleD_2025 = form "us_schedule_d" 2025 $ do
             sumOf [l8a, l8b, l9, l10, l11, l12, l13, l14]
 
     -- Part III: Summary
-    _l16 <-
+    l16 <-
         keyOutput "L16" "net_capital_gain_loss" "Net capital gain or loss" $
             l7 .+. l15
 
-    outputs ["L7", "L15", "L16"]
+    -- Line 21: the section 1211(b) limitation. A net capital LOSS is
+    -- deductible against ordinary income only up to $3,000 ($1,500 MFS); the
+    -- rest carries forward. A gain passes through unchanged. `maxE l16 negCap`
+    -- captures both: for a gain it returns line 16, for a loss it floors the
+    -- deduction at the cap. This capped figure is what flows to Form 1040
+    -- line 7 (and thence Form 8960 line 5a). Line 16 stays the true net for
+    -- the Qualified Dividends worksheet's smaller-of-15-or-16 test.
+    l21 <-
+        keyOutput "L21" "allowable_capital_loss" "Allowable capital gain or (loss) after the section 1211(b) limitation" $
+            maxE l16 $
+                byStatusE $
+                    ByStatus
+                        { bsSingle = dollars (-3000)
+                        , bsMarriedJoint = dollars (-3000)
+                        , bsMarriedSeparate = dollars (-1500)
+                        , bsHeadOfHousehold = dollars (-3000)
+                        , bsQualifyingWidow = dollars (-3000)
+                        }
+
+    outputs ["L7", "L15", "L16", "L21"]
