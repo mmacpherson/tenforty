@@ -104,6 +104,11 @@ us1040_2024 = form "us_1040" 2024 $ do
     let qcgws2 = l3a
 
     -- Line 3: If Sched D used, smaller of D15 or D16. If not, L7.
+    -- NB: l7 is now Schedule D L21 (the section 1211(b)-capped net), not the
+    -- uncapped L16 the instruction names. The proxy is exact here: capped and
+    -- uncapped differ only when the net loss exceeds the cap, and there both
+    -- legs of the min are negative, so max0 floors this term to 0 either way.
+    -- Guarded by test_graph_capital_loss_cap_does_not_leak_into_the_qcgws.
     qcgws3 <- interior "qcgws_3" "work_l3" $ max0 (minE l15SchedD l7)
 
     qcgws4 <- interior "qcgws_4" "work_l4" $ qcgws2 .+. qcgws3

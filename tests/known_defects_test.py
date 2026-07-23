@@ -126,6 +126,35 @@ def test_graph_niit_honors_the_capital_loss_limitation():
         assert r.federal_niit == pytest.approx(3_686.0, abs=1.0), kind
 
 
+@skip_if_graph_unavailable
+def test_graph_capital_loss_cap_does_not_leak_into_the_qcgws():
+    """The capped Schedule D line 21 is a safe proxy for line 16 in the QCGWS.
+
+    Form 1040 line 7 imports the section 1211(b)-capped line 21, and the
+    Qualified Dividends and Capital Gain Tax Worksheet reads that same line 7 as
+    its line-3 term ("smaller of Schedule D line 15 or line 16"). Reusing the
+    capped figure there is exact only because the worksheet floors the term at
+    zero whenever the cap bites. This case makes that load-bearing: a net LOSS
+    that carries a positive long-term gain leg (D15 = +$10k, D16 = -$40k, below
+    the -$3k cap) must still see no preferential-rate tax. Pinned to OTS so a
+    future refactor that reads an uncapped node, or otherwise breaks the proxy,
+    diverges here rather than silently mispricing the gain leg.
+    """
+    inputs = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=300_000,
+        taxable_interest=100_000,
+        long_term_capital_gains=10_000,
+        short_term_capital_gains=-50_000,
+    )
+    graph = evaluate_return(backend="graph", **inputs)
+    ots = evaluate_return(backend="ots", **inputs)
+    assert graph.federal_adjusted_gross_income == pytest.approx(397_000.0, abs=1.0)
+    assert graph.federal_income_tax == pytest.approx(ots.federal_income_tax, abs=1.0)
+    assert graph.federal_total_tax == pytest.approx(ots.federal_total_tax, abs=1.0)
+
+
 def test_ots_niit_fires_when_gains_are_the_only_investment_income():
     """Form 8960 must run when capital gains are the sole investment income.
 
