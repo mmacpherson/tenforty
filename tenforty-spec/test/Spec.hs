@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -766,7 +764,8 @@ spec n = do
                     Right frm -> do
                         let graph = compileForm frm
                         cgImports graph `shouldSatisfy` (not . null)
-                        cgImports graph `shouldContain` [("us_schedule_d", "L16", tyYear ty)]
+                        cgImports graph `shouldContain` [("us_schedule_d", "L21", tyYear ty)]
+                        cgImports graph `shouldContain` [("us_schedule_d", "L15", tyYear ty)]
                     Left err -> expectationFailure $ show err
 
         forM_ taxYears $ \ty ->
