@@ -101,19 +101,20 @@ def _f12_itemized_category_amt(backend: str, case: dict) -> set[str]:
     return set()
 
 
-def _f14_amt_std_deduction_addback(backend: str, case: dict) -> set[str]:
-    """F14: AMT standard-deduction add-back divergence on AMT-preference cases.
+def _f14_taxcalc_omits_amt_std_addback(backend: str, case: dict) -> set[str]:
+    """F14: taxcalc omits the Form 6251 line 2a standard-deduction add-back.
 
-    OTS adds the standard deduction back into AMTI (Form 6251 line 2a for
-    non-itemizers); taxcalc and the graph spec do not, and agree to the
-    penny. Adjudication pending — if the form walkthrough holds, this is a
-    taxcalc AND graph defect and the excusal flips to the graph backend.
+    Adjudicated (tenforty-ztx): for a non-itemizer the standard deduction is
+    added back into AMTI (line 2a; IRC 56(b)(1)(E)). OTS does this and the graph
+    now does too (tenforty-8ik), so BOTH tenforty backends agree with the form
+    and diverge from taxcalc, which omits the add-back. The gap is the marginal
+    AMT rate x the standard deduction (e.g. 28% x $14,600 = $4,088), and it
+    surfaces on ISO + Standard cases where the preference makes AMT bind. Unlike
+    the other signatures this excuses BOTH backends — taxcalc is the outlier
+    here, not us. Upstream note filed to PSL (docs/upstream-taxcalc-reports.md);
+    delete this once a taxcalc release carries the correction.
     """
-    if (
-        backend == "ots"
-        and case.get("iso", 0)
-        and case.get("std_or_item") == "Standard"
-    ):
+    if case.get("iso", 0) and case.get("std_or_item") == "Standard":
         return {"amt", "income_tax", "total_tax"}
     return set()
 
@@ -124,7 +125,7 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
     _f15_ots_itemized_taxable_income,
-    _f14_amt_std_deduction_addback,
+    _f14_taxcalc_omits_amt_std_addback,
 ]
 
 

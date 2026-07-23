@@ -30,7 +30,7 @@ delete the signature, and update this table in the same PR.
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS 15%-rate ceiling wrong (266,700 vs 300,000), inline in 1040 not Tables | graph spec | fixed | differential grid |
-| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc + graph (both, apparently) | adjudicated: OTS matches the form; fix graph, ask taxcalc | H_amt stratum |
+| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); taxcalc omits add-back, upstream note pending | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
 
@@ -212,7 +212,7 @@ breakpoint error for MFS in the 2025 spec parameters (MFS thresholds are
 not always half of Single). 2-vs-1 against the graph; fix and adjudicate in
 the spec bundle.
 
-### F14. NEW — AMT standard-deduction add-back divergence
+### F14. FIXED (graph) — AMT standard-deduction add-back divergence
 
 Found by the first AMT-positive stratum (H_amt: ISO exercise spread carried
 to taxcalc as `cmbtp`). Single, $150k wages + $200k ISO: OTS computes AMT
@@ -280,10 +280,18 @@ same shortcut (start from taxable income, add preferences, skip line 2a), so
 it looks like common-mode error rather than independent corroboration. The
 statute and the form instructions are what carry the argument, not the vote.
 
-Consequences for us: the excusing signature flips from `ots` to `graph`; the
-graph spec needs the add-back; goldens regenerate. We are changing our own
-engine regardless of how the upstream question lands, since we are claiming
-to compute the law rather than to match an aggregate.
+**Fixed (tenforty-8ik).** Form 6251 line 2a now adds the taxes back
+correctly: it imports the 1040's deduction actually taken (`L12Final`) and
+compares it to the standard deduction for the status; when the filer itemized
+(the 1040 took the larger itemized amount) it adds back SALT, otherwise it
+adds back the standard deduction. Both backends now compute AMT $43,813.50 on
+the walkthrough case, matching Form 6251. The `_f14` signature is not deleted
+but **inverted**: it previously excused OTS's divergence from taxcalc; now that
+both backends add the deduction back, it excuses **both** backends against
+taxcalc on ISO + Standard cases (the 24 such golden fixtures), taxcalc being
+the outlier. The upstream note to PSL (`docs/upstream-taxcalc-reports.md`) is
+unchanged; we changed our own engine regardless of how that question lands,
+since we claim to compute the law rather than match an aggregate.
 
 ### F16. NEW — the suite's taxcalc adapter drops `iso`, so taxcalc sees no AMT preference
 

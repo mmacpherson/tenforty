@@ -294,17 +294,17 @@ def test_graph_2025_mfs_ltcg_matches_consensus():
     assert r.federal_income_tax == pytest.approx(56_779.50, abs=2.0)
 
 
-@pytest.mark.xfail(
-    reason="F14: AMT std-deduction add-back divergence (adjudication pending)",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_amt_std_addback_agrees_across_backends():
-    """Single, $150k wages + $200k ISO spread: backends must agree on AMT.
+    """Single, $150k wages + $200k ISO spread: backends agree on AMT.
 
-    OTS adds the standard deduction back into AMTI (Form 6251 line 2a);
-    graph (and taxcalc) do not. Whichever way adjudication lands, the
-    backends must converge (F14).
+    Adjudication (tenforty-ztx) held that OTS matches Form 6251: for a
+    non-itemizer the standard deduction is added back into AMTI (line 2a; IRC
+    56(b)(1)(E)). The graph now does the same, so both backends give AMT
+    $43,813.50 — AMTI $350,000 (taxable $135,400 + std deduction $14,600 + ISO
+    $200,000), TMT $69,352 less regular tax $25,538.50. taxcalc omits the
+    add-back and lands at $39,725.50; that deviation is the taxcalc bug the
+    upstream note documents. Fixed by tenforty-8ik.
     """
     kwargs = dict(
         year=2024,
@@ -315,6 +315,7 @@ def test_amt_std_addback_agrees_across_backends():
     ots = evaluate_return(backend="ots", **kwargs)
     graph = evaluate_return(backend="graph", **kwargs)
     assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=2.0)
+    assert graph.federal_amt == pytest.approx(43_813.50, abs=1.0)
 
 
 @pytest.mark.xfail(

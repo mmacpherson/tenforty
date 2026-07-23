@@ -14,8 +14,26 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
     -- Line 1: Enter taxable income from Form 1040, line 15
     l1 <- interior "L1" "taxable_income" $ importForm "us_1040" "L15"
 
-    -- Line 2a: SALT deduction (add back state/local taxes from Schedule A)
-    l2a <- keyInput "L2a" "salt_addback" "State and local taxes from Schedule A, line 5d"
+    -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A taxes when
+    -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E): the
+    -- standard deduction is not allowed for AMT). Line 1 (1040 L15) already has
+    -- the deduction removed, so a non-itemizer must add the standard deduction
+    -- back into AMTI. The 1040 takes the greater of itemized and standard, so
+    -- "itemizing" is exactly the deduction taken exceeding the standard
+    -- deduction; in that case add back SALT, otherwise the standard deduction.
+    l2aSalt <- keyInput "L2a" "salt_addback" "State and local taxes from Schedule A, line 5d"
+    stdDeduction <-
+        interior "std_deduction" "Standard deduction for this filing status" $
+            byStatusE (fmap lit standardDeduction2025)
+    deductionTaken <-
+        interior "deduction_taken" "Deduction the 1040 used (greater of itemized and standard)" $
+            importForm "us_1040" "L12Final"
+    itemizingExcess <-
+        interior "amt_itemizing_excess" "By how much the 1040 deduction exceeds the standard deduction" $
+            deductionTaken `subtractNotBelowZero` stdDeduction
+    l2a <-
+        interior "L2a_taxes_addback" "Taxes added back to AMTI" $
+            ifPos itemizingExcess l2aSalt stdDeduction
 
     -- Line 2b: Medical expenses adjustment (difference between 7.5% and AMT floor)
     l2b <- keyInput "L2b" "medical_adjustment" "Medical expense adjustment"
