@@ -28,7 +28,16 @@ STANDARD_DEDUCTION = {
 
 
 def _f3_qbi(backend: str, case: dict) -> set[str]:
-    """F3: OTS omits the QBI deduction; graph uses gross base."""
+    """F3: QBI divergence on self-employment cases, now from two causes.
+
+    OTS omits the deduction entirely (it reads 1040 line 13 as a direct input
+    and nothing supplies it — tenforty-6hr follow-up). The graph now nets the
+    half-SE deduction into the QBI base and agrees with taxcalc below the
+    section 199A threshold; above it the graph still uses the simplified Form
+    8995 (no W-2-wage/UBIA limit), so it diverges from taxcalc there — a
+    distinct limitation tracked separately. Both faults land on the same
+    self-employment cases, so the excusal stays broad until each is closed.
+    """
     if case.get("se", 0):
         return {"taxable_income", "income_tax", "total_tax"}
     return set()
