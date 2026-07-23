@@ -23,10 +23,18 @@ usForm8995_2024 = form "us_form_8995" 2024 $ do
     l3 <- keyInput "L3" "qbi_business_3" "Qualified business income from trade/business 3"
     l4 <- keyInput "L4" "qbi_business_4" "Qualified business income from trade/business 4"
 
-    -- Line 5: Total qualified business income
+    -- Qualified business income is net of the deductible half of the
+    -- self-employment tax attributable to the business (IRC 199A(c); the
+    -- Schedule C profit that seeds L1 is gross). Import Schedule SE line 11 —
+    -- the deductible part of SE tax — and net it out before the 20%.
+    seHalfDeduction <-
+        interior "se_half_deduction" "Deductible half of SE tax reducing QBI" $
+            importForm "us_schedule_se" "L11"
+
+    -- Line 5: Total qualified business income (net of the half-SE deduction)
     l5 <-
         interior "L5" "total_qbi" $
-            l1 .+. l2 .+. l3 .+. l4
+            (l1 .+. l2 .+. l3 .+. l4) .-. seHalfDeduction
 
     -- Line 6: QBI component. Multiply line 5 by 20% (0.20)
     l6 <-
