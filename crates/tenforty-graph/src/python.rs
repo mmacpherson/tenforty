@@ -119,12 +119,8 @@ impl Graph {
         iter.map(|(idx, status, input_vals)| {
             let mut rt = RsRuntime::new(graph, status);
 
-            // Set all graph inputs to 0 first
-            for input_id in &graph.inputs {
-                rt.set_by_id(*input_id, 0.0);
-            }
-
-            // Set specified inputs
+            // Unset inputs default to 0 in eval, so only the provided ones need
+            // setting — no per-scenario zero-fill over all ~800 graph inputs.
             for (name, &value) in &input_vals {
                 let _ = rt.set(name, value);
             }

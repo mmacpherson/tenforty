@@ -112,11 +112,13 @@ impl<'g> Runtime<'g> {
 
     fn eval_op(&mut self, op: &Op, node_id: NodeId) -> Result<f64, EvalError> {
         match op {
-            Op::Input | Op::Import { .. } => self
-                .inputs
-                .get(&node_id)
-                .copied()
-                .ok_or_else(|| EvalError::InputNotSet(format!("node_{}", node_id))),
+            // An input that was never set reads as 0. The resolved per-year
+            // graph carries every state's inputs (~800); a given return only
+            // provides a handful, and the rest are genuinely zero. Erroring
+            // here would force callers to zero all inputs up front, which costs
+            // ~800 writes per eval for no benefit. Mapping typos are still
+            // caught at `set()`, where an unknown input *name* is rejected.
+            Op::Input | Op::Import { .. } => Ok(self.inputs.get(&node_id).copied().unwrap_or(0.0)),
 
             Op::Literal { value } => Ok(*value),
 

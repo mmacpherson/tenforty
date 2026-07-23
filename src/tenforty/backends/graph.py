@@ -94,9 +94,8 @@ class GraphBackend:
         )
         evaluator = Runtime(graph, filing_status)
 
-        for input_name in graph.input_names():
-            evaluator.set(input_name, 0.0)
-
+        # Unset inputs default to 0 in eval; only the provided values are set
+        # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
         natural_values = inputs_dict
 
         unsupported: list[tuple[str, object]] = []
