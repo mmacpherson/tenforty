@@ -7,7 +7,6 @@ import logging
 import pathlib
 from functools import lru_cache
 
-from ..form_resolution import resolve_forms
 from ..mappings import (
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
@@ -58,6 +57,20 @@ def _load_graph(form_id: str, year: int):
         return None
 
     return Graph.from_json(form_path.read_text())
+
+
+@lru_cache(maxsize=4)
+def _load_resolved_graph(year: int):
+    """Load the pre-resolved one-graph-per-year (federal + all states).
+
+    The Haskell compiler resolves every cross-form import at build time
+    (tenforty-ovz), so there is nothing to link at runtime — just load and
+    evaluate. Eval is demand-driven, so requesting one state's outputs only
+    touches that state plus federal; the other states stay dormant.
+    """
+    from ..graphlib import Graph
+
+    return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
 
 
 @lru_cache(maxsize=16)
@@ -140,14 +153,7 @@ class GraphBackend:
         inputs_dict = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
-        form_ids = resolve_forms(
-            tax_input.year.value,
-            tax_input.state.value if tax_input.state else None,
-            inputs_dict,
-            _forms_dir(),
-        )
-
-        graph = _link_graphs(tax_input.year.value, tuple(form_ids))
+        graph = _load_resolved_graph(tax_input.year.value)
         filing_status = FilingStatus.from_str(
             FILING_STATUS_MAP.get(tax_input.filing_status, "single")
         )
@@ -358,19 +364,7 @@ class GraphBackend:
                 normalized.setdefault(name, []).append(float(value))
         inputs = normalized
 
-        # Determine required forms using representative inputs from the batch.
-        # We use the max-absolute value per input to capture any non-zero cases.
-        resolve_inputs = {
-            name: (max(values, key=lambda v: abs(v)) if values else 0.0)
-            for name, values in inputs.items()
-        }
-        form_ids = resolve_forms(
-            year,
-            state.value if state else None,
-            resolve_inputs,
-            _forms_dir(),
-        )
-        graph = _link_graphs(year, tuple(form_ids))
+        graph = _load_resolved_graph(year)
 
         # Map natural input names to graph node names
         graph_inputs = {}

@@ -5,11 +5,44 @@ import json
 import os
 
 
-def _iter_form_json_paths() -> list[str]:
-    repo_root = os.path.dirname(os.path.dirname(__file__))
-    return sorted(
-        glob.glob(os.path.join(repo_root, "src", "tenforty", "forms", "*.json"))
+def _forms_dir() -> str:
+    return os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "src", "tenforty", "forms"
     )
+
+
+def _iter_form_json_paths() -> list[str]:
+    # Per-form compiled graphs only; the resolved per-year graph (us_tax_graph_*)
+    # is a different artifact with its own integrity test below.
+    return sorted(
+        p
+        for p in glob.glob(os.path.join(_forms_dir(), "*.json"))
+        if not os.path.basename(p).startswith("us_tax_graph_")
+    )
+
+
+def _operand_refs(op: dict) -> list:
+    t = op.get("type")
+    if t in ("add", "sub", "mul", "div", "max", "min"):
+        return [op.get("left"), op.get("right")]
+    if t in ("floor", "neg", "abs", "clamp"):
+        return [op.get("arg")]
+    if t == "bracket_tax":
+        return [op.get("income")]
+    if t == "phase_out":
+        return [op.get("agi")]
+    if t == "by_status":
+        v = op.get("values", {})
+        return [
+            v.get("single"),
+            v.get("married_joint"),
+            v.get("married_separate"),
+            v.get("head_of_household"),
+            v.get("qualifying_widow"),
+        ]
+    if t == "if_positive":
+        return [op.get("cond"), op.get("then"), op.get("otherwise")]
+    return []
 
 
 def test_compiled_form_graphs_policy_and_integrity() -> None:
@@ -86,33 +119,34 @@ def test_compiled_form_graphs_policy_and_integrity() -> None:
         # 5. Integrity: Node references
         for node in nodes.values():
             op = node.get("op", {})
-            op_type = op.get("type")
 
-            refs_to_check = []
-            if op_type in ("add", "sub", "mul", "div", "max", "min"):
-                refs_to_check = [op.get("left"), op.get("right")]
-            elif op_type in ("floor", "neg", "abs"):
-                refs_to_check = [op.get("arg")]
-            elif op_type == "clamp":
-                refs_to_check = [op.get("arg")]
-            elif op_type == "bracket_tax":
-                refs_to_check = [op.get("income")]
-            elif op_type == "phase_out":
-                refs_to_check = [op.get("agi")]
-            elif op_type == "by_status":
-                values = op.get("values", {})
-                refs_to_check = [
-                    values.get("single"),
-                    values.get("married_joint"),
-                    values.get("married_separate"),
-                    values.get("head_of_household"),
-                    values.get("qualifying_widow"),
-                ]
-            elif op_type == "if_positive":
-                refs_to_check = [op.get("cond"), op.get("then"), op.get("otherwise")]
-
-            for ref in refs_to_check:
+            for ref in _operand_refs(op):
                 if ref is not None:
                     assert str(ref) in nodes, (
                         f"{filename}: node {node.get('name')} references non-existent node {ref}"
                     )
+
+
+def test_resolved_tax_graph_integrity() -> None:
+    """The resolved per-year graph (us_tax_graph_<year>) has no imports, no dangling edges."""
+    paths = sorted(glob.glob(os.path.join(_forms_dir(), "us_tax_graph_*.json")))
+    assert paths, "Expected resolved per-year graphs (us_tax_graph_<year>.json)"
+
+    for path in paths:
+        filename = os.path.basename(path)
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+
+        assert data["meta"]["generated_by"] == "resolveForms", filename
+        assert data.get("imports") == [], (
+            f"{filename}: resolved graph must carry no imports"
+        )
+
+        nodes = data["nodes"]
+        for key_id, node in nodes.items():
+            assert str(node.get("id")) == key_id, (
+                f"{filename}: node id/key mismatch at {key_id}"
+            )
+            for ref in _operand_refs(node.get("op", {})):
+                if ref is not None:
+                    assert str(ref) in nodes, f"{filename}: dangling edge -> {ref}"

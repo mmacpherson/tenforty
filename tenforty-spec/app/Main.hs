@@ -25,6 +25,7 @@ import DCFormD40_2024
 import DCFormD40_2025
 import DEFormPITRES_2024
 import DEFormPITRES_2025
+import Data.Aeson qualified as Aeson
 import Data.Aeson.Encode.Pretty qualified as AP
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Lazy.Char8 qualified as BL8
@@ -375,13 +376,19 @@ main = do
                 forms = rights wanted
                 cgs = map compileForm forms
                 badImports = unresolvedImports cgs
-                outPath = T.unpack formName ++ ".json"
+                name =
+                  if null states
+                    then "us_tax_graph_" ++ T.unpack yr ++ ".json"
+                    else T.unpack formName ++ ".json"
+                outPath = "dist/" ++ name
             unless (null badImports) $ do
               hPutStrLn stderr "resolve: unresolved cross-form imports (fix the importForm reference):"
               forM_ badImports $ \(src, tf, tl) ->
                 hPutStrLn stderr $ "  " ++ T.unpack src ++ " imports " ++ T.unpack tf ++ ":" ++ T.unpack tl
               exitFailure
-            BL.writeFile outPath (AP.encodePretty (resolveForms cgs) <> BL8.pack "\n")
+            createDirectoryIfMissing True "dist"
+            -- compact: this is a machine-loaded artifact, not read by humans
+            BL.writeFile outPath (Aeson.encode (resolveForms cgs) <> BL8.pack "\n")
             putStrLn $
               "Wrote " ++ outPath ++ " (" ++ show (length forms) ++ " forms -> one resolved graph)"
           [] -> hPutStrLn stderr "resolve: missing year" >> exitFailure
