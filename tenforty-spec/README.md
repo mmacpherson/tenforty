@@ -143,19 +143,21 @@ external tools (hlint, fourmolu, cabal-fmt). These are not required to build
 or run the compiler.
 
 ```bash
-make fmt          # Format code (fourmolu + cabal-fmt)
+make fmt          # Format code (ormolu + cabal-gild)
+make fmt-check    # Check formatting (fails if unformatted)
 make lint         # Lint code (hlint, non-blocking)
 make lint-strict  # Lint code (hlint, fails on hints)
 ```
 
-If missing, the Makefile prints install instructions. Here's one way to set
-them up:
+If missing, the Makefile prints install instructions. All three build on the
+project's own GHC — the Makefile derives it from `cabal.project` — so one
+compiler covers everything:
 
 ```bash
 cabal install -j --install-method=copy --installdir="$HOME/.local/bin" \
-    --overwrite-policy=always -w ghc-9.6 hlint fourmolu cabal-fmt
+    --overwrite-policy=always -w ghc-9.12.4 hlint ormolu-0.8.1.1 cabal-gild-1.8.4.1
 ```
 
-These tools often lag behind the latest GHC, so we pin them to GHC 9.6 which
-has broad compatibility. The `-w ghc-9.6` flag selects that compiler for
-building the tools only; it doesn't affect the project build.
+The project GHC is kept at the newest version the dev tools also build on (they
+lag the compiler via `ghc-lib-parser`), so there's no second compiler — see the
+dependency-policy note in `AGENTS.md`.

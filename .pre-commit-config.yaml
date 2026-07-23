@@ -51,6 +51,16 @@ repos:
     files: ^crates/tenforty-graph/demo/.*\.(css|html|js|json)$
 - repo: local
   hooks:
+  - id: ormolu
+    name: ormolu (haskell format check)
+    language: system
+    entry: ormolu --mode check
+    files: ^tenforty-spec/.*\.hs$
+  - id: cabal-gild
+    name: cabal-gild (.cabal format check)
+    language: system
+    entry: cabal-gild --mode check
+    files: ^tenforty-spec/.*\.cabal$
   - id: cargo-fmt
     name: cargo fmt
     language: system
