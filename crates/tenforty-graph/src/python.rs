@@ -168,6 +168,13 @@ impl Graph {
             let compiler = JitCompiler::new().ok();
 
             if let Some(compiler) = compiler {
+                // Slice the JIT to just the requested outputs: compile only the
+                // nodes those outputs depend on, not the whole ~3000-node graph.
+                let output_ids: Vec<crate::graph::NodeId> = outputs
+                    .iter()
+                    .filter_map(|name| graph.node_id_by_name(name))
+                    .collect();
+
                 let mut blocks: Vec<Vec<(usize, RsFilingStatus, HashMap<String, f64>)>> =
                     vec![Vec::new(); unique_statuses.len()];
                 for scenario in &scenarios {
@@ -182,7 +189,7 @@ impl Graph {
                     let status = block[0].1;
 
                     // Compile for this status
-                    if let Ok(compiled) = compiler.compile_batch(graph, status) {
+                    if let Ok(compiled) = compiler.compile_batch(graph, status, &output_ids) {
                         // Pre-calculate input mappings
                         let input_mappings: Vec<(&String, Option<usize>)> = input_names
                             .iter()

@@ -495,7 +495,7 @@ mod tests {
         }
 
         let batch_compiled = compiler
-            .compile_batch(&graph, FilingStatus::Single)
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
             .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("income", &incomes).unwrap();
@@ -533,7 +533,7 @@ mod tests {
         }
 
         let batch_compiled = compiler
-            .compile_batch(&graph, FilingStatus::Single)
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
             .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("wages", &wages).unwrap();
@@ -560,7 +560,7 @@ mod tests {
         let incomes = [0.0, -100.0];
 
         let batch_compiled = compiler
-            .compile_batch(&graph, FilingStatus::Single)
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
             .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("income", &incomes).unwrap();

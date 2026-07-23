@@ -105,6 +105,7 @@ impl JitCompiler {
         &self,
         graph: &Graph,
         filing_status: FilingStatus,
+        output_ids: &[NodeId],
     ) -> Result<CompiledBatchGraph, JitError> {
         let builder =
             JITBuilder::with_isa(self.isa.clone(), cranelift_module::default_libcall_names());
@@ -122,14 +123,22 @@ impl JitCompiler {
             .declare_function("eval_batch", Linkage::Export, &ctx.func.signature)
             .map_err(Box::new)?;
 
-        let (input_offsets, num_inputs) = build_batch_input_offsets(graph);
-        let (output_offsets, num_outputs) = build_batch_output_offsets(graph);
+        // Only compile what the requested outputs actually depend on. The
+        // resolved per-year graph carries all ~50 states; a federal-or-one-state
+        // batch touches a few hundred of its ~3000 nodes, so lowering the whole
+        // graph would compute (and SIMD-execute) every dormant state per row.
+        let order = graph.reachable_topological_order(output_ids, filing_status)?;
+        let reachable: std::collections::HashSet<NodeId> = order.iter().copied().collect();
+
+        let (input_offsets, num_inputs) = build_batch_input_offsets(graph, &reachable);
+        let (output_offsets, num_outputs) = build_batch_output_offsets(output_ids);
 
         lower_graph_simd(
             &mut ctx.func,
             &mut module,
             graph,
             filing_status,
+            &order,
             &input_offsets,
             &output_offsets,
         )?;
@@ -214,20 +223,27 @@ fn build_output_offsets(
     offsets
 }
 
-fn build_batch_input_offsets(graph: &Graph) -> (HashMap<NodeId, usize>, usize) {
+fn build_batch_input_offsets(
+    graph: &Graph,
+    reachable: &std::collections::HashSet<NodeId>,
+) -> (HashMap<NodeId, usize>, usize) {
     let mut offsets = HashMap::new();
-    for (slot, &input_id) in graph.inputs.iter().enumerate() {
-        offsets.insert(input_id, slot);
+    let mut slot = 0;
+    for &input_id in &graph.inputs {
+        if reachable.contains(&input_id) {
+            offsets.insert(input_id, slot);
+            slot += 1;
+        }
     }
-    (offsets, graph.inputs.len())
+    (offsets, slot)
 }
 
-fn build_batch_output_offsets(graph: &Graph) -> (HashMap<NodeId, usize>, usize) {
+fn build_batch_output_offsets(output_ids: &[NodeId]) -> (HashMap<NodeId, usize>, usize) {
     let mut offsets = HashMap::new();
-    for (slot, &output_id) in graph.outputs.iter().enumerate() {
+    for (slot, &output_id) in output_ids.iter().enumerate() {
         offsets.insert(output_id, slot);
     }
-    (offsets, graph.outputs.len())
+    (offsets, output_ids.len())
 }
 
 pub struct CompiledGraph {
