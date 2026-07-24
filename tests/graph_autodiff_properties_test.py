@@ -24,6 +24,8 @@ pins the finite-difference agreement on the runtime directly.
   marginal negative at very low income).
 """
 
+import math
+
 import pytest
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
@@ -60,15 +62,41 @@ INCOME_NATURALS = [
     "rental_income",
 ]
 
+# Incomes landing in the last unit before a power of two, where float spacing
+# DOUBLES on the way across. A derivative probed as `f(x + 1) - f(x)` reads a slope
+# of 1.0000000000009095 rather than 1.0 there, because the exact sum is no longer
+# representable in the wider binade above; `derived_chain_factor` compared that to
+# 1.0 outright and dropped the w2 -> Schedule SE coupling in silence.
+#
+# Uniform sampling reaches this by accident: the windows are one unit wide, so about
+# 2e-5 of [0, 200_000) lies in one, and the deep sweep needed 10,000 examples to trip
+# over it once. Landing ON the window instead makes it a per-example event, which is
+# the whole argument for a targeted strategy over more reps — same corner, four
+# orders of magnitude cheaper. Sampling the exponent rather than hard-coding 2**13
+# keeps it a statement about float structure and not about the one value that failed.
+_BINADE_EDGE = st.builds(
+    lambda exponent, offset: math.ldexp(1.0, exponent) - offset,
+    st.sampled_from(range(1, 18)),  # 2 .. 131072, inside the 200_000 cap
+    st.floats(
+        min_value=0.0,
+        max_value=1.0,
+        exclude_min=True,
+        allow_nan=False,
+        allow_infinity=False,
+    ),
+)
+
 # A random income for every source, so the gradient is exercised with the
 # subordinate forms (Schedule SE, 8959, 8960) live and fanning out.
+_INCOME = st.one_of(
+    st.floats(
+        min_value=0.0, max_value=200_000.0, allow_nan=False, allow_infinity=False
+    ),
+    _BINADE_EDGE,
+)
+
 _INCOME_VECTOR = st.fixed_dictionaries(
-    {
-        natural: st.floats(
-            min_value=0.0, max_value=200_000.0, allow_nan=False, allow_infinity=False
-        )
-        for natural in INCOME_NATURALS
-    }
+    {natural: _INCOME for natural in INCOME_NATURALS}
 )
 
 _STEP = 10.0
@@ -101,7 +129,7 @@ def _gradient(wrt: str, case: dict) -> float:
 
 
 @skip_if_graph_unavailable
-@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
+@settings(deadline=None)  # inherit profile count (ci=500, deep=10k, soak=100k)
 @given(
     filing_status=st.sampled_from(FEDERAL_STATUSES),
     wrt=st.sampled_from(INCOME_NATURALS),
@@ -147,7 +175,7 @@ def test_autodiff_matches_finite_difference(filing_status, wrt, incomes):
 
 
 @skip_if_graph_unavailable
-@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
+@settings(deadline=None)  # inherit profile count (ci=500, deep=10k, soak=100k)
 @given(
     filing_status=st.sampled_from(FEDERAL_STATUSES),
     wrt=st.sampled_from(INCOME_NATURALS),
