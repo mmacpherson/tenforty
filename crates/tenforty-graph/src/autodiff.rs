@@ -343,4 +343,113 @@ mod tests {
         let grad = gradient(&mut runtime, 1, 0).unwrap();
         assert_eq!(grad, 0.30);
     }
+
+    /// A graph where the input fans out to two branches that recombine, so the
+    /// gradient must sum both paths. `income` feeds the bracket tax (node 1) and
+    /// a flat 3.8% surtax (node 3); the output (node 4) adds them. A backprop
+    /// that follows only one edge out of the input gets the surtax or the bracket
+    /// rate but not their sum — exactly the fan-out/chain-rule bug the numerical
+    /// oracle catches.
+    fn fanout_graph() -> Graph {
+        let mut nodes = HashMap::new();
+        nodes.insert(
+            0,
+            Node {
+                id: 0,
+                op: Op::Input,
+                name: Some("income".to_string()),
+            },
+        );
+        nodes.insert(
+            1,
+            Node {
+                id: 1,
+                op: Op::BracketTax {
+                    table: "federal".to_string(),
+                    income: 0,
+                },
+                name: Some("tax".to_string()),
+            },
+        );
+        nodes.insert(
+            2,
+            Node {
+                id: 2,
+                op: Op::Literal { value: 0.038 },
+                name: Some("surtax_rate".to_string()),
+            },
+        );
+        nodes.insert(
+            3,
+            Node {
+                id: 3,
+                op: Op::Mul { left: 0, right: 2 },
+                name: Some("surtax".to_string()),
+            },
+        );
+        nodes.insert(
+            4,
+            Node {
+                id: 4,
+                op: Op::Add { left: 1, right: 3 },
+                name: Some("total".to_string()),
+            },
+        );
+
+        let mut tables = HashMap::new();
+        tables.insert(
+            "federal".to_string(),
+            BracketTable {
+                brackets: ByStatus::uniform(vec![
+                    Bracket {
+                        threshold: 10000.0,
+                        rate: 0.10,
+                    },
+                    Bracket {
+                        threshold: 40000.0,
+                        rate: 0.20,
+                    },
+                    Bracket {
+                        threshold: f64::INFINITY,
+                        rate: 0.30,
+                    },
+                ]),
+            },
+        );
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables,
+            inputs: vec![0],
+            outputs: vec![4],
+            invariants: vec![],
+        }
+    }
+
+    proptest::proptest! {
+        /// Autodiff agrees with a central finite difference at any income away
+        /// from a bracket edge. Bracket tax is piecewise linear, so within a
+        /// bracket the analytical gradient is the exact slope and the central
+        /// difference recovers it; a +/-$50 guard keeps the +/-$1 difference from
+        /// straddling the 10k/40k kinks. This is the property version of the
+        /// fixed-point `test_gradient_vs_numerical`, over the fan-out graph.
+        #[test]
+        fn autodiff_matches_numerical_on_fanout(income in 1.0f64..100_000.0) {
+            proptest::prop_assume!(
+                (income - 10_000.0).abs() > 50.0 && (income - 40_000.0).abs() > 50.0
+            );
+            let graph = fanout_graph();
+            let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+            runtime.set_by_id(0, income);
+
+            let analytical = gradient(&mut runtime, 4, 0).unwrap();
+            let numerical = numerical_gradient(&mut runtime, 4, 0, 1.0).unwrap();
+            proptest::prop_assert!(
+                (analytical - numerical).abs() < 1e-6,
+                "income={income}: analytical={analytical} numerical={numerical}"
+            );
+        }
+    }
 }
