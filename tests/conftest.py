@@ -33,4 +33,15 @@ settings.register_profile(
     max_examples=50,
     suppress_health_check=[HealthCheck.too_slow],
 )
+# Ad-hoc deep sweep: `uv run pytest --hypothesis-profile=deep`. Reaches rare
+# corners the 500-example ci profile clears only ~40% of the time (bugs with a
+# per-example hit rate in ~[1e-4, 2e-3] — obscure-threshold conjunctions). Only
+# tests that do NOT pin their own @settings(max_examples=...) inherit this; a
+# property meant for the deep sweep should leave max_examples to the profile.
+settings.register_profile(
+    "deep",
+    max_examples=10_000,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
 settings.load_profile("dev")  # Default for local dev

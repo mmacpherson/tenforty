@@ -87,6 +87,7 @@ freeze rather than rolling the whole tree back.
 - `pip install -e ".[dev]"` — Install in dev mode
 - `pytest` — Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` — Run with CI profile (500 examples)
+- `pytest --hypothesis-profile=deep` — Deep property sweep (10,000 examples; ad hoc)
 - `python ots/amalgamate.py ots/ots-releases/*.tgz` — Regenerate OTS bindings
 - `make graph-build` — Build graph library (interpreter only)
 - `make spec-graphs` — Generate JSON graphs from Haskell specs
@@ -110,6 +111,29 @@ If the graph backend tests in `tests/backends_test.py` fail to load the compiled
 module (or `evaluate` raises on a fresh graph), the `.so` is out of sync — run
 `make env-full`.
 Never bypass pre-commit hooks with `--no-verify`; fix the underlying issue instead.
+
+### Sweeps expected for substantive engine changes
+
+The per-PR suite runs the `ci` hypothesis profile (500 examples) — enough to
+gate a change, not to hunt rare corners. For a **substantive change to a compute
+engine** (the Rust graph runtime, the OTS mapping/orchestration, or the Haskell
+spec/graph — not docs, tests, or tooling), run all three deeper sweeps and note
+the result in the PR:
+
+- **Deep hypothesis sweep** — `uv run pytest --hypothesis-profile=deep` (10,000
+  examples). Catches obscure-threshold conjunctions the 500-example gate clears
+  only intermittently. Targeted boundary-straddling strategies (tenforty-g79)
+  are the higher-leverage complement; reps are the safety net under them.
+- **OTS regression + cross-backend parity** — the `tests/parity/` suite, so the
+  OTS and graph backends still agree.
+- **taxcalc differential** — `TENFORTY_TAXCALC=1 uv run pytest tests/taxcalc/`
+  (install with `uv sync --group taxcalc`), the value oracle against
+  Tax-Calculator.
+
+These are complementary nets: the differential pins **numbers**, parity pins
+**backend agreement**, and the property sweep pins **shape/structure** the other
+two are blind to. None runs in the per-PR gate; they are the author's
+responsibility on an engine change.
 
 ## Python Style
 
