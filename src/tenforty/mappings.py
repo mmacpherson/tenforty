@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from .models import STATE_TO_FORM, OTSFilingStatus, OTSState, TaxReturnInput
@@ -82,11 +83,18 @@ def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -
     """d(derived natural)/d(source natural), read off the model itself.
 
     The derivations are piecewise linear in their source and every one of them is
-    currently either identity or a constant zero, so a unit bump recovers the exact
-    slope — no step-size choice to get wrong. Probing beats restating the condition
-    (`schedule_se_ss_wages` is zero for Married/Joint and when there is no
-    self-employment income) because a copy of that rule here could fall out of step
-    with `models.py` without anything failing.
+    currently either identity or a constant zero, so a single bump recovers the exact
+    slope. Probing beats restating the condition (`schedule_se_ss_wages` is zero for
+    Married/Joint and when there is no self-employment income) because a copy of that
+    rule here could fall out of step with `models.py` without anything failing.
+
+    The slope is taken against the bump that SURVIVED rounding, not the one requested,
+    and that is what makes it EXACT: an identity derivation moves the derived value by
+    precisely the amount the source moved, so the ratio is 1.0 with no tolerance to
+    choose. Dividing by the requested bump instead reads 1.0000000000009095 whenever
+    `source + bump` crosses a power of two, and 0.0 above 2**53 where a unit bump
+    rounds away to nothing — both of which used to read as "not 1" and drop the
+    coupling in silence. The bump is at least one ulp wide so it can never vanish.
 
     That guarantee covers pydantic COMPUTED FIELDS, which recompute on attribute
     access. It does not extend to derivations applied by a `model_validator`:
@@ -103,8 +111,12 @@ def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -
     `DERIVED_NATURAL_SOURCES` is a deliberate opt-in, so a factor it cannot carry is
     a mapping defect to surface rather than a coupling to drop in silence.
     """
-    bumped = tax_input.model_copy(update={source: getattr(tax_input, source) + 1.0})
-    factor = getattr(bumped, derived) - getattr(tax_input, derived)
+    current = float(getattr(tax_input, source))
+    bump = max(1.0, math.ulp(current))
+    bumped = tax_input.model_copy(update={source: current + bump})
+
+    realized = float(getattr(bumped, source)) - current
+    factor = (getattr(bumped, derived) - getattr(tax_input, derived)) / realized
 
     if factor not in (0.0, 1.0):
         raise NotImplementedError(

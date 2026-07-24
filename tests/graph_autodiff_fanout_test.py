@@ -313,3 +313,40 @@ def test_derived_chain_factor_rejects_a_slope_it_cannot_carry():
 
     with pytest.raises(NotImplementedError, match=r"only 0 or 1 can be carried"):
         derived_chain_factor(tax_input, "scaled_wages", "w2_income")
+
+
+@pytest.mark.parametrize(
+    "w2_income",
+    [
+        8191.969842312686,
+        4095.1460934553484,
+        2**53 - 0.5,
+        1e16,
+        1e17,
+    ],
+    ids=["binade-8192", "binade-4096", "at-2**53", "above-2**53", "far-above-2**53"],
+)
+def test_derived_chain_factor_is_exact_where_a_unit_bump_is_not(w2_income):
+    """An identity derivation reads as slope 1 even where `w + 1.0` misbehaves.
+
+    Two ways a nominal unit bump lies about the slope. Below 2**53, `w + 1.0` can
+    cross a power of two and land 1.0000000000009095 away; above it, the bump rounds
+    off entirely and the probe sees no movement at all. Both used to read as "not 1"
+    and drop the schedule_se_ss_wages coupling in silence — the deep sweep caught the
+    first one through `test_marginal_rate_within_bounds`.
+
+    Taking the slope against the bump that survived rounding makes it exact rather
+    than merely close, so `_input_nodes` can keep comparing to 1.0 outright.
+    """
+    from tenforty.mappings import derived_chain_factor
+
+    tax_input = TaxReturnInput(
+        year=2024,
+        filing_status="Single",
+        w2_income=w2_income,
+        self_employment_income=50_000.0,
+    )
+
+    assert (
+        derived_chain_factor(tax_input, "schedule_se_ss_wages", "w2_income") == 1.0
+    ), "identity derivation must read as exactly 1.0, not approximately"
