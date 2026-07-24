@@ -126,11 +126,16 @@ newtype NodeId = NodeId {unNodeId :: Int}
 -- | A typed, cross-form reference to a form's output line: it carries the
 -- target form, the target line, and the line's unit as a phantom.
 --
--- A 'LineRef' is minted only by 'TenForty.Form.export', from the very 'Expr'
--- the line's own @keyOutput@/@compute@ returned — so the handle cannot name a
--- line that does not exist, and its unit is the line's unit. Importers
--- reference the handle instead of a @(form, line)@ string pair, which turns a
--- mistyped or since-renamed reference into a compile-time \"not in scope\"
--- error and a unit mismatch into a type error.
+-- Handles are minted by 'TenForty.DSL.lineRef' from a @(form, line)@ pair, with
+-- the unit fixed at the declaration site, and all live in one dependency-free
+-- module (@FormRefs@). This consolidates every cross-form reference to a single
+-- named handle: importers write @importForm us1040L11@ rather than the string
+-- pair, so a mistyped or since-renamed reference is a compile-time \"not in
+-- scope\" error at the reference site, and a unit mismatch is a type error.
+--
+-- The @(form, line)@ strings still live inside each handle, so a handle whose
+-- strings name no real line — or name a line that is not a declared output — is
+-- not a type error; it is caught at graph-resolution time by
+-- 'TenForty.Compile.JSON.unresolvedImports', which fails the build.
 data LineRef (u :: Type) = LineRef FormId LineId
   deriving stock (Show)
