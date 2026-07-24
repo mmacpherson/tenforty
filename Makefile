@@ -19,7 +19,7 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all test-deep hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs spec-test forms-sync
 .PHONY: spec-fmt spec-fmt-check spec-lint spec-lint-strict
 .PHONY: runner-image bench-zip-mode
@@ -60,6 +60,18 @@ test-full: check-uv ## Run tests with graph backend
 
 test-all: test-full graph-test spec-test ## Run all tests (Python + Rust + Haskell)
 	@echo "All tests passed."
+
+# Parallel because the deep profile's cost sits in ~11 property tests that omit
+# max_examples and so run 10,000 examples each, among 800+ tests that finish
+# instantly. `worksteal` (not the default `load`) is what handles that skew:
+# round-robin hands each worker a fixed slice up front, so the ones holding only
+# fast tests go idle while a straggler finishes alone. Serial and parallel runs
+# must agree on pass/xfail/skip counts — the suite has no shared-path writes,
+# no chdir, and no session- or module-scoped fixtures, which is what makes the
+# per-worker process isolation sound.
+test-deep: check-uv ## Deep hypothesis sweep (10,000 examples, parallel)
+	uv sync
+	uv run pytest --hypothesis-profile=deep -n auto --dist worksteal
 
 hooks: check-uv ## Install pre-commit hooks
 	uv sync

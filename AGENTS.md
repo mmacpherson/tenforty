@@ -87,7 +87,7 @@ freeze rather than rolling the whole tree back.
 - `pip install -e ".[dev]"` — Install in dev mode
 - `pytest` — Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` — Run with CI profile (500 examples)
-- `pytest --hypothesis-profile=deep` — Deep property sweep (10,000 examples; ad hoc)
+- `make test-deep` — Deep property sweep (10,000 examples, all cores; ad hoc)
 - `python ots/amalgamate.py ots/ots-releases/*.tgz` — Regenerate OTS bindings
 - `make graph-build` — Build graph library (interpreter only)
 - `make spec-graphs` — Generate JSON graphs from Haskell specs
@@ -120,10 +120,13 @@ engine** (the Rust graph runtime, the OTS mapping/orchestration, or the Haskell
 spec/graph — not docs, tests, or tooling), run all three deeper sweeps and note
 the result in the PR:
 
-- **Deep hypothesis sweep** — `uv run pytest --hypothesis-profile=deep` (10,000
-  examples). Catches obscure-threshold conjunctions the 500-example gate clears
-  only intermittently. Targeted boundary-straddling strategies (tenforty-g79)
-  are the higher-leverage complement; reps are the safety net under them.
+- **Deep hypothesis sweep** — `make test-deep` (10,000 examples). Catches
+  obscure-threshold conjunctions the 500-example gate clears only
+  intermittently. Targeted boundary-straddling strategies (tenforty-g79) are the
+  higher-leverage complement; reps are the safety net under them. The target
+  runs the sweep across all cores; `uv run pytest --hypothesis-profile=deep`
+  is the same sweep serial, and is what to reach for when a failure needs
+  reproducing without worker interleaving in the output.
 - **OTS regression + cross-backend parity** — the `tests/parity/` suite, so the
   OTS and graph backends still agree.
 - **taxcalc differential** — `TENFORTY_TAXCALC=1 uv run pytest tests/taxcalc/`

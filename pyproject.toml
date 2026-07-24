@@ -8,6 +8,7 @@ dev = [
   "hypothesis",
   "pytest>=7.0",
   "pytest-cov",
+  "pytest-xdist",
   "ruff>=0.2.0",
   "pre-commit"
 ]
@@ -56,6 +57,7 @@ dev = [
   "hypothesis",
   "pytest>=7.0",
   "pytest-cov",
+  "pytest-xdist",
   "ruff>=0.2.0",
   "pre-commit"
 ]
