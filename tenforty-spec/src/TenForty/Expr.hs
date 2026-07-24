@@ -45,7 +45,7 @@ type Expr :: Type -> Type
 data Expr u where
   Lit :: Amount u -> Expr u
   Line :: LineId -> Expr Dollars
-  Import :: FormId -> LineId -> Expr Dollars
+  Import :: FormId -> LineId -> Expr u
   Add :: Expr u -> Expr u -> Expr u
   Sub :: Expr u -> Expr u -> Expr u
   Mul :: Expr Dollars -> Expr Rate -> Expr Dollars

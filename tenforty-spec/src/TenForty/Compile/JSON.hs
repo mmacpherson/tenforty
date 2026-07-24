@@ -352,7 +352,10 @@ unresolvedImports cgs =
     Map.notMember (tf, tl) resKeys
   ]
   where
-    -- (formId, key) present, key = full name and lid base (matches resolveForms)
+    -- (formId, key) present, key = full name and lid base (matches resolveForms).
+    -- Only OUTPUT nodes register keys: a cross-form import may target a declared
+    -- output and nothing else (tenforty-9yh.2). An import of an interior line is
+    -- therefore "unresolved" and fails the build.
     resKeys :: Map (Text, Text) ()
     resKeys =
       Map.fromList $
@@ -361,7 +364,8 @@ unresolvedImports cgs =
               Nothing -> []
               Just nm -> [((gmFormId (cgMeta cg), nm), ()), ((gmFormId (cgMeta cg), T.takeWhile (/= '_') nm), ())]
           | cg <- cgs,
-            n <- Map.elems (cgNodes cg)
+            oid <- cgOutputs cg,
+            Just n <- [Map.lookup oid (cgNodes cg)]
           ]
 
 -- | Resolve a set of per-form compiled graphs into ONE graph (tenforty-ovz,
@@ -402,8 +406,11 @@ resolveForms cgs@(cg0 : _) =
     outputNodes =
       [(formOf cg, n) | cg <- cgs, oid <- cgOutputs cg, Just n <- [Map.lookup oid (cgNodes cg)]]
 
+    -- Only OUTPUT nodes are resolution targets: a cross-form import may bind to
+    -- a declared output and nothing else (tenforty-9yh.2). Interior lines are
+    -- unreachable across forms, so an import can never silently land on one.
     resMap :: Map (Text, Text) Int
-    resMap = foldl' ins Map.empty (outputNodes ++ flat)
+    resMap = foldl' ins Map.empty outputNodes
       where
         ins m (f, n) = case nodeName n of
           Nothing -> m

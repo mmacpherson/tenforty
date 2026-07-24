@@ -5,6 +5,7 @@ module NJ1040_2024
   )
 where
 
+import FormRefs
 import TablesNJ2024
 import TenForty
 
@@ -16,7 +17,7 @@ nj1040_2024 = form "nj_1040" 2024 $ do
   -- Line 14: Federal adjusted gross income (imported from US 1040 L11)
   -- Note: NJ form technically builds from gross income, but for graph backend
   -- we simplify by starting from federal AGI as a reasonable approximation
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   _l14 <-
     keyOutput "L14" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

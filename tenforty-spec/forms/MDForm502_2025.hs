@@ -5,6 +5,7 @@ module MDForm502_2025
   )
 where
 
+import FormRefs
 import TablesMD2025
 import TenForty
 
@@ -15,7 +16,7 @@ mdForm502_2025 = form "md_502" 2025 $ do
 
   -- Line 1: Federal adjusted gross income (from US 1040)
   -- Note: 2025 federal return has AGI on L11b, but importForm handles year-specific mapping
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 2-12: Maryland additions to income

@@ -5,6 +5,7 @@ module ALForm40_2024
   )
 where
 
+import FormRefs
 import TablesAL2024
 import TenForty
 
@@ -14,7 +15,7 @@ alForm40_2024 = form "al_40" 2024 $ do
 
   -- Line 8: Total Income (imported from US 1040 Line 9)
   -- This includes wages, interest, dividends, capital gains, etc.
-  let federalTotalIncome = importForm "us_1040" "L9"
+  let federalTotalIncome = importForm us1040L9
   l8 <-
     keyOutput "L8" "total_income" "Total income" $
       federalTotalIncome .+. dollars 0

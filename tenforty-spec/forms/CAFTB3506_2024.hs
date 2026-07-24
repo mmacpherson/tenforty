@@ -5,6 +5,7 @@ module CAFTB3506_2024
   )
 where
 
+import FormRefs
 import TablesCA2024
 import TenForty
 
@@ -51,7 +52,7 @@ caFTB3506_2024 = form "ca_ftb_3506" 2024 $ do
       smallerOf l4 (smallerOf l5 l6)
 
   -- Line 8: California AGI (from CA 540 Line 17 or Schedule CA)
-  l8 <- interior "L8" "ca_agi" $ importForm "ca_540" "L17"
+  l8 <- interior "L8" "ca_agi" $ importForm ca540L17
 
   -- Line 9: Credit percentage based on CA AGI
   -- California uses a sliding scale: 50% at low AGI, phases to 0% at $100,000+

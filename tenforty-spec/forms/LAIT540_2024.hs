@@ -5,6 +5,7 @@ module LAIT540_2024
   )
 where
 
+import FormRefs
 import TablesLA2024
 import TenForty
 
@@ -13,7 +14,7 @@ laIT540_2024 = form "la_it540" 2024 $ do
   defineTable louisianaBracketsTable2024
 
   -- Line 7: Federal Adjusted Gross Income (from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l7 <-
     keyOutput "L7" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

@@ -5,6 +5,7 @@ module SCForm1040_2024
   )
 where
 
+import FormRefs
 import TablesSC2024
 import TenForty
 
@@ -13,7 +14,7 @@ scForm1040_2024 = form "sc_1040" 2024 $ do
   defineTable scBracketsTable2024
 
   -- Line 1: Federal Taxable Income (from US 1040 Line 15)
-  let federalTaxableIncome = importForm "us_1040" "L15"
+  let federalTaxableIncome = importForm us1040L15
   l1 <-
     keyOutput "L1" "federal_taxable_income" "Federal taxable income" $
       federalTaxableIncome .+. dollars 0

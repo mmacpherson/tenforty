@@ -5,6 +5,7 @@ module USForm8960_2024
   )
 where
 
+import FormRefs
 import Tables2024
 import TenForty
 
@@ -20,7 +21,7 @@ usForm8960_2024 = form "us_form_8960" 2024 $ do
   l4b <- keyInput "L4b" "adjustment_active_business" "Adjustment for net income/loss from active trade/business"
   l4c <- interior "L4c" "net_rental_royalty" $ l4a .+. l4b
 
-  l5a <- interior "L5a" "net_gain_disposition" $ importForm "us_schedule_d" "L21"
+  l5a <- interior "L5a" "net_gain_disposition" $ importForm usScheduleDL21
   l5b <- keyInput "L5b" "adjustment_disposition" "Adjustments from disposition of partnership/S corp interest"
   l5c <- interior "L5c" "net_gain_adjusted" $ l5a .+. l5b
   l5d <- keyInput "L5d" "net_gain_estate_trust" "Net gain or loss from estate or trust"
@@ -48,7 +49,7 @@ usForm8960_2024 = form "us_form_8960" 2024 $ do
       l8 `subtractNotBelowZero` l11
 
   -- Modified AGI - for most taxpayers this equals AGI
-  l13 <- interior "L13" "modified_agi" $ importForm "us_1040" "L11"
+  l13 <- interior "L13" "modified_agi" $ importForm us1040L11
 
   l14 <-
     interior "L14" "niit_threshold" $

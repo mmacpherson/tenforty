@@ -5,13 +5,14 @@ module NCFormD400_2025
   )
 where
 
+import FormRefs
 import TablesNC2025
 import TenForty
 
 ncFormD400_2025 :: Either FormError Form
 ncFormD400_2025 = form "nc_d400" 2025 $ do
   -- Line 6: Federal Adjusted Gross Income (from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l6 <-
     keyOutput "L6" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

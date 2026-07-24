@@ -5,13 +5,14 @@ module KYForm740_2025
   )
 where
 
+import FormRefs
 import TablesKY2025
 import TenForty
 
 kyForm740_2025 :: Either FormError Form
 kyForm740_2025 = form "ky_740" 2025 $ do
   -- Line 5: Federal Adjusted Gross Income (from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l5 <-
     keyOutput "L5" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

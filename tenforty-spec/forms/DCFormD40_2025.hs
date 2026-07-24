@@ -5,6 +5,7 @@ module DCFormD40_2025
   )
 where
 
+import FormRefs
 import TablesDC2025
 import TenForty
 
@@ -13,7 +14,7 @@ dcFormD40_2025 = form "dc_d40" 2025 $ do
   defineTable dcBracketsTable2025
 
   -- Line 1: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 2: Net additions to Federal AGI from DC Schedule I

@@ -5,6 +5,7 @@ module USForm8812_2025
   )
 where
 
+import FormRefs
 import Tables2025
 import TenForty
 
@@ -36,7 +37,7 @@ usForm8812_2025 = form "us_form_8812" 2025 $ do
       l2 .+. l4
 
   -- Line 6: AGI from Form 1040, line 11
-  l6 <- interior "L6" "agi" $ importForm "us_1040" "L11"
+  l6 <- interior "L6" "agi" $ importForm us1040L11
 
   -- Line 7: Phase-out threshold
   l7 <-
@@ -68,7 +69,7 @@ usForm8812_2025 = form "us_form_8812" 2025 $ do
       l5 `subtractNotBelowZero` l10
 
   -- Line 12: Tax liability limit (from Form 1040, line 18)
-  l12 <- interior "L12" "tax_liability" $ importForm "us_1040" "L18"
+  l12 <- interior "L12" "tax_liability" $ importForm us1040L18
 
   -- Line 13: Credit for other dependents (limited to tax liability)
   -- This is the portion of credit attributable to other dependents (ODC)

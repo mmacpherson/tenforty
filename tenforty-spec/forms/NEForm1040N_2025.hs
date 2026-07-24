@@ -5,6 +5,7 @@ module NEForm1040N_2025
   )
 where
 
+import FormRefs
 import TablesNE2025
 import TenForty
 
@@ -13,7 +14,7 @@ neForm1040N_2025 = form "ne_1040n" 2025 $ do
   defineTable nebraskaBracketsTable2025
 
   -- Line 5: Federal Adjusted Gross Income (imported from US 1040 L11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l5 <- keyOutput "L5" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 6: Nebraska standard deduction

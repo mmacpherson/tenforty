@@ -5,13 +5,14 @@ module UTTC40_2024
   )
 where
 
+import FormRefs
 import TablesUT2024
 import TenForty
 
 utTC40_2024 :: Either FormError Form
 utTC40_2024 = form "ut_tc40" 2024 $ do
   -- Line 4: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l4 <-
     keyOutput "L4" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0
@@ -46,7 +47,7 @@ utTC40_2024 = form "ut_tc40" 2024 $ do
   -- Line 12: Federal standard or itemized deductions (imported from US 1040)
   l12 <-
     interior "L12" "federal_deductions" $
-      importForm "us_1040" "L12Final"
+      importForm us1040L12final
 
   -- Line 13: Total exemptions and deductions
   l13 <-

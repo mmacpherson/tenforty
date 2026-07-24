@@ -5,13 +5,14 @@ module GAForm500_2025
   )
 where
 
+import FormRefs
 import TablesGA2025
 import TenForty
 
 gaForm500_2025 :: Either FormError Form
 gaForm500_2025 = form "ga_500" 2025 $ do
   -- Line 1: Federal Adjusted Gross Income (from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <-
     keyOutput "L1" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

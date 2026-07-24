@@ -318,7 +318,11 @@ validateFormSet forms =
 validateFormSetYear :: Int -> [Form] -> [FormSetError]
 validateFormSetYear year forms =
   let formMap = Map.fromList [(formId f, f) | f <- forms]
-      availableExports = Map.map (Map.keysSet . formLineMap) formMap
+      -- A form may import only another form's declared OUTPUTS, never its
+      -- interior lines (tenforty-9yh.2). This is what makes a typed handle a
+      -- promise about the exporter's public surface rather than a peek at any
+      -- line that happens to exist.
+      availableExports = Map.map formOutputIds formMap
    in concatMap (checkFormImports year availableExports) forms
 
 checkFormImports :: Int -> Map FormId (Set LineId) -> Form -> [FormSetError]

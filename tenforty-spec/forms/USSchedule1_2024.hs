@@ -5,6 +5,7 @@ module USSchedule1_2024
   )
 where
 
+import FormRefs
 import TenForty
 
 usSchedule1_2024 :: Either FormError Form
@@ -73,7 +74,7 @@ usSchedule1_2024 = form "us_schedule_1" 2024 $ do
   l12 <- keyInput "L12" "business_expenses_reservists" "Certain business expenses of reservists"
   l13 <- keyInput "L13" "hsa_deduction" "Health savings account deduction"
   l14 <- keyInput "L14" "moving_expenses_military" "Moving expenses for armed forces"
-  l15 <- interior "L15" "self_employment_tax_deduction" $ importForm "us_schedule_se" "L11"
+  l15 <- interior "L15" "self_employment_tax_deduction" $ importForm usScheduleSeL11
   l16 <- keyInput "L16" "sep_simple_deduction" "Self-employed SEP, SIMPLE, and qualified plans"
   l17 <- keyInput "L17" "self_employed_health" "Self-employed health insurance deduction"
   l18 <- keyInput "L18" "early_withdrawal_penalty" "Penalty on early withdrawal of savings"

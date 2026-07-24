@@ -5,6 +5,7 @@ module CA540_2025
   )
 where
 
+import FormRefs
 import TablesCA2025
 import TenForty
 
@@ -13,17 +14,17 @@ ca540_2025 = form "ca_540" 2025 $ do
   defineTable californiaBracketsTable2025
 
   -- Line 13: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l13 <- keyOutput "L13" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 14: California adjustments - subtractions (from Schedule CA)
-  l14 <- interior "L14" "ca_subtractions" $ importForm "ca_schedule_ca" "TOTAL_SUB"
+  l14 <- interior "L14" "ca_subtractions" $ importForm caScheduleCaTotalSub
 
   -- Line 15: Federal AGI minus subtractions
   l15 <- interior "L15" "agi_minus_subtractions" $ l13 .-. l14
 
   -- Line 16: California adjustments - additions (from Schedule CA)
-  l16 <- interior "L16" "ca_additions" $ importForm "ca_schedule_ca" "TOTAL_ADD"
+  l16 <- interior "L16" "ca_additions" $ importForm caScheduleCaTotalAdd
 
   -- Line 17: California AGI
   l17 <-
@@ -113,7 +114,7 @@ ca540_2025 = form "ca_540" 2025 $ do
 
   -- Refundable credits
   -- Line 91: CA EITC (from FTB 3514)
-  l91 <- interior "L91" "ca_eitc" $ importForm "ca_ftb_3514" "L18"
+  l91 <- interior "L91" "ca_eitc" $ importForm caFtb3514L18
   l92 <- keyInput "L92" "young_child_credit" "Young Child Tax Credit"
   l93 <- keyInput "L93" "foster_youth_credit" "Foster Youth Tax Credit"
   l94 <- keyInput "L94" "other_refundable_credits" "Other refundable credits"

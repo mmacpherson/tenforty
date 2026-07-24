@@ -5,19 +5,20 @@ module IAIA1040_2025
   )
 where
 
+import FormRefs
 import TablesIA2025
 import TenForty
 
 iaIA1040_2025 :: Either FormError Form
 iaIA1040_2025 = form "ia_ia1040" 2025 $ do
   -- Line 1c: Federal AGI (imported from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   _ <-
     keyOutput "L1c" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0
 
   -- Line 2: Federal Taxable Income (imported from US 1040 Line 15)
-  let federalTaxableIncome = importForm "us_1040" "L15"
+  let federalTaxableIncome = importForm us1040L15
   l2 <-
     keyOutput "L2" "federal_taxable_income" "Federal taxable income" $
       federalTaxableIncome .+. dollars 0

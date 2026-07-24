@@ -5,6 +5,7 @@ module MOForm1040_2024
   )
 where
 
+import FormRefs
 import TablesMO2024
 import TenForty
 
@@ -13,7 +14,7 @@ moForm1040_2024 = form "mo_1040" 2024 $ do
   defineTable missouriBracketsTable2024
 
   -- Line 1: Federal adjusted gross income (from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 2-5: Missouri additions to federal AGI

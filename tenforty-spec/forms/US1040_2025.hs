@@ -5,6 +5,7 @@ module US1040_2025
   )
 where
 
+import FormRefs
 import Tables2025
 import TenForty
 
@@ -43,9 +44,9 @@ us1040_2025 = form "us_1040" 2025 $ do
   _l6a <- keyInput "L6a" "social_security_gross" "Total Social Security benefits received"
   l6b <- keyInput "L6b" "social_security_taxable" "Taxable Social Security benefits"
 
-  l7 <- interior "L7" "capital_gain_loss" $ importForm "us_schedule_d" "L21"
+  l7 <- interior "L7" "capital_gain_loss" $ importForm usScheduleDL21
 
-  l8 <- interior "L8" "schedule_1_income" $ importForm "us_schedule_1" "L10"
+  l8 <- interior "L8" "schedule_1_income" $ importForm usSchedule1L10
 
   -- Line 9: Add lines 1z through 8.
   l9 <-
@@ -53,14 +54,14 @@ us1040_2025 = form "us_1040" 2025 $ do
       sumOf [l1z, l2b, l3b, l4b, l5b, l6b, l7, l8]
 
   -- Line 10-11: Adjustments and AGI
-  l10 <- interior "L10" "schedule_1_adjustments" $ importForm "us_schedule_1" "L26"
+  l10 <- interior "L10" "schedule_1_adjustments" $ importForm usSchedule1L26
 
   l11 <-
     keyOutput "L11" "agi" "Adjusted gross income (AGI)" $
       l9 .-. l10
 
   -- Lines 12-14: Deductions
-  l12 <- interior "L12" "itemized_deductions" $ importForm "us_schedule_a" "L17"
+  l12 <- interior "L12" "itemized_deductions" $ importForm usScheduleAL17
 
   -- Additional standard deduction for blind/65+ (from 1040 line 12 worksheet)
   additionalStdDed <- keyInput "AddStdDed" "additional_std_ded" "Additional standard deduction for blind/65+"
@@ -84,7 +85,7 @@ us1040_2025 = form "us_1040" 2025 $ do
     interior "L15_pre_qbi" "taxable_income_before_qbi" $
       l11 `subtractNotBelowZero` l12Final
 
-  l13 <- interior "L13" "qbi_deduction" $ importForm "us_form_8995" "L16"
+  l13 <- interior "L13" "qbi_deduction" $ importForm usForm8995L16
 
   l14 <-
     interior "L14" "total_deductions" $
@@ -99,7 +100,7 @@ us1040_2025 = form "us_1040" 2025 $ do
 
   -- Qualified Dividends and Capital Gain Tax Worksheet
   -- See 2025 Instructions for Form 1040, Line 16.
-  l15SchedD <- interior "L15_sched_d_net_long_term" "Net long-term capital gain" $ importForm "us_schedule_d" "L15"
+  l15SchedD <- interior "L15_sched_d_net_long_term" "Net long-term capital gain" $ importForm usScheduleDL15
 
   let qcgws1 = l15
   let qcgws2 = l3a
@@ -154,16 +155,16 @@ us1040_2025 = form "us_1040" 2025 $ do
     keyOutput "L16" "tax" "Tax from tax tables or Schedule D" $
       ifPos hasPreferential qcgws25 qcgws24
 
-  l17 <- interior "L17" "schedule_2_tax" $ importForm "us_schedule_2" "L3"
+  l17 <- interior "L17" "schedule_2_tax" $ importForm usSchedule2L3
 
   l18 <-
     interior "L18" "total_tax_before_credits" $
       l16 .+. l17
 
   -- Lines 19-21: Credits
-  l19 <- interior "L19" "child_tax_credit" $ importForm "us_form_8812" "L14"
+  l19 <- interior "L19" "child_tax_credit" $ importForm usForm8812L14
 
-  l20 <- interior "L20" "schedule_3_credits" $ importForm "us_schedule_3" "L8"
+  l20 <- interior "L20" "schedule_3_credits" $ importForm usSchedule3L8
 
   l21 <-
     interior "L21" "total_credits" $
@@ -175,7 +176,7 @@ us1040_2025 = form "us_1040" 2025 $ do
       l18 `subtractNotBelowZero` l21
 
   -- Line 23-24: Other Taxes
-  l23 <- interior "L23" "other_taxes" $ importForm "us_schedule_2" "L21"
+  l23 <- interior "L23" "other_taxes" $ importForm usSchedule2L21
 
   l24 <-
     keyOutput "L24" "total_tax" "Total tax liability" $
@@ -192,10 +193,10 @@ us1040_2025 = form "us_1040" 2025 $ do
 
   l26 <- keyInput "L26" "estimated_payments" "Estimated tax payments for the year"
   l27 <- keyInput "L27" "eic" "Earned income credit"
-  l28 <- interior "L28" "additional_ctc" $ importForm "us_form_8812" "L27"
-  l29 <- interior "L29" "aotc" $ importForm "us_form_8863" "L9"
+  l28 <- interior "L28" "additional_ctc" $ importForm usForm8812L27
+  l29 <- interior "L29" "aotc" $ importForm usForm8863L9
   l30 <- keyInput "L30" "recovery_rebate" "Recovery rebate credit"
-  l31 <- interior "L31" "schedule_3_payments" $ importForm "us_schedule_3" "L15"
+  l31 <- interior "L31" "schedule_3_payments" $ importForm usSchedule3L15
   l32 <- keyInput "L32" "extension_payment" "Amount paid with extension request"
 
   l33 <-

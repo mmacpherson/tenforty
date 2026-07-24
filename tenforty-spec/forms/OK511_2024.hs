@@ -5,6 +5,7 @@ module OK511_2024
   )
 where
 
+import FormRefs
 import TablesOK2024
 import TenForty
 
@@ -13,7 +14,7 @@ ok511_2024 = form "ok_511" 2024 $ do
   defineTable okBracketsTable2024
 
   -- Line 7: Federal adjusted gross income (imported from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l7 <-
     keyOutput "L7" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

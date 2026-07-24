@@ -5,14 +5,15 @@ module USSchedule3_2024
   )
 where
 
+import FormRefs
 import TenForty
 
 usSchedule3_2024 :: Either FormError Form
 usSchedule3_2024 = form "us_schedule_3" 2024 $ do
   -- Part I: Nonrefundable Credits
   l1 <- keyInput "L1" "foreign_tax_credit" "Foreign tax credit from Form 1116"
-  l2 <- interior "L2" "child_dependent_care" $ importForm "us_form_2441" "L11"
-  l3 <- interior "L3" "education_credits" $ importForm "us_form_8863" "L19"
+  l2 <- interior "L2" "child_dependent_care" $ importForm usForm2441L11
+  l3 <- interior "L3" "education_credits" $ importForm usForm8863L19
   l4 <- keyInput "L4" "retirement_savings" "Retirement savings contributions credit from Form 8880"
   l5 <- keyInput "L5" "residential_energy" "Residential energy credits from Form 5695"
 

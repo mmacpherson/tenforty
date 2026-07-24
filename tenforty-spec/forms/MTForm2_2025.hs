@@ -5,6 +5,7 @@ module MTForm2_2025
   )
 where
 
+import FormRefs
 import TablesMT2025
 import TenForty
 
@@ -18,7 +19,7 @@ mtForm2_2025 = form "mt_form2" 2025 $ do
   -- additions and subtractions via Schedule I.
   -- For this implementation, we approximate by importing federal taxable income
   -- and accepting adjustments as a single input.
-  let federalTaxableIncome = importForm "us_1040" "L15"
+  let federalTaxableIncome = importForm us1040L15
 
   adjustments <- keyInput "L_Schedule_I" "mt_adjustments" "Montana Schedule I adjustments (additions minus subtractions)"
 

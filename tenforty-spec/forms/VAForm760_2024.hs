@@ -5,6 +5,7 @@ module VAForm760_2024
   )
 where
 
+import FormRefs
 import TablesVA2024
 import TenForty
 
@@ -13,7 +14,7 @@ vaForm760_2024 = form "va_760" 2024 $ do
   defineTable virginiaBracketsTable2024
 
   -- Line 1: Federal AGI (imported from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <-
     keyOutput "L1" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

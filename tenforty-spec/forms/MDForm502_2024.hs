@@ -5,6 +5,7 @@ module MDForm502_2024
   )
 where
 
+import FormRefs
 import TablesMD2024
 import TenForty
 
@@ -14,7 +15,7 @@ mdForm502_2024 = form "md_502" 2024 $ do
   defineTable marylandBracketsJointTable2024
 
   -- Line 1: Federal adjusted gross income (from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 2-12: Maryland additions to income
