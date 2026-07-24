@@ -57,6 +57,25 @@ jobs:
         TENFORTY_TAXCALC: '1'
       run: uv run pytest tests/taxcalc/adapter_conformance_test.py -q
 
+  # The shipped extension is built features=["python"] (setup.py), so the JIT +
+  # SIMD batch path — including reachability-slicing in compile_batch — is
+  # compiled out of every other job here and of pip installs. Without this job
+  # the sliced batch path (the one path where a batch can diverge from
+  # single-eval) has no CI coverage at all. Runs the graph crate's jit-gated
+  # tests, which include the proper-subset slice-vs-interpreter check.
+  graph-jit:
+    name: graph backend (JIT + SIMD)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Run graph crate tests with JIT
+      run: cargo test -p tenforty-graph --features jit
+
   # Build wheels and sdist only on pushes to main, and only if validation
   # succeeds
   build-wheels:

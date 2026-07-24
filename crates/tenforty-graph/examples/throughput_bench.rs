@@ -160,7 +160,9 @@ fn bench_jit_parallel(graph: &Graph, scenarios: &[(f64, f64, f64)], num_threads:
 #[cfg(feature = "jit")]
 fn bench_jit_simd_sequential(graph: &Graph, scenarios: &[(f64, f64, f64)]) -> f64 {
     let compiler = JitCompiler::new().unwrap();
-    let compiled = compiler.compile_batch(graph, FilingStatus::Single).unwrap();
+    let compiled = compiler
+        .compile_batch(graph, FilingStatus::Single, &graph.outputs)
+        .unwrap();
     let scalar_compiled = compiler.compile(graph, FilingStatus::Single).unwrap();
 
     let start = Instant::now();
@@ -232,7 +234,9 @@ fn bench_jit_simd_parallel(
         let sum: f64 = scenarios
             .par_chunks(chunk_size)
             .map(|big_chunk| {
-                let compiled = compiler.compile_batch(graph, FilingStatus::Single).unwrap();
+                let compiled = compiler
+                    .compile_batch(graph, FilingStatus::Single, &graph.outputs)
+                    .unwrap();
                 let mut rt = JitBatchRuntime::new(compiled, graph);
                 let mut local_sum = 0.0;
 

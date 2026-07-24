@@ -4,11 +4,9 @@ from . import graphlib as _graphlib
 from .graphlib import (
     FilingStatus,
     Graph,
-    GraphSet,
     Runtime,
-    UnresolvedImport,
 )
 
-__all__ = ["FilingStatus", "Graph", "GraphSet", "Runtime", "UnresolvedImport"]
+__all__ = ["FilingStatus", "Graph", "Runtime"]
 
 __doc__ = _graphlib.__doc__ or __doc__

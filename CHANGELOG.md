@@ -1,3 +1,21 @@
+## [Unreleased]
+### Removed
+- Graph backend runtime linker. `GraphSet`, `UnresolvedImport`, and `LinkError`
+  are gone from `tenforty.graphlib` and the WASM bindings, along with
+  `form_resolution.py`. Cross-form imports are now resolved at spec-build time by
+  the Haskell `resolveForms` pass, which emits one import-free graph per year
+  (`us_tax_graph_<year>.json`). Migration for direct `graphlib` consumers: load
+  the resolved per-year graph with `Graph.from_json(...)` and evaluate it
+  directly, instead of building a `GraphSet`, adding per-form graphs, and calling
+  `.link()`. The `tenforty` public tax API (`evaluate_return[s]`) is unaffected.
+
+### Changed
+- Graph backend: an unset graph input now reads as `0.0` instead of raising.
+  The resolved per-year graph carries every state's inputs (~800); a given return
+  sets only the handful it uses. Mapping typos are still rejected at `set()` (an
+  unknown input *name* errors), and the new `graph_continuity_test` asserts every
+  mapped input is wired to an output. (#314)
+
 ## [2025.11] - 2026-07-21
 ### Fixed
 - Schedule SE line 8a now receives the filer's own W-2 social security wages

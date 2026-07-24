@@ -7,7 +7,6 @@ import logging
 import pathlib
 from functools import lru_cache
 
-from ..form_resolution import resolve_forms
 from ..mappings import (
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
@@ -45,69 +44,18 @@ def _forms_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent.parent.parent / "forms"
 
 
-@lru_cache(maxsize=8)
-def _load_graph(form_id: str, year: int):
-    """Load a graph for a given form and year."""
-    try:
-        from ..graphlib import Graph
-    except ImportError:
-        raise ImportError("Graph backend requires tenforty.graphlib module") from None
+@lru_cache(maxsize=4)
+def _load_resolved_graph(year: int):
+    """Load the pre-resolved one-graph-per-year (federal + all states).
 
-    form_path = _forms_dir() / f"{form_id}_{year}.json"
-    if not form_path.exists():
-        return None
+    The Haskell compiler resolves every cross-form import at build time
+    (tenforty-ovz), so there is nothing to link at runtime — just load and
+    evaluate. Eval is demand-driven, so requesting one state's outputs only
+    touches that state plus federal; the other states stay dormant.
+    """
+    from ..graphlib import Graph
 
-    return Graph.from_json(form_path.read_text())
-
-
-@lru_cache(maxsize=16)
-def _link_graphs(year: int, form_ids: tuple[str, ...]):
-    """Link a specific set of graphs for a given year."""
-    try:
-        from ..graphlib import GraphSet
-    except ImportError:
-        raise ImportError("Graph backend requires tenforty.graphlib module") from None
-
-    gs = GraphSet()
-
-    for form_id in form_ids:
-        graph = _load_graph(form_id, year)
-        if graph is None:
-            raise ValueError(f"Required graph not found: {form_id}_{year}")
-        gs.add(form_id, graph)
-
-    # Verify no unresolved imports remain (should be handled by resolve_forms,
-    # but strictly enforced here).
-    unresolved = gs.unresolved_imports()
-    if unresolved:
-        mismatched_years = sorted({u.year for u in unresolved if u.year != year})
-        if mismatched_years:
-            mismatches = sorted(
-                {(u.form, u.line, u.year) for u in unresolved if u.year != year}
-            )
-            mismatch_lines = "\n".join(
-                f"- {form}:{line} ({imp_year})" for form, line, imp_year in mismatches
-            )
-            raise RuntimeError(
-                "Graph backend does not support linking mixed-year graphs.\n"
-                f"Requested year: {year}\n"
-                "Mismatched imports:\n"
-                f"{mismatch_lines}"
-            )
-
-        missing = sorted({(u.form, u.line, u.year) for u in unresolved})
-        missing_lines = "\n".join(
-            f"- {form}:{line} ({imp_year})" for form, line, imp_year in missing
-        )
-        loaded = ", ".join(gs.forms())
-        raise RuntimeError(
-            "Graph backend cannot link required forms: unresolved imports remain.\n"
-            f"Loaded forms: {loaded}\n"
-            "Unresolved imports:\n"
-            f"{missing_lines}"
-        )
-
-    return gs.link()
+    return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
 
 
 class GraphBackend:
@@ -140,22 +88,14 @@ class GraphBackend:
         inputs_dict = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
         )
-        form_ids = resolve_forms(
-            tax_input.year.value,
-            tax_input.state.value if tax_input.state else None,
-            inputs_dict,
-            _forms_dir(),
-        )
-
-        graph = _link_graphs(tax_input.year.value, tuple(form_ids))
+        graph = _load_resolved_graph(tax_input.year.value)
         filing_status = FilingStatus.from_str(
             FILING_STATUS_MAP.get(tax_input.filing_status, "single")
         )
         evaluator = Runtime(graph, filing_status)
 
-        for input_name in graph.input_names():
-            evaluator.set(input_name, 0.0)
-
+        # Unset inputs default to 0 in eval; only the provided values are set
+        # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
         natural_values = inputs_dict
 
         unsupported: list[tuple[str, object]] = []
@@ -240,11 +180,12 @@ class GraphBackend:
         )
 
         result["federal_tax_bracket"] = 0.0
-        try:
-            result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
-        except Exception as exc:
-            logger.debug("AMT evaluation failed (Form 6251 may not be linked): %s", exc)
-            result["federal_amt"] = 0.0
+        # The resolved per-year graph always carries the full federal return, and
+        # unset inputs read as 0, so these nodes are always present and always
+        # evaluate — a missing one is a real graph defect and should surface, not
+        # be swallowed to 0. (The old try/except guarded the retired runtime
+        # linker's "form may not be linked" case, which no longer exists.)
+        result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
 
         for node, field in [
             ("us_schedule_se_L10_se_tax", "federal_se_tax"),
@@ -254,10 +195,7 @@ class GraphBackend:
                 "federal_additional_medicare_tax",
             ),
         ]:
-            try:
-                result[field] = evaluator.eval(node)
-            except Exception:
-                result[field] = 0.0
+            result[field] = evaluator.eval(node)
 
         result["state_adjusted_gross_income"] = 0.0
         result["state_taxable_income"] = 0.0
@@ -358,19 +296,7 @@ class GraphBackend:
                 normalized.setdefault(name, []).append(float(value))
         inputs = normalized
 
-        # Determine required forms using representative inputs from the batch.
-        # We use the max-absolute value per input to capture any non-zero cases.
-        resolve_inputs = {
-            name: (max(values, key=lambda v: abs(v)) if values else 0.0)
-            for name, values in inputs.items()
-        }
-        form_ids = resolve_forms(
-            year,
-            state.value if state else None,
-            resolve_inputs,
-            _forms_dir(),
-        )
-        graph = _link_graphs(year, tuple(form_ids))
+        graph = _load_resolved_graph(year)
 
         # Map natural input names to graph node names
         graph_inputs = {}

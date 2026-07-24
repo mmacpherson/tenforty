@@ -1814,10 +1814,8 @@ def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
     from tenforty.backends.graph import (
         FILING_STATUS_MAP,
         GraphBackend,
-        _forms_dir,
-        _link_graphs,
+        _load_resolved_graph,
     )
-    from tenforty.form_resolution import resolve_forms
     from tenforty.models import OTSFilingStatus
 
     backend = GraphBackend()
@@ -1826,10 +1824,7 @@ def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
 
     from tenforty.graphlib import FilingStatus, Runtime
 
-    # Determine required forms
-    inputs = {"us_1040_L1a_wages": w2_income}
-    form_ids = resolve_forms(2025, state, inputs, _forms_dir())
-    graph = _link_graphs(2025, tuple(form_ids))
+    graph = _load_resolved_graph(2025)
 
     fs_enum = OTSFilingStatus(filing_status)
     fs = FilingStatus.from_str(FILING_STATUS_MAP.get(fs_enum, "single"))

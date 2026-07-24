@@ -64,7 +64,10 @@ The explicit canonical-concept step does not currently exist. Instead:
   `mappings.py`.
 - Graph scalar, batch, gradient, and solver code consumes those declarations
   differently in `backends/graph.py`.
-- Form activation is maintained separately in `form_resolution.py`.
+- Form activation is implicit: the resolved per-year graph
+  (`us_tax_graph_<year>.json`, built by Haskell `resolveForms`) contains every
+  form, and demand-driven eval touches only the forms reachable from the
+  requested outputs.
 - Public result models default fields to zero, including outputs that an
   adapter did not actually materialize.
 

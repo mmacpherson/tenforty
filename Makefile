@@ -116,6 +116,8 @@ spec-test: ## Run tenforty-spec tests
 
 spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.json
 	cd tenforty-spec && cabal run tenforty-compile -- all -p
+	cd tenforty-spec && cabal run -v0 tenforty-compile -- resolve_2024
+	cd tenforty-spec && cabal run -v0 tenforty-compile -- resolve_2025
 
 spec-fmt: ## Format tenforty-spec (ormolu, cabal-gild)
 	$(MAKE) -C tenforty-spec fmt

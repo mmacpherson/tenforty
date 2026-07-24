@@ -11,7 +11,6 @@ use std::sync::Arc;
 
 use crate::eval::Runtime as RsRuntime;
 use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
-use crate::link::{GraphSet as RsGraphSet, UnresolvedImport as RsUnresolvedImport};
 use crate::{autodiff, solver, viz};
 
 #[pyclass]
@@ -120,12 +119,8 @@ impl Graph {
         iter.map(|(idx, status, input_vals)| {
             let mut rt = RsRuntime::new(graph, status);
 
-            // Set all graph inputs to 0 first
-            for input_id in &graph.inputs {
-                rt.set_by_id(*input_id, 0.0);
-            }
-
-            // Set specified inputs
+            // Unset inputs default to 0 in eval, so only the provided ones need
+            // setting — no per-scenario zero-fill over all ~800 graph inputs.
             for (name, &value) in &input_vals {
                 let _ = rt.set(name, value);
             }
@@ -173,6 +168,13 @@ impl Graph {
             let compiler = JitCompiler::new().ok();
 
             if let Some(compiler) = compiler {
+                // Slice the JIT to just the requested outputs: compile only the
+                // nodes those outputs depend on, not the whole ~3000-node graph.
+                let output_ids: Vec<crate::graph::NodeId> = outputs
+                    .iter()
+                    .filter_map(|name| graph.node_id_by_name(name))
+                    .collect();
+
                 let mut blocks: Vec<Vec<(usize, RsFilingStatus, HashMap<String, f64>)>> =
                     vec![Vec::new(); unique_statuses.len()];
                 for scenario in &scenarios {
@@ -187,7 +189,7 @@ impl Graph {
                     let status = block[0].1;
 
                     // Compile for this status
-                    if let Ok(compiled) = compiler.compile_batch(graph, status) {
+                    if let Ok(compiled) = compiler.compile_batch(graph, status, &output_ids) {
                         // Pre-calculate input mappings
                         let input_mappings: Vec<(&String, Option<usize>)> = input_names
                             .iter()
@@ -628,7 +630,7 @@ impl Runtime {
     /// derivative is the sum of the partials over every node it is written to.
     /// Costs one backward pass regardless of how many are named. Nodes absent
     /// from the graph contribute nothing, which lets callers pass the full
-    /// fan-out without first checking which forms were linked.
+    /// fan-out without first checking which forms are present in the graph.
     fn gradient_multi(&mut self, output: &str, inputs: Vec<String>) -> PyResult<f64> {
         self.inner.with_runtime_mut(|rt| {
             let output_id = rt
@@ -709,84 +711,10 @@ impl Runtime {
     }
 }
 
-#[pyclass]
-pub struct UnresolvedImport {
-    #[pyo3(get)]
-    pub form: String,
-    #[pyo3(get)]
-    pub line: String,
-    #[pyo3(get)]
-    pub year: u16,
-}
-
-impl From<RsUnresolvedImport> for UnresolvedImport {
-    fn from(u: RsUnresolvedImport) -> Self {
-        UnresolvedImport {
-            form: u.form,
-            line: u.line,
-            year: u.year,
-        }
-    }
-}
-
-#[pymethods]
-impl UnresolvedImport {
-    fn __repr__(&self) -> String {
-        format!(
-            "UnresolvedImport(form='{}', line='{}', year={})",
-            self.form, self.line, self.year
-        )
-    }
-}
-
-#[pyclass]
-#[derive(Default)]
-pub struct GraphSet {
-    inner: RsGraphSet,
-}
-
-#[pymethods]
-impl GraphSet {
-    #[new]
-    fn new() -> Self {
-        GraphSet {
-            inner: RsGraphSet::new(),
-        }
-    }
-
-    fn add(&mut self, form_id: &str, graph: &Graph) {
-        self.inner.add_mut(form_id, (*graph.inner).clone());
-    }
-
-    fn forms(&self) -> Vec<String> {
-        self.inner.forms().to_vec()
-    }
-
-    fn unresolved_imports(&self) -> Vec<UnresolvedImport> {
-        self.inner
-            .unresolved_imports()
-            .into_iter()
-            .map(UnresolvedImport::from)
-            .collect()
-    }
-
-    fn link(&self) -> PyResult<Graph> {
-        let linked = self
-            .inner
-            .link()
-            .map_err(|e| PyValueError::new_err(format!("Link error: {}", e)))?;
-        Ok(Graph {
-            inner: Arc::new(linked),
-        })
-    }
-}
-
 #[pymodule]
 fn graphlib(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<FilingStatus>()?;
     m.add_class::<Graph>()?;
     m.add_class::<Runtime>()?;
-    m.add_class::<GraphSet>()?;
-    m.add_class::<UnresolvedImport>()?;
     Ok(())
 }
