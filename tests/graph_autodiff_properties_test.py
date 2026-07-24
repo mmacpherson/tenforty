@@ -90,7 +90,7 @@ def _gradient(wrt: str, case: dict) -> float:
 
 
 @skip_if_graph_unavailable
-@settings(max_examples=400, deadline=None)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     filing_status=st.sampled_from(FEDERAL_STATUSES),
     wrt=st.sampled_from(INCOME_NATURALS),
@@ -134,7 +134,7 @@ def test_autodiff_matches_finite_difference(filing_status, wrt, incomes):
 
 
 @skip_if_graph_unavailable
-@settings(max_examples=400, deadline=None)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     filing_status=st.sampled_from(FEDERAL_STATUSES),
     wrt=st.sampled_from(INCOME_NATURALS),
