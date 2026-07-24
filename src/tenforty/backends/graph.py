@@ -36,6 +36,44 @@ if _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG:
     )
 
 
+FEDERAL_OUTPUT_NODES: dict[str, str] = {
+    "us_1040_L11_agi": "federal_adjusted_gross_income",
+    "us_1040_L15_taxable_income": "federal_taxable_income",
+    "us_1040_L24_total_tax": "federal_total_tax",
+    "us_form_6251_L11_amt": "federal_amt",
+    "us_schedule_se_L10_se_tax": "federal_se_tax",
+    "us_form_8960_L17_niit": "federal_niit",
+    "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
+}
+
+_STATE_ZERO_FIELDS = (
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+
+
+def _state_output_node(form_name: str, line_name: str) -> str:
+    """Resolve a state output line to a graph node name.
+
+    A line that is already a fully-qualified node (e.g. "us_1040_L11_agi", which
+    CT/NE/NM/OR reuse for state AGI) is used as-is; a bare line (e.g.
+    "L17_ca_agi") is prefixed with the state form. Single- and batch-eval must
+    resolve these identically, or the batch silently zero-fills a mis-prefixed
+    node.
+    """
+    if "_" in line_name and not line_name.startswith("L"):
+        return line_name
+    return f"{form_name}_{line_name}"
+
+
+def _federal_effective_tax_rate(total_tax: float, agi: float) -> float:
+    """Effective rate as a percent; 0 when AGI is non-positive (avoid div-by-0)."""
+    return (total_tax / agi * 100.0) if agi > 0 else 0.0
+
+
 def _forms_dir() -> pathlib.Path:
     """Get the forms directory path."""
     pkg_forms = pathlib.Path(__file__).parent.parent / "forms"
@@ -162,46 +200,23 @@ class GraphBackend:
 
         evaluator, _graph = self._create_evaluator(tax_input)
 
-        result = {}
-
-        agi = evaluator.eval("us_1040_L11_agi")
-        result["federal_adjusted_gross_income"] = agi
-
-        taxable = evaluator.eval("us_1040_L15_taxable_income")
-        result["federal_taxable_income"] = taxable
-
-        total_tax = evaluator.eval("us_1040_L24_total_tax")
-        result["federal_total_tax"] = total_tax
-        result["total_tax"] = total_tax
-
-        # Avoid divide-by-zero behavior inside the graph when AGI is 0.
-        result["federal_effective_tax_rate"] = (
-            (total_tax / agi * 100.0) if agi > 0 else 0.0
-        )
-
-        result["federal_tax_bracket"] = 0.0
         # The resolved per-year graph always carries the full federal return, and
-        # unset inputs read as 0, so these nodes are always present and always
-        # evaluate — a missing one is a real graph defect and should surface, not
-        # be swallowed to 0. (The old try/except guarded the retired runtime
-        # linker's "form may not be linked" case, which no longer exists.)
-        result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
+        # unset inputs read as 0, so every node in FEDERAL_OUTPUT_NODES is present
+        # and evaluates — a missing one is a real graph defect and should surface,
+        # not be swallowed to 0.
+        result: dict[str, float] = {
+            field: evaluator.eval(node) for node, field in FEDERAL_OUTPUT_NODES.items()
+        }
 
-        for node, field in [
-            ("us_schedule_se_L10_se_tax", "federal_se_tax"),
-            ("us_form_8960_L17_niit", "federal_niit"),
-            (
-                "us_form_8959_L18_total_additional_medicare",
-                "federal_additional_medicare_tax",
-            ),
-        ]:
-            result[field] = evaluator.eval(node)
+        total_tax = result["federal_total_tax"]
+        result["total_tax"] = total_tax
+        result["federal_effective_tax_rate"] = _federal_effective_tax_rate(
+            total_tax, result["federal_adjusted_gross_income"]
+        )
+        result["federal_tax_bracket"] = 0.0
 
-        result["state_adjusted_gross_income"] = 0.0
-        result["state_taxable_income"] = 0.0
-        result["state_total_tax"] = 0.0
-        result["state_tax_bracket"] = 0.0
-        result["state_effective_tax_rate"] = 0.0
+        for field in _STATE_ZERO_FIELDS:
+            result[field] = 0.0
 
         if tax_input.state and tax_input.state != OTSState.NONE:
             state_result = self._evaluate_state(evaluator, tax_input.state)
@@ -321,28 +336,37 @@ class GraphBackend:
                     continue
                 graph_inputs[node_name] = values
 
-        # Define outputs we want to capture
-        output_map = {
-            "us_1040_L11_agi": "federal_adjusted_gross_income",
-            "us_1040_L15_taxable_income": "federal_taxable_income",
-            "us_1040_L24_total_tax": "federal_total_tax",
-            "us_schedule_se_L10_se_tax": "federal_se_tax",
-            "us_form_8960_L17_niit": "federal_niit",
-            "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
-        }
-
+        # Output contract as (node, field) pairs — the same federal node->field
+        # map the single path uses (so federal_amt is actually requested, not
+        # zero-filled), plus this state's output lines resolved through the
+        # shared helper. A pair list, not a dict: one node can feed two fields
+        # (CT/NE/NM/OR reuse us_1040_L11_agi for both federal and state AGI),
+        # which the single path handles by evaluating that node into each.
+        output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         if state and state != OTSState.NONE:
             state_form = STATE_FORM_NAMES.get(state)
-            state_outputs = STATE_OUTPUT_LINES.get(state, {})
             if state_form:
-                for line, key in state_outputs.items():
-                    output_map[f"{state_form}_{line}"] = key
+                for line, key in STATE_OUTPUT_LINES.get(state, {}).items():
+                    output_pairs.append((_state_output_node(state_form, line), key))
+
+        requested_nodes = list(dict.fromkeys(node for node, _ in output_pairs))
+
+        # Reject a requested output node that isn't in the graph rather than let
+        # eval_scenarios silently return a 0.0 column for it (the failure mode
+        # that returned state_adjusted_gross_income=0 for CT/NE/NM/OR).
+        graph_nodes = set(graph.node_names())
+        missing_outputs = sorted(n for n in requested_nodes if n not in graph_nodes)
+        if missing_outputs:
+            raise RuntimeError(
+                "Graph backend output contract error: requested output nodes "
+                f"absent from the resolved graph: {missing_outputs}"
+            )
 
         # Call the batch API
         graph_statuses = [FILING_STATUS_MAP.get(s, s) for s in statuses]
         eval_fn = graph.eval_scenarios_zip if mode == "zip" else graph.eval_scenarios
         status_col, input_cols, output_cols = eval_fn(
-            graph_inputs, graph_statuses, list(output_map.keys())
+            graph_inputs, graph_statuses, requested_nodes
         )
 
         # Build final dictionary
@@ -362,38 +386,39 @@ class GraphBackend:
             )
             final_results[natural_name] = values
 
-        # Map outputs back to natural names
-        for node_name, values in output_cols.items():
-            final_results[output_map[node_name]] = values
+        # Map each (node, field) pair back — a node feeding two fields sets both.
+        for node_name, field in output_pairs:
+            final_results[field] = output_cols[node_name]
 
-        # Post-process common fields
         count = len(status_col)
+
+        # Federal derived fields — mirror the single path exactly.
+        final_results["federal_tax_bracket"] = [0.0] * count
+        final_results["federal_effective_tax_rate"] = [
+            _federal_effective_tax_rate(ft, agi)
+            for ft, agi in zip(
+                final_results["federal_total_tax"],
+                final_results["federal_adjusted_gross_income"],
+                strict=True,
+            )
+        ]
+
+        # State fields default to 0 when no state was requested (matching the
+        # single path); tax_bracket / effective_rate stay 0 even with a state.
+        for field in _STATE_ZERO_FIELDS:
+            final_results.setdefault(field, [0.0] * count)
+
         final_results["total_tax"] = [
             f + s
             for f, s in zip(
                 final_results["federal_total_tax"],
-                final_results.get("state_total_tax", [0.0] * count),
-                strict=False,
+                final_results["state_total_tax"],
+                strict=True,
             )
         ]
 
-        # Fill in missing expected fields with zeros
-        for field in [
-            "federal_amt",
-            "federal_se_tax",
-            "federal_niit",
-            "federal_additional_medicare_tax",
-            "federal_income_tax",
-            "state_adjusted_gross_income",
-            "state_taxable_income",
-            "state_total_tax",
-            "state_tax_bracket",
-            "state_effective_tax_rate",
-        ]:
-            if field not in final_results:
-                final_results[field] = [0.0] * count
-
-        # Compute federal_income_tax = total_tax - subordinate taxes
+        # federal_income_tax = total federal tax minus the subordinate taxes,
+        # the decomposition the InterpretedTaxReturn validator applies.
         final_results["federal_income_tax"] = [
             ft - se - niit - admed
             for ft, se, niit, admed in zip(
@@ -417,13 +442,9 @@ class GraphBackend:
         output_map = STATE_OUTPUT_LINES.get(state, {})
 
         for line_name, result_key in output_map.items():
-            # If line_name already contains a form prefix (e.g., "us_1040_L11_agi"),
-            # use it directly. Otherwise, prepend the state's form_name.
-            if "_" in line_name and not line_name.startswith("L"):
-                node_name = line_name
-            else:
-                node_name = f"{form_name}_{line_name}"
-            result[result_key] = evaluator.eval(node_name)
+            result[result_key] = evaluator.eval(
+                _state_output_node(form_name, line_name)
+            )
 
         return result
 
