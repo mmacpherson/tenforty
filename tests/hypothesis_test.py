@@ -32,7 +32,7 @@ SUPPORTED_STATES = [e.value for e in OTSState]
 @example(w2_income=100525, w2_increment=1, year=2024, filing_status="Single")
 @example(w2_income=191950, w2_increment=1, year=2024, filing_status="Single")
 @example(w2_income=0, w2_increment=0, year=2024, filing_status="Single")
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     w2_income=st.integers(min_value=0, max_value=1_000_000),  # base w2_income
     w2_increment=st.integers(min_value=0, max_value=500_000),  # w2_income increment
@@ -85,7 +85,7 @@ def test_w2_monotonicity(
     incentive_stock_option_gains=0.0,
     iso_gains_increment=0.0,
 )
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
@@ -211,7 +211,7 @@ def test_federal_tax_monotonicity(
     state_adjustment=0.0,
     incentive_stock_option_gains=0.0,
 )
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     state=st.sampled_from(SUPPORTED_STATES),
@@ -361,7 +361,7 @@ def test_az_widow_standard_deduction():
 @example(
     year=2024, state=None, filing_status="Married/Joint", qualified_dividends=100000.0
 )
-@settings(max_examples=100)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     state=st.sampled_from(SUPPORTED_STATES),
@@ -411,7 +411,7 @@ def test_qualified_dividends_properly_taxed(
 
 @example(year=2024, filing_status="Single", amount=50000.0)
 @example(year=2024, filing_status="Married/Joint", amount=100000.0)
-@settings(max_examples=100)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
