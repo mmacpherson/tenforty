@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
-from .models import STATE_TO_FORM, OTSFilingStatus, OTSState
+from .models import STATE_TO_FORM, OTSFilingStatus, OTSState, TaxReturnInput
 
 NATURAL_TO_NODE = {
     # Federal (1040)
@@ -55,6 +56,78 @@ NATURAL_TO_NODES: dict[str, list[str]] = {
 for name, nodes in _SUBORDINATE_NODES.items():
     if name not in NATURAL_TO_NODES:
         NATURAL_TO_NODES[name] = list(nodes)
+
+# Naturals that are COMPUTED from another natural rather than supplied by the
+# caller (pydantic computed fields on TaxReturnInput), mapped to the natural they
+# derive from. Evaluation reaches their nodes on its own, but a derivative with
+# respect to the SOURCE natural has to follow the derived natural's nodes too, or
+# it silently drops the coupling those nodes carry — d(se_tax)/d(w2_income) losing
+# the shared social security wage base is exactly that (tenforty-hrp).
+#
+# The chain factor is not stored here: it is read off the model at call time
+# (`derived_chain_factor`), so this table cannot drift from the derivation in
+# models.py. Only identity derivations can be expressed downstream, because
+# `gradient_sum` adds one unweighted adjoint per node.
+#
+# COMPUTED FIELDS ONLY. A derivation applied by a `model_validator` rather than a
+# computed field cannot be entered here: `derived_chain_factor` probes with
+# `model_copy`, which does not re-run validators, so the entry would read as a
+# constant zero and be skipped in silence. `ensure_ordinary_includes_qualified` is
+# exactly that shape and is tracked separately (tenforty-3gt).
+DERIVED_NATURAL_SOURCES: dict[str, str] = {
+    "schedule_se_ss_wages": "w2_income",
+}
+
+
+def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -> float:
+    """d(derived natural)/d(source natural), read off the model itself.
+
+    The derivations are piecewise linear in their source and every one of them is
+    currently either identity or a constant zero, so a single bump recovers the exact
+    slope. Probing beats restating the condition (`schedule_se_ss_wages` is zero for
+    Married/Joint and when there is no self-employment income) because a copy of that
+    rule here could fall out of step with `models.py` without anything failing.
+
+    The slope is taken against the bump that SURVIVED rounding, not the one requested,
+    and that is what makes it EXACT: an identity derivation moves the derived value by
+    precisely the amount the source moved, so the ratio is 1.0 with no tolerance to
+    choose. Dividing by the requested bump instead reads 1.0000000000009095 whenever
+    `source + bump` crosses a power of two, and 0.0 above 2**53 where a unit bump
+    rounds away to nothing — both of which used to read as "not 1" and drop the
+    coupling in silence. The bump is at least one ulp wide so it can never vanish.
+
+    That guarantee covers pydantic COMPUTED FIELDS, which recompute on attribute
+    access. It does not extend to derivations applied by a `model_validator`:
+    `model_copy` does not re-run validators, so the probe reads a slope of zero and
+    the caller skips the edge without complaint. See the note on
+    `DERIVED_NATURAL_SOURCES` and tenforty-3gt.
+
+    Note this is deliberately not `getattr(tax_input, derived) != 0`: with
+    `w2_income` at zero the derived value is zero while the slope is still 1, and
+    that is a live gradient, not a dead one.
+
+    Raises NotImplementedError for any other slope. Downstream can only express 0
+    or 1 — `gradient_sum` adds one unweighted adjoint per node — and an entry in
+    `DERIVED_NATURAL_SOURCES` is a deliberate opt-in, so a factor it cannot carry is
+    a mapping defect to surface rather than a coupling to drop in silence.
+    """
+    current = float(getattr(tax_input, source))
+    bump = max(1.0, math.ulp(current))
+    bumped = tax_input.model_copy(update={source: current + bump})
+
+    realized = float(getattr(bumped, source)) - current
+    factor = (getattr(bumped, derived) - getattr(tax_input, derived)) / realized
+
+    if factor not in (0.0, 1.0):
+        raise NotImplementedError(
+            f"d({derived})/d({source}) = {factor}, but only 0 or 1 can be carried: "
+            f"`gradient_sum` adds one unweighted adjoint per node, so a scaled "
+            f"derivation cannot be expressed by naming nodes. Give {derived} its own "
+            f"weighted edge instead of an entry in DERIVED_NATURAL_SOURCES."
+        )
+
+    return factor
+
 
 CAPITAL_GAINS_FIELDS = {"short_term_capital_gains", "long_term_capital_gains"}
 

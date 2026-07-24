@@ -44,4 +44,23 @@ settings.register_profile(
     deadline=None,
     suppress_health_check=[HealthCheck.too_slow],
 )
+# Ad-hoc soak: `uv run pytest --hypothesis-profile=soak`, roughly two hours for the
+# suite against deep's eleven minutes. The rung exists because deep is a COIN FLIP on
+# the rarest defects rather than a net: the float-boundary drop in
+# `derived_chain_factor` had a per-example hit rate near 2e-5, which deep clears about
+# one run in five — it was found by luck, not by budget. A hundred thousand examples
+# turns that into a near-certainty.
+#
+# Reach for this the way you reach for deep — deliberately, on an engine change, when
+# the change is large enough that a one-in-five detection rate is not reassurance.
+# Nothing schedules it and nothing gates on it; a targeted strategy that lands ON the
+# corner (see `_BINADE_EDGE` in graph_autodiff_properties_test.py) beats buying the
+# same corner with reps by four orders of magnitude, so prefer writing one of those
+# when the corner is known. This is for the corners nobody has characterized yet.
+settings.register_profile(
+    "soak",
+    max_examples=100_000,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
 settings.load_profile("dev")  # Default for local dev
