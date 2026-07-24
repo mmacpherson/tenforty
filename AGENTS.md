@@ -135,6 +135,18 @@ These are complementary nets: the differential pins **numbers**, parity pins
 two are blind to. None runs in the per-PR gate; they are the author's
 responsibility on an engine change.
 
+For the deep sweep to reach a property, that property must **inherit** the
+profile's example count:
+
+- **Invariant / corner-hunting property tests** (monotonicity, continuity,
+  wiring, gradients — cheap, one or two evaluations per example) omit
+  `max_examples` and use `@settings(deadline=None)`, so they run 500 under `ci`
+  and 10,000 under `deep`.
+- **Oracle / expensive tests** (parity across both backends, the taxcalc
+  differential, the Newton solver) pin an explicit, bounded `max_examples` with a
+  one-line reason — 10k of a slow example is prohibitive and adds nothing to a
+  value/agreement oracle, so these deliberately do **not** scale.
+
 ## Python Style
 
 - Use modern type hints (PEP 604 unions with `|`, generics without `typing` module)
