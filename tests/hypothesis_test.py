@@ -484,38 +484,55 @@ MONOTONE_INCOME_FIELDS = [
 
 
 # Continuity: above the IRS tax-table region (taxable income >= $100k, where tax
-# is a continuous piecewise-linear formula), a $1 rise in income can change total
-# tax by at most the top marginal stack — 37% ordinary + 3.8% NIIT + 0.9%
-# additional Medicare ~ 0.417 — plus whole-dollar rounding slack. A larger step
-# is a discontinuity: the signature of a bracket/worksheet wiring bug that
-# monotonicity alone cannot see. The $150k income floor keeps taxable income
-# clear of the tax-table region for every status/year (max standard deduction is
-# ~$30k).
+# is a continuous piecewise-linear formula), a $1 rise in ANY income source can
+# change total tax by at most the top marginal stack — 37% ordinary + 3.8% NIIT +
+# 0.9% additional Medicare ~ 0.417 — plus whole-dollar rounding slack. A larger
+# step is a discontinuity: the signature of a bracket/worksheet wiring bug that
+# monotonicity alone cannot see. Testing each source (not just w2) reaches the
+# capital-gains worksheet and the NIIT/Medicare thresholds, where a discontinuity
+# is likelier to hide than in the plain wage brackets. The $150k floor keeps
+# taxable income clear of the tax-table region for every status/year (max
+# standard deduction is ~$30k); the 0.417 ceiling holds for every source,
+# including SE income (above the wage base it carries only the 2.9% Medicare
+# portion — measured max |Δ per $1| is 0.41).
 @pytest.mark.parametrize("backend", BACKENDS)
-@example(year=2024, filing_status="Single", base_income=200000.0)
-@example(year=2024, filing_status="Married/Joint", base_income=250000.0)
+@example(
+    year=2024, filing_status="Single", income_field="w2_income", base_income=200000.0
+)
+@example(
+    year=2024,
+    filing_status="Married/Joint",
+    income_field="long_term_capital_gains",
+    base_income=250000.0,
+)
 @settings(max_examples=500)
 @given(
     year=st.sampled_from(INVARIANT_YEARS),
     filing_status=st.sampled_from(FEDERAL_STATUSES),
+    income_field=st.sampled_from(MONOTONE_INCOME_FIELDS),
     base_income=st.floats(
         min_value=150_000, max_value=2_000_000, allow_nan=False, allow_infinity=False
     ),
 )
-def test_federal_tax_continuity(backend, year, filing_status, base_income):
+def test_federal_tax_continuity(
+    backend, year, filing_status, income_field, base_income
+):
     r1 = tenforty.evaluate_return(
-        year=year, filing_status=filing_status, w2_income=base_income, backend=backend
+        year=year,
+        filing_status=filing_status,
+        backend=backend,
+        **{income_field: base_income},
     )
     r2 = tenforty.evaluate_return(
         year=year,
         filing_status=filing_status,
-        w2_income=base_income + 1.0,
         backend=backend,
+        **{income_field: base_income + 1.0},
     )
     delta = r2.total_tax - r1.total_tax
     assert abs(delta) <= 0.417 + 2.0, (
-        f"Discontinuity [{backend}]: total_tax moved {delta:.2f} for a $1 income "
-        f"rise at base {base_income:.0f} ({filing_status}, {year})"
+        f"Discontinuity [{backend}]: total_tax moved {delta:.2f} for a $1 rise in "
+        f"{income_field} at base {base_income:.0f} ({filing_status}, {year})"
     )
 
 
@@ -614,31 +631,38 @@ def test_federal_tax_monotone_nonincreasing_in_deductions(
 
 # Cross-status ordering: bracket widths and standard deductions order
 # MFJ >= HoH >= Single, so at the same income total tax orders
-# Single >= HoH >= MFJ. Extends the existing MFJ <= Single check with the HoH
-# rung between them.
+# Single >= HoH >= MFJ. Holds for any income source (the ordering comes from the
+# brackets and deductions, including the status-dependent capital-gains
+# breakpoints), so it is tested per source. Extends the existing MFJ <= Single
+# check with the HoH rung between them.
 @pytest.mark.parametrize("backend", BACKENDS)
-@example(year=2024, income=80000.0)
+@example(year=2024, income_field="w2_income", income=80000.0)
+@example(year=2024, income_field="long_term_capital_gains", income=120000.0)
 @settings(max_examples=300)
 @given(
     year=st.sampled_from(INVARIANT_YEARS),
+    income_field=st.sampled_from(MONOTONE_INCOME_FIELDS),
     income=st.floats(
         min_value=30_000, max_value=1_000_000, allow_nan=False, allow_infinity=False
     ),
 )
-def test_cross_status_tax_ordering(backend, year, income):
+def test_cross_status_tax_ordering(backend, year, income_field, income):
     def tax(filing_status):
         return tenforty.evaluate_return(
-            year=year, filing_status=filing_status, w2_income=income, backend=backend
+            year=year,
+            filing_status=filing_status,
+            backend=backend,
+            **{income_field: income},
         ).total_tax
 
     single = tax("Single")
     hoh = tax("Head_of_House")
     mfj = tax("Married/Joint")
     assert mfj <= hoh + 1e-6, (
-        f"MFJ tax ({mfj:.2f}) exceeds HoH tax ({hoh:.2f}) at income {income:.2f} "
-        f"[{backend}, {year}]"
+        f"MFJ tax ({mfj:.2f}) exceeds HoH tax ({hoh:.2f}) at {income_field}="
+        f"{income:.2f} [{backend}, {year}]"
     )
     assert hoh <= single + 1e-6, (
-        f"HoH tax ({hoh:.2f}) exceeds Single tax ({single:.2f}) at income {income:.2f} "
-        f"[{backend}, {year}]"
+        f"HoH tax ({hoh:.2f}) exceeds Single tax ({single:.2f}) at {income_field}="
+        f"{income:.2f} [{backend}, {year}]"
     )
