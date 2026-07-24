@@ -26,6 +26,15 @@ __pycache__/
 # C extensions
 *.so
 
+# Cython output. setup.py cythonizes src/tenforty/otslib/ots.pyx on every build
+# and Cython is an unconditional build requirement, so this file is regenerated,
+# never consumed. Tracking it only produced churn: a routine `uv sync` that moved
+# Cython 3.2.4 -> 3.2.9 rewrote 635 lines of it inside an unrelated PR.
+# NOTE this is NOT ots_amalgamation.cpp, which stays tracked — the .pxd files do
+# `cdef extern from "ots_amalgamation.cpp"`, making it a genuine build INPUT that
+# would otherwise require the OTS release tarballs to reconstruct.
+src/tenforty/otslib/ots.cpp
+
 # Distribution / packaging
 .Python
 env/
