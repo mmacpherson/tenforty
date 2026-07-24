@@ -194,6 +194,51 @@ def test_solve_recovers_input_through_fanout(natural, true_value, extra):
     )
 
 
+@skip_if_graph_unavailable
+def test_solve_recovers_wages_through_the_derived_schedule_se_node():
+    """Solving must vary the DERIVED natural's nodes too, not only the mapped ones.
+
+    `_input_nodes` serves `solve` as well as `gradient`, and the solver assigns its
+    candidate to every node it names. The cases above were picked so that
+    `schedule_se_ss_wages` is unaffected by hiding the unknown; this one is the
+    opposite, and is the case the derived fan-out repairs. Self-employment income
+    stays visible, so the derivation is live at a unit slope throughout the search
+    while the wage-base coupling is the thing being solved through.
+
+    Without the derived node the solver leaves Schedule SE line 5a at zero, so it
+    searches a function the library does not compute: it reports convergence at
+    $127,478 for a true $140,000, a point whose total tax is $1,601.62 short of the
+    target it claims to have hit. The residual is asserted alongside the recovered
+    input so the failure reads as "not a root", not merely "not the number we chose".
+    """
+    known = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=140_000.0,
+        self_employment_income=60_000.0,
+    )
+    target = evaluate_return(backend="graph", **known).federal_total_tax
+
+    solved = _solve_for("w2_income", **known)
+
+    assert solved is not None, "solver failed to converge"
+    assert solved == pytest.approx(known["w2_income"], rel=1e-3), (
+        f"solved w2_income={solved:,.2f} but the true value was 140,000.00; the "
+        f"search likely left us_schedule_se_L5_w2_ss_wages at zero"
+    )
+
+    residual = (
+        evaluate_return(
+            backend="graph", **{**known, "w2_income": solved}
+        ).federal_total_tax
+        - target
+    )
+    assert residual == pytest.approx(0.0, abs=1.0), (
+        f"solver converged on a point that is not a root: total tax there misses "
+        f"the target by ${residual:,.2f}"
+    )
+
+
 @pytest.mark.xfail(
     reason="tenforty-gxk: solve freezes computed input fields at construction, "
     "so hiding the unknown collapses schedule_se_ss_wages and the solver "
@@ -246,3 +291,25 @@ def test_w2_gradient_includes_schedule_se_wage_base():
     assert _gradient("w2_income", **case) == pytest.approx(
         _finite_difference("w2_income", **case), abs=1e-6
     )
+
+
+def test_derived_chain_factor_rejects_a_slope_it_cannot_carry():
+    """A derivation the adjoint sum cannot express must raise, not be skipped.
+
+    `_input_nodes` extends across a derived natural by NAMING its nodes, and
+    `gradient_sum` adds one unweighted adjoint per name — so the only slopes the
+    mechanism can carry are 0 and 1. Dropping anything else would be silently
+    correct-looking: the table entry sits there reading as wired while the coupling
+    goes missing, which is the failure mode that hid tenforty-3gt.
+    """
+    from tenforty.mappings import derived_chain_factor
+
+    class ScaledInput(TaxReturnInput):
+        @property
+        def scaled_wages(self) -> float:
+            return 0.9235 * self.w2_income
+
+    tax_input = ScaledInput(year=2024, filing_status="Single", w2_income=100_000.0)
+
+    with pytest.raises(NotImplementedError, match=r"only 0 or 1 can be carried"):
+        derived_chain_factor(tax_input, "scaled_wages", "w2_income")
