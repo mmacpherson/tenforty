@@ -8,6 +8,7 @@ import pathlib
 from functools import lru_cache
 
 from ..mappings import (
+    DERIVED_NATURAL_SOURCES,
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
@@ -16,6 +17,7 @@ from ..mappings import (
     STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
     STATE_OUTPUT_LINES,
+    derived_chain_factor,
 )
 from ..models import STATE_TO_FORM, InterpretedTaxReturn, OTSState, TaxReturnInput
 
@@ -495,6 +497,15 @@ class GraphBackend:
         influence the requested output simply contributes a zero partial, so
         there is no need to guess which namespace the caller meant.
 
+        DERIVED naturals count as well. `schedule_se_ss_wages` is computed from
+        `w2_income`, so evaluation writes the filer's wages to Schedule SE line 5a
+        and the shared social security wage base couples W2 to SE tax — but the
+        node is filed under the derived natural's own key, so a gradient that
+        consulted only `NATURAL_TO_NODES[var]` dropped that coupling entirely
+        (tenforty-hrp). Only derivations with a unit slope contribute: an adjoint
+        sum is unweighted, so a factor other than 0 or 1 could not be represented
+        here and is left out rather than counted wrong.
+
         The result is deduplicated. Evaluation is idempotent to a repeated
         node — assigning it twice leaves the same value — but `gradient_sum`
         adds one adjoint per name, so a node named twice would have its
@@ -508,6 +519,13 @@ class GraphBackend:
         state_node = STATE_NATURAL_TO_NODE.get(tax_input.state, {}).get(var)
         if state_node:
             nodes.append(state_node)
+
+        for derived, source in DERIVED_NATURAL_SOURCES.items():
+            if (
+                source == var
+                and derived_chain_factor(tax_input, derived, source) == 1.0
+            ):
+                nodes.extend(NATURAL_TO_NODES.get(derived, []))
 
         if nodes:
             return list(dict.fromkeys(nodes))

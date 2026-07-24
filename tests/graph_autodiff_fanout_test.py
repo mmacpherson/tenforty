@@ -221,12 +221,6 @@ def test_solve_through_derived_input_is_wrong():
     assert solved == pytest.approx(60_000.0, rel=1e-3)
 
 
-@pytest.mark.xfail(
-    reason="tenforty-gxk: schedule_se_ss_wages is a Python computed field derived "
-    "from w2_income, so it is invisible to the graph's dependency structure and "
-    "the wage-base path is missing from the derivative",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_w2_gradient_includes_schedule_se_wage_base():
     """Wages displace self-employment earnings from the OASDI base.
@@ -236,10 +230,12 @@ def test_w2_gradient_includes_schedule_se_wage_base():
     earnings together exceed that base, another dollar of wages pushes a dollar
     of SE earnings out of the 12.4% charge. Here 2024's $168,600 base leaves
     $28,600 of room against $46,175 of SE earnings, so the true marginal rate
-    is 0.130880 while the derivative reports 0.240000 — nearly double.
+    is 0.130880 — the derivative used to report 0.240000, nearly double.
 
-    Fan-out summing cannot reach this: the wage-base node is written from a
-    computed field rather than from any node w2_income is mapped to.
+    Fan-out summing over NATURAL_TO_NODES alone cannot reach this: the wage-base
+    node is written from a computed field rather than from any node w2_income is
+    mapped to. Following DERIVED_NATURAL_SOURCES is what closes it (tenforty-hrp,
+    and the gradient half of tenforty-gxk).
     """
     case = dict(
         year=2024,

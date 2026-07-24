@@ -75,8 +75,19 @@ _STEP = 10.0
 
 # 2024 Social Security wage base. Below it, W2 wages and self-employment income
 # share the 12.4% SS ceiling, coupling the two — the region where the autodiff
-# currently drops the derived w2 -> Schedule SE edge (tenforty-hrp).
+# used to drop the derived w2 -> Schedule SE edge (tenforty-hrp).
 _SS_WAGE_BASE_2024 = 168_600.0
+
+# 2024 Additional Medicare Tax thresholds (IRC 3101(b)(2)). Form 8959 hangs two
+# max0 branches off these, so wages landing exactly on one put both on a kink at
+# the same time — see tenforty-dhi.
+_ADDITIONAL_MEDICARE_THRESHOLDS = {
+    "Single": 200_000.0,
+    "Head_of_House": 200_000.0,
+    "Widow(er)": 200_000.0,
+    "Married/Joint": 250_000.0,
+    "Married/Sep": 125_000.0,
+}
 
 
 def _total_tax(case: dict) -> float:
@@ -102,16 +113,18 @@ def test_autodiff_matches_finite_difference(filing_status, wrt, incomes):
     # Leave room for a symmetric step without pushing the input negative.
     case[wrt] = max(case[wrt], _STEP)
 
-    # Skip the W2 gradient in the SS wage-base sharing region: there the autodiff
-    # omits the derived w2 -> Schedule SE SS-wages edge and disagrees with the
-    # evaluation path. This is a real, tracked bug (tenforty-hrp), pinned by the
-    # strict-xfail tests below; scope it out here rather than hide it by loosening
-    # the tolerance. Remove this assume when hrp lands.
+    # Skip wages landing EXACTLY on the Additional Medicare threshold. Form 8959
+    # charges two max0 branches off that one threshold, so both sit on their kinks
+    # at once and autodiff takes the subgradient 0 for each — but the kinks cancel
+    # and the sum is differentiable, so the true slope is 0.009 and the gradient
+    # reads 0. A real, tracked defect (tenforty-dhi), pinned by the strict xfail
+    # below. The kink filter underneath cannot catch it: it watches the composed
+    # function, which is smooth here, not the interior nodes. Remove when dhi lands.
     assume(
         not (
             wrt == "w2_income"
             and incomes["self_employment_income"] > 0.0
-            and case["w2_income"] < _SS_WAGE_BASE_2024
+            and case["w2_income"] == _ADDITIONAL_MEDICARE_THRESHOLDS[filing_status]
         )
     )
 
@@ -145,6 +158,20 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
     # Monotone region: total income clear of the EIC phase-in, where more income
     # buys more refundable credit and the marginal rate can dip below zero.
     assume(sum(incomes.values()) >= 50_000.0)
+
+    # Skip the long-term capital gain rate where a QBI deduction is live: Form 8995
+    # line 13 (net capital gain) is an unfed input, so the line 15 taxable-income
+    # limit is computed on taxable income INCLUDING the gain, and another dollar of
+    # gain buys $0.20 of QBI deduction it should not. The marginal goes to -0.024.
+    # A real, tracked defect (tenforty-345), pinned by the strict xfail below;
+    # scoped out here rather than hidden by widening the bound. Remove when 345
+    # lands. Only this pair misbehaves — short-term gains, dividends, interest,
+    # schedule-1 and wages all stay positive with the same QBI deduction live.
+    assume(
+        not (
+            wrt == "long_term_capital_gains" and incomes["self_employment_income"] > 0.0
+        )
+    )
     case = dict(year=2024, filing_status=filing_status, **incomes)
 
     marginal = _gradient(wrt, case)
@@ -153,12 +180,80 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
     )
 
 
-# Durable record of tenforty-hrp: the graph autodiff omits the derived
-# w2_income -> us_schedule_se_L5_w2_ss_wages edge, so d(*)/d(w2_income) drops the
-# Social Security wage-base coupling. These assert the CORRECT behavior and are
-# strict xfails, so the day hrp is fixed they xpass and force their own removal.
-# The coupling is live here: W2 ($101,237) sits below the wage base and
-# W2 + 0.9235 * SE (~$67,373) exceeds it, so SE income is partially SS-capped.
+# Durable record of tenforty-345: Form 8995 line 13 (net capital gain) is declared
+# as a graph input and never written, so the line 15 limit does not subtract the
+# gain and the QBI deduction grows with it. Asserts the CORRECT behavior and is a
+# strict xfail, so the day 345 is fixed it xpasses and forces its own removal --
+# along with the `assume` above, which nothing else would flag.
+_QBI_GAIN_CASE = dict(
+    year=2024,
+    filing_status="Single",
+    self_employment_income=35_401.0,
+    rental_income=14_598.0,
+    long_term_capital_gains=1.0,
+)
+
+
+# Durable record of tenforty-dhi: at wages exactly on the Additional Medicare
+# threshold, Form 8959's two max0 branches are both at their kink and autodiff
+# zeroes each, losing a derivative that survives in their sum. Strict xfail, so
+# the fix forces this and the `assume` above out together.
+_KINK_CASE = dict(
+    year=2024,
+    filing_status="Single",
+    w2_income=200_000.0,
+    self_employment_income=11.0,
+)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.xfail(
+    reason="tenforty-dhi: coincident max0 kinks at the Additional Medicare "
+    "threshold zero the adjoint, so d(*)/d(w2_income) loses the 0.9%",
+    strict=True,
+)
+def test_gradient_survives_coincident_kinks_at_the_medicare_threshold():
+    """The sum is differentiable at the threshold even though each branch kinks."""
+    from tenforty.backends import GraphBackend
+
+    analytical = GraphBackend().gradient(
+        TaxReturnInput(**_KINK_CASE),
+        "us_form_8959_L18_total_additional_medicare",
+        "w2_income",
+    )
+
+    def additional_medicare(value):
+        return evaluate_return(
+            backend="graph", **{**_KINK_CASE, "w2_income": value}
+        ).federal_additional_medicare_tax
+
+    w2 = _KINK_CASE["w2_income"]
+    left = (additional_medicare(w2) - additional_medicare(w2 - 1.0)) / 1.0
+    right = (additional_medicare(w2 + 1.0) - additional_medicare(w2)) / 1.0
+    assert left == pytest.approx(right, abs=1e-9), "guard: the point must be smooth"
+    assert analytical == pytest.approx(right, abs=1e-6)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.xfail(
+    reason="tenforty-345: Form 8995 L13 net_capital_gain is an unfed input, so the "
+    "QBI taxable-income limit omits the gain and d(total_tax)/d(LTCG) goes negative",
+    strict=True,
+)
+def test_long_term_gain_marginal_is_not_negative_under_qbi():
+    """A dollar of long-term gain must never REDUCE total tax."""
+    marginal = _gradient("long_term_capital_gains", _QBI_GAIN_CASE)
+    assert marginal >= -1e-6, (
+        f"d(total_tax)/d(long_term_capital_gains) = {marginal:.6f}: the gain is "
+        f"buying QBI deduction through the unsubtracted line 15 limit"
+    )
+
+
+# Regression pins for tenforty-hrp: the graph autodiff used to omit the derived
+# w2_income -> us_schedule_se_L5_w2_ss_wages edge, so d(*)/d(w2_income) dropped the
+# Social Security wage-base coupling entirely. The coupling is live here: W2
+# ($101,237) sits below the wage base and W2 + 0.9235 * SE (~$67,373) exceeds it,
+# so SE income is partially SS-capped.
 _COUPLING_CASE = dict(
     year=2024,
     filing_status="Single",
@@ -168,11 +263,6 @@ _COUPLING_CASE = dict(
 
 
 @skip_if_graph_unavailable
-@pytest.mark.xfail(
-    reason="tenforty-hrp: autodiff omits the derived w2 -> Schedule SE SS-wages "
-    "edge, so d(se_tax)/d(w2_income) misses the wage-base coupling",
-    strict=True,
-)
 def test_se_tax_gradient_carries_w2_wage_base_coupling():
     """More W2 wages crowd SE income out of the 12.4% SS portion, cutting SE tax."""
     from tenforty.backends import GraphBackend
@@ -192,11 +282,6 @@ def test_se_tax_gradient_carries_w2_wage_base_coupling():
 
 
 @skip_if_graph_unavailable
-@pytest.mark.xfail(
-    reason="tenforty-hrp: the dropped w2 -> Schedule SE edge inflates "
-    "d(total_tax)/d(w2_income) above the SS wage base (~0.24 vs ~0.128 truth)",
-    strict=True,
-)
 def test_total_tax_gradient_matches_finite_difference_at_wage_base_coupling():
     """The total-tax w2 gradient must include the (negative) SE-tax reduction."""
     w2 = _COUPLING_CASE["w2_income"]
@@ -206,3 +291,66 @@ def test_total_tax_gradient_matches_finite_difference_at_wage_base_coupling():
         - _total_tax({**_COUPLING_CASE, "w2_income": w2 - 1.0})
     ) / 2.0
     assert analytical == pytest.approx(central, abs=1e-3)
+
+
+# The coupling is live only where the wage base actually binds. With SE income of
+# $72,954, net earnings are 0.9235 * 72,954 = $67,373, so wages start crowding SE
+# income out of the 12.4% portion once w2 clears 168,600 - 67,373 = ~$101,227 (and
+# the SE OASDI charge is gone entirely above the base). Below that band the zero
+# gradient is CORRECT -- nothing is being displaced -- which makes it the honest
+# control for the coupled samples.
+_COUPLING_SE_INCOME = 72_954.0
+_COUPLING_BAND_FLOOR = _SS_WAGE_BASE_2024 - 0.9235 * _COUPLING_SE_INCOME
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(
+    ("w2", "coupled"),
+    [
+        (40_000.0, False),
+        (90_000.0, False),
+        (105_000.0, True),
+        (130_000.0, True),
+        (_SS_WAGE_BASE_2024 - 5_000.0, True),
+    ],
+    ids=lambda v: f"w2-{int(v)}" if isinstance(v, float) else f"coupled-{v}",
+)
+def test_se_tax_gradient_tracks_wage_base_across_the_region(w2: float, coupled: bool):
+    """The w2 -> SE coupling holds across the band it lives in, not at one point.
+
+    A single sample can be matched by a wrong gradient that happens to agree there;
+    the coupling has to survive a walk across its whole region. Reverting the
+    derived-fan-out fix flattens every coupled sample here to 0.0.
+    """
+    from tenforty.backends import GraphBackend
+
+    case = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=w2,
+        self_employment_income=_COUPLING_SE_INCOME,
+    )
+    analytical = GraphBackend().gradient(
+        TaxReturnInput(**case), "us_schedule_se_L10_se_tax", "w2_income"
+    )
+
+    def se_tax(value):
+        return evaluate_return(
+            backend="graph", **{**case, "w2_income": value}
+        ).federal_se_tax
+
+    central = (se_tax(w2 + 1.0) - se_tax(w2 - 1.0)) / 2.0
+    assert analytical == pytest.approx(central, abs=1e-3)
+
+    assert (w2 > _COUPLING_BAND_FLOOR) is coupled, (
+        f"test data drift: w2={w2} sits on the wrong side of the "
+        f"${_COUPLING_BAND_FLOOR:,.0f} wage-base band floor"
+    )
+    if coupled:
+        assert analytical < 0.0, (
+            f"more W2 wages must crowd SE income out of the 12.4% SS portion at w2={w2}"
+        )
+    else:
+        assert analytical == pytest.approx(0.0, abs=1e-9), (
+            f"the wage base does not bind at w2={w2}; nothing is displaced"
+        )

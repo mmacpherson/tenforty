@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .models import STATE_TO_FORM, OTSFilingStatus, OTSState
+from .models import STATE_TO_FORM, OTSFilingStatus, OTSState, TaxReturnInput
 
 NATURAL_TO_NODE = {
     # Federal (1040)
@@ -55,6 +55,40 @@ NATURAL_TO_NODES: dict[str, list[str]] = {
 for name, nodes in _SUBORDINATE_NODES.items():
     if name not in NATURAL_TO_NODES:
         NATURAL_TO_NODES[name] = list(nodes)
+
+# Naturals that are COMPUTED from another natural rather than supplied by the
+# caller (pydantic computed fields on TaxReturnInput), mapped to the natural they
+# derive from. Evaluation reaches their nodes on its own, but a derivative with
+# respect to the SOURCE natural has to follow the derived natural's nodes too, or
+# it silently drops the coupling those nodes carry — d(se_tax)/d(w2_income) losing
+# the shared social security wage base is exactly that (tenforty-hrp).
+#
+# The chain factor is not stored here: it is read off the model at call time
+# (`derived_chain_factor`), so this table cannot drift from the derivation in
+# models.py. Only identity derivations can be expressed downstream, because
+# `gradient_sum` adds one unweighted adjoint per node.
+DERIVED_NATURAL_SOURCES: dict[str, str] = {
+    "schedule_se_ss_wages": "w2_income",
+}
+
+
+def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -> float:
+    """d(derived natural)/d(source natural), read off the model itself.
+
+    The derivations are piecewise linear in their source and every one of them is
+    currently either identity or a constant zero, so a unit bump recovers the exact
+    slope — no step-size choice to get wrong. Probing beats restating the condition
+    (`schedule_se_ss_wages` is zero for Married/Joint and when there is no
+    self-employment income) because a copy of that rule here could fall out of step
+    with `models.py` without anything failing.
+
+    Note this is deliberately not `getattr(tax_input, derived) != 0`: with
+    `w2_income` at zero the derived value is zero while the slope is still 1, and
+    that is a live gradient, not a dead one.
+    """
+    bumped = tax_input.model_copy(update={source: getattr(tax_input, source) + 1.0})
+    return getattr(bumped, derived) - getattr(tax_input, derived)
+
 
 CAPITAL_GAINS_FIELDS = {"short_term_capital_gains", "long_term_capital_gains"}
 
