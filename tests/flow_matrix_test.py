@@ -45,36 +45,51 @@ ACTIVE_CASE = dict(
     self_employment_income=100_000.0,
     taxable_interest=80_000.0,
     long_term_capital_gains=50_000.0,
+    ordinary_dividends=40_000.0,
+    short_term_capital_gains=30_000.0,
+    schedule_1_income=20_000.0,
+    rental_income=20_000.0,
 )
 
 CONNECTED = "connected"
 ZERO = "zero"
 
-# (income input, output field, relationship) declared from tax law. The zeros are
-# STRUCTURAL, not regime artifacts: SE tax is levied only on self-employment
-# income; Additional Medicare tax only on earned income (wages + SE), never on
-# investment income. NIIT's dependence on wages/SE runs through MAGI and is
-# regime-dependent, so those cells are deliberately omitted rather than asserted.
+# (income input, output field, relationship) declared from tax law, verified on
+# both backends. The zeros are STRUCTURAL, not regime artifacts: SE tax is levied
+# only on self-employment income; Additional Medicare tax only on earned income
+# (wages + SE); NIIT only on net investment income, never on earned or schedule-1
+# "other" income.
+#
+# Two families of cells are deliberately OMITTED because they are regime- rather
+# than law-dependent: NIIT vs earned income (couples through MAGI) and SE tax vs
+# w2 income (couples through the shared Social Security wage base — the region
+# where tenforty-hrp lives). Those belong to the derivative sweep, not a
+# structural yes/no matrix.
+_EARNED = ["w2_income", "self_employment_income"]
+_INVESTMENT = [
+    "taxable_interest",
+    "ordinary_dividends",
+    "long_term_capital_gains",
+    "short_term_capital_gains",
+    "rental_income",
+]
+_OTHER = ["schedule_1_income"]  # not earned, not net investment income
+
 FLOW_MATRIX = [
-    # SE tax: self-employment income only.
+    # SE tax: self-employment income only. (w2 omitted: wage-base coupling, hrp.)
     ("self_employment_income", "federal_se_tax", CONNECTED),
-    ("w2_income", "federal_se_tax", ZERO),
-    ("taxable_interest", "federal_se_tax", ZERO),
-    ("long_term_capital_gains", "federal_se_tax", ZERO),
+    *[(src, "federal_se_tax", ZERO) for src in _INVESTMENT + _OTHER],
     # Additional Medicare tax: earned income only (wages + SE). The SE cell is the
     # F5 wire.
     ("w2_income", "federal_additional_medicare_tax", CONNECTED),
     ("self_employment_income", "federal_additional_medicare_tax", CONNECTED),
-    ("taxable_interest", "federal_additional_medicare_tax", ZERO),
-    ("long_term_capital_gains", "federal_additional_medicare_tax", ZERO),
-    # NIIT: net investment income (interest, capital gains); not earned income.
-    ("taxable_interest", "federal_niit", CONNECTED),
-    ("long_term_capital_gains", "federal_niit", CONNECTED),
+    *[(src, "federal_additional_medicare_tax", ZERO) for src in _INVESTMENT + _OTHER],
+    # NIIT: net investment income only; not schedule-1 income. (Earned omitted:
+    # MAGI coupling.)
+    *[(src, "federal_niit", CONNECTED) for src in _INVESTMENT],
+    *[(src, "federal_niit", ZERO) for src in _OTHER],
     # Total tax: every income source must reach the bottom line.
-    ("w2_income", "federal_total_tax", CONNECTED),
-    ("self_employment_income", "federal_total_tax", CONNECTED),
-    ("taxable_interest", "federal_total_tax", CONNECTED),
-    ("long_term_capital_gains", "federal_total_tax", CONNECTED),
+    *[(src, "federal_total_tax", CONNECTED) for src in _EARNED + _INVESTMENT + _OTHER],
 ]
 
 # A connected edge in the active region carries at least this slope (the smallest
