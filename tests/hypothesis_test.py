@@ -505,7 +505,9 @@ MONOTONE_INCOME_FIELDS = [
     income_field="long_term_capital_gains",
     base_income=250000.0,
 )
-@settings(max_examples=500)
+# Inherits the example count from the active hypothesis profile (ci=500,
+# deep=10k) — an invariant test, so it scales with the deep sweep.
+@settings(deadline=None)
 @given(
     year=st.sampled_from(INVARIANT_YEARS),
     filing_status=st.sampled_from(FEDERAL_STATUSES),
@@ -549,7 +551,7 @@ def test_federal_tax_continuity(
     base=100000.0,
     increment=1000.0,
 )
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(INVARIANT_YEARS),
     filing_status=st.sampled_from(FEDERAL_STATUSES),
@@ -591,7 +593,7 @@ def test_federal_tax_monotone_in_each_income(
     deduction=10000.0,
     increment=20000.0,
 )
-@settings(max_examples=500)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(INVARIANT_YEARS),
     filing_status=st.sampled_from(FEDERAL_STATUSES),
@@ -638,7 +640,7 @@ def test_federal_tax_monotone_nonincreasing_in_deductions(
 @pytest.mark.parametrize("backend", BACKENDS)
 @example(year=2024, income_field="w2_income", income=80000.0)
 @example(year=2024, income_field="long_term_capital_gains", income=120000.0)
-@settings(max_examples=300)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(INVARIANT_YEARS),
     income_field=st.sampled_from(MONOTONE_INCOME_FIELDS),
