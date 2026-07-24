@@ -5,6 +5,7 @@ module OHIT1040_2025
   )
 where
 
+import FormRefs
 import TablesOH2025
 import TenForty
 
@@ -13,7 +14,7 @@ ohIT1040_2025 = form "oh_it1040" 2025 $ do
   defineTable ohioBracketsTable2025
 
   -- Line 1: Federal Adjusted Gross Income (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 2: Additions to federal AGI (from Schedule of Adjustments)

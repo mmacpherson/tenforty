@@ -5,6 +5,7 @@ module CAFTB3514_2025
   )
 where
 
+import FormRefs
 import TablesCA2025
 import TenForty
 
@@ -37,7 +38,7 @@ caFTB3514_2025 = form "ca_ftb_3514" 2025 $ do
   -- Part III: California AGI and Investment Income Tests
 
   -- Line 6: California AGI (from CA 540 or import)
-  _l6 <- interior "L6" "ca_agi" $ importForm "ca_540" "L17"
+  _l6 <- interior "L6" "ca_agi" $ importForm ca540L17
 
   -- Line 7: Investment income (disqualified if > threshold)
   -- Used to determine eligibility (not modeled as disqualifier here)

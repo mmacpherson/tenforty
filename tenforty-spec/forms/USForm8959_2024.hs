@@ -5,6 +5,7 @@ module USForm8959_2024
   )
 where
 
+import FormRefs
 import Tables2024
 import TenForty
 
@@ -32,7 +33,7 @@ usForm8959_2024 = form "us_form_8959" 2024 $ do
       l6 .*. lit 0.009
 
   -- Part II: Additional Medicare Tax on Self-Employment Income
-  l8 <- interior "L8" "se_income" $ importForm "us_schedule_se" "L4a"
+  l8 <- interior "L8" "se_income" $ importForm usScheduleSeL4a
 
   l9 <-
     interior "L9" "threshold_se" $

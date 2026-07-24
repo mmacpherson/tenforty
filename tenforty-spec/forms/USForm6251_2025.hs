@@ -5,6 +5,7 @@ module USForm6251_2025
   )
 where
 
+import FormRefs
 import Tables2025
 import TenForty
 
@@ -13,7 +14,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- Part I: Alternative Minimum Taxable Income (AMTI)
 
   -- Line 1: Enter taxable income from Form 1040, line 15
-  l1 <- interior "L1" "taxable_income" $ importForm "us_1040" "L15"
+  l1 <- interior "L1" "taxable_income" $ importForm us1040L15
 
   -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A taxes when
   -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E): the
@@ -41,7 +42,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
       byStatusE (fmap lit standardDeduction2025)
   deductionTaken <-
     interior "deduction_taken" "Deduction the 1040 used (greater of itemized and standard)" $
-      importForm "us_1040" "L12Final"
+      importForm us1040L12final
   itemizingExcess <-
     interior "amt_itemizing_excess" "By how much the 1040 deduction exceeds the standard deduction" $
       deductionTaken `subtractNotBelowZero` stdDeduction
@@ -199,10 +200,10 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- Part III: Tax Computation Using Maximum Capital Gains Rates
   preferentialIncome <-
     interior "P3_pref_income" "preferential_income" $
-      importForm "us_1040" "qcgws_4"
+      importForm us1040Qcgws4
   ordinaryTaxableIncome <-
     interior "P3_ord_taxable" "ordinary_taxable_income" $
-      importForm "us_1040" "qcgws_5"
+      importForm us1040Qcgws5
 
   -- Split AMT taxable income into ordinary and preferential portions
   prefInAmt <-
@@ -294,7 +295,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
       l7 `subtractNotBelowZero` l8
 
   -- Line 10: Regular tax liability from Form 1040
-  l10 <- interior "L10" "regular_tax" $ importForm "us_1040" "L16"
+  l10 <- interior "L10" "regular_tax" $ importForm us1040L16
 
   -- Line 11: AMT. Subtract line 10 from line 9. If zero or less, enter -0-.
   _l11 <-

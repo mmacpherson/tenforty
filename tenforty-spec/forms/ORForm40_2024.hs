@@ -5,6 +5,7 @@ module ORForm40_2024
   )
 where
 
+import FormRefs
 import TablesOR2024
 import TenForty
 
@@ -13,7 +14,7 @@ orForm40_2024 = form "or_40" 2024 $ do
   defineTable oregonBracketsTable2024
 
   -- Line 7: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l7 <- keyOutput "L7" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 8-12: Oregon additions to income
@@ -37,7 +38,7 @@ orForm40_2024 = form "or_40" 2024 $ do
   -- The phaseout is linear: $8,250 at AGI $0-$125k (Single/MFS) or $0-$250k (MFJ/HoH/QW),
   -- then reduces by $1,650 per $5,000 of AGI until $0 at $145k (Single/MFS) or $290k (MFJ/HoH/QW).
   -- This is a 20% reduction per $5,000 increment: rate = $1,650 / $5,000 = 0.33
-  let _federalTaxFromReturn = importForm "us_1040" "L22"
+  let _federalTaxFromReturn = importForm us1040L22
   let fedTaxPhaseoutSpec =
         PhaseOutSpec
           { poBase = 8250,

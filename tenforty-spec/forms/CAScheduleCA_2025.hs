@@ -5,6 +5,7 @@ module CAScheduleCA_2025
   )
 where
 
+import FormRefs
 import TenForty
 
 caScheduleCA_2025 :: Either FormError Form
@@ -119,7 +120,7 @@ caScheduleCA_2025 = form "ca_schedule_ca" 2025 $ do
 
   -- QBI Deduction add-back (California does not allow federal QBI deduction)
   -- Import from Form 8995 if available
-  aQBI <- interior "A_QBI" "qbi_addback" $ importForm "us_form_8995" "L16"
+  aQBI <- interior "A_QBI" "qbi_addback" $ importForm usForm8995L16
 
   -- Line 22-24: Other additions
   aOther <- keyInput "A22_24" "other_additions" "Other additions"

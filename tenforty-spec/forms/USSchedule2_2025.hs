@@ -5,12 +5,13 @@ module USSchedule2_2025
   )
 where
 
+import FormRefs
 import TenForty
 
 usSchedule2_2025 :: Either FormError Form
 usSchedule2_2025 = form "us_schedule_2" 2025 $ do
   -- Part I: Tax
-  l1 <- interior "L1" "amt" $ importForm "us_form_6251" "L11"
+  l1 <- interior "L1" "amt" $ importForm usForm6251L11
   l2 <- keyInput "L2" "excess_aptc" "Excess advance premium tax credit repayment from Form 8962"
 
   _l3 <-
@@ -18,15 +19,15 @@ usSchedule2_2025 = form "us_schedule_2" 2025 $ do
       l1 .+. l2
 
   -- Part II: Other Taxes
-  l4 <- interior "L4" "self_employment_tax" $ importForm "us_schedule_se" "L10"
+  l4 <- interior "L4" "self_employment_tax" $ importForm usScheduleSeL10
   l5 <- keyInput "L5" "unreported_ss_medicare" "Social security and Medicare on unreported tip income from Form 4137"
   l6 <- keyInput "L6" "additional_tax_ira" "Additional tax on IRAs or other tax-favored accounts from Form 5329"
 
   l7a <- keyInput "L7a" "household_employment" "Household employment taxes from Schedule H"
   l7b <- keyInput "L7b" "first_time_homebuyer" "First-time homebuyer credit repayment from Form 5405"
 
-  l8_8959 <- interior "L8_8959" "additional_medicare" $ importForm "us_form_8959" "L18"
-  l8_8960 <- interior "L8_8960" "niit" $ importForm "us_form_8960" "L17"
+  l8_8959 <- interior "L8_8959" "additional_medicare" $ importForm usForm8959L18
+  l8_8960 <- interior "L8_8960" "niit" $ importForm usForm8960L17
   l8 <- interior "L8" "additional_medicare_niit" $ l8_8959 .+. l8_8960
 
   l9 <- keyInput "L9" "section_965" "Section 965 net tax liability installment from Form 965-A"

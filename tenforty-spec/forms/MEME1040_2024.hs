@@ -5,6 +5,7 @@ module MEME1040_2024
   )
 where
 
+import FormRefs
 import TablesME2024
 import TenForty
 
@@ -13,7 +14,7 @@ meme1040_2024 = form "me_1040me" 2024 $ do
   defineTable maineBracketsTable2024
 
   -- Line 1: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 2-5: Maine additions to income

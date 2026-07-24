@@ -5,13 +5,14 @@ module COForm104_2025
   )
 where
 
+import FormRefs
 import TablesCO2025
 import TenForty
 
 coForm104_2025 :: Either FormError Form
 coForm104_2025 = form "co_form104" 2025 $ do
   -- Line 1: Federal Taxable Income (from US 1040 Line 15)
-  let federalTaxableIncome = importForm "us_1040" "L15"
+  let federalTaxableIncome = importForm us1040L15
   l1 <-
     keyOutput "L1" "federal_taxable_income" "Federal taxable income" $
       federalTaxableIncome .+. dollars 0

@@ -5,6 +5,7 @@ module NYIT201_2024
   )
 where
 
+import FormRefs
 import TablesNY2024
 import TenForty
 
@@ -14,7 +15,7 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
   defineTable nycBracketsTable2024
 
   -- Line 19: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l19 <- keyOutput "L19" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 20-23: New York additions to income
@@ -29,9 +30,9 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
       sumOf [l19, l20, l21, l22, l23]
 
   -- Lines 25-31: New York subtractions from income
-  l25 <- interior "L25" "ny_sub_refunds" $ importForm "us_schedule_1" "L1"
+  l25 <- interior "L25" "ny_sub_refunds" $ importForm usSchedule1L1
   l26 <- keyInput "L26" "ny_sub_gov_pensions" "Pensions of NYS/local/federal governments"
-  l27 <- interior "L27" "ny_sub_socsec" $ importForm "us_1040" "L6b"
+  l27 <- interior "L27" "ny_sub_socsec" $ importForm us1040L6b
   l28 <- keyInput "L28" "ny_sub_us_bond_interest" "Interest income on U.S. government bonds"
   l29 <- keyInput "L29" "ny_sub_pension_exclusion" "Pension and annuity income exclusion"
   l30 <- keyInput "L30" "ny_sub_college_tuition" "College choice tuition savings deduction"

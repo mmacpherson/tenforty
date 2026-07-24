@@ -5,13 +5,14 @@ module IL1040_2025
   )
 where
 
+import FormRefs
 import TablesIL2025
 import TenForty
 
 il1040_2025 :: Either FormError Form
 il1040_2025 = form "il_1040" 2025 $ do
   -- Line 1: Federal Adjusted Gross Income (from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <-
     keyOutput "L1" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

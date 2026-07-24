@@ -5,6 +5,7 @@ module NDForm1_2025
   )
 where
 
+import FormRefs
 import TablesND2025
 import TenForty
 
@@ -13,7 +14,7 @@ ndForm1_2025 = form "nd_1" 2025 $ do
   defineTable ndBracketsTable2025
 
   -- Line 1a: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1a <- keyOutput "L1a" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 1b-1l: Additions to federal AGI

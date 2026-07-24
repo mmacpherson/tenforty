@@ -5,13 +5,14 @@ module AZForm140_2025
   )
 where
 
+import FormRefs
 import TablesAZ2025
 import TenForty
 
 azForm140_2025 :: Either FormError Form
 azForm140_2025 = form "az_140" 2025 $ do
   -- Line 12: Federal Adjusted Gross Income (from US 1040 Line 11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l12 <-
     keyOutput "L12" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

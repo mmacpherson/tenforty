@@ -5,6 +5,7 @@ module HIHIN11_2025
   )
 where
 
+import FormRefs
 import TablesHI2025
 import TenForty
 
@@ -13,7 +14,7 @@ hihiN11_2025 = form "hi_n11" 2025 $ do
   defineTable hawaiiBracketsTable2025
 
   -- Line 7: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l7 <- keyOutput "L7" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 8-9: Hawaii additions to income

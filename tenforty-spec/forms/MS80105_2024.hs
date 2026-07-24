@@ -5,6 +5,7 @@ module MS80105_2024
   )
 where
 
+import FormRefs
 import TablesMS2024
 import TenForty
 
@@ -12,7 +13,7 @@ ms80105_2024 :: Either FormError Form
 ms80105_2024 = form "ms_80105" 2024 $ do
   -- Line 13: Mississippi Adjusted Gross Income
   -- Starts with Federal AGI and applies Mississippi modifications
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l13 <-
     keyOutput "L13" "ms_agi" "Mississippi adjusted gross income" $
       federalAgi .+. dollars 0

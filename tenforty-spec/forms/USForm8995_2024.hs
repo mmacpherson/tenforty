@@ -5,6 +5,7 @@ module USForm8995_2024
   )
 where
 
+import FormRefs
 import Tables2024
 import TenForty
 
@@ -30,7 +31,7 @@ usForm8995_2024 = form "us_form_8995" 2024 $ do
   -- the deductible part of SE tax — and net it out before the 20%.
   seHalfDeduction <-
     interior "se_half_deduction" "Deductible half of SE tax reducing QBI" $
-      importForm "us_schedule_se" "L11"
+      importForm usScheduleSeL11
 
   -- Line 5: Total qualified business income (net of the half-SE deduction)
   l5 <-
@@ -64,7 +65,7 @@ usForm8995_2024 = form "us_form_8995" 2024 $ do
       l6 .+. l10
 
   -- Line 12: Taxable income before QBI deduction
-  l12 <- interior "L12" "taxable_income_before" $ importForm "us_1040" "L15_pre_qbi"
+  l12 <- interior "L12" "taxable_income_before" $ importForm us1040L15PreQbi
 
   -- Line 13: Net capital gain (from Form 1040, lines 3a and 7, if applicable)
   l13 <- keyInput "L13" "net_capital_gain" "Net capital gain (qualified dividends + capital gain)"

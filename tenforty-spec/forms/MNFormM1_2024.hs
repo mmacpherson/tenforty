@@ -5,6 +5,7 @@ module MNFormM1_2024
   )
 where
 
+import FormRefs
 import TablesMN2024
 import TenForty
 
@@ -13,7 +14,7 @@ mnFormM1_2024 = form "mn_m1" 2024 $ do
   defineTable mnBracketsTable2024
 
   -- Line 1: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <-
     keyOutput "L1" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0

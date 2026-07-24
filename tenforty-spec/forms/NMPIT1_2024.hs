@@ -5,6 +5,7 @@ module NMPIT1_2024
   )
 where
 
+import FormRefs
 import TablesNM2024
 import TenForty
 
@@ -13,7 +14,7 @@ nmPIT1_2024 = form "nm_pit1" 2024 $ do
   defineTable newMexicoBracketsTable2024
 
   -- Line 9: Federal Adjusted Gross Income (imported from US 1040 L11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l9 <- keyOutput "L9" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 10: State and local tax deduction from federal Schedule A
@@ -26,7 +27,7 @@ nmPIT1_2024 = form "nm_pit1" 2024 $ do
   -- Line 12: Federal standard or itemized deduction
   -- (NM subtracts this from AGI since NM uses federal deductions)
   -- Import from US 1040 Line 12
-  let federalDeduction = importForm "us_1040" "L12Final"
+  let federalDeduction = importForm us1040L12final
   l12 <- interior "L12" "federal_deduction" federalDeduction
 
   -- Line 13: Deduction for certain dependents

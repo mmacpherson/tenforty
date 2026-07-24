@@ -5,6 +5,7 @@ module VTIN111_2025
   )
 where
 
+import FormRefs
 import TablesVT2025
 import TenForty
 
@@ -13,7 +14,7 @@ vtIN111_2025 = form "vt_in111" 2025 $ do
   defineTable vtBracketsTable2025
 
   -- Line 1: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 2: Net additions to Federal AGI from Vermont Schedule IN-113

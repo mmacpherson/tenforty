@@ -51,6 +51,7 @@ module TenForty.DSL
     line,
     importLine,
     importForm,
+    lineRef,
 
     -- * Tax Operations
     bracketTax,
@@ -131,8 +132,20 @@ interior lid name = F.compute lid name "" Interior
 max0 :: Expr Dollars -> Expr Dollars
 max0 = maxE (dollars 0)
 
-importForm :: FormId -> LineId -> Expr Dollars
-importForm = Import
+-- | Mint a typed cross-form output handle. Handles live in a dependency-free
+-- module (see @FormRefs@) so importers never depend on the exporter's form
+-- module — the form graph stays acyclic even where two forms reference each
+-- other's lines. The unit is fixed at the handle's declaration site.
+lineRef :: FormId -> LineId -> LineRef u
+lineRef = LineRef
+
+-- | Import another form's output through its typed handle. A mistyped or
+-- since-renamed reference is a compile-time \"not in scope\" error, and a unit
+-- mismatch is a type error — neither can slip through to the resolver. This is
+-- the only way a form definition refers across form boundaries; the raw
+-- string-keyed 'importLine' is reserved for the resolver's own tests.
+importForm :: LineRef u -> Expr u
+importForm (LineRef fid lid) = Import fid lid
 
 bracketTax :: TableId -> Expr Dollars -> Expr Dollars
 bracketTax = BracketTax

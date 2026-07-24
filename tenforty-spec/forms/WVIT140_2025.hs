@@ -5,6 +5,7 @@ module WVIT140_2025
   )
 where
 
+import FormRefs
 import TablesWV2025
 import TenForty
 
@@ -13,7 +14,7 @@ wvIT140_2025 = form "wv_it140" 2025 $ do
   defineTable westVirginiaBracketsTable2025
 
   -- Line 1: Federal Adjusted Gross Income (imported from US 1040 L11)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 2: Additions to federal AGI (from Schedule M)

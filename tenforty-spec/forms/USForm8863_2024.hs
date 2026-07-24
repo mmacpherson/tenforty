@@ -5,6 +5,7 @@ module USForm8863_2024
   )
 where
 
+import FormRefs
 import Tables2024
 import TenForty
 
@@ -18,7 +19,7 @@ usForm8863_2024 = form "us_form_8863" 2024 $ do
   l1 <- keyInput "L1" "aotc_total" "Total American opportunity credit from Part III"
 
   -- Line 2: MAGI from Form 1040 (used for phase-out calculation)
-  l2 <- interior "L2" "magi" $ importForm "us_1040" "L11"
+  l2 <- interior "L2" "magi" $ importForm us1040L11
 
   -- Line 3: Phase-out threshold
   l3 <-
@@ -61,7 +62,7 @@ usForm8863_2024 = form "us_form_8863" 2024 $ do
   l11 <- keyInput "L11" "llc_total" "Total lifetime learning credit from Part III"
 
   -- Line 12: MAGI for LLC phase-out
-  l12 <- interior "L12" "magi_llc" $ importForm "us_1040" "L11"
+  l12 <- interior "L12" "magi_llc" $ importForm us1040L11
 
   -- Line 13: LLC phase-out threshold
   l13 <-

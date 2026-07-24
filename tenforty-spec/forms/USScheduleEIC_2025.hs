@@ -5,6 +5,7 @@ module USScheduleEIC_2025
   )
 where
 
+import FormRefs
 import Tables2025
 import TenForty
 
@@ -20,7 +21,7 @@ usScheduleEIC_2025 = form "us_schedule_eic" 2025 $ do
   investmentIncome <- keyInput "INVESTMENT_INCOME" "investment_income" "Investment income"
 
   -- Get AGI for phase-out calculation
-  agi <- interior "AGI" "agi" $ importForm "us_1040" "L11"
+  agi <- interior "AGI" "agi" $ importForm us1040L11
 
   -- Phase-out thresholds by status (varies by 0 vs 1+ qualifying children)
   phaseOutThreshold0QC <-

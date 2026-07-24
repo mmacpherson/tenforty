@@ -85,6 +85,7 @@ executable tenforty-compile
     DEFormPITRES_2025
     FLNoTax_2024
     FLNoTax_2025
+    FormRefs
     GAForm500_2024
     GAForm500_2025
     HIHIN11_2024
@@ -370,6 +371,7 @@ test-suite tenforty-spec-test
     ExprProperties
     FLNoTax_2024
     FLNoTax_2025
+    FormRefs
     GAForm500_2024
     GAForm500_2025
     HIHIN11_2024

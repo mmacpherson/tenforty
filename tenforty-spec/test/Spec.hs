@@ -233,7 +233,7 @@ spec n = do
           case form
             (fid "source")
             2024
-            (void (compute (lid "L2") "Source Line" "" Interior (importForm (fid "target") (lid "L9")))) of
+            (void (compute (lid "L2") "Source Line" "" Interior (importLine (fid "target") (lid "L9")))) of
             Left err -> expectationFailure $ show err
             Right sourceForm -> do
               let errors = validateFormSet [sourceForm, targetForm]

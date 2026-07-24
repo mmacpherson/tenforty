@@ -5,6 +5,7 @@ module USForm2441_2024
   )
 where
 
+import FormRefs
 import Tables2024
 import TenForty
 
@@ -49,7 +50,7 @@ usForm2441_2024 = form "us_form_2441" 2024 $ do
       smallerOf l4 (smallerOf l5 l6)
 
   -- Line 8: AGI from Form 1040, line 11
-  l8 <- interior "L8" "agi" $ importForm "us_1040" "L11"
+  l8 <- interior "L8" "agi" $ importForm us1040L11
 
   -- Line 9: Decimal amount (credit percentage based on AGI)
   -- Credit starts at 35% for AGI <= $15,000

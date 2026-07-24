@@ -5,13 +5,14 @@ module USScheduleA_2025
   )
 where
 
+import FormRefs
 import TenForty
 
 usScheduleA_2025 :: Either FormError Form
 usScheduleA_2025 = form "us_schedule_a" 2025 $ do
   -- Medical and Dental Expenses
   l1 <- keyInput "L1" "medical_dental" "Medical and dental expenses"
-  l2 <- interior "L2" "agi_amount" $ importForm "us_1040" "L11"
+  l2 <- interior "L2" "agi_amount" $ importForm us1040L11
   l3 <- interior "L3" "medical_threshold" $ l2 .*. lit 0.075
   _l4 <-
     keyOutput "L4" "medical_deduction" "Subtract L3 from L1 (not below 0)" $

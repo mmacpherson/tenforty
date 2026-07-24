@@ -5,6 +5,7 @@ module CTForm1_2024
   )
 where
 
+import FormRefs
 import TablesCT2024
 import TenForty
 
@@ -13,7 +14,7 @@ ctForm1_2024 = form "ct_1" 2024 $ do
   defineTable ctBracketsTable2024
 
   -- Line 1: Connecticut AGI (imports federal AGI from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- interior "L1" "ct_agi" federalAgi
 
   -- Line 2: Personal exemption with phaseout

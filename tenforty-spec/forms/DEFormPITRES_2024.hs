@@ -5,6 +5,7 @@ module DEFormPITRES_2024
   )
 where
 
+import FormRefs
 import TablesDE2024
 import TenForty
 
@@ -13,7 +14,7 @@ deFormPITRES_2024 = form "de_pit_res" 2024 $ do
   defineTable delawareBracketsTable2024
 
   -- Line 1: Federal AGI (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 2: Delaware additions to AGI (e.g., state tax refund, municipal bond interest)

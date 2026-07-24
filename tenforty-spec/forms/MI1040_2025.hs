@@ -5,13 +5,14 @@ module MI1040_2025
   )
 where
 
+import FormRefs
 import TablesMI2025
 import TenForty
 
 mi1040_2025 :: Either FormError Form
 mi1040_2025 = form "mi_1040" 2025 $ do
   -- Line 7: Federal adjusted gross income (imported from US 1040)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l7 <- keyOutput "L7" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Line 8: Additions to federal AGI (from Michigan Schedule 1)

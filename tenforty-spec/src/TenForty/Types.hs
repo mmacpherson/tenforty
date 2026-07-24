@@ -23,6 +23,9 @@ module TenForty.Types
     FormId (..),
     TableId (..),
     NodeId (..),
+
+    -- * Typed Cross-Form Output References
+    LineRef (..),
   )
 where
 
@@ -119,3 +122,15 @@ instance IsString TableId where
 newtype NodeId = NodeId {unNodeId :: Int}
   deriving stock (Show, Read)
   deriving newtype (Eq, Ord, Num, Enum)
+
+-- | A typed, cross-form reference to a form's output line: it carries the
+-- target form, the target line, and the line's unit as a phantom.
+--
+-- A 'LineRef' is minted only by 'TenForty.Form.export', from the very 'Expr'
+-- the line's own @keyOutput@/@compute@ returned — so the handle cannot name a
+-- line that does not exist, and its unit is the line's unit. Importers
+-- reference the handle instead of a @(form, line)@ string pair, which turns a
+-- mistyped or since-renamed reference into a compile-time \"not in scope\"
+-- error and a unit mismatch into a type error.
+data LineRef (u :: Type) = LineRef FormId LineId
+  deriving stock (Show)

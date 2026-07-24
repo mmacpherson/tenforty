@@ -5,6 +5,7 @@ module MAForm1_2025
   )
 where
 
+import FormRefs
 import TablesMA2025
 import TenForty
 
@@ -14,7 +15,7 @@ maForm1_2025 = form "ma_1" 2025 $ do
   -- Line 4: Taxable pensions and annuities (from US 1040)
   -- Lines 5-9: Various income sources
   -- Line 10: Total income (approximated by federal AGI for this implementation)
-  let federalAgi = importForm "us_1040" "L11"
+  let federalAgi = importForm us1040L11
   l10 <-
     keyOutput
       "L10"
