@@ -504,7 +504,13 @@ class GraphBackend:
         consulted only `NATURAL_TO_NODES[var]` dropped that coupling entirely
         (tenforty-hrp). Only derivations with a unit slope contribute: an adjoint
         sum is unweighted, so a factor other than 0 or 1 could not be represented
-        here and is left out rather than counted wrong.
+        here — `derived_chain_factor` raises on one rather than let it be counted
+        wrong or dropped in silence.
+
+        This reaches `solve` as well, which names the same nodes and assigns the
+        candidate to every one of them. Omitting the derived node left the solver
+        searching a function the library does not compute, and converging on a
+        point that is not a root.
 
         The result is deduplicated. Evaluation is idempotent to a repeated
         node — assigning it twice leaves the same value — but `gradient_sum`

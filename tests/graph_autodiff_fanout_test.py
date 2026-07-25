@@ -194,6 +194,51 @@ def test_solve_recovers_input_through_fanout(natural, true_value, extra):
     )
 
 
+@skip_if_graph_unavailable
+def test_solve_recovers_wages_through_the_derived_schedule_se_node():
+    """Solving must vary the DERIVED natural's nodes too, not only the mapped ones.
+
+    `_input_nodes` serves `solve` as well as `gradient`, and the solver assigns its
+    candidate to every node it names. The cases above were picked so that
+    `schedule_se_ss_wages` is unaffected by hiding the unknown; this one is the
+    opposite, and is the case the derived fan-out repairs. Self-employment income
+    stays visible, so the derivation is live at a unit slope throughout the search
+    while the wage-base coupling is the thing being solved through.
+
+    Without the derived node the solver leaves Schedule SE line 5a at zero, so it
+    searches a function the library does not compute: it reports convergence at
+    $127,478 for a true $140,000, a point whose total tax is $1,601.62 short of the
+    target it claims to have hit. The residual is asserted alongside the recovered
+    input so the failure reads as "not a root", not merely "not the number we chose".
+    """
+    known = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=140_000.0,
+        self_employment_income=60_000.0,
+    )
+    target = evaluate_return(backend="graph", **known).federal_total_tax
+
+    solved = _solve_for("w2_income", **known)
+
+    assert solved is not None, "solver failed to converge"
+    assert solved == pytest.approx(known["w2_income"], rel=1e-3), (
+        f"solved w2_income={solved:,.2f} but the true value was 140,000.00; the "
+        f"search likely left us_schedule_se_L5_w2_ss_wages at zero"
+    )
+
+    residual = (
+        evaluate_return(
+            backend="graph", **{**known, "w2_income": solved}
+        ).federal_total_tax
+        - target
+    )
+    assert residual == pytest.approx(0.0, abs=1.0), (
+        f"solver converged on a point that is not a root: total tax there misses "
+        f"the target by ${residual:,.2f}"
+    )
+
+
 @pytest.mark.xfail(
     reason="tenforty-gxk: solve freezes computed input fields at construction, "
     "so hiding the unknown collapses schedule_se_ss_wages and the solver "
@@ -246,3 +291,62 @@ def test_w2_gradient_includes_schedule_se_wage_base():
     assert _gradient("w2_income", **case) == pytest.approx(
         _finite_difference("w2_income", **case), abs=1e-6
     )
+
+
+def test_derived_chain_factor_rejects_a_slope_it_cannot_carry():
+    """A derivation the adjoint sum cannot express must raise, not be skipped.
+
+    `_input_nodes` extends across a derived natural by NAMING its nodes, and
+    `gradient_sum` adds one unweighted adjoint per name — so the only slopes the
+    mechanism can carry are 0 and 1. Dropping anything else would be silently
+    correct-looking: the table entry sits there reading as wired while the coupling
+    goes missing, which is the failure mode that hid tenforty-3gt.
+    """
+    from tenforty.mappings import derived_chain_factor
+
+    class ScaledInput(TaxReturnInput):
+        @property
+        def scaled_wages(self) -> float:
+            return 0.9235 * self.w2_income
+
+    tax_input = ScaledInput(year=2024, filing_status="Single", w2_income=100_000.0)
+
+    with pytest.raises(NotImplementedError, match=r"only 0 or 1 can be carried"):
+        derived_chain_factor(tax_input, "scaled_wages", "w2_income")
+
+
+@pytest.mark.parametrize(
+    "w2_income",
+    [
+        8191.969842312686,
+        4095.1460934553484,
+        2**53 - 0.5,
+        1e16,
+        1e17,
+    ],
+    ids=["binade-8192", "binade-4096", "at-2**53", "above-2**53", "far-above-2**53"],
+)
+def test_derived_chain_factor_is_exact_where_a_unit_bump_is_not(w2_income):
+    """An identity derivation reads as slope 1 even where `w + 1.0` misbehaves.
+
+    Two ways a nominal unit bump lies about the slope. Below 2**53, `w + 1.0` can
+    cross a power of two and land 1.0000000000009095 away; above it, the bump rounds
+    off entirely and the probe sees no movement at all. Both used to read as "not 1"
+    and drop the schedule_se_ss_wages coupling in silence — the deep sweep caught the
+    first one through `test_marginal_rate_within_bounds`.
+
+    Taking the slope against the bump that survived rounding makes it exact rather
+    than merely close, so `_input_nodes` can keep comparing to 1.0 outright.
+    """
+    from tenforty.mappings import derived_chain_factor
+
+    tax_input = TaxReturnInput(
+        year=2024,
+        filing_status="Single",
+        w2_income=w2_income,
+        self_employment_income=50_000.0,
+    )
+
+    assert (
+        derived_chain_factor(tax_input, "schedule_se_ss_wages", "w2_income") == 1.0
+    ), "identity derivation must read as exactly 1.0, not approximately"

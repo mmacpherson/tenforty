@@ -88,6 +88,7 @@ freeze rather than rolling the whole tree back.
 - `pytest` — Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` — Run with CI profile (500 examples)
 - `make test-deep` — Deep property sweep (10,000 examples, all cores; ad hoc)
+- `pytest --hypothesis-profile=soak` — Soak (100,000 examples; ad hoc, ~2 hours)
 - `python ots/amalgamate.py ots/ots-releases/*.tgz` — Regenerate OTS bindings
 - `make graph-build` — Build graph library (interpreter only)
 - `make spec-graphs` — Generate JSON graphs from Haskell specs
@@ -138,13 +139,23 @@ These are complementary nets: the differential pins **numbers**, parity pins
 two are blind to. None runs in the per-PR gate; they are the author's
 responsibility on an engine change.
 
+Above those sits an ad-hoc fourth, expected of nothing: **`--hypothesis-profile=soak`**
+(100,000 examples, ~2 hours). Reach for it when a change is large enough that `deep`
+is not reassurance, because `deep` is a coin flip on the rarest defects rather than a
+net — the float-boundary drop in `derived_chain_factor` sat at a per-example hit rate
+near 2e-5, which `deep` clears about one run in five, and it was found by luck. But
+reps are the instrument of last resort. Once a corner is **characterized**, write a
+strategy that lands on it (`_BINADE_EDGE` in `tests/graph_autodiff_properties_test.py`)
+rather than buying it with reps: the defect `deep` took eleven minutes to hit falls out
+of the 500-example `ci` gate in fifteen seconds once the strategy aims there.
+
 For the deep sweep to reach a property, that property must **inherit** the
 profile's example count:
 
 - **Invariant / corner-hunting property tests** (monotonicity, continuity,
   wiring, gradients — cheap, one or two evaluations per example) omit
-  `max_examples` and use `@settings(deadline=None)`, so they run 500 under `ci`
-  and 10,000 under `deep`.
+  `max_examples` and use `@settings(deadline=None)`, so they run 500 under `ci`,
+  10,000 under `deep`, and 100,000 under `soak`.
 - **Oracle / expensive tests** (parity across both backends, the taxcalc
   differential, the Newton solver) pin an explicit, bounded `max_examples` with a
   one-line reason — 10k of a slow example is prohibitive and adds nothing to a
