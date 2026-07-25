@@ -87,8 +87,8 @@ freeze rather than rolling the whole tree back.
 - `pip install -e ".[dev]"` — Install in dev mode
 - `pytest` — Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` — Run with CI profile (500 examples)
-- `pytest --hypothesis-profile=deep` — Deep property sweep (10,000 examples; ad hoc)
-- `pytest --hypothesis-profile=soak` — Soak (100,000 examples; ad hoc, ~2 hours)
+- `make test-deep` — Deep property sweep (10,000 examples, all cores; ad hoc, ~5 min)
+- `make test-soak` — Soak (100,000 examples, all cores; ad hoc, ~50 min)
 - `python ots/amalgamate.py ots/ots-releases/*.tgz` — Regenerate OTS bindings
 - `make graph-build` — Build graph library (interpreter only)
 - `make spec-graphs` — Generate JSON graphs from Haskell specs
@@ -121,11 +121,13 @@ engine** (the Rust graph runtime, the OTS mapping/orchestration, or the Haskell
 spec/graph — not docs, tests, or tooling), run all three deeper sweeps and note
 the result in the PR:
 
-- **Deep hypothesis sweep** — `uv run pytest --hypothesis-profile=deep` (10,000
-  examples, ~11 minutes). Catches obscure-threshold conjunctions the 500-example
-  gate clears only intermittently. Targeted boundary-straddling strategies
-  (tenforty-g79) are the higher-leverage complement; reps are the safety net
-  under them.
+- **Deep hypothesis sweep** — `make test-deep` (10,000 examples, ~5 minutes on 12
+  cores). Catches obscure-threshold conjunctions the 500-example gate clears only
+  intermittently. Targeted boundary-straddling strategies (tenforty-g79) are the
+  higher-leverage complement; reps are the safety net under them. The target
+  fans the sweep across all cores; `uv run pytest --hypothesis-profile=deep` is
+  the same sweep serial (~11 minutes), and is what to reach for when a failure
+  needs reproducing without worker output interleaved.
 - **OTS regression + cross-backend parity** — the `tests/parity/` suite, so the
   OTS and graph backends still agree.
 - **taxcalc differential** — `TENFORTY_TAXCALC=1 uv run pytest tests/taxcalc/`
@@ -137,15 +139,22 @@ These are complementary nets: the differential pins **numbers**, parity pins
 two are blind to. None runs in the per-PR gate; they are the author's
 responsibility on an engine change.
 
-Above those sits an ad-hoc fourth, expected of nothing: **`--hypothesis-profile=soak`**
-(100,000 examples, ~2 hours). Reach for it when a change is large enough that `deep`
-is not reassurance, because `deep` is a coin flip on the rarest defects rather than a
-net — the float-boundary drop in `derived_chain_factor` sat at a per-example hit rate
-near 2e-5, which `deep` clears about one run in five, and it was found by luck. But
-reps are the instrument of last resort. Once a corner is **characterized**, write a
-strategy that lands on it (`_BINADE_EDGE` in `tests/graph_autodiff_properties_test.py`)
-rather than buying it with reps: the defect `deep` took eleven minutes to hit falls out
-of the 500-example `ci` gate in fifteen seconds once the strategy aims there.
+Above those sits an ad-hoc fourth, expected of nothing: **`make test-soak`** (100,000
+examples, ~50 minutes on 12 cores; ~2 hours serial). Reach for it when a change is
+large enough that `deep` is not reassurance, because `deep` is a coin flip on the
+rarest defects rather than a net — the float-boundary drop in `derived_chain_factor`
+sat at a per-example hit rate near 2e-5, which `deep` clears about one run in five,
+and it was found by luck. But reps are the instrument of last resort. Once a corner is
+**characterized**, write a strategy that lands on it (`_BINADE_EDGE` in
+`tests/graph_autodiff_properties_test.py`) rather than buying it with reps: the defect
+that cost `deep` a full sweep to hit falls out of the 500-example `ci` gate in fifteen
+seconds once the strategy aims there.
+
+Parallelism buys a constant factor here, and only once. Under `deep` the sweep's cost
+is ~15 property tests that inherit the profile — 637s of a 661s serial run — and the
+single slowest is 196s of the 295s parallel wall clock. That one test sets the floor;
+adding property tests raises it. When the sweep gets slow again, the lever is the
+properties, not more cores.
 
 For the deep sweep to reach a property, that property must **inherit** the
 profile's example count:
