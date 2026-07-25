@@ -19,7 +19,7 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all test-deep hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all test-deep test-soak hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs spec-test forms-sync
 .PHONY: spec-fmt spec-fmt-check spec-lint spec-lint-strict
 .PHONY: runner-image bench-zip-mode
@@ -61,17 +61,37 @@ test-full: check-uv ## Run tests with graph backend
 test-all: test-full graph-test spec-test ## Run all tests (Python + Rust + Haskell)
 	@echo "All tests passed."
 
-# Parallel because the deep profile's cost sits in ~11 property tests that omit
-# max_examples and so run 10,000 examples each, among 800+ tests that finish
-# instantly. `worksteal` (not the default `load`) is what handles that skew:
-# round-robin hands each worker a fixed slice up front, so the ones holding only
-# fast tests go idle while a straggler finishes alone. Serial and parallel runs
-# must agree on pass/xfail/skip counts — the suite has no shared-path writes,
-# no chdir, and no session- or module-scoped fixtures, which is what makes the
-# per-worker process isolation sound.
+# Parallel because the cost of these profiles sits in ~15 property tests that
+# omit max_examples, among 880+ that finish instantly: under `deep` those 15 are
+# 637s of a 661s serial run. `worksteal` (not the default `load`) handles that
+# skew. `load` is already dynamic — it seeds each worker with `items_per_node/4`
+# CONSECUTIVE tests and then feeds the rest on demand — but that initial chunk
+# follows collection order, so hypothesis_test.py's nine slow tests land on one
+# or two workers and cannot be moved once assigned. Measured on 12 cores under
+# `deep`: serial 661s, `load` 403s, `worksteal` 295s.
+#
+# 295s is not the floor. The slowest single test is 196s of it, and a property
+# running 10,000 examples is one indivisible unit — Hypothesis's engine is a
+# sequential adaptive search, not independent sampling. Perfect packing would
+# give 196s; getting under that means splitting that one property, which changes
+# the instrument (12 shards of 833 examples is not one 10,000-example search).
+#
+# Serial and parallel must agree on pass/xfail/skip counts. The suite has no
+# chdir and no session- or module-scoped fixtures; the one fixed-path write in
+# library code (tenforty.log, core.py) is gated off behind FILE_LOG_LEVEL, and
+# OTS's argv globals are per-process, which is what makes worker isolation sound.
+# Hypothesis's own .hypothesis/ database IS shared across workers, which is safe:
+# DirectoryBasedExampleDatabase.save writes via mkstemp+rename and tolerates the
+# race. Both profiles set deadline=None, so worker contention cannot manufacture
+# a DeadlineExceeded — that is why this is not simply added to the `ci` profile,
+# which leaves the 200ms default in place.
 test-deep: check-uv ## Deep hypothesis sweep (10,000 examples, parallel)
-	uv sync
+	$(MAKE) env-full
 	uv run pytest --hypothesis-profile=deep -n auto --dist worksteal
+
+test-soak: check-uv ## Soak hypothesis sweep (100,000 examples, parallel)
+	$(MAKE) env-full
+	uv run pytest --hypothesis-profile=soak -n auto --dist worksteal
 
 hooks: check-uv ## Install pre-commit hooks
 	uv sync
