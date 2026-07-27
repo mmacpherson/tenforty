@@ -46,6 +46,16 @@ INVENTORY = {
         "ots": "missing:F3",  # no Form 8995 config exists at all
         "graph": "mapped",
     },
+    # Form 8995 line 13 (net capital gain) is deliberately NOT inventoried here,
+    # for either capital-gain natural. The derivative is the wrong instrument for
+    # it: line 13 imports the same gain that line 12 already carries, so a
+    # CORRECT wiring makes d(L16)/d(gain) identically zero -- the cancellation is
+    # the whole point of the line, and `_graph_flows` would read the fixed graph
+    # as unmapped. (d/d(qualified_dividends) does read nonzero, but only because
+    # the gradient misses the ordinary-dividend fan-out, tenforty-3gt; that row
+    # would pass today and break the day 3gt lands.) The edge is pinned by value
+    # instead, in graph_autodiff_properties_test.py's
+    # test_form_8995_line_13_carries_the_net_capital_gain.
 }
 
 

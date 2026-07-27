@@ -187,19 +187,6 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
     # buys more refundable credit and the marginal rate can dip below zero.
     assume(sum(incomes.values()) >= 50_000.0)
 
-    # Skip the long-term capital gain rate where a QBI deduction is live: Form 8995
-    # line 13 (net capital gain) is an unfed input, so the line 15 taxable-income
-    # limit is computed on taxable income INCLUDING the gain, and another dollar of
-    # gain buys $0.20 of QBI deduction it should not. The marginal goes to -0.024.
-    # A real, tracked defect (tenforty-345), pinned by the strict xfail below;
-    # scoped out here rather than hidden by widening the bound. Remove when 345
-    # lands. Only this pair misbehaves — short-term gains, dividends, interest,
-    # schedule-1 and wages all stay positive with the same QBI deduction live.
-    assume(
-        not (
-            wrt == "long_term_capital_gains" and incomes["self_employment_income"] > 0.0
-        )
-    )
     case = dict(year=2024, filing_status=filing_status, **incomes)
 
     marginal = _gradient(wrt, case)
@@ -208,11 +195,12 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
     )
 
 
-# Durable record of tenforty-345: Form 8995 line 13 (net capital gain) is declared
-# as a graph input and never written, so the line 15 limit does not subtract the
-# gain and the QBI deduction grows with it. Asserts the CORRECT behavior and is a
-# strict xfail, so the day 345 is fixed it xpasses and forces its own removal --
-# along with the `assume` above, which nothing else would flag.
+# Regression pins for tenforty-345: Form 8995 line 13 (net capital gain) was
+# declared as a graph input and never written, so the line 15 limit did not
+# subtract the gain and the QBI deduction grew with it -- a dollar of long-term
+# gain REDUCED total tax by $0.024. Line 13 now imports the 1040 qualified
+# dividends and capital gain worksheet line 4 (qualified dividends + net capital
+# gain), which is the definition the form asks for.
 _QBI_GAIN_CASE = dict(
     year=2024,
     filing_status="Single",
@@ -263,11 +251,6 @@ def test_gradient_survives_coincident_kinks_at_the_medicare_threshold():
 
 
 @skip_if_graph_unavailable
-@pytest.mark.xfail(
-    reason="tenforty-345: Form 8995 L13 net_capital_gain is an unfed input, so the "
-    "QBI taxable-income limit omits the gain and d(total_tax)/d(LTCG) goes negative",
-    strict=True,
-)
 def test_long_term_gain_marginal_is_not_negative_under_qbi():
     """A dollar of long-term gain must never REDUCE total tax."""
     marginal = _gradient("long_term_capital_gains", _QBI_GAIN_CASE)
@@ -275,6 +258,80 @@ def test_long_term_gain_marginal_is_not_negative_under_qbi():
         f"d(total_tax)/d(long_term_capital_gains) = {marginal:.6f}: the gain is "
         f"buying QBI deduction through the unsubtracted line 15 limit"
     )
+
+
+@skip_if_graph_unavailable
+def test_qualified_dividend_marginal_is_not_negative_under_qbi():
+    """The same for the other half of line 13 -- qualified dividends.
+
+    Measured on the VALUE function, not the gradient: with `ordinary_dividends`
+    left unset the model validator raises it to match, and the gradient misses
+    that fan-out (tenforty-3gt), so autodiff still reads -0.096 here where the
+    tax itself is flat. The line 13 defect is a defect of the computed tax, and
+    this is the form of it that 345 owns.
+    """
+    case = {
+        **_QBI_GAIN_CASE,
+        "long_term_capital_gains": 0.0,
+        "qualified_dividends": 1.0,
+    }
+    central = (
+        _total_tax({**case, "qualified_dividends": 2.0})
+        - _total_tax({**case, "qualified_dividends": 0.0})
+    ) / 2.0
+    assert central >= -1e-6, (
+        f"d(total_tax)/d(qualified_dividends) = {central:.6f}: the dividend is "
+        f"buying QBI deduction through the unsubtracted line 15 limit"
+    )
+
+
+@skip_if_graph_unavailable
+def test_form_8995_line_13_carries_the_net_capital_gain():
+    """Worked case with the taxable-income limit binding, checked line by line.
+
+    $100k of self-employment income and $60k of long-term gain: taxable income
+    before QBI sits under the 199A threshold, so the simplified form applies,
+    and line 11 (20% of QBI) exceeds line 15 (20% of taxable income less the
+    gain) -- the limit binds and the gain must be out of its base. With line 13
+    unfed, line 15 was 20% of taxable income INCLUDING the gain, line 11 bound
+    instead, and the deduction came out $2,920 high.
+    """
+    from tenforty.backends import GraphBackend
+
+    backend = GraphBackend()
+    evaluator, _graph = backend._create_evaluator(
+        TaxReturnInput(
+            year=2024,
+            filing_status="Single",
+            self_employment_income=100_000.0,
+            long_term_capital_gains=60_000.0,
+        )
+    )
+    # Lines 12 and 13 are interior and the resolver inlines them -- that they are
+    # no longer addressable is itself the fix, since line 13 used to be an input
+    # node. The subtraction is pinned through line 14 against the 1040 line it
+    # imports.
+    line = {
+        n: evaluator.eval(f"us_form_8995_L{n}_{s}")
+        for n, s in (
+            (11, "combined_qbi_component"),
+            (14, "taxable_income_less_cg"),
+            (15, "income_limitation"),
+            (16, "qbi_deduction"),
+        )
+    }
+    taxable_income_before_qbi = evaluator.eval("us_1040_L15_pre_qbi")
+    net_capital_gain = evaluator.eval("us_1040_qcgws_4")
+
+    assert net_capital_gain == pytest.approx(60_000.0), (
+        "guard: line 13's source is qualified dividends plus net capital gain"
+    )
+    assert line[14] == pytest.approx(taxable_income_before_qbi - 60_000.0), (
+        "line 14 must subtract the net capital gain from line 12"
+    )
+    assert line[15] == pytest.approx(0.20 * line[14])
+    assert line[15] < line[11], "guard: the case must have the limit binding"
+    assert line[16] == pytest.approx(line[15])
 
 
 # Regression pins for tenforty-hrp: the graph autodiff used to omit the derived
