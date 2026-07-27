@@ -286,22 +286,23 @@ def test_qualified_dividend_marginal_is_not_negative_under_qbi():
 
 
 @skip_if_graph_unavailable
-def test_form_8995_line_13_carries_the_net_capital_gain():
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_form_8995_line_13_carries_the_net_capital_gain(year):
     """Worked case with the taxable-income limit binding, checked line by line.
 
     $100k of self-employment income and $60k of long-term gain: taxable income
     before QBI sits under the 199A threshold, so the simplified form applies,
     and line 11 (20% of QBI) exceeds line 15 (20% of taxable income less the
     gain) -- the limit binds and the gain must be out of its base. With line 13
-    unfed, line 15 was 20% of taxable income INCLUDING the gain, line 11 bound
-    instead, and the deduction came out $2,920 high.
+    unfed, line 15 was 20% of taxable income INCLUDING the gain, so line 11 bound
+    instead and the deduction came out $2,920 high in 2024.
     """
     from tenforty.backends import GraphBackend
 
     backend = GraphBackend()
     evaluator, _graph = backend._create_evaluator(
         TaxReturnInput(
-            year=2024,
+            year=year,
             filing_status="Single",
             self_employment_income=100_000.0,
             long_term_capital_gains=60_000.0,
