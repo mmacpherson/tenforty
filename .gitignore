@@ -26,6 +26,17 @@ __pycache__/
 # C extensions
 *.so
 
+# Cython output, regenerated from ots.pyx on every build — setup.py cythonizes
+# unconditionally and Cython is a build requirement. Tracking it produced churn
+# (a routine `uv sync` moving Cython 3.2.4 -> 3.2.9 rewrote 635 lines inside an
+# unrelated PR) and risked worse: cythonize REUSES an existing .cpp when its
+# version header matches the installed Cython and its mtime beats every
+# dependency, so a committed .cpp can silently shadow the .pyx it came from.
+# NOTE this is NOT ots_amalgamation.cpp, which stays tracked — the .pxd files do
+# `cdef extern from "ots_amalgamation.cpp"`, making it a genuine build INPUT that
+# would otherwise require the OTS release tarballs to reconstruct.
+src/tenforty/otslib/ots.cpp
+
 # Distribution / packaging
 .Python
 env/
