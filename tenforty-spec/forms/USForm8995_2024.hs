@@ -67,8 +67,16 @@ usForm8995_2024 = form "us_form_8995" 2024 $ do
   -- Line 12: Taxable income before QBI deduction
   l12 <- interior "L12" "taxable_income_before" $ importForm us1040L15PreQbi
 
-  -- Line 13: Net capital gain (from Form 1040, lines 3a and 7, if applicable)
-  l13 <- keyInput "L13" "net_capital_gain" "Net capital gain (qualified dividends + capital gain)"
+  -- Line 13: Net capital gain (from Form 1040, lines 3a and 7, if applicable).
+  -- Qualified dividends plus net capital gain is line 4 of the Qualified
+  -- Dividends and Capital Gain Tax Worksheet, which already carries the
+  -- Schedule D form of the definition — min(line 15, line 16), floored at zero,
+  -- so a net short-term loss cannot make this negative. Import it rather than
+  -- ask for it: this is a form-internal relationship, not a user input, and as
+  -- an input nothing ever wrote it (tenforty-345).
+  l13 <-
+    interior "L13" "net_capital_gain" $
+      importForm us1040Qcgws4
 
   -- Line 14: Subtract line 13 from line 12. If zero or less, enter -0-
   l14 <-

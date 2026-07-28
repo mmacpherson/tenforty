@@ -9,6 +9,11 @@
             "form": "us_1040",
             "line": "L15_pre_qbi",
             "year": 2024
+        },
+        {
+            "form": "us_1040",
+            "line": "qcgws_4",
+            "year": 2024
         }
     ],
     "inputs": [
@@ -17,8 +22,7 @@
         2,
         3,
         4,
-        5,
-        6
+        5
     ],
     "meta": {
         "form_id": "us_form_8995",
@@ -42,54 +46,46 @@
         },
         "10": {
             "id": 10,
+            "name": "L5_total_qbi",
             "op": {
                 "left": 9,
-                "right": 3,
-                "type": "add"
+                "right": 6,
+                "type": "sub"
             }
         },
         "11": {
             "id": 11,
-            "name": "L5_total_qbi",
-            "op": {
-                "left": 10,
-                "right": 7,
-                "type": "sub"
-            }
-        },
-        "12": {
-            "id": 12,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "13": {
-            "id": 13,
+        "12": {
+            "id": 12,
             "op": {
-                "left": 12,
-                "right": 11,
+                "left": 11,
+                "right": 10,
                 "type": "max"
             }
         },
-        "14": {
-            "id": 14,
+        "13": {
+            "id": 13,
             "op": {
                 "type": "literal",
                 "value": 0.2
             }
         },
-        "15": {
-            "id": 15,
+        "14": {
+            "id": 14,
             "name": "L6_qbi_component",
             "op": {
-                "left": 13,
-                "right": 14,
+                "left": 12,
+                "right": 13,
                 "type": "mul"
             }
         },
-        "16": {
-            "id": 16,
+        "15": {
+            "id": 15,
             "name": "L9_reit_ptp_total",
             "op": {
                 "left": 4,
@@ -97,26 +93,35 @@
                 "type": "add"
             }
         },
-        "17": {
-            "id": 17,
+        "16": {
+            "id": 16,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "17": {
+            "id": 17,
+            "op": {
+                "left": 16,
+                "right": 15,
+                "type": "max"
+            }
+        },
         "18": {
             "id": 18,
             "op": {
-                "left": 17,
-                "right": 16,
-                "type": "max"
+                "type": "literal",
+                "value": 0.2
             }
         },
         "19": {
             "id": 19,
+            "name": "L10_reit_ptp_component",
             "op": {
-                "type": "literal",
-                "value": 0.2
+                "left": 17,
+                "right": 18,
+                "type": "mul"
             }
         },
         "2": {
@@ -128,28 +133,29 @@
         },
         "20": {
             "id": 20,
-            "name": "L10_reit_ptp_component",
+            "name": "L11_combined_qbi_component",
             "op": {
-                "left": 18,
+                "left": 14,
                 "right": 19,
-                "type": "mul"
+                "type": "add"
             }
         },
         "21": {
             "id": 21,
-            "name": "L11_combined_qbi_component",
-            "op": {
-                "left": 15,
-                "right": 20,
-                "type": "add"
-            }
-        },
-        "22": {
-            "id": 22,
             "name": "L12_taxable_income_before",
             "op": {
                 "form": "us_1040",
                 "line": "L15_pre_qbi",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "22": {
+            "id": 22,
+            "name": "L13_net_capital_gain",
+            "op": {
+                "form": "us_1040",
+                "line": "qcgws_4",
                 "type": "import",
                 "year": 2024
             }
@@ -164,8 +170,8 @@
         "24": {
             "id": 24,
             "op": {
-                "left": 22,
-                "right": 6,
+                "left": 21,
+                "right": 22,
                 "type": "sub"
             }
         },
@@ -198,7 +204,7 @@
             "id": 28,
             "name": "L16_qbi_deduction",
             "op": {
-                "left": 21,
+                "left": 20,
                 "right": 27,
                 "type": "min"
             }
@@ -226,13 +232,6 @@
         },
         "6": {
             "id": 6,
-            "name": "L13_net_capital_gain",
-            "op": {
-                "type": "input"
-            }
-        },
-        "7": {
-            "id": 7,
             "name": "se_half_deduction",
             "op": {
                 "form": "us_schedule_se",
@@ -241,11 +240,19 @@
                 "year": 2024
             }
         },
-        "8": {
-            "id": 8,
+        "7": {
+            "id": 7,
             "op": {
                 "left": 0,
                 "right": 1,
+                "type": "add"
+            }
+        },
+        "8": {
+            "id": 8,
+            "op": {
+                "left": 7,
+                "right": 2,
                 "type": "add"
             }
         },
@@ -253,20 +260,20 @@
             "id": 9,
             "op": {
                 "left": 8,
-                "right": 2,
+                "right": 3,
                 "type": "add"
             }
         }
     },
     "outputs": [
+        19,
         20,
-        21,
         25,
         27,
         28,
-        11,
-        15,
-        16
+        10,
+        14,
+        15
     ],
     "tables": {}
 }

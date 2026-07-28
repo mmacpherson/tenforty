@@ -4,8 +4,19 @@ The audit's worst bug class was the silent missing edge: a form input that
 neither backend fills, invisible to parity because both agree. This test
 pins an explicit inventory of (form, natural input) consumer edges per
 backend — "mapped", or "missing" with its tracking issue — and introspects
-the real mapping tables against it. Adding or fixing an edge without
+the real mapping tables against it. Changing a declared row's state without
 updating the inventory fails; so does a regression that drops one.
+
+Two limits, since the title claims more than the check delivers:
+
+- It runs over the declared rows only. Nothing here discovers an edge that
+  was never written down, so a wholly new (form, natural) pair is caught by
+  review, not by this test.
+- An edge can be real and still undeclarable. `_graph_flows` reads a
+  consumer edge off the derivative, and the derivative is silent wherever a
+  correct wiring cancels — see the Form 8995 line 13 note in INVENTORY.
+  Those edges are pinned by value in their form's own test and named here so
+  the omission is deliberate rather than an oversight.
 """
 
 import pytest
@@ -46,6 +57,16 @@ INVENTORY = {
         "ots": "missing:F3",  # no Form 8995 config exists at all
         "graph": "mapped",
     },
+    # Form 8995 line 13 (net capital gain) is deliberately NOT inventoried here,
+    # for either capital-gain natural. The derivative is the wrong instrument for
+    # it: line 13 imports the same gain that line 12 already carries, so a
+    # CORRECT wiring makes d(L16)/d(gain) identically zero -- the cancellation is
+    # the whole point of the line, and `_graph_flows` would read the fixed graph
+    # as unmapped. (d/d(qualified_dividends) does read nonzero, but only because
+    # the gradient misses the ordinary-dividend fan-out, tenforty-3gt; that row
+    # would pass today and break the day 3gt lands.) The edge is pinned by value
+    # instead, in graph_autodiff_properties_test.py's
+    # test_form_8995_line_13_carries_the_net_capital_gain.
 }
 
 
