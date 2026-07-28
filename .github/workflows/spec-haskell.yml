@@ -31,7 +31,7 @@ jobs:
         cabal-version: latest
 
     - name: Cache cabal store + dist-newstyle
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ${{ steps.setup.outputs.cabal-store }}
