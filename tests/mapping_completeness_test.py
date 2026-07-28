@@ -4,8 +4,19 @@ The audit's worst bug class was the silent missing edge: a form input that
 neither backend fills, invisible to parity because both agree. This test
 pins an explicit inventory of (form, natural input) consumer edges per
 backend — "mapped", or "missing" with its tracking issue — and introspects
-the real mapping tables against it. Adding or fixing an edge without
+the real mapping tables against it. Changing a declared row's state without
 updating the inventory fails; so does a regression that drops one.
+
+Two limits, since the title claims more than the check delivers:
+
+- It runs over the declared rows only. Nothing here discovers an edge that
+  was never written down, so a wholly new (form, natural) pair is caught by
+  review, not by this test.
+- An edge can be real and still undeclarable. `_graph_flows` reads a
+  consumer edge off the derivative, and the derivative is silent wherever a
+  correct wiring cancels — see the Form 8995 line 13 note in INVENTORY.
+  Those edges are pinned by value in their form's own test and named here so
+  the omission is deliberate rather than an oversight.
 """
 
 import pytest
