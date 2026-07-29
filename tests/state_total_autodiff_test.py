@@ -3,6 +3,9 @@
 import pytest
 
 from tenforty import evaluate_return, marginal_rate, solve_for_income
+from tenforty.mappings import STATE_GRAPH_CONFIGS
+
+GRAPH_STATES = sorted(state.value for state in STATE_GRAPH_CONFIGS if state.value)
 
 
 def _total_tax_at_wages(state: str, wages: float) -> float:
@@ -86,3 +89,52 @@ def test_state_total_solver_roundtrips_public_total():
 
     assert result.total_tax == pytest.approx(target, abs=0.01)
     assert result.federal_total_tax < target
+
+
+@pytest.mark.parametrize("state", GRAPH_STATES)
+def test_total_marginal_decomposes_into_federal_plus_state(state):
+    """Every state's total-tax derivative is its two parts, and nothing else.
+
+    `total_tax` is now resolved in two places that must not drift: `evaluate`
+    adds the federal and state totals in Python, and `_output_nodes` names the
+    two graph nodes for the derivative and the solver. This pins the second to
+    the first for EVERY state in `STATE_GRAPH_CONFIGS`, so a state added or
+    rewired without a matching output line cannot slip through unguarded.
+
+    Deliberately not a finite difference. Several state graphs are genuinely
+    non-differentiable at round wage figures — CT's bracket edge at $30,000 of
+    wages, NY's standard-deduction crossover — where autodiff takes one side and
+    a central difference straddles both. A test built on finite differences is
+    hostage to those points forever; this identity holds at every one of them,
+    because `gradient_sum_outputs` sums exactly the two partials taken here.
+    """
+    kwargs = {
+        "year": 2024,
+        "state": state,
+        "filing_status": "Single",
+        "w2_income": 100_000.0,
+    }
+
+    total = marginal_rate(**kwargs)
+    federal = marginal_rate(**kwargs, output="federal_total_tax")
+    state_rate = marginal_rate(**kwargs, output="state_total_tax")
+
+    assert total == pytest.approx(federal + state_rate, abs=1e-12)
+
+
+@pytest.mark.parametrize("state", GRAPH_STATES)
+def test_solver_targets_the_public_total_in_every_state(state):
+    """Solving for income lands on the total the caller can actually observe.
+
+    The failure this pins is not a rounding one: resolving `total_tax` to the
+    federal line alone made the solver converge on a root of a function the
+    library does not expose. For 2024 CA Single it returned the income for
+    $20,000 of FEDERAL tax, whose public total is $27,792 -- off by 39%.
+    """
+    target = 20_000.0
+
+    wages = solve_for_income(
+        target_tax=target, year=2024, state=state, filing_status="Single"
+    )
+
+    assert _total_tax_at_wages(state, wages) == pytest.approx(target, abs=0.01)
