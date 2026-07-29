@@ -91,6 +91,14 @@ def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -
     pydantic validation, which exposes the local slope of validator-mediated
     derivations without stepping across a nearby inactive clamp.
 
+    THE `model_copy` BRANCH STILL CANNOT SEE A VALIDATOR. It is reached only when the
+    derived natural is not a concrete field, so nothing entered here today needs it to
+    — a computed field recomputes on attribute access. But a computed field that reads
+    a concrete field some `model_validator` adjusts would have its coupling probed as a
+    constant zero and dropped in silence, which is the shape that cost us tenforty-3gt.
+    Reconstructing through validation on both branches would close it; that is a change
+    to the `schedule_se_ss_wages` path and wants its own commit, not this note.
+
     Note this is deliberately not `getattr(tax_input, derived) != 0`: with
     `w2_income` at zero the derived value is zero while the slope is still 1, and
     that is a live gradient, not a dead one.

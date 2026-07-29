@@ -113,6 +113,22 @@ _INCOME_VECTOR = st.fixed_dictionaries(
 
 _STEP = 10.0
 
+# The one marginal rate that may be negative. When line 3b already exceeds line 3a,
+# a dollar added to line 3a RECLASSIFIES a dollar of ordinary dividend income as
+# preferential rather than adding any, so the tax can only fall. The most it can fall
+# by is the widest gap between an ordinary bracket and the preferential rate that
+# applies at the same taxable income: 35% against 15%, which is 2024 Single between
+# $243,725 and $518,900 of taxable income. QBI pushes the other way (a larger net
+# capital gain tightens the line 15 limit) and NIIT is neutral to the reclassification,
+# so neither widens it.
+#
+# A structured search over statuses, years, wage levels and dividend splits lands
+# exactly on -0.20 and never below, so the derivation above IS the extremum and a bound
+# of -0.20 would pass with zero float headroom. The extra cent buys margin against an
+# adjoint sum that rounds the wrong way under `soak`, without admitting any slope the
+# tax law can produce.
+_RECLASSIFICATION_FLOOR = -0.21
+
 # 2024 Social Security wage base. Below it, W2 wages and self-employment income
 # share the 12.4% SS ceiling, coupling the two — the region where the autodiff
 # used to drop the derived w2 -> Schedule SE edge (tenforty-hrp).
@@ -202,10 +218,8 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
     case = dict(year=2024, filing_status=filing_status, **incomes)
 
     marginal = _gradient(wrt, case)
-    # When line 3b is already larger, increasing line 3a reclassifies rather than
-    # adds income, so the preferential-rate delta can legitimately be negative.
     lower_bound = (
-        -0.2
+        _RECLASSIFICATION_FLOOR
         if wrt == "qualified_dividends"
         and case["ordinary_dividends"] > case["qualified_dividends"]
         else -1e-6
