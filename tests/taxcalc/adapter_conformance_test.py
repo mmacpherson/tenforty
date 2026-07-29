@@ -148,3 +148,36 @@ def test_itemized_aggregate_is_not_charity_capped():
 
     assert result["taxable_income"] == pytest.approx(15_535.0, abs=0.01)
     assert result["income_tax"] == pytest.approx(1_553.5, abs=0.01)
+
+
+def test_taxcalc_keeps_the_standard_deduction_when_itemizing_is_free():
+    """Deduction choice: taxcalc takes the cheaper, tenforty takes the larger.
+
+    taxcalc computes the return both ways and keeps the itemized total only when
+    it strictly lowers tax (`calculator.py`, `_calc_one_year`). OTS and the graph
+    spec take whichever deduction is bigger. A deduction landing on income already
+    in the 0% long-term-gain bracket lowers nothing, so the two rules report
+    different taxable income and identical tax. F16 excuses taxable_income for
+    exactly this, and only taxable_income -- this test is what says the tax really
+    does agree, so that excusing it stays honest.
+    """
+    case = {
+        **F14_CASE,
+        "year": 2025,
+        "status": "Head_of_House",
+        "w2": 0.0,
+        "ltcg": 58_509.0,
+        "itemized": 56_482.0,
+        "iso": 0.0,
+    }
+
+    result = taxcalc_batch([case])[0]
+    ours = evaluate_components(case, "graph")
+
+    # AGI 58,509 less the 2025 Head-of-Household standard deduction of 23,625.
+    assert result["taxable_income"] == pytest.approx(34_884.0, abs=0.01)
+    # tenforty takes the larger deduction instead: 58,509 less 56,482.
+    assert ours["taxable_income"] == pytest.approx(2_027.0, abs=0.01)
+    # ... and it costs nothing, which is the whole reason taxable_income is excused.
+    assert result["income_tax"] == pytest.approx(ours["income_tax"], abs=0.01)
+    assert result["total_tax"] == pytest.approx(ours["total_tax"], abs=0.01)
