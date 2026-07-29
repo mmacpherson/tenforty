@@ -69,6 +69,35 @@ def test_no_tax_state_total_matches_federal():
     assert total_rate == pytest.approx(federal_rate, abs=1e-9)
 
 
+def test_state_mapped_interest_survives_federal_kink_probe():
+    """A federal right-derivative probe preserves a state-side input fan-out."""
+    kwargs = {
+        "year": 2024,
+        "state": "NH",
+        "filing_status": "Single",
+        "w2_income": 150_000.0,
+        "taxable_interest": 50_000.0,
+    }
+    step = 0.01
+
+    total_rate = marginal_rate(**kwargs, wrt="taxable_interest")
+    federal_rate = marginal_rate(
+        **kwargs, output="federal_total_tax", wrt="taxable_interest"
+    )
+    state_rate = marginal_rate(
+        **kwargs, output="state_total_tax", wrt="taxable_interest"
+    )
+    base_tax = evaluate_return(**kwargs, backend="graph").total_tax
+    right_tax = evaluate_return(
+        **(kwargs | {"taxable_interest": kwargs["taxable_interest"] + step}),
+        backend="graph",
+    ).total_tax
+
+    assert total_rate == pytest.approx(federal_rate + state_rate, abs=1e-12)
+    assert total_rate == pytest.approx((right_tax - base_tax) / step, abs=1e-6)
+    assert state_rate == pytest.approx(0.03, abs=1e-12)
+
+
 def test_state_total_solver_roundtrips_public_total():
     """Income solving targets the public federal-plus-state total."""
     target = 20_000.0

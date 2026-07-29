@@ -227,6 +227,10 @@ impl<'g> Runtime<'g> {
         &self.cache
     }
 
+    pub fn input_value(&self, node_id: NodeId) -> Option<f64> {
+        self.inputs.get(&node_id).copied()
+    }
+
     pub fn filing_status(&self) -> FilingStatus {
         self.filing_status
     }
