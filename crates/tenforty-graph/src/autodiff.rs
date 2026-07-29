@@ -6,12 +6,23 @@ use std::collections::{HashMap, HashSet};
 /// Compute the adjoint of every node with respect to an output node.
 ///
 /// One reverse-mode pass produces the partial derivative of `output` with
-/// respect to *every* node in the graph, so callers wanting several partials
-/// should take this map rather than calling [`gradient`] repeatedly.
+/// respect to every node on its active dependency path, so callers wanting
+/// several partials should take this map rather than calling [`gradient`]
+/// repeatedly.
 pub fn adjoints(runtime: &mut Runtime, output: NodeId) -> Result<HashMap<NodeId, f64>, EvalError> {
+    let (adjoints, _) = adjoints_with_order(runtime, output)?;
+    Ok(adjoints)
+}
+
+fn adjoints_with_order(
+    runtime: &mut Runtime,
+    output: NodeId,
+) -> Result<(HashMap<NodeId, f64>, Vec<NodeId>), EvalError> {
     runtime.eval_node(output)?;
 
-    let order = runtime.graph().topological_order()?;
+    let order = runtime
+        .graph()
+        .reachable_topological_order(&[output], runtime.filing_status())?;
     let values = runtime.get_all_values();
 
     let mut adjoints: HashMap<NodeId, f64> = HashMap::new();
@@ -31,7 +42,7 @@ pub fn adjoints(runtime: &mut Runtime, output: NodeId) -> Result<HashMap<NodeId,
         backprop(&node.op, node_id, adj, values, runtime, &mut adjoints)?;
     }
 
-    Ok(adjoints)
+    Ok((adjoints, order))
 }
 
 /// Compute the gradient of an output node with respect to an input node.
@@ -57,13 +68,13 @@ pub fn gradient_sum(
     output: NodeId,
     inputs: &[NodeId],
 ) -> Result<f64, EvalError> {
-    let adjoints = adjoints(runtime, output)?;
+    let (adjoints, order) = adjoints_with_order(runtime, output)?;
     let reverse_gradient = inputs
         .iter()
         .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
         .sum();
 
-    if has_active_kink(runtime, &adjoints, inputs)? {
+    if has_active_kink(runtime, &adjoints, inputs, &order) {
         return forward_gradient(runtime, output, inputs);
     }
 
@@ -74,11 +85,17 @@ fn has_active_kink(
     runtime: &Runtime,
     adjoints: &HashMap<NodeId, f64>,
     inputs: &[NodeId],
-) -> Result<bool, EvalError> {
-    let mut reachable: HashSet<NodeId> = inputs.iter().copied().collect();
+    order: &[NodeId],
+) -> bool {
+    let active_nodes: HashSet<NodeId> = order.iter().copied().collect();
+    let mut reachable: HashSet<NodeId> = inputs
+        .iter()
+        .copied()
+        .filter(|input| active_nodes.contains(input))
+        .collect();
     let values = runtime.get_all_values();
 
-    for node_id in runtime.graph().topological_order()? {
+    for &node_id in order {
         let Some(node) = runtime.graph().nodes.get(&node_id) else {
             continue;
         };
@@ -131,11 +148,11 @@ fn has_active_kink(
             _ => false,
         };
         if is_tie {
-            return Ok(true);
+            return true;
         }
     }
 
-    Ok(false)
+    false
 }
 
 fn forward_gradient(
@@ -145,12 +162,7 @@ fn forward_gradient(
 ) -> Result<f64, EvalError> {
     let originals: Vec<_> = inputs
         .iter()
-        .map(|input| {
-            (
-                *input,
-                runtime.get_all_values().get(input).copied().unwrap_or(0.0),
-            )
-        })
+        .map(|input| (*input, original_value(runtime, *input)))
         .collect();
     let scale = originals
         .iter()
@@ -171,6 +183,13 @@ fn forward_gradient(
     let f_plus = f_plus?;
     let f_original = f_original?;
     Ok((f_plus - f_original) / epsilon)
+}
+
+fn original_value(runtime: &Runtime, node_id: NodeId) -> f64 {
+    runtime
+        .input_value(node_id)
+        .or_else(|| runtime.get_all_values().get(&node_id).copied())
+        .unwrap_or(0.0)
 }
 
 /// Compute the derivative of the sum of several outputs with respect to a
@@ -316,7 +335,8 @@ pub fn numerical_gradient(
     input: NodeId,
     epsilon: f64,
 ) -> Result<f64, EvalError> {
-    let original = runtime.get_all_values().get(&input).copied().unwrap_or(0.0);
+    runtime.eval_node(output)?;
+    let original = original_value(runtime, input);
 
     runtime.set_by_id(input, original + epsilon);
     let f_plus = runtime.eval_node(output)?;
@@ -460,6 +480,44 @@ mod tests {
         }
     }
 
+    fn disjoint_fanout_graph() -> Graph {
+        let nodes = [
+            (0, Op::Input, Some("federal_input")),
+            (1, Op::Input, Some("state_input")),
+            (2, Op::Literal { value: 0.0 }, Some("zero")),
+            (3, Op::Max { left: 2, right: 0 }, Some("federal_output")),
+            (4, Op::Literal { value: 10.0 }, Some("state_deduction")),
+            (
+                5,
+                Op::Sub { left: 1, right: 4 },
+                Some("state_taxable_income"),
+            ),
+            (6, Op::Max { left: 2, right: 5 }, Some("state_output")),
+        ]
+        .into_iter()
+        .map(|(id, op, name)| {
+            (
+                id,
+                Node {
+                    id,
+                    op,
+                    name: name.map(str::to_string),
+                },
+            )
+        })
+        .collect();
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0, 1],
+            outputs: vec![3, 6],
+            invariants: vec![],
+        }
+    }
+
     fn minimum_graph() -> Graph {
         let nodes = [
             (0, Op::Input, Some("x")),
@@ -565,6 +623,21 @@ mod tests {
     }
 
     #[test]
+    fn test_gradient_sum_outputs_preserves_inputs_outside_each_output_path() {
+        let graph = disjoint_fanout_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+        runtime.set_by_id(1, 50.0);
+
+        let grad = gradient_sum_outputs(&mut runtime, &[3, 6], &[0, 1]).unwrap();
+
+        assert_eq!(grad, 2.0);
+        assert_eq!(runtime.input_value(0), Some(0.0));
+        assert_eq!(runtime.input_value(1), Some(50.0));
+        assert_eq!(runtime.eval_node(6).unwrap(), 40.0);
+    }
+
+    #[test]
     fn test_gradient_vs_numerical() {
         let graph = simple_arithmetic_graph();
         let mut runtime = Runtime::new(&graph, FilingStatus::Single);
@@ -573,6 +646,19 @@ mod tests {
         let analytical = gradient(&mut runtime, 2, 0).unwrap();
         let numerical = numerical_gradient(&mut runtime, 2, 0, 1e-6).unwrap();
         assert!((analytical - numerical).abs() < 1e-4);
+    }
+
+    #[test]
+    fn test_numerical_gradient_restores_an_uncached_input() {
+        let graph = simple_arithmetic_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 5.0);
+
+        let numerical = numerical_gradient(&mut runtime, 2, 0, 1e-6).unwrap();
+
+        assert!((numerical - 2.0).abs() < 1e-6);
+        assert_eq!(runtime.input_value(0), Some(5.0));
+        assert_eq!(runtime.eval_node(2).unwrap(), 10.0);
     }
 
     #[test]
