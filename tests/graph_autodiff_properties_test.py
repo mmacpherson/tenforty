@@ -55,6 +55,7 @@ INCOME_NATURALS = [
     "w2_income",
     "self_employment_income",
     "taxable_interest",
+    "qualified_dividends",
     "ordinary_dividends",
     "long_term_capital_gains",
     "short_term_capital_gains",
@@ -95,11 +96,38 @@ _INCOME = st.one_of(
     _BINADE_EDGE,
 )
 
+
+def _normalize_dividend_boxes(incomes: dict[str, float]) -> dict[str, float]:
+    """Keep generated Form 1040 line 3b inclusive of line 3a."""
+    return {
+        **incomes,
+        "ordinary_dividends": max(
+            incomes["ordinary_dividends"], incomes["qualified_dividends"]
+        ),
+    }
+
+
 _INCOME_VECTOR = st.fixed_dictionaries(
     {natural: _INCOME for natural in INCOME_NATURALS}
-)
+).map(_normalize_dividend_boxes)
 
 _STEP = 10.0
+
+# The one marginal rate that may be negative. When line 3b already exceeds line 3a,
+# a dollar added to line 3a RECLASSIFIES a dollar of ordinary dividend income as
+# preferential rather than adding any, so the tax can only fall. The most it can fall
+# by is the widest gap between an ordinary bracket and the preferential rate that
+# applies at the same taxable income: 35% against 15%, which is 2024 Single between
+# $243,725 and $518,900 of taxable income. QBI pushes the other way (a larger net
+# capital gain tightens the line 15 limit) and NIIT is neutral to the reclassification,
+# so neither widens it.
+#
+# A structured search over statuses, years, wage levels and dividend splits lands
+# exactly on -0.20 and never below, so the derivation above IS the extremum and a bound
+# of -0.20 would pass with zero float headroom. The extra cent buys margin against an
+# adjoint sum that rounds the wrong way under `soak`, without admitting any slope the
+# tax law can produce.
+_RECLASSIFICATION_FLOOR = -0.21
 
 # 2024 Social Security wage base. Below it, W2 wages and self-employment income
 # share the 12.4% SS ceiling, coupling the two — the region where the autodiff
@@ -190,8 +218,15 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
     case = dict(year=2024, filing_status=filing_status, **incomes)
 
     marginal = _gradient(wrt, case)
-    assert -1e-6 <= marginal <= 0.5, (
-        f"marginal d(total_tax)/d({wrt}) = {marginal:.6f} is outside [0, 0.5] at {case}"
+    lower_bound = (
+        _RECLASSIFICATION_FLOOR
+        if wrt == "qualified_dividends"
+        and case["ordinary_dividends"] > case["qualified_dividends"]
+        else -1e-6
+    )
+    assert lower_bound <= marginal <= 0.5, (
+        f"marginal d(total_tax)/d({wrt}) = {marginal:.6f} is outside "
+        f"[{lower_bound}, 0.5] at {case}"
     )
 
 

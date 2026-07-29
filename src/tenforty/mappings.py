@@ -57,25 +57,21 @@ for name, nodes in _SUBORDINATE_NODES.items():
     if name not in NATURAL_TO_NODES:
         NATURAL_TO_NODES[name] = list(nodes)
 
-# Naturals that are COMPUTED from another natural rather than supplied by the
-# caller (pydantic computed fields on TaxReturnInput), mapped to the natural they
-# derive from. Evaluation reaches their nodes on its own, but a derivative with
-# respect to the SOURCE natural has to follow the derived natural's nodes too, or
-# it silently drops the coupling those nodes carry — d(se_tax)/d(w2_income) losing
-# the shared social security wage base is exactly that (tenforty-hrp).
+# Naturals that are derived from another natural rather than supplied independently
+# by the caller, mapped to the natural they derive from. Evaluation reaches their
+# nodes on its own, but a derivative with respect to the SOURCE natural has to follow
+# the derived natural's nodes too, or it silently drops the coupling those nodes carry
+# — d(se_tax)/d(w2_income) losing the shared social security wage base is exactly that
+# (tenforty-hrp).
 #
 # The chain factor is not stored here: it is read off the model at call time
 # (`derived_chain_factor`), so this table cannot drift from the derivation in
 # models.py. Only identity derivations can be expressed downstream, because
 # `gradient_sum` adds one unweighted adjoint per node.
 #
-# COMPUTED FIELDS ONLY. A derivation applied by a `model_validator` rather than a
-# computed field cannot be entered here: `derived_chain_factor` probes with
-# `model_copy`, which does not re-run validators, so the entry would read as a
-# constant zero and be skipped in silence. `ensure_ordinary_includes_qualified` is
-# exactly that shape and is tracked separately (tenforty-3gt).
 DERIVED_NATURAL_SOURCES: dict[str, str] = {
     "schedule_se_ss_wages": "w2_income",
+    "ordinary_dividends": "qualified_dividends",
 }
 
 
@@ -89,18 +85,19 @@ def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -
     rule here could fall out of step with `models.py` without anything failing.
 
     The slope is taken against the bump that SURVIVED rounding, not the one requested,
-    and that is what makes it EXACT: an identity derivation moves the derived value by
-    precisely the amount the source moved, so the ratio is 1.0 with no tolerance to
-    choose. Dividing by the requested bump instead reads 1.0000000000009095 whenever
-    `source + bump` crosses a power of two, and 0.0 above 2**53 where a unit bump
-    rounds away to nothing — both of which used to read as "not 1" and drop the
-    coupling in silence. The bump is at least one ulp wide so it can never vanish.
+    and that is what makes an identity derivation exact with no tolerance to choose.
+    Computed fields and properties use a stable bump of at least one dollar. Concrete
+    model fields use the next representable source value and reconstruct through
+    pydantic validation, which exposes the local slope of validator-mediated
+    derivations without stepping across a nearby inactive clamp.
 
-    That guarantee covers pydantic COMPUTED FIELDS, which recompute on attribute
-    access. It does not extend to derivations applied by a `model_validator`:
-    `model_copy` does not re-run validators, so the probe reads a slope of zero and
-    the caller skips the edge without complaint. See the note on
-    `DERIVED_NATURAL_SOURCES` and tenforty-3gt.
+    THE `model_copy` BRANCH STILL CANNOT SEE A VALIDATOR. It is reached only when the
+    derived natural is not a concrete field, so nothing entered here today needs it to
+    — a computed field recomputes on attribute access. But a computed field that reads
+    a concrete field some `model_validator` adjusts would have its coupling probed as a
+    constant zero and dropped in silence, which is the shape that cost us tenforty-3gt.
+    Reconstructing through validation on both branches would close it; that is a change
+    to the `schedule_se_ss_wages` path and wants its own commit, not this note.
 
     Note this is deliberately not `getattr(tax_input, derived) != 0`: with
     `w2_income` at zero the derived value is zero while the slope is still 1, and
@@ -112,8 +109,14 @@ def derived_chain_factor(tax_input: TaxReturnInput, derived: str, source: str) -
     a mapping defect to surface rather than a coupling to drop in silence.
     """
     current = float(getattr(tax_input, source))
-    bump = max(1.0, math.ulp(current))
-    bumped = tax_input.model_copy(update={source: current + bump})
+    if derived in type(tax_input).model_fields:
+        bump = math.ulp(current)
+        bumped_values = tax_input.model_dump(round_trip=True)
+        bumped_values[source] = current + bump
+        bumped = type(tax_input).model_validate(bumped_values)
+    else:
+        bump = max(1.0, math.ulp(current))
+        bumped = tax_input.model_copy(update={source: current + bump})
 
     realized = float(getattr(bumped, source)) - current
     factor = (getattr(bumped, derived) - getattr(tax_input, derived)) / realized
