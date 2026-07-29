@@ -1,7 +1,7 @@
 use crate::eval::{EvalError, Runtime};
 use crate::graph::{NodeId, Op};
 use crate::primitives;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// Compute the adjoint of every node with respect to an output node.
 ///
@@ -35,9 +35,10 @@ pub fn adjoints(runtime: &mut Runtime, output: NodeId) -> Result<HashMap<NodeId,
 }
 
 /// Compute the gradient of an output node with respect to an input node.
-/// Uses reverse-mode automatic differentiation (backpropagation).
+/// Uses reverse-mode automatic differentiation in smooth regions and the
+/// composed function's symmetric numerical derivative at an active max tie.
 pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
-    Ok(*adjoints(runtime, output)?.get(&input).unwrap_or(&0.0))
+    gradient_sum(runtime, output, &[input])
 }
 
 /// Compute the total derivative of an output with respect to a quantity that
@@ -57,10 +58,90 @@ pub fn gradient_sum(
     inputs: &[NodeId],
 ) -> Result<f64, EvalError> {
     let adjoints = adjoints(runtime, output)?;
+    if has_active_max_tie(runtime, &adjoints, inputs)? {
+        return numerical_gradient_sum(runtime, output, inputs);
+    }
+
     Ok(inputs
         .iter()
         .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
         .sum())
+}
+
+fn has_active_max_tie(
+    runtime: &Runtime,
+    adjoints: &HashMap<NodeId, f64>,
+    inputs: &[NodeId],
+) -> Result<bool, EvalError> {
+    let mut reachable: HashSet<NodeId> = inputs.iter().copied().collect();
+    let values = runtime.get_all_values();
+
+    for node_id in runtime.graph().topological_order()? {
+        let Some(node) = runtime.graph().nodes.get(&node_id) else {
+            continue;
+        };
+        if node
+            .op
+            .dependencies()
+            .iter()
+            .any(|dependency| reachable.contains(dependency))
+        {
+            reachable.insert(node_id);
+        }
+
+        let Op::Max { left, right } = &node.op else {
+            continue;
+        };
+        if reachable.contains(&node_id)
+            && adjoints.get(&node_id).copied().unwrap_or(0.0) != 0.0
+            && values.get(left).copied().unwrap_or(0.0) == values.get(right).copied().unwrap_or(0.0)
+        {
+            return Ok(true);
+        }
+    }
+
+    Ok(false)
+}
+
+fn numerical_gradient_sum(
+    runtime: &mut Runtime,
+    output: NodeId,
+    inputs: &[NodeId],
+) -> Result<f64, EvalError> {
+    let originals: Vec<_> = inputs
+        .iter()
+        .map(|input| {
+            (
+                *input,
+                runtime.get_all_values().get(input).copied().unwrap_or(0.0),
+            )
+        })
+        .collect();
+    let scale = originals
+        .iter()
+        .map(|(_, value)| value.abs())
+        .fold(1.0, f64::max);
+    let epsilon = (scale * f64::EPSILON.sqrt()).max(1e-4);
+
+    for (input, original) in &originals {
+        runtime.set_by_id(*input, original + epsilon);
+    }
+    let f_plus = runtime.eval_node(output);
+
+    for (input, original) in &originals {
+        runtime.set_by_id(*input, original - epsilon);
+    }
+    let f_minus = runtime.eval_node(output);
+
+    for (input, original) in &originals {
+        runtime.set_by_id(*input, *original);
+    }
+    let restored = runtime.eval_node(output);
+
+    let f_plus = f_plus?;
+    let f_minus = f_minus?;
+    restored?;
+    Ok((f_plus - f_minus) / (2.0 * epsilon))
 }
 
 /// Compute the derivative of the sum of several outputs with respect to a
@@ -116,10 +197,7 @@ fn backprop(
         Op::Max { left, right } => {
             let l = values.get(left).copied().unwrap_or(0.0);
             let r = values.get(right).copied().unwrap_or(0.0);
-            if l == r {
-                *adjoints.entry(*left).or_insert(0.0) += adj * 0.5;
-                *adjoints.entry(*right).or_insert(0.0) += adj * 0.5;
-            } else if l > r {
+            if l >= r {
                 *adjoints.entry(*left).or_insert(0.0) += adj;
             } else {
                 *adjoints.entry(*right).or_insert(0.0) += adj;
@@ -315,6 +393,44 @@ mod tests {
         }
     }
 
+    fn limited_max_graph() -> Graph {
+        let nodes = [
+            (0, Op::Input, Some("x")),
+            (1, Op::Literal { value: 0.0 }, Some("zero")),
+            (2, Op::Max { left: 1, right: 0 }, Some("positive_x")),
+            (3, Op::Literal { value: 10.0 }, Some("threshold")),
+            (4, Op::Sub { left: 0, right: 3 }, Some("above_threshold")),
+            (
+                5,
+                Op::Max { left: 1, right: 4 },
+                Some("positive_above_threshold"),
+            ),
+            (6, Op::Min { left: 2, right: 5 }, Some("limited_amount")),
+        ]
+        .into_iter()
+        .map(|(id, op, name)| {
+            (
+                id,
+                Node {
+                    id,
+                    op,
+                    name: name.map(str::to_string),
+                },
+            )
+        })
+        .collect();
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0],
+            outputs: vec![6],
+            invariants: vec![],
+        }
+    }
+
     fn tax_graph() -> Graph {
         let mut nodes = HashMap::new();
         nodes.insert(
@@ -418,8 +534,20 @@ mod tests {
 
         let analytical = gradient(&mut runtime, 8, 0).unwrap();
         let numerical = numerical_gradient(&mut runtime, 8, 0, 1e-6).unwrap();
-        assert!((analytical - 1.0).abs() < 1e-12);
+        assert!((analytical - 1.0).abs() < 1e-8);
         assert!((analytical - numerical).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_gradient_does_not_leak_through_limited_max_tie() {
+        let graph = limited_max_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+
+        let analytical = gradient(&mut runtime, 6, 0).unwrap();
+        let numerical = numerical_gradient(&mut runtime, 6, 0, 1e-6).unwrap();
+        assert_eq!(analytical, 0.0);
+        assert_eq!(analytical, numerical);
     }
 
     #[test]
