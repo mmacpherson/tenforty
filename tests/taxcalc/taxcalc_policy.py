@@ -73,10 +73,10 @@ def _f15_ots_itemized_taxable_income(backend: str, case: dict) -> set[str]:
     """F15: OTS applies itemized deductions the caller did not ask for.
 
     With a nonzero itemized aggregate, OTS deducts it whatever
-    `standard_or_itemized` says, while the taxcalc adapter carries the amount as
-    charity and so meets the 60%-of-AGI charitable ceiling. Taxable income
-    therefore diverges in both directions, and the deduction quantities
-    downstream of it follow.
+    `standard_or_itemized` says, while taxcalc takes the greater of the standard
+    deduction and the uncapped aggregate carried through e19200. Taxable income
+    therefore diverges when the caller requests standard treatment but the
+    aggregate exceeds it, and the downstream tax quantities follow.
 
     The same category mismatch as F12, surfacing on taxable income rather than
     AMT. Blocked on the Itemized-semantics decision (tenforty-ddj); tracked as
@@ -101,9 +101,9 @@ def _f12_itemized_category_amt(backend: str, case: dict) -> set[str]:
     """F12: per-engine Schedule A category for the itemized aggregate.
 
     OTS carries it as A6 "other taxes" (AMT add-back); graph as L16 "other
-    deductions"; the taxcalc adapter as charity. AMT legitimately diverges
-    whenever the amount is nonzero. API decision needed (categorized
-    deductions, input model v2).
+    deductions"; the taxcalc adapter as interest paid through e19200. AMT
+    legitimately diverges whenever the amount is nonzero. API decision needed
+    (categorized deductions, input model v2).
     """
     if backend == "ots" and case.get("itemized", 0):
         return {"amt", "income_tax", "total_tax"}

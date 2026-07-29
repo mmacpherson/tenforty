@@ -131,3 +131,20 @@ def test_ots_matches_form_6251_on_the_same_case():
     assert evaluate_components(F14_CASE, "ots")["amt"] == pytest.approx(
         43_813.50, abs=1.0
     )
+
+
+def test_itemized_aggregate_is_not_charity_capped():
+    """The generic aggregate must survive taxcalc without a charitable ceiling."""
+    case = {
+        **F14_CASE,
+        "status": "Widow(er)",
+        "w2": 0.0,
+        "stcg": 74_196.0,
+        "itemized": 58_661.0,
+        "iso": 0.0,
+    }
+
+    result = taxcalc_batch([case])[0]
+
+    assert result["taxable_income"] == pytest.approx(15_535.0, abs=0.01)
+    assert result["income_tax"] == pytest.approx(1_553.5, abs=0.01)
