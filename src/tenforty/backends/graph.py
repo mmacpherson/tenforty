@@ -47,6 +47,7 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_form_8960_L17_niit": "federal_niit",
     "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
 }
+_FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}
 
 _STATE_ZERO_FIELDS = (
     "state_adjusted_gross_income",
@@ -69,6 +70,19 @@ def _state_output_node(form_name: str, line_name: str) -> str:
     if "_" in line_name and not line_name.startswith("L"):
         return line_name
     return f"{form_name}_{line_name}"
+
+
+def _state_output_node_for_field(state: OTSState, field: str) -> str:
+    """Resolve a public state output field to its selected state's graph node."""
+    form_name = STATE_FORM_NAMES.get(state)
+    if form_name is None:
+        raise ValueError(f"Graph backend does not support state: {state.value}")
+
+    for line_name, result_field in STATE_OUTPUT_LINES.get(state, {}).items():
+        if result_field == field:
+            return _state_output_node(form_name, line_name)
+
+    raise ValueError(f"State {state.value} does not provide output field {field!r}")
 
 
 def _federal_effective_tax_rate(total_tax: float, agi: float) -> float:
@@ -538,6 +552,35 @@ class GraphBackend:
 
         return [self._resolve_input_node(tax_input, var, output_node)]
 
+    def _output_nodes(self, tax_input: TaxReturnInput, output: str) -> list[str]:
+        """Resolve a public output to the graph nodes whose sum it denotes."""
+        if output.startswith(_ALL_KNOWN_PREFIXES):
+            return [output]
+
+        has_state = bool(tax_input.state and tax_input.state != OTSState.NONE)
+        if output == "total_tax":
+            nodes = [_FEDERAL_FIELD_TO_NODE["federal_total_tax"]]
+            if has_state:
+                nodes.append(
+                    _state_output_node_for_field(tax_input.state, "state_total_tax")
+                )
+            return nodes
+
+        federal_node = _FEDERAL_FIELD_TO_NODE.get(output)
+        if federal_node:
+            return [federal_node]
+
+        if output.startswith("state_"):
+            if not has_state:
+                raise ValueError(f"Output {output!r} requires a state return")
+            return [_state_output_node_for_field(tax_input.state, output)]
+
+        for line, natural in LINE_TO_NATURAL.items():
+            if natural == output:
+                return [f"us_1040_{line}"]
+
+        return [f"us_1040_{output}"]
+
     def gradient(
         self, tax_input: TaxReturnInput, output: str, wrt: str
     ) -> float | None:
@@ -546,23 +589,10 @@ class GraphBackend:
             return None
 
         evaluator, _ = self._create_evaluator(tax_input)
+        output_nodes = self._output_nodes(tax_input, output)
+        input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
 
-        if output.startswith(_ALL_KNOWN_PREFIXES):
-            output_node = output
-        else:
-            output_node = None
-            for line, natural in LINE_TO_NATURAL.items():
-                if natural == output:
-                    output_node = line
-                    break
-            if output_node is None:
-                output_node = f"us_1040_{output}"
-            else:
-                output_node = f"us_1040_{output_node}"
-
-        input_nodes = self._input_nodes(tax_input, wrt, output_node)
-
-        return evaluator.gradient_multi(output_node, input_nodes)
+        return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
@@ -583,21 +613,8 @@ class GraphBackend:
             return None
 
         evaluator, _ = self._create_evaluator(tax_input)
-
-        if output.startswith(_ALL_KNOWN_PREFIXES):
-            output_node = output
-        else:
-            output_node = None
-            for line, natural in LINE_TO_NATURAL.items():
-                if natural == output:
-                    output_node = line
-                    break
-            if output_node is None:
-                output_node = f"us_1040_{output}"
-            else:
-                output_node = f"us_1040_{output_node}"
-
-        input_nodes = self._input_nodes(tax_input, var, output_node)
+        output_nodes = self._output_nodes(tax_input, output)
+        input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
 
         natural_values = tax_input.model_dump(
             exclude={"year", "state", "filing_status", "standard_or_itemized"}
@@ -621,8 +638,8 @@ class GraphBackend:
             initial_guess = tax_estimate
 
         try:
-            return evaluator.solve_multi(
-                output_node, target, input_nodes, initial_guess
+            return evaluator.solve_multi_output(
+                output_nodes, target, input_nodes, initial_guess
             )
         except Exception as exc:
             msg = str(exc)

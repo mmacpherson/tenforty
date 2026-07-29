@@ -1,4 +1,4 @@
-use crate::autodiff::gradient_sum;
+use crate::autodiff::gradient_sum_outputs;
 use crate::eval::{EvalError, Runtime};
 use crate::graph::NodeId;
 use thiserror::Error;
@@ -61,9 +61,20 @@ pub fn solve_multi(
     inputs: &[NodeId],
     initial_guess: f64,
 ) -> Result<f64, SolveError> {
-    solve_with_config(
+    solve_multi_output(runtime, &[output], target, inputs, initial_guess)
+}
+
+/// Solve for an input quantity against the sum of several output nodes.
+pub fn solve_multi_output(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    target: f64,
+    inputs: &[NodeId],
+    initial_guess: f64,
+) -> Result<f64, SolveError> {
+    solve_multi_output_with_config(
         runtime,
-        output,
+        outputs,
         target,
         inputs,
         initial_guess,
@@ -71,9 +82,9 @@ pub fn solve_multi(
     )
 }
 
-pub fn solve_with_config(
+pub fn solve_multi_output_with_config(
     runtime: &mut Runtime,
-    output: NodeId,
+    outputs: &[NodeId],
     target: f64,
     inputs: &[NodeId],
     initial_guess: f64,
@@ -85,14 +96,16 @@ pub fn solve_with_config(
         for &input in inputs {
             runtime.set_by_id(input, x);
         }
-        let y = runtime.eval_node(output)?;
+        let y = outputs.iter().try_fold(0.0, |sum, output| {
+            runtime.eval_node(*output).map(|value| sum + value)
+        })?;
         let error = y - target;
 
         if error.abs() < config.tolerance {
             return Ok(x);
         }
 
-        let grad = gradient_sum(runtime, output, inputs)?;
+        let grad = gradient_sum_outputs(runtime, outputs, inputs)?;
 
         if grad.abs() < config.min_step {
             return Err(SolveError::ZeroGradient);
@@ -102,7 +115,6 @@ pub fn solve_with_config(
         let clamped_step = step.clamp(-config.max_step, config.max_step);
         x -= clamped_step;
 
-        // Clamp to bounds
         if let Some(lb) = config.lower_bound {
             x = x.max(lb);
         }
@@ -112,6 +124,17 @@ pub fn solve_with_config(
     }
 
     Err(SolveError::NoConvergence(config.max_iterations))
+}
+
+pub fn solve_with_config(
+    runtime: &mut Runtime,
+    output: NodeId,
+    target: f64,
+    inputs: &[NodeId],
+    initial_guess: f64,
+    config: &SolverConfig,
+) -> Result<f64, SolveError> {
+    solve_multi_output_with_config(runtime, &[output], target, inputs, initial_guess, config)
 }
 
 /// Binary search fallback for non-smooth regions.
@@ -271,6 +294,15 @@ mod tests {
 
         let x = solve(&mut runtime, 4, 100.0, 0, 0.0).unwrap();
         assert!((x - 45.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_solve_multi_output() {
+        let graph = linear_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+
+        let x = solve_multi_output(&mut runtime, &[2, 4], 100.0, &[0], 0.0).unwrap();
+        assert!((x - 22.5).abs() < 1e-6);
     }
 
     #[test]
