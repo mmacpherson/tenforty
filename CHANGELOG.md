@@ -10,6 +10,17 @@
   `.link()`. The `tenforty` public tax API (`evaluate_return[s]`) is unaffected.
 
 ### Changed
+- **`marginal_rate` and `solve_for_income` now read `total_tax` as federal plus the
+  selected state's tax**, matching what `evaluate_return(...).total_tax` has always
+  returned. Both previously resolved the default `output="total_tax"` to the federal
+  1040 line alone, so with a state selected they answered a different question than
+  the one the field name names: for 2024 CA Single at $100,000 of wages,
+  `marginal_rate` returned `0.22` where the derivative of the public total is `0.313`,
+  and `solve_for_income(target_tax=20_000)` returned an income producing $27,792 of
+  total tax. Callers who calibrated against the old federal-only number will see it
+  move; pass `output="federal_total_tax"` to keep the previous meaning. `output` also
+  now accepts `federal_total_tax` and `state_total_tax`, which previously raised
+  `ValueError: Node not found`. Evaluation is unchanged. (#328)
 - Graph backend: an unset graph input now reads as `0.0` instead of raising.
   The resolved per-year graph carries every state's inputs (~800); a given return
   sets only the handful it uses. Mapping typos are still rejected at `set()` (an

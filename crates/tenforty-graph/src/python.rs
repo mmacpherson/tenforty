@@ -653,6 +653,43 @@ impl Runtime {
         })
     }
 
+    /// Total derivative of the sum of `outputs` with respect to a quantity
+    /// written into several input nodes.
+    fn gradient_multi_output(
+        &mut self,
+        outputs: Vec<String>,
+        inputs: Vec<String>,
+    ) -> PyResult<f64> {
+        self.inner.with_runtime_mut(|rt| {
+            if outputs.is_empty() {
+                return Err(PyValueError::new_err(
+                    "At least one output node is required",
+                ));
+            }
+            let output_ids = outputs
+                .iter()
+                .map(|name| {
+                    rt.graph()
+                        .node_id_by_name(name)
+                        .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", name)))
+                })
+                .collect::<PyResult<Vec<_>>>()?;
+            let input_ids: Vec<_> = inputs
+                .iter()
+                .filter_map(|name| rt.graph().node_id_by_name(name))
+                .collect();
+            if input_ids.is_empty() {
+                return Err(PyValueError::new_err(format!(
+                    "None of the input nodes were found: {}",
+                    inputs.join(", ")
+                )));
+            }
+
+            autodiff::gradient_sum_outputs(rt, &output_ids, &input_ids)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
+    }
+
     /// Solve for the value of a quantity written into several input nodes.
     ///
     /// Each Newton step assigns the trial value to every named node and steps
@@ -683,6 +720,46 @@ impl Runtime {
             }
 
             solver::solve_multi(rt, output_id, target, &input_ids, guess)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
+    }
+
+    /// Solve for an input quantity against the sum of several output nodes.
+    #[pyo3(signature = (outputs, target, for_inputs, initial_guess=None))]
+    fn solve_multi_output(
+        &mut self,
+        outputs: Vec<String>,
+        target: f64,
+        for_inputs: Vec<String>,
+        initial_guess: Option<f64>,
+    ) -> PyResult<f64> {
+        let guess = initial_guess.unwrap_or(target);
+        self.inner.with_runtime_mut(|rt| {
+            if outputs.is_empty() {
+                return Err(PyValueError::new_err(
+                    "At least one output node is required",
+                ));
+            }
+            let output_ids = outputs
+                .iter()
+                .map(|name| {
+                    rt.graph()
+                        .node_id_by_name(name)
+                        .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", name)))
+                })
+                .collect::<PyResult<Vec<_>>>()?;
+            let input_ids: Vec<_> = for_inputs
+                .iter()
+                .filter_map(|name| rt.graph().node_id_by_name(name))
+                .collect();
+            if input_ids.is_empty() {
+                return Err(PyValueError::new_err(format!(
+                    "None of the input nodes were found: {}",
+                    for_inputs.join(", ")
+                )));
+            }
+
+            solver::solve_multi_output(rt, &output_ids, target, &input_ids, guess)
                 .map_err(|e| PyValueError::new_err(format!("{}", e)))
         })
     }

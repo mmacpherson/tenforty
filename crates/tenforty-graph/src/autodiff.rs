@@ -63,6 +63,19 @@ pub fn gradient_sum(
         .sum())
 }
 
+/// Compute the derivative of the sum of several outputs with respect to a
+/// quantity written into several input nodes.
+pub fn gradient_sum_outputs(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    inputs: &[NodeId],
+) -> Result<f64, EvalError> {
+    outputs
+        .iter()
+        .map(|output| gradient_sum(runtime, *output, inputs))
+        .sum()
+}
+
 fn backprop(
     op: &Op,
     _node_id: NodeId,
@@ -313,6 +326,16 @@ mod tests {
 
         let grad = gradient(&mut runtime, 2, 0).unwrap();
         assert_eq!(grad, 2.0);
+    }
+
+    #[test]
+    fn test_gradient_sum_outputs() {
+        let graph = simple_arithmetic_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 5.0);
+
+        let grad = gradient_sum_outputs(&mut runtime, &[0, 2], &[0]).unwrap();
+        assert_eq!(grad, 3.0);
     }
 
     #[test]
