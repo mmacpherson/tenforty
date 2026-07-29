@@ -116,7 +116,10 @@ fn backprop(
         Op::Max { left, right } => {
             let l = values.get(left).copied().unwrap_or(0.0);
             let r = values.get(right).copied().unwrap_or(0.0);
-            if l >= r {
+            if l == r {
+                *adjoints.entry(*left).or_insert(0.0) += adj * 0.5;
+                *adjoints.entry(*right).or_insert(0.0) += adj * 0.5;
+            } else if l > r {
                 *adjoints.entry(*left).or_insert(0.0) += adj;
             } else {
                 *adjoints.entry(*right).or_insert(0.0) += adj;
@@ -264,6 +267,54 @@ mod tests {
         }
     }
 
+    fn coincident_max_graph() -> Graph {
+        let nodes = [
+            (0, Op::Input, Some("x")),
+            (1, Op::Literal { value: 0.0 }, Some("zero")),
+            (2, Op::Neg { arg: 0 }, Some("negative_x")),
+            (3, Op::Max { left: 1, right: 0 }, Some("positive_x")),
+            (
+                4,
+                Op::Max { left: 1, right: 2 },
+                Some("positive_negative_x"),
+            ),
+            (5, Op::Literal { value: 11.0 }, Some("other_income")),
+            (
+                6,
+                Op::Sub { left: 5, right: 4 },
+                Some("income_above_remaining_threshold"),
+            ),
+            (
+                7,
+                Op::Max { left: 1, right: 6 },
+                Some("positive_other_income"),
+            ),
+            (8, Op::Add { left: 3, right: 7 }, Some("combined")),
+        ]
+        .into_iter()
+        .map(|(id, op, name)| {
+            (
+                id,
+                Node {
+                    id,
+                    op,
+                    name: name.map(str::to_string),
+                },
+            )
+        })
+        .collect();
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0],
+            outputs: vec![8],
+            invariants: vec![],
+        }
+    }
+
     fn tax_graph() -> Graph {
         let mut nodes = HashMap::new();
         nodes.insert(
@@ -347,6 +398,28 @@ mod tests {
         let analytical = gradient(&mut runtime, 2, 0).unwrap();
         let numerical = numerical_gradient(&mut runtime, 2, 0, 1e-6).unwrap();
         assert!((analytical - numerical).abs() < 1e-4);
+    }
+
+    #[test]
+    fn test_gradient_splits_max_tie_between_operands() {
+        let graph = coincident_max_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+
+        let grad = gradient(&mut runtime, 3, 0).unwrap();
+        assert_eq!(grad, 0.5);
+    }
+
+    #[test]
+    fn test_gradient_survives_coincident_max_ties() {
+        let graph = coincident_max_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+
+        let analytical = gradient(&mut runtime, 8, 0).unwrap();
+        let numerical = numerical_gradient(&mut runtime, 8, 0, 1e-6).unwrap();
+        assert!((analytical - 1.0).abs() < 1e-12);
+        assert!((analytical - numerical).abs() < 1e-6);
     }
 
     #[test]
