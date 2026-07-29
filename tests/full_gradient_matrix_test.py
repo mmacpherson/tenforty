@@ -112,6 +112,7 @@ _GRAPH_STEP = 1.0
 _OTS_STEP = 100.0
 _GRAPH_TOLERANCE = 1e-4
 _OTS_TOLERANCE = 0.03
+_SIGNED_INCOMES = {"long_term_capital_gains", "short_term_capital_gains"}
 
 
 def _case(region: str) -> dict[str, float | int | str]:
@@ -206,7 +207,8 @@ def test_full_graph_gradient_matrix_matches_evaluation_path():
 def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset):
     """Probe around every named region, with exact boundaries sampled directly."""
     case = _case(region)
-    case[wrt] = float(case.get(wrt, 0.0)) + offset
+    value = float(case.get(wrt, 0.0)) + offset
+    case[wrt] = value if wrt in _SIGNED_INCOMES else max(0.0, value)
     backward, forward, central = _slopes("graph", case, wrt, output, _GRAPH_STEP)
     assume(abs(forward - backward) < _GRAPH_TOLERANCE)
 
