@@ -36,7 +36,7 @@ pub fn adjoints(runtime: &mut Runtime, output: NodeId) -> Result<HashMap<NodeId,
 
 /// Compute the gradient of an output node with respect to an input node.
 /// Uses reverse-mode automatic differentiation in smooth regions and the
-/// composed function's symmetric numerical derivative at an active max tie.
+/// composed function's right-hand numerical derivative at an active kink.
 pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
     gradient_sum(runtime, output, &[input])
 }
@@ -58,17 +58,19 @@ pub fn gradient_sum(
     inputs: &[NodeId],
 ) -> Result<f64, EvalError> {
     let adjoints = adjoints(runtime, output)?;
-    if has_active_max_tie(runtime, &adjoints, inputs)? {
-        return numerical_gradient_sum(runtime, output, inputs);
-    }
-
-    Ok(inputs
+    let reverse_gradient = inputs
         .iter()
         .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
-        .sum())
+        .sum();
+
+    if has_active_kink(runtime, &adjoints, inputs)? {
+        return forward_gradient(runtime, output, inputs);
+    }
+
+    Ok(reverse_gradient)
 }
 
-fn has_active_max_tie(
+fn has_active_kink(
     runtime: &Runtime,
     adjoints: &HashMap<NodeId, f64>,
     inputs: &[NodeId],
@@ -89,13 +91,46 @@ fn has_active_max_tie(
             reachable.insert(node_id);
         }
 
-        let Op::Max { left, right } = &node.op else {
+        if !reachable.contains(&node_id) || adjoints.get(&node_id).copied().unwrap_or(0.0) == 0.0 {
             continue;
+        }
+
+        let is_tie = match &node.op {
+            Op::Max { left, right } | Op::Min { left, right } => {
+                values.get(left).copied().unwrap_or(0.0)
+                    == values.get(right).copied().unwrap_or(0.0)
+            }
+            Op::Abs { arg } => values.get(arg).copied().unwrap_or(0.0) == 0.0,
+            Op::Clamp { arg, min, max } => {
+                let value = values.get(arg).copied().unwrap_or(0.0);
+                value == *min || value == *max
+            }
+            Op::BracketTax { table, income } => {
+                let income = values.get(income).copied().unwrap_or(0.0);
+                runtime.graph().tables.get(table).is_some_and(|table| {
+                    table
+                        .brackets
+                        .get(runtime.filing_status())
+                        .iter()
+                        .any(|bracket| bracket.threshold.is_finite() && income == bracket.threshold)
+                })
+            }
+            Op::PhaseOut {
+                base,
+                threshold,
+                rate,
+                agi,
+            } => {
+                let agi = values.get(agi).copied().unwrap_or(0.0);
+                let threshold = *threshold.get(runtime.filing_status());
+                agi == threshold || (*rate != 0.0 && agi == threshold + base / rate)
+            }
+            Op::IfPositive { cond, .. } => {
+                reachable.contains(cond) && values.get(cond).copied().unwrap_or(0.0) == 0.0
+            }
+            _ => false,
         };
-        if reachable.contains(&node_id)
-            && adjoints.get(&node_id).copied().unwrap_or(0.0) != 0.0
-            && values.get(left).copied().unwrap_or(0.0) == values.get(right).copied().unwrap_or(0.0)
-        {
+        if is_tie {
             return Ok(true);
         }
     }
@@ -103,7 +138,7 @@ fn has_active_max_tie(
     Ok(false)
 }
 
-fn numerical_gradient_sum(
+fn forward_gradient(
     runtime: &mut Runtime,
     output: NodeId,
     inputs: &[NodeId],
@@ -129,19 +164,13 @@ fn numerical_gradient_sum(
     let f_plus = runtime.eval_node(output);
 
     for (input, original) in &originals {
-        runtime.set_by_id(*input, original - epsilon);
-    }
-    let f_minus = runtime.eval_node(output);
-
-    for (input, original) in &originals {
         runtime.set_by_id(*input, *original);
     }
-    let restored = runtime.eval_node(output);
+    let f_original = runtime.eval_node(output);
 
     let f_plus = f_plus?;
-    let f_minus = f_minus?;
-    restored?;
-    Ok((f_plus - f_minus) / (2.0 * epsilon))
+    let f_original = f_original?;
+    Ok((f_plus - f_original) / epsilon)
 }
 
 /// Compute the derivative of the sum of several outputs with respect to a
@@ -431,6 +460,36 @@ mod tests {
         }
     }
 
+    fn minimum_graph() -> Graph {
+        let nodes = [
+            (0, Op::Input, Some("x")),
+            (1, Op::Literal { value: 0.0 }, Some("zero")),
+            (2, Op::Min { left: 0, right: 1 }, Some("nonpositive_x")),
+        ]
+        .into_iter()
+        .map(|(id, op, name)| {
+            (
+                id,
+                Node {
+                    id,
+                    op,
+                    name: name.map(str::to_string),
+                },
+            )
+        })
+        .collect();
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0],
+            outputs: vec![2],
+            invariants: vec![],
+        }
+    }
+
     fn tax_graph() -> Graph {
         let mut nodes = HashMap::new();
         nodes.insert(
@@ -517,13 +576,23 @@ mod tests {
     }
 
     #[test]
-    fn test_gradient_splits_max_tie_between_operands() {
+    fn test_gradient_uses_composed_right_derivative_at_a_max_kink() {
         let graph = coincident_max_graph();
         let mut runtime = Runtime::new(&graph, FilingStatus::Single);
         runtime.set_by_id(0, 0.0);
 
         let grad = gradient(&mut runtime, 3, 0).unwrap();
-        assert_eq!(grad, 0.5);
+        assert_eq!(grad, 1.0);
+    }
+
+    #[test]
+    fn test_gradient_uses_composed_right_derivative_at_a_min_kink() {
+        let graph = minimum_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+
+        let grad = gradient(&mut runtime, 2, 0).unwrap();
+        assert_eq!(grad, 0.0);
     }
 
     #[test]
