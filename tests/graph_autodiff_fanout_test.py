@@ -293,6 +293,59 @@ def test_w2_gradient_includes_schedule_se_wage_base():
     )
 
 
+@skip_if_graph_unavailable
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_qualified_dividend_gradient_follows_ordinary_dividend_clamp(year):
+    """Qualified dividends feed ordinary income when line 3b is omitted."""
+    case = dict(
+        year=year,
+        filing_status="Single",
+        w2_income=120_000.0,
+        qualified_dividends=20_000.0,
+    )
+
+    gradient = _gradient("qualified_dividends", **case)
+
+    assert gradient == pytest.approx(
+        _finite_difference("qualified_dividends", **case), abs=1e-6
+    )
+    assert gradient == pytest.approx(0.15, abs=1e-6)
+
+
+@skip_if_graph_unavailable
+def test_qualified_dividend_gradient_leaves_larger_ordinary_dividend_fixed():
+    """The derived edge is inactive when line 3b already exceeds line 3a."""
+    case = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=120_000.0,
+        qualified_dividends=20_000.0,
+        ordinary_dividends=30_000.0,
+    )
+
+    gradient = _gradient("qualified_dividends", **case)
+
+    assert gradient == pytest.approx(
+        _finite_difference("qualified_dividends", **case), abs=1e-6
+    )
+    assert gradient == pytest.approx(-0.09, abs=1e-6)
+
+
+@skip_if_graph_unavailable
+def test_solve_recovers_qualified_dividends_through_ordinary_dividend_clamp():
+    """Solving varies both dividend lines when line 3b is derived from line 3a."""
+    known = dict(
+        year=2024,
+        filing_status="Single",
+        w2_income=120_000.0,
+        qualified_dividends=20_000.0,
+    )
+
+    solved = _solve_for("qualified_dividends", **known)
+
+    assert solved == pytest.approx(known["qualified_dividends"], abs=0.01)
+
+
 def test_derived_chain_factor_rejects_a_slope_it_cannot_carry():
     """A derivation the adjoint sum cannot express must raise, not be skipped.
 
@@ -313,6 +366,27 @@ def test_derived_chain_factor_rejects_a_slope_it_cannot_carry():
 
     with pytest.raises(NotImplementedError, match=r"only 0 or 1 can be carried"):
         derived_chain_factor(tax_input, "scaled_wages", "w2_income")
+
+
+@pytest.mark.parametrize(
+    ("ordinary_dividends", "expected"),
+    [(20_000.0, 1.0), (20_000.5, 0.0)],
+)
+def test_derived_chain_factor_revalidates_dividend_clamp(ordinary_dividends, expected):
+    """The probe follows the validator without crossing a nearby inactive clamp."""
+    from tenforty.mappings import derived_chain_factor
+
+    tax_input = TaxReturnInput(
+        year=2024,
+        filing_status="Single",
+        qualified_dividends=20_000.0,
+        ordinary_dividends=ordinary_dividends,
+    )
+
+    assert (
+        derived_chain_factor(tax_input, "ordinary_dividends", "qualified_dividends")
+        == expected
+    )
 
 
 @pytest.mark.parametrize(
