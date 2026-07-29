@@ -70,17 +70,32 @@ def _f11_ots_hoh_bracket(backend: str, case: dict) -> set[str]:
 
 
 def _f15_ots_itemized_taxable_income(backend: str, case: dict) -> set[str]:
-    """F15: OTS applies itemized deductions the caller did not ask for.
+    """F15: OTS taxable income, excused wherever an itemized aggregate is present.
 
-    With a nonzero itemized aggregate, OTS deducts it whatever
-    `standard_or_itemized` says, while taxcalc takes the greater of the standard
-    deduction and the uncapped aggregate carried through e19200. Taxable income
-    therefore diverges when the caller requests standard treatment but the
-    aggregate exceeds it, and the downstream tax quantities follow.
+    WIDER THAN ANY DIVERGENCE WE CAN NOW REPRODUCE. The finding this signature
+    was written for was the charitable ceiling: the aggregate rode to taxcalc as
+    cash charity (e19800), which caps at 60% of AGI, so taxable income diverged
+    whenever the aggregate cleared that ceiling. Carrying it through the uncapped
+    e19200 instead (tenforty-pus) removed the cap, and with it the divergence.
+    All three engines now take the greater of the standard deduction and the
+    aggregate: checked three ways on Standard-flag cases with the aggregate above
+    the standard deduction, and OTS against graph over 1,500 randomized cases
+    with no self-employment income, where nothing disagreed.
 
-    The same category mismatch as F12, surfacing on taxable income rather than
-    AMT. Blocked on the Itemized-semantics decision (tenforty-ddj); tracked as
-    tenforty-z31.
+    What is left is F7's case and not this one — the caller asks for Itemized
+    with an aggregate BELOW the standard deduction, OTS itemizes anyway, and the
+    other two take the standard deduction. F7 already excuses the same three
+    quantities under that narrower condition.
+
+    So the predicate below is a blanket. It fires on a nonzero aggregate whatever
+    `standard_or_itemized` says, which means it also forgives OTS taxable-income
+    gaps that have nothing to do with deductions — the self-employment-deduction
+    difference, say — for any case that happens to carry one. Narrow it to F7's
+    condition or delete it and let F7 and F12 carry the ground, once the
+    differential has been run to confirm the gate stays green without it. That
+    check has not been done; until it is, this stays as-is rather than trading a
+    documented blanket for a red gate. Blocked on the Itemized-semantics decision
+    (tenforty-ddj); tracked as tenforty-z31.
     """
     if backend == "ots" and case.get("itemized", 0):
         return {"taxable_income", "income_tax", "total_tax"}
