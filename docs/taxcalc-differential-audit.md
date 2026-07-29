@@ -211,11 +211,11 @@ itemized). All three engines take the same deduction and agree on taxable
 income — but OTS reports $1,634.46 of AMT where graph and taxcalc report
 none. Cause: the aggregate rides in a different Schedule A category per
 engine — OTS maps it to A6 ("other taxes", added back on Form 6251), graph
-to L16 ("other deductions", not added back), the taxcalc adapter to charity
-(not added back). None is wrong; the input model cannot say which kind of
-deduction it is. This is the categorized-deductions API gap made concrete,
-resolved by input model v2; until then the divergence is a documented
-assumption, excused by signature.
+to L16 ("other deductions", not added back), and the taxcalc adapter to
+interest paid through e19200 (not added back). None is wrong; the input model
+cannot say which kind of deduction it is. This is the categorized-deductions
+API gap made concrete, resolved by input model v2; until then the divergence
+is a documented assumption, excused by signature.
 
 ### F13. NEW — graph 2025 Married/Sep long-term-gain thresholds diverge
 

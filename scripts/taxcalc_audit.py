@@ -15,8 +15,8 @@ Scope notes:
 - Federal only (taxcalc has no state model).
 - No dependents, no ISO gains, no rental/schedule-1 income (taxcalc mapping
   for those is ambiguous or absent).
-- Itemized deductions are mapped to taxcalc cash charity (e19800): no AGI
-  floor below 60%, so it's the cleanest single-aggregate carrier.
+- Itemized deductions are mapped to taxcalc interest paid (e19200), an
+  uncapped carrier for tenforty's uncategorized aggregate.
 - MFJ wage attribution: taxcalc requires per-spouse wages; tenforty's
   w2_income is a household aggregate. taxcalc runs under both attributions
   (all wages on the self-employed primary / all on the other spouse); a
@@ -277,7 +277,7 @@ def run_taxcalc(cases, wage_attribution="primary"):
                     "e00650": qd,
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
-                    "e19800": c["itemized"],
+                    "e19200": c["itemized"],
                     "cmbtp": c["iso"],
                 }
             )

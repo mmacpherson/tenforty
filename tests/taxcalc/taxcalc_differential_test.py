@@ -152,7 +152,10 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "e00650": c["qual_div"],
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
-                    "e19800": c["itemized"],
+                    # Carry the uncategorized aggregate through an uncapped
+                    # itemized field. Cash charity (e19800) would impose a
+                    # 60%-of-AGI ceiling that tenforty's aggregate does not have.
+                    "e19200": c["itemized"],
                     # AMT preference income (ISO exercise spread). Without this
                     # taxcalc is handed no preference at all and reports zero
                     # AMT, so every AMT case would compare tenforty with the
