@@ -157,7 +157,7 @@ def test_taxcalc_keeps_the_standard_deduction_when_itemizing_is_free():
     it strictly lowers tax (`calculator.py`, `_calc_one_year`). OTS and the graph
     spec take whichever deduction is bigger. A deduction landing on income already
     in the 0% long-term-gain bracket lowers nothing, so the two rules report
-    different taxable income and identical tax. F16 excuses taxable_income for
+    different taxable income and identical tax. F19 excuses taxable_income for
     exactly this, and only taxable_income -- this test is what says the tax really
     does agree, so that excusing it stays honest.
     """

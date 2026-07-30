@@ -33,6 +33,7 @@ delete the signature, and update this table in the same PR.
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); taxcalc omits add-back, upstream note pending | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
+| F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
 
 ## Method
 
@@ -217,7 +218,7 @@ cannot say which kind of deduction it is. This is the categorized-deductions
 API gap made concrete, resolved by input model v2; until then the divergence
 is a documented assumption, excused by signature.
 
-### F16. NEW — deduction choice: taxcalc minimizes tax, tenforty maximizes the deduction
+### F19. NEW — deduction choice: taxcalc minimizes tax, tenforty maximizes the deduction
 
 Retires F15, which named the wrong mechanism. F15 said OTS applied itemized
 deductions the caller had not asked for; it does not — all three engines take
@@ -253,7 +254,7 @@ agreement so the excuse stays honest.
 The signature excuses **both** backends, as F14 does. F15 excused OTS only,
 which is why `[graph]` failed the differential about half the times it was run:
 the identical divergence was suppressed on one engine and unexcused on the
-other. Over 8,000 randomized cases, F15 → F16 takes graph from 17 violating
+other. Over 8,000 randomized cases, F15 → F19 takes graph from 17 violating
 cases to 2 and OTS from 16 to 1. Tracked as tenforty-z31.
 
 ### F13. NEW — graph 2025 Married/Sep long-term-gain thresholds diverge

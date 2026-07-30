@@ -85,8 +85,8 @@ def _preferential_income(case: dict) -> float:
     return case.get("ltcg", 0) + case.get("qual_div", 0)
 
 
-def _f16_deduction_choice_rule(backend: str, case: dict) -> set[str]:
-    """F16: taxcalc picks the CHEAPER deduction; tenforty picks the LARGER one.
+def _f19_deduction_choice_rule(backend: str, case: dict) -> set[str]:
+    """F19: taxcalc picks the CHEAPER deduction; tenforty picks the LARGER one.
 
     Replaces F15, which claimed OTS deducted an itemized aggregate the caller had
     not asked for. That was never the mechanism -- all three engines take the
@@ -180,7 +180,7 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f7_itemized_semantics,
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
-    _f16_deduction_choice_rule,
+    _f19_deduction_choice_rule,
     _f14_taxcalc_omits_amt_std_addback,
 ]
 
