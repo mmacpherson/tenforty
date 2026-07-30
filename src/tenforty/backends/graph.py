@@ -594,6 +594,35 @@ class GraphBackend:
 
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
+    def gradients(
+        self, tax_input: TaxReturnInput, output: str
+    ) -> dict[str, float] | None:
+        """Compute gradients for every continuous public input.
+
+        Smooth inputs share one reverse traversal per resolved output. At an
+        active piecewise boundary, each affected input retains the scalar API's
+        composed right-hand derivative convention.
+        """
+        if not self.is_available():
+            return None
+
+        evaluator, _ = self._create_evaluator(tax_input)
+        output_nodes = self._output_nodes(tax_input, output)
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+        natural_names = [
+            name
+            for name, field in TaxReturnInput.model_fields.items()
+            if field.annotation is float
+            and (name in NATURAL_TO_NODES or name in state_mapping)
+        ]
+        input_groups = [
+            self._input_nodes(tax_input, name, output_nodes[0])
+            for name in natural_names
+        ]
+        values = evaluator.gradients_multi_output(output_nodes, input_groups)
+
+        return dict(zip(natural_names, values, strict=True))
+
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
     ) -> float | None:

@@ -46,6 +46,12 @@ class OTSBackend:
         """OTS does not support autodiff - returns None."""
         return None
 
+    def gradients(
+        self, tax_input: TaxReturnInput, output: str
+    ) -> dict[str, float] | None:
+        """OTS does not support autodiff - returns None."""
+        return None
+
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
     ) -> float | None:

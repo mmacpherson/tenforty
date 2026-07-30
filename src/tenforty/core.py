@@ -969,6 +969,7 @@ def marginal_rate(
     itemized_deductions: float = 0.0,
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
+    dependent_exemptions: float = 0.0,
     *,
     wrt: str = "w2_income",
     output: str = "total_tax",
@@ -995,6 +996,7 @@ def marginal_rate(
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        dependent_exemptions=dependent_exemptions,
     )
 
     from .backends.graph import GraphBackend
@@ -1004,6 +1006,68 @@ def marginal_rate(
         raise RuntimeError("Graph backend is not available")
 
     result = backend.gradient(tax_input, output, wrt)
+    if result is None:
+        raise RuntimeError("Graph backend does not support autodiff")
+
+    return result
+
+
+def marginal_rates(
+    year: int = 2025,
+    state: str | None = None,
+    filing_status: str = "Single",
+    num_dependents: int = 0,
+    standard_or_itemized: str = "Standard",
+    w2_income: float = 0.0,
+    taxable_interest: float = 0.0,
+    qualified_dividends: float = 0.0,
+    ordinary_dividends: float = 0.0,
+    short_term_capital_gains: float = 0.0,
+    long_term_capital_gains: float = 0.0,
+    self_employment_income: float = 0.0,
+    rental_income: float = 0.0,
+    schedule_1_income: float = 0.0,
+    itemized_deductions: float = 0.0,
+    state_adjustment: float = 0.0,
+    incentive_stock_option_gains: float = 0.0,
+    dependent_exemptions: float = 0.0,
+    *,
+    output: str = "total_tax",
+) -> dict[str, float]:
+    """Compute marginal rates for every continuous public input.
+
+    Smooth inputs are differentiated together in one reverse pass per resolved
+    output. At a piecewise boundary, affected entries use the composed
+    function's right-hand derivative, matching :func:`marginal_rate`.
+    """
+    tax_input = TaxReturnInput(
+        year=year,
+        state=state,
+        filing_status=filing_status,
+        num_dependents=num_dependents,
+        standard_or_itemized=standard_or_itemized,
+        w2_income=w2_income,
+        taxable_interest=taxable_interest,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        short_term_capital_gains=short_term_capital_gains,
+        long_term_capital_gains=long_term_capital_gains,
+        self_employment_income=self_employment_income,
+        rental_income=rental_income,
+        schedule_1_income=schedule_1_income,
+        itemized_deductions=itemized_deductions,
+        state_adjustment=state_adjustment,
+        incentive_stock_option_gains=incentive_stock_option_gains,
+        dependent_exemptions=dependent_exemptions,
+    )
+
+    from .backends.graph import GraphBackend
+
+    backend = GraphBackend()
+    if not backend.is_available():
+        raise RuntimeError("Graph backend is not available")
+
+    result = backend.gradients(tax_input, output)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
 
