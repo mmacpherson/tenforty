@@ -48,6 +48,13 @@ F14_CASE = {
     "iso": 200_000.0,
 }
 
+REFUNDABLE_CREDIT_CASE = {
+    **F14_CASE,
+    "status": "Head_of_House",
+    "w2": 802.0,
+    "iso": 0.0,
+}
+
 
 def test_iso_reaches_taxcalc_as_amt_preference():
     """An ISO spread must produce AMT in taxcalc, not silence."""
@@ -181,3 +188,28 @@ def test_taxcalc_keeps_the_standard_deduction_when_itemizing_is_free():
     # ... and it costs nothing, which is the whole reason taxable_income is excused.
     assert result["income_tax"] == pytest.approx(ours["income_tax"], abs=0.01)
     assert result["total_tax"] == pytest.approx(ours["total_tax"], abs=0.01)
+
+
+def test_refundable_credit_does_not_change_pre_refund_tax_contract():
+    """Record cardinality cannot change the pre-refund quantities we compare."""
+    single = taxcalc_batch([REFUNDABLE_CREDIT_CASE])[0]
+    zero_record = {**REFUNDABLE_CREDIT_CASE, "status": "Single", "w2": 0.0}
+    second_in_batch = taxcalc_batch([zero_record, REFUNDABLE_CREDIT_CASE])[1]
+
+    for result in (single, second_in_batch):
+        assert result["income_tax"] == pytest.approx(0.0, abs=0.01)
+        assert result["total_tax"] == pytest.approx(0.0, abs=0.01)
+
+
+def test_raw_iitax_remains_net_of_refundable_credits():
+    """The adapter preserves Tax-Calculator's raw post-refund diagnostics."""
+    zero_record = {**REFUNDABLE_CREDIT_CASE, "status": "Single", "w2": 0.0}
+    single = taxcalc_batch([REFUNDABLE_CREDIT_CASE])[0]
+    second_in_batch = taxcalc_batch([zero_record, REFUNDABLE_CREDIT_CASE])[1]
+
+    assert single["refund"] == pytest.approx(0.0, abs=0.001)
+    assert single["iitax"] == pytest.approx(0.0, abs=0.001)
+    assert second_in_batch["refund"] == pytest.approx(61.353, abs=0.001)
+    assert second_in_batch["iitax"] == pytest.approx(
+        -second_in_batch["refund"], abs=0.001
+    )
