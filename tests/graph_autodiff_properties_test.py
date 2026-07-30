@@ -134,17 +134,6 @@ _RECLASSIFICATION_FLOOR = -0.21
 # used to drop the derived w2 -> Schedule SE edge (tenforty-hrp).
 _SS_WAGE_BASE_2024 = 168_600.0
 
-# 2024 Additional Medicare Tax thresholds (IRC 3101(b)(2)). Form 8959 hangs two
-# max0 branches off these, so wages landing exactly on one put both on a kink at
-# the same time — see tenforty-dhi.
-_ADDITIONAL_MEDICARE_THRESHOLDS = {
-    "Single": 200_000.0,
-    "Head_of_House": 200_000.0,
-    "Widow(er)": 200_000.0,
-    "Married/Joint": 250_000.0,
-    "Married/Sep": 125_000.0,
-}
-
 
 def _total_tax(case: dict) -> float:
     return evaluate_return(backend="graph", **case).federal_total_tax
@@ -168,21 +157,6 @@ def test_autodiff_matches_finite_difference(filing_status, wrt, incomes):
     case = dict(year=2024, filing_status=filing_status, **incomes)
     # Leave room for a symmetric step without pushing the input negative.
     case[wrt] = max(case[wrt], _STEP)
-
-    # Skip wages landing EXACTLY on the Additional Medicare threshold. Form 8959
-    # charges two max0 branches off that one threshold, so both sit on their kinks
-    # at once and autodiff takes the subgradient 0 for each — but the kinks cancel
-    # and the sum is differentiable, so the true slope is 0.009 and the gradient
-    # reads 0. A real, tracked defect (tenforty-dhi), pinned by the strict xfail
-    # below. The kink filter underneath cannot catch it: it watches the composed
-    # function, which is smooth here, not the interior nodes. Remove when dhi lands.
-    assume(
-        not (
-            wrt == "w2_income"
-            and incomes["self_employment_income"] > 0.0
-            and case["w2_income"] == _ADDITIONAL_MEDICARE_THRESHOLDS[filing_status]
-        )
-    )
 
     f0 = _total_tax(case)
     f_plus = _total_tax({**case, wrt: case[wrt] + _STEP})
@@ -245,10 +219,8 @@ _QBI_GAIN_CASE = dict(
 )
 
 
-# Durable record of tenforty-dhi: at wages exactly on the Additional Medicare
-# threshold, Form 8959's two max0 branches are both at their kink and autodiff
-# zeroes each, losing a derivative that survives in their sum. Strict xfail, so
-# the fix forces this and the `assume` above out together.
+# At wages exactly on the Additional Medicare threshold, Form 8959's two max0
+# branches kink in opposite directions while their sum remains differentiable.
 _KINK_CASE = dict(
     year=2024,
     filing_status="Single",
@@ -258,11 +230,6 @@ _KINK_CASE = dict(
 
 
 @skip_if_graph_unavailable
-@pytest.mark.xfail(
-    reason="tenforty-dhi: coincident max0 kinks at the Additional Medicare "
-    "threshold zero the adjoint, so d(*)/d(w2_income) loses the 0.9%",
-    strict=True,
-)
 def test_gradient_survives_coincident_kinks_at_the_medicare_threshold():
     """The sum is differentiable at the threshold even though each branch kinks."""
     from tenforty.backends import GraphBackend
