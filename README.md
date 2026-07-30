@@ -192,6 +192,13 @@ right-hand derivative: the change implied by adding a small amount to that
 input. Smooth entries in `marginal_rates` share one reverse-mode traversal per
 resolved output.
 
+The reproducible
+[autodiff planning examples](docs/autodiff-applications.md) show a full
+next-dollar table, the interaction between wages and long-term-gain stacking,
+and a bounded ordinary-income sizing exercise. They also measure where forward
+simulation remains competitive and explain why derivatives alone cannot find
+true tax cliffs.
+
 
 ### Creating Tax Tables: Federal/State Tax Brackets as a Function of W2 Income
 
