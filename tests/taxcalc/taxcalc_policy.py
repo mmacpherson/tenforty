@@ -69,37 +69,69 @@ def _f11_ots_hoh_bracket(backend: str, case: dict) -> set[str]:
     return set()
 
 
-def _f15_ots_itemized_taxable_income(backend: str, case: dict) -> set[str]:
-    """F15: OTS taxable income, excused wherever an itemized aggregate is present.
+def _ordinary_income(case: dict) -> float:
+    """Income taxed at ordinary rates, which a deduction displaces first."""
+    return (
+        case.get("w2", 0)
+        + case.get("se", 0)
+        + case.get("stcg", 0)
+        + case.get("interest", 0)
+        + max(0.0, case.get("ord_div", 0) - case.get("qual_div", 0))
+    )
 
-    WIDER THAN ANY DIVERGENCE WE CAN NOW REPRODUCE. The finding this signature
-    was written for was the charitable ceiling: the aggregate rode to taxcalc as
-    cash charity (e19800), which caps at 60% of AGI, so taxable income diverged
-    whenever the aggregate cleared that ceiling. Carrying it through the uncapped
-    e19200 instead (tenforty-pus) removed the cap, and with it the divergence.
-    All three engines now take the greater of the standard deduction and the
-    aggregate: checked three ways on Standard-flag cases with the aggregate above
-    the standard deduction, and OTS against graph over 1,500 randomized cases
-    with no self-employment income, where nothing disagreed.
 
-    What is left is F7's case and not this one — the caller asks for Itemized
-    with an aggregate BELOW the standard deduction, OTS itemizes anyway, and the
-    other two take the standard deduction. F7 already excuses the same three
-    quantities under that narrower condition.
+def _preferential_income(case: dict) -> float:
+    """Income taxed at long-term capital gain rates, stacked on top."""
+    return case.get("ltcg", 0) + case.get("qual_div", 0)
 
-    So the predicate below is a blanket. It fires on a nonzero aggregate whatever
-    `standard_or_itemized` says, which means it also forgives OTS taxable-income
-    gaps that have nothing to do with deductions — the self-employment-deduction
-    difference, say — for any case that happens to carry one. Narrow it to F7's
-    condition or delete it and let F7 and F12 carry the ground, once the
-    differential has been run to confirm the gate stays green without it. That
-    check has not been done; until it is, this stays as-is rather than trading a
-    documented blanket for a red gate. Blocked on the Itemized-semantics decision
-    (tenforty-ddj); tracked as tenforty-z31.
+
+def _f19_deduction_choice_rule(backend: str, case: dict) -> set[str]:
+    """F19: taxcalc picks the CHEAPER deduction; tenforty picks the LARGER one.
+
+    Replaces F15, which claimed OTS deducted an itemized aggregate the caller had
+    not asked for. That was never the mechanism -- all three engines take the
+    greater of the standard deduction and the aggregate -- and the divergence F15
+    was actually written for was the 60%-of-AGI charitable ceiling, removed when
+    the aggregate moved to the uncapped e19200 (#327, tenforty-pus).
+
+    The real rule is in taxcalc's `calculator.py` (`_calc_one_year`): it computes
+    the whole return BOTH ways and keeps the itemized total only when it strictly
+    lowers tax --
+
+        self.array('standard', np.where(item_taxes < std_taxes, 0., std))
+        self.array('c04470',   np.where(item_taxes < std_taxes, item, 0.))
+
+    -- while OTS and the graph spec both simply take whichever deduction is
+    bigger. The two rules agree whenever the extra deduction displaces income
+    taxed at a positive rate. They part company when it does not: a deduction
+    landing on income already in the 0% long-term-gain bracket buys nothing, so
+    taxcalc keeps the standard deduction and reports a HIGHER taxable income
+    while computing exactly the same tax.
+
+    Hence taxable_income ONLY. income_tax and total_tax are not excused here,
+    because the whole point is that the tax agrees -- if it ever stops agreeing,
+    that is a real divergence and must surface.
+
+    Both backends, not just OTS. The graph spec has the identical rule, so it has
+    the identical divergence; F15 excused it on OTS and left it unexcused on
+    graph, which is why the differential went red on `[graph]` about half the time
+    it was run. Cf. F14, the other signature that excuses both engines.
+
+    The predicate identifies the structure rather than the outcome: an aggregate
+    above the standard deduction, some preferential income for the surplus to land
+    on, and ordinary income small enough that the surplus cannot displace it.
+    Measured over 8,000 randomized cases it fires on 70 backend-case pairs and
+    catches all 30 real violations -- full recall, and 46x narrower than keying on
+    the aggregate alone. Tracked as tenforty-z31.
     """
-    if backend == "ots" and case.get("itemized", 0):
-        return {"taxable_income", "income_tax", "total_tax"}
-    return set()
+    std = STANDARD_DEDUCTION.get((case.get("year", 2024), case.get("status", "")))
+    if std is None or case.get("itemized", 0) <= std:
+        return set()
+    if _preferential_income(case) <= 0:
+        return set()
+    if _ordinary_income(case) > std:
+        return set()
+    return {"taxable_income"}
 
 
 def _f7_itemized_semantics(backend: str, case: dict) -> set[str]:
@@ -148,7 +180,7 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
     _f7_itemized_semantics,
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
-    _f15_ots_itemized_taxable_income,
+    _f19_deduction_choice_rule,
     _f14_taxcalc_omits_amt_std_addback,
 ]
 

@@ -33,6 +33,7 @@ delete the signature, and update this table in the same PR.
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); taxcalc omits add-back, upstream note pending | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
+| F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
 
 ## Method
 
@@ -216,6 +217,45 @@ interest paid through e19200 (not added back). None is wrong; the input model
 cannot say which kind of deduction it is. This is the categorized-deductions
 API gap made concrete, resolved by input model v2; until then the divergence
 is a documented assumption, excused by signature.
+
+### F19. NEW — deduction choice: taxcalc minimizes tax, tenforty maximizes the deduction
+
+Retires F15, which named the wrong mechanism. F15 said OTS applied itemized
+deductions the caller had not asked for; it does not — all three engines take
+the greater of the standard deduction and the aggregate. The divergence F15 was
+really written for was the 60%-of-AGI charitable ceiling, which went away when
+the aggregate moved to the uncapped `e19200` (F12, #327).
+
+The actual rule is in taxcalc's `calculator.py` (`_calc_one_year`): it computes
+the return **both ways** and keeps the itemized total only when it strictly
+lowers tax.
+
+```python
+self.array('standard', np.where(item_taxes < std_taxes, 0., std))
+self.array('c04470',   np.where(item_taxes < std_taxes, item, 0.))
+```
+
+OTS and the graph spec take whichever deduction is larger. The rules agree
+whenever the extra deduction displaces income taxed at a positive rate, and part
+company when it does not — a deduction landing on income already in the 0%
+long-term-gain bracket buys nothing, so taxcalc keeps the standard deduction and
+reports higher taxable income for identical tax. 2025 Head of Household, $58,509
+of long-term gain, $56,482 aggregate: taxcalc reports taxable income $34,884
+(AGI less the $23,625 standard deduction), both tenforty backends report $2,027
+(AGI less the aggregate), and income tax is $0 on all three.
+
+None is wrong. taxcalc answers "what does this filer owe", tenforty's backends
+answer "what does the larger deduction produce", and the two coincide except
+where the deduction is free. **Only `taxable_income` is excused** — the tax
+agreeing is the entire premise, so if it ever stops agreeing that must surface.
+`test_taxcalc_keeps_the_standard_deduction_when_itemizing_is_free` pins the tax
+agreement so the excuse stays honest.
+
+The signature excuses **both** backends, as F14 does. F15 excused OTS only,
+which is why `[graph]` failed the differential about half the times it was run:
+the identical divergence was suppressed on one engine and unexcused on the
+other. Over 8,000 randomized cases, F15 → F19 takes graph from 17 violating
+cases to 2 and OTS from 16 to 1. Tracked as tenforty-z31.
 
 ### F13. NEW — graph 2025 Married/Sep long-term-gain thresholds diverge
 
