@@ -392,12 +392,22 @@ def _mfs_amt_line4_tax_effect(
     return 0.28 * (addition + exemption_before - exemption_after)
 
 
-def _f23_taxcalc_graph_omit_mfs_amt_increase(
+def _amt_deduction_addback(backend: str, case: dict) -> float:
+    standard = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")), 0.0)
+    itemized = max(0.0, case.get("itemized", 0.0))
+    if itemized <= standard:
+        return standard
+    if backend == "ots":
+        return itemized
+    return 0.0
+
+
+def _f23_taxcalc_omits_mfs_amt_increase(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
-    """F23: TaxCalc and graph omit the high-income MFS line-4 increase."""
+    """F23: Model corrected backends against TaxCalc's omitted MFS increase."""
     if (
-        backend != "ots"
+        backend not in {"ots", "graph"}
         or case.get("status") != "Married/Sep"
         or reference is None
         or "amti" not in reference
@@ -406,11 +416,11 @@ def _f23_taxcalc_graph_omit_mfs_amt_increase(
     rule = MFS_AMT_LINE4_RULE.get(case.get("year"))
     if rule is None:
         return {}
-    ots_amti = reference["amti"] + max(0.0, case.get("itemized", 0.0))
-    addition = _mfs_amt_line4_addition(ots_amti, *rule)
+    backend_amti = reference["amti"] + _amt_deduction_addback(backend, case)
+    addition = _mfs_amt_line4_addition(backend_amti, *rule)
     if addition == 0.0:
         return {}
-    tax_effect = _mfs_amt_line4_tax_effect(ots_amti, addition, rule[0])
+    tax_effect = _mfs_amt_line4_tax_effect(backend_amti, addition, rule[0])
     return _same_delta({"amt", "income_tax", "total_tax"}, DeltaRange(0.0, tax_effect))
 
 
@@ -426,7 +436,7 @@ def _f24_ots_2024_mfs_amt_constants(
         or "amti" not in reference
     ):
         return {}
-    ots_amti = reference["amti"] + max(0.0, case.get("itemized", 0.0))
+    ots_amti = reference["amti"] + _amt_deduction_addback("ots", case)
     official = _mfs_amt_line4_addition(ots_amti, *MFS_AMT_LINE4_RULE[2024])
     stale = _mfs_amt_line4_addition(ots_amti, *OTS_2024_MFS_AMT_LINE4_RULE)
     exemption_terminal = MFS_AMT_LINE4_RULE[2024][0]
@@ -488,7 +498,7 @@ SIGNATURES = [
     KnownDefect("F19", _f19_deduction_choice_rule),
     KnownDefect("F21", _f21_taxcalc_qw_qbi_phase_range),
     KnownDefect("F22", _f22_ots_amt_taxable_income_floor),
-    KnownDefect("F23", _f23_taxcalc_graph_omit_mfs_amt_increase),
+    KnownDefect("F23", _f23_taxcalc_omits_mfs_amt_increase),
     KnownDefect("F24", _f24_ots_2024_mfs_amt_constants),
     KnownDefect("F25", _f25_graph_2025_mfs_amt_cg_ceiling),
     KnownDefect("F26", _f26_taxcalc_itemized_amt_floor),

@@ -110,9 +110,11 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- Line 3: Other adjustments
   l3 <- keyInput "L3" "other_adjustments" "Other adjustments including income-based related items"
 
-  -- Line 4: Alternative minimum taxable income (AMTI)
-  l4 <-
-    keyOutput "L4" "amti" "Alternative minimum taxable income" $
+  -- Line 4: Alternative minimum taxable income (AMTI). Married filing
+  -- separately adds 25% of the amount above the MFS threshold, capped at the
+  -- MFS exemption amount.
+  l4BeforeMfsIncrease <-
+    interior "L4_before_mfs_increase" "AMTI before the MFS special increase" $
       l1
         .+. l2a
         .+. l2b
@@ -135,6 +137,32 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
         .+. l2s
         .+. l2t
         .+. l3
+  mfsIncreaseThreshold <-
+    interior "L4_mfs_threshold" "MFS special-increase threshold" $
+      byStatusE $
+        byStatus
+          (dollars 0)
+          (dollars 0)
+          (lit amtMfsIncreaseThreshold2025)
+          (dollars 0)
+          (dollars 0)
+  mfsIncreaseCap <-
+    interior "L4_mfs_cap" "MFS special-increase cap" $
+      byStatusE $
+        byStatus
+          (dollars 0)
+          (dollars 0)
+          (lit amtMfsIncreaseCap2025)
+          (dollars 0)
+          (dollars 0)
+  mfsIncrease <-
+    interior "L4_mfs_increase" "MFS special increase" $
+      smallerOf
+        ((l4BeforeMfsIncrease `subtractNotBelowZero` mfsIncreaseThreshold) .*. lit 0.25)
+        mfsIncreaseCap
+  l4 <-
+    keyOutput "L4" "amti" "Alternative minimum taxable income" $
+      l4BeforeMfsIncrease .+. mfsIncrease
 
   -- Part II: Alternative Minimum Tax (AMT)
 

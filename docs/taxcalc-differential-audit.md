@@ -37,7 +37,7 @@ signature, and update this table in the same PR.
 | F20 | Suite adapter compares post-refund `iitax` with pre-refund tenforty tax | taxcalc harness | fixed (tenforty-jte) | differential sweep |
 | F21 | 199A QBI phase-in range is doubled for qualifying widow(er) | upstream TaxCalc parameter | open (tenforty-2jg; upstream report pending) | Form 8995-A adjudication |
 | F22 | OTS cancels the AMT standard-deduction add-back when taxable income floors at zero | upstream OpenTaxSolver | open (tenforty-by2; upstream report pending) | randomized ISO differential |
-| F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | open (tenforty-3bt, tenforty-doo) | randomized high-income ISO differential |
+| F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | graph fixed (tenforty-3bt); TaxCalc open (tenforty-doo) | randomized high-income ISO differential |
 | F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
 | F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | open (tenforty-c9a) | randomized MFS ISO/gain differential |
 | F26 | TaxCalc lets unused itemization reduce AMTI below the taxable-income floor | upstream TaxCalc | open (tenforty-w7t; upstream report pending) | randomized itemized ISO/loss differential |
@@ -597,27 +597,28 @@ will flip when an OTS release preserves the Form 1040 line-15 floor. The
 upstream report is staged in `docs/upstream-ots-reports.md`; tracked by
 `tenforty-by2`.
 
-### F23. NEW, ADJUDICATED — graph and TaxCalc omit the MFS AMTI increase
+### F23. ADJUDICATED — TaxCalc omits the MFS AMTI increase; graph fixed
 
 The 2025 Form 6251 instructions have a special line-4 rule for married filing
 separately: above $900,350 of AMTI, add 25% of the excess to line 4, capped at
 $68,500. For 2024 the threshold is $875,950 and the cap is $66,650. OTS has the
-mechanism; the graph goes straight from the ordinary AMTI sum to the exemption,
-and TaxCalc's `c62100` path likewise only zeros the exemption above its terminal
-threshold.
+mechanism. Before `tenforty-3bt`, the graph went straight from the ordinary AMTI
+sum to the exemption; TaxCalc's `c62100` path still only zeros the exemption
+above its terminal threshold.
 
 A clean 2025 witness is MFS with $750,000 wages and a $300,000 ISO spread.
 Before the special rule, AMTI is $1,050,000. The required addition is
 25% x ($1,050,000 - $900,350) = $37,412.50, increasing AMT by $10,475.50.
-OTS reports the official **$68,380.75**; graph reports **$57,905.25** and
-TaxCalc is lower still because F14 independently omits the standard-deduction
-add-back.
+OTS reports the official **$68,380.75**. Before `tenforty-3bt`, graph reported
+**$57,905.25**; TaxCalc remains lower still because F14 independently omits the
+standard-deduction add-back.
 
-The F23 reference-delta model is deliberately one-sided and applies only to
-OTS: TaxCalc is the reference with the omission, OTS carries the required
-positive amount, and graph currently shares the reference defect. Separate
-strict-xfails pin the graph and TaxCalc omissions. Tracked by `tenforty-3bt`
-and `tenforty-doo`; the TaxCalc report is staged upstream.
+The graph now implements the increase from shared table constants and pins the
+threshold, partial-increase, and cap regimes for both years. The F23
+reference-delta model applies to graph and OTS because TaxCalc remains the
+reference with the omission; only the TaxCalc strict-xfail remains. The graph
+fix is tracked by `tenforty-3bt`, and the staged TaxCalc report remains tracked
+by `tenforty-doo`.
 
 ### F24. NEW, ADJUDICATED — OTS 2024 uses stale MFS line-4 constants
 

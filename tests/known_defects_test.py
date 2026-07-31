@@ -338,11 +338,6 @@ def test_ots_amt_preserves_the_zero_taxable_income_floor():
     assert graph.federal_amt == pytest.approx(35_412.00, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F23: graph and TaxCalc omit the Form 6251 high-income MFS "
-    "increase on line 4",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_graph_applies_the_high_income_mfs_amt_increase():
     """2025 MFS line 4 adds 25% of AMTI above $900,350."""

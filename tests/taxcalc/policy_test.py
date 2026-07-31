@@ -14,7 +14,7 @@ from .taxcalc_policy import (
     _f19_deduction_choice_rule,
     _f21_taxcalc_qw_qbi_phase_range,
     _f22_ots_amt_taxable_income_floor,
-    _f23_taxcalc_graph_omit_mfs_amt_increase,
+    _f23_taxcalc_omits_mfs_amt_increase,
     _f24_ots_2024_mfs_amt_constants,
     _f25_graph_2025_mfs_amt_cg_ceiling,
     _f26_taxcalc_itemized_amt_floor,
@@ -164,13 +164,14 @@ def test_f22_is_a_signed_correction_to_the_correct_amt_path():
 def test_f23_models_the_official_mfs_line4_increase():
     """The reference defect contributes at most 28% of the required addition."""
     case = _case(year=2025, status="Married/Sep")
-    reference = {"amti": 920_350.0}
+    reference = {"amti": 904_600.0}
 
-    model = _f23_taxcalc_graph_omit_mfs_amt_increase("ots", case, reference)
+    model = _f23_taxcalc_omits_mfs_amt_increase("ots", case, reference)
+    graph_model = _f23_taxcalc_omits_mfs_amt_increase("graph", case, reference)
 
     assert model["amt"].minimum == 0.0
     assert model["amt"].maximum == pytest.approx(1_400.0)
-    assert _f23_taxcalc_graph_omit_mfs_amt_increase("graph", case, reference) == {}
+    assert graph_model == model
 
 
 def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
@@ -185,7 +186,7 @@ def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
 
     model = _f24_ots_2024_mfs_amt_constants("ots", case, reference)
 
-    assert _f23_taxcalc_graph_omit_mfs_amt_increase("ots", case, reference) == {}
+    assert _f23_taxcalc_omits_mfs_amt_increase("ots", case, reference) == {}
     assert model["amt"].minimum == 0.0
     assert model["amt"].maximum == pytest.approx(1_649.375)
 

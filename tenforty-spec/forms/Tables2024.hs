@@ -14,6 +14,8 @@ module Tables2024
     amtExemption2024,
     amtPhaseOutThreshold2024,
     amtRate1Threshold2024,
+    amtMfsIncreaseThreshold2024,
+    amtMfsIncreaseCap2024,
 
     -- * Self-Employment Tax
     ssWageBase2024,
@@ -140,6 +142,16 @@ additionalMedicareThreshold2024 = byStatus 200000 250000 125000 200000 200000
 -- Order: Single, MFJ, MFS, HoH, QW
 amtRate1Threshold2024 :: ByStatus (Amount Dollars)
 amtRate1Threshold2024 = byStatus 232600 232600 116300 232600 232600
+
+-- | Form 6251 line 4 special increase for married filing separately. The
+-- threshold is the point where the MFS exemption is fully phased out.
+amtMfsIncreaseThreshold2024 :: Amount Dollars
+amtMfsIncreaseThreshold2024 =
+  forStatus amtPhaseOutThreshold2024 MarriedSeparate
+    + 4 * forStatus amtExemption2024 MarriedSeparate
+
+amtMfsIncreaseCap2024 :: Amount Dollars
+amtMfsIncreaseCap2024 = forStatus amtExemption2024 MarriedSeparate
 
 -- | 2024 Social Security wage base
 ssWageBase2024 :: Amount Dollars

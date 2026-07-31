@@ -119,6 +119,15 @@ spec n = do
     it "multiplication by rate scales correctly" $ property $ \(d :: Double) (r :: Double) ->
       unAmount (Amount d * Amount r :: Amount Dollars) == d * r
 
+  describe "Form 6251 MFS line-4 tables" $ do
+    it "derives the 2024 threshold and cap from the exemption table" $ do
+      amtMfsIncreaseThreshold2024 `shouldBe` 875950
+      amtMfsIncreaseCap2024 `shouldBe` 66650
+
+    it "derives the 2025 threshold and cap from the exemption table" $ do
+      amtMfsIncreaseThreshold2025 `shouldBe` 900350
+      amtMfsIncreaseCap2025 `shouldBe` 68500
+
   describe "BracketTable" $ do
     forM_ taxYears $ \ty -> do
       let yr = show (tyYear ty)
