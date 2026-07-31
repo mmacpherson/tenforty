@@ -199,7 +199,6 @@ and a bounded ordinary-income sizing exercise. They also measure where forward
 simulation remains competitive and explain why derivatives alone cannot find
 true tax cliffs.
 
-
 ### Creating Tax Tables: Federal/State Tax Brackets as a Function of W2 Income
 
 The `evaluate_returns` method sweeps out a grid over any input arguments that
