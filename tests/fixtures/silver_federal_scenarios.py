@@ -268,6 +268,50 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         expected_federal_tax=10965.0,
         expected_federal_agi=101900.0,
     ),
+    # Single with $100k SE profit and $60k LTCG.
+    # AGI: $100,000 - $7,064.775 half-SE tax + $60,000 = $152,935.225.
+    # Taxable before QBI: $152,935.225 - $14,600 standard deduction = $138,335.225.
+    # Form 8995 capital-gain limit:
+    # ($138,335.225 - $60,000) * 20% = $15,667.045 QBI deduction.
+    # Taxable income: $138,335.225 - $15,667.045 = $122,668.18.
+    # Income tax: $17,839.9996; SE tax: $14,129.55; total: $31,969.5496.
+    TaxScenario(
+        source="Tax-Calculator 6.7.2 / IRS Form 8995",
+        description="Single below QBI threshold with SE income and LTCG limit",
+        year=2024,
+        state=None,
+        filing_status="Single",
+        w2_income=0.0,
+        self_employment_income=100000.0,
+        long_term_capital_gains=60000.0,
+        expected_federal_tax=31969.5496,
+        expected_federal_agi=152935.225,
+        expected_federal_taxable_income=122668.18,
+        backend="graph",
+    ),
+    # Single with $250k SE profit and $60k LTCG. Tax-Calculator assumes zero
+    # business W-2 wages and UBIA for tenforty's input surface, so Form 8995-A
+    # reduces QBI to zero: taxable income is AGI $296,199.1125 less the $14,600
+    # standard deduction. The graph still applies simplified Form 8995 and
+    # deducts $44,319.8225, tracked by tenforty-mhe. These expected values pin
+    # Tax-Calculator's assumption, not a tenforty policy decision: if mhe adds
+    # business-wage/UBIA inputs, update this scenario rather than merely
+    # removing known_failure.
+    TaxScenario(
+        source="Tax-Calculator 6.7.2 / IRS Form 8995-A",
+        description="Single above QBI threshold with SE income and LTCG",
+        year=2024,
+        state=None,
+        filing_status="Single",
+        w2_income=0.0,
+        self_employment_income=250000.0,
+        long_term_capital_gains=60000.0,
+        expected_federal_tax=87757.866,
+        expected_federal_agi=296199.1125,
+        expected_federal_taxable_income=281599.1125,
+        known_failure="Graph lacks the above-threshold Form 8995-A limitation",
+        backend="graph",
+    ),
     # 2023 Single filer in 12% bracket
     # Taxable income: $30,000
     # Formula: $3,380

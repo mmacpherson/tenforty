@@ -13,6 +13,7 @@ class TaxScenario:
     state: str | None
     filing_status: str
     w2_income: float
+    self_employment_income: float = 0.0
     taxable_interest: float = 0.0
     qualified_dividends: float = 0.0
     ordinary_dividends: float = 0.0
@@ -24,5 +25,6 @@ class TaxScenario:
     expected_federal_tax: float | None = None
     expected_state_tax: float | None = None
     expected_federal_agi: float | None = None
+    expected_federal_taxable_income: float | None = None
     known_failure: str | None = None
     backend: str | None = None
