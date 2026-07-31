@@ -31,15 +31,6 @@ skip_if_graph_unavailable = pytest.mark.skipif(
 )
 
 
-@pytest.mark.xfail(reason="F3: OTS never supplies 1040 line 13 (QBI)", strict=True)
-def test_ots_qbi_deduction_reaches_1040():
-    """MFJ, $80k SE profit: §199A deduction is $9,029.64, taxable $36,118.54."""
-    r = evaluate_return(
-        year=2024, filing_status="Married/Joint", self_employment_income=80_000
-    )
-    assert r.federal_taxable_income == pytest.approx(36_118.54, abs=1.0)
-
-
 @skip_if_graph_unavailable
 def test_graph_qbi_uses_net_base():
     """Single, $50k wages + $80k SE: QBI base must be net of the half-SE deduction.

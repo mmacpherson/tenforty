@@ -19,6 +19,7 @@ from .models import (
     SUBORDINATE_FORM_CONFIG,
     InterpretedTaxReturn,
     OTSFieldTerminator,
+    OTSFilingStatus,
     OTSForm,
     OTSParseError,
     OTSState,
@@ -361,9 +362,74 @@ def evaluate_form(
 
 _FORM_DISPATCH_ALIASES = {
     "Form_6781": "f6781",
+    "Form_8995": "f8995",
     "Form_8959": "f8959",
     "Form_8960": "f8960",
 }
+
+_QBI_THRESHOLDS = {
+    2024: {"joint": 383_900.0, "other": 191_950.0},
+    2025: {"joint": 394_600.0, "other": 197_300.0},
+}
+
+
+def _form_8995_input_values(
+    year: int,
+    federal_return: dict[str, Any],
+) -> dict[str, Any]:
+    qbi = federal_return.get("S1_3", 0.0) - sum(
+        federal_return.get(key, 0.0) for key in ("S1_15", "S1_16", "S1_17")
+    )
+    if "D15" in federal_return and "D16" in federal_return:
+        capital_gain = max(
+            0.0,
+            min(federal_return["D15"], federal_return["D16"]),
+        )
+    else:
+        gain_key = "L7a" if year >= 2025 else "L7"
+        capital_gain = max(0.0, federal_return.get(gain_key, 0.0))
+    net_capital_gain = max(
+        0.0,
+        federal_return.get("L3a", 0.0) + capital_gain,
+    )
+    return {
+        "FileName1040": "__FED_FILENAME__",
+        "L1_i_c": qbi,
+        "L12": net_capital_gain,
+    }
+
+
+def _form_8995a_deduction(
+    year: int,
+    filing_status: Any,
+    natural_input: dict[str, Any],
+    federal_return: dict[str, Any],
+    form_8995: dict[str, Any],
+) -> float:
+    threshold_kind = (
+        "joint" if filing_status == OTSFilingStatus.MARRIED_JOINT else "other"
+    )
+    threshold = _QBI_THRESHOLDS[year][threshold_kind]
+    phase_range = 100_000.0 if threshold_kind == "joint" else 50_000.0
+    taxable_income_before_qbi = federal_return.get("L15", 0.0)
+    phase = min(
+        1.0,
+        max(0.0, (taxable_income_before_qbi - threshold) / phase_range),
+    )
+
+    applicable_percentage = 1.0 - phase if natural_input["qbi_is_sstb"] else 1.0
+    qbi_component = form_8995.get("L5", 0.0) * applicable_percentage
+    applicable_wages = natural_input["qbi_w2_wages"] * applicable_percentage
+    applicable_ubia = natural_input["qbi_ubia"] * applicable_percentage
+    wage_property_limit = max(
+        0.5 * applicable_wages,
+        0.25 * applicable_wages + 0.025 * applicable_ubia,
+    )
+    reduction = max(0.0, qbi_component - wage_property_limit) * phase
+    limited_qbi_component = qbi_component - reduction
+    reit_ptp_component = form_8995.get("L9", 0.0)
+    taxable_income_limit = form_8995.get("L14", 0.0)
+    return min(limited_qbi_component + reit_ptp_component, taxable_income_limit)
 
 
 def _evaluate_subordinate(
@@ -371,6 +437,7 @@ def _evaluate_subordinate(
     form_id: str,
     form_values: dict[str, Any],
     on_error: str = "raise",
+    fed_form_text: str | None = None,
 ) -> dict[str, Any]:
     """Evaluate a single subordinate form (Schedule SE, Form 8959, etc.)."""
     key = (year, form_id)
@@ -380,7 +447,13 @@ def _evaluate_subordinate(
     form_text = generate_ots_return(form_values, form_config)
     logger.debug(f"Raw {form_id} OTS Input:\n{form_text}")
     dispatch_id = _FORM_DISPATCH_ALIASES.get(form_id, form_id)
-    ots_output = otslib._evaluate_form(year, dispatch_id, form_text, on_error=on_error)
+    ots_output = otslib._evaluate_form(
+        year,
+        dispatch_id,
+        form_text,
+        fed_form_text=fed_form_text,
+        on_error=on_error,
+    )
     logger.debug(f"Raw {form_id} OTS Output:\n{ots_output}")
     return parse_ots_return(ots_output, year=year, form_id=form_id)
 
@@ -516,7 +589,66 @@ def evaluate_natural_input_form(
         )
     logger.debug(f"{state_form_values=}")
 
-    # Phase 2: Evaluate 1040 (and state) with injected subordinate results.
+    # Phase 2: Run a preliminary 1040 for forms whose result feeds back into it.
+    for sub_cfg in subordinate_configs:
+        if sub_cfg.phase != 2:
+            continue
+        if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
+            continue
+        if not subordinate_form_applies(sub_cfg, natural_form_values):
+            continue
+
+        federal_form_config = OTS_FORM_CONFIG[(year.value, federal_form_id)]
+        preliminary_form_text = generate_ots_return(
+            federal_form_values, federal_form_config
+        )
+        preliminary_output = otslib._evaluate_form(
+            year.value,
+            federal_form_id,
+            preliminary_form_text,
+            on_error=on_error,
+        )
+        preliminary_return = parse_ots_return(
+            preliminary_output,
+            year=year.value,
+            form_id=federal_form_id,
+        )
+        sub_form_values = sub_cfg.defaults | _form_8995_input_values(
+            year.value, preliminary_return
+        )
+        try:
+            sub_result = _evaluate_subordinate(
+                year.value,
+                sub_cfg.form_id,
+                sub_form_values,
+                on_error=on_error,
+                fed_form_text=preliminary_output,
+            )
+        except Exception:
+            if on_error == "raise":
+                raise
+            if on_error == "warn":
+                logger.warning(
+                    "Subordinate form %s/%s failed; skipping.",
+                    year.value,
+                    sub_cfg.form_id,
+                    exc_info=True,
+                )
+            continue
+
+        qbi_deduction = _form_8995a_deduction(
+            year.value,
+            natural_form_values["filing_status"],
+            natural_form_values,
+            preliminary_return,
+            sub_result,
+        )
+        for fed_key in sub_cfg.export_map.values():
+            federal_form_values[fed_key] = qbi_deduction
+        for natural_name in sub_cfg.output_map.values():
+            subordinate_natural_outputs[natural_name] = qbi_deduction
+
+    # Evaluate the final 1040 (and state) with injected subordinate results.
     fed_import_map = (
         state_natural_config.fed_import_map if state_natural_config else None
     )
@@ -646,11 +778,6 @@ def evaluate_return(
     )
 
     if backend == "ots":
-        if input_data.qbi_w2_wages or input_data.qbi_ubia or input_data.qbi_is_sstb:
-            raise NotImplementedError(
-                "QBI business W-2 wages, UBIA, and SSTB status are supported only "
-                "by backend='graph'; OpenTaxSolver does not compute Form 8995-A."
-            )
         return InterpretedTaxReturn(
             **evaluate_natural_input_form(
                 input_data.year,

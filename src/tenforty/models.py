@@ -353,6 +353,7 @@ class InterpretedTaxReturn(BaseModel):
     federal_effective_tax_rate: float = 0.0
     federal_tax_bracket: float = 0.0
     federal_taxable_income: float = 0.0
+    federal_qbi_deduction: float = 0.0
     federal_amt: float = 0.0
     federal_income_tax: float = 0.0
     federal_se_tax: float = 0.0
@@ -1206,6 +1207,23 @@ _SUBORDINATE_FORM_CONFIG = [
         "export_map": {"L18": "S2_11"},
         "output_map": {"L18": "additional_medicare_tax"},
     },
+    # 2024 Form 8995/8995-A — Phase 2 (preliminary 1040 feeds the deduction
+    # back into the final 1040). OTS supplies the independent simplified-form
+    # components; Python orchestration applies the missing 8995-A limitation.
+    {
+        "year": 2024,
+        "form_id": "Form_8995",
+        "phase": 2,
+        "input_map": {},
+        "export_map": {"L15": "L13"},
+        "activation_naturals": [
+            "self_employment_income",
+            "qbi_w2_wages",
+            "qbi_ubia",
+            "qbi_is_sstb",
+        ],
+        "output_map": {"L15": "qbi_deduction"},
+    },
     # 2024 Form 8960 — Phase 3 (needs AGI from 1040)
     {
         "year": 2024,
@@ -1268,6 +1286,21 @@ _SUBORDINATE_FORM_CONFIG = [
         },
         "export_map": {"L18": "S2_11"},
         "output_map": {"L18": "additional_medicare_tax"},
+    },
+    # 2025 Form 8995/8995-A — Phase 2; see the 2024 entry above.
+    {
+        "year": 2025,
+        "form_id": "Form_8995",
+        "phase": 2,
+        "input_map": {},
+        "export_map": {"L15": "L13a"},
+        "activation_naturals": [
+            "self_employment_income",
+            "qbi_w2_wages",
+            "qbi_ubia",
+            "qbi_is_sstb",
+        ],
+        "output_map": {"L15": "qbi_deduction"},
     },
     # 2025 Form 8960 — Phase 3
     {
