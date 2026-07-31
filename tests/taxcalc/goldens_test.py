@@ -90,6 +90,7 @@ def test_golden_grid_keeps_nonvacuous_boundary_strata():
         "M_amt_mfs",
         "N_amt_mfs_gain",
         "O_amt_itemized_floor",
+        "P_amt_mfs_stale_only",
     } <= tags
     assert sum(case["expected"]["amt"] > 0.0 for case in cases) >= 10
     assert any(case["w2"] > 400_000.0 for case in cases)

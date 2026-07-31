@@ -44,7 +44,7 @@ signature, and update this table in the same PR.
 
 ## Method
 
-1,178 boundary-focused federal cases (SS wage base, NIIT/additional-Medicare
+1,179 boundary-focused federal cases (SS wage base, NIIT/additional-Medicare
 thresholds, QBI interactions, capital-gain mixes, dividend subsets, forced
 itemization) across all five filing statuses, evaluated on three engines:
 tenforty OTS, tenforty graph, and taxcalc. Eight quantities compared per case:
@@ -630,6 +630,13 @@ F24 models only the signed difference between OTS's stale addition and the
 official F23 addition; the two ranges compose. The vendored source remains
 unchanged, and the upstream report plus strict-xfail are tracked by
 `tenforty-2jv`.
+
+An independent golden witness places OTS AMTI at $850,000: above the stale
+$831,150 threshold but below the official $875,950 threshold. F24 contributes
+$1,649.38 of modeled AMT there while F23 contributes exactly zero, preventing
+the overlapping high-income witness from masking an error in either model.
+The effective rate is 35% in this interval: 28% tentative minimum tax plus the
+7% effect of phasing out another 25 cents of exemption per added dollar.
 
 ### F25. NEW, ADJUDICATED — graph Form 6251 retains the stale MFS gain ceiling
 

@@ -210,6 +210,18 @@ def build_cases() -> list[dict]:
                 iso=50_000,
             )
         if year == 2024:
+            # P_amt_mfs_stale_only: OTS AMTI is above its stale 2023 line-4
+            # threshold but below the official 2024 threshold. F24 is active
+            # here while F23's official addition is exactly zero.
+            add(
+                year,
+                "P_amt_mfs_stale_only",
+                status="Married/Sep",
+                w2=600_000,
+                itemized=20_000,
+                std_or_item="Itemized",
+                iso=250_000,
+            )
             add(
                 year,
                 "O_amt_itemized_floor",

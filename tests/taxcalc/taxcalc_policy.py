@@ -381,6 +381,17 @@ def _mfs_amt_line4_addition(amti: float, threshold: float, cap: float) -> float:
     return min(cap, 0.25 * max(0.0, amti - threshold))
 
 
+def _mfs_amt_line4_tax_effect(
+    amti: float, addition: float, exemption_terminal: float
+) -> float:
+    exemption_before = 0.25 * max(0.0, exemption_terminal - amti)
+    exemption_after = 0.25 * max(
+        0.0,
+        exemption_terminal - amti - addition,
+    )
+    return 0.28 * (addition + exemption_before - exemption_after)
+
+
 def _f23_taxcalc_graph_omit_mfs_amt_increase(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
@@ -399,9 +410,8 @@ def _f23_taxcalc_graph_omit_mfs_amt_increase(
     addition = _mfs_amt_line4_addition(ots_amti, *rule)
     if addition == 0.0:
         return {}
-    return _same_delta(
-        {"amt", "income_tax", "total_tax"}, DeltaRange(0.0, 0.28 * addition)
-    )
+    tax_effect = _mfs_amt_line4_tax_effect(ots_amti, addition, rule[0])
+    return _same_delta({"amt", "income_tax", "total_tax"}, DeltaRange(0.0, tax_effect))
 
 
 def _f24_ots_2024_mfs_amt_constants(
@@ -419,7 +429,10 @@ def _f24_ots_2024_mfs_amt_constants(
     ots_amti = reference["amti"] + max(0.0, case.get("itemized", 0.0))
     official = _mfs_amt_line4_addition(ots_amti, *MFS_AMT_LINE4_RULE[2024])
     stale = _mfs_amt_line4_addition(ots_amti, *OTS_2024_MFS_AMT_LINE4_RULE)
-    tax_delta = 0.28 * (stale - official)
+    exemption_terminal = MFS_AMT_LINE4_RULE[2024][0]
+    tax_delta = _mfs_amt_line4_tax_effect(
+        ots_amti, stale, exemption_terminal
+    ) - _mfs_amt_line4_tax_effect(ots_amti, official, exemption_terminal)
     if tax_delta == 0.0:
         return {}
     delta = DeltaRange(min(0.0, tax_delta), max(0.0, tax_delta))

@@ -6,7 +6,7 @@
    2024,
    2025
   ],
-  "n_cases": 1178
+  "n_cases": 1179
  },
  "cases": [
   {
@@ -16936,6 +16936,34 @@
     "income_tax": 287586.0,
     "total_tax": 293211.0,
     "amti": 1035400.0,
+    "qbi_deduction": 0.0
+   },
+   "expected_spouse_attr": null
+  },
+  {
+   "year": 2024,
+   "tag": "P_amt_mfs_stale_only",
+   "status": "Married/Sep",
+   "w2": 600000.0,
+   "se": 0.0,
+   "stcg": 0.0,
+   "ltcg": 0.0,
+   "interest": 0.0,
+   "ord_div": 0.0,
+   "qual_div": 0.0,
+   "itemized": 20000.0,
+   "iso": 250000.0,
+   "std_or_item": "Itemized",
+   "expected": {
+    "agi": 600000.0,
+    "taxable_income": 580000.0,
+    "se_tax": 0.0,
+    "niit": 0.0,
+    "addl_medicare": 4275.0,
+    "amt": 49194.75,
+    "income_tax": 226857.5,
+    "total_tax": 231132.5,
+    "amti": 830000.0,
     "qbi_deduction": 0.0
    },
    "expected_spouse_attr": null

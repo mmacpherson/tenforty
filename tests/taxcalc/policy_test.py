@@ -173,15 +173,21 @@ def test_f23_models_the_official_mfs_line4_increase():
     assert _f23_taxcalc_graph_omit_mfs_amt_increase("graph", case, reference) == {}
 
 
-def test_f24_models_only_the_stale_2024_constant_difference():
-    """OTS's early threshold composes with the official F23 reference delta."""
-    case = _case(year=2024, status="Married/Sep")
-    reference = {"amti": 875_950.0}
+def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
+    """OTS's stale rule is active while the official line-4 addition is zero."""
+    case = _case(
+        year=2024,
+        status="Married/Sep",
+        itemized=20_000.0,
+        std_or_item="Itemized",
+    )
+    reference = {"amti": 830_000.0}
 
     model = _f24_ots_2024_mfs_amt_constants("ots", case, reference)
 
+    assert _f23_taxcalc_graph_omit_mfs_amt_increase("ots", case, reference) == {}
     assert model["amt"].minimum == 0.0
-    assert model["amt"].maximum == pytest.approx(3_136.0)
+    assert model["amt"].maximum == pytest.approx(1_649.375)
 
 
 def test_f25_caps_the_stale_mfs_preferential_band_at_1665():
