@@ -34,6 +34,7 @@ delete the signature, and update this table in the same PR.
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
 | F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
+| F20 | Suite adapter compares post-refund `iitax` with pre-refund tenforty tax | taxcalc harness | fixed (tenforty-jte) | differential sweep |
 
 ## Method
 
@@ -362,6 +363,29 @@ dangerous — the moment AMT coverage is added (which `tenforty-y90` plans),
 every such case would compare tenforty *with* the preference against taxcalc
 *without* it, manufacturing large bogus divergences on both backends and
 burying any real one. Fix the adapter before adding the coverage.
+
+### F20. FIXED — the suite compares post-refund `iitax` with pre-refund tax
+
+Found while validating the graph autodiff kink fix. Tax-Calculator defines
+`iitax` as `c09200 - refund`: Form 1040 line 24 less its line-32 analogue of
+refundable credits. Tenforty's `federal_income_tax` and `federal_total_tax`
+are pre-refund line-24 quantities. The suite nevertheless mapped raw `iitax`
+directly, so a low-income return with an EITC appeared to disagree even though
+both engines reported zero pre-refund tax.
+
+The apparent batch-cardinality defect had the same cause. Tax-Calculator
+generates `credit_claim_urn` by row position for probabilistic EITC take-up.
+TY2024 Head of Household with wages of $802 receives no credit alone, but as
+the second row of a two-record batch it receives a $61.353 EITC: raw `iitax`
+changes from $0 to -$61.353 while pre-refund tax remains $0 in both cases.
+That microsimulation behavior is not part of the quantity this differential
+claims to compare.
+
+The adapter now adds `refund` back to `iitax` before applying its existing
+NIIT, self-employment-tax, and Additional-Medicare bucketing. It retains raw
+`iitax` and `refund` as diagnostics, and deterministic conformance tests pin
+both the one-record and multi-record cases. No policy signature excuses the
+difference.
 
 ### F7. Itemization semantics diverge between backends
 

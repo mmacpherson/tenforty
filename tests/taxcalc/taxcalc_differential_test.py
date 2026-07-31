@@ -171,9 +171,11 @@ def taxcalc_batch(cases, wage_attribution="primary"):
         arr = calc.array
         for row, i in enumerate(idx):
             iitax = float(arr("iitax")[row])
+            refund = float(arr("refund")[row])
             setax = float(arr("setax")[row])
             amc = float(arr("ptax_amc")[row])
             niit = float(arr("niit")[row])
+            pre_refund_iitax = iitax + refund
             out[i] = {
                 "agi": float(arr("c00100")[row]),
                 "taxable_income": float(arr("c04800")[row]),
@@ -181,10 +183,14 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                 "niit": niit,
                 "addl_medicare": amc,
                 "amt": float(arr("c09600")[row]),
-                # taxcalc iitax includes NIIT; tenforty federal_income_tax
-                # excludes it.
-                "income_tax": iitax - niit,
-                "total_tax": iitax + setax + amc,
+                # Tax-Calculator nets refundable credits out of iitax, while
+                # tenforty's federal tax outputs stop at Form 1040 line 24.
+                # Add its line-32 analogue back before preserving the existing
+                # NIIT and employment-tax bucketing.
+                "income_tax": pre_refund_iitax - niit,
+                "total_tax": pre_refund_iitax + setax + amc,
+                "iitax": iitax,
+                "refund": refund,
             }
     return out
 
