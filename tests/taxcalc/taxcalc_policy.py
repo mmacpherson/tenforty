@@ -39,22 +39,7 @@ QBI_SIMPLIFIED_THRESHOLD = {
     (2025, "Widow(er)"): 197_300.0,
 }
 
-_QBI_AFFECTED_QUANTITIES = {"taxable_income", "income_tax", "total_tax"}
-_F21_AFFECTED_QUANTITIES = _QBI_AFFECTED_QUANTITIES | {"amt"}
-
-
-def _f3_qbi(backend: str, case: dict) -> set[str]:
-    """F3: OTS omits QBI on every self-employment case.
-
-    OTS omits the deduction entirely (it reads 1040 line 13 as a direct input
-    and nothing supplies it — tenforty-2u6), so every OTS case with QBI remains
-    excused. The graph implements both the simplified and Form 8995-A paths.
-    """
-    if case.get("se", 0) <= 0:
-        return set()
-    if backend == "ots":
-        return _QBI_AFFECTED_QUANTITIES.copy()
-    return set()
+_F21_AFFECTED_QUANTITIES = {"taxable_income", "amt", "income_tax", "total_tax"}
 
 
 def _f21_taxcalc_qw_qbi_phase_range(
@@ -62,7 +47,7 @@ def _f21_taxcalc_qw_qbi_phase_range(
 ) -> set[str]:
     """F21: TaxCalc doubles the QBI phase-in range for qualifying widow(er)."""
     if (
-        backend != "graph"
+        backend not in {"graph", "ots"}
         or case.get("status") != "Widow(er)"
         or case.get("se", 0) <= 0
         or reference is None
@@ -218,7 +203,6 @@ def _f14_taxcalc_omits_amt_std_addback(backend: str, case: dict) -> set[str]:
 
 
 SIGNATURES: list[Callable[[str, dict], set[str]]] = [
-    _f3_qbi,
     _f7_itemized_semantics,
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,

@@ -187,17 +187,3 @@ def test_qbi_business_amounts_cannot_be_negative(field):
     """Wages and UBIA reject amounts outside their nonnegative domain."""
     with pytest.raises(ValidationError):
         TaxReturnInput(**{field: -1.0})
-
-
-@pytest.mark.parametrize(
-    "extra",
-    [
-        {"qbi_w2_wages": 1.0},
-        {"qbi_ubia": 1.0},
-        {"qbi_is_sstb": True},
-    ],
-)
-def test_ots_rejects_graph_only_qbi_business_inputs(extra):
-    """OTS fails explicitly rather than silently dropping Form 8995-A inputs."""
-    with pytest.raises(NotImplementedError, match="Form 8995-A"):
-        evaluate_return(self_employment_income=100_000.0, **extra)

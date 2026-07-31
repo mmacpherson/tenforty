@@ -53,10 +53,10 @@ INVENTORY = {
     ("form_8960", "ordinary_dividends"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "long_term_capital_gains"): {"ots": "mapped", "graph": "mapped"},
     ("form_8960", "short_term_capital_gains"): {"ots": "mapped", "graph": "mapped"},
-    ("form_8995", "self_employment_income"): {
-        "ots": "missing:F3",  # no Form 8995 config exists at all
-        "graph": "mapped",
-    },
+    ("form_8995", "self_employment_income"): {"ots": "mapped", "graph": "mapped"},
+    ("form_8995", "qbi_w2_wages"): {"ots": "mapped", "graph": "mapped"},
+    ("form_8995", "qbi_ubia"): {"ots": "mapped", "graph": "mapped"},
+    ("form_8995", "qbi_is_sstb"): {"ots": "mapped", "graph": "mapped"},
     # Form 8995 line 13 (net capital gain) is deliberately NOT inventoried here,
     # for either capital-gain natural. The derivative is the wrong instrument for
     # it: line 13 imports the same gain that line 12 already carries, so a

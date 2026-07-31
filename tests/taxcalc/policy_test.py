@@ -4,12 +4,10 @@ import pytest
 
 from .taxcalc_policy import (
     QBI_SIMPLIFIED_THRESHOLD,
-    _f3_qbi,
     _f21_taxcalc_qw_qbi_phase_range,
 )
 
-_QBI_QUANTITIES = {"taxable_income", "income_tax", "total_tax"}
-_F21_QUANTITIES = _QBI_QUANTITIES | {"amt"}
+_F21_QUANTITIES = {"taxable_income", "amt", "income_tax", "total_tax"}
 _EXPECTED_QBI_THRESHOLDS = {
     (2024, "Single"): 191_950.0,
     (2024, "Married/Joint"): 383_900.0,
@@ -39,39 +37,9 @@ def _case(**updates):
     return case
 
 
-def test_f3_keeps_ots_qbi_broadly_excused():
-    """OTS still omits QBI even when Form 8995's simplified method applies."""
-    case = _case(w2=50_000.0, se=80_000.0)
-
-    assert _f3_qbi("ots", case) == _QBI_QUANTITIES
-
-
-def test_f3_exposes_the_graph_net_qbi_anchor():
-    """The corrected below-threshold graph case must reach the differential."""
-    case = _case(w2=50_000.0, se=80_000.0)
-
-    assert _f3_qbi("graph", case) == set()
-
-
 def test_qbi_simplified_thresholds_match_form_8995():
     """Only married filing jointly receives the doubled statutory threshold."""
     assert QBI_SIMPLIFIED_THRESHOLD == _EXPECTED_QBI_THRESHOLDS
-
-
-@pytest.mark.parametrize(("year", "status"), sorted(_EXPECTED_QBI_THRESHOLDS))
-def test_f3_never_excuses_the_graph(year, status):
-    """The graph now implements both Form 8995 and Form 8995-A."""
-    case = _case(year=year, status=status, w2=1_000_000.0, se=100_000.0)
-
-    assert _f3_qbi("graph", case) == set()
-
-
-@pytest.mark.parametrize("backend", ["ots", "graph"])
-def test_f3_does_not_fire_without_self_employment_income(backend):
-    """The signature cannot hide unrelated high-income disagreements."""
-    case = _case(w2=1_000_000.0)
-
-    assert _f3_qbi(backend, case) == set()
 
 
 def test_f21_excuses_only_the_qw_taxcalc_phase_range():
@@ -80,7 +48,7 @@ def test_f21_excuses_only_the_qw_taxcalc_phase_range():
     reference = {"taxable_income": 200_000.0, "qbi_deduction": 10_000.0}
 
     assert _f21_taxcalc_qw_qbi_phase_range("graph", case, reference) == _F21_QUANTITIES
-    assert _f21_taxcalc_qw_qbi_phase_range("ots", case, reference) == set()
+    assert _f21_taxcalc_qw_qbi_phase_range("ots", case, reference) == _F21_QUANTITIES
     assert (
         _f21_taxcalc_qw_qbi_phase_range(
             "graph", {**case, "status": "Single"}, reference

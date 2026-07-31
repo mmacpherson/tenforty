@@ -19,7 +19,7 @@ delete the signature, and update this table in the same PR.
 |----|---------|----------|--------|----------|
 | F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
 | F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
-| F3 | QBI: missing (OTS) / above-threshold limit (graph) | OTS orchestration + graph spec | graph fixed (tenforty-6hr, tenforty-mhe); OTS omission open (tenforty-2u6) | @bg002h, #278 |
+| F3 | QBI: missing (OTS) / above-threshold limit (graph) | OTS orchestration + graph spec | fixed (tenforty-6hr, tenforty-mhe, tenforty-2u6) | @bg002h, #278 |
 | F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed (OTS #296, graph: L5a imports Schedule D L16) | mapping assessment + differential sweep |
 | F5 | Graph Form 8959 Part II drops SE earnings (line 12 used min, not subtract) | graph spec | fixed | mapping assessment + differential sweep |
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
@@ -98,9 +98,11 @@ everything downstream of them.
   cases agree with TaxCalc where its parameters are correct. The previously
   dead threshold table is now live, with qualifying widow(er) corrected to the
   all-other-returns threshold and $50,000 phase-in range.
-- **Signature narrowed (tenforty-gyp, completed by tenforty-mhe):** OTS remains
-  excused on every self-employment case because it still omits Form 8995. The
-  graph F3 excusal is gone across both the simplified and Form 8995-A regions.
+- **OTS fixed (tenforty-2u6):** a preliminary OTS 1040 now feeds OTS's own Form
+  8995, preserving an independent QBI base and taxable-income/capital-gain
+  ceiling. Tenforty's orchestration applies the Form 8995-A wage, UBIA, and SSTB
+  phase calculation that OTS does not implement, injects the resulting deduction,
+  and reruns the 1040. The F3 differential signature is gone for both backends.
   Deterministic anchors cover the net QBI base, capital-gain limitation,
   zero-wage phase-in, both wage/UBIA branches, and SSTB treatment. F21 separately
   records TaxCalc's qualifying-widow(er) phase-range defect; it is not attributed
@@ -428,14 +430,13 @@ bugs are batch-path defects this scalar harness deliberately did not probe.
    - Form 8960 input_map: add `short_term_capital_gains` summed into L5a (F4);
    - activation: decide form firing from the *natural inputs consumed*, not
      the post-format values (F6);
-   - Form 8995: new phase-2 subordinate config fed by
-     taxable-income-before-QBI from the 1040 pass (F3), with the phase-out
-     assumption documented.
+   - Form 8995: completed in tenforty-2u6 with a preliminary OTS 1040 feeding
+     OTS Form 8995, tenforty's Form 8995-A limitation, and a final 1040 pass
+     carrying the resulting deduction (F3).
 4. **API decisions** (blocking full correctness, owner's call):
    - per-spouse wage/SE fields (completes F1 for MFJ; taxcalc's
      `e00200p`/`e00200s` is a working reference);
    - define "Itemized": force vs best-of, then make both backends match (F7);
-   - §199A above-threshold assumption (F3).
 5. **Keep the reference**: promote the harness to `scripts/`, commit a pinned
    golden fixture set at the semantic boundaries, and run the three-way sweep
    as a scheduled/pre-release job. Parity catches divergence; only an
