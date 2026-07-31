@@ -93,10 +93,11 @@ everything downstream of them.
   business W-2 wages / UBIA / SSTB status — concepts absent from tenforty's
   API (taxcalc assumes zero business wages, phasing the deduction to zero
   above the upper threshold). Any fix must choose an assumption there and
-  document it. The graph's threshold table also incorrectly gives qualifying
-  widow(er) the doubled MFJ threshold; Form 8995 assigns widow(er) the
-  all-other-returns threshold. Both graph limitations are tracked by
-  tenforty-mhe.
+  document it. The spec also exports an unused QBI threshold table whose
+  qualifying-widow(er) value incorrectly matches MFJ rather than the
+  all-other-returns threshold. That dead constant does not affect results
+  today, but must be corrected before a future Form 8995 gate consumes it;
+  both pieces of work are tracked by tenforty-mhe.
 - **Signature narrowed (tenforty-gyp):** OTS remains excused on every
   self-employment case because it still omits Form 8995. Graph is now excused
   only when generated gross income can exceed the applicable simplified-method
