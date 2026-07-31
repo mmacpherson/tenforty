@@ -293,7 +293,10 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
     # business W-2 wages and UBIA for tenforty's input surface, so Form 8995-A
     # reduces QBI to zero: taxable income is AGI $296,199.1125 less the $14,600
     # standard deduction. The graph still applies simplified Form 8995 and
-    # deducts $44,319.8225, tracked by tenforty-mhe.
+    # deducts $44,319.8225, tracked by tenforty-mhe. These expected values pin
+    # Tax-Calculator's assumption, not a tenforty policy decision: if mhe adds
+    # business-wage/UBIA inputs, update this scenario rather than merely
+    # removing known_failure.
     TaxScenario(
         source="Tax-Calculator 6.7.2 / IRS Form 8995-A",
         description="Single above QBI threshold with SE income and LTCG",
