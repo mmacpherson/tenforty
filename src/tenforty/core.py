@@ -19,6 +19,7 @@ from .models import (
     SUBORDINATE_FORM_CONFIG,
     InterpretedTaxReturn,
     OTSFieldTerminator,
+    OTSFilingStatus,
     OTSForm,
     OTSParseError,
     OTSState,
@@ -405,7 +406,9 @@ def _form_8995a_deduction(
     federal_return: dict[str, Any],
     form_8995: dict[str, Any],
 ) -> float:
-    threshold_kind = "joint" if str(filing_status) == "Married/Joint" else "other"
+    threshold_kind = (
+        "joint" if filing_status == OTSFilingStatus.MARRIED_JOINT else "other"
+    )
     threshold = _QBI_THRESHOLDS[year][threshold_kind]
     phase_range = 100_000.0 if threshold_kind == "joint" else 50_000.0
     taxable_income_before_qbi = federal_return.get("L15", 0.0)

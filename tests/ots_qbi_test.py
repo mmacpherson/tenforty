@@ -140,6 +140,9 @@ def test_ots_qbi_business_inputs_have_scalar_batch_parity():
     assert batch["federal_taxable_income"][0] == pytest.approx(
         scalar.federal_taxable_income, abs=0.01
     )
+    assert batch["federal_qbi_deduction"][0] == pytest.approx(
+        scalar.federal_qbi_deduction, abs=0.01
+    )
     assert batch["federal_total_tax"][0] == pytest.approx(
         scalar.federal_total_tax, abs=0.01
     )

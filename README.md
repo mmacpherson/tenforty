@@ -118,6 +118,7 @@ The functions output these fields:
 | federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
 | federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
 | federal_taxable_income          | Income subject to federal tax after deductions        |
+| federal_qbi_deduction           | Qualified business income deduction (Form 8995/8995-A) |
 | federal_amt                     | Federal Alternative Minimum Tax                       |
 | federal_income_tax              | Federal income tax + AMT (excludes SE tax, NIIT, Additional Medicare Tax) |
 | federal_se_tax                  | Federal self-employment tax (Schedule SE)             |

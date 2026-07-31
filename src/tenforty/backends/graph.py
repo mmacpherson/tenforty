@@ -41,6 +41,7 @@ if _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG:
 FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_1040_L11_agi": "federal_adjusted_gross_income",
     "us_1040_L15_taxable_income": "federal_taxable_income",
+    "us_form_8995_L16_qbi_deduction": "federal_qbi_deduction",
     "us_1040_L24_total_tax": "federal_total_tax",
     "us_form_6251_L11_amt": "federal_amt",
     "us_schedule_se_L10_se_tax": "federal_se_tax",

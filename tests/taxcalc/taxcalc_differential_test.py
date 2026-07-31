@@ -11,11 +11,10 @@ Structural choices:
   (policy deepcopy and parameter expansion) but is vectorized over records, so
   each hypothesis example is a *list* of cases evaluated in one taxcalc call.
   Shrinking collapses a failing list to the single minimal failing case.
-- **target()-guided graph search.** Each quantity's worst UNEXCUSED graph
-  disagreement is fed to hypothesis as an optimization target, so generation
-  climbs toward novel divergence instead of re-finding tracked defects. OTS
-  uses ordinary generation because harmless tax-table rounding otherwise
-  attracts the optimizer and causes repeated TaxCalc rebuilds.
+- **target()-guided search.** Each quantity's worst UNEXCUSED disagreement
+  beyond its allowed tolerance is fed to hypothesis as an optimization target,
+  so generation climbs toward novel divergence instead of harmless rounding or
+  already-tracked defects.
 - **@example anchors.** The audit's known counterexamples are pinned so every
   run exercises them deterministically regardless of search luck.
 - **MFJ attribution bounds.** taxcalc requires per-spouse wages; tenforty's
@@ -293,13 +292,13 @@ def tenforty_components(case, backend):
     }
 
 
-def _assert_components_match_taxcalc(backend, cases, *, guide_search):
+def _assert_components_match_taxcalc(backend, cases):
     expected = taxcalc_batch(cases)
     mfj_present = any(c["status"] == "Married/Joint" for c in cases)
     expected_alt = taxcalc_batch(cases, "spouse") if mfj_present else expected
 
     failures = []
-    worst = dict.fromkeys(QUANTITIES, 0.0)
+    worst_excess = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
         excused = excused_quantities(backend, case, exp)
@@ -310,20 +309,16 @@ def _assert_components_match_taxcalc(backend, cases, *, guide_search):
             diff = max(lo - ours[quantity], ours[quantity] - hi, 0.0)
             if quantity in excused:
                 continue
-            worst[quantity] = max(worst[quantity], diff)
+            worst_excess[quantity] = max(worst_excess[quantity], max(0.0, diff - tol))
             if diff > tol:
                 failures.append(
                     f"{case}: {quantity} got={ours[quantity]:,.2f} "
                     f"expected=[{lo:,.2f}, {hi:,.2f}] (diff {diff:,.2f} > {tol})"
                 )
-    if guide_search:
-        # target() accepts one observation per label per example, so feed it the
-        # batch maximum of unexcused disagreement: hypothesis steers toward novel
-        # divergence, not the already-tracked defects. OTS is excluded because
-        # its expected tax-table rounding gives the optimiser a harmless nonzero
-        # gradient and causes repeated TaxCalc rebuilds without new coverage.
-        for quantity, diff in worst.items():
-            target(diff, label=quantity)
+    # target() accepts one observation per label per example, so feed it the
+    # batch maximum beyond tolerance: harmless OTS rounding has a zero gradient.
+    for quantity, excess in worst_excess.items():
+        target(excess, label=quantity)
     assert not failures, "\n".join(failures[:5])
 
 
@@ -341,7 +336,7 @@ def _assert_components_match_taxcalc(backend, cases, *, guide_search):
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
     """Every quantity matches taxcalc within tolerance, unless excused by name."""
-    _assert_components_match_taxcalc(backend, cases, guide_search=backend == "graph")
+    _assert_components_match_taxcalc(backend, cases)
 
 
 # TaxCalc is an expensive oracle, so randomized QBI cases are batched and bounded.
@@ -353,7 +348,7 @@ def test_components_match_taxcalc(backend, cases):
 @given(cases=st.lists(_qbi_case_strategy(), min_size=1, max_size=30))
 def test_qbi_business_inputs_match_taxcalc(cases):
     """Generated graph wages, UBIA, and SSTB inputs agree with TaxCalc."""
-    _assert_components_match_taxcalc("graph", cases, guide_search=True)
+    _assert_components_match_taxcalc("graph", cases)
 
 
 # OTS executes three native forms per record, so use fewer, denser oracle batches.
@@ -365,4 +360,4 @@ def test_qbi_business_inputs_match_taxcalc(cases):
 @given(cases=st.lists(_qbi_case_strategy(), min_size=5, max_size=30))
 def test_ots_qbi_business_inputs_match_taxcalc(cases):
     """Generated OTS wages, UBIA, and SSTB inputs agree with TaxCalc."""
-    _assert_components_match_taxcalc("ots", cases, guide_search=False)
+    _assert_components_match_taxcalc("ots", cases)

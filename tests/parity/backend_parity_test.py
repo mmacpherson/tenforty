@@ -502,6 +502,51 @@ def test_graph_se_income_produces_qbi_deduction(self_employment_income):
     )
 
 
+# Cross-backend evaluation is an expensive oracle, so keep this sweep bounded.
+@skip_if_backends_unavailable
+@given(
+    year=st.sampled_from([2024, 2025]),
+    filing_status=st.sampled_from(
+        ["Single", "Married/Joint", "Married/Sep", "Widow(er)"]
+    ),
+    self_employment_income=st.integers(10_000, 500_000),
+    taxable_interest=st.integers(0, 200_000),
+    long_term_capital_gains=st.integers(0, 100_000),
+    qbi_w2_wages=st.integers(0, 200_000),
+    qbi_ubia=st.integers(0, 2_000_000),
+    qbi_is_sstb=st.booleans(),
+)
+@settings(max_examples=100, deadline=None)
+def test_qbi_form_8995a_parity(
+    year,
+    filing_status,
+    self_employment_income,
+    taxable_interest,
+    long_term_capital_gains,
+    qbi_w2_wages,
+    qbi_ubia,
+    qbi_is_sstb,
+):
+    """The independent Python and graph §199A implementations remain aligned."""
+    kwargs = {
+        "year": year,
+        "filing_status": filing_status,
+        "self_employment_income": self_employment_income,
+        "taxable_interest": taxable_interest,
+        "long_term_capital_gains": long_term_capital_gains,
+        "qbi_w2_wages": qbi_w2_wages,
+        "qbi_ubia": qbi_ubia,
+        "qbi_is_sstb": qbi_is_sstb,
+    }
+
+    ots = evaluate_return(**kwargs, backend="ots")
+    graph = evaluate_return(**kwargs, backend="graph")
+
+    assert ots.federal_qbi_deduction == pytest.approx(
+        graph.federal_qbi_deduction, abs=0.02
+    )
+
+
 @skip_if_backends_unavailable
 @given(w2_income=st.integers(50_000, 200_000))
 @settings(max_examples=50)

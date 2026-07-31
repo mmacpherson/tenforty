@@ -353,6 +353,7 @@ class InterpretedTaxReturn(BaseModel):
     federal_effective_tax_rate: float = 0.0
     federal_tax_bracket: float = 0.0
     federal_taxable_income: float = 0.0
+    federal_qbi_deduction: float = 0.0
     federal_amt: float = 0.0
     federal_income_tax: float = 0.0
     federal_se_tax: float = 0.0
