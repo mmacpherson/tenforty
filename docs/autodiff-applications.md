@@ -47,8 +47,10 @@ These are illustrative timings, not a stable benchmark promise; run
 `--benchmark` on the target machine. The structural result is more important:
 the vector removes repeated reverse traversals and is materially faster than
 calling scalar autodiff for every input, but it is not currently faster than a
-forward-difference table end to end. Evaluator construction is cheap, and
-active tax kinks require independent right-hand probes for affected inputs.
+forward-difference table end to end. The public scalar-loop timing also includes
+constructing a fresh evaluator for every call, so its 2.44–2.62× ratio measures
+both evaluator reuse and reverse-traversal reuse; it does not isolate the latter.
+Active tax kinks also require independent right-hand probes for affected inputs.
 
 Forward simulation is therefore genuinely competitive for this workflow. The
 vector API wins on semantics, ergonomics, and exact smooth-region slopes—not
@@ -63,12 +65,17 @@ Hold $50,000 of long-term gains fixed for a single filer and vary wages:
 | $30,000 | $4,372.25 | 27% |
 | $50,000 | $9,772.25 | 27% |
 | $60,000 | $12,472.25 | 27% |
+| $61,700 | $12,920.00 | 12% |
 | $65,000 | $13,641.00 | 22% |
 | $70,000 | $14,741.00 | 22% |
 
 At the lower wage values, another ordinary dollar both incurs the 12% ordinary
 rate and pushes a gain dollar from the 0% preferential band into the 15% band:
-12% + 15% = 27%. Once that interaction ends, the local rate falls to 22%.
+12% + 15% = 27%. At $61,625 of wages, ordinary taxable income reaches the
+$47,025 ceiling of the 0% gain band, so the stacking interaction ends and the
+local rate falls to 12%. Only $125 later, ordinary taxable income reaches the
+$47,150 boundary of the 22% ordinary bracket, and the local rate rises to 22%.
+The $61,700 row exposes the short middle regime that a coarser table would miss.
 
 This is a good explanatory and diagnostic use of autodiff. It gives the exact
 local slope under the library's documented right-hand convention. A small

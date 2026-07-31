@@ -35,7 +35,7 @@ _SENSITIVITY_SCENARIO = {
     "incentive_stock_option_gains": 3_000.0,
 }
 
-_STACKING_WAGES = (30_000, 50_000, 60_000, 65_000, 70_000)
+_STACKING_WAGES = (30_000, 50_000, 60_000, 61_700, 65_000, 70_000)
 _STACKING_SCENARIO = {
     "year": 2024,
     "filing_status": "Single",
@@ -111,7 +111,7 @@ def next_dollar_table() -> pl.DataFrame:
 
 
 def ltcg_stacking_table() -> pl.DataFrame:
-    """Show the wage-rate hump created by long-term-gain stacking."""
+    """Show the non-monotonic wage-rate profile from long-term-gain stacking."""
     rows = []
     for wages in _STACKING_WAGES:
         result = evaluate_return(
