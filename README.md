@@ -162,6 +162,37 @@ The output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary.
 
 
+### Marginal Rates for Every Input
+
+The graph backend can differentiate a selected output with respect to every
+continuous public input at once:
+
+``` python
+from tenforty import marginal_rates
+
+rates = marginal_rates(
+    year=2024,
+    state="CA",
+    filing_status="Single",
+    w2_income=100_000,
+)
+
+rates["w2_income"]
+```
+
+The returned dictionary uses the same natural input names as
+`evaluate_return`. It includes federal inputs and any continuous inputs mapped
+by the selected state; discrete choices such as filing status and number of
+dependents are omitted. The existing `marginal_rate(..., wrt="w2_income")`
+function remains available for one input at a time.
+
+Tax calculations are piecewise functions. At a bracket, phase-out, or other
+active boundary, both marginal-rate APIs report the composed function's
+right-hand derivative: the change implied by adding a small amount to that
+input. Smooth entries in `marginal_rates` share one reverse-mode traversal per
+resolved output.
+
+
 ### Creating Tax Tables: Federal/State Tax Brackets as a Function of W2 Income
 
 The `evaluate_returns` method sweeps out a grid over any input arguments that

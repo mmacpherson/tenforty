@@ -205,7 +205,7 @@ def test_full_graph_gradient_matrix_matches_evaluation_path():
     ),
 )
 def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset):
-    """Probe around every named region, with exact boundaries sampled directly."""
+    """Pin scalar wiring and grouped-gradient agreement in composed-smooth cells."""
     case = _case(region)
     value = float(case.get(wrt, 0.0)) + offset
     case[wrt] = value if wrt in _SIGNED_INCOMES else max(0.0, value)
@@ -213,6 +213,11 @@ def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset)
     assume(abs(forward - backward) < _GRAPH_TOLERANCE)
 
     analytical = _gradient(case, wrt, output)
+    vector = GraphBackend().gradients(TaxReturnInput(**case), output)
+    assert vector is not None
+    assert vector[wrt] == pytest.approx(analytical, abs=1e-12, rel=0.0), _failure(
+        region, wrt, output, vector[wrt], analytical
+    )
     assert analytical == pytest.approx(central, abs=_GRAPH_TOLERANCE), _failure(
         region, wrt, output, analytical, central
     )

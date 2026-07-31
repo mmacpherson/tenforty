@@ -690,6 +690,54 @@ impl Runtime {
         })
     }
 
+    /// Grouped total derivatives of the sum of `outputs`.
+    ///
+    /// Each inner input vector is one natural input's complete graph fan-out.
+    /// Smooth groups share one reverse traversal per output; groups crossing
+    /// an active kink preserve `gradient_multi_output`'s composed right-hand
+    /// derivative convention.
+    fn gradients_multi_output(
+        &mut self,
+        outputs: Vec<String>,
+        input_groups: Vec<Vec<String>>,
+    ) -> PyResult<Vec<f64>> {
+        self.inner.with_runtime_mut(|rt| {
+            if outputs.is_empty() {
+                return Err(PyValueError::new_err(
+                    "At least one output node is required",
+                ));
+            }
+            let output_ids = outputs
+                .iter()
+                .map(|name| {
+                    rt.graph()
+                        .node_id_by_name(name)
+                        .ok_or_else(|| PyValueError::new_err(format!("Node not found: {}", name)))
+                })
+                .collect::<PyResult<Vec<_>>>()?;
+            let input_ids = input_groups
+                .iter()
+                .map(|inputs| {
+                    let ids: Vec<_> = inputs
+                        .iter()
+                        .filter_map(|name| rt.graph().node_id_by_name(name))
+                        .collect();
+                    if ids.is_empty() {
+                        Err(PyValueError::new_err(format!(
+                            "None of the input nodes were found: {}",
+                            inputs.join(", ")
+                        )))
+                    } else {
+                        Ok(ids)
+                    }
+                })
+                .collect::<PyResult<Vec<_>>>()?;
+
+            autodiff::gradient_sums_outputs(rt, &output_ids, &input_ids)
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+        })
+    }
+
     /// Solve for the value of a quantity written into several input nodes.
     ///
     /// Each Newton step assigns the trial value to every named node and steps

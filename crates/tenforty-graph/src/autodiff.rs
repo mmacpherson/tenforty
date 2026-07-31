@@ -68,17 +68,51 @@ pub fn gradient_sum(
     output: NodeId,
     inputs: &[NodeId],
 ) -> Result<f64, EvalError> {
-    let (adjoints, order) = adjoints_with_order(runtime, output)?;
-    let reverse_gradient = inputs
-        .iter()
-        .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
-        .sum();
+    Ok(gradient_slices(runtime, output, &[inputs])?[0])
+}
 
-    if has_active_kink(runtime, &adjoints, inputs, &order) {
-        return forward_gradient(runtime, output, inputs);
+/// Compute grouped derivatives of one output in a single reverse pass.
+///
+/// Each inner slice names every graph node written by one natural input. In
+/// smooth regions all groups are read from the same adjoint map. A group whose
+/// requested path reaches an active piecewise boundary instead receives the
+/// same composed right-hand directional derivative as [`gradient_sum`].
+fn gradient_slices(
+    runtime: &mut Runtime,
+    output: NodeId,
+    input_groups: &[&[NodeId]],
+) -> Result<Vec<f64>, EvalError> {
+    let (adjoints, order) = adjoints_with_order(runtime, output)?;
+    let mut gradients = Vec::with_capacity(input_groups.len());
+
+    for inputs in input_groups {
+        let reverse_gradient = inputs
+            .iter()
+            .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
+            .sum();
+        let gradient = if has_active_kink(runtime, &adjoints, inputs, &order) {
+            forward_gradient(runtime, output, inputs)?
+        } else {
+            reverse_gradient
+        };
+        gradients.push(gradient);
     }
 
-    Ok(reverse_gradient)
+    Ok(gradients)
+}
+
+/// Compute grouped derivatives of one output.
+///
+/// This is the vector form of [`gradient_sum`]: one reverse traversal supplies
+/// every smooth group, rather than repeating the traversal for each natural
+/// input.
+pub fn gradient_sums(
+    runtime: &mut Runtime,
+    output: NodeId,
+    input_groups: &[Vec<NodeId>],
+) -> Result<Vec<f64>, EvalError> {
+    let input_slices: Vec<_> = input_groups.iter().map(Vec::as_slice).collect();
+    gradient_slices(runtime, output, &input_slices)
 }
 
 fn has_active_kink(
@@ -199,10 +233,38 @@ pub fn gradient_sum_outputs(
     outputs: &[NodeId],
     inputs: &[NodeId],
 ) -> Result<f64, EvalError> {
-    outputs
-        .iter()
-        .map(|output| gradient_sum(runtime, *output, inputs))
-        .sum()
+    Ok(gradient_slices_outputs(runtime, outputs, &[inputs])?[0])
+}
+
+fn gradient_slices_outputs(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    input_groups: &[&[NodeId]],
+) -> Result<Vec<f64>, EvalError> {
+    let mut gradients = vec![0.0; input_groups.len()];
+    for output in outputs {
+        for (total, partial) in
+            gradients
+                .iter_mut()
+                .zip(gradient_slices(runtime, *output, input_groups)?)
+        {
+            *total += partial;
+        }
+    }
+    Ok(gradients)
+}
+
+/// Compute grouped derivatives of a sum of outputs.
+///
+/// Costs one reverse traversal per output in smooth regions, independent of
+/// the number of natural-input groups.
+pub fn gradient_sums_outputs(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    input_groups: &[Vec<NodeId>],
+) -> Result<Vec<f64>, EvalError> {
+    let input_slices: Vec<_> = input_groups.iter().map(Vec::as_slice).collect();
+    gradient_slices_outputs(runtime, outputs, &input_slices)
 }
 
 fn backprop(
@@ -635,6 +697,65 @@ mod tests {
         assert_eq!(runtime.input_value(0), Some(0.0));
         assert_eq!(runtime.input_value(1), Some(50.0));
         assert_eq!(runtime.eval_node(6).unwrap(), 40.0);
+    }
+
+    #[test]
+    fn test_grouped_gradients_preserve_inputs_and_kink_semantics() {
+        let graph = disjoint_fanout_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+        runtime.set_by_id(1, 50.0);
+
+        let gradients =
+            gradient_sums_outputs(&mut runtime, &[3, 6], &[vec![0, 1], vec![0], vec![1]]).unwrap();
+
+        assert_eq!(gradients, vec![2.0, 1.0, 1.0]);
+        assert_eq!(runtime.input_value(0), Some(0.0));
+        assert_eq!(runtime.input_value(1), Some(50.0));
+        assert_eq!(runtime.eval_node(6).unwrap(), 40.0);
+    }
+
+    #[test]
+    fn test_grouped_gradient_matches_scalar_at_coincident_max_ties() {
+        let graph = coincident_max_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+
+        let gradients = gradient_sums(&mut runtime, 8, &[vec![0]]).unwrap();
+
+        assert!((gradients[0] - 1.0).abs() < 1e-8);
+    }
+
+    #[test]
+    fn test_grouped_gradients_choose_kink_fallback_per_group() {
+        let mut graph = coincident_max_graph();
+        graph.nodes.insert(
+            9,
+            Node {
+                id: 9,
+                op: Op::Input,
+                name: Some("smooth_input".to_string()),
+            },
+        );
+        graph.nodes.insert(
+            10,
+            Node {
+                id: 10,
+                op: Op::Add { left: 9, right: 8 },
+                name: Some("output".to_string()),
+            },
+        );
+        graph.inputs.push(9);
+        graph.outputs = vec![10];
+
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+        runtime.set_by_id(9, 5.0);
+
+        let gradients = gradient_sums(&mut runtime, 10, &[vec![9], vec![0]]).unwrap();
+
+        assert_eq!(gradients[0], 1.0);
+        assert!((gradients[1] - 1.0).abs() < 1e-8);
     }
 
     #[test]
