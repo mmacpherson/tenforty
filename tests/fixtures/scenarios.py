@@ -27,7 +27,10 @@ from .tax_scenario import TaxScenario
 def scenario_id(scenario: TaxScenario) -> str:
     """Generate a pytest test ID from a scenario."""
     state_part = scenario.state or "FED"
-    return f"{state_part}-{scenario.year}-{scenario.filing_status}-{int(scenario.w2_income)}"
+    incomes = str(int(scenario.w2_income))
+    if scenario.self_employment_income:
+        incomes += f"-SE-{int(scenario.self_employment_income)}"
+    return f"{state_part}-{scenario.year}-{scenario.filing_status}-{incomes}"
 
 
 def run_tax_scenario(scenario: TaxScenario):
@@ -40,6 +43,7 @@ def run_tax_scenario(scenario: TaxScenario):
         state=scenario.state,
         filing_status=scenario.filing_status,
         w2_income=scenario.w2_income,
+        self_employment_income=scenario.self_employment_income,
         taxable_interest=scenario.taxable_interest,
         qualified_dividends=scenario.qualified_dividends,
         ordinary_dividends=scenario.ordinary_dividends,
@@ -80,6 +84,16 @@ def run_tax_scenario(scenario: TaxScenario):
             failures.append(
                 f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} != "
                 f"expected {scenario.expected_federal_agi}"
+            )
+
+    if scenario.expected_federal_taxable_income is not None:
+        if result.federal_taxable_income != pytest.approx(
+            scenario.expected_federal_taxable_income, abs=0.01
+        ):
+            failures.append(
+                f"[{scenario.source}] Taxable income "
+                f"{result.federal_taxable_income} != "
+                f"expected {scenario.expected_federal_taxable_income}"
             )
 
     if scenario.known_failure:
