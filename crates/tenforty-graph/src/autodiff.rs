@@ -727,6 +727,38 @@ mod tests {
     }
 
     #[test]
+    fn test_grouped_gradients_choose_kink_fallback_per_group() {
+        let mut graph = coincident_max_graph();
+        graph.nodes.insert(
+            9,
+            Node {
+                id: 9,
+                op: Op::Input,
+                name: Some("smooth_input".to_string()),
+            },
+        );
+        graph.nodes.insert(
+            10,
+            Node {
+                id: 10,
+                op: Op::Add { left: 9, right: 8 },
+                name: Some("output".to_string()),
+            },
+        );
+        graph.inputs.push(9);
+        graph.outputs = vec![10];
+
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        runtime.set_by_id(0, 0.0);
+        runtime.set_by_id(9, 5.0);
+
+        let gradients = gradient_sums(&mut runtime, 10, &[vec![9], vec![0]]).unwrap();
+
+        assert_eq!(gradients[0], 1.0);
+        assert!((gradients[1] - 1.0).abs() < 1e-8);
+    }
+
+    #[test]
     fn test_gradient_vs_numerical() {
         let graph = simple_arithmetic_graph();
         let mut runtime = Runtime::new(&graph, FilingStatus::Single);
