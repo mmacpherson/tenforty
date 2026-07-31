@@ -6,14 +6,14 @@ Update 2026-07-21: PR #279 has since merged, fixing F1/F2; the remaining
 findings are burned into the suite as strict xfails in
 `tests/known_defects_test.py`.
 Reference: [Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator) (`taxcalc` 6.7.2, CC0),
-federal only, tax year 2024.
+federal only, tax years 2024 and 2025.
 
 ## Findings ledger
 
 Every disagreement class gets an ID here, a narrative section below, a
-strict-xfail burn-in in `tests/known_defects_test.py`, and an excusing
-signature in `tests/taxcalc/taxcalc_policy.py`. Fixes must flip the burn-in,
-delete the signature, and update this table in the same PR.
+strict-xfail burn-in, and a bounded-delta signature in
+`tests/taxcalc/taxcalc_policy.py`. Fixes must flip the burn-in, delete the
+signature, and update this table in the same PR.
 
 | ID | Finding | At fault | Status | Found by |
 |----|---------|----------|--------|----------|
@@ -32,18 +32,24 @@ delete the signature, and update this table in the same PR.
 | F13 | 2025 MFS 15%-rate ceiling wrong (266,700 vs 300,000), inline in 1040 not Tables | graph spec | fixed | differential grid |
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); taxcalc omits add-back, upstream note pending | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
-| F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
+| F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | fixed (tenforty-dw0, #297) | differential sweep |
 | F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
 | F20 | Suite adapter compares post-refund `iitax` with pre-refund tenforty tax | taxcalc harness | fixed (tenforty-jte) | differential sweep |
 | F21 | 199A QBI phase-in range is doubled for qualifying widow(er) | upstream TaxCalc parameter | open (tenforty-2jg; upstream report pending) | Form 8995-A adjudication |
+| F22 | OTS cancels the AMT standard-deduction add-back when taxable income floors at zero | upstream OpenTaxSolver | open (tenforty-by2; upstream report pending) | randomized ISO differential |
+| F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | open (tenforty-3bt, tenforty-doo) | randomized high-income ISO differential |
+| F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
+| F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | open (tenforty-c9a) | randomized MFS ISO/gain differential |
+| F26 | TaxCalc lets unused itemization reduce AMTI below the taxable-income floor | upstream TaxCalc | open (tenforty-w7t; upstream report pending) | randomized itemized ISO/loss differential |
 
 ## Method
 
-363 boundary-focused federal cases (SS wage base, NIIT/additional-Medicare
+1,179 boundary-focused federal cases (SS wage base, NIIT/additional-Medicare
 thresholds, QBI interactions, capital-gain mixes, dividend subsets, forced
 itemization) across all five filing statuses, evaluated on three engines:
-tenforty OTS, tenforty graph, and taxcalc. Seven quantities compared per case:
-AGI, taxable income, SE tax, NIIT, additional Medicare tax, AMT, total tax.
+tenforty OTS, tenforty graph, and taxcalc. Eight quantities compared per case:
+AGI, taxable income, SE tax, NIIT, additional Medicare tax, AMT, income tax,
+and total tax.
 
 - Tolerances: $2, except $15 for total tax (OTS uses the 1040 tax tables,
   which quantize taxable income in $50 steps; taxcalc uses exact formulas).
@@ -51,11 +57,13 @@ AGI, taxable income, SE tax, NIIT, additional Medicare tax, AMT, total tax.
   `w2_income` is a household aggregate. taxcalc was run with wages attributed
   to the self-employed primary and separately to the other spouse; a tenforty
   MFJ value is flagged only if it falls outside both bounds.
-- Out of scope: states (taxcalc has none), dependents/credits, ISO/AMT
-  preference items, rental and schedule-1 income, batch evaluation paths.
+- Out of scope: states (taxcalc has none), dependents/credits, rental and
+  schedule-1 income. ISO/AMT preference cases and scalar/batch identity are now
+  covered; TaxCalc itself has no tenforty-style batch API to compare directly.
 
-Harness: `audit_harness.py` + `analyze*.py` (session scratchpad; candidates
-for `scripts/` promotion).
+Harness: `scripts/taxcalc_audit.py`; the committed fixture records the exact
+TaxCalc version and can be regenerated or checked byte-for-semantics from that
+canonical case grid.
 
 ## Findings
 
@@ -561,3 +569,107 @@ The signature covers taxable income, AMT, income tax, and total tax because the
 incorrect deduction can propagate through both regular taxable income and AMTI.
 The upstream report is staged in `docs/upstream-taxcalc-reports.md`; tracked by
 `tenforty-2jg`.
+
+### F22. NEW, ADJUDICATED — OTS loses the AMT taxable-income floor
+
+The randomized ISO strategy found a case below the regular taxable-income
+floor: 2024 Head of Household, no regular income, the standard deduction, and
+a $200,000 ISO exercise spread. Form 1040 line 15 is zero. Form 6251 then adds
+the $21,900 standard deduction on line 2a, so AMTI is $221,900. After the
+$85,700 exemption, tentative minimum tax and AMT are **$35,412.00**.
+
+The graph follows that form path. OTS reports **$29,718.00** because
+`form6251_AlternativeMinimumTax` replaces line 1 with the unfloored
+`L11 - L14` whenever Form 1040 line 15 is zero. Here that is -$21,900; line
+2a adds $21,900 back and the two cancel, leaving AMTI at $200,000. This is an
+upstream tax-logic defect, so the vendored source remains unchanged.
+
+TaxCalc 6.7.2 reports **$24,024.00** for the same return. That is the already
+adjudicated F14 defect: it starts AMTI from AGI less the standard deduction,
+producing $178,100. Below the regular taxable-income floor, the full gap between
+TaxCalc and the Form 6251 path is the standard deduction plus its unused part,
+not merely one standard deduction. F14's bounded model now reflects that; F22
+adds a separate negative OTS correction, so the two mechanisms compose without
+a blanket waiver.
+
+The strict-xfail compares OTS directly with the hand-worked graph value and
+will flip when an OTS release preserves the Form 1040 line-15 floor. The
+upstream report is staged in `docs/upstream-ots-reports.md`; tracked by
+`tenforty-by2`.
+
+### F23. NEW, ADJUDICATED — graph and TaxCalc omit the MFS AMTI increase
+
+The 2025 Form 6251 instructions have a special line-4 rule for married filing
+separately: above $900,350 of AMTI, add 25% of the excess to line 4, capped at
+$68,500. For 2024 the threshold is $875,950 and the cap is $66,650. OTS has the
+mechanism; the graph goes straight from the ordinary AMTI sum to the exemption,
+and TaxCalc's `c62100` path likewise only zeros the exemption above its terminal
+threshold.
+
+A clean 2025 witness is MFS with $750,000 wages and a $300,000 ISO spread.
+Before the special rule, AMTI is $1,050,000. The required addition is
+25% x ($1,050,000 - $900,350) = $37,412.50, increasing AMT by $10,475.50.
+OTS reports the official **$68,380.75**; graph reports **$57,905.25** and
+TaxCalc is lower still because F14 independently omits the standard-deduction
+add-back.
+
+The F23 reference-delta model is deliberately one-sided and applies only to
+OTS: TaxCalc is the reference with the omission, OTS carries the required
+positive amount, and graph currently shares the reference defect. Separate
+strict-xfails pin the graph and TaxCalc omissions. Tracked by `tenforty-3bt`
+and `tenforty-doo`; the TaxCalc report is staged upstream.
+
+### F24. NEW, ADJUDICATED — OTS 2024 uses stale MFS line-4 constants
+
+OTS's 2024 routine implements the F23 mechanism with the prior-year threshold
+and cap: $831,150 and $63,250. The official 2024 instructions use $875,950 and
+$66,650. On the clean $750,000-wage / $300,000-ISO witness, OTS reports
+**$71,832.75** while the official 2024 rule gives **$68,696.75**.
+
+F24 models only the signed difference between OTS's stale addition and the
+official F23 addition; the two ranges compose. The vendored source remains
+unchanged, and the upstream report plus strict-xfail are tracked by
+`tenforty-2jv`.
+
+An independent golden witness places OTS AMTI at $850,000: above the stale
+$831,150 threshold but below the official $875,950 threshold. F24 contributes
+$1,649.38 of modeled AMT there while F23 contributes exactly zero, preventing
+the overlapping high-income witness from masking an error in either model.
+The effective rate is 35% in this interval: 28% tentative minimum tax plus the
+7% effect of phasing out another 25 cents of exemption per added dollar.
+
+### F25. NEW, ADJUDICATED — graph Form 6251 retains the stale MFS gain ceiling
+
+F13 corrected the 2025 MFS 15%-rate ceiling in the 1040 qualified-dividend and
+capital-gain worksheet from $266,700 to $300,000. Form 6251 Part III contains a
+second hand-written copy and still uses $266,700, so an AMT-binding MFS return
+can move up to $33,300 of preferential income from the 15% band to 20%.
+
+The deterministic witness has $250,000 wages, $15,458 STCG, $6,032 LTCG,
+$49,171 interest, $11,057 qualified dividends, $19,444 itemized deductions,
+and a $50,000 ISO spread. Graph AMT is **$2,459.55** versus TaxCalc's
+**$2,218.80**; the $240.75 difference is exactly 5% of the $4,815 that reaches
+the stale band.
+
+F25 permits only the 5-point spread over at most the $33,300 bad interval, a
+maximum $1,665 positive graph delta. Its strict-xfail and a dedicated golden
+witness track `tenforty-c9a`; the fix should replace the duplicate constant
+with the shared table source.
+
+### F26. NEW, ADJUDICATED — TaxCalc loses the itemized taxable-income floor
+
+TaxCalc's itemizer AMTI branch reconstructs Form 6251 line 4 directly from AGI
+less itemized deductions plus AMT add-backs. When allowed itemized deductions
+exceed AGI, their unused portion therefore makes the base negative. Form 6251
+line 1 is Form 1040 line 15, which has already floored taxable income at zero;
+unused itemization cannot carry through that line.
+
+The witness is 2024 MFS with a large net capital loss, $15,079 interest,
+$33,112 ordinary dividends ($16,556 qualified), $50,061 itemized deductions,
+and a $300,000 ISO spread. AGI is $46,691, so $3,370 of itemization is unused.
+Graph starts line 1 at zero and reports AMT **$58,376.32**. TaxCalc carries the
+-$3,370 through AMTI and reports **$57,432.72**, lower by $943.60 (28%).
+
+F26 applies only to the positive graph-minus-TaxCalc effect of that unused
+deduction, bounded by the same AMT/preferential slopes as F12. A TaxCalc
+strict-xfail, upstream draft, and golden witness track `tenforty-w7t`.

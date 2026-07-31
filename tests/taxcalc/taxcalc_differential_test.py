@@ -45,7 +45,7 @@ from hypothesis import strategies as st  # noqa: E402
 
 import tenforty  # noqa: E402
 
-from .taxcalc_policy import excused_quantities, tolerance  # noqa: E402
+from .taxcalc_policy import ZERO_DELTA, modeled_deltas, tolerance  # noqa: E402
 
 MARS = {
     "Single": 1,
@@ -75,8 +75,10 @@ def _normalize_case(case):
 
 def _case_strategy():
     dollars = st.one_of(
-        st.sampled_from((0, 125_000, 168_600, 176_100, 200_000, 250_000)),
-        st.integers(min_value=0, max_value=400_000),
+        st.sampled_from(
+            (0, 125_000, 168_600, 176_100, 200_000, 250_000, 750_000, 1_200_000)
+        ),
+        st.integers(min_value=0, max_value=1_200_000),
     ).map(float)
     small_dollars = st.one_of(st.just(0), st.integers(0, 60_000)).map(float)
     return st.fixed_dictionaries(
@@ -85,19 +87,18 @@ def _case_strategy():
             "status": st.sampled_from(sorted(MARS)),
             "w2": dollars,
             "se": dollars,
-            "stcg": st.one_of(st.just(0), st.integers(0, 250_000)).map(float),
-            "ltcg": st.one_of(st.just(0), st.integers(0, 250_000)).map(float),
+            "stcg": st.one_of(st.just(0), st.integers(-250_000, 250_000)).map(float),
+            "ltcg": st.one_of(st.just(0), st.integers(-250_000, 250_000)).map(float),
             "interest": small_dollars,
             "ord_div": small_dollars,
             "qual_frac": st.sampled_from((0.0, 0.5, 1.0)),
             "itemized": small_dollars,
             "std_or_item": st.sampled_from(("Standard", "Itemized")),
-            # No "iso" yet, deliberately. The adapter now carries it (see
-            # cmbtp above), but generating AMT-preference cases surfaces F14 on
-            # both engines at once, and the _f14 signature currently excuses
-            # the backend that turned out to be RIGHT. Flip that signature and
-            # fix the graph spec first (tenforty-8ik), then add iso here as
-            # part of the AMT coverage in tenforty-y90.
+            "iso": st.one_of(
+                st.just(0.0),
+                st.sampled_from((50_000.0, 200_000.0)),
+                st.integers(0, 300_000).map(float),
+            ),
         }
     ).map(_normalize_case)
 
@@ -173,6 +174,7 @@ def _anchor(**kw):
         "ord_div": 0.0,
         "qual_div": 0.0,
         "itemized": 0.0,
+        "iso": 0.0,
         "std_or_item": "Standard",
     }
     base.update(kw)
@@ -184,6 +186,17 @@ ANCHOR_SE_WAGE_BASE = _anchor(w2=168_600.0, se=60_000.0)
 ANCHOR_8959_NO_WAGES = _anchor(se=300_000.0)
 ANCHOR_QBI_NET_BASE = _anchor(w2=50_000.0, se=80_000.0)
 ANCHOR_QBI_CAPITAL_GAIN_LIMIT = _anchor(se=100_000.0, ltcg=60_000.0)
+ANCHOR_AMT_ISO = _anchor(w2=150_000.0, iso=200_000.0)
+ANCHOR_AMT_FLOOR = _anchor(
+    status="Head_of_House",
+    iso=200_000.0,
+)
+ANCHOR_CAPITAL_LOSS = _anchor(
+    w2=300_000.0,
+    interest=100_000.0,
+    stcg=-50_000.0,
+    ltcg=10_000.0,
+)
 
 
 def taxcalc_batch(cases, wage_attribution="primary"):
@@ -248,6 +261,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                 "niit": niit,
                 "addl_medicare": amc,
                 "amt": float(arr("c09600")[row]),
+                "amti": float(arr("c62100")[row]),
                 # Tax-Calculator nets refundable credits out of iitax, while
                 # tenforty's federal tax outputs stop at Form 1040 line 24.
                 # Add its line-32 analogue back before preserving the existing
@@ -278,6 +292,7 @@ def tenforty_components(case, backend):
         ordinary_dividends=case["ord_div"],
         qualified_dividends=case["qual_div"],
         itemized_deductions=case["itemized"],
+        incentive_stock_option_gains=case.get("iso", 0.0),
         standard_or_itemized=case["std_or_item"],
     )
     return {
@@ -301,19 +316,26 @@ def _assert_components_match_taxcalc(backend, cases):
     worst_excess = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
-        excused = excused_quantities(backend, case, exp)
+        deltas = modeled_deltas(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])
             hi = max(exp[quantity], exp_alt[quantity])
             tol = tolerance(backend, quantity, exp["taxable_income"], case)
-            diff = max(lo - ours[quantity], ours[quantity] - hi, 0.0)
-            if quantity in excused:
-                continue
-            worst_excess[quantity] = max(worst_excess[quantity], max(0.0, diff - tol))
-            if diff > tol:
+            delta = deltas.get(quantity, ZERO_DELTA)
+            allowed_lo = lo + delta.minimum - tol
+            allowed_hi = hi + delta.maximum + tol
+            residual = max(
+                allowed_lo - ours[quantity],
+                ours[quantity] - allowed_hi,
+                0.0,
+            )
+            worst_excess[quantity] = max(worst_excess[quantity], residual)
+            if residual > 0.0:
                 failures.append(
                     f"{case}: {quantity} got={ours[quantity]:,.2f} "
-                    f"expected=[{lo:,.2f}, {hi:,.2f}] (diff {diff:,.2f} > {tol})"
+                    f"expected=[{lo:,.2f}, {hi:,.2f}] + "
+                    f"delta=[{delta.minimum:,.2f}, {delta.maximum:,.2f}] "
+                    f"+/- {tol} (residual {residual:,.2f})"
                 )
     # target() accepts one observation per label per example, so feed it the
     # batch maximum beyond tolerance: harmless OTS rounding has a zero gradient.
@@ -333,9 +355,12 @@ def _assert_components_match_taxcalc(backend, cases):
 @example(cases=[ANCHOR_8959_NO_WAGES])
 @example(cases=[ANCHOR_QBI_NET_BASE])
 @example(cases=[ANCHOR_QBI_CAPITAL_GAIN_LIMIT])
+@example(cases=[ANCHOR_AMT_ISO])
+@example(cases=[ANCHOR_AMT_FLOOR])
+@example(cases=[ANCHOR_CAPITAL_LOSS])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
-    """Every quantity matches taxcalc within tolerance, unless excused by name."""
+    """Every quantity falls within its modeled TaxCalc range and tolerance."""
     _assert_components_match_taxcalc(backend, cases)
 
 

@@ -64,6 +64,28 @@ F21_QW_QBI_PHASE_IN_CASE = {
     "iso": 0.0,
 }
 
+F23_MFS_AMT_LINE4_CASE = {
+    **F14_CASE,
+    "year": 2025,
+    "status": "Married/Sep",
+    "w2": 750_000.0,
+    "iso": 300_000.0,
+}
+
+F26_ITEMIZED_AMT_FLOOR_CASE = {
+    **F14_CASE,
+    "status": "Married/Sep",
+    "w2": 0.0,
+    "stcg": -211_156.0,
+    "ltcg": 33_745.0,
+    "interest": 15_079.0,
+    "ord_div": 33_112.0,
+    "qual_div": 16_556.0,
+    "itemized": 50_061.0,
+    "std_or_item": "Itemized",
+    "iso": 300_000.0,
+}
+
 
 def test_iso_reaches_taxcalc_as_amt_preference():
     """An ISO spread must produce AMT in taxcalc, not silence."""
@@ -151,6 +173,29 @@ def test_taxcalc_qw_qbi_uses_the_all_other_returns_phase_in_range():
     """The QW midpoint must apply 50%, not 25%, of the wage-limit reduction."""
     result = taxcalc_batch([F21_QW_QBI_PHASE_IN_CASE])[0]
     assert result["taxable_income"] == pytest.approx(207_656.4775, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F23: TaxCalc omits the Form 6251 high-income MFS increase on line 4",
+    strict=True,
+)
+def test_taxcalc_applies_the_high_income_mfs_amt_increase():
+    """The 2025 line-4 increase raises AMT to the official $68,380.75."""
+    result = taxcalc_batch([F23_MFS_AMT_LINE4_CASE])[0]
+
+    assert result["amt"] == pytest.approx(68_380.75, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F26: TaxCalc lets unused itemized deductions reduce Form 6251 "
+    "line 1 below the Form 1040 taxable-income floor",
+    strict=True,
+)
+def test_taxcalc_preserves_the_itemized_taxable_income_floor_in_amti():
+    """The $3,370 unused deduction cannot reduce Form 6251 line 1 below zero."""
+    result = taxcalc_batch([F26_ITEMIZED_AMT_FLOOR_CASE])[0]
+
+    assert result["amt"] == pytest.approx(58_376.32, abs=1.0)
 
 
 @pytest.mark.parametrize(
@@ -261,6 +306,26 @@ def test_refundable_credit_does_not_change_pre_refund_tax_contract():
     for result in (single, second_in_batch):
         assert result["income_tax"] == pytest.approx(0.0, abs=0.01)
         assert result["total_tax"] == pytest.approx(0.0, abs=0.01)
+
+
+@pytest.mark.parametrize("case", [F14_CASE, REFUNDABLE_CREDIT_CASE])
+def test_tax_components_reconcile_to_total(case):
+    """Both the oracle adapter and tenforty preserve the public tax identity."""
+    reference = taxcalc_batch([case])[0]
+    reference_components = (
+        reference["income_tax"]
+        + reference["se_tax"]
+        + reference["niit"]
+        + reference["addl_medicare"]
+    )
+    assert reference_components == pytest.approx(reference["total_tax"], abs=0.01)
+
+    for backend in ("ots", "graph"):
+        ours = evaluate_components(case, backend)
+        our_components = (
+            ours["income_tax"] + ours["se_tax"] + ours["niit"] + ours["addl_medicare"]
+        )
+        assert our_components == pytest.approx(ours["total_tax"], abs=0.01)
 
 
 def test_raw_iitax_remains_net_of_refundable_credits():
