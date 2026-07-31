@@ -26,20 +26,53 @@ STANDARD_DEDUCTION = {
     (2025, "Widow(er)"): 31_500.0,
 }
 
+QBI_SIMPLIFIED_THRESHOLD = {
+    (2024, "Single"): 191_950.0,
+    (2024, "Married/Joint"): 383_900.0,
+    (2024, "Married/Sep"): 191_950.0,
+    (2024, "Head_of_House"): 191_950.0,
+    (2024, "Widow(er)"): 191_950.0,
+    (2025, "Single"): 197_300.0,
+    (2025, "Married/Joint"): 394_600.0,
+    (2025, "Married/Sep"): 197_300.0,
+    (2025, "Head_of_House"): 197_300.0,
+    (2025, "Widow(er)"): 197_300.0,
+}
+
+_QBI_AFFECTED_QUANTITIES = {"taxable_income", "income_tax", "total_tax"}
+
 
 def _f3_qbi(backend: str, case: dict) -> set[str]:
-    """F3: QBI divergence on self-employment cases, now from two causes.
+    """F3: QBI divergence on self-employment cases from two remaining causes.
 
     OTS omits the deduction entirely (it reads 1040 line 13 as a direct input
-    and nothing supplies it — tenforty-6hr follow-up). The graph now nets the
-    half-SE deduction into the QBI base and agrees with taxcalc below the
-    section 199A threshold; above it the graph still uses the simplified Form
-    8995 (no W-2-wage/UBIA limit), so it diverges from taxcalc there — a
-    distinct limitation tracked separately. Both faults land on the same
-    self-employment cases, so the excusal stays broad until each is closed.
+    and nothing supplies it — tenforty-2u6), so every OTS case with QBI remains
+    excused. The graph agrees with taxcalc under the Form 8995 simplified-method
+    threshold, but lacks the Form 8995-A W-2-wage/UBIA limit above it
+    (tenforty-mhe).
+
+    Signature functions receive inputs rather than computed taxable income.
+    Gross generated income is a conservative proxy: deductions and the half-SE
+    adjustment can only reduce taxable income, so gross at or below the threshold
+    proves that Form 8995 applies. Gross above the threshold remains excused even
+    when deductions ultimately keep the case below it.
     """
-    if case.get("se", 0):
-        return {"taxable_income", "income_tax", "total_tax"}
+    if case.get("se", 0) <= 0:
+        return set()
+    if backend == "ots":
+        return _QBI_AFFECTED_QUANTITIES.copy()
+    if backend != "graph":
+        return set()
+
+    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), case.get("status")))
+    if threshold is None:
+        return set()
+    income_upper_bound = sum(
+        max(0.0, case.get(field, 0))
+        for field in ("w2", "se", "stcg", "ltcg", "interest", "ord_div")
+    )
+    if income_upper_bound > threshold:
+        return _QBI_AFFECTED_QUANTITIES.copy()
     return set()
 
 

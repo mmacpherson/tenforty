@@ -19,7 +19,7 @@ delete the signature, and update this table in the same PR.
 |----|---------|----------|--------|----------|
 | F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
 | F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
-| F3 | QBI: missing (OTS) / gross base (graph) | OTS orchestration + graph spec | graph base fixed (tenforty-6hr); OTS omission + graph above-threshold open | @bg002h, #278 |
+| F3 | QBI: missing (OTS) / above-threshold limit (graph) | OTS orchestration + graph spec | graph base fixed and below-threshold signature narrowed; OTS omission + graph above-threshold open | @bg002h, #278 |
 | F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed (OTS #296, graph: L5a imports Schedule D L16) | mapping assessment + differential sweep |
 | F5 | Graph Form 8959 Part II drops SE earnings (line 12 used min, not subtract) | graph spec | fixed | mapping assessment + differential sweep |
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
@@ -93,7 +93,21 @@ everything downstream of them.
   business W-2 wages / UBIA / SSTB status — concepts absent from tenforty's
   API (taxcalc assumes zero business wages, phasing the deduction to zero
   above the upper threshold). Any fix must choose an assumption there and
-  document it.
+  document it. The graph's threshold table also incorrectly gives qualifying
+  widow(er) the doubled MFJ threshold; Form 8995 assigns widow(er) the
+  all-other-returns threshold. Both graph limitations are tracked by
+  tenforty-mhe.
+- **Signature narrowed (tenforty-gyp):** OTS remains excused on every
+  self-employment case because it still omits Form 8995. Graph is now excused
+  only when generated gross income can exceed the applicable simplified-method
+  threshold ($191,950 / $383,900 MFJ in 2024; $197,300 / $394,600 MFJ in
+  2025). The predicate is deliberately conservative because signatures receive
+  inputs rather than computed taxable income: deductions may keep a high-gross
+  case below the threshold, but a case whose gross income is at or below the
+  threshold cannot cross it. Deterministic Single anchors cover both the net QBI
+  base ($50k wages / $80k SE) and its capital-gain limitation ($100k SE / $60k
+  LTCG); the latter makes the differential fail if Form 8995 line 13 stops
+  importing net capital gain.
 
 ### F4. NIIT omits short-term capital gains — shared omission, both backends
 

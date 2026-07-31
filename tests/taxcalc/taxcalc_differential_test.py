@@ -122,6 +122,8 @@ def _anchor(**kw):
 ANCHOR_NIIT_STCG = _anchor(w2=300_000.0, stcg=50_000.0)
 ANCHOR_SE_WAGE_BASE = _anchor(w2=168_600.0, se=60_000.0)
 ANCHOR_8959_NO_WAGES = _anchor(se=300_000.0)
+ANCHOR_QBI_NET_BASE = _anchor(w2=50_000.0, se=80_000.0)
+ANCHOR_QBI_CAPITAL_GAIN_LIMIT = _anchor(se=100_000.0, ltcg=60_000.0)
 
 
 def taxcalc_batch(cases, wage_attribution="primary"):
@@ -232,6 +234,8 @@ def tenforty_components(case, backend):
 @example(cases=[ANCHOR_NIIT_STCG])
 @example(cases=[ANCHOR_SE_WAGE_BASE])
 @example(cases=[ANCHOR_8959_NO_WAGES])
+@example(cases=[ANCHOR_QBI_NET_BASE])
+@example(cases=[ANCHOR_QBI_CAPITAL_GAIN_LIMIT])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
     """Every quantity matches taxcalc within tolerance, unless excused by name."""
