@@ -60,6 +60,27 @@ def test_graph_qbi_uses_net_base():
     assert r.federal_taxable_income == pytest.approx(94_878.54, abs=1.0)
 
 
+@skip_if_graph_unavailable
+@pytest.mark.xfail(
+    reason="F3: graph never switches from Form 8995 to Form 8995-A",
+    strict=True,
+)
+def test_graph_qbi_applies_above_threshold_limitation():
+    """Single, $250k SE profit: Form 8995-A limits QBI with no business wages.
+
+    Tax-Calculator 6.7.2 assumes zero business W-2 wages and UBIA for the
+    inputs tenforty exposes, producing taxable income of $202,371.67. The graph
+    instead applies simplified Form 8995 above its statutory threshold.
+    """
+    r = evaluate_return(
+        year=2024,
+        filing_status="Single",
+        self_employment_income=250_000,
+        backend="graph",
+    )
+    assert r.federal_taxable_income == pytest.approx(202_371.67, abs=1.0)
+
+
 def test_ots_niit_includes_short_term_gains():
     """$300k wages + $50k STCG: NIIT is 3.8% of $50k = $1,900."""
     r = evaluate_return(
