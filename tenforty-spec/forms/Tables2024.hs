@@ -33,6 +33,7 @@ module Tables2024
     -- * QBI Deduction (Form 8995)
     qbiDeductionRate2024,
     qbiThreshold2024,
+    qbiPhaseInRange2024,
 
     -- * Education Credits (Form 8863)
     aotcMaxCredit2024,
@@ -192,7 +193,12 @@ qbiDeductionRate2024 = 0.20
 -- | 2024 QBI simplified method threshold (above this, use Form 8995-A)
 -- Order: Single, MFJ, MFS, HoH, QW
 qbiThreshold2024 :: ByStatus (Amount Dollars)
-qbiThreshold2024 = byStatus 191950 383900 191950 191950 383900
+qbiThreshold2024 = byStatus 191950 383900 191950 191950 191950
+
+-- | 2024 Form 8995-A W-2 wage/UBIA and SSTB phase-in range
+-- Order: Single, MFJ, MFS, HoH, QW
+qbiPhaseInRange2024 :: ByStatus (Amount Dollars)
+qbiPhaseInRange2024 = byStatus 50000 100000 50000 50000 50000
 
 -- | 2024 AOTC maximum credit per student
 aotcMaxCredit2024 :: Amount Dollars

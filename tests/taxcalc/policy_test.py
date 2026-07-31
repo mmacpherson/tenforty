@@ -5,9 +5,11 @@ import pytest
 from .taxcalc_policy import (
     QBI_SIMPLIFIED_THRESHOLD,
     _f3_qbi,
+    _f21_taxcalc_qw_qbi_phase_range,
 )
 
 _QBI_QUANTITIES = {"taxable_income", "income_tax", "total_tax"}
+_F21_QUANTITIES = _QBI_QUANTITIES | {"amt"}
 _EXPECTED_QBI_THRESHOLDS = {
     (2024, "Single"): 191_950.0,
     (2024, "Married/Joint"): 383_900.0,
@@ -56,27 +58,12 @@ def test_qbi_simplified_thresholds_match_form_8995():
     assert QBI_SIMPLIFIED_THRESHOLD == _EXPECTED_QBI_THRESHOLDS
 
 
-@pytest.mark.parametrize(
-    ("year", "status", "threshold"),
-    [
-        (year, status, threshold)
-        for (year, status), threshold in _EXPECTED_QBI_THRESHOLDS.items()
-    ],
-)
-def test_f3_graph_excusal_starts_above_the_gross_income_threshold(
-    year, status, threshold
-):
-    """Every supported year/status uses its statutory Form 8995 threshold."""
-    at_threshold = _case(
-        year=year,
-        status=status,
-        w2=threshold - 1.0,
-        se=1.0,
-    )
-    above_threshold = {**at_threshold, "w2": threshold}
+@pytest.mark.parametrize(("year", "status"), sorted(_EXPECTED_QBI_THRESHOLDS))
+def test_f3_never_excuses_the_graph(year, status):
+    """The graph now implements both Form 8995 and Form 8995-A."""
+    case = _case(year=year, status=status, w2=1_000_000.0, se=100_000.0)
 
-    assert _f3_qbi("graph", at_threshold) == set()
-    assert _f3_qbi("graph", above_threshold) == _QBI_QUANTITIES
+    assert _f3_qbi("graph", case) == set()
 
 
 @pytest.mark.parametrize("backend", ["ots", "graph"])
@@ -87,15 +74,25 @@ def test_f3_does_not_fire_without_self_employment_income(backend):
     assert _f3_qbi(backend, case) == set()
 
 
-def test_f3_unknown_contract_fails_loud():
-    """An unregistered year/status must not silently inherit an excusal."""
-    case = _case(year=2026, w2=500_000.0, se=1.0)
+def test_f21_excuses_only_the_qw_taxcalc_phase_range():
+    """F21 is limited to the graph QW case inside TaxCalc's longer range."""
+    case = _case(status="Widow(er)", se=100_000.0)
+    reference = {"taxable_income": 200_000.0, "qbi_deduction": 10_000.0}
 
-    assert _f3_qbi("graph", case) == set()
+    assert _f21_taxcalc_qw_qbi_phase_range("graph", case, reference) == _F21_QUANTITIES
+    assert _f21_taxcalc_qw_qbi_phase_range("ots", case, reference) == set()
+    assert (
+        _f21_taxcalc_qw_qbi_phase_range(
+            "graph", {**case, "status": "Single"}, reference
+        )
+        == set()
+    )
 
 
-def test_f3_negative_gains_cannot_lower_the_conservative_bound():
-    """Future capital-loss generation must not expose an above-threshold case."""
-    case = _case(w2=191_950.0, se=1.0, stcg=-1_000_000.0)
+@pytest.mark.parametrize("pre_qbi", [191_950.0, 291_950.0, 400_000.0])
+def test_f21_does_not_excuse_outside_taxcalcs_qw_phase_range(pre_qbi):
+    """F21 leaves both endpoints and values above TaxCalc's range exposed."""
+    case = _case(status="Widow(er)", se=100_000.0)
+    reference = {"taxable_income": pre_qbi, "qbi_deduction": 0.0}
 
-    assert _f3_qbi("graph", case) == _QBI_QUANTITIES
+    assert _f21_taxcalc_qw_qbi_phase_range("graph", case, reference) == set()

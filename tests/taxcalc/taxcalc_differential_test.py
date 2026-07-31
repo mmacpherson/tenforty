@@ -149,6 +149,9 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "e00900": c["se"],
                     "e00900p": c["se"],
                     "e00900s": 0.0,
+                    "PT_binc_w2_wages": c.get("qbi_w2_wages", 0.0),
+                    "PT_ubia_property": c.get("qbi_ubia", 0.0),
+                    "PT_SSTB_income": int(c.get("qbi_is_sstb", False)),
                     "e00300": c["interest"],
                     "e00600": max(c["ord_div"], c["qual_div"]),
                     "e00650": c["qual_div"],
@@ -193,6 +196,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                 "total_tax": pre_refund_iitax + setax + amc,
                 "iitax": iitax,
                 "refund": refund,
+                "qbi_deduction": float(arr("qbided")[row]),
             }
     return out
 
@@ -205,6 +209,9 @@ def tenforty_components(case, backend):
         backend=backend,
         w2_income=case["w2"],
         self_employment_income=case["se"],
+        qbi_w2_wages=case.get("qbi_w2_wages", 0.0),
+        qbi_ubia=case.get("qbi_ubia", 0.0),
+        qbi_is_sstb=case.get("qbi_is_sstb", False),
         short_term_capital_gains=case["stcg"],
         long_term_capital_gains=case["ltcg"],
         taxable_interest=case["interest"],
@@ -247,7 +254,7 @@ def test_components_match_taxcalc(backend, cases):
     worst = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
-        excused = excused_quantities(backend, case)
+        excused = excused_quantities(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])
             hi = max(exp[quantity], exp_alt[quantity])

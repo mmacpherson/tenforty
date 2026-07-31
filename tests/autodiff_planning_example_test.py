@@ -21,7 +21,7 @@ def test_next_dollar_table_ranks_every_continuous_input(example):
     table = example["next_dollar_table"]()
     rates = dict(table.select("input", "tax_change_per_dollar").iter_rows())
 
-    assert len(rates) == 12
+    assert len(rates) == 14
     assert rates["self_employment_income"] == pytest.approx(0.42344684, abs=1e-7)
     assert rates["qualified_dividends"] == pytest.approx(-0.09, abs=1e-7)
     assert rates["itemized_deductions"] == pytest.approx(-0.333, abs=1e-7)

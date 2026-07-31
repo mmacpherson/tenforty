@@ -47,6 +47,8 @@ def test_gradient_vector_matches_scalar_api(graph_backend):
         "short_term_capital_gains",
         "long_term_capital_gains",
         "self_employment_income",
+        "qbi_w2_wages",
+        "qbi_ubia",
         "rental_income",
         "schedule_1_income",
         "itemized_deductions",

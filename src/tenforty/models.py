@@ -10,7 +10,7 @@ from collections.abc import Callable
 from enum import Enum
 from functools import partial
 
-from pydantic import BaseModel, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from . import _ots_form_models
 
@@ -298,6 +298,9 @@ class TaxReturnInput(BaseModel):
     short_term_capital_gains: float = 0.0
     long_term_capital_gains: float = 0.0
     self_employment_income: float = 0.0
+    qbi_w2_wages: float = Field(default=0.0, ge=0.0)
+    qbi_ubia: float = Field(default=0.0, ge=0.0)
+    qbi_is_sstb: bool = False
     rental_income: float = 0.0
     schedule_1_income: float = 0.0
     itemized_deductions: float = 0.0

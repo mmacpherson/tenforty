@@ -98,7 +98,7 @@ REGIONS = {
     },
     "qbi": {
         "self_employment_income": 100_000.0,
-        "rental_income": 60_000.0,
+        "rental_income": 50_000.0,
         "long_term_capital_gains": 60_000.0,
     },
 }

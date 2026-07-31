@@ -19,7 +19,7 @@ delete the signature, and update this table in the same PR.
 |----|---------|----------|--------|----------|
 | F1 | Schedule SE L8a never filled | mapping, both backends | fixed (#279, v2025.11) | @bg002h, #278 |
 | F2 | SE-tax error propagates to AGI | consequence of F1 | fixed with F1 | @bg002h, #278 |
-| F3 | QBI: missing (OTS) / above-threshold limit (graph) | OTS orchestration + graph spec | graph base fixed and below-threshold signature narrowed; OTS omission + graph above-threshold open | @bg002h, #278 |
+| F3 | QBI: missing (OTS) / above-threshold limit (graph) | OTS orchestration + graph spec | graph fixed (tenforty-6hr, tenforty-mhe); OTS omission open (tenforty-2u6) | @bg002h, #278 |
 | F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed (OTS #296, graph: L5a imports Schedule D L16) | mapping assessment + differential sweep |
 | F5 | Graph Form 8959 Part II drops SE earnings (line 12 used min, not subtract) | graph spec | fixed | mapping assessment + differential sweep |
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
@@ -35,6 +35,7 @@ delete the signature, and update this table in the same PR.
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | open (tenforty-dw0) | differential sweep |
 | F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
 | F20 | Suite adapter compares post-refund `iitax` with pre-refund tenforty tax | taxcalc harness | fixed (tenforty-jte) | differential sweep |
+| F21 | 199A QBI phase-in range is doubled for qualifying widow(er) | upstream TaxCalc parameter | open (tenforty-2jg; upstream report pending) | Form 8995-A adjudication |
 
 ## Method
 
@@ -89,26 +90,21 @@ everything downstream of them.
   threshold the graph agrees with taxcalc to the cent (verified at both the
   base-bound Single w2 $50k / SE $80k → taxable $94,878.54 and the cap-bound
   MFJ SE $80k → taxable $36,118.54).
-- Above the §199A thresholds the correct deduction additionally depends on
-  business W-2 wages / UBIA / SSTB status — concepts absent from tenforty's
-  API (taxcalc assumes zero business wages, phasing the deduction to zero
-  above the upper threshold). Any fix must choose an assumption there and
-  document it. The spec also exports an unused QBI threshold table whose
-  qualifying-widow(er) value incorrectly matches MFJ rather than the
-  all-other-returns threshold. That dead constant does not affect results
-  today, but must be corrected before a future Form 8995 gate consumes it;
-  both pieces of work are tracked by tenforty-mhe.
-- **Signature narrowed (tenforty-gyp):** OTS remains excused on every
-  self-employment case because it still omits Form 8995. Graph is now excused
-  only when generated gross income can exceed the applicable simplified-method
-  threshold ($191,950 / $383,900 MFJ in 2024; $197,300 / $394,600 MFJ in
-  2025). The predicate is deliberately conservative because signatures receive
-  inputs rather than computed taxable income: deductions may keep a high-gross
-  case below the threshold, but a case whose gross income is at or below the
-  threshold cannot cross it. Deterministic Single anchors cover both the net QBI
-  base ($50k wages / $80k SE) and its capital-gain limitation ($100k SE / $60k
-  LTCG); the latter makes the differential fail if Form 8995 line 13 stops
-  importing net capital gain.
+- **Form 8995-A fixed (tenforty-mhe):** the graph now accepts business W-2
+  wages, UBIA, and SSTB status for one trade or business (or a valid
+  aggregation), and applies the statutory wage/UBIA limitation and SSTB
+  applicable percentage through the phase-in range. The zero-wage default
+  phases the component to zero above the range; nonzero wage, UBIA, and SSTB
+  cases agree with TaxCalc where its parameters are correct. The previously
+  dead threshold table is now live, with qualifying widow(er) corrected to the
+  all-other-returns threshold and $50,000 phase-in range.
+- **Signature narrowed (tenforty-gyp, completed by tenforty-mhe):** OTS remains
+  excused on every self-employment case because it still omits Form 8995. The
+  graph F3 excusal is gone across both the simplified and Form 8995-A regions.
+  Deterministic anchors cover the net QBI base, capital-gain limitation,
+  zero-wage phase-in, both wage/UBIA branches, and SSTB treatment. F21 separately
+  records TaxCalc's qualifying-widow(er) phase-range defect; it is not attributed
+  to F3 or copied into the graph.
 
 ### F4. NIIT omits short-term capital gains — shared omission, both backends
 
@@ -540,3 +536,27 @@ losses, the MFS half-cap, sub-cap losses, and gain cases (unchanged); AGI on a
 net-loss return now falls by at most the cap. The strict-xfail
 `test_graph_niit_honors_the_capital_loss_limitation` flipped to a passing
 guard. Closed by `tenforty-kf4`.
+
+### F21. NEW, ADJUDICATED — TaxCalc doubles the QBI phase-in range for qualifying widow(er)
+
+TaxCalc 6.7.2 gives qualifying widow(er) the correct all-other-returns
+section 199A threshold, but the married-filing-jointly phase-in range. Its
+`PT_qbid_taxinc_thd` parameter is $191,950 for 2024 qualifying widow(er), while
+`PT_qbid_taxinc_gap` is $100,000. The 2024 Form 8995-A instructions specify a
+$50,000 range for every return other than married filing jointly.
+
+The difference is visible at the midpoint of the statutory range. For a 2024
+qualifying widow(er) with $100,000 of self-employment profit and $153,214.775
+of taxable interest, taxable income before the QBI deduction is $216,950.
+After the deductible half of self-employment tax, QBI is $92,935.225 and its
+20% component is $18,587.045. With zero business W-2 wages and UBIA, the
+official 50% phase-in reduction leaves a $9,293.5225 deduction. TaxCalc applies
+only a 25% reduction over its $100,000 range and returns $13,940.28375.
+
+The graph follows the official range. The differential policy excuses only
+qualifying-widow(er) cases in the affected phase-in band, and a strict-xfail
+adapter test pins TaxCalc 6.7.2's result until a release corrects the parameter.
+The signature covers taxable income, AMT, income tax, and total tax because the
+incorrect deduction can propagate through both regular taxable income and AMTI.
+The upstream report is staged in `docs/upstream-taxcalc-reports.md`; tracked by
+`tenforty-2jg`.
