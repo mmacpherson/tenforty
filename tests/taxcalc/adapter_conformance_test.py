@@ -55,6 +55,15 @@ REFUNDABLE_CREDIT_CASE = {
     "iso": 0.0,
 }
 
+F21_QW_QBI_PHASE_IN_CASE = {
+    **F14_CASE,
+    "status": "Widow(er)",
+    "w2": 0.0,
+    "se": 100_000.0,
+    "interest": 153_214.775,
+    "iso": 0.0,
+}
+
 
 def test_iso_reaches_taxcalc_as_amt_preference():
     """An ISO spread must produce AMT in taxcalc, not silence."""
@@ -131,6 +140,59 @@ def test_taxcalc_amt_matches_form_6251():
     adopts the add-back.
     """
     assert taxcalc_batch([F14_CASE])[0]["amt"] == pytest.approx(43_813.50, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F21: TaxCalc 6.7.2 gives qualifying widow(er) a $100,000 QBI "
+    "phase-in range instead of the official $50,000 range",
+    strict=True,
+)
+def test_taxcalc_qw_qbi_uses_the_all_other_returns_phase_in_range():
+    """The QW midpoint must apply 50%, not 25%, of the wage-limit reduction."""
+    result = taxcalc_batch([F21_QW_QBI_PHASE_IN_CASE])[0]
+    assert result["taxable_income"] == pytest.approx(207_656.4775, abs=0.01)
+
+
+@pytest.mark.parametrize(
+    ("extra", "expected_qbi_deduction"),
+    [
+        ({}, 1_152.39679),
+        ({"qbi_w2_wages": 20_000.0}, 10_532.39679),
+        ({"qbi_ubia": 400_000.0}, 10_532.39679),
+        ({"qbi_is_sstb": True}, 71.44860098),
+        (
+            {
+                "qbi_w2_wages": 20_000.0,
+                "qbi_ubia": 400_000.0,
+                "qbi_is_sstb": True,
+            },
+            943.78860098,
+        ),
+    ],
+)
+def test_qbi_business_fields_reach_taxcalc(extra, expected_qbi_deduction):
+    """The adapter carries all three Form 8995-A business attributes."""
+    case = {
+        **F14_CASE,
+        "w2": 0.0,
+        "se": 100_000.0,
+        "interest": 160_514.775,
+        "iso": 0.0,
+        **extra,
+    }
+
+    taxcalc_result = taxcalc_batch([case])[0]
+    graph_result = evaluate_components(case, "graph")
+
+    assert taxcalc_result["qbi_deduction"] == pytest.approx(
+        expected_qbi_deduction, abs=1e-8
+    )
+    assert graph_result["taxable_income"] == pytest.approx(
+        taxcalc_result["taxable_income"], abs=1e-8
+    )
+    assert graph_result["total_tax"] == pytest.approx(
+        taxcalc_result["total_tax"], abs=1e-8
+    )
 
 
 def test_ots_matches_form_6251_on_the_same_case():

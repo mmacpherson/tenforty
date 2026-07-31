@@ -34,21 +34,21 @@ This table is the clearest current application:
 - negative rates and stacked preferential income make hidden interactions
   visible.
 
-The performance claim needs care. On a 12-lever 2024 California return, two
-local runs on 2026-07-30 measured:
+The performance claim needs care. On a 14-lever 2024 California return, two
+local runs on 2026-07-31 measured:
 
 | Method | Milliseconds per table | Relative to vector |
 |---|---:|---:|
-| Vector autodiff | 31.7–32.5 | 1.00× |
-| Scalar-autodiff loop | 79.2–83.1 | 2.44–2.62× |
-| $1 forward-difference loop | 28.4–33.7 | 0.87–1.06× |
+| Vector autodiff | 41.2–41.8 | 1.00× |
+| Scalar-autodiff loop | 104.3–106.1 | 2.53–2.54× |
+| $1 forward-difference loop | 33.0–41.3 | 0.80–0.99× |
 
 These are illustrative timings, not a stable benchmark promise; run
 `--benchmark` on the target machine. The structural result is more important:
 the vector removes repeated reverse traversals and is materially faster than
 calling scalar autodiff for every input, but it is not currently faster than a
 forward-difference table end to end. The public scalar-loop timing also includes
-constructing a fresh evaluator for every call, so its 2.44–2.62× ratio measures
+constructing a fresh evaluator for every call, so its 2.53–2.54× ratio measures
 both evaluator reuse and reverse-traversal reuse; it does not isolate the latter.
 Active tax kinks also require independent right-hand probes for affected inputs.
 

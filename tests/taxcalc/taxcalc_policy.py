@@ -40,39 +40,48 @@ QBI_SIMPLIFIED_THRESHOLD = {
 }
 
 _QBI_AFFECTED_QUANTITIES = {"taxable_income", "income_tax", "total_tax"}
+_F21_AFFECTED_QUANTITIES = _QBI_AFFECTED_QUANTITIES | {"amt"}
 
 
 def _f3_qbi(backend: str, case: dict) -> set[str]:
-    """F3: QBI divergence on self-employment cases from two remaining causes.
+    """F3: OTS omits QBI on every self-employment case.
 
     OTS omits the deduction entirely (it reads 1040 line 13 as a direct input
     and nothing supplies it — tenforty-2u6), so every OTS case with QBI remains
-    excused. The graph agrees with taxcalc under the Form 8995 simplified-method
-    threshold, but lacks the Form 8995-A W-2-wage/UBIA limit above it
-    (tenforty-mhe).
-
-    Signature functions receive inputs rather than computed taxable income.
-    Gross generated income is a conservative proxy: deductions and the half-SE
-    adjustment can only reduce taxable income, so gross at or below the threshold
-    proves that Form 8995 applies. Gross above the threshold remains excused even
-    when deductions ultimately keep the case below it.
+    excused. The graph implements both the simplified and Form 8995-A paths.
     """
     if case.get("se", 0) <= 0:
         return set()
     if backend == "ots":
         return _QBI_AFFECTED_QUANTITIES.copy()
-    if backend != "graph":
+    return set()
+
+
+def _f21_taxcalc_qw_qbi_phase_range(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> set[str]:
+    """F21: TaxCalc doubles the QBI phase-in range for qualifying widow(er)."""
+    if (
+        backend != "graph"
+        or case.get("status") != "Widow(er)"
+        or case.get("se", 0) <= 0
+        or reference is None
+    ):
         return set()
 
-    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), case.get("status")))
+    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), "Widow(er)"))
     if threshold is None:
         return set()
-    income_upper_bound = sum(
-        max(0.0, case.get(field, 0))
-        for field in ("w2", "se", "stcg", "ltcg", "interest", "ord_div")
-    )
-    if income_upper_bound > threshold:
-        return _QBI_AFFECTED_QUANTITIES.copy()
+    if "qbi_deduction" in reference:
+        taxable_income_before_qbi = (
+            reference["taxable_income"] + reference["qbi_deduction"]
+        )
+    else:
+        standard = STANDARD_DEDUCTION[(case["year"], "Widow(er)")]
+        deduction = max(standard, case.get("itemized", 0.0))
+        taxable_income_before_qbi = max(0.0, reference["agi"] - deduction)
+    if threshold < taxable_income_before_qbi < threshold + 100_000.0:
+        return _F21_AFFECTED_QUANTITIES.copy()
     return set()
 
 
@@ -218,11 +227,14 @@ SIGNATURES: list[Callable[[str, dict], set[str]]] = [
 ]
 
 
-def excused_quantities(backend: str, case: dict) -> set[str]:
+def excused_quantities(
+    backend: str, case: dict, reference: dict[str, float] | None = None
+) -> set[str]:
     """Return quantities whose disagreement is attributable to a known defect."""
     excused: set[str] = set()
     for signature in SIGNATURES:
         excused |= signature(backend, case)
+    excused |= _f21_taxcalc_qw_qbi_phase_range(backend, case, reference)
     return excused
 
 
@@ -275,6 +287,9 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
         backend=backend,
         w2_income=case["w2"],
         self_employment_income=case["se"],
+        qbi_w2_wages=case.get("qbi_w2_wages", 0.0),
+        qbi_ubia=case.get("qbi_ubia", 0.0),
+        qbi_is_sstb=case.get("qbi_is_sstb", False),
         short_term_capital_gains=case["stcg"],
         long_term_capital_gains=case["ltcg"],
         taxable_interest=case["interest"],
@@ -306,7 +321,7 @@ def unexcused_violations(
     pass expected_alt (the spouse-attribution run) to form bounds.
     """
     ours = evaluate_components(case, backend)
-    excused = excused_quantities(backend, case)
+    excused = excused_quantities(backend, case, expected)
     violations = []
     for quantity in QUANTITIES:
         exp_alt = expected_alt or expected

@@ -91,10 +91,22 @@ Here are all arguments available for those two functions:
 | `ordinary_dividends`         | float                    | 0.0                 |                                    |
 | `short_term_capital_gains`   | float                    | 0.0                 |                                    |
 | `long_term_capital_gains`    | float                    | 0.0                 |                                    |
+| `self_employment_income`     | float                    | 0.0                 | Schedule C profit used by Schedule SE and QBI |
+| `qbi_w2_wages`               | float                    | 0.0                 | Graph only: W-2 wages paid by the QBI business or aggregation |
+| `qbi_ubia`                   | float                    | 0.0                 | Graph only: UBIA of qualified property for that business or aggregation |
+| `qbi_is_sstb`                | bool                     | False               | Graph only: whether that business or aggregation is an SSTB |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
 | `itemized_deductions`        | float                    | 0.0                 |                                    |
 | `state_adjustment`           | float                    | 0.0                 |                                    |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
+
+The three `qbi_` inputs describe one trade or business, or businesses the
+taxpayer has validly aggregated for section 199A. They are not totals across
+unrelated businesses, because Form 8995-A applies its wage and UBIA limitation
+per business or valid aggregation. Their defaults model a non-SSTB business
+with no business W-2 wages or qualified property. OpenTaxSolver does not
+compute Form 8995-A, so non-default `qbi_` inputs require `backend="graph"` and
+are rejected rather than silently ignored by the OTS backend.
 
 The functions output these fields:
 

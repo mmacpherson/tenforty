@@ -123,3 +123,64 @@ and Tax-Calculator may simply be making the same shortcut — starting from
 taxable income and adding preferences without the line 2a step. We're changing
 our engine accordingly, and wanted to raise the question here in case it's
 relevant, or in case we've misunderstood the treatment.
+
+---
+
+## 2. Bug: qualifying widow(er) receives the MFJ-sized QBI phase-in range
+
+**Where:** `taxcalc/policy_current_law.json`, parameter
+`PT_qbid_taxinc_gap`.
+
+Tax-Calculator 6.7.2 gives qualifying widow(er) the all-other-returns section
+199A threshold but the married-filing-jointly phase-in range. For 2024,
+`PT_qbid_taxinc_thd` correctly supplies $191,950 for qualifying widow(er),
+while `PT_qbid_taxinc_gap` supplies $100,000. The 2024 Form 8995-A instructions
+specify a $50,000 range for all returns other than married filing jointly.
+
+### Reproducer
+
+The following 2024 qualifying-widow(er) return places taxable income before
+the QBI deduction exactly $25,000 above the threshold:
+
+```python
+import pandas as pd
+import taxcalc
+
+data = pd.DataFrame(
+    [
+        {
+            "RECID": 1,
+            "MARS": 5,
+            "XTOT": 1,
+            "age_head": 40,
+            "age_spouse": 0,
+            "e00900": 100_000.0,
+            "e00900p": 100_000.0,
+            "e00900s": 0.0,
+            "e00300": 153_214.775,
+        }
+    ]
+)
+records = taxcalc.Records(data=data, start_year=2024, gfactors=None, weights=None)
+calc = taxcalc.Calculator(policy=taxcalc.Policy(), records=records)
+calc.advance_to_year(2024)
+calc.calc_all()
+print(calc.array("qbided")[0])
+```
+
+Tax-Calculator returns a QBI deduction of $13,940.28375. The official $50,000
+range puts this return at 50% phase-in, so with zero business W-2 wages and
+UBIA the deduction is $9,293.5225:
+
+| quantity | amount |
+|---|---:|
+| QBI after the deductible half of SE tax | $92,935.225 |
+| 20% QBI component | $18,587.045 |
+| excess over threshold | $25,000 |
+| official phase-in percentage | 50% |
+| official QBI deduction | $9,293.5225 |
+
+Tax-Calculator's $100,000 range applies a 25% phase-in percentage instead,
+which produces its $13,940.28375 result. The corresponding qualifying-widow(er)
+gap should be $50,000, matching Single, Married/Sep, and Head of Household;
+only Married/Joint receives $100,000.

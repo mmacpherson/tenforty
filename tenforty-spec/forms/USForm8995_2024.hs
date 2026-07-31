@@ -38,10 +38,50 @@ usForm8995_2024 = form "us_form_8995" 2024 $ do
     interior "L5" "total_qbi" $
       (l1 .+. l2 .+. l3 .+. l4) .-. seHalfDeduction
 
-  -- Line 6: QBI component. Multiply line 5 by 20% (0.20)
+  -- Form 8995-A uses taxable income before the QBI deduction to phase in the
+  -- W-2 wage/UBIA limitation and phase out SSTB amounts. The public inputs
+  -- describe one trade or business, or a valid aggregation of businesses.
+  l12 <- interior "L12" "taxable_income_before" $ importForm us1040L15PreQbi
+  qbiW2Wages <- keyInput "A_W2" "qbi_w2_wages" "W-2 wages paid by the QBI business or aggregation"
+  qbiUbia <- keyInput "A_UBIA" "qbi_ubia" "Unadjusted basis immediately after acquisition"
+  qbiIsSstb <- keyInput "A_SSTB" "qbi_is_sstb" "One when the QBI business or aggregation is an SSTB"
+
+  let threshold = byStatusE (fmap lit qbiThreshold2024)
+      phaseInRange = byStatusE (fmap lit qbiPhaseInRange2024)
+      phasePercentage =
+        minE (rate 1) $
+          maxE (rate 0) ((l12 .-. threshold) ./. phaseInRange)
+      applicablePercentage =
+        ifPos qbiIsSstb (rate 1 .-. phasePercentage) (rate 1)
+
+  applicableQbi <-
+    interior "A_QBI" "applicable_qbi" $
+      max0 l5 .*. applicablePercentage
+  applicableW2Wages <-
+    interior "A_W2_APPLICABLE" "applicable_qbi_w2_wages" $
+      qbiW2Wages .*. applicablePercentage
+  applicableUbia <-
+    interior "A_UBIA_APPLICABLE" "applicable_qbi_ubia" $
+      qbiUbia .*. applicablePercentage
+
+  -- Line 6 / Form 8995-A Part II: the QBI component before the wage limit.
   l6 <-
     interior "L6" "qbi_component" $
-      max0 l5 .*. lit qbiDeductionRate2024
+      applicableQbi .*. lit qbiDeductionRate2024
+
+  wageLimit <-
+    interior "A_WAGE_LIMIT" "w2_wage_ubia_limit" $
+      greaterOf
+        (applicableW2Wages .*. rate 0.50)
+        ( (applicableW2Wages .*. rate 0.25)
+            .+. (applicableUbia .*. rate 0.025)
+        )
+  wageLimitReduction <-
+    interior "A_WAGE_REDUCTION" "w2_wage_ubia_reduction" $
+      (l6 `subtractNotBelowZero` wageLimit) .*. phasePercentage
+  limitedQbiComponent <-
+    interior "A_QBI_COMPONENT" "limited_qbi_component" $
+      l6 `subtractNotBelowZero` wageLimitReduction
 
   -- Line 7: Qualified REIT dividends
   l7 <- keyInput "L7" "reit_dividends" "Qualified REIT dividends"
@@ -62,10 +102,7 @@ usForm8995_2024 = form "us_form_8995" 2024 $ do
   -- Line 11: Add lines 6 and 10
   l11 <-
     interior "L11" "combined_qbi_component" $
-      l6 .+. l10
-
-  -- Line 12: Taxable income before QBI deduction
-  l12 <- interior "L12" "taxable_income_before" $ importForm us1040L15PreQbi
+      limitedQbiComponent .+. l10
 
   -- Line 13: Net capital gain (from Form 1040, lines 3a and 7, if applicable).
   -- Qualified dividends plus net capital gain is line 4 of the Qualified

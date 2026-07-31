@@ -198,9 +198,14 @@ def test_marginal_rate_within_bounds(filing_status, wrt, incomes):
         and case["ordinary_dividends"] > case["qualified_dividends"]
         else -1e-6
     )
-    assert lower_bound <= marginal <= 0.5, (
+    # Inside the Form 8995-A range, another dollar can also phase in the
+    # W-2/UBIA limit and shrink the QBI deduction. With generated QBI capped at
+    # $200k, that interaction can add at most 0.8 of taxable income before the
+    # ordinary marginal rate is applied; even the top bracket plus employment
+    # and surtax effects remains below 0.8.
+    assert lower_bound <= marginal <= 0.8, (
         f"marginal d(total_tax)/d({wrt}) = {marginal:.6f} is outside "
-        f"[{lower_bound}, 0.5] at {case}"
+        f"[{lower_bound}, 0.8] at {case}"
     )
 
 

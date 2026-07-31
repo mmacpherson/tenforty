@@ -101,6 +101,65 @@ def _case_strategy():
     ).map(_normalize_case)
 
 
+_QBI_WAGES = st.one_of(
+    st.sampled_from((10_000.0, 20_000.0, 40_000.0)),
+    st.integers(min_value=1, max_value=200_000).map(float),
+)
+_QBI_UBIA = st.one_of(
+    st.sampled_from((100_000.0, 400_000.0, 800_000.0)),
+    st.integers(min_value=1, max_value=2_000_000).map(float),
+)
+_QBI_BUSINESS_INPUTS = st.one_of(
+    _QBI_WAGES.map(
+        lambda wages: {
+            "qbi_w2_wages": wages,
+            "qbi_ubia": 0.0,
+            "qbi_is_sstb": False,
+        }
+    ),
+    _QBI_UBIA.map(
+        lambda ubia: {
+            "qbi_w2_wages": 0.0,
+            "qbi_ubia": ubia,
+            "qbi_is_sstb": False,
+        }
+    ),
+    st.just(
+        {
+            "qbi_w2_wages": 0.0,
+            "qbi_ubia": 0.0,
+            "qbi_is_sstb": True,
+        }
+    ),
+    st.builds(
+        lambda wages, ubia, is_sstb: {
+            "qbi_w2_wages": wages,
+            "qbi_ubia": ubia,
+            "qbi_is_sstb": is_sstb,
+        },
+        _QBI_WAGES,
+        _QBI_UBIA,
+        st.booleans(),
+    ),
+)
+
+
+def _add_qbi_business_inputs(case, business_inputs):
+    return {
+        **case,
+        "se": case["se"] or 100_000.0,
+        **business_inputs,
+    }
+
+
+def _qbi_case_strategy():
+    return st.builds(
+        _add_qbi_business_inputs,
+        _case_strategy(),
+        _QBI_BUSINESS_INPUTS,
+    )
+
+
 def _anchor(**kw):
     base = {
         "year": 2024,
@@ -149,6 +208,9 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "e00900": c["se"],
                     "e00900p": c["se"],
                     "e00900s": 0.0,
+                    "PT_binc_w2_wages": c.get("qbi_w2_wages", 0.0),
+                    "PT_ubia_property": c.get("qbi_ubia", 0.0),
+                    "PT_SSTB_income": int(c.get("qbi_is_sstb", False)),
                     "e00300": c["interest"],
                     "e00600": max(c["ord_div"], c["qual_div"]),
                     "e00650": c["qual_div"],
@@ -193,6 +255,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                 "total_tax": pre_refund_iitax + setax + amc,
                 "iitax": iitax,
                 "refund": refund,
+                "qbi_deduction": float(arr("qbided")[row]),
             }
     return out
 
@@ -205,6 +268,9 @@ def tenforty_components(case, backend):
         backend=backend,
         w2_income=case["w2"],
         self_employment_income=case["se"],
+        qbi_w2_wages=case.get("qbi_w2_wages", 0.0),
+        qbi_ubia=case.get("qbi_ubia", 0.0),
+        qbi_is_sstb=case.get("qbi_is_sstb", False),
         short_term_capital_gains=case["stcg"],
         long_term_capital_gains=case["ltcg"],
         taxable_interest=case["interest"],
@@ -225,20 +291,7 @@ def tenforty_components(case, backend):
     }
 
 
-@settings(
-    max_examples=50,
-    deadline=None,
-    suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large],
-)
-@given(cases=st.lists(_case_strategy(), min_size=1, max_size=40))
-@example(cases=[ANCHOR_NIIT_STCG])
-@example(cases=[ANCHOR_SE_WAGE_BASE])
-@example(cases=[ANCHOR_8959_NO_WAGES])
-@example(cases=[ANCHOR_QBI_NET_BASE])
-@example(cases=[ANCHOR_QBI_CAPITAL_GAIN_LIMIT])
-@pytest.mark.parametrize("backend", ["ots", "graph"])
-def test_components_match_taxcalc(backend, cases):
-    """Every quantity matches taxcalc within tolerance, unless excused by name."""
+def _assert_components_match_taxcalc(backend, cases):
     expected = taxcalc_batch(cases)
     mfj_present = any(c["status"] == "Married/Joint" for c in cases)
     expected_alt = taxcalc_batch(cases, "spouse") if mfj_present else expected
@@ -247,7 +300,7 @@ def test_components_match_taxcalc(backend, cases):
     worst = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
-        excused = excused_quantities(backend, case)
+        excused = excused_quantities(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])
             hi = max(exp[quantity], exp_alt[quantity])
@@ -267,3 +320,32 @@ def test_components_match_taxcalc(backend, cases):
     for quantity, diff in worst.items():
         target(diff, label=quantity)
     assert not failures, "\n".join(failures[:5])
+
+
+@settings(
+    max_examples=50,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large],
+)
+@given(cases=st.lists(_case_strategy(), min_size=1, max_size=40))
+@example(cases=[ANCHOR_NIIT_STCG])
+@example(cases=[ANCHOR_SE_WAGE_BASE])
+@example(cases=[ANCHOR_8959_NO_WAGES])
+@example(cases=[ANCHOR_QBI_NET_BASE])
+@example(cases=[ANCHOR_QBI_CAPITAL_GAIN_LIMIT])
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+def test_components_match_taxcalc(backend, cases):
+    """Every quantity matches taxcalc within tolerance, unless excused by name."""
+    _assert_components_match_taxcalc(backend, cases)
+
+
+# TaxCalc is an expensive oracle, so randomized QBI cases are batched and bounded.
+@settings(
+    max_examples=20,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large],
+)
+@given(cases=st.lists(_qbi_case_strategy(), min_size=1, max_size=30))
+def test_qbi_business_inputs_match_taxcalc(cases):
+    """Generated wages, UBIA, and SSTB inputs agree with TaxCalc on the graph."""
+    _assert_components_match_taxcalc("graph", cases)

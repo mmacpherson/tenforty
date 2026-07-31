@@ -609,6 +609,9 @@ def evaluate_return(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
@@ -632,6 +635,9 @@ def evaluate_return(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
@@ -640,6 +646,11 @@ def evaluate_return(
     )
 
     if backend == "ots":
+        if input_data.qbi_w2_wages or input_data.qbi_ubia or input_data.qbi_is_sstb:
+            raise NotImplementedError(
+                "QBI business W-2 wages, UBIA, and SSTB status are supported only "
+                "by backend='graph'; OpenTaxSolver does not compute Form 8995-A."
+            )
         return InterpretedTaxReturn(
             **evaluate_natural_input_form(
                 input_data.year,
@@ -684,6 +695,9 @@ def evaluate_returns(
     short_term_capital_gains: list[float] | float = 0.0,
     long_term_capital_gains: list[float] | float = 0.0,
     self_employment_income: list[float] | float = 0.0,
+    qbi_w2_wages: list[float] | float = 0.0,
+    qbi_ubia: list[float] | float = 0.0,
+    qbi_is_sstb: list[bool] | bool = False,
     rental_income: list[float] | float = 0.0,
     schedule_1_income: list[float] | float = 0.0,
     itemized_deductions: list[float] | float = 0.0,
@@ -722,6 +736,9 @@ def evaluate_returns(
     st_cap_gains = ensure_list(short_term_capital_gains)
     lt_cap_gains = ensure_list(long_term_capital_gains)
     se_incomes = ensure_list(self_employment_income)
+    qbi_w2_wage_values = ensure_list(qbi_w2_wages)
+    qbi_ubia_values = ensure_list(qbi_ubia)
+    qbi_sstb_values = ensure_list(qbi_is_sstb)
     rental_incomes = ensure_list(rental_income)
     sched1_incomes = ensure_list(schedule_1_income)
     item_deductions = ensure_list(itemized_deductions)
@@ -743,6 +760,9 @@ def evaluate_returns(
             ("short_term_capital_gains", st_cap_gains),
             ("long_term_capital_gains", lt_cap_gains),
             ("self_employment_income", se_incomes),
+            ("qbi_w2_wages", qbi_w2_wage_values),
+            ("qbi_ubia", qbi_ubia_values),
+            ("qbi_is_sstb", qbi_sstb_values),
             ("rental_income", rental_incomes),
             ("schedule_1_income", sched1_incomes),
             ("itemized_deductions", item_deductions),
@@ -777,6 +797,9 @@ def evaluate_returns(
         st_cap_gains = broadcast(st_cap_gains)
         lt_cap_gains = broadcast(lt_cap_gains)
         se_incomes = broadcast(se_incomes)
+        qbi_w2_wage_values = broadcast(qbi_w2_wage_values)
+        qbi_ubia_values = broadcast(qbi_ubia_values)
+        qbi_sstb_values = broadcast(qbi_sstb_values)
         rental_incomes = broadcast(rental_incomes)
         sched1_incomes = broadcast(sched1_incomes)
         item_deductions = broadcast(item_deductions)
@@ -801,6 +824,9 @@ def evaluate_returns(
                                 "short_term_capital_gains": st_cap_gains,
                                 "long_term_capital_gains": lt_cap_gains,
                                 "self_employment_income": se_incomes,
+                                "qbi_w2_wages": qbi_w2_wage_values,
+                                "qbi_ubia": qbi_ubia_values,
+                                "qbi_is_sstb": qbi_sstb_values,
                                 "rental_income": rental_incomes,
                                 "schedule_1_income": sched1_incomes,
                                 "itemized_deductions": item_deductions,
@@ -841,6 +867,9 @@ def evaluate_returns(
                                 lt_cap_gains[i] for i in indices
                             ],
                             "self_employment_income": [se_incomes[i] for i in indices],
+                            "qbi_w2_wages": [qbi_w2_wage_values[i] for i in indices],
+                            "qbi_ubia": [qbi_ubia_values[i] for i in indices],
+                            "qbi_is_sstb": [qbi_sstb_values[i] for i in indices],
                             "rental_income": [rental_incomes[i] for i in indices],
                             "schedule_1_income": [sched1_incomes[i] for i in indices],
                             "itemized_deductions": [
@@ -900,6 +929,9 @@ def evaluate_returns(
         "short_term_capital_gains",
         "long_term_capital_gains",
         "self_employment_income",
+        "qbi_w2_wages",
+        "qbi_ubia",
+        "qbi_is_sstb",
         "rental_income",
         "schedule_1_income",
         "itemized_deductions",
@@ -920,6 +952,9 @@ def evaluate_returns(
         st_cap_gains,
         lt_cap_gains,
         se_incomes,
+        qbi_w2_wage_values,
+        qbi_ubia_values,
+        qbi_sstb_values,
         rental_incomes,
         sched1_incomes,
         item_deductions,
@@ -964,6 +999,9 @@ def marginal_rate(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
@@ -978,6 +1016,8 @@ def marginal_rate(
 
     This computes the derivative of `output` with respect to `wrt`.
     """
+    if wrt == "qbi_is_sstb":
+        raise ValueError("qbi_is_sstb is discrete and cannot be differentiated")
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -991,6 +1031,9 @@ def marginal_rate(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
@@ -1025,6 +1068,9 @@ def marginal_rates(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
@@ -1053,6 +1099,9 @@ def marginal_rates(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
@@ -1088,6 +1137,9 @@ def solve_for_income(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
@@ -1098,6 +1150,8 @@ def solve_for_income(
     output: str = "total_tax",
 ) -> float:
     """Solve for an input value that produces a target output (graph backend only)."""
+    if for_input == "qbi_is_sstb":
+        raise ValueError("qbi_is_sstb is discrete and cannot be solved continuously")
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1111,6 +1165,9 @@ def solve_for_income(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,

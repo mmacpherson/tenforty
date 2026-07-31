@@ -290,13 +290,10 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         backend="graph",
     ),
     # Single with $250k SE profit and $60k LTCG. Tax-Calculator assumes zero
-    # business W-2 wages and UBIA for tenforty's input surface, so Form 8995-A
+    # business W-2 wages and UBIA, so Form 8995-A
     # reduces QBI to zero: taxable income is AGI $296,199.1125 less the $14,600
-    # standard deduction. The graph still applies simplified Form 8995 and
-    # deducts $44,319.8225, tracked by tenforty-mhe. These expected values pin
-    # Tax-Calculator's assumption, not a tenforty policy decision: if mhe adds
-    # business-wage/UBIA inputs, update this scenario rather than merely
-    # removing known_failure.
+    # standard deduction. Nonzero business-wage/UBIA inputs exercise the other
+    # Form 8995-A paths in tests/qbi_form_8995a_test.py.
     TaxScenario(
         source="Tax-Calculator 6.7.2 / IRS Form 8995-A",
         description="Single above QBI threshold with SE income and LTCG",
@@ -309,7 +306,6 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         expected_federal_tax=87757.866,
         expected_federal_agi=296199.1125,
         expected_federal_taxable_income=281599.1125,
-        known_failure="Graph lacks the above-threshold Form 8995-A limitation",
         backend="graph",
     ),
     # 2023 Single filer in 12% bracket

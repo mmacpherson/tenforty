@@ -19,6 +19,9 @@ NATURAL_TO_NODE = {
     # Schedule 1 (approximation): map aggregate values into "other" buckets.
     "schedule_1_income": "us_schedule_1_L8z_other_income",
     "self_employment_income": "us_schedule_1_L3_business_income",
+    "qbi_w2_wages": "us_form_8995_A_W2",
+    "qbi_ubia": "us_form_8995_A_UBIA",
+    "qbi_is_sstb": "us_form_8995_A_SSTB",
     "rental_income": "us_schedule_1_L5_rental_income",
     # Schedule A (approximation): map aggregate value into "other deductions".
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
