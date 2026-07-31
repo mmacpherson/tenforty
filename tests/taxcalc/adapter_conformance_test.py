@@ -209,6 +209,7 @@ def test_raw_iitax_remains_net_of_refundable_credits():
 
     assert single["refund"] == pytest.approx(0.0, abs=0.001)
     assert single["iitax"] == pytest.approx(0.0, abs=0.001)
+    # Pinned to TaxCalc 6.7.2; its row-derived credit_claim_urn may change on upgrade.
     assert second_in_batch["refund"] == pytest.approx(61.353, abs=0.001)
     assert second_in_batch["iitax"] == pytest.approx(
         -second_in_batch["refund"], abs=0.001
