@@ -319,6 +319,90 @@ def test_amt_std_addback_agrees_across_backends():
 
 
 @pytest.mark.xfail(
+    reason="F22: OTS cancels the Form 6251 standard-deduction add-back when "
+    "Form 1040 taxable income floors at zero",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_ots_amt_preserves_the_zero_taxable_income_floor():
+    """Form 6251 line 1 is zero, not negative unused standard deduction."""
+    kwargs = dict(
+        year=2024,
+        filing_status="Head_of_House",
+        incentive_stock_option_gains=200_000,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=2.0)
+    assert graph.federal_amt == pytest.approx(35_412.00, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F23: graph and TaxCalc omit the Form 6251 high-income MFS "
+    "increase on line 4",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_graph_applies_the_high_income_mfs_amt_increase():
+    """2025 MFS line 4 adds 25% of AMTI above $900,350."""
+    kwargs = dict(
+        year=2025,
+        filing_status="Married/Sep",
+        w2_income=750_000,
+        incentive_stock_option_gains=300_000,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+
+    assert graph.federal_amt == pytest.approx(ots.federal_amt, abs=2.0)
+    assert ots.federal_amt == pytest.approx(68_380.75, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F24: OTS 2024 uses the 2023 MFS AMT line-4 threshold and cap",
+    strict=True,
+)
+def test_ots_2024_mfs_amt_uses_current_year_line4_constants():
+    """The official 2024 threshold is $875,950 and the cap is $66,650."""
+    result = evaluate_return(
+        year=2024,
+        filing_status="Married/Sep",
+        backend="ots",
+        w2_income=750_000,
+        incentive_stock_option_gains=300_000,
+    )
+
+    assert result.federal_amt == pytest.approx(68_696.75, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="F25: graph Form 6251 uses $266,700 instead of the 2025 MFS "
+    "$300,000 capital-gain ceiling",
+    strict=True,
+)
+@skip_if_graph_unavailable
+def test_graph_2025_mfs_amt_uses_the_current_capital_gain_ceiling():
+    """The stale band moves $4,815 from the 15% AMT band into the 20% band."""
+    result = evaluate_return(
+        year=2025,
+        filing_status="Married/Sep",
+        backend="graph",
+        w2_income=250_000,
+        short_term_capital_gains=15_458,
+        long_term_capital_gains=6_032,
+        taxable_interest=49_171,
+        ordinary_dividends=11_057,
+        qualified_dividends=11_057,
+        itemized_deductions=19_444,
+        standard_or_itemized="Itemized",
+        incentive_stock_option_gains=50_000,
+    )
+
+    assert result.federal_amt == pytest.approx(2_218.80, abs=1.0)
+
+
+@pytest.mark.xfail(
     reason="F7: backends disagree on 'Itemized' semantics",
     strict=True,
 )
@@ -342,6 +426,25 @@ def test_itemized_semantics_agree_across_backends():
     assert ots.federal_taxable_income == pytest.approx(
         graph.federal_taxable_income, abs=1.0
     )
+
+
+@pytest.mark.xfail(
+    reason="F19: TaxCalc minimizes tax while tenforty maximizes the deduction",
+    strict=True,
+)
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+def test_deduction_choice_matches_taxcalc_when_itemizing_is_free(backend):
+    """TaxCalc keeps the standard deduction when larger itemization saves no tax."""
+    result = evaluate_return(
+        year=2025,
+        filing_status="Head_of_House",
+        long_term_capital_gains=58_509.0,
+        itemized_deductions=56_482.0,
+        backend=backend,
+    )
+
+    assert result.federal_taxable_income == pytest.approx(34_884.0, abs=0.01)
+    assert result.federal_total_tax == pytest.approx(0.0, abs=0.01)
 
 
 @skip_if_graph_unavailable

@@ -15,19 +15,10 @@ from pathlib import Path
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
-
-from .taxcalc_policy import evaluate_components
+from tenforty.models import InterpretedTaxReturn
 
 FIXTURE = Path(__file__).parent / "fixtures" / "taxcalc_goldens.json"
-
-BATCH_QUANTITY_COLUMNS = {
-    "agi": "federal_adjusted_gross_income",
-    "taxable_income": "federal_taxable_income",
-    "se_tax": "federal_se_tax",
-    "niit": "federal_niit",
-    "addl_medicare": "federal_additional_medicare_tax",
-    "total_tax": "federal_total_tax",
-}
+OUTPUT_FIELDS = tuple(InterpretedTaxReturn.model_fields)
 
 
 def _graph_available() -> bool:
@@ -43,6 +34,38 @@ def _sample_cases(n=24) -> list[dict]:
     cases = json.loads(FIXTURE.read_text())["cases"]
     step = max(1, len(cases) // n)
     return cases[::step][:n]
+
+
+def _scalar_result(case: dict, backend: str) -> InterpretedTaxReturn:
+    return evaluate_return(
+        year=case["year"],
+        filing_status=case["status"],
+        w2_income=case["w2"],
+        self_employment_income=case["se"],
+        short_term_capital_gains=case["stcg"],
+        long_term_capital_gains=case["ltcg"],
+        taxable_interest=case["interest"],
+        ordinary_dividends=case["ord_div"],
+        qualified_dividends=case["qual_div"],
+        itemized_deductions=case["itemized"],
+        incentive_stock_option_gains=case.get("iso", 0.0),
+        standard_or_itemized=case["std_or_item"],
+        backend=backend,
+    )
+
+
+def _assert_full_output_row(df, row: int, scalar: InterpretedTaxReturn) -> None:
+    missing = set(OUTPUT_FIELDS) - set(df.columns)
+    assert not missing, f"batch dropped public output columns: {sorted(missing)}"
+    mismatches = []
+    for field in OUTPUT_FIELDS:
+        batch_value = float(df[field][row])
+        scalar_value = float(getattr(scalar, field))
+        if abs(batch_value - scalar_value) > 0.02:
+            mismatches.append(
+                f"{field}: batch={batch_value:,.2f} scalar={scalar_value:,.2f}"
+            )
+    assert not mismatches, "\n".join(mismatches[:5])
 
 
 backends = pytest.mark.parametrize(
@@ -74,22 +97,14 @@ def test_zip_batch_matches_scalar(backend):
         ordinary_dividends=[c["ord_div"] for c in cases],
         qualified_dividends=[c["qual_div"] for c in cases],
         itemized_deductions=[c["itemized"] for c in cases],
+        incentive_stock_option_gains=[c.get("iso", 0.0) for c in cases],
         standard_or_itemized=[c["std_or_item"] for c in cases],
         backend=backend,
         mode="zip",
     )
     assert len(df) == len(cases)
-    mismatches = []
     for i, case in enumerate(cases):
-        scalar = evaluate_components(case, backend)
-        for quantity, column in BATCH_QUANTITY_COLUMNS.items():
-            batch_value = float(df[column][i])
-            if abs(batch_value - scalar[quantity]) > 0.02:
-                mismatches.append(
-                    f"row {i} {case}: {quantity} batch={batch_value:,.2f} "
-                    f"scalar={scalar[quantity]:,.2f}"
-                )
-    assert not mismatches, "\n".join(mismatches[:5])
+        _assert_full_output_row(df, i, _scalar_result(case, backend))
 
 
 @backends
@@ -112,6 +127,4 @@ def test_cross_grid_matches_scalar(backend):
             w2_income=float(df["w2_income"][i]),
             backend=backend,
         )
-        assert float(df["federal_total_tax"][i]) == pytest.approx(
-            scalar.federal_total_tax, abs=0.02
-        )
+        _assert_full_output_row(df, i, scalar)

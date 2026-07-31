@@ -184,3 +184,82 @@ Tax-Calculator's $100,000 range applies a 25% phase-in percentage instead,
 which produces its $13,940.28375 result. The corresponding qualifying-widow(er)
 gap should be $50,000, matching Single, Married/Sep, and Head of Household;
 only Married/Joint receives $100,000.
+
+---
+
+## 3. Bug: high-income MFS Form 6251 line-4 increase is omitted
+
+**Where:** `taxcalc/calcfunctions.py`, the `c62100` / Form 6251 Part II path.
+
+The 2025 Form 6251 instructions require a married-filing-separately filer with
+line 4 above $900,350 to add 25% of the excess to line 4, capped at $68,500.
+For 2024 the threshold is $875,950 and the cap is $66,650. Tax-Calculator
+zeros the MFS exemption above `AMT_em_pe`, but it never adds this separate
+amount to `c62100`.
+
+### Reproducer
+
+```python
+import pandas as pd
+import taxcalc
+
+data = pd.DataFrame(
+    [{
+        "RECID": 1,
+        "MARS": 3,
+        "XTOT": 1,
+        "age_head": 40,
+        "age_spouse": 0,
+        "e00200": 750_000.0,
+        "e00200p": 750_000.0,
+        "e00200s": 0.0,
+        "cmbtp": 300_000.0,
+    }]
+)
+records = taxcalc.Records(data=data, start_year=2025, gfactors=None, weights=None)
+calc = taxcalc.Calculator(policy=taxcalc.Policy(), records=records)
+calc.advance_to_year(2025)
+calc.calc_all()
+print(calc.array("c62100")[0], calc.array("c09600")[0])
+```
+
+Before the special rule, Form 6251 line 4 is $1,050,000. The instructions add
+25% x ($1,050,000 - $900,350) = $37,412.50. That raises AMT by $10,475.50.
+An independent Form 6251 implementation reports AMT of **$68,380.75**;
+Tax-Calculator 6.7.2 omits the increase. Its result is lower by a further
+$4,410 because of the separate standard-deduction issue described in report 1.
+
+The missing operation is distinct from setting the exemption to zero. The
+official instructions say to increase line 4 first, and then use that increased
+amount throughout the remainder of Form 6251.
+
+---
+
+## 4. Bug: unused itemized deductions reduce AMTI below Form 1040 line 15
+
+**Where:** `taxcalc/calcfunctions.py`, the itemizer branch that constructs
+`c62100`.
+
+Form 6251 line 1 is Form 1040 line 15, whose taxable income is floored at zero.
+Tax-Calculator instead reconstructs the itemizer's AMTI base directly from AGI
+less itemized deductions. If allowed itemized deductions exceed AGI, the unused
+portion passes through as a negative line-1 amount and reduces AMTI.
+
+### Reproducer
+
+Use a 2024 married-filing-separately record with short-term gain -$211,156,
+long-term gain $33,745, taxable interest $15,079, ordinary dividends $33,112
+($16,556 qualified), mortgage-interest carrier `e19200=50061`, and
+`cmbtp=300000`. The section 1211(b) MFS loss cap leaves AGI of $46,691, so
+$3,370 of itemization is unused and Form 1040 line 15 is zero.
+
+| quantity | Tax-Calculator 6.7.2 | Form 6251 line path |
+|---|---:|---:|
+| Form 1040 line 15 | $0.00 | $0.00 |
+| Form 6251 line-1 base used | -$3,370.00 | $0.00 |
+| AMTI | $296,630.00 | $300,000.00 |
+| AMT | **$57,432.72** | **$58,376.32** |
+
+The $943.60 AMT difference is 28% of the unused $3,370 deduction. Preserving
+the Form 1040 taxable-income floor before applying Form 6251 adjustments would
+make the two branches agree with the form's line sequence.

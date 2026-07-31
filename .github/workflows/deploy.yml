@@ -57,6 +57,11 @@ jobs:
         TENFORTY_TAXCALC: '1'
       run: uv run pytest tests/taxcalc/adapter_conformance_test.py -q
 
+    - name: Verify committed TaxCalc goldens
+      run: >-
+        uv run python scripts/taxcalc_audit.py
+        --check-goldens tests/taxcalc/fixtures/taxcalc_goldens.json
+
   # The shipped extension is built features=["python"] (setup.py), so the JIT +
   # SIMD batch path — including reachability-slicing in compile_batch — is
   # compiled out of every other job here and of pip installs. Without this job

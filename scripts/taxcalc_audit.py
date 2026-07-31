@@ -13,8 +13,8 @@ Modes:
 
 Scope notes:
 - Federal only (taxcalc has no state model).
-- No dependents, no ISO gains, no rental/schedule-1 income (taxcalc mapping
-  for those is ambiguous or absent).
+- No dependents or rental/schedule-1 income (taxcalc mapping for those is
+  ambiguous or absent). ISO exercise spread is carried as `cmbtp`.
 - Itemized deductions are mapped to taxcalc interest paid (e19200), an
   uncapped carrier for tenforty's uncategorized aggregate.
 - MFJ wage attribution: taxcalc requires per-spouse wages; tenforty's
@@ -39,6 +39,7 @@ warnings.filterwarnings("ignore")
 _POLICY_PATH = Path(__file__).parent.parent / "tests" / "taxcalc" / "taxcalc_policy.py"
 _spec = importlib.util.spec_from_file_location("taxcalc_policy", _POLICY_PATH)
 taxcalc_policy = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = taxcalc_policy
 _spec.loader.exec_module(taxcalc_policy)
 
 STATUSES = ["Single", "Married/Joint", "Married/Sep", "Head_of_House", "Widow(er)"]
@@ -63,6 +64,7 @@ QUANTITIES = (
     "income_tax",
     "total_tax",
 )
+REFERENCE_FIELDS = (*QUANTITIES, "amti", "qbi_deduction")
 
 
 def build_cases() -> list[dict]:
@@ -177,6 +179,51 @@ def build_cases() -> list[dict]:
                 for iso in (50_000, 200_000):
                     add(year, "H_amt", status=st, w2=w2, iso=iso)
 
+        # L_amt_floor: Form 1040 line 15 is zero, but Form 6251 line 2a still
+        # adds back the standard deduction. This is the F22 OTS witness and a
+        # below-floor counterpart to the positive-income F14 cases.
+        for st in STATUSES:
+            add(year, "L_amt_floor", status=st, iso=200_000)
+
+        # M_amt_mfs: the special high-income line-4 increase. TaxCalc and the
+        # graph omit it (F23); OTS 2024 uses stale prior-year constants (F24).
+        add(
+            year,
+            "M_amt_mfs",
+            status="Married/Sep",
+            w2=750_000,
+            iso=300_000,
+        )
+        if year == 2025:
+            add(
+                year,
+                "N_amt_mfs_gain",
+                status="Married/Sep",
+                w2=250_000,
+                stcg=15_458,
+                ltcg=6_032,
+                interest=49_171,
+                ord_div=11_057,
+                qual_div=11_057,
+                itemized=19_444,
+                std_or_item="Itemized",
+                iso=50_000,
+            )
+        if year == 2024:
+            add(
+                year,
+                "O_amt_itemized_floor",
+                status="Married/Sep",
+                stcg=-211_156,
+                ltcg=33_745,
+                interest=15_079,
+                ord_div=33_112,
+                qual_div=16_556,
+                itemized=50_061,
+                std_or_item="Itemized",
+                iso=300_000,
+            )
+
         # I_straddle: per-status additional-Medicare and NIIT thresholds
         amedt = pol.AMEDT_ec[0]
         niit_thd = pol.NIIT_thd[0]
@@ -203,6 +250,38 @@ def build_cases() -> list[dict]:
                 qual_div=10_000,
                 interest=5_000,
             )
+
+        # J_loss: section 1211(b) loss caps, including a positive long-term leg
+        # inside an overall loss so the QCG worksheet's smaller-of rule is live.
+        for st in ("Single", "Married/Sep"):
+            for loss in (-1_000, -3_000, -50_000):
+                add(
+                    year,
+                    "J_loss",
+                    status=st,
+                    w2=300_000,
+                    interest=100_000,
+                    stcg=loss,
+                )
+            add(
+                year,
+                "J_loss",
+                status=st,
+                w2=300_000,
+                interest=100_000,
+                stcg=-50_000,
+                ltcg=10_000,
+            )
+
+        # K_deduction: taxcalc minimizes tax while tenforty maximizes the
+        # deduction when extra itemization lands wholly in the 0% LTCG band.
+        add(
+            year,
+            "K_deduction",
+            status="Head_of_House",
+            ltcg=60_000,
+            itemized=50_000 if year == 2024 else 56_000,
+        )
 
     for i, c in enumerate(cases):
         c["case_id"] = i
@@ -289,9 +368,11 @@ def run_taxcalc(cases, wage_attribution="primary"):
         arr = calc.array
         for i, c in enumerate(year_cases):
             iitax = float(arr("iitax")[i])
+            refund = float(arr("refund")[i])
             setax = float(arr("setax")[i])
             amc = float(arr("ptax_amc")[i])
             niit = float(arr("niit")[i])
+            pre_refund_iitax = iitax + refund
             out[c["case_id"]] = {
                 "agi": float(arr("c00100")[i]),
                 "taxable_income": float(arr("c04800")[i]),
@@ -299,11 +380,10 @@ def run_taxcalc(cases, wage_attribution="primary"):
                 "niit": niit,
                 "addl_medicare": amc,
                 "amt": float(arr("c09600")[i]),
-                # taxcalc iitax includes NIIT; tenforty's federal_income_tax
-                # excludes it (and SE tax and additional Medicare).
-                "income_tax": iitax - niit,
-                "total_tax": iitax + setax + amc,
-                "qbided": float(arr("qbided")[i]),
+                "amti": float(arr("c62100")[i]),
+                "income_tax": pre_refund_iitax - niit,
+                "total_tax": pre_refund_iitax + setax + amc,
+                "qbi_deduction": float(arr("qbided")[i]),
             }
     return out
 
@@ -316,12 +396,12 @@ def taxcalc_expectations(cases):
     return primary, spouse
 
 
-def write_goldens(cases, path):
-    """Write committed golden fixtures with taxcalc metadata."""
+def golden_payload(cases):
+    """Build the versioned golden payload for a canonical case grid."""
     import taxcalc as tc
 
     primary, spouse = taxcalc_expectations(cases)
-    payload = {
+    return {
         "meta": {
             "taxcalc_version": tc.__version__,
             "generated": date.today().isoformat(),
@@ -331,9 +411,9 @@ def write_goldens(cases, path):
         "cases": [
             {
                 **{k: c[k] for k in c if k != "case_id"},
-                "expected": {q: primary[c["case_id"]][q] for q in QUANTITIES},
+                "expected": {q: primary[c["case_id"]][q] for q in REFERENCE_FIELDS},
                 "expected_spouse_attr": (
-                    {q: spouse[c["case_id"]][q] for q in QUANTITIES}
+                    {q: spouse[c["case_id"]][q] for q in REFERENCE_FIELDS}
                     if c["case_id"] in spouse
                     else None
                 ),
@@ -341,9 +421,30 @@ def write_goldens(cases, path):
             for c in cases
         ],
     }
+
+
+def write_goldens(cases, path):
+    """Write committed golden fixtures with taxcalc metadata."""
+    payload = golden_payload(cases)
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(payload, indent=1) + "\n")
     print(f"wrote {len(cases)} golden cases to {path}", file=sys.stderr)
+
+
+def check_goldens(cases, path):
+    """Regenerate golden semantics and compare them with the committed fixture."""
+    expected = json.loads(Path(path).read_text())
+    regenerated = golden_payload(cases)
+    expected["meta"].pop("generated", None)
+    regenerated["meta"].pop("generated", None)
+    if regenerated == expected:
+        print(f"golden fixture is current: {path}")
+        return 0
+    print(
+        f"golden fixture is stale: regenerate with --goldens {path}",
+        file=sys.stderr,
+    )
+    return 1
 
 
 def check(cases):
@@ -352,7 +453,7 @@ def check(cases):
     ots = run_tenforty(cases, "ots")
     graph = run_tenforty(cases, "graph")
 
-    unclassified, known, errors = [], [], []
+    unclassified, modeled_mismatches, errors = [], [], []
     for c in cases:
         cid = c["case_id"]
         exp = primary[cid]
@@ -362,26 +463,29 @@ def check(cases):
             if "error" in got:
                 errors.append((backend, c, got["error"]))
                 continue
-            excused = taxcalc_policy.excused_quantities(backend, c)
+            deltas = taxcalc_policy.modeled_deltas(backend, c, exp)
             for q in QUANTITIES:
                 tol = taxcalc_policy.tolerance(backend, q, exp["taxable_income"], c)
                 lo = hi = exp[q]
                 if exp_alt is not None:
                     lo, hi = min(lo, exp_alt[q]), max(hi, exp_alt[q])
-                if lo - tol <= got[q] <= hi + tol:
+                delta = deltas.get(q, taxcalc_policy.ZERO_DELTA)
+                if lo + delta.minimum - tol <= got[q] <= hi + delta.maximum + tol:
                     continue
                 record = (backend, c, q, got[q], exp[q])
-                (known if q in excused else unclassified).append(record)
+                (modeled_mismatches if q in deltas else unclassified).append(record)
 
     print(
-        f"cases={len(cases)} known_disagreements={len(known)} "
+        f"cases={len(cases)} modeled_mismatches={len(modeled_mismatches)} "
         f"unclassified={len(unclassified)} backend_errors={len(errors)}"
     )
     for backend, c, err in errors:
         print(f"ERROR  {backend} case={c}: {err}")
     for backend, c, q, got, exp in unclassified[:25]:
         print(f"UNCLASSIFIED  {backend} {q} got={got:,.2f} expected={exp:,.2f} {c}")
-    return 1 if (unclassified or errors) else 0
+    for backend, c, q, got, exp in modeled_mismatches[:25]:
+        print(f"MODELED_MISMATCH  {backend} {q} got={got:,.2f} expected={exp:,.2f} {c}")
+    return 1 if (unclassified or modeled_mismatches or errors) else 0
 
 
 def main():
@@ -389,6 +493,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv", nargs="?", default=None)
     parser.add_argument("--goldens", metavar="PATH")
+    parser.add_argument("--check-goldens", metavar="PATH")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
@@ -398,6 +503,8 @@ def main():
     if args.goldens:
         write_goldens(cases, args.goldens)
         return 0
+    if args.check_goldens:
+        return check_goldens(cases, args.check_goldens)
     if args.check:
         return check(cases)
 
