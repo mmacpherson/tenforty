@@ -30,6 +30,9 @@ says a married-filing-separately filer cannot take the standard deduction when
 their spouse itemizes, so that filer must be able to use itemized deductions
 even when the amount is smaller. See [IRS Topic 501](https://www.irs.gov/taxtopics/tc501)
 and the [2025 Form 1040 instructions](https://www.irs.gov/instructions/i1040gi).
+The IRS also notes that a filer who is eligible for the standard deduction may
+choose a smaller federal itemized deduction when doing so produces a larger
+state-tax benefit. See [Publication 501](https://www.irs.gov/publications/p501).
 OpenTaxSolver's `A18` input already implements this election; the graph backend
 currently drops the choice and is the nonconforming implementation.
 
