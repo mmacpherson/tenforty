@@ -16,7 +16,6 @@ from .taxcalc_policy import (
     _f22_ots_amt_taxable_income_floor,
     _f23_taxcalc_omits_mfs_amt_increase,
     _f24_ots_2024_mfs_amt_constants,
-    _f25_graph_2025_mfs_amt_cg_ceiling,
     _f26_taxcalc_itemized_amt_floor,
     _f27_ots_skips_amt_preferential_worksheet,
     tolerance,
@@ -190,19 +189,6 @@ def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
     assert _f23_taxcalc_omits_mfs_amt_increase("ots", case, reference) == {}
     assert model["amt"].minimum == 0.0
     assert model["amt"].maximum == pytest.approx(1_649.375)
-
-
-def test_f25_caps_the_stale_mfs_preferential_band_at_1665():
-    """Only the 5-point spread across the $33,300 band is modeled."""
-    case = _case(
-        year=2025,
-        status="Married/Sep",
-        ltcg=100_000.0,
-    )
-
-    model = _f25_graph_2025_mfs_amt_cg_ceiling("graph", case, None)
-
-    assert model["amt"] == DeltaRange(0.0, 1_665.0)
 
 
 def test_f26_bounds_only_the_unused_itemized_deduction():

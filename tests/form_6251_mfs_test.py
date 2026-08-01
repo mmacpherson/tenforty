@@ -95,3 +95,36 @@ def test_graph_2024_mfs_amt_uses_the_official_line4_rule():
     )
 
     assert result.federal_amt == pytest.approx(68_696.75, abs=1.0)
+
+
+def test_graph_2025_mfs_amt_uses_the_shared_capital_gain_ceiling():
+    """Form 6251 and Form 1040 use the same current 15% ceiling."""
+    evaluator, _graph = GraphBackend()._create_evaluator(
+        TaxReturnInput(
+            year=2025,
+            filing_status="Married/Sep",
+        )
+    )
+
+    assert evaluator.eval("us_form_6251_P3_15_bracket") == pytest.approx(300_000.0)
+    assert evaluator.eval("us_1040_qcgws_13") == pytest.approx(300_000.0)
+
+
+def test_graph_2025_mfs_amt_mixed_gain_case_matches_form_6251():
+    """Preferential income inside the corrected band remains taxed at 15%."""
+    result = evaluate_return(
+        year=2025,
+        filing_status="Married/Sep",
+        backend="graph",
+        w2_income=250_000,
+        short_term_capital_gains=15_458,
+        long_term_capital_gains=6_032,
+        taxable_interest=49_171,
+        ordinary_dividends=11_057,
+        qualified_dividends=11_057,
+        itemized_deductions=19_444,
+        standard_or_itemized="Itemized",
+        incentive_stock_option_gains=50_000,
+    )
+
+    assert result.federal_amt == pytest.approx(2_218.80, abs=1.0)

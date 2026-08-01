@@ -273,14 +273,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- 15% bracket for preferential income
   fifteenBracket <-
     interior "P3_15_bracket" "amt_cg_15_bracket" $
-      byStatusE $
-        ByStatus
-          { bsSingle = lit 533400,
-            bsMarriedSeparate = lit 266700,
-            bsMarriedJoint = lit 600050,
-            bsQualifyingWidow = lit 600050,
-            bsHeadOfHousehold = lit 566700
-          }
+      byStatusE (fmap lit qualifiedDividend15PctMax2025)
   afterZero <-
     interior "P3_after_zero" "amt_cg_after_zero" $
       prefInAmt `subtractNotBelowZero` zeroAmt

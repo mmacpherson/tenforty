@@ -128,6 +128,10 @@ spec n = do
       amtMfsIncreaseThreshold2025 `shouldBe` 900350
       amtMfsIncreaseCap2025 `shouldBe` 68500
 
+  describe "2025 preferential-rate tables" $ do
+    it "uses the current MFS 15% ceiling" $
+      forStatus qualifiedDividend15PctMax2025 MarriedSeparate `shouldBe` 300000
+
   describe "BracketTable" $ do
     forM_ taxYears $ \ty -> do
       let yr = show (tyYear ty)

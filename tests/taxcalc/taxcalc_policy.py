@@ -449,23 +449,6 @@ def _f24_ots_2024_mfs_amt_constants(
     return _same_delta({"amt", "income_tax", "total_tax"}, delta)
 
 
-def _f25_graph_2025_mfs_amt_cg_ceiling(
-    backend: str, case: dict, reference: dict[str, float] | None
-) -> DeltaModel:
-    """F25: graph Form 6251 uses $266,700, not $300,000, for 2025 MFS."""
-    if (
-        backend != "graph"
-        or case.get("year") != 2025
-        or case.get("status") != "Married/Sep"
-    ):
-        return {}
-    preferential = max(0.0, _preferential_income(case))
-    if preferential == 0.0:
-        return {}
-    overcharge = 0.05 * min(33_300.0, preferential)
-    return _same_delta({"amt", "income_tax", "total_tax"}, DeltaRange(0.0, overcharge))
-
-
 def _f26_taxcalc_itemized_amt_floor(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
@@ -519,7 +502,6 @@ SIGNATURES = [
     KnownDefect("F22", _f22_ots_amt_taxable_income_floor),
     KnownDefect("F23", _f23_taxcalc_omits_mfs_amt_increase),
     KnownDefect("F24", _f24_ots_2024_mfs_amt_constants),
-    KnownDefect("F25", _f25_graph_2025_mfs_amt_cg_ceiling),
     KnownDefect("F26", _f26_taxcalc_itemized_amt_floor),
     KnownDefect("F27", _f27_ots_skips_amt_preferential_worksheet),
 ]
