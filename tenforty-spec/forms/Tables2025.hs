@@ -14,6 +14,8 @@ module Tables2025
     amtExemption2025,
     amtPhaseOutThreshold2025,
     amtRate1Threshold2025,
+    amtMfsIncreaseThreshold2025,
+    amtMfsIncreaseCap2025,
 
     -- * Self-Employment Tax
     ssWageBase2025,
@@ -130,6 +132,16 @@ additionalMedicareThreshold2025 = byStatus 200000 250000 125000 200000 200000
 -- Order: Single, MFJ, MFS, HoH, QW
 amtRate1Threshold2025 :: ByStatus (Amount Dollars)
 amtRate1Threshold2025 = byStatus 239100 239100 119550 239100 239100
+
+-- | Form 6251 line 4 special increase for married filing separately. The
+-- threshold is the point where the MFS exemption is fully phased out.
+amtMfsIncreaseThreshold2025 :: Amount Dollars
+amtMfsIncreaseThreshold2025 =
+  forStatus amtPhaseOutThreshold2025 MarriedSeparate
+    + 4 * forStatus amtExemption2025 MarriedSeparate
+
+amtMfsIncreaseCap2025 :: Amount Dollars
+amtMfsIncreaseCap2025 = forStatus amtExemption2025 MarriedSeparate
 
 -- | 2025 Social Security wage base
 ssWageBase2025 :: Amount Dollars
