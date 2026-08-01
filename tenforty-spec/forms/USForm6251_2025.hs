@@ -255,14 +255,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- 0% bracket for preferential income
   zeroBracket <-
     interior "P3_zero_bracket" "amt_cg_zero_bracket" $
-      byStatusE $
-        ByStatus
-          { bsSingle = lit 48350,
-            bsMarriedSeparate = lit 48350,
-            bsMarriedJoint = lit 96700,
-            bsQualifyingWidow = lit 96700,
-            bsHeadOfHousehold = lit 64750
-          }
+      byStatusE (fmap lit qualifiedDividend0PctMax2025)
   zeroRoom <-
     interior "P3_zero_room" "amt_cg_zero_room" $
       zeroBracket `subtractNotBelowZero` ordinaryTaxableIncome

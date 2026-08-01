@@ -97,17 +97,34 @@ def test_graph_2024_mfs_amt_uses_the_official_line4_rule():
     assert result.federal_amt == pytest.approx(68_696.75, abs=1.0)
 
 
-def test_graph_2025_mfs_amt_uses_the_shared_capital_gain_ceiling():
-    """Form 6251 and Form 1040 use the same current 15% ceiling."""
+@pytest.mark.parametrize(
+    ("year", "zero_percent_max", "fifteen_percent_max"),
+    [
+        (2024, 47_025.0, 291_850.0),
+        (2025, 48_350.0, 300_000.0),
+    ],
+)
+def test_graph_mfs_amt_uses_shared_preferential_rate_boundaries(
+    year,
+    zero_percent_max,
+    fifteen_percent_max,
+):
+    """Form 6251 and Form 1040 use the same preferential-rate tables."""
     evaluator, _graph = GraphBackend()._create_evaluator(
         TaxReturnInput(
-            year=2025,
+            year=year,
             filing_status="Married/Sep",
         )
     )
 
-    assert evaluator.eval("us_form_6251_P3_15_bracket") == pytest.approx(300_000.0)
-    assert evaluator.eval("us_1040_qcgws_13") == pytest.approx(300_000.0)
+    assert evaluator.eval("us_form_6251_P3_zero_bracket") == pytest.approx(
+        zero_percent_max
+    )
+    assert evaluator.eval("us_1040_qcgws_6") == pytest.approx(zero_percent_max)
+    assert evaluator.eval("us_form_6251_P3_15_bracket") == pytest.approx(
+        fifteen_percent_max
+    )
+    assert evaluator.eval("us_1040_qcgws_13") == pytest.approx(fifteen_percent_max)
 
 
 def test_graph_2025_mfs_amt_mixed_gain_case_matches_form_6251():

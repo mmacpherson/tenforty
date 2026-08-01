@@ -128,8 +128,13 @@ spec n = do
       amtMfsIncreaseThreshold2025 `shouldBe` 900350
       amtMfsIncreaseCap2025 `shouldBe` 68500
 
-  describe "2025 preferential-rate tables" $ do
-    it "uses the current MFS 15% ceiling" $
+  describe "preferential-rate tables" $ do
+    it "uses the current 2024 MFS boundaries" $ do
+      forStatus qualifiedDividend0PctMax2024 MarriedSeparate `shouldBe` 47025
+      forStatus qualifiedDividend15PctMax2024 MarriedSeparate `shouldBe` 291850
+
+    it "uses the current 2025 MFS boundaries" $ do
+      forStatus qualifiedDividend0PctMax2025 MarriedSeparate `shouldBe` 48350
       forStatus qualifiedDividend15PctMax2025 MarriedSeparate `shouldBe` 300000
 
   describe "BracketTable" $ do
