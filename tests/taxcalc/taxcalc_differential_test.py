@@ -191,6 +191,12 @@ ANCHOR_AMT_FLOOR = _anchor(
     status="Head_of_House",
     iso=200_000.0,
 )
+ANCHOR_AMT_ZERO_TI_QUALIFIED_DIVIDENDS = _anchor(
+    status="Head_of_House",
+    ord_div=17_322.0,
+    qual_div=17_322.0,
+    iso=200_000.0,
+)
 ANCHOR_CAPITAL_LOSS = _anchor(
     w2=300_000.0,
     interest=100_000.0,
@@ -357,6 +363,7 @@ def _assert_components_match_taxcalc(backend, cases):
 @example(cases=[ANCHOR_QBI_CAPITAL_GAIN_LIMIT])
 @example(cases=[ANCHOR_AMT_ISO])
 @example(cases=[ANCHOR_AMT_FLOOR])
+@example(cases=[ANCHOR_AMT_ZERO_TI_QUALIFIED_DIVIDENDS])
 @example(cases=[ANCHOR_CAPITAL_LOSS])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):

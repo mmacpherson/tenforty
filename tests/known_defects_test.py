@@ -338,6 +338,68 @@ def test_ots_amt_preserves_the_zero_taxable_income_floor():
     assert graph.federal_amt == pytest.approx(35_412.00, abs=1.0)
 
 
+@pytest.mark.xfail(
+    reason="F27: OTS skips the AMT preferential-rate worksheet when regular "
+    "taxable income is zero",
+    strict=True,
+)
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(
+    ("year", "qualified_dividends", "official_amt"),
+    [
+        (2024, 21_900.0, 29_718.00),
+        (2025, 23_625.0, 29_094.00),
+    ],
+)
+def test_ots_initializes_amt_preferential_inputs_at_zero_taxable_income(
+    year,
+    qualified_dividends,
+    official_amt,
+):
+    """Part III must see qualified dividends even when Form 1040 line 15 is zero."""
+    kwargs = dict(
+        year=year,
+        filing_status="Head_of_House",
+        ordinary_dividends=qualified_dividends,
+        qualified_dividends=qualified_dividends,
+        incentive_stock_option_gains=200_000.0,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=0.01)
+    assert graph.federal_amt == pytest.approx(official_amt, abs=0.01)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(
+    ("year", "qualified_dividends", "official_amt"),
+    [
+        (2024, 21_901.0, 29_718.00),
+        (2025, 23_626.0, 29_094.00),
+    ],
+)
+def test_ots_amt_preferential_cliff_ends_above_zero_taxable_income(
+    year,
+    qualified_dividends,
+    official_amt,
+):
+    """One taxable dollar activates the preferential-rate worksheet in OTS."""
+    kwargs = dict(
+        year=year,
+        filing_status="Head_of_House",
+        ordinary_dividends=qualified_dividends,
+        qualified_dividends=qualified_dividends,
+        incentive_stock_option_gains=200_000.0,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+
+    assert ots.federal_taxable_income == pytest.approx(1.0, abs=0.01)
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=0.01)
+    assert graph.federal_amt == pytest.approx(official_amt, abs=0.01)
+
+
 @skip_if_graph_unavailable
 def test_graph_applies_the_high_income_mfs_amt_increase():
     """2025 MFS line 4 adds 25% of AMTI above $900,350."""
