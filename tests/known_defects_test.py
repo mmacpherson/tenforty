@@ -434,32 +434,6 @@ def test_ots_2024_mfs_amt_uses_current_year_line4_constants():
 
 
 @pytest.mark.xfail(
-    reason="F25: graph Form 6251 uses $266,700 instead of the 2025 MFS "
-    "$300,000 capital-gain ceiling",
-    strict=True,
-)
-@skip_if_graph_unavailable
-def test_graph_2025_mfs_amt_uses_the_current_capital_gain_ceiling():
-    """The stale band moves $4,815 from the 15% AMT band into the 20% band."""
-    result = evaluate_return(
-        year=2025,
-        filing_status="Married/Sep",
-        backend="graph",
-        w2_income=250_000,
-        short_term_capital_gains=15_458,
-        long_term_capital_gains=6_032,
-        taxable_interest=49_171,
-        ordinary_dividends=11_057,
-        qualified_dividends=11_057,
-        itemized_deductions=19_444,
-        standard_or_itemized="Itemized",
-        incentive_stock_option_gains=50_000,
-    )
-
-    assert result.federal_amt == pytest.approx(2_218.80, abs=1.0)
-
-
-@pytest.mark.xfail(
     reason="F7: backends disagree on 'Itemized' semantics",
     strict=True,
 )

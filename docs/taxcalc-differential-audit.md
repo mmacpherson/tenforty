@@ -39,7 +39,7 @@ signature, and update this table in the same PR.
 | F22 | OTS cancels the AMT standard-deduction add-back when taxable income floors at zero | upstream OpenTaxSolver | open (tenforty-by2; upstream report pending) | randomized ISO differential |
 | F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | graph fixed (tenforty-3bt); TaxCalc open (tenforty-doo) | randomized high-income ISO differential |
 | F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
-| F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | open (tenforty-c9a) | randomized MFS ISO/gain differential |
+| F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | fixed (tenforty-c9a) | randomized MFS ISO/gain differential |
 | F26 | TaxCalc lets unused itemization reduce AMTI below the taxable-income floor | upstream TaxCalc | open (tenforty-w7t; upstream report pending) | randomized itemized ISO/loss differential |
 | F27 | OTS skips the AMT preferential-rate worksheet when regular taxable income is zero | upstream OpenTaxSolver | open (tenforty-909.1; upstream report pending) | randomized zero-taxable-income ISO/dividend differential |
 
@@ -640,7 +640,7 @@ the overlapping high-income witness from masking an error in either model.
 The effective rate is 35% in this interval: 28% tentative minimum tax plus the
 7% effect of phasing out another 25 cents of exemption per added dollar.
 
-### F25. NEW, ADJUDICATED — graph Form 6251 retains the stale MFS gain ceiling
+### F25. FIXED — graph Form 6251 retained the stale MFS gain ceiling
 
 F13 corrected the 2025 MFS 15%-rate ceiling in the 1040 qualified-dividend and
 capital-gain worksheet from $266,700 to $300,000. Form 6251 Part III contains a
@@ -653,10 +653,12 @@ and a $50,000 ISO spread. Graph AMT is **$2,459.55** versus TaxCalc's
 **$2,218.80**; the $240.75 difference is exactly 5% of the $4,815 that reaches
 the stale band.
 
-F25 permits only the 5-point spread over at most the $33,300 bad interval, a
-maximum $1,665 positive graph delta. Its strict-xfail and a dedicated golden
-witness track `tenforty-c9a`; the fix should replace the duplicate constant
-with the shared table source.
+F25 permitted only the 5-point spread over at most the $33,300 bad interval, a
+maximum $1,665 positive graph delta. `tenforty-c9a` replaced Form 6251's
+duplicate table with `qualifiedDividend15PctMax2025`, the same source used by
+the Form 1040 worksheet. The strict-xfail and differential signature were
+retired together; the dedicated golden witness now passes without an
+allowance.
 
 ### F26. NEW, ADJUDICATED — TaxCalc loses the itemized taxable-income floor
 

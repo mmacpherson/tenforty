@@ -255,14 +255,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- 0% bracket for preferential income
   zeroBracket <-
     interior "P3_zero_bracket" "amt_cg_zero_bracket" $
-      byStatusE $
-        ByStatus
-          { bsSingle = lit 48350,
-            bsMarriedSeparate = lit 48350,
-            bsMarriedJoint = lit 96700,
-            bsQualifyingWidow = lit 96700,
-            bsHeadOfHousehold = lit 64750
-          }
+      byStatusE (fmap lit qualifiedDividend0PctMax2025)
   zeroRoom <-
     interior "P3_zero_room" "amt_cg_zero_room" $
       zeroBracket `subtractNotBelowZero` ordinaryTaxableIncome
@@ -273,14 +266,7 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- 15% bracket for preferential income
   fifteenBracket <-
     interior "P3_15_bracket" "amt_cg_15_bracket" $
-      byStatusE $
-        ByStatus
-          { bsSingle = lit 533400,
-            bsMarriedSeparate = lit 266700,
-            bsMarriedJoint = lit 600050,
-            bsQualifyingWidow = lit 600050,
-            bsHeadOfHousehold = lit 566700
-          }
+      byStatusE (fmap lit qualifiedDividend15PctMax2025)
   afterZero <-
     interior "P3_after_zero" "amt_cg_after_zero" $
       prefInAmt `subtractNotBelowZero` zeroAmt
