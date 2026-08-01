@@ -29,7 +29,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -60,7 +60,7 @@ jobs:
         cp -R crates/tenforty-graph/pkg target/pages/pkg
         cp src/tenforty/forms/us_tax_graph_*.json target/pages/forms/
 
-    - name: Smoke-test WASM and tax graph
+    - name: Smoke-test WASM tax engine and graphs
       run: node scripts/smoke_wasm_demo.mjs target/pages
 
     - name: Setup Pages
@@ -91,7 +91,7 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v5
 
-    - name: Smoke-test deployed WASM and tax graph
+    - name: Smoke-test deployed WASM tax engine and graphs
       env:
         PAGE_URL: ${{ steps.deployment.outputs.page_url }}
       run: |
