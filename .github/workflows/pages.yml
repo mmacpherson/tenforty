@@ -4,23 +4,38 @@ on:
   push:
     branches: [main]
     paths:
+    - Cargo.lock
+    - Cargo.toml
     - crates/tenforty-graph/src/**
+    - crates/tenforty-graph/Cargo.toml
     - crates/tenforty-graph/demo/**
+    - scripts/smoke_wasm_demo.mjs
+    - src/tenforty/forms/**
+    - .github/workflows/pages.yml
+  pull_request:
+    paths:
+    - Cargo.lock
+    - Cargo.toml
+    - crates/tenforty-graph/src/**
+    - crates/tenforty-graph/Cargo.toml
+    - crates/tenforty-graph/demo/**
+    - scripts/smoke_wasm_demo.mjs
     - src/tenforty/forms/**
     - .github/workflows/pages.yml
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
+    permissions:
+      contents: read
+      pages: read
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
@@ -34,30 +49,56 @@ jobs:
       run: curl --proto '=https' --tlsv1.2 https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     - name: Build WASM module
-      run: |
-        wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
-        ln -sfn ../pkg crates/tenforty-graph/demo/pkg
+      run: wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
 
-    - name: Copy form data to demo
+    - name: Stage self-contained Pages artifact
       run: |
-        mkdir -p crates/tenforty-graph/demo/forms
-        cp src/tenforty/forms/*.json crates/tenforty-graph/demo/forms/
+        mkdir -p target/pages/forms
+        cp crates/tenforty-graph/demo/index.html target/pages/
+        cp crates/tenforty-graph/demo/app.js target/pages/
+        cp crates/tenforty-graph/demo/style.css target/pages/
+        cp -R crates/tenforty-graph/pkg target/pages/pkg
+        cp src/tenforty/forms/us_tax_graph_*.json target/pages/forms/
+
+    - name: Smoke-test WASM and tax graph
+      run: node scripts/smoke_wasm_demo.mjs target/pages
 
     - name: Setup Pages
+      if: github.event_name != 'pull_request'
       uses: actions/configure-pages@v6
 
     - name: Upload artifact
+      if: github.event_name != 'pull_request'
       uses: actions/upload-pages-artifact@v5
       with:
-        path: crates/tenforty-graph/demo
+        path: target/pages
 
   deploy:
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
+    - uses: actions/checkout@v7
+
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v5
+
+    - name: Smoke-test deployed WASM and tax graph
+      env:
+        PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+      run: |
+        smoke_dir=$(mktemp -d)
+        mkdir -p "$smoke_dir/pkg" "$smoke_dir/forms"
+        for asset in index.html app.js style.css pkg/graphlib.js pkg/graphlib_bg.wasm forms/us_tax_graph_2024.json forms/us_tax_graph_2025.json; do
+          curl --fail --location --retry 12 --retry-all-errors --retry-delay 5 \
+            "${PAGE_URL%/}/$asset" --output "$smoke_dir/$asset"
+        done
+        node scripts/smoke_wasm_demo.mjs "$smoke_dir"
