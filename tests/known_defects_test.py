@@ -338,6 +338,42 @@ def test_ots_amt_preserves_the_zero_taxable_income_floor():
     assert graph.federal_amt == pytest.approx(35_412.00, abs=1.0)
 
 
+@pytest.mark.xfail(
+    reason="F27: OTS skips the AMT preferential-rate worksheet when regular "
+    "taxable income is zero",
+    strict=True,
+)
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(
+    ("year", "floor_only_amt", "official_amt"),
+    [
+        (2024, 29_718.00, 30_908.28),
+        (2025, 29_094.00, 30_732.78),
+    ],
+)
+def test_ots_initializes_amt_preferential_inputs_at_zero_taxable_income(
+    year,
+    floor_only_amt,
+    official_amt,
+):
+    """Part III must see qualified dividends even when Form 1040 line 15 is zero."""
+    kwargs = dict(
+        year=year,
+        filing_status="Head_of_House",
+        ordinary_dividends=17_322.0,
+        qualified_dividends=17_322.0,
+        incentive_stock_option_gains=200_000.0,
+    )
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+
+    assert any(
+        ots.federal_amt == pytest.approx(expected, abs=1.0)
+        for expected in (floor_only_amt, graph.federal_amt)
+    )
+    assert graph.federal_amt == pytest.approx(official_amt, abs=1.0)
+
+
 @skip_if_graph_unavailable
 def test_graph_applies_the_high_income_mfs_amt_increase():
     """2025 MFS line 4 adds 25% of AMTI above $900,350."""

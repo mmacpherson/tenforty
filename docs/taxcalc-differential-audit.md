@@ -41,6 +41,7 @@ signature, and update this table in the same PR.
 | F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
 | F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | open (tenforty-c9a) | randomized MFS ISO/gain differential |
 | F26 | TaxCalc lets unused itemization reduce AMTI below the taxable-income floor | upstream TaxCalc | open (tenforty-w7t; upstream report pending) | randomized itemized ISO/loss differential |
+| F27 | OTS skips the AMT preferential-rate worksheet when regular taxable income is zero | upstream OpenTaxSolver | open (tenforty-909.1; upstream report pending) | randomized zero-taxable-income ISO/dividend differential |
 
 ## Method
 
@@ -674,3 +675,36 @@ Graph starts line 1 at zero and reports AMT **$58,376.32**. TaxCalc carries the
 F26 applies only to the positive graph-minus-TaxCalc effect of that unused
 deduction, bounded by the same AMT/preferential slopes as F12. A TaxCalc
 strict-xfail, upstream draft, and golden witness track `tenforty-w7t`.
+
+### F27. NEW, ADJUDICATED — OTS skips the AMT preferential-rate worksheet at zero taxable income
+
+The zero-taxable-income path exposes a second OTS defect independent of F22.
+The 2024 1040 routine does not run its qualified-dividend or Schedule D tax
+worksheet when line 15 is zero. Form 6251 Part III nevertheless reads the
+worksheet arrays when qualified dividends or gains are present. Their
+zero-initialized values make the AMT computation treat all AMT taxable income
+as ordinary rather than preserving its preferential component. The 2025
+routine has the same control flow.
+
+The deterministic witness is 2024 Head of Household with $17,322 of ordinary
+dividends, all qualified, a $200,000 ISO spread, and the standard deduction.
+The official path has AMTI $221,900 and AMT taxable income $136,200. Removing
+the $17,322 preferential component leaves $118,878 taxed at 26%, for AMT
+**$30,908.28**.
+
+OTS also carries F22 on this return, putting AMT taxable income at $131,622.
+With only F22, Part III would tax $114,300 of ordinary AMT income and report
+**$29,718.00**. Instead the uninitialized worksheet makes OTS tax the full
+$131,622 at 26%, reporting **$34,221.72**. Thus F27 contributes exactly
+$4,503.72, while F22 separately contributes -$1,190.28 relative to the
+official path. TaxCalc's **$24,024.00** remains the already-adjudicated F14
+standard-deduction defect.
+
+The F27 signature is a nonnegative OTS correction bounded by 28% of the
+preferential income, the largest amount skipping Part III can add. It applies
+only when TaxCalc regular taxable income is zero, preference income and an ISO
+adjustment are present, and composes with F14 and F22. A deterministic
+differential anchor prevents the randomized suite from rediscovering the case
+as an unclassified failure. The strict-xfail accepts either the F22-only result
+or the fully corrected result, so an upstream F27 correction flips it even if
+F22 remains. Tracked by `tenforty-909.1`; the vendored source is unchanged.

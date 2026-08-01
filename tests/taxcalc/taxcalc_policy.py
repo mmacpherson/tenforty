@@ -490,6 +490,25 @@ def _f26_taxcalc_itemized_amt_floor(
     )
 
 
+def _f27_ots_skips_amt_preferential_worksheet(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F27: OTS leaves Form 6251's preferential-rate inputs uninitialized."""
+    preferential = _preferential_income(case)
+    if (
+        backend != "ots"
+        or not case.get("iso", 0.0)
+        or preferential <= 0.0
+        or reference is None
+        or reference.get("taxable_income") != 0.0
+    ):
+        return {}
+    return _same_delta(
+        {"amt", "income_tax", "total_tax"},
+        DeltaRange(0.0, 0.28 * preferential),
+    )
+
+
 SIGNATURES = [
     KnownDefect("F7", _f7_itemized_semantics),
     KnownDefect("F11", _f11_ots_hoh_bracket),
@@ -502,6 +521,7 @@ SIGNATURES = [
     KnownDefect("F24", _f24_ots_2024_mfs_amt_constants),
     KnownDefect("F25", _f25_graph_2025_mfs_amt_cg_ceiling),
     KnownDefect("F26", _f26_taxcalc_itemized_amt_floor),
+    KnownDefect("F27", _f27_ots_skips_amt_preferential_worksheet),
 ]
 
 

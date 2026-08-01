@@ -18,6 +18,7 @@ from .taxcalc_policy import (
     _f24_ots_2024_mfs_amt_constants,
     _f25_graph_2025_mfs_amt_cg_ceiling,
     _f26_taxcalc_itemized_amt_floor,
+    _f27_ots_skips_amt_preferential_worksheet,
     tolerance,
 )
 
@@ -222,6 +223,27 @@ def test_f26_bounds_only_the_unused_itemized_deduction():
 
     assert model["amt"].minimum == 0.0
     assert model["amt"].maximum == pytest.approx(0.55 * 3_370.0)
+
+
+def test_f27_bounds_the_uninitialized_amt_preferential_worksheet():
+    """Skipping Part III can overstate AMT by at most 28% of preference income."""
+    case = _case(
+        year=2024,
+        status="Head_of_House",
+        ord_div=17_322.0,
+        qual_div=17_322.0,
+        iso=200_000.0,
+    )
+    reference = {"taxable_income": 0.0}
+
+    model = _f27_ots_skips_amt_preferential_worksheet("ots", case, reference)
+
+    assert model["amt"] == DeltaRange(0.0, 0.28 * 17_322.0)
+    assert _f27_ots_skips_amt_preferential_worksheet("graph", case, reference) == {}
+    assert (
+        _f27_ots_skips_amt_preferential_worksheet("ots", case, {"taxable_income": 1.0})
+        == {}
+    )
 
 
 def test_f7_bounds_the_qbi_cap_response_to_forced_itemization():

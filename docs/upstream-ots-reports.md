@@ -219,3 +219,65 @@ to the 2024 release.
 
 We have not patched the vendored source because this is a tax-logic change. A
 strict-xfail records it until an upstream release carries the corrected table.
+
+---
+
+## 5. Form 6251 loses qualified dividends when regular taxable income is zero
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_US_1040_2024.c`
+- `src/taxsolve_US_1040_2025.c`
+
+The 1040 routine deliberately skips its qualified-dividend and Schedule D tax
+worksheets when regular taxable income is zero:
+
+```c
+if (L[15] <= 0.0)
+  {
+   /* Do not use QDCGT or Schedule D Tax Worksheets. */
+  }
+else if (Do_QDCGTW)
+  capgains_qualdividends_worksheets(status);
+```
+
+Form 6251 Part III still uses the worksheet arrays when qualified dividends or
+capital gains are present:
+
+```c
+if ((L[7] != 0.0) || (L3a != 0.0)
+    || ((SchedD[15] > 0.0) && (SchedD[16] > 0.0)))
+  {
+   amtws[13] = largerof(qcgws[4], ws_sched_D[13]);
+   /* ... */
+  }
+```
+
+Because the skipped worksheets never populate `qcgws`, Part III sees no
+preferential income and applies the ordinary AMT rate to the entire base.
+
+**Minimal reproducer:** 2024 Head of Household, under age 65, $17,322 of
+ordinary dividends all reported as qualified dividends, the standard
+deduction, and a $200,000 ISO adjustment on `AMTws3`.
+
+| quantity | official Form 6251 | OTS with only the separate line-1 defect | OpenTaxSolver2024_22.06 |
+|---|---:|---:|---:|
+| AMT taxable income | $136,200.00 | $131,622.00 | $131,622.00 |
+| preferential income recognized | $17,322.00 | $17,322.00 | $0.00 |
+| ordinary AMT income | $118,878.00 | $114,300.00 | $131,622.00 |
+| AMT | **$30,908.28** | **$29,718.00** | **$34,221.72** |
+
+The middle column isolates the separate line-1 floor issue described in report
+3. Holding that lower OTS AMT base fixed, skipping the preferential worksheet
+adds exactly $4,503.72, or 26% of the $17,322 qualified dividend. The same
+control-flow issue reproduces in the 2025 routine.
+
+**Suggested fix:** make the preferential-income inputs required by Form 6251
+Part III available independently of whether the regular-tax worksheet itself
+is applicable. Calling the regular worksheet unconditionally may not match its
+instructions; deriving or initializing the Part III inputs inside the AMT path
+would avoid coupling them to Form 1040 line 15.
+
+We have not patched the vendored source because this changes a computed tax
+figure. A strict-xfail records the defect until an upstream release carries a
+correction.
