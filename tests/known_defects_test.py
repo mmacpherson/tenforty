@@ -345,33 +345,59 @@ def test_ots_amt_preserves_the_zero_taxable_income_floor():
 )
 @skip_if_graph_unavailable
 @pytest.mark.parametrize(
-    ("year", "floor_only_amt", "official_amt"),
+    ("year", "qualified_dividends", "official_amt"),
     [
-        (2024, 29_718.00, 30_908.28),
-        (2025, 29_094.00, 30_732.78),
+        (2024, 21_900.0, 29_718.00),
+        (2025, 23_625.0, 29_094.00),
     ],
 )
 def test_ots_initializes_amt_preferential_inputs_at_zero_taxable_income(
     year,
-    floor_only_amt,
+    qualified_dividends,
     official_amt,
 ):
     """Part III must see qualified dividends even when Form 1040 line 15 is zero."""
     kwargs = dict(
         year=year,
         filing_status="Head_of_House",
-        ordinary_dividends=17_322.0,
-        qualified_dividends=17_322.0,
+        ordinary_dividends=qualified_dividends,
+        qualified_dividends=qualified_dividends,
         incentive_stock_option_gains=200_000.0,
     )
     ots = evaluate_return(backend="ots", **kwargs)
     graph = evaluate_return(backend="graph", **kwargs)
 
-    assert any(
-        ots.federal_amt == pytest.approx(expected, abs=1.0)
-        for expected in (floor_only_amt, graph.federal_amt)
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=0.01)
+    assert graph.federal_amt == pytest.approx(official_amt, abs=0.01)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(
+    ("year", "qualified_dividends", "official_amt"),
+    [
+        (2024, 21_901.0, 29_718.00),
+        (2025, 23_626.0, 29_094.00),
+    ],
+)
+def test_ots_amt_preferential_cliff_ends_above_zero_taxable_income(
+    year,
+    qualified_dividends,
+    official_amt,
+):
+    """One taxable dollar activates the preferential-rate worksheet in OTS."""
+    kwargs = dict(
+        year=year,
+        filing_status="Head_of_House",
+        ordinary_dividends=qualified_dividends,
+        qualified_dividends=qualified_dividends,
+        incentive_stock_option_gains=200_000.0,
     )
-    assert graph.federal_amt == pytest.approx(official_amt, abs=1.0)
+    ots = evaluate_return(backend="ots", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs)
+
+    assert ots.federal_taxable_income == pytest.approx(1.0, abs=0.01)
+    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=0.01)
+    assert graph.federal_amt == pytest.approx(official_amt, abs=0.01)
 
 
 @skip_if_graph_unavailable

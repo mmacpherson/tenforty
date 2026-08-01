@@ -686,11 +686,26 @@ zero-initialized values make the AMT computation treat all AMT taxable income
 as ordinary rather than preserving its preferential component. The 2025
 routine has the same control flow.
 
-The deterministic witness is 2024 Head of Household with $17,322 of ordinary
-dividends, all qualified, a $200,000 ISO spread, and the standard deduction.
-The official path has AMTI $221,900 and AMT taxable income $136,200. Removing
-the $17,322 preferential component leaves $118,878 taxed at 26%, for AMT
-**$30,908.28**.
+The cleanest isolated witness is 2024 Head of Household with a $200,000 ISO
+spread and ordinary dividends all reported as qualified. At exactly the
+$21,900 standard deduction, F22's unused-deduction error is zero, but F27 makes
+OTS tax the entire AMT base at 26%. One additional dollar activates the
+regular-tax worksheet and makes the defect disappear:
+
+| qualified dividends | taxable income | OTS AMT | graph AMT |
+|---:|---:|---:|---:|
+| $21,900 | $0 | $35,412.00 | $29,718.00 |
+| $21,901 | $1 | $29,718.00 | $29,718.00 |
+
+The $5,694 cliff is exactly 26% of $21,900. The same boundary reproduces in
+2025: OTS falls from $35,236.50 to $29,094.00 when taxable income moves from
+zero to one dollar, a $6,142.50 drop equal to 26% of the $23,625 standard
+deduction.
+
+The randomized differential originally exposed a composite 2024 witness with
+$17,322 of qualified dividends. Its official path has AMTI $221,900 and AMT
+taxable income $136,200. Removing the $17,322 preferential component leaves
+$118,878 taxed at 26%, for AMT **$30,908.28**.
 
 OTS also carries F22 on this return, putting AMT taxable income at $131,622.
 With only F22, Part III would tax $114,300 of ordinary AMT income and report
@@ -705,6 +720,7 @@ preferential income, the largest amount skipping Part III can add. It applies
 only when TaxCalc regular taxable income is zero, preference income and an ISO
 adjustment are present, and composes with F14 and F22. A deterministic
 differential anchor prevents the randomized suite from rediscovering the case
-as an unclassified failure. The strict-xfail accepts either the F22-only result
-or the fully corrected result, so an upstream F27 correction flips it even if
-F22 remains. Tracked by `tenforty-909.1`; the vendored source is unchanged.
+as an unclassified failure. The strict-xfail uses the exact-standard-deduction
+boundary where F22 is inert, while a passing companion pins the correct result
+one dollar above it. Tracked by `tenforty-909.1`; the vendored source is
+unchanged.

@@ -256,9 +256,24 @@ if ((L[7] != 0.0) || (L3a != 0.0)
 Because the skipped worksheets never populate `qcgws`, Part III sees no
 preferential income and applies the ordinary AMT rate to the entire base.
 
-**Minimal reproducer:** 2024 Head of Household, under age 65, $17,322 of
-ordinary dividends all reported as qualified dividends, the standard
-deduction, and a $200,000 ISO adjustment on `AMTws3`.
+**Minimal reproducer:** 2024 Head of Household, under age 65, a $200,000 ISO
+adjustment on `AMTws3`, and ordinary dividends all reported as qualified.
+
+| qualified dividends | regular taxable income | OpenTaxSolver AMT | correct AMT |
+|---:|---:|---:|---:|
+| $21,900 | $0 | **$35,412.00** | **$29,718.00** |
+| $21,901 | $1 | **$29,718.00** | **$29,718.00** |
+
+At exactly the $21,900 standard deduction, the separate line-1 floor issue in
+report 3 contributes nothing. The $5,694 AMT drop caused by adding one dollar
+of income therefore isolates this issue: $5,694 is exactly 26% of the $21,900
+qualified dividend. The cliff occurs precisely where the regular-tax
+preferential worksheet starts running. The same boundary reproduces in 2025,
+where OTS falls from $35,236.50 to $29,094.00 between $0 and $1 of regular
+taxable income.
+
+The original differential witness used $17,322 of qualified dividends. It
+shows how this issue composes with report 3:
 
 | quantity | official Form 6251 | OTS with only the separate line-1 defect | OpenTaxSolver2024_22.06 |
 |---|---:|---:|---:|
@@ -267,10 +282,8 @@ deduction, and a $200,000 ISO adjustment on `AMTws3`.
 | ordinary AMT income | $118,878.00 | $114,300.00 | $131,622.00 |
 | AMT | **$30,908.28** | **$29,718.00** | **$34,221.72** |
 
-The middle column isolates the separate line-1 floor issue described in report
-3. Holding that lower OTS AMT base fixed, skipping the preferential worksheet
-adds exactly $4,503.72, or 26% of the $17,322 qualified dividend. The same
-control-flow issue reproduces in the 2025 routine.
+Holding the lower OTS AMT base fixed, skipping the preferential worksheet adds
+exactly $4,503.72, or 26% of the $17,322 qualified dividend.
 
 **Suggested fix:** make the preferential-income inputs required by Form 6251
 Part III available independently of whether the regular-tax worksheet itself
