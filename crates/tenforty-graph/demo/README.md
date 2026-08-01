@@ -9,6 +9,11 @@ does not leave the browser. The deployed site is
 > the bindings and adding a browser-level contract are tracked by
 > `tenforty-ox4.4.3`.
 
+The checked-in [browser calculator contract](../../../docs/browser-calculator-contract.md)
+defines the supported years, jurisdictions, public inputs and outputs, graph
+provenance, error behavior, and current limitations. The Pages smoke test
+validates that contract against both resolved graphs and pinned Python scenarios.
+
 Build and serve it locally with:
 
 ```console
