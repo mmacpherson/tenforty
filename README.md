@@ -84,7 +84,7 @@ Here are all arguments available for those two functions:
 | `state`                      | str \| None               | None                | Two-letter state code. Income-tax states with OTS support: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. Other states unsupported for now. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
-| `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
+| `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md); graph support pending) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
 | `qualified_dividends`        | float                    | 0.0                 |                                    |
