@@ -133,14 +133,21 @@ graph-throughput: ## Run throughput comparison (interpreter vs JIT vs SIMD)
 ## WASM targets
 wasm: ## Build wasm module (release)
 	wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
-	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
 
 wasm-dev: ## Build wasm module (debug)
 	wasm-pack build --target web --dev crates/tenforty-graph -- --features wasm --no-default-features
-	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
 
-wasm-serve: wasm-dev ## Serve demo locally
-	python3 -m http.server 8080 -d crates/tenforty-graph/demo
+wasm-serve: wasm-dev ## Serve the current Pages artifact locally
+	rm -rf target/pages-dev
+	mkdir -p target/pages-dev/forms
+	cp crates/tenforty-graph/demo/index.html target/pages-dev/
+	cp crates/tenforty-graph/demo/app.js target/pages-dev/
+	cp crates/tenforty-graph/demo/browser_contract.js target/pages-dev/
+	cp crates/tenforty-graph/demo/browser_contract.json target/pages-dev/
+	cp crates/tenforty-graph/demo/style.css target/pages-dev/
+	cp -R crates/tenforty-graph/pkg target/pages-dev/pkg
+	cp src/tenforty/forms/us_tax_graph_*.json target/pages-dev/forms/
+	python3 -m http.server 8080 -d target/pages-dev
 
 ## tenforty-spec (Haskell) targets (local dev only; CI does not run these)
 spec-test: ## Run tenforty-spec tests

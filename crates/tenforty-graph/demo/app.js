@@ -845,10 +845,8 @@ function showError(message) {
   errorP.textContent = "Failed to load: " + message;
 
   const helpP = document.createElement("p");
-  helpP.textContent = "Make sure to run: ";
-  const code = document.createElement("code");
-  code.textContent = "make wasm-dev";
-  helpP.appendChild(code);
+  helpP.textContent =
+    "Calculator initialization stopped; no tax result was calculated.";
 
   loading.appendChild(errorP);
   loading.appendChild(helpP);

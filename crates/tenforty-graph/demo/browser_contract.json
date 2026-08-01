@@ -1,0 +1,1721 @@
+{
+  "schema_version": 1,
+  "contract_id": "tenforty-browser-calculator",
+  "supported_years": [2024, 2025],
+  "graph": {
+    "path_template": "forms/us_tax_graph_{year}.json",
+    "engine": "Haskell tax specification compiled to a resolved JSON graph and evaluated by the Rust WebAssembly runtime",
+    "metadata": {
+      "2024": {
+        "form_id": "resolved",
+        "generated_by": "resolveForms",
+        "year": 2024,
+        "sha256": "1838fcac2c16ecf54abc45a843070d793f3cc47e65f45daaf585db27b9e566f2"
+      },
+      "2025": {
+        "form_id": "resolved",
+        "generated_by": "resolveForms",
+        "year": 2025,
+        "sha256": "107afb2349cb0a37e16f8b4c601f43cc29f0820ffd242afa900458183c17995b"
+      }
+    }
+  },
+  "filing_statuses": {
+    "single": "Single",
+    "married_joint": "Married filing jointly",
+    "married_separate": "Married filing separately",
+    "head_of_household": "Head of household",
+    "qualifying_widow": "Qualifying surviving spouse"
+  },
+  "inputs": {
+    "w2_income": {
+      "label": "Wages and salary",
+      "description": "Household Form W-2 wages.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": ["us_1040_L1a_wages", "us_form_8959_L1_medicare_wages"]
+    },
+    "taxable_interest": {
+      "label": "Taxable interest",
+      "description": "Taxable interest reported on Form 1040 line 2b.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": [
+        "us_1040_L2b_taxable_interest",
+        "us_form_8960_L1_taxable_interest"
+      ]
+    },
+    "ordinary_dividends": {
+      "label": "Ordinary dividends",
+      "description": "Total ordinary dividends, including qualified dividends.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": [
+        "us_1040_L3b_ordinary_dividends",
+        "us_form_8960_L2_ordinary_dividends"
+      ]
+    },
+    "qualified_dividends": {
+      "label": "Qualified dividends",
+      "description": "The qualified portion of ordinary dividends.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": ["us_1040_L3a_qualified_dividends"]
+    },
+    "short_term_capital_gains": {
+      "label": "Short-term capital gain or loss",
+      "description": "Net short-term capital gain or loss.",
+      "type": "money",
+      "allows_negative": true,
+      "default": 0,
+      "federal_nodes": ["us_schedule_d_L1a_short_term_totals"]
+    },
+    "long_term_capital_gains": {
+      "label": "Long-term capital gain or loss",
+      "description": "Net long-term capital gain or loss.",
+      "type": "money",
+      "allows_negative": true,
+      "default": 0,
+      "federal_nodes": ["us_schedule_d_L8a_long_term_totals"]
+    },
+    "self_employment_income": {
+      "label": "Self-employment income",
+      "description": "Net business profit subject to self-employment tax and QBI.",
+      "type": "money",
+      "allows_negative": true,
+      "default": 0,
+      "federal_nodes": [
+        "us_schedule_1_L3_business_income",
+        "us_schedule_se_L2_business_profit",
+        "us_form_8995_L1_qbi_business_1"
+      ]
+    },
+    "rental_income": {
+      "label": "Rental and royalty income",
+      "description": "Net Schedule E rental and royalty income.",
+      "type": "money",
+      "allows_negative": true,
+      "default": 0,
+      "federal_nodes": [
+        "us_schedule_1_L5_rental_income",
+        "us_form_8960_L4a_rental_royalty_income"
+      ]
+    },
+    "schedule_1_income": {
+      "label": "Other Schedule 1 income",
+      "description": "Aggregate other income reported on Schedule 1 line 8z.",
+      "type": "money",
+      "allows_negative": true,
+      "default": 0,
+      "federal_nodes": ["us_schedule_1_L8z_other_income"]
+    },
+    "itemized_deductions": {
+      "label": "Itemized deductions",
+      "description": "Aggregate Schedule A deductions; automatic best-of only.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": ["us_schedule_a_L16_other_deductions"]
+    },
+    "incentive_stock_option_gains": {
+      "label": "ISO exercise spread",
+      "description": "Alternative-minimum-tax adjustment from exercising ISOs.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": ["us_form_6251_L2k_iso_adjustment"]
+    },
+    "qbi_w2_wages": {
+      "label": "Qualified-business W-2 wages",
+      "description": "W-2 wages attributable to the modeled qualified business.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": ["us_form_8995_A_W2"]
+    },
+    "qbi_ubia": {
+      "label": "Qualified-property UBIA",
+      "description": "Unadjusted basis immediately after acquisition for QBI.",
+      "type": "money",
+      "allows_negative": false,
+      "default": 0,
+      "federal_nodes": ["us_form_8995_A_UBIA"]
+    },
+    "qbi_is_sstb": {
+      "label": "Specified service business",
+      "description": "Whether the modeled qualified business is an SSTB.",
+      "type": "boolean",
+      "default": false,
+      "federal_nodes": ["us_form_8995_A_SSTB"]
+    }
+  },
+  "derived_inputs": {
+    "schedule_se_ss_wages": {
+      "description": "For a non-joint filer with self-employment income, W-2 wages fill the Social Security wage base before self-employment earnings.",
+      "rule": "w2_when_self_employed_non_joint",
+      "federal_nodes": ["us_schedule_se_L5_w2_ss_wages"]
+    }
+  },
+  "normalizations": [
+    {
+      "target": "ordinary_dividends",
+      "rule": "at_least",
+      "source": "qualified_dividends",
+      "description": "Form 1040 ordinary dividends include qualified dividends."
+    }
+  ],
+  "outputs": {
+    "federal_adjusted_gross_income": {
+      "label": "Federal adjusted gross income",
+      "description": "Form 1040 adjusted gross income.",
+      "node": "us_1040_L11_agi",
+      "type": "money"
+    },
+    "federal_taxable_income": {
+      "label": "Federal taxable income",
+      "description": "Form 1040 taxable income after deductions.",
+      "node": "us_1040_L15_taxable_income",
+      "type": "money"
+    },
+    "federal_qbi_deduction": {
+      "label": "Qualified business income deduction",
+      "description": "Section 199A deduction from Form 8995 or 8995-A.",
+      "node": "us_form_8995_L16_qbi_deduction",
+      "type": "money"
+    },
+    "federal_amt": {
+      "label": "Alternative minimum tax",
+      "description": "Additional tax from Form 6251.",
+      "node": "us_form_6251_L11_amt",
+      "type": "money"
+    },
+    "federal_se_tax": {
+      "label": "Self-employment tax",
+      "description": "Self-employment tax from Schedule SE.",
+      "node": "us_schedule_se_L10_se_tax",
+      "type": "money"
+    },
+    "federal_niit": {
+      "label": "Net investment income tax",
+      "description": "Net investment income tax from Form 8960.",
+      "node": "us_form_8960_L17_niit",
+      "type": "money"
+    },
+    "federal_additional_medicare_tax": {
+      "label": "Additional Medicare tax",
+      "description": "Additional Medicare tax from Form 8959.",
+      "node": "us_form_8959_L18_total_additional_medicare",
+      "type": "money"
+    },
+    "federal_total_tax": {
+      "label": "Federal total tax",
+      "description": "Form 1040 line 24, before payments and refundable credits.",
+      "node": "us_1040_L24_total_tax",
+      "type": "money"
+    }
+  },
+  "state_outputs": {
+    "state_adjusted_gross_income": {
+      "label": "State adjusted gross income",
+      "description": "The selected state's closest modeled AGI quantity.",
+      "type": "money"
+    },
+    "state_taxable_income": {
+      "label": "State taxable income",
+      "description": "The selected state's modeled taxable-income quantity.",
+      "type": "money"
+    },
+    "state_total_tax": {
+      "label": "State total tax",
+      "description": "The selected state's modeled income-tax liability.",
+      "type": "money"
+    }
+  },
+  "derived_outputs": [
+    {
+      "name": "federal_income_tax",
+      "label": "Federal income tax",
+      "formula": "subtract",
+      "from": "federal_total_tax",
+      "values": [
+        "federal_se_tax",
+        "federal_niit",
+        "federal_additional_medicare_tax"
+      ]
+    },
+    {
+      "name": "total_tax",
+      "label": "Federal and state total tax",
+      "formula": "sum",
+      "values": ["federal_total_tax", "state_total_tax"]
+    },
+    {
+      "name": "federal_effective_tax_rate",
+      "label": "Federal effective tax rate",
+      "formula": "ratio_percent",
+      "numerator": "federal_total_tax",
+      "denominator": "federal_adjusted_gross_income"
+    },
+    {
+      "name": "state_effective_tax_rate",
+      "label": "State effective tax rate",
+      "formula": "ratio_percent",
+      "numerator": "state_total_tax",
+      "denominator": "federal_adjusted_gross_income"
+    },
+    {
+      "name": "effective_tax_rate",
+      "label": "Combined effective tax rate",
+      "formula": "ratio_percent",
+      "numerator": "total_tax",
+      "denominator": "federal_adjusted_gross_income"
+    }
+  ],
+  "gradient_semantics": {
+    "description": "A next-dollar rate is the composed right-hand derivative of the selected public output with respect to every graph node written by one public input.",
+    "federal_output": ["us_1040_L24_total_tax"],
+    "state_output": "jurisdiction.output_nodes[year].state_total_tax",
+    "total_output": "federal_output plus state_output",
+    "input_nodes": "inputs[name].federal_nodes plus jurisdiction.input_nodes[year][name] plus active derived-input nodes"
+  },
+  "jurisdictions": {
+    "US": {
+      "name": "Federal only",
+      "kind": "federal",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "AK": {
+      "name": "Alaska",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "ak_notax_L1_ak_tax"
+        },
+        "2025": {
+          "state_total_tax": "ak_notax_L1_ak_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "AL": {
+      "name": "Alabama",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["al_40_L12_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["al_40_L12_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "al_40_L10_al_agi",
+          "state_taxable_income": "al_40_L14_al_taxable_income",
+          "state_total_tax": "al_40_L15_al_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "al_40_L10_al_agi",
+          "state_taxable_income": "al_40_L14_al_taxable_income",
+          "state_total_tax": "al_40_L15_al_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "AR": {
+      "name": "Arkansas",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["ar_ar1000f_L6a_itemized_deduction"]
+        },
+        "2025": {
+          "itemized_deductions": ["ar_ar1000f_L6a_itemized_deduction"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ar_ar1000f_L5_ar_income",
+          "state_taxable_income": "ar_ar1000f_L9_ar_taxable_income",
+          "state_total_tax": "ar_ar1000f_L14_balance_after_credits"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ar_ar1000f_L5_ar_income",
+          "state_taxable_income": "ar_ar1000f_L9_ar_taxable_income",
+          "state_total_tax": "ar_ar1000f_L14_balance_after_credits"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "AZ": {
+      "name": "Arizona",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["az_140_L43_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["az_140_L43_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "az_140_L42_az_agi",
+          "state_taxable_income": "az_140_L45_az_taxable_income",
+          "state_total_tax": "az_140_L52_tax_after_credits"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "az_140_L42_az_agi",
+          "state_taxable_income": "az_140_L45_az_taxable_income",
+          "state_total_tax": "az_140_L52_tax_after_credits"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "CA": {
+      "name": "California",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["ca_540_L18_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["ca_540_L18_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ca_540_L17_ca_agi",
+          "state_taxable_income": "ca_540_L19_ca_taxable_income",
+          "state_total_tax": "ca_540_L64_ca_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ca_540_L17_ca_agi",
+          "state_taxable_income": "ca_540_L19_ca_taxable_income",
+          "state_total_tax": "ca_540_L64_ca_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "CO": {
+      "name": "Colorado",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "co_form104_L1_federal_taxable_income",
+          "state_taxable_income": "co_form104_L11_co_taxable_income",
+          "state_total_tax": "co_form104_L12_co_income_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "co_form104_L1_federal_taxable_income",
+          "state_taxable_income": "co_form104_L11_co_taxable_income",
+          "state_total_tax": "co_form104_L12_co_income_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "CT": {
+      "name": "Connecticut",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "ct_1_L3_ct_taxable_income",
+          "state_total_tax": "ct_1_L18_ct_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "ct_1_L3_ct_taxable_income",
+          "state_total_tax": "ct_1_L18_ct_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "DC": {
+      "name": "District of Columbia",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "dc_d40_L4_dc_adjusted_gross_income",
+          "state_taxable_income": "dc_d40_L6_dc_taxable_income",
+          "state_total_tax": "dc_d40_L11_dc_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "dc_d40_L4_dc_adjusted_gross_income",
+          "state_taxable_income": "dc_d40_L6_dc_taxable_income",
+          "state_total_tax": "dc_d40_L11_dc_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "DE": {
+      "name": "Delaware",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["de_pit_res_L20a_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["de_pit_res_L20a_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "de_pit_res_L5_de_agi",
+          "state_taxable_income": "de_pit_res_L21_de_taxable_income",
+          "state_total_tax": "de_pit_res_L30_de_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "de_pit_res_L5_de_agi",
+          "state_taxable_income": "de_pit_res_L21_de_taxable_income",
+          "state_total_tax": "de_pit_res_L30_de_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "FL": {
+      "name": "Florida",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "fl_notax_L1_fl_tax"
+        },
+        "2025": {
+          "state_total_tax": "fl_notax_L1_fl_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "GA": {
+      "name": "Georgia",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["ga_500_L5_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["ga_500_L5_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ga_500_L4_ga_agi",
+          "state_taxable_income": "ga_500_L7_ga_taxable_income",
+          "state_total_tax": "ga_500_L12_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ga_500_L4_ga_agi",
+          "state_taxable_income": "ga_500_L7_ga_taxable_income",
+          "state_total_tax": "ga_500_L12_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "HI": {
+      "name": "Hawaii",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["hi_n11_L19_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["hi_n11_L19_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "hi_n11_L18_hi_agi",
+          "state_taxable_income": "hi_n11_L25_hi_taxable_income",
+          "state_total_tax": "hi_n11_L33_hi_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "hi_n11_L18_hi_agi",
+          "state_taxable_income": "hi_n11_L25_hi_taxable_income",
+          "state_total_tax": "hi_n11_L33_hi_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "IA": {
+      "name": "Iowa",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ia_ia1040_L1c_federal_agi",
+          "state_taxable_income": "ia_ia1040_L4_ia_taxable_income",
+          "state_total_tax": "ia_ia1040_L20_total_state_and_local_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ia_ia1040_L1c_federal_agi",
+          "state_taxable_income": "ia_ia1040_L4_ia_taxable_income",
+          "state_total_tax": "ia_ia1040_L20_total_state_and_local_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "ID": {
+      "name": "Idaho",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "id_form40_L11_id_adjusted_income",
+          "state_taxable_income": "id_form40_L19_id_taxable_income",
+          "state_total_tax": "id_form40_L42_total_tax_plus_donations"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "id_form40_L11_id_adjusted_income",
+          "state_taxable_income": "id_form40_L19_id_taxable_income",
+          "state_total_tax": "id_form40_L42_total_tax_plus_donations"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "IL": {
+      "name": "Illinois",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "il_1040_L9_il_base_income",
+          "state_taxable_income": "il_1040_L11_il_net_income",
+          "state_total_tax": "il_1040_L12_il_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "il_1040_L9_il_base_income",
+          "state_taxable_income": "il_1040_L11_il_net_income",
+          "state_total_tax": "il_1040_L12_il_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "IN": {
+      "name": "Indiana",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "in_it40_L7_in_agi",
+          "state_total_tax": "in_it40_L9_in_state_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "in_it40_L7_in_agi",
+          "state_total_tax": "in_it40_L9_in_state_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "KS": {
+      "name": "Kansas",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["ks_k40_L4_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["ks_k40_L4_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ks_k40_L3_ks_agi",
+          "state_taxable_income": "ks_k40_L7_ks_taxable_income",
+          "state_total_tax": "ks_k40_L19_ks_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ks_k40_L3_ks_agi",
+          "state_taxable_income": "ks_k40_L7_ks_taxable_income",
+          "state_total_tax": "ks_k40_L19_ks_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "KY": {
+      "name": "Kentucky",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ky_740_L9_ky_agi",
+          "state_taxable_income": "ky_740_L11_ky_taxable_income",
+          "state_total_tax": "ky_740_L12_ky_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ky_740_L9_ky_agi",
+          "state_taxable_income": "ky_740_L11_ky_taxable_income",
+          "state_total_tax": "ky_740_L12_ky_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "LA": {
+      "name": "Louisiana",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {
+          "itemized_deductions": ["la_it540_L8_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "la_it540_L10_la_tax"
+        },
+        "2025": {
+          "state_total_tax": "la_it540_L10_la_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": ["itemized_deductions"],
+        "2025": []
+      }
+    },
+    "MA": {
+      "name": "Massachusetts",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ma_1_L17_ma_income_after_deductions",
+          "state_taxable_income": "ma_1_L19_ma_taxable_income",
+          "state_total_tax": "ma_1_L28_ma_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ma_1_L17_ma_income_after_deductions",
+          "state_taxable_income": "ma_1_L19_ma_taxable_income",
+          "state_total_tax": "ma_1_L28_ma_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "MD": {
+      "name": "Maryland",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["md_502_L17_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["md_502_L17_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "md_502_L16_md_agi",
+          "state_taxable_income": "md_502_L20_md_taxable_income",
+          "state_total_tax": "md_502_L32_md_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "md_502_L16_md_agi",
+          "state_taxable_income": "md_502_L20_md_taxable_income",
+          "state_total_tax": "md_502_L32_md_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "ME": {
+      "name": "Maine",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["me_1040me_L17_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["me_1040me_L17_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "me_1040me_L16_me_agi",
+          "state_taxable_income": "me_1040me_L22_me_taxable_income",
+          "state_total_tax": "me_1040me_L32_me_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "me_1040me_L16_me_agi",
+          "state_taxable_income": "me_1040me_L22_me_taxable_income",
+          "state_total_tax": "me_1040me_L32_me_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "MI": {
+      "name": "Michigan",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "mi_1040_L11_mi_agi",
+          "state_taxable_income": "mi_1040_L13_mi_taxable_income",
+          "state_total_tax": "mi_1040_L18_mi_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "mi_1040_L11_mi_agi",
+          "state_taxable_income": "mi_1040_L13_mi_taxable_income",
+          "state_total_tax": "mi_1040_L18_mi_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "MN": {
+      "name": "Minnesota",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["mn_m1_L4_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["mn_m1_L4_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "mn_m1_L1_federal_agi",
+          "state_taxable_income": "mn_m1_L9_mn_taxable_income",
+          "state_total_tax": "mn_m1_L10_mn_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "mn_m1_L1_federal_agi",
+          "state_taxable_income": "mn_m1_L9_mn_taxable_income",
+          "state_total_tax": "mn_m1_L10_mn_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "MO": {
+      "name": "Missouri",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["mo_1040_L19_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["mo_1040_L19_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "mo_1040_L16_mo_agi",
+          "state_taxable_income": "mo_1040_L22_mo_taxable_income",
+          "state_total_tax": "mo_1040_L32_mo_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "mo_1040_L16_mo_agi",
+          "state_taxable_income": "mo_1040_L22_mo_taxable_income",
+          "state_total_tax": "mo_1040_L32_mo_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "MS": {
+      "name": "Mississippi",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ms_80105_L13_ms_agi",
+          "state_taxable_income": "ms_80105_L16_ms_taxable_income",
+          "state_total_tax": "ms_80105_L21_tax_after_credits"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ms_80105_L13_ms_agi",
+          "state_taxable_income": "ms_80105_L16_ms_taxable_income",
+          "state_total_tax": "ms_80105_L21_tax_after_credits"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "MT": {
+      "name": "Montana",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "mt_form2_L1_mt_taxable_income",
+          "state_taxable_income": "mt_form2_L4_mt_ordinary_income",
+          "state_total_tax": "mt_form2_L13_mt_total_resident_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "mt_form2_L1_mt_taxable_income",
+          "state_taxable_income": "mt_form2_L4_mt_ordinary_income",
+          "state_total_tax": "mt_form2_L13_mt_total_resident_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NC": {
+      "name": "North Carolina",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["nc_d400_L10_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["nc_d400_L10_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "nc_d400_L6_federal_agi",
+          "state_taxable_income": "nc_d400_L11_nc_taxable_income",
+          "state_total_tax": "nc_d400_L12_nc_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "nc_d400_L6_federal_agi",
+          "state_taxable_income": "nc_d400_L11_nc_taxable_income",
+          "state_total_tax": "nc_d400_L12_nc_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "ND": {
+      "name": "North Dakota",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "nd_1_L3_nd_adjusted_gross_income",
+          "state_taxable_income": "nd_1_L5_nd_taxable_income",
+          "state_total_tax": "nd_1_L16_nd_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "nd_1_L3_nd_adjusted_gross_income",
+          "state_taxable_income": "nd_1_L5_nd_taxable_income",
+          "state_total_tax": "nd_1_L16_nd_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NE": {
+      "name": "Nebraska",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "ne_1040n_L14_ne_taxable_income",
+          "state_total_tax": "ne_1040n_L19_total_ne_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "ne_1040n_L14_ne_taxable_income",
+          "state_total_tax": "ne_1040n_L19_total_ne_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NH": {
+      "name": "New Hampshire",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "taxable_interest": ["nh_dp10_L1_interest_income"],
+          "ordinary_dividends": ["nh_dp10_L2_dividend_income"]
+        },
+        "2025": {
+          "taxable_interest": ["nh_dp10_L1_interest_income"],
+          "ordinary_dividends": ["nh_dp10_L2_dividend_income"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "nh_dp10_L3_total_id_income",
+          "state_taxable_income": "nh_dp10_L7_taxable_id_income",
+          "state_total_tax": "nh_dp10_L8_nh_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "nh_dp10_L3_total_id_income",
+          "state_taxable_income": "nh_dp10_L7_taxable_id_income",
+          "state_total_tax": "nh_dp10_L8_nh_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NJ": {
+      "name": "New Jersey",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "nj_1040_L14_federal_agi",
+          "state_taxable_income": "nj_1040_L39_nj_taxable_income",
+          "state_total_tax": "nj_1040_L46_nj_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "nj_1040_L14_federal_agi",
+          "state_taxable_income": "nj_1040_L39_nj_taxable_income",
+          "state_total_tax": "nj_1040_L46_nj_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NM": {
+      "name": "New Mexico",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "nm_pit1_L17_nm_taxable_income",
+          "state_total_tax": "nm_pit1_L22_net_nm_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "nm_pit1_L17_nm_taxable_income",
+          "state_total_tax": "nm_pit1_L22_net_nm_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NV": {
+      "name": "Nevada",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "nv_notax_L1_nv_tax"
+        },
+        "2025": {
+          "state_total_tax": "nv_notax_L1_nv_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "NY": {
+      "name": "New York",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["ny_it201_L34_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["ny_it201_L34_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ny_it201_L33_ny_agi",
+          "state_taxable_income": "ny_it201_L37_ny_taxable_income",
+          "state_total_tax": "ny_it201_L46_ny_total_state_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ny_it201_L33_ny_agi",
+          "state_taxable_income": "ny_it201_L37_ny_taxable_income",
+          "state_total_tax": "ny_it201_L46_ny_total_state_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "OH": {
+      "name": "Ohio",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "oh_it1040_L4_oh_agi",
+          "state_taxable_income": "oh_it1040_L9_oh_taxable_nonbusiness_income",
+          "state_total_tax": "oh_it1040_L25_total_tax_liability"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "oh_it1040_L4_oh_agi",
+          "state_taxable_income": "oh_it1040_L9_oh_taxable_nonbusiness_income",
+          "state_total_tax": "oh_it1040_L25_total_tax_liability"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "OK": {
+      "name": "Oklahoma",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ok_511_L11_ok_agi",
+          "state_taxable_income": "ok_511_L13_ok_taxable_income",
+          "state_total_tax": "ok_511_L22_tax_after_credits"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ok_511_L11_ok_agi",
+          "state_taxable_income": "ok_511_L13_ok_taxable_income",
+          "state_total_tax": "ok_511_L22_tax_after_credits"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "OR": {
+      "name": "Oregon",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "or_40_L23_or_taxable_income",
+          "state_total_tax": "or_40_L32_or_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_taxable_income": "or_40_L23_or_taxable_income",
+          "state_total_tax": "or_40_L32_or_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "PA": {
+      "name": "Pennsylvania",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "w2_income": ["pa_40_L1a_gross_compensation"],
+          "taxable_interest": ["pa_40_L2_interest_income"],
+          "ordinary_dividends": ["pa_40_L3_dividend_income"]
+        },
+        "2025": {
+          "w2_income": ["pa_40_L1a_gross_compensation"],
+          "taxable_interest": ["pa_40_L2_interest_income"],
+          "ordinary_dividends": ["pa_40_L3_dividend_income"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "pa_40_L9_total_pa_taxable_income",
+          "state_taxable_income": "pa_40_L11_adjusted_pa_taxable_income",
+          "state_total_tax": "pa_40_L12_pa_tax_liability"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "pa_40_L9_total_pa_taxable_income",
+          "state_taxable_income": "pa_40_L11_adjusted_pa_taxable_income",
+          "state_total_tax": "pa_40_L12_pa_tax_liability"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "RI": {
+      "name": "Rhode Island",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ri_1040_L3_ri_modified_agi",
+          "state_taxable_income": "ri_1040_L7_ri_taxable_income",
+          "state_total_tax": "ri_1040_L13a_ri_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ri_1040_L3_ri_modified_agi",
+          "state_taxable_income": "ri_1040_L7_ri_taxable_income",
+          "state_total_tax": "ri_1040_L13a_ri_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "SC": {
+      "name": "South Carolina",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "sc_1040_L1_federal_taxable_income",
+          "state_taxable_income": "sc_1040_L5_sc_taxable_income",
+          "state_total_tax": "sc_1040_L6_sc_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "sc_1040_L1_federal_taxable_income",
+          "state_taxable_income": "sc_1040_L5_sc_taxable_income",
+          "state_total_tax": "sc_1040_L6_sc_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "SD": {
+      "name": "South Dakota",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "sd_notax_L1_sd_tax"
+        },
+        "2025": {
+          "state_total_tax": "sd_notax_L1_sd_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "TN": {
+      "name": "Tennessee",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "tn_notax_L1_tn_tax"
+        },
+        "2025": {
+          "state_total_tax": "tn_notax_L1_tn_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "TX": {
+      "name": "Texas",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "tx_notax_L1_tx_tax"
+        },
+        "2025": {
+          "state_total_tax": "tx_notax_L1_tx_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "UT": {
+      "name": "Utah",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "ut_tc40_L4_federal_agi",
+          "state_taxable_income": "ut_tc40_L9_ut_taxable_income_initial",
+          "state_total_tax": "ut_tc40_L20_ut_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "ut_tc40_L4_federal_agi",
+          "state_taxable_income": "ut_tc40_L9_ut_taxable_income_initial",
+          "state_total_tax": "ut_tc40_L20_ut_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "VA": {
+      "name": "Virginia",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["va_760_L9_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["va_760_L9_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "va_760_L8_va_agi",
+          "state_taxable_income": "va_760_L13_va_taxable_income",
+          "state_total_tax": "va_760_L18_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "va_760_L8_va_agi",
+          "state_taxable_income": "va_760_L13_va_taxable_income",
+          "state_total_tax": "va_760_L18_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "VT": {
+      "name": "Vermont",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["vt_in111_L6_vt_itemized_deductions"]
+        },
+        "2025": {
+          "itemized_deductions": ["vt_in111_L6_vt_itemized_deductions"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "vt_in111_L4_vt_agi",
+          "state_taxable_income": "vt_in111_L8_vt_taxable_income",
+          "state_total_tax": "vt_in111_L15_vt_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "vt_in111_L4_vt_agi",
+          "state_taxable_income": "vt_in111_L8_vt_taxable_income",
+          "state_total_tax": "vt_in111_L15_vt_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "WA": {
+      "name": "Washington",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "wa_notax_L1_wa_tax"
+        },
+        "2025": {
+          "state_total_tax": "wa_notax_L1_wa_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "WI": {
+      "name": "Wisconsin",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {
+          "itemized_deductions": ["wi_form1_L23_itemized"]
+        },
+        "2025": {
+          "itemized_deductions": ["wi_form1_L23_itemized"]
+        }
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "wi_form1_L22_wi_agi",
+          "state_taxable_income": "wi_form1_L39_wi_taxable_income",
+          "state_total_tax": "wi_form1_L45_wi_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "wi_form1_L22_wi_agi",
+          "state_taxable_income": "wi_form1_L39_wi_taxable_income",
+          "state_total_tax": "wi_form1_L45_wi_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "WV": {
+      "name": "West Virginia",
+      "kind": "state_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_adjusted_gross_income": "wv_it140_L4_wv_agi",
+          "state_taxable_income": "wv_it140_L7_wv_taxable_income",
+          "state_total_tax": "wv_it140_L12_total_tax"
+        },
+        "2025": {
+          "state_adjusted_gross_income": "wv_it140_L4_wv_agi",
+          "state_taxable_income": "wv_it140_L7_wv_taxable_income",
+          "state_total_tax": "wv_it140_L12_total_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    },
+    "WY": {
+      "name": "Wyoming",
+      "kind": "no_individual_income_tax",
+      "input_nodes": {
+        "2024": {},
+        "2025": {}
+      },
+      "output_nodes": {
+        "2024": {
+          "state_total_tax": "wy_notax_L1_wy_tax"
+        },
+        "2025": {
+          "state_total_tax": "wy_notax_L1_wy_tax"
+        }
+      },
+      "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      }
+    }
+  },
+  "limitations": [
+    {
+      "id": "tax-years",
+      "summary": "Only tax years 2024 and 2025 are supported by the browser contract."
+    },
+    {
+      "id": "deduction-choice",
+      "summary": "Itemized deductions use automatic best-of behavior; forcing a below-standard itemized deduction is not yet supported.",
+      "tracking": "tenforty-435"
+    },
+    {
+      "id": "dependents-and-credits",
+      "summary": "Dependent counts and dependent-related federal credits are outside the initial browser contract."
+    },
+    {
+      "id": "state-specific-adjustments",
+      "summary": "State-specific adjustment and exemption aggregates are excluded until they have state-specific public concepts.",
+      "tracking": "tenforty-avr"
+    },
+    {
+      "id": "calculation-scope",
+      "summary": "Results estimate modeled income taxes before payments and refundable credits; they are not filing advice."
+    }
+  ],
+  "parity_cases": [
+    {
+      "id": "federal-wages-2024",
+      "year": 2024,
+      "jurisdiction": "US",
+      "filing_status": "single",
+      "inputs": {
+        "w2_income": 100000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 100000,
+        "federal_taxable_income": 85400,
+        "federal_total_tax": 13841,
+        "state_total_tax": 0,
+        "total_tax": 13841
+      }
+    },
+    {
+      "id": "california-mixed-2024",
+      "year": 2024,
+      "jurisdiction": "CA",
+      "filing_status": "married_joint",
+      "inputs": {
+        "w2_income": 180000,
+        "taxable_interest": 2500,
+        "ordinary_dividends": 3500,
+        "qualified_dividends": 2000,
+        "long_term_capital_gains": 15000,
+        "itemized_deductions": 30000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 201000,
+        "federal_taxable_income": 171000,
+        "federal_total_tax": 26536,
+        "state_adjusted_gross_income": 201000,
+        "state_taxable_income": 171000,
+        "state_total_tax": 8910.7,
+        "total_tax": 35446.7
+      }
+    },
+    {
+      "id": "new-york-business-2025",
+      "year": 2025,
+      "jurisdiction": "NY",
+      "filing_status": "head_of_household",
+      "inputs": {
+        "w2_income": 120000,
+        "self_employment_income": 30000,
+        "rental_income": 10000,
+        "itemized_deductions": 25000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 157880.5675,
+        "federal_taxable_income": 127304.454,
+        "federal_qbi_deduction": 5576.1135,
+        "federal_se_tax": 4238.865,
+        "federal_total_tax": 25899.93396,
+        "state_adjusted_gross_income": 157880.5675,
+        "state_taxable_income": 132880.5675,
+        "state_total_tax": 7185.95905,
+        "total_tax": 33085.89301
+      }
+    },
+    {
+      "id": "new-hampshire-investment-2024",
+      "year": 2024,
+      "jurisdiction": "NH",
+      "filing_status": "single",
+      "inputs": {
+        "w2_income": 100000,
+        "taxable_interest": 50000,
+        "ordinary_dividends": 10000,
+        "qualified_dividends": 5000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 160000,
+        "federal_taxable_income": 145400,
+        "federal_total_tax": 27488.5,
+        "state_adjusted_gross_income": 60000,
+        "state_taxable_income": 57600,
+        "state_total_tax": 1728,
+        "total_tax": 29216.5
+      }
+    },
+    {
+      "id": "pennsylvania-income-2025",
+      "year": 2025,
+      "jurisdiction": "PA",
+      "filing_status": "married_joint",
+      "inputs": {
+        "w2_income": 180000,
+        "taxable_interest": 3000,
+        "ordinary_dividends": 5000,
+        "qualified_dividends": 2000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 188000,
+        "federal_taxable_income": 156500,
+        "federal_total_tax": 24118,
+        "state_adjusted_gross_income": 188000,
+        "state_taxable_income": 188000,
+        "state_total_tax": 5771.6,
+        "total_tax": 29889.6
+      }
+    },
+    {
+      "id": "texas-iso-2025",
+      "year": 2025,
+      "jurisdiction": "TX",
+      "filing_status": "single",
+      "inputs": {
+        "w2_income": 100000,
+        "incentive_stock_option_gains": 50000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 100000,
+        "federal_taxable_income": 84250,
+        "federal_amt": 2645,
+        "federal_total_tax": 16094,
+        "state_total_tax": 0,
+        "total_tax": 16094
+      }
+    }
+  ]
+}
