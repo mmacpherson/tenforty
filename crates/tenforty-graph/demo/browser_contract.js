@@ -98,6 +98,30 @@ function evaluateNode(runtime, node, context) {
   return value;
 }
 
+function evaluateGradientVector(runtime, outputs, inputGroups, context) {
+  const inputNodes = inputGroups.flat();
+  const groupLengths = inputGroups.map((nodes) => nodes.length);
+  let values;
+  try {
+    values = Array.from(
+      runtime.gradientVector(outputs, inputNodes, groupLengths),
+    );
+  } catch (error) {
+    throw new BrowserContractError(
+      `Browser contract gradient failed (${context}): ${error}`,
+    );
+  }
+  if (
+    values.length !== inputGroups.length ||
+    values.some((value) => !Number.isFinite(value))
+  ) {
+    throw new BrowserContractError(
+      `Browser contract gradient is invalid (${context})`,
+    );
+  }
+  return values;
+}
+
 function calculateDerivedOutput(specification, values) {
   if (specification.formula === "subtract") {
     return specification.values.reduce(
@@ -214,6 +238,7 @@ export class BrowserTaxRuntime {
 
   setInputs(suppliedInputs) {
     const values = normalizeInputs(this.contract, suppliedInputs);
+    this.values = values;
     const unsupported = this.jurisdictionSpec.unsupported_inputs[this.yearKey];
     for (const name of unsupported) {
       if (values[name] !== 0 && values[name] !== false) {
@@ -261,6 +286,56 @@ export class BrowserTaxRuntime {
         setNode(this.runtime, node, value, `derived ${name}`);
       }
     }
+  }
+
+  gradientVectors() {
+    if (!this.values) {
+      throw new BrowserContractError(
+        "Set browser inputs before requesting gradients",
+      );
+    }
+    const inputNames = Object.entries(this.contract.inputs)
+      .filter(([, specification]) => specification.type === "money")
+      .map(([name]) => name);
+    const stateInputNodes = this.jurisdictionSpec.input_nodes[this.yearKey];
+    const derivedWageNodes =
+      this.values.self_employment_income !== 0 &&
+      this.filingStatus !== "married_joint"
+        ? this.contract.derived_inputs.schedule_se_ss_wages.federal_nodes
+        : [];
+    const inputGroups = inputNames.map((name) => [
+      ...this.contract.inputs[name].federal_nodes,
+      ...(stateInputNodes[name] ?? []),
+      ...(name === "w2_income" ? derivedWageNodes : []),
+    ]);
+    const federalOutput = this.contract.outputs.federal_total_tax.node;
+    const stateOutput =
+      this.jurisdictionSpec.output_nodes[this.yearKey].state_total_tax;
+    const federalValues = evaluateGradientVector(
+      this.runtime,
+      [federalOutput],
+      inputGroups,
+      "federal total tax",
+    );
+    const stateValues = stateOutput
+      ? evaluateGradientVector(
+          this.runtime,
+          [stateOutput],
+          inputGroups,
+          `${this.jurisdiction} total tax`,
+        )
+      : federalValues.map(() => 0);
+
+    return Object.fromEntries(
+      inputNames.map((name, index) => [
+        name,
+        {
+          federal: federalValues[index],
+          state: stateValues[index],
+          total: federalValues[index] + stateValues[index],
+        },
+      ]),
+    );
   }
 
   evaluate() {

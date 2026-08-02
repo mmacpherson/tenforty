@@ -15,10 +15,13 @@ const { BrowserContractError, validateBrowserContract } =
   await import(pathToFileURL(contractModulePath));
 const {
   INPUT_GROUPS,
+  SENSITIVITY_INPUTS,
+  analyzeScenario,
   calculateScenario,
   parseScenario,
   scenarioFromParityCase,
   serializeScenario,
+  sweepScenario,
 } = await import(pathToFileURL(calculatorModulePath));
 await graphlib.default({ module_or_path: await readFile(wasmPath) });
 const contract = JSON.parse(await readFile(contractPath, "utf8"));
@@ -33,6 +36,16 @@ assert.equal(
   visibleInputs.length,
   new Set(visibleInputs).size,
   "calculator must expose each browser input exactly once",
+);
+assert.equal(
+  SENSITIVITY_INPUTS.qualified_dividends.reclassification,
+  true,
+  "qualified-dividend sensitivity must be labeled as a reclassification",
+);
+assert.match(
+  SENSITIVITY_INPUTS.qualified_dividends.action,
+  /^Reclassify /,
+  "qualified-dividend copy must not describe a new dollar of income",
 );
 
 const graphs = new Map();
@@ -77,6 +90,46 @@ for (const testCase of contract.parity_cases) {
   }
 }
 
+for (const testCase of contract.gradient_cases) {
+  const scenario = scenarioFromParityCase(contract, testCase);
+  const analysis = analyzeScenario(
+    graphlib,
+    graphs.get(testCase.year),
+    contract,
+    scenario,
+  );
+  for (const [inputName, expectedParts] of Object.entries(testCase.expected)) {
+    for (const [part, expected] of Object.entries(expectedParts)) {
+      const actual = analysis.gradients[inputName][part];
+      assert.ok(
+        Math.abs(actual - expected) <= 1e-6,
+        `${testCase.id}/${inputName}/${part}: expected ${expected}, received ${actual}`,
+      );
+    }
+  }
+}
+
+const ordinaryScenario = scenarioFromParityCase(
+  contract,
+  contract.gradient_cases.find(({ id }) => id === "ordinary-bracket"),
+);
+const ordinaryCurve = sweepScenario(
+  graphlib,
+  graphs.get(ordinaryScenario.year),
+  contract,
+  ordinaryScenario,
+  "w2_income",
+);
+assert.equal(ordinaryCurve.length, 57);
+assert.equal(ordinaryCurve[0].input, 0);
+assert.equal(ordinaryCurve.at(-1).input, 200000);
+assert.ok(
+  ordinaryCurve.every(
+    (point, index) => index === 0 || point.total >= ordinaryCurve[index - 1].total,
+  ),
+  "ordinary wage curve must remain monotone",
+);
+
 const staleContract = structuredClone(contract);
 staleContract.inputs.w2_income.federal_nodes = ["us_1040_wages"];
 assert.throws(
@@ -89,5 +142,5 @@ assert.throws(
 );
 
 console.log(
-  `WASM browser contract passed: ${contract.parity_cases.length} parity cases across ${contract.supported_years.length} tax years and ${Object.keys(contract.jurisdictions).length} jurisdictions`,
+  `WASM browser contract passed: ${contract.parity_cases.length} value cases, ${contract.gradient_cases.length} gradient regions, ${contract.supported_years.length} tax years, and ${Object.keys(contract.jurisdictions).length} jurisdictions`,
 );

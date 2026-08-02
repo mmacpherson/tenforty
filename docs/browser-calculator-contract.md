@@ -35,7 +35,11 @@ outputs have named formulas:
 A next-dollar rate means the composed right-hand derivative of a public output
 with respect to every graph node written by one public input. That includes
 federal fan-out, state-side nodes, and active derived inputs. A single accidental
-node-to-node partial is not a public marginal rate.
+node-to-node partial is not a public marginal rate. The WASM boundary returns a
+grouped gradient vector: smooth public inputs share one reverse traversal per
+output, while active thresholds retain the graph runtime's right-hand convention.
+The calculator derives combined effects by adding the federal and selected-state
+vectors entry by entry.
 
 ## Failure and accuracy contract
 
@@ -47,10 +51,12 @@ does not define is `null`; a modeled no-income-tax result is numeric zero.
 The executable contract has two halves:
 
 1. Python tests regenerate the manifest and compare its pinned federal and state
-   scenarios with `GraphBackend`.
+   values and gradient regions with `GraphBackend`.
 2. The Pages smoke test loads the same manifest through the public WASM API,
    validates every declared node for both years and every jurisdiction, and runs
-   the same pinned scenarios. A deliberately stale node must raise.
+   the same pinned values and gradient vectors. The gradient pins cover an
+   ordinary bracket, capital-gain stacking, AMT, Additional Medicare Tax and
+   NIIT, and a state-side income node. A deliberately stale node must raise.
 
 This makes the checked-in scenario values a bridge between Python and the browser
 rather than deriving either side's expected result from the other at test time.

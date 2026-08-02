@@ -4,11 +4,14 @@ import {
   loadBrowserContract,
 } from "./browser_contract.js";
 import {
+  CURVE_INPUTS,
   INPUT_GROUPS,
-  calculateScenario,
+  SENSITIVITY_INPUTS,
+  analyzeScenario,
   createDefaultScenario,
   parseScenario,
   serializeScenario,
+  sweepScenario,
 } from "./calculator.js";
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
@@ -21,6 +24,7 @@ let contract;
 let scenario;
 let calculationSequence = 0;
 let toastTimer;
+let selectedCurveInput = "w2_income";
 const graphCache = new Map();
 
 function byId(id) {
@@ -33,6 +37,20 @@ function formatCurrency(value) {
 
 function formatPercent(value) {
   return `${value.toFixed(1)}%`;
+}
+
+function formatCents(value) {
+  const cents = value * 100;
+  const sign = cents < -0.0005 ? "−" : "";
+  return `${sign}${Math.abs(cents).toFixed(1)}¢`;
+}
+
+function formatAxisCurrency(value) {
+  if (Math.abs(value) >= 1000) {
+    const thousands = value / 1000;
+    return `$${thousands >= 100 ? thousands.toFixed(0) : thousands.toFixed(1)}k`;
+  }
+  return `$${Math.round(value)}`;
 }
 
 function createTextElement(tagName, className, text) {
@@ -195,10 +213,228 @@ function populateInterface() {
       container.appendChild(createInputField(name));
   }
 
+  const curveInput = byId("curve-input");
+  for (const name of CURVE_INPUTS) {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = SENSITIVITY_INPUTS[name].shortLabel;
+    curveInput.appendChild(option);
+  }
+  curveInput.value = selectedCurveInput;
+
   const limitations = byId("limitations-list");
   for (const limitation of contract.limitations) {
     limitations.appendChild(createTextElement("p", "", limitation.summary));
   }
+}
+
+function svgElement(name, attributes = {}) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const [attribute, value] of Object.entries(attributes)) {
+    element.setAttribute(attribute, String(value));
+  }
+  return element;
+}
+
+function curvePath(points, valueName, xScale, yScale) {
+  return points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"}${xScale(point.input).toFixed(2)},${yScale(point[valueName]).toFixed(2)}`,
+    )
+    .join(" ");
+}
+
+function renderCurve(points, results, gradient, inputName) {
+  const width = 680;
+  const height = 320;
+  const margin = { top: 22, right: 18, bottom: 40, left: 58 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+  const minimumInput = points[0].input;
+  const maximumInput = points.at(-1).input;
+  const maximumTax = Math.max(
+    1,
+    ...points.flatMap((point) => [point.total, point.federal, point.state]),
+  );
+  const paddedMaximumTax = maximumTax * 1.08;
+  const xScale = (value) =>
+    margin.left +
+    ((value - minimumInput) / (maximumInput - minimumInput)) * innerWidth;
+  const yScale = (value) =>
+    margin.top + innerHeight - (value / paddedMaximumTax) * innerHeight;
+
+  byId("curve-total").setAttribute(
+    "d",
+    curvePath(points, "total", xScale, yScale),
+  );
+  byId("curve-federal").setAttribute(
+    "d",
+    curvePath(points, "federal", xScale, yScale),
+  );
+  byId("curve-state").setAttribute(
+    "d",
+    curvePath(points, "state", xScale, yScale),
+  );
+
+  const grid = byId("curve-grid");
+  const labels = byId("curve-labels");
+  grid.replaceChildren();
+  labels.replaceChildren();
+  for (let index = 0; index <= 4; index += 1) {
+    const taxValue = (paddedMaximumTax * index) / 4;
+    const y = yScale(taxValue);
+    grid.appendChild(
+      svgElement("line", {
+        x1: margin.left,
+        x2: width - margin.right,
+        y1: y,
+        y2: y,
+      }),
+    );
+    const label = svgElement("text", {
+      x: margin.left - 9,
+      y: y + 4,
+      "text-anchor": "end",
+    });
+    label.textContent = formatAxisCurrency(taxValue);
+    labels.appendChild(label);
+  }
+  for (let index = 0; index <= 4; index += 1) {
+    const inputValue =
+      minimumInput + ((maximumInput - minimumInput) * index) / 4;
+    const label = svgElement("text", {
+      x: xScale(inputValue),
+      y: height - 12,
+      "text-anchor": index === 0 ? "start" : index === 4 ? "end" : "middle",
+    });
+    label.textContent = formatAxisCurrency(inputValue);
+    labels.appendChild(label);
+  }
+
+  const currentInput = scenario.inputs[inputName];
+  const currentTax = results.total_tax;
+  const currentX = xScale(currentInput);
+  const currentY = yScale(currentTax);
+  const currentPoint = byId("curve-current");
+  currentPoint.setAttribute("cx", currentX);
+  currentPoint.setAttribute("cy", currentY);
+  const guide = byId("curve-guide");
+  guide.setAttribute("x1", currentX);
+  guide.setAttribute("x2", currentX);
+  guide.setAttribute("y1", currentY);
+  guide.setAttribute("y2", margin.top + innerHeight);
+
+  const tangentRadius = (maximumInput - minimumInput) * 0.075;
+  const tangentStart = Math.max(minimumInput, currentInput - tangentRadius);
+  const tangentEnd = Math.min(maximumInput, currentInput + tangentRadius);
+  const tangent = byId("curve-tangent");
+  tangent.setAttribute("x1", xScale(tangentStart));
+  tangent.setAttribute("x2", xScale(tangentEnd));
+  tangent.setAttribute(
+    "y1",
+    yScale(currentTax + gradient.total * (tangentStart - currentInput)),
+  );
+  tangent.setAttribute(
+    "y2",
+    yScale(currentTax + gradient.total * (tangentEnd - currentInput)),
+  );
+
+  const shortLabel = SENSITIVITY_INPUTS[inputName].shortLabel.toLowerCase();
+  setText("curve-title", `as ${shortLabel} changes`);
+  setText(
+    "curve-summary",
+    `Modeled total tax as ${shortLabel} ranges from ${formatCurrency(minimumInput)} to ${formatCurrency(maximumInput)}. This return is at ${formatCurrency(currentInput)} with ${formatCurrency(currentTax)} of modeled total tax and a local slope of ${formatCents(gradient.total)} per dollar.`,
+  );
+}
+
+function sensitivityNames(gradients) {
+  const unsupported = new Set(
+    selectedJurisdiction().unsupported_inputs[String(scenario.year)],
+  );
+  const active = Object.keys(gradients).filter(
+    (name) =>
+      SENSITIVITY_INPUTS[name] &&
+      !unsupported.has(name) &&
+      Math.abs(scenario.inputs[name]) >= 0.005,
+  );
+  const staples = [
+    "w2_income",
+    "taxable_interest",
+    "long_term_capital_gains",
+    "qualified_dividends",
+    "ordinary_dividends",
+    "itemized_deductions",
+    "incentive_stock_option_gains",
+  ];
+  return [...new Set([...active, ...staples])]
+    .filter(
+      (name) =>
+        gradients[name] &&
+        !unsupported.has(name) &&
+        (name !== "qualified_dividends" ||
+          scenario.inputs.ordinary_dividends >
+            scenario.inputs.qualified_dividends),
+    )
+    .slice(0, 6);
+}
+
+function renderSensitivities(gradients) {
+  const list = byId("sensitivity-list");
+  list.replaceChildren();
+  for (const name of sensitivityNames(gradients)) {
+    const metadata = SENSITIVITY_INPUTS[name];
+    const element = document.createElement(
+      metadata.curveMaximum ? "button" : "div",
+    );
+    element.className = "sensitivity-item";
+    if (metadata.curveMaximum) {
+      element.type = "button";
+      element.dataset.curveInput = name;
+      element.setAttribute(
+        "aria-label",
+        `Plot ${metadata.shortLabel}: ${formatCents(gradients[name].total)} of tax per dollar`,
+      );
+    }
+    element.append(
+      createTextElement("span", "sensitivity-action", metadata.action),
+      createTextElement(
+        "strong",
+        gradients[name].total < 0 ? "negative" : "",
+        formatCents(gradients[name].total),
+      ),
+      createTextElement(
+        "small",
+        "",
+        `${formatCents(gradients[name].federal)} federal · ${formatCents(gradients[name].state)} state`,
+      ),
+    );
+    list.appendChild(element);
+  }
+}
+
+function renderAnalysis(analysis, curvePoints, inputName) {
+  const metadata = SENSITIVITY_INPUTS[inputName];
+  const gradient = analysis.gradients[inputName];
+  const jurisdiction = selectedJurisdiction();
+  setText("analysis-action", metadata.action);
+  setText("next-dollar-cents", (gradient.total * 100).toFixed(1));
+  setText("next-dollar-federal", formatCents(gradient.federal));
+  setText(
+    "next-dollar-state-label",
+    scenario.jurisdiction === "US" ? "No state selected" : jurisdiction.name,
+  );
+  setText("next-dollar-state", formatCents(gradient.state));
+  setText("next-dollar-total", formatPercent(gradient.total * 100));
+  setText(
+    "derivative-interpretation",
+    metadata.reclassification
+      ? "This reclassifies an existing ordinary-dividend dollar; it is not the cost of earning another dollar."
+      : "This is the composed right-hand effect at the current return—not your effective rate.",
+  );
+  renderCurve(curvePoints, analysis.results, gradient, inputName);
+  renderSensitivities(analysis.gradients);
+  byId("analysis-lab").setAttribute("aria-busy", "false");
 }
 
 function renderScenario(nextScenario) {
@@ -405,6 +641,11 @@ function clearResults() {
   const hero = byId("results-heading").closest(".results-hero");
   hero.classList.add("is-stale");
   hero.setAttribute("aria-busy", "false");
+  byId("analysis-lab").setAttribute("aria-busy", "false");
+  setText("next-dollar-cents", "—");
+  setText("next-dollar-federal", "—");
+  setText("next-dollar-state", "—");
+  setText("next-dollar-total", "—");
 }
 
 function showError(error) {
@@ -434,13 +675,22 @@ async function calculate() {
   byId("results-heading")
     .closest(".results-hero")
     .setAttribute("aria-busy", "true");
+  byId("analysis-lab").setAttribute("aria-busy", "true");
 
   try {
     const graph = await loadGraph(scenario.year);
     const startedAt = performance.now();
-    const results = calculateScenario(graphlib, graph, contract, scenario);
+    const analysis = analyzeScenario(graphlib, graph, contract, scenario);
+    const curvePoints = sweepScenario(
+      graphlib,
+      graph,
+      contract,
+      scenario,
+      selectedCurveInput,
+    );
     if (sequence !== calculationSequence) return;
-    renderResults(results, performance.now() - startedAt);
+    renderResults(analysis.results, performance.now() - startedAt);
+    renderAnalysis(analysis, curvePoints, selectedCurveInput);
     updateAddressBar();
   } catch (error) {
     if (sequence !== calculationSequence) return;
@@ -490,6 +740,18 @@ function bindEvents() {
   for (const id of ["tax-year", "filing-status", "jurisdiction"]) {
     byId(id).addEventListener("change", scheduleCalculation);
   }
+
+  byId("curve-input").addEventListener("change", (event) => {
+    selectedCurveInput = event.target.value;
+    scheduleCalculation();
+  });
+  byId("sensitivity-list").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-curve-input]");
+    if (!button) return;
+    selectedCurveInput = button.dataset.curveInput;
+    byId("curve-input").value = selectedCurveInput;
+    scheduleCalculation();
+  });
 
   byId("share-scenario").addEventListener("click", copyShareLink);
   byId("reset-scenario").addEventListener("click", () => {
