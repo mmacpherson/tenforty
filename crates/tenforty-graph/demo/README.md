@@ -11,6 +11,12 @@ concepts from that contract rather than graph-node names. Share links serialize
 the same public scenario passed to the calculator boundary in the URL fragment,
 which browsers do not send to the hosting server.
 
+The primary view is analytical rather than a filing interview: it places the
+current return on a live federal/state/combined tax curve, draws the exact local
+tangent, and decomposes selected next-dollar sensitivities from a grouped
+autodiff vector. Effective rates remain separate from these local effects, and
+qualified-dividend sensitivity is labeled as a reclassification.
+
 Build and serve it locally with:
 
 ```console

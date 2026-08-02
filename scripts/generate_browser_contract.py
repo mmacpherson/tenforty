@@ -365,6 +365,79 @@ PARITY_CASES = [
     },
 ]
 
+GRADIENT_CASES = [
+    {
+        "id": "ordinary-bracket",
+        "year": 2024,
+        "jurisdiction": "US",
+        "filing_status": "single",
+        "inputs": {"w2_income": 100000},
+        "expected": {"w2_income": {"federal": 0.22, "state": 0.0, "total": 0.22}},
+    },
+    {
+        "id": "capital-gain-stacking",
+        "year": 2024,
+        "jurisdiction": "US",
+        "filing_status": "single",
+        "inputs": {"w2_income": 30000, "long_term_capital_gains": 50000},
+        "expected": {
+            "w2_income": {"federal": 0.27, "state": 0.0, "total": 0.27},
+            "long_term_capital_gains": {
+                "federal": 0.15,
+                "state": 0.0,
+                "total": 0.15,
+            },
+        },
+    },
+    {
+        "id": "alternative-minimum-tax",
+        "year": 2025,
+        "jurisdiction": "US",
+        "filing_status": "single",
+        "inputs": {
+            "w2_income": 200000,
+            "incentive_stock_option_gains": 300000,
+        },
+        "expected": {
+            "w2_income": {"federal": 0.289, "state": 0.0, "total": 0.289},
+            "incentive_stock_option_gains": {
+                "federal": 0.28,
+                "state": 0.0,
+                "total": 0.28,
+            },
+        },
+    },
+    {
+        "id": "medicare-and-niit",
+        "year": 2024,
+        "jurisdiction": "US",
+        "filing_status": "single",
+        "inputs": {"w2_income": 250000, "taxable_interest": 50000},
+        "expected": {
+            "w2_income": {"federal": 0.359, "state": 0.0, "total": 0.359},
+            "taxable_interest": {
+                "federal": 0.388,
+                "state": 0.0,
+                "total": 0.388,
+            },
+        },
+    },
+    {
+        "id": "new-hampshire-interest",
+        "year": 2024,
+        "jurisdiction": "NH",
+        "filing_status": "single",
+        "inputs": {"w2_income": 150000, "taxable_interest": 50000},
+        "expected": {
+            "taxable_interest": {
+                "federal": 0.278,
+                "state": 0.03,
+                "total": 0.308,
+            }
+        },
+    },
+]
+
 
 def _graph_inventory(year: int) -> tuple[set[str], set[str], dict[str, object]]:
     graph_path = ROOT / f"src/tenforty/forms/us_tax_graph_{year}.json"
@@ -581,6 +654,7 @@ def build_contract() -> dict[str, object]:
             },
         ],
         "parity_cases": PARITY_CASES,
+        "gradient_cases": GRADIENT_CASES,
     }
 
 
