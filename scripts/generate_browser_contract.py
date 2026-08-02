@@ -25,6 +25,14 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
 
 INPUTS = {
+    "standard_or_itemized": {
+        "label": "Deduction choice",
+        "description": "Choose deductions automatically or force the supplied itemized amount.",
+        "type": "choice",
+        "choices": ["Standard", "Itemized"],
+        "encoding": {"Standard": 0, "Itemized": 1},
+        "default": "Standard",
+    },
     "w2_income": {
         "label": "Wages and salary",
         "description": "Household Form W-2 wages.",
@@ -81,7 +89,7 @@ INPUTS = {
     },
     "itemized_deductions": {
         "label": "Itemized deductions",
-        "description": "Aggregate Schedule A deductions; automatic best-of only.",
+        "description": "Aggregate Schedule A deductions used as the automatic candidate or forced amount.",
         "type": "money",
         "allows_negative": False,
     },
@@ -230,6 +238,26 @@ PARITY_CASES = [
             "federal_total_tax": 13841,
             "state_total_tax": 0,
             "total_tax": 13841,
+        },
+    },
+    {
+        "id": "iowa-forced-itemization-2024",
+        "year": 2024,
+        "jurisdiction": "IA",
+        "filing_status": "single",
+        "inputs": {
+            "standard_or_itemized": "Itemized",
+            "w2_income": 100000,
+            "itemized_deductions": 10000,
+        },
+        "expected": {
+            "federal_adjusted_gross_income": 100000,
+            "federal_taxable_income": 90000,
+            "federal_total_tax": 14853,
+            "state_adjusted_gross_income": 100000,
+            "state_taxable_income": 90000,
+            "state_total_tax": 4830.678,
+            "total_tax": 19683.678,
         },
     },
     {
@@ -435,9 +463,10 @@ def build_contract() -> dict[str, object]:
             missing = set(nodes) - input_names
             if missing:
                 raise ValueError(f"{year}/{natural} input nodes are missing: {missing}")
+        default = metadata.get("default", False if metadata["type"] == "boolean" else 0)
         inputs[natural] = {
             **metadata,
-            "default": False if metadata["type"] == "boolean" else 0,
+            "default": default,
             "federal_nodes": nodes,
         }
 
@@ -536,11 +565,6 @@ def build_contract() -> dict[str, object]:
             {
                 "id": "tax-years",
                 "summary": "Only tax years 2024 and 2025 are supported by the browser contract.",
-            },
-            {
-                "id": "deduction-choice",
-                "summary": "Itemized deductions use automatic best-of behavior; forcing a below-standard itemized deduction is not yet supported.",
-                "tracking": "tenforty-435",
             },
             {
                 "id": "dependents-and-credits",

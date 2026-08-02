@@ -74,9 +74,20 @@ us1040_2025 = form "us_1040" 2025 $ do
     interior "StdDed" "standard_deduction" $
       baseStdDed .+. additionalStdDed
 
+  forceItemized <-
+    keyInput "ForceItemized" "force_itemized" "Use Schedule A even when it is less than the standard deduction"
+
+  automaticUsesItemized <-
+    interior "AutomaticUsesItemized" "Automatic choice selected Schedule A" $
+      ifPos (l12 .-. stdDed) (dollars 1) (dollars 0)
+
+  usesItemized <-
+    keyOutput "UsesItemized" "uses_itemized" "Whether Form 1040 uses Schedule A" $
+      ifPos forceItemized (dollars 1) automaticUsesItemized
+
   l12Final <-
     keyOutput "L12Final" "deduction_amount" "Standard or itemized deduction" $
-      greaterOf l12 stdDed
+      ifPos usesItemized l12 stdDed
 
   -- Taxable income before the QBI deduction (used by Form 8995). This avoids
   -- a cross-form cycle where 1040 imports the QBI deduction from 8995 while
@@ -224,6 +235,7 @@ us1040_2025 = form "us_1040" 2025 $ do
       "L6b",
       "L9",
       "L11",
+      "UsesItemized",
       "L12Final",
       "L14",
       "L15_pre_qbi",

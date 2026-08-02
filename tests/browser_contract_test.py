@@ -54,7 +54,6 @@ def test_browser_contract_exposes_known_limitations():
     limitation_ids = {limitation["id"] for limitation in CONTRACT["limitations"]}
     assert limitation_ids == {
         "tax-years",
-        "deduction-choice",
         "dependents-and-credits",
         "state-specific-adjustments",
         "calculation-scope",

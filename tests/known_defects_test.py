@@ -433,18 +433,9 @@ def test_ots_2024_mfs_amt_uses_current_year_line4_constants():
     assert result.federal_amt == pytest.approx(68_696.75, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F7: backends disagree on 'Itemized' semantics",
-    strict=True,
-)
 @skip_if_graph_unavailable
 def test_itemized_semantics_agree_across_backends():
-    """Both backends must implement the same 'Itemized' contract.
-
-    With deductions below the standard deduction, OTS forces itemization
-    while graph takes best-of-both. This asserts agreement without
-    prejudging which semantic is chosen (F7).
-    """
+    """Both backends force a below-standard amount when Itemized is selected."""
     kwargs = dict(
         year=2024,
         filing_status="Single",
@@ -457,6 +448,7 @@ def test_itemized_semantics_agree_across_backends():
     assert ots.federal_taxable_income == pytest.approx(
         graph.federal_taxable_income, abs=1.0
     )
+    assert graph.federal_taxable_income == pytest.approx(90_000.0)
 
 
 @pytest.mark.xfail(

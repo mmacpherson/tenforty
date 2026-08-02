@@ -19,12 +19,30 @@ from ..mappings import (
     STATE_OUTPUT_LINES,
     derived_chain_factor,
 )
-from ..models import STATE_TO_FORM, InterpretedTaxReturn, OTSState, TaxReturnInput
+from ..models import (
+    STATE_TO_FORM,
+    InterpretedTaxReturn,
+    OTSDeductionType,
+    OTSState,
+    TaxReturnInput,
+)
 
 _STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
 _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 
 logger = logging.getLogger(__name__)
+
+_MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
+
+
+def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
+    """Lower a validated public input model to graph-compatible natural values."""
+    values = tax_input.model_dump(exclude=_MODEL_CONTEXT_FIELDS)
+    values["standard_or_itemized"] = float(
+        tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
+    )
+    return values
+
 
 _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
     s
@@ -140,9 +158,7 @@ class GraphBackend:
         from ..graphlib import FilingStatus, Runtime
 
         # Determine required forms based on inputs and state
-        inputs_dict = tax_input.model_dump(
-            exclude={"year", "state", "filing_status", "standard_or_itemized"}
-        )
+        inputs_dict = _natural_values(tax_input)
         graph = _load_resolved_graph(tax_input.year.value)
         filing_status = FilingStatus.from_str(
             FILING_STATUS_MAP.get(tax_input.filing_status, "single")
@@ -248,7 +264,7 @@ class GraphBackend:
         self,
         year: int,
         state: OTSState | None,
-        inputs: dict[str, list[float]],
+        inputs: dict[str, list[object]],
         statuses: list[str],
         mode: str = "cross",
     ) -> dict[str, list[float]]:
@@ -294,7 +310,7 @@ class GraphBackend:
             axis_values = [
                 list(values) if values else [0.0] for values in inputs.values()
             ]
-            expanded: dict[str, list[float]] = {name: [] for name in axis_names}
+            expanded: dict[str, list[object]] = {name: [] for name in axis_names}
             expanded_statuses: list[str] = []
             for combo in itertools.product(*axis_values):
                 for status in statuses:
@@ -316,14 +332,13 @@ class GraphBackend:
         scenario_fields = [name for name in inputs if name in model_fields]
         normalized: dict[str, list[float]] = {}
         for i, status in enumerate(statuses):
-            dumped = TaxReturnInput(
+            tax_input = TaxReturnInput(
                 year=year,
                 state=state or OTSState.NONE,
                 filing_status=status,
                 **{name: inputs[name][i] for name in scenario_fields},
-            ).model_dump(
-                exclude={"year", "state", "filing_status", "standard_or_itemized"}
             )
+            dumped = _natural_values(tax_input)
             for name, value in dumped.items():
                 normalized.setdefault(name, []).append(float(value))
         inputs = normalized
@@ -646,9 +661,7 @@ class GraphBackend:
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
 
-        natural_values = tax_input.model_dump(
-            exclude={"year", "state", "filing_status", "standard_or_itemized"}
-        )
+        natural_values = _natural_values(tax_input)
         current_val = natural_values.get(var, 0)
 
         if current_val == 0:

@@ -961,6 +961,7 @@ def evaluate_returns(
                                 "incentive_stock_option_gains": iso_gains,
                                 "num_dependents": [nd],
                                 "dependent_exemptions": dep_exemptions,
+                                "standard_or_itemized": [soi],
                             }
                             batch_results = graph_backend.evaluate_batch(
                                 y,
@@ -1012,6 +1013,7 @@ def evaluate_returns(
                             "dependent_exemptions": [
                                 dep_exemptions[i] for i in indices
                             ],
+                            "standard_or_itemized": [std_or_items[i] for i in indices],
                         }
                         group_statuses = [filing_statuses[i] for i in indices]
                         batch_results = graph_backend.evaluate_batch(

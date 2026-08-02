@@ -64,10 +64,10 @@ browser computation backend.
 
 The contract records its user-visible limitations directly. The initial browser
 surface excludes dependent-related federal credits and ambiguous aggregate state
-adjustment/exemption inputs. Itemized deductions currently use automatic best-of
-behavior; forced below-standard itemization is tracked by `tenforty-435`. Results
-estimate modeled income taxes before payments and refundable credits and are not
-tax-return filing advice.
+adjustment/exemption inputs. The legacy deduction choice is explicit: `Standard`
+means automatic best-of and `Itemized` forces the supplied amount even below the
+standard deduction. Results estimate modeled income taxes before payments and
+refundable credits and are not tax-return filing advice.
 
 Regenerate and validate after changing a Python mapping or public concept:
 

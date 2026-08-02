@@ -27,6 +27,14 @@ function validateInputValue(name, specification, value) {
     }
     return value;
   }
+  if (specification.type === "choice") {
+    if (!specification.choices.includes(value)) {
+      throw new BrowserContractError(
+        `${name} must be one of: ${specification.choices.join(", ")}`,
+      );
+    }
+    return value;
+  }
   if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new BrowserContractError(`${name} must be a finite number`);
   }
@@ -216,8 +224,11 @@ export class BrowserTaxRuntime {
     }
 
     for (const [name, specification] of Object.entries(this.contract.inputs)) {
+      const graphValue = specification.encoding
+        ? specification.encoding[values[name]]
+        : values[name];
       for (const node of specification.federal_nodes) {
-        setNode(this.runtime, node, values[name], `federal ${name}`);
+        setNode(this.runtime, node, graphValue, `federal ${name}`);
       }
     }
     for (const [name, nodes] of Object.entries(
