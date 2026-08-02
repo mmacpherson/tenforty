@@ -15,6 +15,8 @@ from tenforty.models import OTSFilingStatus, OTSState, TaxReturnInput
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
 CONTRACT = json.loads(CONTRACT_PATH.read_text())
+APP_PATH = ROOT / "crates/tenforty-graph/demo/app.js"
+CALCULATOR_PATH = ROOT / "crates/tenforty-graph/demo/calculator.js"
 
 FILING_STATUSES = {
     "single": OTSFilingStatus.SINGLE,
@@ -61,6 +63,18 @@ def test_browser_contract_exposes_known_limitations():
     assert CONTRACT["jurisdictions"]["LA"]["unsupported_inputs"]["2024"] == [
         "itemized_deductions"
     ]
+
+
+def test_browser_ui_uses_the_public_calculation_boundary():
+    """The DOM layer must not regress to form-node bindings or silent zeros."""
+    app_source = APP_PATH.read_text()
+    calculator_source = CALCULATOR_PATH.read_text()
+
+    assert not re.search(r"\bus_[a-z0-9_]+", app_source)
+    assert not re.search(r"\bus_[a-z0-9_]+", calculator_source)
+    assert "BrowserTaxRuntime" in calculator_source
+    assert "safeEval" not in app_source
+    assert "safeGradient" not in app_source
 
 
 @pytest.mark.parametrize("case", CONTRACT["parity_cases"], ids=lambda case: case["id"])

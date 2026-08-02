@@ -58,11 +58,12 @@ jobs:
         cp crates/tenforty-graph/demo/app.js target/pages/
         cp crates/tenforty-graph/demo/browser_contract.js target/pages/
         cp crates/tenforty-graph/demo/browser_contract.json target/pages/
+        cp crates/tenforty-graph/demo/calculator.js target/pages/
         cp crates/tenforty-graph/demo/style.css target/pages/
         cp -R crates/tenforty-graph/pkg target/pages/pkg
         cp src/tenforty/forms/us_tax_graph_*.json target/pages/forms/
 
-    - name: Smoke-test WASM tax engine and graphs
+    - name: Smoke-test browser calculator contract
       run: node scripts/smoke_wasm_demo.mjs target/pages
 
     - name: Setup Pages
@@ -93,13 +94,13 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v5
 
-    - name: Smoke-test deployed WASM tax engine and graphs
+    - name: Smoke-test deployed browser calculator
       env:
         PAGE_URL: ${{ steps.deployment.outputs.page_url }}
       run: |
         smoke_dir=$(mktemp -d)
         mkdir -p "$smoke_dir/pkg" "$smoke_dir/forms"
-        for asset in index.html app.js browser_contract.js browser_contract.json style.css pkg/graphlib.js pkg/graphlib_bg.wasm forms/us_tax_graph_2024.json forms/us_tax_graph_2025.json; do
+        for asset in index.html app.js browser_contract.js browser_contract.json calculator.js style.css pkg/graphlib.js pkg/graphlib_bg.wasm forms/us_tax_graph_2024.json forms/us_tax_graph_2025.json; do
           curl --fail --location --retry 12 --retry-all-errors --retry-delay 5 \
             "${PAGE_URL%/}/$asset" --output "$smoke_dir/$asset"
         done
