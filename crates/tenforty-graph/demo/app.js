@@ -176,6 +176,12 @@ function createInputField(name) {
 }
 
 function populateInterface() {
+  const calculatorForm = byId("calculator-form");
+  calculatorForm.insertBefore(
+    byId("analysis-lab"),
+    calculatorForm.querySelector(".results-column"),
+  );
+
   const yearSelect = byId("tax-year");
   for (const year of [...contract.supported_years].reverse()) {
     const option = document.createElement("option");
@@ -742,6 +748,7 @@ function bindEvents() {
   }
 
   byId("curve-input").addEventListener("change", (event) => {
+    event.stopPropagation();
     selectedCurveInput = event.target.value;
     scheduleCalculation();
   });

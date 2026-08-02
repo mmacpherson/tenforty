@@ -143,6 +143,9 @@ a {
 }
 
 main {
+  display: grid;
+  grid-template-columns: minmax(20rem, 0.62fr) minmax(0, 1.38fr);
+  gap: 1.3rem;
   max-width: 1280px;
   margin: 0 auto;
   padding: 4.5rem 2rem 6rem;
@@ -150,6 +153,8 @@ main {
 
 .intro {
   display: grid;
+  grid-column: 1 / -1;
+  grid-row: 1;
   grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr);
   grid-template-areas:
     "eyebrow copy"
@@ -194,6 +199,8 @@ main {
 
 .scenario-bar {
   display: grid;
+  grid-column: 1 / -1;
+  grid-row: 2;
   grid-template-columns: 0.72fr 1.28fr;
   gap: 2rem;
   align-items: end;
@@ -296,6 +303,12 @@ a:focus-visible {
   color: #702921;
 }
 
+main > .error-banner {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 0;
+}
+
 .error-banner p {
   margin: 0.2rem 0 0;
   font-size: 0.86rem;
@@ -313,7 +326,12 @@ a:focus-visible {
   display: grid;
   grid-template-columns: minmax(18rem, 0.68fr) minmax(26rem, 1.32fr);
   gap: 0;
-  margin-top: 1.3rem;
+  position: sticky;
+  top: 1rem;
+  grid-column: 2;
+  grid-row: 4 / span 4;
+  align-self: start;
+  margin-top: 0;
   overflow: hidden;
   background: var(--analysis);
   color: white;
@@ -659,11 +677,7 @@ button.sensitivity-item:hover {
 }
 
 .calculator-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.72fr);
-  gap: 1.3rem;
-  align-items: start;
-  margin-top: 1.3rem;
+  display: contents;
 }
 
 .input-card,
@@ -676,6 +690,22 @@ button.sensitivity-item:hover {
 .input-card {
   grid-column: 1;
   padding: 1.7rem;
+}
+
+#income-card {
+  grid-row: 4;
+}
+
+#other-income-card {
+  grid-row: 5;
+}
+
+#deductions-card {
+  grid-row: 6;
+}
+
+#advanced-card {
+  grid-row: 7;
 }
 
 .card-heading {
@@ -876,12 +906,16 @@ button.sensitivity-item:hover {
 }
 
 .results-column {
-  position: sticky;
-  top: 1rem;
+  position: static;
   display: grid;
-  grid-column: 2;
-  grid-row: 1 / span 4;
+  grid-column: 1 / -1;
+  grid-row: 8;
+  grid-template-columns: minmax(20rem, 0.62fr) minmax(0, 1.38fr);
   gap: 1rem;
+}
+
+.results-column .scope-note {
+  grid-column: 1 / -1;
 }
 
 .results-hero {
@@ -1249,6 +1283,10 @@ button.sensitivity-item:hover {
 }
 
 @media (max-width: 980px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
   .intro {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -1263,6 +1301,9 @@ button.sensitivity-item:hover {
   }
 
   .analysis-lab {
+    position: static;
+    grid-column: 1;
+    grid-row: 8;
     grid-template-columns: 1fr;
   }
 
@@ -1271,14 +1312,11 @@ button.sensitivity-item:hover {
     border-bottom: 1px solid var(--analysis-line);
   }
 
-  .calculator-grid {
-    grid-template-columns: 1fr;
-  }
-
   .results-column {
     position: static;
     grid-column: 1;
-    grid-row: auto;
+    grid-row: 9;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1352,18 +1390,6 @@ button.sensitivity-item:hover {
   .scenario-controls,
   .field-grid {
     grid-template-columns: 1fr;
-  }
-
-  .calculator-grid > :first-child {
-    order: 1;
-  }
-
-  .results-column {
-    order: 2;
-  }
-
-  .calculator-grid > .input-card:not(:first-child) {
-    order: 3;
   }
 
   .input-field.full-width {
