@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "1838fcac2c16ecf54abc45a843070d793f3cc47e65f45daaf585db27b9e566f2"
+        "sha256": "f1810541d5ea00730777d19b363c821ac4add702f0930ea76d5160b31e74ca8f"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "107afb2349cb0a37e16f8b4c601f43cc29f0820ffd242afa900458183c17995b"
+        "sha256": "c92bc6a1d41d01add5156177dccaa0fe6dd790e16634115e94a0d73bbd9659f5"
       }
     }
   },
@@ -28,6 +28,18 @@
     "qualifying_widow": "Qualifying surviving spouse"
   },
   "inputs": {
+    "standard_or_itemized": {
+      "label": "Deduction choice",
+      "description": "Choose deductions automatically or force the supplied itemized amount.",
+      "type": "choice",
+      "choices": ["Standard", "Itemized"],
+      "encoding": {
+        "Standard": 0,
+        "Itemized": 1
+      },
+      "default": "Standard",
+      "federal_nodes": ["us_1040_ForceItemized"]
+    },
     "w2_income": {
       "label": "Wages and salary",
       "description": "Household Form W-2 wages.",
@@ -115,7 +127,7 @@
     },
     "itemized_deductions": {
       "label": "Itemized deductions",
-      "description": "Aggregate Schedule A deductions; automatic best-of only.",
+      "description": "Aggregate Schedule A deductions used as the automatic candidate or forced amount.",
       "type": "money",
       "allows_negative": false,
       "default": 0,
@@ -1576,11 +1588,6 @@
       "summary": "Only tax years 2024 and 2025 are supported by the browser contract."
     },
     {
-      "id": "deduction-choice",
-      "summary": "Itemized deductions use automatic best-of behavior; forcing a below-standard itemized deduction is not yet supported.",
-      "tracking": "tenforty-435"
-    },
-    {
       "id": "dependents-and-credits",
       "summary": "Dependent counts and dependent-related federal credits are outside the initial browser contract."
     },
@@ -1609,6 +1616,26 @@
         "federal_total_tax": 13841,
         "state_total_tax": 0,
         "total_tax": 13841
+      }
+    },
+    {
+      "id": "iowa-forced-itemization-2024",
+      "year": 2024,
+      "jurisdiction": "IA",
+      "filing_status": "single",
+      "inputs": {
+        "standard_or_itemized": "Itemized",
+        "w2_income": 100000,
+        "itemized_deductions": 10000
+      },
+      "expected": {
+        "federal_adjusted_gross_income": 100000,
+        "federal_taxable_income": 90000,
+        "federal_total_tax": 14853,
+        "state_adjusted_gross_income": 100000,
+        "state_taxable_income": 90000,
+        "state_total_tax": 4830.678,
+        "total_tax": 19683.678
       }
     },
     {

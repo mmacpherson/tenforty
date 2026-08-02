@@ -250,8 +250,8 @@ def _f19_deduction_choice_rule(
 def _f7_itemized_semantics(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
-    """F7: OTS forces itemization; taxcalc and graph take best-of."""
-    if backend != "ots" or case.get("std_or_item") != "Itemized":
+    """F7: tenforty can force itemization; taxcalc always takes best-of."""
+    if backend not in {"ots", "graph"} or case.get("std_or_item") != "Itemized":
         return {}
     std = STANDARD_DEDUCTION.get((case.get("year", 2024), case.get("status", "")))
     if std is None or case.get("itemized", 0) >= std or reference is None:

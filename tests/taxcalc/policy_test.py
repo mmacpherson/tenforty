@@ -249,8 +249,10 @@ def test_f7_bounds_the_qbi_cap_response_to_forced_itemization():
     }
 
     model = _f7_itemized_semantics("ots", case, reference)
+    graph_model = _f7_itemized_semantics("graph", case, reference)
 
     assert model["taxable_income"] == DeltaRange(25_200.0, 31_500.0)
+    assert graph_model == model
 
 
 def test_gains_tolerance_requires_a_material_worksheet_input():

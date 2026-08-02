@@ -1,7 +1,7 @@
 # Federal deduction-choice contract
 
-Status: accepted 2026-08-01. Graph implementation is tracked by
-`tenforty-435`; the input-model-v2 replacement is tracked by `tenforty-avr`.
+Status: accepted 2026-08-01 and implemented by `tenforty-435`. The
+input-model-v2 replacement is tracked by `tenforty-avr`.
 
 ## Decision
 

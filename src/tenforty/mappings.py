@@ -9,6 +9,7 @@ from .models import STATE_TO_FORM, OTSFilingStatus, OTSState, TaxReturnInput
 
 NATURAL_TO_NODE = {
     # Federal (1040)
+    "standard_or_itemized": "us_1040_ForceItemized",
     "w2_income": "us_1040_L1a_wages",
     "taxable_interest": "us_1040_L2b_taxable_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",

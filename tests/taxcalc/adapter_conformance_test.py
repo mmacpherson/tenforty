@@ -86,6 +86,14 @@ F26_ITEMIZED_AMT_FLOOR_CASE = {
     "iso": 300_000.0,
 }
 
+F7_FORCED_ITEMIZATION_CASE = {
+    **F14_CASE,
+    "w2": 100_000.0,
+    "itemized": 10_000.0,
+    "std_or_item": "Itemized",
+    "iso": 0.0,
+}
+
 
 def test_iso_reaches_taxcalc_as_amt_preference():
     """An ISO spread must produce AMT in taxcalc, not silence."""
@@ -141,6 +149,17 @@ def test_case_fields_all_reach_the_adapter():
         f"case fields the adapter ignores: {', '.join(inert)}. Either map them "
         f"in taxcalc_batch or add them to NOT_CARRIED with a reason."
     )
+
+
+@pytest.mark.xfail(
+    reason="F7: TaxCalc exposes no switch for forcing a below-standard itemized deduction",
+    strict=True,
+)
+def test_taxcalc_can_match_tenforty_forced_itemization():
+    """A future TaxCalc force switch should reproduce Form 1040 taxable income."""
+    result = taxcalc_batch([F7_FORCED_ITEMIZATION_CASE])[0]
+
+    assert result["taxable_income"] == pytest.approx(90_000.0, abs=0.01)
 
 
 @pytest.mark.xfail(

@@ -17,38 +17,20 @@ usForm6251_2025 = form "us_form_6251" 2025 $ do
   l1 <- interior "L1" "taxable_income" $ importForm us1040L15
 
   -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A taxes when
-  -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E): the
-  -- standard deduction is not allowed for AMT). Line 1 (1040 L15) already has
-  -- the deduction removed, so a non-itemizer must add the standard deduction
-  -- back into AMTI. The 1040 takes the greater of itemized and standard, so
-  -- "itemizing" is exactly the deduction taken exceeding the standard
-  -- deduction; in that case add back SALT, otherwise the standard deduction.
-  --
-  -- Coupling caveat: `stdDeduction` recomputes the BASE standard deduction,
-  -- but the 1040's actual deduction is base + the 65+/blind additional
-  -- standard deduction (US1040 `StdDed`), and `L12Final` = greaterOf(itemized,
-  -- that actual). These agree today only because the additional amount
-  -- (`AddStdDed` / `additional_std_ded`) has no API input mapping and is
-  -- always 0, so for a non-itemizer L12Final == base. If a future change wires
-  -- the additional standard deduction to an input, this breaks silently: a
-  -- 65+/blind non-itemizer gets itemizingExcess = additional > 0, takes the
-  -- SALT branch, and adds back salt_addback (0) instead of the standard
-  -- deduction — reintroducing F14. Fix then by comparing against the 1040's
-  -- actual standard deduction (promote US1040 `StdDed` to an output and import
-  -- it, or drive "itemizing?" off Schedule A line 17), not this base recompute.
+  -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E)). Import
+  -- the 1040's actual choice because a forced itemized deduction can be less
+  -- than the standard deduction. When the 1040 did not itemize, L12Final is
+  -- also the exact standard deduction it used, including any additions.
   l2aSalt <- keyInput "L2a" "salt_addback" "State and local taxes from Schedule A, line 5d"
-  stdDeduction <-
-    interior "std_deduction" "Standard deduction for this filing status" $
-      byStatusE (fmap lit standardDeduction2025)
   deductionTaken <-
-    interior "deduction_taken" "Deduction the 1040 used (greater of itemized and standard)" $
+    interior "deduction_taken" "Deduction the 1040 used" $
       importForm us1040L12final
-  itemizingExcess <-
-    interior "amt_itemizing_excess" "By how much the 1040 deduction exceeds the standard deduction" $
-      deductionTaken `subtractNotBelowZero` stdDeduction
+  usesItemized <-
+    interior "uses_itemized" "Whether the 1040 used Schedule A" $
+      importForm us1040UsesItemized
   l2a <-
     interior "L2a_taxes_addback" "Taxes added back to AMTI" $
-      ifPos itemizingExcess l2aSalt stdDeduction
+      ifPos usesItemized l2aSalt deductionTaken
 
   -- Line 2b: Medical expenses adjustment (difference between 7.5% and AMT floor)
   l2b <- keyInput "L2b" "medical_adjustment" "Medical expense adjustment"

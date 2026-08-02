@@ -23,7 +23,7 @@ signature, and update this table in the same PR.
 | F4 | Form 8960 L5a omits short-term gains | mapping, both backends | fixed (OTS #296, graph: L5a imports Schedule D L16) | mapping assessment + differential sweep |
 | F5 | Graph Form 8959 Part II drops SE earnings (line 12 used min, not subtract) | graph spec | fixed | mapping assessment + differential sweep |
 | F6 | OTS 8959 never fires with zero wages | OTS activation semantics | fixed | differential sweep |
-| F7 | "Itemized" force vs best-of divergence | graph backend | contract decided; implementation pending (`tenforty-435`) | differential sweep |
+| F7 | TaxCalc cannot express forced below-standard itemization | TaxCalc capability gap | tenforty fixed (`tenforty-435`); TaxCalc gap open | differential sweep |
 | F8 | Cross-mode batch grid explosion | graph batch path | fix in PR #287 | benchmark |
 | F9 | Batch path bypasses TaxReturnInput | graph batch path | fixed (tenforty-tve) | batch-conformance tests |
 | F10 | Short-term gains taxed at preferential rates (QCGWS line 3) | graph spec | fixed | differential grid |
@@ -409,22 +409,22 @@ NIIT, self-employment-tax, and Additional-Medicare bucketing. It retains raw
 both the one-record and multi-record cases. No policy signature excuses the
 difference.
 
-### F7. Itemization semantics diverge between backends
+### F7. TaxCalc cannot express forced below-standard itemization
 
 With `standard_or_itemized="Itemized"` and deductions below the standard
-deduction, OTS *forces* itemization (higher tax) while graph takes
-best-of-both (agreeing with taxcalc, which cannot force). With deductions
-above the standard deduction all three agree. The API contract for
-"Itemized" is currently implemented two different ways.
+deduction, both tenforty backends force itemization. TaxCalc always chooses
+between the available deductions and exposes no equivalent force switch, so
+the differential retains a bounded F7 delta for both backends. With deductions
+above the standard deduction all three agree.
 
 **Decision (`tenforty-ddj`, 2026-08-01):** preserve the historical default
 without discarding a required tax election. Legacy `"Standard"` remains the
 automatic greater-of mode; `"Itemized"` forces federal itemization even when
 the supplied amount is smaller or zero. Forced itemization is necessary for,
 among other cases, a married-filing-separately filer whose spouse itemizes and
-who is therefore ineligible for the standard deduction. The graph backend is
-the nonconforming implementation; `tenforty-435` owns the fix. Input model v2
-will replace the misleading legacy field with an explicit
+who is therefore ineligible for the standard deduction. The graph backend was
+brought into conformance by `tenforty-435`. Input model v2 will replace the
+misleading legacy field with an explicit
 `Auto / Standard / Itemized` choice. See
 [`docs/deduction-choice-contract.md`](deduction-choice-contract.md).
 
@@ -456,8 +456,8 @@ bugs are batch-path defects this scalar harness deliberately did not probe.
 4. **API decisions**:
    - per-spouse wage/SE fields (completes F1 for MFJ; taxcalc's
      `e00200p`/`e00200s` is a working reference);
-   - **decided:** legacy `"Standard"` is automatic greater-of and
-     `"Itemized"` forces itemization; make graph conform (F7, `tenforty-435`);
+   - **implemented:** legacy `"Standard"` is automatic greater-of and
+     `"Itemized"` forces itemization in both backends (F7, `tenforty-435`);
 5. **Keep the reference**: promote the harness to `scripts/`, commit a pinned
    golden fixture set at the semantic boundaries, and run the three-way sweep
    as a scheduled/pre-release job. Parity catches divergence; only an
