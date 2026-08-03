@@ -25,7 +25,7 @@ jobs:
       # its `with-compiler` line (see AGENTS.md — the tool ceiling sets it).
     - name: Set up GHC + cabal
       id: setup
-      uses: haskell-actions/setup@v2
+      uses: haskell-actions/setup@v2.11.0
       with:
         ghc-version: 9.12.4
         cabal-version: latest
