@@ -8,12 +8,32 @@ const siteDirectory = path.resolve(process.argv[2] ?? "target/pages");
 const modulePath = path.join(siteDirectory, "pkg", "graphlib.js");
 const wasmPath = path.join(siteDirectory, "pkg", "graphlib_bg.wasm");
 const contractModulePath = path.join(siteDirectory, "browser_contract.js");
+const calculatorModulePath = path.join(siteDirectory, "calculator.js");
 const contractPath = path.join(siteDirectory, "browser_contract.json");
 const graphlib = await import(pathToFileURL(modulePath));
-const { BrowserContractError, BrowserTaxRuntime, validateBrowserContract } =
+const { BrowserContractError, validateBrowserContract } =
   await import(pathToFileURL(contractModulePath));
+const {
+  INPUT_GROUPS,
+  calculateScenario,
+  parseScenario,
+  scenarioFromParityCase,
+  serializeScenario,
+} = await import(pathToFileURL(calculatorModulePath));
 await graphlib.default({ module_or_path: await readFile(wasmPath) });
 const contract = JSON.parse(await readFile(contractPath, "utf8"));
+const visibleInputs = Object.values(INPUT_GROUPS).flat();
+
+assert.deepEqual(
+  new Set(visibleInputs),
+  new Set(Object.keys(contract.inputs)),
+  "calculator must expose every contracted browser input",
+);
+assert.equal(
+  visibleInputs.length,
+  new Set(visibleInputs).size,
+  "calculator must expose each browser input exactly once",
+);
 
 const graphs = new Map();
 
@@ -32,18 +52,22 @@ for (const year of contract.supported_years) {
 }
 
 for (const testCase of contract.parity_cases) {
-  const calculator = new BrowserTaxRuntime(
+  const scenario = scenarioFromParityCase(contract, testCase);
+  const sharedScenario = parseScenario(
+    contract,
+    `#${serializeScenario(contract, scenario)}`,
+  );
+  assert.deepEqual(
+    sharedScenario,
+    scenario,
+    `${testCase.id}: share URL changed the scenario`,
+  );
+  const actual = calculateScenario(
     graphlib,
     graphs.get(testCase.year),
     contract,
-    {
-      year: testCase.year,
-      jurisdiction: testCase.jurisdiction,
-      filingStatus: testCase.filing_status,
-    },
+    sharedScenario,
   );
-  calculator.setInputs(testCase.inputs);
-  const actual = calculator.evaluate();
 
   for (const [name, expected] of Object.entries(testCase.expected)) {
     assert.ok(

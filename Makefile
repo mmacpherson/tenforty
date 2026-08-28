@@ -144,6 +144,7 @@ wasm-serve: wasm-dev ## Serve the current Pages artifact locally
 	cp crates/tenforty-graph/demo/app.js target/pages-dev/
 	cp crates/tenforty-graph/demo/browser_contract.js target/pages-dev/
 	cp crates/tenforty-graph/demo/browser_contract.json target/pages-dev/
+	cp crates/tenforty-graph/demo/calculator.js target/pages-dev/
 	cp crates/tenforty-graph/demo/style.css target/pages-dev/
 	cp -R crates/tenforty-graph/pkg target/pages-dev/pkg
 	cp src/tenforty/forms/us_tax_graph_*.json target/pages-dev/forms/
