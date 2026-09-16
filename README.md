@@ -55,7 +55,16 @@ Known limitations of this package are detailed in the
 
 ## Installation
 
-Requires Python 3.10+.
+Python 3.10–3.14 is supported on Linux and macOS. Python 3.15 is experimental:
+CI builds and installs a wheel on both platforms, requires both the OTS and
+Rust graph backends, and runs the standard test suite. These checks cover the
+regular CPython build, not the free-threaded build or optional notebook and
+Tax-Calculator dependencies.
+
+Use Python 3.10–3.14 for supported installations. Prebuilt Python 3.15 wheels
+are not published yet; testing 3.15 from source requires a C++ compiler and Rust,
+and dependencies may also need to compile from source. Full 3.15 support will
+be reconsidered after the final Python release and wheel validation.
 
 ```sh
 pip install tenforty
