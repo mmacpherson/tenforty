@@ -636,90 +636,397 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== VERMONT SCENARIOS ==========
-    # VT 2024 & 2025: 4-bracket progressive system (3.35%, 6.6%, 7.6%, 8.75%)
-    # Brackets vary by filing status.
-    # Standard deduction: Single/MFS $7,400, MFJ/QW $14,850, HoH $11,100
-    # VT imports federal AGI and allows additions/subtractions.
+    # VT IN-111 starts from federal AGI (Line 1), subtracts VT's own standard
+    # deduction (Line 4) and personal exemptions (Line 5e: $5,300 each for 2025,
+    # $5,100 for 2024), then taxes Line 7 from the $100-band tax tables below
+    # $75,000 or the rate schedules above it (IN-111 instructions pp.6-7, p.13).
+    # W-2 only, under 65, not blind, no dependents: AGI = wages, IN-112 mods = 0.
     #
-    # VT Single, $50,000 W2 (2024) - first bracket only
-    # Federal: AGI=$50k, Std Ded=$14,600, Taxable=$35,400, Tax=$4,016 (tax table)
-    # VT: AGI=$50k, Std Ded=$7,400, Taxable=$42,600
-    # VT tax: $42,600 * 0.0335 = $1,427.10 (all in first bracket, under $47,900)
+    # Every expected value below was derived blind, session 1b251ce6, from the
+    # VT Department of Taxes PDFs retrieved 2026-09-30:
+    #   2025: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf
+    #   2024: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf
+    # They are strict known failures: the graph omits the Line 5e personal
+    # exemption, and it prices Line 7 with the exact bracket formula where VT
+    # prescribes the tax table (midpoint of a $100 band) or a rounded published
+    # base tax, a residual of a few dollars ($3.70 observed; tenforty-xew precision contract).
+    #
+    # VT Single, $30,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.15, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 7,650 std - 5,300 exemptions = 17,050
+    # VT tax: row 17,000-17,100 -> $571
     TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT Single, $50,000 W2",
-        year=2024,
-        state="VT",
-        filing_status="Single",
-        w2_income=50000.0,
-        expected_federal_tax=4016.0,
-        expected_state_tax=1427.10,
-        expected_federal_agi=50000.0,
-        backend="graph",
-    ),
-    # VT MFJ, $80,000 W2 (2024) - first bracket only
-    # Federal: AGI=$80k, Std Ded=$29,200, Taxable=$50,800, Tax=$5,632 (tax table)
-    # VT: AGI=$80k, Std Ded=$14,850, Taxable=$65,150
-    # VT tax: $65,150 * 0.0335 = $2,182.53 (all in first bracket, under $79,950)
-    TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT MFJ, $80,000 W2",
-        year=2024,
-        state="VT",
-        filing_status="Married/Joint",
-        w2_income=80000.0,
-        expected_federal_tax=5632.0,
-        expected_state_tax=2182.53,
-        expected_federal_agi=80000.0,
-        backend="graph",
-    ),
-    # VT HoH, $60,000 W2 (2024) - first bracket only
-    # Federal: AGI=$60k, Std Ded=$21,900, Taxable=$38,100, Tax=$4,241 (tax table)
-    # VT: AGI=$60k, Std Ded=$11,100, Taxable=$48,900
-    # VT tax: $48,900 * 0.0335 = $1,638.15 (all in first bracket, under $64,200)
-    TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT HoH, $60,000 W2",
-        year=2024,
-        state="VT",
-        filing_status="Head_of_House",
-        w2_income=60000.0,
-        expected_federal_tax=4241.0,
-        expected_state_tax=1638.15,
-        expected_federal_agi=60000.0,
-        backend="graph",
-    ),
-    # VT Single, $70,000 W2 (2024) - crosses into second bracket
-    # Federal: AGI=$70k, Std Ded=$14,600, Taxable=$55,400, Tax=$7,241 (tax table)
-    # VT: AGI=$70k, Std Ded=$7,400, Taxable=$62,600
-    # VT tax: $47,900 * 0.0335 + ($62,600 - $47,900) * 0.066
-    #       = $1,604.65 + $970.20 = $2,574.85
-    TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT Single, $70,000 W2 (second bracket)",
-        year=2024,
-        state="VT",
-        filing_status="Single",
-        w2_income=70000.0,
-        expected_federal_tax=7241.0,
-        expected_state_tax=2574.85,
-        expected_federal_agi=70000.0,
-        backend="graph",
-    ),
-    # VT Single, $55,000 W2 (2025) - test 2025 (brackets/deductions unchanged)
-    # Federal: AGI=$55k, Std Ded=$15,000 (2025), Taxable=$40,000, Tax=$4,561.50 (tax table)
-    # VT: AGI=$55k, Std Ded=$7,400 (unchanged), Taxable=$47,600
-    # VT tax: $47,600 * 0.0335 = $1,594.60 (all in first bracket)
-    TaxScenario(
-        source="VT 2025 Tax Rate Schedules (computed)",
-        description="VT Single, $55,000 W2 (2025)",
+        source="VT 2025 IN-111 instructions p.15 (tax-table)",
+        description="VT Single, $30,000 W2 (2025)",
         year=2025,
         state="VT",
         filing_status="Single",
-        w2_income=55000.0,
-        expected_federal_tax=4471.5,
-        expected_state_tax=1594.60,
-        expected_federal_agi=55000.0,
+        w2_income=30000.0,
+        expected_state_tax=571.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 22,350 vs official 17,050; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $90,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 7,650 std - 5,300 exemptions = 77,050
+    # VT tax: Schedule X: 3,345 + 6.6% x (77,050 - 75,000) = 3,480.30 -> $3,480
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13 (derived-arithmetic)",
+        description="VT Single, $90,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=90000.0,
+        expected_state_tax=3480.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 82,350 vs official 77,050; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $300,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 7,650 std - 5,300 exemptions = 287,050
+    # VT tax: Schedule X: 16,175 + 8.75% x (287,050 - 249,700) = 19,443.13; 3% x AGI = 9,000 does not bind -> $19,443
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT Single, $300,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=300000.0,
+        expected_state_tax=19443.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 292,350 vs official 287,050; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $30,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 15,300 std - 10,600 exemptions = 4,100
+    # VT tax: row 4,100-4,200 -> $139
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        description="VT MFJ, $30,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        expected_state_tax=139.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
+            "VT TI 14,700 vs official 4,100; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $90,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 15,300 std - 10,600 exemptions = 64,100
+    # VT tax: row 64,100-64,200 -> $2,149
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.18 (tax-table)",
+        description="VT MFJ, $90,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        expected_state_tax=2149.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
+            "VT TI 74,700 vs official 64,100; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $300,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 15,300 std - 10,600 exemptions = 274,100
+    # VT tax: Schedule Y-1: 10,482 + 7.6% x (274,100 - 199,450) = 16,155.40; 3% x AGI = 9,000 does not bind -> $16,155
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT MFJ, $300,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=300000.0,
+        expected_state_tax=16155.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
+            "VT TI 284,700 vs official 274,100; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $30,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 11,450 std - 5,300 exemptions = 13,250
+    # VT tax: row 13,200-13,300 -> $444
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        description="VT HoH, $30,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=30000.0,
+        expected_state_tax=444.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 18,550 vs official 13,250; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $90,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 11,450 std - 5,300 exemptions = 73,250
+    # VT tax: row 73,200-73,300 -> $2,683
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.18 (tax-table)",
+        description="VT HoH, $90,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=90000.0,
+        expected_state_tax=2683.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 78,550 vs official 73,250; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $300,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 11,450 std - 5,300 exemptions = 283,250
+    # VT tax: Schedule Z: 17,179 + 8.75% x (283,250 - 276,850) = 17,739.00; 3% x AGI = 9,000 does not bind -> $17,739
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT HoH, $300,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=300000.0,
+        expected_state_tax=17739.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 288,550 vs official 283,250; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $30,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.15, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 7,400 std - 5,100 exemptions = 17,500
+    # VT tax: row 17,500-17,600 -> $588
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.15 (tax-table)",
+        description="VT Single, $30,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_state_tax=588.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 22,600 vs official 17,500; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $90,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 7,400 std - 5,100 exemptions = 77,500
+    # VT tax: Schedule X: 3,393 + 6.6% x (77,500 - 75,000) = 3,558.00 -> $3,558
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13 (derived-arithmetic)",
+        description="VT Single, $90,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=90000.0,
+        expected_state_tax=3558.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 82,600 vs official 77,500; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $300,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 7,400 std - 5,100 exemptions = 287,500
+    # VT tax: Schedule X: 15,675 + 8.75% x (287,500 - 242,000) = 19,656.25; 3% x AGI = 9,000 does not bind -> $19,656
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT Single, $300,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=300000.0,
+        expected_state_tax=19656.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 292,600 vs official 287,500; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $30,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 14,850 std - 10,200 exemptions = 4,950
+    # VT tax: row 4,900-5,000 -> $166
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        description="VT MFJ, $30,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        expected_state_tax=166.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
+            "VT TI 15,150 vs official 4,950; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $90,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 14,850 std - 10,200 exemptions = 64,950
+    # VT tax: row 64,900-65,000 -> $2,176
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.18 (tax-table)",
+        description="VT MFJ, $90,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        expected_state_tax=2176.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
+            "VT TI 75,150 vs official 64,950; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $300,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 14,850 std - 10,200 exemptions = 274,950
+    # VT tax: Schedule Y-1: 10,159 + 7.6% x (274,950 - 193,300) = 16,364.40; 3% x AGI = 9,000 does not bind -> $16,364
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT MFJ, $300,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=300000.0,
+        expected_state_tax=16364.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
+            "VT TI 285,150 vs official 274,950; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $30,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 11,100 std - 5,100 exemptions = 13,800
+    # VT tax: row 13,800-13,900 -> $464
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        description="VT HoH, $30,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=30000.0,
+        expected_state_tax=464.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 18,900 vs official 13,800; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $90,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 11,100 std - 5,100 exemptions = 73,800
+    # VT tax: row 73,800-73,900 -> $2,788
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.18 (tax-table)",
+        description="VT HoH, $90,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=90000.0,
+        expected_state_tax=2788.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 78,900 vs official 73,800; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $300,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 11,100 std - 5,100 exemptions = 283,800
+    # VT tax: Schedule Z: 16,647 + 8.75% x (283,800 - 268,300) = 18,003.25; 3% x AGI = 9,000 does not bind -> $18,003
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT HoH, $300,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=300000.0,
+        expected_state_tax=18003.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 288,900 vs official 283,800; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
         backend="graph",
     ),
     # ========== DELAWARE SCENARIOS ==========
