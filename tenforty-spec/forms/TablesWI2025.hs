@@ -6,10 +6,11 @@ module TablesWI2025
     -- * Standard Deduction (sliding scale)
     wiStandardDeductionMax2025,
     wiStandardDeductionPhaseoutStart2025,
-    wiStandardDeductionPhaseoutEnd2025,
+    wiStandardDeductionPhaseoutRate2025,
 
     -- * Personal Exemptions
-    wiPersonalExemption2025,
+    wiFilerExemptions2025,
+    wiDependentExemption2025,
     wiAgeExemption2025,
 
     -- * Retirement Income Exclusion (new in 2025)
@@ -24,17 +25,23 @@ import TenForty.Types
 
 -- | 2025 Wisconsin State income tax brackets
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Wisconsin DOR, 2025 Wisconsin Act 15 (effective for tax year 2025)
--- Note: 2025 Wisconsin Act 15 expanded the 4.4% bracket significantly:
---  - Single/HoH: 4.4% bracket now ends at $50,480 (was $28,640 in 2024)
---  - MFJ: 4.4% bracket now ends at $67,300 (was $38,190 in 2024)
---  - MFS: 4.4% bracket now ends at $33,650 (was $19,095 in 2024)
--- The 3.5%, 5.3%, and 7.65% bracket thresholds remain unchanged from 2024.
+-- Source: Wisconsin DOR FAQ "What are the individual income tax rates?"
+-- (https://revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) and DOR "Wisconsin Tax
+-- Update - Fall 2025" slide 7; reconciles with the 2025 Form 1 Instructions
+-- p. 44 Tax Computation Worksheet. Retrieved 2026-09-30.
+-- Head of household uses the Single schedule (Form 1 Instructions p. 38 tax
+-- table column "Single or Head of household"; p. 44 worksheet section A).
+-- Wisconsin has no qualifying-surviving-spouse status: a federal QSS "may file
+-- your Wisconsin return as head of household" (Form 1 Instructions, Filing
+-- Status), so QW takes the head-of-household brackets, standard deduction and
+-- exemptions.
+-- 2025 Wisconsin Act 15 widened the 4.4% bracket; every threshold was also
+-- indexed from 2024.
 wisconsinBrackets2025 :: NonEmpty Bracket
 wisconsinBrackets2025 =
-  Bracket (byStatus 14320 19090 9545 14320 19090) 0.035
-    :| [ Bracket (byStatus 50480 67300 33650 50480 67300) 0.044,
-         Bracket (byStatus 315310 420420 210210 315310 420420) 0.053,
+  Bracket (byStatus 14680 19580 9790 14680 14680) 0.035
+    :| [ Bracket (byStatus 50480 67300 33650 50480 50480) 0.044,
+         Bracket (byStatus 323290 431060 215530 323290 323290) 0.053,
          Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0765
        ]
 
@@ -44,40 +51,52 @@ wisconsinBracketsTable2025 =
     Right bt -> TableBracket "wi_brackets_2025" bt
     Left err -> error $ "Invalid Wisconsin brackets: " ++ err
 
--- | 2025 Wisconsin State maximum standard deduction amounts
+-- | 2025 Wisconsin sliding-scale standard deduction, Wis. Stat. 71.05(22)(dp):
+-- the maximum, less the phase-down rate times Wisconsin income over the
+-- phase-out start, but not less than zero. Head of household never falls below
+-- the Single amount at the same income (71.05(22)(dp)1.).
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Wisconsin DOR Form 1 Instructions (2025)
--- Note: Values will be inflation-adjusted from 2024; using estimated values
--- based on typical inflation adjustments. Official values TBD.
--- For implementation purposes, using 2024 values as conservative estimate.
+-- Statute: https://docs.legis.wisconsin.gov/statutes/statutes/71/i/05/22
+--   (dp)1. base amounts: Single $7,200 over $10,380 at 12%; HoH $9,300 over
+--   $10,380 at 22.515%. (dp)2. base amounts (2015 base year): MFJ $19,010 over
+--   $21,360 and MFS $9,030 over $10,140, both at 19.778%. (dt) indexes every
+--   dollar amount by August CPI-U and rounds to the nearest $10.
+-- Indexed 2025 amounts: Wisconsin Legislative Fiscal Bureau,
+-- Paper #325 to the Joint Committee on Finance, "Overview of Broad-Based General
+-- Fund Tax Reductions" (2025-27 budget), Table 1 "Current Law Sliding Scale
+-- Standard Deduction, Tax Year 2025", mirrored at
+-- https://taxsim.nber.org/historical_state_tax_forms/WI/2025/325%20-%20General%20Fund%20Taxes%20--%20Income%20and%20Franchise%20Taxes_Overview%20of%20Broad-Based%20General%20Fund%20Tax%20Reductions.pdf
+-- (retrieved 2026-09-30). The maxima match the 2025 Form 1 Instructions p. 35,
+-- https://www.revenue.wi.gov/TaxForms2025/2025-Form1-Inst.pdf
+-- The DOR Standard Deduction Table (Form 1 Instructions pp. 35-37) prices this
+-- formula at the midpoint of $500 income bands; the graph computes the exact
+-- statutory formula instead.
 wiStandardDeductionMax2025 :: ByStatus (Amount Dollars)
-wiStandardDeductionMax2025 = byStatus 9930 17880 8490 12820 17880
+wiStandardDeductionMax2025 = byStatus 13560 25110 11930 17520 17520
 
--- | 2025 Wisconsin standard deduction phase-out start (income levels)
--- Order: Single, MFJ, MFS, HoH, QW
--- Source: Wisconsin DOR Form 1 Instructions (2025)
--- Note: Using 2024 values as conservative estimate pending official publication.
 wiStandardDeductionPhaseoutStart2025 :: ByStatus (Amount Dollars)
-wiStandardDeductionPhaseoutStart2025 = byStatus 14310 20090 9540 14310 20090
+wiStandardDeductionPhaseoutStart2025 = byStatus 19550 28210 13390 19550 19550
 
--- | 2025 Wisconsin standard deduction phase-out end (income levels)
+-- | Statutory phase-down rates, Wis. Stat. 71.05(22)(dp) (not indexed).
+wiStandardDeductionPhaseoutRate2025 :: ByStatus (Amount Rate)
+wiStandardDeductionPhaseoutRate2025 = byStatus 0.12 0.19778 0.19778 0.22515 0.22515
+
+-- | 2025 Wisconsin personal exemptions for the filer (and spouse on a joint
+-- return), Form 1 line 10a: $700 each. Wis. Stat. 71.05(23)(b)1. denies the
+-- spouse exemption when filing separately or as head of household.
+-- Assumes no filer can be claimed as someone else's dependent (the API has no
+-- such input); a claimable filer would get $0 here.
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Wisconsin DOR Form 1 Instructions (2025)
--- Note: Using 2024 values as conservative estimate pending official publication.
-wiStandardDeductionPhaseoutEnd2025 :: ByStatus (Amount Dollars)
-wiStandardDeductionPhaseoutEnd2025 = byStatus 97060 110493 52466 97060 110493
+wiFilerExemptions2025 :: ByStatus (Amount Dollars)
+wiFilerExemptions2025 = byStatus 700 1400 700 700 700
 
--- | 2025 Wisconsin personal exemption amount
--- Source: Wisconsin DOR Form 1 Instructions (2025)
--- Note: $700 per taxpayer, spouse (if MFJ), and each dependent.
--- Unchanged from 2024.
-wiPersonalExemption2025 :: Amount Dollars
-wiPersonalExemption2025 = 700
+-- | 2025 Wisconsin exemption per dependent, Form 1 line 10a; Wis. Stat.
+-- 71.05(23)(b)2.
+wiDependentExemption2025 :: Amount Dollars
+wiDependentExemption2025 = 700
 
--- | 2025 Wisconsin age exemption (65+)
--- Source: Wisconsin DOR Form 1 Instructions (2025)
--- Note: Additional $250 per taxpayer/spouse age 65 or older.
--- Unchanged from 2024.
+-- | 2025 Wisconsin age exemption (65+), Form 1 line 10b; Wis. Stat.
+-- 71.05(23)(b)3. Not applied: the API carries no age input.
 wiAgeExemption2025 :: Amount Dollars
 wiAgeExemption2025 = 250
 

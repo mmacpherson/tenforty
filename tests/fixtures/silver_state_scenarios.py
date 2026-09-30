@@ -2,6 +2,25 @@
 
 from .tax_scenario import TaxScenario
 
+
+def _wi_band_tolerance(
+    marginal_rate: float, sd_phase_rate: float = 0.0, *, tax_table: bool
+) -> float:
+    """Bound on |official WI Form 1 table value - exact statutory formula|.
+
+    The Standard Deduction Table prices the Wis. Stat. 71.05(22) formula at the
+    midpoint of a $500 band of line 7 income, so line 8 can differ from the exact
+    formula by up to $250 times the phase-down rate. Below $100k of TI the Tax
+    Table prices tax at the midpoint of a $100 band, up to $50 of TI. Both reach
+    tax at the marginal rate, and line 12 is rounded to whole dollars.
+
+    This bounds the WI scenarios below, each of which sits inside one bracket and
+    one phase-out segment across both bands. It is not a general bound: a band
+    straddling a rate or phase-out kink can exceed it.
+    """
+    return 0.50 + marginal_rate * (250.0 * sd_phase_rate + (50.0 if tax_table else 0.0))
+
+
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
 SILVER_STANDARD_STATE_SCENARIOS = [
     # ========== ALABAMA SCENARIOS ==========
@@ -1292,165 +1311,397 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== WISCONSIN SCENARIOS ==========
-    # WI 2024 Single: Standard deduction max $9,930 (sliding scale)
-    # Brackets: 3.5% ($0-$14,320), 4.4% ($14,320-$28,640),
-    #           5.3% ($28,640-$315,310), 7.65% ($315,310+)
-    # Exemptions: $700 per person + $250 if 65+
-    # WI 2024 MFJ: Standard deduction max $17,880 (sliding scale)
-    # Brackets: 3.5% ($0-$19,090), 4.4% ($19,090-$38,190),
-    #           5.3% ($38,190-$420,420), 7.65% ($420,420+)
-    #
-    # WI Single in 3.5%/4.4% bracket
-    # Federal AGI: $20,000, WI AGI: $20,000 (no additions/subtractions)
-    # Note: Std deduction and exemptions are 0 (not mapped in graph backend)
-    # WI taxable: $20,000
-    # WI tax: $14,320 x 0.035 + ($20,000 - $14,320) x 0.044 = $751.12
-    # Federal taxable: $5,400, Federal tax: $540 (Formula)
+    # WI Form 1, wages only, under 65, no dependents, no credits; line 7 = wages.
+    # Derived blind, session 1b251ce6, retrieved 2026-09-30, from
+    #   I24 https://www.revenue.wi.gov/TaxForms2024/2024-Form1-Inst.pdf
+    #   I25 https://www.revenue.wi.gov/TaxForms2025/2025-Form1-Inst.pdf
+    # SD is the official Standard Deduction Table row (pp. 35-37, $500 bands);
+    # exemptions are $700 per filer (line 10a). Tax is the official Tax Table row
+    # (pp. 38-43, $100 bands) below $100k of TI, else the p. 44 worksheet rounded
+    # to whole dollars. The graph computes the exact statutory formulas, so each
+    # tolerance is the band-effect bound from _wi_band_tolerance.
+    # WI 2024 Single $12,000: SD 13,230 (0-13,000) + exemptions 700 -> TI 0, tax 0
+    # I24 p.35, p.38; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $20k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $12k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 Single $20,000: SD 13,088 (20,000-20,500) + exemptions 700 -> TI 6,212, tax 219
+    # I24 p.35, p.38; tax-table (row 6,200-6,300)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $20k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
         w2_income=20000.0,
-        expected_federal_tax=540.0,
-        expected_state_tax=751.12,
-        expected_federal_agi=20000.0,
+        expected_state_tax=219.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.12, tax_table=True),
         backend="graph",
     ),
-    # WI Single in 5.3% bracket
-    # Federal AGI: $50,000, WI AGI: $50,000
-    # WI taxable: $50,000 (no deductions/exemptions)
-    # WI tax: $501.20 + $630.08 + ($50,000 - $28,640) x 0.053 = $2,263.36
-    # Federal taxable: $35,400, Federal tax: $4,016
+    # WI 2024 Single $60,000: SD 8,288 (60,000-60,500) + exemptions 700 -> TI 51,012, tax 2,319
+    # I24 p.35, p.41; tax-table (row 51,000-51,100)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $50k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $60k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
-        w2_income=50000.0,
-        expected_federal_tax=4016.0,
-        expected_state_tax=2263.36,
-        expected_federal_agi=50000.0,
+        w2_income=60000.0,
+        expected_state_tax=2319.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
         backend="graph",
     ),
-    # WI Single in 5.3% bracket (high income)
-    # Federal AGI: $100,000, WI AGI: $100,000
-    # WI taxable: $100,000 (no deductions/exemptions)
-    # WI tax: $501.20 + $630.08 + ($100,000 - $28,640) x 0.053 = $4,913.36
-    # Federal taxable: $85,400, Federal tax: $13,841
+    # WI 2024 Single $150,000: SD 0 (129,500 and over) + exemptions 700 -> TI 149,300, tax 7,526
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $100k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $150k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
-        w2_income=100000.0,
-        expected_federal_tax=13841.0,
-        expected_state_tax=4913.36,
-        expected_federal_agi=100000.0,
+        w2_income=150000.0,
+        expected_state_tax=7526.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
         backend="graph",
     ),
-    # WI Single in 7.65% bracket (top bracket)
-    # Federal AGI: $400,000, WI AGI: $400,000
-    # WI taxable: $400,000 (no deductions/exemptions)
-    # WI tax: $14,320 x 0.035 + $14,320 x 0.044 + $286,670 x 0.053 + $84,690 x 0.0765
-    #       = $501.20 + $630.08 + $15,193.51 + $6,478.785 = $22,803.575
-    # Federal taxable: $385,400 ($400K - $14.6K std ded), in 35% bracket
-    # Federal tax: $1,160 + $4,266 + $11,742.50 + $21,942 + $16,568 + $49,586.25
-    #            = $105,264.75
-    #   + Additional Medicare Tax: ($400,000 - $200,000) * 0.009 = $1,800
-    #   = $107,064.75
+    # WI 2024 Single $400,000: SD 0 (Single column is 0 from the 129,500 row;
+    # formula zero ~129,320) + exemptions 700 -> TI 399,300, tax 22,750
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $400k income (7.65% top bracket)",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $400k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
         w2_income=400000.0,
-        expected_federal_tax=107064.75,
-        expected_state_tax=22803.575,
-        expected_federal_agi=400000.0,
+        expected_state_tax=22750.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
         backend="graph",
     ),
-    # WI MFJ in 5.3% bracket
-    # Federal AGI: $60,000, WI AGI: $60,000
-    # WI taxable: $60,000 (no deductions/exemptions)
-    # WI tax: $19,090 x 0.035 + ($38,190 - $19,090) x 0.044 + ($60,000 - $38,190) x 0.053
-    #       = $668.15 + $840.40 + $1,155.93 = $2,664.48
-    # Federal taxable: $30,800, Federal tax: $2,320 + ($30,800 - $23,200) * 0.12 = $3,232
+    # WI 2024 MFJ $12,000: SD 24,490 + exemptions 1,400 -> TI 0, tax 0
+    # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI MFJ, $60k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $12k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 MFJ $20,000: SD 24,490 + exemptions 1,400 -> TI 0, tax 0
+    # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $20k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 MFJ $60,000: SD 18,017 (60,000-60,500) + exemptions 1,400 -> TI 40,583, tax 1,634
+    # I24 p.35, p.40; tax-table (row 40,500-40,600)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $60k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Married/Joint",
         w2_income=60000.0,
-        expected_federal_tax=3232.0,
-        expected_state_tax=2664.48,
-        expected_federal_agi=60000.0,
+        expected_state_tax=1634.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.19778, tax_table=True),
         backend="graph",
     ),
-    # ========== WISCONSIN 2025 SCENARIOS ==========
-    # WI 2025: Expanded 4.4% bracket (Single: $14,320-$50,480, MFJ: $19,090-$67,300)
-    # Other brackets unchanged: 3.5% ($0-$14,320/$19,090),
-    #   5.3% ($50,480/$67,300-$315,310/$420,420), 7.65% above
-    # New retirement income exclusion (age 67+) - not tested here (no age input)
-    #
-    # WI 2025 Single, $50,000 W2 only
-    # Federal AGI: $50,000, WI AGI: $50,000, WI taxable: $50,000
-    # WI tax: $14,320 x 0.035 + ($50,000 - $14,320) x 0.044
-    #       = $501.20 + $1,569.92 = $2,071.12
-    # Federal taxable: $35,000 (AGI - $15,000 std ded)
-    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # WI 2024 MFJ $150,000: SD 216 (150,000-150,500) + exemptions 1,400 -> TI 148,384, tax 7,349
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
-        source="WI 2025 Tax Brackets (computed)",
-        description="WI Single, $50k income (2025 expanded 4.4% bracket)",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $150k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=150000.0,
+        expected_state_tax=7349.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.19778, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2024 MFJ $400,000: SD 0 (151,344 or over) + exemptions 1,400 -> TI 398,600, tax 20,610
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $400k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=400000.0,
+        expected_state_tax=20610.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2024 HoH $12,000: SD 17,090 + exemptions 700 -> TI 0, tax 0
+    # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $12k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 HoH $20,000: SD 16,824 (20,000-20,500) + exemptions 700 -> TI 2,476, tax 86
+    # I24 p.35, p.38; tax-table (row 2,400-2,500)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $20k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=86.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.22515, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2024 HoH $60,000: SD 8,288 (60,000-60,500) + exemptions 700 -> TI 51,012, tax 2,319
+    # I24 p.35, p.41; tax-table (row 51,000-51,100)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $60k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_state_tax=2319.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2024 HoH $150,000: SD 0 + exemptions 700 -> TI 149,300, tax 7,526
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $150k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=7526.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2024 HoH $400,000: SD 0 + exemptions 700 -> TI 399,300, tax 22,750
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $400k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=400000.0,
+        expected_state_tax=22750.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 Single $12,000: SD 13,560 (0-13,390) + exemptions 700 -> TI 0, tax 0
+    # I25 p.35, p.38; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $12k wages (2025)",
         year=2025,
         state="WI",
         filing_status="Single",
-        w2_income=50000.0,
-        expected_federal_tax=3871.5,
-        expected_state_tax=2071.12,
-        expected_federal_agi=50000.0,
+        w2_income=12000.0,
+        expected_state_tax=0.0,
         backend="graph",
     ),
-    # WI 2025 Single, $100,000 W2 only
-    # Federal AGI: $100,000, WI AGI: $100,000, WI taxable: $100,000
-    # WI tax: $14,320 x 0.035 + ($50,480 - $14,320) x 0.044 + ($100,000 - $50,480) x 0.053
-    #       = $501.20 + $1,591.04 + $2,624.56 = $4,716.80
-    # Federal taxable: $85,000 (AGI - $15,000 std ded)
-    # Federal tax (2025): $11,925 x 0.10 + $36,550 x 0.12 + $36,525 x 0.22
-    #   = $1,192.50 + $4,386 + $8,035.50 = $13,614
+    # WI 2025 Single $20,000: SD 13,476 (20,000-20,500) + exemptions 700 -> TI 5,824, tax 205
+    # I25 p.35, p.38; tax-table (row 5,800-5,900)
     TaxScenario(
-        source="WI 2025 Tax Brackets (computed)",
-        description="WI Single, $100k income (2025 expanded 4.4% bracket)",
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $20k wages (2025)",
         year=2025,
         state="WI",
         filing_status="Single",
-        w2_income=100000.0,
-        expected_federal_tax=13449.0,
-        expected_state_tax=4716.80,
-        expected_federal_agi=100000.0,
+        w2_income=20000.0,
+        expected_state_tax=205.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.12, tax_table=True),
         backend="graph",
     ),
-    # WI 2025 MFJ, $120,000 W2 only
-    # Federal AGI: $120,000, WI AGI: $120,000, WI taxable: $120,000
-    # WI tax: $19,090 x 0.035 + ($67,300 - $19,090) x 0.044 + ($120,000 - $67,300) x 0.053
-    #       = $668.15 + $2,121.24 + $2,793.10 = $5,582.49
-    # Federal taxable: $90,000 (AGI - $30,000 std ded)
-    # Federal tax (2025 MFJ): $23,850 x 0.10 + $66,150 x 0.12 = $2,385 + $7,938 = $10,323
+    # WI 2025 Single $60,000: SD 8,676 (60,000-60,500) + exemptions 700 -> TI 50,624, tax 2,098
+    # I25 p.35, p.41; tax-table (row 50,600-50,700)
     TaxScenario(
-        source="WI 2025 Tax Brackets (computed)",
-        description="WI MFJ, $120k income (2025 expanded 4.4% bracket)",
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $60k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_state_tax=2098.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 Single $150,000: SD 0 (132,500 and over) + exemptions 700 -> TI 149,300, tax 7,326
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $150k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=7326.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 Single $400,000: SD 0 (Single column is 0 from the 132,500 row;
+    # formula zero ~132,550) + exemptions 700 -> TI 399,300, tax 22,363
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $400k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=400000.0,
+        expected_state_tax=22363.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 MFJ $12,000: SD 25,110 + exemptions 1,400 -> TI 0, tax 0
+    # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $12k wages (2025)",
         year=2025,
         state="WI",
         filing_status="Married/Joint",
-        w2_income=120000.0,
-        expected_federal_tax=10143.0,
-        expected_state_tax=5582.49,
-        expected_federal_agi=120000.0,
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2025 MFJ $20,000: SD 25,110 + exemptions 1,400 -> TI 0, tax 0
+    # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $20k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2025 MFJ $60,000: SD 18,773 (60,000-60,500) + exemptions 1,400 -> TI 39,827, tax 1,577
+    # I25 p.35, p.40; tax-table (row 39,800-39,900)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $60k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=60000.0,
+        expected_state_tax=1577.0,
+        state_tax_tolerance=_wi_band_tolerance(0.044, 0.19778, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 MFJ $150,000: SD 973 (150,000-150,500) + exemptions 1,400 -> TI 147,627, tax 7,042
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $150k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=150000.0,
+        expected_state_tax=7042.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.19778, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 MFJ $400,000: SD 0 (155,169 or more) + exemptions 1,400 -> TI 398,600, tax 20,344
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $400k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=400000.0,
+        expected_state_tax=20344.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 HoH $12,000: SD 17,520 + exemptions 700 -> TI 0, tax 0
+    # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $12k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2025 HoH $20,000: SD 17,362 (20,000-20,500) + exemptions 700 -> TI 1,938, tax 68
+    # I25 p.35, p.38; tax-table (row 1,900-2,000)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $20k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=68.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.22515, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 HoH $60,000: SD 8,676 (60,000-60,500) + exemptions 700 -> TI 50,624, tax 2,098
+    # I25 p.35, p.41; tax-table (row 50,600-50,700)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $60k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_state_tax=2098.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 HoH $150,000: SD 0 + exemptions 700 -> TI 149,300, tax 7,326
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $150k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=7326.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 HoH $400,000: SD 0 + exemptions 700 -> TI 399,300, tax 22,363
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $400k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=400000.0,
+        expected_state_tax=22363.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
         backend="graph",
     ),
     # ========== NEW JERSEY SCENARIOS ==========

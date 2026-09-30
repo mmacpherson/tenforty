@@ -737,10 +737,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.WI: StateGraphConfig(
         # WI Form 1 imports federal AGI and uses simplified Schedule I inputs.
-        # Standard deduction and exemptions are accepted as total inputs due to
-        # complexity (sliding-scale deduction, age-based exemptions).
+        # The graph computes the sliding-scale standard deduction and the $700
+        # filer and per-dependent exemptions; num_dependents is a count that the
+        # form multiplies by $700. The $250 age-65 exemption needs an age input.
         natural_to_node={
             "itemized_deductions": "wi_form1_L23_itemized",
+            "num_dependents": "wi_form1_L38_dependents",
         },
         output_lines={
             "L22_wi_agi": "state_adjusted_gross_income",
