@@ -30,6 +30,7 @@ module TenForty.Form
     -- * Validation
     validateForm,
     validateFormSet,
+    checkUnsupportedLookups,
     FormError (..),
     FormSetError (..),
   )
@@ -45,6 +46,7 @@ import Data.Text (Text)
 import TenForty.Expr hiding (Line)
 import TenForty.Expr qualified as E
 import TenForty.Table
+import TenForty.Table qualified as Table
 import TenForty.Types
 
 data Form = Form
@@ -220,6 +222,13 @@ data FormError
   | DuplicateLine LineId
   | UndefinedOutput LineId
   | UndefinedTable TableId
+  | -- | A line uses 'E.TableLookup', which the graph compiler cannot lower yet
+    -- (tenforty-tj2.7): it would emit a bracket-tax node over an empty table
+    -- and silently evaluate to 0.
+    UnsupportedTableLookup LineId TableId
+  | -- | A lookup table is defined; the graph compiler has no lowering for it
+    -- (tenforty-tj2.7).
+    UnsupportedLookupTable TableId
   deriving stock (Show, Eq)
 
 validateForm :: Form -> [FormError]
@@ -228,6 +237,7 @@ validateForm form =
     ++ checkCycles form
     ++ checkUndefinedOutputs form
     ++ checkUndefinedTables form
+    ++ checkUnsupportedLookups form
 
 checkUndefinedLines :: Form -> [FormError]
 checkUndefinedLines form =
@@ -286,6 +296,22 @@ checkUndefinedTables form =
       | tid <- Set.toList usedTables,
         not (Set.member tid definedTables)
       ]
+
+checkUnsupportedLookups :: Form -> [FormError]
+checkUnsupportedLookups form =
+  [ UnsupportedTableLookup (lineId ln) tid
+  | ln <- formLines form,
+    tid <- Set.toList (lineTableLookups ln)
+  ]
+    ++ [ UnsupportedLookupTable tid
+       | Table.TableLookup tid _ <- formTables form
+       ]
+
+lineTableLookups :: Line -> Set TableId
+lineTableLookups ln = case lineType ln of
+  LineInput -> Set.empty
+  LineComputed expr -> E.extractTableLookups expr
+  LineWorksheet _ ws -> foldMap (E.extractTableLookups . wsStepExpr) ws
 
 lineTableRefs :: Line -> Set TableId
 lineTableRefs ln = case lineType ln of
