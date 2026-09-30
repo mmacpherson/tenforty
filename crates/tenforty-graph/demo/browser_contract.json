@@ -10,7 +10,7 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "f1810541d5ea00730777d19b363c821ac4add702f0930ea76d5160b31e74ca8f"
+        "sha256": "47591249b4091ef9e5f09cff8ec8fe8dbd631c7a093701b947a01094179d7081"
       },
       "2025": {
         "form_id": "resolved",
@@ -1657,8 +1657,8 @@
         "federal_total_tax": 26536,
         "state_adjusted_gross_income": 201000,
         "state_taxable_income": 171000,
-        "state_total_tax": 8910.7,
-        "total_tax": 35446.7
+        "state_total_tax": 8689.724,
+        "total_tax": 35225.724
       }
     },
     {

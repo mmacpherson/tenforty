@@ -279,8 +279,8 @@ PARITY_CASES = [
             "federal_total_tax": 26536,
             "state_adjusted_gross_income": 201000,
             "state_taxable_income": 171000,
-            "state_total_tax": 8910.7,
-            "total_tax": 35446.7,
+            "state_total_tax": 8689.724,
+            "total_tax": 35225.724,
         },
     },
     {

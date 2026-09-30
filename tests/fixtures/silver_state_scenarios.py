@@ -2,6 +2,8 @@
 
 from .tax_scenario import TaxScenario
 
+CA_WHOLE_DOLLAR_TOLERANCE = 1.0
+
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
 SILVER_STANDARD_STATE_SCENARIOS = [
     # ========== ALABAMA SCENARIOS ==========
@@ -303,6 +305,157 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=105540.0,  # CA taxable $100,000 + $5,540 std ded
         expected_federal_tax=15057.0,
         expected_state_tax=5693.0,  # OTS rounds to nearest dollar ($5693.36 -> $5693)
+    ),
+    # ---------- CA 2024 official values (tenforty-b72.3) ----------
+    # Source: FTB 2024 Personal Income Tax Booklet, Form 540,
+    # https://www.ftb.ca.gov/forms/2024/2024-540-booklet.pdf, retrieved 2026-09-30.
+    # Std deduction p. 13 (Single $5,540; MFJ/HoH $11,080); personal exemption
+    # credit p. 12 ($149 per box); AGI Limitation Worksheet p. 14; Tax Table
+    # pp. 69-74 (TI <= $100,000); Tax Rate Schedules X/Y/Z p. 75.
+    # Derived blind, session 1b251ce6.
+    # Form 540 line 31 is whole dollars (Tax Table rows priced at the $100 midpoint;
+    # rate-schedule result rounded to the dollar, p. 75 Step 4). The graph computes
+    # the exact bracket formula, so these fixtures allow $1: the rate-schedule gap
+    # is at most $0.50, and the tax-table gap in these rows is at most $0.36.
+    # CA Single $30,000 W2 (2024). Fixture kind: tax-table + derived-arithmetic.
+    # TI $24,460; Tax Table p. 70 row 24,451-24,550 col "1 or 3" = $382; less $149 exemption credit (p. 12) = $233
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $30,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_state_tax=233.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA Single $120,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $114,460; Schedule X (p. 75): $3,108.72 + 9.3% x $43,854 = $7,187.14 -> $7,187; less $149 = $7,038
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $120,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=120000.0,
+        expected_state_tax=7038.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA Single $600,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $594,460; Schedule X (p. 75): $37,512.83 + 11.3% x $161,673 = $55,781.88 -> $55,782; exemption credit fully phased out (p. 14 worksheet: ceil(355,143 / 2,500) x $6 = $858 > $149)
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $600,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=600000.0,
+        expected_state_tax=55782.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA MFJ $30,000 W2 (2024). Fixture kind: tax-table + derived-arithmetic.
+    # TI $18,920; Tax Table p. 69 row 18,851-18,950 col "2 or 5" = $189; less $298 exemption credit, floored at $0
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA MFJ, $30,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        expected_state_tax=0.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA MFJ $120,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $108,920; Schedule Y (p. 75): $1,984.52 + 6% x $28,430 = $3,690.32 -> $3,690; less $298 = $3,392
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA MFJ, $120,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_state_tax=3392.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA MFJ $600,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $588,920; Schedule Y (p. 75): $6,217.44 + 9.3% x $447,708 = $47,854.28 -> $47,854; exemption credit fully phased out (p. 14: ceil(110,281 / 2,500) x $6 x 2 = $540 > $298)
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA MFJ, $600,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=600000.0,
+        expected_state_tax=47854.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA HoH $30,000 W2 (2024). Fixture kind: tax-table + derived-arithmetic.
+    # TI $18,920; Tax Table p. 69 row 18,851-18,950 col "4" = $189; less $149 = $40
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA HoH, $30,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Head_of_House",
+        w2_income=30000.0,
+        expected_state_tax=40.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA HoH $120,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $108,920; Schedule Z (p. 75): $3,511.13 + 9.3% x $12,813 = $4,702.74 -> $4,703; less $149 = $4,554
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA HoH, $120,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Head_of_House",
+        w2_income=120000.0,
+        expected_state_tax=4554.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA HoH $600,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $588,920; Schedule Z (p. 75): $50,293.33 + 11.3% x $327 = $50,330.28 -> $50,330; exemption credit fully phased out (p. 14: ceil(232,709 / 2,500) x $6 = $564 > $149)
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA HoH, $600,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Head_of_House",
+        w2_income=600000.0,
+        expected_state_tax=50330.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA Single $250,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # Implementer-derived from the same booklet's rules, not by the blind deriver.
+    # TI $244,460; Schedule X (p. 75): $3,108.72 + 9.3% x $173,854 = $19,277.14
+    # -> $19,277. AGI Limitation Worksheet (p. 14): excess $5,143 / $2,500 = 2.06,
+    # rounded UP to 3; 3 x $6 = $18; exemption credit $149 - $18 = $131.
+    # Net $19,277 - $131 = $19,146.
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $250,000 W2, exemption credit in phase-out (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=250000.0,
+        expected_state_tax=19146.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+        known_failure=(
+            "CA 540 line 32 phase-out is continuous in the graph ($0.0024 per "
+            "excess AGI dollar); FTB AGI Limitation Worksheet rounds excess/$2,500 "
+            "UP to a whole step, $6 per step. Graph credit $136.66 vs official "
+            "$131; graph net $19,140.48 vs $19,146 (tenforty-b72.17)."
+        ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
