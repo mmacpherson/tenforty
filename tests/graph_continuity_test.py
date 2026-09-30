@@ -14,8 +14,8 @@ import os
 from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
+    STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
-    STATE_OUTPUT_LINES,
 )
 from tenforty.models import OTSState
 
@@ -121,7 +121,7 @@ def test_state_inputs_are_not_dead_wires() -> None:
 
         for state in OTSState:
             state_map = STATE_NATURAL_TO_NODE.get(state, {})
-            if not state_map or state not in STATE_OUTPUT_LINES:
+            if not state_map or state not in STATE_GRAPH_CONFIGS:
                 continue
             for field, node_name in state_map.items():
                 node_id = name_to_id.get(node_name)
@@ -145,7 +145,7 @@ def test_state_form_names_have_output_lines() -> None:
     """Any state with a graph form should also declare its output lines."""
     for state, form in STATE_FORM_NAMES.items():
         if form and state in STATE_NATURAL_TO_NODE:
-            assert state in STATE_OUTPUT_LINES, (
+            assert state in STATE_GRAPH_CONFIGS, (
                 f"{state.value}: has graph form {form} and input mappings but no "
-                "STATE_OUTPUT_LINES entry"
+                "StateGraphConfig"
             )

@@ -701,10 +701,12 @@
       "output_nodes": {
         "2024": {
           "state_adjusted_gross_income": "in_it40_L7_in_agi",
+          "state_taxable_income": "in_it40_L7_in_agi",
           "state_total_tax": "in_it40_L9_in_state_tax"
         },
         "2025": {
           "state_adjusted_gross_income": "in_it40_L7_in_agi",
+          "state_taxable_income": "in_it40_L7_in_agi",
           "state_total_tax": "in_it40_L9_in_state_tax"
         }
       },
@@ -776,10 +778,14 @@
       },
       "output_nodes": {
         "2024": {
-          "state_total_tax": "la_it540_L10_la_tax"
+          "state_adjusted_gross_income": "la_it540_L7_federal_agi",
+          "state_total_tax": "la_it540_L10_la_tax",
+          "state_taxable_income": "la_it540_L10_taxable"
         },
         "2025": {
-          "state_total_tax": "la_it540_L10_la_tax"
+          "state_adjusted_gross_income": "la_it540_L7_federal_agi",
+          "state_total_tax": "la_it540_L10_la_tax",
+          "state_taxable_income": "la_it540_L9_la_taxable_income"
         }
       },
       "unsupported_inputs": {
