@@ -13,10 +13,12 @@ import polars as pl
 
 from . import otslib
 from .models import (
+    FINITE_FLOAT_COLUMNS,
     NATURAL_FORM_CONFIG,
     OTS_FORM_CONFIG,
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
+    TAX_RETURN_FLOAT_FIELDS,
     InterpretedTaxReturn,
     OTSFieldTerminator,
     OTSFilingStatus,
@@ -846,9 +848,14 @@ def evaluate_returns(
         # mode="zip":   2 rows           (element-wise)
 
     """
+    arguments = dict(locals())
 
     def ensure_list(x):
         return x if isinstance(x, list) else [x]
+
+    FINITE_FLOAT_COLUMNS.validate_python(
+        {name: ensure_list(arguments[name]) for name in TAX_RETURN_FLOAT_FIELDS}
+    )
 
     years = ensure_list(year)
     states_of_residence = ensure_list(state)

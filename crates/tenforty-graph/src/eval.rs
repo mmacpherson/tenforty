@@ -10,6 +10,8 @@ use thiserror::Error;
 pub enum EvalError {
     #[error("Input '{0}' not set")]
     InputNotSet(String),
+    #[error("Input '{name}' must be a finite number, got {value}")]
+    NonFiniteInput { name: String, value: f64 },
     #[error("Node {0} not found")]
     NodeNotFound(NodeId),
     #[error("Node '{0}' not found")]
@@ -22,6 +24,17 @@ pub enum EvalError {
     CycleDetected(Vec<String>),
     #[error(transparent)]
     Graph(#[from] GraphError),
+}
+
+pub(crate) fn ensure_finite(name: &str, value: f64) -> Result<(), EvalError> {
+    if value.is_finite() {
+        Ok(())
+    } else {
+        Err(EvalError::NonFiniteInput {
+            name: name.to_string(),
+            value,
+        })
+    }
 }
 
 pub struct Runtime<'g> {
@@ -50,6 +63,7 @@ impl<'g> Runtime<'g> {
             .graph
             .node_id_by_name(name)
             .ok_or_else(|| EvalError::InputNotSet(name.to_string()))?;
+        ensure_finite(name, value)?;
         self.inputs.insert(node_id, value);
         self.cache.clear();
         Ok(())
@@ -400,5 +414,59 @@ mod tests {
         runtime.set("income", 5000.0).unwrap();
         let taxable = runtime.eval("taxable_floor").unwrap();
         assert_eq!(taxable, 0.0);
+    }
+
+    #[test]
+    fn test_set_rejects_non_finite_inputs() {
+        let graph = simple_graph();
+        for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+            let err = runtime.set("income", bad).unwrap_err();
+            assert!(
+                matches!(&err, EvalError::NonFiniteInput { name, .. } if name == "income"),
+                "unexpected error for {bad}: {err:?}"
+            );
+            assert!(err.to_string().contains("income"));
+            assert!(err.to_string().contains("finite"));
+        }
+    }
+
+    #[test]
+    fn test_rejected_set_keeps_previous_value() {
+        let graph = simple_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+
+        runtime.set("income", 50000.0).unwrap();
+        assert!(runtime.set("income", f64::NAN).is_err());
+        let taxable = runtime.eval("taxable_floor").unwrap();
+        assert_eq!(taxable, 50000.0 - 12950.0);
+    }
+
+    #[test]
+    fn test_set_reports_unknown_name_before_finiteness() {
+        let graph = simple_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+
+        let err = runtime.set("no_such_input", f64::NAN).unwrap_err();
+        assert!(matches!(err, EvalError::InputNotSet(_)));
+    }
+
+    #[test]
+    fn test_eval_batch_named_rejects_non_finite_scenario() {
+        let graph = Arc::new(simple_graph());
+        let scenarios = vec![
+            (
+                FilingStatus::Single,
+                HashMap::from([("income".to_string(), 50000.0)]),
+            ),
+            (
+                FilingStatus::Single,
+                HashMap::from([("income".to_string(), f64::NAN)]),
+            ),
+        ];
+
+        let results = eval_batch_named(&graph, &scenarios, &["taxable_floor"]);
+        assert!(results[0].is_ok());
+        assert!(matches!(results[1], Err(EvalError::NonFiniteInput { .. })));
     }
 }

@@ -1,4 +1,4 @@
-use crate::eval::{EvalError, Runtime};
+use crate::eval::{ensure_finite, EvalError, Runtime};
 use crate::graph::{FilingStatus, Graph, NodeId};
 use crate::solver::SolveError;
 use std::collections::HashMap;
@@ -31,6 +31,7 @@ impl<'g> JitRuntime<'g> {
             .graph
             .node_id_by_name(name)
             .ok_or_else(|| EvalError::InputNotSet(name.to_string()))?;
+        ensure_finite(name, value)?;
         self.set_by_id(node_id, value);
         Ok(())
     }
@@ -156,6 +157,9 @@ impl<'g> JitBatchRuntime<'g> {
             .graph
             .node_id_by_name(name)
             .ok_or_else(|| EvalError::InputNotSet(name.to_string()))?;
+        for &value in values {
+            ensure_finite(name, value)?;
+        }
         self.set_batch_by_id(node_id, *values);
         Ok(())
     }
@@ -342,6 +346,38 @@ mod tests {
         jit_rt.set("income", 50000.0).unwrap();
         let taxable = jit_rt.eval("taxable_floor").unwrap();
         assert!((taxable - (50000.0 - 12950.0)).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_jit_set_batch_rejects_non_finite_lane() {
+        let graph = simple_graph();
+        let compiler = JitCompiler::new().unwrap();
+        let batch_compiled = compiler
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
+            .unwrap();
+        let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
+
+        let mut incomes = [50000.0; BATCH_SIZE];
+        incomes[BATCH_SIZE - 1] = f64::NAN;
+        assert!(matches!(
+            batch_rt.set_batch("income", &incomes),
+            Err(EvalError::NonFiniteInput { .. })
+        ));
+    }
+
+    #[test]
+    fn test_jit_set_rejects_non_finite_inputs() {
+        let graph = simple_graph();
+        let compiler = JitCompiler::new().unwrap();
+        let compiled = compiler.compile(&graph, FilingStatus::Single).unwrap();
+        let mut jit_rt = JitRuntime::new(compiled, &graph);
+
+        for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            assert!(matches!(
+                jit_rt.set("income", bad),
+                Err(EvalError::NonFiniteInput { .. })
+            ));
+        }
     }
 
     #[test]
