@@ -299,40 +299,51 @@ pub fn eval_batch(
     .collect()
 }
 
+/// An evaluation error raised by one row of a batch, tagged with that row's
+/// index so a caller can tell which scenario failed.
+#[derive(Debug, Error)]
+#[error("batch row {row}: {source}")]
+pub struct BatchRowError {
+    pub row: usize,
+    #[source]
+    pub source: EvalError,
+}
+
+/// Evaluate one scenario by name, with the same semantics as a single
+/// `Runtime`: an unknown input name, a missing output, or any evaluation error
+/// is returned rather than read as 0.
+pub fn eval_named_scenario<'a>(
+    graph: &Graph,
+    filing_status: FilingStatus,
+    named_inputs: &HashMap<String, f64>,
+    output_names: impl ExactSizeIterator<Item = &'a str>,
+) -> Result<HashMap<String, f64>, EvalError> {
+    let mut rt = Runtime::new(graph, filing_status);
+    for (name, &value) in named_inputs {
+        rt.set(name, value)?;
+    }
+
+    let mut results = HashMap::with_capacity(output_names.len());
+    for name in output_names {
+        let value = rt.eval(name)?;
+        results.insert(name.to_string(), value);
+    }
+    Ok(results)
+}
+
 /// Convenience version that takes named inputs/outputs
 pub fn eval_batch_named(
     graph: &Arc<Graph>,
     scenarios: &[(FilingStatus, HashMap<String, f64>)],
     output_names: &[&str],
 ) -> Vec<Result<HashMap<String, f64>, EvalError>> {
-    // Resolve output names to IDs once (for validation)
-    let _output_ids: Vec<NodeId> = output_names
-        .iter()
-        .filter_map(|name| graph.node_id_by_name(name))
-        .collect();
-
     #[cfg(feature = "parallel")]
     let iter = scenarios.par_iter();
     #[cfg(not(feature = "parallel"))]
     let iter = scenarios.iter();
 
     iter.map(|(status, named_inputs)| {
-        let mut rt = Runtime::new(graph, *status);
-
-        // Set inputs by name
-        for (name, &value) in named_inputs {
-            rt.set(name, value)?;
-        }
-
-        // Evaluate outputs
-        let mut results = HashMap::new();
-        for &name in output_names {
-            if let Ok(value) = rt.eval(name) {
-                results.insert(name.to_string(), value);
-            }
-        }
-
-        Ok(results)
+        eval_named_scenario(graph, *status, named_inputs, output_names.iter().copied())
     })
     .collect()
 }
@@ -468,5 +479,129 @@ mod tests {
         let results = eval_batch_named(&graph, &scenarios, &["taxable_floor"]);
         assert!(results[0].is_ok());
         assert!(matches!(results[1], Err(EvalError::NonFiniteInput { .. })));
+    }
+
+    fn ratio_graph() -> Graph {
+        let mut nodes = HashMap::new();
+        for (id, name) in [(0, "numerator"), (1, "denominator")] {
+            nodes.insert(
+                id,
+                Node {
+                    id,
+                    op: Op::Input,
+                    name: Some(name.to_string()),
+                },
+            );
+        }
+        nodes.insert(
+            2,
+            Node {
+                id: 2,
+                op: Op::Div { left: 0, right: 1 },
+                name: Some("ratio".to_string()),
+            },
+        );
+        nodes.insert(
+            3,
+            Node {
+                id: 3,
+                op: Op::BracketTax {
+                    table: "absent_table".to_string(),
+                    income: 0,
+                },
+                name: Some("tabled".to_string()),
+            },
+        );
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0, 1],
+            outputs: vec![2],
+            invariants: vec![],
+        }
+    }
+
+    fn ratio_row(numerator: f64, denominator: f64) -> (FilingStatus, HashMap<String, f64>) {
+        (
+            FilingStatus::Single,
+            HashMap::from([
+                ("numerator".to_string(), numerator),
+                ("denominator".to_string(), denominator),
+            ]),
+        )
+    }
+
+    #[test]
+    fn batch_named_propagates_division_by_zero_on_the_failing_row_only() {
+        let graph = Arc::new(ratio_graph());
+        let rows = [
+            ratio_row(10.0, 2.0),
+            ratio_row(10.0, 0.0),
+            ratio_row(9.0, 3.0),
+        ];
+
+        let results = eval_batch_named(&graph, &rows, &["ratio"]);
+
+        assert_eq!(results[0].as_ref().unwrap()["ratio"], 5.0);
+        assert!(matches!(results[1], Err(EvalError::DivisionByZero(2))));
+        assert_eq!(results[2].as_ref().unwrap()["ratio"], 3.0);
+    }
+
+    #[test]
+    fn batch_named_matches_single_runtime_errors() {
+        let graph = Arc::new(ratio_graph());
+        let mut single = Runtime::new(&graph, FilingStatus::Single);
+        single.set("numerator", 10.0).unwrap();
+        single.set("denominator", 0.0).unwrap();
+        let single_err = single.eval("ratio").unwrap_err();
+
+        let batch = eval_batch_named(&graph, &[ratio_row(10.0, 0.0)], &["ratio"]);
+        let batch_err = batch.into_iter().next().unwrap().unwrap_err();
+
+        assert_eq!(batch_err.to_string(), single_err.to_string());
+    }
+
+    #[test]
+    fn batch_named_rejects_unknown_input_name() {
+        let graph = Arc::new(ratio_graph());
+        let (status, mut inputs) = ratio_row(10.0, 2.0);
+        inputs.insert("numeratr".to_string(), 1.0);
+
+        let results = eval_batch_named(&graph, &[(status, inputs)], &["ratio"]);
+
+        assert!(matches!(&results[0], Err(EvalError::InputNotSet(name)) if name == "numeratr"));
+    }
+
+    #[test]
+    fn batch_named_rejects_unknown_output_name() {
+        let graph = Arc::new(ratio_graph());
+
+        let results = eval_batch_named(&graph, &[ratio_row(10.0, 2.0)], &["ratio", "nope"]);
+
+        assert!(matches!(&results[0], Err(EvalError::NodeNameNotFound(name)) if name == "nope"));
+    }
+
+    #[test]
+    fn batch_named_propagates_missing_table() {
+        let graph = Arc::new(ratio_graph());
+
+        let results = eval_batch_named(&graph, &[ratio_row(10.0, 2.0)], &["tabled"]);
+
+        assert!(
+            matches!(&results[0], Err(EvalError::TableNotFound(name)) if name == "absent_table")
+        );
+    }
+
+    #[test]
+    fn batch_row_error_names_row_and_cause() {
+        let err = BatchRowError {
+            row: 7,
+            source: EvalError::DivisionByZero(2),
+        };
+
+        assert_eq!(err.to_string(), "batch row 7: Division by zero at node 2");
     }
 }
