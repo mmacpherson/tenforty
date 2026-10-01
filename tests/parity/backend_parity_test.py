@@ -1470,10 +1470,6 @@ def test_or_state_agi_parity_2024(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $249 exemption credits; graph leaves credits as zero input",
-    strict=True,
-)
 @skip_if_backends_unavailable
 @given(
     w2_income=st.integers(0, 500_000),
@@ -1481,26 +1477,8 @@ def test_or_state_agi_parity_2024(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_or_state_tax_parity_2024(w2_income, filing_status):
-    """OR 2024 total tax differs because OTS auto-applies exemption credits."""
-    ots = evaluate_return(
-        year=2024,
-        state="OR",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="OR",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"OR tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+    """OR 2024 tax agrees up to the federal tax subtraction, exemption credit and bracket floors."""
+    assert_state_parity("OR", 2024, filing_status, w2_income)
 
 
 # === OR State Parity Tests (2025) ===
@@ -1535,10 +1513,6 @@ def test_or_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $256 exemption credits; graph leaves credits as zero input",
-    strict=True,
-)
 @skip_if_backends_unavailable
 @given(
     w2_income=st.integers(0, 500_000),
@@ -1546,26 +1520,8 @@ def test_or_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_or_state_tax_parity(w2_income, filing_status):
-    """OR 2025 total tax differs because OTS auto-applies exemption credits."""
-    ots = evaluate_return(
-        year=2025,
-        state="OR",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2025,
-        state="OR",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"OR tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+    """OR 2025 tax agrees up to the federal tax subtraction, exemption credit and bracket floors."""
+    assert_state_parity("OR", 2025, filing_status, w2_income)
 
 
 # === Known state-parity defects (tests/parity/state_parity_policy.py) ===
@@ -1806,6 +1762,27 @@ def test_ots_ny_married_joint_household_credit_counts_both_spouses():
         backend="ots",
     )
     assert result.state_total_tax == pytest.approx(534.0, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="MAP-OR-SPOUSE-EXEMPTION (tenforty-r91.6): the OR_40 input map leaves CkL6bRegular at "
+    "its 'No' default, so OTS gives a joint return one exemption credit",
+    strict=True,
+)
+def test_ots_or_married_joint_gets_two_exemption_credits():
+    """OR 2024 MFJ, $13,000 wages: two $249 credits exceed the tax, so none is due.
+
+    No federal tax to subtract; taxable income is $13,000 - $5,495 = $7,505,
+    whose tax at the 4.75% bottom rate is about $358, below $498.
+    """
+    result = evaluate_return(
+        year=2024,
+        state="OR",
+        filing_status="Married/Joint",
+        w2_income=13_000,
+        backend="ots",
+    )
+    assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
 
 
 # === AZ State Parity Tests (2024) ===

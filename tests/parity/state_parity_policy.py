@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from tests.taxcalc.taxcalc_policy import (
+    STANDARD_DEDUCTION,
     ZERO_DELTA,
     DeltaModel,
     DeltaRange,
@@ -852,6 +853,253 @@ def _va_taxable_income_representation(case: dict) -> DeltaModel:
     return {"state_taxable_income": DeltaRange.exact(shortfall)}
 
 
+# --- Oregon Form OR-40 (2024, 2025) ------------------------------------------
+# Oregon DOR Form OR-40 instructions 2024
+# (https://www.oregon.gov/dor/forms/FormsPubs/form-or-40-inst_101-040-1_2024.pdf)
+# and 2025 (.../form-or-40-inst_101-040-1_2025.pdf), PDF pages: Table 4,
+# federal tax liability subtraction AGI phaseout -- $8,250 (2024) / $8,500 (2025)
+# below $125,000 single or $250,000 joint, then one fifth less per $5,000
+# (single) or $10,000 (joint) band, zero from $145,000 / $290,000 (p.15 both
+# years); standard deduction $2,745 / $5,495 and $2,835 / $5,670 (p.16);
+# exemption credit $249 / $256, none above federal AGI $100,000 single or
+# $200,000 joint (p.18); tax tables and rate charts (2024 p.28-29, 2025 p.32-33).
+# The rate charts publish base amounts rather than floors; the floors below
+# reproduce them (2024 single: $4,073 at $50,000 = 4.75% x 4,300 + 6.75% x 6,450
+# + 8.75% x 39,250, rounded per increment). Single and Married/Joint only. The
+# federal tax subtraction depends on federal tax, so the federal schedules of
+# Rev. Proc. 2023-34 sec. 3.01 (2024) and Rev. Proc. 2024-40 sec. 3.01 (2025)
+# enter too, with the standard deductions shared from taxcalc_policy.
+
+OR_STANDARD_DEDUCTION = {
+    (2024, "Single"): 2_745.0,
+    (2024, "Married/Joint"): 5_495.0,
+    (2025, "Single"): 2_835.0,
+    (2025, "Married/Joint"): 5_670.0,
+}
+_OR_RATES = (0.0475, 0.0675, 0.0875, 0.099)
+OR_OFFICIAL_FLOORS = {
+    (2024, "Single"): (0.0, 4_300.0, 10_750.0, 125_000.0),
+    (2024, "Married/Joint"): (0.0, 8_600.0, 21_500.0, 250_000.0),
+    (2025, "Single"): (0.0, 4_400.0, 11_100.0, 125_000.0),
+    (2025, "Married/Joint"): (0.0, 8_800.0, 22_200.0, 250_000.0),
+}
+# The floors the graph spec carries for both years
+# (tenforty-spec/forms/TablesOR2024.hs:27-29, TablesOR2025.hs:27-29).
+OR_GRAPH_FLOORS = {
+    "Single": (0.0, 4_400.0, 11_050.0, 125_000.0),
+    "Married/Joint": (0.0, 8_800.0, 22_100.0, 250_000.0),
+}
+OR_EXEMPTION_CREDIT = {2024: 249.0, 2025: 256.0}
+OR_EXEMPTIONS = {"Single": 1, "Married/Joint": 2}
+OR_EXEMPTION_CREDIT_AGI_LIMIT = {"Single": 100_000.0, "Married/Joint": 200_000.0}
+# Federal tax subtraction limit: the full cap below the phase-out start, then
+# one step lower for each band of AGI, reaching zero after five bands.
+OR_FEDERAL_SUBTRACTION_CAP = {2024: 8_250.0, 2025: 8_500.0}
+OR_FEDERAL_SUBTRACTION_PHASEOUT = {
+    "Single": (125_000.0, 5_000.0),
+    "Married/Joint": (250_000.0, 10_000.0),
+}
+OR_FEDERAL_SUBTRACTION_STEPS = 5
+OR_TAX_TABLE_CEILING = 50_000.0
+# Below $50,000 the OR tax table prices $100 rows at their midpoint; every
+# schedule increment rounds to the dollar (three below $50,000). At or above
+# $50,000 OTS rounds four increments in 2024 and, in 2025, five increments
+# plus a $1 base adjustment it carries to reproduce the published chart.
+OR_TAX_TABLE_TOLERANCE = 0.0875 * 50.0 + 3 * 0.5
+OR_RATE_CHART_TOLERANCE = {2024: 4 * 0.5, 2025: 5 * 0.5 + 1.0}
+
+FEDERAL_SCHEDULE = {
+    (2024, "Single"): (
+        (0.0, 0.10),
+        (11_600.0, 0.12),
+        (47_150.0, 0.22),
+        (100_525.0, 0.24),
+        (191_950.0, 0.32),
+        (243_725.0, 0.35),
+        (609_350.0, 0.37),
+    ),
+    (2024, "Married/Joint"): (
+        (0.0, 0.10),
+        (23_200.0, 0.12),
+        (94_300.0, 0.22),
+        (201_050.0, 0.24),
+        (383_900.0, 0.32),
+        (487_450.0, 0.35),
+        (731_200.0, 0.37),
+    ),
+    (2025, "Single"): (
+        (0.0, 0.10),
+        (11_925.0, 0.12),
+        (48_475.0, 0.22),
+        (103_350.0, 0.24),
+        (197_300.0, 0.32),
+        (250_525.0, 0.35),
+        (626_350.0, 0.37),
+    ),
+    (2025, "Married/Joint"): (
+        (0.0, 0.10),
+        (23_850.0, 0.12),
+        (96_950.0, 0.22),
+        (206_700.0, 0.24),
+        (394_600.0, 0.32),
+        (501_050.0, 0.35),
+        (751_600.0, 0.37),
+    ),
+}
+FEDERAL_TAX_TABLE_CEILING = 100_000.0
+FEDERAL_TAX_TABLE_HALF_ROW = 25.0
+
+
+def _or_case(case: dict) -> bool:
+    return case["state"] == "OR" and (case["year"], case["status"]) in (
+        OR_STANDARD_DEDUCTION
+    )
+
+
+def _or_schedule(floors: tuple[float, ...]) -> Schedule:
+    return tuple(zip(floors, _OR_RATES, strict=True))
+
+
+def _or_graph_taxable_income(case: dict) -> float:
+    return max(0.0, case["w2"] - OR_STANDARD_DEDUCTION[(case["year"], case["status"])])
+
+
+def _or_federal_subtraction_cap(case: dict) -> float:
+    start, band = OR_FEDERAL_SUBTRACTION_PHASEOUT[case["status"]]
+    cap = OR_FEDERAL_SUBTRACTION_CAP[case["year"]]
+    if case["w2"] < start:
+        return cap
+    steps_taken = min(
+        OR_FEDERAL_SUBTRACTION_STEPS, 1 + int((case["w2"] - start) // band)
+    )
+    return cap * (1 - steps_taken / OR_FEDERAL_SUBTRACTION_STEPS)
+
+
+def _federal_tax_range(case: dict) -> tuple[float, float]:
+    """Federal income tax on wages, widened by the 1040 Tax Table and rounding.
+
+    Below $100,000 the 1040 Tax Table prices $50 rows at their midpoint and
+    rounds; OR's worksheet rounds the result again.
+    """
+    key = (case["year"], case["status"])
+    taxable_income = max(0.0, case["w2"] - STANDARD_DEDUCTION[key])
+    exact = _bracket_tax(FEDERAL_SCHEDULE[key], taxable_income)
+    slack = 0.5
+    if taxable_income < FEDERAL_TAX_TABLE_CEILING:
+        slack += _table_half_width(
+            FEDERAL_SCHEDULE[key], taxable_income, FEDERAL_TAX_TABLE_HALF_ROW
+        )
+    return max(0.0, exact - slack), exact + slack
+
+
+def _or_subtraction_range(case: dict) -> tuple[float, float]:
+    cap = _or_federal_subtraction_cap(case)
+    graph_taxable_income = _or_graph_taxable_income(case)
+    federal_low, federal_high = _federal_tax_range(case)
+    return (
+        min(federal_low, cap, graph_taxable_income),
+        min(federal_high, cap, graph_taxable_income),
+    )
+
+
+def _or_table_tolerance(case: dict) -> float:
+    """OTS prices OR-40 tax from the tax table below $50,000, rate charts above.
+
+    ``TaxLookup`` (ots_amalgamation.cpp:89393) prices $100 rows at their
+    midpoint and ``TaxFunction`` (:89366-89367) rounds each schedule increment.
+    Whether OTS's taxable income lies below $50,000 is judged with the largest
+    federal tax subtraction the case allows.
+    """
+    _, largest_subtraction = _or_subtraction_range(case)
+    lowest_ots_income = _or_graph_taxable_income(case) - largest_subtraction
+    if lowest_ots_income < OR_TAX_TABLE_CEILING:
+        return OR_TAX_TABLE_TOLERANCE
+    return OR_RATE_CHART_TOLERANCE[case["year"]]
+
+
+def _or_graph_federal_tax_subtraction(case: dict) -> DeltaModel:
+    """Graph omits the OR-40 federal tax liability subtraction.
+
+    OR-40 subtracts federal income tax liability up to a limit that steps down
+    over an AGI band ($8,250 in 2024, $8,500 in 2025). OTS applies it
+    (worksheet at ots_amalgamation.cpp:90449-90468 for 2024, :93805 for 2025;
+    limit tables at :89438/:89461 and :92721/:92744). The graph spec takes it
+    as a zero-default input (tenforty-spec/forms/ORForm40_2024.hs:54,
+    ORForm40_2025.hs:54); its computed ``L18_allowable`` node is unused. The
+    graph departs from the form (tenforty-b72.27).
+
+    Bound: graph taxable income is higher by the subtraction -- federal tax,
+    capped by the limit and by taxable income itself. The removed income lies
+    between the two taxable incomes, so its tax lies between the official rates
+    at the lower and at the higher of them.
+    """
+    if not _or_case(case):
+        return {}
+    subtraction_low, subtraction_high = _or_subtraction_range(case)
+    if subtraction_high == 0.0:
+        return {}
+    schedule = _or_schedule(OR_OFFICIAL_FLOORS[(case["year"], case["status"])])
+    graph_taxable_income = _or_graph_taxable_income(case)
+    low_rate = _marginal_rate(schedule, graph_taxable_income - subtraction_high)
+    high_rate = _marginal_rate(schedule, graph_taxable_income)
+    return {
+        "state_taxable_income": DeltaRange(subtraction_low, subtraction_high),
+        "state_total_tax": DeltaRange(
+            low_rate * subtraction_low, high_rate * subtraction_high
+        ),
+    }
+
+
+def _or_graph_exemption_credit(case: dict) -> DeltaModel:
+    """Graph omits the OR-40 personal exemption credit.
+
+    OR-40 allows a credit per exemption ($249 in 2024, $256 in 2025) when
+    federal AGI is at most $100,000 ($200,000 joint). OTS computes it
+    (ots_amalgamation.cpp:90590 for 2024, :93939 for 2025); the graph spec has
+    no exemption credit node, only credit inputs (ORForm40_2024.hs:88-90). The
+    graph departs from the form (tenforty-b72.28).
+
+    Bound: graph tax is higher by the credit OTS applies, limited to its tax,
+    so the delta lies in [0, credit x exemptions]. OTS counts one exemption on
+    a joint return -- our OR input map leaves the spouse box unchecked
+    (MAP-OR-SPOUSE-EXEMPTION, tenforty-r91.6) -- which keeps it inside the form's bound.
+    """
+    if not _or_case(case):
+        return {}
+    if case["w2"] > OR_EXEMPTION_CREDIT_AGI_LIMIT[case["status"]]:
+        return {}
+    credit = OR_EXEMPTION_CREDIT[case["year"]] * OR_EXEMPTIONS[case["status"]]
+    return {"state_total_tax": DeltaRange(0.0, credit)}
+
+
+def _or_graph_bracket_floors(case: dict) -> DeltaModel:
+    """Graph spec carries the wrong OR bracket floors.
+
+    The graph uses one set of floors for both years (4,400 / 11,050 single;
+    8,800 / 22,100 joint). The 2024 rate charts start the 6.75% and 8.75%
+    brackets at 4,300 / 10,750 (8,600 / 21,500 joint) and the 2025 charts at
+    4,400 / 11,100 (8,800 / 22,200 joint). OTS matches the charts (2024 floors
+    at ots_amalgamation.cpp:89327/:89336, 2025 at :92606-92623). The graph
+    departs from the form.
+
+    Bound: the graph's tax on its own taxable income less the official
+    schedule's on the same income -- each misplaced floor shifts that much
+    income by one 2-point rate step.
+    """
+    if not _or_case(case):
+        return {}
+    graph_taxable_income = _or_graph_taxable_income(case)
+    shift = _bracket_tax(
+        _or_schedule(OR_GRAPH_FLOORS[case["status"]]), graph_taxable_income
+    ) - _bracket_tax(
+        _or_schedule(OR_OFFICIAL_FLOORS[(case["year"], case["status"])]),
+        graph_taxable_income,
+    )
+    if shift == 0.0:
+        return {}
+    return {"state_total_tax": DeltaRange.exact(shift)}
+
+
 SIGNATURES = [
     KnownParityDefect(
         "CA-EXEMPTION-STEP",
@@ -955,6 +1203,30 @@ SIGNATURES = [
         _va_taxable_income_representation,
         {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 0},
     ),
+    KnownParityDefect(
+        "OR-FEDERAL-SUBTRACTION",
+        "graph",
+        "tenforty-b72.27",
+        _or_graph_federal_tax_subtraction,
+        # Above the exemption credit's AGI limit, below the subtraction phase-out.
+        {"state": "OR", "year": 2024, "status": "Single", "w2": 110_000},
+    ),
+    KnownParityDefect(
+        "OR-EXEMPTION-CREDIT",
+        "graph",
+        "tenforty-b72.28",
+        _or_graph_exemption_credit,
+        # Wages below the federal standard deduction: no federal tax to subtract.
+        {"state": "OR", "year": 2024, "status": "Single", "w2": 13_000},
+    ),
+    KnownParityDefect(
+        "OR-BRACKET-FLOORS",
+        "graph",
+        "tenforty-b72.29",
+        _or_graph_bracket_floors,
+        # Above every misplaced floor and every AGI-limited credit or subtraction.
+        {"state": "OR", "year": 2024, "status": "Married/Joint", "w2": 400_000},
+    ),
 ]
 
 
@@ -978,6 +1250,7 @@ _TABLE_TOLERANCE = {
     "NY": (_ny_case, _ny_table_tolerance),
     "NJ": (_nj_case, _nj_table_tolerance),
     "MA": (_ma_case, _ma_table_tolerance),
+    "OR": (_or_case, _or_table_tolerance),
 }
 
 
