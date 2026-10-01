@@ -695,6 +695,163 @@ def _ma24_no_tax_status(case: dict) -> DeltaModel:
     return {"state_total_tax": DeltaRange.exact(MA_RATE * _ma_taxable_income(case))}
 
 
+# --- Virginia Form 760 (2024, 2025) ------------------------------------------
+# Virginia Form 760 instructions, 2024
+# (https://www.tax.virginia.gov/sites/default/files/vatax-pdf/2024-760-instructions.pdf)
+# and 2025 (.../2025-760-instructions.pdf): standard deduction $8,500 / $17,000
+# for 2024 and $8,750 / $17,500 for 2025 (PDF p.7 and p.17); $930 per personal
+# exemption (p.15); the tax rate schedule (2024 PDF p.41, printed p.34). Line 15
+# is "Subtract Line 14 from Line 9" with no stated floor (p.17). Above the rate
+# schedule: "If your Virginia Adjusted Gross Income is less than the filing
+# threshold, do not use the rate schedule or tax table below. Enter $0 as your
+# tax instead" (2024 PDF p.41; 2025 PDF p.41); the thresholds are $11,950
+# single and $23,900 joint in both years (p.9, p.17).
+#
+# Below the filing threshold BOTH backends are wrong: each charges schedule tax
+# (OTS notes "Your VA Tax is zero" at ots_amalgamation.cpp:88207 but leaves
+# line 18 standing; the graph has no threshold). Parity residuals there record
+# how two wrong answers differ, not correctness. Burn-ins:
+# test_ots_va_owes_no_tax_below_the_filing_threshold and
+# test_graph_va_owes_no_tax_below_the_filing_threshold.
+
+VA_STANDARD_DEDUCTION = {
+    (2024, "Single"): 8_500.0,
+    (2024, "Married/Joint"): 17_000.0,
+    (2025, "Single"): 8_750.0,
+    (2025, "Married/Joint"): 17_500.0,
+}
+VA_PERSONAL_EXEMPTION = 930.0
+VA_PERSONAL_EXEMPTIONS = {"Single": 1, "Married/Joint": 2}
+VA_SCHEDULE = (
+    (0.0, 0.02),
+    (3_000.0, 0.03),
+    (5_000.0, 0.05),
+    (17_000.0, 0.0575),
+)
+
+
+def _va_case(case: dict) -> bool:
+    return (
+        case["state"] == "VA"
+        and (case["year"], case["status"]) in VA_STANDARD_DEDUCTION
+    )
+
+
+def _va_income_after_deduction(case: dict) -> float:
+    return case["w2"] - VA_STANDARD_DEDUCTION[(case["year"], case["status"])]
+
+
+def _va_exemptions(case: dict) -> float:
+    return VA_PERSONAL_EXEMPTION * VA_PERSONAL_EXEMPTIONS[case["status"]]
+
+
+def _va_personal_exemptions(case: dict) -> DeltaModel:
+    """Graph omits the Form 760 personal exemptions that OTS applies.
+
+    Form 760 line 12 subtracts $930 per filer (two on a joint return). OTS
+    computes it (ots_amalgamation.cpp:88017-88108 for 2024, :94981-95077 for
+    2025); the graph spec takes line 10 as a zero-default input
+    (tenforty-spec/forms/VAForm760_2024.hs:52, VAForm760_2025.hs:52). The graph
+    departs from the form (tenforty-b72.11).
+
+    Bound: against the form's floored taxable income, the graph's is higher by
+    the exemptions or by whatever income remains after the standard deduction,
+    whichever is smaller. That income is taxed between the lowest (2%) and
+    highest (5.75%) Virginia rates -- but only at or above the filing
+    threshold; below it both backends' taxes are VA-*-BELOW-THRESHOLD's.
+    """
+    if not _va_case(case):
+        return {}
+    income_gap = min(_va_exemptions(case), max(0.0, _va_income_after_deduction(case)))
+    if income_gap == 0.0:
+        return {}
+    deltas = {"state_taxable_income": DeltaRange.exact(income_gap)}
+    if not _va_below_filing_threshold(case):
+        deltas["state_total_tax"] = DeltaRange(
+            VA_SCHEDULE[0][1] * income_gap, VA_SCHEDULE[-1][1] * income_gap
+        )
+    return deltas
+
+
+VA_FILING_THRESHOLD = {"Single": 11_950.0, "Married/Joint": 23_900.0}
+
+
+def _va_below_filing_threshold(case: dict) -> bool:
+    return _va_case(case) and case["w2"] < VA_FILING_THRESHOLD[case["status"]]
+
+
+def _va_schedule_tax(taxable_income: float) -> float:
+    """Apply the rate schedule, with OTS's 2% extension below zero."""
+    if taxable_income < 0.0:
+        return VA_SCHEDULE[0][1] * taxable_income
+    return _bracket_tax(VA_SCHEDULE, taxable_income)
+
+
+def _va_ots_tax_below_threshold(case: dict) -> DeltaModel:
+    """OTS charges Virginia tax below the filing threshold, negative at the bottom.
+
+    Instructions, 2024 PDF p.41 (printed p.34), 2025 PDF p.41: "If your
+    Virginia Adjusted Gross Income is less than the filing threshold, do not
+    use the rate schedule or tax table below. Enter $0 as your tax instead."
+    OTS prints "Your VA Tax is zero" (ots_amalgamation.cpp:88207, :95177) but
+    leaves line 18 at the rate-schedule tax of line 15, which it also does not
+    floor (:88116, :95085; its tax function returns 2% of a negative amount at
+    :87844, :94770). OTS departs from the form; upstream report 7.
+
+    Bound: the form's tax is $0, OTS's the schedule on its own taxable income
+    (VAGI less standard deduction and exemptions, 2% below zero), so OTS is
+    over by exactly that and the graph comparatively lower by it.
+    """
+    if not _va_below_filing_threshold(case):
+        return {}
+    ots_taxable_income = _va_income_after_deduction(case) - _va_exemptions(case)
+    ots_tax = _va_schedule_tax(ots_taxable_income)
+    if ots_tax == 0.0:
+        return {}
+    return {"state_total_tax": DeltaRange.exact(-ots_tax)}
+
+
+def _va_graph_tax_below_threshold(case: dict) -> DeltaModel:
+    """Graph charges Virginia tax below the filing threshold.
+
+    Same instruction as VA-OTS-BELOW-THRESHOLD: below the filing threshold the
+    tax is $0. The graph spec has no threshold rule (VAForm760_2024.hs:70,
+    VAForm760_2025.hs:70 apply the brackets unconditionally). The graph departs
+    from the form (tenforty-b72.30).
+
+    Bound: the form's tax is $0, the graph's the schedule on its floored
+    taxable income (VAGI less the standard deduction), so the graph is over by
+    exactly that.
+    """
+    if not _va_below_filing_threshold(case):
+        return {}
+    graph_tax = _va_schedule_tax(max(0.0, _va_income_after_deduction(case)))
+    if graph_tax == 0.0:
+        return {}
+    return {"state_total_tax": DeltaRange.exact(graph_tax)}
+
+
+def _va_taxable_income_representation(case: dict) -> DeltaModel:
+    """Model OTS reporting negative Virginia taxable income the graph floors at zero.
+
+    Line 15 is "Subtract Line 14 from Line 9" (instructions p.17), with no floor
+    stated, and below the filing threshold lines 10-15 are still completed. OTS
+    reports the negative amount (ots_amalgamation.cpp:88116, :95085); the graph
+    spec floors it (tenforty-spec/forms/VAForm760_2024.hs:65). Which the graph
+    should report is a question about our output concept (tenforty-r91.7),
+    left unchanged; the tax is $0 either way (VA-OTS-BELOW-THRESHOLD).
+
+    Bound: OTS's taxable income is negative by exactly the shortfall of income
+    under deductions plus exemptions; the graph's is $0.
+    """
+    if not _va_case(case):
+        return {}
+    shortfall = max(0.0, _va_exemptions(case) - _va_income_after_deduction(case))
+    if shortfall == 0.0:
+        return {}
+    return {"state_taxable_income": DeltaRange.exact(shortfall)}
+
+
 SIGNATURES = [
     KnownParityDefect(
         "CA-EXEMPTION-STEP",
@@ -768,6 +925,35 @@ SIGNATURES = [
         "tenforty-b72.26",
         _ma24_no_tax_status,
         {"state": "MA", "year": 2024, "status": "Single", "w2": 8_000},
+    ),
+    KnownParityDefect(
+        "VA-EXEMPTIONS",
+        "graph",
+        "tenforty-b72.11",
+        _va_personal_exemptions,
+        {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 100_000},
+    ),
+    KnownParityDefect(
+        "VA-OTS-BELOW-THRESHOLD",
+        "ots",
+        "upstream report 7",
+        _va_ots_tax_below_threshold,
+        # Below the $23,900 joint threshold with positive taxable income.
+        {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 20_000},
+    ),
+    KnownParityDefect(
+        "VA-GRAPH-BELOW-THRESHOLD",
+        "graph",
+        "tenforty-b72.30",
+        _va_graph_tax_below_threshold,
+        {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 20_000},
+    ),
+    KnownParityDefect(
+        "VA-TI-REPRESENTATION",
+        "representation",
+        "tenforty-r91.7",
+        _va_taxable_income_representation,
+        {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 0},
     ),
 ]
 

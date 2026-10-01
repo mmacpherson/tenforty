@@ -343,6 +343,56 @@ figure. A strict-xfail legal-value witness and a bounded parity signature
 
 ---
 
+## 7. VA 760: tax is not zeroed below the filing threshold (finding VA-OTS-BELOW-THRESHOLD)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_VA_760_2024.c:313`, `:333`, `:404`
+- `src/taxsolve_VA_760_2025.c:359`, `:371`, `:451`
+
+The 2024 Form 760 instructions
+(https://www.tax.virginia.gov/sites/default/files/vatax-pdf/2024-760-instructions.pdf,
+PDF p.41, printed p.34) say, directly above the tax rate schedule: "If your
+Virginia Adjusted Gross Income is less than the filing threshold, do not use
+the rate schedule or tax table below. Enter $0 as your tax instead." The
+thresholds are $11,950 (single, married filing separately) and $23,900
+(married filing jointly) (PDF p.9 and p.17). The 2025 instructions say the same
+(PDF p.41).
+
+The program does notice the condition:
+
+```c
+ if (L[9] < min2file)
+  {
+   fprintf(outfile,"\nYour VAGI is less than the minimum required to file a return.\n");
+   ...
+    fprintf(outfile,"You do not need to file return.  Your VA Tax is zero.\n");
+  }
+```
+
+As far as we can tell, though, lines 16 and 18 keep the rate-schedule tax.
+Line 18 is computed as `L[18] = L[16] - L[17];` (`taxsolve_VA_760_2024.c:333`)
+before this check runs, and nothing sets it to zero afterwards.
+
+A related case: line 15 (`L[15] = L[9] - L[14];`, `:313`) is not floored, and
+`TaxRateFunction` returns 2% of a negative amount, so the tax can also go
+negative. The instructions for line 15 say only "Subtract Line 14 from Line 9",
+so we are not raising the negative line 15 itself. But every return where line
+15 is negative is also below the filing threshold here, so its tax should be
+$0 too.
+
+**Minimal reproducers:** 2024, Married filing jointly.
+- $20,000 of wages: VAGI $20,000, below $23,900. OTS reports tax of **$22.80**;
+  we would have expected $0.
+- No income: OTS reports **-$377.20**; we would have expected $0.
+
+**Possible fix:** set lines 16 and 18 to zero when `L[9] < min2file`, before
+the line 18 subtraction.
+
+Not patched locally, for the same reason as report 6.
+
+---
+
 ## 8. NY IT-201 line 39 keeps the tax table above $65,000 of taxable income (finding NY-OTS-TABLE-ABOVE-65K)
 
 **Releases:** OpenTaxSolver2024_22.06 (the same code is in OpenTaxSolver2025_23.06)

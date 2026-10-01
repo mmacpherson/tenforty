@@ -900,37 +900,13 @@ def test_va_state_agi_parity_2024(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $930 personal exemption + $8,000 standard deduction; graph leaves as zero",
-    strict=True,
-)
+# Excludes Single returns until MAP-VA-STATUS is fixed: OTS computes them as Married/Joint.
 @skip_if_backends_unavailable
-@given(
-    w2_income=st.integers(0, 500_000),
-    filing_status=st.sampled_from(["Single", "Married/Joint"]),
-)
+@given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
-def test_va_state_tax_parity_2024(w2_income, filing_status):
-    """VA 2024 total tax differs because OTS auto-applies personal exemption + standard deduction."""
-    ots = evaluate_return(
-        year=2024,
-        state="VA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="VA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"VA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+def test_va_state_tax_parity_2024(w2_income):
+    """VA 2024 tax agrees up to personal exemptions and OTS's unfloored taxable income."""
+    assert_state_parity("VA", 2024, "Married/Joint", w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1453,37 +1429,13 @@ def test_va_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $930 personal exemption + $8,000 standard deduction; graph leaves as zero",
-    strict=True,
-)
+# Excludes Single returns until MAP-VA-STATUS is fixed: OTS computes them as Married/Joint.
 @skip_if_backends_unavailable
-@given(
-    w2_income=st.integers(0, 500_000),
-    filing_status=st.sampled_from(["Single", "Married/Joint"]),
-)
+@given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
-def test_va_state_tax_parity(w2_income, filing_status):
-    """VA total tax differs because OTS auto-applies personal exemption + standard deduction."""
-    ots = evaluate_return(
-        year=2025,
-        state="VA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2025,
-        state="VA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"VA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+def test_va_state_tax_parity(w2_income):
+    """VA 2025 tax agrees up to personal exemptions and OTS's unfloored taxable income."""
+    assert_state_parity("VA", 2025, "Married/Joint", w2_income)
 
 
 # === OR State Parity Tests (2024) ===
@@ -1725,6 +1677,43 @@ def test_ots_nc_tax_is_zero_when_taxable_income_is_not_positive(year):
 
 
 @pytest.mark.xfail(
+    reason="VA-OTS-BELOW-THRESHOLD (upstream report 7): OTS leaves line 18 at "
+    "the rate-schedule tax when VAGI is below the filing threshold",
+    strict=True,
+)
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_ots_va_owes_no_tax_below_the_filing_threshold(year):
+    """VA MFJ, $20,000 VAGI, below the $23,900 threshold: "Enter $0 as your tax"."""
+    result = evaluate_return(
+        year=year,
+        state="VA",
+        filing_status="Married/Joint",
+        w2_income=20_000,
+        backend="ots",
+    )
+    assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.xfail(
+    reason="VA-GRAPH-BELOW-THRESHOLD (tenforty-b72.30): the graph VA 760 spec has no "
+    "filing threshold, so it taxes VAGI below it",
+    strict=True,
+)
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_graph_va_owes_no_tax_below_the_filing_threshold(year):
+    """VA MFJ, $20,000 VAGI, below the $23,900 threshold: "Enter $0 as your tax"."""
+    result = evaluate_return(
+        year=year,
+        state="VA",
+        filing_status="Married/Joint",
+        w2_income=20_000,
+        backend="graph",
+    )
+    assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
+
+
+@pytest.mark.xfail(
     reason="NY-OTS-TABLE-ABOVE-65K (upstream report 8): OTS prices taxable "
     "income of $65,000 or more from the $50 tax table",
     strict=True,
@@ -1779,6 +1768,23 @@ def test_ots_nj_married_joint_gets_two_exemptions():
         backend="ots",
     )
     assert result.state_taxable_income == pytest.approx(48_000.0, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="MAP-VA-STATUS (tenforty-r91.4): the VA_760 input map omits filing_status, so OTS reads "
+    "its template default and computes every return as Married/Joint",
+    strict=True,
+)
+def test_ots_va_single_gets_single_deduction():
+    """VA 2024 Single, $50,000 wages: $8,500 deduction and one $930 exemption leave $40,570."""
+    result = evaluate_return(
+        year=2024,
+        state="VA",
+        filing_status="Single",
+        w2_income=50_000,
+        backend="ots",
+    )
+    assert result.state_taxable_income == pytest.approx(40_570.0, abs=1.0)
 
 
 @pytest.mark.xfail(
