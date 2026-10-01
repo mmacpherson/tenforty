@@ -17,7 +17,7 @@ from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
     STATE_NATURAL_TO_NODE,
-    STATE_OUTPUT_LINES,
+    state_output_lines,
 )
 from tenforty.models import STATE_TO_FORM
 
@@ -480,7 +480,6 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
     for state in sorted(STATE_FORM_NAMES, key=lambda item: item.value or ""):
         state_code = state.value
         state_inputs = STATE_NATURAL_TO_NODE.get(state, {})
-        output_lines = STATE_OUTPUT_LINES.get(state, {})
         jurisdiction = {
             "name": STATE_NAMES[state_code],
             "kind": (
@@ -506,7 +505,7 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
                     unsupported_inputs.append(natural)
 
             mapped_outputs = {}
-            for line, public_name in output_lines.items():
+            for public_name, line in state_output_lines(state, year).items():
                 if public_name not in STATE_OUTPUTS:
                     continue
                 node = _state_output_node(STATE_FORM_NAMES[state], line)
