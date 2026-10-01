@@ -627,9 +627,12 @@ def _nj_ots_taxes_at_threshold(case: dict) -> DeltaModel:
 
 
 # --- Massachusetts Form 1 (2024) ---------------------------------------------
-# MA DOR 2024 Form 1 instructions (mass.gov "2024 Form 1 Instructions", as
-# archived at https://taxsim.nber.org/historical_state_tax_forms/MA/2024/dor-2024-inc-form-1-inst_1.pdf
-# because mass.gov refuses scripted downloads; PDF pages): line 2a personal
+# MA DOR 2024 Form 1 instructions, https://www.mass.gov/doc/2024-form-1-instructions/download
+# (page numbers read from the copy archived at
+# https://taxsim.nber.org/historical_state_tax_forms/MA/2024/dor-2024-inc-form-1-inst_1.pdf
+# because mass.gov refuses scripted downloads; No Tax Status thresholds also at
+# https://www.mass.gov/info-details/no-tax-status-and-limited-income-credit;
+# PDF pages): line 2a personal
 # exemption $4,400 / $6,800 / $8,800 (p.8); "If line 21 is less than $24,000,
 # find the proper tax in the tax table" (p.11); No Tax Status at AGI "$8,000 or
 # less if single, $14,400 or less ... head of household, or $16,400 or less"
