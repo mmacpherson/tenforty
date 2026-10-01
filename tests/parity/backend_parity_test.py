@@ -623,16 +623,6 @@ def test_ca_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason=(
-        "Graph deviates from Form 540 where OTS follows it: (1) taxable income "
-        "<= $100,000 must use the FTB Tax Table ($100 rows priced at the midpoint), "
-        "graph uses the exact rate formula (precision contract, tenforty-xew); "
-        "(2) the line 32 exemption-credit phase-out steps $6 per $2,500 of excess "
-        "AGI rounded up, graph phases out continuously (up to $6 per exemption)."
-    ),
-    strict=True,
-)
 @skip_if_backends_unavailable
 @given(
     w2_income=st.integers(0, 500_000),
@@ -640,26 +630,8 @@ def test_ca_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=200)
 def test_ca_state_tax_parity(w2_income, filing_status):
-    """CA total tax differs: graph ignores the FTB Tax Table (TI <= $100k) and phases the exemption credit out continuously (tenforty-b72.17)."""
-    ots = evaluate_return(
-        year=2024,
-        state="CA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="CA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"CA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+    """CA 2024 tax agrees up to the Tax Table tolerance and the stepped exemption phase-out."""
+    assert_state_parity("CA", 2024, filing_status, w2_income)
 
 
 CA_2024_RATE_SCHEDULE_W2_RANGE = {

@@ -32,6 +32,7 @@ from typing import Literal
 from tests.taxcalc.taxcalc_policy import (
     ZERO_DELTA,
     DeltaModel,
+    DeltaRange,
 )
 
 PARITY_TOLERANCE = 1.0
@@ -95,7 +96,127 @@ def _table_half_width(schedule: Schedule, income: float, half_row: float) -> flo
     return _marginal_rate(schedule, income + half_row) * half_row + 0.5
 
 
-SIGNATURES: list[KnownParityDefect] = []
+# --- California Form 540 (2024) ---------------------------------------------
+# FTB 2024 California Resident Income Tax Booklet
+# (https://www.ftb.ca.gov/forms/2024/2024-540-booklet.pdf; PDF pages): standard
+# deduction $5,540 / $11,080 (p.13); "Tax Table - If your taxable income on line
+# 19 is $100,000 or less" (p.13); $149 personal exemption credit (Form 540
+# line 7); line 32 AGI Limitation Worksheet: thresholds $244,857 / $367,291 /
+# $489,719, excess divided by $2,500 ($1,250 MFS) "round it to the next higher
+# whole number", times $6 per credit (p.14); rate schedules X, Y, Z (p.75,
+# brackets reachable below the Tax Table ceiling).
+
+CA_2024_STANDARD_DEDUCTION = {
+    "Single": 5_540.0,
+    "Married/Sep": 5_540.0,
+    "Married/Joint": 11_080.0,
+    "Widow(er)": 11_080.0,
+    "Head_of_House": 11_080.0,
+}
+_CA_2024_SCHEDULE_X = (
+    (0.0, 0.01),
+    (10_756.0, 0.02),
+    (25_499.0, 0.04),
+    (40_245.0, 0.06),
+    (55_866.0, 0.08),
+    (70_606.0, 0.093),
+)
+_CA_2024_SCHEDULE_Y = (
+    (0.0, 0.01),
+    (21_512.0, 0.02),
+    (50_998.0, 0.04),
+    (80_490.0, 0.06),
+    (111_732.0, 0.08),
+)
+_CA_2024_SCHEDULE_Z = (
+    (0.0, 0.01),
+    (21_527.0, 0.02),
+    (51_000.0, 0.04),
+    (65_744.0, 0.06),
+    (81_364.0, 0.08),
+    (96_107.0, 0.093),
+)
+CA_2024_SCHEDULE = {
+    "Single": _CA_2024_SCHEDULE_X,
+    "Married/Sep": _CA_2024_SCHEDULE_X,
+    "Married/Joint": _CA_2024_SCHEDULE_Y,
+    "Widow(er)": _CA_2024_SCHEDULE_Y,
+    "Head_of_House": _CA_2024_SCHEDULE_Z,
+}
+CA_TAX_TABLE_CEILING = 100_000.0
+CA_TAX_TABLE_HALF_ROW = 50.0
+CA_2024_EXEMPTION_PHASEOUT_THRESHOLD = {
+    "Single": 244_857.0,
+    "Married/Sep": 244_857.0,
+    "Head_of_House": 367_291.0,
+    "Married/Joint": 489_719.0,
+    "Widow(er)": 489_719.0,
+}
+CA_PERSONAL_EXEMPTION_CREDITS = {
+    "Single": 1,
+    "Married/Sep": 1,
+    "Head_of_House": 1,
+    "Married/Joint": 2,
+    "Widow(er)": 2,
+}
+CA_PHASEOUT_STEP_REDUCTION = 6.0
+
+
+def _ca_case(case: dict) -> bool:
+    return case["state"] == "CA" and case["year"] == 2024
+
+
+def _ca_taxable_income(case: dict) -> float:
+    return max(0.0, case["w2"] - CA_2024_STANDARD_DEDUCTION[case["status"]])
+
+
+def _ca_table_tolerance(case: dict) -> float:
+    """Form 540 line 31: taxable income of $100,000 or less uses the Tax Table.
+
+    OTS quantizes to the nearest $100 row and rounds (``TaxRateFunction``,
+    ots_amalgamation.cpp:77998), so it prices at most $50 from taxable income.
+    """
+    taxable_income = _ca_taxable_income(case)
+    if taxable_income >= CA_TAX_TABLE_CEILING:
+        return 0.0
+    return _table_half_width(
+        CA_2024_SCHEDULE[case["status"]], taxable_income, CA_TAX_TABLE_HALF_ROW
+    )
+
+
+def _ca24_stepped_exemption_phaseout(case: dict) -> DeltaModel:
+    """Graph phases the exemption credit out continuously; Form 540 steps it.
+
+    Form 540 line 32: above the AGI threshold each personal exemption credit is
+    reduced by $6 for each $2,500 of excess AGI "or fraction thereof" ($1,250
+    married filing separately). OTS rounds the excess up to whole steps; the
+    graph spec reduces by $6/$2,500 per dollar (tenforty-b72.17). The graph is
+    the side that departs from the form.
+
+    Bound: per credit, the stepped reduction exceeds the continuous one by at
+    least $0 and less than one $6 step, so OTS's tax is higher by up to $6 per
+    credit: delta in [-$6 x credits, 0]. Once a reduction exhausts the $149
+    credit the gap only narrows.
+    """
+    if not _ca_case(case):
+        return {}
+    status = case["status"]
+    if case["w2"] <= CA_2024_EXEMPTION_PHASEOUT_THRESHOLD[status]:
+        return {}
+    widest_gap = CA_PHASEOUT_STEP_REDUCTION * CA_PERSONAL_EXEMPTION_CREDITS[status]
+    return {"state_total_tax": DeltaRange(-widest_gap, 0.0)}
+
+
+SIGNATURES = [
+    KnownParityDefect(
+        "CA-EXEMPTION-STEP",
+        "graph",
+        "tenforty-b72.17",
+        _ca24_stepped_exemption_phaseout,
+        # $1 over the threshold: Form 540 takes a full $6 step, the graph $0.0024.
+        {"state": "CA", "year": 2024, "status": "Single", "w2": 244_858},
+    ),
+]
 
 
 def modeled_parity_deltas(
@@ -113,7 +234,9 @@ def modeled_parity_deltas(
     return combined
 
 
-_TABLE_TOLERANCE: dict = {}
+_TABLE_TOLERANCE = {
+    "CA": (_ca_case, _ca_table_tolerance),
+}
 
 
 def tolerance(case: dict, quantity: str) -> float:
