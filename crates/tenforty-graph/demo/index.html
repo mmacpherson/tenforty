@@ -31,12 +31,14 @@
 
     <main id="calculator">
       <section class="intro" aria-labelledby="page-title">
-        <p class="eyebrow">Federal + all 50 states + DC</p>
-        <h1 id="page-title">See the tax picture,<br />as you change it.</h1>
+        <p class="eyebrow">
+          Federal + all 50 states + DC · exact local effects
+        </p>
+        <h1 id="page-title">See what the<br />next dollar does.</h1>
         <p class="intro-copy">
-          A fast, open-source estimate of modeled personal income taxes. Change
-          any number and the graph recalculates instantly—without sending your
-          financial information anywhere.
+          Most calculators give you one total. tenforty also shows the local
+          shape of the tax system: where your return sits, how the curve
+          changes, and what one more dollar does next.
         </p>
       </section>
 
@@ -74,8 +76,111 @@
         </button>
       </div>
 
+      <section
+        id="analysis-lab"
+        class="analysis-lab"
+        aria-labelledby="analysis-heading"
+        aria-busy="true"
+      >
+        <div class="analysis-copy">
+          <p class="analysis-eyebrow">03 · Local tax geometry</p>
+          <div class="analysis-title-row">
+            <div>
+              <h2 id="analysis-heading">What the next dollar costs</h2>
+              <p id="analysis-action">Earn $1 more in wages</p>
+            </div>
+            <label class="curve-control" for="curve-input">
+              Change the question
+              <select id="curve-input"></select>
+            </label>
+          </div>
+
+          <div class="next-dollar-readout" aria-live="polite">
+            <div class="next-dollar-number">
+              <strong id="next-dollar-cents">—</strong><span>¢</span>
+            </div>
+            <p>of the next $1 goes to modeled income tax</p>
+          </div>
+          <div class="rate-parts">
+            <div>
+              <span>Federal effect</span>
+              <strong id="next-dollar-federal">—</strong>
+            </div>
+            <div>
+              <span id="next-dollar-state-label">State effect</span>
+              <strong id="next-dollar-state">—</strong>
+            </div>
+            <div>
+              <span>Combined local slope</span>
+              <strong id="next-dollar-total">—</strong>
+            </div>
+          </div>
+          <p id="derivative-interpretation" class="derivative-interpretation">
+            This is a local, right-hand derivative—not your effective rate.
+          </p>
+        </div>
+
+        <div class="curve-panel">
+          <div class="curve-heading">
+            <div>
+              <span>Modeled total tax</span>
+              <strong id="curve-title">as wages change</strong>
+            </div>
+            <div class="curve-legend" aria-hidden="true">
+              <span class="legend-total">Total</span>
+              <span class="legend-federal">Federal</span>
+              <span class="legend-state">State</span>
+            </div>
+          </div>
+          <svg
+            id="tax-curve"
+            class="tax-curve"
+            viewBox="0 0 680 320"
+            role="img"
+            aria-labelledby="curve-title curve-summary"
+          >
+            <g id="curve-grid"></g>
+            <path id="curve-state" class="curve-line state-line"></path>
+            <path id="curve-federal" class="curve-line federal-line"></path>
+            <path id="curve-total" class="curve-line total-line"></path>
+            <line id="curve-tangent" class="curve-tangent"></line>
+            <line id="curve-guide" class="curve-guide"></line>
+            <circle id="curve-current" class="curve-current" r="6"></circle>
+            <g id="curve-labels"></g>
+          </svg>
+          <p id="curve-summary" class="sr-only"></p>
+          <p class="curve-caption">
+            The dot is your return. The short gold line is the exact local
+            slope; the full curve comes from evaluating nearby scenarios.
+          </p>
+        </div>
+
+        <div class="sensitivity-panel">
+          <div>
+            <p class="analysis-eyebrow">Selected sensitivities</p>
+            <h3>Several questions, one gradient vector</h3>
+          </div>
+          <div id="sensitivity-list" class="sensitivity-list"></div>
+        </div>
+
+        <details class="derivative-note">
+          <summary>What “next dollar” means here</summary>
+          <p>
+            This is the composed effect of one public input across every federal
+            and state graph node it writes. At an exact threshold, tenforty
+            shows the effect immediately to the right. Qualified dividends are a
+            reclassification of ordinary dividends, so their sensitivity can be
+            negative without implying that earning income creates a subsidy.
+          </p>
+        </details>
+      </section>
+
       <form id="calculator-form" class="calculator-grid" novalidate>
-        <section class="input-card" aria-labelledby="income-heading">
+        <section
+          id="income-card"
+          class="input-card"
+          aria-labelledby="income-heading"
+        >
           <div class="card-heading">
             <p class="section-number">02</p>
             <div>
@@ -99,7 +204,11 @@
           <div id="other-income-fields" class="field-grid details-fields"></div>
         </details>
 
-        <section class="input-card" aria-labelledby="deductions-heading">
+        <section
+          id="deductions-card"
+          class="input-card"
+          aria-labelledby="deductions-heading"
+        >
           <div class="card-heading compact-heading">
             <div>
               <h2 id="deductions-heading">Deductions</h2>
@@ -158,7 +267,7 @@
           <section class="result-details" aria-labelledby="detail-heading">
             <div class="result-details-heading">
               <div>
-                <p class="section-number">03</p>
+                <p class="section-number">04</p>
                 <h2 id="detail-heading">How it adds up</h2>
               </div>
               <span id="calculation-status" class="calculation-status"
