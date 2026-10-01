@@ -10,7 +10,7 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "b293838063570bc49586720df1da57ef44b1e6d60f4e73217885be6be486d428"
+        "sha256": "99eafe21dfe25f9e5ab4c7cc9db2f29cdbec8b395fa3aee2e7887d07ec96f739"
       },
       "2025": {
         "form_id": "resolved",
@@ -701,10 +701,12 @@
       "output_nodes": {
         "2024": {
           "state_adjusted_gross_income": "in_it40_L7_in_agi",
+          "state_taxable_income": "in_it40_L7_in_agi",
           "state_total_tax": "in_it40_L9_in_state_tax"
         },
         "2025": {
           "state_adjusted_gross_income": "in_it40_L7_in_agi",
+          "state_taxable_income": "in_it40_L7_in_agi",
           "state_total_tax": "in_it40_L9_in_state_tax"
         }
       },
@@ -776,10 +778,14 @@
       },
       "output_nodes": {
         "2024": {
-          "state_total_tax": "la_it540_L10_la_tax"
+          "state_adjusted_gross_income": "la_it540_L7_federal_agi",
+          "state_total_tax": "la_it540_L10_la_tax",
+          "state_taxable_income": "la_it540_L10_taxable"
         },
         "2025": {
-          "state_total_tax": "la_it540_L10_la_tax"
+          "state_adjusted_gross_income": "la_it540_L7_federal_agi",
+          "state_total_tax": "la_it540_L10_la_tax",
+          "state_taxable_income": "la_it540_L9_la_taxable_income"
         }
       },
       "unsupported_inputs": {
@@ -1657,8 +1663,8 @@
         "federal_total_tax": 26536,
         "state_adjusted_gross_income": 201000,
         "state_taxable_income": 171000,
-        "state_total_tax": 8910.7,
-        "total_tax": 35446.7
+        "state_total_tax": 8689.724,
+        "total_tax": 35225.724
       }
     },
     {

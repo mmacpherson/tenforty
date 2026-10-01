@@ -40,17 +40,18 @@ import TenForty.Types
 
 -- | 2024 California income tax brackets
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: FTB Tax Rate Schedules
+-- Source: FTB 2024 Form 540 Booklet p. 75, Tax Rate Schedules X (Single/MFS),
+-- Y (MFJ/QSS), Z (HoH); https://www.ftb.ca.gov/forms/2024/2024-540-booklet.pdf
 californiaBrackets2024 :: NonEmpty Bracket
 californiaBrackets2024 =
-  Bracket (byStatus 10412 20824 10412 20839 20824) 0.01
-    :| [ Bracket (byStatus 24684 49368 24684 49371 49368) 0.02,
-         Bracket (byStatus 38959 77918 38959 77921 77918) 0.04,
-         Bracket (byStatus 54081 108162 54081 108164 108162) 0.06,
-         Bracket (byStatus 68350 136700 68350 136702 136700) 0.08,
-         Bracket (byStatus 349137 698274 349137 698280 698274) 0.093,
-         Bracket (byStatus 418961 837922 418961 837926 837922) 0.103,
-         Bracket (byStatus 698271 1396542 698271 1396550 1396542) 0.113,
+  Bracket (byStatus 10756 21512 10756 21527 21512) 0.01
+    :| [ Bracket (byStatus 25499 50998 25499 51000 50998) 0.02,
+         Bracket (byStatus 40245 80490 40245 65744 80490) 0.04,
+         Bracket (byStatus 55866 111732 55866 81364 111732) 0.06,
+         Bracket (byStatus 70606 141212 70606 96107 141212) 0.08,
+         Bracket (byStatus 360659 721318 360659 490493 721318) 0.093,
+         Bracket (byStatus 432787 865574 432787 588593 865574) 0.103,
+         Bracket (byStatus 721314 1442628 721314 980987 1442628) 0.113,
          Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.123
        ]
 
@@ -74,8 +75,9 @@ caDependentExemption2024 :: Amount Dollars
 caDependentExemption2024 = 461
 
 -- | 2024 AGI threshold above which exemption credits phase out
+-- Source: FTB 2024 Form 540 Booklet p. 14, line 32 AGI Limitation Worksheet
 caExemptionPhaseoutThreshold2024 :: ByStatus (Amount Dollars)
-caExemptionPhaseoutThreshold2024 = byStatus 244857 489714 244857 367290 489714
+caExemptionPhaseoutThreshold2024 = byStatus 244857 489719 244857 367291 489719
 
 -- | 2024 total personal exemption credit by filing status
 -- Single/MFS/HoH: 1 × $149 = $149; MFJ/QW: 2 × $149 = $298

@@ -6,7 +6,10 @@ pub mod solver;
 pub mod viz;
 
 pub use autodiff::gradient;
-pub use eval::{eval_batch, eval_batch_named, Runtime, Scenario, ScenarioResult};
+pub use eval::{
+    eval_batch, eval_batch_named, eval_named_scenario, BatchRowError, Runtime, Scenario,
+    ScenarioResult,
+};
 pub use graph::{FilingStatus, Graph, Node, NodeId, Op, TableId};
 pub use solver::solve;
 
