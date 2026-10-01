@@ -447,3 +447,98 @@ def test_se_tax_gradient_tracks_wage_base_across_the_region(w2: float, coupled: 
         assert analytical == pytest.approx(0.0, abs=1e-9), (
             f"the wage base does not bind at w2={w2}; nothing is displaced"
         )
+
+
+# A bracket_tax fed straight from an input, as Montana's Form 2 line 11 and the
+# NYC tax on IT-201 line 47 are. Tax is clamped to zero below zero income, so zero
+# is a kink that no bracket threshold names; the natural-API surfaces never reach
+# it because their taxable incomes pass through a max0 first.
+_BRACKET_THRESHOLDS = (10_000.0, 40_000.0)
+_BRACKET_RATES = (0.10, 0.20, 0.30)
+
+
+def _bare_bracket_runtime():
+    import json
+
+    from tenforty.graphlib import FilingStatus, Graph, Runtime
+
+    brackets = [
+        {"threshold": threshold, "rate": rate}
+        for threshold, rate in zip(
+            _BRACKET_THRESHOLDS, _BRACKET_RATES[:-1], strict=True
+        )
+    ] + [{"threshold": 1e12, "rate": _BRACKET_RATES[-1]}]
+    statuses = (
+        "single",
+        "married_joint",
+        "married_separate",
+        "head_of_household",
+        "qualifying_widow",
+    )
+    graph = Graph.from_json(
+        json.dumps(
+            {
+                "meta": None,
+                "imports": [],
+                "inputs": [0],
+                "outputs": [1],
+                "tables": {
+                    "brackets": {"brackets": {status: brackets for status in statuses}}
+                },
+                "nodes": {
+                    "0": {"id": 0, "name": "income", "op": {"type": "input"}},
+                    "1": {
+                        "id": 1,
+                        "name": "tax",
+                        "op": {
+                            "type": "bracket_tax",
+                            "table": "brackets",
+                            "income": 0,
+                        },
+                    },
+                },
+            }
+        )
+    )
+    return Runtime(graph, FilingStatus.from_str("single"))
+
+
+def _right_derivative_of_brackets(income: float) -> float:
+    if income < 0.0:
+        return 0.0
+    return next(
+        (
+            rate
+            for threshold, rate in zip(
+                _BRACKET_THRESHOLDS, _BRACKET_RATES[:-1], strict=True
+            )
+            if income < threshold
+        ),
+        _BRACKET_RATES[-1],
+    )
+
+
+_BRACKET_EDGE = st.sampled_from((0.0, *_BRACKET_THRESHOLDS))
+
+
+@skip_if_graph_unavailable
+@settings(deadline=None)  # inherit profile count (ci=500, deep=10k, soak=100k)
+@given(
+    income=st.one_of(
+        _BRACKET_EDGE,
+        st.floats(
+            min_value=-50_000.0,
+            max_value=100_000.0,
+            allow_nan=False,
+            allow_infinity=False,
+        ),
+    )
+)
+def test_bare_bracket_tax_gradient_is_the_right_derivative(income):
+    """The raw gradient of a bracket_tax is its right-hand slope, kinks included."""
+    runtime = _bare_bracket_runtime()
+    runtime.set("income", income)
+
+    assert runtime.gradient("tax", "income") == pytest.approx(
+        _right_derivative_of_brackets(income), abs=1e-6
+    )

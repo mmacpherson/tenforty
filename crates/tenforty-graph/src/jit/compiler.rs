@@ -107,6 +107,47 @@ impl JitCompiler {
         filing_status: FilingStatus,
         output_ids: &[NodeId],
     ) -> Result<CompiledBatchGraph, JitError> {
+        // Only compile what the requested outputs actually depend on. The
+        // resolved per-year graph carries all ~50 states; a federal-or-one-state
+        // batch touches a few hundred of its ~3000 nodes, so lowering the whole
+        // graph would compute (and SIMD-execute) every dormant state per row.
+        let order = graph.reachable_topological_order(output_ids, filing_status)?;
+        self.compile_batch_order(graph, filing_status, output_ids, &order)
+    }
+
+    /// Compile a batch slice only if it evaluates exactly as `Runtime` would,
+    /// errors included; `None` means the caller must use the interpreter.
+    ///
+    /// The SIMD lowering has no per-lane error channel, so it turns division
+    /// by zero into 0 where `Runtime` raises. A slice that reaches any `Div`
+    /// is therefore declined, whatever its inputs.
+    pub fn compile_batch_strict(
+        &self,
+        graph: &Graph,
+        filing_status: FilingStatus,
+        output_ids: &[NodeId],
+    ) -> Result<Option<CompiledBatchGraph>, JitError> {
+        let order = graph.reachable_topological_order(output_ids, filing_status)?;
+        let reaches_division = order.iter().any(|id| {
+            graph
+                .nodes
+                .get(id)
+                .is_some_and(|node| matches!(node.op, crate::graph::Op::Div { .. }))
+        });
+        if reaches_division {
+            return Ok(None);
+        }
+        self.compile_batch_order(graph, filing_status, output_ids, &order)
+            .map(Some)
+    }
+
+    fn compile_batch_order(
+        &self,
+        graph: &Graph,
+        filing_status: FilingStatus,
+        output_ids: &[NodeId],
+        order: &[NodeId],
+    ) -> Result<CompiledBatchGraph, JitError> {
         let builder =
             JITBuilder::with_isa(self.isa.clone(), cranelift_module::default_libcall_names());
         let mut module = JITModule::new(builder);
@@ -123,11 +164,6 @@ impl JitCompiler {
             .declare_function("eval_batch", Linkage::Export, &ctx.func.signature)
             .map_err(Box::new)?;
 
-        // Only compile what the requested outputs actually depend on. The
-        // resolved per-year graph carries all ~50 states; a federal-or-one-state
-        // batch touches a few hundred of its ~3000 nodes, so lowering the whole
-        // graph would compute (and SIMD-execute) every dormant state per row.
-        let order = graph.reachable_topological_order(output_ids, filing_status)?;
         let reachable: std::collections::HashSet<NodeId> = order.iter().copied().collect();
 
         let (input_offsets, num_inputs) = build_batch_input_offsets(graph, &reachable);
@@ -138,7 +174,7 @@ impl JitCompiler {
             &mut module,
             graph,
             filing_status,
-            &order,
+            order,
             &input_offsets,
             &output_offsets,
         )?;
