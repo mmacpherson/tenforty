@@ -77,5 +77,8 @@ uv run pytest tests/browser_contract_test.py
 node scripts/smoke_wasm_demo.mjs target/pages
 ```
 
-The current demo UI does not consume the contract yet. Rebinding the calculator
-and adding a browser-level integration test are the scope of `tenforty-ox4.4.3`.
+The calculator renders its supported fields and dimensions from this contract.
+Its DOM layer passes a public scenario to the same calculation boundary exercised
+by the Pages smoke test; that test also round-trips every pinned scenario through
+the share-link encoding before comparing its WASM result with Python. Share links
+put scenario data after the URL fragment marker so it remains client-side.
