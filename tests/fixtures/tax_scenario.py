@@ -27,6 +27,7 @@ class TaxScenario:
     state_adjustment: float = 0.0
     expected_federal_tax: float | None = None
     expected_state_tax: float | None = None
+    state_tax_tolerance: float = 0.01
     expected_federal_agi: float | None = None
     expected_federal_taxable_income: float | None = None
     known_failure: str | None = None
