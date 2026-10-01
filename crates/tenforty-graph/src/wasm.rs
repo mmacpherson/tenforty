@@ -157,6 +157,66 @@ impl Runtime {
         })
     }
 
+    /// Grouped total derivatives of the sum of `outputs`.
+    ///
+    /// `input_nodes` contains every graph node written by the public inputs,
+    /// flattened group by group. `group_lengths` restores those public-input
+    /// groups without requiring nested-array conversion at the WASM boundary.
+    #[wasm_bindgen(js_name = gradientVector)]
+    pub fn gradient_vector(
+        &mut self,
+        outputs: Vec<String>,
+        input_nodes: Vec<String>,
+        group_lengths: Vec<u32>,
+    ) -> Result<Vec<f64>, JsError> {
+        self.inner.with_runtime_mut(|rt| {
+            if outputs.is_empty() {
+                return Err(JsError::new("At least one output node is required"));
+            }
+            let output_ids = outputs
+                .iter()
+                .map(|name| {
+                    rt.graph()
+                        .node_id_by_name(name)
+                        .ok_or_else(|| JsError::new(&format!("Node not found: {}", name)))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            let expected_nodes: usize = group_lengths.iter().map(|length| *length as usize).sum();
+            if expected_nodes != input_nodes.len() {
+                return Err(JsError::new(&format!(
+                    "Input group lengths describe {} nodes, received {}",
+                    expected_nodes,
+                    input_nodes.len()
+                )));
+            }
+
+            let mut offset = 0;
+            let input_ids = group_lengths
+                .iter()
+                .map(|length| {
+                    let end = offset + *length as usize;
+                    let names = &input_nodes[offset..end];
+                    offset = end;
+                    if names.is_empty() {
+                        return Err(JsError::new("Input groups cannot be empty"));
+                    }
+                    names
+                        .iter()
+                        .map(|name| {
+                            rt.graph()
+                                .node_id_by_name(name)
+                                .ok_or_else(|| JsError::new(&format!("Node not found: {}", name)))
+                        })
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            autodiff::gradient_sums_outputs(rt, &output_ids, &input_ids)
+                .map_err(|e| JsError::new(&format!("{}", e)))
+        })
+    }
+
     pub fn solve(
         &mut self,
         output: &str,

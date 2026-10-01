@@ -41,13 +41,23 @@ const context = vm.createContext({
   loadGraph: async () => ({}),
   graphlib: {},
   performance: { now: () => 0 },
-  calculateScenario() { evaluations++; return {}; },
+  analyzeScenario() {
+    evaluations++;
+    return { results: {}, gradients: { w2_income: { federal: 0.1, state: 0.05, total: 0.15 } } };
+  },
+  sweepScenario: () => [],
+  SENSITIVITY_INPUTS: { w2_income: { action: "Earn $1 more" } },
+  selectedJurisdiction: () => ({ name: "Federal" }),
+  formatCents: String,
+  formatPercent: String,
+  renderCurve() { element("tax-curve").textContent = "fresh curve"; },
+  renderSensitivities() { element("sensitivity-list").textContent = "fresh sensitivities"; },
   renderResults() {},
   updateAddressBar() { addressUpdates++; },
 });
 vm.runInContext(
-  "let scenario; let calculationSequence = 0;\n" +
-    ["readScenario", "clearResults", "showError", "calculate"].map(functionSource).join("\n"),
+  'let scenario; let calculationSequence = 0; const selectedCurveInput = "w2_income";\n' +
+    ["readScenario", "clearResults", "showError", "renderAnalysis", "calculate"].map(functionSource).join("\n"),
   context,
 );
 element("tax-year").value = "2025";
@@ -72,4 +82,17 @@ assert.equal(vm.runInContext("readScenario()", context).inputs.w2_income, 1234.5
 await vm.runInContext("calculate()", context);
 assert.equal(evaluations, 1);
 assert.equal(addressUpdates, 1);
+assert.equal(element("analysis-lab").hidden, false);
+assert.equal(element("tax-curve").textContent, "fresh curve");
+assert.equal(element("sensitivity-list").textContent, "fresh sensitivities");
+wage.validity.badInput = true;
+await vm.runInContext("calculate()", context);
+assert.equal(element("analysis-lab").hidden, true);
+assert.equal(element("next-dollar-total").textContent, "—");
+assert.equal(addressUpdates, 1);
+wage.validity.badInput = false;
+await vm.runInContext("calculate()", context);
+assert.equal(element("analysis-lab").hidden, false);
+assert.equal(element("next-dollar-cents").textContent, "15.0");
+assert.equal(addressUpdates, 2);
 console.log("Browser UI handler regressions passed (DOM stubs).");
