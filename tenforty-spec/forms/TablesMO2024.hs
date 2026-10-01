@@ -13,19 +13,24 @@ import TenForty.Table
 import TenForty.Types
 
 -- | 2024 Missouri income tax brackets
--- Missouri uses the same bracket thresholds for all filing statuses.
+-- Missouri uses the same bracket thresholds for all filing statuses; the first
+
+-- $1,273 of taxable income is taxed at 0%.
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Missouri Form MO-1040 Instructions 2024, Tax Computation Schedule
--- https://dor.mo.gov/forms/MO-1040%20Instructions_2024.pdf
+-- Source: Missouri DOR 2024 Tax Chart (MO-1040 Instructions 2024, p.26)
+-- https://dor.mo.gov/forms/2024%20Tax%20Chart_2024.pdf
+-- The chart prints whole-dollar base amounts ($25, $57, ... $248) and rounds the
+-- tax to the nearest dollar; this schedule is the unrounded formula, within $1.
+
 missouriBrackets2024 :: NonEmpty Bracket
 missouriBrackets2024 =
-  Bracket (byStatus 1273 1273 1273 1273 1273) 0.02
-    :| [ Bracket (byStatus 2546 2546 2546 2546 2546) 0.025,
-         Bracket (byStatus 3819 3819 3819 3819 3819) 0.03,
-         Bracket (byStatus 5092 5092 5092 5092 5092) 0.035,
-         Bracket (byStatus 6365 6365 6365 6365 6365) 0.04,
-         Bracket (byStatus 7638 7638 7638 7638 7638) 0.045,
-         Bracket (byStatus 8911 8911 8911 8911 8911) 0.048,
+  Bracket (byStatus 1273 1273 1273 1273 1273) 0.0
+    :| [ Bracket (byStatus 2546 2546 2546 2546 2546) 0.02,
+         Bracket (byStatus 3819 3819 3819 3819 3819) 0.025,
+         Bracket (byStatus 5092 5092 5092 5092 5092) 0.03,
+         Bracket (byStatus 6365 6365 6365 6365 6365) 0.035,
+         Bracket (byStatus 7638 7638 7638 7638 7638) 0.04,
+         Bracket (byStatus 8911 8911 8911 8911 8911) 0.045,
          Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.048
        ]
 
