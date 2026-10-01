@@ -10,13 +10,25 @@ from .fixtures.helpers import graph_backend_available
 
 _graph_passes = 0
 _graph_skips = 0
+_unexpected_skips: list[str] = []
+_require_graph = False
+
+_ALLOWED_GRAPH_LANE_SKIPS = {
+    "taxcalc adapter tests require the taxcalc dependency group; set TENFORTY_TAXCALC=1 to run": "tests/taxcalc/adapter_conformance_test.py",
+    "taxcalc differential suite is slow; set TENFORTY_TAXCALC=1 to run": "tests/taxcalc/taxcalc_differential_test.py",
+    "live TaxCalc version is checked only under the oracle gate": "tests/taxcalc/goldens_test.py",
+    "Graph backend has no 2023 state form specs yet": "tests/parity/backend_parity_test.py",
+    "Graph backend is available": "tests/unified_api_test.py",
+}
 
 
 def pytest_configure(config):
     """Register custom markers."""
-    global _graph_passes, _graph_skips
+    global _graph_passes, _graph_skips, _unexpected_skips, _require_graph
     _graph_passes = 0
     _graph_skips = 0
+    _unexpected_skips = []
+    _require_graph = config.getoption("--require-graph")
     config.addinivalue_line(
         "markers", "requires_graph: mark test as requiring graph backend extension"
     )
@@ -27,7 +39,13 @@ def pytest_addoption(parser):
     parser.addoption(
         "--require-graph",
         action="store_true",
-        help="fail if the graph backend cannot evaluate or no graph tests pass",
+        help="require graph evaluation and reject unrecognized test skips",
+    )
+    parser.addoption(
+        "--min-graph-passes",
+        type=int,
+        default=1,
+        help="minimum graph-marked passing tests when --require-graph is set",
     )
 
 
@@ -35,6 +53,8 @@ def pytest_sessionstart(session):
     """Ensure the optional native extension actually evaluates a fresh graph."""
     if not session.config.getoption("--require-graph"):
         return
+    if session.config.getoption("--min-graph-passes") < 1:
+        raise pytest.UsageError("--min-graph-passes must be positive")
 
     from tenforty import evaluate_return
     from tenforty.backends import GraphBackend
@@ -68,6 +88,25 @@ def pytest_runtest_logreport(report):
             _graph_passes += 1
         elif report.skipped and not hasattr(report, "wasxfail"):
             _graph_skips += 1
+    _check_skip_report(report)
+
+
+def pytest_collectreport(report):
+    """Check skipped modules as well as skipped test items."""
+    _check_skip_report(report)
+
+
+def _check_skip_report(report):
+    """Reject a skip not explicitly admitted by the graph CI lane."""
+    if not _require_graph or not report.skipped or hasattr(report, "wasxfail"):
+        return
+    detail = (
+        report.longrepr[2] if isinstance(report.longrepr, tuple) else report.longrepr
+    )
+    reason = str(detail).removeprefix("Skipped: ")
+    origin = report.nodeid.split("::", 1)[0]
+    if _ALLOWED_GRAPH_LANE_SKIPS.get(reason) != origin:
+        _unexpected_skips.append(f"{report.nodeid}: {reason}")
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -75,14 +114,19 @@ def pytest_sessionfinish(session, exitstatus):
     if session.config.getoption("--require-graph") and not hasattr(
         session.config, "workerinput"
     ):
-        if exitstatus == pytest.ExitCode.OK and (_graph_passes == 0 or _graph_skips):
+        minimum = session.config.getoption("--min-graph-passes")
+        if exitstatus == pytest.ExitCode.OK and (
+            _graph_passes < minimum or _graph_skips or _unexpected_skips
+        ):
             session.exitstatus = pytest.ExitCode.TESTS_FAILED
             reporter = session.config.pluginmanager.get_plugin("terminalreporter")
             if reporter is not None:
                 reporter.write_line(
                     f"--require-graph: graph-marked passed={_graph_passes}, "
-                    f"skipped={_graph_skips}"
+                    f"skipped={_graph_skips}, minimum={minimum}"
                 )
+                for skipped in _unexpected_skips:
+                    reporter.write_line(f"--require-graph: unexpected skip: {skipped}")
 
 
 settings.register_profile(
