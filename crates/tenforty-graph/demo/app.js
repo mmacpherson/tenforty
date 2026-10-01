@@ -240,9 +240,15 @@ function readScenario() {
     } else if (specification.type === "choice") {
       inputs[name] = input.value;
     } else {
-      inputs[name] = Number.isFinite(input.valueAsNumber)
-        ? input.valueAsNumber
-        : 0;
+      if (
+        input.validity.badInput ||
+        (input.value !== "" && !Number.isFinite(input.valueAsNumber))
+      ) {
+        throw new BrowserContractError(
+          `${specification.label} must be a finite number.`,
+        );
+      }
+      inputs[name] = input.value === "" ? 0 : input.valueAsNumber;
     }
   }
   return {
@@ -427,8 +433,6 @@ function scenarioLocation() {
 
 async function calculate() {
   const sequence = ++calculationSequence;
-  scenario = readScenario();
-  updateUnsupportedInputs(scenario.year, scenario.jurisdiction);
   byId("calculation-status").classList.add("calculating");
   setText("calculation-status", "Calculating locally…");
   byId("results-heading")
@@ -436,6 +440,8 @@ async function calculate() {
     .setAttribute("aria-busy", "true");
 
   try {
+    scenario = readScenario();
+    updateUnsupportedInputs(scenario.year, scenario.jurisdiction);
     const graph = await loadGraph(scenario.year);
     const startedAt = performance.now();
     const results = calculateScenario(graphlib, graph, contract, scenario);

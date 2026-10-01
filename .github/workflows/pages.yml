@@ -64,7 +64,9 @@ jobs:
         cp src/tenforty/forms/us_tax_graph_*.json target/pages/forms/
 
     - name: Smoke-test browser calculator contract
-      run: node scripts/smoke_wasm_demo.mjs target/pages
+      run: |
+        node scripts/browser_ui_test.mjs
+        node scripts/smoke_wasm_demo.mjs target/pages
 
     - name: Setup Pages
       if: github.event_name != 'pull_request'
