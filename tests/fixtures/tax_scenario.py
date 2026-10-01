@@ -5,6 +5,26 @@ from dataclasses import dataclass
 from .evidence import UNVERIFIED, TaxEvidence
 
 
+@dataclass(frozen=True)
+class KnownDefect:
+    """A strict, quantity-scoped residual the backend is known to produce.
+
+    The scenario xfails only while ``actual - expected`` for ``quantity`` lies in
+    ``[minimum, maximum]``. A mismatch outside that range, or on any other
+    quantity, fails; so does a match, which means the defect was fixed.
+    """
+
+    quantity: str
+    minimum: float
+    maximum: float
+    reason: str
+
+    def __post_init__(self) -> None:
+        """Reject inverted ranges."""
+        if self.minimum > self.maximum:
+            raise ValueError("delta minimum cannot exceed maximum")
+
+
 @dataclass
 class TaxScenario:
     """A tax test scenario with expected outputs."""
@@ -33,8 +53,11 @@ class TaxScenario:
     # exact statutory formula. A scenario whose expected value is an official
     # table row states the band-effect bound it tolerates, with its derivation.
     state_tax_tolerance: float = 0.01
+    # Same rule for an expected federal tax that is an IRS Tax Table row.
+    federal_tax_tolerance: float = 0.01
     expected_federal_agi: float | None = None
     expected_federal_taxable_income: float | None = None
     known_failure: str | None = None
+    known_defects: tuple[KnownDefect, ...] = ()
     backend: str | None = None
     state_evidence: TaxEvidence = UNVERIFIED
