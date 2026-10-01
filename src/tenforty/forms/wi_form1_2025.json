@@ -16,8 +16,7 @@
         6,
         7,
         8,
-        9,
-        10
+        9
     ],
     "meta": {
         "form_id": "wi_form1",
@@ -41,13 +40,6 @@
         },
         "10": {
             "id": 10,
-            "name": "L62_wi_refundable_credits",
-            "op": {
-                "type": "input"
-            }
-        },
-        "11": {
-            "id": 11,
             "name": "L1_federal_agi",
             "op": {
                 "form": "us_1040",
@@ -56,17 +48,175 @@
                 "year": 2025
             }
         },
-        "12": {
-            "id": 12,
+        "100": {
+            "id": 100,
+            "op": {
+                "left": 4,
+                "right": 99,
+                "type": "mul"
+            }
+        },
+        "101": {
+            "id": 101,
+            "name": "L38_total_exemptions",
+            "op": {
+                "left": 98,
+                "right": 100,
+                "type": "add"
+            }
+        },
+        "102": {
+            "id": 102,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "103": {
+            "id": 103,
+            "op": {
+                "left": 92,
+                "right": 101,
+                "type": "sub"
+            }
+        },
+        "104": {
+            "id": 104,
+            "name": "L39_wi_taxable_income",
+            "op": {
+                "left": 102,
+                "right": 103,
+                "type": "max"
+            }
+        },
+        "105": {
+            "id": 105,
+            "name": "L40_wi_bracket_tax",
+            "op": {
+                "income": 104,
+                "table": "wi_brackets_2025",
+                "type": "bracket_tax"
+            }
+        },
+        "106": {
+            "id": 106,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "107": {
+            "id": 107,
+            "op": {
+                "left": 105,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "108": {
+            "id": 108,
+            "name": "L42_wi_tax_after_credits",
+            "op": {
+                "left": 106,
+                "right": 107,
+                "type": "max"
+            }
+        },
+        "109": {
+            "id": 109,
+            "name": "L45_wi_total_tax",
+            "op": {
+                "left": 108,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "11": {
+            "id": 11,
             "name": "L9_wi_income_before_subs",
             "op": {
-                "left": 11,
+                "left": 10,
                 "right": 0,
                 "type": "add"
             }
         },
-        "13": {
-            "id": 13,
+        "110": {
+            "id": 110,
+            "name": "L61_total_payments",
+            "op": {
+                "left": 7,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "111": {
+            "id": 111,
+            "name": "L71_total_payments_credits",
+            "op": {
+                "left": 110,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "112": {
+            "id": 112,
+            "op": {
+                "left": 111,
+                "right": 109,
+                "type": "sub"
+            }
+        },
+        "113": {
+            "id": 113,
+            "op": {
+                "left": 111,
+                "right": 109,
+                "type": "sub"
+            }
+        },
+        "114": {
+            "id": 114,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "115": {
+            "id": 115,
+            "name": "L73_refund",
+            "op": {
+                "cond": 112,
+                "otherwise": 114,
+                "then": 113,
+                "type": "if_positive"
+            }
+        },
+        "116": {
+            "id": 116,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "117": {
+            "id": 117,
+            "op": {
+                "left": 109,
+                "right": 111,
+                "type": "sub"
+            }
+        },
+        "118": {
+            "id": 118,
+            "name": "L75_amount_owed",
+            "op": {
+                "left": 116,
+                "right": 117,
+                "type": "max"
+            }
+        },
+        "12": {
+            "id": 12,
             "name": "L21_total",
             "op": {
                 "left": 1,
@@ -74,37 +224,42 @@
                 "type": "add"
             }
         },
-        "14": {
-            "id": 14,
+        "13": {
+            "id": 13,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "14": {
+            "id": 14,
+            "op": {
+                "left": 11,
+                "right": 12,
+                "type": "sub"
+            }
+        },
         "15": {
             "id": 15,
+            "name": "L22_wi_agi",
             "op": {
-                "left": 12,
-                "right": 13,
-                "type": "sub"
+                "left": 13,
+                "right": 14,
+                "type": "max"
             }
         },
         "16": {
             "id": 16,
-            "name": "L22_wi_agi",
             "op": {
-                "left": 14,
-                "right": 15,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "17": {
             "id": 17,
-            "name": "L23_deduction",
             "op": {
-                "left": 3,
-                "right": 4,
-                "type": "max"
+                "type": "literal",
+                "value": 13560
             }
         },
         "18": {
@@ -117,9 +272,8 @@
         "19": {
             "id": 19,
             "op": {
-                "left": 16,
-                "right": 17,
-                "type": "sub"
+                "type": "literal",
+                "value": 19550
             }
         },
         "2": {
@@ -131,86 +285,77 @@
         },
         "20": {
             "id": 20,
-            "name": "L27_wi_agi_minus_deduction",
             "op": {
-                "left": 18,
+                "left": 15,
                 "right": 19,
-                "type": "max"
+                "type": "sub"
             }
         },
         "21": {
             "id": 21,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 18,
+                "right": 20,
+                "type": "max"
             }
         },
         "22": {
             "id": 22,
             "op": {
-                "left": 20,
-                "right": 5,
-                "type": "sub"
+                "type": "literal",
+                "value": 0.12
             }
         },
         "23": {
             "id": 23,
-            "name": "L39_wi_taxable_income",
             "op": {
                 "left": 21,
                 "right": 22,
-                "type": "max"
+                "type": "mul"
             }
         },
         "24": {
             "id": 24,
-            "name": "L40_wi_bracket_tax",
             "op": {
-                "income": 23,
-                "table": "wi_brackets_2025",
-                "type": "bracket_tax"
+                "left": 17,
+                "right": 23,
+                "type": "sub"
             }
         },
         "25": {
             "id": 25,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 16,
+                "right": 24,
+                "type": "max"
             }
         },
         "26": {
             "id": 26,
             "op": {
-                "left": 24,
-                "right": 6,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "27": {
             "id": 27,
-            "name": "L42_wi_tax_after_credits",
             "op": {
-                "left": 25,
-                "right": 26,
-                "type": "max"
+                "type": "literal",
+                "value": 25110
             }
         },
         "28": {
             "id": 28,
-            "name": "L45_wi_total_tax",
             "op": {
-                "left": 27,
-                "right": 7,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "29": {
             "id": 29,
-            "name": "L61_total_payments",
             "op": {
-                "left": 8,
-                "right": 9,
-                "type": "add"
+                "type": "literal",
+                "value": 28210
             }
         },
         "3": {
@@ -222,123 +367,597 @@
         },
         "30": {
             "id": 30,
-            "name": "L71_total_payments_credits",
             "op": {
-                "left": 29,
-                "right": 10,
-                "type": "add"
+                "left": 15,
+                "right": 29,
+                "type": "sub"
             }
         },
         "31": {
             "id": 31,
             "op": {
-                "left": 30,
-                "right": 28,
-                "type": "sub"
+                "left": 28,
+                "right": 30,
+                "type": "max"
             }
         },
         "32": {
             "id": 32,
             "op": {
-                "left": 30,
-                "right": 28,
-                "type": "sub"
+                "type": "literal",
+                "value": 0.19778
             }
         },
         "33": {
             "id": 33,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 31,
+                "right": 32,
+                "type": "mul"
             }
         },
         "34": {
             "id": 34,
-            "name": "L73_refund",
             "op": {
-                "cond": 31,
-                "otherwise": 33,
-                "then": 32,
-                "type": "if_positive"
+                "left": 27,
+                "right": 33,
+                "type": "sub"
             }
         },
         "35": {
             "id": 35,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 26,
+                "right": 34,
+                "type": "max"
             }
         },
         "36": {
             "id": 36,
             "op": {
-                "left": 28,
-                "right": 30,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "37": {
             "id": 37,
-            "name": "L75_amount_owed",
             "op": {
-                "left": 35,
-                "right": 36,
-                "type": "max"
+                "type": "literal",
+                "value": 11930
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "type": "literal",
+                "value": 13390
             }
         },
         "4": {
             "id": 4,
-            "name": "StdDed",
+            "name": "L38_dependents",
             "op": {
                 "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "left": 15,
+                "right": 39,
+                "type": "sub"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "left": 38,
+                "right": 40,
+                "type": "max"
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "type": "literal",
+                "value": 0.19778
+            }
+        },
+        "43": {
+            "id": 43,
+            "op": {
+                "left": 41,
+                "right": 42,
+                "type": "mul"
+            }
+        },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 37,
+                "right": 43,
+                "type": "sub"
+            }
+        },
+        "45": {
+            "id": 45,
+            "op": {
+                "left": 36,
+                "right": 44,
+                "type": "max"
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "type": "literal",
+                "value": 17520
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "type": "literal",
+                "value": 19550
             }
         },
         "5": {
             "id": 5,
-            "name": "L38_total_exemptions",
-            "op": {
-                "type": "input"
-            }
-        },
-        "6": {
-            "id": 6,
             "name": "L41_wi_credits",
             "op": {
                 "type": "input"
             }
         },
-        "7": {
-            "id": 7,
+        "50": {
+            "id": 50,
+            "op": {
+                "left": 15,
+                "right": 49,
+                "type": "sub"
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "left": 48,
+                "right": 50,
+                "type": "max"
+            }
+        },
+        "52": {
+            "id": 52,
+            "op": {
+                "type": "literal",
+                "value": 0.22515
+            }
+        },
+        "53": {
+            "id": 53,
+            "op": {
+                "left": 51,
+                "right": 52,
+                "type": "mul"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "left": 47,
+                "right": 53,
+                "type": "sub"
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "left": 46,
+                "right": 54,
+                "type": "max"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "type": "literal",
+                "value": 13560
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "type": "literal",
+                "value": 19550
+            }
+        },
+        "6": {
+            "id": 6,
             "name": "L44_wi_amt",
             "op": {
                 "type": "input"
             }
         },
-        "8": {
-            "id": 8,
+        "60": {
+            "id": 60,
+            "op": {
+                "left": 15,
+                "right": 59,
+                "type": "sub"
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "left": 58,
+                "right": 60,
+                "type": "max"
+            }
+        },
+        "62": {
+            "id": 62,
+            "op": {
+                "type": "literal",
+                "value": 0.12
+            }
+        },
+        "63": {
+            "id": 63,
+            "op": {
+                "left": 61,
+                "right": 62,
+                "type": "mul"
+            }
+        },
+        "64": {
+            "id": 64,
+            "op": {
+                "left": 57,
+                "right": 63,
+                "type": "sub"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "left": 56,
+                "right": 64,
+                "type": "max"
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "left": 55,
+                "right": 65,
+                "type": "max"
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "type": "literal",
+                "value": 17520
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "7": {
+            "id": 7,
             "name": "L59_wi_withholding",
             "op": {
                 "type": "input"
             }
         },
-        "9": {
-            "id": 9,
+        "70": {
+            "id": 70,
+            "op": {
+                "type": "literal",
+                "value": 19550
+            }
+        },
+        "71": {
+            "id": 71,
+            "op": {
+                "left": 15,
+                "right": 70,
+                "type": "sub"
+            }
+        },
+        "72": {
+            "id": 72,
+            "op": {
+                "left": 69,
+                "right": 71,
+                "type": "max"
+            }
+        },
+        "73": {
+            "id": 73,
+            "op": {
+                "type": "literal",
+                "value": 0.22515
+            }
+        },
+        "74": {
+            "id": 74,
+            "op": {
+                "left": 72,
+                "right": 73,
+                "type": "mul"
+            }
+        },
+        "75": {
+            "id": 75,
+            "op": {
+                "left": 68,
+                "right": 74,
+                "type": "sub"
+            }
+        },
+        "76": {
+            "id": 76,
+            "op": {
+                "left": 67,
+                "right": 75,
+                "type": "max"
+            }
+        },
+        "77": {
+            "id": 77,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "78": {
+            "id": 78,
+            "op": {
+                "type": "literal",
+                "value": 13560
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "8": {
+            "id": 8,
             "name": "L60_wi_estimated_payments",
             "op": {
                 "type": "input"
             }
+        },
+        "80": {
+            "id": 80,
+            "op": {
+                "type": "literal",
+                "value": 19550
+            }
+        },
+        "81": {
+            "id": 81,
+            "op": {
+                "left": 15,
+                "right": 80,
+                "type": "sub"
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "left": 79,
+                "right": 81,
+                "type": "max"
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "type": "literal",
+                "value": 0.12
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "left": 82,
+                "right": 83,
+                "type": "mul"
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "left": 78,
+                "right": 84,
+                "type": "sub"
+            }
+        },
+        "86": {
+            "id": 86,
+            "op": {
+                "left": 77,
+                "right": 85,
+                "type": "max"
+            }
+        },
+        "87": {
+            "id": 87,
+            "op": {
+                "left": 76,
+                "right": 86,
+                "type": "max"
+            }
+        },
+        "88": {
+            "id": 88,
+            "name": "StdDed",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 66,
+                    "married_joint": 35,
+                    "married_separate": 45,
+                    "qualifying_widow": 87,
+                    "single": 25
+                }
+            }
+        },
+        "89": {
+            "id": 89,
+            "name": "L23_deduction",
+            "op": {
+                "left": 3,
+                "right": 88,
+                "type": "max"
+            }
+        },
+        "9": {
+            "id": 9,
+            "name": "L62_wi_refundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "90": {
+            "id": 90,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "91": {
+            "id": 91,
+            "op": {
+                "left": 15,
+                "right": 89,
+                "type": "sub"
+            }
+        },
+        "92": {
+            "id": 92,
+            "name": "L27_wi_agi_minus_deduction",
+            "op": {
+                "left": 90,
+                "right": 91,
+                "type": "max"
+            }
+        },
+        "93": {
+            "id": 93,
+            "op": {
+                "type": "literal",
+                "value": 700
+            }
+        },
+        "94": {
+            "id": 94,
+            "op": {
+                "type": "literal",
+                "value": 1400
+            }
+        },
+        "95": {
+            "id": 95,
+            "op": {
+                "type": "literal",
+                "value": 700
+            }
+        },
+        "96": {
+            "id": 96,
+            "op": {
+                "type": "literal",
+                "value": 700
+            }
+        },
+        "97": {
+            "id": 97,
+            "op": {
+                "type": "literal",
+                "value": 700
+            }
+        },
+        "98": {
+            "id": 98,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 96,
+                    "married_joint": 94,
+                    "married_separate": 95,
+                    "qualifying_widow": 97,
+                    "single": 93
+                }
+            }
+        },
+        "99": {
+            "id": 99,
+            "op": {
+                "type": "literal",
+                "value": 700
+            }
         }
     },
     "outputs": [
-        11,
-        16,
-        23,
-        24,
-        27,
-        28,
-        30,
-        34,
-        37
+        10,
+        15,
+        104,
+        105,
+        108,
+        109,
+        111,
+        115,
+        118
     ],
     "tables": {
         "wi_brackets_2025": {
@@ -346,7 +965,7 @@
                 "head_of_household": [
                     {
                         "rate": 3.5e-2,
-                        "threshold": 14320
+                        "threshold": 14680
                     },
                     {
                         "rate": 4.4e-2,
@@ -354,7 +973,7 @@
                     },
                     {
                         "rate": 5.3e-2,
-                        "threshold": 315310
+                        "threshold": 323290
                     },
                     {
                         "rate": 7.65e-2,
@@ -364,7 +983,7 @@
                 "married_joint": [
                     {
                         "rate": 3.5e-2,
-                        "threshold": 19090
+                        "threshold": 19580
                     },
                     {
                         "rate": 4.4e-2,
@@ -372,7 +991,7 @@
                     },
                     {
                         "rate": 5.3e-2,
-                        "threshold": 420420
+                        "threshold": 431060
                     },
                     {
                         "rate": 7.65e-2,
@@ -382,7 +1001,7 @@
                 "married_separate": [
                     {
                         "rate": 3.5e-2,
-                        "threshold": 9545
+                        "threshold": 9790
                     },
                     {
                         "rate": 4.4e-2,
@@ -390,7 +1009,7 @@
                     },
                     {
                         "rate": 5.3e-2,
-                        "threshold": 210210
+                        "threshold": 215530
                     },
                     {
                         "rate": 7.65e-2,
@@ -400,15 +1019,15 @@
                 "qualifying_widow": [
                     {
                         "rate": 3.5e-2,
-                        "threshold": 19090
+                        "threshold": 14680
                     },
                     {
                         "rate": 4.4e-2,
-                        "threshold": 67300
+                        "threshold": 50480
                     },
                     {
                         "rate": 5.3e-2,
-                        "threshold": 420420
+                        "threshold": 323290
                     },
                     {
                         "rate": 7.65e-2,
@@ -418,7 +1037,7 @@
                 "single": [
                     {
                         "rate": 3.5e-2,
-                        "threshold": 14320
+                        "threshold": 14680
                     },
                     {
                         "rate": 4.4e-2,
@@ -426,7 +1045,7 @@
                     },
                     {
                         "rate": 5.3e-2,
-                        "threshold": 315310
+                        "threshold": 323290
                     },
                     {
                         "rate": 7.65e-2,
