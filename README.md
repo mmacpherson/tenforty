@@ -73,15 +73,11 @@ What `tenforty` brings to this neighborhood: state returns computed locally,
 form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
 rates via automatic differentiation, an input solver, and a deliberately
 simple API. It's built for an individual interrogating *their own return* —
-sensitivity analysis, what-if sweeps, optimization — and the performance
-profile follows from that: the Rust graph engine evaluates a return in about
-a microsecond interpreted, and on the order of a hundred nanoseconds
-JIT-compiled — millions of returns per second — with batch sweeps through
-the Python API running at thousands of returns per second end-to-end. Plotting
-your tax against a swept input is an interactive experience, not a batch job.
-(Tax-Calculator makes the opposite — and for its purpose equally sensible —
-trade: a few seconds of fixed setup that amortize across population-scale
-record batches.) If your
+sensitivity analysis, what-if sweeps, optimization. Performance depends on
+the backend, graph, and API path: a small Rust demo-graph benchmark is not a
+measurement of a complete return through Python or the browser. The shipped
+Python and browser graph paths use the interpreter, not the experimental JIT.
+If your
 question is "what would *this return* look like, federal and state, and how
 does it change as inputs move?" — that's the job this package is built for.
 
