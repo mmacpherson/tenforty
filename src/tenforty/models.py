@@ -10,7 +10,15 @@ from collections.abc import Callable
 from enum import Enum
 from functools import partial
 
-from pydantic import BaseModel, Field, computed_field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    FiniteFloat,
+    TypeAdapter,
+    computed_field,
+    model_validator,
+)
 
 from . import _ots_form_models
 
@@ -286,6 +294,8 @@ OTS_FORM_CONFIG = dict(
 
 
 class TaxReturnInput(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)
+
     year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
@@ -344,6 +354,15 @@ class TaxReturnInput(BaseModel):
         if self.qualified_dividends > self.ordinary_dividends:
             self.ordinary_dividends = self.qualified_dividends
         return self
+
+
+TAX_RETURN_FLOAT_FIELDS = tuple(
+    name
+    for name, field in TaxReturnInput.model_fields.items()
+    if field.annotation is float
+)
+
+FINITE_FLOAT_COLUMNS = TypeAdapter(dict[str, list[FiniteFloat]])
 
 
 class InterpretedTaxReturn(BaseModel):
