@@ -398,3 +398,37 @@ reproduced them end to end. We offer them tentatively.
   `L[38] <= 5000000`. We may be misreading it, but `>` would seem to be the
   intended test. As written, taxable income over $5,000,000 appears to fall
   through to "AGI Case not handled".
+
+---
+
+## 10. NJ-1040 taxes gross income exactly at the filing threshold (finding NJ-OTS-THRESHOLD-BOUNDARY)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_NJ_1040_2024.c:572` (threshold set at :357)
+- `src/taxsolve_NJ_1040_2025.c:578` (threshold set at :363)
+
+```c
+ if ((L[29] < filing_threshold) || (L[43] < 0.0))
+  L[43] = 0.0;
+```
+
+As we read the 2024 NJ-1040 instructions, a return is required only when gross
+income is *more than* the filing threshold: $10,000 for single or
+married-filing-separately filers, $20,000 for everyone else (p.3, "Do You Have
+to File"). The instructions also say you are "not required to file a return if
+your income is at or below the filing threshold" (p.22). That reads as no tax at
+the threshold itself. The strict `<` above zeroes tax only below it, so income
+of exactly $10,000 (or $20,000) is taxed.
+
+**Minimal reproducer:** 2024 Single, $10,000 of wages. OTS reports NJ taxable
+income of $9,000 and tax of **$126**. At $9,999 it reports $0, and at $10,001 it
+reports $126. 2025 behaves the same way. We would have expected $0 at exactly
+$10,000.
+
+**Possible fix:** `if ((L[29] <= filing_threshold) || (L[43] < 0.0))`. The
+"You do not need to file" message a few lines earlier uses the same `<` and
+may want the same change.
+
+We may be misreading the threshold's inclusivity, so we offer this tentatively.
+Not patched locally, for the same reason as report 6.

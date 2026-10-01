@@ -852,37 +852,13 @@ def test_nj_state_agi_parity_2024(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $1,000 NJ personal exemption; graph leaves as zero input",
-    strict=True,
-)
+# Excludes Married/Joint returns until MAP-NJ-STATUS is fixed: OTS computes them as Single.
 @skip_if_backends_unavailable
-@given(
-    w2_income=st.integers(0, 500_000),
-    filing_status=st.sampled_from(["Single", "Married/Joint"]),
-)
+@given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
-def test_nj_state_tax_parity_2024(w2_income, filing_status):
-    """NJ 2024 total tax differs because OTS auto-applies personal exemption."""
-    ots = evaluate_return(
-        year=2024,
-        state="NJ",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="NJ",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"NJ tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+def test_nj_state_tax_parity_2024(w2_income):
+    """NJ 2024 tax agrees up to the Tax Table, the regular exemption and the no-tax threshold."""
+    assert_state_parity("NJ", 2024, "Single", w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1463,37 +1439,13 @@ def test_nj_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $1,000 NJ personal exemption; graph leaves as zero input",
-    strict=True,
-)
+# Excludes Married/Joint returns until MAP-NJ-STATUS is fixed: OTS computes them as Single.
 @skip_if_backends_unavailable
-@given(
-    w2_income=st.integers(0, 500_000),
-    filing_status=st.sampled_from(["Single", "Married/Joint"]),
-)
+@given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
-def test_nj_state_tax_parity(w2_income, filing_status):
-    """NJ total tax differs because OTS auto-applies personal exemption."""
-    ots = evaluate_return(
-        year=2025,
-        state="NJ",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2025,
-        state="NJ",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"NJ tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+def test_nj_state_tax_parity(w2_income):
+    """NJ 2025 tax agrees up to the Tax Table, the regular exemption and the no-tax threshold."""
+    assert_state_parity("NJ", 2025, "Single", w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1745,6 +1697,39 @@ def test_parity_findings_are_unique_tracked_and_ots_ones_staged_and_witnessed():
             assert defect.tracking.startswith("tenforty-"), defect
 
 
+# NJ filing threshold: no tax is due at or below $10,000 single (2024 NJ-1040
+# instructions, p.3 and p.22). Both backends miss it, on different sides.
+
+
+@pytest.mark.xfail(
+    reason="NJ-OTS-THRESHOLD-BOUNDARY (upstream report 10): OTS zeroes NJ tax only when gross income "
+    "is strictly below the filing threshold, so it taxes exactly $10,000",
+    strict=True,
+)
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_ots_nj_owes_no_tax_at_the_filing_threshold(year):
+    """NJ Single, $10,000 gross income: at the threshold no tax is due."""
+    result = evaluate_return(
+        year=year, state="NJ", filing_status="Single", w2_income=10_000, backend="ots"
+    )
+    assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.xfail(
+    reason="NJ-NO-TAX (tenforty-b72.24): the graph NJ-1040 spec has no filing threshold, "
+    "so it taxes income at and below it",
+    strict=True,
+)
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_graph_nj_owes_no_tax_below_the_filing_threshold(year):
+    """NJ Single, $9,999 gross income: below the threshold no tax is due."""
+    result = evaluate_return(
+        year=year, state="NJ", filing_status="Single", w2_income=9_999, backend="graph"
+    )
+    assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
+
+
 # Direct legal-value witnesses for the other OTS findings and their graph
 # counterparts: each asserts the figure the cited instruction gives.
 
@@ -1784,6 +1769,23 @@ def test_ots_ny_uses_the_rate_schedule_from_65000():
 # computed by hand from the cited instructions, and xfails until src/tenforty
 # passes OTS what it needs. When one flips, return the excluded filing status
 # to the state's parity strategy above.
+
+
+@pytest.mark.xfail(
+    reason="MAP-NJ-STATUS (tenforty-r91.3): the NJ_1040 input map omits filing_status, so OTS reads "
+    "its template default and computes every return as Single",
+    strict=True,
+)
+def test_ots_nj_married_joint_gets_two_exemptions():
+    """NJ 2024 MFJ, $50,000 wages: two $1,000 regular exemptions leave $48,000."""
+    result = evaluate_return(
+        year=2024,
+        state="NJ",
+        filing_status="Married/Joint",
+        w2_income=50_000,
+        backend="ots",
+    )
+    assert result.state_taxable_income == pytest.approx(48_000.0, abs=1.0)
 
 
 @pytest.mark.xfail(

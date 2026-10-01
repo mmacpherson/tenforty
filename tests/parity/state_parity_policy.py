@@ -453,6 +453,178 @@ def _ny24_tax_benefit_recapture(case: dict) -> DeltaModel:
     }
 
 
+# --- New Jersey Form NJ-1040 (2024, 2025) ------------------------------------
+# NJ-1040 instructions 2024
+# (https://www.nj.gov/treasury/taxation/pdf/other_forms/tgi-ee/2024/1040i.pdf)
+# and 2025 (https://www.nj.gov/treasury/taxation/pdf/current/1040i.pdf), PDF
+# pages identical in both: the $1,000 regular exemption (line 6, p.8); Tax Rate
+# Schedules A and B (p.65); the Tax Table below $100,000 (line 43, p.33); and
+# the filing thresholds (p.5 "Do You Have to File", p.22). A return is
+# required only when gross income is MORE than $10,000 (single, married filing
+# separately) or $20,000 (joint, head of household, surviving spouse); at or
+# below the threshold no tax is due.
+#
+# At and below the threshold BOTH backends are wrong: the graph has no
+# threshold at all (tenforty-b72.24) and omits the exemption (tenforty-b72.11), and OTS's strict
+# comparison taxes income exactly at the threshold (NJ-OTS-THRESHOLD-BOUNDARY).
+# Parity residuals there record how the two wrong answers differ; they are not
+# evidence that either is correct.
+
+NJ_YEARS = (2024, 2025)
+NJ_REGULAR_EXEMPTION = 1_000.0
+NJ_REGULAR_EXEMPTIONS = {
+    "Single": 1,
+    "Married/Sep": 1,
+    "Head_of_House": 1,
+    "Married/Joint": 2,
+    "Widow(er)": 1,
+}
+_NJ_SCHEDULE_A = (
+    (0.0, 0.014),
+    (20_000.0, 0.0175),
+    (35_000.0, 0.035),
+    (40_000.0, 0.05525),
+    (75_000.0, 0.0637),
+    (500_000.0, 0.0897),
+    (1_000_000.0, 0.1075),
+)
+_NJ_SCHEDULE_B = (
+    (0.0, 0.014),
+    (20_000.0, 0.0175),
+    (50_000.0, 0.0245),
+    (70_000.0, 0.035),
+    (80_000.0, 0.05525),
+    (150_000.0, 0.0637),
+    (500_000.0, 0.0897),
+    (1_000_000.0, 0.1075),
+)
+NJ_SCHEDULE = {
+    "Single": _NJ_SCHEDULE_A,
+    "Married/Sep": _NJ_SCHEDULE_A,
+    "Married/Joint": _NJ_SCHEDULE_B,
+    "Head_of_House": _NJ_SCHEDULE_B,
+    "Widow(er)": _NJ_SCHEDULE_B,
+}
+NJ_FILING_THRESHOLD = {
+    "Single": 10_000.0,
+    "Married/Sep": 10_000.0,
+    "Married/Joint": 20_000.0,
+    "Head_of_House": 20_000.0,
+    "Widow(er)": 20_000.0,
+}
+NJ_TAX_TABLE_CEILING = 100_000.0
+NJ_TAX_TABLE_HALF_ROW = 25.0
+
+
+def _nj_case(case: dict) -> bool:
+    return case["state"] == "NJ" and case["year"] in NJ_YEARS
+
+
+def _nj_exemption(case: dict) -> float:
+    return NJ_REGULAR_EXEMPTION * NJ_REGULAR_EXEMPTIONS[case["status"]]
+
+
+def _nj_no_tax_due(case: dict) -> bool:
+    """Gross income at or below the filing threshold owes no tax."""
+    return case["w2"] <= NJ_FILING_THRESHOLD[case["status"]]
+
+
+def _nj_ots_taxable_income(case: dict) -> float:
+    return max(0.0, case["w2"] - _nj_exemption(case))
+
+
+def _nj_table_half_width(case: dict) -> float:
+    return _table_half_width(
+        NJ_SCHEDULE[case["status"]],
+        _nj_ots_taxable_income(case),
+        NJ_TAX_TABLE_HALF_ROW,
+    )
+
+
+def _nj_table_tolerance(case: dict) -> float:
+    """Taxable income under $100,000 uses the NJ Tax Table ($50 rows).
+
+    OTS prices the row midpoint and rounds (``TaxRateFunction``,
+    ots_amalgamation.cpp:73669 for 2024, :108248 for 2025). Where no tax is
+    due the table plays no part, except in NJ-OTS-THRESHOLD-BOUNDARY, which
+    carries its own allowance.
+    """
+    if _nj_no_tax_due(case) or _nj_ots_taxable_income(case) >= NJ_TAX_TABLE_CEILING:
+        return 0.0
+    return _nj_table_half_width(case)
+
+
+def _nj_regular_exemption(case: dict) -> DeltaModel:
+    """Graph omits the NJ-1040 regular exemption that OTS applies (tenforty-b72.11).
+
+    NJ-1040 line 6 allows $1,000 for the taxpayer (and spouse on a joint
+    return). OTS applies it (ots_amalgamation.cpp:73806 for 2024, :108385 for
+    2025); the graph spec takes line 30 as a zero-default input
+    (tenforty-spec/forms/NJ1040_2024.hs:37, NJ1040_2025.hs:37). The graph
+    departs from the form.
+
+    Bound: graph taxable income is higher by the exemption, or by all of AGI
+    when that is smaller. The extra income is taxed between the schedule rates
+    at the two taxable incomes, so the tax delta lies between the lower and
+    higher of those rates times the income difference. Where no tax is due the
+    tax delta belongs to NJ-NO-TAX and NJ-OTS-THRESHOLD-BOUNDARY instead.
+    """
+    if not _nj_case(case):
+        return {}
+    graph_taxable_income = case["w2"]
+    income_gap = min(_nj_exemption(case), graph_taxable_income)
+    if income_gap == 0.0:
+        return {}
+    deltas = {"state_taxable_income": DeltaRange.exact(income_gap)}
+    if not _nj_no_tax_due(case):
+        schedule = NJ_SCHEDULE[case["status"]]
+        low_rate = _marginal_rate(schedule, graph_taxable_income - income_gap)
+        high_rate = _marginal_rate(schedule, graph_taxable_income)
+        deltas["state_total_tax"] = DeltaRange(
+            low_rate * income_gap, high_rate * income_gap
+        )
+    return deltas
+
+
+def _nj_graph_taxes_below_threshold(case: dict) -> DeltaModel:
+    """Graph taxes income at or below the NJ filing threshold (tenforty-b72.24).
+
+    No tax is due when gross income is at or below the filing threshold
+    (instructions p.3 and p.22). The graph spec has no threshold rule, so it
+    charges its full schedule tax there. The graph departs from the form.
+
+    Bound: the graph is higher than the form's $0 by its whole tax, the first
+    schedule rate on graph taxable income (all of AGI). OTS charges $0 below the
+    threshold, so this is the whole delta there; exactly at the threshold OTS is
+    wrong as well (NJ-OTS-THRESHOLD-BOUNDARY).
+    """
+    if not _nj_case(case) or not _nj_no_tax_due(case):
+        return {}
+    first_rate = NJ_SCHEDULE[case["status"]][0][1]
+    return {"state_total_tax": DeltaRange.exact(first_rate * case["w2"])}
+
+
+def _nj_ots_taxes_at_threshold(case: dict) -> DeltaModel:
+    """OTS taxes gross income exactly at the NJ filing threshold.
+
+    The instructions require a return, and tax, only above the threshold. OTS
+    zeroes line 43 only when ``L[29] < filing_threshold``
+    (ots_amalgamation.cpp:74134 for 2024, :108719 for 2025), so a return at
+    exactly $10,000 single ($20,000 joint) is taxed. OTS departs from the form;
+    upstream report 10.
+
+    Bound: OTS is above the form's $0 by its Tax Table tax on income less the
+    exemption, first-bracket rate times that income within the table's
+    half-row allowance; the graph is higher by less than that.
+    """
+    if not _nj_case(case) or case["w2"] != NJ_FILING_THRESHOLD[case["status"]]:
+        return {}
+    first_rate = NJ_SCHEDULE[case["status"]][0][1]
+    ots_tax = first_rate * _nj_ots_taxable_income(case)
+    half_width = _nj_table_half_width(case)
+    return {"state_total_tax": DeltaRange(-ots_tax - half_width, -ots_tax + half_width)}
+
+
 SIGNATURES = [
     KnownParityDefect(
         "CA-EXEMPTION-STEP",
@@ -499,6 +671,27 @@ SIGNATURES = [
         _ny24_tax_benefit_recapture,
         {"state": "NY", "year": 2024, "status": "Single", "w2": 300_000},
     ),
+    KnownParityDefect(
+        "NJ-EXEMPTION",
+        "graph",
+        "tenforty-b72.11",
+        _nj_regular_exemption,
+        {"state": "NJ", "year": 2024, "status": "Single", "w2": 200_000},
+    ),
+    KnownParityDefect(
+        "NJ-NO-TAX",
+        "graph",
+        "tenforty-b72.24",
+        _nj_graph_taxes_below_threshold,
+        {"state": "NJ", "year": 2024, "status": "Single", "w2": 9_000},
+    ),
+    KnownParityDefect(
+        "NJ-OTS-THRESHOLD-BOUNDARY",
+        "ots",
+        "upstream report 10",
+        _nj_ots_taxes_at_threshold,
+        {"state": "NJ", "year": 2024, "status": "Single", "w2": 10_000},
+    ),
 ]
 
 
@@ -520,6 +713,7 @@ def modeled_parity_deltas(
 _TABLE_TOLERANCE = {
     "CA": (_ca_case, _ca_table_tolerance),
     "NY": (_ny_case, _ny_table_tolerance),
+    "NJ": (_nj_case, _nj_table_tolerance),
 }
 
 
