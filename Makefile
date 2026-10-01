@@ -19,9 +19,9 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all test-deep test-soak hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs spec-test forms-sync
-.PHONY: spec-fmt spec-lint spec-lint-strict
+.PHONY: spec-fmt spec-fmt-check spec-lint spec-lint-strict
 .PHONY: runner-image bench-zip-mode
 
 check-uv: ## Check if uv is installed
@@ -60,6 +60,38 @@ test-full: check-uv ## Run tests with graph backend
 
 test-all: test-full graph-test spec-test ## Run all tests (Python + Rust + Haskell)
 	@echo "All tests passed."
+
+# Parallel because the cost of these profiles sits in ~15 property tests that
+# omit max_examples, among 880+ that finish instantly: under `deep` those 15 are
+# 637s of a 661s serial run. `worksteal` (not the default `load`) handles that
+# skew. `load` is already dynamic — it seeds each worker with `items_per_node/4`
+# CONSECUTIVE tests and then feeds the rest on demand — but that initial chunk
+# follows collection order, so hypothesis_test.py's nine slow tests land on one
+# or two workers and cannot be moved once assigned. Measured on 12 cores under
+# `deep`: serial 661s, `load` 403s, `worksteal` 295s.
+#
+# 295s is not the floor. The slowest single test is 196s of it, and a property
+# running 10,000 examples is one indivisible unit — Hypothesis's engine is a
+# sequential adaptive search, not independent sampling. Perfect packing would
+# give 196s; getting under that means splitting that one property, which changes
+# the instrument (12 shards of 833 examples is not one 10,000-example search).
+#
+# Serial and parallel must agree on pass/xfail/skip counts. The suite has no
+# chdir and no session- or module-scoped fixtures; the one fixed-path write in
+# library code (tenforty.log, core.py) is gated off behind FILE_LOG_LEVEL, and
+# OTS's argv globals are per-process, which is what makes worker isolation sound.
+# Hypothesis's own .hypothesis/ database IS shared across workers, which is safe:
+# DirectoryBasedExampleDatabase.save writes via mkstemp+rename and tolerates the
+# race. Both profiles set deadline=None, so worker contention cannot manufacture
+# a DeadlineExceeded — that is why this is not simply added to the `ci` profile,
+# which leaves the 200ms default in place.
+test-deep: check-uv ## Deep hypothesis sweep (10,000 examples, parallel)
+	$(MAKE) env-full
+	uv run pytest --hypothesis-profile=deep -n auto --dist worksteal
+
+test-soak: check-uv ## Soak hypothesis sweep (100,000 examples, parallel)
+	$(MAKE) env-full
+	uv run pytest --hypothesis-profile=soak -n auto --dist worksteal
 
 hooks: check-uv ## Install pre-commit hooks
 	uv sync
@@ -101,14 +133,21 @@ graph-throughput: ## Run throughput comparison (interpreter vs JIT vs SIMD)
 ## WASM targets
 wasm: ## Build wasm module (release)
 	wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
-	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
 
 wasm-dev: ## Build wasm module (debug)
 	wasm-pack build --target web --dev crates/tenforty-graph -- --features wasm --no-default-features
-	ln -sfn ../pkg crates/tenforty-graph/demo/pkg
 
-wasm-serve: wasm-dev ## Serve demo locally
-	python3 -m http.server 8080 -d crates/tenforty-graph/demo
+wasm-serve: wasm-dev ## Serve the current Pages artifact locally
+	rm -rf target/pages-dev
+	mkdir -p target/pages-dev/forms
+	cp crates/tenforty-graph/demo/index.html target/pages-dev/
+	cp crates/tenforty-graph/demo/app.js target/pages-dev/
+	cp crates/tenforty-graph/demo/browser_contract.js target/pages-dev/
+	cp crates/tenforty-graph/demo/browser_contract.json target/pages-dev/
+	cp crates/tenforty-graph/demo/style.css target/pages-dev/
+	cp -R crates/tenforty-graph/pkg target/pages-dev/pkg
+	cp src/tenforty/forms/us_tax_graph_*.json target/pages-dev/forms/
+	python3 -m http.server 8080 -d target/pages-dev
 
 ## tenforty-spec (Haskell) targets (local dev only; CI does not run these)
 spec-test: ## Run tenforty-spec tests
@@ -116,9 +155,14 @@ spec-test: ## Run tenforty-spec tests
 
 spec-graphs: ## Generate JSON graphs from tenforty-spec into tenforty-spec/*.json
 	cd tenforty-spec && cabal run tenforty-compile -- all -p
+	cd tenforty-spec && cabal run -v0 tenforty-compile -- resolve_2024
+	cd tenforty-spec && cabal run -v0 tenforty-compile -- resolve_2025
 
-spec-fmt: ## Format tenforty-spec (fourmolu, cabal-fmt)
+spec-fmt: ## Format tenforty-spec (ormolu, cabal-gild)
 	$(MAKE) -C tenforty-spec fmt
+
+spec-fmt-check: ## Check tenforty-spec formatting (ormolu + cabal-gild)
+	$(MAKE) -C tenforty-spec fmt-check
 
 spec-lint: ## Lint tenforty-spec (hlint, non-blocking)
 	$(MAKE) -C tenforty-spec lint

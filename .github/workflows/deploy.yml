@@ -30,6 +30,106 @@ jobs:
     - name: Run tests
       run: uv run pytest --hypothesis-profile=ci
 
+  python-prerelease:
+    name: experimental Python 3.15 (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/setup-python@v7
+      with:
+        python-version: '3.15'
+        allow-prereleases: true
+
+    - uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install test dependencies
+      run: uv sync --python python --no-install-project
+
+    - name: Build and install wheel
+      run: |
+        uv build --wheel --python .venv/bin/python
+        uv pip install --no-deps dist/*.whl
+
+    - name: Require both native backends from the installed wheel
+      run: |
+        uv run --no-sync python - <<'PY'
+        import sys
+        from pathlib import Path
+
+        import tenforty
+        from tenforty.backends import available_backends
+
+        assert sys.version_info[:2] == (3, 15), sys.version
+        assert Path(tenforty.__file__).is_relative_to(Path(sys.prefix)), tenforty.__file__
+        assert {"ots", "graph"} <= set(available_backends()), available_backends()
+        PY
+
+    - name: Run tests against the installed wheel
+      run: uv run --no-sync pytest --hypothesis-profile=ci
+
+  # The taxcalc adapter conformance tests are gated behind TENFORTY_TAXCALC,
+  # which the job above never sets — so without this job they would never run
+  # anywhere. That is the same failure they exist to catch: F16 happened
+  # because nothing exercised the adapter. Only the conformance file runs here;
+  # the full differential sweep takes ~7 minutes and stays opt-in.
+  taxcalc-adapter:
+    name: taxcalc adapter conformance
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install deps with taxcalc
+      run: uv sync --group taxcalc
+
+    - name: Run adapter conformance
+      env:
+        TENFORTY_TAXCALC: '1'
+      run: uv run pytest tests/taxcalc/adapter_conformance_test.py -q
+
+    - name: Verify committed TaxCalc goldens
+      run: >-
+        uv run python scripts/taxcalc_audit.py
+        --check-goldens tests/taxcalc/fixtures/taxcalc_goldens.json
+
+  # The shipped extension is built features=["python"] (setup.py), so the JIT +
+  # SIMD batch path — including reachability-slicing in compile_batch — is
+  # compiled out of every other job here and of pip installs. Without this job
+  # the sliced batch path (the one path where a batch can diverge from
+  # single-eval) has no CI coverage at all. Runs the graph crate's jit-gated
+  # tests, which include the proper-subset slice-vs-interpreter check.
+  graph-jit:
+    name: graph backend (JIT + SIMD)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Run graph crate tests with JIT
+      run: cargo test -p tenforty-graph --features jit
+
   # Build wheels and sdist only on pushes to main, and only if validation
   # succeeds
   build-wheels:
@@ -49,7 +149,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v4.1.0
+      uses: pypa/cibuildwheel@v4.2.1
       env:
         CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-*
         CIBW_BEFORE_BUILD: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && pip install setuptools-rust>=1.7
@@ -143,7 +243,7 @@ jobs:
         path: dist
         merge-multiple: true
     - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.4.0
+      uses: sigstore/gh-action-sigstore-python@v3.5.0
       with:
         inputs: >-
           ./dist/*.tar.gz

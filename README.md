@@ -92,7 +92,16 @@ Known limitations of this package are detailed in the
 
 ## Installation
 
-Requires Python 3.10+.
+Python 3.10–3.14 is supported on Linux and macOS. Python 3.15 is experimental:
+CI builds and installs a wheel on both platforms, requires both the OTS and
+Rust graph backends, and runs the standard test suite. These checks cover the
+regular CPython build, not the free-threaded build or optional notebook and
+Tax-Calculator dependencies.
+
+Use Python 3.10–3.14 for supported installations. Prebuilt Python 3.15 wheels
+are not published yet; testing 3.15 from source requires a C++ compiler and Rust,
+and dependencies may also need to compile from source. Full 3.15 support will
+be reconsidered after the final Python release and wheel validation.
 
 ```sh
 pip install tenforty
@@ -121,17 +130,30 @@ Here are all arguments available for those two functions:
 | `state`                      | str \| None               | None                | Two-letter state code. Income-tax states with OTS support: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. Other states unsupported for now. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
-| `standard_or_itemized`       | str                      | Standard            | "Standard" or "Itemized"               |
+| `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
 | `qualified_dividends`        | float                    | 0.0                 |                                    |
 | `ordinary_dividends`         | float                    | 0.0                 |                                    |
 | `short_term_capital_gains`   | float                    | 0.0                 |                                    |
 | `long_term_capital_gains`    | float                    | 0.0                 |                                    |
+| `self_employment_income`     | float                    | 0.0                 | Schedule C profit used by Schedule SE and QBI |
+| `qbi_w2_wages`               | float                    | 0.0                 | W-2 wages paid by the QBI business or aggregation |
+| `qbi_ubia`                   | float                    | 0.0                 | UBIA of qualified property for that business or aggregation |
+| `qbi_is_sstb`                | bool                     | False               | Whether that business or aggregation is an SSTB |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
 | `itemized_deductions`        | float                    | 0.0                 |                                    |
 | `state_adjustment`           | float                    | 0.0                 |                                    |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
+
+The three `qbi_` inputs describe one trade or business, or businesses the
+taxpayer has validly aggregated for section 199A. They are not totals across
+unrelated businesses, because Form 8995-A applies its wage and UBIA limitation
+per business or valid aggregation. Their defaults model a non-SSTB business
+with no business W-2 wages or qualified property. The OTS backend uses OTS's
+Form 8995 for the independent QBI base and taxable-income ceiling, then applies
+the missing Form 8995-A wage, property, and SSTB limitation in tenforty's
+orchestration layer before rerunning Form 1040.
 
 The functions output these fields:
 
@@ -142,6 +164,7 @@ The functions output these fields:
 | federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
 | federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
 | federal_taxable_income          | Income subject to federal tax after deductions        |
+| federal_qbi_deduction           | Qualified business income deduction (Form 8995/8995-A) |
 | federal_amt                     | Federal Alternative Minimum Tax                       |
 | federal_income_tax              | Federal income tax + AMT (excludes SE tax, NIIT, Additional Medicare Tax) |
 | federal_se_tax                  | Federal self-employment tax (Schedule SE)             |
@@ -198,6 +221,43 @@ No `year=` argument was specified here, so the current tax year, 2025, was used.
 The output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary.
 
+
+### Marginal Rates for Every Input
+
+The graph backend can differentiate a selected output with respect to every
+continuous public input at once:
+
+``` python
+from tenforty import marginal_rates
+
+rates = marginal_rates(
+    year=2024,
+    state="CA",
+    filing_status="Single",
+    w2_income=100_000,
+)
+
+rates["w2_income"]
+```
+
+The returned dictionary uses the same natural input names as
+`evaluate_return`. It includes federal inputs and any continuous inputs mapped
+by the selected state; discrete choices such as filing status and number of
+dependents are omitted. The existing `marginal_rate(..., wrt="w2_income")`
+function remains available for one input at a time.
+
+Tax calculations are piecewise functions. At a bracket, phase-out, or other
+active boundary, both marginal-rate APIs report the composed function's
+right-hand derivative: the change implied by adding a small amount to that
+input. Smooth entries in `marginal_rates` share one reverse-mode traversal per
+resolved output.
+
+The reproducible
+[autodiff planning examples](docs/autodiff-applications.md) show a full
+next-dollar table, the interaction between wages and long-term-gain stacking,
+and a bounded ordinary-income sizing exercise. They also measure where forward
+simulation remains competitive and explain why derivatives alone cannot find
+true tax cliffs.
 
 ### Creating Tax Tables: Federal/State Tax Brackets as a Function of W2 Income
 

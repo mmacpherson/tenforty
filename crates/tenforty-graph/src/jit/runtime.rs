@@ -495,7 +495,7 @@ mod tests {
         }
 
         let batch_compiled = compiler
-            .compile_batch(&graph, FilingStatus::Single)
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
             .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("income", &incomes).unwrap();
@@ -510,6 +510,208 @@ mod tests {
                 simd_results[i]
             );
         }
+    }
+
+    // A graph with two independent output chains: a "requested" chain (which
+    // carries a ByStatus, so the slice must prune to the active branch) and a
+    // "dormant" chain fed by its own input. Requesting only the first output is
+    // a PROPER SUBSET of graph.outputs — the case the resolved per-year graph
+    // actually hits (federal-only outputs on a graph carrying every state), and
+    // the one no other batch test exercises: they all pass &graph.outputs, so
+    // the slice degenerates to the whole graph.
+    fn sliced_graph() -> Graph {
+        let mut nodes = HashMap::new();
+        let mut n = |id, op, name: &str| {
+            nodes.insert(
+                id,
+                Node {
+                    id,
+                    op,
+                    name: Some(name.to_string()),
+                },
+            );
+        };
+        n(0, Op::Input, "income");
+        n(1, Op::Literal { value: 12_000.0 }, "std_single");
+        n(2, Op::Literal { value: 24_000.0 }, "std_mfj");
+        n(
+            3,
+            Op::ByStatus {
+                values: ByStatus {
+                    single: 1,
+                    married_joint: 2,
+                    married_separate: 1,
+                    head_of_household: 1,
+                    qualifying_widow: 2,
+                },
+            },
+            "std_ded",
+        );
+        n(4, Op::Sub { left: 0, right: 3 }, "taxable");
+        n(5, Op::Literal { value: 0.0 }, "zero");
+        n(6, Op::Max { left: 4, right: 5 }, "requested");
+        // Dormant chain: its own input (7) and output (9), reachable from
+        // neither the requested output nor the active ByStatus branch.
+        n(7, Op::Input, "dormant_income");
+        n(8, Op::Literal { value: 5_000.0 }, "dormant_base");
+        n(9, Op::Add { left: 7, right: 8 }, "dormant");
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0, 7],
+            outputs: vec![6, 9],
+            invariants: vec![],
+        }
+    }
+
+    #[test]
+    fn test_simd_batch_slice_proper_subset_matches_interpreter() {
+        let graph = sliced_graph();
+        let compiler = JitCompiler::new().unwrap();
+        let requested = [6]; // proper subset of graph.outputs, which is [6, 9]
+        let incomes = [30_000.0, 100_000.0];
+
+        for status in [FilingStatus::Single, FilingStatus::MarriedJoint] {
+            let batch_compiled = compiler.compile_batch(&graph, status, &requested).unwrap();
+
+            // The slice must drop the dormant output and the input that only
+            // feeds it. This is what "proper subset" buys, and what was
+            // previously untested.
+            assert!(batch_compiled.output_offset(6).is_some());
+            assert!(
+                batch_compiled.output_offset(9).is_none(),
+                "dormant output must be sliced out"
+            );
+            assert!(
+                batch_compiled.input_offset(7).is_none(),
+                "input feeding only the dormant output must be sliced out"
+            );
+            assert_eq!(batch_compiled.num_outputs(), 1);
+
+            let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
+            batch_rt.set_batch("income", &incomes).unwrap();
+            let simd = batch_rt.eval_batch("requested").unwrap();
+
+            for i in 0..BATCH_SIZE {
+                let mut interp = crate::eval::Runtime::new(&graph, status);
+                interp.set("income", incomes[i]).unwrap();
+                let expected = interp.eval("requested").unwrap();
+                assert!(
+                    (simd[i] - expected).abs() < 1e-9,
+                    "status {:?} lane {}: simd={} interpreter={}",
+                    status,
+                    i,
+                    simd[i],
+                    expected
+                );
+            }
+        }
+    }
+
+    // `ratio` divides only on the married-joint branch of a ByStatus, and
+    // `offset` never divides, so the strict compiler's decision depends on
+    // both the requested output and the filing status.
+    fn division_graph() -> Graph {
+        let mut nodes = HashMap::new();
+        let mut n = |id, op, name: &str| {
+            nodes.insert(
+                id,
+                Node {
+                    id,
+                    op,
+                    name: Some(name.to_string()),
+                },
+            );
+        };
+        n(0, Op::Input, "numerator");
+        n(1, Op::Input, "denominator");
+        n(2, Op::Div { left: 0, right: 1 }, "quotient");
+        n(
+            3,
+            Op::ByStatus {
+                values: ByStatus {
+                    single: 0,
+                    married_joint: 2,
+                    married_separate: 0,
+                    head_of_household: 0,
+                    qualifying_widow: 0,
+                },
+            },
+            "ratio",
+        );
+        n(4, Op::Literal { value: 1.0 }, "one");
+        n(5, Op::Add { left: 0, right: 4 }, "offset");
+
+        Graph {
+            meta: None,
+            nodes,
+            imports: vec![],
+            tables: HashMap::new(),
+            inputs: vec![0, 1],
+            outputs: vec![3, 5],
+            invariants: vec![],
+        }
+    }
+
+    #[test]
+    fn test_simd_batch_lowers_division_by_zero_to_zero() {
+        let graph = division_graph();
+        let compiled = JitCompiler::new()
+            .unwrap()
+            .compile_batch(&graph, FilingStatus::MarriedJoint, &[3])
+            .unwrap();
+        let mut batch_rt = super::JitBatchRuntime::new(compiled, &graph);
+        batch_rt
+            .set_batch("numerator", &[10.0; BATCH_SIZE])
+            .unwrap();
+        batch_rt
+            .set_batch("denominator", &[0.0; BATCH_SIZE])
+            .unwrap();
+
+        let mut interp = crate::eval::Runtime::new(&graph, FilingStatus::MarriedJoint);
+        interp.set("numerator", 10.0).unwrap();
+        interp.set("denominator", 0.0).unwrap();
+
+        assert_eq!(batch_rt.eval_batch("ratio").unwrap(), [0.0; BATCH_SIZE]);
+        assert!(matches!(
+            interp.eval("ratio"),
+            Err(crate::eval::EvalError::DivisionByZero(2))
+        ));
+    }
+
+    #[test]
+    fn test_strict_batch_declines_slice_reaching_division() {
+        let graph = division_graph();
+        let compiler = JitCompiler::new().unwrap();
+
+        let declined = compiler
+            .compile_batch_strict(&graph, FilingStatus::MarriedJoint, &[3])
+            .unwrap();
+
+        assert!(declined.is_none());
+    }
+
+    #[test]
+    fn test_strict_batch_compiles_slice_without_division() {
+        let graph = division_graph();
+        let compiler = JitCompiler::new().unwrap();
+
+        let unreached_by_output = compiler
+            .compile_batch_strict(&graph, FilingStatus::MarriedJoint, &[5])
+            .unwrap();
+        let unreached_by_status = compiler
+            .compile_batch_strict(&graph, FilingStatus::Single, &[3])
+            .unwrap();
+
+        let mut batch_rt = super::JitBatchRuntime::new(unreached_by_output.unwrap(), &graph);
+        batch_rt
+            .set_batch("numerator", &[10.0; BATCH_SIZE])
+            .unwrap();
+        assert_eq!(batch_rt.eval_batch("offset").unwrap(), [11.0; BATCH_SIZE]);
+        assert!(unreached_by_status.is_some());
     }
 
     #[test]
@@ -533,7 +735,7 @@ mod tests {
         }
 
         let batch_compiled = compiler
-            .compile_batch(&graph, FilingStatus::Single)
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
             .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("wages", &wages).unwrap();
@@ -560,7 +762,7 @@ mod tests {
         let incomes = [0.0, -100.0];
 
         let batch_compiled = compiler
-            .compile_batch(&graph, FilingStatus::Single)
+            .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
             .unwrap();
         let mut batch_rt = super::JitBatchRuntime::new(batch_compiled, &graph);
         batch_rt.set_batch("income", &incomes).unwrap();

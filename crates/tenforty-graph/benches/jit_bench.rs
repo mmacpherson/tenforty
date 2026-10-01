@@ -41,7 +41,7 @@ fn bench_jit(c: &mut Criterion) {
         b.iter(|| {
             black_box(
                 compiler
-                    .compile_batch(&graph, FilingStatus::Single)
+                    .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
                     .unwrap(),
             )
         })
@@ -65,7 +65,7 @@ fn bench_jit(c: &mut Criterion) {
     c.bench_function("jit/batch_eval_2", |b| {
         let mut batch_rt = JitBatchRuntime::new(
             compiler
-                .compile_batch(&graph, FilingStatus::Single)
+                .compile_batch(&graph, FilingStatus::Single, &graph.outputs)
                 .unwrap(),
             &graph,
         );

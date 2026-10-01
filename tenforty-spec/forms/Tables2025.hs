@@ -1,5 +1,5 @@
-module Tables2025 (
-    -- * Federal Income Tax Brackets
+module Tables2025
+  ( -- * Federal Income Tax Brackets
     federalBrackets2025,
     federalBracketsTable2025,
 
@@ -7,13 +7,15 @@ module Tables2025 (
     standardDeduction2025,
 
     -- * Qualified Dividends / Long-Term Capital Gains
-    qualifiedDividendBrackets2025,
-    qualifiedDividendTable2025,
+    qualifiedDividend0PctMax2025,
+    qualifiedDividend15PctMax2025,
 
     -- * AMT Exemptions and Thresholds
     amtExemption2025,
     amtPhaseOutThreshold2025,
     amtRate1Threshold2025,
+    amtMfsIncreaseThreshold2025,
+    amtMfsIncreaseCap2025,
 
     -- * Self-Employment Tax
     ssWageBase2025,
@@ -33,6 +35,7 @@ module Tables2025 (
     -- * QBI Deduction (Form 8995)
     qbiDeductionRate2025,
     qbiThreshold2025,
+    qbiPhaseInRange2025,
 
     -- * Education Credits (Form 8863)
     aotcMaxCredit2025,
@@ -76,45 +79,42 @@ module Tables2025 (
     eitcMaxCredit1QC2025,
     eitcMaxCredit2QC2025,
     eitcMaxCredit3PlusQC2025,
-) where
+  )
+where
 
 import Data.List.NonEmpty (NonEmpty (..))
-
 import TenForty.Table
 import TenForty.Types
 
 federalBrackets2025 :: NonEmpty Bracket
 federalBrackets2025 =
-    Bracket (byStatus 11925 23850 11925 17000 23850) 0.10
-        :| [ Bracket (byStatus 48475 96950 48475 64850 96950) 0.12
-           , Bracket (byStatus 103350 206700 103350 103350 206700) 0.22
-           , Bracket (byStatus 197300 394600 197300 197300 394600) 0.24
-           , Bracket (byStatus 250525 501050 250525 250500 501050) 0.32
-           , Bracket (byStatus 626350 751600 375800 626350 751600) 0.35
-           , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.37
-           ]
+  Bracket (byStatus 11925 23850 11925 17000 23850) 0.10
+    :| [ Bracket (byStatus 48475 96950 48475 64850 96950) 0.12,
+         Bracket (byStatus 103350 206700 103350 103350 206700) 0.22,
+         Bracket (byStatus 197300 394600 197300 197300 394600) 0.24,
+         Bracket (byStatus 250525 501050 250525 250500 501050) 0.32,
+         Bracket (byStatus 626350 751600 375800 626350 751600) 0.35,
+         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.37
+       ]
 
 federalBracketsTable2025 :: Table
 federalBracketsTable2025 =
-    case mkBracketTable federalBrackets2025 of
-        Right bt -> TableBracket "federal_brackets_2025" bt
-        Left err -> error $ "Invalid federal brackets: " ++ err
+  case mkBracketTable federalBrackets2025 of
+    Right bt -> TableBracket "federal_brackets_2025" bt
+    Left err -> error $ "Invalid federal brackets: " ++ err
 
 standardDeduction2025 :: ByStatus (Amount Dollars)
 standardDeduction2025 = byStatus 15750 31500 15750 23625 31500
 
-qualifiedDividendBrackets2025 :: NonEmpty Bracket
-qualifiedDividendBrackets2025 =
-    Bracket (byStatus 48350 96700 48350 64750 96700) 0.00
-        :| [ Bracket (byStatus 533400 600050 300025 566700 600050) 0.15
-           , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.20
-           ]
+-- Qualified Dividends and Capital Gain Tax Worksheet, lines 6 and 13: the
+-- maximum taxable income taxed at the 0% and 15% preferential rates. Above the
+-- 15% ceiling the rate is 20%. (Rev. Proc. 2024-40.) These are the single
+-- source for the worksheet's breakpoints in US1040_2025.
+qualifiedDividend0PctMax2025 :: ByStatus (Amount Dollars)
+qualifiedDividend0PctMax2025 = byStatus 48350 96700 48350 64750 96700
 
-qualifiedDividendTable2025 :: Table
-qualifiedDividendTable2025 =
-    case mkBracketTable qualifiedDividendBrackets2025 of
-        Right bt -> TableBracket "qualified_dividend_brackets_2025" bt
-        Left err -> error $ "Invalid qualified dividend brackets: " ++ err
+qualifiedDividend15PctMax2025 :: ByStatus (Amount Dollars)
+qualifiedDividend15PctMax2025 = byStatus 533400 600050 300000 566700 600050
 
 amtExemption2025 :: ByStatus (Amount Dollars)
 amtExemption2025 = byStatus 88100 137000 68500 88100 137000
@@ -128,11 +128,20 @@ niitThreshold2025 = byStatus 200000 250000 125000 200000 250000
 additionalMedicareThreshold2025 :: ByStatus (Amount Dollars)
 additionalMedicareThreshold2025 = byStatus 200000 250000 125000 200000 200000
 
-{- | 2025 AMT 26%/28% rate threshold (above this, 28% applies)
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 AMT 26%/28% rate threshold (above this, 28% applies)
+-- Order: Single, MFJ, MFS, HoH, QW
 amtRate1Threshold2025 :: ByStatus (Amount Dollars)
 amtRate1Threshold2025 = byStatus 239100 239100 119550 239100 239100
+
+-- | Form 6251 line 4 special increase for married filing separately. The
+-- threshold is the point where the MFS exemption is fully phased out.
+amtMfsIncreaseThreshold2025 :: Amount Dollars
+amtMfsIncreaseThreshold2025 =
+  forStatus amtPhaseOutThreshold2025 MarriedSeparate
+    + 4 * forStatus amtExemption2025 MarriedSeparate
+
+amtMfsIncreaseCap2025 :: Amount Dollars
+amtMfsIncreaseCap2025 = forStatus amtExemption2025 MarriedSeparate
 
 -- | 2025 Social Security wage base
 ssWageBase2025 :: Amount Dollars
@@ -158,9 +167,8 @@ ctcPerChild2025 = 2000
 ctcOtherDependent2025 :: Amount Dollars
 ctcOtherDependent2025 = 500
 
-{- | 2025 CTC phase-out threshold
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 CTC phase-out threshold
+-- Order: Single, MFJ, MFS, HoH, QW
 ctcThreshold2025 :: ByStatus (Amount Dollars)
 ctcThreshold2025 = byStatus 200000 400000 200000 200000 400000
 
@@ -184,11 +192,15 @@ actcEarnedIncomeRate2025 = 0.15
 qbiDeductionRate2025 :: Amount Rate
 qbiDeductionRate2025 = 0.20
 
-{- | 2025 QBI simplified method threshold (above this, use Form 8995-A)
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 QBI simplified method threshold (above this, use Form 8995-A)
+-- Order: Single, MFJ, MFS, HoH, QW
 qbiThreshold2025 :: ByStatus (Amount Dollars)
-qbiThreshold2025 = byStatus 197300 394600 197300 197300 394600
+qbiThreshold2025 = byStatus 197300 394600 197300 197300 197300
+
+-- | 2025 Form 8995-A W-2 wage/UBIA and SSTB phase-in range
+-- Order: Single, MFJ, MFS, HoH, QW
+qbiPhaseInRange2025 :: ByStatus (Amount Dollars)
+qbiPhaseInRange2025 = byStatus 50000 100000 50000 50000 50000
 
 -- | 2025 AOTC maximum credit per student
 aotcMaxCredit2025 :: Amount Dollars
@@ -198,9 +210,8 @@ aotcMaxCredit2025 = 2500
 aotcRefundableRate2025 :: Amount Rate
 aotcRefundableRate2025 = 0.40
 
-{- | 2025 AOTC phase-out threshold (start)
-Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
--}
+-- | 2025 AOTC phase-out threshold (start)
+-- Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
 aotcThreshold2025 :: ByStatus (Amount Dollars)
 aotcThreshold2025 = byStatus 80000 160000 0 80000 160000
 
@@ -220,9 +231,8 @@ llcExpenseLimit2025 = 10000
 llcRate2025 :: Amount Rate
 llcRate2025 = 0.20
 
-{- | 2025 LLC phase-out threshold (start)
-Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
--}
+-- | 2025 LLC phase-out threshold (start)
+-- Order: Single, MFJ, MFS, HoH, QW (MFS = 0, not eligible)
 llcThreshold2025 :: ByStatus (Amount Dollars)
 llcThreshold2025 = byStatus 80000 160000 0 80000 160000
 
@@ -258,9 +268,8 @@ dependentCarePercentStep2025 = 0.01
 dependentCareAGIFloor2025 :: Amount Dollars
 dependentCareAGIFloor2025 = 15000
 
-{- | 2025 EITC phase-in ends (earned income for max credit)
-Values inflation-adjusted from 2024
--}
+-- | 2025 EITC phase-in ends (earned income for max credit)
+-- Values inflation-adjusted from 2024
 eitcPhaseInEnds0QC2025 :: Amount Dollars
 eitcPhaseInEnds0QC2025 = 8490
 
@@ -293,9 +302,8 @@ eitcPhaseOutRate1QC2025 = 0.1598
 eitcPhaseOutRate2PlusQC2025 :: Amount Rate
 eitcPhaseOutRate2PlusQC2025 = 0.2106
 
-{- | 2025 EITC phase-out thresholds
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2025 EITC phase-out thresholds
+-- Order: Single, MFJ, MFS, HoH, QW
 eitcPhaseOutThreshold0QC2025 :: ByStatus (Amount Dollars)
 eitcPhaseOutThreshold0QC2025 = byStatus 10620 17730 10620 10620 10620
 

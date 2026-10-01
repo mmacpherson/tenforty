@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import itertools
 import logging
 import pathlib
 from functools import lru_cache
 
-from ..form_resolution import resolve_forms
 from ..mappings import (
+    DERIVED_NATURAL_SOURCES,
     FILING_STATUS_MAP,
     LINE_TO_NATURAL,
     NATURAL_TO_NODE,
@@ -15,14 +16,33 @@ from ..mappings import (
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
-    STATE_OUTPUT_LINES,
+    derived_chain_factor,
+    state_output_lines,
 )
-from ..models import STATE_TO_FORM, InterpretedTaxReturn, OTSState, TaxReturnInput
+from ..models import (
+    STATE_TO_FORM,
+    InterpretedTaxReturn,
+    OTSDeductionType,
+    OTSState,
+    TaxReturnInput,
+)
 
 _STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
 _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 
 logger = logging.getLogger(__name__)
+
+_MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
+
+
+def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
+    """Lower a validated public input model to graph-compatible natural values."""
+    values = tax_input.model_dump(exclude=_MODEL_CONTEXT_FIELDS)
+    values["standard_or_itemized"] = float(
+        tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
+    )
+    return values
+
 
 _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
     s
@@ -36,6 +56,60 @@ if _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG:
     )
 
 
+FEDERAL_OUTPUT_NODES: dict[str, str] = {
+    "us_1040_L11_agi": "federal_adjusted_gross_income",
+    "us_1040_L15_taxable_income": "federal_taxable_income",
+    "us_form_8995_L16_qbi_deduction": "federal_qbi_deduction",
+    "us_1040_L24_total_tax": "federal_total_tax",
+    "us_form_6251_L11_amt": "federal_amt",
+    "us_schedule_se_L10_se_tax": "federal_se_tax",
+    "us_form_8960_L17_niit": "federal_niit",
+    "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
+}
+_FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}
+
+_STATE_ZERO_FIELDS = (
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+
+
+def _state_output_node(form_name: str, line_name: str) -> str:
+    """Resolve a state output line to a graph node name.
+
+    A line that is already a fully-qualified node (e.g. "us_1040_L11_agi", which
+    CT/NE/NM/OR reuse for state AGI) is used as-is; a bare line (e.g.
+    "L17_ca_agi") is prefixed with the state form. Single- and batch-eval must
+    resolve these identically, or the batch silently zero-fills a mis-prefixed
+    node.
+    """
+    if "_" in line_name and not line_name.startswith("L"):
+        return line_name
+    return f"{form_name}_{line_name}"
+
+
+def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
+    """Resolve a public state output field to its selected state's graph node."""
+    form_name = STATE_FORM_NAMES.get(state)
+    if form_name is None:
+        raise ValueError(f"Graph backend does not support state: {state.value}")
+
+    line_name = state_output_lines(state, year).get(field)
+    if line_name is None:
+        raise ValueError(
+            f"State {state.value} does not provide output field {field!r} for {year}"
+        )
+    return _state_output_node(form_name, line_name)
+
+
+def _federal_effective_tax_rate(total_tax: float, agi: float) -> float:
+    """Effective rate as a percent; 0 when AGI is non-positive (avoid div-by-0)."""
+    return (total_tax / agi * 100.0) if agi > 0 else 0.0
+
+
 def _forms_dir() -> pathlib.Path:
     """Get the forms directory path."""
     pkg_forms = pathlib.Path(__file__).parent.parent / "forms"
@@ -44,69 +118,18 @@ def _forms_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent.parent.parent / "forms"
 
 
-@lru_cache(maxsize=8)
-def _load_graph(form_id: str, year: int):
-    """Load a graph for a given form and year."""
-    try:
-        from ..graphlib import Graph
-    except ImportError:
-        raise ImportError("Graph backend requires tenforty.graphlib module") from None
+@lru_cache(maxsize=4)
+def _load_resolved_graph(year: int):
+    """Load the pre-resolved one-graph-per-year (federal + all states).
 
-    form_path = _forms_dir() / f"{form_id}_{year}.json"
-    if not form_path.exists():
-        return None
+    The Haskell compiler resolves every cross-form import at build time
+    (tenforty-ovz), so there is nothing to link at runtime — just load and
+    evaluate. Eval is demand-driven, so requesting one state's outputs only
+    touches that state plus federal; the other states stay dormant.
+    """
+    from ..graphlib import Graph
 
-    return Graph.from_json(form_path.read_text())
-
-
-@lru_cache(maxsize=16)
-def _link_graphs(year: int, form_ids: tuple[str, ...]):
-    """Link a specific set of graphs for a given year."""
-    try:
-        from ..graphlib import GraphSet
-    except ImportError:
-        raise ImportError("Graph backend requires tenforty.graphlib module") from None
-
-    gs = GraphSet()
-
-    for form_id in form_ids:
-        graph = _load_graph(form_id, year)
-        if graph is None:
-            raise ValueError(f"Required graph not found: {form_id}_{year}")
-        gs.add(form_id, graph)
-
-    # Verify no unresolved imports remain (should be handled by resolve_forms,
-    # but strictly enforced here).
-    unresolved = gs.unresolved_imports()
-    if unresolved:
-        mismatched_years = sorted({u.year for u in unresolved if u.year != year})
-        if mismatched_years:
-            mismatches = sorted(
-                {(u.form, u.line, u.year) for u in unresolved if u.year != year}
-            )
-            mismatch_lines = "\n".join(
-                f"- {form}:{line} ({imp_year})" for form, line, imp_year in mismatches
-            )
-            raise RuntimeError(
-                "Graph backend does not support linking mixed-year graphs.\n"
-                f"Requested year: {year}\n"
-                "Mismatched imports:\n"
-                f"{mismatch_lines}"
-            )
-
-        missing = sorted({(u.form, u.line, u.year) for u in unresolved})
-        missing_lines = "\n".join(
-            f"- {form}:{line} ({imp_year})" for form, line, imp_year in missing
-        )
-        loaded = ", ".join(gs.forms())
-        raise RuntimeError(
-            "Graph backend cannot link required forms: unresolved imports remain.\n"
-            f"Loaded forms: {loaded}\n"
-            "Unresolved imports:\n"
-            f"{missing_lines}"
-        )
-
-    return gs.link()
+    return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
 
 
 class GraphBackend:
@@ -136,25 +159,15 @@ class GraphBackend:
         from ..graphlib import FilingStatus, Runtime
 
         # Determine required forms based on inputs and state
-        inputs_dict = tax_input.model_dump(
-            exclude={"year", "state", "filing_status", "standard_or_itemized"}
-        )
-        form_ids = resolve_forms(
-            tax_input.year.value,
-            tax_input.state.value if tax_input.state else None,
-            inputs_dict,
-            _forms_dir(),
-        )
-
-        graph = _link_graphs(tax_input.year.value, tuple(form_ids))
+        inputs_dict = _natural_values(tax_input)
+        graph = _load_resolved_graph(tax_input.year.value)
         filing_status = FilingStatus.from_str(
             FILING_STATUS_MAP.get(tax_input.filing_status, "single")
         )
         evaluator = Runtime(graph, filing_status)
 
-        for input_name in graph.input_names():
-            evaluator.set(input_name, 0.0)
-
+        # Unset inputs default to 0 in eval; only the provided values are set
+        # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
         natural_values = inputs_dict
 
         unsupported: list[tuple[str, object]] = []
@@ -221,51 +234,28 @@ class GraphBackend:
 
         evaluator, _graph = self._create_evaluator(tax_input)
 
-        result = {}
+        # The resolved per-year graph always carries the full federal return, and
+        # unset inputs read as 0, so every node in FEDERAL_OUTPUT_NODES is present
+        # and evaluates — a missing one is a real graph defect and should surface,
+        # not be swallowed to 0.
+        result: dict[str, float] = {
+            field: evaluator.eval(node) for node, field in FEDERAL_OUTPUT_NODES.items()
+        }
 
-        agi = evaluator.eval("us_1040_L11_agi")
-        result["federal_adjusted_gross_income"] = agi
-
-        taxable = evaluator.eval("us_1040_L15_taxable_income")
-        result["federal_taxable_income"] = taxable
-
-        total_tax = evaluator.eval("us_1040_L24_total_tax")
-        result["federal_total_tax"] = total_tax
+        total_tax = result["federal_total_tax"]
         result["total_tax"] = total_tax
-
-        # Avoid divide-by-zero behavior inside the graph when AGI is 0.
-        result["federal_effective_tax_rate"] = (
-            (total_tax / agi * 100.0) if agi > 0 else 0.0
+        result["federal_effective_tax_rate"] = _federal_effective_tax_rate(
+            total_tax, result["federal_adjusted_gross_income"]
         )
-
         result["federal_tax_bracket"] = 0.0
-        try:
-            result["federal_amt"] = evaluator.eval("us_form_6251_L11_amt")
-        except Exception as exc:
-            logger.debug("AMT evaluation failed (Form 6251 may not be linked): %s", exc)
-            result["federal_amt"] = 0.0
 
-        for node, field in [
-            ("us_schedule_se_L10_se_tax", "federal_se_tax"),
-            ("us_form_8960_L17_niit", "federal_niit"),
-            (
-                "us_form_8959_L18_total_additional_medicare",
-                "federal_additional_medicare_tax",
-            ),
-        ]:
-            try:
-                result[field] = evaluator.eval(node)
-            except Exception:
-                result[field] = 0.0
-
-        result["state_adjusted_gross_income"] = 0.0
-        result["state_taxable_income"] = 0.0
-        result["state_total_tax"] = 0.0
-        result["state_tax_bracket"] = 0.0
-        result["state_effective_tax_rate"] = 0.0
+        for field in _STATE_ZERO_FIELDS:
+            result[field] = 0.0
 
         if tax_input.state and tax_input.state != OTSState.NONE:
-            state_result = self._evaluate_state(evaluator, tax_input.state)
+            state_result = self._evaluate_state(
+                evaluator, tax_input.state, tax_input.year.value
+            )
             result.update(state_result)
             result["total_tax"] = result["federal_total_tax"] + result.get(
                 "state_total_tax", 0.0
@@ -277,7 +267,7 @@ class GraphBackend:
         self,
         year: int,
         state: OTSState | None,
-        inputs: dict[str, list[float]],
+        inputs: dict[str, list[object]],
         statuses: list[str],
         mode: str = "cross",
     ) -> dict[str, list[float]]:
@@ -313,19 +303,50 @@ class GraphBackend:
                 f"Unsupported inputs:\n{details}"
             )
 
-        # Determine required forms using representative inputs from the batch.
-        # We use the max-absolute value per input to capture any non-zero cases.
-        resolve_inputs = {
-            name: (max(values, key=lambda v: abs(v)) if values else 0.0)
-            for name, values in inputs.items()
-        }
-        form_ids = resolve_forms(
-            year,
-            state.value if state else None,
-            resolve_inputs,
-            _forms_dir(),
-        )
-        graph = _link_graphs(year, tuple(form_ids))
+        if mode == "cross":
+            # A natural input fans out to several graph nodes, and the Rust
+            # cross API treats every node column as an independent axis — so
+            # the product must be taken here, at natural-name granularity,
+            # and evaluated as tied rows. Axis order matches the Rust cross:
+            # inputs outermost in dict order, statuses innermost.
+            axis_names = list(inputs.keys())
+            axis_values = [
+                list(values) if values else [0.0] for values in inputs.values()
+            ]
+            expanded: dict[str, list[object]] = {name: [] for name in axis_names}
+            expanded_statuses: list[str] = []
+            for combo in itertools.product(*axis_values):
+                for status in statuses:
+                    for name, value in zip(axis_names, combo, strict=True):
+                        expanded[name].append(value)
+                    expanded_statuses.append(status)
+            inputs = expanded
+            statuses = expanded_statuses
+            mode = "zip"
+
+        # Normalize each materialized row through TaxReturnInput so the batch
+        # path applies the same validators (the qualified>ordinary dividend
+        # lift) and computed fields (schedule_se_ss_wages, Schedule SE line 8a)
+        # that evaluate_return() applies via the single-scenario model. Rows are
+        # concrete here — cross mode expanded to zip above — so each entry in
+        # `statuses` pairs with one value per column, and the status-dependent
+        # line-8a derivation can be done per row on the Python side.
+        model_fields = set(TaxReturnInput.model_fields)
+        scenario_fields = [name for name in inputs if name in model_fields]
+        normalized: dict[str, list[float]] = {}
+        for i, status in enumerate(statuses):
+            tax_input = TaxReturnInput(
+                year=year,
+                state=state or OTSState.NONE,
+                filing_status=status,
+                **{name: inputs[name][i] for name in scenario_fields},
+            )
+            dumped = _natural_values(tax_input)
+            for name, value in dumped.items():
+                normalized.setdefault(name, []).append(float(value))
+        inputs = normalized
+
+        graph = _load_resolved_graph(year)
 
         # Map natural input names to graph node names
         graph_inputs = {}
@@ -350,28 +371,37 @@ class GraphBackend:
                     continue
                 graph_inputs[node_name] = values
 
-        # Define outputs we want to capture
-        output_map = {
-            "us_1040_L11_agi": "federal_adjusted_gross_income",
-            "us_1040_L15_taxable_income": "federal_taxable_income",
-            "us_1040_L24_total_tax": "federal_total_tax",
-            "us_schedule_se_L10_se_tax": "federal_se_tax",
-            "us_form_8960_L17_niit": "federal_niit",
-            "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
-        }
-
+        # Output contract as (node, field) pairs — the same federal node->field
+        # map the single path uses (so federal_amt is actually requested, not
+        # zero-filled), plus this state's output lines resolved through the
+        # shared helper. A pair list, not a dict: one node can feed two fields
+        # (CT/NE/NM/OR reuse us_1040_L11_agi for both federal and state AGI),
+        # which the single path handles by evaluating that node into each.
+        output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         if state and state != OTSState.NONE:
             state_form = STATE_FORM_NAMES.get(state)
-            state_outputs = STATE_OUTPUT_LINES.get(state, {})
             if state_form:
-                for line, key in state_outputs.items():
-                    output_map[f"{state_form}_{line}"] = key
+                for key, line in state_output_lines(state, year).items():
+                    output_pairs.append((_state_output_node(state_form, line), key))
+
+        requested_nodes = list(dict.fromkeys(node for node, _ in output_pairs))
+
+        # Reject a requested output node that isn't in the graph rather than let
+        # eval_scenarios silently return a 0.0 column for it (the failure mode
+        # that returned state_adjusted_gross_income=0 for CT/NE/NM/OR).
+        graph_nodes = set(graph.node_names())
+        missing_outputs = sorted(n for n in requested_nodes if n not in graph_nodes)
+        if missing_outputs:
+            raise RuntimeError(
+                "Graph backend output contract error: requested output nodes "
+                f"absent from the resolved graph: {missing_outputs}"
+            )
 
         # Call the batch API
         graph_statuses = [FILING_STATUS_MAP.get(s, s) for s in statuses]
         eval_fn = graph.eval_scenarios_zip if mode == "zip" else graph.eval_scenarios
         status_col, input_cols, output_cols = eval_fn(
-            graph_inputs, graph_statuses, list(output_map.keys())
+            graph_inputs, graph_statuses, requested_nodes
         )
 
         # Build final dictionary
@@ -391,38 +421,39 @@ class GraphBackend:
             )
             final_results[natural_name] = values
 
-        # Map outputs back to natural names
-        for node_name, values in output_cols.items():
-            final_results[output_map[node_name]] = values
+        # Map each (node, field) pair back — a node feeding two fields sets both.
+        for node_name, field in output_pairs:
+            final_results[field] = output_cols[node_name]
 
-        # Post-process common fields
         count = len(status_col)
+
+        # Federal derived fields — mirror the single path exactly.
+        final_results["federal_tax_bracket"] = [0.0] * count
+        final_results["federal_effective_tax_rate"] = [
+            _federal_effective_tax_rate(ft, agi)
+            for ft, agi in zip(
+                final_results["federal_total_tax"],
+                final_results["federal_adjusted_gross_income"],
+                strict=True,
+            )
+        ]
+
+        # State fields default to 0 when no state was requested (matching the
+        # single path); tax_bracket / effective_rate stay 0 even with a state.
+        for field in _STATE_ZERO_FIELDS:
+            final_results.setdefault(field, [0.0] * count)
+
         final_results["total_tax"] = [
             f + s
             for f, s in zip(
                 final_results["federal_total_tax"],
-                final_results.get("state_total_tax", [0.0] * count),
-                strict=False,
+                final_results["state_total_tax"],
+                strict=True,
             )
         ]
 
-        # Fill in missing expected fields with zeros
-        for field in [
-            "federal_amt",
-            "federal_se_tax",
-            "federal_niit",
-            "federal_additional_medicare_tax",
-            "federal_income_tax",
-            "state_adjusted_gross_income",
-            "state_taxable_income",
-            "state_total_tax",
-            "state_tax_bracket",
-            "state_effective_tax_rate",
-        ]:
-            if field not in final_results:
-                final_results[field] = [0.0] * count
-
-        # Compute federal_income_tax = total_tax - subordinate taxes
+        # federal_income_tax = total federal tax minus the subordinate taxes,
+        # the decomposition the InterpretedTaxReturn validator applies.
         final_results["federal_income_tax"] = [
             ft - se - niit - admed
             for ft, se, niit, admed in zip(
@@ -436,25 +467,18 @@ class GraphBackend:
 
         return final_results
 
-    def _evaluate_state(self, evaluator, state: OTSState) -> dict[str, float] | None:
+    def _evaluate_state(
+        self, evaluator, state: OTSState, year: int
+    ) -> dict[str, float] | None:
         """Evaluate state outputs from linked graph."""
         if state not in STATE_FORM_NAMES:
             raise ValueError(f"Graph backend does not support state: {state.value}")
 
         form_name = STATE_FORM_NAMES[state]
-        result = {}
-        output_map = STATE_OUTPUT_LINES.get(state, {})
-
-        for line_name, result_key in output_map.items():
-            # If line_name already contains a form prefix (e.g., "us_1040_L11_agi"),
-            # use it directly. Otherwise, prepend the state's form_name.
-            if "_" in line_name and not line_name.startswith("L"):
-                node_name = line_name
-            else:
-                node_name = f"{form_name}_{line_name}"
-            result[result_key] = evaluator.eval(node_name)
-
-        return result
+        return {
+            result_key: evaluator.eval(_state_output_node(form_name, line_name))
+            for result_key, line_name in state_output_lines(state, year).items()
+        }
 
     def _resolve_input_node(
         self, tax_input: TaxReturnInput, var: str, output_node: str | None = None
@@ -487,6 +511,98 @@ class GraphBackend:
             input_node = f"us_1040_{input_node}"
         return input_node
 
+    def _input_nodes(
+        self, tax_input: TaxReturnInput, var: str, output_node: str | None = None
+    ) -> list[str]:
+        """Every graph node a natural input is written to.
+
+        `_create_evaluator` fans one natural input out to several nodes —
+        `w2_income` reaches both the 1040 wage line and Form 8959's Medicare
+        wages. A derivative or solve with respect to that natural input has to
+        account for all of them, so this returns the same set evaluation
+        writes; resolving a single "primary" node instead is what let the
+        derivative silently omit every subordinate form.
+
+        Federal and state nodes are both included. A node that cannot
+        influence the requested output simply contributes a zero partial, so
+        there is no need to guess which namespace the caller meant.
+
+        DERIVED naturals count as well. `schedule_se_ss_wages` is computed from
+        `w2_income`, so evaluation writes the filer's wages to Schedule SE line 5a
+        and the shared social security wage base couples W2 to SE tax — but the
+        node is filed under the derived natural's own key, so a gradient that
+        consulted only `NATURAL_TO_NODES[var]` dropped that coupling entirely
+        (tenforty-hrp). Only derivations with a unit slope contribute: an adjoint
+        sum is unweighted, so a factor other than 0 or 1 could not be represented
+        here — `derived_chain_factor` raises on one rather than let it be counted
+        wrong or dropped in silence.
+
+        This reaches `solve` as well, which names the same nodes and assigns the
+        candidate to every one of them. Omitting the derived node left the solver
+        searching a function the library does not compute, and converging on a
+        point that is not a root.
+
+        The result is deduplicated. Evaluation is idempotent to a repeated
+        node — assigning it twice leaves the same value — but `gradient_sum`
+        adds one adjoint per name, so a node named twice would have its
+        contribution counted twice. The mapping tables are maintained by hand,
+        so the two must not be allowed to disagree.
+        """
+        if isinstance(var, str) and var.startswith(_ALL_KNOWN_PREFIXES):
+            return [var]
+
+        nodes = list(NATURAL_TO_NODES.get(var, []))
+        state_node = STATE_NATURAL_TO_NODE.get(tax_input.state, {}).get(var)
+        if state_node:
+            nodes.append(state_node)
+
+        for derived, source in DERIVED_NATURAL_SOURCES.items():
+            if (
+                source == var
+                and derived_chain_factor(tax_input, derived, source) == 1.0
+            ):
+                nodes.extend(NATURAL_TO_NODES.get(derived, []))
+
+        if nodes:
+            return list(dict.fromkeys(nodes))
+
+        return [self._resolve_input_node(tax_input, var, output_node)]
+
+    def _output_nodes(self, tax_input: TaxReturnInput, output: str) -> list[str]:
+        """Resolve a public output to the graph nodes whose sum it denotes."""
+        if output.startswith(_ALL_KNOWN_PREFIXES):
+            return [output]
+
+        has_state = bool(tax_input.state and tax_input.state != OTSState.NONE)
+        if output == "total_tax":
+            nodes = [_FEDERAL_FIELD_TO_NODE["federal_total_tax"]]
+            if has_state:
+                nodes.append(
+                    _state_output_node_for_field(
+                        tax_input.state, "state_total_tax", tax_input.year.value
+                    )
+                )
+            return nodes
+
+        federal_node = _FEDERAL_FIELD_TO_NODE.get(output)
+        if federal_node:
+            return [federal_node]
+
+        if output.startswith("state_"):
+            if not has_state:
+                raise ValueError(f"Output {output!r} requires a state return")
+            return [
+                _state_output_node_for_field(
+                    tax_input.state, output, tax_input.year.value
+                )
+            ]
+
+        for line, natural in LINE_TO_NATURAL.items():
+            if natural == output:
+                return [f"us_1040_{line}"]
+
+        return [f"us_1040_{output}"]
+
     def gradient(
         self, tax_input: TaxReturnInput, output: str, wrt: str
     ) -> float | None:
@@ -495,23 +611,39 @@ class GraphBackend:
             return None
 
         evaluator, _ = self._create_evaluator(tax_input)
+        output_nodes = self._output_nodes(tax_input, output)
+        input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
 
-        if output.startswith(_ALL_KNOWN_PREFIXES):
-            output_node = output
-        else:
-            output_node = None
-            for line, natural in LINE_TO_NATURAL.items():
-                if natural == output:
-                    output_node = line
-                    break
-            if output_node is None:
-                output_node = f"us_1040_{output}"
-            else:
-                output_node = f"us_1040_{output_node}"
+        return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
-        input_node = self._resolve_input_node(tax_input, wrt, output_node)
+    def gradients(
+        self, tax_input: TaxReturnInput, output: str
+    ) -> dict[str, float] | None:
+        """Compute gradients for every continuous public input.
 
-        return evaluator.gradient(output_node, input_node)
+        Smooth inputs share one reverse traversal per resolved output. At an
+        active piecewise boundary, each affected input retains the scalar API's
+        composed right-hand derivative convention.
+        """
+        if not self.is_available():
+            return None
+
+        evaluator, _ = self._create_evaluator(tax_input)
+        output_nodes = self._output_nodes(tax_input, output)
+        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+        natural_names = [
+            name
+            for name, field in TaxReturnInput.model_fields.items()
+            if field.annotation is float
+            and (name in NATURAL_TO_NODES or name in state_mapping)
+        ]
+        input_groups = [
+            self._input_nodes(tax_input, name, output_nodes[0])
+            for name in natural_names
+        ]
+        values = evaluator.gradients_multi_output(output_nodes, input_groups)
+
+        return dict(zip(natural_names, values, strict=True))
 
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
@@ -532,25 +664,10 @@ class GraphBackend:
             return None
 
         evaluator, _ = self._create_evaluator(tax_input)
+        output_nodes = self._output_nodes(tax_input, output)
+        input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
 
-        if output.startswith(_ALL_KNOWN_PREFIXES):
-            output_node = output
-        else:
-            output_node = None
-            for line, natural in LINE_TO_NATURAL.items():
-                if natural == output:
-                    output_node = line
-                    break
-            if output_node is None:
-                output_node = f"us_1040_{output}"
-            else:
-                output_node = f"us_1040_{output_node}"
-
-        input_node = self._resolve_input_node(tax_input, var, output_node)
-
-        natural_values = tax_input.model_dump(
-            exclude={"year", "state", "filing_status", "standard_or_itemized"}
-        )
+        natural_values = _natural_values(tax_input)
         current_val = natural_values.get(var, 0)
 
         if current_val == 0:
@@ -570,7 +687,9 @@ class GraphBackend:
             initial_guess = tax_estimate
 
         try:
-            return evaluator.solve(output_node, target, input_node, initial_guess)
+            return evaluator.solve_multi_output(
+                output_nodes, target, input_nodes, initial_guess
+            )
         except Exception as exc:
             msg = str(exc)
             if "Failed to converge" in msg or "Zero gradient" in msg:

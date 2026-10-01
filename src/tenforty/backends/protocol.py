@@ -29,6 +29,15 @@ class TaxBackend(Protocol):
         """
         ...
 
+    def gradients(
+        self, tax_input: TaxReturnInput, output: str
+    ) -> dict[str, float] | None:
+        """Compute gradients for every continuous public input.
+
+        Returns None if the backend does not support autodiff.
+        """
+        ...
+
     def solve(
         self, tax_input: TaxReturnInput, output: str, target: float, var: str
     ) -> float | None:

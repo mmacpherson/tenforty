@@ -307,6 +307,88 @@ impl Graph {
 
         Ok(result)
     }
+
+    /// Topological order of just the nodes reachable from `roots`.
+    ///
+    /// Unlike [`topological_order`](Self::topological_order), this seeds the
+    /// DFS from `roots` (typically the requested outputs) rather than every
+    /// node, so the result contains only what those outputs actually depend on.
+    /// `ByStatus` follows only the branch selected by `filing_status`, matching
+    /// how the interpreter and JIT evaluate it — the other branches are neither
+    /// evaluated nor emitted. The result is a valid topological order (each node
+    /// appears after its dependencies), so a lowerer can consume it directly.
+    pub fn reachable_topological_order(
+        &self,
+        roots: &[NodeId],
+        filing_status: FilingStatus,
+    ) -> Result<Vec<NodeId>, GraphError> {
+        let mut result = Vec::new();
+        let mut visited = std::collections::HashSet::new();
+        let mut temp_mark = std::collections::HashSet::new();
+        let mut stack = Vec::new();
+
+        fn visit(
+            id: NodeId,
+            graph: &Graph,
+            filing_status: FilingStatus,
+            visited: &mut std::collections::HashSet<NodeId>,
+            temp_mark: &mut std::collections::HashSet<NodeId>,
+            stack: &mut Vec<NodeId>,
+            result: &mut Vec<NodeId>,
+        ) -> Result<(), GraphError> {
+            if visited.contains(&id) {
+                return Ok(());
+            }
+            if temp_mark.contains(&id) {
+                let start = stack.iter().position(|&node_id| node_id == id).unwrap_or(0);
+                let mut cycle_ids: Vec<NodeId> = stack[start..].to_vec();
+                cycle_ids.push(id);
+                let cycle = cycle_ids
+                    .into_iter()
+                    .map(|id| {
+                        graph
+                            .nodes
+                            .get(&id)
+                            .and_then(|n| n.name.clone())
+                            .unwrap_or_else(|| format!("node_{id}"))
+                    })
+                    .collect();
+                return Err(GraphError::CycleDetected(cycle));
+            }
+            temp_mark.insert(id);
+            stack.push(id);
+
+            if let Some(node) = graph.nodes.get(&id) {
+                let deps = match &node.op {
+                    Op::ByStatus { values } => vec![*values.get(filing_status)],
+                    other => other.dependencies(),
+                };
+                for dep in deps {
+                    visit(dep, graph, filing_status, visited, temp_mark, stack, result)?;
+                }
+            }
+
+            stack.pop();
+            temp_mark.remove(&id);
+            visited.insert(id);
+            result.push(id);
+            Ok(())
+        }
+
+        for &root in roots {
+            visit(
+                root,
+                self,
+                filing_status,
+                &mut visited,
+                &mut temp_mark,
+                &mut stack,
+                &mut result,
+            )?;
+        }
+
+        Ok(result)
+    }
 }
 
 #[cfg(test)]

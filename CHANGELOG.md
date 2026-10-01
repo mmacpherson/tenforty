@@ -1,3 +1,46 @@
+## [Unreleased]
+### Removed
+- Graph backend runtime linker. `GraphSet`, `UnresolvedImport`, and `LinkError`
+  are gone from `tenforty.graphlib` and the WASM bindings, along with
+  `form_resolution.py`. Cross-form imports are now resolved at spec-build time by
+  the Haskell `resolveForms` pass, which emits one import-free graph per year
+  (`us_tax_graph_<year>.json`). Migration for direct `graphlib` consumers: load
+  the resolved per-year graph with `Graph.from_json(...)` and evaluate it
+  directly, instead of building a `GraphSet`, adding per-form graphs, and calling
+  `.link()`. The `tenforty` public tax API (`evaluate_return[s]`) is unaffected.
+
+### Changed
+- **`marginal_rate` and `solve_for_income` now read `total_tax` as federal plus the
+  selected state's tax**, matching what `evaluate_return(...).total_tax` has always
+  returned. Both previously resolved the default `output="total_tax"` to the federal
+  1040 line alone, so with a state selected they answered a different question than
+  the one the field name names: for 2024 CA Single at $100,000 of wages,
+  `marginal_rate` returned `0.22` where the derivative of the public total is `0.313`,
+  and `solve_for_income(target_tax=20_000)` returned an income producing $27,792 of
+  total tax. Callers who calibrated against the old federal-only number will see it
+  move; pass `output="federal_total_tax"` to keep the previous meaning. `output` also
+  now accepts `federal_total_tax` and `state_total_tax`, which previously raised
+  `ValueError: Node not found`. Evaluation is unchanged. (#328)
+- Graph backend: an unset graph input now reads as `0.0` instead of raising.
+  The resolved per-year graph carries every state's inputs (~800); a given return
+  sets only the handful it uses. Mapping typos are still rejected at `set()` (an
+  unknown input *name* errors), and the new `graph_continuity_test` asserts every
+  mapped input is wired to an output. (#314)
+
+## [2025.11] - 2026-07-21
+### Fixed
+- Schedule SE line 8a now receives the filer's own W-2 social security wages
+  for single-person filing statuses (Single, Head of Household,
+  Married/Separate, Widow(er)), so the 12.4% OASDI portion of self-employment
+  tax correctly respects the wage base already consumed by W-2 wages.
+  Previously SE tax was invariant to W-2 income: a Single filer with $168,600
+  of wages and $60,000 of Schedule C profit was overcharged $6,870.84.
+  Corrected figures verified independently against OpenTaxSolver driven
+  directly and against PSL Tax-Calculator. Married/Joint behavior is
+  intentionally unchanged pending per-spouse wage attribution, since
+  `w2_income` is a household aggregate and Schedule SE is a per-person form.
+  (thanks @bg002h, #278, #279)
+
 ## [2025.10] - 2026-05-03
 ### Changed
 - Accelerated `parse_ots_return` for faster bulk estimate calculation

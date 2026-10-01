@@ -2,7 +2,13 @@
 
 import pytest
 
-from tenforty import evaluate_return, evaluate_returns, marginal_rate, solve_for_income
+from tenforty import (
+    evaluate_return,
+    evaluate_returns,
+    marginal_rate,
+    marginal_rates,
+    solve_for_income,
+)
 
 
 class TestEvaluateReturn:
@@ -104,6 +110,19 @@ class TestMarginalRate:
 
         rate = marginal_rate(year=2024, w2_income=100_000)
         assert 0 < rate < 1
+
+
+class TestMarginalRates:
+    """Tests for the full gradient-vector API."""
+
+    def test_marginal_rates_raises_without_graph(self, monkeypatch):
+        """marginal_rates should fail clearly when graph support is absent."""
+        from tenforty.backends.graph import GraphBackend
+
+        monkeypatch.setattr(GraphBackend, "is_available", lambda self: False)
+
+        with pytest.raises(RuntimeError, match="Graph backend is not available"):
+            marginal_rates(year=2024, w2_income=100_000)
 
 
 class TestSolveForIncome:

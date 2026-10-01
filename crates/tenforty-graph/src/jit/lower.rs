@@ -268,6 +268,7 @@ pub fn lower_graph_simd<M: Module>(
     _module: &mut M,
     graph: &Graph,
     filing_status: FilingStatus,
+    order: &[NodeId],
     input_offsets: &HashMap<NodeId, usize>,
     output_offsets: &HashMap<NodeId, usize>,
 ) -> Result<(), JitError> {
@@ -284,9 +285,7 @@ pub fn lower_graph_simd<M: Module>(
 
     let mut node_values: HashMap<NodeId, Value> = HashMap::new();
 
-    let order = graph.topological_order()?;
-
-    for node_id in &order {
+    for node_id in order {
         let node = match graph.nodes.get(node_id) {
             Some(n) => n,
             None => continue,

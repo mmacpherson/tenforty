@@ -1,5 +1,5 @@
-module TablesCA2024 (
-    -- * California Income Tax Brackets
+module TablesCA2024
+  ( -- * California Income Tax Brackets
     californiaBrackets2024,
     californiaBracketsTable2024,
 
@@ -31,39 +31,37 @@ module TablesCA2024 (
     caDepCareMaxPercent2024,
     caDepCarePhaseoutStart2024,
     caDepCarePhaseoutEnd2024,
-) where
+  )
+where
 
 import Data.List.NonEmpty (NonEmpty (..))
-
 import TenForty.Table
 import TenForty.Types
 
-{- | 2024 California income tax brackets
-Order: Single, MFJ, MFS, HoH, QW
-Source: FTB Tax Rate Schedules
--}
+-- | 2024 California income tax brackets
+-- Order: Single, MFJ, MFS, HoH, QW
+-- Source: FTB Tax Rate Schedules
 californiaBrackets2024 :: NonEmpty Bracket
 californiaBrackets2024 =
-    Bracket (byStatus 10412 20824 10412 20839 20824) 0.01
-        :| [ Bracket (byStatus 24684 49368 24684 49371 49368) 0.02
-           , Bracket (byStatus 38959 77918 38959 77921 77918) 0.04
-           , Bracket (byStatus 54081 108162 54081 108164 108162) 0.06
-           , Bracket (byStatus 68350 136700 68350 136702 136700) 0.08
-           , Bracket (byStatus 349137 698274 349137 698280 698274) 0.093
-           , Bracket (byStatus 418961 837922 418961 837926 837922) 0.103
-           , Bracket (byStatus 698271 1396542 698271 1396550 1396542) 0.113
-           , Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.123
-           ]
+  Bracket (byStatus 10412 20824 10412 20839 20824) 0.01
+    :| [ Bracket (byStatus 24684 49368 24684 49371 49368) 0.02,
+         Bracket (byStatus 38959 77918 38959 77921 77918) 0.04,
+         Bracket (byStatus 54081 108162 54081 108164 108162) 0.06,
+         Bracket (byStatus 68350 136700 68350 136702 136700) 0.08,
+         Bracket (byStatus 349137 698274 349137 698280 698274) 0.093,
+         Bracket (byStatus 418961 837922 418961 837926 837922) 0.103,
+         Bracket (byStatus 698271 1396542 698271 1396550 1396542) 0.113,
+         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.123
+       ]
 
 californiaBracketsTable2024 :: Table
 californiaBracketsTable2024 =
-    case mkBracketTable californiaBrackets2024 of
-        Right bt -> TableBracket "ca_brackets_2024" bt
-        Left err -> error $ "Invalid California brackets: " ++ err
+  case mkBracketTable californiaBrackets2024 of
+    Right bt -> TableBracket "ca_brackets_2024" bt
+    Left err -> error $ "Invalid California brackets: " ++ err
 
-{- | 2024 California standard deduction amounts
-Order: Single, MFJ, MFS, HoH, QW
--}
+-- | 2024 California standard deduction amounts
+-- Order: Single, MFJ, MFS, HoH, QW
 caStandardDeduction2024 :: ByStatus (Amount Dollars)
 caStandardDeduction2024 = byStatus 5540 11080 5540 11080 11080
 
@@ -79,16 +77,14 @@ caDependentExemption2024 = 461
 caExemptionPhaseoutThreshold2024 :: ByStatus (Amount Dollars)
 caExemptionPhaseoutThreshold2024 = byStatus 244857 489714 244857 367290 489714
 
-{- | 2024 total personal exemption credit by filing status
-Single/MFS/HoH: 1 × $149 = $149; MFJ/QW: 2 × $149 = $298
--}
+-- | 2024 total personal exemption credit by filing status
+-- Single/MFS/HoH: 1 × $149 = $149; MFJ/QW: 2 × $149 = $298
 caPersonalExemptionCredit2024 :: ByStatus (Amount Dollars)
 caPersonalExemptionCredit2024 = byStatus 149 298 149 149 298
 
-{- | 2024 exemption credit phase-out rate per dollar of excess AGI
-FTB: $6 per $2,500 excess per exemption ($6/$1,250 for MFS)
-Single/HoH: 1 × $6/$2,500; MFJ/QW: 2 × $6/$2,500; MFS: 1 × $6/$1,250
--}
+-- | 2024 exemption credit phase-out rate per dollar of excess AGI
+-- FTB: $6 per $2,500 excess per exemption ($6/$1,250 for MFS)
+-- Single/HoH: 1 × $6/$2,500; MFJ/QW: 2 × $6/$2,500; MFS: 1 × $6/$1,250
 caExemptionPhaseoutRate2024 :: ByStatus (Amount Rate)
 caExemptionPhaseoutRate2024 = byStatus 0.0024 0.0048 0.0048 0.0024 0.0048
 

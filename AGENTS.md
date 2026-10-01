@@ -11,6 +11,43 @@ pick up the same content. It follows the [AGENTS.md](https://agents.md) conventi
 - **Never force-push** `main` or any branch with an open PR.
 - Run the relevant quality gates before requesting review.
 
+## Vendored OpenTaxSolver is not ours to edit
+
+We **vendor** OpenTaxSolver, we do not fork it. Never change what OTS computes —
+not the release tarballs, not the generated `ots_amalgamation.cpp`, and not
+through a patch function in `ots/amalgamate.py`. This holds even when the defect
+is proven and the fix is one character.
+
+When you find a defect in OTS's tax logic:
+
+1. Report it upstream. Stage the report in `docs/upstream-ots-reports.md`.
+2. Record it locally as a **strict-xfail** test plus a known-defect signature in
+   `tests/taxcalc/taxcalc_policy.py`. The xfail is the durable record and flips on
+   its own once a release carries the correction.
+
+Patching the vendored source instead would fork it invisibly: our tree would
+silently diverge from the upstream we claim to wrap, with nothing in the OTS
+release to show for it.
+
+**The narrow exception is portability and memory safety** — making the source
+compile and not read out of bounds, without changing any computed figure. The
+existing patch functions are of this kind: C99→C++ shims, and
+`patch_az_widow_std_deduction` for an out-of-bounds array read. Anything in this
+category still gets reported upstream, and the patch function carries a docstring
+saying why it qualifies.
+
+Before deciding a finding is upstream's, check whether it is actually **ours**:
+the mapping layer (`models.py` input maps, `core.py` activation and
+orchestration) is our code and gets fixed here.
+
+Two traps worth knowing:
+
+- `ots_amalgamation.cpp` is the only `.cpp` the generator emits and the only one
+  compiled — every `.pxd` points at it. The 114 per-year `ots_YYYY_*.cpp` files
+  are stale and carry unpatched sources; don't read them as live.
+- Editing a generated file without a matching patch function means the next
+  regeneration silently reverts you. Change `ots/amalgamate.py`, then regenerate.
+
 ## Overview
 
 Python library for US federal and state tax computation. Two backends:
@@ -25,11 +62,44 @@ Python library for US federal and state tax computation. Two backends:
 - **Testing**: pytest + hypothesis (Python), proptest (Rust), QuickCheck (Haskell)
 - **Quality**: ruff (linting), pre-commit hooks
 
+## Dependency & toolchain versions
+
+All three toolchains track newest-compatible versions on the latest stable
+compiler. They deliberately differ on lockfiles, because they differ on who
+consumes the dependency ranges: the Python package is a published library, while
+the Rust crate and the Haskell spec are not published on their own. The Rust
+crate does ship compiled inside the Python wheel, which is a concrete reason to
+track `Cargo.lock`: it pins what goes into the shipped extension.
+
+- **Python (uv)**: loose `pyproject.toml` constraints, **no committed lockfile**.
+  Those ranges are what PyPI consumers resolve against, so they are a claim about
+  what tenforty supports; `uv.lock` never ships in the sdist or wheel and could
+  not pin consumers anyway. `uv.lock` is gitignored, local-only, and removed by
+  `make clean`. CI runs a plain `uv sync` and resolves fresh every run, which is
+  what keeps testing the claim. Don't commit `uv.lock` or add `--frozen`/`--locked`
+  to CI.
+- **Rust (cargo)**: semver `Cargo.toml` → exact `Cargo.lock`; bump with `cargo update`.
+- **Haskell (cabal)**: lower-bounds-only `.cabal` (no PVP upper bounds —
+  `tenforty-spec` is unpublished) → exact `tenforty-spec/cabal.project.freeze` at a
+  pinned `index-state`, compiler pinned via `with-compiler`; bump with
+  `cabal update` → bump `index-state` → `cabal freeze`. GHC: the latest stable the
+  pinned deps **and the dev toolchain** build against — hlint/ormolu track GHC via
+  `ghc-lib-parser` and lag it, so the linter sets the practical ceiling (currently
+  9.12.x). This keeps one compiler for the project and all dev tools.
+
+Rust and Haskell lockfiles are tracked, and `main` builds against them. If a newest
+combination breaks the build or tests, pin that one package back in the lock or
+freeze rather than rolling the whole tree back. For Python, a break from a fresh
+resolve means the supported range is wrong: fix the code, or tighten the
+`pyproject.toml` bound.
+
 ## Development Commands
 
 - `pip install -e ".[dev]"` — Install in dev mode
 - `pytest` — Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` — Run with CI profile (500 examples)
+- `make test-deep` — Deep property sweep (10,000 examples, all cores; ad hoc, ~5 min)
+- `make test-soak` — Soak (100,000 examples, all cores; ad hoc, ~50 min)
 - `python ots/amalgamate.py ots/ots-releases/*.tgz` — Regenerate OTS bindings
 - `make graph-build` — Build graph library (interpreter only)
 - `make spec-graphs` — Generate JSON graphs from Haskell specs
@@ -49,8 +119,65 @@ QA sequence (Claude Code exposes it as the `/graph-qa` slash command):
 6. `make run-hooks` — Run pre-commit hooks
 7. `uv run pytest tests/ -q --tb=line` — Run the test suite
 
-If `graphlib_link_year_test.py` fails, the `.so` is out of sync — run `make env-full`.
+If the graph backend tests in `tests/backends_test.py` fail to load the compiled
+module (or `evaluate` raises on a fresh graph), the `.so` is out of sync — run
+`make env-full`.
 Never bypass pre-commit hooks with `--no-verify`; fix the underlying issue instead.
+
+### Sweeps expected for substantive engine changes
+
+The per-PR suite runs the `ci` hypothesis profile (500 examples) — enough to
+gate a change, not to hunt rare corners. For a **substantive change to a compute
+engine** (the Rust graph runtime, the OTS mapping/orchestration, or the Haskell
+spec/graph — not docs, tests, or tooling), run all three deeper sweeps and note
+the result in the PR:
+
+- **Deep hypothesis sweep** — `make test-deep` (10,000 examples, ~5 minutes on 12
+  cores). Catches obscure-threshold conjunctions the 500-example gate clears only
+  intermittently. Targeted boundary-straddling strategies (tenforty-g79) are the
+  higher-leverage complement; reps are the safety net under them. The target
+  fans the sweep across all cores; `uv run pytest --hypothesis-profile=deep` is
+  the same sweep serial (~11 minutes), and is what to reach for when a failure
+  needs reproducing without worker output interleaved.
+- **OTS regression + cross-backend parity** — the `tests/parity/` suite, so the
+  OTS and graph backends still agree.
+- **taxcalc differential** — `TENFORTY_TAXCALC=1 uv run pytest tests/taxcalc/`
+  (install with `uv sync --group taxcalc`), the value oracle against
+  Tax-Calculator.
+
+These are complementary nets: the differential pins **numbers**, parity pins
+**backend agreement**, and the property sweep pins **shape/structure** the other
+two are blind to. None runs in the per-PR gate; they are the author's
+responsibility on an engine change.
+
+Above those sits an ad-hoc fourth, expected of nothing: **`make test-soak`** (100,000
+examples, ~50 minutes on 12 cores; ~2 hours serial). Reach for it when a change is
+large enough that `deep` is not reassurance, because `deep` is a coin flip on the
+rarest defects rather than a net — the float-boundary drop in `derived_chain_factor`
+sat at a per-example hit rate near 2e-5, which `deep` clears about one run in five,
+and it was found by luck. But reps are the instrument of last resort. Once a corner is
+**characterized**, write a strategy that lands on it (`_BINADE_EDGE` in
+`tests/graph_autodiff_properties_test.py`) rather than buying it with reps: the defect
+that cost `deep` a full sweep to hit falls out of the 500-example `ci` gate in fifteen
+seconds once the strategy aims there.
+
+Parallelism buys a constant factor here, and only once. Under `deep` the sweep's cost
+is ~15 property tests that inherit the profile — 637s of a 661s serial run — and the
+single slowest is 196s of the 295s parallel wall clock. That one test sets the floor;
+adding property tests raises it. When the sweep gets slow again, the lever is the
+properties, not more cores.
+
+For the deep sweep to reach a property, that property must **inherit** the
+profile's example count:
+
+- **Invariant / corner-hunting property tests** (monotonicity, continuity,
+  wiring, gradients — cheap, one or two evaluations per example) omit
+  `max_examples` and use `@settings(deadline=None)`, so they run 500 under `ci`,
+  10,000 under `deep`, and 100,000 under `soak`.
+- **Oracle / expensive tests** (parity across both backends, the taxcalc
+  differential, the Newton solver) pin an explicit, bounded `max_examples` with a
+  one-line reason — 10k of a slow example is prohibitive and adds nothing to a
+  value/agreement oracle, so these deliberately do **not** scale.
 
 ## Python Style
 

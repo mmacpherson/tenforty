@@ -10,7 +10,7 @@ from collections.abc import Callable
 from enum import Enum
 from functools import partial
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from . import _ots_form_models
 
@@ -271,6 +271,12 @@ class SubordinateFormConfig(BaseModel):
     output_map: dict[str, str] = {}
     total_tax_key: str | None = None
     defaults: dict[str, str] = {}
+    # Naturals this form consumes through `fed_import_map` rather than directly.
+    # Activation is decided on the inputs a form consumes, and a value arriving
+    # from the federal return is invisible to `input_map` — so without this a
+    # filer whose only investment income is capital gains would never trigger
+    # Form 8960 at all.
+    activation_naturals: list[str] = []
 
 
 OTS_FORM_CONFIG = dict(
@@ -292,12 +298,40 @@ class TaxReturnInput(BaseModel):
     short_term_capital_gains: float = 0.0
     long_term_capital_gains: float = 0.0
     self_employment_income: float = 0.0
+    qbi_w2_wages: float = Field(default=0.0, ge=0.0)
+    qbi_ubia: float = Field(default=0.0, ge=0.0)
+    qbi_is_sstb: bool = False
     rental_income: float = 0.0
     schedule_1_income: float = 0.0
     itemized_deductions: float = 0.0
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = 0.0
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_se_ss_wages(self) -> float:
+        """The filer's own W-2 social security wages, for Schedule SE line 8a.
+
+        Line 8a feeds line 9 — what is LEFT of the social security wage base ($168,600
+        in 2024) once the filer's own wages are counted — and line 9 caps the 12.4% OASDI
+        charge on line 10. Leaving 8a empty charges that 12.4% on self-employment earnings
+        the filer's wages have already carried past the base.
+
+        `w2_income` is a HOUSEHOLD aggregate, but Schedule SE is a per-person form. For
+        Married/Joint we cannot tell whose wages are whose, so this stays zero and the full
+        OASDI charge stands — the conservative reading, and the behaviour that
+        `test_se_tax_mfj_w2_above_ss_base` locks in. Every other filing status has exactly
+        one person, so the aggregate simply IS that person's wages.
+
+        Zero when there is no self-employment income, so that this never causes Schedule SE
+        to be resolved or evaluated for a return that would not otherwise have filed one.
+        """
+        if not self.self_employment_income:
+            return 0.0
+        if self.filing_status == OTSFilingStatus.MARRIED_JOINT:
+            return 0.0
+        return float(self.w2_income)
 
     @model_validator(mode="after")
     def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
@@ -319,6 +353,7 @@ class InterpretedTaxReturn(BaseModel):
     federal_effective_tax_rate: float = 0.0
     federal_tax_bracket: float = 0.0
     federal_taxable_income: float = 0.0
+    federal_qbi_deduction: float = 0.0
     federal_amt: float = 0.0
     federal_income_tax: float = 0.0
     federal_se_tax: float = 0.0
@@ -1150,7 +1185,12 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2024,
         "form_id": "US_1040_Sched_SE",
         "phase": 1,
-        "input_map": {"self_employment_income": "L2"},
+        "input_map": {
+            "self_employment_income": "L2",
+            # Line 8a: the filer's own social security wages, which fill the wage base
+            # before self-employment earnings do. See TaxReturnInput.schedule_se_ss_wages.
+            "schedule_se_ss_wages": "L8a",
+        },
         "export_map": {"L12": "S2_4", "L13": "S1_15"},
         "output_map": {"L12": "se_tax"},
     },
@@ -1167,6 +1207,23 @@ _SUBORDINATE_FORM_CONFIG = [
         "export_map": {"L18": "S2_11"},
         "output_map": {"L18": "additional_medicare_tax"},
     },
+    # 2024 Form 8995/8995-A — Phase 2 (preliminary 1040 feeds the deduction
+    # back into the final 1040). OTS supplies the independent simplified-form
+    # components; Python orchestration applies the missing 8995-A limitation.
+    {
+        "year": 2024,
+        "form_id": "Form_8995",
+        "phase": 2,
+        "input_map": {},
+        "export_map": {"L15": "L13"},
+        "activation_naturals": [
+            "self_employment_income",
+            "qbi_w2_wages",
+            "qbi_ubia",
+            "qbi_is_sstb",
+        ],
+        "output_map": {"L15": "qbi_deduction"},
+    },
     # 2024 Form 8960 — Phase 3 (needs AGI from 1040)
     {
         "year": 2024,
@@ -1176,10 +1233,24 @@ _SUBORDINATE_FORM_CONFIG = [
             "taxable_interest": "L1",
             "ordinary_dividends": "L2",
             "rental_income": "L4a",
-            "long_term_capital_gains": "L5a",
             "filing_status": "Status",
         },
-        "fed_import_map": {"L11": "L13"},
+        # L5a is "net gain from disposition of property" — Form 8960 takes it
+        # from Form 1040 line 7, which is the Schedule D result with the
+        # section 1211(b) $3,000 loss limitation already applied and both
+        # holding periods already netted. Importing it is what the form
+        # instructs; reconstructing it from the gain naturals would drop the
+        # limitation and have to re-net the two terms by hand.
+        #
+        # Line 5a intentionally carries ALL of line 7. Gain from property held
+        # in an active trade or business is excluded from net investment income
+        # on line 5b, not by filtering 5a. We map no 5b because no input can
+        # produce business-property gain; add both together if one ever does.
+        "fed_import_map": {"L11": "L13", "L7": "L5a"},
+        "activation_naturals": [
+            "short_term_capital_gains",
+            "long_term_capital_gains",
+        ],
         "output_map": {"L17": "niit"},
         "total_tax_key": "L17",
         "defaults": {
@@ -1194,7 +1265,12 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2025,
         "form_id": "US_1040_Sched_SE",
         "phase": 1,
-        "input_map": {"self_employment_income": "L2"},
+        "input_map": {
+            "self_employment_income": "L2",
+            # Line 8a: the filer's own social security wages, which fill the wage base
+            # before self-employment earnings do. See TaxReturnInput.schedule_se_ss_wages.
+            "schedule_se_ss_wages": "L8a",
+        },
         "export_map": {"L12": "S2_4", "L13": "S1_15"},
         "output_map": {"L12": "se_tax"},
     },
@@ -1211,6 +1287,21 @@ _SUBORDINATE_FORM_CONFIG = [
         "export_map": {"L18": "S2_11"},
         "output_map": {"L18": "additional_medicare_tax"},
     },
+    # 2025 Form 8995/8995-A — Phase 2; see the 2024 entry above.
+    {
+        "year": 2025,
+        "form_id": "Form_8995",
+        "phase": 2,
+        "input_map": {},
+        "export_map": {"L15": "L13a"},
+        "activation_naturals": [
+            "self_employment_income",
+            "qbi_w2_wages",
+            "qbi_ubia",
+            "qbi_is_sstb",
+        ],
+        "output_map": {"L15": "qbi_deduction"},
+    },
     # 2025 Form 8960 — Phase 3
     {
         "year": 2025,
@@ -1220,10 +1311,17 @@ _SUBORDINATE_FORM_CONFIG = [
             "taxable_interest": "L1",
             "ordinary_dividends": "L2",
             "rental_income": "L4a",
-            "long_term_capital_gains": "L5a",
             "filing_status": "Status",
         },
-        "fed_import_map": {"L11b": "L13"},
+        # See the 2024 Form 8960 entry for why line 5a is imported from the
+        # 1040 rather than mapped from the gain naturals. The 2025 1040 splits
+        # the capital-gain line, so the gain is on L7a here, not L7 — the same
+        # year shift as L11 -> L11b for AGI.
+        "fed_import_map": {"L11b": "L13", "L7a": "L5a"},
+        "activation_naturals": [
+            "short_term_capital_gains",
+            "long_term_capital_gains",
+        ],
         "output_map": {"L17": "niit"},
         "total_tax_key": "L17",
         "defaults": {

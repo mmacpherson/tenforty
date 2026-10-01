@@ -19,12 +19,14 @@ from .models import (
     SUBORDINATE_FORM_CONFIG,
     InterpretedTaxReturn,
     OTSFieldTerminator,
+    OTSFilingStatus,
     OTSForm,
     OTSParseError,
     OTSState,
     OTSYear,
     OutputFieldSpec,
     StrEnum,
+    SubordinateFormConfig,
     TaxReturnInput,
 )
 
@@ -360,9 +362,74 @@ def evaluate_form(
 
 _FORM_DISPATCH_ALIASES = {
     "Form_6781": "f6781",
+    "Form_8995": "f8995",
     "Form_8959": "f8959",
     "Form_8960": "f8960",
 }
+
+_QBI_THRESHOLDS = {
+    2024: {"joint": 383_900.0, "other": 191_950.0},
+    2025: {"joint": 394_600.0, "other": 197_300.0},
+}
+
+
+def _form_8995_input_values(
+    year: int,
+    federal_return: dict[str, Any],
+) -> dict[str, Any]:
+    qbi = federal_return.get("S1_3", 0.0) - sum(
+        federal_return.get(key, 0.0) for key in ("S1_15", "S1_16", "S1_17")
+    )
+    if "D15" in federal_return and "D16" in federal_return:
+        capital_gain = max(
+            0.0,
+            min(federal_return["D15"], federal_return["D16"]),
+        )
+    else:
+        gain_key = "L7a" if year >= 2025 else "L7"
+        capital_gain = max(0.0, federal_return.get(gain_key, 0.0))
+    net_capital_gain = max(
+        0.0,
+        federal_return.get("L3a", 0.0) + capital_gain,
+    )
+    return {
+        "FileName1040": "__FED_FILENAME__",
+        "L1_i_c": qbi,
+        "L12": net_capital_gain,
+    }
+
+
+def _form_8995a_deduction(
+    year: int,
+    filing_status: Any,
+    natural_input: dict[str, Any],
+    federal_return: dict[str, Any],
+    form_8995: dict[str, Any],
+) -> float:
+    threshold_kind = (
+        "joint" if filing_status == OTSFilingStatus.MARRIED_JOINT else "other"
+    )
+    threshold = _QBI_THRESHOLDS[year][threshold_kind]
+    phase_range = 100_000.0 if threshold_kind == "joint" else 50_000.0
+    taxable_income_before_qbi = federal_return.get("L15", 0.0)
+    phase = min(
+        1.0,
+        max(0.0, (taxable_income_before_qbi - threshold) / phase_range),
+    )
+
+    applicable_percentage = 1.0 - phase if natural_input["qbi_is_sstb"] else 1.0
+    qbi_component = form_8995.get("L5", 0.0) * applicable_percentage
+    applicable_wages = natural_input["qbi_w2_wages"] * applicable_percentage
+    applicable_ubia = natural_input["qbi_ubia"] * applicable_percentage
+    wage_property_limit = max(
+        0.5 * applicable_wages,
+        0.25 * applicable_wages + 0.025 * applicable_ubia,
+    )
+    reduction = max(0.0, qbi_component - wage_property_limit) * phase
+    limited_qbi_component = qbi_component - reduction
+    reit_ptp_component = form_8995.get("L9", 0.0)
+    taxable_income_limit = form_8995.get("L14", 0.0)
+    return min(limited_qbi_component + reit_ptp_component, taxable_income_limit)
 
 
 def _evaluate_subordinate(
@@ -370,6 +437,7 @@ def _evaluate_subordinate(
     form_id: str,
     form_values: dict[str, Any],
     on_error: str = "raise",
+    fed_form_text: str | None = None,
 ) -> dict[str, Any]:
     """Evaluate a single subordinate form (Schedule SE, Form 8959, etc.)."""
     key = (year, form_id)
@@ -379,13 +447,44 @@ def _evaluate_subordinate(
     form_text = generate_ots_return(form_values, form_config)
     logger.debug(f"Raw {form_id} OTS Input:\n{form_text}")
     dispatch_id = _FORM_DISPATCH_ALIASES.get(form_id, form_id)
-    ots_output = otslib._evaluate_form(year, dispatch_id, form_text, on_error=on_error)
+    ots_output = otslib._evaluate_form(
+        year,
+        dispatch_id,
+        form_text,
+        fed_form_text=fed_form_text,
+        on_error=on_error,
+    )
     logger.debug(f"Raw {form_id} OTS Output:\n{ots_output}")
     return parse_ots_return(ots_output, year=year, form_id=form_id)
 
 
 ## LEVEL 1: Map from natural description, eg "w2_income", to OTS line-level
 ##          description, eg "L1a", and back.
+def subordinate_form_applies(
+    sub_cfg: SubordinateFormConfig, natural_input: dict[str, Any]
+) -> bool:
+    """Decide whether a subordinate form has any input worth evaluating.
+
+    Judged on the natural inputs the form consumes, not on the formatted OTS
+    values. A mapping expressed as a callable returns a preformatted string
+    that no numeric test can see: Form 8959 takes self-employment income that
+    way, so a filer with SE earnings and no W-2 wages used to look entirely
+    empty and the form never ran. Formatting must not decide whether a form
+    runs.
+
+    A form can also consume a natural indirectly, receiving it from the
+    federal return through `fed_import_map` — Form 8960 takes its net gain
+    from Form 1040 line 7 that way. Those naturals never appear in
+    `input_map`, so the form declares them in `activation_naturals`.
+    """
+    consumed = set(sub_cfg.input_map) | set(sub_cfg.activation_naturals)
+    return any(
+        isinstance(value, (int, float)) and value != 0
+        for key, value in natural_input.items()
+        if key in consumed
+    )
+
+
 def map_natural_to_ots_input(
     natural_input: dict[str, Any], natural_mapping: dict[str, str]
 ):
@@ -449,13 +548,11 @@ def evaluate_natural_input_form(
             continue
         if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
             continue
+        if not subordinate_form_applies(sub_cfg, natural_form_values):
+            continue
         sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
             natural_form_values, sub_cfg.input_map
         )
-        if not any(
-            isinstance(v, (int, float)) and v != 0 for v in sub_form_values.values()
-        ):
-            continue
         try:
             sub_result = _evaluate_subordinate(
                 year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
@@ -492,7 +589,66 @@ def evaluate_natural_input_form(
         )
     logger.debug(f"{state_form_values=}")
 
-    # Phase 2: Evaluate 1040 (and state) with injected subordinate results.
+    # Phase 2: Run a preliminary 1040 for forms whose result feeds back into it.
+    for sub_cfg in subordinate_configs:
+        if sub_cfg.phase != 2:
+            continue
+        if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
+            continue
+        if not subordinate_form_applies(sub_cfg, natural_form_values):
+            continue
+
+        federal_form_config = OTS_FORM_CONFIG[(year.value, federal_form_id)]
+        preliminary_form_text = generate_ots_return(
+            federal_form_values, federal_form_config
+        )
+        preliminary_output = otslib._evaluate_form(
+            year.value,
+            federal_form_id,
+            preliminary_form_text,
+            on_error=on_error,
+        )
+        preliminary_return = parse_ots_return(
+            preliminary_output,
+            year=year.value,
+            form_id=federal_form_id,
+        )
+        sub_form_values = sub_cfg.defaults | _form_8995_input_values(
+            year.value, preliminary_return
+        )
+        try:
+            sub_result = _evaluate_subordinate(
+                year.value,
+                sub_cfg.form_id,
+                sub_form_values,
+                on_error=on_error,
+                fed_form_text=preliminary_output,
+            )
+        except Exception:
+            if on_error == "raise":
+                raise
+            if on_error == "warn":
+                logger.warning(
+                    "Subordinate form %s/%s failed; skipping.",
+                    year.value,
+                    sub_cfg.form_id,
+                    exc_info=True,
+                )
+            continue
+
+        qbi_deduction = _form_8995a_deduction(
+            year.value,
+            natural_form_values["filing_status"],
+            natural_form_values,
+            preliminary_return,
+            sub_result,
+        )
+        for fed_key in sub_cfg.export_map.values():
+            federal_form_values[fed_key] = qbi_deduction
+        for natural_name in sub_cfg.output_map.values():
+            subordinate_natural_outputs[natural_name] = qbi_deduction
+
+    # Evaluate the final 1040 (and state) with injected subordinate results.
     fed_import_map = (
         state_natural_config.fed_import_map if state_natural_config else None
     )
@@ -512,13 +668,11 @@ def evaluate_natural_input_form(
             continue
         if (year.value, sub_cfg.form_id) not in OTS_FORM_CONFIG:
             continue
+        if not subordinate_form_applies(sub_cfg, natural_form_values):
+            continue
         sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
             natural_form_values, sub_cfg.input_map
         )
-        if not any(
-            isinstance(v, (int, float)) and v != 0 for v in sub_form_values.values()
-        ):
-            continue
         federal_return = ots_output["federal"]
         for fed_key, sub_key in sub_cfg.fed_import_map.items():
             if fed_key in federal_return:
@@ -587,6 +741,9 @@ def evaluate_return(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
@@ -610,6 +767,9 @@ def evaluate_return(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
@@ -662,6 +822,9 @@ def evaluate_returns(
     short_term_capital_gains: list[float] | float = 0.0,
     long_term_capital_gains: list[float] | float = 0.0,
     self_employment_income: list[float] | float = 0.0,
+    qbi_w2_wages: list[float] | float = 0.0,
+    qbi_ubia: list[float] | float = 0.0,
+    qbi_is_sstb: list[bool] | bool = False,
     rental_income: list[float] | float = 0.0,
     schedule_1_income: list[float] | float = 0.0,
     itemized_deductions: list[float] | float = 0.0,
@@ -700,6 +863,9 @@ def evaluate_returns(
     st_cap_gains = ensure_list(short_term_capital_gains)
     lt_cap_gains = ensure_list(long_term_capital_gains)
     se_incomes = ensure_list(self_employment_income)
+    qbi_w2_wage_values = ensure_list(qbi_w2_wages)
+    qbi_ubia_values = ensure_list(qbi_ubia)
+    qbi_sstb_values = ensure_list(qbi_is_sstb)
     rental_incomes = ensure_list(rental_income)
     sched1_incomes = ensure_list(schedule_1_income)
     item_deductions = ensure_list(itemized_deductions)
@@ -721,6 +887,9 @@ def evaluate_returns(
             ("short_term_capital_gains", st_cap_gains),
             ("long_term_capital_gains", lt_cap_gains),
             ("self_employment_income", se_incomes),
+            ("qbi_w2_wages", qbi_w2_wage_values),
+            ("qbi_ubia", qbi_ubia_values),
+            ("qbi_is_sstb", qbi_sstb_values),
             ("rental_income", rental_incomes),
             ("schedule_1_income", sched1_incomes),
             ("itemized_deductions", item_deductions),
@@ -755,6 +924,9 @@ def evaluate_returns(
         st_cap_gains = broadcast(st_cap_gains)
         lt_cap_gains = broadcast(lt_cap_gains)
         se_incomes = broadcast(se_incomes)
+        qbi_w2_wage_values = broadcast(qbi_w2_wage_values)
+        qbi_ubia_values = broadcast(qbi_ubia_values)
+        qbi_sstb_values = broadcast(qbi_sstb_values)
         rental_incomes = broadcast(rental_incomes)
         sched1_incomes = broadcast(sched1_incomes)
         item_deductions = broadcast(item_deductions)
@@ -779,6 +951,9 @@ def evaluate_returns(
                                 "short_term_capital_gains": st_cap_gains,
                                 "long_term_capital_gains": lt_cap_gains,
                                 "self_employment_income": se_incomes,
+                                "qbi_w2_wages": qbi_w2_wage_values,
+                                "qbi_ubia": qbi_ubia_values,
+                                "qbi_is_sstb": qbi_sstb_values,
                                 "rental_income": rental_incomes,
                                 "schedule_1_income": sched1_incomes,
                                 "itemized_deductions": item_deductions,
@@ -786,6 +961,7 @@ def evaluate_returns(
                                 "incentive_stock_option_gains": iso_gains,
                                 "num_dependents": [nd],
                                 "dependent_exemptions": dep_exemptions,
+                                "standard_or_itemized": [soi],
                             }
                             batch_results = graph_backend.evaluate_batch(
                                 y,
@@ -819,6 +995,9 @@ def evaluate_returns(
                                 lt_cap_gains[i] for i in indices
                             ],
                             "self_employment_income": [se_incomes[i] for i in indices],
+                            "qbi_w2_wages": [qbi_w2_wage_values[i] for i in indices],
+                            "qbi_ubia": [qbi_ubia_values[i] for i in indices],
+                            "qbi_is_sstb": [qbi_sstb_values[i] for i in indices],
                             "rental_income": [rental_incomes[i] for i in indices],
                             "schedule_1_income": [sched1_incomes[i] for i in indices],
                             "itemized_deductions": [
@@ -834,6 +1013,7 @@ def evaluate_returns(
                             "dependent_exemptions": [
                                 dep_exemptions[i] for i in indices
                             ],
+                            "standard_or_itemized": [std_or_items[i] for i in indices],
                         }
                         group_statuses = [filing_statuses[i] for i in indices]
                         batch_results = graph_backend.evaluate_batch(
@@ -878,6 +1058,9 @@ def evaluate_returns(
         "short_term_capital_gains",
         "long_term_capital_gains",
         "self_employment_income",
+        "qbi_w2_wages",
+        "qbi_ubia",
+        "qbi_is_sstb",
         "rental_income",
         "schedule_1_income",
         "itemized_deductions",
@@ -898,6 +1081,9 @@ def evaluate_returns(
         st_cap_gains,
         lt_cap_gains,
         se_incomes,
+        qbi_w2_wage_values,
+        qbi_ubia_values,
+        qbi_sstb_values,
         rental_incomes,
         sched1_incomes,
         item_deductions,
@@ -942,11 +1128,15 @@ def marginal_rate(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
+    dependent_exemptions: float = 0.0,
     *,
     wrt: str = "w2_income",
     output: str = "total_tax",
@@ -954,6 +1144,76 @@ def marginal_rate(
     """Compute marginal tax rate via autodiff (graph backend only).
 
     This computes the derivative of `output` with respect to `wrt`.
+    """
+    if wrt == "qbi_is_sstb":
+        raise ValueError("qbi_is_sstb is discrete and cannot be differentiated")
+    tax_input = TaxReturnInput(
+        year=year,
+        state=state,
+        filing_status=filing_status,
+        num_dependents=num_dependents,
+        standard_or_itemized=standard_or_itemized,
+        w2_income=w2_income,
+        taxable_interest=taxable_interest,
+        qualified_dividends=qualified_dividends,
+        ordinary_dividends=ordinary_dividends,
+        short_term_capital_gains=short_term_capital_gains,
+        long_term_capital_gains=long_term_capital_gains,
+        self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
+        rental_income=rental_income,
+        schedule_1_income=schedule_1_income,
+        itemized_deductions=itemized_deductions,
+        state_adjustment=state_adjustment,
+        incentive_stock_option_gains=incentive_stock_option_gains,
+        dependent_exemptions=dependent_exemptions,
+    )
+
+    from .backends.graph import GraphBackend
+
+    backend = GraphBackend()
+    if not backend.is_available():
+        raise RuntimeError("Graph backend is not available")
+
+    result = backend.gradient(tax_input, output, wrt)
+    if result is None:
+        raise RuntimeError("Graph backend does not support autodiff")
+
+    return result
+
+
+def marginal_rates(
+    year: int = 2025,
+    state: str | None = None,
+    filing_status: str = "Single",
+    num_dependents: int = 0,
+    standard_or_itemized: str = "Standard",
+    w2_income: float = 0.0,
+    taxable_interest: float = 0.0,
+    qualified_dividends: float = 0.0,
+    ordinary_dividends: float = 0.0,
+    short_term_capital_gains: float = 0.0,
+    long_term_capital_gains: float = 0.0,
+    self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
+    rental_income: float = 0.0,
+    schedule_1_income: float = 0.0,
+    itemized_deductions: float = 0.0,
+    state_adjustment: float = 0.0,
+    incentive_stock_option_gains: float = 0.0,
+    dependent_exemptions: float = 0.0,
+    *,
+    output: str = "total_tax",
+) -> dict[str, float]:
+    """Compute marginal rates for every continuous public input.
+
+    Smooth inputs are differentiated together in one reverse pass per resolved
+    output. At a piecewise boundary, affected entries use the composed
+    function's right-hand derivative, matching :func:`marginal_rate`.
     """
     tax_input = TaxReturnInput(
         year=year,
@@ -968,11 +1228,15 @@ def marginal_rate(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        dependent_exemptions=dependent_exemptions,
     )
 
     from .backends.graph import GraphBackend
@@ -981,7 +1245,7 @@ def marginal_rate(
     if not backend.is_available():
         raise RuntimeError("Graph backend is not available")
 
-    result = backend.gradient(tax_input, output, wrt)
+    result = backend.gradients(tax_input, output)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
 
@@ -1002,6 +1266,9 @@ def solve_for_income(
     short_term_capital_gains: float = 0.0,
     long_term_capital_gains: float = 0.0,
     self_employment_income: float = 0.0,
+    qbi_w2_wages: float = 0.0,
+    qbi_ubia: float = 0.0,
+    qbi_is_sstb: bool = False,
     rental_income: float = 0.0,
     schedule_1_income: float = 0.0,
     itemized_deductions: float = 0.0,
@@ -1012,6 +1279,8 @@ def solve_for_income(
     output: str = "total_tax",
 ) -> float:
     """Solve for an input value that produces a target output (graph backend only)."""
+    if for_input == "qbi_is_sstb":
+        raise ValueError("qbi_is_sstb is discrete and cannot be solved continuously")
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1025,6 +1294,9 @@ def solve_for_income(
         short_term_capital_gains=short_term_capital_gains,
         long_term_capital_gains=long_term_capital_gains,
         self_employment_income=self_employment_income,
+        qbi_w2_wages=qbi_w2_wages,
+        qbi_ubia=qbi_ubia,
+        qbi_is_sstb=qbi_is_sstb,
         rental_income=rental_income,
         schedule_1_income=schedule_1_income,
         itemized_deductions=itemized_deductions,

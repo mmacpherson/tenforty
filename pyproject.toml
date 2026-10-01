@@ -8,8 +8,18 @@ dev = [
   "hypothesis",
   "pytest>=7.0",
   "pytest-cov",
+  "pytest-xdist>=3.2",  # --dist worksteal
   "ruff>=0.2.0",
   "pre-commit"
+]
+# Independent federal reference implementation for differential testing (scripts/taxcalc_audit.py,
+# tests/taxcalc/). Not synced by default: uv sync --group taxcalc
+# Pinned exactly: golden fixtures and burn-in expected values are only
+# meaningful against a fixed taxcalc version. Upgrades are deliberate PRs that
+# regenerate fixtures.
+taxcalc = [
+  "taxcalc==6.7.2",
+  "pandas>=2"
 ]
 
 [project]
@@ -40,13 +50,14 @@ license = {file = "LICENSE.txt", content-type = "text/plain"}
 name = "tenforty"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">= 3.10"
-version = "2025.10"
+version = "2025.11"
 
 [project.optional-dependencies]
 dev = [
   "hypothesis",
   "pytest>=7.0",
   "pytest-cov",
+  "pytest-xdist>=3.2",  # --dist worksteal
   "ruff>=0.2.0",
   "pre-commit"
 ]

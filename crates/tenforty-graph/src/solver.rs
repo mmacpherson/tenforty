@@ -1,4 +1,4 @@
-use crate::autodiff::gradient;
+use crate::autodiff::gradient_sum_outputs;
 use crate::eval::{EvalError, Runtime};
 use crate::graph::NodeId;
 use thiserror::Error;
@@ -44,36 +44,68 @@ pub fn solve(
     input: NodeId,
     initial_guess: f64,
 ) -> Result<f64, SolveError> {
-    solve_with_config(
+    solve_multi(runtime, output, target, &[input], initial_guess)
+}
+
+/// Solve for the value of a quantity that is written into several input nodes.
+///
+/// One natural input can feed more than one node — wage income reaches both
+/// the 1040 wage line and Form 8959's Medicare wages. Solving for such a
+/// quantity has to assign each trial value to every one of those nodes and
+/// step on their combined derivative; varying only the first would search
+/// along a slope the model does not actually have.
+pub fn solve_multi(
+    runtime: &mut Runtime,
+    output: NodeId,
+    target: f64,
+    inputs: &[NodeId],
+    initial_guess: f64,
+) -> Result<f64, SolveError> {
+    solve_multi_output(runtime, &[output], target, inputs, initial_guess)
+}
+
+/// Solve for an input quantity against the sum of several output nodes.
+pub fn solve_multi_output(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    target: f64,
+    inputs: &[NodeId],
+    initial_guess: f64,
+) -> Result<f64, SolveError> {
+    solve_multi_output_with_config(
         runtime,
-        output,
+        outputs,
         target,
-        input,
+        inputs,
         initial_guess,
         &SolverConfig::default(),
     )
 }
 
-pub fn solve_with_config(
+pub fn solve_multi_output_with_config(
     runtime: &mut Runtime,
-    output: NodeId,
+    outputs: &[NodeId],
     target: f64,
-    input: NodeId,
+    inputs: &[NodeId],
     initial_guess: f64,
     config: &SolverConfig,
 ) -> Result<f64, SolveError> {
     let mut x = initial_guess;
 
     for _ in 0..config.max_iterations {
-        runtime.set_by_id(input, x);
-        let y = runtime.eval_node(output)?;
+        for &input in inputs {
+            runtime.set_by_id(input, x);
+        }
+        let y = outputs.iter().try_fold(0.0, |sum, output| {
+            runtime.eval_node(*output).map(|value| sum + value)
+        })?;
         let error = y - target;
 
         if error.abs() < config.tolerance {
             return Ok(x);
         }
 
-        let grad = gradient(runtime, output, input)?;
+        let grad = gradient_sum_outputs(runtime, outputs, inputs)?;
 
         if grad.abs() < config.min_step {
             return Err(SolveError::ZeroGradient);
@@ -83,7 +115,6 @@ pub fn solve_with_config(
         let clamped_step = step.clamp(-config.max_step, config.max_step);
         x -= clamped_step;
 
-        // Clamp to bounds
         if let Some(lb) = config.lower_bound {
             x = x.max(lb);
         }
@@ -93,6 +124,17 @@ pub fn solve_with_config(
     }
 
     Err(SolveError::NoConvergence(config.max_iterations))
+}
+
+pub fn solve_with_config(
+    runtime: &mut Runtime,
+    output: NodeId,
+    target: f64,
+    inputs: &[NodeId],
+    initial_guess: f64,
+    config: &SolverConfig,
+) -> Result<f64, SolveError> {
+    solve_multi_output_with_config(runtime, &[output], target, inputs, initial_guess, config)
 }
 
 /// Binary search fallback for non-smooth regions.
@@ -255,6 +297,15 @@ mod tests {
     }
 
     #[test]
+    fn test_solve_multi_output() {
+        let graph = linear_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+
+        let x = solve_multi_output(&mut runtime, &[2, 4], 100.0, &[0], 0.0).unwrap();
+        assert!((x - 22.5).abs() < 1e-6);
+    }
+
+    #[test]
     fn test_solve_tax() {
         let graph = tax_graph();
         let mut runtime = Runtime::new(&graph, FilingStatus::Single);
@@ -284,7 +335,7 @@ mod tests {
             lower_bound: Some(0.0),
             ..Default::default()
         };
-        let result = solve_with_config(&mut runtime, 4, 5.0, 0, 10.0, &config);
+        let result = solve_with_config(&mut runtime, 4, 5.0, &[0], 10.0, &config);
         // Should not converge since target is unreachable with x >= 0
         assert!(result.is_err());
     }

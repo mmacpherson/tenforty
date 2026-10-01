@@ -1,9 +1,11 @@
 # ruff: noqa: D100, D103
+import pytest
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
 import tenforty
 from tenforty.backends import OTSBackend
+from tenforty.backends.graph import GraphBackend
 from tenforty.models import (
     OTSFilingStatus,
     OTSState,
@@ -30,7 +32,7 @@ SUPPORTED_STATES = [e.value for e in OTSState]
 @example(w2_income=100525, w2_increment=1, year=2024, filing_status="Single")
 @example(w2_income=191950, w2_increment=1, year=2024, filing_status="Single")
 @example(w2_income=0, w2_increment=0, year=2024, filing_status="Single")
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     w2_income=st.integers(min_value=0, max_value=1_000_000),  # base w2_income
     w2_increment=st.integers(min_value=0, max_value=500_000),  # w2_income increment
@@ -83,7 +85,7 @@ def test_w2_monotonicity(
     incentive_stock_option_gains=0.0,
     iso_gains_increment=0.0,
 )
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
@@ -209,7 +211,7 @@ def test_federal_tax_monotonicity(
     state_adjustment=0.0,
     incentive_stock_option_gains=0.0,
 )
-@settings(max_examples=1000)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     state=st.sampled_from(SUPPORTED_STATES),
@@ -359,7 +361,7 @@ def test_az_widow_standard_deduction():
 @example(
     year=2024, state=None, filing_status="Married/Joint", qualified_dividends=100000.0
 )
-@settings(max_examples=100)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     state=st.sampled_from(SUPPORTED_STATES),
@@ -409,7 +411,7 @@ def test_qualified_dividends_properly_taxed(
 
 @example(year=2024, filing_status="Single", amount=50000.0)
 @example(year=2024, filing_status="Married/Joint", amount=100000.0)
-@settings(max_examples=100)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
 @given(
     year=st.sampled_from(SUPPORTED_YEARS),
     filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
@@ -432,4 +434,237 @@ def test_qualified_dividends_preferential_rates(year, filing_status, amount):
     assert qualified_result.total_tax <= ordinary_result.total_tax, (
         f"Qualified dividends ({qualified_result.total_tax}) should be taxed at "
         f"preferential rates compared to ordinary income ({ordinary_result.total_tax})"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Generalized structural invariants (tenforty-dct).
+#
+# These are federal-only so each property pins federal *shape* without state
+# noise, and they catch STRUCTURE bugs — discontinuities, wrong-direction
+# responses, filing-status mis-ordering — that the taxcalc value differential
+# passes over. They complement the differential (which pins numbers); they do
+# not replace it.
+#
+# Each runs on BOTH backends: the graph backend is the one under active
+# validation (shape bugs there are the target), and OTS is the mature C++
+# reference. A property that holds structurally must hold on either engine.
+# ---------------------------------------------------------------------------
+
+try:
+    _graph_backend = GraphBackend()
+    _graph_available = _graph_backend.is_available()
+    _graph_years = set(_graph_backend.supported_years) if _graph_available else set()
+except Exception:
+    _graph_available = False
+    _graph_years = set()
+
+BACKENDS = ["ots"] + (["graph"] if _graph_available else [])
+
+# These properties run on both backends over the years both can serve, so OTS
+# and graph are exercised apples-to-apples. The graph backend currently supports
+# a subset of OTS's year range (2024-2025); the existing per-year tests already
+# cover OTS's older years, so nothing is lost by pinning the shared window here.
+INVARIANT_YEARS = sorted(_graph_years & set(SUPPORTED_YEARS)) or SUPPORTED_YEARS
+
+FEDERAL_STATUSES = [e.value for e in OTSFilingStatus]
+
+# Ordinary and investment income sources that must each drive total tax
+# monotonically upward on their own. Qualified dividends are excluded (their
+# preferential-rate behavior has its own test); ISO gains are excluded (an
+# AMT-only preference, not an ordinary-tax driver).
+MONOTONE_INCOME_FIELDS = [
+    "w2_income",
+    "taxable_interest",
+    "ordinary_dividends",
+    "short_term_capital_gains",
+    "long_term_capital_gains",
+    "schedule_1_income",
+]
+
+
+# Continuity: above the IRS tax-table region (taxable income >= $100k, where tax
+# is a continuous piecewise-linear formula), a $1 rise in ANY income source can
+# change total tax by at most the top marginal stack — 37% ordinary + 3.8% NIIT +
+# 0.9% additional Medicare ~ 0.417 — plus whole-dollar rounding slack. A larger
+# step is a discontinuity: the signature of a bracket/worksheet wiring bug that
+# monotonicity alone cannot see. Testing each source (not just w2) reaches the
+# capital-gains worksheet and the NIIT/Medicare thresholds, where a discontinuity
+# is likelier to hide than in the plain wage brackets. The $150k floor keeps
+# taxable income clear of the tax-table region for every status/year (max
+# standard deduction is ~$30k); the 0.417 ceiling holds for every source,
+# including SE income (above the wage base it carries only the 2.9% Medicare
+# portion — measured max |Δ per $1| is 0.41).
+@pytest.mark.parametrize("backend", BACKENDS)
+@example(
+    year=2024, filing_status="Single", income_field="w2_income", base_income=200000.0
+)
+@example(
+    year=2024,
+    filing_status="Married/Joint",
+    income_field="long_term_capital_gains",
+    base_income=250000.0,
+)
+# Inherits the example count from the active hypothesis profile (ci=500,
+# deep=10k) — an invariant test, so it scales with the deep sweep.
+@settings(deadline=None)
+@given(
+    year=st.sampled_from(INVARIANT_YEARS),
+    filing_status=st.sampled_from(FEDERAL_STATUSES),
+    income_field=st.sampled_from(MONOTONE_INCOME_FIELDS),
+    base_income=st.floats(
+        min_value=150_000, max_value=2_000_000, allow_nan=False, allow_infinity=False
+    ),
+)
+def test_federal_tax_continuity(
+    backend, year, filing_status, income_field, base_income
+):
+    r1 = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        backend=backend,
+        **{income_field: base_income},
+    )
+    r2 = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        backend=backend,
+        **{income_field: base_income + 1.0},
+    )
+    delta = r2.total_tax - r1.total_tax
+    assert abs(delta) <= 0.417 + 2.0, (
+        f"Discontinuity [{backend}]: total_tax moved {delta:.2f} for a $1 rise in "
+        f"{income_field} at base {base_income:.0f} ({filing_status}, {year})"
+    )
+
+
+# Generalized monotonicity: every ordinary/investment income source, taken on
+# its own, must drive total tax non-decreasing. Restricted to the high-income
+# region (base >= $50k) because credits that phase in then out — EIC above all —
+# make monotonicity regional, not global, at low income; the existing low-income
+# w2 test covers that end.
+@pytest.mark.parametrize("backend", BACKENDS)
+@example(
+    year=2024,
+    filing_status="Single",
+    income_field="w2_income",
+    base=100000.0,
+    increment=1000.0,
+)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
+@given(
+    year=st.sampled_from(INVARIANT_YEARS),
+    filing_status=st.sampled_from(FEDERAL_STATUSES),
+    income_field=st.sampled_from(MONOTONE_INCOME_FIELDS),
+    base=st.floats(
+        min_value=50_000, max_value=1_000_000, allow_nan=False, allow_infinity=False
+    ),
+    increment=st.floats(
+        min_value=0, max_value=500_000, allow_nan=False, allow_infinity=False
+    ),
+)
+def test_federal_tax_monotone_in_each_income(
+    backend, year, filing_status, income_field, base, increment
+):
+    r1 = tenforty.evaluate_return(
+        year=year, filing_status=filing_status, backend=backend, **{income_field: base}
+    )
+    r2 = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        backend=backend,
+        **{income_field: base + increment},
+    )
+    assert r1.total_tax <= r2.total_tax + 1e-6, (
+        f"Non-monotone in {income_field} [{backend}]: total_tax fell from "
+        f"{r1.total_tax:.2f} to {r2.total_tax:.2f} adding {increment:.2f} at "
+        f"base {base:.2f} ({filing_status}, {year})"
+    )
+
+
+# Deduction monotonicity: more itemized deductions never raise total tax. AMT can
+# floor the benefit — total tax is max(regular, tentative minimum) — but the max
+# of a non-increasing regular tax and the AMT line is still non-increasing.
+@pytest.mark.parametrize("backend", BACKENDS)
+@example(
+    year=2024,
+    filing_status="Single",
+    income=200000.0,
+    deduction=10000.0,
+    increment=20000.0,
+)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
+@given(
+    year=st.sampled_from(INVARIANT_YEARS),
+    filing_status=st.sampled_from(FEDERAL_STATUSES),
+    income=st.floats(
+        min_value=50_000, max_value=1_000_000, allow_nan=False, allow_infinity=False
+    ),
+    deduction=st.floats(
+        min_value=0, max_value=200_000, allow_nan=False, allow_infinity=False
+    ),
+    increment=st.floats(
+        min_value=0, max_value=200_000, allow_nan=False, allow_infinity=False
+    ),
+)
+def test_federal_tax_monotone_nonincreasing_in_deductions(
+    backend, year, filing_status, income, deduction, increment
+):
+    r1 = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        w2_income=income,
+        itemized_deductions=deduction,
+        backend=backend,
+    )
+    r2 = tenforty.evaluate_return(
+        year=year,
+        filing_status=filing_status,
+        w2_income=income,
+        itemized_deductions=deduction + increment,
+        backend=backend,
+    )
+    assert r2.total_tax <= r1.total_tax + 1e-6, (
+        f"Deductions raised tax [{backend}]: total_tax rose from {r1.total_tax:.2f} "
+        f"to {r2.total_tax:.2f} adding {increment:.2f} to deductions at "
+        f"deduction {deduction:.2f}, income {income:.2f} ({filing_status}, {year})"
+    )
+
+
+# Cross-status ordering: bracket widths and standard deductions order
+# MFJ >= HoH >= Single, so at the same income total tax orders
+# Single >= HoH >= MFJ. Holds for any income source (the ordering comes from the
+# brackets and deductions, including the status-dependent capital-gains
+# breakpoints), so it is tested per source. Extends the existing MFJ <= Single
+# check with the HoH rung between them.
+@pytest.mark.parametrize("backend", BACKENDS)
+@example(year=2024, income_field="w2_income", income=80000.0)
+@example(year=2024, income_field="long_term_capital_gains", income=120000.0)
+@settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)
+@given(
+    year=st.sampled_from(INVARIANT_YEARS),
+    income_field=st.sampled_from(MONOTONE_INCOME_FIELDS),
+    income=st.floats(
+        min_value=30_000, max_value=1_000_000, allow_nan=False, allow_infinity=False
+    ),
+)
+def test_cross_status_tax_ordering(backend, year, income_field, income):
+    def tax(filing_status):
+        return tenforty.evaluate_return(
+            year=year,
+            filing_status=filing_status,
+            backend=backend,
+            **{income_field: income},
+        ).total_tax
+
+    single = tax("Single")
+    hoh = tax("Head_of_House")
+    mfj = tax("Married/Joint")
+    assert mfj <= hoh + 1e-6, (
+        f"MFJ tax ({mfj:.2f}) exceeds HoH tax ({hoh:.2f}) at {income_field}="
+        f"{income:.2f} [{backend}, {year}]"
+    )
+    assert hoh <= single + 1e-6, (
+        f"HoH tax ({hoh:.2f}) exceeds Single tax ({single:.2f}) at {income_field}="
+        f"{income:.2f} [{backend}, {year}]"
     )

@@ -1,9 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module TenForty.Compile.JSON (
-    -- * Compilation
+module TenForty.Compile.JSON
+  ( -- * Compilation
     compileForm,
     compileFormToJSON,
+    resolveForms,
+    unresolvedImports,
 
     -- * Graph Types
     ComputationGraph (..),
@@ -15,7 +17,8 @@ module TenForty.Compile.JSON (
     StatusValues (..),
     StatusNodeIds (..),
     Bracket (..),
-) where
+  )
+where
 
 import Control.Monad (forM, forM_)
 import Control.Monad.State.Strict
@@ -29,7 +32,6 @@ import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as T
-
 import TenForty.Expr hiding (Line)
 import TenForty.Expr qualified as E
 import TenForty.Form
@@ -38,247 +40,247 @@ import TenForty.Types
 
 verboseLineId :: Line -> Text
 verboseLineId ln =
-    let lid = unLineId (lineId ln)
-        name = lineName ln
-     in if T.null name
-            || T.isInfixOf "_" lid
-            || not (T.isPrefixOf "L" lid)
-            then lid
-            else lid <> "_" <> name
+  let lid = unLineId (lineId ln)
+      name = lineName ln
+   in if T.null name
+        || T.isInfixOf "_" lid
+        || not (T.isPrefixOf "L" lid)
+        then lid
+        else lid <> "_" <> name
 
 data ComputationGraph = ComputationGraph
-    { cgMeta :: GraphMeta
-    , cgNodes :: Map Int Node
-    , cgTables :: Map Text BracketTable
-    , cgInputs :: [Int]
-    , cgOutputs :: [Int]
-    , cgImports :: [(Text, Text, Int)] -- [(form_id, line_id, year)]
-    }
-    deriving stock (Show)
+  { cgMeta :: GraphMeta,
+    cgNodes :: Map Int Node,
+    cgTables :: Map Text BracketTable,
+    cgInputs :: [Int],
+    cgOutputs :: [Int],
+    cgImports :: [(Text, Text, Int)] -- [(form_id, line_id, year)]
+  }
+  deriving stock (Show)
 
 data GraphMeta = GraphMeta
-    { gmFormId :: Text
-    , gmYear :: Int
-    , gmGeneratedBy :: Text
-    }
-    deriving stock (Show)
+  { gmFormId :: Text,
+    gmYear :: Int,
+    gmGeneratedBy :: Text
+  }
+  deriving stock (Show)
 
 data Node = Node
-    { nodeId :: Int
-    , nodeName :: Maybe Text
-    , nodeOp :: Op
-    }
-    deriving stock (Show)
+  { nodeId :: Int,
+    nodeName :: Maybe Text,
+    nodeOp :: Op
+  }
+  deriving stock (Show)
 
 data Op
-    = OpInput
-    | OpImport Text Text Int -- (form_id, line_id, year)
-    | OpLiteral Double
-    | OpAdd Int Int
-    | OpSub Int Int
-    | OpMul Int Int
-    | OpDiv Int Int
-    | OpNeg Int
-    | OpAbs Int
-    | OpMax Int Int
-    | OpMin Int Int
-    | OpFloor Int
-    | OpClamp Int Double Double
-    | OpIfPositive Int Int Int
-    | OpBracketTax Text Int
-    | OpPhaseOut Double StatusValues Double Int
-    | OpByStatus StatusNodeIds
-    deriving stock (Show)
+  = OpInput
+  | OpImport Text Text Int -- (form_id, line_id, year)
+  | OpLiteral Double
+  | OpAdd Int Int
+  | OpSub Int Int
+  | OpMul Int Int
+  | OpDiv Int Int
+  | OpNeg Int
+  | OpAbs Int
+  | OpMax Int Int
+  | OpMin Int Int
+  | OpFloor Int
+  | OpClamp Int Double Double
+  | OpIfPositive Int Int Int
+  | OpBracketTax Text Int
+  | OpPhaseOut Double StatusValues Double Int
+  | OpByStatus StatusNodeIds
+  deriving stock (Show)
 
 data StatusValues = StatusValues
-    { svSingle :: Double
-    , svMarriedJoint :: Double
-    , svMarriedSeparate :: Double
-    , svHeadOfHousehold :: Double
-    , svQualifyingWidow :: Double
-    }
-    deriving stock (Show)
+  { svSingle :: Double,
+    svMarriedJoint :: Double,
+    svMarriedSeparate :: Double,
+    svHeadOfHousehold :: Double,
+    svQualifyingWidow :: Double
+  }
+  deriving stock (Show)
 
 data StatusNodeIds = StatusNodeIds
-    { snSingle :: Int
-    , snMarriedJoint :: Int
-    , snMarriedSeparate :: Int
-    , snHeadOfHousehold :: Int
-    , snQualifyingWidow :: Int
-    }
-    deriving stock (Show)
+  { snSingle :: Int,
+    snMarriedJoint :: Int,
+    snMarriedSeparate :: Int,
+    snHeadOfHousehold :: Int,
+    snQualifyingWidow :: Int
+  }
+  deriving stock (Show)
 
 newtype BracketTable = BracketTable
-    { btBrackets :: StatusBrackets
-    }
-    deriving stock (Show)
+  { btBrackets :: StatusBrackets
+  }
+  deriving stock (Show)
 
 data StatusBrackets = StatusBrackets
-    { sbSingle :: [Bracket]
-    , sbMarriedJoint :: [Bracket]
-    , sbMarriedSeparate :: [Bracket]
-    , sbHeadOfHousehold :: [Bracket]
-    , sbQualifyingWidow :: [Bracket]
-    }
-    deriving stock (Show)
+  { sbSingle :: [Bracket],
+    sbMarriedJoint :: [Bracket],
+    sbMarriedSeparate :: [Bracket],
+    sbHeadOfHousehold :: [Bracket],
+    sbQualifyingWidow :: [Bracket]
+  }
+  deriving stock (Show)
 
 data Bracket = Bracket
-    { brThreshold :: Double
-    , brRate :: Double
-    }
-    deriving stock (Show)
+  { brThreshold :: Double,
+    brRate :: Double
+  }
+  deriving stock (Show)
 
 instance ToJSON ComputationGraph where
-    toJSON ComputationGraph{..} =
-        object
-            [ "meta" .= cgMeta
-            , "nodes" .= nodeMapToObject cgNodes
-            , "tables" .= cgTables
-            , "inputs" .= cgInputs
-            , "outputs" .= cgOutputs
-            , "imports" .= map importToJSON cgImports
+  toJSON ComputationGraph {..} =
+    object
+      [ "meta" .= cgMeta,
+        "nodes" .= nodeMapToObject cgNodes,
+        "tables" .= cgTables,
+        "inputs" .= cgInputs,
+        "outputs" .= cgOutputs,
+        "imports" .= map importToJSON cgImports
+      ]
+    where
+      nodeMapToObject :: Map Int Node -> Value
+      nodeMapToObject m =
+        Aeson.Object $
+          KM.fromList
+            [ (Key.fromText (T.pack (show k)), toJSON v)
+            | (k, v) <- Map.toList m
             ]
-      where
-        nodeMapToObject :: Map Int Node -> Value
-        nodeMapToObject m =
-            Aeson.Object $
-                KM.fromList
-                    [ (Key.fromText (T.pack (show k)), toJSON v)
-                    | (k, v) <- Map.toList m
-                    ]
 
-        importToJSON :: (Text, Text, Int) -> Value
-        importToJSON (fid, lid, yr) = object ["form" .= fid, "line" .= lid, "year" .= yr]
+      importToJSON :: (Text, Text, Int) -> Value
+      importToJSON (fid, lid, yr) = object ["form" .= fid, "line" .= lid, "year" .= yr]
 
 instance ToJSON GraphMeta where
-    toJSON GraphMeta{..} =
-        object
-            [ "form_id" .= gmFormId
-            , "year" .= gmYear
-            , "generated_by" .= gmGeneratedBy
-            ]
+  toJSON GraphMeta {..} =
+    object
+      [ "form_id" .= gmFormId,
+        "year" .= gmYear,
+        "generated_by" .= gmGeneratedBy
+      ]
 
 instance ToJSON Node where
-    toJSON Node{..} =
-        let baseFields = ["id" .= nodeId, "op" .= nodeOp]
-            nameField = maybe [] (\n -> ["name" .= n]) nodeName
-         in object (baseFields ++ nameField)
+  toJSON Node {..} =
+    let baseFields = ["id" .= nodeId, "op" .= nodeOp]
+        nameField = maybe [] (\n -> ["name" .= n]) nodeName
+     in object (baseFields ++ nameField)
 
 instance ToJSON Op where
-    toJSON = \case
-        OpInput -> object ["type" .= ("input" :: Text)]
-        OpImport fid lid yr -> object ["type" .= ("import" :: Text), "form" .= fid, "line" .= lid, "year" .= yr]
-        OpLiteral v -> object ["type" .= ("literal" :: Text), "value" .= v]
-        OpAdd a b -> object ["type" .= ("add" :: Text), "left" .= a, "right" .= b]
-        OpSub a b -> object ["type" .= ("sub" :: Text), "left" .= a, "right" .= b]
-        OpMul a b -> object ["type" .= ("mul" :: Text), "left" .= a, "right" .= b]
-        OpDiv a b -> object ["type" .= ("div" :: Text), "left" .= a, "right" .= b]
-        OpNeg a -> object ["type" .= ("neg" :: Text), "arg" .= a]
-        OpAbs a -> object ["type" .= ("abs" :: Text), "arg" .= a]
-        OpMax a b -> object ["type" .= ("max" :: Text), "left" .= a, "right" .= b]
-        OpMin a b -> object ["type" .= ("min" :: Text), "left" .= a, "right" .= b]
-        OpFloor a -> object ["type" .= ("floor" :: Text), "arg" .= a]
-        OpClamp a lo hi -> object ["type" .= ("clamp" :: Text), "arg" .= a, "min" .= lo, "max" .= hi]
-        OpIfPositive c t e -> object ["type" .= ("if_positive" :: Text), "cond" .= c, "then" .= t, "otherwise" .= e]
-        OpBracketTax t a -> object ["type" .= ("bracket_tax" :: Text), "table" .= t, "income" .= a]
-        OpPhaseOut base threshold r agi ->
-            object
-                [ "type" .= ("phase_out" :: Text)
-                , "base" .= base
-                , "threshold" .= threshold
-                , "rate" .= r
-                , "agi" .= agi
-                ]
-        OpByStatus sn ->
-            object
-                [ "type" .= ("by_status" :: Text)
-                , "values" .= sn
-                ]
+  toJSON = \case
+    OpInput -> object ["type" .= ("input" :: Text)]
+    OpImport fid lid yr -> object ["type" .= ("import" :: Text), "form" .= fid, "line" .= lid, "year" .= yr]
+    OpLiteral v -> object ["type" .= ("literal" :: Text), "value" .= v]
+    OpAdd a b -> object ["type" .= ("add" :: Text), "left" .= a, "right" .= b]
+    OpSub a b -> object ["type" .= ("sub" :: Text), "left" .= a, "right" .= b]
+    OpMul a b -> object ["type" .= ("mul" :: Text), "left" .= a, "right" .= b]
+    OpDiv a b -> object ["type" .= ("div" :: Text), "left" .= a, "right" .= b]
+    OpNeg a -> object ["type" .= ("neg" :: Text), "arg" .= a]
+    OpAbs a -> object ["type" .= ("abs" :: Text), "arg" .= a]
+    OpMax a b -> object ["type" .= ("max" :: Text), "left" .= a, "right" .= b]
+    OpMin a b -> object ["type" .= ("min" :: Text), "left" .= a, "right" .= b]
+    OpFloor a -> object ["type" .= ("floor" :: Text), "arg" .= a]
+    OpClamp a lo hi -> object ["type" .= ("clamp" :: Text), "arg" .= a, "min" .= lo, "max" .= hi]
+    OpIfPositive c t e -> object ["type" .= ("if_positive" :: Text), "cond" .= c, "then" .= t, "otherwise" .= e]
+    OpBracketTax t a -> object ["type" .= ("bracket_tax" :: Text), "table" .= t, "income" .= a]
+    OpPhaseOut base threshold r agi ->
+      object
+        [ "type" .= ("phase_out" :: Text),
+          "base" .= base,
+          "threshold" .= threshold,
+          "rate" .= r,
+          "agi" .= agi
+        ]
+    OpByStatus sn ->
+      object
+        [ "type" .= ("by_status" :: Text),
+          "values" .= sn
+        ]
 
 instance ToJSON StatusValues where
-    toJSON StatusValues{..} =
-        object
-            [ "single" .= svSingle
-            , "married_joint" .= svMarriedJoint
-            , "married_separate" .= svMarriedSeparate
-            , "head_of_household" .= svHeadOfHousehold
-            , "qualifying_widow" .= svQualifyingWidow
-            ]
+  toJSON StatusValues {..} =
+    object
+      [ "single" .= svSingle,
+        "married_joint" .= svMarriedJoint,
+        "married_separate" .= svMarriedSeparate,
+        "head_of_household" .= svHeadOfHousehold,
+        "qualifying_widow" .= svQualifyingWidow
+      ]
 
 instance ToJSON StatusNodeIds where
-    toJSON StatusNodeIds{..} =
-        object
-            [ "single" .= snSingle
-            , "married_joint" .= snMarriedJoint
-            , "married_separate" .= snMarriedSeparate
-            , "head_of_household" .= snHeadOfHousehold
-            , "qualifying_widow" .= snQualifyingWidow
-            ]
+  toJSON StatusNodeIds {..} =
+    object
+      [ "single" .= snSingle,
+        "married_joint" .= snMarriedJoint,
+        "married_separate" .= snMarriedSeparate,
+        "head_of_household" .= snHeadOfHousehold,
+        "qualifying_widow" .= snQualifyingWidow
+      ]
 
 instance ToJSON BracketTable where
-    toJSON BracketTable{..} =
-        object
-            [ "brackets" .= btBrackets
-            ]
+  toJSON BracketTable {..} =
+    object
+      [ "brackets" .= btBrackets
+      ]
 
 instance ToJSON StatusBrackets where
-    toJSON StatusBrackets{..} =
-        object
-            [ "single" .= sbSingle
-            , "married_joint" .= sbMarriedJoint
-            , "married_separate" .= sbMarriedSeparate
-            , "head_of_household" .= sbHeadOfHousehold
-            , "qualifying_widow" .= sbQualifyingWidow
-            ]
+  toJSON StatusBrackets {..} =
+    object
+      [ "single" .= sbSingle,
+        "married_joint" .= sbMarriedJoint,
+        "married_separate" .= sbMarriedSeparate,
+        "head_of_household" .= sbHeadOfHousehold,
+        "qualifying_widow" .= sbQualifyingWidow
+      ]
 
 instance ToJSON Bracket where
-    toJSON Bracket{..} =
-        object
-            [ "threshold" .= brThreshold
-            , "rate" .= brRate
-            ]
+  toJSON Bracket {..} =
+    object
+      [ "threshold" .= brThreshold,
+        "rate" .= brRate
+      ]
 
 data CompileState = CompileState
-    { csNextId :: Int
-    , csNodes :: Map Int Node
-    , csLineToId :: Map LineId Int
-    , csInputIds :: [Int]
-    , csImports :: [(Text, Text, Int)] -- [(form_id, line_id, year)]
-    , csYear :: Int
-    , csFormId :: FormId
-    }
+  { csNextId :: Int,
+    csNodes :: Map Int Node,
+    csLineToId :: Map LineId Int,
+    csInputIds :: [Int],
+    csImports :: [(Text, Text, Int)], -- [(form_id, line_id, year)]
+    csYear :: Int,
+    csFormId :: FormId
+  }
 
 newtype Compile a = Compile {unCompile :: State CompileState a}
-    deriving newtype (Functor, Applicative, Monad, MonadState CompileState)
+  deriving newtype (Functor, Applicative, Monad, MonadState CompileState)
 
 runCompile :: Form -> Compile a -> (a, Map Int Node, [Int], [(Text, Text, Int)])
 runCompile frm c =
-    let (a, st) = runState (unCompile c) (initState frm)
-     in (a, csNodes st, reverse (csInputIds st), reverse (csImports st))
+  let (a, st) = runState (unCompile c) (initState frm)
+   in (a, csNodes st, reverse (csInputIds st), reverse (csImports st))
   where
     initState form =
-        CompileState
-            { csNextId = 0
-            , csNodes = Map.empty
-            , csLineToId = Map.empty
-            , csInputIds = []
-            , csImports = []
-            , csYear = formYear form
-            , csFormId = formId form
-            }
+      CompileState
+        { csNextId = 0,
+          csNodes = Map.empty,
+          csLineToId = Map.empty,
+          csInputIds = [],
+          csImports = [],
+          csYear = formYear form,
+          csFormId = formId form
+        }
 
 freshId :: Compile Int
 freshId = do
-    n <- gets csNextId
-    modify' $ \s -> s{csNextId = n + 1}
-    pure n
+  n <- gets csNextId
+  modify' $ \s -> s {csNextId = n + 1}
+  pure n
 
 emitNode :: Maybe Text -> Op -> Compile Int
 emitNode mname op = do
-    nid <- freshId
-    let node = Node nid mname op
-    modify' $ \s -> s{csNodes = Map.insert nid node (csNodes s)}
-    pure nid
+  nid <- freshId
+  let node = Node nid mname op
+  modify' $ \s -> s {csNodes = Map.insert nid node (csNodes s)}
+  pure nid
 
 emitNamedNode :: Text -> Op -> Compile Int
 emitNamedNode name = emitNode (Just name)
@@ -288,21 +290,21 @@ emitAnonymousNode = emitNode Nothing
 
 registerLine :: LineId -> Int -> Compile ()
 registerLine lid nid = modify' $ \s ->
-    s
-        { csLineToId = Map.insert lid nid (csLineToId s)
-        }
+  s
+    { csLineToId = Map.insert lid nid (csLineToId s)
+    }
 
 registerInput :: Int -> Compile ()
 registerInput nid = modify' $ \s ->
-    s
-        { csInputIds = nid : csInputIds s
-        }
+  s
+    { csInputIds = nid : csInputIds s
+    }
 
 registerImport :: Text -> Text -> Int -> Compile ()
 registerImport fid lid yr = modify' $ \s ->
-    s
-        { csImports = (fid, lid, yr) : csImports s
-        }
+  s
+    { csImports = (fid, lid, yr) : csImports s
+    }
 
 getYear :: Compile Int
 getYear = gets csYear
@@ -314,22 +316,47 @@ lookupLineId :: LineId -> Compile (Maybe Int)
 lookupLineId lid = gets (Map.lookup lid . csLineToId)
 
 compileForm :: Form -> ComputationGraph
-compileForm frm =
-    let (outputIds, nodes, inputIds, imports) = runCompile frm (compileLines frm)
-        tables = Map.fromList [(getTableId tbl, compileTable tbl) | tbl <- formTables frm]
-     in ComputationGraph
-            { cgMeta =
-                GraphMeta
-                    { gmFormId = unFormId (formId frm)
-                    , gmYear = formYear frm
-                    , gmGeneratedBy = "tenforty-dsl"
-                    }
-            , cgNodes = nodes
-            , cgTables = tables
-            , cgInputs = inputIds
-            , cgOutputs = outputIds
-            , cgImports = imports
-            }
+compileForm frm = case checkUnsupportedLookups frm of
+  err : _ -> error (unsupportedLookupMessage (formId frm) err)
+  [] -> compileSupportedForm frm
+
+-- | Rejects a lookup anywhere in the form, including positions such as
+-- 'PhaseOut' constants that 'compileExpr' never descends into (tenforty-tj2.7).
+unsupportedLookupMessage :: FormId -> FormError -> String
+unsupportedLookupMessage fid = \case
+  UnsupportedTableLookup _ tid -> tableLookupMessage fid tid
+  UnsupportedLookupTable tid -> lookupTableMessage tid
+  other -> "Unexpected lookup validation error: " <> show other
+
+tableLookupMessage :: FormId -> TableId -> String
+tableLookupMessage (FormId fid) (TableId tid) =
+  "TableLookup is not supported by the graph compiler (tenforty-tj2.7): "
+    <> T.unpack fid
+    <> " -> "
+    <> T.unpack tid
+
+lookupTableMessage :: TableId -> String
+lookupTableMessage (TableId tid) =
+  "Lookup tables are not supported by the graph compiler (tenforty-tj2.7): "
+    <> T.unpack tid
+
+compileSupportedForm :: Form -> ComputationGraph
+compileSupportedForm frm =
+  let (outputIds, nodes, inputIds, imports) = runCompile frm (compileLines frm)
+      tables = Map.fromList [(getTableId tbl, compileTable tbl) | tbl <- formTables frm]
+   in ComputationGraph
+        { cgMeta =
+            GraphMeta
+              { gmFormId = unFormId (formId frm),
+                gmYear = formYear frm,
+                gmGeneratedBy = "tenforty-dsl"
+              },
+          cgNodes = nodes,
+          cgTables = tables,
+          cgInputs = inputIds,
+          cgOutputs = outputIds,
+          cgImports = imports
+        }
 
 getTableId :: T.Table -> Text
 getTableId tbl = unTableId (T.tableId tbl)
@@ -337,187 +364,332 @@ getTableId tbl = unTableId (T.tableId tbl)
 compileFormToJSON :: Form -> ByteString
 compileFormToJSON = Aeson.encode . compileForm
 
+-- | Cross-form imports that do not resolve against the given form set, as
+-- (source form, imported form, imported line). Non-empty means a bad
+-- @importForm@ reference: the compile driver fails the build on it, turning what
+-- would be a runtime "node not found" into a compile-time error (tenforty-ovz).
+unresolvedImports :: [ComputationGraph] -> [(Text, Text, Text)]
+unresolvedImports cgs =
+  [ (gmFormId (cgMeta cg), tf, tl)
+  | cg <- cgs,
+    n <- Map.elems (cgNodes cg),
+    OpImport tf tl _ <- [nodeOp n],
+    Map.notMember (tf, tl) resKeys
+  ]
+  where
+    -- (formId, key) present, key = full name and lid base (matches resolveForms).
+    -- Only OUTPUT nodes register keys: a cross-form import may target a declared
+    -- output and nothing else (tenforty-9yh.2). An import of an interior line is
+    -- therefore "unresolved" and fails the build.
+    resKeys :: Map (Text, Text) ()
+    resKeys =
+      Map.fromList $
+        concat
+          [ case nodeName n of
+              Nothing -> []
+              Just nm -> [((gmFormId (cgMeta cg), nm), ()), ((gmFormId (cgMeta cg), T.takeWhile (/= '_') nm), ())]
+          | cg <- cgs,
+            oid <- cgOutputs cg,
+            Just n <- [Map.lookup oid (cgNodes cg)]
+          ]
+
+-- | Resolve a set of per-form compiled graphs into ONE graph (tenforty-ovz,
+-- Stage 2). Assign fresh global node ids by traversal, resolve every cross-form
+-- Import to a direct node reference, and prefix node names + table ids by form.
+-- The result carries no imports: the runtime just loads and evaluates it, with
+-- no linker and no positional-id coupling.
+resolveForms :: [ComputationGraph] -> ComputationGraph
+resolveForms [] = ComputationGraph (GraphMeta "resolved" 0 "resolveForms") Map.empty Map.empty [] [] []
+resolveForms cgs@(cg0 : _) =
+  ComputationGraph
+    { cgMeta = GraphMeta "resolved" (gmYear (cgMeta cg0)) "resolveForms",
+      cgNodes = mergedNodes,
+      cgTables = mergedTables,
+      cgInputs = mergedInputs,
+      cgOutputs = mergedOutputs,
+      cgImports = []
+    }
+  where
+    formOf cg = gmFormId (cgMeta cg)
+
+    -- every (formId, local node) flattened, form order then node-id order
+    flat :: [(Text, Node)]
+    flat = [(formOf cg, n) | cg <- cgs, n <- Map.elems (cgNodes cg)]
+
+    -- fresh global id per node, assigned by traversal
+    gidOf :: Map (Text, Int) Int
+    gidOf = Map.fromList [((f, nodeId n), g) | ((f, n), g) <- zip flat [0 ..]]
+
+    global :: Text -> Int -> Int
+    global f localId = gidOf Map.! (f, localId)
+
+    -- (formId, key) -> global id for named nodes; key is the full name and the
+    -- lid base (before the first '_'). OUTPUT nodes are registered first so they
+    -- win the base key — mirrors the linker: import "L15" must hit the L15 output,
+    -- not an interior L15_pre_qbi / L15_sched_d that happens to emit earlier.
+    outputNodes :: [(Text, Node)]
+    outputNodes =
+      [(formOf cg, n) | cg <- cgs, oid <- cgOutputs cg, Just n <- [Map.lookup oid (cgNodes cg)]]
+
+    -- Only OUTPUT nodes are resolution targets: a cross-form import may bind to
+    -- a declared output and nothing else (tenforty-9yh.2). Interior lines are
+    -- unreachable across forms, so an import can never silently land on one.
+    resMap :: Map (Text, Text) Int
+    resMap = foldl' ins Map.empty outputNodes
+      where
+        ins m (f, n) = case nodeName n of
+          Nothing -> m
+          Just nm ->
+            let g = global f (nodeId n)
+                base = T.takeWhile (/= '_') nm
+                keep = Map.insertWith (\_ old -> old)
+             in keep (f, base) g (keep (f, nm) g m)
+
+    -- global id of each import node -> resolved target global id
+    importRedirect :: Map Int Int
+    importRedirect =
+      Map.fromList
+        [ (global f (nodeId n), tgt)
+        | (f, n) <- flat,
+          OpImport tf tl _ <- [nodeOp n],
+          Just tgt <- [Map.lookup (tf, tl) resMap]
+        ]
+
+    -- a form-local operand -> its global id, following import redirects
+    ref :: Text -> Int -> Int
+    ref f localId = let g = global f localId in Map.findWithDefault g g importRedirect
+
+    isImport op = case op of OpImport {} -> True; _ -> False
+
+    remapOp :: Text -> Op -> Op
+    remapOp f op = case op of
+      OpInput -> OpInput
+      OpLiteral d -> OpLiteral d
+      OpImport {} -> op
+      OpAdd a b -> OpAdd (ref f a) (ref f b)
+      OpSub a b -> OpSub (ref f a) (ref f b)
+      OpMul a b -> OpMul (ref f a) (ref f b)
+      OpDiv a b -> OpDiv (ref f a) (ref f b)
+      OpNeg a -> OpNeg (ref f a)
+      OpAbs a -> OpAbs (ref f a)
+      OpFloor a -> OpFloor (ref f a)
+      OpMax a b -> OpMax (ref f a) (ref f b)
+      OpMin a b -> OpMin (ref f a) (ref f b)
+      OpClamp a lo hi -> OpClamp (ref f a) lo hi
+      OpIfPositive c t e -> OpIfPositive (ref f c) (ref f t) (ref f e)
+      OpBracketTax tbl inc -> OpBracketTax (f <> "__" <> tbl) (ref f inc)
+      OpPhaseOut base sv rate agi -> OpPhaseOut base sv rate (ref f agi)
+      OpByStatus (StatusNodeIds a b c d e) ->
+        OpByStatus (StatusNodeIds (ref f a) (ref f b) (ref f c) (ref f d) (ref f e))
+
+    mergedNodes :: Map Int Node
+    mergedNodes =
+      Map.fromList
+        [ ( g,
+            Node
+              { nodeId = g,
+                nodeName = ((f <> "_") <>) <$> nodeName n,
+                nodeOp = remapOp f (nodeOp n)
+              }
+          )
+        | (f, n) <- flat,
+          not (isImport (nodeOp n)),
+          let g = global f (nodeId n)
+        ]
+
+    mergedTables :: Map Text BracketTable
+    mergedTables =
+      Map.fromList
+        [ (formOf cg <> "__" <> tn, t) | cg <- cgs, (tn, t) <- Map.toList (cgTables cg)
+        ]
+
+    mergedInputs :: [Int]
+    mergedInputs = [global (formOf cg) i | cg <- cgs, i <- cgInputs cg]
+
+    mergedOutputs :: [Int]
+    mergedOutputs = [ref (formOf cg) o | cg <- cgs, o <- cgOutputs cg]
+
 compileLines :: Form -> Compile [Int]
 compileLines frm = do
-    forM_ (formInputs frm) $ \ln -> do
-        nid <- emitNamedNode (verboseLineId ln) OpInput
+  forM_ (formInputs frm) $ \ln -> do
+    nid <- emitNamedNode (verboseLineId ln) OpInput
+    registerLine (lineId ln) nid
+    registerInput nid
+
+  forM_ (formLines frm) $ \ln ->
+    case lineType ln of
+      LineInput -> pure ()
+      LineComputed expr -> do
+        nid <- compileExpr (Just $ verboseLineId ln) expr
         registerLine (lineId ln) nid
-        registerInput nid
+      LineWorksheet _ steps -> do
+        forM_ steps $ \step -> do
+          nid <- compileExpr (Just $ unLineId (wsStepId step)) (wsStepExpr step)
+          registerLine (wsStepId step) nid
+        case steps of
+          [] -> pure ()
+          _ -> do
+            let lastStep = last steps
+            mLastId <- lookupLineId (wsStepId lastStep)
+            for_ mLastId (registerLine (lineId ln))
 
-    forM_ (formLines frm) $ \ln ->
-        case lineType ln of
-            LineInput -> pure ()
-            LineComputed expr -> do
-                nid <- compileExpr (Just $ verboseLineId ln) expr
-                registerLine (lineId ln) nid
-            LineWorksheet _ steps -> do
-                forM_ steps $ \step -> do
-                    nid <- compileExpr (Just $ unLineId (wsStepId step)) (wsStepExpr step)
-                    registerLine (wsStepId step) nid
-                case steps of
-                    [] -> pure ()
-                    _ -> do
-                        let lastStep = last steps
-                        mLastId <- lookupLineId (wsStepId lastStep)
-                        for_ mLastId (registerLine (lineId ln))
-
-    forM (formOutputs frm) $ \ln -> do
-        mNid <- lookupLineId (lineId ln)
-        nid <- case mNid of
-            Just existing -> pure existing
-            Nothing -> do
-                fid <- getFormId
-                error $
-                    "Missing output line during compile: "
-                        <> T.unpack (unFormId fid)
-                        <> " -> "
-                        <> T.unpack (unLineId (lineId ln))
-        ensureOutputNamed ln nid
+  forM (formOutputs frm) $ \ln -> do
+    mNid <- lookupLineId (lineId ln)
+    nid <- case mNid of
+      Just existing -> pure existing
+      Nothing -> do
+        fid <- getFormId
+        error $
+          "Missing output line during compile: "
+            <> T.unpack (unFormId fid)
+            <> " -> "
+            <> T.unpack (unLineId (lineId ln))
+    ensureOutputNamed ln nid
 
 ensureOutputNamed :: Line -> Int -> Compile Int
 ensureOutputNamed ln nid = do
-    nodes <- gets csNodes
-    let desired = verboseLineId ln
-        lid = unLineId (lineId ln)
-        okName nm = nm == lid || T.isPrefixOf (lid <> "_") nm
-        currentName = Map.lookup nid nodes >>= nodeName
-    if maybe False okName currentName
-        then pure nid
-        else do
-            zero <- emitAnonymousNode (OpLiteral 0)
-            emitNamedNode desired (OpAdd nid zero)
+  nodes <- gets csNodes
+  let desired = verboseLineId ln
+      lid = unLineId (lineId ln)
+      okName nm = nm == lid || T.isPrefixOf (lid <> "_") nm
+      currentName = Map.lookup nid nodes >>= nodeName
+  if maybe False okName currentName
+    then pure nid
+    else do
+      zero <- emitAnonymousNode (OpLiteral 0)
+      emitNamedNode desired (OpAdd nid zero)
 
 compileExpr :: Maybe Text -> Expr u -> Compile Int
 compileExpr mname = \case
-    Lit (Amount v) -> emitNode mname (OpLiteral v)
-    E.Line lid -> do
-        mNid <- lookupLineId lid
-        case mNid of
-            Just nid -> pure nid
-            Nothing -> do
-                fid <- getFormId
-                error $
-                    "Missing line reference during compile: "
-                        <> T.unpack (unFormId fid)
-                        <> " -> "
-                        <> T.unpack (unLineId lid)
-    Import (FormId fid) (LineId lid) -> do
-        yr <- getYear
-        registerImport fid lid yr
-        emitNode mname (OpImport fid lid yr)
-    Add a b -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        emitNode mname (OpAdd aid bid)
-    Sub a b -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        emitNode mname (OpSub aid bid)
-    Mul a b -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        emitNode mname (OpMul aid bid)
-    Div a b -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        emitNode mname (OpDiv aid bid)
-    Neg a -> do
-        aid <- compileExpr Nothing a
-        emitNode mname (OpNeg aid)
-    Max a b -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        emitNode mname (OpMax aid bid)
-    Min a b -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        emitNode mname (OpMin aid bid)
-    IfPos c t e -> do
-        cid <- compileExpr Nothing c
-        tid <- compileExpr Nothing t
-        eid <- compileExpr Nothing e
-        emitNode mname (OpIfPositive cid tid eid)
-    IfNeg c t e -> do
-        cid <- compileExpr Nothing c
-        negCid <- emitAnonymousNode (OpNeg cid)
-        tid <- compileExpr Nothing t
-        eid <- compileExpr Nothing e
-        emitNode mname (OpIfPositive negCid tid eid)
-    IfGte a b t e -> do
-        aid <- compileExpr Nothing a
-        bid <- compileExpr Nothing b
-        diffId <- emitAnonymousNode (OpSub bid aid)
-        tid <- compileExpr Nothing t
-        eid <- compileExpr Nothing e
-        emitNode mname (OpIfPositive diffId eid tid)
-    Floor a -> do
-        aid <- compileExpr Nothing a
-        emitNode mname (OpFloor aid)
-    Round a -> do
-        aid <- compileExpr Nothing a
-        halfId <- emitAnonymousNode (OpLiteral 0.5)
-        plusHalfId <- emitAnonymousNode (OpAdd aid halfId)
-        emitNode mname (OpFloor plusHalfId)
-    BracketTax (TableId tid) income -> do
-        iid <- compileExpr Nothing income
-        emitNode mname (OpBracketTax tid iid)
-    E.TableLookup (TableId tid) amount -> do
-        aid <- compileExpr Nothing amount
-        emitNode mname (OpBracketTax tid aid)
-    PhaseOut base threshold rateE agi -> do
-        baseVal <- evalConstExpr base
-        thresholdVals <- evalStatusExpr threshold
-        rateVal <- evalConstExpr rateE
-        aid <- compileExpr Nothing agi
-        emitNode mname (OpPhaseOut baseVal thresholdVals rateVal aid)
-    ByStatusE bs -> do
-        sId <- compileExpr Nothing (bsSingle bs)
-        mjId <- compileExpr Nothing (bsMarriedJoint bs)
-        msId <- compileExpr Nothing (bsMarriedSeparate bs)
-        hhId <- compileExpr Nothing (bsHeadOfHousehold bs)
-        qwId <- compileExpr Nothing (bsQualifyingWidow bs)
-        emitNode mname (OpByStatus $ StatusNodeIds sId mjId msId hhId qwId)
+  Lit (Amount v) -> emitNode mname (OpLiteral v)
+  E.Line lid -> do
+    mNid <- lookupLineId lid
+    case mNid of
+      Just nid -> pure nid
+      Nothing -> do
+        fid <- getFormId
+        error $
+          "Missing line reference during compile: "
+            <> T.unpack (unFormId fid)
+            <> " -> "
+            <> T.unpack (unLineId lid)
+  Import (FormId fid) (LineId lid) -> do
+    yr <- getYear
+    registerImport fid lid yr
+    emitNode mname (OpImport fid lid yr)
+  Add a b -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    emitNode mname (OpAdd aid bid)
+  Sub a b -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    emitNode mname (OpSub aid bid)
+  Mul a b -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    emitNode mname (OpMul aid bid)
+  Div a b -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    emitNode mname (OpDiv aid bid)
+  Neg a -> do
+    aid <- compileExpr Nothing a
+    emitNode mname (OpNeg aid)
+  Max a b -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    emitNode mname (OpMax aid bid)
+  Min a b -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    emitNode mname (OpMin aid bid)
+  IfPos c t e -> do
+    cid <- compileExpr Nothing c
+    tid <- compileExpr Nothing t
+    eid <- compileExpr Nothing e
+    emitNode mname (OpIfPositive cid tid eid)
+  IfNeg c t e -> do
+    cid <- compileExpr Nothing c
+    negCid <- emitAnonymousNode (OpNeg cid)
+    tid <- compileExpr Nothing t
+    eid <- compileExpr Nothing e
+    emitNode mname (OpIfPositive negCid tid eid)
+  IfGte a b t e -> do
+    aid <- compileExpr Nothing a
+    bid <- compileExpr Nothing b
+    diffId <- emitAnonymousNode (OpSub bid aid)
+    tid <- compileExpr Nothing t
+    eid <- compileExpr Nothing e
+    emitNode mname (OpIfPositive diffId eid tid)
+  Floor a -> do
+    aid <- compileExpr Nothing a
+    emitNode mname (OpFloor aid)
+  Round a -> do
+    aid <- compileExpr Nothing a
+    halfId <- emitAnonymousNode (OpLiteral 0.5)
+    plusHalfId <- emitAnonymousNode (OpAdd aid halfId)
+    emitNode mname (OpFloor plusHalfId)
+  BracketTax (TableId tid) income -> do
+    iid <- compileExpr Nothing income
+    emitNode mname (OpBracketTax tid iid)
+  E.TableLookup tid _ -> do
+    fid <- getFormId
+    error (tableLookupMessage fid tid)
+  PhaseOut base threshold rateE agi -> do
+    baseVal <- evalConstExpr base
+    thresholdVals <- evalStatusExpr threshold
+    rateVal <- evalConstExpr rateE
+    aid <- compileExpr Nothing agi
+    emitNode mname (OpPhaseOut baseVal thresholdVals rateVal aid)
+  ByStatusE bs -> do
+    sId <- compileExpr Nothing (bsSingle bs)
+    mjId <- compileExpr Nothing (bsMarriedJoint bs)
+    msId <- compileExpr Nothing (bsMarriedSeparate bs)
+    hhId <- compileExpr Nothing (bsHeadOfHousehold bs)
+    qwId <- compileExpr Nothing (bsQualifyingWidow bs)
+    emitNode mname (OpByStatus $ StatusNodeIds sId mjId msId hhId qwId)
 
 evalConstExpr :: Expr u -> Compile Double
 evalConstExpr = \case
-    Lit (Amount v) -> pure v
-    _ -> pure 0
+  Lit (Amount v) -> pure v
+  _ -> pure 0
 
 evalStatusExpr :: Expr u -> Compile StatusValues
 evalStatusExpr = \case
-    ByStatusE bs -> do
-        s <- evalConstExpr (bsSingle bs)
-        mj <- evalConstExpr (bsMarriedJoint bs)
-        ms <- evalConstExpr (bsMarriedSeparate bs)
-        hh <- evalConstExpr (bsHeadOfHousehold bs)
-        qw <- evalConstExpr (bsQualifyingWidow bs)
-        pure $ StatusValues s mj ms hh qw
-    Lit (Amount v) -> pure $ StatusValues v v v v v
-    _ -> pure $ StatusValues 0 0 0 0 0
+  ByStatusE bs -> do
+    s <- evalConstExpr (bsSingle bs)
+    mj <- evalConstExpr (bsMarriedJoint bs)
+    ms <- evalConstExpr (bsMarriedSeparate bs)
+    hh <- evalConstExpr (bsHeadOfHousehold bs)
+    qw <- evalConstExpr (bsQualifyingWidow bs)
+    pure $ StatusValues s mj ms hh qw
+  Lit (Amount v) -> pure $ StatusValues v v v v v
+  _ -> pure $ StatusValues 0 0 0 0 0
 
 compileTable :: T.Table -> BracketTable
 compileTable = \case
-    T.TableBracket _ bt -> compileBracketTable bt
-    T.TableLookup _ _ -> BracketTable (StatusBrackets [] [] [] [] [])
+  T.TableBracket _ bt -> compileBracketTable bt
+  T.TableLookup tid _ -> error (lookupTableMessage tid)
 
 compileBracketTable :: T.BracketTable -> BracketTable
 compileBracketTable bt =
-    BracketTable
-        { btBrackets =
-            StatusBrackets
-                { sbSingle = compileBracketsForStatus Single bt
-                , sbMarriedJoint = compileBracketsForStatus MarriedJoint bt
-                , sbMarriedSeparate = compileBracketsForStatus MarriedSeparate bt
-                , sbHeadOfHousehold = compileBracketsForStatus HeadOfHousehold bt
-                , sbQualifyingWidow = compileBracketsForStatus QualifyingWidow bt
-                }
-        }
+  BracketTable
+    { btBrackets =
+        StatusBrackets
+          { sbSingle = compileBracketsForStatus Single bt,
+            sbMarriedJoint = compileBracketsForStatus MarriedJoint bt,
+            sbMarriedSeparate = compileBracketsForStatus MarriedSeparate bt,
+            sbHeadOfHousehold = compileBracketsForStatus HeadOfHousehold bt,
+            sbQualifyingWidow = compileBracketsForStatus QualifyingWidow bt
+          }
+    }
 
 compileBracketsForStatus :: FilingStatus -> T.BracketTable -> [Bracket]
 compileBracketsForStatus status bt =
-    [ Bracket
-        { brThreshold = unAmount (forStatus (T.bracketThreshold b) status)
-        , brRate = unAmount (T.bracketRate b)
-        }
-    | b <- T.bracketTableList bt
-    ]
+  [ Bracket
+      { brThreshold = unAmount (forStatus (T.bracketThreshold b) status),
+        brRate = unAmount (T.bracketRate b)
+      }
+  | b <- T.bracketTableList bt
+  ]

@@ -1,2 +1,7 @@
 [default.extend-words]
+# "Ded" abbreviates "Deduction" in upstream OpenTaxSolver identifiers such as
+# getAZStdDedAmt. typos splits identifiers into words, reads "Ded" as a
+# misspelling of "Dead", and rewrites the symbol — silently corrupting quoted
+# upstream source.
+Ded = "Ded"
 ND = "ND"

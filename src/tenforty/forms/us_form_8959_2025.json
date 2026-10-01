@@ -201,11 +201,9 @@
         },
         "29": {
             "id": 29,
-            "name": "L12_se_subject_to_tax",
             "op": {
-                "left": 19,
-                "right": 28,
-                "type": "min"
+                "type": "literal",
+                "value": 0
             }
         },
         "3": {
@@ -218,81 +216,83 @@
         "30": {
             "id": 30,
             "op": {
-                "type": "literal",
-                "value": 9.0e-3
+                "left": 19,
+                "right": 28,
+                "type": "sub"
             }
         },
         "31": {
             "id": 31,
-            "name": "L13_additional_medicare_se",
+            "name": "L12_se_subject_to_tax",
             "op": {
                 "left": 29,
                 "right": 30,
-                "type": "mul"
+                "type": "max"
             }
         },
         "32": {
             "id": 32,
             "op": {
                 "type": "literal",
-                "value": 200000
+                "value": 9.0e-3
             }
         },
         "33": {
             "id": 33,
+            "name": "L13_additional_medicare_se",
             "op": {
-                "type": "literal",
-                "value": 250000
+                "left": 31,
+                "right": 32,
+                "type": "mul"
             }
         },
         "34": {
             "id": 34,
             "op": {
                 "type": "literal",
-                "value": 125000
+                "value": 200000
             }
         },
         "35": {
             "id": 35,
             "op": {
                 "type": "literal",
-                "value": 200000
+                "value": 250000
             }
         },
         "36": {
             "id": 36,
             "op": {
                 "type": "literal",
-                "value": 200000
+                "value": 125000
             }
         },
         "37": {
             "id": 37,
-            "name": "L15_threshold_rrta",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 35,
-                    "married_joint": 33,
-                    "married_separate": 34,
-                    "qualifying_widow": 36,
-                    "single": 32
-                }
+                "type": "literal",
+                "value": 200000
             }
         },
         "38": {
             "id": 38,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 200000
             }
         },
         "39": {
             "id": 39,
+            "name": "L15_threshold_rrta",
             "op": {
-                "left": 3,
-                "right": 37,
-                "type": "sub"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 37,
+                    "married_joint": 35,
+                    "married_separate": 36,
+                    "qualifying_widow": 38,
+                    "single": 34
+                }
             }
         },
         "4": {
@@ -304,84 +304,82 @@
         },
         "40": {
             "id": 40,
-            "name": "L16_excess_rrta",
             "op": {
-                "left": 38,
-                "right": 39,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "41": {
             "id": 41,
             "op": {
-                "type": "literal",
-                "value": 9.0e-3
+                "left": 3,
+                "right": 39,
+                "type": "sub"
             }
         },
         "42": {
             "id": 42,
-            "name": "L17_additional_medicare_rrta",
+            "name": "L16_excess_rrta",
             "op": {
                 "left": 40,
                 "right": 41,
-                "type": "mul"
+                "type": "max"
             }
         },
         "43": {
             "id": 43,
             "op": {
-                "left": 18,
-                "right": 31,
-                "type": "add"
+                "type": "literal",
+                "value": 9.0e-3
             }
         },
         "44": {
             "id": 44,
-            "name": "L18_total_additional_medicare",
+            "name": "L17_additional_medicare_rrta",
             "op": {
-                "left": 43,
-                "right": 42,
-                "type": "add"
+                "left": 42,
+                "right": 43,
+                "type": "mul"
             }
         },
         "45": {
             "id": 45,
             "op": {
-                "type": "literal",
-                "value": 1.45e-2
+                "left": 18,
+                "right": 33,
+                "type": "add"
             }
         },
         "46": {
             "id": 46,
-            "name": "L20_regular_medicare",
+            "name": "L18_total_additional_medicare",
             "op": {
-                "left": 0,
-                "right": 45,
-                "type": "mul"
+                "left": 45,
+                "right": 44,
+                "type": "add"
             }
         },
         "47": {
             "id": 47,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 1.45e-2
             }
         },
         "48": {
             "id": 48,
+            "name": "L20_regular_medicare",
             "op": {
-                "left": 4,
-                "right": 46,
-                "type": "sub"
+                "left": 0,
+                "right": 47,
+                "type": "mul"
             }
         },
         "49": {
             "id": 49,
-            "name": "L21_additional_withheld",
             "op": {
-                "left": 47,
-                "right": 48,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "5": {
@@ -393,9 +391,26 @@
         },
         "50": {
             "id": 50,
-            "name": "L23_total_withheld",
+            "op": {
+                "left": 4,
+                "right": 48,
+                "type": "sub"
+            }
+        },
+        "51": {
+            "id": 51,
+            "name": "L21_additional_withheld",
             "op": {
                 "left": 49,
+                "right": 50,
+                "type": "max"
+            }
+        },
+        "52": {
+            "id": 52,
+            "name": "L23_total_withheld",
+            "op": {
+                "left": 51,
                 "right": 5,
                 "type": "add"
             }
@@ -433,12 +448,12 @@
         }
     },
     "outputs": [
-        29,
         31,
-        42,
+        33,
         44,
-        49,
-        50,
+        46,
+        51,
+        52,
         7,
         18
     ],
