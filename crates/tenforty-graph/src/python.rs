@@ -9,7 +9,7 @@ use rayon::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::eval::Runtime as RsRuntime;
+use crate::eval::{eval_named_scenario, BatchRowError, Runtime as RsRuntime};
 use crate::graph::{FilingStatus as RsFilingStatus, Graph as RsGraph};
 use crate::{autodiff, solver, viz};
 
@@ -99,47 +99,76 @@ pub struct Graph {
     inner: Arc<RsGraph>,
 }
 
+type ScenarioRow = (usize, RsFilingStatus, HashMap<String, f64>);
+type EvaluatedRow = (
+    usize,
+    RsFilingStatus,
+    HashMap<String, f64>,
+    HashMap<String, f64>,
+);
+
+fn batch_row_error_to_py(err: BatchRowError) -> PyErr {
+    PyValueError::new_err(err.to_string())
+}
+
+type PlacedRow = Option<(RsFilingStatus, HashMap<String, f64>, HashMap<String, f64>)>;
+
+fn place_by_row(evaluated: Vec<EvaluatedRow>, row_count: usize) -> Vec<PlacedRow> {
+    let mut results: Vec<PlacedRow> = vec![None; row_count];
+    for (idx, stat, scen_inputs, output_vals) in evaluated {
+        results[idx] = Some((stat, scen_inputs, output_vals));
+    }
+    results
+}
+
+fn lowest_row_error(errors: impl IntoIterator<Item = BatchRowError>) -> Option<BatchRowError> {
+    errors.into_iter().min_by_key(|err| err.row)
+}
+
 impl Graph {
     fn eval_scenarios_interpreter(
         &self,
-        scenarios: Vec<(usize, RsFilingStatus, HashMap<String, f64>)>,
+        scenarios: Vec<ScenarioRow>,
         outputs: &[String],
-    ) -> Vec<(
-        usize,
-        RsFilingStatus,
-        HashMap<String, f64>,
-        HashMap<String, f64>,
-    )> {
+    ) -> Result<Vec<EvaluatedRow>, BatchRowError> {
         let graph = &self.inner;
         #[cfg(feature = "parallel")]
         let iter = scenarios.into_par_iter();
         #[cfg(not(feature = "parallel"))]
         let iter = scenarios.into_iter();
 
-        iter.map(|(idx, status, input_vals)| {
-            let mut rt = RsRuntime::new(graph, status);
+        // Unset inputs default to 0 in eval, so only the provided ones need
+        // setting — no per-scenario zero-fill over all ~800 graph inputs.
+        let evaluated: Vec<Result<EvaluatedRow, BatchRowError>> = iter
+            .map(|(idx, status, input_vals)| {
+                eval_named_scenario(
+                    graph,
+                    status,
+                    &input_vals,
+                    outputs.iter().map(String::as_str),
+                )
+                .map(|output_vals| (idx, status, input_vals, output_vals))
+                .map_err(|source| BatchRowError { row: idx, source })
+            })
+            .collect();
 
-            // Unset inputs default to 0 in eval, so only the provided ones need
-            // setting — no per-scenario zero-fill over all ~800 graph inputs.
-            for (name, &value) in &input_vals {
-                let _ = rt.set(name, value);
+        let mut rows = Vec::with_capacity(evaluated.len());
+        let mut errors = Vec::new();
+        for result in evaluated {
+            match result {
+                Ok(row) => rows.push(row),
+                Err(err) => errors.push(err),
             }
-
-            // Evaluate outputs
-            let mut output_vals = HashMap::new();
-            for output in outputs {
-                if let Ok(value) = rt.eval(output) {
-                    output_vals.insert(output.clone(), value);
-                }
-            }
-            (idx, status, input_vals, output_vals)
-        })
-        .collect()
+        }
+        match lowest_row_error(errors) {
+            Some(err) => Err(err),
+            None => Ok(rows),
+        }
     }
 
     fn evaluate_and_columnize(
         &self,
-        scenarios: Vec<(usize, RsFilingStatus, HashMap<String, f64>)>,
+        scenarios: Vec<ScenarioRow>,
         input_names: &[&String],
         outputs: &[String],
     ) -> PyResult<(
@@ -160,12 +189,26 @@ impl Graph {
         #[cfg(feature = "jit")]
         let graph = &self.inner;
 
+        // The JIT has no error channel: it reads an unknown name as 0, so it
+        // only runs when every requested name resolves, and otherwise the
+        // interpreter raises what `Runtime` would. A block whose slice reaches
+        // a division, or that fails to compile (a missing table), falls back
+        // to the interpreter the same way.
+        #[cfg(feature = "jit")]
+        let jit_names_resolve = input_names
+            .iter()
+            .map(|name| name.as_str())
+            .chain(outputs.iter().map(String::as_str))
+            .all(|name| graph.node_id_by_name(name).is_some());
+
         #[cfg(feature = "jit")]
         let results = {
-            let mut results: Vec<
-                Option<(RsFilingStatus, HashMap<String, f64>, HashMap<String, f64>)>,
-            > = vec![None; scenarios.len()];
-            let compiler = JitCompiler::new().ok();
+            let mut results: Vec<PlacedRow> = vec![None; scenarios.len()];
+            let compiler = if jit_names_resolve {
+                JitCompiler::new().ok()
+            } else {
+                None
+            };
 
             if let Some(compiler) = compiler {
                 // Slice the JIT to just the requested outputs: compile only the
@@ -175,21 +218,22 @@ impl Graph {
                     .filter_map(|name| graph.node_id_by_name(name))
                     .collect();
 
-                let mut blocks: Vec<Vec<(usize, RsFilingStatus, HashMap<String, f64>)>> =
-                    vec![Vec::new(); unique_statuses.len()];
+                let mut blocks: Vec<Vec<ScenarioRow>> = vec![Vec::new(); unique_statuses.len()];
                 for scenario in &scenarios {
                     let status_index = seen.get(&scenario.1).copied().unwrap_or(0);
                     blocks[status_index].push(scenario.clone());
                 }
 
+                let mut block_errors: Vec<BatchRowError> = Vec::new();
                 for block in blocks {
                     if block.is_empty() {
                         continue;
                     }
                     let status = block[0].1;
 
-                    // Compile for this status
-                    if let Ok(compiled) = compiler.compile_batch(graph, status, &output_ids) {
+                    if let Ok(Some(compiled)) =
+                        compiler.compile_batch_strict(graph, status, &output_ids)
+                    {
                         // Pre-calculate input mappings
                         let input_mappings: Vec<(&String, Option<usize>)> = input_names
                             .iter()
@@ -215,54 +259,44 @@ impl Graph {
                             .collect();
 
                         // Process block in chunks
-                        let process_chunk =
-                            |chunk: &[(usize, RsFilingStatus, HashMap<String, f64>)]| {
-                                let mut chunk_results = Vec::with_capacity(chunk.len());
-                                let mut batch_inputs =
-                                    vec![0.0; compiled.num_inputs() * BATCH_SIZE];
-                                let mut batch_outputs =
-                                    vec![0.0; compiled.num_outputs() * BATCH_SIZE];
+                        let process_chunk = |chunk: &[ScenarioRow]| {
+                            let mut chunk_results = Vec::with_capacity(chunk.len());
+                            let mut batch_inputs = vec![0.0; compiled.num_inputs() * BATCH_SIZE];
+                            let mut batch_outputs = vec![0.0; compiled.num_outputs() * BATCH_SIZE];
 
-                                // Fill inputs
-                                for (lane, (_idx, _stat, scen_inputs)) in chunk.iter().enumerate() {
-                                    for (name, slot_opt) in &input_mappings {
-                                        if let Some(slot) = slot_opt {
-                                            let val =
-                                                scen_inputs.get(*name).copied().unwrap_or(0.0);
-                                            batch_inputs[*slot * BATCH_SIZE + lane] = val;
-                                        }
+                            // Fill inputs
+                            for (lane, (_idx, _stat, scen_inputs)) in chunk.iter().enumerate() {
+                                for (name, slot_opt) in &input_mappings {
+                                    if let Some(slot) = slot_opt {
+                                        let val = scen_inputs.get(*name).copied().unwrap_or(0.0);
+                                        batch_inputs[*slot * BATCH_SIZE + lane] = val;
                                     }
                                 }
+                            }
 
-                                // Call JIT
-                                unsafe {
-                                    // SAFETY: compiled.call expects valid pointers to contiguous
-                                    // input/output buffers sized for num_inputs/num_outputs * BATCH_SIZE,
-                                    // which we allocate above. The JIT does not retain these pointers.
-                                    compiled
-                                        .call(batch_inputs.as_ptr(), batch_outputs.as_mut_ptr());
-                                }
+                            // Call JIT
+                            unsafe {
+                                // SAFETY: compiled.call expects valid pointers to contiguous
+                                // input/output buffers sized for num_inputs/num_outputs * BATCH_SIZE,
+                                // which we allocate above. The JIT does not retain these pointers.
+                                compiled.call(batch_inputs.as_ptr(), batch_outputs.as_mut_ptr());
+                            }
 
-                                // Read outputs
-                                for (lane, (idx, stat, scen_inputs)) in chunk.iter().enumerate() {
-                                    let mut output_vals = HashMap::new();
-                                    for (name, slot_opt) in &output_mappings {
-                                        let val = if let Some(slot) = slot_opt {
-                                            batch_outputs[*slot * BATCH_SIZE + lane]
-                                        } else {
-                                            0.0
-                                        };
-                                        output_vals.insert((*name).clone(), val);
-                                    }
-                                    chunk_results.push((
-                                        *idx,
-                                        *stat,
-                                        scen_inputs.clone(),
-                                        output_vals,
-                                    ));
+                            // Read outputs
+                            for (lane, (idx, stat, scen_inputs)) in chunk.iter().enumerate() {
+                                let mut output_vals = HashMap::new();
+                                for (name, slot_opt) in &output_mappings {
+                                    let val = if let Some(slot) = slot_opt {
+                                        batch_outputs[*slot * BATCH_SIZE + lane]
+                                    } else {
+                                        0.0
+                                    };
+                                    output_vals.insert((*name).clone(), val);
                                 }
-                                chunk_results
-                            };
+                                chunk_results.push((*idx, *stat, scen_inputs.clone(), output_vals));
+                            }
+                            chunk_results
+                        };
 
                         #[cfg(feature = "parallel")]
                         let chunk_results: Vec<_> = block
@@ -278,13 +312,19 @@ impl Graph {
                             results[idx] = Some((stat, scen_inputs, output_vals));
                         }
                     } else {
-                        // Compilation failed, fallback to interpreter for this block
-                        let block_vec = block.to_vec();
-                        let fallback = self.eval_scenarios_interpreter(block_vec, outputs);
-                        for (idx, stat, scen_inputs, output_vals) in fallback {
-                            results[idx] = Some((stat, scen_inputs, output_vals));
+                        // Declined or failed to compile: interpret this block
+                        match self.eval_scenarios_interpreter(block, outputs) {
+                            Ok(fallback) => {
+                                for (idx, stat, scen_inputs, output_vals) in fallback {
+                                    results[idx] = Some((stat, scen_inputs, output_vals));
+                                }
+                            }
+                            Err(err) => block_errors.push(err),
                         }
                     }
+                }
+                if let Some(err) = lowest_row_error(block_errors) {
+                    return Err(batch_row_error_to_py(err));
                 }
                 Some(results)
             } else {
@@ -293,27 +333,24 @@ impl Graph {
         };
 
         #[cfg(feature = "jit")]
-        let results = results.unwrap_or_else(|| {
-            let mut results: Vec<
-                Option<(RsFilingStatus, HashMap<String, f64>, HashMap<String, f64>)>,
-            > = vec![None; scenarios.len()];
-            let fallback = self.eval_scenarios_interpreter(scenarios, outputs);
-            for (idx, stat, scen_inputs, output_vals) in fallback {
-                results[idx] = Some((stat, scen_inputs, output_vals));
+        let results = match results {
+            Some(results) => results,
+            None => {
+                let row_count = scenarios.len();
+                let evaluated = self
+                    .eval_scenarios_interpreter(scenarios, outputs)
+                    .map_err(batch_row_error_to_py)?;
+                place_by_row(evaluated, row_count)
             }
-            results
-        });
+        };
 
         #[cfg(not(feature = "jit"))]
         let results = {
-            let mut results: Vec<
-                Option<(RsFilingStatus, HashMap<String, f64>, HashMap<String, f64>)>,
-            > = vec![None; scenarios.len()];
-            let fallback = self.eval_scenarios_interpreter(scenarios, outputs);
-            for (idx, stat, scen_inputs, output_vals) in fallback {
-                results[idx] = Some((stat, scen_inputs, output_vals));
-            }
-            results
+            let row_count = scenarios.len();
+            let evaluated = self
+                .eval_scenarios_interpreter(scenarios, outputs)
+                .map_err(batch_row_error_to_py)?;
+            place_by_row(evaluated, row_count)
         };
 
         // Build column-oriented data
@@ -351,7 +388,9 @@ impl Graph {
                 .iter()
                 .map(|r| {
                     let (_, _, outputs) = r.as_ref().expect("missing scenario result");
-                    outputs.get(output_name).copied().unwrap_or(0.0)
+                    *outputs
+                        .get(output_name)
+                        .expect("evaluated row missing a requested output")
                 })
                 .collect();
             output_cols.insert(output_name.clone(), values);

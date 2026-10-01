@@ -73,7 +73,7 @@ def run_tax_scenario(scenario: TaxScenario):
 
     if scenario.expected_state_tax is not None:
         if result.state_total_tax != pytest.approx(
-            scenario.expected_state_tax, abs=0.01
+            scenario.expected_state_tax, abs=scenario.state_tax_tolerance
         ):
             failures.append(
                 f"[{scenario.source}] State tax {result.state_total_tax} != "

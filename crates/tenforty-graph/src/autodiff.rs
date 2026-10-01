@@ -159,11 +159,14 @@ fn has_active_kink(
             Op::BracketTax { table, income } => {
                 let income = values.get(income).copied().unwrap_or(0.0);
                 runtime.graph().tables.get(table).is_some_and(|table| {
-                    table
-                        .brackets
-                        .get(runtime.filing_status())
-                        .iter()
-                        .any(|bracket| bracket.threshold.is_finite() && income == bracket.threshold)
+                    income == 0.0
+                        || table
+                            .brackets
+                            .get(runtime.filing_status())
+                            .iter()
+                            .any(|bracket| {
+                                bracket.threshold.is_finite() && income == bracket.threshold
+                            })
                 })
             }
             Op::PhaseOut {
@@ -842,6 +845,35 @@ mod tests {
         runtime.set_by_id(0, 50000.0);
         let grad = gradient(&mut runtime, 1, 0).unwrap();
         assert_eq!(grad, 0.30);
+    }
+
+    #[test]
+    fn test_gradient_bracket_tax_takes_right_derivative_at_zero_income() {
+        let graph = tax_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+
+        runtime.set_by_id(0, 0.0);
+        let grad = gradient(&mut runtime, 1, 0).unwrap();
+        assert!((grad - 0.10).abs() < 1e-9, "grad at 0 = {grad}");
+        assert_eq!(runtime.input_value(0), Some(0.0));
+        assert_eq!(runtime.eval_node(1).unwrap(), 0.0);
+
+        let grouped = gradient_sums(&mut runtime, 1, &[vec![0]]).unwrap();
+        assert_eq!(grouped, vec![grad]);
+
+        runtime.set_by_id(0, -5000.0);
+        let grad = gradient(&mut runtime, 1, 0).unwrap();
+        assert_eq!(grad, 0.0);
+    }
+
+    #[test]
+    fn test_gradient_bracket_tax_takes_right_derivative_at_a_threshold() {
+        let graph = tax_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+
+        runtime.set_by_id(0, 10000.0);
+        let grad = gradient(&mut runtime, 1, 0).unwrap();
+        assert!((grad - 0.20).abs() < 1e-9, "grad at 10k = {grad}");
     }
 
     /// A graph where the input fans out to two branches that recombine, so the

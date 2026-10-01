@@ -11,9 +11,11 @@ import CAFTB3514_2024
 import CAFTB3514_2025
 import CAScheduleCA_2024
 import CAScheduleCA_2025
+import Control.Exception (evaluate)
 import Control.Monad (void)
+import Data.ByteString.Lazy qualified as BL
 import Data.Foldable (forM_)
-import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)
 import Data.Set qualified as Set
@@ -27,7 +29,8 @@ import TablesCA2024
 import TablesCA2025
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
-import TenForty.Expr (extractLineRefs, extractTableRefs)
+import TenForty.Expr (Expr (PhaseOut), extractLineRefs, extractTableRefs)
+import TenForty.Table qualified as Table
 import Test.Hspec
 import Test.QuickCheck
 import Text.Read (readMaybe)
@@ -440,6 +443,57 @@ spec n = do
       case caFTB3514_2025 of
         Right _ -> pure ()
         Left err -> expectationFailure $ show err
+
+  describe "TableLookup rejection (tenforty-tj2.7)" $ do
+    let probeTable = TableId "probe_table"
+        income = LineId "L1"
+        tax = LineId "L2"
+        probeBrackets = either error id (mkBracketTable federalBrackets2024)
+        probeEntries =
+          either error id $
+            mkLookupTable (LookupEntry 0 1000 (byStatus 1 1 1 1 1) :| [])
+        lookupForm = do
+          defineTable (TableBracket probeTable probeBrackets)
+          incomeRef <- input income "Income" "" Interior
+          void (compute tax "Tax" "" Interior (tableLookup probeTable incomeRef))
+          outputs [tax]
+
+    it "rejects a line that uses tableLookup" $
+      (formId <$> form (FormId "probe") 2024 lookupForm)
+        `shouldBe` Left (UnsupportedTableLookup tax probeTable)
+
+    it "rejects a defined lookup table" $ do
+      let definesLookupTable = do
+            defineTable (Table.TableLookup probeTable probeEntries)
+            void (input income "Income" "" Interior)
+      (formId <$> form (FormId "probe") 2024 definesLookupTable)
+        `shouldBe` Left (UnsupportedLookupTable probeTable)
+
+    let unvalidatedWith taxExpr =
+          Form
+            { formId = FormId "probe",
+              formYear = 2024,
+              formLineMap =
+                Map.fromList
+                  [ (income, Line income "Income" "" Interior LineInput),
+                    (tax, Line tax "Tax" "" Interior (LineComputed taxExpr))
+                  ],
+              formLineOrder = [income, tax],
+              formOutputIds = Set.singleton tax,
+              formTableMap = Map.singleton probeTable (TableBracket probeTable probeBrackets)
+            }
+        compileRejection =
+          errorCall "TableLookup is not supported by the graph compiler (tenforty-tj2.7): probe -> probe_table"
+
+    it "compileForm rejects a TableLookup that bypassed validation" $
+      evaluate (BL.length (compileFormToJSON (unvalidatedWith (tableLookup probeTable (line income)))))
+        `shouldThrow` compileRejection
+
+    it "compileForm rejects a TableLookup hidden in a PhaseOut constant" $ do
+      let hiddenInPhaseOut =
+            PhaseOut (tableLookup probeTable (line income)) (dollars 0) (rate 0.1) (line income)
+      evaluate (BL.length (compileFormToJSON (unvalidatedWith hiddenInPhaseOut)))
+        `shouldThrow` compileRejection
 
   describe "Form Compilation" $ do
     forM_ taxYears $ \ty ->

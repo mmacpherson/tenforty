@@ -316,7 +316,32 @@ lookupLineId :: LineId -> Compile (Maybe Int)
 lookupLineId lid = gets (Map.lookup lid . csLineToId)
 
 compileForm :: Form -> ComputationGraph
-compileForm frm =
+compileForm frm = case checkUnsupportedLookups frm of
+  err : _ -> error (unsupportedLookupMessage (formId frm) err)
+  [] -> compileSupportedForm frm
+
+-- | Rejects a lookup anywhere in the form, including positions such as
+-- 'PhaseOut' constants that 'compileExpr' never descends into (tenforty-tj2.7).
+unsupportedLookupMessage :: FormId -> FormError -> String
+unsupportedLookupMessage fid = \case
+  UnsupportedTableLookup _ tid -> tableLookupMessage fid tid
+  UnsupportedLookupTable tid -> lookupTableMessage tid
+  other -> "Unexpected lookup validation error: " <> show other
+
+tableLookupMessage :: FormId -> TableId -> String
+tableLookupMessage (FormId fid) (TableId tid) =
+  "TableLookup is not supported by the graph compiler (tenforty-tj2.7): "
+    <> T.unpack fid
+    <> " -> "
+    <> T.unpack tid
+
+lookupTableMessage :: TableId -> String
+lookupTableMessage (TableId tid) =
+  "Lookup tables are not supported by the graph compiler (tenforty-tj2.7): "
+    <> T.unpack tid
+
+compileSupportedForm :: Form -> ComputationGraph
+compileSupportedForm frm =
   let (outputIds, nodes, inputIds, imports) = runCompile frm (compileLines frm)
       tables = Map.fromList [(getTableId tbl, compileTable tbl) | tbl <- formTables frm]
    in ComputationGraph
@@ -608,9 +633,9 @@ compileExpr mname = \case
   BracketTax (TableId tid) income -> do
     iid <- compileExpr Nothing income
     emitNode mname (OpBracketTax tid iid)
-  E.TableLookup (TableId tid) amount -> do
-    aid <- compileExpr Nothing amount
-    emitNode mname (OpBracketTax tid aid)
+  E.TableLookup tid _ -> do
+    fid <- getFormId
+    error (tableLookupMessage fid tid)
   PhaseOut base threshold rateE agi -> do
     baseVal <- evalConstExpr base
     thresholdVals <- evalStatusExpr threshold
@@ -645,7 +670,7 @@ evalStatusExpr = \case
 compileTable :: T.Table -> BracketTable
 compileTable = \case
   T.TableBracket _ bt -> compileBracketTable bt
-  T.TableLookup _ _ -> BracketTable (StatusBrackets [] [] [] [] [])
+  T.TableLookup tid _ -> error (lookupTableMessage tid)
 
 compileBracketTable :: T.BracketTable -> BracketTable
 compileBracketTable bt =
