@@ -22,7 +22,8 @@ Checklist for adding a new state form to the tenforty graph backend.
 
 6. **Add `StateGraphConfig` entry** in `src/tenforty/mappings.py`:
    - `natural_to_node`: maps natural input names to graph node names for state-specific inputs
-   - `output_lines`: maps graph output line names to result field names
+   - `outputs`: maps each public result field (`state_adjusted_gross_income`, `state_taxable_income`, `state_total_tax`) to the graph line that supplies it; every income-tax state declares all three, or the field would silently read as zero
+   - `outputs_by_year`: per-year overrides, for a concept whose line differs between form revisions
 
 7. **Add silver standard scenarios** to `tests/fixtures/scenarios.py` — formula-derived expected values from published state tax brackets. Include at least one 2025 scenario if rates change between years.
 
