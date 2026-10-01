@@ -834,10 +834,6 @@ def test_nc_state_agi_parity_2024(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $2,000 child deduction for MFJ; graph leaves child deduction as zero input",
-    strict=True,
-)
 @skip_if_backends_unavailable
 @given(
     w2_income=st.integers(0, 500_000),
@@ -845,26 +841,8 @@ def test_nc_state_agi_parity_2024(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_nc_state_tax_parity_2024(w2_income, filing_status):
-    """NC 2024 total tax differs because OTS auto-applies child deduction for MFJ."""
-    ots = evaluate_return(
-        year=2024,
-        state="NC",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="NC",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"NC tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+    """NC 2024 tax agrees except where OTS lets taxable income go negative."""
+    assert_state_parity("NC", 2024, filing_status, w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1467,10 +1445,6 @@ def test_nc_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies $2,000 child deduction for MFJ; graph leaves child deduction as zero input",
-    strict=True,
-)
 @skip_if_backends_unavailable
 @given(
     w2_income=st.integers(0, 500_000),
@@ -1478,26 +1452,8 @@ def test_nc_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_nc_state_tax_parity(w2_income, filing_status):
-    """NC total tax differs because OTS auto-applies child deduction for MFJ."""
-    ots = evaluate_return(
-        year=2025,
-        state="NC",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2025,
-        state="NC",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"NC tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+    """NC 2025 tax agrees except where OTS lets taxable income go negative."""
+    assert_state_parity("NC", 2025, filing_status, w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1809,6 +1765,24 @@ def test_parity_findings_are_unique_tracked_and_ots_ones_staged_and_witnessed():
             assert f'reason="{defect.finding_id}' in this_file, defect
         else:
             assert defect.tracking.startswith("tenforty-"), defect
+
+
+# Direct legal-value witnesses for the other OTS findings and their graph
+# counterparts: each asserts the figure the cited instruction gives.
+
+
+@pytest.mark.xfail(
+    reason="NC-OTS-NEGATIVE-TAX (upstream report 6): OTS multiplies negative NC "
+    "taxable income by the flat rate instead of entering zero on line 15",
+    strict=True,
+)
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_ots_nc_tax_is_zero_when_taxable_income_is_not_positive(year):
+    """NC Single, no wages: D-400 line 15 "If zero or less, enter a zero"."""
+    result = evaluate_return(
+        year=year, state="NC", filing_status="Single", w2_income=0, backend="ots"
+    )
+    assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
 
 
 # === AZ State Parity Tests (2024) ===

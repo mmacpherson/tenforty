@@ -294,3 +294,49 @@ would avoid coupling them to Form 1040 line 15.
 We have not patched the vendored source because this changes a computed tax
 figure. A strict-xfail records the defect until an upstream release carries a
 correction.
+
+---
+
+## 6. NC D-400 line 15 can go negative (finding NC-OTS-NEGATIVE-TAX)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_NC_D400_2024.c:341`
+- `src/taxsolve_NC_D400_2025.c:323`
+
+```c
+ L[12] = L[8] - L12a;
+
+ L[14] = L[13] * L[12];		 /* NC Taxable Income. */
+
+ L[15] = flat_tax_rate * L[14];	 /* NC Income Tax. */
+```
+
+The 2024 D-400 (web-fill version, https://www.ncdor.gov/2024-d-400-web-fill-version/open,
+p.1) reads, for line 15: "Multiply Line 14 by 4.5% (0.0450). If zero or less,
+enter a zero." The D-401 instructions say the same for 2024 and 2025
+(https://www.ncdor.gov/2024-d-401-individual-income-tax-instructions/open, p.14).
+As far as we can tell, the code above multiplies without that floor. A negative
+line 14 therefore produces a negative tax on line 15, which then carries to
+line 17.
+
+The negative line 14 itself appears to be intended. D-401 p.14 says: "If North
+Carolina taxable income is negative, enter the amount on Line 14 and fill in
+the circle." So we are only raising the line 15 tax.
+
+**Minimal reproducer:** 2024, Single, no income. OTS reports income tax of
+**-$573.75** (4.5% of -$12,750). Per line 15 we would have expected $0. The
+2025 release behaves the same way at 4.25% (-$541.88).
+
+**Possible fix:** floor line 15, e.g.
+`L[15] = NotLessThanZero( flat_tax_rate * L[14] );`.
+
+**Possibly related, noticed in passing (not verified against a return):** in the
+Single / Married-filing-separately branch of the child deduction table
+(`taxsolve_NC_D400_2024.c:323`, `taxsolve_NC_D400_2025.c:305`), the fourth row
+reads `if (L[6] <= 500000.0)`. Next to the neighbouring 40,000 and 60,000 rows,
+it looks like it may have been meant as 50,000.
+
+We have not patched the vendored source, because this changes a computed tax
+figure. A strict-xfail legal-value witness and a bounded parity signature
+(`tests/parity/`) record it until an upstream release carries a correction.

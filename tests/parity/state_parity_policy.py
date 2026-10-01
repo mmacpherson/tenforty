@@ -207,6 +207,74 @@ def _ca24_stepped_exemption_phaseout(case: dict) -> DeltaModel:
     return {"state_total_tax": DeltaRange(-widest_gap, 0.0)}
 
 
+# --- North Carolina Form D-400 (2024, 2025) ----------------------------------
+# NCDOR Form D-401 instructions, 2024
+# (https://www.ncdor.gov/2024-d-401-individual-income-tax-instructions/open)
+# and 2025 (https://www.ncdor.gov/2025-d-401-individual-income-tax-instructions/open):
+# standard deduction chart (p.14 both years), flat rate 4.5% / 4.25% (line 15,
+# p.14). Line 14 "If North Carolina taxable income is negative, enter the amount
+# on Line 14 and fill in the circle"; line 15 "If North Carolina taxable income
+# is zero or less, enter a zero on Line 15" (p.14 both years).
+
+NC_STANDARD_DEDUCTION = {
+    "Single": 12_750.0,
+    "Married/Sep": 12_750.0,
+    "Head_of_House": 19_125.0,
+    "Married/Joint": 25_500.0,
+    "Widow(er)": 25_500.0,
+}
+NC_FLAT_RATE = {2024: 0.045, 2025: 0.0425}
+
+
+def _nc_shortfall(case: dict) -> float:
+    if case["state"] != "NC" or case["year"] not in NC_FLAT_RATE:
+        return 0.0
+    return max(0.0, NC_STANDARD_DEDUCTION[case["status"]] - case["w2"])
+
+
+def _nc_ots_negative_tax(case: dict) -> DeltaModel:
+    """OTS carries negative NC taxable income into a negative line 15 tax.
+
+    D-400 line 15 (2024 web-fill version p.1): "Multiply Line 14 by 4.5%
+    (0.0450). If zero or less, enter a zero." D-401 p.14 says the same for both
+    years. OTS computes
+    ``L[15] = flat_tax_rate * L[14]`` with no floor (ots_amalgamation.cpp:81698
+    for 2024, :101295 for 2025), so a negative line 14 yields a negative tax.
+    The graph floors taxable income and so taxes it at $0. OTS departs from the
+    form; upstream report 6.
+
+    Bound: OTS's tax is the flat rate times its negative taxable income, which
+    is below zero by exactly the shortfall of AGI under the standard deduction;
+    the graph's is $0. The graph is higher by the flat rate times the shortfall.
+    """
+    shortfall = _nc_shortfall(case)
+    if shortfall == 0.0:
+        return {}
+    return {"state_total_tax": DeltaRange.exact(NC_FLAT_RATE[case["year"]] * shortfall)}
+
+
+def _nc_taxable_income_representation(case: dict) -> DeltaModel:
+    """Model the graph reporting NC taxable income floored where the form is negative.
+
+    Not a defect of either engine's tax. D-400 line 12b is "Subtract Line 12a
+    from Line 8" and line 14 is "the amount from Line 12b" (2024 D-400 web-fill
+    version, https://www.ncdor.gov/2024-d-400-web-fill-version/open, p.1), and
+    D-401 p.14 says a negative line 14 is entered with its circle filled. OTS
+    reports that negative amount (ots_amalgamation.cpp:81694, :101291); the graph
+    spec floors its taxable income node at zero
+    (tenforty-spec/forms/NCFormD400_2024.hs:44, NCFormD400_2025.hs:44). Which
+    the graph should report is a question about our output concept (tenforty-r91.7),
+    left unchanged.
+
+    Bound: OTS's taxable income is negative by exactly the shortfall of AGI
+    under the standard deduction; the graph's is $0.
+    """
+    shortfall = _nc_shortfall(case)
+    if shortfall == 0.0:
+        return {}
+    return {"state_taxable_income": DeltaRange.exact(shortfall)}
+
+
 SIGNATURES = [
     KnownParityDefect(
         "CA-EXEMPTION-STEP",
@@ -215,6 +283,20 @@ SIGNATURES = [
         _ca24_stepped_exemption_phaseout,
         # $1 over the threshold: Form 540 takes a full $6 step, the graph $0.0024.
         {"state": "CA", "year": 2024, "status": "Single", "w2": 244_858},
+    ),
+    KnownParityDefect(
+        "NC-OTS-NEGATIVE-TAX",
+        "ots",
+        "upstream report 6",
+        _nc_ots_negative_tax,
+        {"state": "NC", "year": 2024, "status": "Single", "w2": 0},
+    ),
+    KnownParityDefect(
+        "NC-TI-REPRESENTATION",
+        "representation",
+        "tenforty-r91.7",
+        _nc_taxable_income_representation,
+        {"state": "NC", "year": 2024, "status": "Single", "w2": 0},
     ),
 ]
 
