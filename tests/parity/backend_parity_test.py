@@ -707,10 +707,6 @@ def test_ny_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS auto-applies household credit at low income; graph lacks supplemental tax at high income",
-    strict=True,
-)
 @skip_if_backends_unavailable
 @given(
     w2_income=st.integers(0, 500_000),
@@ -718,26 +714,8 @@ def test_ny_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=200)
 def test_ny_state_tax_parity(w2_income, filing_status):
-    """NY total tax differs due to household credit and missing supplemental tax."""
-    ots = evaluate_return(
-        year=2024,
-        state="NY",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="NY",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"NY tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+    """NY 2024 tax agrees up to the tax table, household credit and tax benefit recapture."""
+    assert_state_parity("NY", 2024, filing_status, w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1783,6 +1761,50 @@ def test_ots_nc_tax_is_zero_when_taxable_income_is_not_positive(year):
         year=year, state="NC", filing_status="Single", w2_income=0, backend="ots"
     )
     assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
+
+
+@pytest.mark.xfail(
+    reason="NY-OTS-TABLE-ABOVE-65K (upstream report 8): OTS prices taxable "
+    "income of $65,000 or more from the $50 tax table",
+    strict=True,
+)
+def test_ots_ny_uses_the_rate_schedule_from_65000():
+    """NY 2024 Single, $89,000 wages: line 38 is $81,000, so the rate schedule.
+
+    IT-201-I p.33: $4,271 plus 6% of the excess over $80,650 = $4,292. No
+    household credit at this income, so line 46 is $4,292.
+    """
+    result = evaluate_return(
+        year=2024, state="NY", filing_status="Single", w2_income=89_000, backend="ots"
+    )
+    assert result.state_total_tax == pytest.approx(4_292.0, abs=0.5)
+
+
+# OTS mapping defects (ours). Each asserts the form's figure on the OTS backend,
+# computed by hand from the cited instructions, and xfails until src/tenforty
+# passes OTS what it needs. When one flips, return the excluded filing status
+# to the state's parity strategy above.
+
+
+@pytest.mark.xfail(
+    reason="MAP-NY-EXEMPTIONS (tenforty-r91.5): the NY_IT201 input map never sets OTS's Exemptions, "
+    "which its household credit formula reads as household size",
+    strict=True,
+)
+def test_ots_ny_married_joint_household_credit_counts_both_spouses():
+    """NY 2024 MFJ, $30,000 wages: Table 2 two-exemption column gives a $25 credit.
+
+    Taxable income is $13,950; the tax table prices its $13,950-$14,000 row at
+    4% of $13,975 = $559, so line 46 is $559 - $25 = $534.
+    """
+    result = evaluate_return(
+        year=2024,
+        state="NY",
+        filing_status="Married/Joint",
+        w2_income=30_000,
+        backend="ots",
+    )
+    assert result.state_total_tax == pytest.approx(534.0, abs=1.0)
 
 
 # === AZ State Parity Tests (2024) ===

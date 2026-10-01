@@ -275,6 +275,184 @@ def _nc_taxable_income_representation(case: dict) -> DeltaModel:
     return {"state_taxable_income": DeltaRange.exact(shortfall)}
 
 
+# --- New York Form IT-201 (2024) ---------------------------------------------
+# NYS 2024 IT-201-I (https://www.tax.ny.gov/pdf/2024/inc/it201i_2024.pdf; PDF
+# pages): standard deduction $8,000 / $16,050 (p.11); household credit tables
+# 1 and 2 and the line 39 rule -- tax table only for line 38 under $65,000
+# (p.12); NYS tax rate schedule (p.33); tax computation worksheets (pp.34-39).
+# Single and Married/Joint only.
+
+NY_2024_STANDARD_DEDUCTION = {"Single": 8_000.0, "Married/Joint": 16_050.0}
+NY_2024_SCHEDULE = {
+    "Single": (
+        (0.0, 0.04),
+        (8_500.0, 0.045),
+        (11_700.0, 0.0525),
+        (13_900.0, 0.055),
+        (80_650.0, 0.06),
+        (215_400.0, 0.0685),
+        (1_077_550.0, 0.0965),
+        (5_000_000.0, 0.103),
+        (25_000_000.0, 0.109),
+    ),
+    "Married/Joint": (
+        (0.0, 0.04),
+        (17_150.0, 0.045),
+        (23_600.0, 0.0525),
+        (27_900.0, 0.055),
+        (161_550.0, 0.06),
+        (323_200.0, 0.0685),
+        (2_155_350.0, 0.0965),
+        (5_000_000.0, 0.103),
+        (25_000_000.0, 0.109),
+    ),
+}
+NY_RECAPTURE_AGI_FLOOR = 107_650.0
+NY_TAX_TABLE_CEILING = 65_000.0
+NY_TAX_TABLE_HALF_ROW = 25.0
+# The published schedule rounds its bracket base amounts to the dollar (e.g.
+# $600 against an exact $599.50); the graph sums the brackets exactly.
+NY_SCHEDULE_BASE_ROUNDING = 0.5
+# Worksheet 7 (Single) and worksheet 1 (Married/Joint) recapture toward a flat
+# 6% and 5.5% of taxable income respectively.
+NY_FIRST_WORKSHEET_RATE = {"Single": 0.06, "Married/Joint": 0.055}
+# Household credit by federal AGI, "over ... but not over" each row ceiling.
+# Single is Table 1; Married/Joint is Table 2's two-exemption column (you and
+# your spouse, no dependents).
+NY_2024_HOUSEHOLD_CREDIT = {
+    "Single": (
+        (5_000.0, 75.0),
+        (6_000.0, 60.0),
+        (7_000.0, 50.0),
+        (20_000.0, 45.0),
+        (25_000.0, 40.0),
+        (28_000.0, 20.0),
+    ),
+    "Married/Joint": (
+        (5_000.0, 105.0),
+        (6_000.0, 90.0),
+        (7_000.0, 80.0),
+        (20_000.0, 75.0),
+        (22_000.0, 70.0),
+        (25_000.0, 60.0),
+        (28_000.0, 45.0),
+        (32_000.0, 25.0),
+    ),
+}
+
+
+def _ny_case(case: dict) -> bool:
+    return (
+        case["state"] == "NY"
+        and case["year"] == 2024
+        and case["status"] in NY_2024_SCHEDULE
+    )
+
+
+def _ny_taxable_income(case: dict) -> float:
+    return max(0.0, case["w2"] - NY_2024_STANDARD_DEDUCTION[case["status"]])
+
+
+def _ny_table_half_width(case: dict) -> float:
+    return (
+        _table_half_width(
+            NY_2024_SCHEDULE[case["status"]],
+            _ny_taxable_income(case),
+            NY_TAX_TABLE_HALF_ROW,
+        )
+        + NY_SCHEDULE_BASE_ROUNDING
+    )
+
+
+def _ny_table_tolerance(case: dict) -> float:
+    """IT-201 line 39: line 33 at most $107,650 and line 38 under $65,000.
+
+    There the tax comes from the NYS tax table, $50 rows priced at their
+    midpoint and rounded to the dollar; OTS emulates it (``TaxRateLookup``,
+    ots_amalgamation.cpp:82459).
+    """
+    if case["w2"] > NY_RECAPTURE_AGI_FLOOR:
+        return 0.0
+    if _ny_taxable_income(case) >= NY_TAX_TABLE_CEILING:
+        return 0.0
+    return _ny_table_half_width(case)
+
+
+def _ny24_household_credit(case: dict) -> DeltaModel:
+    """Graph omits the NYS household credit that OTS computes.
+
+    IT-201 line 40 is the household credit from Tables 1-3, a function of
+    filing status, federal AGI and household size. The graph spec takes it as a
+    zero-default input (tenforty-spec/forms/NYIT201_2024.hs:79); OTS computes
+    it (ots_amalgamation.cpp:83389-83418). The graph departs from the form
+    (tenforty-b72.25).
+
+    Bound: graph tax is higher by the credit OTS applies, limited to the tax,
+    so the delta lies in [0, credit], capped at the form's credit for the case
+    (the higher row at an exact row ceiling). OTS's Married/Joint credit is a
+    column short of the form's -- our NY input map never sets OTS's
+    ``Exemptions`` (MAP-NY-EXEMPTIONS, tenforty-r91.5) -- which keeps it inside the bound.
+    """
+    if not _ny_case(case):
+        return {}
+    for ceiling, credit in NY_2024_HOUSEHOLD_CREDIT[case["status"]]:
+        if case["w2"] <= ceiling:
+            return {"state_total_tax": DeltaRange(0.0, credit)}
+    return {}
+
+
+def _ny24_ots_table_above_ceiling(case: dict) -> DeltaModel:
+    """OTS keeps the tax table up to $107,650 of AGI; the form stops at $65,000.
+
+    IT-201 line 39 sends taxable income of $65,000 or more to the NYS tax rate
+    schedule. OTS calls ``TaxRateLookup`` whenever line 33 is at most $107,650
+    (ots_amalgamation.cpp:83375-83376), so taxable income from $65,000 up to
+    that AGI still gets $50-row midpoint pricing and whole-dollar rounding. OTS
+    departs from the form; upstream report 8.
+
+    Bound: as for the table -- the marginal rate across the $25 half-row, plus
+    $0.50 rounding and the schedule's rounded base amounts.
+    """
+    if not _ny_case(case) or case["w2"] > NY_RECAPTURE_AGI_FLOOR:
+        return {}
+    if _ny_taxable_income(case) < NY_TAX_TABLE_CEILING:
+        return {}
+    half_width = _ny_table_half_width(case)
+    return {"state_total_tax": DeltaRange(-half_width, half_width)}
+
+
+def _ny24_tax_benefit_recapture(case: dict) -> DeltaModel:
+    """Graph omits the tax benefit recapture of the IT-201 worksheets.
+
+    Above $107,650 of NY AGI, line 39 comes from the tax computation
+    worksheets, which phase out the benefit of the lower brackets over $50,000
+    of AGI until all of taxable income bears a flat rate. OTS implements them
+    (ots_amalgamation.cpp:82518-82658, chosen at :82791); the graph spec applies
+    the brackets alone (NYIT201_2024.hs:76). The graph departs from the form
+    (tenforty-b72.4).
+
+    Bound: the recapture is never negative and never exceeds its fully
+    phased-in amount -- the flat rate on all of taxable income less the bracket
+    sum, the flat rate being the first worksheet's rate or the marginal rate,
+    whichever is higher. The graph is lower by that recapture, give or take the
+    schedule's rounded base amounts.
+    """
+    if not _ny_case(case) or case["w2"] <= NY_RECAPTURE_AGI_FLOOR:
+        return {}
+    status = case["status"]
+    taxable_income = _ny_taxable_income(case)
+    schedule = NY_2024_SCHEDULE[status]
+    flat_rate = max(
+        NY_FIRST_WORKSHEET_RATE[status], _marginal_rate(schedule, taxable_income)
+    )
+    full_recapture = flat_rate * taxable_income - _bracket_tax(schedule, taxable_income)
+    return {
+        "state_total_tax": DeltaRange(
+            -full_recapture - NY_SCHEDULE_BASE_ROUNDING, NY_SCHEDULE_BASE_ROUNDING
+        )
+    }
+
+
 SIGNATURES = [
     KnownParityDefect(
         "CA-EXEMPTION-STEP",
@@ -298,6 +476,29 @@ SIGNATURES = [
         _nc_taxable_income_representation,
         {"state": "NC", "year": 2024, "status": "Single", "w2": 0},
     ),
+    KnownParityDefect(
+        "NY-HOUSEHOLD-CREDIT",
+        "graph",
+        "tenforty-b72.25",
+        _ny24_household_credit,
+        # Table 1's $45 row; taxable income $1,000 keeps the tax below it.
+        {"state": "NY", "year": 2024, "status": "Single", "w2": 9_000},
+    ),
+    KnownParityDefect(
+        "NY-OTS-TABLE-ABOVE-65K",
+        "ots",
+        "upstream report 8",
+        _ny24_ots_table_above_ceiling,
+        # Taxable income $81,000 prices at its $81,025 row midpoint at 6%.
+        {"state": "NY", "year": 2024, "status": "Single", "w2": 89_000},
+    ),
+    KnownParityDefect(
+        "NY-RECAPTURE",
+        "graph",
+        "tenforty-b72.4",
+        _ny24_tax_benefit_recapture,
+        {"state": "NY", "year": 2024, "status": "Single", "w2": 300_000},
+    ),
 ]
 
 
@@ -318,6 +519,7 @@ def modeled_parity_deltas(
 
 _TABLE_TOLERANCE = {
     "CA": (_ca_case, _ca_table_tolerance),
+    "NY": (_ny_case, _ny_table_tolerance),
 }
 
 

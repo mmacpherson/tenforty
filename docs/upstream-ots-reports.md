@@ -340,3 +340,61 @@ it looks like it may have been meant as 50,000.
 We have not patched the vendored source, because this changes a computed tax
 figure. A strict-xfail legal-value witness and a bounded parity signature
 (`tests/parity/`) record it until an upstream release carries a correction.
+
+---
+
+## 8. NY IT-201 line 39 keeps the tax table above $65,000 of taxable income (finding NY-OTS-TABLE-ABOVE-65K)
+
+**Releases:** OpenTaxSolver2024_22.06 (the same code is in OpenTaxSolver2025_23.06)
+**Files:**
+- `src/taxsolve_NY_IT201_2024.c:1525`
+- `src/taxsolve_NY_IT201_2025.c:1524`
+
+```c
+ if (L[33] <= 107650.0)
+   L[39] = TaxRateLookup( L[38], status );
+ else
+   tax_computation_worksheet( status );
+```
+
+As we read the 2024 IT-201-I line 39 instructions:
+- If line 33 is $107,650 or less and line 38 is **less than $65,000**, the NYS
+  tax table applies.
+- If line 38 is $65,000 or more, the NYS tax rate schedule applies.
+
+`TaxRateLookup` prices taxable income at the midpoint of a $50 row and rounds
+to the dollar. Under the condition above it is also used for taxable income
+between $65,000 and $107,650, where the schedule would apply to the exact
+amount.
+
+**Effect:** small, at most about $2. Example: 2024 Single, $89,000 wages,
+taxable income $81,000. The schedule gives $4,271 + 6% x $350 = $4,292.00,
+while OTS reports $4,294 (6% of $81,025, rounded).
+
+**Possible fix:** call `TaxRateLookup` only when `L[38] < 65000.0` and use
+`TaxRateFunction` otherwise, inside the `L[33] <= 107650.0` branch.
+
+Not patched locally, for the same reason as report 6.
+
+---
+
+## 9. NY IT-201: three possible typos outside our parity tests (not yet burned in)
+
+**Releases:** OpenTaxSolver2024_22.06 and OpenTaxSolver2025_23.06
+
+We noticed these while tracing report 8. None falls within the Single and
+Married-filing-jointly W-2 cases our parity suite samples, so we have not
+reproduced them end to end. We offer them tentatively.
+
+- **Head of Household, first bracket ceiling.** `TaxRateFunction` reads
+  `if (income <= 12080.0)` (`taxsolve_NY_IT201_2024.c:548`,
+  `taxsolve_NY_IT201_2025.c:524`), but the next line computes
+  `512.0 + 0.045 * (income - 12800.0)`, and `Report_bracket_info` uses 12800. It
+  looks like a transposition of 12,800. For taxable income from $12,080 to
+  $12,800 the tax would come out up to about $3.60 low.
+- **Worksheet 11 rate.** `ws[2] = 0.0109 * ws[1];` (`taxsolve_NY_IT201_2024.c:852`)
+  seems to intend 10.9%, i.e. 0.109. It only applies above $25,000,000 of AGI.
+- **Worksheet 10 guard.** Single / MFS worksheet 10 is selected on
+  `L[38] <= 5000000`. We may be misreading it, but `>` would seem to be the
+  intended test. As written, taxable income over $5,000,000 appears to fall
+  through to "AGI Case not handled".
