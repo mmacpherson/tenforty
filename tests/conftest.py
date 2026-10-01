@@ -16,10 +16,49 @@ def pytest_configure(config):
     )
 
 
+def pytest_addoption(parser):
+    """Expose the graph-required CI mode."""
+    parser.addoption(
+        "--require-graph",
+        action="store_true",
+        help="fail if the graph backend cannot evaluate or no graph tests are collected",
+    )
+
+
+def pytest_sessionstart(session):
+    """Ensure the optional native extension actually evaluates a fresh graph."""
+    if not session.config.getoption("--require-graph"):
+        return
+
+    from tenforty import evaluate_return
+    from tenforty.backends import GraphBackend
+
+    if not GraphBackend().is_available():
+        raise pytest.UsageError("--require-graph: graph backend is unavailable")
+
+    try:
+        for year in GraphBackend.supported_years:
+            evaluate_return(year=year, w2_income=100_000, backend="graph")
+    except Exception as exc:
+        raise pytest.UsageError(
+            f"--require-graph: graph backend cannot evaluate: {exc}"
+        ) from exc
+
+
+def pytest_collection_finish(session):
+    """Reject a graph-required run that collected no graph-marked tests."""
+    if session.config.getoption("--require-graph") and not any(
+        item.get_closest_marker("requires_graph") for item in session.items
+    ):
+        raise pytest.UsageError("--require-graph: no requires_graph tests collected")
+
+
 def pytest_runtest_setup(item):
     """Skip tests marked with requires_graph if graphlib is not available."""
     if any(item.iter_markers(name="requires_graph")):
         if not graph_backend_available():
+            if item.config.getoption("--require-graph"):
+                pytest.fail("--require-graph: graphlib backend became unavailable")
             pytest.skip("graphlib backend not available (Rust extension not built)")
 
 

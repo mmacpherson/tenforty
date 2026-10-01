@@ -1,0 +1,28 @@
+name: graph Python
+
+on: push
+
+jobs:
+  graph-python:
+    name: graph Python (evaluation · tests)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Build both native backends
+      run: |
+        uv venv --python 3.12
+        make env-full
+
+    - name: Run full Python suite with graph required
+      run: uv run pytest tests/ -q --tb=line --hypothesis-profile=ci --require-graph
