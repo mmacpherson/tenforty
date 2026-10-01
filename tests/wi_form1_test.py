@@ -45,21 +45,27 @@ def _bracket_tax(
 # taxable income of $28,653 and read the $28,600-28,700 Tax Table row.
 # https://www.revenue.wi.gov/TaxForms2024/2024-Form1-Inst.pdf p. 38 -> $1,089
 # https://www.revenue.wi.gov/TaxForms2025/2025-Form1-Inst.pdf p. 38 -> $1,084
-# Retrieved 2026-09-30; worked-example; derived blind, session 1b251ce6.
+# Retrieved 2026-09-30; published worked example, transcribed in session 1b251ce6.
+# The $28,650 midpoint is an independently selected input, not the Smiths' input.
+# Full source record: docs/validation/state-fixtures/WI-2024-2025.md.
 SMITHS_TAXABLE_INCOME = 28653.0
 SMITHS_ROW_MIDPOINT = 28650.0
 SMITHS_TAX = {2024: 1089.0, 2025: 1084.0}
 
 
 @pytest.mark.requires_graph
-@pytest.mark.parametrize("year", sorted(SMITHS_TAX))
-def test_worked_example_row_is_the_schedule_at_its_midpoint(year):
+@pytest.mark.parametrize(
+    "year", sorted(SMITHS_TAX), ids=lambda year: f"independent-derivation-{year}"
+)
+def test_independent_midpoint_matches_published_table_row(year):
     """The official Tax Table row is the rate schedule at the row midpoint, rounded."""
     assert round(_bracket_tax(year, SMITHS_ROW_MIDPOINT)) == SMITHS_TAX[year]
 
 
 @pytest.mark.requires_graph
-@pytest.mark.parametrize("year", sorted(SMITHS_TAX))
+@pytest.mark.parametrize(
+    "year", sorted(SMITHS_TAX), ids=lambda year: f"published-worked-example-{year}"
+)
 def test_worked_example_exact_tax_is_within_the_table_row(year):
     """Exact tax at TI $28,653 differs from the row only by the $100-band effect."""
     half_row_at_marginal_rate = 50.0 * 0.044
@@ -97,7 +103,9 @@ MFS_2024_EDGES = [(9550.0, 334.25, 0.035, 0.044), (19090.0, 754.01, 0.044, 0.053
 
 @pytest.mark.requires_graph
 @pytest.mark.parametrize(
-    ("edge", "tax_at_edge", "rate_below", "rate_above"), MFS_2024_EDGES
+    ("edge", "tax_at_edge", "rate_below", "rate_above"),
+    MFS_2024_EDGES,
+    ids=["published-table-row-MFS-9550", "published-table-row-MFS-19090"],
 )
 def test_2024_mfs_bracket_edges(edge, tax_at_edge, rate_below, rate_above):
     """The 2024 MFS rate changes exactly at the published $9,550 and $19,090."""
