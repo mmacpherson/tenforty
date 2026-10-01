@@ -8,9 +8,15 @@ from hypothesis import HealthCheck, settings
 
 from .fixtures.helpers import graph_backend_available
 
+_graph_passes = 0
+_graph_skips = 0
+
 
 def pytest_configure(config):
     """Register custom markers."""
+    global _graph_passes, _graph_skips
+    _graph_passes = 0
+    _graph_skips = 0
     config.addinivalue_line(
         "markers", "requires_graph: mark test as requiring graph backend extension"
     )
@@ -21,7 +27,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--require-graph",
         action="store_true",
-        help="fail if the graph backend cannot evaluate or no graph tests are collected",
+        help="fail if the graph backend cannot evaluate or no graph tests pass",
     )
 
 
@@ -45,14 +51,6 @@ def pytest_sessionstart(session):
         ) from exc
 
 
-def pytest_collection_finish(session):
-    """Reject a graph-required run that collected no graph-marked tests."""
-    if session.config.getoption("--require-graph") and not any(
-        item.get_closest_marker("requires_graph") for item in session.items
-    ):
-        raise pytest.UsageError("--require-graph: no requires_graph tests collected")
-
-
 def pytest_runtest_setup(item):
     """Skip tests marked with requires_graph if graphlib is not available."""
     if any(item.iter_markers(name="requires_graph")):
@@ -60,6 +58,31 @@ def pytest_runtest_setup(item):
             if item.config.getoption("--require-graph"):
                 pytest.fail("--require-graph: graphlib backend became unavailable")
             pytest.skip("graphlib backend not available (Rust extension not built)")
+
+
+def pytest_runtest_logreport(report):
+    """Track graph-marked passes and skips, including xdist worker reports."""
+    global _graph_passes, _graph_skips
+    if "requires_graph" in report.keywords:
+        if report.when == "call" and report.passed:
+            _graph_passes += 1
+        elif report.skipped and not hasattr(report, "wasxfail"):
+            _graph_skips += 1
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Do not let an all-skipped graph suite pass."""
+    if session.config.getoption("--require-graph") and not hasattr(
+        session.config, "workerinput"
+    ):
+        if exitstatus == pytest.ExitCode.OK and (_graph_passes == 0 or _graph_skips):
+            session.exitstatus = pytest.ExitCode.TESTS_FAILED
+            reporter = session.config.pluginmanager.get_plugin("terminalreporter")
+            if reporter is not None:
+                reporter.write_line(
+                    f"--require-graph: graph-marked passed={_graph_passes}, "
+                    f"skipped={_graph_skips}"
+                )
 
 
 settings.register_profile(
