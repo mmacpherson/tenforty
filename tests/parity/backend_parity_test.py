@@ -1,10 +1,16 @@
 """Property-based parity testing between OTS and Graph backends."""
 
+from pathlib import Path
+
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from tenforty import evaluate_return
+from tests.parity.state_parity_policy import (
+    SIGNATURES,
+    unexcused_parity_violations,
+)
 
 EXACT_TOLERANCE = 1.0
 ACCEPTABLE_TOLERANCE = 10.0
@@ -47,6 +53,13 @@ skip_if_graph_unavailable = pytest.mark.skipif(
     not graph_available(),
     reason="Graph backend required for this test",
 )
+
+
+def assert_state_parity(state, year, filing_status, w2_income):
+    """Fail on any state divergence no known-defect signature or tolerance explains."""
+    case = {"state": state, "year": year, "status": filing_status, "w2": w2_income}
+    violations = unexcused_parity_violations(case)
+    assert not violations, "\n".join(violations)
 
 
 @skip_if_backends_unavailable
@@ -1767,6 +1780,63 @@ def test_or_state_tax_parity(w2_income, filing_status):
     assert tax_diff <= EXACT_TOLERANCE, (
         f"OR tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
     )
+
+
+# === Known state-parity defects (tests/parity/state_parity_policy.py) ===
+
+
+@skip_if_backends_unavailable
+@pytest.mark.parametrize(
+    "defect",
+    [
+        pytest.param(
+            defect,
+            id=defect.finding_id,
+            marks=pytest.mark.xfail(
+                reason=(
+                    f"{defect.finding_id} ({defect.tracking}): "
+                    f"{defect.signature.__doc__.splitlines()[0]}"
+                ),
+                strict=True,
+            ),
+        )
+        for defect in SIGNATURES
+    ],
+)
+def test_known_parity_defect_still_present(defect):
+    """Burn-in: the witness agrees with its signature withdrawn only once the defect is fixed."""
+    assert not unexcused_parity_violations(defect.witness, exclude=defect.finding_id)
+
+
+@skip_if_backends_unavailable
+@pytest.mark.parametrize("defect", SIGNATURES, ids=lambda defect: defect.finding_id)
+def test_parity_witness_is_explained_by_its_signatures(defect):
+    """Each witness activates its own signature and is fully explained with it."""
+    assert defect.signature(defect.witness)
+    assert not unexcused_parity_violations(defect.witness)
+
+
+def test_parity_findings_are_unique_tracked_and_ots_ones_staged_and_witnessed():
+    """Name each finding once, track it, and stage and witness every OTS one.
+
+    An OTS finding needs a staged upstream report naming it and a strict-xfail
+    legal-value witness of its own in this file.
+    """
+    finding_ids = [defect.finding_id for defect in SIGNATURES]
+    assert len(finding_ids) == len(set(finding_ids))
+    reports = (
+        Path(__file__).parents[2] / "docs" / "upstream-ots-reports.md"
+    ).read_text()
+    this_file = Path(__file__).read_text()
+    for defect in SIGNATURES:
+        if defect.side == "ots":
+            number = defect.tracking.removeprefix("upstream report ")
+            assert number.isdigit(), defect
+            assert f"## {number}. " in reports, defect
+            assert defect.finding_id in reports, defect
+            assert f'reason="{defect.finding_id}' in this_file, defect
+        else:
+            assert defect.tracking.startswith("tenforty-"), defect
 
 
 # === AZ State Parity Tests (2024) ===
