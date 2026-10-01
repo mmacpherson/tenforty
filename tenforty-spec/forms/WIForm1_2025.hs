@@ -47,9 +47,23 @@ wiForm1_2025 = form "wi_form1" 2025 $ do
   -- Line 23: Wisconsin itemized deductions or standard deduction (whichever is greater)
   itemized <- keyInput "L23_itemized" "wi_itemized" "Wisconsin itemized deductions (from Schedule 2WD)"
 
-  -- Wisconsin standard deduction uses a sliding scale (from standard deduction table)
-  -- Complex sliding-scale formula based on WAGI - accepted as input for graph backend
-  stdDed <- keyInput "StdDed" "wi_std_deduction" "Wisconsin standard deduction (from table)"
+  -- Sliding-scale standard deduction, Wis. Stat. 71.05(22)(dp), on Wisconsin income.
+  -- Head of household never falls below the Single amount at the same income.
+  let slidingScale status =
+        lit (forStatus wiStandardDeductionMax2025 status)
+          `subtractNotBelowZero` ( (l22 `subtractNotBelowZero` lit (forStatus wiStandardDeductionPhaseoutStart2025 status))
+                                     .*. lit (forStatus wiStandardDeductionPhaseoutRate2025 status)
+                                 )
+      notBelowSingle status = greaterOf (slidingScale status) (slidingScale Single)
+  stdDed <-
+    interior "StdDed" "wi_std_deduction" $
+      byStatusE $
+        byStatus
+          (slidingScale Single)
+          (slidingScale MarriedJoint)
+          (slidingScale MarriedSeparate)
+          (notBelowSingle HeadOfHousehold)
+          (notBelowSingle QualifyingWidow)
 
   l23 <- interior "L23" "deduction" $ greaterOf itemized stdDed
 
@@ -58,10 +72,14 @@ wiForm1_2025 = form "wi_form1" 2025 $ do
     interior "L27" "wi_agi_minus_deduction" $
       l22 `subtractNotBelowZero` l23
 
-  -- Line 38: Total exemptions
-  -- Wisconsin allows $700 per taxpayer/spouse/dependent plus $250 for age 65+
-  -- Since we cannot automatically compute counts, we accept total exemptions as input
-  l38 <- keyInput "L38" "total_exemptions" "Total Wisconsin exemptions"
+  -- Line 38: Total exemptions, Wis. Stat. 71.05(23)(b): $700 for the filer (and
+  -- spouse on a joint return) plus $700 per dependent. The $250 age-65 exemption
+  -- is not applied because there is no age input.
+  numDependents <- keyInput "L38_dependents" "num_dependents" "Number of dependents"
+  l38 <-
+    interior "L38" "total_exemptions" $
+      byStatusE (fmap lit wiFilerExemptions2025)
+        .+. (numDependents .*. rate (unAmount wiDependentExemption2025))
 
   -- Line 39: Wisconsin taxable income
   l39 <-

@@ -16,8 +16,8 @@ from ..mappings import (
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
     STATE_NATURAL_TO_NODE,
-    STATE_OUTPUT_LINES,
     derived_chain_factor,
+    state_output_lines,
 )
 from ..models import (
     STATE_TO_FORM,
@@ -91,17 +91,18 @@ def _state_output_node(form_name: str, line_name: str) -> str:
     return f"{form_name}_{line_name}"
 
 
-def _state_output_node_for_field(state: OTSState, field: str) -> str:
+def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
     """Resolve a public state output field to its selected state's graph node."""
     form_name = STATE_FORM_NAMES.get(state)
     if form_name is None:
         raise ValueError(f"Graph backend does not support state: {state.value}")
 
-    for line_name, result_field in STATE_OUTPUT_LINES.get(state, {}).items():
-        if result_field == field:
-            return _state_output_node(form_name, line_name)
-
-    raise ValueError(f"State {state.value} does not provide output field {field!r}")
+    line_name = state_output_lines(state, year).get(field)
+    if line_name is None:
+        raise ValueError(
+            f"State {state.value} does not provide output field {field!r} for {year}"
+        )
+    return _state_output_node(form_name, line_name)
 
 
 def _federal_effective_tax_rate(total_tax: float, agi: float) -> float:
@@ -252,7 +253,9 @@ class GraphBackend:
             result[field] = 0.0
 
         if tax_input.state and tax_input.state != OTSState.NONE:
-            state_result = self._evaluate_state(evaluator, tax_input.state)
+            state_result = self._evaluate_state(
+                evaluator, tax_input.state, tax_input.year.value
+            )
             result.update(state_result)
             result["total_tax"] = result["federal_total_tax"] + result.get(
                 "state_total_tax", 0.0
@@ -378,7 +381,7 @@ class GraphBackend:
         if state and state != OTSState.NONE:
             state_form = STATE_FORM_NAMES.get(state)
             if state_form:
-                for line, key in STATE_OUTPUT_LINES.get(state, {}).items():
+                for key, line in state_output_lines(state, year).items():
                     output_pairs.append((_state_output_node(state_form, line), key))
 
         requested_nodes = list(dict.fromkeys(node for node, _ in output_pairs))
@@ -464,21 +467,18 @@ class GraphBackend:
 
         return final_results
 
-    def _evaluate_state(self, evaluator, state: OTSState) -> dict[str, float] | None:
+    def _evaluate_state(
+        self, evaluator, state: OTSState, year: int
+    ) -> dict[str, float] | None:
         """Evaluate state outputs from linked graph."""
         if state not in STATE_FORM_NAMES:
             raise ValueError(f"Graph backend does not support state: {state.value}")
 
         form_name = STATE_FORM_NAMES[state]
-        result = {}
-        output_map = STATE_OUTPUT_LINES.get(state, {})
-
-        for line_name, result_key in output_map.items():
-            result[result_key] = evaluator.eval(
-                _state_output_node(form_name, line_name)
-            )
-
-        return result
+        return {
+            result_key: evaluator.eval(_state_output_node(form_name, line_name))
+            for result_key, line_name in state_output_lines(state, year).items()
+        }
 
     def _resolve_input_node(
         self, tax_input: TaxReturnInput, var: str, output_node: str | None = None
@@ -578,7 +578,9 @@ class GraphBackend:
             nodes = [_FEDERAL_FIELD_TO_NODE["federal_total_tax"]]
             if has_state:
                 nodes.append(
-                    _state_output_node_for_field(tax_input.state, "state_total_tax")
+                    _state_output_node_for_field(
+                        tax_input.state, "state_total_tax", tax_input.year.value
+                    )
                 )
             return nodes
 
@@ -589,7 +591,11 @@ class GraphBackend:
         if output.startswith("state_"):
             if not has_state:
                 raise ValueError(f"Output {output!r} requires a state return")
-            return [_state_output_node_for_field(tax_input.state, output)]
+            return [
+                _state_output_node_for_field(
+                    tax_input.state, output, tax_input.year.value
+                )
+            ]
 
         for line, natural in LINE_TO_NATURAL.items():
             if natural == output:

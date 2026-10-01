@@ -2,6 +2,27 @@
 
 from .tax_scenario import TaxScenario
 
+
+def _wi_band_tolerance(
+    marginal_rate: float, sd_phase_rate: float = 0.0, *, tax_table: bool
+) -> float:
+    """Bound on |official WI Form 1 table value - exact statutory formula|.
+
+    The Standard Deduction Table prices the Wis. Stat. 71.05(22) formula at the
+    midpoint of a $500 band of line 7 income, so line 8 can differ from the exact
+    formula by up to $250 times the phase-down rate. Below $100k of TI the Tax
+    Table prices tax at the midpoint of a $100 band, up to $50 of TI. Both reach
+    tax at the marginal rate, and line 12 is rounded to whole dollars.
+
+    This bounds the WI scenarios below, each of which sits inside one bracket and
+    one phase-out segment across both bands. It is not a general bound: a band
+    straddling a rate or phase-out kink can exceed it.
+    """
+    return 0.50 + marginal_rate * (250.0 * sd_phase_rate + (50.0 if tax_table else 0.0))
+
+
+CA_WHOLE_DOLLAR_TOLERANCE = 1.0
+
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
 SILVER_STANDARD_STATE_SCENARIOS = [
     # ========== ALABAMA SCENARIOS ==========
@@ -303,6 +324,157 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=105540.0,  # CA taxable $100,000 + $5,540 std ded
         expected_federal_tax=15057.0,
         expected_state_tax=5693.0,  # OTS rounds to nearest dollar ($5693.36 -> $5693)
+    ),
+    # ---------- CA 2024 official values (tenforty-b72.3) ----------
+    # Source: FTB 2024 Personal Income Tax Booklet, Form 540,
+    # https://www.ftb.ca.gov/forms/2024/2024-540-booklet.pdf, retrieved 2026-09-30.
+    # Std deduction p. 13 (Single $5,540; MFJ/HoH $11,080); personal exemption
+    # credit p. 12 ($149 per box); AGI Limitation Worksheet p. 14; Tax Table
+    # pp. 69-74 (TI <= $100,000); Tax Rate Schedules X/Y/Z p. 75.
+    # Derived blind, session 1b251ce6.
+    # Form 540 line 31 is whole dollars (Tax Table rows priced at the $100 midpoint;
+    # rate-schedule result rounded to the dollar, p. 75 Step 4). The graph computes
+    # the exact bracket formula, so these fixtures allow $1: the rate-schedule gap
+    # is at most $0.50, and the tax-table gap in these rows is at most $0.36.
+    # CA Single $30,000 W2 (2024). Fixture kind: tax-table + derived-arithmetic.
+    # TI $24,460; Tax Table p. 70 row 24,451-24,550 col "1 or 3" = $382; less $149 exemption credit (p. 12) = $233
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $30,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_state_tax=233.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA Single $120,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $114,460; Schedule X (p. 75): $3,108.72 + 9.3% x $43,854 = $7,187.14 -> $7,187; less $149 = $7,038
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $120,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=120000.0,
+        expected_state_tax=7038.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA Single $600,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $594,460; Schedule X (p. 75): $37,512.83 + 11.3% x $161,673 = $55,781.88 -> $55,782; exemption credit fully phased out (p. 14 worksheet: ceil(355,143 / 2,500) x $6 = $858 > $149)
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $600,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=600000.0,
+        expected_state_tax=55782.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA MFJ $30,000 W2 (2024). Fixture kind: tax-table + derived-arithmetic.
+    # TI $18,920; Tax Table p. 69 row 18,851-18,950 col "2 or 5" = $189; less $298 exemption credit, floored at $0
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA MFJ, $30,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        expected_state_tax=0.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA MFJ $120,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $108,920; Schedule Y (p. 75): $1,984.52 + 6% x $28,430 = $3,690.32 -> $3,690; less $298 = $3,392
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA MFJ, $120,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=120000.0,
+        expected_state_tax=3392.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA MFJ $600,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $588,920; Schedule Y (p. 75): $6,217.44 + 9.3% x $447,708 = $47,854.28 -> $47,854; exemption credit fully phased out (p. 14: ceil(110,281 / 2,500) x $6 x 2 = $540 > $298)
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA MFJ, $600,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Married/Joint",
+        w2_income=600000.0,
+        expected_state_tax=47854.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA HoH $30,000 W2 (2024). Fixture kind: tax-table + derived-arithmetic.
+    # TI $18,920; Tax Table p. 69 row 18,851-18,950 col "4" = $189; less $149 = $40
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA HoH, $30,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Head_of_House",
+        w2_income=30000.0,
+        expected_state_tax=40.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA HoH $120,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $108,920; Schedule Z (p. 75): $3,511.13 + 9.3% x $12,813 = $4,702.74 -> $4,703; less $149 = $4,554
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA HoH, $120,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Head_of_House",
+        w2_income=120000.0,
+        expected_state_tax=4554.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA HoH $600,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # TI $588,920; Schedule Z (p. 75): $50,293.33 + 11.3% x $327 = $50,330.28 -> $50,330; exemption credit fully phased out (p. 14: ceil(232,709 / 2,500) x $6 = $564 > $149)
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA HoH, $600,000 W2, official Form 540 (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Head_of_House",
+        w2_income=600000.0,
+        expected_state_tax=50330.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+    ),
+    # CA Single $250,000 W2 (2024). Fixture kind: derived-arithmetic.
+    # Implementer-derived from the same booklet's rules, not by the blind deriver.
+    # TI $244,460; Schedule X (p. 75): $3,108.72 + 9.3% x $173,854 = $19,277.14
+    # -> $19,277. AGI Limitation Worksheet (p. 14): excess $5,143 / $2,500 = 2.06,
+    # rounded UP to 3; 3 x $6 = $18; exemption credit $149 - $18 = $131.
+    # Net $19,277 - $131 = $19,146.
+    TaxScenario(
+        source="FTB 2024 Form 540 Booklet (official)",
+        description="CA Single, $250,000 W2, exemption credit in phase-out (2024)",
+        year=2024,
+        state="CA",
+        filing_status="Single",
+        w2_income=250000.0,
+        expected_state_tax=19146.0,
+        state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
+        backend="graph",
+        known_failure=(
+            "CA 540 line 32 phase-out is continuous in the graph ($0.0024 per "
+            "excess AGI dollar); FTB AGI Limitation Worksheet rounds excess/$2,500 "
+            "UP to a whole step, $6 per step. Graph credit $136.66 vs official "
+            "$131; graph net $19,140.48 vs $19,146 (tenforty-b72.17)."
+        ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
@@ -636,90 +808,397 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== VERMONT SCENARIOS ==========
-    # VT 2024 & 2025: 4-bracket progressive system (3.35%, 6.6%, 7.6%, 8.75%)
-    # Brackets vary by filing status.
-    # Standard deduction: Single/MFS $7,400, MFJ/QW $14,850, HoH $11,100
-    # VT imports federal AGI and allows additions/subtractions.
+    # VT IN-111 starts from federal AGI (Line 1), subtracts VT's own standard
+    # deduction (Line 4) and personal exemptions (Line 5e: $5,300 each for 2025,
+    # $5,100 for 2024), then taxes Line 7 from the $100-band tax tables below
+    # $75,000 or the rate schedules above it (IN-111 instructions pp.6-7, p.13).
+    # W-2 only, under 65, not blind, no dependents: AGI = wages, IN-112 mods = 0.
     #
-    # VT Single, $50,000 W2 (2024) - first bracket only
-    # Federal: AGI=$50k, Std Ded=$14,600, Taxable=$35,400, Tax=$4,016 (tax table)
-    # VT: AGI=$50k, Std Ded=$7,400, Taxable=$42,600
-    # VT tax: $42,600 * 0.0335 = $1,427.10 (all in first bracket, under $47,900)
+    # Every expected value below was derived blind, session 1b251ce6, from the
+    # VT Department of Taxes PDFs retrieved 2026-09-30:
+    #   2025: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf
+    #   2024: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf
+    # They are strict known failures: the graph omits the Line 5e personal
+    # exemption, and it prices Line 7 with the exact bracket formula where VT
+    # prescribes the tax table (midpoint of a $100 band) or a rounded published
+    # base tax, a residual of a few dollars ($3.70 observed; tenforty-xew precision contract).
+    #
+    # VT Single, $30,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.15, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 7,650 std - 5,300 exemptions = 17,050
+    # VT tax: row 17,000-17,100 -> $571
     TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT Single, $50,000 W2",
-        year=2024,
-        state="VT",
-        filing_status="Single",
-        w2_income=50000.0,
-        expected_federal_tax=4016.0,
-        expected_state_tax=1427.10,
-        expected_federal_agi=50000.0,
-        backend="graph",
-    ),
-    # VT MFJ, $80,000 W2 (2024) - first bracket only
-    # Federal: AGI=$80k, Std Ded=$29,200, Taxable=$50,800, Tax=$5,632 (tax table)
-    # VT: AGI=$80k, Std Ded=$14,850, Taxable=$65,150
-    # VT tax: $65,150 * 0.0335 = $2,182.53 (all in first bracket, under $79,950)
-    TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT MFJ, $80,000 W2",
-        year=2024,
-        state="VT",
-        filing_status="Married/Joint",
-        w2_income=80000.0,
-        expected_federal_tax=5632.0,
-        expected_state_tax=2182.53,
-        expected_federal_agi=80000.0,
-        backend="graph",
-    ),
-    # VT HoH, $60,000 W2 (2024) - first bracket only
-    # Federal: AGI=$60k, Std Ded=$21,900, Taxable=$38,100, Tax=$4,241 (tax table)
-    # VT: AGI=$60k, Std Ded=$11,100, Taxable=$48,900
-    # VT tax: $48,900 * 0.0335 = $1,638.15 (all in first bracket, under $64,200)
-    TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT HoH, $60,000 W2",
-        year=2024,
-        state="VT",
-        filing_status="Head_of_House",
-        w2_income=60000.0,
-        expected_federal_tax=4241.0,
-        expected_state_tax=1638.15,
-        expected_federal_agi=60000.0,
-        backend="graph",
-    ),
-    # VT Single, $70,000 W2 (2024) - crosses into second bracket
-    # Federal: AGI=$70k, Std Ded=$14,600, Taxable=$55,400, Tax=$7,241 (tax table)
-    # VT: AGI=$70k, Std Ded=$7,400, Taxable=$62,600
-    # VT tax: $47,900 * 0.0335 + ($62,600 - $47,900) * 0.066
-    #       = $1,604.65 + $970.20 = $2,574.85
-    TaxScenario(
-        source="VT 2024 Tax Rate Schedules (computed)",
-        description="VT Single, $70,000 W2 (second bracket)",
-        year=2024,
-        state="VT",
-        filing_status="Single",
-        w2_income=70000.0,
-        expected_federal_tax=7241.0,
-        expected_state_tax=2574.85,
-        expected_federal_agi=70000.0,
-        backend="graph",
-    ),
-    # VT Single, $55,000 W2 (2025) - test 2025 (brackets/deductions unchanged)
-    # Federal: AGI=$55k, Std Ded=$15,000 (2025), Taxable=$40,000, Tax=$4,561.50 (tax table)
-    # VT: AGI=$55k, Std Ded=$7,400 (unchanged), Taxable=$47,600
-    # VT tax: $47,600 * 0.0335 = $1,594.60 (all in first bracket)
-    TaxScenario(
-        source="VT 2025 Tax Rate Schedules (computed)",
-        description="VT Single, $55,000 W2 (2025)",
+        source="VT 2025 IN-111 instructions p.15 (tax-table)",
+        description="VT Single, $30,000 W2 (2025)",
         year=2025,
         state="VT",
         filing_status="Single",
-        w2_income=55000.0,
-        expected_federal_tax=4471.5,
-        expected_state_tax=1594.60,
-        expected_federal_agi=55000.0,
+        w2_income=30000.0,
+        expected_state_tax=571.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 22,350 vs official 17,050; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $90,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 7,650 std - 5,300 exemptions = 77,050
+    # VT tax: Schedule X: 3,345 + 6.6% x (77,050 - 75,000) = 3,480.30 -> $3,480
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13 (derived-arithmetic)",
+        description="VT Single, $90,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=90000.0,
+        expected_state_tax=3480.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 82,350 vs official 77,050; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $300,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 7,650 std - 5,300 exemptions = 287,050
+    # VT tax: Schedule X: 16,175 + 8.75% x (287,050 - 249,700) = 19,443.13; 3% x AGI = 9,000 does not bind -> $19,443
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT Single, $300,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=300000.0,
+        expected_state_tax=19443.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 292,350 vs official 287,050; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $30,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 15,300 std - 10,600 exemptions = 4,100
+    # VT tax: row 4,100-4,200 -> $139
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        description="VT MFJ, $30,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        expected_state_tax=139.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
+            "VT TI 14,700 vs official 4,100; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $90,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 15,300 std - 10,600 exemptions = 64,100
+    # VT tax: row 64,100-64,200 -> $2,149
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.18 (tax-table)",
+        description="VT MFJ, $90,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        expected_state_tax=2149.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
+            "VT TI 74,700 vs official 64,100; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $300,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 15,300 std - 10,600 exemptions = 274,100
+    # VT tax: Schedule Y-1: 10,482 + 7.6% x (274,100 - 199,450) = 16,155.40; 3% x AGI = 9,000 does not bind -> $16,155
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT MFJ, $300,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=300000.0,
+        expected_state_tax=16155.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
+            "VT TI 284,700 vs official 274,100; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $30,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 11,450 std - 5,300 exemptions = 13,250
+    # VT tax: row 13,200-13,300 -> $444
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        description="VT HoH, $30,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=30000.0,
+        expected_state_tax=444.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 18,550 vs official 13,250; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $90,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 11,450 std - 5,300 exemptions = 73,250
+    # VT tax: row 73,200-73,300 -> $2,683
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.18 (tax-table)",
+        description="VT HoH, $90,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=90000.0,
+        expected_state_tax=2683.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 78,550 vs official 73,250; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $300,000 W2 (2025)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 11,450 std - 5,300 exemptions = 283,250
+    # VT tax: Schedule Z: 17,179 + 8.75% x (283,250 - 276,850) = 17,739.00; 3% x AGI = 9,000 does not bind -> $17,739
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT HoH, $300,000 W2 (2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=300000.0,
+        expected_state_tax=17739.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
+            "VT TI 288,550 vs official 283,250; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $30,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.15, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 7,400 std - 5,100 exemptions = 17,500
+    # VT tax: row 17,500-17,600 -> $588
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.15 (tax-table)",
+        description="VT Single, $30,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=30000.0,
+        expected_state_tax=588.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 22,600 vs official 17,500; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $90,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 7,400 std - 5,100 exemptions = 77,500
+    # VT tax: Schedule X: 3,393 + 6.6% x (77,500 - 75,000) = 3,558.00 -> $3,558
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13 (derived-arithmetic)",
+        description="VT Single, $90,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=90000.0,
+        expected_state_tax=3558.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 82,600 vs official 77,500; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT Single, $300,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 7,400 std - 5,100 exemptions = 287,500
+    # VT tax: Schedule X: 15,675 + 8.75% x (287,500 - 242,000) = 19,656.25; 3% x AGI = 9,000 does not bind -> $19,656
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT Single, $300,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=300000.0,
+        expected_state_tax=19656.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 292,600 vs official 287,500; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $30,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 14,850 std - 10,200 exemptions = 4,950
+    # VT tax: row 4,900-5,000 -> $166
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        description="VT MFJ, $30,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=30000.0,
+        expected_state_tax=166.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
+            "VT TI 15,150 vs official 4,950; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $90,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 14,850 std - 10,200 exemptions = 64,950
+    # VT tax: row 64,900-65,000 -> $2,176
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.18 (tax-table)",
+        description="VT MFJ, $90,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        expected_state_tax=2176.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
+            "VT TI 75,150 vs official 64,950; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT MFJ, $300,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 14,850 std - 10,200 exemptions = 274,950
+    # VT tax: Schedule Y-1: 10,159 + 7.6% x (274,950 - 193,300) = 16,364.40; 3% x AGI = 9,000 does not bind -> $16,364
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT MFJ, $300,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=300000.0,
+        expected_state_tax=16364.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
+            "VT TI 285,150 vs official 274,950; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $30,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.14, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 30,000 - 11,100 std - 5,100 exemptions = 13,800
+    # VT tax: row 13,800-13,900 -> $464
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        description="VT HoH, $30,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=30000.0,
+        expected_state_tax=464.0,
+        expected_federal_agi=30000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 18,900 vs official 13,800; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $90,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.18, retrieved 2026-09-30
+    # Fixture kind: tax-table; derived blind, session 1b251ce6
+    # VT TI: 90,000 - 11,100 std - 5,100 exemptions = 73,800
+    # VT tax: row 73,800-73,900 -> $2,788
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.18 (tax-table)",
+        description="VT HoH, $90,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=90000.0,
+        expected_state_tax=2788.0,
+        expected_federal_agi=90000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 78,900 vs official 73,800; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
+        backend="graph",
+    ),
+    # VT HoH, $300,000 W2 (2024)
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-09-30
+    # Fixture kind: derived-arithmetic; derived blind, session 1b251ce6
+    # VT TI: 300,000 - 11,100 std - 5,100 exemptions = 283,800
+    # VT tax: Schedule Z: 16,647 + 8.75% x (283,800 - 268,300) = 18,003.25; 3% x AGI = 9,000 does not bind -> $18,003
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        description="VT HoH, $300,000 W2 (2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=300000.0,
+        expected_state_tax=18003.0,
+        expected_federal_agi=300000.0,
+        known_failure=(
+            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
+            "VT TI 288,900 vs official 283,800; exemption missing (tenforty-b72.19), "
+            "then table-band precision (tenforty-xew)"
+        ),
         backend="graph",
     ),
     # ========== DELAWARE SCENARIOS ==========
@@ -1292,165 +1771,397 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== WISCONSIN SCENARIOS ==========
-    # WI 2024 Single: Standard deduction max $9,930 (sliding scale)
-    # Brackets: 3.5% ($0-$14,320), 4.4% ($14,320-$28,640),
-    #           5.3% ($28,640-$315,310), 7.65% ($315,310+)
-    # Exemptions: $700 per person + $250 if 65+
-    # WI 2024 MFJ: Standard deduction max $17,880 (sliding scale)
-    # Brackets: 3.5% ($0-$19,090), 4.4% ($19,090-$38,190),
-    #           5.3% ($38,190-$420,420), 7.65% ($420,420+)
-    #
-    # WI Single in 3.5%/4.4% bracket
-    # Federal AGI: $20,000, WI AGI: $20,000 (no additions/subtractions)
-    # Note: Std deduction and exemptions are 0 (not mapped in graph backend)
-    # WI taxable: $20,000
-    # WI tax: $14,320 x 0.035 + ($20,000 - $14,320) x 0.044 = $751.12
-    # Federal taxable: $5,400, Federal tax: $540 (Formula)
+    # WI Form 1, wages only, under 65, no dependents, no credits; line 7 = wages.
+    # Derived blind, session 1b251ce6, retrieved 2026-09-30, from
+    #   I24 https://www.revenue.wi.gov/TaxForms2024/2024-Form1-Inst.pdf
+    #   I25 https://www.revenue.wi.gov/TaxForms2025/2025-Form1-Inst.pdf
+    # SD is the official Standard Deduction Table row (pp. 35-37, $500 bands);
+    # exemptions are $700 per filer (line 10a). Tax is the official Tax Table row
+    # (pp. 38-43, $100 bands) below $100k of TI, else the p. 44 worksheet rounded
+    # to whole dollars. The graph computes the exact statutory formulas, so each
+    # tolerance is the band-effect bound from _wi_band_tolerance.
+    # WI 2024 Single $12,000: SD 13,230 (0-13,000) + exemptions 700 -> TI 0, tax 0
+    # I24 p.35, p.38; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $20k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $12k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Single",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 Single $20,000: SD 13,088 (20,000-20,500) + exemptions 700 -> TI 6,212, tax 219
+    # I24 p.35, p.38; tax-table (row 6,200-6,300)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $20k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
         w2_income=20000.0,
-        expected_federal_tax=540.0,
-        expected_state_tax=751.12,
-        expected_federal_agi=20000.0,
+        expected_state_tax=219.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.12, tax_table=True),
         backend="graph",
     ),
-    # WI Single in 5.3% bracket
-    # Federal AGI: $50,000, WI AGI: $50,000
-    # WI taxable: $50,000 (no deductions/exemptions)
-    # WI tax: $501.20 + $630.08 + ($50,000 - $28,640) x 0.053 = $2,263.36
-    # Federal taxable: $35,400, Federal tax: $4,016
+    # WI 2024 Single $60,000: SD 8,288 (60,000-60,500) + exemptions 700 -> TI 51,012, tax 2,319
+    # I24 p.35, p.41; tax-table (row 51,000-51,100)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $50k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $60k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
-        w2_income=50000.0,
-        expected_federal_tax=4016.0,
-        expected_state_tax=2263.36,
-        expected_federal_agi=50000.0,
+        w2_income=60000.0,
+        expected_state_tax=2319.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
         backend="graph",
     ),
-    # WI Single in 5.3% bracket (high income)
-    # Federal AGI: $100,000, WI AGI: $100,000
-    # WI taxable: $100,000 (no deductions/exemptions)
-    # WI tax: $501.20 + $630.08 + ($100,000 - $28,640) x 0.053 = $4,913.36
-    # Federal taxable: $85,400, Federal tax: $13,841
+    # WI 2024 Single $150,000: SD 0 (129,500 and over) + exemptions 700 -> TI 149,300, tax 7,526
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $100k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $150k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
-        w2_income=100000.0,
-        expected_federal_tax=13841.0,
-        expected_state_tax=4913.36,
-        expected_federal_agi=100000.0,
+        w2_income=150000.0,
+        expected_state_tax=7526.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
         backend="graph",
     ),
-    # WI Single in 7.65% bracket (top bracket)
-    # Federal AGI: $400,000, WI AGI: $400,000
-    # WI taxable: $400,000 (no deductions/exemptions)
-    # WI tax: $14,320 x 0.035 + $14,320 x 0.044 + $286,670 x 0.053 + $84,690 x 0.0765
-    #       = $501.20 + $630.08 + $15,193.51 + $6,478.785 = $22,803.575
-    # Federal taxable: $385,400 ($400K - $14.6K std ded), in 35% bracket
-    # Federal tax: $1,160 + $4,266 + $11,742.50 + $21,942 + $16,568 + $49,586.25
-    #            = $105,264.75
-    #   + Additional Medicare Tax: ($400,000 - $200,000) * 0.009 = $1,800
-    #   = $107,064.75
+    # WI 2024 Single $400,000: SD 0 (Single column is 0 from the 129,500 row;
+    # formula zero ~129,320) + exemptions 700 -> TI 399,300, tax 22,750
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI Single, $400k income (7.65% top bracket)",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI Single, $400k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Single",
         w2_income=400000.0,
-        expected_federal_tax=107064.75,
-        expected_state_tax=22803.575,
-        expected_federal_agi=400000.0,
+        expected_state_tax=22750.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
         backend="graph",
     ),
-    # WI MFJ in 5.3% bracket
-    # Federal AGI: $60,000, WI AGI: $60,000
-    # WI taxable: $60,000 (no deductions/exemptions)
-    # WI tax: $19,090 x 0.035 + ($38,190 - $19,090) x 0.044 + ($60,000 - $38,190) x 0.053
-    #       = $668.15 + $840.40 + $1,155.93 = $2,664.48
-    # Federal taxable: $30,800, Federal tax: $2,320 + ($30,800 - $23,200) * 0.12 = $3,232
+    # WI 2024 MFJ $12,000: SD 24,490 + exemptions 1,400 -> TI 0, tax 0
+    # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
-        source="WI 2024 Tax Brackets (computed)",
-        description="WI MFJ, $60k income",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $12k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 MFJ $20,000: SD 24,490 + exemptions 1,400 -> TI 0, tax 0
+    # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $20k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 MFJ $60,000: SD 18,017 (60,000-60,500) + exemptions 1,400 -> TI 40,583, tax 1,634
+    # I24 p.35, p.40; tax-table (row 40,500-40,600)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $60k wages (2024)",
         year=2024,
         state="WI",
         filing_status="Married/Joint",
         w2_income=60000.0,
-        expected_federal_tax=3232.0,
-        expected_state_tax=2664.48,
-        expected_federal_agi=60000.0,
+        expected_state_tax=1634.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.19778, tax_table=True),
         backend="graph",
     ),
-    # ========== WISCONSIN 2025 SCENARIOS ==========
-    # WI 2025: Expanded 4.4% bracket (Single: $14,320-$50,480, MFJ: $19,090-$67,300)
-    # Other brackets unchanged: 3.5% ($0-$14,320/$19,090),
-    #   5.3% ($50,480/$67,300-$315,310/$420,420), 7.65% above
-    # New retirement income exclusion (age 67+) - not tested here (no age input)
-    #
-    # WI 2025 Single, $50,000 W2 only
-    # Federal AGI: $50,000, WI AGI: $50,000, WI taxable: $50,000
-    # WI tax: $14,320 x 0.035 + ($50,000 - $14,320) x 0.044
-    #       = $501.20 + $1,569.92 = $2,071.12
-    # Federal taxable: $35,000 (AGI - $15,000 std ded)
-    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # WI 2024 MFJ $150,000: SD 216 (150,000-150,500) + exemptions 1,400 -> TI 148,384, tax 7,349
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
-        source="WI 2025 Tax Brackets (computed)",
-        description="WI Single, $50k income (2025 expanded 4.4% bracket)",
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $150k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=150000.0,
+        expected_state_tax=7349.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.19778, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2024 MFJ $400,000: SD 0 (151,344 or over) + exemptions 1,400 -> TI 398,600, tax 20,610
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI MFJ, $400k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=400000.0,
+        expected_state_tax=20610.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2024 HoH $12,000: SD 17,090 + exemptions 700 -> TI 0, tax 0
+    # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $12k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2024 HoH $20,000: SD 16,824 (20,000-20,500) + exemptions 700 -> TI 2,476, tax 86
+    # I24 p.35, p.38; tax-table (row 2,400-2,500)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $20k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=86.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.22515, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2024 HoH $60,000: SD 8,288 (60,000-60,500) + exemptions 700 -> TI 51,012, tax 2,319
+    # I24 p.35, p.41; tax-table (row 51,000-51,100)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $60k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_state_tax=2319.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2024 HoH $150,000: SD 0 + exemptions 700 -> TI 149,300, tax 7,526
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $150k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=7526.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2024 HoH $400,000: SD 0 + exemptions 700 -> TI 399,300, tax 22,750
+    # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2024 Form 1 Instructions (official tables)",
+        description="WI HoH, $400k wages (2024)",
+        year=2024,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=400000.0,
+        expected_state_tax=22750.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 Single $12,000: SD 13,560 (0-13,390) + exemptions 700 -> TI 0, tax 0
+    # I25 p.35, p.38; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $12k wages (2025)",
         year=2025,
         state="WI",
         filing_status="Single",
-        w2_income=50000.0,
-        expected_federal_tax=3871.5,
-        expected_state_tax=2071.12,
-        expected_federal_agi=50000.0,
+        w2_income=12000.0,
+        expected_state_tax=0.0,
         backend="graph",
     ),
-    # WI 2025 Single, $100,000 W2 only
-    # Federal AGI: $100,000, WI AGI: $100,000, WI taxable: $100,000
-    # WI tax: $14,320 x 0.035 + ($50,480 - $14,320) x 0.044 + ($100,000 - $50,480) x 0.053
-    #       = $501.20 + $1,591.04 + $2,624.56 = $4,716.80
-    # Federal taxable: $85,000 (AGI - $15,000 std ded)
-    # Federal tax (2025): $11,925 x 0.10 + $36,550 x 0.12 + $36,525 x 0.22
-    #   = $1,192.50 + $4,386 + $8,035.50 = $13,614
+    # WI 2025 Single $20,000: SD 13,476 (20,000-20,500) + exemptions 700 -> TI 5,824, tax 205
+    # I25 p.35, p.38; tax-table (row 5,800-5,900)
     TaxScenario(
-        source="WI 2025 Tax Brackets (computed)",
-        description="WI Single, $100k income (2025 expanded 4.4% bracket)",
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $20k wages (2025)",
         year=2025,
         state="WI",
         filing_status="Single",
-        w2_income=100000.0,
-        expected_federal_tax=13449.0,
-        expected_state_tax=4716.80,
-        expected_federal_agi=100000.0,
+        w2_income=20000.0,
+        expected_state_tax=205.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.12, tax_table=True),
         backend="graph",
     ),
-    # WI 2025 MFJ, $120,000 W2 only
-    # Federal AGI: $120,000, WI AGI: $120,000, WI taxable: $120,000
-    # WI tax: $19,090 x 0.035 + ($67,300 - $19,090) x 0.044 + ($120,000 - $67,300) x 0.053
-    #       = $668.15 + $2,121.24 + $2,793.10 = $5,582.49
-    # Federal taxable: $90,000 (AGI - $30,000 std ded)
-    # Federal tax (2025 MFJ): $23,850 x 0.10 + $66,150 x 0.12 = $2,385 + $7,938 = $10,323
+    # WI 2025 Single $60,000: SD 8,676 (60,000-60,500) + exemptions 700 -> TI 50,624, tax 2,098
+    # I25 p.35, p.41; tax-table (row 50,600-50,700)
     TaxScenario(
-        source="WI 2025 Tax Brackets (computed)",
-        description="WI MFJ, $120k income (2025 expanded 4.4% bracket)",
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $60k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=60000.0,
+        expected_state_tax=2098.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 Single $150,000: SD 0 (132,500 and over) + exemptions 700 -> TI 149,300, tax 7,326
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $150k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=7326.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 Single $400,000: SD 0 (Single column is 0 from the 132,500 row;
+    # formula zero ~132,550) + exemptions 700 -> TI 399,300, tax 22,363
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI Single, $400k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Single",
+        w2_income=400000.0,
+        expected_state_tax=22363.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 MFJ $12,000: SD 25,110 + exemptions 1,400 -> TI 0, tax 0
+    # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $12k wages (2025)",
         year=2025,
         state="WI",
         filing_status="Married/Joint",
-        w2_income=120000.0,
-        expected_federal_tax=10143.0,
-        expected_state_tax=5582.49,
-        expected_federal_agi=120000.0,
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2025 MFJ $20,000: SD 25,110 + exemptions 1,400 -> TI 0, tax 0
+    # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $20k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2025 MFJ $60,000: SD 18,773 (60,000-60,500) + exemptions 1,400 -> TI 39,827, tax 1,577
+    # I25 p.35, p.40; tax-table (row 39,800-39,900)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $60k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=60000.0,
+        expected_state_tax=1577.0,
+        state_tax_tolerance=_wi_band_tolerance(0.044, 0.19778, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 MFJ $150,000: SD 973 (150,000-150,500) + exemptions 1,400 -> TI 147,627, tax 7,042
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $150k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=150000.0,
+        expected_state_tax=7042.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.19778, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 MFJ $400,000: SD 0 (155,169 or more) + exemptions 1,400 -> TI 398,600, tax 20,344
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI MFJ, $400k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Married/Joint",
+        w2_income=400000.0,
+        expected_state_tax=20344.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 HoH $12,000: SD 17,520 + exemptions 700 -> TI 0, tax 0
+    # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $12k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=12000.0,
+        expected_state_tax=0.0,
+        backend="graph",
+    ),
+    # WI 2025 HoH $20,000: SD 17,362 (20,000-20,500) + exemptions 700 -> TI 1,938, tax 68
+    # I25 p.35, p.38; tax-table (row 1,900-2,000)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $20k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=68.0,
+        state_tax_tolerance=_wi_band_tolerance(0.035, 0.22515, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 HoH $60,000: SD 8,676 (60,000-60,500) + exemptions 700 -> TI 50,624, tax 2,098
+    # I25 p.35, p.41; tax-table (row 50,600-50,700)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $60k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=60000.0,
+        expected_state_tax=2098.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, 0.12, tax_table=True),
+        backend="graph",
+    ),
+    # WI 2025 HoH $150,000: SD 0 + exemptions 700 -> TI 149,300, tax 7,326
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $150k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=7326.0,
+        state_tax_tolerance=_wi_band_tolerance(0.053, tax_table=False),
+        backend="graph",
+    ),
+    # WI 2025 HoH $400,000: SD 0 + exemptions 700 -> TI 399,300, tax 22,363
+    # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
+    TaxScenario(
+        source="WI 2025 Form 1 Instructions (official tables)",
+        description="WI HoH, $400k wages (2025)",
+        year=2025,
+        state="WI",
+        filing_status="Head_of_House",
+        w2_income=400000.0,
+        expected_state_tax=22363.0,
+        state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
         backend="graph",
     ),
     # ========== NEW JERSEY SCENARIOS ==========
@@ -1635,7 +2346,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     ),
     # ========== MISSOURI SCENARIOS ==========
     # Missouri fixtures live in tests/mo_1040_test.py: official MO values are
-    # whole dollars and need a documented $1 tolerance this runner lacks.
+    # whole dollars; that module documents the $1 chart-rounding tolerance.
     # ========== MINNESOTA SCENARIOS ==========
     # MN 2024: 4 brackets (5.35%, 6.80%, 7.85%, 9.85%)
     # Standard deduction: $14,575 (Single/MFS), $29,150 (MFJ), $21,862.50 (HoH)
@@ -2132,31 +2843,252 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== MISSISSIPPI SCENARIOS ==========
-    # MS 2024: 0% on first $10,000, then 4.7% above
-    # MS 2025: 0% on first $10,000, then 4.4% above
-    # Personal exemption: Single $6,000, MFJ $12,000, HoH $8,000
-    # Standard deduction: Single $2,300, MFJ $4,600
-    # MS taxable income = MS AGI - exemptions - deductions
+    # MS Form 80-105, both years: 0% on the first $10,000 of taxable income, then
+    # 4.7% (2024) / 4.4% (2025). Filing-status exemption (Line 11): Single $6,000,
+    # MFJ $12,000, HoH $8,000. Standard deduction: Single $2,300, MFJ $4,600,
+    # HoH $3,400. MS taxable income = MS AGI - exemptions - deduction.
     #
-    # MS 2024 Single, $50,000 W2, no dependents
-    # Fed AGI: $50,000, Fed std ded: $14,600, Fed taxable: $35,400
-    # Fed tax: $11,600 * 0.10 + $23,800 * 0.12 = $1,160 + $2,856 = $4,016
-    # MS AGI: $50,000 (imports from federal)
-    # MS exemption: $6,000, MS std ded: $2,300
-    # MS taxable: $50,000 - $6,000 - $2,300 = $41,700
-    # MS tax: ($41,700 - $10,000) * 0.047 = $31,700 * 0.047 = $1,489.90
+    # Precision: Line 17 is rounded half-up to whole dollars on the return
+    # (I24 p.21 / I25 p.22). These fixtures carry the deriver's unrounded product,
+    # matching the silver convention of formula-exact cents (see tenforty-xew).
+    #
+    # HoH rows are the literal "Head of Family box, zero dependents" reading
+    # (Line 11 = $8,000, Line 10 = $0). A legal HoH return needs a dependent
+    # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4), but the graph
+    # backend rejects nonzero num_dependents and MS maps no dependent-exemption
+    # input (tenforty-avr.1), so that variant is not expressible here.
+    #
+    # MFJ: the Schedule of Tax Computation applies the $10,000 zero band per
+    # spouse column; the API carries no spouse split, and the graph applies one
+    # band to joint taxable income. Only MFJ rows where no split can matter
+    # (taxable income under $10,000) come from the deriver.
+    #
+    # MS 2024 Single, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 6,000 - 2,300 = 11,700; tax: 1,700 x 0.047 = 79.90
     TaxScenario(
-        source="MS 2024 Tax Rate Schedule (computed)",
-        description="MS Single, $50,000 W2, no dependents",
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS Single, $20,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=79.90,
+        backend="graph",
+    ),
+    # MS 2024 Single, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 6,000 - 2,300 = 41,700; tax: 31,700 x 0.047 = 1,489.90
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS Single, $50,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
         filing_status="Single",
         w2_income=50000.0,
-        expected_federal_tax=4016.0,
         expected_state_tax=1489.90,
-        expected_federal_agi=50000.0,
         backend="graph",
     ),
+    # MS 2024 Single, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 6,000 - 2,300 = 141,700; tax: 131,700 x 0.047 = 6,189.90
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS Single, $150,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=6189.90,
+        backend="graph",
+    ),
+    # MS 2024 MFJ, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 12,000 - 4,600 = 3,400; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS MFJ, $20,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2024 HoH, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $20,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2024 HoH, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.047 = 1,344.20
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $50,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=50000.0,
+        expected_state_tax=1344.20,
+        backend="graph",
+    ),
+    # MS 2024 HoH, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.047 = 6,044.20
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $150,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=6044.20,
+        backend="graph",
+    ),
+    # MS 2025 Single, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 6,000 - 2,300 = 11,700; tax: 1,700 x 0.044 = 74.80
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS Single, $20,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=74.80,
+        backend="graph",
+    ),
+    # MS 2025 Single, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 6,000 - 2,300 = 41,700; tax: 31,700 x 0.044 = 1,394.80
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS Single, $50,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1394.80,
+        backend="graph",
+    ),
+    # MS 2025 Single, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 6,000 - 2,300 = 141,700; tax: 131,700 x 0.044 = 5,794.80
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS Single, $150,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=5794.80,
+        backend="graph",
+    ),
+    # MS 2025 MFJ, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 12,000 - 4,600 = 3,400; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS MFJ, $20,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2025 HoH, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $20,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2025 HoH, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.044 = 1,258.40
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $50,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=50000.0,
+        expected_state_tax=1258.40,
+        backend="graph",
+    ),
+    # MS 2025 HoH, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.044 = 5,658.40
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $150,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=5658.40,
+        backend="graph",
+    ),
+    # Scenarios below are formula-derived in-repo (not from the blind deriver).
+    # The MFJ ones assume all wages belong to one spouse (one $10,000 zero band).
     # MS 2024 MFJ, $100,000 W2, no dependents
     # Fed AGI: $100,000, Fed std ded: $29,200, Fed taxable: $70,800
     # Fed tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
@@ -2174,25 +3106,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=8032.0,
         expected_state_tax=3449.80,
         expected_federal_agi=100000.0,
-        backend="graph",
-    ),
-    # MS 2024 Head of Household, $70,000 W2, no dependents
-    # Fed AGI: $70,000, Fed std ded: $21,900, Fed taxable: $48,100
-    # Fed tax: $16,550 * 0.10 + $31,550 * 0.12 = $1,655 + $3,786 = $5,441
-    # MS AGI: $70,000
-    # MS exemption: $8,000, MS std ded: $4,600
-    # MS taxable: $70,000 - $8,000 - $4,600 = $57,400
-    # MS tax: ($57,400 - $10,000) * 0.047 = $47,400 * 0.047 = $2,227.80
-    TaxScenario(
-        source="MS 2024 Tax Rate Schedule (computed)",
-        description="MS HoH, $70,000 W2, no dependents",
-        year=2024,
-        state="MS",
-        filing_status="Head_of_House",
-        w2_income=70000.0,
-        expected_federal_tax=5441.0,
-        expected_state_tax=2227.80,
-        expected_federal_agi=70000.0,
         backend="graph",
     ),
     # MS 2025 Single, $60,000 W2, no dependents (reduced rate)
