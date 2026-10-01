@@ -1,4 +1,4 @@
-"""Silver standard state scenarios: formula-derived from published state tax brackets."""
+"""State value checks with explicit independent or unverified legacy provenance."""
 
 from .evidence import CA_EVIDENCE, MS_EVIDENCE, VT_EVIDENCE, WI_EVIDENCE
 from .tax_scenario import TaxScenario

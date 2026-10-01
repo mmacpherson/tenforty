@@ -1,8 +1,9 @@
 """Missouri MO-1040 (2024, 2025) against official Missouri DOR values.
 
-Every expected value was derived blind (session 1b251ce6) from official
-Missouri DOR and IRS publications, retrieved 2026-09-30, never from graph
-output or repo tables:
+Chart examples are transcribed published worked examples; whole-return values
+are independent derivations. Both come from the blind source review (session
+1b251ce6) of official Missouri DOR and IRS publications, retrieved 2026-09-30,
+never from graph output or repo tables:
 
 - 2024 Tax Chart (= MO-1040 Instructions 2024 p.26):
   https://dor.mo.gov/forms/2024%20Tax%20Chart_2024.pdf

@@ -209,9 +209,7 @@ profile's example count:
 - Per-year OTS file splitting for organization
 - Self-referential structs via `ouroboros` for Rust FFI lifetime management
 
-## Code Review Focus
-
-### Independent expected values
+## Independent expected values
 
 Never run tenforty (either backend), its generated graphs, or its tax-table
 implementation to generate or adjust expected tax values. Passing tests are not
@@ -238,6 +236,8 @@ checks, but cannot establish independent tax values. Record precision tolerances
 from the published rounding/table rules, not from the observed mismatch.
 
 See `docs/validation/state-fixtures/README.md` for the state fixture evidence.
+
+## Code Review Focus
 
 - Tax calculation correctness
 - Hypothesis strategy robustness (no NaN/infinity)
