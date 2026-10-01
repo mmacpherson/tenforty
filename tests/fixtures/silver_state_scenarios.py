@@ -1,5 +1,6 @@
-"""Silver standard state scenarios: formula-derived from published state tax brackets."""
+"""State value checks with explicit independent or unverified legacy provenance."""
 
+from .evidence import CA_EVIDENCE, MS_EVIDENCE, VT_EVIDENCE, WI_EVIDENCE
 from .tax_scenario import TaxScenario
 
 
@@ -340,6 +341,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $24,460; Tax Table p. 70 row 24,451-24,550 col "1 or 3" = $382; less $149 exemption credit (p. 12) = $233
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA Single, $30,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -353,6 +355,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $114,460; Schedule X (p. 75): $3,108.72 + 9.3% x $43,854 = $7,187.14 -> $7,187; less $149 = $7,038
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA Single, $120,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -366,6 +369,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $594,460; Schedule X (p. 75): $37,512.83 + 11.3% x $161,673 = $55,781.88 -> $55,782; exemption credit fully phased out (p. 14 worksheet: ceil(355,143 / 2,500) x $6 = $858 > $149)
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA Single, $600,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -379,6 +383,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $18,920; Tax Table p. 69 row 18,851-18,950 col "2 or 5" = $189; less $298 exemption credit, floored at $0
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA MFJ, $30,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -392,6 +397,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $108,920; Schedule Y (p. 75): $1,984.52 + 6% x $28,430 = $3,690.32 -> $3,690; less $298 = $3,392
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA MFJ, $120,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -405,6 +411,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $588,920; Schedule Y (p. 75): $6,217.44 + 9.3% x $447,708 = $47,854.28 -> $47,854; exemption credit fully phased out (p. 14: ceil(110,281 / 2,500) x $6 x 2 = $540 > $298)
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA MFJ, $600,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -418,6 +425,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $18,920; Tax Table p. 69 row 18,851-18,950 col "4" = $189; less $149 = $40
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA HoH, $30,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -431,6 +439,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $108,920; Schedule Z (p. 75): $3,511.13 + 9.3% x $12,813 = $4,702.74 -> $4,703; less $149 = $4,554
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA HoH, $120,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -444,6 +453,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI $588,920; Schedule Z (p. 75): $50,293.33 + 11.3% x $327 = $50,330.28 -> $50,330; exemption credit fully phased out (p. 14: ceil(232,709 / 2,500) x $6 = $564 > $149)
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA HoH, $600,000 W2, official Form 540 (2024)",
         year=2024,
         state="CA",
@@ -461,6 +471,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Net $19,277 - $131 = $19,146.
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
+        state_evidence=CA_EVIDENCE,
         description="CA Single, $250,000 W2, exemption credit in phase-out (2024)",
         year=2024,
         state="CA",
@@ -830,6 +841,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 17,000-17,100 -> $571
     TaxScenario(
         source="VT 2025 IN-111 instructions p.15 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT Single, $30,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -851,6 +863,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule X: 3,345 + 6.6% x (77,050 - 75,000) = 3,480.30 -> $3,480
     TaxScenario(
         source="VT 2025 IN-111 instructions p.13 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT Single, $90,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -872,6 +885,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule X: 16,175 + 8.75% x (287,050 - 249,700) = 19,443.13; 3% x AGI = 9,000 does not bind -> $19,443
     TaxScenario(
         source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT Single, $300,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -893,6 +907,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 4,100-4,200 -> $139
     TaxScenario(
         source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT MFJ, $30,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -914,6 +929,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 64,100-64,200 -> $2,149
     TaxScenario(
         source="VT 2025 IN-111 instructions p.18 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT MFJ, $90,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -935,6 +951,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule Y-1: 10,482 + 7.6% x (274,100 - 199,450) = 16,155.40; 3% x AGI = 9,000 does not bind -> $16,155
     TaxScenario(
         source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT MFJ, $300,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -956,6 +973,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 13,200-13,300 -> $444
     TaxScenario(
         source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT HoH, $30,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -977,6 +995,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 73,200-73,300 -> $2,683
     TaxScenario(
         source="VT 2025 IN-111 instructions p.18 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT HoH, $90,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -998,6 +1017,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule Z: 17,179 + 8.75% x (283,250 - 276,850) = 17,739.00; 3% x AGI = 9,000 does not bind -> $17,739
     TaxScenario(
         source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT HoH, $300,000 W2 (2025)",
         year=2025,
         state="VT",
@@ -1019,6 +1039,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 17,500-17,600 -> $588
     TaxScenario(
         source="VT 2024 IN-111 instructions p.15 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT Single, $30,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1040,6 +1061,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule X: 3,393 + 6.6% x (77,500 - 75,000) = 3,558.00 -> $3,558
     TaxScenario(
         source="VT 2024 IN-111 instructions p.13 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT Single, $90,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1061,6 +1083,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule X: 15,675 + 8.75% x (287,500 - 242,000) = 19,656.25; 3% x AGI = 9,000 does not bind -> $19,656
     TaxScenario(
         source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT Single, $300,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1082,6 +1105,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 4,900-5,000 -> $166
     TaxScenario(
         source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT MFJ, $30,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1103,6 +1127,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 64,900-65,000 -> $2,176
     TaxScenario(
         source="VT 2024 IN-111 instructions p.18 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT MFJ, $90,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1124,6 +1149,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule Y-1: 10,159 + 7.6% x (274,950 - 193,300) = 16,364.40; 3% x AGI = 9,000 does not bind -> $16,364
     TaxScenario(
         source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT MFJ, $300,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1145,6 +1171,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 13,800-13,900 -> $464
     TaxScenario(
         source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT HoH, $30,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1166,6 +1193,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: row 73,800-73,900 -> $2,788
     TaxScenario(
         source="VT 2024 IN-111 instructions p.18 (tax-table)",
+        state_evidence=VT_EVIDENCE,
         description="VT HoH, $90,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1187,6 +1215,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT tax: Schedule Z: 16,647 + 8.75% x (283,800 - 268,300) = 18,003.25; 3% x AGI = 9,000 does not bind -> $18,003
     TaxScenario(
         source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EVIDENCE,
         description="VT HoH, $300,000 W2 (2024)",
         year=2024,
         state="VT",
@@ -1784,6 +1813,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35, p.38; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $12k wages (2024)",
         year=2024,
         state="WI",
@@ -1796,6 +1826,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35, p.38; tax-table (row 6,200-6,300)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $20k wages (2024)",
         year=2024,
         state="WI",
@@ -1809,6 +1840,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35, p.41; tax-table (row 51,000-51,100)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $60k wages (2024)",
         year=2024,
         state="WI",
@@ -1822,6 +1854,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $150k wages (2024)",
         year=2024,
         state="WI",
@@ -1836,6 +1869,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $400k wages (2024)",
         year=2024,
         state="WI",
@@ -1849,6 +1883,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $12k wages (2024)",
         year=2024,
         state="WI",
@@ -1861,6 +1896,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $20k wages (2024)",
         year=2024,
         state="WI",
@@ -1873,6 +1909,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35, p.40; tax-table (row 40,500-40,600)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $60k wages (2024)",
         year=2024,
         state="WI",
@@ -1886,6 +1923,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $150k wages (2024)",
         year=2024,
         state="WI",
@@ -1899,6 +1937,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $400k wages (2024)",
         year=2024,
         state="WI",
@@ -1912,6 +1951,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $12k wages (2024)",
         year=2024,
         state="WI",
@@ -1924,6 +1964,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35, p.38; tax-table (row 2,400-2,500)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $20k wages (2024)",
         year=2024,
         state="WI",
@@ -1937,6 +1978,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.35, p.41; tax-table (row 51,000-51,100)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $60k wages (2024)",
         year=2024,
         state="WI",
@@ -1950,6 +1992,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $150k wages (2024)",
         year=2024,
         state="WI",
@@ -1963,6 +2006,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I24 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2024 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $400k wages (2024)",
         year=2024,
         state="WI",
@@ -1976,6 +2020,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35, p.38; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $12k wages (2025)",
         year=2025,
         state="WI",
@@ -1988,6 +2033,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35, p.38; tax-table (row 5,800-5,900)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $20k wages (2025)",
         year=2025,
         state="WI",
@@ -2001,6 +2047,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35, p.41; tax-table (row 50,600-50,700)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $60k wages (2025)",
         year=2025,
         state="WI",
@@ -2014,6 +2061,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $150k wages (2025)",
         year=2025,
         state="WI",
@@ -2028,6 +2076,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI Single, $400k wages (2025)",
         year=2025,
         state="WI",
@@ -2041,6 +2090,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $12k wages (2025)",
         year=2025,
         state="WI",
@@ -2053,6 +2103,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $20k wages (2025)",
         year=2025,
         state="WI",
@@ -2065,6 +2116,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35, p.40; tax-table (row 39,800-39,900)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $60k wages (2025)",
         year=2025,
         state="WI",
@@ -2078,6 +2130,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $150k wages (2025)",
         year=2025,
         state="WI",
@@ -2091,6 +2144,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI MFJ, $400k wages (2025)",
         year=2025,
         state="WI",
@@ -2104,6 +2158,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35; derived-arithmetic (TI is 0; tax-table row 0-20 is $0)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $12k wages (2025)",
         year=2025,
         state="WI",
@@ -2116,6 +2171,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35, p.38; tax-table (row 1,900-2,000)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $20k wages (2025)",
         year=2025,
         state="WI",
@@ -2129,6 +2185,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.35, p.41; tax-table (row 50,600-50,700)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $60k wages (2025)",
         year=2025,
         state="WI",
@@ -2142,6 +2199,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $150k wages (2025)",
         year=2025,
         state="WI",
@@ -2155,6 +2213,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # I25 p.37, p.44; derived-arithmetic (p. 44 Tax Computation Worksheet)
     TaxScenario(
         source="WI 2025 Form 1 Instructions (official tables)",
+        state_evidence=WI_EVIDENCE,
         description="WI HoH, $400k wages (2025)",
         year=2025,
         state="WI",
@@ -2871,6 +2930,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 20,000 - 6,000 - 2,300 = 11,700; tax: 1,700 x 0.047 = 79.90
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS Single, $20,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2887,6 +2947,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 50,000 - 6,000 - 2,300 = 41,700; tax: 31,700 x 0.047 = 1,489.90
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS Single, $50,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2903,6 +2964,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 150,000 - 6,000 - 2,300 = 141,700; tax: 131,700 x 0.047 = 6,189.90
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS Single, $150,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2919,6 +2981,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 20,000 - 12,000 - 4,600 = 3,400; tax: 0 (under the $10,000 band) = 0.00
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS MFJ, $20,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2935,6 +2998,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS HoH, $20,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2951,6 +3015,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.047 = 1,344.20
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS HoH, $50,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2967,6 +3032,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.047 = 6,044.20
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS HoH, $150,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
@@ -2983,6 +3049,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 20,000 - 6,000 - 2,300 = 11,700; tax: 1,700 x 0.044 = 74.80
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS Single, $20,000 W2, no dependents (2025)",
         year=2025,
         state="MS",
@@ -2999,6 +3066,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 50,000 - 6,000 - 2,300 = 41,700; tax: 31,700 x 0.044 = 1,394.80
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS Single, $50,000 W2, no dependents (2025)",
         year=2025,
         state="MS",
@@ -3015,6 +3083,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 150,000 - 6,000 - 2,300 = 141,700; tax: 131,700 x 0.044 = 5,794.80
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS Single, $150,000 W2, no dependents (2025)",
         year=2025,
         state="MS",
@@ -3031,6 +3100,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 20,000 - 12,000 - 4,600 = 3,400; tax: 0 (under the $10,000 band) = 0.00
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS MFJ, $20,000 W2, no dependents (2025)",
         year=2025,
         state="MS",
@@ -3047,6 +3117,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS HoH, $20,000 W2, no dependents (2025)",
         year=2025,
         state="MS",
@@ -3063,6 +3134,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.044 = 1,258.40
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS HoH, $50,000 W2, no dependents (2025)",
         year=2025,
         state="MS",
@@ -3079,6 +3151,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.044 = 5,658.40
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
+        state_evidence=MS_EVIDENCE,
         description="MS HoH, $150,000 W2, no dependents (2025)",
         year=2025,
         state="MS",

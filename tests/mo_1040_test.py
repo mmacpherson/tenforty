@@ -1,8 +1,9 @@
 """Missouri MO-1040 (2024, 2025) against official Missouri DOR values.
 
-Every expected value was derived blind (session 1b251ce6) from official
-Missouri DOR and IRS publications, retrieved 2026-09-30, never from graph
-output or repo tables:
+Chart examples are transcribed published worked examples; whole-return values
+are independent derivations. Both come from the blind source review (session
+1b251ce6) of official Missouri DOR and IRS publications, retrieved 2026-09-30,
+never from graph output or repo tables:
 
 - 2024 Tax Chart (= MO-1040 Instructions 2024 p.26):
   https://dor.mo.gov/forms/2024%20Tax%20Chart_2024.pdf
@@ -58,7 +59,12 @@ MISSING_FEDERAL_TAX_DEDUCTION = (
         # Worked example, same source: 256 + 4.7% x (12,000 - 9,191) = 388.02 -> $388.
         (2025, 12_000.0, 388.0),
     ],
-    ids=lambda v: str(v),
+    ids=[
+        "published-worked-example-2024-TI3090",
+        "published-worked-example-2024-TI12000",
+        "published-worked-example-2025-TI3090",
+        "published-worked-example-2025-TI12000",
+    ],
 )
 def test_mo_tax_chart_worked_examples(year, taxable_income, expected_tax):
     """The MO rate chart reproduces the official worked examples at taxable income.
@@ -150,7 +156,7 @@ MO_WHOLE_RETURN_SCENARIOS = [
     MO_WHOLE_RETURN_SCENARIOS,
     ids=lambda v: str(v),
 )
-def test_mo_whole_return(
+def test_mo_whole_return_independent_derivation(
     year, filing_status, wages, expected_taxable_income, expected_tax
 ):
     """MO taxable income and tax for a wage-only return match the official forms."""

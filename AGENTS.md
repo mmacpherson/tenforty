@@ -209,6 +209,34 @@ profile's example count:
 - Per-year OTS file splitting for organization
 - Self-referential structs via `ouroboros` for Rust FFI lifetime management
 
+## Independent expected values
+
+Never run tenforty (either backend), its generated graphs, or its tax-table
+implementation to generate or adjust expected tax values. Passing tests are not
+evidence that their expectations are correct. Do not tune expectations or
+tolerances to observed output.
+
+Label each value example with its evidence kind, source URL and page/table/line:
+
+- **Published worked example**: copy the inputs and answer from the official
+  workbook; identify the example. This is the strongest value evidence.
+- **Published table row**: transcribe the row and column from an official table;
+  identify the exact interval, status and year. A derived whole return that uses
+  that row is still an independent derivation, not a published worked example.
+- **Independent derivation**: derive from official instructions without access
+  to our implementation or its output. Preserve the arithmetic, assumptions,
+  rounding, source retrieval date, and the independent derivation's identity.
+- **Unverified legacy**: retain existing tests whose independence is not yet
+  established, but do not present them as tax-law evidence. Existing backend
+  snapshots are regression checks only; do not create new expected-tax snapshots.
+
+It is fine to run tenforty to check independently established expectations.
+Parity, finite-difference and metamorphic tests also remain useful structural
+checks, but cannot establish independent tax values. Record precision tolerances
+from the published rounding/table rules, not from the observed mismatch.
+
+See `docs/validation/state-fixtures/README.md` for the state fixture evidence.
+
 ## Code Review Focus
 
 - Tax calculation correctness

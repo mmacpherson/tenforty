@@ -4,7 +4,8 @@ The silver VT scenarios are strict known failures until the graph models the
 Line 5e personal exemption, so they cannot detect a regression in the rate
 schedule or standard deduction. These checks can.
 
-Values derived blind, session 1b251ce6, retrieved 2026-09-30, from:
+Evidence kind: published table rows / instruction amounts (not worked returns).
+Transcribed blind, session 1b251ce6, retrieved 2026-09-30, from:
   2025: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf
         (p.7 standard deduction, p.13 rate schedules)
   2024: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf

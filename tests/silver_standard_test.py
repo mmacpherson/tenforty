@@ -1,8 +1,9 @@
 """Silver standard tests: formula-derived tax calculations.
 
-These scenarios use expected values computed from published tax bracket formulas.
-They are "correct by construction" - we calculate what the tax SHOULD be based on
-official IRS/state bracket rates and standard deductions.
+These scenarios contain formula-derived claims, not answers that are correct
+merely by construction. State cases explicitly identify independent derivations
+or unverified legacy provenance. Source records and arithmetic, not agreement
+with tenforty, establish the expected values.
 
 Scenarios marked with known_failure document where OTS output differs from the
 formula-derived expected values. Run with --runxfail to see actual discrepancies.

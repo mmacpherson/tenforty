@@ -7,9 +7,9 @@ Three tiers of test scenarios:
    confidence validation - if we match these, we're computing taxes correctly.
 
 2. SILVER STANDARD (SILVER_STANDARD_FEDERAL_SCENARIOS, SILVER_STANDARD_STATE_SCENARIOS):
-   Formula-derived from published tax brackets. These are "correct by construction"
-   using official bracket rates and standard deduction amounts, but aren't from
-   worked examples. Useful for testing bracket boundaries and edge cases.
+   Formula-derived claims require independently established provenance. See each
+   state scenario's state_evidence and arithmetic; unaudited legacy cases are not
+   independent value evidence merely because they are in this collection.
 
 3. OTS BASELINE (REGRESSION_SCENARIOS): Captured OTS library output with NO
    external validation. Only detects unexpected changes in library behavior.
@@ -30,7 +30,10 @@ def scenario_id(scenario: TaxScenario) -> str:
     incomes = str(int(scenario.w2_income))
     if scenario.self_employment_income:
         incomes += f"-SE-{int(scenario.self_employment_income)}"
-    return f"{state_part}-{scenario.year}-{scenario.filing_status}-{incomes}"
+    identity = f"{state_part}-{scenario.year}-{scenario.filing_status}-{incomes}"
+    if scenario.state:
+        identity += f"-{scenario.state_evidence.kind.value}"
+    return identity
 
 
 def run_tax_scenario(scenario: TaxScenario):

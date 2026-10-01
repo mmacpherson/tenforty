@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+from .evidence import UNVERIFIED, TaxEvidence
+
 
 @dataclass
 class TaxScenario:
@@ -35,3 +37,4 @@ class TaxScenario:
     expected_federal_taxable_income: float | None = None
     known_failure: str | None = None
     backend: str | None = None
+    state_evidence: TaxEvidence = UNVERIFIED
