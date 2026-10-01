@@ -625,6 +625,76 @@ def _nj_ots_taxes_at_threshold(case: dict) -> DeltaModel:
     return {"state_total_tax": DeltaRange(-ots_tax - half_width, -ots_tax + half_width)}
 
 
+# --- Massachusetts Form 1 (2024) ---------------------------------------------
+# MA DOR 2024 Form 1 instructions (mass.gov "2024 Form 1 Instructions", as
+# archived at https://taxsim.nber.org/historical_state_tax_forms/MA/2024/dor-2024-inc-form-1-inst_1.pdf
+# because mass.gov refuses scripted downloads; PDF pages): line 2a personal
+# exemption $4,400 / $6,800 / $8,800 (p.8); "If line 21 is less than $24,000,
+# find the proper tax in the tax table" (p.11); No Tax Status at AGI "$8,000 or
+# less if single, $14,400 or less ... head of household, or $16,400 or less"
+# joint (p.12).
+
+MA_2024_PERSONAL_EXEMPTION = {
+    "Single": 4_400.0,
+    "Married/Sep": 4_400.0,
+    "Head_of_House": 6_800.0,
+    "Married/Joint": 8_800.0,
+}
+MA_2024_NO_TAX_STATUS_AGI = {
+    "Single": 8_000.0,
+    "Head_of_House": 14_400.0,
+    "Married/Joint": 16_400.0,
+}
+MA_RATE = 0.05
+MA_TAX_TABLE_CEILING = 24_000.0
+MA_TAX_TABLE_HALF_ROW = 25.0
+
+
+def _ma_case(case: dict) -> bool:
+    return (
+        case["state"] == "MA"
+        and case["year"] == 2024
+        and case["status"] in MA_2024_PERSONAL_EXEMPTION
+    )
+
+
+def _ma_taxable_income(case: dict) -> float:
+    return max(0.0, case["w2"] - MA_2024_PERSONAL_EXEMPTION[case["status"]])
+
+
+def _ma_no_tax_status(case: dict) -> bool:
+    threshold = MA_2024_NO_TAX_STATUS_AGI.get(case["status"])
+    return threshold is not None and case["w2"] <= threshold
+
+
+def _ma_table_tolerance(case: dict) -> float:
+    """Taxable income under $24,000 uses the Form 1 Tax Table ($50 rows).
+
+    OTS prices it as ``(int)(0.05 * (income + 25) + 0.5)``
+    (ots_amalgamation.cpp:80853): $25 above taxable income, then rounded.
+    """
+    if _ma_no_tax_status(case) or _ma_taxable_income(case) >= MA_TAX_TABLE_CEILING:
+        return 0.0
+    return MA_RATE * MA_TAX_TABLE_HALF_ROW + 0.5
+
+
+def _ma24_no_tax_status(case: dict) -> DeltaModel:
+    """Graph omits Massachusetts No Tax Status; OTS applies it.
+
+    Form 1 line 27: a filer whose AGI is at or below the No Tax Status
+    threshold ($8,000 single) owes no tax. OTS zeroes line 28 there
+    (ots_amalgamation.cpp:81166-81191); the graph spec takes line 27 as a
+    zero-default input (tenforty-spec/forms/MAForm1_2024.hs:103). The graph
+    departs from the form (tenforty-b72.26).
+
+    Bound: OTS tax is zero, so the delta is the graph's whole tax, 5% of
+    taxable income after the personal exemption.
+    """
+    if not _ma_case(case) or not _ma_no_tax_status(case):
+        return {}
+    return {"state_total_tax": DeltaRange.exact(MA_RATE * _ma_taxable_income(case))}
+
+
 SIGNATURES = [
     KnownParityDefect(
         "CA-EXEMPTION-STEP",
@@ -692,6 +762,13 @@ SIGNATURES = [
         _nj_ots_taxes_at_threshold,
         {"state": "NJ", "year": 2024, "status": "Single", "w2": 10_000},
     ),
+    KnownParityDefect(
+        "MA-NO-TAX-STATUS",
+        "graph",
+        "tenforty-b72.26",
+        _ma24_no_tax_status,
+        {"state": "MA", "year": 2024, "status": "Single", "w2": 8_000},
+    ),
 ]
 
 
@@ -714,6 +791,7 @@ _TABLE_TOLERANCE = {
     "CA": (_ca_case, _ca_table_tolerance),
     "NY": (_ny_case, _ny_table_tolerance),
     "NJ": (_nj_case, _nj_table_tolerance),
+    "MA": (_ma_case, _ma_table_tolerance),
 }
 
 

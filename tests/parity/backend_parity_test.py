@@ -747,37 +747,13 @@ def test_ma_state_agi_parity(w2_income, filing_status):
     )
 
 
-@pytest.mark.xfail(
-    reason="OTS applies one $4,400 personal exemption for MFJ; graph applies two ($8,800)",
-    strict=True,
-)
+# Excludes Married/Joint returns until MAP-MA-STATUS is fixed: OTS computes them as Single.
 @skip_if_backends_unavailable
-@given(
-    w2_income=st.integers(0, 500_000),
-    filing_status=st.sampled_from(["Single", "Married/Joint"]),
-)
+@given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=200)
-def test_ma_state_tax_parity(w2_income, filing_status):
-    """MA total tax differs because OTS under-counts MFJ personal exemptions."""
-    ots = evaluate_return(
-        year=2024,
-        state="MA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
-    graph = evaluate_return(
-        year=2024,
-        state="MA",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="graph",
-    )
-
-    tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
-    assert tax_diff <= EXACT_TOLERANCE, (
-        f"MA tax diff ${tax_diff:.2f} for {filing_status} w2=${w2_income}"
-    )
+def test_ma_state_tax_parity(w2_income):
+    """MA 2024 tax agrees up to the Tax Table tolerance and No Tax Status."""
+    assert_state_parity("MA", 2024, "Single", w2_income)
 
 
 # === State Parity Tests (2024 — extended) ===
@@ -1769,6 +1745,23 @@ def test_ots_ny_uses_the_rate_schedule_from_65000():
 # computed by hand from the cited instructions, and xfails until src/tenforty
 # passes OTS what it needs. When one flips, return the excluded filing status
 # to the state's parity strategy above.
+
+
+@pytest.mark.xfail(
+    reason="MAP-MA-STATUS (tenforty-r91.2): the MA_1 input map omits filing_status, so OTS reads "
+    "its template default and computes every return as Single",
+    strict=True,
+)
+def test_ots_ma_married_joint_gets_joint_exemption():
+    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800, so line 19 is $11,200."""
+    result = evaluate_return(
+        year=2024,
+        state="MA",
+        filing_status="Married/Joint",
+        w2_income=20_000,
+        backend="ots",
+    )
+    assert result.state_taxable_income == pytest.approx(11_200.0, abs=1.0)
 
 
 @pytest.mark.xfail(
