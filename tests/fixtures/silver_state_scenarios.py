@@ -2389,31 +2389,252 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== MISSISSIPPI SCENARIOS ==========
-    # MS 2024: 0% on first $10,000, then 4.7% above
-    # MS 2025: 0% on first $10,000, then 4.4% above
-    # Personal exemption: Single $6,000, MFJ $12,000, HoH $8,000
-    # Standard deduction: Single $2,300, MFJ $4,600
-    # MS taxable income = MS AGI - exemptions - deductions
+    # MS Form 80-105, both years: 0% on the first $10,000 of taxable income, then
+    # 4.7% (2024) / 4.4% (2025). Filing-status exemption (Line 11): Single $6,000,
+    # MFJ $12,000, HoH $8,000. Standard deduction: Single $2,300, MFJ $4,600,
+    # HoH $3,400. MS taxable income = MS AGI - exemptions - deduction.
     #
-    # MS 2024 Single, $50,000 W2, no dependents
-    # Fed AGI: $50,000, Fed std ded: $14,600, Fed taxable: $35,400
-    # Fed tax: $11,600 * 0.10 + $23,800 * 0.12 = $1,160 + $2,856 = $4,016
-    # MS AGI: $50,000 (imports from federal)
-    # MS exemption: $6,000, MS std ded: $2,300
-    # MS taxable: $50,000 - $6,000 - $2,300 = $41,700
-    # MS tax: ($41,700 - $10,000) * 0.047 = $31,700 * 0.047 = $1,489.90
+    # Precision: Line 17 is rounded half-up to whole dollars on the return
+    # (I24 p.21 / I25 p.22). These fixtures carry the deriver's unrounded product,
+    # matching the silver convention of formula-exact cents (see tenforty-xew).
+    #
+    # HoH rows are the literal "Head of Family box, zero dependents" reading
+    # (Line 11 = $8,000, Line 10 = $0). A legal HoH return needs a dependent
+    # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4), but the graph
+    # backend rejects nonzero num_dependents and MS maps no dependent-exemption
+    # input (tenforty-avr.1), so that variant is not expressible here.
+    #
+    # MFJ: the Schedule of Tax Computation applies the $10,000 zero band per
+    # spouse column; the API carries no spouse split, and the graph applies one
+    # band to joint taxable income. Only MFJ rows where no split can matter
+    # (taxable income under $10,000) come from the deriver.
+    #
+    # MS 2024 Single, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 6,000 - 2,300 = 11,700; tax: 1,700 x 0.047 = 79.90
     TaxScenario(
-        source="MS 2024 Tax Rate Schedule (computed)",
-        description="MS Single, $50,000 W2, no dependents",
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS Single, $20,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=79.90,
+        backend="graph",
+    ),
+    # MS 2024 Single, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 6,000 - 2,300 = 41,700; tax: 31,700 x 0.047 = 1,489.90
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS Single, $50,000 W2, no dependents (2024)",
         year=2024,
         state="MS",
         filing_status="Single",
         w2_income=50000.0,
-        expected_federal_tax=4016.0,
         expected_state_tax=1489.90,
-        expected_federal_agi=50000.0,
         backend="graph",
     ),
+    # MS 2024 Single, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 6,000 - 2,300 = 141,700; tax: 131,700 x 0.047 = 6,189.90
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS Single, $150,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=6189.90,
+        backend="graph",
+    ),
+    # MS 2024 MFJ, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 12,000 - 4,600 = 3,400; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS MFJ, $20,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2024 HoH, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $20,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2024 HoH, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.047 = 1,344.20
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $50,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=50000.0,
+        expected_state_tax=1344.20,
+        backend="graph",
+    ),
+    # MS 2024 HoH, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-24-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
+    #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.047 = 6,044.20
+    TaxScenario(
+        source="MS 2024 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $150,000 W2, no dependents (2024)",
+        year=2024,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=6044.20,
+        backend="graph",
+    ),
+    # MS 2025 Single, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 6,000 - 2,300 = 11,700; tax: 1,700 x 0.044 = 74.80
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS Single, $20,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=74.80,
+        backend="graph",
+    ),
+    # MS 2025 Single, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 6,000 - 2,300 = 41,700; tax: 31,700 x 0.044 = 1,394.80
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS Single, $50,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1394.80,
+        backend="graph",
+    ),
+    # MS 2025 Single, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 6,000 - 2,300 = 141,700; tax: 131,700 x 0.044 = 5,794.80
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS Single, $150,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=5794.80,
+        backend="graph",
+    ),
+    # MS 2025 MFJ, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 12,000 - 4,600 = 3,400; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS MFJ, $20,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Married/Joint",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2025 HoH, $20,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $20,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=20000.0,
+        expected_state_tax=0.00,
+        backend="graph",
+    ),
+    # MS 2025 HoH, $50,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.044 = 1,258.40
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $50,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=50000.0,
+        expected_state_tax=1258.40,
+        backend="graph",
+    ),
+    # MS 2025 HoH, $150,000 W2, no dependents
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
+    # Kind: derived-arithmetic; derived blind, session 1b251ce6.
+    # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.044 = 5,658.40
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (derived blind)",
+        description="MS HoH, $150,000 W2, no dependents (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=150000.0,
+        expected_state_tax=5658.40,
+        backend="graph",
+    ),
+    # Scenarios below are formula-derived in-repo (not from the blind deriver).
+    # The MFJ ones assume all wages belong to one spouse (one $10,000 zero band).
     # MS 2024 MFJ, $100,000 W2, no dependents
     # Fed AGI: $100,000, Fed std ded: $29,200, Fed taxable: $70,800
     # Fed tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
@@ -2431,25 +2652,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=8032.0,
         expected_state_tax=3449.80,
         expected_federal_agi=100000.0,
-        backend="graph",
-    ),
-    # MS 2024 Head of Household, $70,000 W2, no dependents
-    # Fed AGI: $70,000, Fed std ded: $21,900, Fed taxable: $48,100
-    # Fed tax: $16,550 * 0.10 + $31,550 * 0.12 = $1,655 + $3,786 = $5,441
-    # MS AGI: $70,000
-    # MS exemption: $8,000, MS std ded: $4,600
-    # MS taxable: $70,000 - $8,000 - $4,600 = $57,400
-    # MS tax: ($57,400 - $10,000) * 0.047 = $47,400 * 0.047 = $2,227.80
-    TaxScenario(
-        source="MS 2024 Tax Rate Schedule (computed)",
-        description="MS HoH, $70,000 W2, no dependents",
-        year=2024,
-        state="MS",
-        filing_status="Head_of_House",
-        w2_income=70000.0,
-        expected_federal_tax=5441.0,
-        expected_state_tax=2227.80,
-        expected_federal_agi=70000.0,
         backend="graph",
     ),
     # MS 2025 Single, $60,000 W2, no dependents (reduced rate)
