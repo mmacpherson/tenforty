@@ -47,35 +47,35 @@
             "id": 11,
             "op": {
                 "type": "literal",
-                "value": 7400
+                "value": 7650
             }
         },
         "12": {
             "id": 12,
             "op": {
                 "type": "literal",
-                "value": 14850
+                "value": 15300
             }
         },
         "13": {
             "id": 13,
             "op": {
                 "type": "literal",
-                "value": 7400
+                "value": 7650
             }
         },
         "14": {
             "id": 14,
             "op": {
                 "type": "literal",
-                "value": 11100
+                "value": 11450
             }
         },
         "15": {
             "id": 15,
             "op": {
                 "type": "literal",
-                "value": 14850
+                "value": 15300
             }
         },
         "16": {
@@ -251,15 +251,15 @@
                 "head_of_household": [
                     {
                         "rate": 3.35e-2,
-                        "threshold": 64200
+                        "threshold": 66200
                     },
                     {
                         "rate": 6.6e-2,
-                        "threshold": 165700
+                        "threshold": 171000
                     },
                     {
                         "rate": 7.6e-2,
-                        "threshold": 268300
+                        "threshold": 276850
                     },
                     {
                         "rate": 8.75e-2,
@@ -269,15 +269,15 @@
                 "married_joint": [
                     {
                         "rate": 3.35e-2,
-                        "threshold": 79950
+                        "threshold": 82500
                     },
                     {
                         "rate": 6.6e-2,
-                        "threshold": 193300
+                        "threshold": 199450
                     },
                     {
                         "rate": 7.6e-2,
-                        "threshold": 294600
+                        "threshold": 304000
                     },
                     {
                         "rate": 8.75e-2,
@@ -287,15 +287,15 @@
                 "married_separate": [
                     {
                         "rate": 3.35e-2,
-                        "threshold": 39975
+                        "threshold": 41250
                     },
                     {
                         "rate": 6.6e-2,
-                        "threshold": 96650
+                        "threshold": 99725
                     },
                     {
                         "rate": 7.6e-2,
-                        "threshold": 147300
+                        "threshold": 152000
                     },
                     {
                         "rate": 8.75e-2,
@@ -305,15 +305,15 @@
                 "qualifying_widow": [
                     {
                         "rate": 3.35e-2,
-                        "threshold": 79950
+                        "threshold": 82500
                     },
                     {
                         "rate": 6.6e-2,
-                        "threshold": 193300
+                        "threshold": 199450
                     },
                     {
                         "rate": 7.6e-2,
-                        "threshold": 294600
+                        "threshold": 304000
                     },
                     {
                         "rate": 8.75e-2,
@@ -323,15 +323,15 @@
                 "single": [
                     {
                         "rate": 3.35e-2,
-                        "threshold": 47900
+                        "threshold": 49400
                     },
                     {
                         "rate": 6.6e-2,
-                        "threshold": 116000
+                        "threshold": 119700
                     },
                     {
                         "rate": 7.6e-2,
-                        "threshold": 242000
+                        "threshold": 249700
                     },
                     {
                         "rate": 8.75e-2,
