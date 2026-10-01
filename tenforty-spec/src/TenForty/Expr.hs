@@ -32,6 +32,7 @@ module TenForty.Expr
     extractLineRefs,
     extractImports,
     extractTableRefs,
+    extractTableLookups,
     mapExprs,
   )
 where
@@ -222,6 +223,36 @@ extractTableRefs = \case
       <> extractTableRefs e
   Floor e -> extractTableRefs e
   Round e -> extractTableRefs e
+
+extractTableLookups :: Expr u -> Set TableId
+extractTableLookups = \case
+  Lit _ -> Set.empty
+  Line _ -> Set.empty
+  Import _ _ -> Set.empty
+  Add a b -> extractTableLookups a <> extractTableLookups b
+  Sub a b -> extractTableLookups a <> extractTableLookups b
+  Mul a b -> extractTableLookups a <> extractTableLookups b
+  Div a b -> extractTableLookups a <> extractTableLookups b
+  Neg a -> extractTableLookups a
+  BracketTax _ e -> extractTableLookups e
+  TableLookup tid e -> Set.singleton tid <> extractTableLookups e
+  PhaseOut b t r a ->
+    extractTableLookups b
+      <> extractTableLookups t
+      <> extractTableLookups r
+      <> extractTableLookups a
+  ByStatusE bs -> foldMap extractTableLookups bs
+  Max a b -> extractTableLookups a <> extractTableLookups b
+  Min a b -> extractTableLookups a <> extractTableLookups b
+  IfPos c t e -> extractTableLookups c <> extractTableLookups t <> extractTableLookups e
+  IfNeg c t e -> extractTableLookups c <> extractTableLookups t <> extractTableLookups e
+  IfGte a b t e ->
+    extractTableLookups a
+      <> extractTableLookups b
+      <> extractTableLookups t
+      <> extractTableLookups e
+  Floor e -> extractTableLookups e
+  Round e -> extractTableLookups e
 
 mapExprs :: (forall v. Expr v -> Expr v) -> Expr u -> Expr u
 mapExprs f = go

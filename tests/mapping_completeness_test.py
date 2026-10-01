@@ -17,12 +17,31 @@ Two limits, since the title claims more than the check delivers:
   correct wiring cancels — see the Form 8995 line 13 note in INVENTORY.
   Those edges are pinned by value in their form's own test and named here so
   the omission is deliberate rather than an oversight.
+
+The output side has the same failure shape: a public state result field with
+no declared source reads as 0.0, which looks calculated. Every income-tax
+state therefore declares all of its public result fields, per backend and year.
 """
+
+import json
+from functools import cache
 
 import pytest
 
-from tenforty.mappings import NATURAL_TO_NODES
-from tenforty.models import SUBORDINATE_FORM_CONFIG
+from tenforty import evaluate_return, evaluate_returns
+from tenforty.backends.graph import GraphBackend, _forms_dir, _state_output_node
+from tenforty.mappings import (
+    NATURAL_TO_NODES,
+    STATE_FORM_NAMES,
+    STATE_GRAPH_CONFIGS,
+    state_output_lines,
+)
+from tenforty.models import (
+    NATURAL_FORM_CONFIG,
+    STATE_TO_FORM,
+    SUBORDINATE_FORM_CONFIG,
+    OTSState,
+)
 
 OTS_FORM_IDS = {
     "schedule_se": "US_1040_Sched_SE",
@@ -157,3 +176,157 @@ def test_consumer_edge_matches_inventory(form_key, natural):
             f"{'mapped' if actual[backend] else 'unmapped'} but inventory says "
             f"{state!r} — update the inventory in the same PR as the mapping change"
         )
+
+
+STATE_RESULT_FIELDS = (
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+)
+INCOME_TAX_GRAPH_STATES = sorted(
+    (s for s in STATE_GRAPH_CONFIGS if STATE_TO_FORM[s] is not None),
+    key=lambda s: s.value,
+)
+
+
+@cache
+def _graph_output_names(year: int) -> frozenset[str]:
+    graph = json.loads((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
+    nodes = graph["nodes"]
+    return frozenset(nodes[str(node_id)]["name"] for node_id in graph["outputs"])
+
+
+@pytest.mark.parametrize("year", GraphBackend.supported_years)
+@pytest.mark.parametrize("state", INCOME_TAX_GRAPH_STATES, ids=lambda s: s.value)
+def test_graph_state_declares_every_result_field(state, year):
+    """Each public state result field has a graph output node, or it reads 0.0."""
+    lines = state_output_lines(state, year)
+    undeclared = [f for f in STATE_RESULT_FIELDS if f not in lines]
+    assert not undeclared, (
+        f"{state.value} {year}: no graph output declared for {undeclared}; "
+        "InterpretedTaxReturn would report them as a calculated 0.0"
+    )
+    absent = {
+        field: node
+        for field, line in lines.items()
+        if (node := _state_output_node(STATE_FORM_NAMES[state], line))
+        not in _graph_output_names(year)
+    }
+    assert not absent, f"{state.value} {year}: outputs absent from graph: {absent}"
+
+
+OTS_STATE_CONFIGS = sorted(
+    (year, form_id)
+    for year, form_id in NATURAL_FORM_CONFIG
+    if form_id in set(STATE_TO_FORM.values())
+)
+
+
+@pytest.mark.parametrize(("year", "form_id"), OTS_STATE_CONFIGS)
+def test_ots_state_declares_every_result_field(year, form_id):
+    """An OTS state mapping must source every public state result field."""
+    declared = set(NATURAL_FORM_CONFIG[(year, form_id)].output_map.values())
+    undeclared = [
+        f for f in STATE_RESULT_FIELDS if f.removeprefix("state_") not in declared
+    ]
+    assert not undeclared, f"OTS {year}/{form_id} has no output for {undeclared}"
+
+
+@pytest.mark.parametrize("state", ["IN", "LA"])
+def test_ots_refuses_a_state_it_does_not_map(state):
+    """OTS carries no IN or LA mapping, so it must refuse rather than zero-fill."""
+    form_id = STATE_TO_FORM[OTSState(state)]
+    assert (2024, form_id) not in NATURAL_FORM_CONFIG
+    with pytest.raises(ValueError, match=f"OTS does not support 2024/{form_id}"):
+        evaluate_return(
+            year=2024,
+            state=state,
+            filing_status="Single",
+            w2_income=100_000,
+            backend="ots",
+        )
+
+
+def _graph_both_paths(**kw):
+    single = evaluate_return(backend="graph", **kw)
+    batch = evaluate_returns(
+        backend="graph", mode="zip", **{k: [v] for k, v in kw.items()}
+    )
+    for field in STATE_RESULT_FIELDS:
+        assert batch[field][0] == pytest.approx(getattr(single, field), abs=0.01)
+    return single
+
+
+@pytest.mark.requires_graph
+def test_indiana_taxes_its_adjusted_gross_income():
+    """Indiana's taxable income is its AGI, IT-40 line 7.
+
+    2024 Form IT-40 (State Form 154, R23/9-24), page 1,
+    https://forms.in.gov/Download.aspx?id=16344 : line 7 is "Indiana Adjusted
+    Gross Income", and line 8, the state tax, is "multiply line 7 by 3.05%". Line
+    7 is both the state AGI and the income the rate applies to.
+    """
+    result = _graph_both_paths(
+        year=2024, state="IN", filing_status="Single", w2_income=100_000
+    )
+    assert result.state_adjusted_gross_income > 0
+    assert result.state_taxable_income == result.state_adjusted_gross_income
+    assert result.state_total_tax == pytest.approx(
+        0.0305 * result.state_taxable_income, abs=0.01
+    )
+
+
+@pytest.mark.requires_graph
+def test_louisiana_2024_reports_agi_and_taxable_income():
+    """Louisiana 2024 AGI is IT-540 line 7; taxable income nets the exemptions.
+
+    2024 Form IT-540, PDF page 3,
+    https://dam.ldr.la.gov/taxforms/IT-540-WEB-BC-2024-F.pdf , and its
+    instructions, PDF page 3, https://dam.ldr.la.gov/taxforms/IT540i-WEB-2024.pdf :
+    line 7 is federal AGI (1040 line 11), or Louisiana AGI from Schedule E line 5
+    when an adjustment applies; with wages only, both are the $100,000 of wages.
+    Line 9 (tax table income) is line 7 less excess federal itemized deductions,
+    and line 10 looks the tax up by line 9 and the exemption count. The form
+    prints no taxable-income line; the graph takes the exemption amount as a
+    total, so its taxable income is line 9 less that amount.
+    """
+    result = _graph_both_paths(
+        year=2024,
+        state="LA",
+        filing_status="Single",
+        w2_income=100_000,
+        dependent_exemptions=4_500,
+    )
+    assert result.state_adjusted_gross_income == pytest.approx(100_000)
+    assert result.state_taxable_income == pytest.approx(100_000 - 4_500)
+
+
+LA_2025_SINGLE = dict(year=2025, state="LA", filing_status="Single", w2_income=100_000)
+
+
+@pytest.mark.requires_graph
+def test_louisiana_2025_reports_agi_and_taxable_income():
+    """Louisiana 2025: AGI, taxable income, and tax from the IT-540 lines.
+
+    2025 Form IT-540 instructions, PDF page 3,
+    https://dam.ldr.la.gov/taxforms/IT540i-WEB-2025-Revised-7-26.pdf : line 7 is
+    federal AGI; line 8 is $12,500 for filing status 1 (Single); line 10
+    subtracts lines 8 and 9D from line 7 (9D is zero without federal itemizing),
+    100,000 - 12,500 = 87,500; line 11 multiplies line 10 by .03, giving 2,625.
+    """
+    result = evaluate_return(backend="graph", **LA_2025_SINGLE)
+    assert result.state_adjusted_gross_income == pytest.approx(100_000)
+    assert result.state_taxable_income == pytest.approx(87_500)
+    assert result.state_total_tax == pytest.approx(2_625)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.xfail(
+    strict=True,
+    raises=RuntimeError,
+    reason="tenforty-x08: LA 2025 maps dependent_exemptions to la_it540_L6F_amount, "
+    "which the 2025 graph lacks, so every LA 2025 batch raises",
+)
+def test_louisiana_2025_batch_agrees_with_scalar():
+    """The batch path reports the same Louisiana 2025 state results as scalar."""
+    _graph_both_paths(**LA_2025_SINGLE)
