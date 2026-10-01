@@ -440,6 +440,7 @@ function renderAnalysis(analysis, curvePoints, inputName) {
   );
   renderCurve(curvePoints, analysis.results, gradient, inputName);
   renderSensitivities(analysis.gradients);
+  byId("analysis-lab").hidden = false;
   byId("analysis-lab").setAttribute("aria-busy", "false");
 }
 
@@ -653,6 +654,7 @@ function clearResults() {
   const hero = byId("results-heading").closest(".results-hero");
   hero.classList.add("is-stale");
   hero.setAttribute("aria-busy", "false");
+  byId("analysis-lab").hidden = true;
   byId("analysis-lab").setAttribute("aria-busy", "false");
   setText("next-dollar-cents", "—");
   setText("next-dollar-federal", "—");
