@@ -27,6 +27,9 @@ class TaxScenario:
     state_adjustment: float = 0.0
     expected_federal_tax: float | None = None
     expected_state_tax: float | None = None
+    # Official state tax tables price whole-dollar bands; the graph computes the
+    # exact statutory formula. A scenario whose expected value is an official
+    # table row states the band-effect bound it tolerates, with its derivation.
     state_tax_tolerance: float = 0.01
     expected_federal_agi: float | None = None
     expected_federal_taxable_income: float | None = None
