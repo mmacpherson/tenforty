@@ -667,7 +667,8 @@ impl Runtime {
     ///
     /// A natural input such as wage income reaches more than one node, so its
     /// derivative is the sum of the partials over every node it is written to.
-    /// Costs one backward pass regardless of how many are named. Nodes absent
+    /// Ordinary smooth paths cost one backward pass regardless of how many
+    /// are named; table quantization composes planning tangents. Nodes absent
     /// from the graph contribute nothing, which lets callers pass the full
     /// fan-out without first checking which forms are present in the graph.
     fn gradient_multi(&mut self, output: &str, inputs: Vec<String>) -> PyResult<f64> {

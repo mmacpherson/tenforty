@@ -57,6 +57,9 @@ module TenForty.DSL
     bracketTax,
     tableLookup,
     byStatusE,
+    taxTableBandTax,
+    TaxTable,
+    mkTaxTable,
 
     -- * Re-exports
     module TenForty.Types,
@@ -76,6 +79,7 @@ import TenForty.Form hiding (compute, input, worksheet)
 import TenForty.Form qualified as F
 import TenForty.PhaseOut
 import TenForty.Table hiding (TableLookup)
+import TenForty.TaxTable
 import TenForty.Types
 
 form :: FormId -> Int -> FormBuilder () -> Either FormError Form

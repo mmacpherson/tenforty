@@ -5,12 +5,14 @@ use thiserror::Error;
 pub type NodeId = u32;
 pub type TableId = String;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Clone, Error)]
 pub enum GraphError {
     #[error("Cycle detected: {0:?}")]
     CycleDetected(Vec<String>),
     #[error("Node {0} not found")]
     NodeNotFound(NodeId),
+    #[error("Invalid TaxTableQuantize parameters at node {0}: step must be a positive finite integer, output_offset must be finite")]
+    InvalidTaxTableQuantize(NodeId),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -65,6 +67,13 @@ pub struct BracketTable {
     pub brackets: ByStatus<Vec<Bracket>>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TaxTableQuantizeMode {
+    Floor,
+    Round,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Op {
@@ -98,6 +107,13 @@ pub enum Op {
     },
     Floor {
         arg: NodeId,
+    },
+    /// Exact statutory quantization with an identity planning tangent.
+    TaxTableQuantize {
+        arg: NodeId,
+        step: f64,
+        output_offset: f64,
+        mode: TaxTableQuantizeMode,
     },
     Neg {
         arg: NodeId,
@@ -143,6 +159,21 @@ pub struct Import {
 }
 
 impl Op {
+    pub(crate) fn validate(&self, node: NodeId) -> Result<(), GraphError> {
+        if let Self::TaxTableQuantize {
+            step,
+            output_offset,
+            ..
+        } = self
+        {
+            if !step.is_finite() || *step < 1.0 || step.fract() != 0.0 || !output_offset.is_finite()
+            {
+                return Err(GraphError::InvalidTaxTableQuantize(node));
+            }
+        }
+        Ok(())
+    }
+
     pub fn dependencies(&self) -> Vec<NodeId> {
         match self {
             Op::Input | Op::Literal { .. } | Op::Import { .. } => vec![],
@@ -152,7 +183,11 @@ impl Op {
             | Op::Div { left, right }
             | Op::Max { left, right }
             | Op::Min { left, right } => vec![*left, *right],
-            Op::Floor { arg } | Op::Neg { arg } | Op::Abs { arg } | Op::Clamp { arg, .. } => {
+            Op::Floor { arg }
+            | Op::TaxTableQuantize { arg, .. }
+            | Op::Neg { arg }
+            | Op::Abs { arg }
+            | Op::Clamp { arg, .. } => {
                 vec![*arg]
             }
             Op::BracketTax { income, .. } => vec![*income],
@@ -217,7 +252,13 @@ pub struct Graph {
 
 impl Graph {
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
+        let graph: Self = serde_json::from_str(json)?;
+        for (id, node) in &graph.nodes {
+            node.op
+                .validate(*id)
+                .map_err(<serde_json::Error as serde::de::Error>::custom)?;
+        }
+        Ok(graph)
     }
 
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
@@ -282,6 +323,7 @@ impl Graph {
             stack.push(id);
 
             if let Some(node) = graph.nodes.get(&id) {
+                node.op.validate(id)?;
                 for dep in node.op.dependencies() {
                     visit(dep, graph, visited, temp_mark, stack, result)?;
                 }
@@ -359,6 +401,7 @@ impl Graph {
             stack.push(id);
 
             if let Some(node) = graph.nodes.get(&id) {
+                node.op.validate(id)?;
                 let deps = match &node.op {
                     Op::ByStatus { values } => vec![*values.get(filing_status)],
                     other => other.dependencies(),

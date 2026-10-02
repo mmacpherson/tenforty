@@ -60,6 +60,15 @@ fn node_label(node: &crate::graph::Node) -> String {
         Op::Max { .. } => "max".to_string(),
         Op::Min { .. } => "min".to_string(),
         Op::Floor { .. } => "floor".to_string(),
+        Op::TaxTableQuantize {
+            step,
+            output_offset,
+            mode,
+            ..
+        } => format!(
+            "TaxTableQuantize\\n{:?}, step={}, offset={}",
+            mode, step, output_offset
+        ),
         Op::Neg { .. } => "neg".to_string(),
         Op::Abs { .. } => "abs".to_string(),
         Op::Clamp { min, max, .. } => format!("clamp[{},{}]", min, max),
@@ -106,6 +115,7 @@ fn op_type_name(op: &Op) -> &'static str {
         Op::Max { .. } => "max",
         Op::Min { .. } => "min",
         Op::Floor { .. } => "floor",
+        Op::TaxTableQuantize { .. } => "tax_table_quantize",
         Op::Neg { .. } => "neg",
         Op::Abs { .. } => "abs",
         Op::Clamp { .. } => "clamp",

@@ -618,7 +618,7 @@ class GraphBackend:
     def gradient(
         self, tax_input: TaxReturnInput, output: str, wrt: str
     ) -> float | None:
-        """Compute gradient using autodiff."""
+        """Compute sensitivity, using planning tangents for tax-table quantization."""
         if not self.is_available():
             return None
 
@@ -635,7 +635,8 @@ class GraphBackend:
 
         Smooth inputs share one reverse traversal per resolved output. At an
         active piecewise boundary, each affected input retains the scalar API's
-        composed right-hand derivative convention.
+        composed right-hand derivative convention. Table-dependent outputs
+        instead compose scoped planning tangents and directional tie rules.
         """
         if not self.is_available():
             return None

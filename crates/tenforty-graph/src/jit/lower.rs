@@ -1,4 +1,4 @@
-use crate::graph::{Bracket, FilingStatus, Graph, NodeId, Op};
+use crate::graph::{Bracket, FilingStatus, Graph, NodeId, Op, TaxTableQuantizeMode};
 use cranelift::prelude::*;
 use cranelift_module::Module;
 use std::collections::HashMap;
@@ -135,6 +135,26 @@ fn lower_op(
         Op::Floor { arg } => {
             let v = get_node_value(*arg, node_values)?;
             Ok(builder.ins().floor(v))
+        }
+        Op::TaxTableQuantize {
+            arg,
+            step,
+            output_offset,
+            mode,
+        } => {
+            let value = get_node_value(*arg, node_values)?;
+            let step_value = builder.ins().f64const(*step);
+            let scaled = builder.ins().fdiv(value, step_value);
+            let scaled = if *mode == TaxTableQuantizeMode::Round {
+                let half = builder.ins().f64const(0.5);
+                builder.ins().fadd(scaled, half)
+            } else {
+                scaled
+            };
+            let quantized = builder.ins().floor(scaled);
+            let rescaled = builder.ins().fmul(step_value, quantized);
+            let offset = builder.ins().f64const(*output_offset);
+            Ok(builder.ins().fadd(rescaled, offset))
         }
 
         Op::Neg { arg } => {
@@ -396,6 +416,29 @@ fn lower_op_simd(
         Op::Floor { arg } => {
             let v = get_node_value_simd(*arg, node_values)?;
             Ok(builder.ins().floor(v))
+        }
+        Op::TaxTableQuantize {
+            arg,
+            step,
+            output_offset,
+            mode,
+        } => {
+            let value = get_node_value_simd(*arg, node_values)?;
+            let scalar_step = builder.ins().f64const(*step);
+            let step_value = builder.ins().splat(types::F64X2, scalar_step);
+            let scaled = builder.ins().fdiv(value, step_value);
+            let scaled = if *mode == TaxTableQuantizeMode::Round {
+                let half = builder.ins().f64const(0.5);
+                let halves = builder.ins().splat(types::F64X2, half);
+                builder.ins().fadd(scaled, halves)
+            } else {
+                scaled
+            };
+            let quantized = builder.ins().floor(scaled);
+            let rescaled = builder.ins().fmul(step_value, quantized);
+            let scalar_offset = builder.ins().f64const(*output_offset);
+            let offset = builder.ins().splat(types::F64X2, scalar_offset);
+            Ok(builder.ins().fadd(rescaled, offset))
         }
 
         Op::Neg { arg } => {
