@@ -9,10 +9,27 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.parametrize("opt_in", [None, "1", ""])
-def test_local_deadline_opt_in_preserves_profile_counts(opt_in):
+@pytest.mark.parametrize(
+    ("opt_in", "deadline"),
+    [
+        (None, 0.2),
+        ("", 0.2),
+        ("0", 0.2),
+        ("false", 0.2),
+        ("1", None),
+        ("TRUE", None),
+        ("yes", None),
+    ],
+)
+@pytest.mark.parametrize("ci_environment", [None, "true"])
+def test_local_deadline_opt_in_preserves_profile_counts(
+    opt_in, deadline, ci_environment
+):
     """Only explicitly opted-in ci/dev profiles lose inherited deadlines."""
     environment = os.environ.copy()
+    environment.pop("CI", None)
+    if ci_environment is not None:
+        environment["CI"] = ci_environment
     environment.pop("TENFORTY_HYPOTHESIS_NO_DEADLINE", None)
     if opt_in is not None:
         environment["TENFORTY_HYPOTHESIS_NO_DEADLINE"] = opt_in
@@ -32,7 +49,6 @@ def test_local_deadline_opt_in_preserves_profile_counts(opt_in):
         capture_output=True,
         text=True,
     )
-    deadline = 0.2 if opt_in is None else None
     assert json.loads(result.stdout) == {
         "ci": [500, deadline],
         "dev": [50, deadline],

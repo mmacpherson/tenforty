@@ -131,21 +131,24 @@ def pytest_sessionfinish(session, exitstatus):
                     reporter.write_line(f"--require-graph: unexpected skip: {skipped}")
 
 
-_local_deadline_settings = (
-    {"deadline": None} if "TENFORTY_HYPOTHESIS_NO_DEADLINE" in os.environ else {}
+_profile_deadline = (
+    None
+    if os.environ.get("TENFORTY_HYPOTHESIS_NO_DEADLINE", "").lower()
+    in {"1", "true", "yes"}
+    else 200
 )
 
 settings.register_profile(
     "ci",
     max_examples=500,
     suppress_health_check=[HealthCheck.too_slow],
-    **_local_deadline_settings,
+    deadline=_profile_deadline,
 )
 settings.register_profile(
     "dev",
     max_examples=50,
     suppress_health_check=[HealthCheck.too_slow],
-    **_local_deadline_settings,
+    deadline=_profile_deadline,
 )
 # Ad-hoc deep sweep: `uv run pytest --hypothesis-profile=deep`. Reaches rare
 # corners the 500-example ci profile clears only ~40% of the time (bugs with a
