@@ -318,7 +318,18 @@ lookupLineId lid = gets (Map.lookup lid . csLineToId)
 compileForm :: Form -> ComputationGraph
 compileForm frm = case checkUnsupportedLookups frm of
   err : _ -> error (unsupportedLookupMessage (formId frm) err)
-  [] -> compileSupportedForm frm
+  [] -> case checkUnsupportedPhaseOuts frm of
+    UnsupportedPhaseOutParameter lid parameter : _ ->
+      error (unsupportedPhaseOutMessage (formId frm) (Just lid) parameter)
+    _ -> compileSupportedForm frm
+
+unsupportedPhaseOutMessage :: FormId -> Maybe LineId -> PhaseOutParameter -> String
+unsupportedPhaseOutMessage (FormId fid) lid parameter =
+  "Non-literal PhaseOut parameter is not supported by the graph compiler (tenforty-tj2.16): "
+    <> T.unpack fid
+    <> maybe "" ((" -> " <>) . T.unpack . unLineId) lid
+    <> " -> "
+    <> show parameter
 
 -- | Rejects a lookup anywhere in the form, including positions such as
 -- 'PhaseOut' constants that 'compileExpr' never descends into (tenforty-tj2.7).
@@ -637,9 +648,9 @@ compileExpr mname = \case
     fid <- getFormId
     error (tableLookupMessage fid tid)
   PhaseOut base threshold rateE agi -> do
-    baseVal <- evalConstExpr base
+    baseVal <- evalConstExpr PhaseOutBase base
     thresholdVals <- evalStatusExpr threshold
-    rateVal <- evalConstExpr rateE
+    rateVal <- evalConstExpr PhaseOutRate rateE
     aid <- compileExpr Nothing agi
     emitNode mname (OpPhaseOut baseVal thresholdVals rateVal aid)
   ByStatusE bs -> do
@@ -650,22 +661,26 @@ compileExpr mname = \case
     qwId <- compileExpr Nothing (bsQualifyingWidow bs)
     emitNode mname (OpByStatus $ StatusNodeIds sId mjId msId hhId qwId)
 
-evalConstExpr :: Expr u -> Compile Double
-evalConstExpr = \case
+evalConstExpr :: PhaseOutParameter -> Expr u -> Compile Double
+evalConstExpr parameter = \case
   Lit (Amount v) -> pure v
-  _ -> pure 0
+  _ -> do
+    fid <- getFormId
+    error (unsupportedPhaseOutMessage fid Nothing parameter)
 
 evalStatusExpr :: Expr u -> Compile StatusValues
 evalStatusExpr = \case
   ByStatusE bs -> do
-    s <- evalConstExpr (bsSingle bs)
-    mj <- evalConstExpr (bsMarriedJoint bs)
-    ms <- evalConstExpr (bsMarriedSeparate bs)
-    hh <- evalConstExpr (bsHeadOfHousehold bs)
-    qw <- evalConstExpr (bsQualifyingWidow bs)
+    s <- evalConstExpr PhaseOutThreshold (bsSingle bs)
+    mj <- evalConstExpr PhaseOutThreshold (bsMarriedJoint bs)
+    ms <- evalConstExpr PhaseOutThreshold (bsMarriedSeparate bs)
+    hh <- evalConstExpr PhaseOutThreshold (bsHeadOfHousehold bs)
+    qw <- evalConstExpr PhaseOutThreshold (bsQualifyingWidow bs)
     pure $ StatusValues s mj ms hh qw
   Lit (Amount v) -> pure $ StatusValues v v v v v
-  _ -> pure $ StatusValues 0 0 0 0 0
+  _ -> do
+    fid <- getFormId
+    error (unsupportedPhaseOutMessage fid Nothing PhaseOutThreshold)
 
 compileTable :: T.Table -> BracketTable
 compileTable = \case

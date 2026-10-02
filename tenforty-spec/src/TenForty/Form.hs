@@ -31,6 +31,7 @@ module TenForty.Form
     validateForm,
     validateFormSet,
     checkUnsupportedLookups,
+    checkUnsupportedPhaseOuts,
     FormError (..),
     FormSetError (..),
   )
@@ -229,6 +230,7 @@ data FormError
   | -- | A lookup table is defined; the graph compiler has no lowering for it
     -- (tenforty-tj2.7).
     UnsupportedLookupTable TableId
+  | UnsupportedPhaseOutParameter LineId PhaseOutParameter
   deriving stock (Show, Eq)
 
 validateForm :: Form -> [FormError]
@@ -238,6 +240,7 @@ validateForm form =
     ++ checkUndefinedOutputs form
     ++ checkUndefinedTables form
     ++ checkUnsupportedLookups form
+    ++ checkUnsupportedPhaseOuts form
 
 checkUndefinedLines :: Form -> [FormError]
 checkUndefinedLines form =
@@ -306,6 +309,16 @@ checkUnsupportedLookups form =
     ++ [ UnsupportedLookupTable tid
        | Table.TableLookup tid _ <- formTables form
        ]
+
+checkUnsupportedPhaseOuts :: Form -> [FormError]
+checkUnsupportedPhaseOuts form =
+  [ UnsupportedPhaseOutParameter (lineId ln) parameter
+  | ln <- formLines form,
+    parameter <- case lineType ln of
+      LineInput -> []
+      LineComputed expr -> unsupportedPhaseOutParameters expr
+      LineWorksheet _ steps -> foldMap (unsupportedPhaseOutParameters . wsStepExpr) steps
+  ]
 
 lineTableLookups :: Line -> Set TableId
 lineTableLookups ln = case lineType ln of

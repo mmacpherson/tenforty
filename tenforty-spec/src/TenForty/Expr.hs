@@ -33,6 +33,8 @@ module TenForty.Expr
     extractImports,
     extractTableRefs,
     extractTableLookups,
+    PhaseOutParameter (..),
+    unsupportedPhaseOutParameters,
     mapExprs,
   )
 where
@@ -70,6 +72,49 @@ data Expr u where
   Round :: Expr Dollars -> Expr Dollars
 
 deriving instance Show (Expr u)
+
+data PhaseOutParameter = PhaseOutBase | PhaseOutThreshold | PhaseOutRate
+  deriving stock (Show, Eq)
+
+unsupportedPhaseOutParameters :: Expr u -> [PhaseOutParameter]
+unsupportedPhaseOutParameters = go
+  where
+    isLiteral :: Expr v -> Bool
+    isLiteral (Lit _) = True
+    isLiteral _ = False
+
+    isLiteralThreshold :: Expr v -> Bool
+    isLiteralThreshold (ByStatusE values) = all isLiteral values
+    isLiteralThreshold expr = isLiteral expr
+
+    go :: Expr v -> [PhaseOutParameter]
+    go = \case
+      Lit _ -> []
+      Line _ -> []
+      Import _ _ -> []
+      Add a b -> go a <> go b
+      Sub a b -> go a <> go b
+      Mul a b -> go a <> go b
+      Div a b -> go a <> go b
+      Neg a -> go a
+      BracketTax _ a -> go a
+      TableLookup _ a -> go a
+      PhaseOut base threshold reductionRate agi ->
+        [PhaseOutBase | not (isLiteral base)]
+          <> [PhaseOutThreshold | not (isLiteralThreshold threshold)]
+          <> [PhaseOutRate | not (isLiteral reductionRate)]
+          <> go base
+          <> go threshold
+          <> go reductionRate
+          <> go agi
+      ByStatusE values -> foldMap go values
+      Max a b -> go a <> go b
+      Min a b -> go a <> go b
+      IfPos c t e -> go c <> go t <> go e
+      IfNeg c t e -> go c <> go t <> go e
+      IfGte a b t e -> go a <> go b <> go t <> go e
+      Floor a -> go a
+      Round a -> go a
 
 lit :: Amount u -> Expr u
 lit = Lit
