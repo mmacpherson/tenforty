@@ -64,7 +64,13 @@ QUANTITIES = (
     "income_tax",
     "total_tax",
 )
-REFERENCE_FIELDS = (*QUANTITIES, "amti", "qbi_deduction")
+REFERENCE_FIELDS = (
+    *QUANTITIES,
+    "amti",
+    "qbi_deduction",
+    "standard_deduction",
+    "itemized_deduction",
+)
 
 
 def build_cases() -> list[dict]:
@@ -396,6 +402,8 @@ def run_taxcalc(cases, wage_attribution="primary"):
                 "income_tax": pre_refund_iitax - niit,
                 "total_tax": pre_refund_iitax + setax + amc,
                 "qbi_deduction": float(arr("qbided")[i]),
+                "standard_deduction": float(arr("standard")[i]),
+                "itemized_deduction": float(arr("c04470")[i]),
             }
     return out
 

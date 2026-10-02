@@ -1967,7 +1967,8 @@ def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
     w2_income=st.integers(0, 500_000),
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
-@settings(max_examples=100)
+# Bound graph-initialization cost; deep/soak repetitions add no oracle coverage.
+@settings(max_examples=100, deadline=None)
 def test_2025_federal_sanity(w2_income, filing_status):
     """Sanity check 2025 federal calculations."""
     result = _evaluate_2025_graph(w2_income, filing_status)

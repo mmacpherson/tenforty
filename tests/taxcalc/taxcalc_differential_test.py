@@ -277,6 +277,8 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                 "iitax": iitax,
                 "refund": refund,
                 "qbi_deduction": float(arr("qbided")[row]),
+                "standard_deduction": float(arr("standard")[row]),
+                "itemized_deduction": float(arr("c04470")[row]),
             }
     return out
 

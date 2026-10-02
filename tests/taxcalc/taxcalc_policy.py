@@ -220,15 +220,22 @@ def _f19_deduction_choice_rule(
     graph, which is why the differential went red on `[graph]` about half the time
     it was run. Cf. F14, the other signature that excuses both engines.
 
-    The predicate identifies the structure rather than the outcome: an aggregate
-    above the standard deduction, some preferential income for the surplus to land
-    on, and ordinary income small enough that the surplus cannot displace it.
-    Measured over 8,000 randomized cases it fires on 70 backend-case pairs and
-    catches all 30 real violations -- full recall, and 46x narrower than keying on
-    the aggregate alone. Tracked as tenforty-z31.
+    Ordinary income below the standard deduction does not establish a tie:
+    the surplus can still displace preferential income taxed at a positive rate.
+    Require TaxCalc's selected deductions (`standard` and `c04470`), not an
+    inference from its taxable income or agreement with tenforty's output.
+    Missing selection metadata leaves the comparison unexcused.
+
+    Currently `Standard` means automatic larger-of in tenforty; `Itemized`
+    forces the larger aggregate in the cases eligible here. tenforty-q3r will
+    make `Auto` automatic and `Standard` forced. That change must update this
+    mode guard and its positive tie tests: forced Standard has no F19 delta.
+    TaxCalc always chooses best-of independently of the requested mode.
     """
     std = STANDARD_DEDUCTION.get((case.get("year", 2024), case.get("status", "")))
     if std is None or case.get("itemized", 0) <= std:
+        return {}
+    if case.get("std_or_item", "Standard") not in {"Standard", "Itemized"}:
         return {}
     if _preferential_income(case) <= 0:
         return {}
@@ -238,7 +245,12 @@ def _f19_deduction_choice_rule(
         return {}
     if _ordinary_income(case) > std:
         return {}
-    if reference is None:
+    # If age/blind additions enter this domain, std must include those additions.
+    if (
+        reference is None
+        or reference.get("standard_deduction") != std
+        or reference.get("itemized_deduction") != 0.0
+    ):
         return {}
     difference = min(
         case.get("itemized", 0.0) - std,

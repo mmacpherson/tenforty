@@ -27,7 +27,12 @@ pytest.importorskip("taxcalc")
 pytest.importorskip("pandas")
 
 from .taxcalc_differential_test import taxcalc_batch
-from .taxcalc_policy import evaluate_components
+from .taxcalc_policy import (
+    DeltaRange,
+    _f19_deduction_choice_rule,
+    evaluate_components,
+    unexcused_violations,
+)
 
 # The F14 case: Single 2024, $150k wages, $200k ISO exercise spread, standard
 # deduction. Chosen because the AMT preference is the whole point of the case,
@@ -307,6 +312,11 @@ def test_taxcalc_keeps_the_standard_deduction_when_itemizing_is_free():
     result = taxcalc_batch([case])[0]
     ours = evaluate_components(case, "graph")
 
+    assert result["standard_deduction"] == 23_625.0
+    assert result["itemized_deduction"] == 0.0
+    assert _f19_deduction_choice_rule("graph", case, result) == {
+        "taxable_income": DeltaRange.exact(-32_857.0)
+    }
     # AGI 58,509 less the 2025 Head-of-Household standard deduction of 23,625.
     assert result["taxable_income"] == pytest.approx(34_884.0, abs=0.01)
     # tenforty takes the larger deduction instead: 58,509 less 56,482.
@@ -314,6 +324,30 @@ def test_taxcalc_keeps_the_standard_deduction_when_itemizing_is_free():
     # ... and it costs nothing, which is the whole reason taxable_income is excused.
     assert result["income_tax"] == pytest.approx(ours["income_tax"], abs=0.01)
     assert result["total_tax"] == pytest.approx(ours["total_tax"], abs=0.01)
+
+
+def test_f19_equal_output_qbi_case_is_not_a_known_defect_match():
+    """Itemization that saves preferential-income tax must not activate F19."""
+    case = {
+        **F14_CASE,
+        "w2": 0.0,
+        "se": 383.0,
+        "ltcg": 143_748.0,
+        "itemized": 21_183.0,
+        "iso": 0.0,
+        "qbi_w2_wages": 10_000.0,
+        "qbi_ubia": 231.0,
+        "qbi_is_sstb": True,
+    }
+    result = taxcalc_batch([case])[0]
+    ours = evaluate_components(case, "graph")
+
+    assert result["standard_deduction"] == 0.0
+    assert result["itemized_deduction"] == case["itemized"]
+    for quantity, actual in ours.items():
+        assert actual == pytest.approx(result[quantity], abs=0.01), quantity
+    assert _f19_deduction_choice_rule("graph", case, result) == {}
+    assert unexcused_violations(case, "graph", result, None) == []
 
 
 def test_refundable_credit_does_not_change_pre_refund_tax_contract():

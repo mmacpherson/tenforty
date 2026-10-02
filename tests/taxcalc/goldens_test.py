@@ -97,6 +97,20 @@ def test_golden_grid_keeps_nonvacuous_boundary_strata():
     assert any(case["stcg"] < 0.0 or case["ltcg"] < 0.0 for case in cases)
 
 
+def test_golden_grid_preserves_reference_deduction_selection():
+    """Offline F19 classification requires the oracle's selected deductions."""
+    for case in PAYLOAD["cases"]:
+        for reference in (case["expected"], case["expected_spouse_attr"]):
+            if reference is None:
+                continue
+            assert reference["standard_deduction"] >= 0.0
+            assert reference["itemized_deduction"] >= 0.0
+            assert (
+                reference["standard_deduction"] == 0.0
+                or reference["itemized_deduction"] == 0.0
+            )
+
+
 @pytest.mark.skipif(
     not os.environ.get("TENFORTY_TAXCALC"),
     reason="live TaxCalc version is checked only under the oracle gate",

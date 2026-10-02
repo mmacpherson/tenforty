@@ -139,6 +139,96 @@ def test_f19_does_not_model_amt_sensitive_deduction_choice():
     assert _f19_deduction_choice_rule("ots", case, {"taxable_income": 1_753.0}) == {}
 
 
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+def test_f19_does_not_match_when_taxcalc_selected_itemization(backend):
+    """The minimized QBI-suite failure is agreement, not a deduction-choice tie."""
+    case = _case(
+        se=383.0,
+        ltcg=143_748.0,
+        qual_div=0.0,
+        itemized=21_183.0,
+        std_or_item="Standard",
+        qbi_w2_wages=10_000.0,
+        qbi_ubia=231.0,
+        qbi_is_sstb=True,
+    )
+    reference = {
+        "taxable_income": 122_948.0,
+        "standard_deduction": 0.0,
+        "itemized_deduction": 21_183.0,
+    }
+
+    assert _f19_deduction_choice_rule(backend, case, reference) == {}
+
+
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+@pytest.mark.parametrize("mode", ["Standard", "Itemized"])
+def test_f19_keeps_the_exact_delta_for_the_real_standard_deduction_tie(backend, mode):
+    """Current Standard means auto; only the reference keeps standard in this tie."""
+    case = _case(
+        year=2025,
+        status="Head_of_House",
+        ltcg=58_509.0,
+        itemized=56_482.0,
+        std_or_item=mode,
+    )
+    reference = {
+        "taxable_income": 34_884.0,
+        "standard_deduction": 23_625.0,
+        "itemized_deduction": 0.0,
+    }
+
+    assert _f19_deduction_choice_rule(backend, case, reference) == {
+        "taxable_income": DeltaRange.exact(-32_857.0)
+    }
+
+
+@pytest.mark.parametrize(
+    "selection",
+    [
+        {},
+        {"standard_deduction": 23_625.0},
+        {"itemized_deduction": 0.0},
+        {"standard_deduction": 0.0, "itemized_deduction": 0.0},
+        {"standard_deduction": 23_625.0, "itemized_deduction": 1.0},
+    ],
+)
+def test_f19_requires_affirmative_reference_deduction_selection(selection):
+    """Taxable income alone cannot establish which deduction the oracle selected."""
+    case = _case(
+        year=2025,
+        status="Head_of_House",
+        ltcg=58_509.0,
+        itemized=56_482.0,
+        std_or_item="Standard",
+    )
+
+    assert (
+        _f19_deduction_choice_rule(
+            "graph", case, {"taxable_income": 34_884.0, **selection}
+        )
+        == {}
+    )
+
+
+def test_f19_does_not_assume_the_future_auto_mode_has_been_implemented():
+    """q3r must deliberately update the automatic-mode assumption and tie tests."""
+    case = _case(
+        year=2025,
+        status="Head_of_House",
+        ltcg=58_509.0,
+        itemized=56_482.0,
+        std_or_item="Auto",
+    )
+    reference = {
+        "taxable_income": 34_884.0,
+        "standard_deduction": 23_625.0,
+        "itemized_deduction": 0.0,
+    }
+
+    assert _f19_deduction_choice_rule("graph", case, reference) == {}
+
+
 def test_f22_is_a_signed_correction_to_the_correct_amt_path():
     """OTS can remove only the tax effect of the unused deduction floor."""
     case = _case(
