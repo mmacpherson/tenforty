@@ -321,12 +321,6 @@ def test_louisiana_2025_reports_agi_and_taxable_income():
 
 
 @pytest.mark.requires_graph
-@pytest.mark.xfail(
-    strict=True,
-    raises=RuntimeError,
-    reason="tenforty-x08: LA 2025 maps dependent_exemptions to la_it540_L6F_amount, "
-    "which the 2025 graph lacks, so every LA 2025 batch raises",
-)
 def test_louisiana_2025_batch_agrees_with_scalar():
     """The batch path reports the same Louisiana 2025 state results as scalar."""
     _graph_both_paths(**LA_2025_SINGLE)

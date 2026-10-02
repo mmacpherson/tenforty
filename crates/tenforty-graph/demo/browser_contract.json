@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "59bf39656c342faee1056f8b7728e9fe621988034e863ffd6130cd39e947464a"
+        "sha256": "c8f25c9facac4b616d2155791c1decba5229f91f2843f83937361455b07f3641"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "4f80c5c563d9b4e3a6679fd470fec5aed847418318cc565d85f53d01e06dfaf1"
+        "sha256": "d3b9c25b5c4561bdc7a8397a4265fad3ea4829e450d5c86dcdf07c5cf52123b5"
       }
     }
   },
@@ -772,9 +772,7 @@
       "kind": "state_income_tax",
       "input_nodes": {
         "2024": {},
-        "2025": {
-          "itemized_deductions": ["la_it540_L8_itemized"]
-        }
+        "2025": {}
       },
       "output_nodes": {
         "2024": {
@@ -789,7 +787,7 @@
         }
       },
       "unsupported_inputs": {
-        "2024": ["itemized_deductions"],
+        "2024": [],
         "2025": []
       }
     },

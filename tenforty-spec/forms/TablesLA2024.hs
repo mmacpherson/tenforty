@@ -50,9 +50,10 @@ louisianaBracketsTable2024 =
 --
 -- Single/MFS: $4,500 base
 -- MFJ/QW: $9,000 base
--- HoH: $4,500 base
+-- HoH: $9,000 base (2024 Tax Table, Head of Household header, PDF page 7,
+-- https://dam.ldr.la.gov/taxforms/IT540(2024)D13%20TT.pdf )
 laStandardDeduction2024 :: ByStatus (Amount Dollars)
-laStandardDeduction2024 = byStatus 4500 9000 4500 4500 9000
+laStandardDeduction2024 = byStatus 4500 9000 4500 9000 9000
 
 -- | 2024 Louisiana dependent exemption amount ($1,000 per exemption over base)
 -- Source: Louisiana Form IT-540 (2024) Instructions page 4 and tax table header

@@ -17,13 +17,14 @@ laIT540_2025 = form "la_it540" 2025 $ do
     keyOutput "L7" "federal_agi" "Federal adjusted gross income" $
       federalAgi .+. dollars 0
 
-  -- Line 8: Louisiana Standard Deduction or Louisiana Itemized Deductions
-  -- Compare itemized (input) vs standard (table)
-  l8_itemized <- keyInput "L8_itemized" "itemized_deductions" "Louisiana itemized deductions"
-  l8_std <-
-    interior "L8_std" "standard_deduction" $
+  -- Line 8: Louisiana standard deduction. Louisiana has no itemized
+  -- deduction in 2025; lines 9A-9D allow only federal medical and dental
+  -- expenses above a fixed amount, which this spec does not model.
+  -- Source: 2025 IT-540 instructions, PDF page 3,
+  -- https://dam.ldr.la.gov/taxforms/IT540i-WEB-2025-Revised-7-26.pdf
+  l8 <-
+    interior "L8" "standard_deduction" $
       byStatusE (fmap lit laStandardDeduction2025)
-  l8 <- interior "L8" "deduction_amount" $ greaterOf l8_itemized l8_std
 
   -- Line 9: Louisiana Taxable Income (federal AGI minus deduction)
   l9 <-

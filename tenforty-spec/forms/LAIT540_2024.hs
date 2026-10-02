@@ -45,21 +45,37 @@ laIT540_2024 = form "la_it540" 2024 $ do
   -- 6E: Dependents for adoption deduction (subtract from 6D)
   -- 6F: Net exemptions (6D - 6E)
 
-  -- The tax table applies $4,500/$9,000 base + $1,000 per additional exemption
-  -- We accept the total exemption/deduction amount as input
-  -- Users compute: base + (num_additional_exemptions * $1,000)
-  -- where base = $4,500 (Single/MFS/HoH) or $9,000 (MFJ/QW)
+  -- The tax table applies the combined personal exemption-standard deduction
+  -- ($4,500 Single/MFS; $9,000 MFJ/QSS/HoH) plus $1,000 per additional
+  -- exemption. We accept that total exemption amount as input.
+  -- Source: 2024 Louisiana Tax Table headers, PDF pages 1, 3 and 7,
+  -- https://dam.ldr.la.gov/taxforms/IT540(2024)D13%20TT.pdf
   totalExemptions <- keyInput "L6F_amount" "exemption_amount" "Total personal exemption and dependent deductions"
 
-  -- Taxable income
-  l10_taxable <-
+  -- Taxable income: the form prints no taxable-income line; this is the
+  -- income left once the exemptions are deducted.
+  _ <-
     keyOutput "L10_taxable" "la_taxable_income" "Louisiana taxable income" $
       l9 `subtractNotBelowZero` totalExemptions
 
-  -- Line 10: Louisiana Tax (from brackets)
+  -- Line 10: Louisiana Tax. The exemptions are deducted from the lowest
+  -- bracket first and then the remaining brackets in increasing order (La. R.S.
+  -- 47:32(A)(1), 294, 295(B)), so they are worth the tax on their own amount
+  -- at the lowest rates, not the tax at the taxpayer's top rate.
+  -- Source: Revenue Information Bulletin 25-012, PDF page 1, note 1,
+  -- https://dam.ldr.la.gov/lawspolicies/RIB-25-012-Louisiana-Individual-Income-Tax-Reform-1.pdf
+  -- The 2024 tax table reproduces this: Single, tax table income $50,000 to
+  -- \$50,250, one exemption, $1,466 = tax on $50,125 ($1,549.06) less tax on
+  -- \$4,500 ($83.25).
+  l10_income_tax <-
+    interior "L10_income_tax" "tax_on_tax_table_income" $
+      bracketTax "la_brackets_2024" l9
+  l10_exemption_tax <-
+    interior "L10_exemption_tax" "tax_on_exemptions" $
+      bracketTax "la_brackets_2024" totalExemptions
   l10 <-
     keyOutput "L10" "la_tax" "Louisiana income tax" $
-      bracketTax "la_brackets_2024" l10_taxable
+      l10_income_tax `subtractNotBelowZero` l10_exemption_tax
 
   -- Line 11: Nonrefundable Priority 1 Credits
   l11 <- keyInput "L11" "priority1_credits" "Nonrefundable Priority 1 Credits"

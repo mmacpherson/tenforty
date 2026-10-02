@@ -15,11 +15,12 @@ from ..mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
-    STATE_NATURAL_TO_NODE,
     derived_chain_factor,
+    state_natural_to_node,
     state_output_lines,
 )
 from ..models import (
+    NATURAL_FORM_CONFIG,
     STATE_TO_FORM,
     InterpretedTaxReturn,
     OTSDeductionType,
@@ -89,6 +90,79 @@ def _state_output_node(form_name: str, line_name: str) -> str:
     if "_" in line_name and not line_name.startswith("L"):
         return line_name
     return f"{form_name}_{line_name}"
+
+
+def _lowered_input_nodes(
+    natural_name: str, state: OTSState | None, year: int
+) -> list[str]:
+    """Every graph input node one natural input is written to, in one tax year.
+
+    Scalar and batch evaluation both lower through this, so a natural reaches the
+    same nodes, and is unsupported in the same cases, on either path.
+    """
+    nodes = list(NATURAL_TO_NODES.get(natural_name, []))
+    state_node = state_natural_to_node(state, year).get(natural_name)
+    if state_node:
+        nodes.append(state_node)
+    return nodes
+
+
+@lru_cache(maxsize=4)
+def _graph_input_names(year: int) -> frozenset[str]:
+    return frozenset(_load_resolved_graph(year).input_names())
+
+
+def _require_input_nodes(
+    natural_name: str, node_names: list[str], state: OTSState | None, year: int
+) -> None:
+    """Reject a mapping that names a node absent from the year's graph.
+
+    A mapped node is required whatever the value: a zero that has nowhere to go
+    is the same mapping defect as a nonzero one, and checking only nonzero
+    values is what let scalar evaluation pass a mapping batch evaluation
+    rejected.
+    """
+    missing = [n for n in node_names if n not in _graph_input_names(year)]
+    if missing:
+        raise RuntimeError(
+            "Graph backend mapping error: expected input node not found.\n"
+            f"Year: {year}\n"
+            f"State: {state.value if state else None}\n"
+            f"Natural field: {natural_name}\n"
+            f"Expected node: {', '.join(missing)}"
+        )
+
+
+def _ots_maps_inputs(names: list[str], state: OTSState | None, year: int) -> bool:
+    """Whether OTS computes this year's return for the state and reads every input."""
+    forms = ["US_1040"]
+    state_form = STATE_TO_FORM.get(state) if state is not None else None
+    if state_form is not None:
+        forms.append(state_form)
+    configs = [NATURAL_FORM_CONFIG.get((year, form)) for form in forms]
+    if any(config is None for config in configs):
+        return False
+    return all(any(name in config.input_map for config in configs) for name in names)
+
+
+def _raise_unsupported(
+    unsupported: list[tuple[str, object]], state: OTSState | None, year: int
+) -> None:
+    if not unsupported:
+        return
+    details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
+    if _ots_maps_inputs([name for name, _ in unsupported], state, year):
+        remedy = "Provide these as 0 for now, or use backend='ots'."
+    else:
+        remedy = (
+            "Provide these as 0; the OTS backend does not compute them for this "
+            "return either."
+        )
+    raise NotImplementedError(
+        "Graph backend does not yet support some non-zero inputs.\n"
+        f"{remedy}\n"
+        f"Unsupported inputs:\n{details}"
+    )
 
 
 def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
@@ -170,54 +244,20 @@ class GraphBackend:
         # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
         natural_values = inputs_dict
 
+        year = tax_input.year.value
         unsupported: list[tuple[str, object]] = []
-        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
-
         for natural_name, value in natural_values.items():
+            node_names = _lowered_input_nodes(natural_name, tax_input.state, year)
+            _require_input_nodes(natural_name, node_names, tax_input.state, year)
             if value == 0 or value is None:
                 continue
-
-            handled = False
-
-            # 1. Check Federal mapping (primary + subordinate nodes)
-            if natural_name in NATURAL_TO_NODES:
-                node_names = NATURAL_TO_NODES[natural_name]
-                for i, node_name in enumerate(node_names):
-                    try:
-                        evaluator.set(node_name, float(value))
-                        handled = True
-                    except Exception as exc:
-                        if i == 0:
-                            raise RuntimeError(
-                                "Graph backend mapping error: expected input node not found.\n"
-                                f"Natural field: {natural_name}\n"
-                                f"Expected node: {node_name}"
-                            ) from exc
-
-            # 2. Check State mapping
-            if natural_name in state_mapping:
-                node_name = state_mapping[natural_name]
-                try:
-                    evaluator.set(node_name, float(value))
-                    handled = True
-                except Exception as exc:
-                    raise RuntimeError(
-                        "Graph backend mapping error: expected state input node not found.\n"
-                        f"State: {tax_input.state.value if tax_input.state else None}\n"
-                        f"Natural field: {natural_name}\n"
-                        f"Expected node: {node_name}"
-                    ) from exc
-
-            if not handled:
+            if not node_names:
                 unsupported.append((natural_name, value))
+                continue
+            for node_name in node_names:
+                evaluator.set(node_name, float(value))
 
-        if unsupported:
-            details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
-            raise NotImplementedError(
-                "Graph backend does not yet support some non-zero inputs.\n"
-                "Provide these as 0 for now, or use backend='ots'.\n"
-                f"Unsupported inputs:\n{details}"
-            )
+        _raise_unsupported(unsupported, tax_input.state, year)
 
         return evaluator, graph
 
@@ -285,23 +325,14 @@ class GraphBackend:
                     f"Graph backend does not support state returns for {state.value}"
                 )
 
-        # Enforce the same "unsupported non-zero inputs" rule as the single-scenario path.
-        state_mapping = STATE_NATURAL_TO_NODE.get(state, {})
         unsupported: list[tuple[str, object]] = []
         for natural_name, values in inputs.items():
-            if natural_name in NATURAL_TO_NODES or natural_name in state_mapping:
+            if _lowered_input_nodes(natural_name, state, year):
                 continue
-            if any(v not in (0, 0.0, None) for v in values):
-                sample = next((v for v in values if v not in (0, 0.0, None)), None)
+            sample = next((v for v in values if v not in (0, 0.0, None)), None)
+            if sample is not None:
                 unsupported.append((natural_name, sample))
-
-        if unsupported:
-            details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
-            raise NotImplementedError(
-                "Graph backend does not yet support some non-zero inputs.\n"
-                "Provide these as 0 for now, or use backend='ots'.\n"
-                f"Unsupported inputs:\n{details}"
-            )
+        _raise_unsupported(unsupported, state, year)
 
         if mode == "cross":
             # A natural input fans out to several graph nodes, and the Rust
@@ -348,27 +379,11 @@ class GraphBackend:
 
         graph = _load_resolved_graph(year)
 
-        # Map natural input names to graph node names
         graph_inputs = {}
-        input_names = set(graph.input_names())
-
         for natural_name, values in inputs.items():
-            node_names = []
-            if natural_name in NATURAL_TO_NODES:
-                node_names.extend(NATURAL_TO_NODES[natural_name])
-            if natural_name in state_mapping:
-                node_names.append(state_mapping[natural_name])
-
-            for i, node_name in enumerate(node_names):
-                if node_name not in input_names:
-                    if i == 0:
-                        raise RuntimeError(
-                            "Graph backend mapping error: expected input node not found.\n"
-                            f"State: {state.value if state else None}\n"
-                            f"Natural field: {natural_name}\n"
-                            f"Expected node: {node_name}"
-                        )
-                    continue
+            node_names = _lowered_input_nodes(natural_name, state, year)
+            _require_input_nodes(natural_name, node_names, state, year)
+            for node_name in node_names:
                 graph_inputs[node_name] = values
 
         # Output contract as (node, field) pairs — the same federal node->field
@@ -413,7 +428,7 @@ class GraphBackend:
         for nat, nodes in NATURAL_TO_NODES.items():
             for node in nodes:
                 rev_federal.setdefault(node, nat)
-        rev_state = {v: k for k, v in state_mapping.items()}
+        rev_state = {v: k for k, v in state_natural_to_node(state, year).items()}
 
         for node_name, values in input_cols.items():
             natural_name = (
@@ -490,7 +505,7 @@ class GraphBackend:
         if isinstance(var, str) and var.startswith(_ALL_KNOWN_PREFIXES):
             return var
 
-        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+        state_mapping = state_natural_to_node(tax_input.state, tax_input.year.value)
         federal_node = NATURAL_TO_NODE.get(var)
         state_node = state_mapping.get(var)
 
@@ -551,10 +566,7 @@ class GraphBackend:
         if isinstance(var, str) and var.startswith(_ALL_KNOWN_PREFIXES):
             return [var]
 
-        nodes = list(NATURAL_TO_NODES.get(var, []))
-        state_node = STATE_NATURAL_TO_NODE.get(tax_input.state, {}).get(var)
-        if state_node:
-            nodes.append(state_node)
+        nodes = _lowered_input_nodes(var, tax_input.state, tax_input.year.value)
 
         for derived, source in DERIVED_NATURAL_SOURCES.items():
             if (
@@ -630,7 +642,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
-        state_mapping = STATE_NATURAL_TO_NODE.get(tax_input.state, {})
+        state_mapping = state_natural_to_node(tax_input.state, tax_input.year.value)
         natural_names = [
             name
             for name, field in TaxReturnInput.model_fields.items()
