@@ -28,7 +28,7 @@ jobs:
       run: uv sync
 
     - name: Run tests
-      run: uv run pytest --hypothesis-profile=ci
+      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
 
   python-prerelease:
     name: experimental Python 3.15 (${{ matrix.os }})
