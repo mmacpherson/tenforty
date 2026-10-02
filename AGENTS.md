@@ -98,6 +98,7 @@ resolve means the supported range is wrong: fix the code, or tighten the
 - `pip install -e ".[dev]"` — Install in dev mode
 - `pytest` — Run tests (uses dev profile by default)
 - `pytest --hypothesis-profile=ci` — Run with CI profile (500 examples)
+- `TENFORTY_HYPOTHESIS_NO_DEADLINE=1 pytest --hypothesis-profile=ci` — Opt out of inherited deadlines on a loaded local machine (`ci`/`dev` only); report this in gate evidence. Unset preserves the default 200ms CI tripwire; explicit per-test deadlines still apply.
 - `make test-deep` — Deep property sweep (10,000 examples, all cores; ad hoc, ~5 min)
 - `make test-soak` — Soak (100,000 examples, all cores; ad hoc, ~50 min)
 - `python ots/amalgamate.py ots/ots-releases/*.tgz` — Regenerate OTS bindings
