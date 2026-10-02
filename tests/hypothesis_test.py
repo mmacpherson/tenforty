@@ -264,7 +264,7 @@ def test_evaluate_return_properties(
     state_adjustment,
     incentive_stock_option_gains,
 ):
-    assume(is_state_supported(year, state))
+    assume(is_state_supported(year, state, filing_status))
     result = tenforty.evaluate_return(
         year=year,
         state=state,
@@ -377,7 +377,7 @@ def test_qualified_dividends_properly_taxed(
     qualified_dividends,
 ):
     """Test that qualified dividends are properly included in ordinary dividends."""
-    assume(is_state_supported(year, state))
+    assume(is_state_supported(year, state, filing_status))
     # Test with only qualified dividends
     result = tenforty.evaluate_return(
         year=year,

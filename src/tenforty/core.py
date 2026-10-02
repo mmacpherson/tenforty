@@ -6,6 +6,7 @@ import os
 import pathlib
 import re
 from collections import defaultdict
+from collections.abc import Callable
 from typing import Any, Literal
 
 import dotenv
@@ -519,11 +520,16 @@ def map_ots_to_natural_output(
     ots_output: dict[str, Any],
     natural_mapping: dict[str, str],
     retained_keys=frozenset(["tax_bracket", "effective_tax_rate", "amt"]),
+    transforms: dict[str, Callable[[float], float]] | None = None,
 ):
     """Translate line-level OTS output labels into human-readable quantity labels."""
-    return {k: v for k, v in ots_output.items() if k in retained_keys} | {
+    named = {
         natural_mapping[k]: v for k, v in ots_output.items() if k in natural_mapping
     }
+    for name, transform in (transforms or {}).items():
+        if name in named:
+            named[name] = transform(named[name])
+    return {k: v for k, v in ots_output.items() if k in retained_keys} | named
 
 
 def evaluate_natural_input_form(
@@ -706,14 +712,18 @@ def evaluate_natural_input_form(
 
     # Map outputs to natural names.
     federal_natural_output = map_ots_to_natural_output(
-        ots_output["federal"], federal_natural_config.output_map
+        ots_output["federal"],
+        federal_natural_config.output_map,
+        transforms=federal_natural_config.output_transforms,
     )
 
     if ots_output["state"] is None:
         state_natural_output = {}
     else:
         state_natural_output = map_ots_to_natural_output(
-            ots_output["state"], state_natural_config.output_map
+            ots_output["state"],
+            state_natural_config.output_map,
+            transforms=state_natural_config.output_transforms,
         )
 
     return (
