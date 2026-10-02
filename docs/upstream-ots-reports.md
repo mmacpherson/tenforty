@@ -294,3 +294,191 @@ would avoid coupling them to Form 1040 line 15.
 We have not patched the vendored source because this changes a computed tax
 figure. A strict-xfail records the defect until an upstream release carries a
 correction.
+
+---
+
+## 6. NC D-400 line 15 can go negative (finding NC-OTS-NEGATIVE-TAX)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_NC_D400_2024.c:341`
+- `src/taxsolve_NC_D400_2025.c:323`
+
+```c
+ L[12] = L[8] - L12a;
+
+ L[14] = L[13] * L[12];		 /* NC Taxable Income. */
+
+ L[15] = flat_tax_rate * L[14];	 /* NC Income Tax. */
+```
+
+The 2024 D-400 (web-fill version, https://www.ncdor.gov/2024-d-400-web-fill-version/open,
+p.1) reads, for line 15: "Multiply Line 14 by 4.5% (0.0450). If zero or less,
+enter a zero." The D-401 instructions say the same for 2024 and 2025
+(https://www.ncdor.gov/2024-d-401-individual-income-tax-instructions/open, p.14).
+As far as we can tell, the code above multiplies without that floor. A negative
+line 14 therefore produces a negative tax on line 15, which then carries to
+line 17.
+
+The negative line 14 itself appears to be intended. D-401 p.14 says: "If North
+Carolina taxable income is negative, enter the amount on Line 14 and fill in
+the circle." So we are only raising the line 15 tax.
+
+**Minimal reproducer:** 2024, Single, no income. OTS reports income tax of
+**-$573.75** (4.5% of -$12,750). Per line 15 we would have expected $0. The
+2025 release behaves the same way at 4.25% (-$541.88).
+
+**Possible fix:** floor line 15, e.g.
+`L[15] = NotLessThanZero( flat_tax_rate * L[14] );`.
+
+**Possibly related, noticed in passing (not verified against a return):** in the
+Single / Married-filing-separately branch of the child deduction table
+(`taxsolve_NC_D400_2024.c:323`, `taxsolve_NC_D400_2025.c:305`), the fourth row
+reads `if (L[6] <= 500000.0)`. Next to the neighbouring 40,000 and 60,000 rows,
+it looks like it may have been meant as 50,000.
+
+We have not patched the vendored source, because this changes a computed tax
+figure. A strict-xfail legal-value witness and a bounded parity signature
+(`tests/parity/`) record it until an upstream release carries a correction.
+
+---
+
+## 7. VA 760: tax is not zeroed below the filing threshold (finding VA-OTS-BELOW-THRESHOLD)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_VA_760_2024.c:313`, `:333`, `:404`
+- `src/taxsolve_VA_760_2025.c:359`, `:371`, `:451`
+
+The 2024 Form 760 instructions
+(https://www.tax.virginia.gov/sites/default/files/vatax-pdf/2024-760-instructions.pdf,
+PDF p.41, printed p.34) say, directly above the tax rate schedule: "If your
+Virginia Adjusted Gross Income is less than the filing threshold, do not use
+the rate schedule or tax table below. Enter $0 as your tax instead." The
+thresholds are $11,950 (single, married filing separately) and $23,900
+(married filing jointly) (PDF p.9 and p.17). The 2025 instructions say the same
+(PDF p.41).
+
+The program does notice the condition:
+
+```c
+ if (L[9] < min2file)
+  {
+   fprintf(outfile,"\nYour VAGI is less than the minimum required to file a return.\n");
+   ...
+    fprintf(outfile,"You do not need to file return.  Your VA Tax is zero.\n");
+  }
+```
+
+As far as we can tell, though, lines 16 and 18 keep the rate-schedule tax.
+Line 18 is computed as `L[18] = L[16] - L[17];` (`taxsolve_VA_760_2024.c:333`)
+before this check runs, and nothing sets it to zero afterwards.
+
+A related case: line 15 (`L[15] = L[9] - L[14];`, `:313`) is not floored, and
+`TaxRateFunction` returns 2% of a negative amount, so the tax can also go
+negative. The instructions for line 15 say only "Subtract Line 14 from Line 9",
+so we are not raising the negative line 15 itself. But every return where line
+15 is negative is also below the filing threshold here, so its tax should be
+$0 too.
+
+**Minimal reproducers:** 2024, Married filing jointly.
+- $20,000 of wages: VAGI $20,000, below $23,900. OTS reports tax of **$22.80**;
+  we would have expected $0.
+- No income: OTS reports **-$377.20**; we would have expected $0.
+
+**Possible fix:** set lines 16 and 18 to zero when `L[9] < min2file`, before
+the line 18 subtraction.
+
+Not patched locally, for the same reason as report 6.
+
+---
+
+## 8. NY IT-201 line 39 keeps the tax table above $65,000 of taxable income (finding NY-OTS-TABLE-ABOVE-65K)
+
+**Releases:** OpenTaxSolver2024_22.06 (the same code is in OpenTaxSolver2025_23.06)
+**Files:**
+- `src/taxsolve_NY_IT201_2024.c:1525`
+- `src/taxsolve_NY_IT201_2025.c:1524`
+
+```c
+ if (L[33] <= 107650.0)
+   L[39] = TaxRateLookup( L[38], status );
+ else
+   tax_computation_worksheet( status );
+```
+
+As we read the 2024 IT-201-I line 39 instructions:
+- If line 33 is $107,650 or less and line 38 is **less than $65,000**, the NYS
+  tax table applies.
+- If line 38 is $65,000 or more, the NYS tax rate schedule applies.
+
+`TaxRateLookup` prices taxable income at the midpoint of a $50 row and rounds
+to the dollar. Under the condition above it is also used for taxable income
+between $65,000 and $107,650, where the schedule would apply to the exact
+amount.
+
+**Effect:** small, at most about $2. Example: 2024 Single, $89,000 wages,
+taxable income $81,000. The schedule gives $4,271 + 6% x $350 = $4,292.00,
+while OTS reports $4,294 (6% of $81,025, rounded).
+
+**Possible fix:** call `TaxRateLookup` only when `L[38] < 65000.0` and use
+`TaxRateFunction` otherwise, inside the `L[33] <= 107650.0` branch.
+
+Not patched locally, for the same reason as report 6.
+
+---
+
+## 9. NY IT-201: three possible typos outside our parity tests (not yet burned in)
+
+**Releases:** OpenTaxSolver2024_22.06 and OpenTaxSolver2025_23.06
+
+We noticed these while tracing report 8. None falls within the Single and
+Married-filing-jointly W-2 cases our parity suite samples, so we have not
+reproduced them end to end. We offer them tentatively.
+
+- **Head of Household, first bracket ceiling.** `TaxRateFunction` reads
+  `if (income <= 12080.0)` (`taxsolve_NY_IT201_2024.c:548`,
+  `taxsolve_NY_IT201_2025.c:524`), but the next line computes
+  `512.0 + 0.045 * (income - 12800.0)`, and `Report_bracket_info` uses 12800. It
+  looks like a transposition of 12,800. For taxable income from $12,080 to
+  $12,800 the tax would come out up to about $3.60 low.
+- **Worksheet 11 rate.** `ws[2] = 0.0109 * ws[1];` (`taxsolve_NY_IT201_2024.c:852`)
+  seems to intend 10.9%, i.e. 0.109. It only applies above $25,000,000 of AGI.
+- **Worksheet 10 guard.** Single / MFS worksheet 10 is selected on
+  `L[38] <= 5000000`. We may be misreading it, but `>` would seem to be the
+  intended test. As written, taxable income over $5,000,000 appears to fall
+  through to "AGI Case not handled".
+
+---
+
+## 10. NJ-1040 taxes gross income exactly at the filing threshold (finding NJ-OTS-THRESHOLD-BOUNDARY)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_NJ_1040_2024.c:572` (threshold set at :357)
+- `src/taxsolve_NJ_1040_2025.c:578` (threshold set at :363)
+
+```c
+ if ((L[29] < filing_threshold) || (L[43] < 0.0))
+  L[43] = 0.0;
+```
+
+As we read the 2024 NJ-1040 instructions, a return is required only when gross
+income is *more than* the filing threshold: $10,000 for single or
+married-filing-separately filers, $20,000 for everyone else (p.3, "Do You Have
+to File"). The instructions also say you are "not required to file a return if
+your income is at or below the filing threshold" (p.22). That reads as no tax at
+the threshold itself. The strict `<` above zeroes tax only below it, so income
+of exactly $10,000 (or $20,000) is taxed.
+
+**Minimal reproducer:** 2024 Single, $10,000 of wages. OTS reports NJ taxable
+income of $9,000 and tax of **$126**. At $9,999 it reports $0, and at $10,001 it
+reports $126. 2025 behaves the same way. We would have expected $0 at exactly
+$10,000.
+
+**Possible fix:** `if ((L[29] <= filing_threshold) || (L[43] < 0.0))`. The
+"You do not need to file" message a few lines earlier uses the same `<` and
+may want the same change.
+
+We may be misreading the threshold's inclusivity, so we offer this tentatively.
+Not patched locally, for the same reason as report 6.
