@@ -1,7 +1,7 @@
 """State value checks with explicit independent or unverified legacy provenance."""
 
 from .evidence import CA_EVIDENCE, MS_EVIDENCE, VT_EVIDENCE, WI_EVIDENCE
-from .tax_scenario import TaxScenario
+from .tax_scenario import KnownDefect, TaxScenario
 
 
 def _wi_band_tolerance(
@@ -23,6 +23,59 @@ def _wi_band_tolerance(
 
 
 CA_WHOLE_DOLLAR_TOLERANCE = 1.0
+
+
+# Upper bound and rate of each bracket, "over the previous bound, not over this".
+US_SINGLE_2024_BRACKETS = (
+    (11_600.0, 0.10),
+    (47_150.0, 0.12),
+    (100_525.0, 0.22),
+    (191_950.0, 0.24),
+    (243_725.0, 0.32),
+    (609_350.0, 0.35),
+    (float("inf"), 0.37),
+)
+CA_SINGLE_2024_BRACKETS = (
+    (10_756.0, 0.01),
+    (25_499.0, 0.02),
+    (40_245.0, 0.04),
+    (55_866.0, 0.06),
+    (70_606.0, 0.08),
+    (360_659.0, 0.093),
+    (432_787.0, 0.103),
+    (721_314.0, 0.113),
+    (float("inf"), 0.123),
+)
+
+
+def _table_band_tolerance(
+    brackets: tuple[tuple[float, float], ...], low: float, high: float
+) -> float:
+    """Bound on |published tax-table row - exact bracket formula| for one row.
+
+    A tax table prices the band from ``low`` to ``high`` at its midpoint and
+    rounds to the dollar; the graph computes the exact formula (whether it
+    should is the open precision decision, tenforty-xew). If one rate holds
+    across the band, the gap is at most that rate times half the band, plus
+    $0.50 of rounding. A bracket boundary inside the band breaks that bound, so
+    it is rejected rather than estimated.
+    """
+    boundaries = [upper for upper, _ in brackets[:-1]]
+    straddled = [b for b in boundaries if low < b < high]
+    assert not straddled, f"table band {low}-{high} straddles {straddled}"
+    rate = next(rate for upper, rate in brackets if high <= upper)
+    return 0.50 + rate * (high - low) / 2.0
+
+
+def _federal_table_tolerance(low: float, high: float) -> float:
+    """Band bound for an IRS 2024 Tax Table row, Single column (tenforty-xew)."""
+    return _table_band_tolerance(US_SINGLE_2024_BRACKETS, low, high)
+
+
+def _ca_table_tolerance(low: float, high: float) -> float:
+    """Band bound for an FTB 2024 Form 540 Tax Table row, Single (tenforty-xew)."""
+    return _table_band_tolerance(CA_SINGLE_2024_BRACKETS, low, high)
+
 
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
 SILVER_STANDARD_STATE_SCENARIOS = [
@@ -248,6 +301,24 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Brackets: 1% ($0-$10,756), 2% ($10,756-$25,499), 4% ($25,499-$40,245),
     #           6% ($40,245-$55,866), 8% ($55,866-$70,606), 9.3% ($70,606+)
     #
+    # Provenance audit (tenforty-b72.16); labels stay unverified-legacy.
+    # Commit 18f4954 moved these six from exact-formula values to OTS output
+    # ("align with OTS rounding"), federal and state alike. Re-checked against
+    # official tables, retrieved 2026-10-01:
+    # - Federal: each expected value equals the Single column of the IRS 2024
+    #   Tax Table, https://www.irs.gov/pub/irs-prior/i1040tt--2024.pdf. The graph
+    #   computes the exact formula; see _federal_table_tolerance.
+    # - State: the first five equal the FTB 2024 Form 540 Tax Table row less the
+    #   $149 credit, https://www.ftb.ca.gov/forms/2024/2024-540-booklet.pdf
+    #   (pp. 69-72). The $105,540 case was $5,693, the rounded rate-schedule
+    #   formula OTS computes; Form 540 requires the table at TI <= $100,000, and
+    #   row 99,951-100,000 (p. 73) gives $5,840 - $149 = $5,691, now expected.
+    # Each tolerance is the band bound of the case's actual table row
+    # (_table_band_tolerance; table vs formula is tenforty-xew). The $16,296
+    # case keeps the default: its CA row 10,751-10,850 straddles the $10,756
+    # bracket bound, and every row through it is under the $149 credit, so the
+    # expected and graph values are both exactly $0.
+    #
     # CA Single at top of 1% bracket
     # CA taxable: $10,756, CA tax: $10,756 x 0.01 = $107.56, less $149 credit = $0
     # Federal taxable: $1,696, Federal tax: $169.60 (Formula) -> $169 (OTS Tables)
@@ -260,6 +331,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=16296.0,  # CA taxable $10,756 + $5,540 std ded
         expected_federal_tax=169.0,
         expected_state_tax=0.0,
+        federal_tax_tolerance=_federal_table_tolerance(1_675, 1_700),
+        backend="graph",
     ),
     # CA Single in 2% bracket
     # CA taxable: $20,000, CA tax: $107.56 + $184.88 = $292.44, less $149 credit = $143.44
@@ -273,6 +346,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=25540.0,  # CA taxable $20,000 + $5,540 std ded
         expected_federal_tax=1093.0,
         expected_state_tax=143.0,  # OTS rounds to nearest dollar ($143.44 -> $143)
+        federal_tax_tolerance=_federal_table_tolerance(10_900, 10_950),
+        state_tax_tolerance=_ca_table_tolerance(19_950, 20_050),
+        backend="graph",
     ),
     # CA Single in 4% bracket
     # CA taxable: $35,000, CA tax: $402.42 + $380.04 = $782.46, less $149 credit = $633.46
@@ -286,6 +362,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=40540.0,  # CA taxable $35,000 + $5,540 std ded
         expected_federal_tax=2879.0,
         expected_state_tax=633.0,  # OTS rounds to nearest dollar ($633.46 -> $633)
+        federal_tax_tolerance=_federal_table_tolerance(25_900, 25_950),
+        state_tax_tolerance=_ca_table_tolerance(34_950, 35_050),
+        backend="graph",
     ),
     # CA Single in 6% bracket
     # CA taxable: $50,000, CA tax: $992.26 + $585.30 = $1,577.56, less $149 credit = $1,428.56
@@ -299,6 +378,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=55540.0,  # CA taxable $50,000 + $5,540 std ded
         expected_federal_tax=4679.0,
         expected_state_tax=1429.0,  # OTS rounds to nearest dollar ($1428.56 -> $1429)
+        federal_tax_tolerance=_federal_table_tolerance(40_900, 40_950),
+        state_tax_tolerance=_ca_table_tolerance(49_950, 50_050),
+        backend="graph",
     ),
     # CA Single in 8% bracket
     # CA taxable: $65,000, CA tax: $1,929.52 + $730.72 = $2,660.24, less $149 credit = $2,511.24
@@ -312,6 +394,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=70540.0,  # CA taxable $65,000 + $5,540 std ded
         expected_federal_tax=7357.0,
         expected_state_tax=2511.0,  # OTS rounds to nearest dollar ($2511.24 -> $2511)
+        federal_tax_tolerance=_federal_table_tolerance(55_900, 55_950),
+        state_tax_tolerance=_ca_table_tolerance(64_950, 65_050),
+        backend="graph",
     ),
     # CA Single in 9.3% bracket
     # CA taxable: $100,000, CA tax: $3,108.72 + $2,733.64 = $5,842.36, less $149 credit = $5,693.36
@@ -324,7 +409,14 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=105540.0,  # CA taxable $100,000 + $5,540 std ded
         expected_federal_tax=15057.0,
-        expected_state_tax=5693.0,  # OTS rounds to nearest dollar ($5693.36 -> $5693)
+        # FTB 2024 Form 540 Tax Table (TI <= $100,000), row 99,951-100,000 =
+        # $5,840, less $149 = $5,691; booklet p. 73,
+        # https://www.ftb.ca.gov/forms/2024/2024-540-booklet.pdf, retrieved
+        # 2026-10-01. Was $5,693, the rounded rate-schedule formula OTS computes.
+        expected_state_tax=5691.0,
+        federal_tax_tolerance=_federal_table_tolerance(90_900, 90_950),
+        state_tax_tolerance=_ca_table_tolerance(99_950, 100_000),
+        backend="graph",
     ),
     # ---------- CA 2024 official values (tenforty-b72.3) ----------
     # Source: FTB 2024 Personal Income Tax Booklet, Form 540,
@@ -1611,6 +1703,29 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Brackets: 4% ($0-$17,150), 4.5% ($17,150-$23,600), 5.25% ($23,600-$27,900),
     #           5.5% ($27,900-$161,550), 6% ($161,550-$323,200), 6.85% ($323,200+)
     #
+    # Provenance audit (tenforty-b72.16); labels stay unverified-legacy.
+    # Commit 09c8442 replaced the exact-formula values of the first three cases
+    # ($340, $407.50, $2,585) with OTS output ($296, $364, $2,587); the comments
+    # below still carry the superseded arithmetic. Re-checked against official
+    # sources, retrieved 2026-10-01, those OTS values equal the return values:
+    # NYS 2024 Tax Table, https://www.tax.ny.gov/pit/file/tax-tables/it201i-2024.htm,
+    # rows 8,500-8,550 = $341, 10,000-10,050 = $409, 50,000-50,050 = $2,587,
+    # less household credit table 1 (IT-201-I 2024 p. 12,
+    # https://www.tax.ny.gov/pdf/2024/inc/it201i_2024.pdf) of $45, $45, $0.
+    # Federal values equal the IRS 2024 Tax Table Single column (i1040tt--2024).
+    #
+    # The graph's IT-201 (tenforty-spec/forms/NYIT201_2024.hs) computes line 39
+    # as the exact bracket formula, and line 40 household credit is a keyInput
+    # defaulting to 0. IT-201-I p. 12 requires the Tax Table when NYAGI <=
+    # $107,650 and TI < $65,000, and the rate schedule (p. 33) publishes
+    # whole-dollar bases ($600 over $13,900) where exact bracket arithmetic gives
+    # $599.50. The known_defects below record the resulting residuals.
+    #
+    # The three cases with NYAGI > $107,650 stay OTS-only. Their expectations are
+    # the rate-schedule formula without the IT-201-I tax computation worksheets
+    # (pp. 34, 36) the return requires. The graph omits those worksheets too, so
+    # on the graph they would pass for the wrong reason.
+    #
     # NY Single at top of 4% bracket
     # NY taxable: $8,500, NY tax: $8,500 x 0.04 = $340
     # Household Credit (FAGI $16,500): $45. Net Tax: $295.
@@ -1624,6 +1739,18 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=16500.0,  # NY taxable $8,500 + $8,000 std ded
         expected_federal_tax=191.0,
         expected_state_tax=296.0,  # OTS $296 (+$1 rounding)
+        federal_tax_tolerance=_federal_table_tolerance(1_900, 1_925),
+        backend="graph",
+        known_defects=(
+            KnownDefect(
+                "state_total_tax",
+                43.5,
+                44.5,
+                "Graph omits NY household credit (IT-201 line 40 is an input, "
+                "default 0; table 1 gives $45 at FAGI $16,500): +$45. Graph line 39 is "
+                "the exact formula, not Tax Table row 8,500-8,550 ($341): -$1. Net +$44.",
+            ),
+        ),
     ),
     # NY Single in 4.5% bracket
     # NY taxable: $10,000, NY tax: $340 + $67.50 = $407.50
@@ -1638,6 +1765,19 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=18000.0,  # NY taxable $10,000 + $8,000 std ded
         expected_federal_tax=343.0,
         expected_state_tax=364.0,  # OTS $364 (+$1.50 rounding)
+        federal_tax_tolerance=_federal_table_tolerance(3_400, 3_450),
+        backend="graph",
+        known_defects=(
+            KnownDefect(
+                "state_total_tax",
+                43.0,
+                44.0,
+                "Graph omits NY household credit (IT-201 line 40 is an input, "
+                "default 0; table 1 gives $45 at FAGI $18,000): +$45. Graph line 39 is "
+                "the exact formula $407.50, not Tax Table row 10,000-10,050 ($409): "
+                "-$1.50. Net +$43.50.",
+            ),
+        ),
     ),
     # NY Single in 5.5% bracket
     # NY taxable: $50,000, NY tax: $599.50 + $1,985.50 = $2,585
@@ -1652,6 +1792,19 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=58000.0,  # NY taxable $50,000 + $8,000 std ded
         expected_federal_tax=4979.0,
         expected_state_tax=2587.0,  # OTS $2587 (+$2 rounding)
+        federal_tax_tolerance=_federal_table_tolerance(43_400, 43_450),
+        backend="graph",
+        known_defects=(
+            KnownDefect(
+                "state_total_tax",
+                -2.5,
+                -1.5,
+                "Graph NY line 39 is the exact bracket formula: base $599.50 at "
+                "$13,900 vs the published rate-schedule base $600 (-$0.50), and no Tax "
+                "Table pricing for TI < $65,000 (row 50,000-50,050 = $2,587; -$1.50). "
+                "Net -$2. No household credit at FAGI $58,000.",
+            ),
+        ),
     ),
     # NY Single in 6% bracket
     # NY taxable: $100,000, NY tax: $4,270.75 + $1,161 = $5,431.75
@@ -1694,7 +1847,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=116050.0,  # NY taxable $100,000 + $16,050 std ded
         expected_federal_tax=9961.0,
         expected_state_tax=5167.5,
-        known_failure="OTS computes state=$5,223.36 (+$55.86) - Unknown reason (not household credit).",
+        known_failure=(
+            "OTS computes state=$5,223.36 (+$55.86): NYAGI $116,050 > $107,650, so"
+            " OTS applies IT-201-I (2024) p. 34 tax computation worksheet 1"
+            " recapture, 0.168 x ($5,500 - $5,167.50) = $55.86; the expected value"
+            " is the rate-schedule formula without that worksheet."
+        ),
     ),
     # ========== PENNSYLVANIA SCENARIOS ==========
     # PA 2024: Flat 3.07% rate, no standard deduction, no personal exemption

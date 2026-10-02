@@ -21,7 +21,7 @@ import pytest
 from tenforty import evaluate_return
 
 from .helpers import graph_backend_available
-from .tax_scenario import TaxScenario
+from .tax_scenario import KnownDefect, TaxScenario
 
 
 def scenario_id(scenario: TaxScenario) -> str:
@@ -63,44 +63,70 @@ def run_tax_scenario(scenario: TaxScenario):
         kwargs["backend"] = scenario.backend
     result = evaluate_return(**kwargs)
 
+    checks = [
+        (
+            "federal_total_tax",
+            "Federal tax",
+            scenario.expected_federal_tax,
+            scenario.federal_tax_tolerance,
+        ),
+        (
+            "state_total_tax",
+            "State tax",
+            scenario.expected_state_tax,
+            scenario.state_tax_tolerance,
+        ),
+        (
+            "federal_adjusted_gross_income",
+            "AGI",
+            scenario.expected_federal_agi,
+            0.01,
+        ),
+        (
+            "federal_taxable_income",
+            "Taxable income",
+            scenario.expected_federal_taxable_income,
+            0.01,
+        ),
+    ]
+    defects = {defect.quantity: defect for defect in scenario.known_defects}
+    assert len(defects) == len(scenario.known_defects), "one defect per quantity"
+    assert not (defects and scenario.known_failure), "use one xfail mechanism"
+    assert set(defects) <= {quantity for quantity, *_ in checks}, (
+        "defect quantity must be a checked field"
+    )
+
     failures: list[str] = []
-
-    if scenario.expected_federal_tax is not None:
-        if result.federal_total_tax != pytest.approx(
-            scenario.expected_federal_tax, abs=0.01
-        ):
-            failures.append(
-                f"[{scenario.source}] Federal tax {result.federal_total_tax} != "
-                f"expected {scenario.expected_federal_tax}"
+    reproduced: list[KnownDefect] = []
+    for quantity, label, expected, tolerance in checks:
+        if expected is None:
+            continue
+        actual = getattr(result, quantity)
+        if actual == pytest.approx(expected, abs=tolerance):
+            continue
+        defect = defects.get(quantity)
+        delta = actual - expected
+        if defect is not None and defect.minimum <= delta <= defect.maximum:
+            reproduced.append(defect)
+            continue
+        failures.append(
+            f"[{scenario.source}] {label} {actual} != expected {expected}"
+            f" (delta {delta:+.2f})"
+            + (
+                f"; outside known-defect range [{defect.minimum}, {defect.maximum}]"
+                if defect is not None
+                else ""
             )
+        )
 
-    if scenario.expected_state_tax is not None:
-        if result.state_total_tax != pytest.approx(
-            scenario.expected_state_tax, abs=scenario.state_tax_tolerance
-        ):
-            failures.append(
-                f"[{scenario.source}] State tax {result.state_total_tax} != "
-                f"expected {scenario.expected_state_tax}"
+    if defects and not failures:
+        stale = [d for d in scenario.known_defects if d not in reproduced]
+        if stale:
+            pytest.fail(
+                "Known defect no longer reproduces; remove its signature: "
+                + "; ".join(d.reason for d in stale)
             )
-
-    if scenario.expected_federal_agi is not None:
-        if result.federal_adjusted_gross_income != pytest.approx(
-            scenario.expected_federal_agi, abs=0.01
-        ):
-            failures.append(
-                f"[{scenario.source}] AGI {result.federal_adjusted_gross_income} != "
-                f"expected {scenario.expected_federal_agi}"
-            )
-
-    if scenario.expected_federal_taxable_income is not None:
-        if result.federal_taxable_income != pytest.approx(
-            scenario.expected_federal_taxable_income, abs=0.01
-        ):
-            failures.append(
-                f"[{scenario.source}] Taxable income "
-                f"{result.federal_taxable_income} != "
-                f"expected {scenario.expected_federal_taxable_income}"
-            )
+        pytest.xfail("; ".join(d.reason for d in reproduced))
 
     if scenario.known_failure:
         if failures:
