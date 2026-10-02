@@ -21,7 +21,7 @@ import Data.Maybe (fromMaybe)
 import Data.Set qualified as Set
 import Data.Text qualified as T
 import ExprProperties qualified
-import ReferenceEvaluator (evalGraph, evalGraphDetailed)
+import ReferenceEvaluator (evalGraph, evalGraphDetailed, evalGraphNode)
 import System.Environment (lookupEnv)
 import Tables2024
 import Tables2025
@@ -29,7 +29,7 @@ import TablesCA2024
 import TablesCA2025
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
-import TenForty.Expr (Expr (PhaseOut), extractLineRefs, extractTableRefs)
+import TenForty.Expr (Expr (PhaseOut), PhaseOutParameter (..), extractLineRefs, extractTableRefs)
 import TenForty.Table qualified as Table
 import Test.Hspec
 import Test.QuickCheck
@@ -494,6 +494,77 @@ spec n = do
             PhaseOut (tableLookup probeTable (line income)) (dollars 0) (rate 0.1) (line income)
       evaluate (BL.length (compileFormToJSON (unvalidatedWith hiddenInPhaseOut)))
         `shouldThrow` compileRejection
+
+  describe "PhaseOut parameter rejection (tenforty-tj2.16)" $ do
+    let income = LineId "L1a"
+        credit = LineId "L2"
+        validThresholds = byStatusE (byStatus (dollars 100) (dollars 200) (dollars 300) (dollars 400) (dollars 500))
+        literalPhaseOut = PhaseOut (dollars 1000) validThresholds (rate 0.1) (line income)
+        invalidParameters =
+          [ ("computed base", PhaseOutBase, PhaseOut (dollars 500 .+. dollars 500) (dollars 100) (rate 0.1) (line income)),
+            ("line base", PhaseOutBase, PhaseOut (line income) (dollars 100) (rate 0.1) (line income)),
+            ("imported base", PhaseOutBase, PhaseOut (importLine (FormId "source") income) (dollars 100) (rate 0.1) (line income)),
+            ("status-dependent base", PhaseOutBase, PhaseOut validThresholds (dollars 100) (rate 0.1) (line income)),
+            ("computed threshold", PhaseOutThreshold, PhaseOut (dollars 1000) (dollars 50 .+. dollars 50) (rate 0.1) (line income)),
+            ("line threshold", PhaseOutThreshold, PhaseOut (dollars 1000) (line income) (rate 0.1) (line income)),
+            ("computed rate", PhaseOutRate, PhaseOut (dollars 1000) (dollars 100) (rate 0.05 .+. rate 0.05) (line income)),
+            ("status-dependent rate", PhaseOutRate, PhaseOut (dollars 1000) (dollars 100) (byStatusE (byStatus (rate 0.1) (rate 0.2) (rate 0.3) (rate 0.4) (rate 0.5))) (line income))
+          ]
+            <> [ ("computed threshold for " <> show status, PhaseOutThreshold, PhaseOut (dollars 1000) (byStatusE thresholds) (rate 0.1) (line income))
+               | status <- [Single, MarriedJoint, MarriedSeparate, HeadOfHousehold, QualifyingWidow],
+                 let threshold selected = if selected == status then dollars 50 .+. dollars 50 else dollars 100
+                     thresholds = byStatus (threshold Single) (threshold MarriedJoint) (threshold MarriedSeparate) (threshold HeadOfHousehold) (threshold QualifyingWidow)
+               ]
+        probeForm expression = form (FormId "phaseout_probe") 2024 $ do
+          void (input income "Income" "" Interior)
+          void (compute credit "Credit" "" Interior expression)
+          outputs [credit]
+        unvalidated expression =
+          Form
+            { formId = FormId "phaseout_probe",
+              formYear = 2024,
+              formLineMap = Map.fromList [(income, Line income "Income" "" Interior LineInput), (credit, Line credit "Credit" "" Interior (LineComputed expression))],
+              formLineOrder = [income, credit],
+              formOutputIds = Set.singleton credit,
+              formTableMap = Map.empty
+            }
+
+    forM_ invalidParameters $ \(name, parameter, expression) -> do
+      it ("rejects " <> name <> " during form validation") $
+        (formId <$> probeForm expression) `shouldBe` Left (UnsupportedPhaseOutParameter credit parameter)
+      it ("rejects " <> name <> " when validation is bypassed") $
+        evaluate (BL.length (compileFormToJSON (unvalidated expression)))
+          `shouldThrow` errorCall ("Non-literal PhaseOut parameter is not supported by the graph compiler (tenforty-tj2.16): phaseout_probe -> L2 -> " <> show parameter)
+
+    it "rejects a nested phase-out in an inactive branch" $
+      (formId <$> probeForm (ifPos (dollars 1) literalPhaseOut (dollars 0 .+. PhaseOut (line income) (dollars 100) (rate 0.1) (line income))))
+        `shouldBe` Left (UnsupportedPhaseOutParameter credit PhaseOutBase)
+
+    it "rejects an invalid worksheet step" $
+      ( formId
+          <$> form
+            (FormId "phaseout_probe")
+            2024
+            ( do
+                void (input income "Income" "" Interior)
+                void (worksheet credit "Credit" "" Interior [(LineId "W1", "Phase-out", PhaseOut (dollars 1000) (line income) (rate 0.1) (line income))])
+                outputs [credit]
+            )
+      )
+        `shouldBe` Left (UnsupportedPhaseOutParameter credit PhaseOutThreshold)
+
+    it "preserves literal and status-literal parameters for all statuses" $
+      case probeForm literalPhaseOut of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let graph = compileForm frm
+          forM_ [(Single, 950), (MarriedJoint, 960), (MarriedSeparate, 970), (HeadOfHousehold, 980), (QualifyingWidow, 990)] $ \(status, expected) ->
+            evalGraphNode graph status 600 "L2_Credit" `shouldBe` expected
+
+    it "preserves a shared literal threshold and a computed AGI" $
+      case probeForm (PhaseOut (dollars 1000) (dollars 100) (rate 0.1) (line income .+. dollars 100)) of
+        Left err -> expectationFailure (show err)
+        Right frm -> evalGraphNode (compileForm frm) Single 500 "L2_Credit" `shouldBe` 950
 
   describe "Form Compilation" $ do
     forM_ taxYears $ \ty ->
