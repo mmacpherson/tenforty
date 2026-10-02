@@ -38,3 +38,17 @@ CA_EVIDENCE = independent_state_evidence("CA-2024.md")
 MS_EVIDENCE = independent_state_evidence("MS-2024-2025.md")
 VT_EVIDENCE = independent_state_evidence("VT-2024-2025.md")
 WI_EVIDENCE = independent_state_evidence("WI-2024-2025.md")
+LA_TABLE_EVIDENCE = TaxEvidence(
+    EvidenceKind.TABLE_ROW,
+    "docs/validation/state-fixtures/LA-2024.md",
+    "Author agent (tenforty-x08), 2026-10-02, non-blind; LDR sources only",
+)
+# Above-table LA 2024 values: the table's continuation rule plus nearest-dollar
+# rounding, derived non-blind. Not a printed row and not independent, so they stay
+# unverified; the arithmetic is in docs/validation/state-fixtures/LA-2024.md. An
+# unverified case carries no record path (fixture_provenance_test).
+LA_DERIVED_EVIDENCE = TaxEvidence(
+    EvidenceKind.UNVERIFIED,
+    None,
+    "Author agent (tenforty-x08), 2026-10-02, non-blind; had seen graph output",
+)

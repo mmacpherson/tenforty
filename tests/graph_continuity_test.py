@@ -15,20 +15,16 @@ from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
-    STATE_NATURAL_TO_NODE,
+    state_natural_to_node,
 )
 from tenforty.models import OTSState
 
 FEDERAL_TOTAL_TAX = "us_1040_L24_total_tax"
 
-# State inputs that map from a user field but reach no output today: genuine,
-# pre-existing spec gaps (not caused by the one-graph refactor). Keyed by
+# State inputs that map from a user field but reach no output today, keyed by
 # (year, state, natural_field). When one is fixed its case starts passing and
-# this test flags it (self-healing) so the entry gets removed. See tenforty-x08.
-KNOWN_DEAD_STATE_INPUTS = {
-    (2024, "LA", "itemized_deductions"),
-    (2025, "LA", "dependent_exemptions"),
-}
+# this test flags it (self-healing) so the entry gets removed.
+KNOWN_DEAD_STATE_INPUTS: set[tuple[int, str, str]] = set()
 
 
 def _forms_dir() -> str:
@@ -120,8 +116,8 @@ def test_state_inputs_are_not_dead_wires() -> None:
         reachable = _reachable(data, output_names)
 
         for state in OTSState:
-            state_map = STATE_NATURAL_TO_NODE.get(state, {})
-            if not state_map or state not in STATE_GRAPH_CONFIGS:
+            state_map = state_natural_to_node(state, year)
+            if not state_map:
                 continue
             for field, node_name in state_map.items():
                 node_id = name_to_id.get(node_name)
@@ -144,8 +140,7 @@ def test_state_inputs_are_not_dead_wires() -> None:
 def test_state_form_names_have_output_lines() -> None:
     """Any state with a graph form should also declare its output lines."""
     for state, form in STATE_FORM_NAMES.items():
-        if form and state in STATE_NATURAL_TO_NODE:
+        if form:
             assert state in STATE_GRAPH_CONFIGS, (
-                f"{state.value}: has graph form {form} and input mappings but no "
-                "StateGraphConfig"
+                f"{state.value}: has graph form {form} but no StateGraphConfig"
             )

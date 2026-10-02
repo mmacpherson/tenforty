@@ -133,6 +133,20 @@ class TestGraphBackend:
         # Verify result is sane (tax should include tax on gains)
         assert result.federal_total_tax > 0
 
+    def test_graph_refusal_points_to_ots_only_where_ots_reads_the_input(self):
+        """The OTS hint appears only when OTS computes the return and the input."""
+        from tenforty import evaluate_return
+
+        with pytest.raises(NotImplementedError, match="backend='ots'"):
+            evaluate_return(
+                year=2024, w2_income=50_000, num_dependents=1, backend="graph"
+            )
+        with pytest.raises(NotImplementedError) as refusal:
+            evaluate_return(
+                year=2024, w2_income=50_000, dependent_exemptions=1.0, backend="graph"
+            )
+        assert "backend='ots'" not in str(refusal.value)
+
     def test_graph_backend_batch_rejects_unsupported_nonzero_inputs(self):
         """Batch evaluation should be as strict as single-scenario evaluation."""
         from tenforty import evaluate_returns

@@ -1,6 +1,13 @@
 """State value checks with explicit independent or unverified legacy provenance."""
 
-from .evidence import CA_EVIDENCE, MS_EVIDENCE, VT_EVIDENCE, WI_EVIDENCE
+from .evidence import (
+    CA_EVIDENCE,
+    LA_DERIVED_EVIDENCE,
+    LA_TABLE_EVIDENCE,
+    MS_EVIDENCE,
+    VT_EVIDENCE,
+    WI_EVIDENCE,
+)
 from .tax_scenario import KnownDefect, TaxScenario
 
 
@@ -75,6 +82,51 @@ def _federal_table_tolerance(low: float, high: float) -> float:
 def _ca_table_tolerance(low: float, high: float) -> float:
     """Band bound for an FTB 2024 Form 540 Tax Table row, Single (tenforty-xew)."""
     return _table_band_tolerance(CA_SINGLE_2024_BRACKETS, low, high)
+
+
+LA_2024_TABLE_URL = "https://dam.ldr.la.gov/taxforms/IT540(2024)D13%20TT.pdf"
+
+
+def la_2024_table_gap(
+    rate: float,
+    row_low: float,
+    row_high: float,
+    tax_table_income: float,
+    rounding_adjustment: float = 0.0,
+) -> KnownDefect:
+    """Graph-minus-table signature for a 2024 Louisiana tax-table value (tenforty-xew).
+
+    IT-540 line 10 is the tax-table value (2024 IT-540 instructions, PDF page 3).
+    Each $250 row prices its midpoint and rounds to the dollar: every parsed cell
+    of the table equals the lowest-bracket-first formula at the row midpoint
+    within $0.50. Above the last row ($51,000; $101,000 MFJ/QSS) the table adds
+    4.25% of the excess to the last row's value, and that continuation is then
+    rounded to the nearest dollar like every entry ("About This Form", item 4,
+    same page). The graph computes the exact formula at the return's own income,
+    so graph minus the raw table value is ``rate`` times the distance from the
+    row midpoint to that income (capped at the last row's upper edge), plus or
+    minus $0.50 for the printed row's rounding. ``rate`` is the single bracket
+    rate in force across the row; the exemption term is constant within a row
+    and cancels.
+
+    ``rounding_adjustment`` is the independently computed rounded continuation
+    less the raw continuation, for above-table cases; it shifts the center
+    (graph minus rounded value = graph minus raw value minus the adjustment) and
+    does not widen the $0.50 allowance. Returns with more than eight exemptions
+    use a different table rule (reduce income, read column eight) and are out of
+    scope here.
+    """
+    midpoint = (row_low + row_high) / 2.0
+    center = rate * (min(tax_table_income, row_high) - midpoint) - rounding_adjustment
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.50,
+        maximum=center + 0.50,
+        reason=(
+            "LA 2024 line 10 is the tax-table value; the graph prices the exact "
+            "bracket formula rather than the table row (tenforty-xew)"
+        ),
+    )
 
 
 # SILVER_STANDARD_STATE_SCENARIOS: Formula-derived from published state tax brackets.
@@ -4707,7 +4759,13 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # LA 2024: 3-bracket system (1.85%, 3.5%, 4.25%)
     # Single/MFS/HoH: 1.85% up to $12,500, 3.5% $12,500-$50,000, 4.25% over $50,000
     # MFJ/QW: 1.85% up to $25,000, 3.5% $25,000-$100,000, 4.25% over $100,000
-    # Combined personal exemption-standard deduction: Single $4,500, MFJ $9,000 (+ $1,000 per additional exemption)
+    # Combined personal exemption-standard deduction: Single $4,500, MFJ/HoH $9,000 (+ $1,000 per additional exemption)
+    # The exemptions are deducted from the lowest bracket first (La. R.S. 47:32(A)(1),
+    # 294, 295(B); RIB 25-012 PDF page 1 note 1), so the tax is the bracket tax on
+    # tax table income less the bracket tax on the exemption amount. IT-540 line 10
+    # is the 2024 tax table value (LA_2024_TABLE_URL), which prices each $250 row
+    # at its midpoint; the expected values below are table values, and the
+    # formula gap is a known defect (la_2024_table_gap, tenforty-xew).
     #
     # LA 2025: Flat 3% tax
     # Standard deduction: Single $12,500, MFJ/HoH $25,000
@@ -4718,12 +4776,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # LA tax table income (L9): $25,000
     # Exemptions: $4,500 (base, 1 exemption)
     # LA taxable: $25,000 - $4,500 = $20,500
-    # LA tax: $12,500 * 0.0185 + ($20,500 - $12,500) * 0.035
-    #       = $231.25 + $280.00 = $511.25
+    # Tax on $25,000: $12,500 * 0.0185 + $12,500 * 0.035 = $231.25 + $437.50 = $668.75
+    # Tax on $4,500 of exemptions: $4,500 * 0.0185 = $83.25
+    # Formula: $668.75 - $83.25 = $585.50.
+    # Legal value (line 10 is the table): 2024 Tax Table, PDF page 1, Single,
+    # row $25,000-$25,250, column 1 exemption: $590.
     # Federal taxable: $25,000 - $14,600 = $10,400
     # Federal tax: $10,400 * 0.10 = $1,040.00
     TaxScenario(
-        source="LA 2024 Tax Brackets (computed)",
+        source="LA 2024 Tax Table (tax-table)",
         description="LA Single, $25,000 income (2024)",
         year=2024,
         state="LA",
@@ -4731,7 +4792,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=25000.0,
         dependent_exemptions=4500.0,
         expected_federal_tax=1040.00,
-        expected_state_tax=511.25,
+        expected_state_tax=590.00,
+        state_evidence=LA_TABLE_EVIDENCE,
+        known_defects=(la_2024_table_gap(0.035, 25_000, 25_250, 25_000),),
         expected_federal_agi=25000.0,
         backend="graph",
     ),
@@ -4740,12 +4803,19 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # LA tax table income: $60,000
     # Exemptions: $4,500
     # LA taxable: $60,000 - $4,500 = $55,500
-    # LA tax: $12,500 * 0.0185 + $37,500 * 0.035 + $5,500 * 0.0425
-    #       = $231.25 + $1,312.50 + $233.75 = $1,777.50
+    # Tax on $60,000: $12,500 * 0.0185 + $37,500 * 0.035 + $10,000 * 0.0425
+    #       = $231.25 + $1,312.50 + $425.00 = $1,968.75
+    # Tax on $4,500 of exemptions: $4,500 * 0.0185 = $83.25
+    # Formula: $1,968.75 - $83.25 = $1,885.50.
+    # Legal value: 2024 Tax Table, PDF page 2, Single, last row $50,750-$51,000,
+    # column 1: $1,498, "Plus 4.25% of Tax Table Income in Excess of $51,000":
+    # $1,498 + $9,000 x 0.0425 = $1,498 + $382.50 = $1,880.50, rounded to the
+    # nearest dollar (2024 IT-540 instructions, PDF page 3, "About This Form"
+    # item 4), half up: $1,881.
     # Federal taxable: $60,000 - $14,600 = $45,400
     # Federal tax: $11,600 * 0.10 + $33,800 * 0.12 = $1,160 + $4,056 = $5,216.00
     TaxScenario(
-        source="LA 2024 Tax Brackets (computed)",
+        source="LA 2024 Tax Table (tax-table)",
         description="LA Single, $60,000 income, all 3 brackets (2024)",
         year=2024,
         state="LA",
@@ -4753,7 +4823,13 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=60000.0,
         dependent_exemptions=4500.0,
         expected_federal_tax=5216.00,
-        expected_state_tax=1777.50,
+        expected_state_tax=1881.00,
+        state_evidence=LA_DERIVED_EVIDENCE,
+        known_defects=(
+            la_2024_table_gap(
+                0.0425, 50_750, 51_000, 60_000, rounding_adjustment=1881.00 - 1880.50
+            ),
+        ),
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -4762,11 +4838,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # LA tax table income: $30,000
     # Exemptions: $9,000 (base, 2 exemptions)
     # LA taxable: $30,000 - $9,000 = $21,000
-    # LA tax: $21,000 * 0.0185 = $388.50
+    # Tax on $30,000: $25,000 * 0.0185 + $5,000 * 0.035 = $462.50 + $175.00 = $637.50
+    # Tax on $9,000 of exemptions: $9,000 * 0.0185 = $166.50
+    # Formula: $637.50 - $166.50 = $471.00.
+    # Legal value: 2024 Tax Table, PDF page 3, MFJ, row $30,000-$30,250,
+    # column 2 exemptions: $475.
     # Federal taxable: $30,000 - $29,200 = $800
     # Federal tax: $800 * 0.10 = $80.00
     TaxScenario(
-        source="LA 2024 Tax Brackets (computed)",
+        source="LA 2024 Tax Table (tax-table)",
         description="LA MFJ, $30,000 income (2024)",
         year=2024,
         state="LA",
@@ -4774,7 +4854,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         dependent_exemptions=9000.0,
         expected_federal_tax=80.00,
-        expected_state_tax=388.50,
+        expected_state_tax=475.00,
+        state_evidence=LA_TABLE_EVIDENCE,
+        known_defects=(la_2024_table_gap(0.035, 30_000, 30_250, 30_000),),
         expected_federal_agi=30000.0,
         backend="graph",
     ),
@@ -4783,12 +4865,18 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # LA tax table income: $150,000
     # Exemptions: $9,000
     # LA taxable: $150,000 - $9,000 = $141,000
-    # LA tax: $25,000 * 0.0185 + $75,000 * 0.035 + $41,000 * 0.0425
-    #       = $462.50 + $2,625.00 + $1,742.50 = $4,830.00
+    # Tax on $150,000: $25,000 * 0.0185 + $75,000 * 0.035 + $50,000 * 0.0425
+    #       = $462.50 + $2,625.00 + $2,125.00 = $5,212.50
+    # Tax on $9,000 of exemptions: $9,000 * 0.0185 = $166.50
+    # Formula: $5,212.50 - $166.50 = $5,046.00.
+    # Legal value: 2024 Tax Table, PDF page 6, MFJ, last row $100,750-$101,000,
+    # column 2: $2,958, "Plus 4.25% of Tax Table Income in Excess of $101,000":
+    # $2,958 + $49,000 x 0.0425 = $2,958 + $2,082.50 = $5,040.50, rounded to the
+    # nearest dollar (PDF page 3, item 4), half up: $5,041.
     # Federal taxable: $150,000 - $29,200 = $120,800
     # Federal tax: $23,200 * 0.10 + $71,100 * 0.12 + $26,500 * 0.22 = $2,320 + $8,532 + $5,830 = $16,682.00
     TaxScenario(
-        source="LA 2024 Tax Brackets (computed)",
+        source="LA 2024 Tax Table (tax-table)",
         description="LA MFJ, $150,000 income, all 3 brackets (2024)",
         year=2024,
         state="LA",
@@ -4796,7 +4884,13 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=150000.0,
         dependent_exemptions=9000.0,
         expected_federal_tax=16682.00,
-        expected_state_tax=4830.00,
+        expected_state_tax=5041.00,
+        state_evidence=LA_DERIVED_EVIDENCE,
+        known_defects=(
+            la_2024_table_gap(
+                0.0425, 100_750, 101_000, 150_000, rounding_adjustment=5041.00 - 5040.50
+            ),
+        ),
         expected_federal_agi=150000.0,
         backend="graph",
     ),

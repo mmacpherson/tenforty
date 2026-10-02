@@ -16,7 +16,7 @@ from tenforty.backends.graph import (
 from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
-    STATE_NATURAL_TO_NODE,
+    state_natural_to_node,
     state_output_lines,
 )
 from tenforty.models import STATE_TO_FORM
@@ -479,7 +479,6 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
 
     for state in sorted(STATE_FORM_NAMES, key=lambda item: item.value or ""):
         state_code = state.value
-        state_inputs = STATE_NATURAL_TO_NODE.get(state, {})
         jurisdiction = {
             "name": STATE_NAMES[state_code],
             "kind": (
@@ -496,13 +495,14 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             input_names, output_names, _meta = inventories[year]
             mapped_inputs = {}
             unsupported_inputs = []
-            for natural, node in state_inputs.items():
+            for natural, node in state_natural_to_node(state, year).items():
                 if natural not in INPUTS:
                     continue
-                if node in input_names:
-                    mapped_inputs[natural] = [node]
-                else:
-                    unsupported_inputs.append(natural)
+                if node not in input_names:
+                    raise ValueError(
+                        f"{year}/{state_code} input node is missing: {node}"
+                    )
+                mapped_inputs[natural] = [node]
 
             mapped_outputs = {}
             for public_name, line in state_output_lines(state, year).items():

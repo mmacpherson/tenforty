@@ -167,16 +167,26 @@ class StateGraphConfig:
     for one tax year, for a concept whose line differs between form revisions.
     Keying by field gives every public field exactly one source, while one line
     may feed several fields (Indiana taxes its adjusted gross income directly).
+
+    `natural_to_node` and `natural_to_node_by_year` do the same for inputs: a
+    natural input is lowered to a state node only in a year whose form has that
+    line. A state input a form revision dropped is left out of that year rather
+    than pointed at a node the year's graph lacks.
     """
 
     natural_to_node: dict[str, str]
     outputs: dict[str, str]
     outputs_by_year: dict[int, dict[str, str]] = field(default_factory=dict)
+    natural_to_node_by_year: dict[int, dict[str, str]] = field(default_factory=dict)
     form_name: str | None = None
 
     def outputs_for(self, year: int) -> dict[str, str]:
         """Public result field -> state form line, for one tax year."""
         return self.outputs | self.outputs_by_year.get(year, {})
+
+    def natural_to_node_for(self, year: int) -> dict[str, str]:
+        """Natural input name -> state graph input node, for one tax year."""
+        return self.natural_to_node | self.natural_to_node_by_year.get(year, {})
 
 
 STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
@@ -401,14 +411,26 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     OTSState.LA: StateGraphConfig(
         # LA Form IT-540 imports federal AGI and applies Louisiana-specific
         # adjustments. For 2024: progressive 3-bracket system (1.85%, 3.5%, 4.25%)
-        # with combined personal exemption-standard deduction ($4,500 Single,
-        # $9,000 MFJ) plus $1,000 per additional exemption. For 2025: flat 3% tax
-        # with standard deduction ($12,500 Single, $25,000 MFJ/HoH) and no
-        # dependent exemptions. Itemized deductions and exemption amounts are
-        # accepted as total input (num_dependents cannot map to dollar amounts).
-        natural_to_node={
-            "itemized_deductions": "la_it540_L8_itemized",
-            "dependent_exemptions": "la_it540_L6F_amount",
+        # with combined personal exemption-standard deduction ($4,500 Single/MFS,
+        # $9,000 MFJ/QSS/HoH) plus $1,000 per additional exemption, accepted as a
+        # total dollar amount (num_dependents cannot map to dollar amounts) and
+        # deducted from the lowest bracket first. Returns with more than eight
+        # exemptions (the table reduces income and reads column eight) and the
+        # table's whole-dollar rows (tenforty-xew) are not modelled. For 2025:
+        # flat 3% tax with standard deduction ($12,500 Single/MFS, $25,000
+        # MFJ/HoH/QSS) and no exemptions at all, so 2025 maps no exemption input
+        # and a nonzero one is rejected as unsupported.
+        #
+        # Neither year has a Louisiana itemized deduction: lines 8A-8D (2024) and
+        # 9A-9D (2025) allow only federal medical and dental expenses (Schedule A
+        # line 4) above a fixed amount. itemized_deductions lowers to federal
+        # Schedule A "other deductions", which Louisiana does not allow, so it
+        # has no Louisiana node in either year. 2024 instructions, PDF page 3,
+        # https://dam.ldr.la.gov/taxforms/IT540i-WEB-2024.pdf ; 2025 instructions,
+        # PDF page 3, https://dam.ldr.la.gov/taxforms/IT540i-WEB-2025-Revised-7-26.pdf .
+        natural_to_node={},
+        natural_to_node_by_year={
+            2024: {"dependent_exemptions": "la_it540_L6F_amount"},
         },
         # IT-540 line 7 carries Louisiana AGI (Schedule E line 5, which is
         # federal AGI when no Schedule E adjustment applies). Taxable income is
@@ -840,7 +862,12 @@ STATE_FORM_NAMES = {
     for s, c in STATE_GRAPH_CONFIGS.items()
     if c.form_name or STATE_TO_FORM.get(s) is not None
 }
-STATE_NATURAL_TO_NODE = {s: c.natural_to_node for s, c in STATE_GRAPH_CONFIGS.items()}
+
+
+def state_natural_to_node(state: OTSState | None, year: int) -> dict[str, str]:
+    """Natural input name -> state graph input node for one state and tax year."""
+    config = STATE_GRAPH_CONFIGS.get(state) if state is not None else None
+    return config.natural_to_node_for(year) if config else {}
 
 
 def state_output_lines(state: OTSState, year: int) -> dict[str, str]:

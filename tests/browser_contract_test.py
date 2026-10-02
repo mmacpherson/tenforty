@@ -53,7 +53,7 @@ def test_browser_contract_covers_the_declared_backend_surface():
 
 
 def test_browser_contract_exposes_known_limitations():
-    """Known exclusions and a state/year mapping gap remain user-visible."""
+    """Known exclusions remain user-visible; no state input lacks its year's node."""
     limitation_ids = {limitation["id"] for limitation in CONTRACT["limitations"]}
     assert limitation_ids == {
         "tax-years",
@@ -61,9 +61,8 @@ def test_browser_contract_exposes_known_limitations():
         "state-specific-adjustments",
         "calculation-scope",
     }
-    assert CONTRACT["jurisdictions"]["LA"]["unsupported_inputs"]["2024"] == [
-        "itemized_deductions"
-    ]
+    for jurisdiction in CONTRACT["jurisdictions"].values():
+        assert all(not names for names in jurisdiction["unsupported_inputs"].values())
 
 
 def test_browser_ui_uses_the_public_calculation_boundary():
