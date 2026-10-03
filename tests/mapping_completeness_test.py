@@ -30,6 +30,7 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends.graph import GraphBackend, _forms_dir, _state_output_node
+from tenforty.core import map_natural_to_ots_input, parse_ots_return
 from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
@@ -38,9 +39,13 @@ from tenforty.mappings import (
 )
 from tenforty.models import (
     NATURAL_FORM_CONFIG,
+    OTS_FORM_CONFIG,
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
+    NaturalFormMapping,
+    OTSFilingStatus,
     OTSState,
+    SubordinateFormConfig,
 )
 
 OTS_FORM_IDS = {
@@ -230,6 +235,179 @@ def test_ots_state_declares_every_result_field(year, form_id):
         f for f in STATE_RESULT_FIELDS if f.removeprefix("state_") not in declared
     ]
     assert not undeclared, f"OTS {year}/{form_id} has no output for {undeclared}"
+
+
+# Every OTS program reads the filing status from a template line named
+# "Status" (get_parameter(infile, 's', word, "Status")). A form whose template
+# carries that line but whose input map never fills it silently computes every
+# return under the template's default status: MA and NJ as Single, VA as
+# Married/Joint (tenforty-r91.2/.3/.4). Which forms carry the line is read off
+# the templates themselves, so a newly mapped form is covered without edits here.
+FILING_STATUS_FIELD = "Status"
+
+
+def _ots_configs() -> dict[tuple[int, str], NaturalFormMapping | SubordinateFormConfig]:
+    configs = dict(NATURAL_FORM_CONFIG)
+    for year, subordinates in SUBORDINATE_FORM_CONFIG.items():
+        for cfg in subordinates:
+            configs[(year, cfg.form_id)] = cfg
+    return configs
+
+
+def _template_reads_filing_status(year: int, form_id: str) -> bool:
+    template = OTS_FORM_CONFIG.get((year, form_id))
+    return template is not None and any(
+        field.key == FILING_STATUS_FIELD for field in template.fields
+    )
+
+
+def _maps_filing_status(input_map: dict) -> bool:
+    ots_values = map_natural_to_ots_input(
+        {"filing_status": OTSFilingStatus.SINGLE}, input_map
+    )
+    return FILING_STATUS_FIELD in ots_values
+
+
+OTS_STATUS_TEMPLATES = sorted(
+    key for key in _ots_configs() if _template_reads_filing_status(*key)
+)
+
+# Found by this guard, outside tenforty-r91's MA/NJ/VA scope. Both programs read
+# Status from their own template. OH_IT1040 prices it only in credits tenforty
+# does not map (the campaign contribution cap and the joint filing credit);
+# MI_1040 parses and echoes it without pricing it. The default still stands in
+# for the filer's status, and mapping it would make OTS reject statuses these
+# programs do not parse (OH: Widow(er); MI: Head_of_House, Widow(er)).
+UNMAPPED_STATUS_TEMPLATES = {
+    "OH_IT1040": "MAP-OH-STATUS: OH_IT1040 input map omits filing_status; OTS reads "
+    "its template default, Single",
+    "MI_1040": "MAP-MI-STATUS: MI_1040 input map omits filing_status; OTS reads "
+    "its template default, Married/Joint",
+}
+
+
+def _status_guard_params():
+    for year, form_id in OTS_STATUS_TEMPLATES:
+        reason = UNMAPPED_STATUS_TEMPLATES.get(form_id)
+        marks = [pytest.mark.xfail(reason=reason, strict=True)] if reason else []
+        yield pytest.param(year, form_id, marks=marks, id=f"{year}-{form_id}")
+
+
+@pytest.mark.parametrize(("year", "form_id"), list(_status_guard_params()))
+def test_ots_form_maps_filing_status_when_its_template_reads_one(year, form_id):
+    """A template with a Status line must have it filled from filing_status."""
+    assert _maps_filing_status(_ots_configs()[(year, form_id)].input_map), (
+        f"OTS {year}/{form_id} reads {FILING_STATUS_FIELD!r} but its input map never "
+        "sets it, so OTS computes every return under the template default"
+    )
+
+
+@pytest.mark.parametrize(
+    ("year", "form_id"),
+    sorted(
+        key for key, cfg in _ots_configs().items() if "filing_status" in cfg.input_map
+    ),
+)
+def test_ots_filing_status_mapping_targets_a_template_status_line(year, form_id):
+    """A mapped filing_status must land on a Status line the template really has."""
+    assert _template_reads_filing_status(year, form_id)
+    assert _maps_filing_status(_ots_configs()[(year, form_id)].input_map)
+
+
+@pytest.mark.parametrize(
+    ("year", "form_id"),
+    [key for key in OTS_STATUS_TEMPLATES if key[1] not in UNMAPPED_STATUS_TEMPLATES],
+)
+def test_status_guard_fails_when_the_mapping_is_removed(monkeypatch, year, form_id):
+    """Negative control: strip filing_status from a real config and the guard fails."""
+    cfg = _ots_configs()[(year, form_id)]
+    stripped = {k: v for k, v in cfg.input_map.items() if k != "filing_status"}
+    monkeypatch.setattr(cfg, "input_map", stripped)
+    with pytest.raises(AssertionError, match="never sets it"):
+        test_ots_form_maps_filing_status_when_its_template_reads_one(year, form_id)
+
+
+@pytest.mark.parametrize(
+    ("state", "status"),
+    [("MA", "Widow(er)"), ("VA", "Head_of_House"), ("VA", "Widow(er)")],
+)
+def test_ots_refuses_a_filing_status_the_state_program_cannot_compute(state, status):
+    """MA_1 has no Widow(er) case and VA_760 neither Head_of_House nor Widow(er)."""
+    with pytest.raises(ValueError, match="cannot compute filing status"):
+        evaluate_return(
+            year=2024,
+            state=state,
+            filing_status=status,
+            w2_income=60_000,
+            backend="ots",
+        )
+
+
+MA_1_YEARS = sorted(year for year, form_id in NATURAL_FORM_CONFIG if form_id == "MA_1")
+
+
+@pytest.mark.parametrize("year", MA_1_YEARS)
+@pytest.mark.parametrize(
+    "filing_status", ["Single", "Married/Joint", "Married/Sep", "Head_of_House"]
+)
+def test_ots_ma_reports_state_agi_for_every_status(year, filing_status):
+    """MA state AGI must come from a line OTS fills for every status (tenforty-r91.8).
+
+    With wages only, Form 1 line 10 (total 5.0% income) is the wages. OTS's No
+    Tax Status worksheet, the previous source, is skipped for Married/Sep.
+    """
+    result = evaluate_return(
+        year=year,
+        state="MA",
+        filing_status=filing_status,
+        w2_income=60_000,
+        backend="ots",
+    )
+    assert result.state_adjusted_gross_income == pytest.approx(60_000.0, abs=0.5)
+
+
+MA_WORKSHEET_STATUSES = {"Single", "Married/Joint", "Head_of_House"}
+
+
+@pytest.mark.parametrize("year", MA_1_YEARS)
+@pytest.mark.parametrize(
+    "filing_status", ["Single", "Married/Joint", "Married/Sep", "Head_of_House"]
+)
+@pytest.mark.parametrize("w2_income", [-1_000.0, -1.0, 0.0, 1.0, 4_401.0, 60_000.0])
+def test_ots_ma_state_agi_is_the_worksheet_agi(
+    monkeypatch, year, filing_status, w2_income
+):
+    """MA state AGI is the No Tax Status worksheet's: line 10, floored at zero.
+
+    Worksheet line 1 floors Form 1 line 10 at zero and its other lines are zero
+    for every input MA_1 maps, so AGI is max(0, wages). Where OTS ran the
+    worksheet (Single, Married/Joint, Head_of_House), its printed AGI must agree.
+    """
+    from tenforty import otslib
+
+    raw_outputs = {}
+    evaluate_form = otslib._evaluate_form
+
+    def capture(year_, form_id, *args, **kwargs):
+        output = evaluate_form(year_, form_id, *args, **kwargs)
+        raw_outputs[form_id] = output
+        return output
+
+    monkeypatch.setattr(otslib, "_evaluate_form", capture)
+    result = evaluate_return(
+        year=year,
+        state="MA",
+        filing_status=filing_status,
+        w2_income=w2_income,
+        backend="ots",
+    )
+    assert result.state_adjusted_gross_income == pytest.approx(max(0.0, w2_income))
+
+    worksheet = parse_ots_return(raw_outputs["MA_1"], year=year, form_id="MA_1")
+    if filing_status in MA_WORKSHEET_STATUSES:
+        assert result.state_adjusted_gross_income == pytest.approx(worksheet["AGI"])
+    else:
+        assert "AGI" not in worksheet
 
 
 @pytest.mark.parametrize("state", ["IN", "LA"])

@@ -85,6 +85,7 @@ data Op
   | OpMax Int Int
   | OpMin Int Int
   | OpFloor Int
+  | OpTaxTableQuantize TaxTableQuantizeMode Double Double Int
   | OpClamp Int Double Double
   | OpIfPositive Int Int Int
   | OpBracketTax Text Int
@@ -180,6 +181,8 @@ instance ToJSON Op where
     OpMax a b -> object ["type" .= ("max" :: Text), "left" .= a, "right" .= b]
     OpMin a b -> object ["type" .= ("min" :: Text), "left" .= a, "right" .= b]
     OpFloor a -> object ["type" .= ("floor" :: Text), "arg" .= a]
+    OpTaxTableQuantize mode step offset a ->
+      object ["type" .= ("tax_table_quantize" :: Text), "arg" .= a, "step" .= step, "output_offset" .= offset, "mode" .= (case mode of TableFloor -> "floor" :: Text; TableRound -> "round")]
     OpClamp a lo hi -> object ["type" .= ("clamp" :: Text), "arg" .= a, "min" .= lo, "max" .= hi]
     OpIfPositive c t e -> object ["type" .= ("if_positive" :: Text), "cond" .= c, "then" .= t, "otherwise" .= e]
     OpBracketTax t a -> object ["type" .= ("bracket_tax" :: Text), "table" .= t, "income" .= a]
@@ -484,6 +487,7 @@ resolveForms cgs@(cg0 : _) =
       OpNeg a -> OpNeg (ref f a)
       OpAbs a -> OpAbs (ref f a)
       OpFloor a -> OpFloor (ref f a)
+      OpTaxTableQuantize mode step offset a -> OpTaxTableQuantize mode step offset (ref f a)
       OpMax a b -> OpMax (ref f a) (ref f b)
       OpMin a b -> OpMin (ref f a) (ref f b)
       OpClamp a lo hi -> OpClamp (ref f a) lo hi
@@ -641,6 +645,12 @@ compileExpr mname = \case
     halfId <- emitAnonymousNode (OpLiteral 0.5)
     plusHalfId <- emitAnonymousNode (OpAdd aid halfId)
     emitNode mname (OpFloor plusHalfId)
+  TaxTableQuantize mode step offset a -> do
+    if step < 1 || isNaN step || isInfinite step || step /= fromInteger (floor step) || isNaN offset || isInfinite offset
+      then error "Invalid TaxTableQuantize parameters: step must be a positive finite integer, output_offset must be finite"
+      else do
+        aid <- compileExpr Nothing a
+        emitNode mname (OpTaxTableQuantize mode step offset aid)
   BracketTax (TableId tid) income -> do
     iid <- compileExpr Nothing income
     emitNode mname (OpBracketTax tid iid)

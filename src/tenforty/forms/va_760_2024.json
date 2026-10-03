@@ -168,7 +168,7 @@
             "id": 25,
             "op": {
                 "type": "literal",
-                "value": 17000
+                "value": 8500
             }
         },
         "26": {
@@ -197,18 +197,15 @@
         "28": {
             "id": 28,
             "op": {
-                "left": 5,
-                "right": 6,
-                "type": "add"
+                "type": "literal",
+                "value": 930
             }
         },
         "29": {
             "id": 29,
-            "name": "L12_total_deductions_exemptions",
             "op": {
-                "left": 27,
-                "right": 28,
-                "type": "add"
+                "type": "literal",
+                "value": 1860
             }
         },
         "3": {
@@ -222,83 +219,85 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 930
             }
         },
         "31": {
             "id": 31,
             "op": {
-                "left": 20,
-                "right": 29,
-                "type": "sub"
+                "type": "literal",
+                "value": 930
             }
         },
         "32": {
             "id": 32,
-            "name": "L13_va_taxable_income",
             "op": {
-                "left": 30,
-                "right": 31,
-                "type": "max"
+                "type": "literal",
+                "value": 930
             }
         },
         "33": {
             "id": 33,
-            "name": "L14_va_tax",
+            "name": "MandatoryExemptions",
             "op": {
-                "income": 32,
-                "table": "va_brackets_2024",
-                "type": "bracket_tax"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 31,
+                    "married_joint": 29,
+                    "married_separate": 30,
+                    "qualifying_widow": 32,
+                    "single": 28
+                }
             }
         },
         "34": {
             "id": 34,
+            "name": "L10_total",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 33,
+                "right": 5,
+                "type": "max"
             }
         },
         "35": {
             "id": 35,
             "op": {
-                "left": 33,
-                "right": 7,
-                "type": "sub"
+                "left": 34,
+                "right": 6,
+                "type": "add"
             }
         },
         "36": {
             "id": 36,
-            "name": "L16_tax_after_credits",
+            "name": "L12_total_deductions_exemptions",
             "op": {
-                "left": 34,
+                "left": 27,
                 "right": 35,
-                "type": "max"
+                "type": "add"
             }
         },
         "37": {
             "id": 37,
-            "name": "L18_total_tax",
             "op": {
-                "left": 36,
-                "right": 8,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "38": {
             "id": 38,
             "op": {
-                "left": 10,
-                "right": 11,
-                "type": "add"
+                "left": 20,
+                "right": 36,
+                "type": "sub"
             }
         },
         "39": {
             "id": 39,
-            "name": "L22_total_payments",
+            "name": "L13_va_taxable_income",
             "op": {
-                "left": 9,
+                "left": 37,
                 "right": 38,
-                "type": "add"
+                "type": "max"
             }
         },
         "4": {
@@ -311,58 +310,83 @@
         "40": {
             "id": 40,
             "op": {
-                "left": 39,
-                "right": 37,
-                "type": "sub"
+                "type": "literal",
+                "value": 11950
             }
         },
         "41": {
             "id": 41,
             "op": {
-                "left": 39,
-                "right": 37,
-                "type": "sub"
+                "type": "literal",
+                "value": 23900
             }
         },
         "42": {
             "id": 42,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 11950
             }
         },
         "43": {
             "id": 43,
-            "name": "L23_overpayment",
             "op": {
-                "cond": 40,
-                "otherwise": 42,
-                "then": 41,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 11950
             }
         },
         "44": {
             "id": 44,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 11950
             }
         },
         "45": {
             "id": 45,
+            "name": "FilingThreshold",
             "op": {
-                "left": 37,
-                "right": 39,
-                "type": "sub"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 43,
+                    "married_joint": 41,
+                    "married_separate": 42,
+                    "qualifying_widow": 44,
+                    "single": 40
+                }
             }
         },
         "46": {
             "id": 46,
-            "name": "L24_amount_owed",
             "op": {
-                "left": 44,
-                "right": 45,
-                "type": "max"
+                "left": 45,
+                "right": 20,
+                "type": "sub"
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "income": 39,
+                "table": "va_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "49": {
+            "id": 49,
+            "name": "L14_va_tax",
+            "op": {
+                "cond": 46,
+                "otherwise": 47,
+                "then": 48,
+                "type": "if_positive"
             }
         },
         "5": {
@@ -372,11 +396,118 @@
                 "type": "input"
             }
         },
+        "50": {
+            "id": 50,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "left": 49,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "52": {
+            "id": 52,
+            "name": "L16_tax_after_credits",
+            "op": {
+                "left": 50,
+                "right": 51,
+                "type": "max"
+            }
+        },
+        "53": {
+            "id": 53,
+            "name": "L18_total_tax",
+            "op": {
+                "left": 52,
+                "right": 8,
+                "type": "add"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "left": 10,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "55": {
+            "id": 55,
+            "name": "L22_total_payments",
+            "op": {
+                "left": 9,
+                "right": 54,
+                "type": "add"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "left": 55,
+                "right": 53,
+                "type": "sub"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "left": 55,
+                "right": 53,
+                "type": "sub"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "59": {
+            "id": 59,
+            "name": "L23_overpayment",
+            "op": {
+                "cond": 56,
+                "otherwise": 58,
+                "then": 57,
+                "type": "if_positive"
+            }
+        },
         "6": {
             "id": 6,
             "name": "L11_age_blind_exemptions",
             "op": {
                 "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "left": 53,
+                "right": 55,
+                "type": "sub"
+            }
+        },
+        "62": {
+            "id": 62,
+            "name": "L24_amount_owed",
+            "op": {
+                "left": 60,
+                "right": 61,
+                "type": "max"
             }
         },
         "7": {
@@ -403,12 +534,12 @@
     },
     "outputs": [
         14,
-        32,
-        33,
-        37,
         39,
-        43,
-        46,
+        49,
+        53,
+        55,
+        59,
+        62,
         20
     ],
     "tables": {

@@ -81,43 +81,37 @@
         },
         "15": {
             "id": 15,
-            "name": "L38_total_exemptions_deductions",
             "op": {
-                "left": 0,
-                "right": 1,
-                "type": "add"
+                "type": "literal",
+                "value": 1000
             }
         },
         "16": {
             "id": 16,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 2000
             }
         },
         "17": {
             "id": 17,
             "op": {
-                "left": 14,
-                "right": 15,
-                "type": "sub"
+                "type": "literal",
+                "value": 1000
             }
         },
         "18": {
             "id": 18,
-            "name": "L39_nj_taxable_income",
             "op": {
-                "left": 16,
-                "right": 17,
-                "type": "max"
+                "type": "literal",
+                "value": 1000
             }
         },
         "19": {
             "id": 19,
             "op": {
-                "income": 18,
-                "table": "nj_single_brackets_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 1000
             }
         },
         "2": {
@@ -129,87 +123,86 @@
         },
         "20": {
             "id": 20,
+            "name": "MandatoryExemptions",
             "op": {
-                "income": 18,
-                "table": "nj_mfj_brackets_2024",
-                "type": "bracket_tax"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 18,
+                    "married_joint": 16,
+                    "married_separate": 17,
+                    "qualifying_widow": 19,
+                    "single": 15
+                }
             }
         },
         "21": {
             "id": 21,
+            "name": "L30_total",
             "op": {
-                "income": 18,
-                "table": "nj_single_brackets_2024",
-                "type": "bracket_tax"
+                "left": 20,
+                "right": 0,
+                "type": "max"
             }
         },
         "22": {
             "id": 22,
+            "name": "L38_total_exemptions_deductions",
             "op": {
-                "income": 18,
-                "table": "nj_mfj_brackets_2024",
-                "type": "bracket_tax"
+                "left": 21,
+                "right": 1,
+                "type": "add"
             }
         },
         "23": {
             "id": 23,
             "op": {
-                "income": 18,
-                "table": "nj_mfj_brackets_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 0
             }
         },
         "24": {
             "id": 24,
-            "name": "L40_nj_bracket_tax",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 22,
-                    "married_joint": 20,
-                    "married_separate": 21,
-                    "qualifying_widow": 23,
-                    "single": 19
-                }
+                "left": 14,
+                "right": 22,
+                "type": "sub"
             }
         },
         "25": {
             "id": 25,
+            "name": "L39_nj_taxable_income",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 23,
+                "right": 24,
+                "type": "max"
             }
         },
         "26": {
             "id": 26,
             "op": {
-                "left": 24,
-                "right": 2,
-                "type": "sub"
+                "type": "literal",
+                "value": 10000
             }
         },
         "27": {
             "id": 27,
-            "name": "L42_tax_after_property_credit",
             "op": {
-                "left": 25,
-                "right": 26,
-                "type": "max"
+                "type": "literal",
+                "value": 20000
             }
         },
         "28": {
             "id": 28,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 10000
             }
         },
         "29": {
             "id": 29,
             "op": {
-                "left": 27,
-                "right": 3,
-                "type": "sub"
+                "type": "literal",
+                "value": 20000
             }
         },
         "3": {
@@ -221,77 +214,83 @@
         },
         "30": {
             "id": 30,
-            "name": "L44_nj_tax_after_credits",
             "op": {
-                "left": 28,
-                "right": 29,
-                "type": "max"
+                "type": "literal",
+                "value": 20000
             }
         },
         "31": {
             "id": 31,
-            "name": "L46_nj_total_tax",
+            "name": "FilingThreshold",
             "op": {
-                "left": 30,
-                "right": 4,
-                "type": "add"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 29,
+                    "married_joint": 27,
+                    "married_separate": 28,
+                    "qualifying_widow": 30,
+                    "single": 26
+                }
             }
         },
         "32": {
             "id": 32,
             "op": {
-                "left": 8,
-                "right": 9,
-                "type": "add"
+                "income": 25,
+                "table": "nj_single_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "33": {
             "id": 33,
             "op": {
-                "left": 7,
-                "right": 32,
-                "type": "add"
+                "income": 25,
+                "table": "nj_mfj_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "34": {
             "id": 34,
             "op": {
-                "left": 6,
-                "right": 33,
-                "type": "add"
+                "income": 25,
+                "table": "nj_single_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "35": {
             "id": 35,
-            "name": "L52_total_payments",
             "op": {
-                "left": 5,
-                "right": 34,
-                "type": "add"
+                "income": 25,
+                "table": "nj_mfj_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "36": {
             "id": 36,
-            "name": "L55_total_refundable_credits",
             "op": {
-                "left": 10,
-                "right": 11,
-                "type": "add"
+                "income": 25,
+                "table": "nj_mfj_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "37": {
             "id": 37,
-            "name": "L56_total_payments_credits",
+            "name": "ScheduleTax",
             "op": {
-                "left": 35,
-                "right": 36,
-                "type": "add"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 35,
+                    "married_joint": 33,
+                    "married_separate": 34,
+                    "qualifying_widow": 36,
+                    "single": 32
+                }
             }
         },
         "38": {
             "id": 38,
             "op": {
-                "left": 37,
+                "left": 14,
                 "right": 31,
                 "type": "sub"
             }
@@ -299,9 +298,8 @@
         "39": {
             "id": 39,
             "op": {
-                "left": 37,
-                "right": 31,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "4": {
@@ -313,58 +311,84 @@
         },
         "40": {
             "id": 40,
+            "name": "L40_nj_bracket_tax",
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 38,
+                "otherwise": 39,
+                "then": 37,
+                "type": "if_positive"
             }
         },
         "41": {
             "id": 41,
-            "name": "L57_refund",
             "op": {
-                "cond": 38,
-                "otherwise": 40,
-                "then": 39,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 0
             }
         },
         "42": {
             "id": 42,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 40,
+                "right": 2,
+                "type": "sub"
             }
         },
         "43": {
             "id": 43,
+            "name": "L42_tax_after_property_credit",
             "op": {
-                "left": 31,
-                "right": 37,
-                "type": "sub"
+                "left": 41,
+                "right": 42,
+                "type": "max"
             }
         },
         "44": {
             "id": 44,
-            "name": "L58_amount_owed",
             "op": {
-                "left": 42,
-                "right": 43,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "45": {
             "id": 45,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 43,
+                "right": 3,
+                "type": "sub"
             }
         },
         "46": {
             "id": 46,
-            "name": "L29_nj_gross_income",
+            "name": "L44_nj_tax_after_credits",
             "op": {
-                "left": 14,
+                "left": 44,
                 "right": 45,
+                "type": "max"
+            }
+        },
+        "47": {
+            "id": 47,
+            "name": "L46_nj_total_tax",
+            "op": {
+                "left": 46,
+                "right": 4,
+                "type": "add"
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "left": 8,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "left": 7,
+                "right": 48,
                 "type": "add"
             }
         },
@@ -375,11 +399,119 @@
                 "type": "input"
             }
         },
+        "50": {
+            "id": 50,
+            "op": {
+                "left": 6,
+                "right": 49,
+                "type": "add"
+            }
+        },
+        "51": {
+            "id": 51,
+            "name": "L52_total_payments",
+            "op": {
+                "left": 5,
+                "right": 50,
+                "type": "add"
+            }
+        },
+        "52": {
+            "id": 52,
+            "name": "L55_total_refundable_credits",
+            "op": {
+                "left": 10,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "53": {
+            "id": 53,
+            "name": "L56_total_payments_credits",
+            "op": {
+                "left": 51,
+                "right": 52,
+                "type": "add"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "left": 53,
+                "right": 47,
+                "type": "sub"
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "left": 53,
+                "right": 47,
+                "type": "sub"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "57": {
+            "id": 57,
+            "name": "L57_refund",
+            "op": {
+                "cond": 54,
+                "otherwise": 56,
+                "then": 55,
+                "type": "if_positive"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 47,
+                "right": 53,
+                "type": "sub"
+            }
+        },
         "6": {
             "id": 6,
             "name": "L48_estimated_payments",
             "op": {
                 "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "name": "L58_amount_owed",
+            "op": {
+                "left": 58,
+                "right": 59,
+                "type": "max"
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "62": {
+            "id": 62,
+            "name": "L29_nj_gross_income",
+            "op": {
+                "left": 14,
+                "right": 61,
+                "type": "add"
             }
         },
         "7": {
@@ -406,15 +538,15 @@
     },
     "outputs": [
         14,
+        62,
+        25,
+        40,
         46,
-        18,
-        24,
-        30,
-        31,
-        35,
-        37,
-        41,
-        44
+        47,
+        51,
+        53,
+        57,
+        60
     ],
     "tables": {
         "nj_mfj_brackets_2024": {

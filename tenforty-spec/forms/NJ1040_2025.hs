@@ -32,9 +32,16 @@ nj1040_2025 = form "nj_1040" 2025 $ do
       line "L14"
 
   -- Line 30: Personal exemptions
-  -- NJ allows $1,000 per taxpayer/spouse/dependent (phased for dependents based on AGI)
-  -- Since exemptions are income-phased for dependents, we accept as input
-  l30 <- keyInput "L30" "personal_exemptions" "Personal exemptions"
+  -- NJ-2025 instructions, PDF p.8 line 6: $1,000 yourself, plus $1,000
+  -- spouse only on a joint return. The legacy input is TOTAL dollars including
+  -- that base; do not add the base a second time. Extra exemptions stay explicit.
+  exemptionTotal <- keyInput "L30" "personal_exemptions" "Total exemption dollars including taxpayer/spouse"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit (byStatus njPersonalExemption2025 (2 * njPersonalExemption2025) njPersonalExemption2025 njPersonalExemption2025 njPersonalExemption2025))
+  l30 <-
+    interior "L30_total" "total_personal_exemptions" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Lines 31-37: Other deductions and exclusions
   -- Simplified: combined into single input
@@ -52,15 +59,25 @@ nj1040_2025 = form "nj_1040" 2025 $ do
 
   -- Line 40: New Jersey tax from brackets
   -- Single and MFS use different brackets than MFJ, HoH, and QW
-  l40 <-
-    keyOutput "L40" "nj_bracket_tax" "Tax from New Jersey tax rate schedule" $
+  -- N.J.S.A. 54A:2-4(a)(3), (b)(5), (c)(5): no tax at gross income
+  -- <= $10,000 Single/MFS or <= $20,000 MFJ/HoH/QW, before deductions.
+  -- Division of Taxation confirms these statuses "pay no tax":
+  -- https://www.nj.gov/treasury/taxation/git_over.shtml
+  filingThreshold <-
+    interior "FilingThreshold" "filing_threshold" $
+      byStatusE (fmap lit (byStatus 10000 20000 10000 20000 20000))
+  scheduleTax <-
+    interior "ScheduleTax" "schedule_tax" $
       byStatusE $
         byStatus
-          (bracketTax "nj_single_brackets_2025" l39) -- Single
-          (bracketTax "nj_mfj_brackets_2025" l39) -- MFJ
-          (bracketTax "nj_single_brackets_2025" l39) -- MFS
-          (bracketTax "nj_mfj_brackets_2025" l39) -- HoH
-          (bracketTax "nj_mfj_brackets_2025" l39) -- QW
+          (bracketTax "nj_single_brackets_2025" l39)
+          (bracketTax "nj_mfj_brackets_2025" l39)
+          (bracketTax "nj_single_brackets_2025" l39)
+          (bracketTax "nj_mfj_brackets_2025" l39)
+          (bracketTax "nj_mfj_brackets_2025" l39)
+  l40 <-
+    keyOutput "L40" "nj_bracket_tax" "Tax from New Jersey tax rate schedule" $
+      ifPos (l29 .-. filingThreshold) scheduleTax (dollars 0)
 
   -- Property tax deduction/credit (complex calculation based on income thresholds)
   l41 <- keyInput "L41" "property_tax_credit" "Property tax deduction/credit"

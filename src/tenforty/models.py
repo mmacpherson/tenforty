@@ -267,6 +267,9 @@ class NaturalFormMapping(BaseModel):
     input_map: dict[str, Callable | str]
     output_map: dict[str, str]
     fed_import_map: dict[str, str] = {}
+    # Applied to a natural output after `output_map` names it, for a quantity the
+    # form defines from an OTS line rather than reporting the line itself.
+    output_transforms: dict[str, Callable[[float], float]] = {}
 
 
 class SubordinateFormConfig(BaseModel):
@@ -316,7 +319,16 @@ class TaxReturnInput(BaseModel):
     itemized_deductions: float = 0.0
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
-    dependent_exemptions: float = 0.0
+    dependent_exemptions: float = Field(
+        default=0.0,
+        description=(
+            "State exemption dollars, not a dependent count. For NJ, VA, and LA "
+            "2024 graph returns, this is the total including the mandatory personal "
+            "and spouse baseline, not additional-only dollars. The effective total "
+            "is max(baseline, explicit total); an omitted or below-baseline amount "
+            "receives the baseline. Other state/year and backend support varies."
+        ),
+    )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -414,6 +426,72 @@ def _force_itemize(value):
     return ("A18", "Y" if value == "Itemized" else "N")
 
 
+def _restricted_filing_status(
+    form_id: str, supported: frozenset[OTSFilingStatus]
+) -> Callable[[str], tuple[str, str]]:
+    """Map filing_status to a state template's Status line, refusing what OTS cannot compute.
+
+    Our filing-status values are the tokens OTS's parsers match, so a supported
+    status passes through unchanged. An unsupported one raises here rather than
+    reaching OTS, where it would either be priced under no status at all or
+    abort with a bare exit code.
+    """
+
+    def status_line(filing_status: str) -> tuple[str, str]:
+        status = OTSFilingStatus(filing_status)
+        if status not in supported:
+            accepted = ", ".join(sorted(s.value for s in supported))
+            raise ValueError(
+                f"OTS {form_id} cannot compute filing status {status.value!r}; "
+                f"it supports {accepted}"
+            )
+        return ("Status", status.value)
+
+    return status_line
+
+
+def _ma_adjusted_gross_income(total_5_percent_income: float) -> float:
+    """MA AGI from Form 1 line 10, as the No Tax Status AGI worksheet computes it.
+
+    Worksheet line 1 is Form 1 line 10 floored at zero (OTS computes it as
+    ``ws[1] = NotLessThanZero(L[10])`` in every MA_1 year). Its remaining
+    lines (Schedule Y deductions, exempt bank interest, line 20 interest and
+    dividends) are zero for every input the MA_1 input map sets, so the floored
+    line 10 is the worksheet's AGI. OTS fills the worksheet only for the
+    statuses eligible for No Tax Status, but prints line 10 for all of them.
+    """
+    return max(0.0, total_5_percent_income)
+
+
+# MA_1 parses Widow(er) but its exemption switch has no case for it, so the
+# personal exemption falls to $0; the No Tax Status worksheet is gated on
+# Single, Head_of_House and Married/Joint, so the return completes silently.
+_ma_filing_status = _restricted_filing_status(
+    "MA_1",
+    frozenset(
+        {
+            OTSFilingStatus.SINGLE,
+            OTSFilingStatus.MARRIED_JOINT,
+            OTSFilingStatus.MARRIED_SEPARATE,
+            OTSFilingStatus.HEAD_OF_HOUSEHOLD,
+        }
+    ),
+)
+
+# VA_760 rejects Widow(er) at parse time and Head_of_House at its standard
+# deduction switch, exiting non-zero on either.
+_va_filing_status = _restricted_filing_status(
+    "VA_760",
+    frozenset(
+        {
+            OTSFilingStatus.SINGLE,
+            OTSFilingStatus.MARRIED_JOINT,
+            OTSFilingStatus.MARRIED_SEPARATE,
+        }
+    ),
+)
+
+
 def capital_gains_pre2021(term: str, year: int, amount: int) -> str:
     """Generate OTS-compatible capital gains clause, for pre-2021 returns."""
     if term == "short":
@@ -475,14 +553,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2024,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2024,
@@ -510,6 +590,7 @@ _NATURAL_FORM_CONFIG = [
         "year": 2024,
         "form_id": "NJ_1040",
         "input_map": {
+            "filing_status": "Status",
             "w2_income": "L15",
             "taxable_interest": "L16a",
             "ordinary_dividends": "L17",
@@ -538,7 +619,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2024,
         "form_id": "VA_760",
-        "input_map": {},
+        "input_map": {"filing_status": _va_filing_status},
         "fed_import_map": {"L11": "L1"},
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -633,14 +714,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2025,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2025,
@@ -668,6 +751,7 @@ _NATURAL_FORM_CONFIG = [
         "year": 2025,
         "form_id": "NJ_1040",
         "input_map": {
+            "filing_status": "Status",
             "w2_income": "L15",
             "taxable_interest": "L16a",
             "ordinary_dividends": "L17",
@@ -696,7 +780,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2025,
         "form_id": "VA_760",
-        "input_map": {},
+        "input_map": {"filing_status": _va_filing_status},
         "fed_import_map": {"L11b": "L1"},
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -790,14 +874,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2023,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2023,
@@ -825,6 +911,7 @@ _NATURAL_FORM_CONFIG = [
         "year": 2023,
         "form_id": "NJ_1040",
         "input_map": {
+            "filing_status": "Status",
             "w2_income": "L15",
             "taxable_interest": "L16a",
             "ordinary_dividends": "L17",
@@ -853,7 +940,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2023,
         "form_id": "VA_760",
-        "input_map": {},
+        "input_map": {"filing_status": _va_filing_status},
         "fed_import_map": {"L11": "L1"},
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -916,14 +1003,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2022,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2022,
@@ -979,14 +1068,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2021,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2021,
@@ -1042,14 +1133,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2020,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2020,
@@ -1104,14 +1197,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2019,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2019,
@@ -1166,14 +1261,16 @@ _NATURAL_FORM_CONFIG = [
         "year": 2018,
         "form_id": "MA_1",
         "input_map": {
+            "filing_status": _ma_filing_status,
             "w2_income": "L3",
             "num_dependents": "Dependents",
         },
         "output_map": {
             "L21": "taxable_income",
-            "AGI": "adjusted_gross_income",
+            "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
+        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2018,

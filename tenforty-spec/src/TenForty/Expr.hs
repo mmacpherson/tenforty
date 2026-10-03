@@ -5,6 +5,7 @@
 module TenForty.Expr
   ( -- * Expression GADT
     Expr (..),
+    TaxTableQuantizeMode (..),
 
     -- * Smart Constructors
     lit,
@@ -70,6 +71,10 @@ data Expr u where
   IfGte :: Expr Dollars -> Expr Dollars -> Expr u -> Expr u -> Expr u
   Floor :: Expr Dollars -> Expr Dollars
   Round :: Expr Dollars -> Expr Dollars
+  TaxTableQuantize :: TaxTableQuantizeMode -> Double -> Double -> Expr Dollars -> Expr Dollars
+
+data TaxTableQuantizeMode = TableFloor | TableRound
+  deriving stock (Show, Eq)
 
 deriving instance Show (Expr u)
 
@@ -115,6 +120,7 @@ unsupportedPhaseOutParameters = go
       IfGte a b t e -> go a <> go b <> go t <> go e
       Floor a -> go a
       Round a -> go a
+      TaxTableQuantize _ _ _ a -> go a
 
 lit :: Amount u -> Expr u
 lit = Lit
@@ -208,6 +214,7 @@ extractLineRefs = \case
       <> extractLineRefs e
   Floor e -> extractLineRefs e
   Round e -> extractLineRefs e
+  TaxTableQuantize _ _ _ e -> extractLineRefs e
 
 extractImports :: Expr u -> Set (FormId, LineId)
 extractImports = \case
@@ -238,6 +245,7 @@ extractImports = \case
       <> extractImports e
   Floor e -> extractImports e
   Round e -> extractImports e
+  TaxTableQuantize _ _ _ e -> extractImports e
 
 extractTableRefs :: Expr u -> Set TableId
 extractTableRefs = \case
@@ -268,6 +276,7 @@ extractTableRefs = \case
       <> extractTableRefs e
   Floor e -> extractTableRefs e
   Round e -> extractTableRefs e
+  TaxTableQuantize _ _ _ e -> extractTableRefs e
 
 extractTableLookups :: Expr u -> Set TableId
 extractTableLookups = \case
@@ -298,6 +307,7 @@ extractTableLookups = \case
       <> extractTableLookups e
   Floor e -> extractTableLookups e
   Round e -> extractTableLookups e
+  TaxTableQuantize _ _ _ e -> extractTableLookups e
 
 mapExprs :: (forall v. Expr v -> Expr v) -> Expr u -> Expr u
 mapExprs f = go
@@ -323,3 +333,4 @@ mapExprs f = go
       IfGte a b t e -> IfGte (go a) (go b) (go t) (go e)
       Floor e -> Floor (go e)
       Round e -> Round (go e)
+      TaxTableQuantize mode step offset e -> TaxTableQuantize mode step offset (go e)

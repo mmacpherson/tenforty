@@ -2,6 +2,7 @@
 
 from tests.parity.state_parity_policy import (
     PARITY_TOLERANCE,
+    SIGNATURES,
     KnownParityDefect,
     parity_residuals,
 )
@@ -89,3 +90,16 @@ def test_withdrawing_a_needed_signature_exposes_its_residual():
     """... and a burn-in sees a still-needed signature by withdrawing it."""
     assert _residuals(_IN_SCOPE, 0.0, 110.0, exclude="ZZ-SYNTHETIC") != []
     assert _residuals(_IN_SCOPE, 0.0, 0.0, exclude="ZZ-SYNTHETIC") == []
+
+
+def test_resolved_nj_va_graph_findings_are_removed_but_ots_witnesses_remain():
+    """Baseline/filing fixes must not retire the upstream or representation cases."""
+    ids = {defect.finding_id for defect in SIGNATURES}
+    assert ids.isdisjoint(
+        {"NJ-EXEMPTION", "NJ-NO-TAX", "VA-EXEMPTIONS", "VA-GRAPH-BELOW-THRESHOLD"}
+    )
+    assert {
+        "NJ-OTS-THRESHOLD-BOUNDARY",
+        "VA-OTS-BELOW-THRESHOLD",
+        "VA-TI-REPRESENTATION",
+    } <= ids

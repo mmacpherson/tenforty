@@ -19,6 +19,7 @@ common warnings
     -Widentities
     -Wincomplete-record-updates
     -Wincomplete-uni-patterns
+    -Werror=incomplete-patterns
     -Wmissing-export-lists
     -Wmissing-home-modules
     -Wpartial-fields
@@ -34,6 +35,7 @@ library
     TenForty.Form
     TenForty.PhaseOut
     TenForty.Table
+    TenForty.TaxTable
     TenForty.Types
 
   build-depends:
