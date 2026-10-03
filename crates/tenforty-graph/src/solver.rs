@@ -11,6 +11,10 @@ pub enum SolveError {
     NoConvergence(u32),
     #[error("Zero gradient encountered")]
     ZeroGradient,
+    #[error("Solver repeated an input without satisfying the exact output residual")]
+    RepeatedIterate,
+    #[error("No exact target found before the bisection interval collapsed")]
+    UnattainableTarget,
 }
 
 pub struct SolverConfig {
@@ -36,7 +40,10 @@ impl Default for SolverConfig {
 }
 
 /// Find the input value that produces a target output.
-/// Uses Newton's method with autodiff gradients.
+/// Uses Newton's method with autodiff gradients. On a plateau, the first
+/// residual-satisfying iterate is returned; it need not recover an original
+/// input or select the plateau's lower endpoint. No nearest-target relaxation
+/// is performed for quantized outputs.
 pub fn solve(
     runtime: &mut Runtime,
     output: NodeId,
@@ -91,6 +98,7 @@ pub fn solve_multi_output_with_config(
     config: &SolverConfig,
 ) -> Result<f64, SolveError> {
     let mut x = initial_guess;
+    let mut visited = std::collections::HashSet::new();
 
     for _ in 0..config.max_iterations {
         for &input in inputs {
@@ -103,6 +111,9 @@ pub fn solve_multi_output_with_config(
 
         if error.abs() < config.tolerance {
             return Ok(x);
+        }
+        if !visited.insert(x.to_bits()) {
+            return Err(SolveError::RepeatedIterate);
         }
 
         let grad = gradient_sum_outputs(runtime, outputs, inputs)?;
@@ -150,18 +161,29 @@ pub fn solve_bisection(
     tolerance: f64,
     max_iterations: u32,
 ) -> Result<f64, SolveError> {
+    for endpoint in [low, high] {
+        runtime.set_by_id(input, endpoint);
+        if (runtime.eval_node(output)? - target).abs() < tolerance {
+            return Ok(endpoint);
+        }
+    }
     for _ in 0..max_iterations {
         let mid = (low + high) / 2.0;
 
-        if (high - low) < tolerance {
-            return Ok(mid);
-        }
-
         runtime.set_by_id(input, mid);
         let y = runtime.eval_node(output)?;
+        if (y - target).abs() < tolerance {
+            return Ok(mid);
+        }
+        if mid == low || mid == high {
+            return Err(SolveError::UnattainableTarget);
+        }
 
         runtime.set_by_id(input, low);
         let y_low = runtime.eval_node(output)?;
+        if (y_low - target).abs() < tolerance {
+            return Ok(low);
+        }
 
         if (y - target).signum() == (y_low - target).signum() {
             low = mid;

@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Clone, Error)]
 pub enum EvalError {
     #[error("Input '{0}' not set")]
     InputNotSet(String),
@@ -125,6 +125,7 @@ impl<'g> Runtime<'g> {
     }
 
     fn eval_op(&mut self, op: &Op, node_id: NodeId) -> Result<f64, EvalError> {
+        op.validate(node_id)?;
         match op {
             // An input that was never set reads as 0. The resolved per-year
             // graph carries every state's inputs (~800); a given return only
@@ -178,6 +179,20 @@ impl<'g> Runtime<'g> {
             Op::Floor { arg } => {
                 let v = self.eval_node(*arg)?;
                 Ok(v.floor())
+            }
+            Op::TaxTableQuantize {
+                arg,
+                step,
+                output_offset,
+                mode,
+            } => {
+                let value = self.eval_node(*arg)?;
+                Ok(primitives::tax_table_quantize(
+                    value,
+                    *step,
+                    *output_offset,
+                    *mode,
+                ))
             }
 
             Op::Neg { arg } => {

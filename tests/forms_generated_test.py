@@ -25,7 +25,7 @@ def _operand_refs(op: dict) -> list:
     t = op.get("type")
     if t in ("add", "sub", "mul", "div", "max", "min"):
         return [op.get("left"), op.get("right")]
-    if t in ("floor", "neg", "abs", "clamp"):
+    if t in ("floor", "tax_table_quantize", "neg", "abs", "clamp"):
         return [op.get("arg")]
     if t == "bracket_tax":
         return [op.get("income")]

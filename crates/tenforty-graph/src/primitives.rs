@@ -1,4 +1,18 @@
-use crate::graph::Bracket;
+use crate::graph::{Bracket, TaxTableQuantizeMode};
+
+pub fn tax_table_quantize(
+    arg: f64,
+    step: f64,
+    output_offset: f64,
+    mode: TaxTableQuantizeMode,
+) -> f64 {
+    let scaled = arg / step;
+    let quantized = match mode {
+        TaxTableQuantizeMode::Floor => scaled.floor(),
+        TaxTableQuantizeMode::Round => (scaled + 0.5).floor(),
+    };
+    step * quantized + output_offset
+}
 
 /// Compute progressive tax from bracket table.
 /// Brackets must be sorted by threshold in ascending order.

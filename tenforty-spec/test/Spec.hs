@@ -29,7 +29,7 @@ import TablesCA2024
 import TablesCA2025
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
-import TenForty.Expr (Expr (PhaseOut), PhaseOutParameter (..), extractLineRefs, extractTableRefs)
+import TenForty.Expr (Expr (PhaseOut, TaxTableQuantize), PhaseOutParameter (..), TaxTableQuantizeMode (..), extractLineRefs, extractTableRefs)
 import TenForty.Table qualified as Table
 import Test.Hspec
 import Test.QuickCheck
@@ -540,6 +540,14 @@ spec n = do
       (formId <$> probeForm (ifPos (dollars 1) literalPhaseOut (dollars 0 .+. PhaseOut (line income) (dollars 100) (rate 0.1) (line income))))
         `shouldBe` Left (UnsupportedPhaseOutParameter credit PhaseOutBase)
 
+    forM_ [TableFloor, TableRound] $ \mode -> do
+      let nestedPhaseOut = TaxTableQuantize mode 50 25 (PhaseOut (line income) (dollars 100) (rate 0.1) (line income))
+      it ("rejects a non-literal phase-out inside " <> show mode <> " during validation") $
+        (formId <$> probeForm nestedPhaseOut) `shouldBe` Left (UnsupportedPhaseOutParameter credit PhaseOutBase)
+      it ("rejects a non-literal phase-out inside " <> show mode <> " when validation is bypassed") $
+        evaluate (BL.length (compileFormToJSON (unvalidated nestedPhaseOut)))
+          `shouldThrow` errorCall "Non-literal PhaseOut parameter is not supported by the graph compiler (tenforty-tj2.16): phaseout_probe -> L2 -> PhaseOutBase"
+
     it "rejects an invalid worksheet step" $
       ( formId
           <$> form
@@ -565,6 +573,37 @@ spec n = do
       case probeForm (PhaseOut (dollars 1000) (dollars 100) (rate 0.1) (line income .+. dollars 100)) of
         Left err -> expectationFailure (show err)
         Right frm -> evalGraphNode (compileForm frm) Single 500 "L2_Credit" `shouldBe` 950
+
+  describe "Tax-table quantization foundation (tenforty-xew)" $ do
+    let tableId = TableId "probe_rates"
+        Right table = mkTaxTable 50 (Amount 25) tableId
+        toyForm = form (FormId "table_probe") 2024 $ do
+          let upper = Amount (1 / 0)
+          defineTable (Table.TableBracket tableId (Table.BracketTable (Table.Bracket (byStatus upper upper upper upper upper) (Amount 0.1) :| [])))
+          income <- input (LineId "L1a") "Income" "" Interior
+          void (compute (LineId "L2") "Tax" "" Interior (taxTableBandTax table income))
+          outputs [LineId "L2"]
+    it "emits distinct band and rounding ops and exact table values" $
+      case toyForm of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let graph = compileForm frm
+              quantizers = [mode | JSON.Node {nodeOp = JSON.OpTaxTableQuantize mode _ _ _} <- Map.elems (JSON.cgNodes graph)]
+          length quantizers `shouldBe` 2
+          forM_ [(0, 3), (49.999, 3), (50, 8)] $ \(income, expected) ->
+            evalGraphNode graph Single income "L2_Tax" `shouldBe` expected
+    it "rejects invalid literal band widths at the combinator" $
+      forM_ [0, -1] $ \step ->
+        case mkTaxTable step (Amount 25) tableId of
+          Left err -> err `shouldBe` "mkTaxTable: step must be a positive integer number of dollars"
+          Right _ -> expectationFailure "invalid band width accepted"
+    it "rejects nonfinite midpoint offsets at the combinator" $
+      forM_ [1 / 0, 0 / 0, -1, 50] $ \offset ->
+        case mkTaxTable 50 (Amount offset) tableId of
+          Left err -> err `shouldBe` "mkTaxTable: midpoint offset must be finite and inside the band"
+          Right _ -> expectationFailure "invalid midpoint accepted"
+    it "tracks line references through table quantization" $
+      extractLineRefs (taxTableBandTax table (line (LineId "income"))) `shouldBe` Set.singleton (LineId "income")
 
   describe "Form Compilation" $ do
     forM_ taxYears $ \ty ->

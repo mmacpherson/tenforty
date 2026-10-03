@@ -14,6 +14,7 @@ import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)
 import Data.Text qualified as T
 import TenForty.Compile.JSON
+import TenForty.Expr (TaxTableQuantizeMode (..))
 import TenForty.Types (FilingStatus (..))
 
 evalGraph :: ComputationGraph -> FilingStatus -> Double -> Double
@@ -60,6 +61,10 @@ evaluateGraph graph status wages =
         OpMax l r -> max (lkp l) (lkp r)
         OpMin l r -> min (lkp l) (lkp r)
         OpFloor a -> fromIntegral (floor (lkp a) :: Int)
+        OpTaxTableQuantize mode step offset a ->
+          let scaled = lkp a / step
+              shifted = case mode of TableFloor -> scaled; TableRound -> scaled + 0.5
+           in step * fromIntegral (floor shifted :: Integer) + offset
         OpClamp a lo hi -> max lo (min hi (lkp a))
         OpIfPositive c t e -> if lkp c > 0 then lkp t else lkp e
         OpBracketTax tblId incomeNode ->

@@ -1,5 +1,5 @@
 use crate::eval::{EvalError, Runtime};
-use crate::graph::{NodeId, Op};
+use crate::graph::{NodeId, Op, TaxTableQuantizeMode};
 use crate::primitives;
 use std::collections::{HashMap, HashSet};
 
@@ -46,8 +46,9 @@ fn adjoints_with_order(
 }
 
 /// Compute the gradient of an output node with respect to an input node.
-/// Uses reverse-mode automatic differentiation in smooth regions and the
-/// composed function's right-hand numerical derivative at an active kink.
+/// Uses reverse-mode automatic differentiation on ordinary smooth paths and a
+/// right-hand numerical derivative at ordinary active kinks. Table quantization
+/// instead composes identity planning tangents with directional tie rules.
 pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<f64, EvalError> {
     gradient_sum(runtime, output, &[input])
 }
@@ -61,7 +62,8 @@ pub fn gradient(runtime: &mut Runtime, output: NodeId, input: NodeId) -> Result<
 /// its total derivative is the sum of the individual partials. Taking only the
 /// first node silently omits whatever the others contribute.
 ///
-/// Costs a single backward pass regardless of how many inputs are named.
+/// Ordinary smooth paths cost a single backward pass regardless of how many
+/// inputs are named. Table paths additionally propagate grouped directions.
 /// Nodes absent from the graph contribute nothing.
 pub fn gradient_sum(
     runtime: &mut Runtime,
@@ -71,21 +73,42 @@ pub fn gradient_sum(
     Ok(gradient_slices(runtime, output, &[inputs])?[0])
 }
 
-/// Compute grouped derivatives of one output in a single reverse pass.
+/// Compute grouped sensitivities, sharing a reverse pass on ordinary paths.
 ///
 /// Each inner slice names every graph node written by one natural input. In
 /// smooth regions all groups are read from the same adjoint map. A group whose
 /// requested path reaches an active piecewise boundary instead receives the
-/// same composed right-hand directional derivative as [`gradient_sum`].
+/// same composed right-hand directional derivative as [`gradient_sum`]. Table
+/// outputs use a directional planning pass per group.
 fn gradient_slices(
     runtime: &mut Runtime,
     output: NodeId,
     input_groups: &[&[NodeId]],
 ) -> Result<Vec<f64>, EvalError> {
     let (adjoints, order) = adjoints_with_order(runtime, output)?;
+    let mut table_paths = HashSet::new();
+    for &id in &order {
+        let Some(node) = runtime.graph().nodes.get(&id) else {
+            continue;
+        };
+        let dependencies = match &node.op {
+            Op::ByStatus { values } => vec![*values.get(runtime.filing_status())],
+            other => other.dependencies(),
+        };
+        if matches!(node.op, Op::TaxTableQuantize { .. })
+            || dependencies.iter().any(|id| table_paths.contains(id))
+        {
+            table_paths.insert(id);
+        }
+    }
     let mut gradients = Vec::with_capacity(input_groups.len());
 
     for inputs in input_groups {
+        if table_paths.contains(&output) {
+            let mut cache = HashMap::new();
+            gradients.push(table_directional(runtime, output, inputs, true, &mut cache)?.1);
+            continue;
+        }
         let reverse_gradient = inputs
             .iter()
             .map(|input| adjoints.get(input).copied().unwrap_or(0.0))
@@ -101,11 +124,212 @@ fn gradient_slices(
     Ok(gradients)
 }
 
+type DirectionalCache = HashMap<(NodeId, bool), Result<(f64, f64), EvalError>>;
+
+/// Compose table planning tangents using tangent-only right-limit values.
+/// The whole output uses one directional rule, with no numerical jump quotient.
+/// Continuous ties use planning motion; discontinuous switches use exact motion.
+fn table_directional(
+    runtime: &mut Runtime,
+    id: NodeId,
+    inputs: &[NodeId],
+    planning: bool,
+    cache: &mut DirectionalCache,
+) -> Result<(f64, f64), EvalError> {
+    if let Some(result) = cache.get(&(id, planning)) {
+        return result.clone();
+    }
+    let result = table_directional_uncached(runtime, id, inputs, planning, cache);
+    cache.insert((id, planning), result.clone());
+    result
+}
+
+fn table_directional_uncached(
+    runtime: &mut Runtime,
+    id: NodeId,
+    inputs: &[NodeId],
+    planning: bool,
+    cache: &mut DirectionalCache,
+) -> Result<(f64, f64), EvalError> {
+    let op = runtime
+        .graph()
+        .nodes
+        .get(&id)
+        .ok_or(EvalError::NodeNotFound(id))?
+        .op
+        .clone();
+    let filing_status = runtime.filing_status();
+    let exact_direction = match op {
+        Op::IfPositive { cond, .. } => {
+            Some(table_directional(runtime, cond, inputs, false, cache)?.1)
+        }
+        Op::Floor { arg } | Op::TaxTableQuantize { arg, .. } => {
+            Some(table_directional(runtime, arg, inputs, false, cache)?.1)
+        }
+        _ => None,
+    };
+    let mut child = |node| table_directional(runtime, node, inputs, planning, cache);
+    let pair = match op {
+        Op::TaxTableQuantize {
+            arg,
+            step,
+            output_offset,
+            mode,
+        } => {
+            let (value, tangent) = child(arg)?;
+            let position = value / step
+                + match mode {
+                    TaxTableQuantizeMode::Floor => 0.0,
+                    TaxTableQuantizeMode::Round => 0.5,
+                };
+            let band = position.floor();
+            (
+                if position == band && exact_direction.unwrap() < 0.0 {
+                    step * (band - 1.0) + output_offset
+                } else {
+                    primitives::tax_table_quantize(value, step, output_offset, mode)
+                },
+                if planning { tangent } else { 0.0 },
+            )
+        }
+        Op::Add { left, right }
+        | Op::Sub { left, right }
+        | Op::Mul { left, right }
+        | Op::Div { left, right } => {
+            let (l, dl) = child(left)?;
+            let (r, dr) = child(right)?;
+            match op {
+                Op::Add { .. } => (l + r, dl + dr),
+                Op::Sub { .. } => (l - r, dl - dr),
+                Op::Mul { .. } => (l * r, dl * r + l * dr),
+                _ if r == 0.0 => return Err(EvalError::DivisionByZero(id)),
+                _ => (l / r, (dl * r - l * dr) / (r * r)),
+            }
+        }
+        Op::Max { left, right } | Op::Min { left, right } => {
+            let l = child(left)?;
+            let r = child(right)?;
+            let choose_left = if matches!(op, Op::Max { .. }) {
+                l.0 > r.0 || (l.0 == r.0 && l.1 >= r.1)
+            } else {
+                l.0 < r.0 || (l.0 == r.0 && l.1 <= r.1)
+            };
+            if choose_left {
+                l
+            } else {
+                r
+            }
+        }
+        Op::Neg { arg } => {
+            let (v, d) = child(arg)?;
+            (-v, -d)
+        }
+        Op::Abs { arg } => {
+            let (v, d) = child(arg)?;
+            (v.abs(), if v == 0.0 { d.abs() } else { v.signum() * d })
+        }
+        Op::Floor { arg } => {
+            let (v, _) = child(arg)?;
+            let value = v.floor();
+            (
+                if v == value && exact_direction.unwrap() < 0.0 {
+                    value - 1.0
+                } else {
+                    value
+                },
+                0.0,
+            )
+        }
+        Op::Clamp { arg, min, max } => {
+            let (v, d) = child(arg)?;
+            let d = if min == max || v < min || v > max {
+                0.0
+            } else if v == min {
+                d.max(0.0)
+            } else if v == max {
+                d.min(0.0)
+            } else {
+                d
+            };
+            (v.clamp(min, max), d)
+        }
+        Op::IfPositive {
+            cond,
+            then,
+            otherwise,
+        } => {
+            let (v, d) = child(cond)?;
+            let exact_direction = exact_direction.unwrap();
+            if v > 0.0 || (v == 0.0 && exact_direction > 0.0) {
+                child(then)?
+            } else if v == 0.0 && exact_direction == 0.0 && planning && d > 0.0 {
+                let legal_branch = child(otherwise)?;
+                match child(then) {
+                    Ok(candidate) if candidate.0 == legal_branch.0 => candidate,
+                    _ => legal_branch,
+                }
+            } else {
+                child(otherwise)?
+            }
+        }
+        Op::BracketTax { table, income } => {
+            let (v, d) = child(income)?;
+            let table = runtime
+                .graph()
+                .tables
+                .get(&table)
+                .ok_or(EvalError::TableNotFound(table))?;
+            let brackets = table.brackets.get(runtime.filing_status());
+            let rate = if v < 0.0 || (v == 0.0 && d <= 0.0) {
+                0.0
+            } else {
+                brackets
+                    .iter()
+                    .find(|b| v < b.threshold || (v == b.threshold && d <= 0.0))
+                    .or_else(|| brackets.last())
+                    .map(|b| b.rate)
+                    .unwrap_or(0.0)
+            };
+            (primitives::bracket_tax(brackets, v), rate * d)
+        }
+        Op::PhaseOut {
+            base,
+            threshold,
+            rate,
+            agi,
+        } => {
+            let (v, d) = child(agi)?;
+            let threshold = *threshold.get(runtime.filing_status());
+            if v < threshold || (v == threshold && d <= 0.0) {
+                (base, 0.0)
+            } else {
+                let remaining = base - (v - threshold) * rate;
+                let slope = -rate * d;
+                (
+                    remaining.max(0.0),
+                    if remaining < 0.0 {
+                        0.0
+                    } else if remaining == 0.0 {
+                        slope.max(0.0)
+                    } else {
+                        slope
+                    },
+                )
+            }
+        }
+        Op::ByStatus { values } => child(*values.get(filing_status))?,
+        Op::Input | Op::Import { .. } => (runtime.eval_node(id)?, 0.0),
+        Op::Literal { value } => (value, 0.0),
+    };
+    let seed = inputs.iter().filter(|&&input| input == id).count() as f64;
+    Ok((pair.0, pair.1 + seed))
+}
+
 /// Compute grouped derivatives of one output.
 ///
-/// This is the vector form of [`gradient_sum`]: one reverse traversal supplies
-/// every smooth group, rather than repeating the traversal for each natural
-/// input.
+/// This is the vector form of [`gradient_sum`]: on ordinary smooth outputs one
+/// reverse traversal supplies every group. Table planning outputs additionally
+/// compose a directional pass per group.
 pub fn gradient_sums(
     runtime: &mut Runtime,
     output: NodeId,
@@ -259,8 +483,8 @@ fn gradient_slices_outputs(
 
 /// Compute grouped derivatives of a sum of outputs.
 ///
-/// Costs one reverse traversal per output in smooth regions, independent of
-/// the number of natural-input groups.
+/// Ordinary smooth outputs cost one reverse traversal each, independent of the
+/// number of natural-input groups. Table outputs add grouped directional passes.
 pub fn gradient_sums_outputs(
     runtime: &mut Runtime,
     outputs: &[NodeId],
@@ -329,6 +553,9 @@ fn backprop(
 
         Op::Floor { arg } => {
             *adjoints.entry(*arg).or_insert(0.0) += 0.0;
+        }
+        Op::TaxTableQuantize { arg, .. } => {
+            *adjoints.entry(*arg).or_insert(0.0) += adj;
         }
 
         Op::Neg { arg } => {
@@ -420,6 +647,42 @@ mod tests {
     use super::*;
     use crate::graph::{Bracket, BracketTable, ByStatus, FilingStatus, Graph, Node};
     use std::collections::HashMap;
+
+    #[test]
+    fn directional_cache_retains_failed_subtrees_in_both_modes() {
+        let mut graph = simple_arithmetic_graph();
+        graph.nodes.insert(
+            2,
+            Node {
+                id: 2,
+                name: Some("invalid".into()),
+                op: Op::Div { left: 1, right: 3 },
+            },
+        );
+        graph.nodes.insert(
+            3,
+            Node {
+                id: 3,
+                name: Some("zero".into()),
+                op: Op::Literal { value: 0.0 },
+            },
+        );
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        let mut cache = DirectionalCache::new();
+        for planning in [false, true] {
+            for _ in 0..20 {
+                assert!(matches!(
+                    table_directional(&mut runtime, 2, &[0], planning, &mut cache),
+                    Err(EvalError::DivisionByZero(2))
+                ));
+                assert!(matches!(
+                    cache.get(&(2, planning)),
+                    Some(Err(EvalError::DivisionByZero(2)))
+                ));
+            }
+        }
+        assert_eq!(cache.len(), 6);
+    }
 
     fn simple_arithmetic_graph() -> Graph {
         let mut nodes = HashMap::new();
