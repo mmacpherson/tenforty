@@ -173,7 +173,12 @@ def forward_difference_guided_ordinary_income_room(
     tolerance: float = 0.01,
     maximum: float = 100_000.0,
 ) -> SizingResult:
-    """Run the same bounded search with point-value forward differences."""
+    """Run the same bounded search with point-value forward differences.
+
+    Below $100,000 of taxable income the reported tax is the Tax Table
+    staircase, so a small forward difference reads zero inside a row and jumps
+    at its edge; this search therefore reports the table-to-worksheet switch.
+    """
 
     def rate(ordinary_income: float) -> float:
         base_tax = evaluate_return(

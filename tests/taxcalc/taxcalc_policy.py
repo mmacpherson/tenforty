@@ -530,10 +530,10 @@ def modeled_deltas(
     return combined
 
 
-# Tolerance policy (tribunal finding, unanimous): the $50-step 1040 tax tables
-# apply only to OTS below $100k of taxable income. The graph backend computes
-# exact bracket formulas everywhere, and OTS uses the exact worksheet at or
-# above $100k — both deserve the tight tolerance.
+# Tolerance policy (tribunal finding, unanimous): OTS prices the $50-step 1040
+# tax tables below $100k of taxable income, and uses the exact worksheet at or
+# above $100k, which deserves the tight tolerance. The graph's table pricing is
+# bounded separately below (GRAPH_TAX_TABLE_DELTA).
 COMPONENT_TOL = 2.0
 TAX_TABLE_TOL = 15.0
 TAX_TABLE_CEILING = 100_000.0
@@ -546,10 +546,45 @@ GAINS_WORKSHEET_TOL = 10.0
 GAINS_WORKSHEET_MIN = 1_000.0
 
 
+# The graph prices Form 1040 line 16 from the IRS Tax Table below $100,000 of
+# the taxed amount (tenforty-xew); taxcalc computes the rate formula. A Tax Table
+# row prices the rate schedule at its midpoint, at most half a $50 row from the
+# amount, then rounds to the dollar. Every 2024-2025 rate below $100,000 is at
+# most 22% (the 24% bracket starts above $100,000 for every status), so one
+# table lookup differs from the formula by at most 22% x $25 + $0.50. The
+# Qualified Dividends and Capital Gain Tax Worksheet prices lines 22 and 24 that
+# way and line 25 takes their minimum, which moves by no more than the larger;
+# credits, AMT and total tax move at most dollar for dollar with line 16. The
+# allowance is added to COMPONENT_TOL, so a table-priced quantity gets $2 + $6.
+# It applies only to the years whose spec carries the table (2024 and 2025), and
+# only to cases that state their year and filing status.
+GRAPH_TAX_TABLE_YEARS = frozenset({2024, 2025})
+GRAPH_TAX_TABLE_MAX_RATE = 0.22
+GRAPH_TAX_TABLE_HALF_ROW = 25.0
+GRAPH_TAX_TABLE_DELTA = GRAPH_TAX_TABLE_MAX_RATE * GRAPH_TAX_TABLE_HALF_ROW + 0.50
+GRAPH_TAX_TABLE_QUANTITIES = frozenset({"amt", "income_tax", "total_tax"})
+
+
+def _ordinary_taxable_income(taxable_income: float, case: dict) -> float:
+    """QDCG worksheet line 5: taxable income less preferential income."""
+    long_term, short_term = case.get("ltcg", 0.0), case.get("stcg", 0.0)
+    net_capital_gain = max(0.0, min(long_term, long_term + short_term))
+    return max(0.0, taxable_income - case.get("qual_div", 0.0) - net_capital_gain)
+
+
 def tolerance(
     backend: str, quantity: str, taxable_income: float, case: dict | None = None
 ) -> float:
     """Return the allowed absolute disagreement for one quantity of one case."""
+    if (
+        backend == "graph"
+        and quantity in GRAPH_TAX_TABLE_QUANTITIES
+        and case is not None
+        and case.get("year") in GRAPH_TAX_TABLE_YEARS
+        and case.get("status") is not None
+        and _ordinary_taxable_income(taxable_income, case) < TAX_TABLE_CEILING
+    ):
+        return COMPONENT_TOL + GRAPH_TAX_TABLE_DELTA
     if quantity in ("total_tax", "income_tax") and backend == "ots":
         if taxable_income < TAX_TABLE_CEILING:
             return TAX_TABLE_TOL

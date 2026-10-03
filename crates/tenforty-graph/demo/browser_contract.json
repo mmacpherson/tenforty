@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "3b79ea1dfc04ea2bc701199070ad19de87e7ef1b982d2fa6b8742ba8a778986a"
+        "sha256": "8bca7d3a065160dd99e84a321fbbe735c22266b618eeb9844dfa38d91453a191"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "4ac6383116fb1f12c6285f5afadd431da98fbcc29f2cde30a352d993635b7cb7"
+        "sha256": "c674dabf0eaa03a0af991e307e10c9f389871faf435fdafee570a687a5f204f7"
       }
     }
   },
@@ -1617,9 +1617,9 @@
       "expected": {
         "federal_adjusted_gross_income": 100000,
         "federal_taxable_income": 85400,
-        "federal_total_tax": 13841,
+        "federal_total_tax": 13847,
         "state_total_tax": 0,
-        "total_tax": 13841
+        "total_tax": 13847
       }
     },
     {
@@ -1635,11 +1635,11 @@
       "expected": {
         "federal_adjusted_gross_income": 100000,
         "federal_taxable_income": 90000,
-        "federal_total_tax": 14853,
+        "federal_total_tax": 14859,
         "state_adjusted_gross_income": 100000,
         "state_taxable_income": 90000,
         "state_total_tax": 4830.678,
-        "total_tax": 19683.678
+        "total_tax": 19689.678
       }
     },
     {
@@ -1742,7 +1742,7 @@
       "expected": {
         "federal_adjusted_gross_income": 100000,
         "federal_taxable_income": 84250,
-        "federal_amt": 2645,
+        "federal_amt": 2639,
         "federal_total_tax": 16094,
         "state_total_tax": 0,
         "total_tax": 16094

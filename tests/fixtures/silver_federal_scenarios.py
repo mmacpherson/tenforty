@@ -274,7 +274,11 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
     # Form 8995 capital-gain limit:
     # ($138,335.225 - $60,000) * 20% = $15,667.045 QBI deduction.
     # Taxable income: $138,335.225 - $15,667.045 = $122,668.18.
-    # Income tax: $17,839.9996; SE tax: $14,129.55; total: $31,969.5496.
+    # QDCG worksheet: line 5 is $62,668.18, under $100,000, so line 22 is Tax
+    # Table row 62,650-62,700 = $8,842 (2024 i1040tt), not Tax-Calculator's
+    # rate formula $8,839.9996. Line 23: $8,842 + 15% x $60,000 = $17,842; line
+    # 24 (Tax Computation Worksheet, $122,668.18 x 24% - $6,957.50) is larger.
+    # Income tax: $17,842; SE tax: $14,129.55; total: $31,971.55.
     TaxScenario(
         source="Tax-Calculator 6.7.2 / IRS Form 8995",
         description="Single below QBI threshold with SE income and LTCG limit",
@@ -284,7 +288,7 @@ SILVER_STANDARD_FEDERAL_SCENARIOS = [
         w2_income=0.0,
         self_employment_income=100000.0,
         long_term_capital_gains=60000.0,
-        expected_federal_tax=31969.5496,
+        expected_federal_tax=31971.55,
         expected_federal_agi=152935.225,
         expected_federal_taxable_income=122668.18,
         backend="graph",

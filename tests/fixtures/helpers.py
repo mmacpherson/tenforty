@@ -50,3 +50,27 @@ def is_state_supported(
     return filing_status is None or _ots_accepts_filing_status(
         year, form_id, filing_status
     )
+
+
+FEDERAL_TAX_TABLE_CEILING = 100_000.0
+
+
+def federal_tax_table_applies(cases) -> bool:
+    """Whether any return prices Form 1040 line 16 from the IRS Tax Table.
+
+    The Qualified Dividends and Capital Gain Tax Worksheet line 5 is at most
+    line 15 (and equals it without preferential income), so the table prices a
+    line-16 amount exactly when line 5 is under $100,000. There the reported tax
+    is a staircase whose planning slope is the rate at the row midpoint, so a
+    finite difference of the reported value is no derivative oracle; the
+    planning twin (tests/fixtures/planning_twin.py) supplies one.
+    """
+    from tenforty.backends.graph import GraphBackend
+    from tenforty.models import TaxReturnInput
+
+    backend = GraphBackend()
+    return any(
+        backend._create_evaluator(TaxReturnInput(**case))[0].eval("us_1040_qcgws_5")
+        < FEDERAL_TAX_TABLE_CEILING
+        for case in cases
+    )

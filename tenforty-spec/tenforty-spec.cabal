@@ -85,6 +85,7 @@ executable tenforty-compile
     DCFormD40_2025
     DEFormPITRES_2024
     DEFormPITRES_2025
+    FederalTaxTable
     FLNoTax_2024
     FLNoTax_2025
     FormRefs
@@ -371,6 +372,7 @@ test-suite tenforty-spec-test
     DEFormPITRES_2024
     DEFormPITRES_2025
     ExprProperties
+    FederalTaxTable
     FLNoTax_2024
     FLNoTax_2025
     FormRefs

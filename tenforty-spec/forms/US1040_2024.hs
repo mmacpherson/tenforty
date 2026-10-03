@@ -5,6 +5,7 @@ module US1040_2024
   )
 where
 
+import FederalTaxTable
 import FormRefs
 import Tables2024
 import TenForty
@@ -155,9 +156,9 @@ us1040_2024 = form "us_1040" 2024 $ do
   qcgws20 <- interior "qcgws_20" "work_l20" $ qcgws10 .-. qcgws19
   qcgws21 <- interior "qcgws_21" "work_l21" $ qcgws20 .*. lit 0.20
 
-  qcgws22 <- interior "qcgws_22" "work_l22" $ bracketTax "federal_brackets_2024" qcgws5
+  qcgws22 <- interior "qcgws_22" "work_l22" $ form1040TaxOnAmount "federal_brackets_2024" qcgws5
   qcgws23 <- interior "qcgws_23" "work_l23" $ qcgws18 .+. qcgws21 .+. qcgws22
-  qcgws24 <- interior "qcgws_24" "work_l24" $ bracketTax "federal_brackets_2024" qcgws1
+  qcgws24 <- interior "qcgws_24" "work_l24" $ form1040TaxOnAmount "federal_brackets_2024" qcgws1
   qcgws25 <- interior "qcgws_25" "work_l25" $ minE qcgws23 qcgws24
 
   hasPreferential <- interior "has_preferential_income" "Has preferential income" qcgws4

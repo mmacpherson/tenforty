@@ -10,7 +10,11 @@ The graph invariant compares autodiff with its own evaluation path. The bounded
 OTS oracle then compares the same matrix across independent implementations,
 apart from OTS's already-recorded missing QBI deduction. Both comparisons are
 kink-aware: a central difference is an honest derivative oracle only where its
-forward and backward slopes agree.
+forward and backward slopes agree. Where the Tax Table prices Form 1040 line 16
+the reported tax is a staircase, so the graph oracle there is the finite
+difference of the formula-priced planning twin frozen at the base return's row
+midpoints (tests/fixtures/planning_twin.py): the schedule rate at the midpoint,
+composed through the rest of the return by point evaluation alone.
 """
 
 import pytest
@@ -20,6 +24,9 @@ from hypothesis import strategies as st
 from tenforty import evaluate_return
 from tenforty.backends import GraphBackend
 from tenforty.models import TaxReturnInput
+
+from .fixtures.helpers import federal_tax_table_applies
+from .fixtures.planning_twin import row_offsets, twin_output
 
 
 def _graph_backend_available() -> bool:
@@ -147,6 +154,23 @@ def _slopes(
     return backward, forward, central
 
 
+def _graph_oracle_slopes(
+    case: dict[str, float | int | str], wrt: str, output: str, step: float
+) -> tuple[float, float, float]:
+    """Evaluation-path slopes, or the planning twin's where the table applies."""
+    value = float(case.get(wrt, 0.0))
+    probes = [{**case, wrt: value + delta} for delta in (-step, 0.0, step)]
+    if not federal_tax_table_applies(probes):
+        return _slopes("graph", case, wrt, output, step)
+    offsets = row_offsets(case)
+    below, center, above = (twin_output(probe, output, offsets) for probe in probes)
+    return (
+        (center - below) / step,
+        (above - center) / step,
+        (above - below) / (2 * step),
+    )
+
+
 def _gradient(case: dict[str, float | int | str], wrt: str, output: str) -> float:
     result = GraphBackend().gradient(TaxReturnInput(**case), output, wrt)
     assert result is not None
@@ -173,8 +197,8 @@ def test_full_graph_gradient_matrix_matches_evaluation_path():
         case = _case(region)
         for wrt in INCOME_NATURALS:
             for output in OUTPUTS:
-                backward, forward, central = _slopes(
-                    "graph", case, wrt, output, _GRAPH_STEP
+                backward, forward, central = _graph_oracle_slopes(
+                    case, wrt, output, _GRAPH_STEP
                 )
                 if abs(forward - backward) >= _GRAPH_TOLERANCE:
                     continue
@@ -209,7 +233,7 @@ def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset)
     case = _case(region)
     value = float(case.get(wrt, 0.0)) + offset
     case[wrt] = value if wrt in _SIGNED_INCOMES else max(0.0, value)
-    backward, forward, central = _slopes("graph", case, wrt, output, _GRAPH_STEP)
+    backward, forward, central = _graph_oracle_slopes(case, wrt, output, _GRAPH_STEP)
     assume(abs(forward - backward) < _GRAPH_TOLERANCE)
 
     analytical = _gradient(case, wrt, output)

@@ -5,6 +5,7 @@ import pytest
 from .taxcalc_policy import (
     COMPONENT_TOL,
     GAINS_WORKSHEET_TOL,
+    GRAPH_TAX_TABLE_DELTA,
     QBI_SIMPLIFIED_THRESHOLD,
     DeltaRange,
     _f7_itemized_semantics,
@@ -352,3 +353,44 @@ def test_gains_tolerance_requires_a_material_worksheet_input():
 
     assert tolerance("ots", "total_tax", 150_000.0, small) == COMPONENT_TOL
     assert tolerance("ots", "total_tax", 150_000.0, material) == GAINS_WORKSHEET_TOL
+
+
+def test_graph_tax_table_delta_is_one_half_row_at_the_top_table_rate():
+    """22% of a $25 half row plus $0.50 of rounding; the 24% bracket starts above $100k."""
+    assert GRAPH_TAX_TABLE_DELTA == pytest.approx(6.0)
+
+
+def test_graph_tax_table_tolerance_follows_qdcg_line_5():
+    """Tax quantities on a table-priced amount get COMPONENT_TOL plus the band."""
+    table_priced = COMPONENT_TOL + GRAPH_TAX_TABLE_DELTA
+    assert table_priced == pytest.approx(8.0)
+    for year in (2024, 2025):
+        case = _case(year=year)
+        assert tolerance("graph", "income_tax", 99_999.0, case) == table_priced
+        assert tolerance("graph", "total_tax", 99_999.0, case) == table_priced
+        assert tolerance("graph", "amt", 99_999.0, case) == table_priced
+    with_gain = _case(ltcg=30_000.0, qual_div=10_000.0)
+    assert tolerance("graph", "total_tax", 139_999.0, with_gain) == table_priced
+
+
+def test_graph_tax_table_tolerance_negative_controls():
+    """No band allowance without a table-priced line 5, table year, status or graph."""
+    case = _case()
+    for quantity in ("agi", "taxable_income", "se_tax", "niit", "addl_medicare"):
+        assert tolerance("graph", quantity, 50_000.0, case) == COMPONENT_TOL
+    assert tolerance("graph", "total_tax", 100_000.0, case) == COMPONENT_TOL
+    assert tolerance("graph", "total_tax", 250_000.0, case) == COMPONENT_TOL
+    with_gain = _case(ltcg=30_000.0, qual_div=10_000.0)
+    assert tolerance("graph", "total_tax", 140_000.0, with_gain) == COMPONENT_TOL
+    short_term_loss = _case(ltcg=30_000.0, stcg=-30_000.0)
+    assert tolerance("graph", "total_tax", 100_000.0, short_term_loss) == COMPONENT_TOL
+    for year in (2018, 2023, 2026):
+        assert tolerance("graph", "income_tax", 50_000.0, _case(year=year)) == (
+            COMPONENT_TOL
+        )
+    for missing in ("year", "status"):
+        partial = {key: value for key, value in case.items() if key != missing}
+        assert tolerance("graph", "income_tax", 50_000.0, partial) == COMPONENT_TOL
+    assert tolerance("graph", "income_tax", 50_000.0, None) == COMPONENT_TOL
+    assert tolerance("ots", "income_tax", 150_000.0, case) == COMPONENT_TOL
+    assert tolerance("taxcalc", "income_tax", 50_000.0, case) == COMPONENT_TOL

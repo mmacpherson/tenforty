@@ -233,7 +233,10 @@ def test_graph_zip_applies_dividend_normalization():
 
 @skip_if_graph_unavailable
 def test_graph_taxes_short_term_gains_as_ordinary():
-    """Single, $50k wages + $25k STCG: income tax $8,341 (STCG is ordinary income)."""
+    """Single, $50k wages + $25k STCG: income tax $8,347 (STCG is ordinary income).
+
+    Taxable income $60,400, all ordinary: 2024 Tax Table row 60,400-60,450.
+    """
     r = evaluate_return(
         year=2024,
         filing_status="Single",
@@ -241,7 +244,7 @@ def test_graph_taxes_short_term_gains_as_ordinary():
         short_term_capital_gains=25_000,
         backend="graph",
     )
-    assert r.federal_income_tax == pytest.approx(8_341.00, abs=2.0)
+    assert r.federal_income_tax == 8_347.00
 
 
 @pytest.mark.xfail(

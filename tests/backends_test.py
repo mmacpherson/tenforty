@@ -112,7 +112,8 @@ class TestGraphBackend:
 
         backend = GraphBackend()
         tax_input = TaxReturnInput(year=2024, w2_income=0)
-        result = backend.solve(tax_input, "L24_total_tax", 10000, "w2_income")
+        # 2024 Tax Table row 67,950-68,000, Single: a reportable tax amount.
+        result = backend.solve(tax_input, "L24_total_tax", 10_008, "w2_income")
         assert result is not None
         assert result > 0
 

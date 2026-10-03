@@ -152,8 +152,9 @@ class TestSolveForIncome:
         if not graph_available:
             pytest.skip("Graph backend not available")
 
-        income = solve_for_income(target_tax=10000, year=2024)
-        assert income > 0
+        # 2024 Tax Table row 67,950-68,000, Single: a reportable tax amount.
+        income = solve_for_income(target_tax=10_008, year=2024)
+        assert 67_950.0 + 14_600.0 <= income < 68_000.0 + 14_600.0
 
 
 class TestBackwardsCompatibility:
