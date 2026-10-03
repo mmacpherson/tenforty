@@ -235,9 +235,10 @@ PARITY_CASES = [
         "expected": {
             "federal_adjusted_gross_income": 100000,
             "federal_taxable_income": 85400,
-            "federal_total_tax": 13841,
+            # 2024 Tax Table row 85,400-85,450, Single.
+            "federal_total_tax": 13847,
             "state_total_tax": 0,
-            "total_tax": 13841,
+            "total_tax": 13847,
         },
     },
     {
@@ -253,11 +254,12 @@ PARITY_CASES = [
         "expected": {
             "federal_adjusted_gross_income": 100000,
             "federal_taxable_income": 90000,
-            "federal_total_tax": 14853,
+            # 2024 Tax Table row 90,000-90,050, Single.
+            "federal_total_tax": 14859,
             "state_adjusted_gross_income": 100000,
             "state_taxable_income": 90000,
             "state_total_tax": 4830.678,
-            "total_tax": 19683.678,
+            "total_tax": 19689.678,
         },
     },
     {
@@ -357,7 +359,9 @@ PARITY_CASES = [
         "expected": {
             "federal_adjusted_gross_income": 100000,
             "federal_taxable_income": 84250,
-            "federal_amt": 2645,
+            # Tentative minimum tax $16,094 less regular tax $13,455, the 2025
+            # Tax Table row 84,250-84,300, Single.
+            "federal_amt": 2639,
             "federal_total_tax": 16094,
             "state_total_tax": 0,
             "total_tax": 16094,

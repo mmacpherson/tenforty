@@ -53,8 +53,6 @@ class TaxScenario:
     # exact statutory formula. A scenario whose expected value is an official
     # table row states the band-effect bound it tolerates, with its derivation.
     state_tax_tolerance: float = 0.01
-    # Same rule for an expected federal tax that is an IRS Tax Table row.
-    federal_tax_tolerance: float = 0.01
     expected_federal_agi: float | None = None
     expected_federal_taxable_income: float | None = None
     known_failure: str | None = None

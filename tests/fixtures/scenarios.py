@@ -68,7 +68,7 @@ def run_tax_scenario(scenario: TaxScenario):
             "federal_total_tax",
             "Federal tax",
             scenario.expected_federal_tax,
-            scenario.federal_tax_tolerance,
+            0.01,
         ),
         (
             "state_total_tax",

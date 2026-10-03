@@ -19,8 +19,13 @@ def _total_tax_at_wages(state: str, wages: float) -> float:
 
 
 def test_state_total_marginal_matches_finite_difference():
-    """The default marginal rate includes the selected state's tax."""
-    wages = 100_000.0
+    """The default marginal rate includes the selected state's tax.
+
+    Wages put federal taxable income above the $100,000 Tax Table ceiling, where
+    the reported federal tax is continuous and a finite difference is a valid
+    oracle: 24% federal plus California's 9.3%.
+    """
+    wages = 130_000.0
     step = 1.0
     finite_difference = (
         _total_tax_at_wages("CA", wages + step)
@@ -35,7 +40,7 @@ def test_state_total_marginal_matches_finite_difference():
     )
 
     assert rate == pytest.approx(finite_difference, abs=1e-9)
-    assert rate == pytest.approx(0.313, abs=1e-9)
+    assert rate == pytest.approx(0.333, abs=1e-9)
 
 
 def test_explicit_federal_output_excludes_state_tax():
@@ -159,8 +164,13 @@ def test_solver_targets_the_public_total_in_every_state(state):
     federal line alone made the solver converge on a root of a function the
     library does not expose. For 2024 CA Single it returned the income for
     $20,000 of FEDERAL tax, whose public total is $27,792 -- off by 39%.
+
+    The $40,000 target keeps every state's federal taxable income above the
+    $100,000 Tax Table ceiling. Below it the public total moves in table steps,
+    so an arbitrary cent-exact target may be unattainable and the solver must
+    report that rather than a nearby row.
     """
-    target = 20_000.0
+    target = 40_000.0
 
     wages = solve_for_income(
         target_tax=target, year=2024, state=state, filing_status="Single"

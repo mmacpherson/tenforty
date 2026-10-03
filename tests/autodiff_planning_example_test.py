@@ -36,20 +36,27 @@ def test_ltcg_stacking_table_reproduces_the_non_monotonic_rate_profile(example):
         abs=1e-7,
     )
     assert table["total_tax"].to_list() == pytest.approx(
-        [4_372.25, 9_772.25, 12_472.25, 12_920.0, 13_641.0, 14_741.0],
+        [4_375.25, 9_775.25, 12_475.25, 12_923.0, 13_647.0, 14_747.0],
         abs=0.01,
     )
 
 
 def test_derivative_guided_sizing_is_more_precise_with_fewer_evaluations(example):
-    """A fair forward search is competitive; a dense grid is not."""
+    """Derivatives find the 24% bracket; point-value differences cannot.
+
+    Below $100,000 of taxable income the reported tax is the Tax Table
+    staircase, so a cent-wide forward difference reads zero inside every row and
+    the search stops where the table gives way to the continuous Tax
+    Computation Worksheet: taxable income $100,000, $525 short of the 24%
+    bracket at $100,525.
+    """
     derivative = example["derivative_guided_ordinary_income_room"]()
     forward_guided = example["forward_difference_guided_ordinary_income_room"]()
     forward = example["forward_grid_ordinary_income_room"]()
 
     assert derivative.ordinary_income == pytest.approx(35_125.0, abs=0.01)
     assert derivative.evaluations == 28
-    assert forward_guided.ordinary_income == pytest.approx(35_125.0, abs=0.01)
-    assert forward_guided.evaluations == 56
+    assert forward_guided.ordinary_income == pytest.approx(34_600.0, abs=0.01)
+    assert forward_guided.evaluations == 54
     assert forward.ordinary_income == 35_200.0
     assert forward.evaluations == 353

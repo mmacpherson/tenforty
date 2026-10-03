@@ -81,7 +81,8 @@ def test_forced_itemization_survives_graph_batch_evaluation():
     )
 
     assert results["federal_taxable_income"].to_list() == [85_400.0, 90_000.0]
-    assert results["federal_total_tax"].to_list() == [13_841.0, 14_853.0]
+    # 2024 Tax Table, Single: rows 85,400-85,450 and 90,000-90,050.
+    assert results["federal_total_tax"].to_list() == [13_847.0, 14_859.0]
 
 
 def test_deduction_choice_is_a_graph_batch_cross_axis():
@@ -111,13 +112,15 @@ def test_forced_itemization_reaches_gradients_and_solver():
     forced_rate = marginal_rate(
         w2_income=61_600, standard_or_itemized="Itemized", **common
     )
-    automatic_income = solve_for_income(13_841, **common)
-    forced_income = solve_for_income(13_841, standard_or_itemized="Itemized", **common)
+    # $13,847 is the 2024 Tax Table row 85,400-85,450, Single; any income
+    # whose taxable income lands in that row attains it.
+    automatic_income = solve_for_income(13_847, **common)
+    forced_income = solve_for_income(13_847, standard_or_itemized="Itemized", **common)
 
     assert automatic_rate == pytest.approx(0.12)
     assert forced_rate == pytest.approx(0.22)
-    assert automatic_income == pytest.approx(100_000.0)
-    assert forced_income == pytest.approx(95_400.0)
+    assert 100_000.0 <= automatic_income < 100_050.0
+    assert 95_400.0 <= forced_income < 95_450.0
 
 
 def test_forced_itemization_reaches_a_state_importing_federal_taxable_income():

@@ -99,27 +99,47 @@ pub fn solve_multi_output_with_config(
 ) -> Result<f64, SolveError> {
     let mut x = initial_guess;
     let mut visited = std::collections::HashSet::new();
+    let mut below_target: Option<f64> = None;
+    let mut above_target: Option<f64> = None;
 
     for _ in 0..config.max_iterations {
-        for &input in inputs {
-            runtime.set_by_id(input, x);
-        }
-        let y = outputs.iter().try_fold(0.0, |sum, output| {
-            runtime.eval_node(*output).map(|value| sum + value)
-        })?;
-        let error = y - target;
+        let error = residual(runtime, outputs, inputs, target, x)?;
 
         if error.abs() < config.tolerance {
             return Ok(x);
         }
+        if error < 0.0 {
+            below_target = Some(x);
+        } else {
+            above_target = Some(x);
+        }
         if !visited.insert(x.to_bits()) {
-            return Err(SolveError::RepeatedIterate);
+            return bisect_newton_bracket(
+                runtime,
+                outputs,
+                inputs,
+                target,
+                below_target.zip(above_target),
+                config,
+                SolveError::RepeatedIterate,
+            );
         }
 
+        for &input in inputs {
+            runtime.set_by_id(input, x);
+        }
         let grad = gradient_sum_outputs(runtime, outputs, inputs)?;
 
         if grad.abs() < config.min_step {
-            return Err(SolveError::ZeroGradient);
+            return bisect_newton_bracket(
+                runtime,
+                outputs,
+                inputs,
+                target,
+                below_target.zip(above_target),
+                config,
+                SolveError::ZeroGradient,
+            );
         }
 
         let step = error / grad;
@@ -134,6 +154,60 @@ pub fn solve_multi_output_with_config(
         }
     }
 
+    Err(SolveError::NoConvergence(config.max_iterations))
+}
+
+fn residual(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    inputs: &[NodeId],
+    target: f64,
+    x: f64,
+) -> Result<f64, SolveError> {
+    for &input in inputs {
+        runtime.set_by_id(input, x);
+    }
+    let y = outputs.iter().try_fold(0.0, |sum, output| {
+        runtime.eval_node(*output).map(|value| sum + value)
+    })?;
+    Ok(y - target)
+}
+
+/// Safeguard for a Newton stall (zero planning gradient or a repeated iterate).
+///
+/// When Newton has already evaluated one input below the target and one above
+/// it, bisect between them. Like `solve_bisection`, only an exact residual is
+/// accepted. If the bracket collapses to floating-point midpoint stagnation
+/// without one, or there is no bracket, Newton's own stall error is returned.
+/// The bisection takes at most `config.max_iterations` midpoints, then reports
+/// `NoConvergence` as Newton does.
+fn bisect_newton_bracket(
+    runtime: &mut Runtime,
+    outputs: &[NodeId],
+    inputs: &[NodeId],
+    target: f64,
+    bracket: Option<(f64, f64)>,
+    config: &SolverConfig,
+    stall: SolveError,
+) -> Result<f64, SolveError> {
+    let Some((mut below, mut above)) = bracket else {
+        return Err(stall);
+    };
+    for _ in 0..config.max_iterations {
+        let mid = below + (above - below) / 2.0;
+        if mid == below || mid == above {
+            return Err(stall);
+        }
+        let error = residual(runtime, outputs, inputs, target, mid)?;
+        if error.abs() < config.tolerance {
+            return Ok(mid);
+        }
+        if error < 0.0 {
+            below = mid;
+        } else {
+            above = mid;
+        }
+    }
     Err(SolveError::NoConvergence(config.max_iterations))
 }
 
@@ -360,6 +434,39 @@ mod tests {
         let result = solve_with_config(&mut runtime, 4, 5.0, &[0], 10.0, &config);
         // Should not converge since target is unreachable with x >= 0
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_newton_bracket_bisection_honours_the_iteration_limit() {
+        let graph = linear_graph();
+        let mut runtime = Runtime::new(&graph, FilingStatus::Single);
+        let limited = SolverConfig {
+            max_iterations: 1,
+            ..Default::default()
+        };
+
+        let exhausted = bisect_newton_bracket(
+            &mut runtime,
+            &[4],
+            &[0],
+            100.0,
+            Some((0.0, 100.0)),
+            &limited,
+            SolveError::ZeroGradient,
+        );
+        assert!(matches!(exhausted, Err(SolveError::NoConvergence(1))));
+
+        let solved = bisect_newton_bracket(
+            &mut runtime,
+            &[4],
+            &[0],
+            100.0,
+            Some((0.0, 100.0)),
+            &SolverConfig::default(),
+            SolveError::ZeroGradient,
+        )
+        .unwrap();
+        assert!((solved - 45.0).abs() < 1e-6);
     }
 
     #[test]

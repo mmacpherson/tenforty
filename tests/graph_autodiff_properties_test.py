@@ -17,6 +17,10 @@ pins the finite-difference agreement on the runtime directly.
   a bracket edge / max0 / floor step the central difference straddles two slopes.
   We detect that by the forward and backward one-sided differences disagreeing and
   only assert where the function is locally linear (``assume`` drops the rest).
+  Below $100,000 Form 1040 line 16 is a Tax Table staircase whose planning slope
+  is the rate at the row midpoint, not the flat or jumping finite difference; there
+  the oracle is the formula-priced planning twin frozen at the base return's row
+  midpoints (tests/fixtures/planning_twin.py), still by point evaluation only.
 - marginal-rate bounds. d(total_tax)/d(income) lies in [0, ~0.5]: the top bracket
   (37%) plus NIIT (3.8%) plus Additional Medicare (0.9%), with headroom for
   SE-tax stacking. An out-of-band rate is unambiguously a gradient bug -- no oracle
@@ -32,6 +36,9 @@ from hypothesis import strategies as st
 
 from tenforty import evaluate_return
 from tenforty.models import OTSFilingStatus, TaxReturnInput
+
+from .fixtures.helpers import federal_tax_table_applies
+from .fixtures.planning_twin import row_offsets, twin_output
 
 
 def graph_backend_available():
@@ -158,9 +165,17 @@ def test_autodiff_matches_finite_difference(filing_status, wrt, incomes):
     # Leave room for a symmetric step without pushing the input negative.
     case[wrt] = max(case[wrt], _STEP)
 
-    f0 = _total_tax(case)
-    f_plus = _total_tax({**case, wrt: case[wrt] + _STEP})
-    f_minus = _total_tax({**case, wrt: case[wrt] - _STEP})
+    plus = {**case, wrt: case[wrt] + _STEP}
+    minus = {**case, wrt: case[wrt] - _STEP}
+    if federal_tax_table_applies([minus, case, plus]):
+        offsets = row_offsets(case)
+        f0, f_plus, f_minus = (
+            twin_output(probe, "total_tax", offsets) for probe in (case, plus, minus)
+        )
+    else:
+        f0 = _total_tax(case)
+        f_plus = _total_tax(plus)
+        f_minus = _total_tax(minus)
 
     forward = (f_plus - f0) / _STEP
     backward = (f0 - f_minus) / _STEP

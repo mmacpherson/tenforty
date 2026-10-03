@@ -62,12 +62,16 @@ Hold $50,000 of long-term gains fixed for a single filer and vary wages:
 
 | W-2 income | Total tax | Tax on the next wage dollar |
 |---:|---:|---:|
-| $30,000 | $4,372.25 | 27% |
-| $50,000 | $9,772.25 | 27% |
-| $60,000 | $12,472.25 | 27% |
-| $61,700 | $12,920.00 | 12% |
-| $65,000 | $13,641.00 | 22% |
-| $70,000 | $14,741.00 | 22% |
+| $30,000 | $4,375.25 | 27% |
+| $50,000 | $9,775.25 | 27% |
+| $60,000 | $12,475.25 | 27% |
+| $61,700 | $12,923.00 | 12% |
+| $65,000 | $13,647.00 | 22% |
+| $70,000 | $14,747.00 | 22% |
+
+Total tax is the legal value: the Qualified Dividends and Capital Gain Tax
+Worksheet prices ordinary taxable income under $100,000 from the IRS Tax Table.
+The local rate is the planning slope, the rate at the table row's midpoint.
 
 At the lower wage values, another ordinary dollar both incurs the 12% ordinary
 rate and pushes a gain dollar from the 0% preferential band into the 15% band:
@@ -78,9 +82,11 @@ $47,150 boundary of the 22% ordinary bracket, and the local rate rises to 22%.
 The $61,700 row exposes the short middle regime that a coarser table would miss.
 
 This is a good explanatory and diagnostic use of autodiff. It gives the exact
-local slope under the library's documented right-hand convention. A small
-forward difference usually gives the same answer inside a linear segment, but
-a step that crosses a boundary returns an average of both sides.
+local slope under the library's documented right-hand convention. Above the
+$100,000 Tax Table ceiling a small forward difference usually gives the same
+answer inside a linear segment, but a step that crosses a boundary returns an
+average of both sides. Below it, the reported tax is a staircase: a small
+forward difference reads zero inside a table row and a jump at its edge.
 
 ## 3. Sizing additional ordinary income
 
@@ -88,19 +94,23 @@ The example uses `schedule_1_income` as a taxable ordinary-income proxy. It is
 not a dedicated Roth-conversion input.
 
 For a single filer with $80,000 of wages, the next local rate increase occurs
-at $35,125 of additional ordinary income. Three bounded methods find it:
+at $35,125 of additional ordinary income. Three bounded methods search for it:
 
 | Method | Result | Point-value or derivative evaluations |
 |---|---:|---:|
 | Coarse scan + derivative bisection | $35,125.01 | 28 |
-| Coarse scan + forward-difference bisection | $35,125.01 | 56 |
+| Coarse scan + forward-difference bisection | $34,600.00 | 54 |
 | $100 point-value grid | $35,200.00 | 353 |
 
-On the same local run, those methods took about 129 ms, 88 ms, and 473 ms.
-Autodiff halves the number of oracle calls relative to the same search driven
-by forward differences, but it is slower in wall-clock time today because a
-reverse pass costs more than two point evaluations. The dense grid is both
-slower and $75 less precise, but it is not the strongest point-value baseline.
+The forward-difference search no longer finds the bracket. Below $100,000 of
+taxable income the reported tax comes from the Tax Table, so a cent-wide
+difference reads zero inside every row; the first positive difference appears
+where the table gives way to the continuous Tax Computation Worksheet, at
+$100,000 of taxable income, $525 short of the bracket. The dense grid averages
+over whole rows and still finds it, $75 late. Before table pricing (2026-07-31
+local run) the derivative, forward-difference and grid searches took about
+129 ms, 88 ms and 473 ms; autodiff is slower in wall-clock time because a
+reverse pass costs more than two point evaluations.
 
 This is promising, not yet a production optimizer. The example first performs
 a coarse scan and bisects only the bracket it found. Marginal rates can be

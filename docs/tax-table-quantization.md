@@ -107,9 +107,18 @@ Solver failure means no
 solution was found by that search, not proof that none exists anywhere in a
 nonmonotone tax graph. No nearest-feasible or inequality inversion is implied.
 
-This foundation introduces the operation and contracts without changing existing
-statutory form computations. Published-table functions and their independent
-row-by-row legal oracles are separate work.
+The foundation introduced the operation without changing statutory form
+computations. Form 1040 line 16 is the first statutory use
+(`tenforty-spec/forms/FederalTaxTable.hs`): below $100,000 the line-16 amount,
+and the Qualified Dividends and Capital Gain Tax Worksheet's lines 22 and 24,
+come from the IRS Tax Table, and from $100,000 the unrounded Tax Computation
+Worksheet. The $25 and $50 rows are uniform segments. The opening $0-5, $5-15
+and $15-25 rows are not cells of any zero-anchored grid, so each is a
+single-cell segment (steps 5, 15 and 25) whose cell contains the row and whose
+offset is the row midpoint, selected only inside the row. Every published row
+of the 2024 and 2025 tables is checked in `tests/federal_tax_table_test.py`
+against a transcription of the IRS PDF (`scripts/parse_irs_tax_table.py`).
+State tables remain separate work.
 Activation must explicitly review cliff-gradient tests: a table-dependent output
 uses these composed directional tangents instead of the ordinary numerical jump
 quotient, so existing finite-difference spike expectations will change.
