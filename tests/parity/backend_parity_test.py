@@ -1600,11 +1600,6 @@ def test_ots_nj_owes_no_tax_at_the_filing_threshold(year):
 
 
 @skip_if_graph_unavailable
-@pytest.mark.xfail(
-    reason="NJ-NO-TAX (tenforty-b72.24): the graph NJ-1040 spec has no filing threshold, "
-    "so it taxes income at and below it",
-    strict=True,
-)
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_graph_nj_owes_no_tax_below_the_filing_threshold(year):
     """NJ Single, $9,999 gross income: below the threshold no tax is due."""
@@ -1651,11 +1646,6 @@ def test_ots_va_owes_no_tax_below_the_filing_threshold(year):
 
 
 @skip_if_graph_unavailable
-@pytest.mark.xfail(
-    reason="VA-GRAPH-BELOW-THRESHOLD (tenforty-b72.30): the graph VA 760 spec has no "
-    "filing threshold, so it taxes VAGI below it",
-    strict=True,
-)
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_graph_va_owes_no_tax_below_the_filing_threshold(year):
     """VA MFJ, $20,000 VAGI, below the $23,900 threshold: "Enter $0 as your tax"."""

@@ -5,6 +5,7 @@ from .evidence import (
     LA_DERIVED_EVIDENCE,
     LA_TABLE_EVIDENCE,
     MS_EVIDENCE,
+    NJ_VA_EVIDENCE,
     VT_EVIDENCE,
     WI_EVIDENCE,
 )
@@ -85,6 +86,32 @@ def _ca_table_tolerance(low: float, high: float) -> float:
 
 
 LA_2024_TABLE_URL = "https://dam.ldr.la.gov/taxforms/IT540(2024)D13%20TT.pdf"
+
+
+def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDefect:
+    """Signed schedule-minus-table bound for these non-kink $50 NJ rows.
+
+    NJ requires its printed table below $100,000. The blind record establishes
+    each row and its single marginal rate. The schedule prices actual income
+    rather than the midpoint, with at most $0.50 of printed-row rounding.
+    """
+    assert row_low <= taxable_income < row_low + 50
+    center = rate * (taxable_income - (row_low + 25))
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.50,
+        maximum=center + 0.50,
+        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
+    )
+
+
+VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
+    quantity="state_total_tax",
+    minimum=-0.50,
+    maximum=0.50,
+    reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
+    "(tenforty-xew, not a table-band difference)",
+)
 
 
 def la_2024_table_gap(
@@ -2433,184 +2460,143 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state_tax_tolerance=_wi_band_tolerance(0.0765, tax_table=False),
         backend="graph",
     ),
-    # ========== NEW JERSEY SCENARIOS ==========
-    # NJ 2024/2025: Progressive brackets (rates and thresholds unchanged)
-    # Personal exemptions: $1,000 per taxpayer
-    # Dependent exemptions: income-phased ($1,500, $1,000, $500, $0)
-    # Single/MFS: 7 brackets: 1.4% ($0-$20k), 1.75% ($20k-$35k),
-    #   3.5% ($35k-$40k), 5.525% ($40k-$75k), 6.37% ($75k-$500k),
-    #   8.97% ($500k-$1M), 10.75% ($1M+)
-    # MFJ/HoH/QW: 8 brackets: 1.4% ($0-$20k), 1.75% ($20k-$50k),
-    #   2.45% ($50k-$70k), 3.5% ($70k-$80k), 5.525% ($80k-$150k),
-    #   6.37% ($150k-$500k), 8.97% ($500k-$1M), 10.75% ($1M+)
-    # These use graph backend with exemptions set to 0 (not auto-computed).
-    #
-    # NJ 2024 Single in 1.75% bracket
-    # Federal AGI: $30,000, NJ taxable: $30,000 (no exemptions)
-    # NJ tax: $20,000 x 0.014 + ($30,000 - $20,000) x 0.0175
-    #       = $280 + $175 = $455
-    # Federal taxable: $15,400 (AGI - $14,600 std ded)
-    # Federal tax (graph backend): $1,616
+    # ========== NJ/VA BLIND-DERIVED STATE SCENARIOS ==========
+    # Record: docs/validation/state-fixtures/NJ-VA-2024-2025.md.
+    # State answers only were re-derived; federal expectations stay unchanged.
+    # Blind case 1: 30,000 - 1,000 = 29,000; mandatory NJ row 29,000-29,050.
     TaxScenario(
-        source="NJ 2024 Tax Brackets (computed)",
+        source="NJ 2024 official tax table (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="NJ Single, $30k income (1.75% bracket)",
         year=2024,
         state="NJ",
         filing_status="Single",
         w2_income=30000.0,
         expected_federal_tax=1616.0,
-        expected_state_tax=455.0,
+        expected_state_tax=438.0,
         expected_federal_agi=30000.0,
+        known_defects=(nj_table_gap(0.0175, 29_000, 29_000),),
         backend="graph",
     ),
-    # NJ 2024 Single in 5.525% bracket
-    # Federal AGI: $60,000, NJ taxable: $60,000 (no exemptions)
-    # NJ tax: $280 + $262.50 + $175 + ($60,000 - $40,000) x 0.05525
-    #       = $280 + $262.50 + $175 + $1,105 = $1,822.50
-    # Federal taxable: $45,400 (AGI - $14,600 std ded)
-    # Federal tax (graph backend): $5,216
+    # Blind case 2: 60,000 - 1,000 = 59,000; mandatory NJ row 59,000-59,050.
     TaxScenario(
-        source="NJ 2024 Tax Brackets (computed)",
+        source="NJ 2024 official tax table (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="NJ Single, $60k income (5.525% bracket)",
         year=2024,
         state="NJ",
         filing_status="Single",
         w2_income=60000.0,
         expected_federal_tax=5216.0,
-        expected_state_tax=1822.5,
+        expected_state_tax=1769.0,
         expected_federal_agi=60000.0,
+        known_defects=(nj_table_gap(0.05525, 59_000, 59_000),),
         backend="graph",
     ),
-    # NJ 2024 MFJ in 2.45% bracket
-    # Federal AGI: $65,000, NJ taxable: $65,000 (no exemptions)
-    # NJ tax: $280 + ($50,000 - $20,000) x 0.0175 + ($65,000 - $50,000) x 0.0245
-    #       = $280 + $525 + $367.50 = $1,172.50
-    # Federal taxable: $35,800 (AGI - $29,200 std ded)
-    # Federal tax (graph backend): $3,832
+    # Blind case 3: 65,000 - 2,000 = 63,000; NJ joint column, row 63,000-63,050.
     TaxScenario(
-        source="NJ 2024 Tax Brackets (computed)",
+        source="NJ 2024 official tax table (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="NJ MFJ, $65k income (2.45% bracket)",
         year=2024,
         state="NJ",
         filing_status="Married/Joint",
         w2_income=65000.0,
         expected_federal_tax=3832.0,
-        expected_state_tax=1172.5,
+        expected_state_tax=1124.0,
         expected_federal_agi=65000.0,
+        known_defects=(nj_table_gap(0.0245, 63_000, 63_000),),
         backend="graph",
     ),
-    # NJ 2024 Head of Household in 5.525% bracket
-    # Federal AGI: $100,000, NJ taxable: $100,000 (no exemptions)
-    # NJ tax: $280 + $525 + $490 + $350 + ($100,000 - $80,000) x 0.05525
-    #       = $280 + $525 + $490 + $350 + $1,105 = $2,750
-    # Federal taxable: $78,100 (AGI - $21,900 std ded)
-    # Federal tax (Over $100k, exact formula): $7,241 + ($78,100 - $63,100) * 0.22 = $10,541
+    # Blind case 4: 100,000 - 1,000 = 99,000; NJ HoH column, below table cutoff.
     TaxScenario(
-        source="NJ 2024 Tax Brackets (computed)",
+        source="NJ 2024 official tax table (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="NJ HoH, $100k income (5.525% bracket)",
         year=2024,
         state="NJ",
         filing_status="Head_of_House",
         w2_income=100000.0,
         expected_federal_tax=10541.0,
-        expected_state_tax=2750.0,
+        expected_state_tax=2696.0,
         expected_federal_agi=100000.0,
+        known_defects=(nj_table_gap(0.05525, 99_000, 99_000),),
         backend="graph",
     ),
-    # NJ 2025 Single in 5.525% bracket (verify rates unchanged)
-    # Federal AGI: $50,000, NJ taxable: $50,000 (no exemptions)
-    # NJ tax: $280 + $262.50 + $175 + ($50,000 - $40,000) x 0.05525
-    #       = $280 + $262.50 + $175 + $552.50 = $1,270
-    # Federal taxable: $35,000 (AGI - $15,000 std ded)
-    # Federal tax (2025): $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
+    # Blind case 5: 50,000 - 1,000 = 49,000; independently checked 2025 table.
     TaxScenario(
-        source="NJ 2025 Tax Brackets (computed)",
+        source="NJ 2025 official tax table (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="NJ Single, $50k income (2025, rates unchanged)",
         year=2025,
         state="NJ",
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3871.5,
-        expected_state_tax=1270.0,
+        expected_state_tax=1216.0,
         expected_federal_agi=50000.0,
+        known_defects=(nj_table_gap(0.05525, 49_000, 49_000),),
         backend="graph",
     ),
-    # ========== VIRGINIA SCENARIOS ==========
-    # VA 2024: Progressive brackets (2%, 3%, 5%, 5.75%)
-    # Standard Deduction: Single $8,500, MFJ $17,000
-    # Brackets (same for all filing statuses):
-    #   2% on first $3,000
-    #   3% on next $2,000 ($3,001-$5,000)
-    #   5% on next $12,000 ($5,001-$17,000)
-    #   5.75% on $17,001+
-    # VA 2025: Same brackets, increased std deduction: Single $8,750, MFJ $17,500
-    #
-    # VA 2024 Single, $50,000 W2 only
-    # Federal AGI: $50,000, VA AGI: $50,000, VA taxable: $50,000 - $8,500 = $41,500
-    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($24,500 x 0.0575)
-    #       = $60 + $60 + $600 + $1,408.75 = $2,128.75
-    # Federal taxable: $35,400, Federal tax: $4,016
+    # Blind case 6: TI 40,570; schedule 2,075.275 -> 2,075 (table agrees).
     TaxScenario(
-        source="VA 2024 Tax Brackets (computed)",
+        source="VA 2024 official rounded schedule (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="VA Single, $50,000 W2 only",
         year=2024,
         state="VA",
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4016.0,
-        expected_state_tax=2128.75,
+        expected_state_tax=2075.0,
         expected_federal_agi=50000.0,
+        known_defects=(VA_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
-    # VA 2024 MFJ, $100,000 W2 only
-    # Federal AGI: $100,000, VA AGI: $100,000, VA taxable: $100,000 - $17,000 = $83,000
-    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($66,000 x 0.0575)
-    #       = $60 + $60 + $600 + $3,795 = $4,515.00
-    # Federal taxable: $70,800, Federal tax: $8,032
+    # Blind case 7: TI 81,140; schedule 4,408.05 -> 4,408 (optional table: 4,409).
+    # All wages belong to the primary filer: spouse adjustment is zero.
     TaxScenario(
-        source="VA 2024 Tax Brackets (computed)",
+        source="VA 2024 official rounded schedule (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="VA MFJ, $100,000 W2 only",
         year=2024,
         state="VA",
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8032.0,
-        expected_state_tax=4515.0,
+        expected_state_tax=4408.0,
         expected_federal_agi=100000.0,
+        known_defects=(VA_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
-    # VA 2025 Single, $25,000 W2 only
-    # Federal AGI: $25,000, VA AGI: $25,000, VA taxable: $25,000 - $8,750 = $16,250
-    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($11,250 x 0.05)
-    #       = $60 + $60 + $562.50 = $682.50
-    # Federal taxable: $10,000, Federal tax: $1,000 (2025 brackets)
+    # Blind case 8: TI 15,320; schedule 636 (optional table: 637).
     TaxScenario(
-        source="VA 2025 Tax Brackets (computed)",
+        source="VA 2025 official rounded schedule (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="VA Single, $25,000 W2 only (2025 std deduction)",
         year=2025,
         state="VA",
         filing_status="Single",
         w2_income=25000.0,
         expected_federal_tax=925.0,
-        expected_state_tax=682.50,
+        expected_state_tax=636.0,
         expected_federal_agi=25000.0,
         backend="graph",
     ),
-    # VA 2025 MFJ, $120,000 W2 only
-    # Federal AGI: $120,000, VA AGI: $120,000, VA taxable: $120,000 - $17,500 = $102,500
-    # VA tax: ($3,000 x 0.02) + ($2,000 x 0.03) + ($12,000 x 0.05) + ($85,500 x 0.0575)
-    #       = $60 + $60 + $600 + $4,916.25 = $5,636.25
-    # Federal taxable: $90,000, Federal tax (2025 MFJ): $10,323
+    # Blind case 9: TI 100,640; schedule 5,529.30 -> 5,529, above table range.
+    # All wages belong to the primary filer: spouse adjustment is zero.
     TaxScenario(
-        source="VA 2025 Tax Brackets (computed)",
+        source="VA 2025 official rounded schedule (blind derivation)",
+        state_evidence=NJ_VA_EVIDENCE,
         description="VA MFJ, $120,000 W2 only (2025 std deduction)",
         year=2025,
         state="VA",
         filing_status="Married/Joint",
         w2_income=120000.0,
         expected_federal_tax=10143.0,
-        expected_state_tax=5636.25,
+        expected_state_tax=5529.0,
         expected_federal_agi=120000.0,
+        known_defects=(VA_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # ========== MISSOURI SCENARIOS ==========

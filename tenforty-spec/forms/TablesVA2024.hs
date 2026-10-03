@@ -47,10 +47,10 @@ virginiaBracketsTable2024 =
 -- Note: Virginia has no Head of Household filing status. Federal HoH filers use Single rates.
 -- https://www.tax.virginia.gov/deductions
 --
--- Single/MFS/HoH: $8,500
--- MFJ/QW: $17,000
+-- Single/MFS/HoH/QW: $8,500 (federal HoH/QW use VA Single).
+-- MFJ: $17,000
 vaStandardDeduction2024 :: ByStatus (Amount Dollars)
-vaStandardDeduction2024 = byStatus 8500 17000 8500 8500 17000
+vaStandardDeduction2024 = byStatus 8500 17000 8500 8500 8500
 
 -- | 2024 Virginia personal exemption amount
 -- Source: Virginia Form 760 Instructions (2024)

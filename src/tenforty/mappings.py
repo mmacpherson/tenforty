@@ -412,8 +412,10 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # LA Form IT-540 imports federal AGI and applies Louisiana-specific
         # adjustments. For 2024: progressive 3-bracket system (1.85%, 3.5%, 4.25%)
         # with combined personal exemption-standard deduction ($4,500 Single/MFS,
-        # $9,000 MFJ/QSS/HoH) plus $1,000 per additional exemption, accepted as a
-        # total dollar amount (num_dependents cannot map to dollar amounts) and
+        # $9,000 MFJ/QSS/HoH) plus $1,000 per additional exemption. The spec
+        # derives the mandatory base; dependent_exemptions remains a TOTAL
+        # dollar aggregate including the personal/spouse base, not additional
+        # dollars. An omitted or below-base total receives the base. The total is
         # deducted from the lowest bracket first. Returns with more than eight
         # exemptions (the table reduces income and reads column eight) and the
         # table's whole-dollar rows (tenforty-xew) are not modelled. For 2025:
@@ -613,10 +615,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.NJ: StateGraphConfig(
         # NJ-1040 imports federal AGI and applies exemptions/deductions.
-        # Personal exemptions and dependent exemptions are accepted as total inputs
-        # (num_dependents cannot map to dollar amounts, and dependent exemptions
-        # are income-phased in NJ).
-        natural_to_node={},
+        # The spec derives $1,000 taxpayer / $2,000 joint regular exemptions.
+        # dependent_exemptions is TOTAL dollars including that base, not a count
+        # or additional dollars; the spec takes max(base, explicit total), so a
+        # below-base additional-only amount receives the personal/spouse base.
+        natural_to_node={
+            "dependent_exemptions": "nj_1040_L30_personal_exemptions",
+        },
         outputs={
             "state_adjusted_gross_income": "L14_federal_agi",
             "state_taxable_income": "L39_nj_taxable_income",
@@ -746,10 +751,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.VA: StateGraphConfig(
         # VA Form 760 imports federal AGI and applies additions/subtractions.
-        # Personal exemptions and age/blind exemptions are accepted as dollar-amount
-        # inputs (num_dependents cannot map to dollar amounts).
+        # The spec derives $930 taxpayer / $1,860 joint exemptions. Federal
+        # HoH/QW use VA Single. dependent_exemptions is TOTAL dollars including
+        # the personal/spouse base, not additional dollars. A below-base total
+        # receives the base; age/blind exemptions remain a separate raw graph input.
         natural_to_node={
             "itemized_deductions": "va_760_L9_itemized",
+            "dependent_exemptions": "va_760_L10_personal_exemptions",
         },
         outputs={
             "state_adjusted_gross_income": "L8_va_agi",

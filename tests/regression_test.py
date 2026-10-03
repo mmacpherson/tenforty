@@ -1491,25 +1491,28 @@ KY_SCENARIOS = [
 
 LA_SCENARIOS = [
     # 2024: Progressive 3-bracket system (1.85%, 3.5%, 4.25%)
-    # Note: No exemptions provided in range tests (would require dependent_exemptions param)
+    # The mandatory personal/spouse exemption is derived when no total is supplied.
     {
         "year": 2024,
         "state": "LA",
         "filing_status": "Single",
         "w2_income": 25000,
-        # Tax: $12,500 * 0.0185 + $12,500 * 0.035 = $231.25 + $437.50 = $668.75
+        # Official LA table: row 25,000-25,250, Single column 1 = $590.
+        # docs/validation/state-fixtures/LA-2024.md records the published cell.
+        # This row stays in the 3.5% bracket. Graph minus table is
+        # 3.5% * (25,000 - 25,125), with +/- $0.50 printed-row rounding.
         "expected_federal_min": 900,
         "expected_federal_max": 1200,
-        "expected_state_min": 600,
-        "expected_state_max": 750,
+        "expected_state_min": 590 - 0.035 * 125 - 0.50,
+        "expected_state_max": 590 - 0.035 * 125 + 0.50,
     },
     {
         "year": 2024,
         "state": "LA",
         "filing_status": "Single",
         "w2_income": 60000,
-        # Tax: $12,500 * 0.0185 + $37,500 * 0.035 + $10,000 * 0.0425
-        #    = $231.25 + $1,312.50 + $425 = $1,968.75
+        # Mandatory $4,500 exemption comes off the lowest bracket first.
+        # The published table continuation is $1,881; see the LA record.
         "expected_federal_min": 4800,
         "expected_federal_max": 5400,
         "expected_state_min": 1850,
@@ -1520,7 +1523,7 @@ LA_SCENARIOS = [
         "state": "LA",
         "filing_status": "Married/Joint",
         "w2_income": 100000,
-        # Tax: $25,000 * 0.0185 + $75,000 * 0.035 = $462.50 + $2,625 = $3,087.50
+        # Mandatory $9,000 exemption comes off the lowest bracket first.
         "expected_federal_min": 7500,
         "expected_federal_max": 8500,
         "expected_state_min": 2900,

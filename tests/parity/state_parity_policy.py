@@ -465,11 +465,9 @@ def _ny24_tax_benefit_recapture(case: dict) -> DeltaModel:
 # separately) or $20,000 (joint, head of household, surviving spouse); at or
 # below the threshold no tax is due.
 #
-# At and below the threshold BOTH backends are wrong: the graph has no
-# threshold at all (tenforty-b72.24) and omits the exemption (tenforty-b72.11), and OTS's strict
-# comparison taxes income exactly at the threshold (NJ-OTS-THRESHOLD-BOUNDARY).
-# Parity residuals there record how the two wrong answers differ; they are not
-# evidence that either is correct.
+# The graph now derives regular exemptions and applies the inclusive no-tax
+# threshold (b72.11/.24). OTS still taxes income exactly at the threshold
+# (NJ-OTS-THRESHOLD-BOUNDARY). Retain that upstream signature and legal witness.
 
 NJ_YEARS = (2024, 2025)
 NJ_REGULAR_EXEMPTION = 1_000.0
@@ -555,56 +553,6 @@ def _nj_table_tolerance(case: dict) -> float:
     return _nj_table_half_width(case)
 
 
-def _nj_regular_exemption(case: dict) -> DeltaModel:
-    """Graph omits the NJ-1040 regular exemption that OTS applies (tenforty-b72.11).
-
-    NJ-1040 line 6 allows $1,000 for the taxpayer (and spouse on a joint
-    return). OTS applies it (ots_amalgamation.cpp:73806 for 2024, :108385 for
-    2025); the graph spec takes line 30 as a zero-default input
-    (tenforty-spec/forms/NJ1040_2024.hs:37, NJ1040_2025.hs:37). The graph
-    departs from the form.
-
-    Bound: graph taxable income is higher by the exemption, or by all of AGI
-    when that is smaller. The extra income is taxed between the schedule rates
-    at the two taxable incomes, so the tax delta lies between the lower and
-    higher of those rates times the income difference. Where no tax is due the
-    tax delta belongs to NJ-NO-TAX and NJ-OTS-THRESHOLD-BOUNDARY instead.
-    """
-    if not _nj_case(case):
-        return {}
-    graph_taxable_income = case["w2"]
-    income_gap = min(_nj_exemption(case), graph_taxable_income)
-    if income_gap == 0.0:
-        return {}
-    deltas = {"state_taxable_income": DeltaRange.exact(income_gap)}
-    if not _nj_no_tax_due(case):
-        schedule = NJ_SCHEDULE[case["status"]]
-        low_rate = _marginal_rate(schedule, graph_taxable_income - income_gap)
-        high_rate = _marginal_rate(schedule, graph_taxable_income)
-        deltas["state_total_tax"] = DeltaRange(
-            low_rate * income_gap, high_rate * income_gap
-        )
-    return deltas
-
-
-def _nj_graph_taxes_below_threshold(case: dict) -> DeltaModel:
-    """Graph taxes income at or below the NJ filing threshold (tenforty-b72.24).
-
-    No tax is due when gross income is at or below the filing threshold
-    (instructions p.3 and p.22). The graph spec has no threshold rule, so it
-    charges its full schedule tax there. The graph departs from the form.
-
-    Bound: the graph is higher than the form's $0 by its whole tax, the first
-    schedule rate on graph taxable income (all of AGI). OTS charges $0 below the
-    threshold, so this is the whole delta there; exactly at the threshold OTS is
-    wrong as well (NJ-OTS-THRESHOLD-BOUNDARY).
-    """
-    if not _nj_case(case) or not _nj_no_tax_due(case):
-        return {}
-    first_rate = NJ_SCHEDULE[case["status"]][0][1]
-    return {"state_total_tax": DeltaRange.exact(first_rate * case["w2"])}
-
-
 def _nj_ots_taxes_at_threshold(case: dict) -> DeltaModel:
     """OTS taxes gross income exactly at the NJ filing threshold.
 
@@ -616,7 +564,7 @@ def _nj_ots_taxes_at_threshold(case: dict) -> DeltaModel:
 
     Bound: OTS is above the form's $0 by its Tax Table tax on income less the
     exemption, first-bracket rate times that income within the table's
-    half-row allowance; the graph is higher by less than that.
+    half-row allowance; the corrected graph is zero, so graph-OTS is negative.
     """
     if not _nj_case(case) or case["w2"] != NJ_FILING_THRESHOLD[case["status"]]:
         return {}
@@ -711,10 +659,10 @@ def _ma24_no_tax_status(case: dict) -> DeltaModel:
 # tax instead" (2024 PDF p.41; 2025 PDF p.41); the thresholds are $11,950
 # single and $23,900 joint in both years (p.9, p.17).
 #
-# Below the filing threshold BOTH backends are wrong: each charges schedule tax
-# (OTS notes "Your VA Tax is zero" at ots_amalgamation.cpp:88207 but leaves
-# line 18 standing; the graph has no threshold). Parity residuals there record
-# how two wrong answers differ, not correctness. Burn-ins:
+# The graph now derives personal exemptions and applies the filing threshold
+# (b72.11/.30). OTS still leaves its schedule tax standing below the threshold
+# despite printing "Your VA Tax is zero". Retain that upstream residual and
+# its strict legal-value witness. Burn-ins:
 # test_ots_va_owes_no_tax_below_the_filing_threshold and
 # test_graph_va_owes_no_tax_below_the_filing_threshold.
 
@@ -747,34 +695,6 @@ def _va_income_after_deduction(case: dict) -> float:
 
 def _va_exemptions(case: dict) -> float:
     return VA_PERSONAL_EXEMPTION * VA_PERSONAL_EXEMPTIONS[case["status"]]
-
-
-def _va_personal_exemptions(case: dict) -> DeltaModel:
-    """Graph omits the Form 760 personal exemptions that OTS applies.
-
-    Form 760 line 12 subtracts $930 per filer (two on a joint return). OTS
-    computes it (ots_amalgamation.cpp:88017-88108 for 2024, :94981-95077 for
-    2025); the graph spec takes line 10 as a zero-default input
-    (tenforty-spec/forms/VAForm760_2024.hs:52, VAForm760_2025.hs:52). The graph
-    departs from the form (tenforty-b72.11).
-
-    Bound: against the form's floored taxable income, the graph's is higher by
-    the exemptions or by whatever income remains after the standard deduction,
-    whichever is smaller. That income is taxed between the lowest (2%) and
-    highest (5.75%) Virginia rates -- but only at or above the filing
-    threshold; below it both backends' taxes are VA-*-BELOW-THRESHOLD's.
-    """
-    if not _va_case(case):
-        return {}
-    income_gap = min(_va_exemptions(case), max(0.0, _va_income_after_deduction(case)))
-    if income_gap == 0.0:
-        return {}
-    deltas = {"state_taxable_income": DeltaRange.exact(income_gap)}
-    if not _va_below_filing_threshold(case):
-        deltas["state_total_tax"] = DeltaRange(
-            VA_SCHEDULE[0][1] * income_gap, VA_SCHEDULE[-1][1] * income_gap
-        )
-    return deltas
 
 
 VA_FILING_THRESHOLD = {"Single": 11_950.0, "Married/Joint": 23_900.0}
@@ -815,35 +735,15 @@ def _va_ots_tax_below_threshold(case: dict) -> DeltaModel:
     return {"state_total_tax": DeltaRange.exact(-ots_tax)}
 
 
-def _va_graph_tax_below_threshold(case: dict) -> DeltaModel:
-    """Graph charges Virginia tax below the filing threshold.
-
-    Same instruction as VA-OTS-BELOW-THRESHOLD: below the filing threshold the
-    tax is $0. The graph spec has no threshold rule (VAForm760_2024.hs:70,
-    VAForm760_2025.hs:70 apply the brackets unconditionally). The graph departs
-    from the form (tenforty-b72.30).
-
-    Bound: the form's tax is $0, the graph's the schedule on its floored
-    taxable income (VAGI less the standard deduction), so the graph is over by
-    exactly that.
-    """
-    if not _va_below_filing_threshold(case):
-        return {}
-    graph_tax = _va_schedule_tax(max(0.0, _va_income_after_deduction(case)))
-    if graph_tax == 0.0:
-        return {}
-    return {"state_total_tax": DeltaRange.exact(graph_tax)}
-
-
 def _va_taxable_income_representation(case: dict) -> DeltaModel:
     """Model OTS reporting negative Virginia taxable income the graph floors at zero.
 
     Line 15 is "Subtract Line 14 from Line 9" (instructions p.17), with no floor
     stated, and below the filing threshold lines 10-15 are still completed. OTS
     reports the negative amount (ots_amalgamation.cpp:88116, :95085); the graph
-    spec floors it (tenforty-spec/forms/VAForm760_2024.hs:65). Which the graph
-    should report is a question about our output concept (tenforty-r91.7),
-    left unchanged; the tax is $0 either way (VA-OTS-BELOW-THRESHOLD).
+    spec floors it (tenforty-spec/forms/VAForm760_2024.hs). Our output contract
+    keeps that floor (Mike's r91.7 decision); the legal tax is $0 either way
+    (VA-OTS-BELOW-THRESHOLD).
 
     Bound: OTS's taxable income is negative by exactly the shortfall of income
     under deductions plus exemptions; the graph's is $0.
@@ -1150,20 +1050,6 @@ SIGNATURES = [
         {"state": "NY", "year": 2024, "status": "Single", "w2": 300_000},
     ),
     KnownParityDefect(
-        "NJ-EXEMPTION",
-        "graph",
-        "tenforty-b72.11",
-        _nj_regular_exemption,
-        {"state": "NJ", "year": 2024, "status": "Single", "w2": 200_000},
-    ),
-    KnownParityDefect(
-        "NJ-NO-TAX",
-        "graph",
-        "tenforty-b72.24",
-        _nj_graph_taxes_below_threshold,
-        {"state": "NJ", "year": 2024, "status": "Single", "w2": 9_000},
-    ),
-    KnownParityDefect(
         "NJ-OTS-THRESHOLD-BOUNDARY",
         "ots",
         "upstream report 10",
@@ -1178,25 +1064,11 @@ SIGNATURES = [
         {"state": "MA", "year": 2024, "status": "Single", "w2": 8_000},
     ),
     KnownParityDefect(
-        "VA-EXEMPTIONS",
-        "graph",
-        "tenforty-b72.11",
-        _va_personal_exemptions,
-        {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 100_000},
-    ),
-    KnownParityDefect(
         "VA-OTS-BELOW-THRESHOLD",
         "ots",
         "upstream report 7",
         _va_ots_tax_below_threshold,
         # Below the $23,900 joint threshold with positive taxable income.
-        {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 20_000},
-    ),
-    KnownParityDefect(
-        "VA-GRAPH-BELOW-THRESHOLD",
-        "graph",
-        "tenforty-b72.30",
-        _va_graph_tax_below_threshold,
         {"state": "VA", "year": 2024, "status": "Married/Joint", "w2": 20_000},
     ),
     KnownParityDefect(

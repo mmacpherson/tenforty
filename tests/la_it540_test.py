@@ -31,8 +31,10 @@ retrieved 2026-10-02, never from graph output or repo tables:
 
 The `itemized_deductions` input lowers to federal Schedule A "other deductions",
 which neither year's Louisiana return allows, so it must leave the Louisiana tax
-unchanged. `dependent_exemptions` is the total exemption amount in 2024 and has
-no 2025 counterpart, so a nonzero 2025 value is refused.
+unchanged. `dependent_exemptions` is the total exemption amount in 2024,
+including the mandatory status baseline. The graph uses the greater of that
+baseline and the explicit total; zero now selects the baseline rather than
+omitting it. There is no 2025 counterpart, so a nonzero 2025 value is refused.
 """
 
 import pytest

@@ -49,7 +49,16 @@ vaForm760_2025 = form "va_760" 2025 $ do
   l9 <- interior "L9" "deduction" $ greaterOf l9_itemized l9_std
 
   -- Line 10: Personal exemptions ($930 per person)
-  l10 <- keyInput "L10" "personal_exemptions" "Personal exemptions"
+  -- Form 760 instructions, PDF p.15: $930 for yourself and for your spouse
+  -- on a joint return. Federal HoH/QW use VA Single. The explicit aggregate
+  -- includes that base; a default-zero input must not omit it or count it twice.
+  exemptionTotal <- keyInput "L10" "personal_exemptions" "Total exemption dollars including taxpayer/spouse"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit (byStatus vaPersonalExemption2025 (2 * vaPersonalExemption2025) vaPersonalExemption2025 vaPersonalExemption2025 vaPersonalExemption2025))
+  l10 <-
+    interior "L10_total" "total_personal_exemptions" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Line 11: Age 65+ or blind exemptions ($800 per qualifying condition)
   l11 <- keyInput "L11" "age_blind_exemptions" "Age 65 or older / blind exemptions"
@@ -65,9 +74,15 @@ vaForm760_2025 = form "va_760" 2025 $ do
       l8 `subtractNotBelowZero` l12
 
   -- Line 14: Tax from rate schedule
+  -- Form 760 instructions, PDF p.41: below the VAGI filing threshold,
+  -- enter zero. Unlike NJ, equality is taxable. Federal HoH/QW use VA Single
+  -- (https://www.tax.virginia.gov/filing-status).
+  filingThreshold <-
+    interior "FilingThreshold" "filing_threshold" $
+      byStatusE (fmap lit (byStatus 11950 23900 11950 11950 11950))
   l14 <-
     keyOutput "L14" "va_tax" "Virginia income tax" $
-      bracketTax "va_brackets_2025" l13
+      ifGte l8 filingThreshold (bracketTax "va_brackets_2025" l13) (dollars 0)
 
   -- Line 15: Credits
   l15 <- keyInput "L15" "credits" "Nonrefundable credits"

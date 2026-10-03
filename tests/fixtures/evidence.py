@@ -38,6 +38,12 @@ CA_EVIDENCE = independent_state_evidence("CA-2024.md")
 MS_EVIDENCE = independent_state_evidence("MS-2024-2025.md")
 VT_EVIDENCE = independent_state_evidence("VT-2024-2025.md")
 WI_EVIDENCE = independent_state_evidence("WI-2024-2025.md")
+NJ_VA_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/NJ-VA-2024-2025.md",
+    "Fresh-context blind deriver, 2026-10-02; official PDFs only, "
+    "no repository access or software output; coordinated by Claude",
+)
 LA_TABLE_EVIDENCE = TaxEvidence(
     EvidenceKind.TABLE_ROW,
     "docs/validation/state-fixtures/LA-2024.md",
