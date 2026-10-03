@@ -4,6 +4,11 @@
             "form": "us_1040",
             "line": "L11",
             "year": 2024
+        },
+        {
+            "form": "us_1040",
+            "line": "NonWageIncomeMagnitude",
+            "year": 2024
         }
     ],
     "inputs": [
@@ -28,7 +33,8 @@
         18,
         19,
         20,
-        21
+        21,
+        22
     ],
     "meta": {
         "form_id": "ma_1",
@@ -57,6 +63,87 @@
                 "type": "input"
             }
         },
+        "100": {
+            "id": 100,
+            "op": {
+                "left": 43,
+                "right": 99,
+                "type": "add"
+            }
+        },
+        "101": {
+            "id": 101,
+            "name": "L28a_income_tax_before_surtax",
+            "op": {
+                "cond": 94,
+                "otherwise": 100,
+                "then": 95,
+                "type": "if_positive"
+            }
+        },
+        "102": {
+            "id": 102,
+            "op": {
+                "left": 8,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "103": {
+            "id": 103,
+            "op": {
+                "left": 7,
+                "right": 102,
+                "type": "add"
+            }
+        },
+        "104": {
+            "id": 104,
+            "name": "total_taxable_for_surtax",
+            "op": {
+                "left": 41,
+                "right": 103,
+                "type": "add"
+            }
+        },
+        "105": {
+            "id": 105,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "106": {
+            "id": 106,
+            "op": {
+                "type": "literal",
+                "value": 1053750
+            }
+        },
+        "107": {
+            "id": 107,
+            "op": {
+                "left": 104,
+                "right": 106,
+                "type": "sub"
+            }
+        },
+        "108": {
+            "id": 108,
+            "name": "surtaxable_income",
+            "op": {
+                "left": 105,
+                "right": 107,
+                "type": "max"
+            }
+        },
+        "109": {
+            "id": 109,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
         "11": {
             "id": 11,
             "name": "L26_installment_sale_tax",
@@ -64,58 +151,208 @@
                 "type": "input"
             }
         },
+        "110": {
+            "id": 110,
+            "op": {
+                "type": "literal",
+                "value": 4.0e-2
+            }
+        },
+        "111": {
+            "id": 111,
+            "op": {
+                "left": 108,
+                "right": 110,
+                "type": "mul"
+            }
+        },
+        "112": {
+            "id": 112,
+            "name": "L28b_ma_surtax",
+            "op": {
+                "cond": 94,
+                "otherwise": 111,
+                "then": 109,
+                "type": "if_positive"
+            }
+        },
+        "113": {
+            "id": 113,
+            "name": "L28_ma_total_tax",
+            "op": {
+                "left": 101,
+                "right": 112,
+                "type": "add"
+            }
+        },
+        "114": {
+            "id": 114,
+            "op": {
+                "left": 10,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "115": {
+            "id": 115,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "116": {
+            "id": 116,
+            "op": {
+                "cond": 114,
+                "otherwise": 115,
+                "then": 16,
+                "type": "if_positive"
+            }
+        },
+        "117": {
+            "id": 117,
+            "op": {
+                "left": 15,
+                "right": 16,
+                "type": "add"
+            }
+        },
+        "118": {
+            "id": 118,
+            "op": {
+                "left": 14,
+                "right": 117,
+                "type": "add"
+            }
+        },
+        "119": {
+            "id": 119,
+            "name": "L32_total_credits",
+            "op": {
+                "cond": 94,
+                "otherwise": 118,
+                "then": 116,
+                "type": "if_positive"
+            }
+        },
         "12": {
             "id": 12,
-            "name": "L27_no_tax_status",
+            "name": "NTS_Addback",
             "op": {
                 "type": "input"
             }
         },
+        "120": {
+            "id": 120,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "121": {
+            "id": 121,
+            "op": {
+                "left": 113,
+                "right": 119,
+                "type": "sub"
+            }
+        },
+        "122": {
+            "id": 122,
+            "name": "tax_after_credits",
+            "op": {
+                "left": 120,
+                "right": 121,
+                "type": "max"
+            }
+        },
+        "123": {
+            "id": 123,
+            "op": {
+                "left": 18,
+                "right": 19,
+                "type": "add"
+            }
+        },
+        "124": {
+            "id": 124,
+            "op": {
+                "left": 17,
+                "right": 123,
+                "type": "add"
+            }
+        },
+        "125": {
+            "id": 125,
+            "name": "L36_total_amount_due",
+            "op": {
+                "left": 122,
+                "right": 124,
+                "type": "add"
+            }
+        },
+        "126": {
+            "id": 126,
+            "op": {
+                "left": 21,
+                "right": 22,
+                "type": "add"
+            }
+        },
+        "127": {
+            "id": 127,
+            "name": "L40_total_payments",
+            "op": {
+                "left": 20,
+                "right": 126,
+                "type": "add"
+            }
+        },
         "13": {
             "id": 13,
-            "name": "L29_limited_income_credit",
+            "name": "NTS_ScheduleY",
             "op": {
                 "type": "input"
             }
         },
         "14": {
             "id": 14,
-            "name": "L30_other_state_tax_credit",
+            "name": "L29_limited_income_credit",
             "op": {
                 "type": "input"
             }
         },
         "15": {
             "id": 15,
-            "name": "L31_other_credits",
+            "name": "L30_other_state_tax_credit",
             "op": {
                 "type": "input"
             }
         },
         "16": {
             "id": 16,
-            "name": "L33_voluntary_contributions",
+            "name": "L31_other_credits",
             "op": {
                 "type": "input"
             }
         },
         "17": {
             "id": 17,
-            "name": "L34_use_tax",
+            "name": "L33_voluntary_contributions",
             "op": {
                 "type": "input"
             }
         },
         "18": {
             "id": 18,
-            "name": "L35_health_care_penalty",
+            "name": "L34_use_tax",
             "op": {
                 "type": "input"
             }
         },
         "19": {
             "id": 19,
-            "name": "L37_ma_withholding",
+            "name": "L35_health_care_penalty",
             "op": {
                 "type": "input"
             }
@@ -129,20 +366,27 @@
         },
         "20": {
             "id": 20,
-            "name": "L38_estimated_payments",
+            "name": "L37_ma_withholding",
             "op": {
                 "type": "input"
             }
         },
         "21": {
             "id": 21,
-            "name": "L39_refundable_credits",
+            "name": "L38_estimated_payments",
             "op": {
                 "type": "input"
             }
         },
         "22": {
             "id": 22,
+            "name": "L39_refundable_credits",
+            "op": {
+                "type": "input"
+            }
+        },
+        "23": {
+            "id": 23,
             "name": "L10_ma_total_income",
             "op": {
                 "form": "us_1040",
@@ -151,56 +395,49 @@
                 "year": 2024
             }
         },
-        "23": {
-            "id": 23,
+        "24": {
+            "id": 24,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "24": {
-            "id": 24,
+        "25": {
+            "id": 25,
             "op": {
-                "left": 22,
+                "left": 23,
                 "right": 0,
                 "type": "sub"
             }
         },
-        "25": {
-            "id": 25,
-            "name": "L17_ma_income_after_deductions",
-            "op": {
-                "left": 23,
-                "right": 24,
-                "type": "max"
-            }
-        },
         "26": {
             "id": 26,
+            "name": "L17_ma_income_after_deductions",
             "op": {
-                "type": "literal",
-                "value": 4400
+                "left": 24,
+                "right": 25,
+                "type": "max"
             }
         },
         "27": {
             "id": 27,
             "op": {
                 "type": "literal",
-                "value": 8800
+                "value": 4400
             }
         },
         "28": {
             "id": 28,
             "op": {
                 "type": "literal",
-                "value": 4400
+                "value": 8800
             }
         },
         "29": {
             "id": 29,
             "op": {
                 "type": "literal",
-                "value": 6800
+                "value": 4400
             }
         },
         "3": {
@@ -214,43 +451,42 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 8800
+                "value": 6800
             }
         },
         "31": {
             "id": 31,
-            "name": "L2a_personal_exemption",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 29,
-                    "married_joint": 27,
-                    "married_separate": 28,
-                    "qualifying_widow": 30,
-                    "single": 26
-                }
+                "type": "literal",
+                "value": 8800
             }
         },
         "32": {
             "id": 32,
+            "name": "L2a_personal_exemption",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 30,
+                    "married_joint": 28,
+                    "married_separate": 29,
+                    "qualifying_widow": 31,
+                    "single": 27
+                }
+            }
+        },
+        "33": {
+            "id": 33,
             "op": {
                 "left": 4,
                 "right": 5,
                 "type": "add"
             }
         },
-        "33": {
-            "id": 33,
-            "op": {
-                "left": 3,
-                "right": 32,
-                "type": "add"
-            }
-        },
         "34": {
             "id": 34,
             "op": {
-                "left": 2,
+                "left": 3,
                 "right": 33,
                 "type": "add"
             }
@@ -258,42 +494,41 @@
         "35": {
             "id": 35,
             "op": {
-                "left": 1,
+                "left": 2,
                 "right": 34,
                 "type": "add"
             }
         },
         "36": {
             "id": 36,
-            "name": "L18_total_exemptions",
             "op": {
-                "left": 31,
+                "left": 1,
                 "right": 35,
                 "type": "add"
             }
         },
         "37": {
             "id": 37,
+            "name": "L18_total_exemptions",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 32,
+                "right": 36,
+                "type": "add"
             }
         },
         "38": {
             "id": 38,
             "op": {
-                "left": 25,
-                "right": 36,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "39": {
             "id": 39,
-            "name": "L19_ma_taxable_income",
             "op": {
-                "left": 37,
-                "right": 38,
-                "type": "max"
+                "left": 26,
+                "right": 37,
+                "type": "sub"
             }
         },
         "4": {
@@ -305,83 +540,84 @@
         },
         "40": {
             "id": 40,
-            "name": "L21_combined_income",
+            "name": "L19_ma_taxable_income",
             "op": {
-                "left": 39,
-                "right": 6,
-                "type": "add"
+                "left": 38,
+                "right": 39,
+                "type": "max"
             }
         },
         "41": {
             "id": 41,
+            "name": "L21_combined_income",
+            "op": {
+                "left": 40,
+                "right": 6,
+                "type": "add"
+            }
+        },
+        "42": {
+            "id": 42,
             "op": {
                 "type": "literal",
                 "value": 5.0e-2
             }
         },
-        "42": {
-            "id": 42,
+        "43": {
+            "id": 43,
             "name": "L22_ma_base_tax",
             "op": {
-                "left": 40,
-                "right": 41,
+                "left": 41,
+                "right": 42,
                 "type": "mul"
             }
         },
-        "43": {
-            "id": 43,
+        "44": {
+            "id": 44,
             "op": {
                 "type": "literal",
                 "value": 8.5e-2
             }
         },
-        "44": {
-            "id": 44,
+        "45": {
+            "id": 45,
             "name": "L23a_tax",
             "op": {
                 "left": 7,
-                "right": 43,
+                "right": 44,
                 "type": "mul"
             }
         },
-        "45": {
-            "id": 45,
+        "46": {
+            "id": 46,
             "op": {
                 "type": "literal",
                 "value": 0.12
             }
         },
-        "46": {
-            "id": 46,
+        "47": {
+            "id": 47,
             "name": "L23b_tax",
             "op": {
                 "left": 8,
-                "right": 45,
+                "right": 46,
                 "type": "mul"
             }
         },
-        "47": {
-            "id": 47,
+        "48": {
+            "id": 48,
             "op": {
                 "type": "literal",
                 "value": 5.0e-2
             }
         },
-        "48": {
-            "id": 48,
+        "49": {
+            "id": 49,
             "name": "L24_tax",
             "op": {
                 "left": 9,
-                "right": 47,
+                "right": 48,
                 "type": "mul"
-            }
-        },
-        "49": {
-            "id": 49,
-            "op": {
-                "left": 11,
-                "right": 12,
-                "type": "add"
             }
         },
         "5": {
@@ -394,81 +630,78 @@
         "50": {
             "id": 50,
             "op": {
-                "left": 10,
-                "right": 49,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "51": {
             "id": 51,
             "op": {
-                "left": 48,
-                "right": 50,
+                "left": 23,
+                "right": 12,
                 "type": "add"
             }
         },
         "52": {
             "id": 52,
             "op": {
-                "left": 46,
-                "right": 51,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "53": {
             "id": 53,
             "op": {
-                "left": 44,
+                "left": 51,
                 "right": 52,
-                "type": "add"
+                "type": "max"
             }
         },
         "54": {
             "id": 54,
-            "name": "L28a_income_tax_before_surtax",
             "op": {
-                "left": 42,
-                "right": 53,
-                "type": "add"
+                "left": 53,
+                "right": 13,
+                "type": "sub"
             }
         },
         "55": {
             "id": 55,
+            "name": "NTS_FivePercentIncome",
             "op": {
-                "left": 8,
-                "right": 9,
-                "type": "add"
+                "left": 50,
+                "right": 54,
+                "type": "max"
             }
         },
         "56": {
             "id": 56,
             "op": {
-                "left": 7,
-                "right": 55,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "57": {
             "id": 57,
-            "name": "total_taxable_for_surtax",
             "op": {
-                "left": 40,
-                "right": 56,
-                "type": "add"
+                "left": 56,
+                "right": 6,
+                "type": "sub"
             }
         },
         "58": {
             "id": 58,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 6,
+                "right": 57,
+                "type": "max"
             }
         },
         "59": {
             "id": 59,
             "op": {
                 "type": "literal",
-                "value": 1053750
+                "value": 0
             }
         },
         "6": {
@@ -481,16 +714,15 @@
         "60": {
             "id": 60,
             "op": {
-                "left": 57,
-                "right": 59,
+                "left": 59,
+                "right": 7,
                 "type": "sub"
             }
         },
         "61": {
             "id": 61,
-            "name": "surtaxable_income",
             "op": {
-                "left": 58,
+                "left": 7,
                 "right": 60,
                 "type": "max"
             }
@@ -499,66 +731,62 @@
             "id": 62,
             "op": {
                 "type": "literal",
-                "value": 4.0e-2
+                "value": 0
             }
         },
         "63": {
             "id": 63,
-            "name": "L28b_ma_surtax",
             "op": {
-                "left": 61,
-                "right": 62,
-                "type": "mul"
+                "left": 62,
+                "right": 8,
+                "type": "sub"
             }
         },
         "64": {
             "id": 64,
-            "name": "L28_ma_total_tax",
             "op": {
-                "left": 54,
+                "left": 8,
                 "right": 63,
-                "type": "add"
+                "type": "max"
             }
         },
         "65": {
             "id": 65,
             "op": {
-                "left": 14,
-                "right": 15,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "66": {
             "id": 66,
-            "name": "L32_total_credits",
             "op": {
-                "left": 13,
-                "right": 65,
-                "type": "add"
+                "left": 65,
+                "right": 9,
+                "type": "sub"
             }
         },
         "67": {
             "id": 67,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 9,
+                "right": 66,
+                "type": "max"
             }
         },
         "68": {
             "id": 68,
             "op": {
                 "left": 64,
-                "right": 66,
-                "type": "sub"
+                "right": 67,
+                "type": "add"
             }
         },
         "69": {
             "id": 69,
-            "name": "tax_after_credits",
             "op": {
-                "left": 67,
+                "left": 61,
                 "right": 68,
-                "type": "max"
+                "type": "add"
             }
         },
         "7": {
@@ -570,44 +798,83 @@
         },
         "70": {
             "id": 70,
+            "name": "NTS_CapitalFacts",
             "op": {
-                "left": 17,
-                "right": 18,
+                "left": 58,
+                "right": 69,
                 "type": "add"
             }
         },
         "71": {
             "id": 71,
             "op": {
-                "left": 16,
-                "right": 70,
-                "type": "add"
+                "type": "literal",
+                "value": 8000
             }
         },
         "72": {
             "id": 72,
-            "name": "L36_total_amount_due",
             "op": {
-                "left": 69,
-                "right": 71,
-                "type": "add"
+                "type": "literal",
+                "value": 16400
             }
         },
         "73": {
             "id": 73,
             "op": {
-                "left": 20,
-                "right": 21,
+                "left": 72,
+                "right": 1,
                 "type": "add"
             }
         },
         "74": {
             "id": 74,
-            "name": "L40_total_payments",
             "op": {
-                "left": 19,
-                "right": 73,
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "75": {
+            "id": 75,
+            "op": {
+                "type": "literal",
+                "value": 14400
+            }
+        },
+        "76": {
+            "id": 76,
+            "op": {
+                "left": 75,
+                "right": 1,
                 "type": "add"
+            }
+        },
+        "77": {
+            "id": 77,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "78": {
+            "id": 78,
+            "name": "NTS_Threshold",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 76,
+                    "married_joint": 73,
+                    "married_separate": 74,
+                    "qualifying_widow": 77,
+                    "single": 71
+                }
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "type": "literal",
+                "value": 1
             }
         },
         "8": {
@@ -617,21 +884,185 @@
                 "type": "input"
             }
         },
+        "80": {
+            "id": 80,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "81": {
+            "id": 81,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "84": {
+            "id": 84,
+            "name": "NTS_EligibleStatus",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 82,
+                    "married_joint": 80,
+                    "married_separate": 81,
+                    "qualifying_widow": 83,
+                    "single": 79
+                }
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "form": "us_1040",
+                "line": "NonWageIncomeMagnitude",
+                "type": "import",
+                "year": 2024
+            }
+        },
+        "86": {
+            "id": 86,
+            "op": {
+                "left": 70,
+                "right": 85,
+                "type": "add"
+            }
+        },
+        "87": {
+            "id": 87,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "88": {
+            "id": 88,
+            "op": {
+                "left": 55,
+                "right": 78,
+                "type": "sub"
+            }
+        },
+        "89": {
+            "id": 89,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
         "9": {
             "id": 9,
             "name": "L24_long_term_gains",
             "op": {
                 "type": "input"
             }
+        },
+        "90": {
+            "id": 90,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "91": {
+            "id": 91,
+            "op": {
+                "cond": 88,
+                "otherwise": 89,
+                "then": 90,
+                "type": "if_positive"
+            }
+        },
+        "92": {
+            "id": 92,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "93": {
+            "id": 93,
+            "op": {
+                "cond": 84,
+                "otherwise": 92,
+                "then": 91,
+                "type": "if_positive"
+            }
+        },
+        "94": {
+            "id": 94,
+            "name": "L27_no_tax_status",
+            "op": {
+                "cond": 86,
+                "otherwise": 93,
+                "then": 87,
+                "type": "if_positive"
+            }
+        },
+        "95": {
+            "id": 95,
+            "op": {
+                "left": 10,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "96": {
+            "id": 96,
+            "op": {
+                "left": 10,
+                "right": 11,
+                "type": "add"
+            }
+        },
+        "97": {
+            "id": 97,
+            "op": {
+                "left": 49,
+                "right": 96,
+                "type": "add"
+            }
+        },
+        "98": {
+            "id": 98,
+            "op": {
+                "left": 47,
+                "right": 97,
+                "type": "add"
+            }
+        },
+        "99": {
+            "id": 99,
+            "op": {
+                "left": 45,
+                "right": 98,
+                "type": "add"
+            }
         }
     },
     "outputs": [
-        22,
-        25,
-        39,
-        42,
-        64,
-        63
+        23,
+        26,
+        40,
+        43,
+        94,
+        113,
+        112
     ],
     "tables": {}
 }

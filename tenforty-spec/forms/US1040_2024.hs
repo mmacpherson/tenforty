@@ -230,8 +230,25 @@ us1040_2024 = form "us_1040" 2024 $ do
 
   _l38 <- keyInput "L38" "estimated_penalty" "Estimated tax penalty"
 
+  -- Form 1040 non-W-2 facts: lines 1b-1i, 2a/b, 3a/b, 4a/b, 5a/b, 6a/b,
+  -- with line 7 covered by individual Schedule D facts and line 8 / adjustments
+  -- covered by individual Schedule 1 facts (not their signed net totals).
+  -- Line 1z is a derived total including supported 1a wages, not another fact.
+  -- Sum absolute individual facts, never absolute net income or adjustments.
+  -- https://www.irs.gov/pub/irs-pdf/f1040.pdf
+  _nonWageIncomeMagnitude <-
+    keyOutput "NonWageIncomeMagnitude" "non_wage_income_magnitude" "Magnitude of non-W-2 income and adjustment facts" $
+      sumOf
+        ( fmap
+            (\amount -> greaterOf amount (dollars 0 .-. amount))
+            [l1b, l1c, l1d, l1e, l1f, l1g, l1h, l1i, _l2a, l2b, l3a, l3b, _l4a, l4b, _l5a, l5b, _l6a, l6b]
+        )
+        .+. importForm usSchedule1IncomeAdjustmentMagnitude
+        .+. importForm usScheduleDCapitalFactsMagnitude
+
   outputs
     [ "L1z",
+      "NonWageIncomeMagnitude",
       "L6b",
       "L9",
       "L11",

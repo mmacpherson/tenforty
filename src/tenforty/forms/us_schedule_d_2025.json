@@ -258,11 +258,118 @@
                 "type": "max"
             }
         },
+        "36": {
+            "id": 36,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 36,
+                "right": 0,
+                "type": "sub"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 0,
+                "right": 37,
+                "type": "max"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
         "4": {
             "id": 4,
             "name": "L4_short_term_from_k1",
             "op": {
                 "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "op": {
+                "left": 39,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "left": 1,
+                "right": 40,
+                "type": "max"
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "43": {
+            "id": 43,
+            "op": {
+                "left": 42,
+                "right": 2,
+                "type": "sub"
+            }
+        },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 2,
+                "right": 43,
+                "type": "max"
+            }
+        },
+        "45": {
+            "id": 45,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "left": 45,
+                "right": 3,
+                "type": "sub"
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "left": 3,
+                "right": 46,
+                "type": "max"
+            }
+        },
+        "48": {
+            "id": 48,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "49": {
+            "id": 49,
+            "op": {
+                "left": 48,
+                "right": 4,
+                "type": "sub"
             }
         },
         "5": {
@@ -272,11 +379,164 @@
                 "type": "input"
             }
         },
+        "50": {
+            "id": 50,
+            "op": {
+                "left": 4,
+                "right": 49,
+                "type": "max"
+            }
+        },
+        "51": {
+            "id": 51,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "52": {
+            "id": 52,
+            "op": {
+                "left": 51,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "53": {
+            "id": 53,
+            "op": {
+                "left": 5,
+                "right": 52,
+                "type": "max"
+            }
+        },
+        "54": {
+            "id": 54,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "left": 54,
+                "right": 6,
+                "type": "sub"
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "left": 6,
+                "right": 55,
+                "type": "max"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "left": 57,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 7,
+                "right": 58,
+                "type": "max"
+            }
+        },
         "6": {
             "id": 6,
             "name": "L6_short_term_other",
             "op": {
                 "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "left": 60,
+                "right": 8,
+                "type": "sub"
+            }
+        },
+        "62": {
+            "id": 62,
+            "op": {
+                "left": 8,
+                "right": 61,
+                "type": "max"
+            }
+        },
+        "63": {
+            "id": 63,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "64": {
+            "id": 64,
+            "op": {
+                "left": 63,
+                "right": 9,
+                "type": "sub"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "left": 9,
+                "right": 64,
+                "type": "max"
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "left": 66,
+                "right": 10,
+                "type": "sub"
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "left": 10,
+                "right": 67,
+                "type": "max"
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "type": "literal",
+                "value": 0
             }
         },
         "7": {
@@ -286,11 +546,168 @@
                 "type": "input"
             }
         },
+        "70": {
+            "id": 70,
+            "op": {
+                "left": 69,
+                "right": 11,
+                "type": "sub"
+            }
+        },
+        "71": {
+            "id": 71,
+            "op": {
+                "left": 11,
+                "right": 70,
+                "type": "max"
+            }
+        },
+        "72": {
+            "id": 72,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "73": {
+            "id": 73,
+            "op": {
+                "left": 72,
+                "right": 12,
+                "type": "sub"
+            }
+        },
+        "74": {
+            "id": 74,
+            "op": {
+                "left": 12,
+                "right": 73,
+                "type": "max"
+            }
+        },
+        "75": {
+            "id": 75,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "76": {
+            "id": 76,
+            "op": {
+                "left": 75,
+                "right": 13,
+                "type": "sub"
+            }
+        },
+        "77": {
+            "id": 77,
+            "op": {
+                "left": 13,
+                "right": 76,
+                "type": "max"
+            }
+        },
+        "78": {
+            "id": 78,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "left": 78,
+                "right": 14,
+                "type": "sub"
+            }
+        },
         "8": {
             "id": 8,
             "name": "L8b_long_term_basis_reported",
             "op": {
                 "type": "input"
+            }
+        },
+        "80": {
+            "id": 80,
+            "op": {
+                "left": 14,
+                "right": 79,
+                "type": "max"
+            }
+        },
+        "81": {
+            "id": 81,
+            "op": {
+                "left": 77,
+                "right": 80,
+                "type": "add"
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "left": 74,
+                "right": 81,
+                "type": "add"
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "left": 71,
+                "right": 82,
+                "type": "add"
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "left": 68,
+                "right": 83,
+                "type": "add"
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "left": 65,
+                "right": 84,
+                "type": "add"
+            }
+        },
+        "86": {
+            "id": 86,
+            "op": {
+                "left": 62,
+                "right": 85,
+                "type": "add"
+            }
+        },
+        "87": {
+            "id": 87,
+            "op": {
+                "left": 59,
+                "right": 86,
+                "type": "add"
+            }
+        },
+        "88": {
+            "id": 88,
+            "op": {
+                "left": 56,
+                "right": 87,
+                "type": "add"
+            }
+        },
+        "89": {
+            "id": 89,
+            "op": {
+                "left": 53,
+                "right": 88,
+                "type": "add"
             }
         },
         "9": {
@@ -299,9 +716,51 @@
             "op": {
                 "type": "input"
             }
+        },
+        "90": {
+            "id": 90,
+            "op": {
+                "left": 50,
+                "right": 89,
+                "type": "add"
+            }
+        },
+        "91": {
+            "id": 91,
+            "op": {
+                "left": 47,
+                "right": 90,
+                "type": "add"
+            }
+        },
+        "92": {
+            "id": 92,
+            "op": {
+                "left": 44,
+                "right": 91,
+                "type": "add"
+            }
+        },
+        "93": {
+            "id": 93,
+            "op": {
+                "left": 41,
+                "right": 92,
+                "type": "add"
+            }
+        },
+        "94": {
+            "id": 94,
+            "name": "CapitalFactsMagnitude",
+            "op": {
+                "left": 38,
+                "right": 93,
+                "type": "add"
+            }
         }
     },
     "outputs": [
+        94,
         27,
         28,
         35,

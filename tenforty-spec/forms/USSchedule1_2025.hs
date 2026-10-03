@@ -134,4 +134,13 @@ usSchedule1_2025 = form "us_schedule_1" 2025 $ do
         .+. l23
         .+. l25
 
-  outputs ["L1", "L9", "L10", "L25", "L26"]
+  -- Schedule 1 lines 1-8 and 11-24, individually before income/adjustment
+  -- netting. This capability output does not change any federal tax line.
+  _incomeAdjustmentMagnitude <-
+    keyOutput "IncomeAdjustmentMagnitude" "income_adjustment_magnitude" "Magnitude of individual additional-income and adjustment facts" $
+      sumOf $
+        fmap
+          (\amount -> greaterOf amount (dollars 0 .-. amount))
+          [l1, l2a, l2b, l3, l4, l5, l6, l7, l8a, l8b, l8c, l8d, l8e, l8f, l8g, l8h, l8i, l8j, l8k, l8l, l8m, l8n, l8o, l8p, l8q, l8r, l8s, l8z, l11, l12, l13, l14, l15, l16, l17, l18, l19a, l19b, l19c, l20, l21, l22, l23, l24a, l24b, l24c, l24d, l24e, l24f, l24g, l24h, l24i, l24j, l24k, l24z]
+
+  outputs ["L1", "L9", "L10", "L25", "L26", "IncomeAdjustmentMagnitude"]

@@ -58,4 +58,12 @@ usScheduleD_2025 = form "us_schedule_d" 2025 $ do
               bsQualifyingWidow = dollars (-3000)
             }
 
-  outputs ["L7", "L15", "L16", "L21"]
+  -- Schedule D lines 1a-6 and 8a-14: check each signed fact before netting.
+  _capitalFactsMagnitude <-
+    keyOutput "CapitalFactsMagnitude" "capital_facts_magnitude" "Magnitude of individual capital facts before netting" $
+      sumOf $
+        fmap
+          (\amount -> greaterOf amount (dollars 0 .-. amount))
+          [l1a, l1b, l2, l3, l4, l5, l6, l8a, l8b, l9, l10, l11, l12, l13, l14]
+
+  outputs ["L7", "L15", "L16", "L21", "CapitalFactsMagnitude"]
