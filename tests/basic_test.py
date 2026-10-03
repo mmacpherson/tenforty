@@ -34,7 +34,7 @@ def test_basic_evaluation():
     for year in OTSBackend.supported_years:
         for state in OTSState:
             for filing_status in OTSFilingStatus:
-                if not is_state_supported(year, state):
+                if not is_state_supported(year, state, filing_status):
                     continue
                 result = evaluate_return(
                     year=year,

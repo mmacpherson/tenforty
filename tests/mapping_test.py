@@ -161,6 +161,19 @@ class TestMapOtsToNaturalOutput:
         assert result["custom_key"] == 999
         assert "tax_bracket" not in result
 
+    def test_transform_applies_to_named_output(self):
+        """A transform rewrites the natural output it names, and only that one."""
+        ots_output = {"L10": -1000.0, "L21": 0.0}
+        natural_mapping = {"L10": "agi", "L21": "taxable_income"}
+
+        result = map_ots_to_natural_output(
+            ots_output,
+            natural_mapping,
+            transforms={"agi": lambda v: max(0.0, v), "absent": lambda v: 1 / 0},
+        )
+
+        assert result == {"agi": 0.0, "taxable_income": 0.0}
+
     def test_unmapped_keys_excluded(self):
         """Keys not in mapping or retained should be excluded."""
         ots_output = {

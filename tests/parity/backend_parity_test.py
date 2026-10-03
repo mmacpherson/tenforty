@@ -747,13 +747,15 @@ def test_ma_state_agi_parity(w2_income, filing_status):
     )
 
 
-# Excludes Married/Joint returns until MAP-MA-STATUS is fixed: OTS computes them as Single.
 @skip_if_backends_unavailable
-@given(w2_income=st.integers(0, 500_000))
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
 @settings(max_examples=200)
-def test_ma_state_tax_parity(w2_income):
+def test_ma_state_tax_parity(w2_income, filing_status):
     """MA 2024 tax agrees up to the Tax Table tolerance and No Tax Status."""
-    assert_state_parity("MA", 2024, "Single", w2_income)
+    assert_state_parity("MA", 2024, filing_status, w2_income)
 
 
 # === State Parity Tests (2024 — extended) ===
@@ -828,13 +830,15 @@ def test_nj_state_agi_parity_2024(w2_income, filing_status):
     )
 
 
-# Excludes Married/Joint returns until MAP-NJ-STATUS is fixed: OTS computes them as Single.
 @skip_if_backends_unavailable
-@given(w2_income=st.integers(0, 500_000))
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
 @settings(max_examples=100)
-def test_nj_state_tax_parity_2024(w2_income):
+def test_nj_state_tax_parity_2024(w2_income, filing_status):
     """NJ 2024 tax agrees up to the Tax Table, the regular exemption and the no-tax threshold."""
-    assert_state_parity("NJ", 2024, "Single", w2_income)
+    assert_state_parity("NJ", 2024, filing_status, w2_income)
 
 
 @skip_if_backends_unavailable
@@ -900,13 +904,15 @@ def test_va_state_agi_parity_2024(w2_income, filing_status):
     )
 
 
-# Excludes Single returns until MAP-VA-STATUS is fixed: OTS computes them as Married/Joint.
 @skip_if_backends_unavailable
-@given(w2_income=st.integers(0, 500_000))
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
 @settings(max_examples=100)
-def test_va_state_tax_parity_2024(w2_income):
+def test_va_state_tax_parity_2024(w2_income, filing_status):
     """VA 2024 tax agrees up to personal exemptions and OTS's unfloored taxable income."""
-    assert_state_parity("VA", 2024, "Married/Joint", w2_income)
+    assert_state_parity("VA", 2024, filing_status, w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1391,13 +1397,15 @@ def test_nj_state_agi_parity(w2_income, filing_status):
     )
 
 
-# Excludes Married/Joint returns until MAP-NJ-STATUS is fixed: OTS computes them as Single.
 @skip_if_backends_unavailable
-@given(w2_income=st.integers(0, 500_000))
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
 @settings(max_examples=100)
-def test_nj_state_tax_parity(w2_income):
+def test_nj_state_tax_parity(w2_income, filing_status):
     """NJ 2025 tax agrees up to the Tax Table, the regular exemption and the no-tax threshold."""
-    assert_state_parity("NJ", 2025, "Single", w2_income)
+    assert_state_parity("NJ", 2025, filing_status, w2_income)
 
 
 @skip_if_backends_unavailable
@@ -1429,13 +1437,15 @@ def test_va_state_agi_parity(w2_income, filing_status):
     )
 
 
-# Excludes Single returns until MAP-VA-STATUS is fixed: OTS computes them as Married/Joint.
 @skip_if_backends_unavailable
-@given(w2_income=st.integers(0, 500_000))
+@given(
+    w2_income=st.integers(0, 500_000),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+)
 @settings(max_examples=100)
-def test_va_state_tax_parity(w2_income):
+def test_va_state_tax_parity(w2_income, filing_status):
     """VA 2025 tax agrees up to personal exemptions and OTS's unfloored taxable income."""
-    assert_state_parity("VA", 2025, "Married/Joint", w2_income)
+    assert_state_parity("VA", 2025, filing_status, w2_income)
 
 
 # === OR State Parity Tests (2024) ===
@@ -1689,16 +1699,15 @@ def test_ots_ny_uses_the_rate_schedule_from_65000():
 # OTS mapping defects (ours). Each asserts the form's figure on the OTS backend,
 # computed by hand from the cited instructions, and xfails until src/tenforty
 # passes OTS what it needs. When one flips, return the excluded filing status
-# to the state's parity strategy above.
+# to the state's parity strategy above and keep the test as a regression.
 
 
-@pytest.mark.xfail(
-    reason="MAP-MA-STATUS (tenforty-r91.2): the MA_1 input map omits filing_status, so OTS reads "
-    "its template default and computes every return as Single",
-    strict=True,
-)
 def test_ots_ma_married_joint_gets_joint_exemption():
-    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800, so line 19 is $11,200."""
+    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800, so line 19 is $11,200.
+
+    Regression for MAP-MA-STATUS (tenforty-r91.2): without filing_status in the
+    MA_1 input map OTS read its template default and computed every return as Single.
+    """
     result = evaluate_return(
         year=2024,
         state="MA",
@@ -1709,13 +1718,12 @@ def test_ots_ma_married_joint_gets_joint_exemption():
     assert result.state_taxable_income == pytest.approx(11_200.0, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="MAP-NJ-STATUS (tenforty-r91.3): the NJ_1040 input map omits filing_status, so OTS reads "
-    "its template default and computes every return as Single",
-    strict=True,
-)
 def test_ots_nj_married_joint_gets_two_exemptions():
-    """NJ 2024 MFJ, $50,000 wages: two $1,000 regular exemptions leave $48,000."""
+    """NJ 2024 MFJ, $50,000 wages: two $1,000 regular exemptions leave $48,000.
+
+    Regression for MAP-NJ-STATUS (tenforty-r91.3): without filing_status in the
+    NJ_1040 input map OTS read its template default and computed every return as Single.
+    """
     result = evaluate_return(
         year=2024,
         state="NJ",
@@ -1726,13 +1734,13 @@ def test_ots_nj_married_joint_gets_two_exemptions():
     assert result.state_taxable_income == pytest.approx(48_000.0, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="MAP-VA-STATUS (tenforty-r91.4): the VA_760 input map omits filing_status, so OTS reads "
-    "its template default and computes every return as Married/Joint",
-    strict=True,
-)
 def test_ots_va_single_gets_single_deduction():
-    """VA 2024 Single, $50,000 wages: $8,500 deduction and one $930 exemption leave $40,570."""
+    """VA 2024 Single, $50,000 wages: $8,500 deduction and one $930 exemption leave $40,570.
+
+    Regression for MAP-VA-STATUS (tenforty-r91.4): without filing_status in the
+    VA_760 input map OTS read its template default and computed every return as
+    Married/Joint.
+    """
     result = evaluate_return(
         year=2024,
         state="VA",
@@ -1741,6 +1749,25 @@ def test_ots_va_single_gets_single_deduction():
         backend="ots",
     )
     assert result.state_taxable_income == pytest.approx(40_570.0, abs=1.0)
+
+
+def test_ots_ma_married_separate_reports_state_agi():
+    """MA 2024 Married/Sep, $60,000 wages: state AGI is the $60,000 of wages.
+
+    With wages only, Form 1 line 10 (total 5.0% income) is the wages and the
+    No Tax Status AGI worksheet adds nothing to it. Regression for
+    tenforty-r91.8: the output map read AGI from that worksheet, which OTS
+    fills only for Single, Head_of_House and Married/Joint, so once filing
+    status reached MA_1 a Married/Sep return reported 0.0.
+    """
+    result = evaluate_return(
+        year=2024,
+        state="MA",
+        filing_status="Married/Sep",
+        w2_income=60_000,
+        backend="ots",
+    )
+    assert result.state_adjusted_gross_income == pytest.approx(60_000.0, abs=1.0)
 
 
 @pytest.mark.xfail(
