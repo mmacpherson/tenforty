@@ -23,6 +23,16 @@ caScheduleCaTotalSub = lineRef "ca_schedule_ca" "TOTAL_SUB"
 us1040L11 :: LineRef Dollars
 us1040L11 = lineRef "us_1040" "L11"
 
+-- | Derived magnitudes of individually checked facts, not net income.
+us1040NonWageIncomeMagnitude :: LineRef Dollars
+us1040NonWageIncomeMagnitude = lineRef "us_1040" "NonWageIncomeMagnitude"
+
+usSchedule1IncomeAdjustmentMagnitude :: LineRef Dollars
+usSchedule1IncomeAdjustmentMagnitude = lineRef "us_schedule_1" "IncomeAdjustmentMagnitude"
+
+usScheduleDCapitalFactsMagnitude :: LineRef Dollars
+usScheduleDCapitalFactsMagnitude = lineRef "us_schedule_d" "CapitalFactsMagnitude"
+
 us1040L12final :: LineRef Dollars
 us1040L12final = lineRef "us_1040" "L12Final"
 

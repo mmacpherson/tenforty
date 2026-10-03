@@ -97,15 +97,60 @@ maForm1_2025 = form "ma_1" 2025 $ do
     interior "L24_tax" "long_term_gains_tax" $
       l24 .*. rate maBaseRate2025
 
-  -- Line 25-27: Other taxes and recaptures
+  -- Line 25-26: Other taxes and recaptures
   l25 <- keyInput "L25" "credit_recapture" "Credit recapture amount"
   l26 <- keyInput "L26" "installment_sale_tax" "Additional tax on installment sales"
-  l27 <- keyInput "L27" "no_tax_status" "No tax status amount"
+
+  -- Line 27 Massachusetts AGI worksheet, 2025 instructions, PDF
+  -- pp.13-14: ordinary Form 1 deductions are NOT the Schedule Y subset here.
+  -- L10 retains the pre-existing federal-AGI approximation (b72.39); these worksheet
+  -- facts are raw-form inputs, not new public natural inputs.
+  -- https://www.mass.gov/doc/2025-form-1-instructions/download
+  abandonedBuildingAddback <- keyInput "NTS_Addback" "abandoned_building_addback" "Abandoned building renovation deduction addback"
+  -- MA-only eligible items, not a duplicate of federal adjustments: those
+  -- adjustments are excluded by the supported-domain guard below.
+  ntsScheduleY <- keyInput "NTS_ScheduleY" "eligible_schedule_y" "MA-only Schedule Y lines 2 through 9b and 10"
+  ntsFivePercentIncome <-
+    interior "NTS_FivePercentIncome" "nts_five_percent_income" $
+      greaterOf (l10 .+. abandonedBuildingAddback) (dollars 0) `subtractNotBelowZero` ntsScheduleY
+  -- Schedule B35 precedes B36 excess exemptions; B38/B39 feed L20/L23.
+  -- Schedule D19 precedes D20 excess exemptions; D21/D22 feed L24.
+  -- These taxable buckets cannot establish the worksheet's pre-exemption
+  -- amounts. Apply NTS only with no represented investment/capital facts;
+  -- otherwise preserve the existing computation pending b72.40's worksheet.
+  -- Absolute values prevent raw, federal ST/LT, or carryover cancellation.
+  ntsCapitalFacts <-
+    interior "NTS_CapitalFacts" "nts_capital_facts" $
+      sumOf $
+        fmap
+          (\amount -> greaterOf amount (dollars 0 .-. amount))
+          [l20, l23a, l23b, l24]
+  -- The represented W-2-only model assumes federal box 1 equals MA wages.
+  -- Form 1 L3 instead uses box 16 for state/local pension contributors:
+  -- unrepresented section 414(h) pickups can still cause false NTS (b72.39).
+  -- Other income/adjustments require reconciliation under b72.39/b72.40;
+  -- check individual signed facts, not their net sum.
+  let ntsNonWageIncomeMagnitude = importForm us1040NonWageIncomeMagnitude
+  ntsMassachusettsAgi <-
+    interior "NTS_MassachusettsAGI" "nts_massachusetts_agi" ntsFivePercentIncome
+  -- L2b is already dollars: $1,000 per dependent, the same increment that
+  -- applies to the joint/HoH NTS threshold. Single gets no dependent increment.
+  -- MFS is explicitly ineligible; QW equivalence remains r91.9, not guessed.
+  ntsThreshold <-
+    interior "NTS_Threshold" "nts_threshold" $
+      byStatusE (byStatus (dollars 8000) (dollars 16400 .+. l2b) (dollars 0) (dollars 14400 .+. l2b) (dollars 0))
+  ntsEligibleStatus <-
+    interior "NTS_EligibleStatus" "nts_eligible_status" $
+      byStatusE (byStatus (dollars 1) (dollars 1) (dollars 0) (dollars 1) (dollars 0))
+  noTaxStatus <-
+    keyOutput "L27" "no_tax_status" "No Tax Status qualification (1 qualifies, 0 does not)" $
+      ifPos (ntsCapitalFacts .+. ntsNonWageIncomeMagnitude) (dollars 0) $
+        ifPos ntsEligibleStatus (ifGte ntsThreshold ntsMassachusettsAgi (dollars 1) (dollars 0)) (dollars 0)
 
   -- Line 28a: Total income tax (before surtax)
   l28a <-
     interior "L28a" "income_tax_before_surtax" $
-      sumOf [l22, l23a_tax, l23b_tax, l24_tax, l25, l26, l27]
+      ifPos noTaxStatus (l25 .+. l26) (sumOf [l22, l23a_tax, l23b_tax, l24_tax, l25, l26])
 
   -- Line 28b: 4% Surtax on income over threshold
   -- Total taxable income for surtax = L21 + L23a + L23b + L24
@@ -119,7 +164,7 @@ maForm1_2025 = form "ma_1" 2025 $ do
 
   l28b <-
     keyOutput "L28b" "ma_surtax" "4% surtax" $
-      surtaxableIncome .*. rate maSurtaxRate2025
+      ifPos noTaxStatus (dollars 0) (surtaxableIncome .*. rate maSurtaxRate2025)
 
   -- Line 28: Total tax (income tax + surtax)
   l28 <-
@@ -133,7 +178,8 @@ maForm1_2025 = form "ma_1" 2025 $ do
 
   l32 <-
     interior "L32" "total_credits" $
-      sumOf [l29, l30, l31]
+      -- NTS skips 29-31, except recapture/installment tax requires line 31.
+      ifPos noTaxStatus (ifPos (l25 .+. l26) l31 (dollars 0)) (sumOf [l29, l30, l31])
 
   -- Tax after credits
   taxAfterCredits <-
@@ -164,6 +210,7 @@ maForm1_2025 = form "ma_1" 2025 $ do
       "L17",
       "L19",
       "L22",
+      "L27",
       "L28b",
       "L28"
     ]

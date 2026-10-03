@@ -64,6 +64,16 @@
             "form": "us_schedule_3",
             "line": "L15",
             "year": 2025
+        },
+        {
+            "form": "us_schedule_1",
+            "line": "IncomeAdjustmentMagnitude",
+            "year": 2025
+        },
+        {
+            "form": "us_schedule_d",
+            "line": "CapitalFactsMagnitude",
+            "year": 2025
         }
     ],
     "inputs": [
@@ -535,11 +545,133 @@
                 "type": "max"
             }
         },
+        "144": {
+            "id": 144,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "145": {
+            "id": 145,
+            "op": {
+                "left": 144,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "146": {
+            "id": 146,
+            "op": {
+                "left": 1,
+                "right": 145,
+                "type": "max"
+            }
+        },
+        "147": {
+            "id": 147,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "148": {
+            "id": 148,
+            "op": {
+                "left": 147,
+                "right": 2,
+                "type": "sub"
+            }
+        },
+        "149": {
+            "id": 149,
+            "op": {
+                "left": 2,
+                "right": 148,
+                "type": "max"
+            }
+        },
         "15": {
             "id": 15,
             "name": "L5a_pensions_gross",
             "op": {
                 "type": "input"
+            }
+        },
+        "150": {
+            "id": 150,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "151": {
+            "id": 151,
+            "op": {
+                "left": 150,
+                "right": 3,
+                "type": "sub"
+            }
+        },
+        "152": {
+            "id": 152,
+            "op": {
+                "left": 3,
+                "right": 151,
+                "type": "max"
+            }
+        },
+        "153": {
+            "id": 153,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "154": {
+            "id": 154,
+            "op": {
+                "left": 153,
+                "right": 4,
+                "type": "sub"
+            }
+        },
+        "155": {
+            "id": 155,
+            "op": {
+                "left": 4,
+                "right": 154,
+                "type": "max"
+            }
+        },
+        "156": {
+            "id": 156,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "157": {
+            "id": 157,
+            "op": {
+                "left": 156,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "158": {
+            "id": 158,
+            "op": {
+                "left": 5,
+                "right": 157,
+                "type": "max"
+            }
+        },
+        "159": {
+            "id": 159,
+            "op": {
+                "type": "literal",
+                "value": 0
             }
         },
         "16": {
@@ -549,11 +681,165 @@
                 "type": "input"
             }
         },
+        "160": {
+            "id": 160,
+            "op": {
+                "left": 159,
+                "right": 6,
+                "type": "sub"
+            }
+        },
+        "161": {
+            "id": 161,
+            "op": {
+                "left": 6,
+                "right": 160,
+                "type": "max"
+            }
+        },
+        "162": {
+            "id": 162,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "163": {
+            "id": 163,
+            "op": {
+                "left": 162,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "164": {
+            "id": 164,
+            "op": {
+                "left": 7,
+                "right": 163,
+                "type": "max"
+            }
+        },
+        "165": {
+            "id": 165,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "166": {
+            "id": 166,
+            "op": {
+                "left": 165,
+                "right": 8,
+                "type": "sub"
+            }
+        },
+        "167": {
+            "id": 167,
+            "op": {
+                "left": 8,
+                "right": 166,
+                "type": "max"
+            }
+        },
+        "168": {
+            "id": 168,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "169": {
+            "id": 169,
+            "op": {
+                "left": 168,
+                "right": 9,
+                "type": "sub"
+            }
+        },
         "17": {
             "id": 17,
             "name": "L6a_social_security_gross",
             "op": {
                 "type": "input"
+            }
+        },
+        "170": {
+            "id": 170,
+            "op": {
+                "left": 9,
+                "right": 169,
+                "type": "max"
+            }
+        },
+        "171": {
+            "id": 171,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "172": {
+            "id": 172,
+            "op": {
+                "left": 171,
+                "right": 10,
+                "type": "sub"
+            }
+        },
+        "173": {
+            "id": 173,
+            "op": {
+                "left": 10,
+                "right": 172,
+                "type": "max"
+            }
+        },
+        "174": {
+            "id": 174,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "175": {
+            "id": 175,
+            "op": {
+                "left": 174,
+                "right": 11,
+                "type": "sub"
+            }
+        },
+        "176": {
+            "id": 176,
+            "op": {
+                "left": 11,
+                "right": 175,
+                "type": "max"
+            }
+        },
+        "177": {
+            "id": 177,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "178": {
+            "id": 178,
+            "op": {
+                "left": 177,
+                "right": 12,
+                "type": "sub"
+            }
+        },
+        "179": {
+            "id": 179,
+            "op": {
+                "left": 12,
+                "right": 178,
+                "type": "max"
             }
         },
         "18": {
@@ -563,11 +849,165 @@
                 "type": "input"
             }
         },
+        "180": {
+            "id": 180,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "181": {
+            "id": 181,
+            "op": {
+                "left": 180,
+                "right": 13,
+                "type": "sub"
+            }
+        },
+        "182": {
+            "id": 182,
+            "op": {
+                "left": 13,
+                "right": 181,
+                "type": "max"
+            }
+        },
+        "183": {
+            "id": 183,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "184": {
+            "id": 184,
+            "op": {
+                "left": 183,
+                "right": 14,
+                "type": "sub"
+            }
+        },
+        "185": {
+            "id": 185,
+            "op": {
+                "left": 14,
+                "right": 184,
+                "type": "max"
+            }
+        },
+        "186": {
+            "id": 186,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "187": {
+            "id": 187,
+            "op": {
+                "left": 186,
+                "right": 15,
+                "type": "sub"
+            }
+        },
+        "188": {
+            "id": 188,
+            "op": {
+                "left": 15,
+                "right": 187,
+                "type": "max"
+            }
+        },
+        "189": {
+            "id": 189,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
         "19": {
             "id": 19,
             "name": "AddStdDed",
             "op": {
                 "type": "input"
+            }
+        },
+        "190": {
+            "id": 190,
+            "op": {
+                "left": 189,
+                "right": 16,
+                "type": "sub"
+            }
+        },
+        "191": {
+            "id": 191,
+            "op": {
+                "left": 16,
+                "right": 190,
+                "type": "max"
+            }
+        },
+        "192": {
+            "id": 192,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "193": {
+            "id": 193,
+            "op": {
+                "left": 192,
+                "right": 17,
+                "type": "sub"
+            }
+        },
+        "194": {
+            "id": 194,
+            "op": {
+                "left": 17,
+                "right": 193,
+                "type": "max"
+            }
+        },
+        "195": {
+            "id": 195,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "196": {
+            "id": 196,
+            "op": {
+                "left": 195,
+                "right": 18,
+                "type": "sub"
+            }
+        },
+        "197": {
+            "id": 197,
+            "op": {
+                "left": 18,
+                "right": 196,
+                "type": "max"
+            }
+        },
+        "198": {
+            "id": 198,
+            "op": {
+                "left": 194,
+                "right": 197,
+                "type": "add"
+            }
+        },
+        "199": {
+            "id": 199,
+            "op": {
+                "left": 191,
+                "right": 198,
+                "type": "add"
             }
         },
         "2": {
@@ -584,11 +1024,166 @@
                 "type": "input"
             }
         },
+        "200": {
+            "id": 200,
+            "op": {
+                "left": 188,
+                "right": 199,
+                "type": "add"
+            }
+        },
+        "201": {
+            "id": 201,
+            "op": {
+                "left": 185,
+                "right": 200,
+                "type": "add"
+            }
+        },
+        "202": {
+            "id": 202,
+            "op": {
+                "left": 182,
+                "right": 201,
+                "type": "add"
+            }
+        },
+        "203": {
+            "id": 203,
+            "op": {
+                "left": 179,
+                "right": 202,
+                "type": "add"
+            }
+        },
+        "204": {
+            "id": 204,
+            "op": {
+                "left": 176,
+                "right": 203,
+                "type": "add"
+            }
+        },
+        "205": {
+            "id": 205,
+            "op": {
+                "left": 173,
+                "right": 204,
+                "type": "add"
+            }
+        },
+        "206": {
+            "id": 206,
+            "op": {
+                "left": 170,
+                "right": 205,
+                "type": "add"
+            }
+        },
+        "207": {
+            "id": 207,
+            "op": {
+                "left": 167,
+                "right": 206,
+                "type": "add"
+            }
+        },
+        "208": {
+            "id": 208,
+            "op": {
+                "left": 164,
+                "right": 207,
+                "type": "add"
+            }
+        },
+        "209": {
+            "id": 209,
+            "op": {
+                "left": 161,
+                "right": 208,
+                "type": "add"
+            }
+        },
         "21": {
             "id": 21,
             "name": "L25a_w2_withholding",
             "op": {
                 "type": "input"
+            }
+        },
+        "210": {
+            "id": 210,
+            "op": {
+                "left": 158,
+                "right": 209,
+                "type": "add"
+            }
+        },
+        "211": {
+            "id": 211,
+            "op": {
+                "left": 155,
+                "right": 210,
+                "type": "add"
+            }
+        },
+        "212": {
+            "id": 212,
+            "op": {
+                "left": 152,
+                "right": 211,
+                "type": "add"
+            }
+        },
+        "213": {
+            "id": 213,
+            "op": {
+                "left": 149,
+                "right": 212,
+                "type": "add"
+            }
+        },
+        "214": {
+            "id": 214,
+            "op": {
+                "left": 146,
+                "right": 213,
+                "type": "add"
+            }
+        },
+        "215": {
+            "id": 215,
+            "op": {
+                "form": "us_schedule_1",
+                "line": "IncomeAdjustmentMagnitude",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "216": {
+            "id": 216,
+            "op": {
+                "left": 214,
+                "right": 215,
+                "type": "add"
+            }
+        },
+        "217": {
+            "id": 217,
+            "op": {
+                "form": "us_schedule_d",
+                "line": "CapitalFactsMagnitude",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "218": {
+            "id": 218,
+            "name": "NonWageIncomeMagnitude",
+            "op": {
+                "left": 216,
+                "right": 217,
+                "type": "add"
             }
         },
         "22": {
@@ -1305,6 +1900,7 @@
         143,
         18,
         46,
+        218,
         62,
         76,
         79

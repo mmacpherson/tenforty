@@ -630,23 +630,6 @@ def _ma_table_tolerance(case: dict) -> float:
     return MA_RATE * MA_TAX_TABLE_HALF_ROW + 0.5
 
 
-def _ma24_no_tax_status(case: dict) -> DeltaModel:
-    """Graph omits Massachusetts No Tax Status; OTS applies it.
-
-    Form 1 line 27: a filer whose AGI is at or below the No Tax Status
-    threshold ($8,000 single) owes no tax. OTS zeroes line 28 there
-    (ots_amalgamation.cpp:81166-81191); the graph spec takes line 27 as a
-    zero-default input (tenforty-spec/forms/MAForm1_2024.hs:103). The graph
-    departs from the form (tenforty-b72.26).
-
-    Bound: OTS tax is zero, so the delta is the graph's whole tax, 5% of
-    taxable income after the personal exemption.
-    """
-    if not _ma_case(case) or not _ma_no_tax_status(case):
-        return {}
-    return {"state_total_tax": DeltaRange.exact(MA_RATE * _ma_taxable_income(case))}
-
-
 # --- Virginia Form 760 (2024, 2025) ------------------------------------------
 # Virginia Form 760 instructions, 2024
 # (https://www.tax.virginia.gov/sites/default/files/vatax-pdf/2024-760-instructions.pdf)
@@ -1055,13 +1038,6 @@ SIGNATURES = [
         "upstream report 10",
         _nj_ots_taxes_at_threshold,
         {"state": "NJ", "year": 2024, "status": "Single", "w2": 10_000},
-    ),
-    KnownParityDefect(
-        "MA-NO-TAX-STATUS",
-        "graph",
-        "tenforty-b72.26",
-        _ma24_no_tax_status,
-        {"state": "MA", "year": 2024, "status": "Single", "w2": 8_000},
     ),
     KnownParityDefect(
         "VA-OTS-BELOW-THRESHOLD",

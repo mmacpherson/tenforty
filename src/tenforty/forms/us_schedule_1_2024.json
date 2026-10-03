@@ -154,11 +154,103 @@
                 "type": "add"
             }
         },
+        "108": {
+            "id": 108,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "109": {
+            "id": 109,
+            "op": {
+                "left": 108,
+                "right": 0,
+                "type": "sub"
+            }
+        },
         "11": {
             "id": 11,
             "name": "L8d_foreign_earned_income",
             "op": {
                 "type": "input"
+            }
+        },
+        "110": {
+            "id": 110,
+            "op": {
+                "left": 0,
+                "right": 109,
+                "type": "max"
+            }
+        },
+        "111": {
+            "id": 111,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "112": {
+            "id": 112,
+            "op": {
+                "left": 111,
+                "right": 1,
+                "type": "sub"
+            }
+        },
+        "113": {
+            "id": 113,
+            "op": {
+                "left": 1,
+                "right": 112,
+                "type": "max"
+            }
+        },
+        "114": {
+            "id": 114,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "115": {
+            "id": 115,
+            "op": {
+                "left": 114,
+                "right": 2,
+                "type": "sub"
+            }
+        },
+        "116": {
+            "id": 116,
+            "op": {
+                "left": 2,
+                "right": 115,
+                "type": "max"
+            }
+        },
+        "117": {
+            "id": 117,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "118": {
+            "id": 118,
+            "op": {
+                "left": 117,
+                "right": 3,
+                "type": "sub"
+            }
+        },
+        "119": {
+            "id": 119,
+            "op": {
+                "left": 3,
+                "right": 118,
+                "type": "max"
             }
         },
         "12": {
@@ -168,11 +260,164 @@
                 "type": "input"
             }
         },
+        "120": {
+            "id": 120,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "121": {
+            "id": 121,
+            "op": {
+                "left": 120,
+                "right": 4,
+                "type": "sub"
+            }
+        },
+        "122": {
+            "id": 122,
+            "op": {
+                "left": 4,
+                "right": 121,
+                "type": "max"
+            }
+        },
+        "123": {
+            "id": 123,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "124": {
+            "id": 124,
+            "op": {
+                "left": 123,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "125": {
+            "id": 125,
+            "op": {
+                "left": 5,
+                "right": 124,
+                "type": "max"
+            }
+        },
+        "126": {
+            "id": 126,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "127": {
+            "id": 127,
+            "op": {
+                "left": 126,
+                "right": 6,
+                "type": "sub"
+            }
+        },
+        "128": {
+            "id": 128,
+            "op": {
+                "left": 6,
+                "right": 127,
+                "type": "max"
+            }
+        },
+        "129": {
+            "id": 129,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
         "13": {
             "id": 13,
             "name": "L8f_alaska_pfd",
             "op": {
                 "type": "input"
+            }
+        },
+        "130": {
+            "id": 130,
+            "op": {
+                "left": 129,
+                "right": 7,
+                "type": "sub"
+            }
+        },
+        "131": {
+            "id": 131,
+            "op": {
+                "left": 7,
+                "right": 130,
+                "type": "max"
+            }
+        },
+        "132": {
+            "id": 132,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "133": {
+            "id": 133,
+            "op": {
+                "left": 132,
+                "right": 8,
+                "type": "sub"
+            }
+        },
+        "134": {
+            "id": 134,
+            "op": {
+                "left": 8,
+                "right": 133,
+                "type": "max"
+            }
+        },
+        "135": {
+            "id": 135,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "136": {
+            "id": 136,
+            "op": {
+                "left": 135,
+                "right": 9,
+                "type": "sub"
+            }
+        },
+        "137": {
+            "id": 137,
+            "op": {
+                "left": 9,
+                "right": 136,
+                "type": "max"
+            }
+        },
+        "138": {
+            "id": 138,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "139": {
+            "id": 139,
+            "op": {
+                "left": 138,
+                "right": 10,
+                "type": "sub"
             }
         },
         "14": {
@@ -182,11 +427,164 @@
                 "type": "input"
             }
         },
+        "140": {
+            "id": 140,
+            "op": {
+                "left": 10,
+                "right": 139,
+                "type": "max"
+            }
+        },
+        "141": {
+            "id": 141,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "142": {
+            "id": 142,
+            "op": {
+                "left": 141,
+                "right": 11,
+                "type": "sub"
+            }
+        },
+        "143": {
+            "id": 143,
+            "op": {
+                "left": 11,
+                "right": 142,
+                "type": "max"
+            }
+        },
+        "144": {
+            "id": 144,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "145": {
+            "id": 145,
+            "op": {
+                "left": 144,
+                "right": 12,
+                "type": "sub"
+            }
+        },
+        "146": {
+            "id": 146,
+            "op": {
+                "left": 12,
+                "right": 145,
+                "type": "max"
+            }
+        },
+        "147": {
+            "id": 147,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "148": {
+            "id": 148,
+            "op": {
+                "left": 147,
+                "right": 13,
+                "type": "sub"
+            }
+        },
+        "149": {
+            "id": 149,
+            "op": {
+                "left": 13,
+                "right": 148,
+                "type": "max"
+            }
+        },
         "15": {
             "id": 15,
             "name": "L8h_prizes_awards",
             "op": {
                 "type": "input"
+            }
+        },
+        "150": {
+            "id": 150,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "151": {
+            "id": 151,
+            "op": {
+                "left": 150,
+                "right": 14,
+                "type": "sub"
+            }
+        },
+        "152": {
+            "id": 152,
+            "op": {
+                "left": 14,
+                "right": 151,
+                "type": "max"
+            }
+        },
+        "153": {
+            "id": 153,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "154": {
+            "id": 154,
+            "op": {
+                "left": 153,
+                "right": 15,
+                "type": "sub"
+            }
+        },
+        "155": {
+            "id": 155,
+            "op": {
+                "left": 15,
+                "right": 154,
+                "type": "max"
+            }
+        },
+        "156": {
+            "id": 156,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "157": {
+            "id": 157,
+            "op": {
+                "left": 156,
+                "right": 16,
+                "type": "sub"
+            }
+        },
+        "158": {
+            "id": 158,
+            "op": {
+                "left": 16,
+                "right": 157,
+                "type": "max"
+            }
+        },
+        "159": {
+            "id": 159,
+            "op": {
+                "type": "literal",
+                "value": 0
             }
         },
         "16": {
@@ -196,11 +594,165 @@
                 "type": "input"
             }
         },
+        "160": {
+            "id": 160,
+            "op": {
+                "left": 159,
+                "right": 17,
+                "type": "sub"
+            }
+        },
+        "161": {
+            "id": 161,
+            "op": {
+                "left": 17,
+                "right": 160,
+                "type": "max"
+            }
+        },
+        "162": {
+            "id": 162,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "163": {
+            "id": 163,
+            "op": {
+                "left": 162,
+                "right": 18,
+                "type": "sub"
+            }
+        },
+        "164": {
+            "id": 164,
+            "op": {
+                "left": 18,
+                "right": 163,
+                "type": "max"
+            }
+        },
+        "165": {
+            "id": 165,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "166": {
+            "id": 166,
+            "op": {
+                "left": 165,
+                "right": 19,
+                "type": "sub"
+            }
+        },
+        "167": {
+            "id": 167,
+            "op": {
+                "left": 19,
+                "right": 166,
+                "type": "max"
+            }
+        },
+        "168": {
+            "id": 168,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "169": {
+            "id": 169,
+            "op": {
+                "left": 168,
+                "right": 20,
+                "type": "sub"
+            }
+        },
         "17": {
             "id": 17,
             "name": "L8j_stock_options",
             "op": {
                 "type": "input"
+            }
+        },
+        "170": {
+            "id": 170,
+            "op": {
+                "left": 20,
+                "right": 169,
+                "type": "max"
+            }
+        },
+        "171": {
+            "id": 171,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "172": {
+            "id": 172,
+            "op": {
+                "left": 171,
+                "right": 21,
+                "type": "sub"
+            }
+        },
+        "173": {
+            "id": 173,
+            "op": {
+                "left": 21,
+                "right": 172,
+                "type": "max"
+            }
+        },
+        "174": {
+            "id": 174,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "175": {
+            "id": 175,
+            "op": {
+                "left": 174,
+                "right": 22,
+                "type": "sub"
+            }
+        },
+        "176": {
+            "id": 176,
+            "op": {
+                "left": 22,
+                "right": 175,
+                "type": "max"
+            }
+        },
+        "177": {
+            "id": 177,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "178": {
+            "id": 178,
+            "op": {
+                "left": 177,
+                "right": 23,
+                "type": "sub"
+            }
+        },
+        "179": {
+            "id": 179,
+            "op": {
+                "left": 23,
+                "right": 178,
+                "type": "max"
             }
         },
         "18": {
@@ -210,11 +762,164 @@
                 "type": "input"
             }
         },
+        "180": {
+            "id": 180,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "181": {
+            "id": 181,
+            "op": {
+                "left": 180,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "182": {
+            "id": 182,
+            "op": {
+                "left": 24,
+                "right": 181,
+                "type": "max"
+            }
+        },
+        "183": {
+            "id": 183,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "184": {
+            "id": 184,
+            "op": {
+                "left": 183,
+                "right": 25,
+                "type": "sub"
+            }
+        },
+        "185": {
+            "id": 185,
+            "op": {
+                "left": 25,
+                "right": 184,
+                "type": "max"
+            }
+        },
+        "186": {
+            "id": 186,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "187": {
+            "id": 187,
+            "op": {
+                "left": 186,
+                "right": 26,
+                "type": "sub"
+            }
+        },
+        "188": {
+            "id": 188,
+            "op": {
+                "left": 26,
+                "right": 187,
+                "type": "max"
+            }
+        },
+        "189": {
+            "id": 189,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
         "19": {
             "id": 19,
             "name": "L8l_income_from_form_4797",
             "op": {
                 "type": "input"
+            }
+        },
+        "190": {
+            "id": 190,
+            "op": {
+                "left": 189,
+                "right": 27,
+                "type": "sub"
+            }
+        },
+        "191": {
+            "id": 191,
+            "op": {
+                "left": 27,
+                "right": 190,
+                "type": "max"
+            }
+        },
+        "192": {
+            "id": 192,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "193": {
+            "id": 193,
+            "op": {
+                "left": 192,
+                "right": 28,
+                "type": "sub"
+            }
+        },
+        "194": {
+            "id": 194,
+            "op": {
+                "left": 28,
+                "right": 193,
+                "type": "max"
+            }
+        },
+        "195": {
+            "id": 195,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "196": {
+            "id": 196,
+            "op": {
+                "left": 195,
+                "right": 29,
+                "type": "sub"
+            }
+        },
+        "197": {
+            "id": 197,
+            "op": {
+                "left": 29,
+                "right": 196,
+                "type": "max"
+            }
+        },
+        "198": {
+            "id": 198,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "199": {
+            "id": 199,
+            "op": {
+                "left": 198,
+                "right": 30,
+                "type": "sub"
             }
         },
         "2": {
@@ -231,11 +936,164 @@
                 "type": "input"
             }
         },
+        "200": {
+            "id": 200,
+            "op": {
+                "left": 30,
+                "right": 199,
+                "type": "max"
+            }
+        },
+        "201": {
+            "id": 201,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "202": {
+            "id": 202,
+            "op": {
+                "left": 201,
+                "right": 31,
+                "type": "sub"
+            }
+        },
+        "203": {
+            "id": 203,
+            "op": {
+                "left": 31,
+                "right": 202,
+                "type": "max"
+            }
+        },
+        "204": {
+            "id": 204,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "205": {
+            "id": 205,
+            "op": {
+                "left": 204,
+                "right": 81,
+                "type": "sub"
+            }
+        },
+        "206": {
+            "id": 206,
+            "op": {
+                "left": 81,
+                "right": 205,
+                "type": "max"
+            }
+        },
+        "207": {
+            "id": 207,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "208": {
+            "id": 208,
+            "op": {
+                "left": 207,
+                "right": 32,
+                "type": "sub"
+            }
+        },
+        "209": {
+            "id": 209,
+            "op": {
+                "left": 32,
+                "right": 208,
+                "type": "max"
+            }
+        },
         "21": {
             "id": 21,
             "name": "L8n_olympic_medal",
             "op": {
                 "type": "input"
+            }
+        },
+        "210": {
+            "id": 210,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "211": {
+            "id": 211,
+            "op": {
+                "left": 210,
+                "right": 33,
+                "type": "sub"
+            }
+        },
+        "212": {
+            "id": 212,
+            "op": {
+                "left": 33,
+                "right": 211,
+                "type": "max"
+            }
+        },
+        "213": {
+            "id": 213,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "214": {
+            "id": 214,
+            "op": {
+                "left": 213,
+                "right": 34,
+                "type": "sub"
+            }
+        },
+        "215": {
+            "id": 215,
+            "op": {
+                "left": 34,
+                "right": 214,
+                "type": "max"
+            }
+        },
+        "216": {
+            "id": 216,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "217": {
+            "id": 217,
+            "op": {
+                "left": 216,
+                "right": 35,
+                "type": "sub"
+            }
+        },
+        "218": {
+            "id": 218,
+            "op": {
+                "left": 35,
+                "right": 217,
+                "type": "max"
+            }
+        },
+        "219": {
+            "id": 219,
+            "op": {
+                "type": "literal",
+                "value": 0
             }
         },
         "22": {
@@ -245,11 +1103,165 @@
                 "type": "input"
             }
         },
+        "220": {
+            "id": 220,
+            "op": {
+                "left": 219,
+                "right": 36,
+                "type": "sub"
+            }
+        },
+        "221": {
+            "id": 221,
+            "op": {
+                "left": 36,
+                "right": 220,
+                "type": "max"
+            }
+        },
+        "222": {
+            "id": 222,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "223": {
+            "id": 223,
+            "op": {
+                "left": 222,
+                "right": 37,
+                "type": "sub"
+            }
+        },
+        "224": {
+            "id": 224,
+            "op": {
+                "left": 37,
+                "right": 223,
+                "type": "max"
+            }
+        },
+        "225": {
+            "id": 225,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "226": {
+            "id": 226,
+            "op": {
+                "left": 225,
+                "right": 38,
+                "type": "sub"
+            }
+        },
+        "227": {
+            "id": 227,
+            "op": {
+                "left": 38,
+                "right": 226,
+                "type": "max"
+            }
+        },
+        "228": {
+            "id": 228,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "229": {
+            "id": 229,
+            "op": {
+                "left": 228,
+                "right": 39,
+                "type": "sub"
+            }
+        },
         "23": {
             "id": 23,
             "name": "L8p_sec_951a_income",
             "op": {
                 "type": "input"
+            }
+        },
+        "230": {
+            "id": 230,
+            "op": {
+                "left": 39,
+                "right": 229,
+                "type": "max"
+            }
+        },
+        "231": {
+            "id": 231,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "232": {
+            "id": 232,
+            "op": {
+                "left": 231,
+                "right": 40,
+                "type": "sub"
+            }
+        },
+        "233": {
+            "id": 233,
+            "op": {
+                "left": 40,
+                "right": 232,
+                "type": "max"
+            }
+        },
+        "234": {
+            "id": 234,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "235": {
+            "id": 235,
+            "op": {
+                "left": 234,
+                "right": 41,
+                "type": "sub"
+            }
+        },
+        "236": {
+            "id": 236,
+            "op": {
+                "left": 41,
+                "right": 235,
+                "type": "max"
+            }
+        },
+        "237": {
+            "id": 237,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "238": {
+            "id": 238,
+            "op": {
+                "left": 237,
+                "right": 42,
+                "type": "sub"
+            }
+        },
+        "239": {
+            "id": 239,
+            "op": {
+                "left": 42,
+                "right": 238,
+                "type": "max"
             }
         },
         "24": {
@@ -259,11 +1271,164 @@
                 "type": "input"
             }
         },
+        "240": {
+            "id": 240,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "241": {
+            "id": 241,
+            "op": {
+                "left": 240,
+                "right": 43,
+                "type": "sub"
+            }
+        },
+        "242": {
+            "id": 242,
+            "op": {
+                "left": 43,
+                "right": 241,
+                "type": "max"
+            }
+        },
+        "243": {
+            "id": 243,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "244": {
+            "id": 244,
+            "op": {
+                "left": 243,
+                "right": 44,
+                "type": "sub"
+            }
+        },
+        "245": {
+            "id": 245,
+            "op": {
+                "left": 44,
+                "right": 244,
+                "type": "max"
+            }
+        },
+        "246": {
+            "id": 246,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "247": {
+            "id": 247,
+            "op": {
+                "left": 246,
+                "right": 45,
+                "type": "sub"
+            }
+        },
+        "248": {
+            "id": 248,
+            "op": {
+                "left": 45,
+                "right": 247,
+                "type": "max"
+            }
+        },
+        "249": {
+            "id": 249,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
         "25": {
             "id": 25,
             "name": "L8r_taxable_scholarship",
             "op": {
                 "type": "input"
+            }
+        },
+        "250": {
+            "id": 250,
+            "op": {
+                "left": 249,
+                "right": 46,
+                "type": "sub"
+            }
+        },
+        "251": {
+            "id": 251,
+            "op": {
+                "left": 46,
+                "right": 250,
+                "type": "max"
+            }
+        },
+        "252": {
+            "id": 252,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "253": {
+            "id": 253,
+            "op": {
+                "left": 252,
+                "right": 47,
+                "type": "sub"
+            }
+        },
+        "254": {
+            "id": 254,
+            "op": {
+                "left": 47,
+                "right": 253,
+                "type": "max"
+            }
+        },
+        "255": {
+            "id": 255,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "256": {
+            "id": 256,
+            "op": {
+                "left": 255,
+                "right": 48,
+                "type": "sub"
+            }
+        },
+        "257": {
+            "id": 257,
+            "op": {
+                "left": 48,
+                "right": 256,
+                "type": "max"
+            }
+        },
+        "258": {
+            "id": 258,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "259": {
+            "id": 259,
+            "op": {
+                "left": 258,
+                "right": 49,
+                "type": "sub"
             }
         },
         "26": {
@@ -273,11 +1438,167 @@
                 "type": "input"
             }
         },
+        "260": {
+            "id": 260,
+            "op": {
+                "left": 49,
+                "right": 259,
+                "type": "max"
+            }
+        },
+        "261": {
+            "id": 261,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "262": {
+            "id": 262,
+            "op": {
+                "left": 261,
+                "right": 50,
+                "type": "sub"
+            }
+        },
+        "263": {
+            "id": 263,
+            "op": {
+                "left": 50,
+                "right": 262,
+                "type": "max"
+            }
+        },
+        "264": {
+            "id": 264,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "265": {
+            "id": 265,
+            "op": {
+                "left": 264,
+                "right": 51,
+                "type": "sub"
+            }
+        },
+        "266": {
+            "id": 266,
+            "op": {
+                "left": 51,
+                "right": 265,
+                "type": "max"
+            }
+        },
+        "267": {
+            "id": 267,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "268": {
+            "id": 268,
+            "op": {
+                "left": 267,
+                "right": 52,
+                "type": "sub"
+            }
+        },
+        "269": {
+            "id": 269,
+            "op": {
+                "left": 52,
+                "right": 268,
+                "type": "max"
+            }
+        },
         "27": {
             "id": 27,
             "name": "L8z_other_income",
             "op": {
                 "type": "input"
+            }
+        },
+        "270": {
+            "id": 270,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "271": {
+            "id": 271,
+            "op": {
+                "left": 270,
+                "right": 53,
+                "type": "sub"
+            }
+        },
+        "272": {
+            "id": 272,
+            "op": {
+                "left": 53,
+                "right": 271,
+                "type": "max"
+            }
+        },
+        "273": {
+            "id": 273,
+            "op": {
+                "left": 269,
+                "right": 272,
+                "type": "add"
+            }
+        },
+        "274": {
+            "id": 274,
+            "op": {
+                "left": 266,
+                "right": 273,
+                "type": "add"
+            }
+        },
+        "275": {
+            "id": 275,
+            "op": {
+                "left": 263,
+                "right": 274,
+                "type": "add"
+            }
+        },
+        "276": {
+            "id": 276,
+            "op": {
+                "left": 260,
+                "right": 275,
+                "type": "add"
+            }
+        },
+        "277": {
+            "id": 277,
+            "op": {
+                "left": 257,
+                "right": 276,
+                "type": "add"
+            }
+        },
+        "278": {
+            "id": 278,
+            "op": {
+                "left": 254,
+                "right": 277,
+                "type": "add"
+            }
+        },
+        "279": {
+            "id": 279,
+            "op": {
+                "left": 251,
+                "right": 278,
+                "type": "add"
             }
         },
         "28": {
@@ -287,11 +1608,171 @@
                 "type": "input"
             }
         },
+        "280": {
+            "id": 280,
+            "op": {
+                "left": 248,
+                "right": 279,
+                "type": "add"
+            }
+        },
+        "281": {
+            "id": 281,
+            "op": {
+                "left": 245,
+                "right": 280,
+                "type": "add"
+            }
+        },
+        "282": {
+            "id": 282,
+            "op": {
+                "left": 242,
+                "right": 281,
+                "type": "add"
+            }
+        },
+        "283": {
+            "id": 283,
+            "op": {
+                "left": 239,
+                "right": 282,
+                "type": "add"
+            }
+        },
+        "284": {
+            "id": 284,
+            "op": {
+                "left": 236,
+                "right": 283,
+                "type": "add"
+            }
+        },
+        "285": {
+            "id": 285,
+            "op": {
+                "left": 233,
+                "right": 284,
+                "type": "add"
+            }
+        },
+        "286": {
+            "id": 286,
+            "op": {
+                "left": 230,
+                "right": 285,
+                "type": "add"
+            }
+        },
+        "287": {
+            "id": 287,
+            "op": {
+                "left": 227,
+                "right": 286,
+                "type": "add"
+            }
+        },
+        "288": {
+            "id": 288,
+            "op": {
+                "left": 224,
+                "right": 287,
+                "type": "add"
+            }
+        },
+        "289": {
+            "id": 289,
+            "op": {
+                "left": 221,
+                "right": 288,
+                "type": "add"
+            }
+        },
         "29": {
             "id": 29,
             "name": "L12_business_expenses_reservists",
             "op": {
                 "type": "input"
+            }
+        },
+        "290": {
+            "id": 290,
+            "op": {
+                "left": 218,
+                "right": 289,
+                "type": "add"
+            }
+        },
+        "291": {
+            "id": 291,
+            "op": {
+                "left": 215,
+                "right": 290,
+                "type": "add"
+            }
+        },
+        "292": {
+            "id": 292,
+            "op": {
+                "left": 212,
+                "right": 291,
+                "type": "add"
+            }
+        },
+        "293": {
+            "id": 293,
+            "op": {
+                "left": 209,
+                "right": 292,
+                "type": "add"
+            }
+        },
+        "294": {
+            "id": 294,
+            "op": {
+                "left": 206,
+                "right": 293,
+                "type": "add"
+            }
+        },
+        "295": {
+            "id": 295,
+            "op": {
+                "left": 203,
+                "right": 294,
+                "type": "add"
+            }
+        },
+        "296": {
+            "id": 296,
+            "op": {
+                "left": 200,
+                "right": 295,
+                "type": "add"
+            }
+        },
+        "297": {
+            "id": 297,
+            "op": {
+                "left": 197,
+                "right": 296,
+                "type": "add"
+            }
+        },
+        "298": {
+            "id": 298,
+            "op": {
+                "left": 194,
+                "right": 297,
+                "type": "add"
+            }
+        },
+        "299": {
+            "id": 299,
+            "op": {
+                "left": 191,
+                "right": 298,
+                "type": "add"
             }
         },
         "3": {
@@ -308,6 +1789,86 @@
                 "type": "input"
             }
         },
+        "300": {
+            "id": 300,
+            "op": {
+                "left": 188,
+                "right": 299,
+                "type": "add"
+            }
+        },
+        "301": {
+            "id": 301,
+            "op": {
+                "left": 185,
+                "right": 300,
+                "type": "add"
+            }
+        },
+        "302": {
+            "id": 302,
+            "op": {
+                "left": 182,
+                "right": 301,
+                "type": "add"
+            }
+        },
+        "303": {
+            "id": 303,
+            "op": {
+                "left": 179,
+                "right": 302,
+                "type": "add"
+            }
+        },
+        "304": {
+            "id": 304,
+            "op": {
+                "left": 176,
+                "right": 303,
+                "type": "add"
+            }
+        },
+        "305": {
+            "id": 305,
+            "op": {
+                "left": 173,
+                "right": 304,
+                "type": "add"
+            }
+        },
+        "306": {
+            "id": 306,
+            "op": {
+                "left": 170,
+                "right": 305,
+                "type": "add"
+            }
+        },
+        "307": {
+            "id": 307,
+            "op": {
+                "left": 167,
+                "right": 306,
+                "type": "add"
+            }
+        },
+        "308": {
+            "id": 308,
+            "op": {
+                "left": 164,
+                "right": 307,
+                "type": "add"
+            }
+        },
+        "309": {
+            "id": 309,
+            "op": {
+                "left": 161,
+                "right": 308,
+                "type": "add"
+            }
+        },
         "31": {
             "id": 31,
             "name": "L14_moving_expenses_military",
@@ -315,11 +1876,148 @@
                 "type": "input"
             }
         },
+        "310": {
+            "id": 310,
+            "op": {
+                "left": 158,
+                "right": 309,
+                "type": "add"
+            }
+        },
+        "311": {
+            "id": 311,
+            "op": {
+                "left": 155,
+                "right": 310,
+                "type": "add"
+            }
+        },
+        "312": {
+            "id": 312,
+            "op": {
+                "left": 152,
+                "right": 311,
+                "type": "add"
+            }
+        },
+        "313": {
+            "id": 313,
+            "op": {
+                "left": 149,
+                "right": 312,
+                "type": "add"
+            }
+        },
+        "314": {
+            "id": 314,
+            "op": {
+                "left": 146,
+                "right": 313,
+                "type": "add"
+            }
+        },
+        "315": {
+            "id": 315,
+            "op": {
+                "left": 143,
+                "right": 314,
+                "type": "add"
+            }
+        },
+        "316": {
+            "id": 316,
+            "op": {
+                "left": 140,
+                "right": 315,
+                "type": "add"
+            }
+        },
+        "317": {
+            "id": 317,
+            "op": {
+                "left": 137,
+                "right": 316,
+                "type": "add"
+            }
+        },
+        "318": {
+            "id": 318,
+            "op": {
+                "left": 134,
+                "right": 317,
+                "type": "add"
+            }
+        },
+        "319": {
+            "id": 319,
+            "op": {
+                "left": 131,
+                "right": 318,
+                "type": "add"
+            }
+        },
         "32": {
             "id": 32,
             "name": "L16_sep_simple_deduction",
             "op": {
                 "type": "input"
+            }
+        },
+        "320": {
+            "id": 320,
+            "op": {
+                "left": 128,
+                "right": 319,
+                "type": "add"
+            }
+        },
+        "321": {
+            "id": 321,
+            "op": {
+                "left": 125,
+                "right": 320,
+                "type": "add"
+            }
+        },
+        "322": {
+            "id": 322,
+            "op": {
+                "left": 122,
+                "right": 321,
+                "type": "add"
+            }
+        },
+        "323": {
+            "id": 323,
+            "op": {
+                "left": 119,
+                "right": 322,
+                "type": "add"
+            }
+        },
+        "324": {
+            "id": 324,
+            "op": {
+                "left": 116,
+                "right": 323,
+                "type": "add"
+            }
+        },
+        "325": {
+            "id": 325,
+            "op": {
+                "left": 113,
+                "right": 324,
+                "type": "add"
+            }
+        },
+        "326": {
+            "id": 326,
+            "name": "IncomeAdjustmentMagnitude",
+            "op": {
+                "left": 110,
+                "right": 325,
+                "type": "add"
             }
         },
         "33": {
@@ -886,6 +2584,7 @@
         }
     },
     "outputs": [
+        326,
         0,
         80,
         92,
