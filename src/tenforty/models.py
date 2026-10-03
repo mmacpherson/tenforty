@@ -319,7 +319,16 @@ class TaxReturnInput(BaseModel):
     itemized_deductions: float = 0.0
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
-    dependent_exemptions: float = 0.0
+    dependent_exemptions: float = Field(
+        default=0.0,
+        description=(
+            "State exemption dollars, not a dependent count. For NJ, VA, and LA "
+            "2024 graph returns, this is the total including the mandatory personal "
+            "and spouse baseline, not additional-only dollars. The effective total "
+            "is max(baseline, explicit total); an omitted or below-baseline amount "
+            "receives the baseline. Other state/year and backend support varies."
+        ),
+    )
 
     @computed_field  # type: ignore[prop-decorator]
     @property

@@ -47,10 +47,18 @@ laIT540_2024 = form "la_it540" 2024 $ do
 
   -- The tax table applies the combined personal exemption-standard deduction
   -- ($4,500 Single/MFS; $9,000 MFJ/QSS/HoH) plus $1,000 per additional
-  -- exemption. We accept that total exemption amount as input.
+  -- exemption. Line 6A is mandatory (2024 instructions, PDF p.3); derive the
+  -- status baseline even when the legacy total-dollar input is left at zero.
+  -- Explicit totals already include the base and must not count it twice.
   -- Source: 2024 Louisiana Tax Table headers, PDF pages 1, 3 and 7,
   -- https://dam.ldr.la.gov/taxforms/IT540(2024)D13%20TT.pdf
-  totalExemptions <- keyInput "L6F_amount" "exemption_amount" "Total personal exemption and dependent deductions"
+  exemptionTotal <- keyInput "L6F_amount" "exemption_amount" "Total personal exemption and dependent deductions"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit laStandardDeduction2024)
+  totalExemptions <-
+    interior "L6F_total" "total_exemptions" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Taxable income: the form prints no taxable-income line; this is the
   -- income left once the exemptions are deducted.

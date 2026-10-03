@@ -135,73 +135,73 @@
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 4500
             }
         },
         "22": {
             "id": 22,
             "op": {
-                "left": 20,
-                "right": 1,
-                "type": "sub"
+                "type": "literal",
+                "value": 9000
             }
         },
         "23": {
             "id": 23,
-            "name": "L10_taxable",
             "op": {
-                "left": 21,
-                "right": 22,
-                "type": "max"
+                "type": "literal",
+                "value": 4500
             }
         },
         "24": {
             "id": 24,
-            "name": "L10_income_tax",
             "op": {
-                "income": 20,
-                "table": "la_brackets_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 9000
             }
         },
         "25": {
             "id": 25,
-            "name": "L10_exemption_tax",
             "op": {
-                "income": 1,
-                "table": "la_brackets_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 9000
             }
         },
         "26": {
             "id": 26,
+            "name": "MandatoryExemptions",
             "op": {
-                "type": "literal",
-                "value": 0
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 24,
+                    "married_joint": 22,
+                    "married_separate": 23,
+                    "qualifying_widow": 25,
+                    "single": 21
+                }
             }
         },
         "27": {
             "id": 27,
+            "name": "L6F_total",
             "op": {
-                "left": 24,
-                "right": 25,
-                "type": "sub"
+                "left": 26,
+                "right": 1,
+                "type": "max"
             }
         },
         "28": {
             "id": 28,
-            "name": "L10_la_tax",
             "op": {
-                "left": 26,
-                "right": 27,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "29": {
             "id": 29,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 20,
+                "right": 27,
+                "type": "sub"
             }
         },
         "3": {
@@ -213,83 +213,85 @@
         },
         "30": {
             "id": 30,
+            "name": "L10_taxable",
             "op": {
                 "left": 28,
-                "right": 2,
-                "type": "sub"
+                "right": 29,
+                "type": "max"
             }
         },
         "31": {
             "id": 31,
-            "name": "L12_tax_after_credits",
+            "name": "L10_income_tax",
             "op": {
-                "left": 29,
-                "right": 30,
-                "type": "max"
+                "income": 20,
+                "table": "la_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "32": {
             "id": 32,
+            "name": "L10_exemption_tax",
             "op": {
-                "left": 4,
-                "right": 5,
-                "type": "add"
+                "income": 27,
+                "table": "la_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "33": {
             "id": 33,
-            "name": "L16_total_payments",
             "op": {
-                "left": 3,
-                "right": 32,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "34": {
             "id": 34,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 31,
+                "right": 32,
+                "type": "sub"
             }
         },
         "35": {
             "id": 35,
+            "name": "L10_la_tax",
             "op": {
-                "left": 31,
-                "right": 33,
-                "type": "sub"
+                "left": 33,
+                "right": 34,
+                "type": "max"
             }
         },
         "36": {
             "id": 36,
-            "name": "L17_tax_due",
             "op": {
-                "left": 34,
-                "right": 35,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "37": {
             "id": 37,
             "op": {
-                "left": 33,
-                "right": 31,
+                "left": 35,
+                "right": 2,
                 "type": "sub"
             }
         },
         "38": {
             "id": 38,
+            "name": "L12_tax_after_credits",
             "op": {
-                "left": 33,
-                "right": 31,
-                "type": "sub"
+                "left": 36,
+                "right": 37,
+                "type": "max"
             }
         },
         "39": {
             "id": 39,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 4,
+                "right": 5,
+                "type": "add"
             }
         },
         "4": {
@@ -301,11 +303,67 @@
         },
         "40": {
             "id": 40,
+            "name": "L16_total_payments",
+            "op": {
+                "left": 3,
+                "right": 39,
+                "type": "add"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "left": 38,
+                "right": 40,
+                "type": "sub"
+            }
+        },
+        "43": {
+            "id": 43,
+            "name": "L17_tax_due",
+            "op": {
+                "left": 41,
+                "right": 42,
+                "type": "max"
+            }
+        },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 40,
+                "right": 38,
+                "type": "sub"
+            }
+        },
+        "45": {
+            "id": 45,
+            "op": {
+                "left": 40,
+                "right": 38,
+                "type": "sub"
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "47": {
+            "id": 47,
             "name": "L18_overpayment",
             "op": {
-                "cond": 37,
-                "otherwise": 39,
-                "then": 38,
+                "cond": 44,
+                "otherwise": 46,
+                "then": 45,
                 "type": "if_positive"
             }
         },
@@ -350,12 +408,12 @@
         }
     },
     "outputs": [
-        28,
-        23,
-        31,
-        33,
-        36,
+        35,
+        30,
+        38,
         40,
+        43,
+        47,
         8,
         20
     ],
