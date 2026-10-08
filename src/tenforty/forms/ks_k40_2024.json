@@ -136,7 +136,7 @@
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 8240
+                "value": 6180
             }
         },
         "22": {
@@ -164,51 +164,50 @@
         },
         "24": {
             "id": 24,
-            "name": "L6_total_deductions",
             "op": {
-                "left": 23,
-                "right": 2,
-                "type": "add"
+                "type": "literal",
+                "value": 9160
             }
         },
         "25": {
             "id": 25,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 18320
             }
         },
         "26": {
             "id": 26,
             "op": {
-                "left": 16,
-                "right": 24,
-                "type": "sub"
+                "type": "literal",
+                "value": 9160
             }
         },
         "27": {
             "id": 27,
-            "name": "L7_ks_taxable_income",
             "op": {
-                "left": 25,
-                "right": 26,
-                "type": "max"
+                "type": "literal",
+                "value": 9160
             }
         },
         "28": {
             "id": 28,
-            "name": "L8_ks_bracket_tax",
             "op": {
-                "income": 27,
-                "table": "ks_brackets_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 9160
             }
         },
         "29": {
             "id": 29,
             "op": {
-                "type": "literal",
-                "value": 100
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 27,
+                    "married_joint": 25,
+                    "married_separate": 26,
+                    "qualifying_widow": 28,
+                    "single": 24
+                }
             }
         },
         "3": {
@@ -221,77 +220,76 @@
         "30": {
             "id": 30,
             "op": {
-                "left": 3,
-                "right": 29,
-                "type": "div"
+                "type": "literal",
+                "value": 0
             }
         },
         "31": {
             "id": 31,
-            "name": "L10_nonresident_tax",
-            "op": {
-                "left": 28,
-                "right": 30,
-                "type": "mul"
-            }
-        },
-        "32": {
-            "id": 32,
-            "name": "ResidentTax",
-            "op": {
-                "left": 28,
-                "right": 4,
-                "type": "add"
-            }
-        },
-        "33": {
-            "id": 33,
-            "name": "L12_total_income_tax",
-            "op": {
-                "left": 31,
-                "right": 32,
-                "type": "max"
-            }
-        },
-        "34": {
-            "id": 34,
-            "op": {
-                "left": 6,
-                "right": 7,
-                "type": "add"
-            }
-        },
-        "35": {
-            "id": 35,
-            "name": "TotalNonrefundableCredits",
-            "op": {
-                "left": 5,
-                "right": 34,
-                "type": "add"
-            }
-        },
-        "36": {
-            "id": 36,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "32": {
+            "id": 32,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "type": "literal",
+                "value": 2320
+            }
+        },
+        "34": {
+            "id": 34,
+            "op": {
+                "type": "literal",
+                "value": 2320
+            }
+        },
+        "35": {
+            "id": 35,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 33,
+                    "married_joint": 31,
+                    "married_separate": 32,
+                    "qualifying_widow": 34,
+                    "single": 30
+                }
+            }
+        },
+        "36": {
+            "id": 36,
+            "name": "MandatoryExemptions",
+            "op": {
+                "left": 29,
+                "right": 35,
+                "type": "add"
+            }
+        },
         "37": {
             "id": 37,
+            "name": "L5_total",
             "op": {
-                "left": 33,
-                "right": 35,
-                "type": "sub"
+                "left": 36,
+                "right": 2,
+                "type": "max"
             }
         },
         "38": {
             "id": 38,
-            "name": "L16_tax_after_nonrefundable_credits",
+            "name": "L6_total_deductions",
             "op": {
-                "left": 36,
+                "left": 23,
                 "right": 37,
-                "type": "max"
+                "type": "add"
             }
         },
         "39": {
@@ -311,83 +309,86 @@
         "40": {
             "id": 40,
             "op": {
-                "left": 8,
-                "right": 9,
-                "type": "add"
+                "left": 16,
+                "right": 38,
+                "type": "sub"
             }
         },
         "41": {
             "id": 41,
+            "name": "L7_ks_taxable_income",
             "op": {
-                "left": 38,
+                "left": 39,
                 "right": 40,
-                "type": "sub"
+                "type": "max"
             }
         },
         "42": {
             "id": 42,
-            "name": "L19_ks_total_tax",
+            "name": "L8_ks_bracket_tax",
             "op": {
-                "left": 39,
-                "right": 41,
-                "type": "max"
+                "income": 41,
+                "table": "ks_brackets_2024",
+                "type": "bracket_tax"
             }
         },
         "43": {
             "id": 43,
             "op": {
-                "left": 13,
-                "right": 14,
-                "type": "add"
+                "type": "literal",
+                "value": 100
             }
         },
         "44": {
             "id": 44,
             "op": {
-                "left": 12,
+                "left": 3,
                 "right": 43,
-                "type": "add"
+                "type": "div"
             }
         },
         "45": {
             "id": 45,
+            "name": "L10_nonresident_tax",
             "op": {
-                "left": 11,
+                "left": 42,
                 "right": 44,
-                "type": "add"
+                "type": "mul"
             }
         },
         "46": {
             "id": 46,
-            "name": "L28_total_payments",
+            "name": "ResidentTax",
             "op": {
-                "left": 10,
-                "right": 45,
+                "left": 42,
+                "right": 4,
                 "type": "add"
             }
         },
         "47": {
             "id": 47,
+            "name": "L12_total_income_tax",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 45,
+                "right": 46,
+                "type": "max"
             }
         },
         "48": {
             "id": 48,
             "op": {
-                "left": 42,
-                "right": 46,
-                "type": "sub"
+                "left": 6,
+                "right": 7,
+                "type": "add"
             }
         },
         "49": {
             "id": 49,
-            "name": "L29_underpayment",
+            "name": "TotalNonrefundableCredits",
             "op": {
-                "left": 47,
+                "left": 5,
                 "right": 48,
-                "type": "max"
+                "type": "add"
             }
         },
         "5": {
@@ -400,34 +401,81 @@
         "50": {
             "id": 50,
             "op": {
-                "left": 46,
-                "right": 42,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "51": {
             "id": 51,
             "op": {
-                "left": 46,
-                "right": 42,
+                "left": 47,
+                "right": 49,
                 "type": "sub"
             }
         },
         "52": {
             "id": 52,
+            "name": "L16_tax_after_nonrefundable_credits",
+            "op": {
+                "left": 50,
+                "right": 51,
+                "type": "max"
+            }
+        },
+        "53": {
+            "id": 53,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "53": {
-            "id": 53,
-            "name": "Overpayment",
+        "54": {
+            "id": 54,
             "op": {
-                "cond": 50,
-                "otherwise": 52,
-                "then": 51,
-                "type": "if_positive"
+                "left": 8,
+                "right": 9,
+                "type": "add"
+            }
+        },
+        "55": {
+            "id": 55,
+            "op": {
+                "left": 52,
+                "right": 54,
+                "type": "sub"
+            }
+        },
+        "56": {
+            "id": 56,
+            "name": "L19_ks_total_tax",
+            "op": {
+                "left": 53,
+                "right": 55,
+                "type": "max"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "left": 13,
+                "right": 14,
+                "type": "add"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "left": 12,
+                "right": 57,
+                "type": "add"
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "left": 11,
+                "right": 58,
+                "type": "add"
             }
         },
         "6": {
@@ -435,6 +483,72 @@
             "name": "L14_child_care_credit",
             "op": {
                 "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "name": "L28_total_payments",
+            "op": {
+                "left": 10,
+                "right": 59,
+                "type": "add"
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "62": {
+            "id": 62,
+            "op": {
+                "left": 56,
+                "right": 60,
+                "type": "sub"
+            }
+        },
+        "63": {
+            "id": 63,
+            "name": "L29_underpayment",
+            "op": {
+                "left": 61,
+                "right": 62,
+                "type": "max"
+            }
+        },
+        "64": {
+            "id": 64,
+            "op": {
+                "left": 60,
+                "right": 56,
+                "type": "sub"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "left": 60,
+                "right": 56,
+                "type": "sub"
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "67": {
+            "id": 67,
+            "name": "Overpayment",
+            "op": {
+                "cond": 64,
+                "otherwise": 66,
+                "then": 65,
+                "type": "if_positive"
             }
         },
         "7": {
@@ -461,12 +575,12 @@
     },
     "outputs": [
         15,
-        42,
-        46,
-        49,
+        56,
+        60,
+        63,
         16,
-        27,
-        53
+        41,
+        67
     ],
     "tables": {
         "ks_brackets_2024": {
@@ -504,7 +618,7 @@
                 "qualifying_widow": [
                     {
                         "rate": 5.2e-2,
-                        "threshold": 46000
+                        "threshold": 23000
                     },
                     {
                         "rate": 5.58e-2,

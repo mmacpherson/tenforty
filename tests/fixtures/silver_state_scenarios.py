@@ -2,6 +2,7 @@
 
 from .evidence import (
     CA_EVIDENCE,
+    KS_EVIDENCE,
     LA_DERIVED_EVIDENCE,
     LA_TABLE_EVIDENCE,
     MS_EVIDENCE,
@@ -98,6 +99,44 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
     "(tenforty-xew, not a table-band difference)",
 )
+
+
+def ks_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDefect:
+    """Signed schedule-minus-table bound for one non-kink $50 KS Tax Table row.
+
+    K-40 line 8 requires the Tax Table when line 7 is $100,000 or less (IP24/IP25
+    p.7). The bound holds only for the named fixture cells: the record and Codex
+    confirmed that each one's statutory midpoint (row_low+25.5) differs from the
+    published amount by at most $0.50. It is not a general table-construction
+    rule. The graph prices actual income at one marginal rate across the row.
+    """
+    assert row_low < taxable_income <= row_low + 50
+    center = rate * (taxable_income - (row_low + 25.5))
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.50,
+        maximum=center + 0.50,
+        reason="KS requires the tax-table row; graph uses the schedule (tenforty-tj2.20)",
+    )
+
+
+def ks_worksheet_gap(statute_minus_worksheet: float, rounding: float) -> KnownDefect:
+    """Graph minus the whole-dollar KS worksheet line 8 above $100,000.
+
+    The Tax Computation Worksheet (IP24/IP25 p.34) subtracts whole-dollar $87
+    (Single/HoH/MFS) or $175 (MFJ); K.S.A. 79-32,110(a) gives $87.40 / $174.80.
+    The graph prices the unrounded statute. ``rounding`` is the record's
+    unrounded worksheet amount minus its whole-dollar line 8. Both terms come
+    from published figures, so the bound is tight.
+    """
+    center = statute_minus_worksheet + rounding
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.01,
+        maximum=center + 0.01,
+        reason="KS worksheet uses whole-dollar subtraction amounts and a whole-"
+        "dollar line 8; graph is the unrounded statute (tenforty-b72.42)",
+    )
 
 
 def la_2024_table_gap(
@@ -1519,6 +1558,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Standard deductions: Single $3,605, MFJ $8,240, MFS $4,120, HoH $6,180
     # Personal exemptions: MFJ $18,320, others $9,160
     # Dependent exemption: $2,320 per dependent
+    # These legacy cases pass the base explicitly and price the smooth schedule;
+    # they are unverified. The Single $50,000 and HoH $60,000 rows are kept for
+    # their federal tax/AGI checks only (unverified legacy): the HoH state value
+    # omitted the $2,320 HoH extra exemption (K-40 instructions p.6), and the
+    # Single state value is superseded by blind case 1. Both state expectations
+    # were retired in b72.34; see KS-2024-2025.md.
     #
     # KS Single, $30,000 W2 (2024)
     # Federal AGI: $30,000
@@ -1542,15 +1587,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=30000.0,
         backend="graph",
     ),
-    # KS Single, $50,000 W2 (2024) - tests 2nd bracket
-    # Federal AGI: $50,000
-    # KS AGI: $50,000
-    # KS Standard deduction: $3,605
-    # KS Personal exemption: $9,160
-    # KS Taxable: $50,000 - $3,605 - $9,160 = $37,235
-    # KS Tax: $23,000 * 0.052 + $14,235 * 0.0558 = $1,196 + $794.31 = $1,990.31
-    # Federal: Std ded $14,600, taxable $35,400
-    # Federal tax: $11,925 * 0.10 + $23,475 * 0.12 = $1,192.50 + $2,817 = $4,009.50
     TaxScenario(
         source="KS 2024 Tax Brackets (computed)",
         description="KS Single, $50,000 income, 2nd bracket (2024)",
@@ -1560,7 +1596,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         dependent_exemptions=9160.0,  # Personal exemption only (std deduction auto-computed)
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=1990.31,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -1586,15 +1621,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
-    # KS HoH, $60,000 W2 (2024) - tests HoH filing status
-    # Federal AGI: $60,000
-    # KS AGI: $60,000
-    # KS Standard deduction: $6,180
-    # KS Personal exemption: $9,160
-    # KS Taxable: $60,000 - $6,180 - $9,160 = $44,660
-    # KS Tax: $23,000 * 0.052 + $21,660 * 0.0558 = $1,196 + $1,208.63 = $2,404.63
-    # Federal: Std ded $21,900, taxable $38,100
-    # Federal tax: $16,550 * 0.10 + $21,550 * 0.12 = $1,655 + $2,586 = $4,241
     TaxScenario(
         source="KS 2024 Tax Brackets (computed)",
         description="KS HoH, $60,000 income (2024)",
@@ -1604,7 +1630,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=60000.0,
         dependent_exemptions=9160.0,  # Personal exemption only (std deduction auto-computed)
         expected_federal_tax=4244.0,  # Tax Table row 38,100-38,150
-        expected_state_tax=2404.63,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -1629,6 +1654,229 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=9055.0,  # Tax Table row 64,250-64,300
         expected_state_tax=3664.31,
         expected_federal_agi=80000.0,
+        backend="graph",
+    ),
+    # ========== KS BLIND-DERIVED SCENARIOS (tenforty-b72.34) ==========
+    # Record: docs/validation/state-fixtures/KS-2024-2025.md. W-2 wages only, KS
+    # standard deduction, KAGI = federal AGI. Every rule and table row is identical
+    # in 2024 and 2025. Cases without dependents rely on the derived status base
+    # (dependent_exemptions omitted); cases with dependents pass the TOTAL line-5
+    # allowance, base included (the KS graph refuses num_dependents). Federal
+    # values are not part of this record.
+    # Blind case 1: 50,000 - 3,605 - 9,160 = 37,235; row 37,201-37,250 -> 1,990.
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS Single $50,000 (2nd bracket) (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1990.0,
+        known_defects=(ks_table_gap(0.0558, 37_235, 37_200),),
+        backend="graph",
+    ),
+    # Blind case 2: 90,000 - 8,240 - (18,320 + 2 x 2,320) = 58,800; MFJ row 58,751-58,800 -> 3,105.
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS MFJ $90,000, 2 dependents (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=22960.0,
+        expected_state_tax=3105.0,
+        known_defects=(ks_table_gap(0.0558, 58_800, 58_750),),
+        backend="graph",
+    ),
+    # Blind case 3: 45,000 - 6,180 - (9,160 + 2,320 HoH + 2,320) = 25,020; row 25,001-25,050 -> 1,309.
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS HoH $45,000, 1 dependent (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=13800.0,
+        expected_state_tax=1309.0,
+        known_defects=(ks_table_gap(0.0558, 25_020, 25_000),),
+        backend="graph",
+    ),
+    # Blind case 4: 40,000 - 4,120 - 9,160 = 26,720; row 26,701-26,750 -> 1,404.
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS MFS $40,000 (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1404.0,
+        known_defects=(ks_table_gap(0.0558, 26_720, 26_700),),
+        backend="graph",
+    ),
+    # Blind case 5: Federal QW files as KS HoH (p.6): 70,000 - 6,180 - (9,160 + 2,320 HoH + 2,320) = 50,020; row 50,001-50,050 -> 2,704 (blind case 5a).
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS QW as KS HoH $70,000, 1 dependent (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=13800.0,
+        expected_state_tax=2704.0,
+        known_defects=(ks_table_gap(0.0558, 50_020, 50_000),),
+        backend="graph",
+    ),
+    # Blind case 6: 20,000 - 12,765 = 7,235; row 7,201-7,250 -> 376.
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS Single $20,000 (1st bracket) (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=376.0,
+        known_defects=(ks_table_gap(0.052, 7_235, 7_200),),
+        backend="graph",
+    ),
+    # Blind case 7: 137,235 > 100,000: worksheet 0.0558 x 137,235 - 87 = 7,570.71 -> 7,571 (statute: 7,570).
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS Single $150,000 (worksheet) (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=7571.0,
+        known_defects=(ks_worksheet_gap(-0.40, 7_570.713 - 7_571),),
+        backend="graph",
+    ),
+    # Blind case 8: 250,000 - 8,240 - (18,320 + 3 x 2,320) = 216,480; worksheet 0.0558 x 216,480 - 175 = 11,904.58 -> 11,905.
+    TaxScenario(
+        source="KS 2024 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS MFJ $250,000, 3 dependents (worksheet) (2024)",
+        year=2024,
+        state="KS",
+        filing_status="Married/Joint",
+        w2_income=250000.0,
+        dependent_exemptions=25280.0,
+        expected_state_tax=11905.0,
+        known_defects=(ks_worksheet_gap(0.20, 11_904.584 - 11_905),),
+        backend="graph",
+    ),
+    # Blind case 1: 50,000 - 3,605 - 9,160 = 37,235; row 37,201-37,250 -> 1,990.
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS Single $50,000 (2nd bracket) (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1990.0,
+        known_defects=(ks_table_gap(0.0558, 37_235, 37_200),),
+        backend="graph",
+    ),
+    # Blind case 2: 90,000 - 8,240 - (18,320 + 2 x 2,320) = 58,800; MFJ row 58,751-58,800 -> 3,105.
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS MFJ $90,000, 2 dependents (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=22960.0,
+        expected_state_tax=3105.0,
+        known_defects=(ks_table_gap(0.0558, 58_800, 58_750),),
+        backend="graph",
+    ),
+    # Blind case 3: 45,000 - 6,180 - (9,160 + 2,320 HoH + 2,320) = 25,020; row 25,001-25,050 -> 1,309.
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS HoH $45,000, 1 dependent (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=13800.0,
+        expected_state_tax=1309.0,
+        known_defects=(ks_table_gap(0.0558, 25_020, 25_000),),
+        backend="graph",
+    ),
+    # Blind case 4: 40,000 - 4,120 - 9,160 = 26,720; row 26,701-26,750 -> 1,404.
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS MFS $40,000 (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1404.0,
+        known_defects=(ks_table_gap(0.0558, 26_720, 26_700),),
+        backend="graph",
+    ),
+    # Blind case 5: Federal QW files as KS HoH (p.6): 70,000 - 6,180 - (9,160 + 2,320 HoH + 2,320) = 50,020; row 50,001-50,050 -> 2,704 (blind case 5a).
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS QW as KS HoH $70,000, 1 dependent (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=13800.0,
+        expected_state_tax=2704.0,
+        known_defects=(ks_table_gap(0.0558, 50_020, 50_000),),
+        backend="graph",
+    ),
+    # Blind case 6: 20,000 - 12,765 = 7,235; row 7,201-7,250 -> 376.
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS Single $20,000 (1st bracket) (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=376.0,
+        known_defects=(ks_table_gap(0.052, 7_235, 7_200),),
+        backend="graph",
+    ),
+    # Blind case 7: 137,235 > 100,000: worksheet 0.0558 x 137,235 - 87 = 7,570.71 -> 7,571 (statute: 7,570).
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS Single $150,000 (worksheet) (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=7571.0,
+        known_defects=(ks_worksheet_gap(-0.40, 7_570.713 - 7_571),),
+        backend="graph",
+    ),
+    # Blind case 8: 250,000 - 8,240 - (18,320 + 3 x 2,320) = 216,480; worksheet 0.0558 x 216,480 - 175 = 11,904.58 -> 11,905.
+    TaxScenario(
+        source="KS 2025 K-40 instructions (blind derivation)",
+        state_evidence=KS_EVIDENCE,
+        description="KS MFJ $250,000, 3 dependents (worksheet) (2025)",
+        year=2025,
+        state="KS",
+        filing_status="Married/Joint",
+        w2_income=250000.0,
+        dependent_exemptions=25280.0,
+        expected_state_tax=11905.0,
+        known_defects=(ks_worksheet_gap(0.20, 11_904.584 - 11_905),),
         backend="graph",
     ),
     # ========== OREGON SCENARIOS ==========

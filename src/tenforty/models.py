@@ -322,9 +322,10 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. For NJ, VA, and LA "
-            "2024 graph returns, this is the total including the mandatory personal "
-            "and spouse baseline, not additional-only dollars. The effective total "
+            "State exemption dollars, not a dependent count. For NJ, VA, KS, and "
+            "LA 2024 graph returns, this is the total including the mandatory "
+            "personal and spouse baseline (and KS's head-of-household extra), not "
+            "additional-only dollars. The effective total "
             "is max(baseline, explicit total); an omitted or below-baseline amount "
             "receives the baseline. Other state/year and backend support varies."
         ),
