@@ -367,16 +367,24 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.IN: StateGraphConfig(
         # IN IT-40 imports federal AGI and applies add-backs/deductions.
-        # Exemptions are accepted as total input (num_dependents cannot map to
-        # dollar amounts due to natural_to_node limitation).
+        # The spec derives the Schedule 3 line 1 base: $2,000 MFJ, $1,000 for
+        # every other status. dependent_exemptions is TOTAL Schedule 3 line 7
+        # dollars including that base, not a count or additional dollars; the
+        # spec takes max(base, explicit total). num_dependents stays unmapped:
+        # Indiana's $1,000 per dependent and $1,500 (or first-year $3,000) per
+        # qualifying child are distinct tests one count cannot express
+        # (tenforty-avr.1), so callers supply those dollars in the total.
         # IT-40 line 7, Indiana adjusted gross income, is also the income the
         # flat state rate applies to (line 8 = line 7 x 3.05% in 2024): Indiana
-        # has no separate taxable-income line.
-        natural_to_node={},
+        # has no separate taxable-income line. state_total_tax is line 8, the
+        # state AGI tax only; line 9 county tax (Schedule CT-40) is excluded.
+        natural_to_node={
+            "dependent_exemptions": "in_it40_L6_exemption_amount",
+        },
         outputs={
             "state_adjusted_gross_income": "L7_in_agi",
             "state_taxable_income": "L7_in_agi",
-            "state_total_tax": "L9_in_state_tax",
+            "state_total_tax": "L8_in_state_tax",
         },
     ),
     OTSState.KS: StateGraphConfig(
