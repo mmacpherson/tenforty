@@ -2105,52 +2105,6 @@ def test_wv_tax_ranges(scenario):
     _run_range_scenario(scenario_with_backend)
 
 
-ME_SCENARIOS = [
-    {
-        "year": 2024,
-        "state": "ME",
-        "filing_status": "Single",
-        "w2_income": 60000,
-        "expected_federal_min": 5200,
-        "expected_federal_max": 5230,
-        "expected_state_min": 2810,
-        "expected_state_max": 2825,
-    },
-    {
-        "year": 2024,
-        "state": "ME",
-        "filing_status": "Married/Joint",
-        "w2_income": 100000,
-        "expected_federal_min": 8020,
-        "expected_federal_max": 8050,
-        "expected_state_min": 4275,
-        "expected_state_max": 4295,
-    },
-    {
-        "year": 2025,
-        "state": "ME",
-        "filing_status": "Single",
-        "w2_income": 60000,
-        "expected_federal_min": 4955,
-        "expected_federal_max": 5170,
-        "expected_state_min": 2575,
-        "expected_state_max": 2790,
-    },
-]
-
-
-@pytest.mark.requires_graph
-@pytest.mark.parametrize(
-    "scenario",
-    ME_SCENARIOS,
-    ids=lambda s: f"ME-{s['year']}-{s['filing_status']}-{s['w2_income']}",
-)
-def test_me_tax_ranges(scenario):
-    """Sanity check: ME tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
-    _run_range_scenario(scenario_with_backend)
-
-
 @pytest.mark.parametrize(
     "state,backend",
     [

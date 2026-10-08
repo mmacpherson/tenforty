@@ -8,6 +8,9 @@ module TablesME2024
 
     -- * Personal Exemption
     mePersonalExemption2024,
+    mePersonalExemptionBase2024,
+    mePersonalExemptionPhaseoutThreshold2024,
+    mePersonalExemptionPhaseoutRange2024,
   )
 where
 
@@ -45,3 +48,24 @@ meStandardDeduction2024 = byStatus 14600 29200 14600 21900 29200
 -- Source: Maine Revenue Services, Individual Income Tax 2024 Rates
 mePersonalExemption2024 :: Amount Dollars
 mePersonalExemption2024 = 5000
+
+-- | Line 18 before phase-out: line 13 count times the amount when neither
+-- the filer nor spouse can be claimed as a dependent: one, or two on a joint return. QSS
+-- gets one (line 13 table, PDF p.4 = printed p.4; 36 M.R.S. 5126-A(1)).
+-- Dependents feed a credit, not line 18.
+-- Order: Single, MFJ, MFS, HoH, QW
+mePersonalExemptionBase2024 :: ByStatus (Amount Dollars)
+mePersonalExemptionBase2024 = byStatus e (2 * e) e e e
+  where
+    e = mePersonalExemption2024
+
+-- | Line 18 phase-out worksheet, line 2 ($323,900 Single; $388,650 MFJ/QSS; $194,325 MFS; $356,300 HoH).
+-- Source: 2024 Form 1040ME instructions, PDF p.4 = printed p.4,
+-- https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/24_1040me_book_gen_instr.pdf
+mePersonalExemptionPhaseoutThreshold2024 :: ByStatus (Amount Dollars)
+mePersonalExemptionPhaseoutThreshold2024 = byStatus 323900 388650 194325 356300 388650
+
+-- | Line 18 phase-out worksheet, line 4: $62,500 MFS, $125,000 otherwise
+-- (36 M.R.S. 5126-A(2)).
+mePersonalExemptionPhaseoutRange2024 :: ByStatus (Amount Dollars)
+mePersonalExemptionPhaseoutRange2024 = byStatus 125000 125000 62500 125000 125000

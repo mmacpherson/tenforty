@@ -499,11 +499,14 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.ME: StateGraphConfig(
         # ME Form 1040ME imports federal AGI and applies Maine-specific
-        # additions/subtractions. Deductions (standard or itemized) and personal
-        # exemptions are accepted as total input. Maine uses a progressive
-        # three-bracket system (5.8%, 6.75%, 7.15%) with COLA-adjusted thresholds.
-        # 2024: personal exemption $5,000; 2025: $5,150 (COLA 1.25).
-        # Standard deductions equal federal amounts.
+        # additions/subtractions. Maine uses a progressive three-bracket system
+        # (5.8%, 6.75%, 7.15%) with COLA-adjusted thresholds. The spec derives the
+        # personal exemption ($5,000 2024 / $5,150 2025; one, or two on a joint
+        # return) and phases it out on Maine AGI. dependent_exemptions is TOTAL
+        # pre-phase-out dollars including that base, not additional dollars; the
+        # spec takes max(base, explicit total) and then applies the phase-out.
+        # Dependents earn a credit, not an exemption. Returns where the filer or
+        # spouse can be claimed as a dependent are unsupported (tenforty-avr.3).
         natural_to_node={
             "itemized_deductions": "me_1040me_L17_itemized",
             "dependent_exemptions": "me_1040me_L21_total_exemptions",

@@ -63,9 +63,42 @@ meme1040_2024 = form "me_1040me" 2024 $ do
     interior "L20" "me_agi_minus_deductions" $
       l16 `subtractNotBelowZero` l19
 
-  -- Line 21: Exemptions ($5,000 per exemption)
-  -- User provides the total exemption amount (num_exemptions * $5,000)
-  l21 <- keyInput "L21" "total_exemptions" "Total exemptions"
+  -- Line 21: Personal exemption deduction (official Form 1040ME line 18).
+  -- \$5,000 per line-13 exemption: one, or two on a joint return; dependents
+  -- feed a credit instead. The legacy input is TOTAL pre-phase-out dollars
+  -- (worksheet line 6) including that base, so take the greater of the two
+  -- rather than adding them. Returns where the filer or spouse can be
+  -- claimed as another's dependent are outside the supported domain: line 13
+  -- then drops below the base (0 for a claimable Single/MFS/HoH/QSS filer; 0
+  -- or 1 on MFJ), which max() cannot express (tenforty-avr.3).
+  -- 2024 Form 1040ME instructions, PDF p.4 = printed p.4 (line 13, line 18 and
+  -- its phase-out worksheet); 36 M.R.S. 5126-A.
+  exemptionTotal <- keyInput "L21" "total_exemptions" "Total exemption dollars before phase-out, including taxpayer/spouse"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit mePersonalExemptionBase2024)
+  exemptionsBeforePhaseout <-
+    interior "L21_total" "total_exemptions_before_phaseout" $
+      greaterOf mandatoryExemptions exemptionTotal
+
+  -- Phase-out worksheet: reduce by (ME AGI - threshold) / range, capped at
+  -- 1, using the statute's unrounded fraction (5126-A(2)). Two worksheet
+  -- precision rules are deliberately not modelled, and this line introduces
+  -- both residuals (tenforty-b72.42): the line-5 ratio entered to 4 decimal
+  -- places, and the whole-dollar line 8. Near the threshold the ratio's
+  -- quantization alone can exceed $0.50 (2025 MFJ, AGI 400,131: worksheet
+  -- 10,298, graph 10,297.45).
+  exemptionPhaseoutExcess <-
+    interior "ExemptionPhaseoutExcess" "exemption_phaseout_excess" $
+      l16 `excessOf` byStatusE (fmap lit mePersonalExemptionPhaseoutThreshold2024)
+  l21 <-
+    interior "L21_allowed" "exemptions_after_phaseout" $
+      exemptionsBeforePhaseout
+        .*. ( rate 1.0
+                .-. minE
+                  (exemptionPhaseoutExcess ./. byStatusE (fmap lit mePersonalExemptionPhaseoutRange2024))
+                  (rate 1.0)
+            )
 
   -- Line 22: Maine taxable income
   _l22 <-
