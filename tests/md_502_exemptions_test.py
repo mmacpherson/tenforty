@@ -163,27 +163,33 @@ def test_derived_taxable_income(year, status, wages, line_19_total, taxable_inco
     assert result.state_taxable_income == taxable_income
 
 
+EXPLICIT_TOTAL_BASES = [
+    (2025, "Single", 50_000, 3_200),
+    (2025, "Married/Joint", 90_000, 6_400),
+    (2025, "Single", 120_000, 1_600),
+    (2025, "Married/Joint", 160_000, 3_200),
+    (2025, "Single", 160_000, 0),
+    (2024, "Married/Sep", 110_000, 1_600),
+]
+
+
 @pytest.mark.parametrize(
-    "year,status,wages,base",
+    "year,status,wages,base,total_offset",
     [
-        (2025, "Single", 50_000, 3_200),
-        (2025, "Married/Joint", 90_000, 6_400),
-        (2025, "Single", 120_000, 1_600),
-        (2025, "Married/Joint", 160_000, 3_200),
-        (2025, "Single", 160_000, 0),
-        (2024, "Married/Sep", 110_000, 1_600),
+        (*case, offset)
+        for case in EXPLICIT_TOTAL_BASES
+        for offset in (-1, 0, 1_000)
+        if case[3] + offset >= 0
     ],
 )
-@pytest.mark.parametrize("total_offset", [-1, 0, 1_000])
 def test_explicit_line_19_total_substitutes_for_the_base(
     year, status, wages, base, total_offset
 ):
     """An explicit Line 19 total replaces the derived base rather than adding to it.
 
-    At a $0 base, a positive total models the unreduced $1,000 age/blind exemption.
+    At a $0 base, a positive total models the unreduced $1,000 age/blind exemption;
+    a negative total is not a valid input, so that combination is not generated.
     """
-    if base + total_offset < 0:
-        pytest.skip("negative total is not a valid input")
     default = _scalar_and_zip(
         year=year, state="MD", filing_status=status, w2_income=wages
     )
