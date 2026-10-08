@@ -5,6 +5,9 @@ module TablesMO2025
 
     -- * Standard Deduction
     moStandardDeduction2025,
+
+    -- * Federal Income Tax Deduction
+    moFederalTaxDeductionCap2025,
   )
 where
 
@@ -48,3 +51,13 @@ missouriBracketsTable2025 =
 -- Note: The source lists $15,750/$31,500/$23,625 as 2025 amounts
 moStandardDeduction2025 :: ByStatus (Amount Dollars)
 moStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500
+
+-- | 2025 cap on the Missouri federal income tax deduction (MO-1040 line 13)
+-- Order: Single, MFJ, MFS, HoH, QW
+-- Source: MO-1040 Instructions 2025, p.8, "Line 13 - Federal Income Tax Deduction":
+-- "If you selected any filing status other than married filing combined on the
+-- MO-1040, your federal tax deduction may not exceed $5,000. If you selected
+-- married filing combined, your federal tax cannot exceed $10,000."
+-- https://dor.mo.gov/forms/MO-1040%20Instructions_2025.pdf
+moFederalTaxDeductionCap2025 :: ByStatus (Amount Dollars)
+moFederalTaxDeductionCap2025 = byStatus 5000 10000 5000 5000 5000

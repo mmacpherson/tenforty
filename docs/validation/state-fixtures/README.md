@@ -19,6 +19,7 @@ Their inputs and federal expectations are unchanged.
 | WI MFS edges | Published schedule amounts; adjacent deltas are structural checks | Same WI record |
 | MO chart examples, taxable incomes $3,090 and $12,000 | Published worked examples | [MO 2024–2025](MO-2024-2025.md) |
 | MO whole returns | Independent derivation | Same MO record |
+| MO line 13 federal tax deduction (bands, CTC/EIC, caps) | Independent derivation, with IRS Tax Table / EIC Table rows | Same MO record, b72.18 section |
 | LA 2024 line 10, in-table W-2 cases (x08) | Published table rows; **not blind** | [LA 2024](LA-2024.md) |
 | LA 2024 line 10, above-table cases (x08) | Unverified legacy: continuation rule plus rounding, derived non-blind | Same LA record |
 | NJ/VA 2024–2025, nine wage-only returns | Independent derivation; official PDFs only, no repository access or software output | [NJ/VA 2024–2025](NJ-VA-2024-2025.md) |

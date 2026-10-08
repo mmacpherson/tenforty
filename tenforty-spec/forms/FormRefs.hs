@@ -54,6 +54,9 @@ us1040L18 = lineRef "us_1040" "L18"
 us1040L22 :: LineRef Dollars
 us1040L22 = lineRef "us_1040" "L22"
 
+us1040L27 :: LineRef Dollars
+us1040L27 = lineRef "us_1040" "L27"
+
 us1040L6b :: LineRef Dollars
 us1040L6b = lineRef "us_1040" "L6b"
 
