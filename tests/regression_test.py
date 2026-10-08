@@ -2006,35 +2006,43 @@ def test_ne_tax_ranges(scenario):
 
 
 HI_SCENARIOS = [
+    # The $1,144 per-exemption base (self, MFJ spouse) is derived by the graph.
+    # State windows: published HI Tax Table rows, looked up non-blind (b72.33);
+    # docs/validation/state-fixtures/HI-2024-2025.md, Part C. Graph minus table
+    # is rate * (TI - row midpoint) + (exact - printed bracket base), +/- $0.50
+    # (tenforty-tj2.20).
     {
         "year": 2024,
         "state": "HI",
         "filing_status": "Single",
         "w2_income": 60000,
+        # TI 60,000 - 4,400 - 1,144 = 54,456; row 54,450-54,500 S/MFS = $3,748.
         "expected_federal_min": 5150,
         "expected_federal_max": 5250,
-        "expected_state_min": 3820,
-        "expected_state_max": 3860,
+        "expected_state_min": 3748 + 0.0825 * (54_456 - 54_475) - 0.40 - 0.50,
+        "expected_state_max": 3748 + 0.0825 * (54_456 - 54_475) - 0.40 + 0.50,
     },
     {
         "year": 2024,
         "state": "HI",
         "filing_status": "Married/Joint",
         "w2_income": 100000,
+        # TI 100,000 - 8,800 - 2,288 = 88,912; row 88,900-88,950 MFJ = $5,868.
         "expected_federal_min": 8000,
         "expected_federal_max": 8100,
-        "expected_state_min": 6020,
-        "expected_state_max": 6080,
+        "expected_state_min": 5868 + 0.079 * (88_912 - 88_925) + 0.20 - 0.50,
+        "expected_state_max": 5868 + 0.079 * (88_912 - 88_925) + 0.20 + 0.50,
     },
     {
         "year": 2025,
         "state": "HI",
         "filing_status": "Single",
         "w2_income": 60000,
+        # TI 54,456; 2025 row 54,450-54,500 S/MFS = $3,031.
         "expected_federal_min": 4950,
         "expected_federal_max": 5170,
-        "expected_state_min": 2900,
-        "expected_state_max": 3140,
+        "expected_state_min": 3031 + 0.076 * (54_456 - 54_475) + 0.20 - 0.50,
+        "expected_state_max": 3031 + 0.076 * (54_456 - 54_475) + 0.20 + 0.50,
     },
 ]
 

@@ -314,12 +314,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.HI: StateGraphConfig(
         # HI Form N-11 imports federal AGI and applies additions/subtractions.
-        # Personal exemptions are $1,144 per exemption and are accepted as total
-        # dollar input (num_dependents cannot map to dollar amounts).
+        # The spec derives $1,144 for the filer, the spouse on a joint return,
+        # and each of num_dependents. dependent_exemptions is TOTAL dollars
+        # including that base (for MFS spouse or age-65 exemptions), not
+        # additional dollars; the spec takes max(base, explicit total), which
+        # can only raise the base. Outside the supported domain: a filer or
+        # joint spouse claimable as another's dependent, and the $7,000
+        # disability exemption, which replaces all regular exemptions.
         # 2024 has 12 brackets (1.4%-11%), 2025 brackets widened under GAP II
         # (Green Affordability Plan II, Act 46 SLH 2024).
         natural_to_node={
             "dependent_exemptions": "hi_n11_L24_total_exemptions",
+            "num_dependents": "hi_n11_L6cd_dependents",
             "itemized_deductions": "hi_n11_L19_itemized",
         },
         outputs={

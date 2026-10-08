@@ -24,7 +24,8 @@
         14,
         15,
         16,
-        17
+        17,
+        18
     ],
     "meta": {
         "form_id": "hi_n11",
@@ -48,77 +49,75 @@
         },
         "10": {
             "id": 10,
-            "name": "L29_hi_tax_credit_other_nonrefundable",
+            "name": "L28_hi_tax_credit_low_income",
             "op": {
                 "type": "input"
             }
         },
         "11": {
             "id": 11,
-            "name": "L32_hi_other_taxes",
+            "name": "L29_hi_tax_credit_other_nonrefundable",
             "op": {
                 "type": "input"
             }
         },
         "12": {
             "id": 12,
-            "name": "L34_hi_food_excise_credit",
+            "name": "L32_hi_other_taxes",
             "op": {
                 "type": "input"
             }
         },
         "13": {
             "id": 13,
-            "name": "L35_hi_eic",
+            "name": "L34_hi_food_excise_credit",
             "op": {
                 "type": "input"
             }
         },
         "14": {
             "id": 14,
-            "name": "L36_hi_refundable_credit_other",
+            "name": "L35_hi_eic",
             "op": {
                 "type": "input"
             }
         },
         "15": {
             "id": 15,
-            "name": "L38_hi_withholding",
+            "name": "L36_hi_refundable_credit_other",
             "op": {
                 "type": "input"
             }
         },
         "16": {
             "id": 16,
-            "name": "L39_hi_estimated_payments",
+            "name": "L38_hi_withholding",
             "op": {
                 "type": "input"
             }
         },
         "17": {
             "id": 17,
-            "name": "L40_hi_extension_payment",
+            "name": "L39_hi_estimated_payments",
             "op": {
                 "type": "input"
             }
         },
         "18": {
             "id": 18,
+            "name": "L40_hi_extension_payment",
+            "op": {
+                "type": "input"
+            }
+        },
+        "19": {
+            "id": 19,
             "name": "L7_federal_agi",
             "op": {
                 "form": "us_1040",
                 "line": "L11",
                 "type": "import",
                 "year": 2025
-            }
-        },
-        "19": {
-            "id": 19,
-            "name": "L10_hi_total_additions",
-            "op": {
-                "left": 0,
-                "right": 1,
-                "type": "add"
             }
         },
         "2": {
@@ -130,81 +129,83 @@
         },
         "20": {
             "id": 20,
-            "name": "L11_hi_income",
+            "name": "L10_hi_total_additions",
             "op": {
-                "left": 18,
-                "right": 19,
+                "left": 0,
+                "right": 1,
                 "type": "add"
             }
         },
         "21": {
             "id": 21,
+            "name": "L11_hi_income",
             "op": {
-                "left": 5,
-                "right": 6,
+                "left": 19,
+                "right": 20,
                 "type": "add"
             }
         },
         "22": {
             "id": 22,
             "op": {
-                "left": 4,
-                "right": 21,
+                "left": 5,
+                "right": 6,
                 "type": "add"
             }
         },
         "23": {
             "id": 23,
             "op": {
-                "left": 3,
+                "left": 4,
                 "right": 22,
                 "type": "add"
             }
         },
         "24": {
             "id": 24,
-            "name": "L17_hi_total_subtractions",
             "op": {
-                "left": 2,
+                "left": 3,
                 "right": 23,
                 "type": "add"
             }
         },
         "25": {
             "id": 25,
-            "name": "L18_hi_agi",
+            "name": "L17_hi_total_subtractions",
             "op": {
-                "left": 20,
+                "left": 2,
                 "right": 24,
-                "type": "sub"
+                "type": "add"
             }
         },
         "26": {
             "id": 26,
+            "name": "L18_hi_agi",
             "op": {
-                "type": "literal",
-                "value": 4400
+                "left": 21,
+                "right": 25,
+                "type": "sub"
             }
         },
         "27": {
             "id": 27,
             "op": {
                 "type": "literal",
-                "value": 8800
+                "value": 4400
             }
         },
         "28": {
             "id": 28,
             "op": {
                 "type": "literal",
-                "value": 4400
+                "value": 8800
             }
         },
         "29": {
             "id": 29,
             "op": {
                 "type": "literal",
-                "value": 6424
+                "value": 4400
             }
         },
         "3": {
@@ -218,87 +219,82 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 8800
+                "value": 6424
             }
         },
         "31": {
             "id": 31,
-            "name": "StdDed",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 29,
-                    "married_joint": 27,
-                    "married_separate": 28,
-                    "qualifying_widow": 30,
-                    "single": 26
-                }
+                "type": "literal",
+                "value": 8800
             }
         },
         "32": {
             "id": 32,
-            "name": "L22_deduction",
+            "name": "StdDed",
             "op": {
-                "left": 7,
-                "right": 31,
-                "type": "max"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 30,
+                    "married_joint": 28,
+                    "married_separate": 29,
+                    "qualifying_widow": 31,
+                    "single": 27
+                }
             }
         },
         "33": {
             "id": 33,
+            "name": "L22_deduction",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 7,
+                "right": 32,
+                "type": "max"
             }
         },
         "34": {
             "id": 34,
             "op": {
-                "left": 25,
-                "right": 32,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "35": {
             "id": 35,
-            "name": "L23_hi_agi_minus_deductions",
             "op": {
-                "left": 33,
-                "right": 34,
-                "type": "max"
+                "left": 26,
+                "right": 33,
+                "type": "sub"
             }
         },
         "36": {
             "id": 36,
+            "name": "L23_hi_agi_minus_deductions",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 34,
+                "right": 35,
+                "type": "max"
             }
         },
         "37": {
             "id": 37,
             "op": {
-                "left": 35,
-                "right": 8,
-                "type": "sub"
+                "type": "literal",
+                "value": 1144
             }
         },
         "38": {
             "id": 38,
-            "name": "L25_hi_taxable_income",
             "op": {
-                "left": 36,
-                "right": 37,
-                "type": "max"
+                "type": "literal",
+                "value": 2288
             }
         },
         "39": {
             "id": 39,
-            "name": "L27_hi_bracket_tax",
             "op": {
-                "income": 38,
-                "table": "hi_brackets_2025",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 1144
             }
         },
         "4": {
@@ -310,87 +306,86 @@
         },
         "40": {
             "id": 40,
-            "name": "L30_hi_total_credits",
             "op": {
-                "left": 9,
-                "right": 10,
-                "type": "add"
+                "type": "literal",
+                "value": 1144
             }
         },
         "41": {
             "id": 41,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 1144
             }
         },
         "42": {
             "id": 42,
             "op": {
-                "left": 39,
-                "right": 40,
-                "type": "sub"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 40,
+                    "married_joint": 38,
+                    "married_separate": 39,
+                    "qualifying_widow": 41,
+                    "single": 37
+                }
             }
         },
         "43": {
             "id": 43,
-            "name": "L31_hi_tax_after_credits",
             "op": {
-                "left": 41,
-                "right": 42,
-                "type": "max"
+                "type": "literal",
+                "value": 1144
             }
         },
         "44": {
             "id": 44,
-            "name": "L33_hi_total_tax",
             "op": {
-                "left": 43,
-                "right": 11,
-                "type": "add"
+                "left": 8,
+                "right": 43,
+                "type": "mul"
             }
         },
         "45": {
             "id": 45,
+            "name": "MandatoryExemptions",
             "op": {
-                "left": 13,
-                "right": 14,
+                "left": 42,
+                "right": 44,
                 "type": "add"
             }
         },
         "46": {
             "id": 46,
-            "name": "L37_hi_total_refundable_credits",
+            "name": "L24_total",
             "op": {
-                "left": 12,
-                "right": 45,
-                "type": "add"
+                "left": 45,
+                "right": 9,
+                "type": "max"
             }
         },
         "47": {
             "id": 47,
             "op": {
-                "left": 16,
-                "right": 17,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "48": {
             "id": 48,
-            "name": "L41_hi_total_payments",
             "op": {
-                "left": 15,
-                "right": 47,
-                "type": "add"
+                "left": 36,
+                "right": 46,
+                "type": "sub"
             }
         },
         "49": {
             "id": 49,
-            "name": "L42_hi_total_payments_and_credits",
+            "name": "L25_hi_taxable_income",
             "op": {
-                "left": 48,
-                "right": 46,
-                "type": "add"
+                "left": 47,
+                "right": 48,
+                "type": "max"
             }
         },
         "5": {
@@ -402,18 +397,20 @@
         },
         "50": {
             "id": 50,
+            "name": "L27_hi_bracket_tax",
             "op": {
-                "left": 49,
-                "right": 44,
-                "type": "sub"
+                "income": 49,
+                "table": "hi_brackets_2025",
+                "type": "bracket_tax"
             }
         },
         "51": {
             "id": 51,
+            "name": "L30_hi_total_credits",
             "op": {
-                "left": 49,
-                "right": 44,
-                "type": "sub"
+                "left": 10,
+                "right": 11,
+                "type": "add"
             }
         },
         "52": {
@@ -425,36 +422,62 @@
         },
         "53": {
             "id": 53,
-            "name": "L43_hi_overpayment",
             "op": {
-                "cond": 50,
-                "otherwise": 52,
-                "then": 51,
-                "type": "if_positive"
+                "left": 50,
+                "right": 51,
+                "type": "sub"
             }
         },
         "54": {
             "id": 54,
+            "name": "L31_hi_tax_after_credits",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 52,
+                "right": 53,
+                "type": "max"
             }
         },
         "55": {
             "id": 55,
+            "name": "L33_hi_total_tax",
             "op": {
-                "left": 44,
-                "right": 49,
-                "type": "sub"
+                "left": 54,
+                "right": 12,
+                "type": "add"
             }
         },
         "56": {
             "id": 56,
-            "name": "L44_hi_amount_owed",
             "op": {
-                "left": 54,
-                "right": 55,
-                "type": "max"
+                "left": 14,
+                "right": 15,
+                "type": "add"
+            }
+        },
+        "57": {
+            "id": 57,
+            "name": "L37_hi_total_refundable_credits",
+            "op": {
+                "left": 13,
+                "right": 56,
+                "type": "add"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "left": 17,
+                "right": 18,
+                "type": "add"
+            }
+        },
+        "59": {
+            "id": 59,
+            "name": "L41_hi_total_payments",
+            "op": {
+                "left": 16,
+                "right": 58,
+                "type": "add"
             }
         },
         "6": {
@@ -462,6 +485,72 @@
             "name": "L16_hi_sub_other",
             "op": {
                 "type": "input"
+            }
+        },
+        "60": {
+            "id": 60,
+            "name": "L42_hi_total_payments_and_credits",
+            "op": {
+                "left": 59,
+                "right": 57,
+                "type": "add"
+            }
+        },
+        "61": {
+            "id": 61,
+            "op": {
+                "left": 60,
+                "right": 55,
+                "type": "sub"
+            }
+        },
+        "62": {
+            "id": 62,
+            "op": {
+                "left": 60,
+                "right": 55,
+                "type": "sub"
+            }
+        },
+        "63": {
+            "id": 63,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "64": {
+            "id": 64,
+            "name": "L43_hi_overpayment",
+            "op": {
+                "cond": 61,
+                "otherwise": 63,
+                "then": 62,
+                "type": "if_positive"
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "left": 55,
+                "right": 60,
+                "type": "sub"
+            }
+        },
+        "67": {
+            "id": 67,
+            "name": "L44_hi_amount_owed",
+            "op": {
+                "left": 65,
+                "right": 66,
+                "type": "max"
             }
         },
         "7": {
@@ -473,30 +562,30 @@
         },
         "8": {
             "id": 8,
-            "name": "L24_total_exemptions",
+            "name": "L6cd_dependents",
             "op": {
                 "type": "input"
             }
         },
         "9": {
             "id": 9,
-            "name": "L28_hi_tax_credit_low_income",
+            "name": "L24_total_exemptions",
             "op": {
                 "type": "input"
             }
         }
     },
     "outputs": [
-        25,
-        38,
-        39,
-        44,
-        46,
-        48,
+        26,
         49,
-        53,
-        56,
-        18
+        50,
+        55,
+        57,
+        59,
+        60,
+        64,
+        67,
+        19
     ],
     "tables": {
         "hi_brackets_2025": {
