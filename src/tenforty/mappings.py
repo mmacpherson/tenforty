@@ -483,8 +483,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.MD: StateGraphConfig(
         # MD Form 502 imports federal AGI and applies Maryland-specific
-        # additions/subtractions. Deductions (standard or itemized) and personal
-        # exemptions are accepted as total input. Maryland uses a progressive
+        # additions/subtractions. The spec derives the taxpayer (and joint
+        # spouse) exemption from Chart 10A, stepped down by federal AGI.
+        # dependent_exemptions is the Line 19 TOTAL in dollars after that
+        # reduction (dependents and age/blind included), not a count or
+        # additional dollars; the spec takes max(base, explicit total).
+        # Itemized deductions are an input. Maryland uses a progressive
         # bracket system with two different schedules: Schedule I (Single/MFS/Dep)
         # and Schedule II (MFJ/HoH/QSS).
         natural_to_node={
