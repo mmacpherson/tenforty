@@ -322,8 +322,8 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. For NJ, VA, and LA "
-            "2024 graph returns, this is the total including the mandatory personal "
+            "State exemption dollars, not a dependent count. For NJ, VA, IN, and "
+            "LA 2024 graph returns, this is the total including the mandatory personal "
             "and spouse baseline, not additional-only dollars; HI 2024-2025 graph "
             "returns follow the same rule, with dependents included in the total. "
             "HI filers claimable as another's dependent, whose total falls below "
