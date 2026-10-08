@@ -694,6 +694,10 @@ WI_SCENARIOS = [
 ]
 
 VT_SCENARIOS = [
+    # Federal windows: unverified legacy, unchanged. The legacy state windows
+    # omitted the IN-111 Line 5e exemption and were retired in b72.19. A state
+    # window is kept only where the blind derivation in
+    # docs/validation/state-fixtures/VT-2024-2025.md covers the same return.
     {
         "year": 2024,
         "state": "VT",
@@ -701,8 +705,6 @@ VT_SCENARIOS = [
         "w2_income": 75000,
         "expected_federal_min": 8000,
         "expected_federal_max": 8500,
-        "expected_state_min": 2800,
-        "expected_state_max": 3000,
     },
     {
         "year": 2024,
@@ -711,8 +713,11 @@ VT_SCENARIOS = [
         "w2_income": 150000,
         "expected_federal_min": 25000,
         "expected_federal_max": 26000,
-        "expected_state_min": 8000,
-        "expected_state_max": 8200,
+        # Blind derivation scenario 7: TI 137,500, Schedule X -> $7,733. The
+        # graph is unrounded; +/- $1 for published-base and whole-dollar
+        # rounding (tenforty-b72.42).
+        "expected_state_min": 7733 - 1.0,
+        "expected_state_max": 7733 + 1.0,
     },
     {
         "year": 2024,
@@ -721,8 +726,6 @@ VT_SCENARIOS = [
         "w2_income": 200000,
         "expected_federal_min": 27000,
         "expected_federal_max": 28000,
-        "expected_state_min": 9500,
-        "expected_state_max": 9700,
     },
 ]
 

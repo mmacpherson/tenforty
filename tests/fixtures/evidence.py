@@ -38,6 +38,12 @@ CA_EVIDENCE = independent_state_evidence("CA-2024.md")
 MS_EVIDENCE = independent_state_evidence("MS-2024-2025.md")
 VT_EVIDENCE = independent_state_evidence("VT-2024-2025.md")
 WI_EVIDENCE = independent_state_evidence("WI-2024-2025.md")
+VT_EXEMPTION_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/VT-2024-2025.md",
+    "Blind Claude subagent, 2026-10-07; VT Department of Taxes PDFs and "
+    "32 V.S.A. only, no repository access or software output (tenforty-b72.19)",
+)
 NJ_VA_EVIDENCE = TaxEvidence(
     EvidenceKind.INDEPENDENT,
     "docs/validation/state-fixtures/NJ-VA-2024-2025.md",

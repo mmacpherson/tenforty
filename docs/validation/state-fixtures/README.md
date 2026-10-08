@@ -13,6 +13,7 @@ Their inputs and federal expectations are unchanged.
 | New CA whole returns | Independent derivation, including table lookups | [CA 2024](CA-2024.md) |
 | New MS whole returns | Independent derivation | [MS 2024–2025](MS-2024-2025.md) |
 | New VT whole returns | Independent derivation, including table lookups | [VT 2024–2025](VT-2024-2025.md) |
+| VT Line 5 exemption returns, 16 wage-only cases incl. MFS/QW/dependents (b72.19) | Independent derivation, including table lookups; second blind deriver, 2026-10-07 | Same VT record, second section |
 | VT parameter assertions | Published table rows / instruction amounts | Same VT record; parameters are not whole-return examples |
 | New WI whole returns | Independent derivation, including table lookups | [WI 2024–2025](WI-2024-2025.md) |
 | WI Smiths, taxable income $28,653 | Published worked example | Same WI record; distinguish the derived $28,650 midpoint check |

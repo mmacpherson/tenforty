@@ -791,8 +791,14 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     OTSState.VT: StateGraphConfig(
         # VT Form IN-111 imports federal AGI and applies additions/subtractions.
         # Itemized deductions are accepted as dollar-amount input.
+        # Line 5 exemptions ($5,100 2024 / $5,300 2025 each): the spec derives
+        # yourself plus a spouse only for MFJ (not MFS or QW). Dependents enter
+        # through dependent_exemptions, TOTAL dollars including that base, not
+        # additional dollars; the spec takes the greater. num_dependents stays
+        # unmapped: the federal graph would silently ignore it (tenforty-aqx.4.1.6).
         natural_to_node={
             "itemized_deductions": "vt_in111_L6_vt_itemized_deductions",
+            "dependent_exemptions": "vt_in111_L5e_personal_exemptions",
         },
         outputs={
             "state_adjusted_gross_income": "L4_vt_agi",
