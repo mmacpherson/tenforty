@@ -77,19 +77,23 @@ def test_worked_example_exact_tax_is_within_the_table_row(year):
 
 @pytest.mark.requires_graph
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("filing_status", ["Single", "Married/Joint"])
+@pytest.mark.parametrize("filing_status", ["single", "married_joint"])
 def test_each_dependent_adds_a_700_exemption(year, filing_status):
-    """num_dependents reaches Form 1 line 10a at $700 each (Wis. Stat. 71.05(23))."""
+    """Form 1 line 38 dependents reach line 10a at $700 each (Wis. Stat. 71.05(23)).
 
-    def wi_taxable_income(num_dependents: int) -> float:
-        return tenforty.evaluate_return(
-            year=year,
-            state="WI",
-            filing_status=filing_status,
-            w2_income=80000.0,
-            num_dependents=num_dependents,
-            backend="graph",
-        ).state_taxable_income
+    Through the raw graph: the natural API refuses nonzero num_dependents until the
+    federal return reads it too (tenforty-aqx.4.1.6).
+    """
+    from tenforty.backends.graph import _load_resolved_graph
+    from tenforty.graphlib import FilingStatus, Runtime
+
+    def wi_taxable_income(dependents: int) -> float:
+        evaluator = Runtime(
+            _load_resolved_graph(year), FilingStatus.from_str(filing_status)
+        )
+        evaluator.set("us_1040_L1a_wages", 80000.0)
+        evaluator.set("wi_form1_L38_dependents", float(dependents))
+        return evaluator.eval("wi_form1_L39_wi_taxable_income")
 
     assert wi_taxable_income(0) - wi_taxable_income(3) == pytest.approx(2100.0)
 
