@@ -324,9 +324,13 @@ class TaxReturnInput(BaseModel):
         description=(
             "State exemption dollars, not a dependent count. For NJ, VA, and LA "
             "2024 graph returns, this is the total including the mandatory personal "
-            "and spouse baseline, not additional-only dollars. The effective total "
-            "is max(baseline, explicit total); an omitted or below-baseline amount "
-            "receives the baseline. Other state/year and backend support varies."
+            "and spouse baseline, not additional-only dollars; HI 2024-2025 graph "
+            "returns follow the same rule, with dependents included in the total. "
+            "HI filers claimable as another's dependent, whose total falls below "
+            "the baseline, are unsupported. The effective "
+            "total is max(baseline, explicit total); an omitted or below-baseline "
+            "amount receives the baseline. Other state/year and backend support "
+            "varies."
         ),
     )
 
