@@ -44,6 +44,12 @@ NJ_VA_EVIDENCE = TaxEvidence(
     "Fresh-context blind deriver, 2026-10-02; official PDFs only, "
     "no repository access or software output; coordinated by Claude",
 )
+KS_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/KS-2024-2025.md",
+    "Fresh-context blind deriver, 2026-10-07; KDOR booklets, notices and "
+    "K.S.A. text only, no repository access or software output",
+)
 MD_EVIDENCE = TaxEvidence(
     EvidenceKind.INDEPENDENT,
     "docs/validation/state-fixtures/MD-2024-2025.md",

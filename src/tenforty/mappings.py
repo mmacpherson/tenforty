@@ -396,12 +396,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.KS: StateGraphConfig(
         # KS K-40 imports federal AGI and applies Kansas modifications.
-        # Standard deduction auto-computed by filing status (Single: $3,605, MFJ: $8,240,
-        # MFS: $4,120, HoH: $6,180). Personal exemptions: MFJ $18,320, others $9,160.
-        # Dependent exemption: $2,320 per dependent. Exemptions accepted as total input
-        # (num_dependents cannot map to dollar amounts due to natural_to_node limitation).
-        # Uses 2-bracket progressive tax: 5.2% up to $23,000 (Single/MFS/HoH) or $46,000 (MFJ),
-        # then 5.58% on income above those thresholds.
+        # Federal QW files as Kansas HoH. Standard deduction by status (Single
+        # $3,605, MFJ $8,240, MFS $4,120, HoH/QW $6,180). The spec derives the
+        # line-5 base: MFJ $18,320, others $9,160, plus $2,320 for HoH/QW.
+        # dependent_exemptions is the TOTAL line-5 allowance including that base
+        # ($2,320 per dependent on top), not a count or additional dollars; the
+        # spec takes max(base, explicit total). Uses 2-bracket progressive tax:
+        # 5.2% up to $23,000 (Single/MFS/HoH/QW) or $46,000 (MFJ), then 5.58%.
         natural_to_node={
             "itemized_deductions": "ks_k40_L4_itemized",
             "dependent_exemptions": "ks_k40_L5_total_exemptions",

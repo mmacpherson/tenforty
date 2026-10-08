@@ -33,9 +33,19 @@ ksFormK40_2025 = form "ks_k40" 2025 $ do
   l4 <- interior "L4" "deduction" $ greaterOf itemized stdDed
 
   -- Line 5: Exemption allowance
-  -- Note: In the DSL, we accept total exemption allowance as input since the
-  -- natural_to_node limitation prevents computing from num_dependents
-  l5 <- keyInput "L5" "total_exemptions" "Total Kansas exemption allowance"
+  -- K.S.A. 79-32,121b and K-40 instructions p.6: $18,320 joint, $9,160 other
+  -- statuses, plus $2,320 for Kansas Head of Household (federal HoH and QW).
+  -- The explicit input is the TOTAL allowance including that base (dependents
+  -- at $2,320 each are added by the caller); the effective allowance is the
+  -- greater of the two, so a default-zero input neither omits the base nor
+  -- counts it twice.
+  exemptionTotal <- keyInput "L5" "total_exemptions" "Total Kansas exemption allowance including the status base"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit ksPersonalExemption2025) .+. byStatusE (fmap lit ksHeadOfHouseholdExemption2025)
+  l5 <-
+    interior "L5_total" "total_exemption_allowance" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Line 6: Total deductions
   l6 <-
