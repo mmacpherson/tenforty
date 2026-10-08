@@ -12,6 +12,8 @@ module TablesMD2024
 
     -- * Personal Exemption
     mdPersonalExemption2024,
+    mdExemptionChartSingle2024,
+    mdExemptionChartJoint2024,
   )
 where
 
@@ -80,3 +82,17 @@ mdStandardDeductionMax2024 = 2700
 -- Note: This exemption is phased out for high earners ($100k single, $150k joint)
 mdPersonalExemption2024 :: Amount Dollars
 mdPersonalExemption2024 = 3200
+
+-- | Exemption Amount Chart (10A), "Single or Married Filing Separately" column:
+-- each exemption's amount once FEDERAL AGI is "Over" the threshold, in
+-- ascending order; $3,200 at $100,000 or less. The $1,000 age/blind
+-- exemption is not reduced.
+-- Source: 2024 MD resident booklet, Instruction 10, PDF p. 12.
+mdExemptionChartSingle2024 :: [(Amount Dollars, Amount Dollars)]
+mdExemptionChartSingle2024 = [(100000, 1600), (125000, 800), (150000, 0)]
+
+-- | Exemption Amount Chart (10A), "Joint, Head of Household, or Qualifying
+-- Surviving Spouse" column; $3,200 at $150,000 or less.
+-- Source: 2024 MD resident booklet, Instruction 10, PDF p. 12.
+mdExemptionChartJoint2024 :: [(Amount Dollars, Amount Dollars)]
+mdExemptionChartJoint2024 = [(150000, 1600), (175000, 800), (200000, 0)]

@@ -23,6 +23,10 @@ Their inputs and federal expectations are unchanged.
 | LA 2024 line 10, in-table W-2 cases (x08) | Published table rows; **not blind** | [LA 2024](LA-2024.md) |
 | LA 2024 line 10, above-table cases (x08) | Unverified legacy: continuation rule plus rounding, derived non-blind | Same LA record |
 | NJ/VA 2024–2025, nine wage-only returns | Independent derivation; official PDFs only, no repository access or software output | [NJ/VA 2024–2025](NJ-VA-2024-2025.md) |
+| MD 2024–2025, twenty wage-only returns and Chart 10A rows | Independent derivation (blind, 2026-10-07); Chart 10A rows are published table rows | [MD 2024–2025](MD-2024-2025.md) |
+| ME 2024–2025, eighteen wage-only returns (b72.36, 2026-10-07; the five legacy ME rows keep only their federal checks, as unverified legacy) | Independent derivation; line 20 below $100k is a published table row (either method is legal) | [ME 2024–2025](ME-2024-2025.md) |
+| IN 2024–2025, sixteen wage-only returns | Independent derivation; Indiana DOR PDFs only, no repository access or software output (2026-10-07) | [IN 2024–2025](IN-2024-2025.md) |
+| HI 2024–2025, fourteen wage-only returns (b72.33) | Independent derivation of taxable income; tax from published table rows below $100,000 and the statutory schedule above. Blind deriver used official PDFs only | [HI 2024–2025](HI-2024-2025.md) |
 
 For the two VA joint cases, wages are attributed entirely to the primary filer,
 so the official Spouse Tax Adjustment is zero. The simplified graph's

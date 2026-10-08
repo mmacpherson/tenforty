@@ -11,6 +11,8 @@ module TablesMD2025
 
     -- * Personal Exemption
     mdPersonalExemption2025,
+    mdExemptionChartSingle2025,
+    mdExemptionChartJoint2025,
   )
 where
 
@@ -82,3 +84,17 @@ mdStandardDeductionJoint2025 = 6700
 -- The exemption amount remains $3,200 per person, subject to phase-out at high income
 mdPersonalExemption2025 :: Amount Dollars
 mdPersonalExemption2025 = 3200
+
+-- | Exemption Amount Chart (10A), "Single or Married Filing Separately" column:
+-- each exemption's amount once FEDERAL AGI is "Over" the threshold, in
+-- ascending order; $3,200 at $100,000 or less. The $1,000 age/blind
+-- exemption is not reduced.
+-- Source: 2025 MD resident booklet, Instruction 10, PDF p. 12.
+mdExemptionChartSingle2025 :: [(Amount Dollars, Amount Dollars)]
+mdExemptionChartSingle2025 = [(100000, 1600), (125000, 800), (150000, 0)]
+
+-- | Exemption Amount Chart (10A), "Joint, Head of Household, or Qualifying
+-- Surviving Spouse" column; $3,200 at $150,000 or less.
+-- Source: 2025 MD resident booklet, Instruction 10, PDF p. 12.
+mdExemptionChartJoint2025 :: [(Amount Dollars, Amount Dollars)]
+mdExemptionChartJoint2025 = [(150000, 1600), (175000, 800), (200000, 0)]
