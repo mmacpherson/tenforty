@@ -50,10 +50,34 @@ moForm1040_2024 = form "mo_1040" 2024 $ do
     keyOutput "L16" "mo_agi" "Missouri adjusted gross income" $
       l7 `subtractNotBelowZero` l15
 
-  -- Line 17: Federal income tax deduction
-  -- Missouri allows a deduction for federal taxes paid, based on MO AGI
-  -- This is accepted as input since it requires complex federal tax computation
-  l17 <- keyInput "L17" "federal_tax_deduction" "Federal income tax deduction"
+  -- Line 17 (official MO-1040 lines 9-13): federal income tax deduction.
+  -- Source: MO-1040 Instructions 2024, pp.7-8 (lines 9, 12, 13), RSMo 143.171.
+  -- Line 9 is federal 1040 line 22 minus the earned income credit (line 27)
+  -- and the refundable AOTC (line 29); the additional child tax credit is not
+  -- subtracted. 1040 line 29 is Form 8863 line 9, imported from 8863 directly
+  -- because the resolver follows an import only one hop, so an import of an
+  -- output that is itself an import dangles (tenforty-0ms.3). DOR's fillable
+  -- MO-1040 refuses a negative line 9, so it is floored at 0. Line 10 (other
+  -- federal taxes) is not modelled.
+  fedTaxForDeduction <-
+    interior "L17_federal_tax" "federal_tax_for_deduction" $
+      importForm us1040L22
+        `subtractNotBelowZero` (importForm us1040L27 .+. importForm usForm8863L9)
+  -- Line 12: percentage keyed to total Missouri AGI (line 6, here L16):
+  -- \$25,000 or less 35%; $25,001-$50,000 25%; $50,001-$100,000 15%;
+  -- \$100,001-$125,000 5%; $125,001 or more 0%.
+  let federalTaxPercentage =
+        ifPos (l16 .-. dollars 125000) (percent 0) $
+          ifPos (l16 .-. dollars 100000) (percent 5) $
+            ifPos (l16 .-. dollars 50000) (percent 15) $
+              ifPos (l16 .-. dollars 25000) (percent 25) (percent 35)
+  -- Line 13: capped at $10,000 married filing combined, $5,000 otherwise.
+  -- The form enters it in whole dollars; this is unrounded (tenforty-b72.42).
+  l17 <-
+    interior "L17" "federal_tax_deduction" $
+      smallerOf
+        (fedTaxForDeduction .*. federalTaxPercentage)
+        (byStatusE (fmap lit moFederalTaxDeductionCap2024))
 
   -- Line 18: Missouri AGI minus federal tax deduction
   l18 <-

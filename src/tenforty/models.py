@@ -322,15 +322,24 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. For NJ, VA, VT, and "
-            "LA 2024 graph returns, this is the total including the mandatory "
-            "personal and spouse baseline, not additional-only dollars. For VT it "
-            "must also include dependents' exemptions; num_dependents is not "
-            "mapped there. VT returns where the filer or either spouse can be "
-            "claimed as someone else's dependent, which lowers the total below "
-            "that baseline, are unsupported. The effective total is "
-            "max(baseline, explicit total); "
-            "an omitted or below-baseline amount receives the baseline. Other "
+            "State exemption dollars, not a dependent count. For NJ, VA, HI, IN, KS, "
+            "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
+            "mandatory personal and spouse baseline (and KS's head-of-household "
+            "extra), not additional-only dollars. The effective total is "
+            "max(baseline, explicit total); an omitted or below-baseline amount "
+            "receives the baseline. For HI, IN, MD and VT the total must include "
+            "dependents' exemptions; num_dependents is not mapped there. For ME the "
+            "explicit total is the pre-phase-out amount (worksheet line 6); the graph "
+            "then applies the income phase-out, so do not pass an already-phased "
+            "figure. For MD the baseline follows the Chart 10A federal-AGI tiers. An "
+            "explicit MD total is the final Form 502 Line 19 amount after Chart 10A: "
+            "the caller tiers the taxpayer, spouse and dependent amounts by federal "
+            "AGI before supplying it, and adds any $1,000 age/blind exemptions "
+            "unreduced. The library does not reduce an explicit total again, so the "
+            "caller must recompute it whenever federal AGI changes. HI, ME and VT "
+            "returns where the filer or spouse can be claimed as another's dependent "
+            "(a total below the baseline) are unsupported. Maryland "
+            "dependent-taxpayer filers, whose exemption is $0, are unsupported. Other "
             "state/year and backend support varies."
         ),
     )

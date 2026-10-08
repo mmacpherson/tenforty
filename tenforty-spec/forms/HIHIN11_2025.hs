@@ -59,9 +59,25 @@ hihiN11_2025 = form "hi_n11" 2025 $ do
     interior "L23" "hi_agi_minus_deductions" $
       l18 `subtractNotBelowZero` l22
 
-  -- Line 24: Exemptions ($1,144 per exemption)
-  -- User provides the total exemption amount (num_exemptions * $1,144)
-  l24 <- keyInput "L24" "total_exemptions" "Total exemptions"
+  -- Line 24 (official line 25): $1,144 per exemption claimed on line 6e.
+  -- N-11 instructions, p.9 lines 6a-6b and p.20 line 25: the derived base is
+  -- one exemption for yourself and one for a spouse on a joint return; no
+  -- phase-out. Dependents (6c/6d), the MFS spouse and age-65 exemptions enter
+  -- only through the explicit TOTAL, which includes this base; do not add the
+  -- base twice. num_dependents is not read here (tenforty-aqx.4.1.6). A
+  -- disability exemption total ($7,000+) always exceeds the base, so max()
+  -- represents it. Claimable-dependent returns are unsupported because the
+  -- inputs carry no claimable status (p.9). A claimable filer, or a claimable
+  -- spouse when the filer is under 65, needs a total below the base, which
+  -- max() cannot express; a claimable spouse with a filer 65+ totals $2,288,
+  -- which only coincides with the MFJ base.
+  exemptionTotal <- keyInput "L24" "total_exemptions" "Total exemption dollars including yourself/spouse/dependents"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit (byStatus hiPersonalExemption2025 (2 * hiPersonalExemption2025) hiPersonalExemption2025 hiPersonalExemption2025 hiPersonalExemption2025))
+  l24 <-
+    interior "L24_total" "total_exemptions_claimed" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Line 25: Hawaii taxable income
   _l25 <-

@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "1ef666769c75e6528a17a9718c70fbd29f1cca3c35baa8f420021f2eb9b548d9"
+        "sha256": "a71707222f731c48c62d8163c684c2da5cfde4b31a2b962d7ce4ff2f4334140f"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "15eaf79b1b12130e4f38977db09348736eacb3e54a432f81be4bd36be91c0d4f"
+        "sha256": "2bba8d83bceb39058e350843d36d73856ea6f1dd677c9b948dda0b0777bb7625"
       }
     }
   },
@@ -702,12 +702,12 @@
         "2024": {
           "state_adjusted_gross_income": "in_it40_L7_in_agi",
           "state_taxable_income": "in_it40_L7_in_agi",
-          "state_total_tax": "in_it40_L9_in_state_tax"
+          "state_total_tax": "in_it40_L8_in_state_tax"
         },
         "2025": {
           "state_adjusted_gross_income": "in_it40_L7_in_agi",
           "state_taxable_income": "in_it40_L7_in_agi",
-          "state_total_tax": "in_it40_L9_in_state_tax"
+          "state_total_tax": "in_it40_L8_in_state_tax"
         }
       },
       "unsupported_inputs": {

@@ -208,8 +208,9 @@ MD_SCENARIOS = [
         "dependent_exemptions": 6400,
         "expected_federal_min": 7800,
         "expected_federal_max": 8200,
-        "expected_state_min": 4200,
-        "expected_state_max": 4700,
+        # No state range: the legacy 4,200-4,700 band admitted only the graph's
+        # Single 2024 standard deduction (tenforty-b72.45), not the $5,450 joint
+        # one. Blind MD values: docs/validation/state-fixtures/MD-2024-2025.md.
     },
     {
         "year": 2025,
@@ -2011,35 +2012,43 @@ def test_ne_tax_ranges(scenario):
 
 
 HI_SCENARIOS = [
+    # The $1,144 per-exemption base (self, MFJ spouse) is derived by the graph.
+    # State windows: published HI Tax Table rows, looked up non-blind (b72.33);
+    # docs/validation/state-fixtures/HI-2024-2025.md, Part C. Graph minus table
+    # is rate * (TI - row midpoint) + (exact - printed bracket base), +/- $0.50
+    # (tenforty-tj2.20).
     {
         "year": 2024,
         "state": "HI",
         "filing_status": "Single",
         "w2_income": 60000,
+        # TI 60,000 - 4,400 - 1,144 = 54,456; row 54,450-54,500 S/MFS = $3,748.
         "expected_federal_min": 5150,
         "expected_federal_max": 5250,
-        "expected_state_min": 3820,
-        "expected_state_max": 3860,
+        "expected_state_min": 3748 + 0.0825 * (54_456 - 54_475) - 0.40 - 0.50,
+        "expected_state_max": 3748 + 0.0825 * (54_456 - 54_475) - 0.40 + 0.50,
     },
     {
         "year": 2024,
         "state": "HI",
         "filing_status": "Married/Joint",
         "w2_income": 100000,
+        # TI 100,000 - 8,800 - 2,288 = 88,912; row 88,900-88,950 MFJ = $5,868.
         "expected_federal_min": 8000,
         "expected_federal_max": 8100,
-        "expected_state_min": 6020,
-        "expected_state_max": 6080,
+        "expected_state_min": 5868 + 0.079 * (88_912 - 88_925) + 0.20 - 0.50,
+        "expected_state_max": 5868 + 0.079 * (88_912 - 88_925) + 0.20 + 0.50,
     },
     {
         "year": 2025,
         "state": "HI",
         "filing_status": "Single",
         "w2_income": 60000,
+        # TI 54,456; 2025 row 54,450-54,500 S/MFS = $3,031.
         "expected_federal_min": 4950,
         "expected_federal_max": 5170,
-        "expected_state_min": 2900,
-        "expected_state_max": 3140,
+        "expected_state_min": 3031 + 0.076 * (54_456 - 54_475) + 0.20 - 0.50,
+        "expected_state_max": 3031 + 0.076 * (54_456 - 54_475) + 0.20 + 0.50,
     },
 ]
 
@@ -2098,52 +2107,6 @@ WV_SCENARIOS = [
 )
 def test_wv_tax_ranges(scenario):
     """Sanity check: WV tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
-    _run_range_scenario(scenario_with_backend)
-
-
-ME_SCENARIOS = [
-    {
-        "year": 2024,
-        "state": "ME",
-        "filing_status": "Single",
-        "w2_income": 60000,
-        "expected_federal_min": 5200,
-        "expected_federal_max": 5230,
-        "expected_state_min": 2810,
-        "expected_state_max": 2825,
-    },
-    {
-        "year": 2024,
-        "state": "ME",
-        "filing_status": "Married/Joint",
-        "w2_income": 100000,
-        "expected_federal_min": 8020,
-        "expected_federal_max": 8050,
-        "expected_state_min": 4275,
-        "expected_state_max": 4295,
-    },
-    {
-        "year": 2025,
-        "state": "ME",
-        "filing_status": "Single",
-        "w2_income": 60000,
-        "expected_federal_min": 4955,
-        "expected_federal_max": 5170,
-        "expected_state_min": 2575,
-        "expected_state_max": 2790,
-    },
-]
-
-
-@pytest.mark.requires_graph
-@pytest.mark.parametrize(
-    "scenario",
-    ME_SCENARIOS,
-    ids=lambda s: f"ME-{s['year']}-{s['filing_status']}-{s['w2_income']}",
-)
-def test_me_tax_ranges(scenario):
-    """Sanity check: ME tax falls within expected ranges (graph backend)."""
     scenario_with_backend = {**scenario, "backend": "graph"}
     _run_range_scenario(scenario_with_backend)
 

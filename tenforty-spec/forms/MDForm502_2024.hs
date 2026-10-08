@@ -18,6 +18,12 @@ mdForm502_2024 = form "md_502" 2024 $ do
   let federalAgi = importForm us1040L11
   l1 <- keyOutput "L1" "federal_agi" "Federal adjusted gross income" federalAgi
 
+  -- Chart 10A step: the amount for the highest threshold federal AGI is over.
+  let chartStep =
+        foldl'
+          (\below (over, amount) -> ifPos (l1 .-. lit over) (lit amount) below)
+          (lit mdPersonalExemption2024)
+
   -- Lines 2-12: Maryland additions to income
   l2 <- keyInput "L2" "md_addition_state_tax_refund" "State income tax refund"
   l3 <- keyInput "L3" "md_addition_interest" "Interest from non-MD state/local bonds"
@@ -96,10 +102,31 @@ mdForm502_2024 = form "md_502" 2024 $ do
     interior "L18" "md_agi_minus_deductions" $
       l16 `subtractNotBelowZero` l17
 
-  -- Line 19: Personal exemptions
-  -- Exemption is $3,200 per person, subject to phase-out at high income
-  -- For simplicity, accept total exemption as input (phase-out is complex)
-  l19 <- keyInput "L19" "personal_exemptions" "Personal exemptions"
+  -- Line 19: Exemptions
+  -- 2024 MD resident booklet, Instruction 10 and Chart 10A, PDF p. 12: each
+  -- exemption is $3,200, stepped down by FEDERAL AGI (Line 1) past $100,000
+  -- (Single/MFS) or $150,000 (Joint/HoH/QSS). Each spouse claims their own
+  -- exemption on separate returns (Instruction 8), and QSS has no spouse
+  -- exemption, so only a joint return carries two. The explicit input is
+  -- TOTAL Line 19 dollars (dependents and age/blind included, after the
+  -- chart), so it substitutes for the derived base rather than adding to it.
+  -- Dependent taxpayers (status 6, $0) are not modelled.
+  exemptionTotal <- keyInput "L19" "personal_exemptions" "Total exemption dollars including taxpayer/spouse"
+  perExemption <-
+    interior "ExemptionPerPerson" "exemption_per_person" $
+      byStatusE $
+        byStatus
+          (chartStep mdExemptionChartSingle2024)
+          (chartStep mdExemptionChartJoint2024)
+          (chartStep mdExemptionChartSingle2024)
+          (chartStep mdExemptionChartJoint2024)
+          (chartStep mdExemptionChartJoint2024)
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (byStatus perExemption (perExemption .+. perExemption) perExemption perExemption perExemption)
+  l19 <-
+    interior "L19_total" "total_exemptions" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Line 20: Maryland taxable net income
   l20 <-

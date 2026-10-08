@@ -314,8 +314,15 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.HI: StateGraphConfig(
         # HI Form N-11 imports federal AGI and applies additions/subtractions.
-        # Personal exemptions are $1,144 per exemption and are accepted as total
-        # dollar input (num_dependents cannot map to dollar amounts).
+        # The spec derives $1,144 for the filer and the spouse on a joint return.
+        # dependent_exemptions is TOTAL dollars including that base, and carries
+        # dependents, the MFS spouse, age-65 and disability exemptions; the spec
+        # takes max(base, explicit total). num_dependents is deliberately not
+        # mapped (tenforty-aqx.4.1.6). Claimable-dependent returns are
+        # unsupported because claimable status is not an input. A claimable
+        # filer, or a claimable spouse when the filer is under 65, needs a total
+        # below the base; a claimable spouse with a filer 65+ only coincides
+        # with the base ($2,288).
         # 2024 has 12 brackets (1.4%-11%), 2025 brackets widened under GAP II
         # (Green Affordability Plan II, Act 46 SLH 2024).
         natural_to_node={
@@ -367,26 +374,35 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.IN: StateGraphConfig(
         # IN IT-40 imports federal AGI and applies add-backs/deductions.
-        # Exemptions are accepted as total input (num_dependents cannot map to
-        # dollar amounts due to natural_to_node limitation).
+        # The spec derives the Schedule 3 line 1 base: $2,000 MFJ, $1,000 for
+        # every other status. dependent_exemptions is TOTAL Schedule 3 line 7
+        # dollars including that base, not a count or additional dollars; the
+        # spec takes max(base, explicit total). num_dependents stays unmapped:
+        # Indiana's $1,000 per dependent and $1,500 (or first-year $3,000) per
+        # qualifying child are distinct tests one count cannot express
+        # (tenforty-avr.1), so callers supply those dollars in the total.
         # IT-40 line 7, Indiana adjusted gross income, is also the income the
         # flat state rate applies to (line 8 = line 7 x 3.05% in 2024): Indiana
-        # has no separate taxable-income line.
-        natural_to_node={},
+        # has no separate taxable-income line. state_total_tax is line 8, the
+        # state AGI tax only; line 9 county tax (Schedule CT-40) is excluded.
+        natural_to_node={
+            "dependent_exemptions": "in_it40_L6_exemption_amount",
+        },
         outputs={
             "state_adjusted_gross_income": "L7_in_agi",
             "state_taxable_income": "L7_in_agi",
-            "state_total_tax": "L9_in_state_tax",
+            "state_total_tax": "L8_in_state_tax",
         },
     ),
     OTSState.KS: StateGraphConfig(
         # KS K-40 imports federal AGI and applies Kansas modifications.
-        # Standard deduction auto-computed by filing status (Single: $3,605, MFJ: $8,240,
-        # MFS: $4,120, HoH: $6,180). Personal exemptions: MFJ $18,320, others $9,160.
-        # Dependent exemption: $2,320 per dependent. Exemptions accepted as total input
-        # (num_dependents cannot map to dollar amounts due to natural_to_node limitation).
-        # Uses 2-bracket progressive tax: 5.2% up to $23,000 (Single/MFS/HoH) or $46,000 (MFJ),
-        # then 5.58% on income above those thresholds.
+        # Federal QW files as Kansas HoH. Standard deduction by status (Single
+        # $3,605, MFJ $8,240, MFS $4,120, HoH/QW $6,180). The spec derives the
+        # line-5 base: MFJ $18,320, others $9,160, plus $2,320 for HoH/QW.
+        # dependent_exemptions is the TOTAL line-5 allowance including that base
+        # ($2,320 per dependent on top), not a count or additional dollars; the
+        # spec takes max(base, explicit total). Uses 2-bracket progressive tax:
+        # 5.2% up to $23,000 (Single/MFS/HoH/QW) or $46,000 (MFJ), then 5.58%.
         natural_to_node={
             "itemized_deductions": "ks_k40_L4_itemized",
             "dependent_exemptions": "ks_k40_L5_total_exemptions",
@@ -468,8 +484,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.MD: StateGraphConfig(
         # MD Form 502 imports federal AGI and applies Maryland-specific
-        # additions/subtractions. Deductions (standard or itemized) and personal
-        # exemptions are accepted as total input. Maryland uses a progressive
+        # additions/subtractions. The spec derives the taxpayer (and joint
+        # spouse) exemption from Chart 10A, stepped down by federal AGI.
+        # dependent_exemptions is the Line 19 TOTAL in dollars after that
+        # reduction (dependents and age/blind included), not a count or
+        # additional dollars; the spec takes max(base, explicit total).
+        # Itemized deductions are an input. Maryland uses a progressive
         # bracket system with two different schedules: Schedule I (Single/MFS/Dep)
         # and Schedule II (MFJ/HoH/QSS).
         natural_to_node={
@@ -484,11 +504,14 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.ME: StateGraphConfig(
         # ME Form 1040ME imports federal AGI and applies Maine-specific
-        # additions/subtractions. Deductions (standard or itemized) and personal
-        # exemptions are accepted as total input. Maine uses a progressive
-        # three-bracket system (5.8%, 6.75%, 7.15%) with COLA-adjusted thresholds.
-        # 2024: personal exemption $5,000; 2025: $5,150 (COLA 1.25).
-        # Standard deductions equal federal amounts.
+        # additions/subtractions. Maine uses a progressive three-bracket system
+        # (5.8%, 6.75%, 7.15%) with COLA-adjusted thresholds. The spec derives the
+        # personal exemption ($5,000 2024 / $5,150 2025; one, or two on a joint
+        # return) and phases it out on Maine AGI. dependent_exemptions is TOTAL
+        # pre-phase-out dollars including that base, not additional dollars; the
+        # spec takes max(base, explicit total) and then applies the phase-out.
+        # Dependents earn a credit, not an exemption. Returns where the filer or
+        # spouse can be claimed as a dependent are unsupported (tenforty-avr.3).
         natural_to_node={
             "itemized_deductions": "me_1040me_L17_itemized",
             "dependent_exemptions": "me_1040me_L21_total_exemptions",

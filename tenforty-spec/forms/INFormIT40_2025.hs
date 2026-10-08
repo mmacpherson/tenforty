@@ -33,28 +33,37 @@ inFormIT40_2025 = form "in_it40" 2025 $ do
     interior "L5" "income_after_deductions" $
       l3 `subtractNotBelowZero` l4
 
-  -- Line 6: Indiana exemptions (from Schedule 3)
-  -- Note: In the DSL, we accept total exemption amount as input since the
-  -- natural_to_node limitation prevents computing from num_dependents
-  l6 <- keyInput "L6" "exemption_amount" "Total exemption amount"
+  -- Line 6: Schedule 3 line 7. Schedule 3 line 1 is $2,000 MFJ, $1,000 for
+  -- all other filers (https://forms.in.gov/Download.aspx?id=16936; booklet
+  -- https://forms.in.gov/Download.aspx?id=16915, printed p.24). The input is the
+  -- TOTAL of Schedule 3 lines 1-6 including that base; do not add it twice.
+  -- Dependent, child, 65+/blind and adopted-child amounts stay explicit.
+  exemptionTotal <- keyInput "L6" "exemption_amount" "Total exemption dollars including taxpayer/spouse"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit (byStatus inPersonalExemption2025 (2 * inPersonalExemption2025) inPersonalExemption2025 inPersonalExemption2025 inPersonalExemption2025))
+  l6 <-
+    interior "L6_total" "total_exemptions" $
+      greaterOf mandatoryExemptions exemptionTotal
 
   -- Line 7: Indiana Adjusted Gross Income
   l7 <-
     keyOutput "L7" "in_agi" "Indiana adjusted gross income" $
       l5 `subtractNotBelowZero` l6
 
-  -- Line 8: Indiana county tax (pre-calculated)
-  l8 <- keyInput "L8" "county_tax" "Indiana county tax"
-
-  -- Line 9: Indiana state tax (3.00% of Line 7)
-  l9 <-
-    keyOutput "L9" "in_state_tax" "Indiana state tax" $
+  -- Line 8: State adjusted gross income tax, line 7 x 3%
+  -- (https://forms.in.gov/Download.aspx?id=16914, line 8).
+  l8 <-
+    keyOutput "L8" "in_state_tax" "Indiana state adjusted gross income tax" $
       l7 .*. rate inTaxRate2025
+
+  -- Line 9: County tax from Schedule CT-40 (pre-calculated)
+  l9 <- keyInput "L9" "county_tax" "Indiana county tax"
 
   -- Line 10: Total Indiana tax (state + county)
   l10 <-
     keyOutput "L10" "in_total_tax" "Total Indiana tax" $
-      l9 .+. l8
+      l8 .+. l9
 
   -- Line 11: Nonrefundable credits
   l11 <- keyInput "L11" "nonrefundable_credits" "Nonrefundable credits"
@@ -102,7 +111,7 @@ inFormIT40_2025 = form "in_it40" 2025 $ do
   outputs
     [ "L1",
       "L7",
-      "L9",
+      "L8",
       "L10",
       "L14",
       "L19",

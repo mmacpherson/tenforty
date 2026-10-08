@@ -5,6 +5,9 @@ module TablesMO2024
 
     -- * Standard Deduction
     moStandardDeduction2024,
+
+    -- * Federal Income Tax Deduction
+    moFederalTaxDeductionCap2024,
   )
 where
 
@@ -47,3 +50,13 @@ missouriBracketsTable2024 =
 -- Standard deductions match federal amounts: $14,600 (Single/MFS), $29,200 (MFJ)
 moStandardDeduction2024 :: ByStatus (Amount Dollars)
 moStandardDeduction2024 = byStatus 14600 29200 14600 21900 29200
+
+-- | 2024 cap on the Missouri federal income tax deduction (MO-1040 line 13)
+-- Order: Single, MFJ, MFS, HoH, QW
+-- Source: MO-1040 Instructions 2024, p.8, "Line 13 - Federal Income Tax Deduction":
+-- "If you selected any filing status other than married filing combined on the
+-- MO-1040, your federal tax deduction may not exceed $5,000. If you selected
+-- married filing combined, your federal tax cannot exceed $10,000."
+-- https://dor.mo.gov/forms/MO-1040%20Instructions_2024.pdf
+moFederalTaxDeductionCap2024 :: ByStatus (Amount Dollars)
+moFederalTaxDeductionCap2024 = byStatus 5000 10000 5000 5000 5000
