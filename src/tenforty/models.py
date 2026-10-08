@@ -327,7 +327,7 @@ class TaxReturnInput(BaseModel):
             "mandatory personal and spouse baseline (and KS's head-of-household "
             "extra), not additional-only dollars. The effective total is "
             "max(baseline, explicit total); an omitted or below-baseline amount "
-            "receives the baseline. For HI, IN, MD and VT the total must include "
+            "receives the baseline. For HI, IN, KS, MD and VT the total must include "
             "dependents' exemptions; num_dependents is not mapped there. For ME the "
             "explicit total is the pre-phase-out amount (worksheet line 6); the graph "
             "then applies the income phase-out, so do not pass an already-phased "
