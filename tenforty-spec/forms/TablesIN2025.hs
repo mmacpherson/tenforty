@@ -20,8 +20,6 @@ inTaxRate2025 = 0.03
 -- Personal exemption remains at $1,000 per exemption (personal, spouse, and each dependent).
 -- Additional exemptions of $1,500 are available for qualifying dependent children.
 -- Value unchanged from 2024.
---
--- Note: Not exported as the form spec accepts total exemptions as a dollar input (L6).
--- Kept for reference/validation purposes.
+-- Schedule 3 line 1: this amount for each filer; $2,000 on a joint return.
 inPersonalExemption2025 :: Amount Dollars
 inPersonalExemption2025 = 1000

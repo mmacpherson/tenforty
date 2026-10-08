@@ -50,6 +50,30 @@ KS_EVIDENCE = TaxEvidence(
     "Fresh-context blind deriver, 2026-10-07; KDOR booklets, notices and "
     "K.S.A. text only, no repository access or software output",
 )
+MD_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/MD-2024-2025.md",
+    "Blind Claude subagent, 2026-10-07; Comptroller of Maryland booklets and "
+    "Form 502 only, no repository access or software output",
+)
+ME_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/ME-2024-2025.md",
+    "Blind Claude subagent, 2026-10-07; Maine Revenue Services PDFs and "
+    "Maine statutes only, no repository access or software output",
+)
+IN_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/IN-2024-2025.md",
+    "Fresh-context blind deriver (Claude subagent), 2026-10-07; Indiana DOR "
+    "PDFs only, no repository access or software output",
+)
+HI_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/HI-2024-2025.md",
+    "Blind Claude subagent, 2026-10-07; official DOTAX PDFs only, "
+    "no repository access or software output; adjudicated by Claude (b72.33)",
+)
 LA_TABLE_EVIDENCE = TaxEvidence(
     EvidenceKind.TABLE_ROW,
     "docs/validation/state-fixtures/LA-2024.md",

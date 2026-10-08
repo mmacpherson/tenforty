@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_reviewed_state_derivations_are_explicit_and_durable():
-    """Keep all 97 independently derived silver cases visibly classified."""
+    """Keep all 165 independently derived silver cases visibly classified."""
     derived = [
         case
         for case in SILVER_STANDARD_STATE_SCENARIOS
@@ -26,6 +26,10 @@ def test_reviewed_state_derivations_are_explicit_and_durable():
         "NJ": 5,
         "VA": 4,
         "KS": 16,
+        "MD": 20,
+        "ME": 18,
+        "IN": 16,
+        "HI": 14,
     }
     for case in derived:
         evidence = case.state_evidence
@@ -37,6 +41,10 @@ def test_reviewed_state_derivations_are_explicit_and_durable():
             "NJ": "2026-10-02",
             "VA": "2026-10-02",
             "KS": "2026-10-07",
+            "MD": "2026-10-07",
+            "ME": "2026-10-07",
+            "IN": "2026-10-07",
+            "HI": "2026-10-07",
         }.get(case.state, "2026-09-30")
         assert derivation_date in record
         assert "independent-derivation" in scenario_id(case)
