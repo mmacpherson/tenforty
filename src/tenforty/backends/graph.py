@@ -107,6 +107,20 @@ def _lowered_input_nodes(
     return nodes
 
 
+# Naturals that federal law reads as well as some states. A nonzero value is
+# supported only when the federal graph reads it too: a state node alone would
+# let the federal return silently ignore it (num_dependents dropped the child
+# tax credit for CA and WI, tenforty-aqx.4.1.6).
+_FEDERAL_LAW_NATURALS = frozenset({"num_dependents"})
+
+
+def _reads_nonzero(natural_name: str, node_names: list[str]) -> bool:
+    """Whether every return that legally reads this natural is given its value."""
+    if natural_name in _FEDERAL_LAW_NATURALS and natural_name not in NATURAL_TO_NODES:
+        return False
+    return bool(node_names)
+
+
 @lru_cache(maxsize=4)
 def _graph_input_names(year: int) -> frozenset[str]:
     return frozenset(_load_resolved_graph(year).input_names())
@@ -133,8 +147,15 @@ def _require_input_nodes(
         )
 
 
+# OTS reads the federal Dependents count in every year but no federal
+# computation uses it, so mapping it is not support (tenforty-aqx.4.1.6).
+_OTS_IGNORED_NATURALS = frozenset({"num_dependents"})
+
+
 def _ots_maps_inputs(names: list[str], state: OTSState | None, year: int) -> bool:
     """Whether OTS computes this year's return for the state and reads every input."""
+    if any(name in _OTS_IGNORED_NATURALS for name in names):
+        return False
     forms = ["US_1040"]
     state_form = STATE_TO_FORM.get(state) if state is not None else None
     if state_form is not None:
@@ -251,7 +272,7 @@ class GraphBackend:
             _require_input_nodes(natural_name, node_names, tax_input.state, year)
             if value == 0 or value is None:
                 continue
-            if not node_names:
+            if not _reads_nonzero(natural_name, node_names):
                 unsupported.append((natural_name, value))
                 continue
             for node_name in node_names:
@@ -327,7 +348,9 @@ class GraphBackend:
 
         unsupported: list[tuple[str, object]] = []
         for natural_name, values in inputs.items():
-            if _lowered_input_nodes(natural_name, state, year):
+            if _reads_nonzero(
+                natural_name, _lowered_input_nodes(natural_name, state, year)
+            ):
                 continue
             sample = next((v for v in values if v not in (0, 0.0, None)), None)
             if sample is not None:
@@ -567,6 +590,12 @@ class GraphBackend:
             return [var]
 
         nodes = _lowered_input_nodes(var, tax_input.state, tax_input.year.value)
+        if var in _FEDERAL_LAW_NATURALS and not _reads_nonzero(var, nodes):
+            raise NotImplementedError(
+                f"Graph backend cannot vary {var}: the federal return does not "
+                "read it yet, so a derivative or solution would omit its federal "
+                "effect."
+            )
 
         for derived, source in DERIVED_NATURAL_SOURCES.items():
             if (

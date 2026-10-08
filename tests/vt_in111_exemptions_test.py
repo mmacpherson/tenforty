@@ -84,7 +84,7 @@ def test_taxable_income_subtracts_line_5e(year, status, count, dependents):
 def test_num_dependents_is_refused_not_dropped(year):
     """VT does not map num_dependents: the federal graph would ignore it.
 
-    Refusal is the contract until tenforty-aqx.4.1.6 wires dependents federally.
+    Refusal is the contract until the federal return reads dependents (tenforty-avr.1).
     """
     with pytest.raises(NotImplementedError, match="num_dependents"):
         evaluate_return(
