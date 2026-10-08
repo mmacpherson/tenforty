@@ -322,11 +322,17 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. For NJ, VA, and LA "
-            "2024 graph returns, this is the total including the mandatory personal "
-            "and spouse baseline, not additional-only dollars. The effective total "
-            "is max(baseline, explicit total); an omitted or below-baseline amount "
-            "receives the baseline. Other state/year and backend support varies."
+            "State exemption dollars, not a dependent count. For NJ, VA, ME, and "
+            "LA 2024 graph returns, this is the total including the mandatory "
+            "personal and spouse baseline, not additional-only dollars. The "
+            "effective total is max(baseline, explicit total); an omitted or "
+            "below-baseline amount receives the baseline. For ME the explicit "
+            "total is the pre-phase-out amount (worksheet line 6); the graph then "
+            "applies the income phase-out, so do not pass an already-phased "
+            "figure. ME returns where the filer or spouse can be claimed as "
+            "another's dependent (fewer exemptions than the baseline) are "
+            "unsupported. "
+            "Other state/year and backend support varies."
         ),
     )
 

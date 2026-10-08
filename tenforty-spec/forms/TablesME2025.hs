@@ -8,6 +8,9 @@ module TablesME2025
 
     -- * Personal Exemption
     mePersonalExemption2025,
+    mePersonalExemptionBase2025,
+    mePersonalExemptionPhaseoutThreshold2025,
+    mePersonalExemptionPhaseoutRange2025,
   )
 where
 
@@ -47,3 +50,24 @@ meStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500
 -- COLA adjustment: 1.25 × $4,120 (base amount) = $5,150
 mePersonalExemption2025 :: Amount Dollars
 mePersonalExemption2025 = 5150
+
+-- | Line 18 before phase-out: line 13 count times the amount when neither
+-- the filer nor spouse can be claimed as a dependent: one, or two on a joint return. QSS
+-- gets one (line 13 table, PDF p.5 = printed p.4; 36 M.R.S. 5126-A(1)).
+-- Dependents feed a credit, not line 18.
+-- Order: Single, MFJ, MFS, HoH, QW
+mePersonalExemptionBase2025 :: ByStatus (Amount Dollars)
+mePersonalExemptionBase2025 = byStatus e (2 * e) e e e
+  where
+    e = mePersonalExemption2025
+
+-- | Line 18 phase-out worksheet, line 2 ($333,450 Single; $400,100 MFJ/QSS; $200,050 MFS; $366,750 HoH).
+-- Source: 2025 Form 1040ME instructions, PDF p.6 = printed p.5,
+-- https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_1040me_gen_instr_w_cover_pg.pdf
+mePersonalExemptionPhaseoutThreshold2025 :: ByStatus (Amount Dollars)
+mePersonalExemptionPhaseoutThreshold2025 = byStatus 333450 400100 200050 366750 400100
+
+-- | Line 18 phase-out worksheet, line 4: $62,500 MFS, $125,000 otherwise
+-- (36 M.R.S. 5126-A(2)).
+mePersonalExemptionPhaseoutRange2025 :: ByStatus (Amount Dollars)
+mePersonalExemptionPhaseoutRange2025 = byStatus 125000 125000 62500 125000 125000
