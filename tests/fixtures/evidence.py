@@ -50,6 +50,18 @@ ME_EVIDENCE = TaxEvidence(
     "Blind Claude subagent, 2026-10-07; Maine Revenue Services PDFs and "
     "Maine statutes only, no repository access or software output",
 )
+IN_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/IN-2024-2025.md",
+    "Fresh-context blind deriver (Claude subagent), 2026-10-07; Indiana DOR "
+    "PDFs only, no repository access or software output",
+)
+HI_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/HI-2024-2025.md",
+    "Blind Claude subagent, 2026-10-07; official DOTAX PDFs only, "
+    "no repository access or software output; adjudicated by Claude (b72.33)",
+)
 LA_TABLE_EVIDENCE = TaxEvidence(
     EvidenceKind.TABLE_ROW,
     "docs/validation/state-fixtures/LA-2024.md",

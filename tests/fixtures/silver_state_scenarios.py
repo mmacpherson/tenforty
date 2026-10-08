@@ -2,6 +2,8 @@
 
 from .evidence import (
     CA_EVIDENCE,
+    HI_EVIDENCE,
+    IN_EVIDENCE,
     LA_DERIVED_EVIDENCE,
     LA_TABLE_EVIDENCE,
     ME_EVIDENCE,
@@ -157,6 +159,53 @@ def me_tax_gap(
         minimum=center - half_width,
         maximum=center + half_width,
         reason="; ".join(reasons),
+    )
+
+
+IN_LINE8_ROUNDING_GAP = KnownDefect(
+    quantity="state_total_tax",
+    minimum=-0.50,
+    maximum=0.50,
+    reason="IN IT-40 line 8 rounds to whole dollars (booklet 'Rounding "
+    "Required'); graph is unrounded (tenforty-b72.42)",
+)
+
+
+def hi_table_gap(
+    rate: float, taxable_income: float, row_low: float, base_offset: float
+) -> KnownDefect:
+    """Signed graph-minus-table bound for a non-kink $50 HI Tax Table row.
+
+    N-11 line 27 requires the table below $100,000. DOTAX built every cell from
+    the printed schedule at the row midpoint, rounded to the dollar. The graph
+    prices exact cumulative brackets at actual income, unrounded. ``base_offset``
+    is exact cumulative base minus printed base for the row's bracket; the
+    arithmetic is in docs/validation/state-fixtures/HI-2024-2025.md, Part C.
+    """
+    assert row_low <= taxable_income < row_low + 50
+    center = rate * (taxable_income - (row_low + 25)) + base_offset
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.50,
+        maximum=center + 0.50,
+        reason="HI requires the tax-table row below $100,000; graph uses the "
+        "schedule (tenforty-tj2.20)",
+    )
+
+
+def hi_schedule_gap(base_offset: float, rounding: float) -> KnownDefect:
+    """Graph minus the statutory HI schedule at $100,000 or more, whole dollars.
+
+    HRS 235-51 prints whole-dollar bases; the graph uses exact cumulative bases
+    and does not round. Both terms come from published figures only.
+    """
+    center = base_offset + rounding
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.01,
+        maximum=center + 0.01,
+        reason="HI schedule uses printed statutory bases rounded to the dollar; "
+        "graph uses exact cumulative bases unrounded (tenforty-b72.41)",
     )
 
 
@@ -3980,17 +4029,227 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=120000.0,
         backend="graph",
     ),
-    # ========== INDIANA SCENARIOS ==========
-    # IN 2024: Flat 3.05% rate, Personal exemption $1,000 per person
-    # IN 2025: Flat 3.00% rate, Personal exemption $1,000 per person
-    # No standard deduction (uses personal exemptions instead)
-    # IN tax = (Federal AGI - exemptions) * rate
-    # These use graph backend with exemptions set to 0 (not auto-computed).
-    #
+    # ========== INDIANA BLIND-DERIVED SCENARIOS ==========
+    # Record: docs/validation/state-fixtures/IN-2024-2025.md (cases 1-14, 4F, 11F).
+    # IT-40 line 6 = Schedule 3 line 7: $2,000 MFJ / $1,000 otherwise, plus
+    # $1,000 per dependent and $1,500 per qualifying child ($3,000 in the
+    # child's first year). The API has no Indiana dependent or child concept
+    # (tenforty-avr.1), so children enter as the dependent_exemptions TOTAL
+    # (Schedule 3 line 7 dollars); childless cases rely on the derived base.
+    # No federal expectation: the record derives only the Indiana return.
+    # Line 8 rounds half-up to whole dollars (booklet "Rounding Required").
+    # Blind case 1: 100,000 - 1,000 = 99,000; 99,000 x .0305 = 3,019.50 -> 3,020.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Single, $100k W2 (2024, case 1)",
+        year=2024,
+        state="IN",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_state_tax=3020.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 2: 50,000 - 1,000 = 49,000; 49,000 x .0305 = 1,494.50 -> 1,495.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Single, $50k W2 (2024, case 2)",
+        year=2024,
+        state="IN",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1495.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 3: 90,000 - 7,000 = 83,000; 83,000 x .0305 = 2,531.50 -> 2,532.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Married/Joint, $90k W2, two children (2024, case 3)",
+        year=2024,
+        state="IN",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=7000.0,
+        expected_state_tax=2532.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 4: 45,000 - 3,500 = 41,500; 41,500 x .0305 = 1,265.75 -> 1,266.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Head_of_House, $45k W2, one child (2024, case 4)",
+        year=2024,
+        state="IN",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=3500.0,
+        expected_state_tax=1266.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 5: 40,000 - 1,000 = 39,000; 39,000 x .0305 = 1,189.50 -> 1,190.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Married/Sep, $40k W2 (2024, case 5)",
+        year=2024,
+        state="IN",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1190.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 6: 70,000 - 3,500 = 66,500; 66,500 x .0305 = 2,028.25 -> 2,028.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Widow(er), $70k W2, one child (2024, case 6)",
+        year=2024,
+        state="IN",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=3500.0,
+        expected_state_tax=2028.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 7: 20,000 - 1,000 = 19,000; 19,000 x .0305 = 579.50 -> 580.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Single, $20k W2 (2024, case 7)",
+        year=2024,
+        state="IN",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=580.0,
+        known_defects=(IN_LINE8_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Blind case 4F: 45,000 - 5,000 = 40,000; 40,000 x .0305 = 1,220.00 -> 1,220.
+    TaxScenario(
+        source="IN 2024 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Head_of_House, $45k W2, one first-year child (2024, case 4F)",
+        year=2024,
+        state="IN",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=5000.0,
+        expected_state_tax=1220.0,
+        backend="graph",
+    ),
+    # Blind case 8: 100,000 - 1,000 = 99,000; 99,000 x .03 = 2,970.00 -> 2,970.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Single, $100k W2 (2025, case 8)",
+        year=2025,
+        state="IN",
+        filing_status="Single",
+        w2_income=100000.0,
+        expected_state_tax=2970.0,
+        backend="graph",
+    ),
+    # Blind case 9: 50,000 - 1,000 = 49,000; 49,000 x .03 = 1,470.00 -> 1,470.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Single, $50k W2 (2025, case 9)",
+        year=2025,
+        state="IN",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1470.0,
+        backend="graph",
+    ),
+    # Blind case 10: 90,000 - 7,000 = 83,000; 83,000 x .03 = 2,490.00 -> 2,490.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Married/Joint, $90k W2, two children (2025, case 10)",
+        year=2025,
+        state="IN",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=7000.0,
+        expected_state_tax=2490.0,
+        backend="graph",
+    ),
+    # Blind case 11: 45,000 - 3,500 = 41,500; 41,500 x .03 = 1,245.00 -> 1,245.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Head_of_House, $45k W2, one child (2025, case 11)",
+        year=2025,
+        state="IN",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=3500.0,
+        expected_state_tax=1245.0,
+        backend="graph",
+    ),
+    # Blind case 12: 40,000 - 1,000 = 39,000; 39,000 x .03 = 1,170.00 -> 1,170.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Married/Sep, $40k W2 (2025, case 12)",
+        year=2025,
+        state="IN",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1170.0,
+        backend="graph",
+    ),
+    # Blind case 13: 70,000 - 3,500 = 66,500; 66,500 x .03 = 1,995.00 -> 1,995.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Widow(er), $70k W2, one child (2025, case 13)",
+        year=2025,
+        state="IN",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=3500.0,
+        expected_state_tax=1995.0,
+        backend="graph",
+    ),
+    # Blind case 14: 20,000 - 1,000 = 19,000; 19,000 x .03 = 570.00 -> 570.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Single, $20k W2 (2025, case 14)",
+        year=2025,
+        state="IN",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=570.0,
+        backend="graph",
+    ),
+    # Blind case 11F: 45,000 - 5,000 = 40,000; 40,000 x .03 = 1,200.00 -> 1,200.
+    TaxScenario(
+        source="IN 2025 Form IT-40 / Schedule 3 (blind derivation)",
+        state_evidence=IN_EVIDENCE,
+        description="IN Head_of_House, $45k W2, one first-year child (2025, case 11F)",
+        year=2025,
+        state="IN",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=5000.0,
+        expected_state_tax=1200.0,
+        backend="graph",
+    ),
+    # Legacy IN rows, kept for their federal tax/AGI checks only (unverified
+    # legacy). Their state expectations omitted the mandatory Schedule 3
+    # line 1 exemption and were retired in r91.1; see IN-2024-2025.md.
     # IN 2024 Single, $50,000 W2 only, no exemptions
     # Federal AGI: $50,000
-    # IN AGI: $50,000 (no add-backs/deductions/exemptions)
-    # IN State Tax: $50,000 * 0.0305 = $1,525.00
     # Federal taxable: $35,400, Federal tax: $4,016
     TaxScenario(
         source="IN 2024 Tax Rate (computed)",
@@ -4000,14 +4259,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=1525.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
     # IN 2024 MFJ, $100,000 W2 only, no exemptions
     # Federal AGI: $100,000
-    # IN AGI: $100,000
-    # IN State Tax: $100,000 * 0.0305 = $3,050.00
     # Federal taxable: $70,800, Federal tax: $8,032
     TaxScenario(
         source="IN 2024 Tax Rate (computed)",
@@ -4017,14 +4273,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=3050.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
     # IN 2024 Head_of_House, $75,000 W2 only, no exemptions
     # Federal AGI: $75,000
-    # IN AGI: $75,000
-    # IN State Tax: $75,000 * 0.0305 = $2,287.50
     # Federal taxable: $53,100, Federal tax: $6,041
     TaxScenario(
         source="IN 2024 Tax Rate (computed)",
@@ -4034,14 +4287,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=2287.5,
         expected_federal_agi=75000.0,
         backend="graph",
     ),
     # IN 2025 Single, $50,000 W2 only, no exemptions
     # Federal AGI: $50,000
-    # IN AGI: $50,000
-    # IN State Tax: $50,000 * 0.03 = $1,500.00
     # Federal taxable: $35,000, Federal tax: $3,961.50
     TaxScenario(
         source="IN 2025 Tax Rate (computed)",
@@ -4051,7 +4301,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1500.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -5361,7 +5610,203 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=1431.90,
         backend="graph",
     ),
-    # Hawaii state scenarios
+    # ========== HI BLIND-DERIVED STATE SCENARIOS ==========
+    # Record: docs/validation/state-fixtures/HI-2024-2025.md (b72.33).
+    # Exemptions are $1,144 each: self, MFJ spouse, each dependent. Dependents
+    # enter only through the dependent_exemptions TOTAL, 1,144 x (1 + MFJ +
+    # deps); num_dependents is not mapped for HI (tenforty-aqx.4.1.6). No federal
+    # expectation: the record derives only the Hawaii return.
+    # Case A24: TI 44,456; row 44,450-44,500, S/MFS.
+    TaxScenario(
+        source="HI 2024 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Single, $50,000 wages, 0 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=2936.0,
+        known_defects=(hi_table_gap(0.079, 44_456, 44_450, -0.40),),
+        backend="graph",
+    ),
+    # Case B24: TI 76,624; row 76,600-76,650, MFJ.
+    TaxScenario(
+        source="HI 2024 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Married/Joint, $90,000 wages, 2 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=4576.0,  # 1,144 x 4
+        expected_state_tax=4896.0,
+        known_defects=(hi_table_gap(0.079, 76_624, 76_600, 0.20),),
+        backend="graph",
+    ),
+    # Case C24: TI 36,288; row 36,250-36,300, HoH.
+    TaxScenario(
+        source="HI 2024 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Head_of_House, $45,000 wages, 1 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=2288.0,  # 1,144 x 2
+        expected_state_tax=2051.0,
+        known_defects=(hi_table_gap(0.076, 36_288, 36_250, 0.40),),
+        backend="graph",
+    ),
+    # Case D24: TI 34,456; row 34,450-34,500, S/MFS.
+    TaxScenario(
+        source="HI 2024 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Married/Sep, $40,000 wages, 0 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=2150.0,
+        known_defects=(hi_table_gap(0.076, 34_456, 34_450, -0.40),),
+        backend="graph",
+    ),
+    # Case E24: TI 58,912; row 58,900-58,950, MFJ (QSS).
+    TaxScenario(
+        source="HI 2024 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Widow(er), $70,000 wages, 1 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=2288.0,  # 1,144 x 2
+        expected_state_tax=3537.0,
+        known_defects=(hi_table_gap(0.076, 58_912, 58_900, 0.20),),
+        backend="graph",
+    ),
+    # Case F24: TI 14,456; row 14,450-14,500, S/MFS.
+    TaxScenario(
+        source="HI 2024 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Single, $20,000 wages, 0 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=687.0,
+        known_defects=(hi_table_gap(0.068, 14_456, 14_450, -0.40),),
+        backend="graph",
+    ),
+    # Case G24: TI 144,456; Schedule I: 3,214 + 8.25% x 96,456 = 11,171.62.
+    TaxScenario(
+        source="HI 2024 Rate Schedule (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Single, $150,000 wages, 0 dependents (2024)",
+        year=2024,
+        state="HI",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=11172.0,
+        known_defects=(hi_schedule_gap(-0.40, 11_171.62 - 11_172),),
+        backend="graph",
+    ),
+    # Case A25: TI 44,456; row 44,450-44,500, S/MFS.
+    TaxScenario(
+        source="HI 2025 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Single, $50,000 wages, 0 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=2285.0,
+        known_defects=(hi_table_gap(0.072, 44_456, 44_450, 0.20),),
+        backend="graph",
+    ),
+    # Case B25: TI 76,624; row 76,600-76,650, MFJ.
+    TaxScenario(
+        source="HI 2025 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Married/Joint, $90,000 wages, 2 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=4576.0,  # 1,144 x 4
+        expected_state_tax=3683.0,
+        known_defects=(hi_table_gap(0.072, 76_624, 76_600, 0.40),),
+        backend="graph",
+    ),
+    # Case C25: TI 36,288; row 36,250-36,300, HoH.
+    TaxScenario(
+        source="HI 2025 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Head_of_House, $45,000 wages, 1 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=2288.0,  # 1,144 x 2
+        expected_state_tax=1308.0,
+        known_defects=(hi_table_gap(0.068, 36_288, 36_250, -0.20),),
+        backend="graph",
+    ),
+    # Case D25: TI 34,456; row 34,450-34,500, S/MFS.
+    TaxScenario(
+        source="HI 2025 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Married/Sep, $40,000 wages, 0 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1571.0,
+        known_defects=(hi_table_gap(0.068, 34_456, 34_450, 0.20),),
+        backend="graph",
+    ),
+    # Case E25: TI 58,912; row 58,900-58,950, MFJ (QSS).
+    TaxScenario(
+        source="HI 2025 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Widow(er), $70,000 wages, 1 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=2288.0,  # 1,144 x 2
+        expected_state_tax=2461.0,
+        known_defects=(hi_table_gap(0.068, 58_912, 58_900, 0.40),),
+        backend="graph",
+    ),
+    # Case F25: TI 14,456; row 14,450-14,500, S/MFS.
+    TaxScenario(
+        source="HI 2025 official tax table (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Single, $20,000 wages, 0 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=292.0,
+        known_defects=(hi_table_gap(0.055, 14_456, 14_450, 0.0),),
+        backend="graph",
+    ),
+    # Case G25: TI 144,456; Schedule I: 8,391 + 7.9% x 19,456 = 9,928.024.
+    TaxScenario(
+        source="HI 2025 Rate Schedule (blind derivation)",
+        state_evidence=HI_EVIDENCE,
+        description="HI Single, $150,000 wages, 0 dependents (2025)",
+        year=2025,
+        state="HI",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=9928.0,
+        known_defects=(hi_schedule_gap(0.20, 9_928.024 - 9_928),),
+        backend="graph",
+    ),
+    # Legacy HI rows, kept for their federal tax/AGI checks only (unverified
+    # legacy). Their state expectations omitted the mandatory $1,144
+    # exemptions and were retired in b72.33; see HI-2024-2025.md, Part C.
     TaxScenario(
         source="HI 2024 Tax Brackets (computed)",
         description="HI Single, $60,000 income (2024)",
@@ -5370,7 +5815,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=60000.0,
         expected_federal_tax=5219.0,  # Tax Table row 45,400-45,450
-        expected_state_tax=3840.60,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -5382,7 +5826,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=6048.00,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -5394,7 +5837,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=4549.90,
         expected_federal_agi=75000.0,
         backend="graph",
     ),
@@ -5406,7 +5848,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=200000.0,
         expected_federal_tax=37538.5,
-        expected_state_tax=15938.60,
         expected_federal_agi=200000.0,
         backend="graph",
     ),
@@ -5418,7 +5859,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=60000.0,
         expected_federal_tax=5075.0,  # Tax Table row 44,250-44,300
-        expected_state_tax=3116.80,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -5774,6 +6214,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Legacy ME rows, kept for their federal tax/AGI checks only (unverified
     # legacy). Their state expectations omitted the mandatory personal
     # exemption and were retired in b72.36; see ME-2024-2025.md.
+    # Maine state scenarios
+    # ME 2024 brackets: $26,050 @ 5.8%, $61,600 @ 6.75%, above @ 7.15%
+    # ME 2025 brackets: $26,800 @ 5.8%, $63,450 @ 6.75%, above @ 7.15%
+    # Personal exemption: $5,000 (2024), $5,150 (2025)
+    # Note: exemptions not provided (defaults to 0)
     TaxScenario(
         source="ME 2024 Tax Brackets (computed)",
         description="ME Single, $60,000 income (2024)",

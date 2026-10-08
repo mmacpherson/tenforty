@@ -100,24 +100,21 @@
             "id": 17,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 1000
             }
         },
         "18": {
             "id": 18,
             "op": {
-                "left": 16,
-                "right": 2,
-                "type": "sub"
+                "type": "literal",
+                "value": 2000
             }
         },
         "19": {
             "id": 19,
-            "name": "L7_in_agi",
             "op": {
-                "left": 17,
-                "right": 18,
-                "type": "max"
+                "type": "literal",
+                "value": 1000
             }
         },
         "2": {
@@ -131,88 +128,91 @@
             "id": 20,
             "op": {
                 "type": "literal",
-                "value": 3.0e-2
+                "value": 1000
             }
         },
         "21": {
             "id": 21,
-            "name": "L9_in_state_tax",
             "op": {
-                "left": 19,
-                "right": 20,
-                "type": "mul"
+                "type": "literal",
+                "value": 1000
             }
         },
         "22": {
             "id": 22,
-            "name": "L10_in_total_tax",
+            "name": "MandatoryExemptions",
             "op": {
-                "left": 21,
-                "right": 3,
-                "type": "add"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 20,
+                    "married_joint": 18,
+                    "married_separate": 19,
+                    "qualifying_widow": 21,
+                    "single": 17
+                }
             }
         },
         "23": {
             "id": 23,
+            "name": "L6_total",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 22,
+                "right": 2,
+                "type": "max"
             }
         },
         "24": {
             "id": 24,
             "op": {
-                "left": 22,
-                "right": 4,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "25": {
             "id": 25,
-            "name": "L12_tax_after_credits",
             "op": {
-                "left": 23,
-                "right": 24,
-                "type": "max"
+                "left": 16,
+                "right": 23,
+                "type": "sub"
             }
         },
         "26": {
             "id": 26,
-            "name": "L14_total_tax_due",
+            "name": "L7_in_agi",
             "op": {
-                "left": 25,
-                "right": 5,
-                "type": "add"
+                "left": 24,
+                "right": 25,
+                "type": "max"
             }
         },
         "27": {
             "id": 27,
             "op": {
-                "left": 8,
-                "right": 9,
-                "type": "add"
+                "type": "literal",
+                "value": 3.0e-2
             }
         },
         "28": {
             "id": 28,
+            "name": "L8_in_state_tax",
             "op": {
-                "left": 7,
+                "left": 26,
                 "right": 27,
-                "type": "add"
+                "type": "mul"
             }
         },
         "29": {
             "id": 29,
-            "name": "L19_total_payments",
+            "name": "L10_in_total_tax",
             "op": {
-                "left": 6,
-                "right": 28,
+                "left": 28,
+                "right": 3,
                 "type": "add"
             }
         },
         "3": {
             "id": 3,
-            "name": "L8_county_tax",
+            "name": "L9_county_tax",
             "op": {
                 "type": "input"
             }
@@ -220,58 +220,82 @@
         "30": {
             "id": 30,
             "op": {
-                "left": 29,
-                "right": 26,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "31": {
             "id": 31,
             "op": {
                 "left": 29,
-                "right": 26,
+                "right": 4,
                 "type": "sub"
             }
         },
         "32": {
             "id": 32,
+            "name": "L12_tax_after_credits",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 30,
+                "right": 31,
+                "type": "max"
             }
         },
         "33": {
             "id": 33,
-            "name": "L20_refund",
+            "name": "L14_total_tax_due",
             "op": {
-                "cond": 30,
-                "otherwise": 32,
-                "then": 31,
-                "type": "if_positive"
+                "left": 32,
+                "right": 5,
+                "type": "add"
             }
         },
         "34": {
             "id": 34,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 8,
+                "right": 9,
+                "type": "add"
             }
         },
         "35": {
             "id": 35,
             "op": {
-                "left": 26,
-                "right": 29,
-                "type": "sub"
+                "left": 7,
+                "right": 34,
+                "type": "add"
             }
         },
         "36": {
             "id": 36,
-            "name": "L21_amount_owed",
+            "name": "L19_total_payments",
             "op": {
-                "left": 34,
+                "left": 6,
                 "right": 35,
-                "type": "max"
+                "type": "add"
+            }
+        },
+        "37": {
+            "id": 37,
+            "op": {
+                "left": 36,
+                "right": 33,
+                "type": "sub"
+            }
+        },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 36,
+                "right": 33,
+                "type": "sub"
+            }
+        },
+        "39": {
+            "id": 39,
+            "op": {
+                "type": "literal",
+                "value": 0
             }
         },
         "4": {
@@ -279,6 +303,40 @@
             "name": "L11_nonrefundable_credits",
             "op": {
                 "type": "input"
+            }
+        },
+        "40": {
+            "id": 40,
+            "name": "L20_refund",
+            "op": {
+                "cond": 37,
+                "otherwise": 39,
+                "then": 38,
+                "type": "if_positive"
+            }
+        },
+        "41": {
+            "id": 41,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "42": {
+            "id": 42,
+            "op": {
+                "left": 33,
+                "right": 36,
+                "type": "sub"
+            }
+        },
+        "43": {
+            "id": 43,
+            "name": "L21_amount_owed",
+            "op": {
+                "left": 41,
+                "right": 42,
+                "type": "max"
             }
         },
         "5": {
@@ -319,13 +377,13 @@
     },
     "outputs": [
         12,
-        22,
-        26,
         29,
         33,
         36,
-        19,
-        21
+        40,
+        43,
+        26,
+        28
     ],
     "tables": {}
 }
