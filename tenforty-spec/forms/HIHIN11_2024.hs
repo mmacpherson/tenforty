@@ -60,21 +60,18 @@ hihiN11_2024 = form "hi_n11" 2024 $ do
       l18 `subtractNotBelowZero` l22
 
   -- Line 24 (official line 25): $1,144 per exemption claimed on line 6e.
-  -- N-11 instructions, p.9 lines 6a-6d and p.20 line 25: one exemption for
-  -- yourself, one for a spouse on a joint return, and one per dependent; no
-  -- phase-out. MFS spouse and age-65 exemptions depend on facts the inputs
-  -- lack, so they stay in the explicit total. The explicit input is TOTAL
-  -- dollars including this base; do not add the base twice. max() can only
-  -- raise the base, so two regimes that lower it are outside the supported
-  -- domain: a filer or joint spouse claimable as another's dependent (p.9),
-  -- and the $7,000 disability exemption, which replaces every regular
-  -- exemption including dependents (p.20).
-  dependents <- keyInput "L6cd_dependents" "num_dependents" "Number of dependents (lines 6c and 6d)"
+  -- N-11 instructions, p.9 lines 6a-6b and p.20 line 25: the derived base is
+  -- one exemption for yourself and one for a spouse on a joint return; no
+  -- phase-out. Dependents (6c/6d), the MFS spouse and age-65 exemptions enter
+  -- only through the explicit TOTAL, which includes this base; do not add the
+  -- base twice. num_dependents is not read here (tenforty-aqx.4.1.6). A
+  -- disability exemption total ($7,000+) always exceeds the base, so max()
+  -- represents it. A filer or joint spouse claimable as another's dependent
+  -- needs a total below the base, which max() cannot express: unsupported.
   exemptionTotal <- keyInput "L24" "total_exemptions" "Total exemption dollars including yourself/spouse/dependents"
   mandatoryExemptions <-
     interior "MandatoryExemptions" "mandatory_exemptions" $
       byStatusE (fmap lit (byStatus hiPersonalExemption2024 (2 * hiPersonalExemption2024) hiPersonalExemption2024 hiPersonalExemption2024 hiPersonalExemption2024))
-        .+. (dependents .*. rate (unAmount hiPersonalExemption2024))
   l24 <-
     interior "L24_total" "total_exemptions_claimed" $
       greaterOf mandatoryExemptions exemptionTotal

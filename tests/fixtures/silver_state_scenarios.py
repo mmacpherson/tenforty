@@ -5342,7 +5342,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     ),
     # ========== HI BLIND-DERIVED STATE SCENARIOS ==========
     # Record: docs/validation/state-fixtures/HI-2024-2025.md (b72.33).
-    # Exemptions are $1,144 each: self, MFJ spouse, num_dependents. No federal
+    # Exemptions are $1,144 each: self, MFJ spouse, each dependent. Dependents
+    # enter only through the dependent_exemptions TOTAL, 1,144 x (1 + MFJ +
+    # deps); num_dependents is not mapped for HI (tenforty-aqx.4.1.6). No federal
     # expectation: the record derives only the Hawaii return.
     # Case A24: TI 44,456; row 44,450-44,500, S/MFS.
     TaxScenario(
@@ -5366,7 +5368,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="HI",
         filing_status="Married/Joint",
         w2_income=90000.0,
-        num_dependents=2,
+        dependent_exemptions=4576.0,  # 1,144 x 4
         expected_state_tax=4896.0,
         known_defects=(hi_table_gap(0.079, 76_624, 76_600, 0.20),),
         backend="graph",
@@ -5380,7 +5382,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="HI",
         filing_status="Head_of_House",
         w2_income=45000.0,
-        num_dependents=1,
+        dependent_exemptions=2288.0,  # 1,144 x 2
         expected_state_tax=2051.0,
         known_defects=(hi_table_gap(0.076, 36_288, 36_250, 0.40),),
         backend="graph",
@@ -5407,7 +5409,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="HI",
         filing_status="Widow(er)",
         w2_income=70000.0,
-        num_dependents=1,
+        dependent_exemptions=2288.0,  # 1,144 x 2
         expected_state_tax=3537.0,
         known_defects=(hi_table_gap(0.076, 58_912, 58_900, 0.20),),
         backend="graph",
@@ -5460,7 +5462,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="HI",
         filing_status="Married/Joint",
         w2_income=90000.0,
-        num_dependents=2,
+        dependent_exemptions=4576.0,  # 1,144 x 4
         expected_state_tax=3683.0,
         known_defects=(hi_table_gap(0.072, 76_624, 76_600, 0.40),),
         backend="graph",
@@ -5474,7 +5476,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="HI",
         filing_status="Head_of_House",
         w2_income=45000.0,
-        num_dependents=1,
+        dependent_exemptions=2288.0,  # 1,144 x 2
         expected_state_tax=1308.0,
         known_defects=(hi_table_gap(0.068, 36_288, 36_250, -0.20),),
         backend="graph",
@@ -5501,7 +5503,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="HI",
         filing_status="Widow(er)",
         w2_income=70000.0,
-        num_dependents=1,
+        dependent_exemptions=2288.0,  # 1,144 x 2
         expected_state_tax=2461.0,
         known_defects=(hi_table_gap(0.068, 58_912, 58_900, 0.40),),
         backend="graph",

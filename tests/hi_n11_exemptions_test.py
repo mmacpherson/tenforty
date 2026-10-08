@@ -9,10 +9,11 @@ https://files.hawaii.gov/tax/forms/2025/n11ins.pdf
 Taxable income is whole dollars here, so it is compared exactly. Tax values,
 which still carry table/schedule-method residuals, live in the silver fixtures.
 
-Supported domain: ordinary exemptions only. Excluded: a filer or joint spouse
-claimable as another taxpayer's dependent (p.9; the API has no such input), and
-the $7,000 disability exemption, which replaces all regular exemptions (p.20).
-Both lower the total below the derived base, which max(base, total) cannot do.
+The graph derives only the 6a/6b base. Dependents enter through the
+dependent_exemptions TOTAL; num_dependents is deliberately unmapped for HI
+(tenforty-aqx.4.1.6). Unsupported: a filer or joint spouse claimable as another
+taxpayer's dependent (p.9), whose total falls below the base, which
+max(base, total) cannot express.
 """
 
 import json
@@ -70,34 +71,23 @@ def test_default_exemptions_match_blind_derivation(
     year, case, status, wages, dependents, taxable_income
 ):
     """Independent derivation: wages - standard deduction - $1,144 x exemptions."""
-    result = _scalar_and_zip(
-        year=year,
-        state="HI",
-        filing_status=status,
-        w2_income=wages,
-        num_dependents=dependents,
-    )
+    inputs = dict(year=year, state="HI", filing_status=status, w2_income=wages)
+    if dependents:
+        base = 2 if status == "Married/Joint" else 1
+        inputs["dependent_exemptions"] = EXEMPTION * (base + dependents)
+    result = _scalar_and_zip(**inputs)
     assert result.state_taxable_income == taxable_income
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("status,count", STATUS_BASE)
-@pytest.mark.parametrize("dependents", [0, 3])
-def test_raw_graph_derives_the_status_and_dependent_base(
-    year, status, count, dependents
-):
+def test_raw_graph_derives_the_status_base(year, status, count):
     """The base belongs in the spec, not only the natural-input adapter."""
     tax_input = TaxReturnInput(
-        year=year,
-        state="HI",
-        filing_status=status,
-        w2_income=100_000,
-        num_dependents=dependents,
+        year=year, state="HI", filing_status=status, w2_income=100_000
     )
     runtime, _ = GraphBackend()._create_evaluator(tax_input)
-    assert runtime.eval("hi_n11_MandatoryExemptions") == EXEMPTION * (
-        count + dependents
-    )
+    assert runtime.eval("hi_n11_MandatoryExemptions") == EXEMPTION * count
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -106,17 +96,11 @@ def test_raw_graph_derives_the_status_and_dependent_base(
 def test_explicit_total_substitutes_for_the_base(year, status, count, total_offset):
     """dependent_exemptions is the TOTAL, so the base is never counted twice.
 
-    A total above the base (e.g. an MFS spouse or age-65 exemption) lowers
-    taxable income by exactly the excess; at or below the base it is inert.
+    A total above the base (dependents, an MFS spouse, age 65) lowers taxable
+    income by exactly the excess; at or below the base it is inert.
     """
-    base = EXEMPTION * (count + 2)
-    common = dict(
-        year=year,
-        state="HI",
-        filing_status=status,
-        w2_income=100_000,
-        num_dependents=2,
-    )
+    base = EXEMPTION * count
+    common = dict(year=year, state="HI", filing_status=status, w2_income=100_000)
     default = _scalar_and_zip(**common)
     explicit = _scalar_and_zip(**common, dependent_exemptions=base + total_offset)
     if total_offset <= 0:
@@ -133,7 +117,11 @@ def test_explicit_total_substitutes_for_the_base(year, status, count, total_offs
 def test_exemptions_do_not_drive_taxable_income_negative(year):
     """N-11 line 26: line 24 minus line 25, but not less than zero."""
     result = _scalar_and_zip(
-        year=year, state="HI", filing_status="Single", w2_income=5_000, num_dependents=3
+        year=year,
+        state="HI",
+        filing_status="Single",
+        w2_income=5_000,
+        dependent_exemptions=EXEMPTION * 4,
     )
     assert result.state_taxable_income == 0
     assert result.state_total_tax == 0
@@ -159,29 +147,39 @@ def test_removing_the_base_reintroduces_the_default_gap(year):
     assert amounts == [44_456, 44_456 + EXEMPTION]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Outside the supported domain: HI's disability exemption replaces all "
-    "regular exemptions, but max(base, explicit total) keeps the larger base "
-    "(tenforty-avr.3)",
-)
 @pytest.mark.parametrize("year", [2024, 2025])
-def test_disability_exemption_replacing_dependents_is_unsupported(year):
-    """Codex counterexample, N-11 instructions printed p.20 (both years).
+def test_nonzero_num_dependents_is_still_rejected_for_hi(year):
+    """HI must not map num_dependents (tenforty-aqx.4.1.6).
 
-    "The Disability Exemption is in lieu of the regular personal exemption ...
-    you will not be able to claim the additional exemptions for your children or
-    other dependents." Single, $100,000 wages, six dependents, $7,000 disability
-    exemption: TI = 100,000 - 4,400 - 7,000 = 88,600 (independent derivation).
-    The graph keeps the 7 x $1,144 = $8,008 base. This records the documented
-    limitation, owned by tenforty-avr.3; it is not a defect to fix in b72.33.
+    A state mapping would let the count through while the federal graph silently
+    ignores it (no CTC, no error). Unmapped, the graph backend rejects it.
+    """
+    with pytest.raises(NotImplementedError, match="num_dependents"):
+        evaluate_return(
+            backend="graph",
+            year=year,
+            state="HI",
+            filing_status="Single",
+            w2_income=50_000,
+            num_dependents=1,
+        )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_disability_exemption_total_replaces_the_base(year):
+    """Codex's disability case, N-11 instructions printed p.20 (both years).
+
+    "The Disability Exemption is in lieu of the regular personal exemption of
+    $1,144." Single, $100,000 wages, $7,000 disability exemption as the explicit
+    total: TI = 100,000 - 4,400 - 7,000 = 88,600 (independent derivation). Every
+    disability total ($7,000 to $14,000) exceeds the $1,144/$2,288 base, so
+    max(base, total) represents it; see HI-2024-2025.md, Part B.
     """
     result = _scalar_and_zip(
         year=year,
         state="HI",
         filing_status="Single",
         w2_income=100_000,
-        num_dependents=6,
         dependent_exemptions=7_000,
     )
     assert result.state_taxable_income == 88_600
