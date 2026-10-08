@@ -22,6 +22,7 @@ Their inputs and federal expectations are unchanged.
 | LA 2024 line 10, in-table W-2 cases (x08) | Published table rows; **not blind** | [LA 2024](LA-2024.md) |
 | LA 2024 line 10, above-table cases (x08) | Unverified legacy: continuation rule plus rounding, derived non-blind | Same LA record |
 | NJ/VA 2024–2025, nine wage-only returns | Independent derivation; official PDFs only, no repository access or software output | [NJ/VA 2024–2025](NJ-VA-2024-2025.md) |
+| MD 2024–2025, twenty wage-only returns and Chart 10A rows | Independent derivation (blind, 2026-10-07); Chart 10A rows are published table rows | [MD 2024–2025](MD-2024-2025.md) |
 
 For the two VA joint cases, wages are attributed entirely to the primary filer,
 so the official Spouse Tax Adjustment is zero. The simplified graph's

@@ -4,6 +4,7 @@ from .evidence import (
     CA_EVIDENCE,
     LA_DERIVED_EVIDENCE,
     LA_TABLE_EVIDENCE,
+    MD_EVIDENCE,
     MS_EVIDENCE,
     NJ_VA_EVIDENCE,
     VT_EVIDENCE,
@@ -98,6 +99,59 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
     "(tenforty-xew, not a table-band difference)",
 )
+
+
+# 2024 MD standard deduction (tenforty-b72.45): Worksheet 16A gives
+# Joint/HoH/QSS $3,650-$5,450; the graph uses the Single $1,800-$2,700 bounds
+# for every status.
+MD_2024_JOINT_STD_DEDUCTION_BEAD = "tenforty-b72.45"
+MD_2024_JOINT_STD_DEDUCTION_SHORTFALL = 5_450.0 - 2_700.0
+
+
+def md_table_gap(
+    taxable_income: float, row_low: float, std_deduction_shortfall: float = 0.0
+) -> KnownDefect:
+    """Signed schedule-minus-table bound for a non-kink $50 MD tax-table row.
+
+    MD requires its state tax table below $100,000 of taxable income (2024/2025
+    resident booklets, Instruction 17). Every row used here lies in the 4.75%
+    band of both schedules. The graph prices the schedule at its own taxable
+    income rather than the row, with at most $0.50 of printed-row rounding.
+    ``std_deduction_shortfall`` is the graph's excess taxable income from the
+    2024 Joint/HoH/QSS standard-deduction defect; it stays in the same band.
+    """
+    assert row_low <= taxable_income < row_low + 50
+    graph_income = taxable_income + std_deduction_shortfall
+    assert 3_000 <= graph_income < 100_000
+    center = 0.0475 * (graph_income - (row_low + 25))
+    reason = "MD requires the tax-table row; graph uses the schedule (tenforty-tj2.20)"
+    if std_deduction_shortfall:
+        reason += (
+            "; graph uses the Single standard deduction for 2024 Joint/HoH/QSS "
+            f"({MD_2024_JOINT_STD_DEDUCTION_BEAD})"
+        )
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - 0.50,
+        maximum=center + 0.50,
+        reason=reason,
+    )
+
+
+def md_2024_joint_std_deduction_gap(schedule_delta: float) -> KnownDefect:
+    """Graph-minus-legal tax at or above $100k for the 2024 joint std-ded defect.
+
+    ``schedule_delta`` is Schedule II tax on $2,750 of extra taxable income at
+    the return's position, from the published schedule. The window is the
+    booklet's cent rounding.
+    """
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=schedule_delta - 0.01,
+        maximum=schedule_delta + 0.01,
+        reason="Graph uses the Single standard deduction for 2024 Joint/HoH/QSS "
+        f"({MD_2024_JOINT_STD_DEDUCTION_BEAD})",
+    )
 
 
 def la_2024_table_gap(
@@ -4588,6 +4642,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # ========== MARYLAND SCENARIOS ==========
+    # Legacy MD rows. The four below $100k of MD taxable income are kept for
+    # their federal tax/AGI checks only (unverified legacy). Their state values
+    # priced the schedule where Line 21 is the tax-table row (tenforty-tj2.20),
+    # and the 2024 MFJ row also used the Single standard deduction
+    # (tenforty-b72.45); they were retired in b72.35. See MD-2024-2025.md. The
+    # $600k row is above the table and keeps its schedule value.
     # MD 2024: Standard deduction 15% of MD AGI (min $1,800, max $2,700)
     # Personal exemption: $3,200 (accepted as input, not computed)
     # Schedule I (Single/MFS/Dep): 8 brackets (2%, 3%, 4%, 4.75%, 5%, 5.25%, 5.5%, 5.75%)
@@ -4615,7 +4675,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         dependent_exemptions=3200.0,  # Personal exemption
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2042.25,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -4641,7 +4700,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=100000.0,
         dependent_exemptions=6400.0,  # 2 personal exemptions
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=4265.25,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -4672,7 +4730,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         dependent_exemptions=3200.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=2011.375,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -4698,7 +4755,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=100000.0,
         dependent_exemptions=6400.0,
         expected_federal_tax=7746.0,  # Tax Table row 68,500-68,550
-        expected_state_tax=4075.25,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -4723,6 +4779,304 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=177634.75,
         expected_state_tax=32975.625,
         expected_federal_agi=600000.0,
+        backend="graph",
+    ),
+    # ========== MD BLIND-DERIVED SCENARIOS (tenforty-b72.35) ==========
+    # Record: docs/validation/state-fixtures/MD-2024-2025.md. State answers only;
+    # Form 502 Line 21, wages only, standard deduction, under 65, not blind.
+    # Exemptions follow Chart 10A on FEDERAL AGI. Returns without dependents
+    # rely on the derived taxpayer/spouse base (dependent_exemptions omitted);
+    # returns with dependents pass the Line 19 TOTAL, since the graph has no
+    # dependent count. Below $100k of taxable income Line 21 is the state
+    # table row (tenforty-tj2.20); at or above, Worksheet 17A to the cent.
+    # 2024 #1: Single 50,000, 0 dependents. 50,000 - 2,700 std - 1 x 3,200 = 44,100; row 44,100-44,150, PDF p. 36.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $50k wages, 0 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=2043.0,
+        expected_federal_agi=50000.0,
+        known_defects=(md_table_gap(44100, 44100),),
+        backend="graph",
+    ),
+    # 2024 #2: MFJ 90,000, 2 dependents. 90,000 - 5,450 std - 4 x 3,200 = 71,750; row 71,750-71,800, PDF p. 38.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFJ, $90k wages, 2 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
+        expected_state_tax=3357.0,
+        expected_federal_agi=90000.0,
+        known_defects=(
+            md_table_gap(71750, 71750, MD_2024_JOINT_STD_DEDUCTION_SHORTFALL),
+        ),
+        backend="graph",
+    ),
+    # 2024 #3: HoH 45,000, 1 dependents. 45,000 - 5,450 std - 2 x 3,200 = 33,150; row 33,150-33,200, PDF p. 36.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD HoH, $45k wages, 1 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
+        expected_state_tax=1523.0,
+        expected_federal_agi=45000.0,
+        known_defects=(
+            md_table_gap(33150, 33150, MD_2024_JOINT_STD_DEDUCTION_SHORTFALL),
+        ),
+        backend="graph",
+    ),
+    # 2024 #4: MFS 40,000, 0 dependents. 40,000 - 2,700 std - 1 x 3,200 = 34,100; row 34,100-34,150, PDF p. 36.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFS, $40k wages, 0 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1568.0,
+        expected_federal_agi=40000.0,
+        known_defects=(md_table_gap(34100, 34100),),
+        backend="graph",
+    ),
+    # 2024 #5: QSS 70,000, 1 dependents. 70,000 - 5,450 std - 2 x 3,200 = 58,150; row 58,150-58,200, PDF p. 37.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD QSS, $70k wages, 1 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
+        expected_state_tax=2711.0,
+        expected_federal_agi=70000.0,
+        known_defects=(
+            md_table_gap(58150, 58150, MD_2024_JOINT_STD_DEDUCTION_SHORTFALL),
+        ),
+        backend="graph",
+    ),
+    # 2024 #6: Single 20,000, 0 dependents. 20,000 - 2,700 std - 1 x 3,200 = 14,100; row 14,100-14,150, PDF p. 34.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $20k wages, 0 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=618.0,
+        expected_federal_agi=20000.0,
+        known_defects=(md_table_gap(14100, 14100),),
+        backend="graph",
+    ),
+    # 2024 #7: Single 120,000, 0 dependents. 120,000 - 2,700 std - 1 x 1,600 = 115,700; Schedule I: 4,697.50 + 5% x 15,700.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $120k wages, 0 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Single",
+        w2_income=120000.0,
+        expected_state_tax=5482.50,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # 2024 #8: Single 160,000, 0 dependents. 160,000 - 2,700 std - 1 x 0 = 157,300; Schedule I: 7,260.00 + 5.5% x 7,300.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $160k wages, 0 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Single",
+        w2_income=160000.0,
+        expected_state_tax=7661.50,
+        expected_federal_agi=160000.0,
+        backend="graph",
+    ),
+    # 2024 #9: MFJ 160,000, 2 dependents. 160,000 - 5,450 std - 4 x 1,600 = 148,150; Schedule II: 90 + 4.75% x 145,150 = 6,984.625.
+    # Graph TI is 150,900 (Single 2024 std ded); Schedule II on the extra 2,750 = 132.875.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFJ, $160k wages, 2 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=160000.0,
+        dependent_exemptions=6400.0,  # 4 x 1,600, Line 19 total
+        expected_state_tax=6984.63,
+        expected_federal_agi=160000.0,
+        known_defects=(md_2024_joint_std_deduction_gap(132.875),),
+        backend="graph",
+    ),
+    # 2024 #10: MFJ 250,000, 3 dependents. 250,000 - 5,450 std - 5 x 0 = 244,550; Schedule II: 10,947.50 + 5.5% x 19,550.
+    # Graph TI is 247,300 (Single 2024 std ded); Schedule II on the extra 2,750 = 151.25.
+    TaxScenario(
+        source="MD 2024 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFJ, $250k wages, 3 dependents (2024)",
+        year=2024,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=250000.0,
+        expected_state_tax=12022.75,
+        expected_federal_agi=250000.0,
+        known_defects=(md_2024_joint_std_deduction_gap(151.25),),
+        backend="graph",
+    ),
+    # 2025 #1: Single 50,000, 0 dependents. 50,000 - 3,350 std - 1 x 3,200 = 43,450; row 43,450-43,500, PDF p. 36.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $50k wages, 0 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=2013.0,
+        expected_federal_agi=50000.0,
+        known_defects=(md_table_gap(43450, 43450),),
+        backend="graph",
+    ),
+    # 2025 #2: MFJ 90,000, 2 dependents. 90,000 - 6,700 std - 4 x 3,200 = 70,500; row 70,500-70,550, PDF p. 38.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFJ, $90k wages, 2 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
+        expected_state_tax=3297.0,
+        expected_federal_agi=90000.0,
+        known_defects=(md_table_gap(70500, 70500),),
+        backend="graph",
+    ),
+    # 2025 #3: HoH 45,000, 1 dependents. 45,000 - 6,700 std - 2 x 3,200 = 31,900; row 31,900-31,950, PDF p. 36.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD HoH, $45k wages, 1 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
+        expected_state_tax=1464.0,
+        expected_federal_agi=45000.0,
+        known_defects=(md_table_gap(31900, 31900),),
+        backend="graph",
+    ),
+    # 2025 #4: MFS 40,000, 0 dependents. 40,000 - 3,350 std - 1 x 3,200 = 33,450; row 33,450-33,500, PDF p. 36.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFS, $40k wages, 0 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=1538.0,
+        expected_federal_agi=40000.0,
+        known_defects=(md_table_gap(33450, 33450),),
+        backend="graph",
+    ),
+    # 2025 #5: QSS 70,000, 1 dependents. 70,000 - 6,700 std - 2 x 3,200 = 56,900; row 56,900-56,950, PDF p. 37.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD QSS, $70k wages, 1 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
+        expected_state_tax=2651.0,
+        expected_federal_agi=70000.0,
+        known_defects=(md_table_gap(56900, 56900),),
+        backend="graph",
+    ),
+    # 2025 #6: Single 20,000, 0 dependents. 20,000 - 3,350 std - 1 x 3,200 = 13,450; row 13,450-13,500, PDF p. 34.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $20k wages, 0 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=588.0,
+        expected_federal_agi=20000.0,
+        known_defects=(md_table_gap(13450, 13450),),
+        backend="graph",
+    ),
+    # 2025 #7: Single 120,000, 0 dependents. 120,000 - 3,350 std - 1 x 1,600 = 115,050; Schedule I: 4,697.50 + 5% x 15,050.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $120k wages, 0 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Single",
+        w2_income=120000.0,
+        expected_state_tax=5450.00,
+        expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # 2025 #8: Single 160,000, 0 dependents. 160,000 - 3,350 std - 1 x 0 = 156,650; Schedule I: 7,260.00 + 5.5% x 6,650.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD Single, $160k wages, 0 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Single",
+        w2_income=160000.0,
+        expected_state_tax=7625.75,
+        expected_federal_agi=160000.0,
+        backend="graph",
+    ),
+    # 2025 #9: MFJ 160,000, 2 dependents. 160,000 - 6,700 std - 4 x 1,600 = 146,900; Schedule II: 90 + 4.75% x 143,900.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFJ, $160k wages, 2 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=160000.0,
+        dependent_exemptions=6400.0,  # 4 x 1,600, Line 19 total
+        expected_state_tax=6925.25,
+        expected_federal_agi=160000.0,
+        backend="graph",
+    ),
+    # 2025 #10: MFJ 250,000, 3 dependents. 250,000 - 6,700 std - 5 x 0 = 243,300; Schedule II: 10,947.50 + 5.5% x 18,300.
+    TaxScenario(
+        source="MD 2025 Form 502 (blind derivation)",
+        state_evidence=MD_EVIDENCE,
+        description="MD MFJ, $250k wages, 3 dependents (2025)",
+        year=2025,
+        state="MD",
+        filing_status="Married/Joint",
+        w2_income=250000.0,
+        expected_state_tax=11954.00,
+        expected_federal_agi=250000.0,
         backend="graph",
     ),
     # ========== LOUISIANA SCENARIOS ==========
