@@ -66,8 +66,11 @@ hihiN11_2024 = form "hi_n11" 2024 $ do
   -- only through the explicit TOTAL, which includes this base; do not add the
   -- base twice. num_dependents is not read here (tenforty-aqx.4.1.6). A
   -- disability exemption total ($7,000+) always exceeds the base, so max()
-  -- represents it. A filer or joint spouse claimable as another's dependent
-  -- needs a total below the base, which max() cannot express: unsupported.
+  -- represents it. Claimable-dependent returns are unsupported because the
+  -- inputs carry no claimable status (p.9). A claimable filer, or a claimable
+  -- spouse when the filer is under 65, needs a total below the base, which
+  -- max() cannot express; a claimable spouse with a filer 65+ totals $2,288,
+  -- which only coincides with the MFJ base.
   exemptionTotal <- keyInput "L24" "total_exemptions" "Total exemption dollars including yourself/spouse/dependents"
   mandatoryExemptions <-
     interior "MandatoryExemptions" "mandatory_exemptions" $
