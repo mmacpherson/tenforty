@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_reviewed_state_derivations_are_explicit_and_durable():
-    """Keep all 81 independently derived silver cases visibly classified."""
+    """Keep all 97 independently derived silver cases visibly classified."""
     derived = [
         case
         for case in SILVER_STANDARD_STATE_SCENARIOS
@@ -21,7 +21,7 @@ def test_reviewed_state_derivations_are_explicit_and_durable():
     assert Counter(case.state for case in derived) == {
         "CA": 10,
         "MS": 14,
-        "VT": 18,
+        "VT": 34,
         "WI": 30,
         "NJ": 5,
         "VA": 4,

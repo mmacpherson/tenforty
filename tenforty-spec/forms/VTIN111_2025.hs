@@ -41,10 +41,25 @@ vtIN111_2025 = form "vt_in111" 2025 $ do
     interior "L7" "vt_deduction" $
       greaterOf l5 l6
 
-  -- Line 8: Vermont Taxable Income
+  -- IN-111 Lines 5a-5e (instructions p.7): one exemption for yourself and one
+  -- for a spouse only on a joint return (the form says not to count a spouse
+  -- for MFS or Qualifying Widow(er)), each $5,300. Line 5c dependents are not
+  -- derived from a count (tenforty-aqx.4.1.6); they enter through the explicit
+  -- aggregate, which is TOTAL dollars including the yourself/spouse base. The
+  -- spec takes the greater, so a default-zero input does not omit the base and
+  -- an explicit total does not count it twice.
+  exemptionTotal <- keyInput "L5e" "personal_exemptions" "Total exemption dollars including taxpayer/spouse/dependents (IN-111 Line 5e)"
+  mandatoryExemptions <-
+    interior "MandatoryExemptions" "mandatory_exemptions" $
+      byStatusE (fmap lit (byStatus vtPersonalExemption2025 (2 * vtPersonalExemption2025) vtPersonalExemption2025 vtPersonalExemption2025 vtPersonalExemption2025))
+  exemptions <-
+    interior "L5e_total" "total_personal_exemptions" $
+      greaterOf mandatoryExemptions exemptionTotal
+
+  -- Line 8: Vermont Taxable Income (IN-111 Line 7: Line 3 less Lines 4 and 5e)
   l8 <-
     keyOutput "L8" "vt_taxable_income" "Vermont taxable income" $
-      l4 `subtractNotBelowZero` l7
+      l4 `subtractNotBelowZero` (l7 .+. exemptions)
 
   -- Line 9: Tax from tax rate schedule
   l9 <-

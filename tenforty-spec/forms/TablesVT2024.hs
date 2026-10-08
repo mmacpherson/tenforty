@@ -3,6 +3,7 @@
 module TablesVT2024
   ( vtBracketsTable2024,
     vtStandardDeduction2024,
+    vtPersonalExemption2024,
   )
 where
 
@@ -67,3 +68,9 @@ vtBracketsTable2024 =
 -- - Qualifying Widow(er): $14,850
 vtStandardDeduction2024 :: ByStatus (Amount Dollars)
 vtStandardDeduction2024 = byStatus 7400 14850 7400 11100 14850
+
+-- | Vermont 2024 personal exemption, per exemption counted on IN-111 Line 5d
+-- Source: Vermont IN-111 instructions 2024, p.7 (Line 5e: "Multiply Line 5d by $5,100")
+-- https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf
+vtPersonalExemption2024 :: Amount Dollars
+vtPersonalExemption2024 = 5100

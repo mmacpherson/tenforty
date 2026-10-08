@@ -1,8 +1,8 @@
 """Pin the compiled VT IN-111 graph parameters to the official VT publications.
 
-The silver VT scenarios are strict known failures until the graph models the
-Line 5e personal exemption, so they cannot detect a regression in the rate
-schedule or standard deduction. These checks can.
+The silver VT scenarios carry bounded tax-table/rounding known defects
+(tenforty-tj2.20), so they detect a regression only beyond about a dollar per
+case. These checks pin the rate schedule and standard deduction exactly.
 
 Evidence kind: published table rows / instruction amounts (not worked returns).
 Transcribed blind, session 1b251ce6, retrieved 2026-09-30, from:

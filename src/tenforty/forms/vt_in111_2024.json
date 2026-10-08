@@ -12,7 +12,8 @@
         2,
         3,
         4,
-        5
+        5,
+        6
     ],
     "meta": {
         "form_id": "vt_in111",
@@ -36,84 +37,84 @@
         },
         "10": {
             "id": 10,
-            "name": "L4_vt_agi",
             "op": {
-                "left": 7,
-                "right": 9,
-                "type": "max"
+                "left": 9,
+                "right": 1,
+                "type": "sub"
             }
         },
         "11": {
             "id": 11,
+            "name": "L4_vt_agi",
             "op": {
-                "type": "literal",
-                "value": 7400
+                "left": 8,
+                "right": 10,
+                "type": "max"
             }
         },
         "12": {
             "id": 12,
             "op": {
                 "type": "literal",
-                "value": 14850
+                "value": 7400
             }
         },
         "13": {
             "id": 13,
             "op": {
                 "type": "literal",
-                "value": 7400
+                "value": 14850
             }
         },
         "14": {
             "id": 14,
             "op": {
                 "type": "literal",
-                "value": 11100
+                "value": 7400
             }
         },
         "15": {
             "id": 15,
             "op": {
                 "type": "literal",
-                "value": 14850
+                "value": 11100
             }
         },
         "16": {
             "id": 16,
-            "name": "L5_vt_standard_deduction",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 14,
-                    "married_joint": 12,
-                    "married_separate": 13,
-                    "qualifying_widow": 15,
-                    "single": 11
-                }
+                "type": "literal",
+                "value": 14850
             }
         },
         "17": {
             "id": 17,
-            "name": "L7_vt_deduction",
+            "name": "L5_vt_standard_deduction",
             "op": {
-                "left": 16,
-                "right": 2,
-                "type": "max"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 15,
+                    "married_joint": 13,
+                    "married_separate": 14,
+                    "qualifying_widow": 16,
+                    "single": 12
+                }
             }
         },
         "18": {
             "id": 18,
+            "name": "L7_vt_deduction",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 17,
+                "right": 2,
+                "type": "max"
             }
         },
         "19": {
             "id": 19,
             "op": {
-                "left": 10,
-                "right": 17,
-                "type": "sub"
+                "type": "literal",
+                "value": 5100
             }
         },
         "2": {
@@ -125,87 +126,168 @@
         },
         "20": {
             "id": 20,
-            "name": "L8_vt_taxable_income",
             "op": {
-                "left": 18,
-                "right": 19,
-                "type": "max"
+                "type": "literal",
+                "value": 10200
             }
         },
         "21": {
             "id": 21,
-            "name": "L9_vt_income_tax",
             "op": {
-                "income": 20,
-                "table": "vt_brackets_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 5100
             }
         },
         "22": {
             "id": 22,
-            "name": "L11_vt_tax_liability",
             "op": {
-                "left": 21,
-                "right": 3,
-                "type": "max"
+                "type": "literal",
+                "value": 5100
             }
         },
         "23": {
             "id": 23,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 5100
             }
         },
         "24": {
             "id": 24,
+            "name": "MandatoryExemptions",
             "op": {
-                "left": 22,
-                "right": 4,
-                "type": "sub"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 22,
+                    "married_joint": 20,
+                    "married_separate": 21,
+                    "qualifying_widow": 23,
+                    "single": 19
+                }
             }
         },
         "25": {
             "id": 25,
-            "name": "L13_vt_tax_after_credits",
+            "name": "L5e_total",
             "op": {
-                "left": 23,
-                "right": 24,
+                "left": 24,
+                "right": 3,
                 "type": "max"
             }
         },
         "26": {
             "id": 26,
-            "name": "L15_vt_total_tax",
             "op": {
-                "left": 25,
-                "right": 5,
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "left": 18,
+                "right": 25,
                 "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 11,
+                "right": 27,
+                "type": "sub"
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "L8_vt_taxable_income",
+            "op": {
+                "left": 26,
+                "right": 28,
+                "type": "max"
             }
         },
         "3": {
             "id": 3,
-            "name": "L10_vt_alternative_minimum_tax",
+            "name": "L5e_personal_exemptions",
             "op": {
                 "type": "input"
             }
         },
+        "30": {
+            "id": 30,
+            "name": "L9_vt_income_tax",
+            "op": {
+                "income": 29,
+                "table": "vt_brackets_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L11_vt_tax_liability",
+            "op": {
+                "left": 30,
+                "right": 4,
+                "type": "max"
+            }
+        },
+        "32": {
+            "id": 32,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "33": {
+            "id": 33,
+            "op": {
+                "left": 31,
+                "right": 5,
+                "type": "sub"
+            }
+        },
+        "34": {
+            "id": 34,
+            "name": "L13_vt_tax_after_credits",
+            "op": {
+                "left": 32,
+                "right": 33,
+                "type": "max"
+            }
+        },
+        "35": {
+            "id": 35,
+            "name": "L15_vt_total_tax",
+            "op": {
+                "left": 34,
+                "right": 6,
+                "type": "add"
+            }
+        },
         "4": {
             "id": 4,
-            "name": "L12_vt_credits",
+            "name": "L10_vt_alternative_minimum_tax",
             "op": {
                 "type": "input"
             }
         },
         "5": {
             "id": 5,
-            "name": "L14_vt_additional_taxes",
+            "name": "L12_vt_credits",
             "op": {
                 "type": "input"
             }
         },
         "6": {
             "id": 6,
+            "name": "L14_vt_additional_taxes",
+            "op": {
+                "type": "input"
+            }
+        },
+        "7": {
+            "id": 7,
             "name": "L1_federal_agi",
             "op": {
                 "form": "us_1040",
@@ -214,36 +296,28 @@
                 "year": 2024
             }
         },
-        "7": {
-            "id": 7,
+        "8": {
+            "id": 8,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "8": {
-            "id": 8,
-            "op": {
-                "left": 6,
-                "right": 0,
-                "type": "add"
-            }
-        },
         "9": {
             "id": 9,
             "op": {
-                "left": 8,
-                "right": 1,
-                "type": "sub"
+                "left": 7,
+                "right": 0,
+                "type": "add"
             }
         }
     },
     "outputs": [
-        6,
-        26,
-        10,
-        20,
-        21
+        7,
+        35,
+        11,
+        29,
+        30
     ],
     "tables": {
         "vt_brackets_2024": {

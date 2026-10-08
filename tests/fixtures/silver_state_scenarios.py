@@ -7,6 +7,7 @@ from .evidence import (
     MS_EVIDENCE,
     NJ_VA_EVIDENCE,
     VT_EVIDENCE,
+    VT_EXEMPTION_EVIDENCE,
     WI_EVIDENCE,
 )
 from .tax_scenario import KnownDefect, TaxScenario
@@ -89,6 +90,45 @@ def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDef
         maximum=center + 0.50,
         reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
     )
+
+
+def vt_table_gap(
+    rate: float, taxable_income: float, row_low: float, *, first_bracket: bool
+) -> KnownDefect:
+    """Signed graph-minus-table bound for one $100 VT tax-table row.
+
+    IN-111 Line 8 uses the tax table below $75,000 of taxable income (2024/2025
+    IN-111 instructions p.13). Each row prices its midpoint at the schedule rate
+    and prints whole dollars, so the exact formula at the return's own income
+    differs by ``rate`` times the distance from the midpoint, plus or minus
+    $0.50 of printed-row rounding. Above the first bracket the published base is
+    itself a whole-dollar rounding of the cumulative schedule (within $0.50),
+    so those rows allow $1.00. ``rate`` is the single rate across the row.
+    """
+    assert row_low <= taxable_income < row_low + 100 and taxable_income < 75_000
+    center = rate * (taxable_income - (row_low + 50))
+    slack = 0.50 if first_bracket else 1.00
+    return KnownDefect(
+        quantity="state_total_tax",
+        minimum=center - slack,
+        maximum=center + slack,
+        reason="VT requires the $100 tax-table row below $75,000 TI; graph uses "
+        "the unrounded schedule formula (tenforty-tj2.20)",
+    )
+
+
+# IN-111 Line 8 at $75,000+ is base + rate x excess from the rate schedule,
+# rounded to whole dollars (instructions p.3 and p.13). Each published base is
+# within $0.50 of the exact cumulative schedule (all 32 bases, 2024 and 2025,
+# checked in docs/validation/state-fixtures/VT-2024-2025.md), and the result
+# rounds by up to $0.50 more.
+VT_SCHEDULE_ROUNDING_GAP = KnownDefect(
+    quantity="state_total_tax",
+    minimum=-1.00,
+    maximum=1.00,
+    reason="VT IN-111 requires whole-dollar schedule tax from rounded published "
+    "bases; graph is the unrounded cumulative formula (tenforty-b72.42)",
+)
 
 
 VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
@@ -986,10 +1026,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # VT Department of Taxes PDFs retrieved 2026-09-30:
     #   2025: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf
     #   2024: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf
-    # They are strict known failures: the graph omits the Line 5e personal
-    # exemption, and it prices Line 7 with the exact bracket formula where VT
-    # prescribes the tax table (midpoint of a $100 band) or a rounded published
-    # base tax, a residual of a few dollars ($3.70 observed; tenforty-xew precision contract).
+    # The Line 5e exemption is derived (tenforty-b72.19). Each case keeps a
+    # bounded known defect: the graph prices Line 7 with the unrounded bracket
+    # formula where VT prescribes the $100 tax table below $75,000 or a
+    # whole-dollar schedule from rounded published bases (tenforty-tj2.20).
     #
     # VT Single, $30,000 W2 (2025)
     # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.15, retrieved 2026-09-30
@@ -1006,11 +1046,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         expected_state_tax=571.0,
         expected_federal_agi=30000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
-            "VT TI 22,350 vs official 17,050; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 17_050, 17_000, first_bracket=True),),
         backend="graph",
     ),
     # VT Single, $90,000 W2 (2025)
@@ -1028,11 +1064,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=90000.0,
         expected_state_tax=3480.0,
         expected_federal_agi=90000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
-            "VT TI 82,350 vs official 77,050; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT Single, $300,000 W2 (2025)
@@ -1050,11 +1082,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=300000.0,
         expected_state_tax=19443.0,
         expected_federal_agi=300000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
-            "VT TI 292,350 vs official 287,050; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT MFJ, $30,000 W2 (2025)
@@ -1072,11 +1100,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         expected_state_tax=139.0,
         expected_federal_agi=30000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
-            "VT TI 14,700 vs official 4,100; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 4_100, 4_100, first_bracket=True),),
         backend="graph",
     ),
     # VT MFJ, $90,000 W2 (2025)
@@ -1094,11 +1118,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=90000.0,
         expected_state_tax=2149.0,
         expected_federal_agi=90000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
-            "VT TI 74,700 vs official 64,100; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 64_100, 64_100, first_bracket=True),),
         backend="graph",
     ),
     # VT MFJ, $300,000 W2 (2025)
@@ -1116,11 +1136,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=300000.0,
         expected_state_tax=16155.0,
         expected_federal_agi=300000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $10,600): "
-            "VT TI 284,700 vs official 274,100; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT HoH, $30,000 W2 (2025)
@@ -1138,11 +1154,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         expected_state_tax=444.0,
         expected_federal_agi=30000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
-            "VT TI 18,550 vs official 13,250; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 13_250, 13_200, first_bracket=True),),
         backend="graph",
     ),
     # VT HoH, $90,000 W2 (2025)
@@ -1150,6 +1162,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Fixture kind: tax-table; derived blind, session 1b251ce6
     # VT TI: 90,000 - 11,450 std - 5,300 exemptions = 73,250
     # VT tax: row 73,200-73,300 -> $2,683
+    # TI is the row midpoint and the exact schedule there is 2,683.00, so the
+    # formula equals the table and no tax-table defect applies.
     TaxScenario(
         source="VT 2025 IN-111 instructions p.18 (tax-table)",
         state_evidence=VT_EVIDENCE,
@@ -1160,11 +1174,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=90000.0,
         expected_state_tax=2683.0,
         expected_federal_agi=90000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
-            "VT TI 78,550 vs official 73,250; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
         backend="graph",
     ),
     # VT HoH, $300,000 W2 (2025)
@@ -1182,11 +1191,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=300000.0,
         expected_state_tax=17739.0,
         expected_federal_agi=300000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,300): "
-            "VT TI 288,550 vs official 283,250; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT Single, $30,000 W2 (2024)
@@ -1204,11 +1209,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         expected_state_tax=588.0,
         expected_federal_agi=30000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
-            "VT TI 22,600 vs official 17,500; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 17_500, 17_500, first_bracket=True),),
         backend="graph",
     ),
     # VT Single, $90,000 W2 (2024)
@@ -1226,11 +1227,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=90000.0,
         expected_state_tax=3558.0,
         expected_federal_agi=90000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
-            "VT TI 82,600 vs official 77,500; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT Single, $300,000 W2 (2024)
@@ -1248,11 +1245,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=300000.0,
         expected_state_tax=19656.0,
         expected_federal_agi=300000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
-            "VT TI 292,600 vs official 287,500; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT MFJ, $30,000 W2 (2024)
@@ -1270,11 +1263,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         expected_state_tax=166.0,
         expected_federal_agi=30000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
-            "VT TI 15,150 vs official 4,950; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 4_950, 4_900, first_bracket=True),),
         backend="graph",
     ),
     # VT MFJ, $90,000 W2 (2024)
@@ -1292,11 +1281,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=90000.0,
         expected_state_tax=2176.0,
         expected_federal_agi=90000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
-            "VT TI 75,150 vs official 64,950; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 64_950, 64_900, first_bracket=True),),
         backend="graph",
     ),
     # VT MFJ, $300,000 W2 (2024)
@@ -1314,11 +1299,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=300000.0,
         expected_state_tax=16364.0,
         expected_federal_agi=300000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $10,200): "
-            "VT TI 285,150 vs official 274,950; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # VT HoH, $30,000 W2 (2024)
@@ -1336,11 +1317,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=30000.0,
         expected_state_tax=464.0,
         expected_federal_agi=30000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
-            "VT TI 18,900 vs official 13,800; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.0335, 13_800, 13_800, first_bracket=True),),
         backend="graph",
     ),
     # VT HoH, $90,000 W2 (2024)
@@ -1358,11 +1335,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=90000.0,
         expected_state_tax=2788.0,
         expected_federal_agi=90000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
-            "VT TI 78,900 vs official 73,800; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(vt_table_gap(0.066, 73_800, 73_800, first_bracket=False),),
         backend="graph",
     ),
     # VT HoH, $300,000 W2 (2024)
@@ -1380,11 +1353,285 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=300000.0,
         expected_state_tax=18003.0,
         expected_federal_agi=300000.0,
-        known_failure=(
-            "Graph omits VT personal exemption (IN-111 Line 5e, $5,100): "
-            "VT TI 288,900 vs official 283,800; exemption missing (tenforty-b72.19), "
-            "then table-band precision (tenforty-xew)"
-        ),
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # VT Line 5 exemption scenarios (tenforty-b72.19), from a second blind
+    # derivation, 2026-10-07, recorded in docs/validation/state-fixtures/VT-2024-2025.md.
+    # Exemptions: yourself, a spouse only for MFJ (not MFS or QW), and each
+    # dependent, at $5,100 (2024) or $5,300 (2025) each. num_dependents is not
+    # mapped for VT (tenforty-aqx.4.1.6), so cases with dependents pass the Line
+    # 5e total as dependent_exemptions.
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.16, retrieved 2026-10-07
+    # VT TI: 50,000 - 7,400 std - 1 x 5,100 exemptions = 37,500
+    # VT tax: row 37,500-37,600 -> $1,258
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.16 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT Single, $50,000 W2 (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1258.0,
+        expected_federal_agi=50000.0,
+        known_defects=(vt_table_gap(0.0335, 37_500, 37_500, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.17, retrieved 2026-10-07
+    # VT TI: 90,000 - 14,850 std - 4 x 5,100 exemptions = 54,750
+    # VT tax: row 54,700-54,800 -> $1,834
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.17 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT MFJ, $90,000 W2, 2 dependents (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        # Line 5d = 2 + 2 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=20400.0,
+        expected_state_tax=1834.0,
+        expected_federal_agi=90000.0,
+        known_defects=(vt_table_gap(0.0335, 54_750, 54_700, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.15, retrieved 2026-10-07
+    # VT TI: 45,000 - 11,100 std - 2 x 5,100 exemptions = 23,700
+    # VT tax: row 23,700-23,800 -> $796
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.15 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT HoH, $45,000 W2, 1 dependent (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        # Line 5d = 1 + 1 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=10200.0,
+        expected_state_tax=796.0,
+        expected_federal_agi=45000.0,
+        known_defects=(vt_table_gap(0.0335, 23_700, 23_700, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.15, retrieved 2026-10-07
+    # VT TI: 40,000 - 7,400 std - 1 x 5,100 exemptions = 27,500
+    # VT tax: row 27,500-27,600 -> $923
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.15 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT MFS, $40,000 W2 (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=923.0,
+        expected_federal_agi=40000.0,
+        known_defects=(vt_table_gap(0.0335, 27_500, 27_500, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.16, retrieved 2026-10-07
+    # VT TI: 70,000 - 14,850 std - 2 x 5,100 exemptions = 44,950
+    # VT tax: row 44,900-45,000 -> $1,506
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.16 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT QW, $70,000 W2, 1 dependent (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        # Line 5d = 1 + 1 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=10200.0,
+        expected_state_tax=1506.0,
+        expected_federal_agi=70000.0,
+        known_defects=(vt_table_gap(0.0335, 44_950, 44_900, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.14, retrieved 2026-10-07
+    # VT TI: 20,000 - 7,400 std - 1 x 5,100 exemptions = 7,500
+    # VT tax: row 7,500-7,600 -> $253
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.14 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT Single, $20,000 W2 (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=253.0,
+        expected_federal_agi=20000.0,
+        known_defects=(vt_table_gap(0.0335, 7_500, 7_500, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, retrieved 2026-10-07
+    # VT TI: 150,000 - 7,400 std - 1 x 5,100 exemptions = 137,500
+    # VT tax: rate schedule -> $7,733 (arithmetic in the record, scenario 7)
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13 (derived-arithmetic)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT Single, $150,000 W2 (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=7733.0,
+        expected_federal_agi=150000.0,
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2024.pdf p.13, p.7, retrieved 2026-10-07
+    # VT TI: 250,000 - 14,850 std - 5 x 5,100 exemptions = 209,650
+    # VT tax: rate schedule -> $11,402 (arithmetic in the record, scenario 8)
+    TaxScenario(
+        source="VT 2024 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT MFJ, $250,000 W2, 3 dependents (exemptions, 2024)",
+        year=2024,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=250000.0,
+        # Line 5d = 2 + 3 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=25500.0,
+        expected_state_tax=11402.0,
+        expected_federal_agi=250000.0,
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.16, retrieved 2026-10-07
+    # VT TI: 50,000 - 7,650 std - 1 x 5,300 exemptions = 37,050
+    # VT tax: row 37,000-37,100 -> $1,241
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.16 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT Single, $50,000 W2 (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=50000.0,
+        expected_state_tax=1241.0,
+        expected_federal_agi=50000.0,
+        known_defects=(vt_table_gap(0.0335, 37_050, 37_000, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.17, retrieved 2026-10-07
+    # VT TI: 90,000 - 15,300 std - 4 x 5,300 exemptions = 53,500
+    # VT tax: row 53,500-53,600 -> $1,794
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.17 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT MFJ, $90,000 W2, 2 dependents (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=90000.0,
+        # Line 5d = 2 + 2 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=21200.0,
+        expected_state_tax=1794.0,
+        expected_federal_agi=90000.0,
+        known_defects=(vt_table_gap(0.0335, 53_500, 53_500, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.15, retrieved 2026-10-07
+    # VT TI: 45,000 - 11,450 std - 2 x 5,300 exemptions = 22,950
+    # VT tax: row 22,900-23,000 -> $769
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.15 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT HoH, $45,000 W2, 1 dependent (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Head_of_House",
+        w2_income=45000.0,
+        # Line 5d = 1 + 1 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=10600.0,
+        expected_state_tax=769.0,
+        expected_federal_agi=45000.0,
+        known_defects=(vt_table_gap(0.0335, 22_950, 22_900, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.15, retrieved 2026-10-07
+    # VT TI: 40,000 - 7,650 std - 1 x 5,300 exemptions = 27,050
+    # VT tax: row 27,000-27,100 -> $906
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.15 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT MFS, $40,000 W2 (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Sep",
+        w2_income=40000.0,
+        expected_state_tax=906.0,
+        expected_federal_agi=40000.0,
+        known_defects=(vt_table_gap(0.0335, 27_050, 27_000, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.16, retrieved 2026-10-07
+    # VT TI: 70,000 - 15,300 std - 2 x 5,300 exemptions = 44,100
+    # VT tax: row 44,100-44,200 -> $1,479
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.16 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT QW, $70,000 W2, 1 dependent (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Widow(er)",
+        w2_income=70000.0,
+        # Line 5d = 1 + 1 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=10600.0,
+        expected_state_tax=1479.0,
+        expected_federal_agi=70000.0,
+        known_defects=(vt_table_gap(0.0335, 44_100, 44_100, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.14, retrieved 2026-10-07
+    # VT TI: 20,000 - 7,650 std - 1 x 5,300 exemptions = 7,050
+    # VT tax: row 7,000-7,100 -> $236
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.14 (tax-table)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT Single, $20,000 W2 (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=20000.0,
+        expected_state_tax=236.0,
+        expected_federal_agi=20000.0,
+        known_defects=(vt_table_gap(0.0335, 7_050, 7_000, first_bracket=True),),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, retrieved 2026-10-07
+    # VT TI: 150,000 - 7,650 std - 1 x 5,300 exemptions = 137,050
+    # VT tax: rate schedule -> $7,614 (arithmetic in the record, scenario 15)
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13 (derived-arithmetic)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT Single, $150,000 W2 (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Single",
+        w2_income=150000.0,
+        expected_state_tax=7614.0,
+        expected_federal_agi=150000.0,
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
+        backend="graph",
+    ),
+    # Source: https://tax.vermont.gov/sites/tax/files/documents/IN-111-Instr-2025.pdf p.13, p.7, retrieved 2026-10-07
+    # VT TI: 250,000 - 15,300 std - 5 x 5,300 exemptions = 208,200
+    # VT tax: rate schedule -> $11,147 (arithmetic in the record, scenario 16)
+    TaxScenario(
+        source="VT 2025 IN-111 instructions p.13, p.7 (derived-arithmetic)",
+        state_evidence=VT_EXEMPTION_EVIDENCE,
+        description="VT MFJ, $250,000 W2, 3 dependents (exemptions, 2025)",
+        year=2025,
+        state="VT",
+        filing_status="Married/Joint",
+        w2_income=250000.0,
+        # Line 5d = 2 + 3 dependents; dependents enter as the total (aqx.4.1.6).
+        dependent_exemptions=26500.0,
+        expected_state_tax=11147.0,
+        expected_federal_agi=250000.0,
+        known_defects=(VT_SCHEDULE_ROUNDING_GAP,),
         backend="graph",
     ),
     # ========== DELAWARE SCENARIOS ==========
