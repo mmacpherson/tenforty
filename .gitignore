@@ -4,8 +4,7 @@ scratch/
 SHARED_TASK_NOTES.md
 .claude/*.json
 .beads/
-# This is a library, not an application.
-uv.lock
+# uv.lock is committed: it pins development and CI, never what users install.
 
 # Benchmark outputs
 bench_results.html

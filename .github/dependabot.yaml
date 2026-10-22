@@ -8,3 +8,12 @@ updates:
   schedule:
       # Check for updates to GitHub Actions every week
     interval: weekly
+
+  # Maintain uv.lock
+- package-ecosystem: uv
+  directory: /
+  schedule:
+    interval: monthly
+  groups:
+    uv-lock:
+      patterns: ['*']
