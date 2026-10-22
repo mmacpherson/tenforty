@@ -254,8 +254,8 @@ the return **both ways** and keeps the itemized total only when it strictly
 lowers tax.
 
 ```python
-self.array("standard", np.where(item_taxes < std_taxes, 0.0, std))
-self.array("c04470", np.where(item_taxes < std_taxes, item, 0.0))
+self.array('standard', np.where(item_taxes < std_taxes, 0., std))
+self.array('c04470',   np.where(item_taxes < std_taxes, item, 0.))
 ```
 
 OTS and the graph spec take whichever deduction is larger. The rules agree
