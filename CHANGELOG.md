@@ -1,6 +1,11 @@
 ## [Unreleased]
 
 ## [2025.12] - 2026-10-22
+OTS remains the default backend. The graph backend is opt-in and experimental:
+it runs when you pass `backend="graph"`, and it always backs `marginal_rate`,
+`marginal_rates` and `solve_for_income`, which rely on its automatic
+differentiation. Entries marked "graph backend" apply only there.
+
 ### Fixed (OTS backend, the default)
 - **Filing status now reaches OTS for Massachusetts, New Jersey and Virginia.**
   Their OTS input maps never set the template's Status field, so every MA and
@@ -18,7 +23,7 @@
   `nan` and $0 of tax on the graph backend, and crashed the process on OTS.
   (#361)
 
-### Fixed (graph backend)
+### Fixed (graph backend: opt-in, experimental)
 - State exemptions are derived from the return instead of a fixed baseline:
   Hawaii (N-11 personal exemption, with dependents through the exemption
   total), Indiana (IT-40 Schedule 3 base, and the line 8/9 order), Kansas
@@ -53,19 +58,21 @@
   evaluate to 0. No shipped form used them. (#358)
 
 ### Added
-- Graph backend: federal tax below $100,000 comes from the IRS Tax Table, as
+- Graph backend (experimental): federal tax below $100,000 comes from the IRS Tax Table, as
   the 1040 instructions require, with the Tax Computation Worksheet above it.
   Every published 2024 and 2025 row is checked against the IRS tables.
-- Graph backend: Form 8995-A limits, with W-2 wage, UBIA, and specified-service
+- Graph backend (experimental): Form 8995-A limits, with W-2 wage, UBIA, and specified-service
   inputs. (#338)
-- Graph backend: full gradient vectors over many inputs at once (#334), and
+- `marginal_rates(...)`: the marginal rate with respect to every continuous
+  input at once, from one reverse-mode pass (graph backend) (#334), and
   autodiff planning examples (#335).
-- A real-time tax calculator that runs in the browser (WebAssembly), with
-  automatic differentiation for marginal rates at its center. (#348)
+- A real-time tax calculator that runs in the browser (WebAssembly), built on
+  the graph backend, with automatic differentiation for marginal rates at its
+  center. (#348)
 - Wheels for Python 3.15.
 
 ### Removed
-- Graph backend runtime linker. `GraphSet`, `UnresolvedImport`, and `LinkError`
+- Graph backend (experimental): the runtime linker. `GraphSet`, `UnresolvedImport`, and `LinkError`
   are gone from `tenforty.graphlib` and the WASM bindings, along with
   `form_resolution.py`. Cross-form imports are now resolved at spec-build time by
   the Haskell `resolveForms` pass, which emits one import-free graph per year
@@ -86,7 +93,7 @@
   move; pass `output="federal_total_tax"` to keep the previous meaning. `output` also
   now accepts `federal_total_tax` and `state_total_tax`, which previously raised
   `ValueError: Node not found`. Evaluation is unchanged. (#328)
-- Graph backend: an unset graph input now reads as `0.0` instead of raising.
+- Graph backend (experimental): an unset graph input now reads as `0.0` instead of raising.
   The resolved per-year graph carries every state's inputs (~800); a given return
   sets only the handful it uses. Mapping typos are still rejected at `set()` (an
   unknown input *name* errors), and the new `graph_continuity_test` asserts every
