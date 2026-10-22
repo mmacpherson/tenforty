@@ -20,6 +20,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v7
       with:
+        persist-credentials: false
         fetch-depth: 0
 
     - name: Set up Python
@@ -117,6 +118,17 @@ jobs:
           fi
         fi
 
+    - name: Mint the CI bot's token
+      # Pushes and PRs made with the built-in token don't trigger workflows, so
+      # the PR would get no CI; ones made with this GitHub App's token do.
+      # Minted just before use: App tokens last an hour.
+      if: env.HOOKS_UPDATED == 'true' && env.HOOKS_VALID == 'true'
+      id: bot
+      uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
+      with:
+        client-id: ${{ vars.CI_BOT_CLIENT_ID }}
+        private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
+
     - name: Create Pull Request
       if: env.HOOKS_UPDATED == 'true' && env.HOOKS_VALID == 'true'
       run: |
@@ -140,7 +152,7 @@ jobs:
         )"
 
         # Push the branch
-        git push origin "$BRANCH_NAME"
+        git push "https://x-access-token:${BOT_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH_NAME"
 
         # Create PR using gh CLI
         gh pr create \
@@ -157,7 +169,8 @@ jobs:
         EOF
         )"
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ steps.bot.outputs.token }}
+        BOT_TOKEN: ${{ steps.bot.outputs.token }}
 
     - name: Summary
       if: always()
