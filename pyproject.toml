@@ -51,7 +51,7 @@ license = { file = "LICENSE.txt", content-type = "text/plain" }
 name = "tenforty"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">= 3.10"
-version = "2025.11"
+version = "2025.12"
 
 [project.optional-dependencies]
 dev = [

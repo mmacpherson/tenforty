@@ -1,6 +1,73 @@
 ## [Unreleased]
+
+## [2025.12] - 2026-10-22
+### Fixed (OTS backend, the default)
+- **Filing status now reaches OTS for Massachusetts, New Jersey and Virginia.**
+  Their OTS input maps never set the template's Status field, so every MA and
+  NJ return was computed as Single and every VA return as Married/Joint,
+  whatever `filing_status` the caller passed. Statuses those state programs
+  cannot compute now raise instead of silently miscomputing: MA Widow(er), and
+  VA Head of Household and Widow(er).
+- The OTS path now applies the Form 8995-A QBI limits (W-2 wages, UBIA, and
+  specified-service phase-ins) that OpenTaxSolver omits, by running Form 1040
+  and Form 8995 once, applying the limits in tenforty, and rerunning. The QBI
+  deduction is now part of the public return output on both backends. (#339)
+
+### Fixed (both backends)
+- NaN or infinite inputs raise `ValueError`. Previously NaN produced an AGI of
+  `nan` and $0 of tax on the graph backend, and crashed the process on OTS.
+  (#361)
+
+### Fixed (graph backend: opt-in, experimental)
+- State exemptions are derived from the return instead of a fixed baseline:
+  Hawaii (N-11 personal exemption, with dependents through the exemption
+  total), Indiana (IT-40 Schedule 3 base, and the line 8/9 order), Kansas
+  (K-40 base; federal qualifying surviving spouse files as KS head of
+  household), Maine (1040ME exemption and its phase-out), Maryland (Form 502
+  base tiered by federal AGI), Vermont (IN-111 line 5), New Jersey, Virginia
+  and Louisiana (baseline exemptions and filing thresholds), and Massachusetts
+  (No Tax Status for W-2 returns).
+- Missouri computes the MO-1040 line 13 federal income tax deduction, and has
+  its 0% bracket for 2024 and 2025.
+- Corrected tables: California's TY2024 rate schedules and phase-out
+  thresholds (#363), Vermont's 2025 brackets and standard deduction,
+  Mississippi's head-of-family standard deduction ($3,400), and Wisconsin's
+  sliding-scale standard deduction and exemptions.
+- Louisiana inputs are lowered per year, with the 2024 exemption arithmetic
+  corrected.
+- Indiana and Louisiana returned 0 for state taxable income (and Louisiana
+  AGI); they now report the forms' values. (#359)
+- `num_dependents` raises when nonzero, since the federal graph doesn't use it
+  and dependents' credits were silently left out. Previously the check passed
+  because CA and WI map the count to their own lines.
+- Batch evaluation raises `ValueError("batch row N: ...")` for a failing row,
+  as the single-return path does, instead of filling it with 0. (#360)
+- Forced itemization is honored. (#347)
+- AMT: the high-income Married/Separate increase is applied (#341), and 2025
+  MFS shares the AMT gain ceiling (#343).
+- Derivatives at kinks: marginal rates use the right derivative of bracket tax
+  at zero income (#362) and of composed functions at active kinks (#330), and
+  follow the qualified-dividend worksheet's validation (#329).
+- Form specifications that use not-yet-supported phase-out parameters or
+  table lookups are rejected, instead of compiling to graphs that silently
+  evaluate to 0. No shipped form used them. (#358)
+
+### Added
+- Graph backend (experimental): federal tax below $100,000 comes from the IRS Tax Table, as
+  the 1040 instructions require, with the Tax Computation Worksheet above it.
+  Every published 2024 and 2025 row is checked against the IRS tables.
+- Graph backend (experimental): Form 8995-A limits, with W-2 wage, UBIA, and specified-service
+  inputs. (#338)
+- `marginal_rates(...)`: the marginal rate with respect to every continuous
+  input at once, from one reverse-mode pass (graph backend) (#334), and
+  autodiff planning examples (#335).
+- A real-time tax calculator that runs in the browser (WebAssembly), built on
+  the graph backend, with automatic differentiation for marginal rates at its
+  center. (#348)
+- Wheels for Python 3.15.
+
 ### Removed
-- Graph backend runtime linker. `GraphSet`, `UnresolvedImport`, and `LinkError`
+- Graph backend (experimental): the runtime linker. `GraphSet`, `UnresolvedImport`, and `LinkError`
   are gone from `tenforty.graphlib` and the WASM bindings, along with
   `form_resolution.py`. Cross-form imports are now resolved at spec-build time by
   the Haskell `resolveForms` pass, which emits one import-free graph per year
@@ -21,7 +88,7 @@
   move; pass `output="federal_total_tax"` to keep the previous meaning. `output` also
   now accepts `federal_total_tax` and `state_total_tax`, which previously raised
   `ValueError: Node not found`. Evaluation is unchanged. (#328)
-- Graph backend: an unset graph input now reads as `0.0` instead of raising.
+- Graph backend (experimental): an unset graph input now reads as `0.0` instead of raising.
   The resolved per-year graph carries every state's inputs (~800); a given return
   sets only the handful it uses. Mapping typos are still rejected at `set()` (an
   unknown input *name* errors), and the new `graph_continuity_test` asserts every
