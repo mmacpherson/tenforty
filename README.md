@@ -199,22 +199,24 @@ evaluate_return(
 This results in the following:
 
 ``` python
-{'total_tax': 8484.0,
- 'federal_adjusted_gross_income': 100000.0,
- 'federal_effective_tax_rate': 11.4,
- 'federal_tax_bracket': 12.0,
- 'federal_taxable_income': 74100.0,
- 'federal_amt': 0.0,
- 'federal_income_tax': 8484.0,
- 'federal_se_tax': 0.0,
- 'federal_niit': 0.0,
- 'federal_additional_medicare_tax': 0.0,
- 'federal_total_tax': 8484.0,
- 'state_adjusted_gross_income': 0.0,
- 'state_taxable_income': 0.0,
- 'state_total_tax': 0.0,
- 'state_tax_bracket': 0.0,
- 'state_effective_tax_rate': 0.0}
+{
+    "total_tax": 8484.0,
+    "federal_adjusted_gross_income": 100000.0,
+    "federal_effective_tax_rate": 11.4,
+    "federal_tax_bracket": 12.0,
+    "federal_taxable_income": 74100.0,
+    "federal_amt": 0.0,
+    "federal_income_tax": 8484.0,
+    "federal_se_tax": 0.0,
+    "federal_niit": 0.0,
+    "federal_additional_medicare_tax": 0.0,
+    "federal_total_tax": 8484.0,
+    "state_adjusted_gross_income": 0.0,
+    "state_taxable_income": 0.0,
+    "state_total_tax": 0.0,
+    "state_tax_bracket": 0.0,
+    "state_effective_tax_rate": 0.0,
+}
 ```
 
 No `year=` argument was specified here, so the current tax year, 2025, was used.
@@ -377,9 +379,8 @@ df = (
 )
 
 (
-    so.Plot(df, x="long_term_capital_gains", y="tax", color="Type").add(
-        so.Area(alpha=0.7), so.Stack()
-    )
+    so.Plot(df, x="long_term_capital_gains", y="tax", color="Type")
+    .add(so.Area(alpha=0.7), so.Stack())
     .label(
         x="Long-Term Capital Gains",
         y="Total Tax",
@@ -407,7 +408,9 @@ df = (
         w2_income=100_000, incentive_stock_option_gains=list(range(0, 100_001, 2500))
     )
     .select(["incentive_stock_option_gains", "federal_total_tax", "federal_amt"])
-    .unpivot(index="incentive_stock_option_gains", variable_name="Type", value_name="tax")
+    .unpivot(
+        index="incentive_stock_option_gains", variable_name="Type", value_name="tax"
+    )
     .with_columns(
         pl.col("Type").replace(
             {"federal_amt": "AMT", "federal_total_tax": '"Regular" Tax'}

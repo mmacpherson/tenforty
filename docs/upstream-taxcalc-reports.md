@@ -48,10 +48,13 @@ The itemizer branch just above handles the analogous situation the other way:
 
 ```python
 c62100 = (
-    c00100 - e00700 - qbided - c04470 +
-    c18300 +    # SALT add-back
-    c20800 +    # Sch A misc add-back
-    ...
+    c00100
+    - e00700
+    - qbided
+    - c04470
+    + c18300  # SALT add-back
+    + c20800  # Sch A misc add-back
+    + ...
 )
 ```
 
@@ -69,9 +72,17 @@ Single filer, 2024, $150,000 wages, $200,000 of AMT preference via `cmbtp` (an
 ISO exercise spread), taking the standard deduction:
 
 ```python
-rec = {"RECID": 1, "MARS": 1, "XTOT": 1, "age_head": 40, "age_spouse": 0,
-       "e00200": 150000.0, "e00200p": 150000.0, "e00200s": 0.0,
-       "cmbtp": 200000.0}
+rec = {
+    "RECID": 1,
+    "MARS": 1,
+    "XTOT": 1,
+    "age_head": 40,
+    "age_spouse": 0,
+    "e00200": 150000.0,
+    "e00200p": 150000.0,
+    "e00200s": 0.0,
+    "cmbtp": 200000.0,
+}
 ```
 
 | quantity | Tax-Calculator | our reading of Form 6251 |
@@ -204,17 +215,19 @@ import pandas as pd
 import taxcalc
 
 data = pd.DataFrame(
-    [{
-        "RECID": 1,
-        "MARS": 3,
-        "XTOT": 1,
-        "age_head": 40,
-        "age_spouse": 0,
-        "e00200": 750_000.0,
-        "e00200p": 750_000.0,
-        "e00200s": 0.0,
-        "cmbtp": 300_000.0,
-    }]
+    [
+        {
+            "RECID": 1,
+            "MARS": 3,
+            "XTOT": 1,
+            "age_head": 40,
+            "age_spouse": 0,
+            "e00200": 750_000.0,
+            "e00200p": 750_000.0,
+            "e00200s": 0.0,
+            "cmbtp": 300_000.0,
+        }
+    ]
 )
 records = taxcalc.Records(data=data, start_year=2025, gfactors=None, weights=None)
 calc = taxcalc.Calculator(policy=taxcalc.Policy(), records=records)
