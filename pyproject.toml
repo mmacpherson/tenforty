@@ -23,7 +23,7 @@ taxcalc = [
 ]
 
 [project]
-authors = [{name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com"}]
+authors = [{ name = "Mike Macpherson", email = "mmacpherson@users.noreply.github.com" }]
 classifiers = [
   "Programming Language :: Cython",
   "Programming Language :: Python :: 3",
@@ -32,6 +32,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Operating System :: MacOS",
   "Operating System :: POSIX :: Linux",
   "License :: OSI Approved :: MIT License",
@@ -46,9 +47,9 @@ dependencies = [
   "python-dotenv"
 ]
 description = "Library to compute US federal taxes, and state taxes for some states."
-license = {file = "LICENSE.txt", content-type = "text/plain"}
+license = { file = "LICENSE.txt", content-type = "text/plain" }
 name = "tenforty"
-readme = {file = "README.md", content-type = "text/markdown"}
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">= 3.10"
 version = "2025.11"
 
@@ -120,10 +121,10 @@ unfixable = []
 
 [tool.setuptools]
 ext-modules = [
-  {name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"]}
+  { name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"] }
 ]
 include-package-data = false
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.forms", "tenforty.graphlib"]
 
 [tool.setuptools.package-data]
