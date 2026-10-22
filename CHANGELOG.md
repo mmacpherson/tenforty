@@ -1,11 +1,6 @@
 ## [Unreleased]
 
 ## [2025.12] - 2026-10-22
-OTS remains the default backend. The graph backend is opt-in and experimental:
-it runs when you pass `backend="graph"`, and it always backs `marginal_rate`,
-`marginal_rates` and `solve_for_income`, which rely on its automatic
-differentiation. Entries marked "graph backend" apply only there.
-
 ### Fixed (OTS backend, the default)
 - **Filing status now reaches OTS for Massachusetts, New Jersey and Virginia.**
   Their OTS input maps never set the template's Status field, so every MA and
