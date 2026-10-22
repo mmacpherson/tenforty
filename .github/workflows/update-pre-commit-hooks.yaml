@@ -92,6 +92,9 @@ jobs:
 
     - name: Validate hook updates
       if: env.HOOKS_UPDATED == 'true'
+      # bash explicitly: GitHub's default shell has no pipefail, so `make | tee`
+      # would report tee's success even when hooks fail
+      shell: bash
       env:
         # Skip hooks whose toolchains this runner lacks: Rust (checked by
         # dedicated CI jobs) and the Haskell formatters
