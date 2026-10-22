@@ -1,5 +1,4 @@
-"""
-Benchmark `parse_ots_return` variants against fixture and synthetic inputs.
+"""Benchmark `parse_ots_return` variants against fixture and synthetic inputs.
 
 This preserves the profiling script used to optimize the tenforty/core/parse_ots_return function,
 so it remains available for future parser profiling.

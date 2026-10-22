@@ -53,6 +53,42 @@ jobs:
           echo "No pre-commit hook updates available"
         fi
 
+    - name: Update pinned hook dependencies
+      # `pre-commit autoupdate` bumps each hook's rev but never its
+      # additional_dependencies; move exact pins there (name==version, in
+      # inline lists) to the latest release on PyPI.
+      run: |
+        cp .pre-commit-config.yaml .pre-commit-config.yaml.pins
+        python3 - <<'PY'
+        import json
+        import re
+        import urllib.request
+
+        def latest(name):
+            with urllib.request.urlopen(f"https://pypi.org/pypi/{name}/json") as r:
+                return json.load(r)["info"]["version"]
+
+        def bump(match):
+            name, old = match.groups()
+            new = latest(name)
+            if new != old:
+                print(f"{name}: {old} -> {new}")
+            return f"{name}=={new}"
+
+        path = ".pre-commit-config.yaml"
+        lines = open(path).read().splitlines(keepends=True)
+        pin = re.compile(r"([A-Za-z0-9][A-Za-z0-9._-]*)==([A-Za-z0-9.+!-]+)")
+        lines = [
+            pin.sub(bump, line) if "additional_dependencies" in line else line
+            for line in lines
+        ]
+        open(path, "w").write("".join(lines))
+        PY
+        if ! diff -q .pre-commit-config.yaml .pre-commit-config.yaml.pins > /dev/null; then
+          echo "HOOKS_UPDATED=true" >> "$GITHUB_ENV"
+        fi
+        rm .pre-commit-config.yaml.pins
+
     - name: Validate hook updates
       if: env.HOOKS_UPDATED == 'true'
       env:
@@ -92,8 +128,8 @@ jobs:
         BRANCH_NAME="chore/update-precommit-hooks-$(date +%Y%m%d)"
         git checkout -b "$BRANCH_NAME"
 
-        # Stage the pre-commit config file
-        git add .pre-commit-config.yaml
+        # Stage the config, and any files the validated hooks reformatted
+        git add -u
 
         # Commit the changes
         git commit -m "$(cat <<'EOF'
