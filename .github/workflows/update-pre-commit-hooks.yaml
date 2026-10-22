@@ -93,13 +93,14 @@ jobs:
     - name: Validate hook updates
       if: env.HOOKS_UPDATED == 'true'
       env:
-        # Skip Rust hooks — no toolchain in CI (enforced by dedicated CI jobs)
-        SKIP: cargo-clippy,cargo-fmt
+        # Skip hooks whose toolchains this runner lacks: Rust (checked by
+        # dedicated CI jobs) and the Haskell formatters
+        SKIP: cargo-clippy,cargo-fmt,ormolu,cabal-gild
       run: |
         echo "Running pre-commit hooks to validate updates..."
 
         # First run - often fails but makes auto-fixes
-        if make run-hooks-all-files; then
+        if make run-hooks-all-files 2>&1 | tee hooks.log; then
           echo "HOOKS_VALID=true" >> "$GITHUB_ENV"
           echo "All pre-commit hooks passed validation on first run"
         else
@@ -109,12 +110,13 @@ jobs:
           git add .pre-commit-config.yaml
 
           # Second run - should pass after auto-fixes
-          if make run-hooks-all-files; then
+          if make run-hooks-all-files 2>&1 | tee hooks.log; then
             echo "HOOKS_VALID=true" >> "$GITHUB_ENV"
             echo "All pre-commit hooks passed validation on second run"
           else
             echo "HOOKS_VALID=false" >> "$GITHUB_ENV"
             echo "Pre-commit hooks failed validation - manual intervention required"
+            grep -E '\.+Failed$' hooks.log | sed -E 's/\.+Failed$//' | sort -u > hooks-failed.txt
           fi
         fi
 
@@ -122,7 +124,7 @@ jobs:
       # Pushes and PRs made with the built-in token don't trigger workflows, so
       # the PR would get no CI; ones made with this GitHub App's token do.
       # Minted just before use: App tokens last an hour.
-      if: env.HOOKS_UPDATED == 'true' && env.HOOKS_VALID == 'true'
+      if: env.HOOKS_UPDATED == 'true'
       id: bot
       uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
       with:
@@ -130,7 +132,7 @@ jobs:
         private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
 
     - name: Create Pull Request
-      if: env.HOOKS_UPDATED == 'true' && env.HOOKS_VALID == 'true'
+      if: env.HOOKS_UPDATED == 'true'
       run: |
         # Configure git
         git config user.name "github-actions[bot]"
@@ -154,23 +156,47 @@ jobs:
         # Push the branch
         git push "https://x-access-token:${BOT_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH_NAME"
 
-        # Create PR using gh CLI
-        gh pr create \
-          --title "chore: update pre-commit hooks to latest versions" \
-          --body "$(cat <<'EOF'
+        # A still-open earlier update PR is superseded by this one
+        for n in $(gh pr list --state open --json number,title \
+            --jq '.[] | select(.title | test("update pre-commit hooks to latest versions")) | .number'); do
+          gh pr close "$n" --delete-branch --comment "Superseded by this week's update."
+        done
+
+        TITLE="chore: update pre-commit hooks to latest versions"
+        BODY="$(cat <<'EOF'
         ## Summary
         Weekly automated update of pre-commit hooks to their latest versions.
 
         ## Changes
         - Updated pre-commit hook versions in `.pre-commit-config.yaml`
-
-        ## Test plan
-        - [ ] Verify hooks pass locally: `make run-hooks-all-files`
+        - Includes any files the updated hooks auto-fixed
         EOF
         )"
+        DRAFT=()
+        if [ "$HOOKS_VALID" != "true" ]; then
+          # -- the updated hooks still fail: open a draft that says which, rather
+          #    than nothing at all
+          TITLE="[hooks failing] $TITLE"
+          BODY="$BODY
+
+        ## ⚠️ The updated hooks don't pass yet
+        These hooks still fail on all files after auto-fixing; fix them on this
+        branch before merging:
+
+        $(sed 's/^/- /' hooks-failed.txt)"
+          DRAFT=(--draft)
+        fi
+
+        gh pr create --head "$BRANCH_NAME" "${DRAFT[@]}" --title "$TITLE" --body "$BODY"
       env:
         GH_TOKEN: ${{ steps.bot.outputs.token }}
         BOT_TOKEN: ${{ steps.bot.outputs.token }}
+
+    - name: Fail if the updated hooks don't pass
+      if: env.HOOKS_UPDATED == 'true' && env.HOOKS_VALID != 'true'
+      run: |
+        echo "::error::Updated hooks fail on all files: $(paste -sd, hooks-failed.txt). See the draft PR."
+        exit 1
 
     - name: Summary
       if: always()
@@ -185,7 +211,7 @@ jobs:
             if [ "${{ env.HOOKS_VALID }}" = "true" ]; then
               echo "- **Status**: PR created with hook updates"
             else
-              echo "- **Status**: Hook updates failed validation"
+              echo "- **Status**: Hook updates failed validation; draft PR opened"
             fi
           else
             echo "- **Status**: All hooks already up to date"
@@ -194,7 +220,7 @@ jobs:
 
     - name: Clean up
       if: always()
-      run: rm -f .pre-commit-config.yaml.bak
+      run: rm -f .pre-commit-config.yaml.bak hooks.log hooks-failed.txt
 
     - name: Open issue on failure
       if: failure()
