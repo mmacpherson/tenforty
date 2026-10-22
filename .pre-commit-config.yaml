@@ -40,6 +40,10 @@ repos:
   hooks:
   - id: pretty-format-toml
     args: [--autofix, --indent, '2']
+    # Pin the formatter: an unpinned one varies with when each machine's hook
+    # environment was built (toml-sort 0.24 and 0.25 space inline tables
+    # differently). The weekly update-pre-commit-hooks workflow bumps this pin.
+    additional_dependencies: [toml-sort==0.25.0]
     # Lockfiles are machine-written; reformatting them only makes churn.
     exclude: ^(Cargo|uv)\.lock$
   - id: pretty-format-yaml
