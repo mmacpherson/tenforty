@@ -18,7 +18,7 @@ dev = [
 # meaningful against a fixed taxcalc version. Upgrades are deliberate PRs that
 # regenerate fixtures.
 taxcalc = [
-  "taxcalc==6.7.2",
+  "taxcalc==6.8.0",
   "pandas>=2"
 ]
 
