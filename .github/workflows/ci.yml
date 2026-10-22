@@ -1,0 +1,227 @@
+name: ci
+
+on:
+  push:
+    branches: ['**']  # tags run this via release.yml instead
+  workflow_call:  # from release.yml, on the tagged commit
+
+permissions:
+  contents: read
+
+# Every uv command uses uv.lock as committed, and fails if it is stale
+# (except the latest-deps job).
+env:
+  UV_LOCKED: 1
+
+jobs:
+  # Run validation on every push
+  validate:
+    name: validate (${{ matrix.os }}, ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Windows excluded due to runtime crashes. See docs/windows-build-research.md
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install deps
+      run: uv sync
+
+    - name: Run tests
+      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
+
+  # The jobs above test against uv.lock; this one tests what a new install
+  # gets today, the newest versions pyproject.toml allows.
+  latest-deps:
+    name: validate (ubuntu-latest, 3.14, newest dependencies)
+    runs-on: ubuntu-latest
+    env:
+      UV_LOCKED: false
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: '3.14'
+
+    - name: Install the newest deps
+      run: uv sync --upgrade
+
+    - name: Run tests
+      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
+
+  # Installs the built wheel (not an editable build) and checks both native
+  # backends load from it, on the newest Python.
+  wheel-install:
+    name: installed wheel, Python 3.15 (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      with:
+        python-version: '3.15'
+
+    - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+
+    - name: Install test dependencies
+      run: uv sync --python python --no-install-project
+
+    - name: Build and install wheel
+      run: |
+        uv build --wheel --python .venv/bin/python
+        uv pip install --no-deps dist/*.whl
+
+    - name: Require both native backends from the installed wheel
+      run: |
+        uv run --no-sync python - <<'PY'
+        import sys
+        from pathlib import Path
+
+        import tenforty
+        from tenforty.backends import available_backends
+
+        assert sys.version_info[:2] == (3, 15), sys.version
+        assert Path(tenforty.__file__).is_relative_to(Path(sys.prefix)), tenforty.__file__
+        assert {"ots", "graph"} <= set(available_backends()), available_backends()
+        PY
+
+    - name: Run tests against the installed wheel
+      run: uv run --no-sync pytest --hypothesis-profile=ci
+
+  # The taxcalc adapter conformance tests are gated behind TENFORTY_TAXCALC,
+  # which the job above never sets — so without this job they would never run
+  # anywhere. That is the same failure they exist to catch: F16 happened
+  # because nothing exercised the adapter. Only the conformance file runs here;
+  # the full differential sweep takes ~7 minutes and stays opt-in.
+  taxcalc-adapter:
+    name: taxcalc adapter conformance
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: '3.12'
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install deps with taxcalc
+      run: uv sync --group taxcalc
+
+    - name: Run adapter conformance
+      env:
+        TENFORTY_TAXCALC: '1'
+      run: uv run pytest tests/taxcalc/adapter_conformance_test.py -q
+
+    - name: Verify committed TaxCalc goldens
+      run: >-
+        uv run python scripts/taxcalc_audit.py
+        --check-goldens tests/taxcalc/fixtures/taxcalc_goldens.json
+
+  # The shipped extension is built features=["python"] (setup.py), so the JIT +
+  # SIMD batch path — including reachability-slicing in compile_batch — is
+  # compiled out of every other job here and of pip installs. Without this job
+  # the sliced batch path (the one path where a batch can diverge from
+  # single-eval) has no CI coverage at all. Runs the graph crate's jit-gated
+  # tests, which include the proper-subset slice-vs-interpreter check.
+  graph-jit:
+    name: graph backend (JIT + SIMD)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+
+    - name: Run graph crate tests with JIT
+      run: cargo test -p tenforty-graph --features jit
+
+  # Build wheels and sdist on main and on release tags (release.yml publishes
+  # these), and only if validation succeeds
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }}
+    needs: validate
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Windows excluded due to runtime crashes. See docs/windows-build-research.md
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+
+    - name: Build wheels
+      uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299  # v4.3.1
+      env:
+        CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*
+        CIBW_BEFORE_BUILD: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && pip install setuptools-rust>=1.7
+        CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
+
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+      with:
+        name: dist-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        path: ./wheelhouse/*.whl
+
+  build-sdist:
+    name: Build source distribution
+    needs: validate
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Build sdist
+      run: pipx run build --sdist
+
+    - name: Check the metadata PyPI will render
+      run: pipx run twine check --strict dist/*
+
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+      with:
+        name: dist-sdist
+        path: dist/*.tar.gz

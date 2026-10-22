@@ -1,6 +1,6 @@
 # tenforty
 
-[![GitHub Actions](https://github.com/mmacpherson/tenforty/actions/workflows/deploy.yml/badge.svg)](https://github.com/mmacpherson/tenforty/actions/workflows/deploy.yml)
+[![GitHub Actions](https://github.com/mmacpherson/tenforty/actions/workflows/ci.yml/badge.svg)](https://github.com/mmacpherson/tenforty/actions/workflows/ci.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mmacpherson/tenforty/main.svg)](https://results.pre-commit.ci/latest/github/mmacpherson/tenforty/main)
 
 [![PyPI](https://img.shields.io/pypi/v/tenforty.svg)](https://pypi.org/project/tenforty/)

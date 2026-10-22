@@ -40,8 +40,8 @@ repos:
   hooks:
   - id: pretty-format-toml
     args: [--autofix, --indent, '2']
-    # Avoid churn/format fights on Cargo's lockfile.
-    exclude: ^Cargo\.lock$
+    # Lockfiles are machine-written; reformatting them only makes churn.
+    exclude: ^(Cargo|uv)\.lock$
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
 - repo: https://github.com/pre-commit/mirrors-prettier
