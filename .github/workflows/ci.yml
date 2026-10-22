@@ -1,7 +1,12 @@
-name: validate-build-publish
+name: ci
 
-on: push
+on:
+  push:
+    branches: ['**']  # tags run this via release.yml instead
+  workflow_call:  # from release.yml, on the tagged commit
 
+permissions:
+  contents: read
 
 jobs:
   # Run validation on every push
@@ -15,10 +20,12 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
       with:
         python-version: ${{ matrix.python-version }}
         enable-cache: true
@@ -39,20 +46,22 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
 
-    - uses: actions/setup-python@v7
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
       with:
         python-version: '3.15'
         allow-prereleases: true
 
-    - uses: astral-sh/setup-uv@v7
+    - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
       with:
         enable-cache: true
         cache-dependency-glob: pyproject.toml
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
 
     - name: Install test dependencies
       run: uv sync --python python --no-install-project
@@ -89,10 +98,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
       with:
         python-version: '3.12'
         enable-cache: true
@@ -122,20 +133,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
 
     - name: Run graph crate tests with JIT
       run: cargo test -p tenforty-graph --features jit
 
-  # Build wheels and sdist only on pushes to main, and only if validation
-  # succeeds
+  # Build wheels and sdist on main and on release tags (release.yml publishes
+  # these), and only if validation succeeds
   build-wheels:
     name: Build wheels on ${{ matrix.os }}
     needs: validate
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/test-v') || startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -143,126 +156,42 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v4.3.1
+      uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299  # v4.3.1
       env:
         CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-*
         CIBW_BEFORE_BUILD: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && pip install setuptools-rust>=1.7
         CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
-        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        name: dist-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: ./wheelhouse/*.whl
 
   build-sdist:
     name: Build source distribution
     needs: validate
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/test-v') || startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Build sdist
       run: pipx run build --sdist
 
-    - uses: actions/upload-artifact@v7
+    - name: Check the metadata PyPI will render
+      run: pipx run twine check --strict dist/*
+
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
-        name: cibw-sdist
+        name: dist-sdist
         path: dist/*.tar.gz
-
-  # Publish to PyPi, build a release,  we've pushed a v* tag to main and the
-  # wheel/sdist builds succeed
-  publish-to-pypi:
-    name: >-
-      Publish Python 🐍 distribution 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags/v')  # only publish to PyPI on 'v*' tag pushes
-    needs: [build-wheels, build-sdist]
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/tenforty
-    permissions:
-      id-token: write
-    steps:
-    - uses: actions/download-artifact@v8
-      with:
-        pattern: cibw-*
-        path: dist
-        merge-multiple: true
-    - uses: pypa/gh-action-pypi-publish@release/v1
-
-  publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
-    # We don't (manaully) push a v* tag until we've got a clean build, meaning
-    # we've already seen a successful push to testpypi. Testpypi throws an error
-    # if you try to push the same version again, so we suppress on v* tag to
-    # avoid a harmless-but-confusing failure error in the Actions UI.
-    if: startsWith(github.ref, 'refs/tags/test-v')
-    needs: [build-wheels, build-sdist]
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/tenforty
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v8
-      with:
-        pattern: cibw-*
-        path: dist
-        merge-multiple: true
-    - name: Publish distribution 📦 to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-
-  github-release:
-    name: >-
-      Sign the Python 🐍 distribution 📦 with Sigstore
-      and upload them to GitHub Release
-    needs:
-    - publish-to-pypi
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write  # IMPORTANT: mandatory for making GitHub Releases
-      id-token: write  # IMPORTANT: mandatory for sigstore
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v8
-      with:
-        pattern: cibw-*
-        path: dist
-        merge-multiple: true
-    - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.5.0
-      with:
-        inputs: >-
-          ./dist/*.tar.gz
-          ./dist/*.whl
-    - name: Create GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release create
-        '${{ github.ref_name }}'
-        --repo '${{ github.repository }}'
-        --notes ""
-    - name: Upload artifact signatures to GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      # Upload to GitHub Release using the `gh` CLI.
-      # `dist/` contains the built packages, and the
-      # sigstore-produced signatures and certificates.
-      run: >-
-        gh release upload
-        '${{ github.ref_name }}' dist/**
-        --repo '${{ github.repository }}'
