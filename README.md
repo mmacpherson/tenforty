@@ -29,6 +29,13 @@ You can try `tenforty` out immediately in your browser via the included Colab
 notebook: [![Try In
 Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mmacpherson/tenforty/blob/main/notebooks/tenforty_Package_Demo.ipynb)
 
+To play with a return interactively, run the [marimo](https://marimo.io) explorer
+locally (needs [uv](https://docs.astral.sh/uv/)):
+
+```sh
+uvx marimo edit --sandbox https://raw.githubusercontent.com/mmacpherson/tenforty/main/notebooks/tenforty_explorer.py
+```
+
 
 ## Features
 
