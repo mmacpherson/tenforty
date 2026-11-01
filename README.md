@@ -105,10 +105,11 @@ the [API Reference](#api-reference).
 ## Previewing Your Own Return with a Coding Agent
 
 The most practical way to use `tenforty` on your own taxes today is to let a
-coding agent drive it — [Claude Code](https://claude.com/claude-code),
-[Codex](https://github.com/openai/codex), [pi](https://github.com/badlogic/pi-mono),
-or similar. You describe your situation in plain language, and the agent maps
-your figures onto `tenforty`'s inputs, runs the return, and answers follow-up
+coding agent drive it, such as [Claude Code](https://claude.com/claude-code),
+[Codex](https://github.com/openai/codex), or an open-source agent like
+[pi](https://github.com/badlogic/pi-mono) or [OpenCode](https://opencode.ai).
+You describe your situation in plain language, and the agent maps your
+figures onto `tenforty`'s inputs, runs the return, and answers follow-up
 questions by changing inputs and re-running.
 
 Treat the result as a **preview**, not as your filed return. `tenforty` models
@@ -119,15 +120,25 @@ owe, and why?" and "what happens if I sell this stock in December?" before you
 file with your usual software or preparer, and to cross-checking that software
 afterwards.
 
-**1. Pick a private model endpoint first.** Your return is about as sensitive
-as personal data gets. Point the agent at an endpoint whose terms commit to not
-retaining or training on your data — an API account under a zero-data-retention
-agreement, or a model you run locally. Check your provider's data-retention
-terms before you start; don't assume a consumer plan's defaults.
+**1. Decide where your data goes.** Your return is about as sensitive as
+personal data gets, and everything you tell the agent is sent to whichever
+model provider it uses. That's a choice worth making deliberately, and it's
+yours to make:
 
-**2. Give it numbers, not documents.** Transcribe the figures you need (W-2 box
-1, 1099-INT and 1099-DIV totals, net short- and long-term gains, and so on)
-rather than handing over scans that carry your SSN and account numbers.
+- If you use a hosted agent from Anthropic, OpenAI, or another provider, read
+  that provider's data-retention and training policies for the plan you're on.
+- Open-source agents such as pi and OpenCode can point at other endpoints,
+  including inference providers that offer zero data retention, such as
+  [DeepInfra](https://docs.deepinfra.com/account/data-privacy) or
+  [Together AI](https://docs.together.ai/docs/zero-data-retention). Check
+  their current terms yourself.
+- For the most privacy, run a model locally with a tool like
+  [Ollama](https://ollama.com) or [LM Studio](https://lmstudio.ai), so nothing
+  leaves your machine.
+
+**2. Consider giving it numbers, not documents.** Transcribing the figures you
+need (W-2 box 1, 1099-INT and 1099-DIV totals, net short- and long-term gains,
+and so on) shares far less than scans that carry your SSN and account numbers.
 
 **3. Work in a scratch directory** and let the agent install `tenforty` there:
 
