@@ -348,45 +348,12 @@ def _f14_taxcalc_omits_amt_std_addback(
         and reference is not None
     ):
         # TaxCalc starts AMTI from AGI less the standard deduction. Form 6251
-        # starts from taxable income (floored at zero) and adds the standard
-        # deduction back. Below the taxable-income floor, that makes the AMTI
-        # gap the standard deduction plus the unused part of the deduction.
-        amti_gap = std + max(0.0, std - reference["agi"])
+        # line 1 is the same difference, negative below the taxable-income
+        # floor, and line 2a then adds the standard deduction back.
         return _same_delta(
-            {"amt", "income_tax", "total_tax"}, DeltaRange(0.0, 0.35 * amti_gap)
+            {"amt", "income_tax", "total_tax"}, DeltaRange(0.0, 0.35 * std)
         )
     return {}
-
-
-def _f22_ots_amt_taxable_income_floor(
-    backend: str, case: dict, reference: dict[str, float] | None
-) -> DeltaModel:
-    """F22: OTS cancels the AMT add-back when regular taxable income is zero.
-
-    OTS substitutes the unfloored ``L11 - L14`` for Form 6251 line 1 whenever
-    Form 1040 line 15 is zero. Adding the standard deduction on line 2a then
-    cancels the unused deduction instead of starting from the required zero.
-    The signed model is negative relative to the correct Form 6251 result; it
-    composes with F14's positive TaxCalc-reference delta.
-    """
-    std = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")))
-    if (
-        backend != "ots"
-        or not case.get("iso", 0)
-        or case.get("std_or_item") != "Standard"
-        or std is None
-        or case.get("itemized", 0.0) > std
-        or reference is None
-    ):
-        return {}
-    deduction = std + reference.get("qbi_deduction", 0.0)
-    missing_floor = max(0.0, deduction - reference["agi"])
-    if missing_floor == 0.0:
-        return {}
-    return _same_delta(
-        {"amt", "income_tax", "total_tax"},
-        DeltaRange(-0.35 * missing_floor, 0.0),
-    )
 
 
 def _mfs_amt_line4_addition(amti: float, threshold: float, cap: float) -> float:
@@ -461,30 +428,6 @@ def _f24_ots_2024_mfs_amt_constants(
     return _same_delta({"amt", "income_tax", "total_tax"}, delta)
 
 
-def _f26_taxcalc_itemized_amt_floor(
-    backend: str, case: dict, reference: dict[str, float] | None
-) -> DeltaModel:
-    """F26: TaxCalc lets unused itemization reduce AMTI below Form 1040 line 15."""
-    if (
-        backend != "graph"
-        or not case.get("iso", 0.0)
-        or case.get("itemized", 0.0) <= 0.0
-        or reference is None
-        or reference.get("taxable_income") != 0.0
-    ):
-        return {}
-    unused = max(
-        0.0,
-        case["itemized"] + reference.get("qbi_deduction", 0.0) - reference["agi"],
-    )
-    if unused == 0.0:
-        return {}
-    rate = 0.55 if _preferential_income(case) > 0.0 else 0.35
-    return _same_delta(
-        {"amt", "income_tax", "total_tax"}, DeltaRange(0.0, rate * unused)
-    )
-
-
 def _f27_ots_skips_amt_preferential_worksheet(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
@@ -511,10 +454,8 @@ SIGNATURES = [
     KnownDefect("F14", _f14_taxcalc_omits_amt_std_addback),
     KnownDefect("F19", _f19_deduction_choice_rule),
     KnownDefect("F21", _f21_taxcalc_qw_qbi_phase_range),
-    KnownDefect("F22", _f22_ots_amt_taxable_income_floor),
     KnownDefect("F23", _f23_taxcalc_omits_mfs_amt_increase),
     KnownDefect("F24", _f24_ots_2024_mfs_amt_constants),
-    KnownDefect("F26", _f26_taxcalc_itemized_amt_floor),
     KnownDefect("F27", _f27_ots_skips_amt_preferential_worksheet),
 ]
 

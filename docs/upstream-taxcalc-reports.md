@@ -235,31 +235,12 @@ amount throughout the remainder of Form 6251.
 
 ---
 
-## 4. Bug: unused itemized deductions reduce AMTI below Form 1040 line 15
+## 4. ~~Bug: unused itemized deductions reduce AMTI below Form 1040 line 15~~ — WITHDRAWN, do not send
 
-**Where:** `taxcalc/calcfunctions.py`, the itemizer branch that constructs
-`c62100`.
-
-Form 6251 line 1 is Form 1040 line 15, whose taxable income is floored at zero.
-Tax-Calculator instead reconstructs the itemizer's AMTI base directly from AGI
-less itemized deductions. If allowed itemized deductions exceed AGI, the unused
-portion passes through as a negative line-1 amount and reduces AMTI.
-
-### Reproducer
-
-Use a 2024 married-filing-separately record with short-term gain -$211,156,
-long-term gain $33,745, taxable interest $15,079, ordinary dividends $33,112
-($16,556 qualified), mortgage-interest carrier `e19200=50061`, and
-`cmbtp=300000`. The section 1211(b) MFS loss cap leaves AGI of $46,691, so
-$3,370 of itemization is unused and Form 1040 line 15 is zero.
-
-| quantity | Tax-Calculator 6.7.2 | Form 6251 line path |
-|---|---:|---:|
-| Form 1040 line 15 | $0.00 | $0.00 |
-| Form 6251 line-1 base used | -$3,370.00 | $0.00 |
-| AMTI | $296,630.00 | $300,000.00 |
-| AMT | **$57,432.72** | **$58,376.32** |
-
-The $943.60 AMT difference is 28% of the unused $3,370 deduction. Preserving
-the Form 1040 taxable-income floor before applying Form 6251 adjustments would
-make the two branches agree with the form's line sequence.
+Withdrawn before sending. This draft claimed Form 6251 line 1 is the floored
+Form 1040 line 15. The form says otherwise: when line 15 is zero, line 1 is line
+11 less line 14, "If less than zero, enter as a negative amount" (2024 line 1;
+2025 line 1b). Tax-Calculator's negative base, and its $57,432.72 on the MFS
+reproducer, are correct. The floored reading was a defect in tenforty's own
+graph backend, fixed by `tenforty-nng`; see F26 in
+`docs/taxcalc-differential-audit.md`.

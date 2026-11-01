@@ -1,5 +1,8 @@
 ci:
-  skip: [cargo-fmt]
+  # pre-commit.ci runners have no Rust or Haskell toolchain, so these local
+  # system hooks can't run there. The spec (Haskell) workflow runs the same
+  # ormolu and cabal-gild checks.
+  skip: [cargo-fmt, ormolu, cabal-gild]
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0

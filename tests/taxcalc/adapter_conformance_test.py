@@ -210,16 +210,24 @@ def test_taxcalc_applies_the_high_income_mfs_amt_increase():
     assert result["amt"] == pytest.approx(68_380.75, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F26: TaxCalc lets unused itemized deductions reduce Form 6251 "
-    "line 1 below the Form 1040 taxable-income floor",
-    strict=True,
-)
-def test_taxcalc_preserves_the_itemized_taxable_income_floor_in_amti():
-    """The $3,370 unused deduction cannot reduce Form 6251 line 1 below zero."""
+def test_taxcalc_carries_unused_itemized_deductions_into_amti():
+    """The $3,370 unused deduction makes Form 6251 line 1 negative: AMT $57,432.72.
+
+    Independent derivation from the 2024 Form 6251 and its instructions: AGI is
+    $15,079 + $33,112 - $1,500 (the MFS capital-loss limit) = $46,691, so line 1
+    is $46,691 - $50,061 = -$3,370, entered as a negative amount. The $300,000
+    ISO spread makes AMTI $296,630, and less the $66,650 exemption line 6 is
+    $229,980. The $16,556 of qualified dividends sits inside the $47,025 MFS
+    zero-rate band, and 28% of the remaining $213,424 less $2,326 is $57,432.72
+    against zero regular tax. Form retrieved 2026-10-31 from
+    https://www.irs.gov/pub/irs-prior/f6251--2024.pdf.
+
+    This was once F26's strict-xfail burn-in, on the premise that line 1 floors
+    at zero; TaxCalc was right and the graph's floored line 1 was the error.
+    """
     result = taxcalc_batch([F26_ITEMIZED_AMT_FLOOR_CASE])[0]
 
-    assert result["amt"] == pytest.approx(58_376.32, abs=1.0)
+    assert result["amt"] == pytest.approx(57_432.72, abs=1.0)
 
 
 @pytest.mark.parametrize(

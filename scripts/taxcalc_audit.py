@@ -185,9 +185,9 @@ def build_cases() -> list[dict]:
                 for iso in (50_000, 200_000):
                     add(year, "H_amt", status=st, w2=w2, iso=iso)
 
-        # L_amt_floor: Form 1040 line 15 is zero, but Form 6251 line 2a still
-        # adds back the standard deduction. This is the F22 OTS witness and a
-        # below-floor counterpart to the positive-income F14 cases.
+        # L_amt_floor: Form 1040 line 15 is zero, so Form 6251 line 1 is the
+        # negative AGI less deductions before line 2a adds back the standard
+        # deduction. A below-floor counterpart to the positive-income F14 cases.
         for st in STATUSES:
             add(year, "L_amt_floor", status=st, iso=200_000)
 

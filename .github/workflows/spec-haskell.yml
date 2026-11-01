@@ -21,6 +21,32 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
+      # Same check as the ormolu and cabal-gild pre-commit hooks, which
+      # pre-commit.ci skips for want of a Haskell toolchain. Prebuilt release
+      # binaries, pinned by version and checksum to the versions tenforty-spec's
+      # Makefile installs, so this costs seconds rather than a cabal build.
+    - name: Formatting (ormolu, cabal-gild)
+      env:
+        ORMOLU_VERSION: 0.8.1.1
+        ORMOLU_SHA256: fde2caaf946c1d3507aebfbf848258c7fb19a0794c0b47ac549f83e556195cf2
+        CABAL_GILD_VERSION: 1.8.4.1
+        CABAL_GILD_SHA256: 257c3182ee0ba38f9f729295a3badd585f6128ec19c44f817058041118f4ad22
+      run: |
+        bin="$RUNNER_TEMP/haskell-fmt"
+        mkdir -p "$bin"
+        curl -fsSL -o "$bin/ormolu.zip" \
+          "https://github.com/tweag/ormolu/releases/download/$ORMOLU_VERSION/ormolu-x86_64-linux.zip"
+        curl -fsSL -o "$bin/cabal-gild.tar.gz" \
+          "https://github.com/tfausak/cabal-gild/releases/download/$CABAL_GILD_VERSION/cabal-gild-$CABAL_GILD_VERSION-linux-x64.tar.gz"
+        sha256sum --check --strict <<EOF
+        $ORMOLU_SHA256  $bin/ormolu.zip
+        $CABAL_GILD_SHA256  $bin/cabal-gild.tar.gz
+        EOF
+        unzip -q -d "$bin" "$bin/ormolu.zip"
+        tar -xzf "$bin/cabal-gild.tar.gz" -C "$bin"
+        export PATH="$bin:$PATH"
+        make spec-fmt-check
+
       # GHC is the single source of truth in cabal.project; keep this in step with
       # its `with-compiler` line (see AGENTS.md — the tool ceiling sets it).
     - name: Set up GHC + cabal

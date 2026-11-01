@@ -13,8 +13,13 @@ usForm6251_2024 :: Either FormError Form
 usForm6251_2024 = form "us_form_6251" 2024 $ do
   -- Part I: Alternative Minimum Taxable Income (AMTI)
 
-  -- Line 1: Enter taxable income from Form 1040, line 15
-  l1 <- interior "L1" "taxable_income" $ importForm us1040L15
+  -- Line 1: Form 1040 line 15 if more than zero; otherwise line 11 minus
+  -- line 14, entered as a negative amount if less than zero. Line 15 is
+  -- line 11 minus line 14 floored at zero, so both cases are the unfloored
+  -- difference.
+  l1 <-
+    interior "L1" "taxable_income" $
+      importForm us1040L11 .-. importForm us1040L14
 
   -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A taxes when
   -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E)). Import

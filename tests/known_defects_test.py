@@ -321,24 +321,40 @@ def test_amt_std_addback_agrees_across_backends():
     assert graph.federal_amt == pytest.approx(43_813.50, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F22: OTS cancels the Form 6251 standard-deduction add-back when "
-    "Form 1040 taxable income floors at zero",
-    strict=True,
-)
 @skip_if_graph_unavailable
-def test_ots_amt_preserves_the_zero_taxable_income_floor():
-    """Form 6251 line 1 is zero, not negative unused standard deduction."""
+@pytest.mark.parametrize(
+    ("year", "official_amt"),
+    [
+        (2024, 29_718.00),
+        (2025, 29_094.00),
+    ],
+)
+def test_amt_line_1_goes_negative_below_the_taxable_income_floor(year, official_amt):
+    """Head of household, $200k ISO spread and no income: AMT is $29,718.
+
+    Independent derivation from Form 6251 (2024 line 1; 2025 line 1b): when
+    Form 1040 line 15 is zero, line 1 is line 11 less line 14, entered as a
+    negative amount if less than zero. With AGI $0, 2024 line 1 is -$21,900,
+    line 2a adds back the $21,900 standard deduction, and AMTI is the $200,000
+    ISO spread. Less the $85,700 exemption, 26% of $114,300 is $29,718 and the
+    regular tax is zero. For 2025 the deduction is $23,625 and the exemption
+    $88,100, so 26% of $111,900 is $29,094. Forms retrieved 2026-10-31 from
+    https://www.irs.gov/pub/irs-prior/f6251--2024.pdf and
+    https://www.irs.gov/pub/irs-pdf/f6251.pdf.
+
+    This was once recorded as F22, an OTS defect, on the premise that line 1
+    floors at zero; the floored reading was the graph's error.
+    """
     kwargs = dict(
-        year=2024,
+        year=year,
         filing_status="Head_of_House",
         incentive_stock_option_gains=200_000,
     )
     ots = evaluate_return(backend="ots", **kwargs)
     graph = evaluate_return(backend="graph", **kwargs)
 
-    assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=2.0)
-    assert graph.federal_amt == pytest.approx(35_412.00, abs=1.0)
+    assert ots.federal_amt == pytest.approx(official_amt, abs=1.0)
+    assert graph.federal_amt == pytest.approx(official_amt, abs=1.0)
 
 
 @pytest.mark.xfail(
