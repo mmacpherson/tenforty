@@ -1306,7 +1306,9 @@ NATURAL_FORM_CONFIG = dict(
 
 
 def _se_income_to_8959_l8(se_income):
-    return ("L8", str(round(se_income * 0.9235)))
+    # Schedule SE line 4c stops below $400, so line 6 (Form 8959 line 8) is zero.
+    se_earnings = se_income * 0.9235
+    return ("L8", str(round(se_earnings)) if se_earnings >= 400 else "0")
 
 
 _SUBORDINATE_FORM_CONFIG = [

@@ -33,7 +33,8 @@ usForm8959_2024 = form "us_form_8959" 2024 $ do
       l6 .*. lit 0.009
 
   -- Part II: Additional Medicare Tax on Self-Employment Income
-  l8 <- interior "L8" "se_income" $ importForm usScheduleSeL4a
+  -- Line 8: Schedule SE line 6, which is never reached below $400.
+  l8 <- interior "L8" "se_income" $ importForm usScheduleSeL4cTaxable
 
   l9 <-
     interior "L9" "threshold_se" $

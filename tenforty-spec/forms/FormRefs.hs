@@ -135,5 +135,5 @@ usScheduleSeL10 = lineRef "us_schedule_se" "L10"
 usScheduleSeL11 :: LineRef Dollars
 usScheduleSeL11 = lineRef "us_schedule_se" "L11"
 
-usScheduleSeL4a :: LineRef Dollars
-usScheduleSeL4a = lineRef "us_schedule_se" "L4a"
+usScheduleSeL4cTaxable :: LineRef Dollars
+usScheduleSeL4cTaxable = lineRef "us_schedule_se" "L4c_taxable"

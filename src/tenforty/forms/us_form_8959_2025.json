@@ -2,7 +2,7 @@
     "imports": [
         {
             "form": "us_schedule_se",
-            "line": "L4a",
+            "line": "L4c_taxable",
             "year": 2025
         }
     ],
@@ -114,7 +114,7 @@
             "name": "L8_se_income",
             "op": {
                 "form": "us_schedule_se",
-                "line": "L4a",
+                "line": "L4c_taxable",
                 "type": "import",
                 "year": 2025
             }

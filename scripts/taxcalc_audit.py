@@ -241,6 +241,15 @@ def build_cases() -> list[dict]:
                 std_or_item="Itemized",
                 iso=300_000,
             )
+            # Q_amt_itemize_election: itemizing $0 lifts the QBI deduction's
+            # 20% taxable-income cap and lowers AMTI, so TaxCalc elects it (F28).
+            add(
+                year,
+                "Q_amt_itemize_election",
+                status="Head_of_House",
+                se=125_000,
+                iso=50_000,
+            )
 
         # I_straddle: per-status additional-Medicare and NIIT thresholds
         amedt = pol.AMEDT_ec[0]

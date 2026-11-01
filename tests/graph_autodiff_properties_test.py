@@ -241,11 +241,12 @@ _QBI_GAIN_CASE = dict(
 
 # At wages exactly on the Additional Medicare threshold, Form 8959's two max0
 # branches kink in opposite directions while their sum remains differentiable.
+# Self-employment earnings must clear Schedule SE's $400 floor to reach line 8.
 _KINK_CASE = dict(
     year=2024,
     filing_status="Single",
     w2_income=200_000.0,
-    self_employment_income=11.0,
+    self_employment_income=1_000.0,
 )
 
 

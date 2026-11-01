@@ -16,9 +16,10 @@ dev = [
 # tests/taxcalc/). Not synced by default: uv sync --group taxcalc
 # Pinned exactly: golden fixtures and burn-in expected values are only
 # meaningful against a fixed taxcalc version. Upgrades are deliberate PRs that
-# regenerate fixtures.
+# regenerate fixtures. taxcalc 6.9.0 requires Python 3.13+, hence the marker:
+# the group installs nothing on older interpreters rather than failing the lock.
 taxcalc = [
-  "taxcalc==6.7.2",
+  "taxcalc==6.9.0; python_version >= '3.13'",
   "pandas>=2"
 ]
 

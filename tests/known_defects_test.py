@@ -358,6 +358,36 @@ def test_amt_line_1_goes_negative_below_the_taxable_income_floor(year, official_
 
 
 @pytest.mark.xfail(
+    reason="F28: the automatic deduction choice takes the larger deduction, "
+    "not the one that minimizes tax",
+    strict=True,
+)
+@skip_if_graph_unavailable
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+def test_automatic_deduction_choice_minimizes_amt_bound_tax(backend):
+    """HoH 2024, $125k SE, $50k ISO: itemizing $0 cuts income tax to $14,881.16.
+
+    Independent derivation from the 2024 Schedule SE, Form 8995 and Form 6251:
+    SE tax is 15.3% of 92.35% of $125,000 = $17,661.94, so AGI and QBI are
+    $116,169.03. With the $21,900 standard deduction, the QBI deduction is
+    capped at 20% of $94,269.03 = $18,853.81, AMTI is $75,415.22 + $21,900 +
+    $50,000 = $147,315.22, and 26% of it less the $85,700 exemption is a
+    $16,019.96 tentative minimum tax. Electing to itemize $0 (IRC 63(e)) lifts
+    the cap to $23,233.81 and AMTI to $92,935.22 + $50,000 = $142,935.22, for
+    $14,881.16. The AMT binds both ways, so that is the income tax.
+    """
+    result = evaluate_return(
+        backend=backend,
+        year=2024,
+        filing_status="Head_of_House",
+        self_employment_income=125_000,
+        incentive_stock_option_gains=50_000,
+    )
+
+    assert result.federal_income_tax == pytest.approx(14_881.16, abs=1.0)
+
+
+@pytest.mark.xfail(
     reason="F27: OTS skips the AMT preferential-rate worksheet when regular "
     "taxable income is zero",
     strict=True,
@@ -523,3 +553,63 @@ def test_graph_honors_se_deminimis_floor():
         backend="graph",
     )
     assert r.federal_se_tax == pytest.approx(0.0, abs=0.01)
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+@pytest.mark.parametrize(
+    ("self_employment_income", "official_additional_medicare"),
+    [(288, 9_000.00), (1_000, 9_008.31)],
+)
+def test_additional_medicare_honors_the_se_deminimis_floor(
+    backend, self_employment_income, official_additional_medicare
+):
+    """Form 8959 line 8 is Schedule SE line 6, never reached below $400.
+
+    Independent derivation from the 2024 Form 8959 and Schedule SE: $1.2M of
+    wages put 0.9% x ($1,200,000 - $200,000) = $9,000 on line 7 and exhaust the
+    head-of-household threshold before Part II. $288 of profit is $265.97 after
+    the 92.35% factor, so Schedule SE line 4c stops and line 8 is zero. $1,000
+    of profit is $923.50, all above the exhausted threshold, adding $8.31.
+    Retrieved 2026-10-31 from https://www.irs.gov/pub/irs-prior/i8959--2024.pdf
+    and https://www.irs.gov/pub/irs-prior/f1040sse--2024.pdf.
+    """
+    result = evaluate_return(
+        year=2024,
+        filing_status="Head_of_House",
+        w2_income=1_200_000,
+        self_employment_income=self_employment_income,
+        backend=backend,
+    )
+
+    # Line 8 may be rounded to whole dollars: 0.9% of $0.50, plus cent rounding
+    # of both results.
+    assert result.federal_additional_medicare_tax == pytest.approx(
+        official_additional_medicare, abs=0.0045 + 0.01
+    )
+
+
+@skip_if_graph_unavailable
+def test_negative_agi_creates_no_medical_deduction():
+    """Qualifying surviving spouse 2025, AGI -$2,761, forced $168 itemized.
+
+    Independent derivation from the 2025 Schedule A and Form 6251: $239 of
+    interest and a $19,288 long-term loss, limited to $3,000, give AGI of
+    -$2,761. Schedule A line 4 allows medical expenses only above 7.5% of AGI
+    (IRC 213(a)), so with no medical expenses there is no medical deduction and
+    line 17 is the $168 entered. Form 6251 line 1 is -$2,761 - $168 = -$2,929,
+    the $200,000 ISO spread makes AMTI $197,071, and 26% of it less the $137,000
+    exemption is $15,618.46 against zero regular tax.
+    """
+    result = evaluate_return(
+        backend="graph",
+        year=2025,
+        filing_status="Widow(er)",
+        taxable_interest=239,
+        long_term_capital_gains=-19_288,
+        itemized_deductions=168,
+        standard_or_itemized="Itemized",
+        incentive_stock_option_gains=200_000,
+    )
+
+    assert result.federal_amt == pytest.approx(15_618.46, abs=0.01)
