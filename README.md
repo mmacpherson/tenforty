@@ -112,12 +112,18 @@ You describe your situation in plain language, and the agent maps your
 figures onto `tenforty`'s inputs, runs the return, and answers follow-up
 questions by changing inputs and re-running.
 
-Treat the result as a **preview**, not as your filed return. `tenforty` models
-a subset of the return (see the [API Reference](#api-reference) and
-[Known Limitations](#known-limitations)), and the agent's mapping from your
-documents to its inputs can be wrong. It's well suited to "roughly what will I
-owe, and why?" and "what happens if I sell this stock in December?" before you
-file with your usual software or preparer, and to cross-checking that software
+For a typical personal return, expect a close estimate. The computation is
+extensively tested against IRS and state worked examples
+([IRS Validation](./docs/irs-validation.md)), against Tax-Calculator as an
+independent federal model
+([differential audit](./docs/taxcalc-differential-audit.md)), and with
+property-based invariants. It's still a **preview**, not a
+filing: nothing is guaranteed, and the usual way it goes wrong is a figure from
+your documents that the agent maps to the wrong input or that `tenforty`
+doesn't model (see the [API Reference](#api-reference) and
+[Known Limitations](#known-limitations)). It's well suited to "what will I owe,
+and why?" and "what happens if I sell this stock in December?" before you file
+with your usual software or preparer, and to cross-checking that software
 afterwards.
 
 **1. Decide where your data goes.** Your return is about as sensitive as
