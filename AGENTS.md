@@ -65,19 +65,22 @@ Python library for US federal and state tax computation. Two backends:
 ## Dependency & toolchain versions
 
 All three toolchains track newest-compatible versions on the latest stable
-compiler. They deliberately differ on lockfiles, because they differ on who
-consumes the dependency ranges: the Python package is a published library, while
-the Rust crate and the Haskell spec are not published on their own. The Rust
-crate does ship compiled inside the Python wheel, which is a concrete reason to
-track `Cargo.lock`: it pins what goes into the shipped extension.
+compiler. All three commit a lockfile so `main` builds reproducibly, but the
+Python lockfile pins less than the other two: the Python package is a published
+library, while the Rust crate and the Haskell spec are not published on their
+own. The Rust crate does ship compiled inside the Python wheel, which is a
+concrete reason to track `Cargo.lock`: it pins what goes into the shipped
+extension.
 
-- **Python (uv)**: loose `pyproject.toml` constraints, **no committed lockfile**.
-  Those ranges are what PyPI consumers resolve against, so they are a claim about
-  what tenforty supports; `uv.lock` never ships in the sdist or wheel and could
-  not pin consumers anyway. `uv.lock` is gitignored, local-only, and removed by
-  `make clean`. CI runs a plain `uv sync` and resolves fresh every run, which is
-  what keeps testing the claim. Don't commit `uv.lock` or add `--frozen`/`--locked`
-  to CI.
+- **Python (uv)**: loose `pyproject.toml` constraints, plus a committed `uv.lock`
+  that pins development and CI. The ranges are what PyPI consumers resolve
+  against, so they are a claim about what tenforty supports; `uv.lock` never
+  ships in the sdist or wheel and cannot pin consumers. CI runs with
+  `UV_LOCKED=1`, so every job uses the lock as committed and fails if it is
+  stale, except the newest-dependencies job, which resolves fresh against
+  `pyproject.toml` to keep testing the claim. Bump with `uv lock --upgrade`
+  (Dependabot groups these), and relock in the same PR as any `pyproject.toml`
+  change.
 - **Rust (cargo)**: semver `Cargo.toml` → exact `Cargo.lock`; bump with `cargo update`.
 - **Haskell (cabal)**: lower-bounds-only `.cabal` (no PVP upper bounds —
   `tenforty-spec` is unpublished) → exact `tenforty-spec/cabal.project.freeze` at a
@@ -89,9 +92,9 @@ track `Cargo.lock`: it pins what goes into the shipped extension.
 
 Rust and Haskell lockfiles are tracked, and `main` builds against them. If a newest
 combination breaks the build or tests, pin that one package back in the lock or
-freeze rather than rolling the whole tree back. For Python, a break from a fresh
-resolve means the supported range is wrong: fix the code, or tighten the
-`pyproject.toml` bound.
+freeze rather than rolling the whole tree back. For Python, a break in the
+newest-dependencies job means the supported range is wrong: fix the code, or
+tighten the `pyproject.toml` bound.
 
 ## Development Commands
 

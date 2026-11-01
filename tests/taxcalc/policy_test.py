@@ -330,7 +330,12 @@ def test_ots_amt_takes_the_table_allowance_below_the_table_ceiling():
 def test_f28_bounds_the_itemizing_election_by_both_amti_channels():
     """Itemized deductions and the QBI cap shift both lower TaxCalc's AMTI."""
     case = _case(status="Head_of_House", se=109_646.0, itemized=15_443.0, iso=50_000.0)
-    reference = {"standard_deduction": 0.0, "itemized_deduction": 15_443.0}
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 15_443.0,
+        "taxable_income": 200_000.0,
+        "qbi_deduction": 0.0,
+    }
 
     model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
         "graph", case, reference
@@ -397,3 +402,43 @@ def test_f7_is_silent_when_taxcalc_elected_the_same_itemization():
     }
 
     assert _f7_itemized_semantics("ots", case, reference) == {}
+
+
+def test_f28_below_the_qbi_threshold_allows_only_the_cap_movement():
+    """Both choices below the threshold: taxable income falls 80-100% of shift."""
+    case = _case(status="Head_of_House", se=125_000.0, iso=50_000.0)
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 0.0,
+        "taxable_income": 92_935.23,
+        "qbi_deduction": 23_233.81,
+    }
+
+    model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+        "ots", case, reference
+    )
+
+    assert model["taxable_income"] == DeltaRange(-21_900.0, -0.8 * 21_900.0)
+    assert model["amt"].minimum == 0.0
+    derived_delta = 75_415.22 - 92_935.22
+    assert model["taxable_income"].minimum <= derived_delta
+    assert derived_delta <= model["taxable_income"].maximum
+    overstated_by_10k = derived_delta + 10_000.0
+    assert overstated_by_10k > model["taxable_income"].maximum
+
+
+def test_f28_respects_the_taxable_income_floor():
+    """Tenforty's taxable income stops at zero, at most TaxCalc's below it."""
+    case = _case(status="Married/Joint", itemized=480.0, iso=200_000.0)
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 480.0,
+        "taxable_income": 20_674.0,
+        "qbi_deduction": 0.0,
+    }
+
+    model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+        "ots", case, reference
+    )
+
+    assert model["taxable_income"] == DeltaRange(-28_720.0, -20_674.0)

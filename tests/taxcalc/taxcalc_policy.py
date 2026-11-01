@@ -414,12 +414,26 @@ def _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
     shift = std - itemized
     if shift <= 0.0:
         return {}
-    # Inside the QBI phase-in range the higher taxable income can instead
-    # shrink TaxCalc's QBI deduction, by at most the 20% component.
-    qbi_loss = 0.2 * max(0.0, case.get("se", 0.0))
+    # Below the QBI threshold the higher taxable income can only lift the 20%
+    # cap, so TaxCalc's QBI deduction grows by 0 to 20% of shift. TaxCalc's path
+    # has the higher pre-QBI income; only once it reaches the phase-in range can
+    # its QBI deduction instead shrink, by at most the 20% component.
+    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), case.get("status")))
+    pre_qbi_taxable = reference.get("taxable_income", 0.0) + reference.get(
+        "qbi_deduction", 0.0
+    )
+    below_phase_in = threshold is not None and pre_qbi_taxable <= threshold
+    qbi_loss = 0.0 if below_phase_in else 0.2 * max(0.0, case.get("se", 0.0))
     tentative_minimum_tax_cut = 0.35 * (itemized + 0.2 * shift)
+    # tenforty's taxable income floors at zero, so it cannot fall further than
+    # TaxCalc's.
+    smallest_drop = (
+        max(-0.8 * shift, -reference.get("taxable_income", 0.0))
+        if below_phase_in
+        else 0.0
+    )
     return {
-        "taxable_income": DeltaRange(-shift - qbi_loss, 0.0),
+        "taxable_income": DeltaRange(-shift - qbi_loss, smallest_drop),
         "amt": DeltaRange(
             -0.35 * qbi_loss,
             0.37 * (shift + qbi_loss) + tentative_minimum_tax_cut,
