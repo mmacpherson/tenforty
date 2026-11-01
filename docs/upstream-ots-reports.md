@@ -129,54 +129,15 @@ much rather drop that patch and track the release.
 
 ---
 
-## 3. Form 6251 line 1 goes negative when Form 1040 taxable income is zero
+## 3. ~~Form 6251 line 1 goes negative when Form 1040 taxable income is zero~~ — WITHDRAWN, do not send
 
-**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
-**Files:**
-- `src/taxsolve_US_1040_2024.c`, `form6251_AlternativeMinimumTax`
-- `src/taxsolve_US_1040_2025.c`, `form6251_AlternativeMinimumTax`
-
-The AMT routine substitutes an unfloored quantity for Form 6251 line 1 when
-Form 1040 line 15 is zero:
-
-```c
-if (L[15] > 0.0)
-  amtws[1] = L[15];
-else
-  amtws[1] = L[11] - L[14];
-```
-
-Form 6251 line 1 is Form 1040 line 15, which is already floored at zero. The
-fallback can be negative when deductions exceed AGI. Because line 2a later adds
-back the standard deduction, the negative line 1 cancels some or all of the
-required add-back.
-
-**Minimal reproducer:** 2024 Head of Household, under age 65, no regular
-income, standard deduction, and a $200,000 incentive-stock-option adjustment
-on `AMTws3`.
-
-| quantity | Form 6251 | OpenTaxSolver2024_22.06 |
-|---|---:|---:|
-| line 1, regular taxable income | $0.00 | -$21,900.00 |
-| line 2a, standard-deduction add-back | $21,900.00 | $21,900.00 |
-| line 4, AMTI | $221,900.00 | $200,000.00 |
-| line 5, exemption | $85,700.00 | $85,700.00 |
-| AMT | **$35,412.00** | **$29,718.00** |
-
-The $5,694 difference is 26% of the unused $21,900 deduction. The defect is
-not Head-of-Household-specific; that status simply makes the arithmetic easy
-to inspect. It applies whenever Form 1040 line 15 floors at zero while an AMT
-preference makes Form 6251 live.
-
-**Suggested fix:** use the floored Form 1040 value unconditionally:
-
-```c
-amtws[1] = L[15];
-```
-
-We have not patched the vendored source because this changes a computed tax
-figure. A strict-xfail in tenforty records the defect until an upstream release
-carries the correction.
+Withdrawn before sending. This draft claimed Form 6251 line 1 is the floored
+Form 1040 line 15. The form says otherwise: when line 15 is zero, line 1 is line
+11 less line 14, "If less than zero, enter as a negative amount" (2024 line 1;
+2025 line 1b). OTS's `amtws[1] = L[11] - L[14]` fallback is exactly that rule,
+and its $29,718.00 on the Head-of-Household reproducer is correct. The floored
+reading was a defect in tenforty's own graph backend, fixed by `tenforty-nng`;
+see F22 in `docs/taxcalc-differential-audit.md`.
 
 ---
 
@@ -264,26 +225,25 @@ adjustment on `AMTws3`, and ordinary dividends all reported as qualified.
 | $21,900 | $0 | **$35,412.00** | **$29,718.00** |
 | $21,901 | $1 | **$29,718.00** | **$29,718.00** |
 
-At exactly the $21,900 standard deduction, the separate line-1 floor issue in
-report 3 contributes nothing. The $5,694 AMT drop caused by adding one dollar
-of income therefore isolates this issue: $5,694 is exactly 26% of the $21,900
-qualified dividend. The cliff occurs precisely where the regular-tax
-preferential worksheet starts running. The same boundary reproduces in 2025,
-where OTS falls from $35,236.50 to $29,094.00 between $0 and $1 of regular
-taxable income.
+At exactly the $21,900 standard deduction, Form 6251 line 1 is zero. The
+$5,694 AMT drop caused by adding one dollar of income therefore isolates this
+issue: $5,694 is exactly 26% of the $21,900 qualified dividend. The cliff occurs
+precisely where the regular-tax preferential worksheet starts running. The same
+boundary reproduces in 2025, where OTS falls from $35,236.50 to $29,094.00
+between $0 and $1 of regular taxable income.
 
-The original differential witness used $17,322 of qualified dividends. It
-shows how this issue composes with report 3:
+The original differential witness used $17,322 of qualified dividends, where
+Form 6251 line 1 is -$4,578:
 
-| quantity | official Form 6251 | OTS with only the separate line-1 defect | OpenTaxSolver2024_22.06 |
-|---|---:|---:|---:|
-| AMT taxable income | $136,200.00 | $131,622.00 | $131,622.00 |
-| preferential income recognized | $17,322.00 | $17,322.00 | $0.00 |
-| ordinary AMT income | $118,878.00 | $114,300.00 | $131,622.00 |
-| AMT | **$30,908.28** | **$29,718.00** | **$34,221.72** |
+| quantity | Form 6251 | OpenTaxSolver2024_22.06 |
+|---|---:|---:|
+| AMT taxable income | $131,622.00 | $131,622.00 |
+| preferential income recognized | $17,322.00 | $0.00 |
+| ordinary AMT income | $114,300.00 | $131,622.00 |
+| AMT | **$29,718.00** | **$34,221.72** |
 
-Holding the lower OTS AMT base fixed, skipping the preferential worksheet adds
-exactly $4,503.72, or 26% of the $17,322 qualified dividend.
+The AMT base agrees; skipping the preferential worksheet adds exactly
+$4,503.72, or 26% of the $17,322 qualified dividend.
 
 **Suggested fix:** make the preferential-income inputs required by Form 6251
 Part III available independently of whether the regular-tax worksheet itself

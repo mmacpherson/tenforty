@@ -39,6 +39,9 @@ us1040L12final = lineRef "us_1040" "L12Final"
 us1040UsesItemized :: LineRef Dollars
 us1040UsesItemized = lineRef "us_1040" "UsesItemized"
 
+us1040L14 :: LineRef Dollars
+us1040L14 = lineRef "us_1040" "L14"
+
 us1040L15 :: LineRef Dollars
 us1040L15 = lineRef "us_1040" "L15"
 
