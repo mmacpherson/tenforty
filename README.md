@@ -139,7 +139,8 @@ yours to make:
   [Together AI](https://docs.together.ai/docs/zero-data-retention). Check
   their current terms yourself.
 - For the most privacy, run a model locally with a tool like
-  [Ollama](https://ollama.com) or [LM Studio](https://lmstudio.ai), so nothing
+  [llama.cpp](https://github.com/ggml-org/llama.cpp),
+  [Ollama](https://ollama.com), or [LM Studio](https://lmstudio.ai), so nothing
   leaves your machine.
 
 **2. Consider giving it numbers, not documents.** Transcribing the figures you
