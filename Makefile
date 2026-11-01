@@ -3,9 +3,10 @@
 SHELL := /bin/bash
 PROJECT := tenforty
 PYTHON_VERSION := 3.12
+# Pinned: the committed Colab .ipynb is marimo's export, so its format must not drift.
+MARIMO := marimo==0.25.2
 VENV := .venv
 PYTHON := $(VENV)/bin/python
-JUPYTER_ENV_NAME := "py-$(PROJECT)-$(PYTHON_VERSION)"
 UV_CHECK := $(shell command -v uv 2> /dev/null)
 
 define UV_INSTALL_MSG
@@ -19,7 +20,7 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env env-full env-graph-only jupyter-env test test-full test-all test-deep test-soak hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: help clean env env-full env-graph-only notebooks notebooks-check explorer readme-plots test test-full test-all test-deep test-soak hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
 .PHONY: spec-graphs spec-test forms-sync
 .PHONY: spec-fmt spec-fmt-check spec-lint spec-lint-strict
 .PHONY: runner-image bench-zip-mode
@@ -46,9 +47,17 @@ env-graph-only: check-uv ## Graph backend only (Windows compatible, no OTS)
 	uv pip install "setuptools-rust>=1.7"
 	TENFORTY_GRAPH_ONLY=1 uv pip install -e "."
 
-jupyter-env: check-uv ## Install Jupyter kernel
-	uv sync --extra jupyter
-	uv run python -m ipykernel install --user --name=$(PROJECT) --display-name=$(JUPYTER_ENV_NAME)
+notebooks: check-uv ## Regenerate the Colab .ipynb from its marimo source
+	uv run --no-project --with $(MARIMO) --with nbformat python scripts/export_colab_notebooks.py --write
+
+notebooks-check: check-uv ## Fail if the Colab .ipynb is stale
+	uv run --no-project --with $(MARIMO) --with nbformat python scripts/export_colab_notebooks.py --check
+
+explorer: check-uv ## Open the interactive marimo explorer against this checkout
+	uv run --with $(MARIMO) --with altair marimo edit notebooks/tenforty_explorer.py
+
+readme-plots: check-uv ## Regenerate images/example*.svg
+	uv run --with $(MARIMO) --with seaborn --with pyarrow python notebooks/readme_plots.py
 
 test: check-uv ## Run tests
 	uv sync

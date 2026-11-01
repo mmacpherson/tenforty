@@ -83,14 +83,21 @@ make env    # or: uv sync
 make test   # or: uv run pytest
 ```
 
-For Jupyter notebook development:
+### Notebooks
 
-```bash
-make jupyter-env
-```
+The notebooks are [marimo](https://marimo.io) files under `notebooks/`, plain
+Python that diffs cleanly:
 
-This installs a jupyter kernel named like `py-tenforty-{python_version}` that makes
-all the same packages available to Jupyter. Start jupyter with `uv run jupyter lab`.
+- `tenforty_explorer.py`: interactive controls for one return. `make explorer`
+  opens it against this checkout.
+- `tenforty_demo.py`: the walkthrough behind the Colab badge. It is written in
+  Jupyter order, top to bottom with imports first and no interactive widgets,
+  because Colab runs the exported `tenforty_Package_Demo.ipynb` that way. Edit
+  the `.py`, then run `make notebooks` to regenerate the `.ipynb`; CI fails if
+  the two drift apart.
+- `readme_plots.py`: regenerates `images/example*.svg` with `make readme-plots`.
+
+Each notebook declares its own dependencies, so none of them need a package extra.
 
 ### With pip
 
@@ -101,13 +108,6 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 pytest
-```
-
-For Jupyter support with pip:
-
-```bash
-pip install -e ".[dev,jupyter]"
-python -m ipykernel install --user --name=tenforty --display-name="py-tenforty"
 ```
 
 ### Source File Guide
