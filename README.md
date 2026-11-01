@@ -511,7 +511,8 @@ true tax cliffs.
 ## Related Projects
 
 A few excellent open-source projects approach US tax computation from
-different angles, and one of them may fit your task better:
+different angles. They are research tools, built for economists modeling
+policy and populations, and for that work one of them may fit better:
 
 - **[Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator)** (Policy
   Simulation Library) is a federal income and payroll tax microsimulation
@@ -530,12 +531,17 @@ different angles, and one of them may fit your task better:
   models federal and many state taxes alongside benefit programs, with a
   policy-reform focus similar to Tax-Calculator's.
 
-What `tenforty` brings to this neighborhood: state returns computed locally,
-form-level fidelity (actual form lines, via Open Tax Solver), a deliberately
-simple API, and, on the experimental graph backend, exact marginal rates and an
-input solver. If your question is "what would *this return* look like, federal
-and state, and how does it change as inputs move?" — that's the job this
-package is built for.
+`tenforty` is built for a different person: someone filing their own return
+who wants to know what it comes to, and what happens if something changes,
+without clicking back through seven screens of tax software to find out. That
+is its express purpose, not a side use. It's a library first: one function
+call, named inputs that match the lines on your documents, validated
+arguments with error messages that tell you (or your agent) what to fix,
+federal and state computed together, and a dataframe out when you sweep a
+grid of scenarios. The research models above can evaluate a single return
+too, but you or your agent have to learn their input conventions first. With
+`tenforty` that work is already done; on the experimental graph backend it
+also gives exact marginal rates and an input solver.
 
 
 ## Development & Contributing
