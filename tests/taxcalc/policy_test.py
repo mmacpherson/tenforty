@@ -6,21 +6,20 @@ from .taxcalc_policy import (
     COMPONENT_TOL,
     GAINS_WORKSHEET_TOL,
     GRAPH_TAX_TABLE_DELTA,
+    MFS_AMT_LINE4_RULE,
     QBI_SIMPLIFIED_THRESHOLD,
     DeltaRange,
+    _amti_before_mfs_line4_addition,
     _f7_itemized_semantics,
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
-    _f14_taxcalc_omits_amt_std_addback,
     _f19_deduction_choice_rule,
-    _f21_taxcalc_qw_qbi_phase_range,
-    _f23_taxcalc_omits_mfs_amt_increase,
     _f24_ots_2024_mfs_amt_constants,
     _f27_ots_skips_amt_preferential_worksheet,
+    _f28_taxcalc_elects_itemizing_below_the_standard_deduction,
     tolerance,
 )
 
-_F21_QUANTITIES = {"taxable_income", "amt", "income_tax", "total_tax"}
 _EXPECTED_QBI_THRESHOLDS = {
     (2024, "Single"): 191_950.0,
     (2024, "Married/Joint"): 383_900.0,
@@ -55,34 +54,6 @@ def test_qbi_simplified_thresholds_match_form_8995():
     assert QBI_SIMPLIFIED_THRESHOLD == _EXPECTED_QBI_THRESHOLDS
 
 
-def test_f21_models_only_the_qw_taxcalc_phase_range():
-    """F21 is limited to both backends inside TaxCalc's longer QW range."""
-    case = _case(status="Widow(er)", se=100_000.0)
-    reference = {"taxable_income": 200_000.0, "qbi_deduction": 10_000.0}
-
-    graph_model = _f21_taxcalc_qw_qbi_phase_range("graph", case, reference)
-    ots_model = _f21_taxcalc_qw_qbi_phase_range("ots", case, reference)
-
-    assert set(graph_model) == _F21_QUANTITIES
-    assert set(ots_model) == _F21_QUANTITIES
-    assert graph_model["taxable_income"] == DeltaRange(0.0, 10_000.0)
-    assert (
-        _f21_taxcalc_qw_qbi_phase_range(
-            "graph", {**case, "status": "Single"}, reference
-        )
-        == {}
-    )
-
-
-@pytest.mark.parametrize("pre_qbi", [191_950.0, 291_950.0, 400_000.0])
-def test_f21_does_not_model_outside_taxcalcs_qw_phase_range(pre_qbi):
-    """F21 leaves both endpoints and values above TaxCalc's range exposed."""
-    case = _case(status="Widow(er)", se=100_000.0)
-    reference = {"taxable_income": pre_qbi, "qbi_deduction": 0.0}
-
-    assert _f21_taxcalc_qw_qbi_phase_range("graph", case, reference) == {}
-
-
 @pytest.mark.parametrize(
     ("taxable_income", "expected_delta"),
     [(191_150.0, 0.0), (191_550.0, 32.0), (191_950.0, 64.0), (300_000.0, 64.0)],
@@ -101,18 +72,13 @@ def test_f11_models_the_exact_hoh_bracket_overcharge(taxable_income, expected_de
         }
 
 
-def test_f14_gap_is_one_standard_deduction_below_the_taxable_income_floor():
-    """Form 6251 line 1 goes negative, so the unused deduction adds no gap."""
-    case = _case(
-        status="Head_of_House",
-        iso=200_000.0,
-        itemized=0.0,
-        std_or_item="Standard",
-    )
+def test_f11_moves_the_overcharge_into_amt_when_an_amt_preference_exists():
+    """With the AMT binding, the stale bracket lowers AMT instead of raising tax."""
+    case = _case(year=2024, status="Head_of_House", iso=50_000.0)
+    model = _f11_ots_hoh_bracket("ots", case, {"taxable_income": 228_100.0})
 
-    model = _f14_taxcalc_omits_amt_std_addback("graph", case, {"agi": 0.0})
-
-    assert model["amt"] == DeltaRange(0.0, 0.35 * 21_900.0)
+    assert model["amt"] == DeltaRange(-64.0, 0.0)
+    assert model["income_tax"] == DeltaRange(0.0, 64.0)
 
 
 def test_f12_reserves_the_preferential_worksheet_displacement():
@@ -228,20 +194,7 @@ def test_f19_does_not_assume_the_future_auto_mode_has_been_implemented():
     assert _f19_deduction_choice_rule("graph", case, reference) == {}
 
 
-def test_f23_models_the_official_mfs_line4_increase():
-    """The reference defect contributes at most 28% of the required addition."""
-    case = _case(year=2025, status="Married/Sep")
-    reference = {"amti": 904_600.0}
-
-    model = _f23_taxcalc_omits_mfs_amt_increase("ots", case, reference)
-    graph_model = _f23_taxcalc_omits_mfs_amt_increase("graph", case, reference)
-
-    assert model["amt"].minimum == 0.0
-    assert model["amt"].maximum == pytest.approx(1_400.0)
-    assert graph_model == model
-
-
-def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
+def test_f24_fires_between_the_stale_and_official_thresholds():
     """OTS's stale rule is active while the official line-4 addition is zero."""
     case = _case(
         year=2024,
@@ -253,9 +206,21 @@ def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
 
     model = _f24_ots_2024_mfs_amt_constants("ots", case, reference)
 
-    assert _f23_taxcalc_omits_mfs_amt_increase("ots", case, reference) == {}
     assert model["amt"].minimum == 0.0
     assert model["amt"].maximum == pytest.approx(1_649.375)
+
+
+@pytest.mark.parametrize(
+    ("pre_addition_amti", "official_addition"),
+    [(850_000.0, 0.0), (900_000.0, 6_012.5), (1_300_000.0, 66_650.0)],
+)
+def test_f24_inverts_taxcalcs_official_line4_addition(
+    pre_addition_amti, official_addition
+):
+    """TaxCalc reports AMTI after the official addition; F24 starts before it."""
+    assert _amti_before_mfs_line4_addition(
+        pre_addition_amti + official_addition, *MFS_AMT_LINE4_RULE[2024]
+    ) == pytest.approx(pre_addition_amti)
 
 
 def test_f27_bounds_the_uninitialized_amt_preferential_worksheet():
@@ -350,3 +315,130 @@ def test_graph_tax_table_tolerance_negative_controls():
     assert tolerance("graph", "income_tax", 50_000.0, None) == COMPONENT_TOL
     assert tolerance("ots", "income_tax", 150_000.0, case) == COMPONENT_TOL
     assert tolerance("taxcalc", "income_tax", 50_000.0, case) == COMPONENT_TOL
+
+
+def test_ots_amt_takes_the_table_allowance_below_the_table_ceiling():
+    """OTS AMT is TMT less a table-priced line 16, so it moves with the table."""
+    case = _case()
+    assert tolerance("ots", "amt", 50_000.0, case) == (
+        COMPONENT_TOL + GRAPH_TAX_TABLE_DELTA
+    )
+    assert tolerance("ots", "amt", 150_000.0, case) == COMPONENT_TOL
+    assert tolerance("ots", "amt", 50_000.0, _case(year=2023)) == COMPONENT_TOL
+
+
+def test_f28_bounds_the_itemizing_election_by_both_amti_channels():
+    """Itemized deductions and the QBI cap shift both lower TaxCalc's AMTI."""
+    case = _case(status="Head_of_House", se=109_646.0, itemized=15_443.0, iso=50_000.0)
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 15_443.0,
+        "taxable_income": 200_000.0,
+        "qbi_deduction": 0.0,
+    }
+
+    model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+        "graph", case, reference
+    )
+
+    shift = 21_900.0 - 15_443.0
+    qbi_loss = 0.2 * 109_646.0
+    cut = 0.35 * (15_443.0 + 0.2 * shift)
+    assert model["taxable_income"] == DeltaRange(-shift - qbi_loss, 0.0)
+    assert model["amt"].maximum == pytest.approx(0.37 * (shift + qbi_loss) + cut)
+    assert model["total_tax"].maximum == pytest.approx(cut)
+
+
+@pytest.mark.parametrize(
+    "update",
+    [
+        {"iso": 0.0},
+        {"std_or_item": "Itemized"},
+        {"itemized": 30_000.0},
+    ],
+)
+def test_f28_needs_an_amt_preference_and_the_automatic_choice(update):
+    """Without AMT, a forced mode, or a larger itemization, F28 is silent."""
+    case = _case(
+        **{"status": "Head_of_House", "se": 125_000.0, "iso": 50_000.0, **update}
+    )
+    reference = {"standard_deduction": 0.0, "itemized_deduction": 0.0}
+
+    assert (
+        _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+            "ots", case, reference
+        )
+        == {}
+    )
+
+
+def test_f28_is_silent_when_taxcalc_kept_the_standard_deduction():
+    """No election by TaxCalc, no excused delta."""
+    case = _case(status="Head_of_House", se=125_000.0, iso=50_000.0)
+    reference = {"standard_deduction": 21_900.0, "itemized_deduction": 0.0}
+
+    assert (
+        _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+            "ots", case, reference
+        )
+        == {}
+    )
+
+
+def test_f7_is_silent_when_taxcalc_elected_the_same_itemization():
+    """Forced itemization below the standard deduction matches TaxCalc's election."""
+    case = _case(
+        status="Head_of_House",
+        se=100_000.0,
+        itemized=0.0,
+        std_or_item="Itemized",
+        iso=50_000.0,
+    )
+    reference = {
+        "agi": 92_935.0,
+        "taxable_income": 74_348.0,
+        "standard_deduction": 0.0,
+        "itemized_deduction": 0.0,
+    }
+
+    assert _f7_itemized_semantics("ots", case, reference) == {}
+
+
+def test_f28_below_the_qbi_threshold_allows_only_the_cap_movement():
+    """Both choices below the threshold: taxable income falls 80-100% of shift."""
+    case = _case(status="Head_of_House", se=125_000.0, iso=50_000.0)
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 0.0,
+        "taxable_income": 92_935.23,
+        "qbi_deduction": 23_233.81,
+    }
+
+    model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+        "ots", case, reference
+    )
+
+    assert model["taxable_income"] == DeltaRange(-21_900.0, -0.8 * 21_900.0)
+    assert model["amt"].minimum == 0.0
+    derived_delta = 75_415.22 - 92_935.22
+    assert model["taxable_income"].minimum <= derived_delta
+    assert derived_delta <= model["taxable_income"].maximum
+    overstated_by_10k = derived_delta + 10_000.0
+    assert overstated_by_10k > model["taxable_income"].maximum
+
+
+def test_f28_respects_the_taxable_income_floor():
+    """Tenforty's taxable income stops at zero, at most TaxCalc's below it."""
+    case = _case(status="Married/Joint", itemized=480.0, iso=200_000.0)
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 480.0,
+        "taxable_income": 20_674.0,
+        "qbi_deduction": 0.0,
+    }
+
+    model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+        "ots", case, reference
+    )
+
+    assert model["taxable_income"] == DeltaRange(-28_720.0, -20_674.0)

@@ -46,66 +46,66 @@
         },
         "12": {
             "id": 12,
+            "op": {
+                "type": "literal",
+                "value": 400
+            }
+        },
+        "13": {
+            "id": 13,
+            "op": {
+                "left": 12,
+                "right": 11,
+                "type": "sub"
+            }
+        },
+        "14": {
+            "id": 14,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "15": {
+            "id": 15,
+            "name": "L4c_taxable",
+            "op": {
+                "cond": 13,
+                "otherwise": 11,
+                "then": 14,
+                "type": "if_positive"
+            }
+        },
+        "16": {
+            "id": 16,
             "name": "L6_ss_wage_base",
             "op": {
                 "type": "literal",
                 "value": 176100
             }
         },
-        "13": {
-            "id": 13,
+        "17": {
+            "id": 17,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "14": {
-            "id": 14,
+        "18": {
+            "id": 18,
             "op": {
-                "left": 12,
+                "left": 16,
                 "right": 4,
                 "type": "sub"
             }
         },
-        "15": {
-            "id": 15,
-            "name": "L7_remaining_wage_base",
-            "op": {
-                "left": 13,
-                "right": 14,
-                "type": "max"
-            }
-        },
-        "16": {
-            "id": 16,
-            "name": "L8a_ss_taxable_se",
-            "op": {
-                "left": 11,
-                "right": 15,
-                "type": "min"
-            }
-        },
-        "17": {
-            "id": 17,
-            "op": {
-                "type": "literal",
-                "value": 0.124
-            }
-        },
-        "18": {
-            "id": 18,
-            "name": "L8b_ss_tax",
-            "op": {
-                "left": 16,
-                "right": 17,
-                "type": "mul"
-            }
-        },
         "19": {
             "id": 19,
+            "name": "L7_remaining_wage_base",
             "op": {
-                "type": "literal",
-                "value": 2.9e-2
+                "left": 17,
+                "right": 18,
+                "type": "max"
             }
         },
         "2": {
@@ -117,67 +117,83 @@
         },
         "20": {
             "id": 20,
-            "name": "L9_medicare_tax",
+            "name": "L8a_ss_taxable_se",
             "op": {
                 "left": 11,
                 "right": 19,
-                "type": "mul"
+                "type": "min"
             }
         },
         "21": {
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 400
+                "value": 0.124
             }
         },
         "22": {
             "id": 22,
+            "name": "L8b_ss_tax",
             "op": {
-                "left": 11,
+                "left": 20,
                 "right": 21,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "23": {
             "id": 23,
             "op": {
-                "left": 18,
-                "right": 20,
-                "type": "add"
+                "type": "literal",
+                "value": 2.9e-2
             }
         },
         "24": {
             "id": 24,
+            "name": "L9_medicare_tax",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 11,
+                "right": 23,
+                "type": "mul"
             }
         },
         "25": {
             "id": 25,
-            "name": "L10_se_tax",
             "op": {
-                "cond": 22,
-                "otherwise": 24,
-                "then": 23,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 400
             }
         },
         "26": {
             "id": 26,
             "op": {
-                "type": "literal",
-                "value": 0.5
+                "left": 25,
+                "right": 11,
+                "type": "sub"
             }
         },
         "27": {
             "id": 27,
-            "name": "L11_se_tax_deduction",
             "op": {
-                "left": 25,
-                "right": 26,
-                "type": "mul"
+                "left": 22,
+                "right": 24,
+                "type": "add"
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "29": {
+            "id": 29,
+            "name": "L10_se_tax",
+            "op": {
+                "cond": 26,
+                "otherwise": 27,
+                "then": 28,
+                "type": "if_positive"
             }
         },
         "3": {
@@ -185,6 +201,22 @@
             "name": "L4b_optional_method",
             "op": {
                 "type": "input"
+            }
+        },
+        "30": {
+            "id": 30,
+            "op": {
+                "type": "literal",
+                "value": 0.5
+            }
+        },
+        "31": {
+            "id": 31,
+            "name": "L11_se_tax_deduction",
+            "op": {
+                "left": 29,
+                "right": 30,
+                "type": "mul"
             }
         },
         "4": {
@@ -236,14 +268,15 @@
         }
     },
     "outputs": [
-        25,
-        27,
+        29,
+        31,
         6,
         8,
         11,
-        16,
-        18,
-        20
+        15,
+        20,
+        22,
+        24
     ],
     "tables": {}
 }

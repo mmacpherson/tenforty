@@ -13,7 +13,9 @@ usScheduleA_2024 = form "us_schedule_a" 2024 $ do
   -- Medical and Dental Expenses
   l1 <- keyInput "L1" "medical_dental" "Medical and dental expenses"
   l2 <- interior "L2" "agi_amount" $ importForm us1040L11
-  l3 <- interior "L3" "medical_threshold" $ l2 .*. lit 0.075
+  -- Line 3 never goes negative: IRC 213(a) allows only expenses in excess of
+  -- 7.5% of AGI, so negative AGI cannot create a deduction above line 1.
+  l3 <- interior "L3" "medical_threshold" $ max0 l2 .*. lit 0.075
   _l4 <-
     keyOutput "L4" "medical_deduction" "Subtract L3 from L1 (not below 0)" $
       l1 `subtractNotBelowZero` l3

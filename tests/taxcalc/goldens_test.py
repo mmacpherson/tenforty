@@ -35,7 +35,7 @@ def _pinned_taxcalc_version() -> str:
         for item in pyproject["dependency-groups"]["taxcalc"]
         if item.startswith("taxcalc==")
     )
-    return requirement.removeprefix("taxcalc==")
+    return requirement.removeprefix("taxcalc==").split(";")[0].strip()
 
 
 def _graph_available() -> bool:

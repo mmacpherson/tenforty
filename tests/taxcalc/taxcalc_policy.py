@@ -90,43 +90,6 @@ MFS_AMT_LINE4_RULE = {
 OTS_2024_MFS_AMT_LINE4_RULE = (831_150.0, 63_250.0)
 
 
-def _f21_taxcalc_qw_qbi_phase_range(
-    backend: str, case: dict, reference: dict[str, float] | None
-) -> DeltaModel:
-    """F21: TaxCalc doubles the QBI phase-in range for qualifying widow(er)."""
-    if (
-        backend not in {"graph", "ots"}
-        or case.get("status") != "Widow(er)"
-        or case.get("se", 0) <= 0
-        or reference is None
-    ):
-        return {}
-
-    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), "Widow(er)"))
-    if threshold is None:
-        return {}
-    if "qbi_deduction" in reference:
-        taxable_income_before_qbi = (
-            reference["taxable_income"] + reference["qbi_deduction"]
-        )
-    else:
-        standard = STANDARD_DEDUCTION[(case["year"], "Widow(er)")]
-        deduction = max(standard, case.get("itemized", 0.0))
-        taxable_income_before_qbi = max(0.0, reference["agi"] - deduction)
-    if threshold < taxable_income_before_qbi < threshold + 100_000.0:
-        maximum = max(
-            0.0,
-            reference.get("qbi_deduction", 0.2 * case.get("se", 0.0)),
-        )
-        return {
-            "taxable_income": DeltaRange(0.0, maximum),
-            "amt": DeltaRange(-maximum, maximum),
-            "income_tax": DeltaRange(0.0, maximum),
-            "total_tax": DeltaRange(0.0, maximum),
-        }
-    return {}
-
-
 def _f11_ots_hoh_bracket(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
@@ -159,6 +122,13 @@ def _f11_ots_hoh_bracket(
     )
     if overcharge == 0.0:
         return {}
+    if case.get("iso", 0.0):
+        # When the AMT binds, income tax is the tentative minimum tax and the
+        # overcharge moves out of income tax into a smaller AMT.
+        return {
+            "amt": DeltaRange(-overcharge, 0.0),
+            **_same_delta({"income_tax", "total_tax"}, DeltaRange(0.0, overcharge)),
+        }
     return _same_delta({"income_tax", "total_tax"}, DeltaRange.exact(overcharge))
 
 
@@ -268,6 +238,9 @@ def _f7_itemized_semantics(
     std = STANDARD_DEDUCTION.get((case.get("year", 2024), case.get("status", "")))
     if std is None or case.get("itemized", 0) >= std or reference is None:
         return {}
+    if reference.get("standard_deduction") == 0.0:
+        # TaxCalc elected the same itemization on its own (F28).
+        return {}
     agi = reference["agi"]
     gross_taxable_delta = max(0.0, agi - case.get("itemized", 0.0)) - max(
         0.0, agi - std
@@ -325,37 +298,6 @@ def _f12_itemized_category_amt(
     return {}
 
 
-def _f14_taxcalc_omits_amt_std_addback(
-    backend: str, case: dict, reference: dict[str, float] | None
-) -> DeltaModel:
-    """F14: taxcalc omits the Form 6251 line 2a standard-deduction add-back.
-
-    Adjudicated (tenforty-ztx): for a non-itemizer the standard deduction is
-    added back into AMTI (line 2a; IRC 56(b)(1)(E)). OTS does this and the graph
-    now does too (tenforty-8ik), so BOTH tenforty backends agree with the form
-    and diverge from taxcalc, which omits the add-back. The gap is the marginal
-    AMT rate x the standard deduction (e.g. 28% x $14,600 = $4,088), and it
-    surfaces on ISO + Standard cases where the preference makes AMT bind. Unlike
-    the other signatures this excuses BOTH backends — taxcalc is the outlier
-    here, not us. Upstream note filed to PSL (docs/upstream-taxcalc-reports.md);
-    delete this once a taxcalc release carries the correction.
-    """
-    std = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")))
-    if (
-        case.get("iso", 0)
-        and std is not None
-        and case.get("itemized", 0.0) <= std
-        and reference is not None
-    ):
-        # TaxCalc starts AMTI from AGI less the standard deduction. Form 6251
-        # line 1 is the same difference, negative below the taxable-income
-        # floor, and line 2a then adds the standard deduction back.
-        return _same_delta(
-            {"amt", "income_tax", "total_tax"}, DeltaRange(0.0, 0.35 * std)
-        )
-    return {}
-
-
 def _mfs_amt_line4_addition(amti: float, threshold: float, cap: float) -> float:
     return min(cap, 0.25 * max(0.0, amti - threshold))
 
@@ -371,42 +313,28 @@ def _mfs_amt_line4_tax_effect(
     return 0.28 * (addition + exemption_before - exemption_after)
 
 
-def _amt_deduction_addback(backend: str, case: dict) -> float:
+def _amti_before_mfs_line4_addition(amti: float, threshold: float, cap: float) -> float:
+    if amti <= threshold:
+        return amti
+    if amti <= threshold + 5.0 * cap:
+        return threshold + (amti - threshold) / 1.25
+    return amti - cap
+
+
+def _ots_itemized_amt_addback(case: dict) -> float:
     standard = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")), 0.0)
     itemized = max(0.0, case.get("itemized", 0.0))
-    if itemized <= standard:
-        return standard
-    if backend == "ots":
-        return itemized
-    return 0.0
-
-
-def _f23_taxcalc_omits_mfs_amt_increase(
-    backend: str, case: dict, reference: dict[str, float] | None
-) -> DeltaModel:
-    """F23: Model corrected backends against TaxCalc's omitted MFS increase."""
-    if (
-        backend not in {"ots", "graph"}
-        or case.get("status") != "Married/Sep"
-        or reference is None
-        or "amti" not in reference
-    ):
-        return {}
-    rule = MFS_AMT_LINE4_RULE.get(case.get("year"))
-    if rule is None:
-        return {}
-    backend_amti = reference["amti"] + _amt_deduction_addback(backend, case)
-    addition = _mfs_amt_line4_addition(backend_amti, *rule)
-    if addition == 0.0:
-        return {}
-    tax_effect = _mfs_amt_line4_tax_effect(backend_amti, addition, rule[0])
-    return _same_delta({"amt", "income_tax", "total_tax"}, DeltaRange(0.0, tax_effect))
+    return itemized if itemized > standard else 0.0
 
 
 def _f24_ots_2024_mfs_amt_constants(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
-    """F24: OTS 2024 applies the 2023 MFS line-4 threshold and cap."""
+    """F24: OTS 2024 applies the 2023 MFS line-4 threshold and cap.
+
+    TaxCalc's ``c62100`` already includes the official line-4 addition, so it
+    is inverted back to the pre-addition AMTI that both rules start from.
+    """
     if (
         backend != "ots"
         or case.get("year") != 2024
@@ -415,7 +343,9 @@ def _f24_ots_2024_mfs_amt_constants(
         or "amti" not in reference
     ):
         return {}
-    ots_amti = reference["amti"] + _amt_deduction_addback("ots", case)
+    ots_amti = _amti_before_mfs_line4_addition(
+        reference["amti"], *MFS_AMT_LINE4_RULE[2024]
+    ) + _ots_itemized_amt_addback(case)
     official = _mfs_amt_line4_addition(ots_amti, *MFS_AMT_LINE4_RULE[2024])
     stale = _mfs_amt_line4_addition(ots_amti, *OTS_2024_MFS_AMT_LINE4_RULE)
     exemption_terminal = MFS_AMT_LINE4_RULE[2024][0]
@@ -447,16 +377,80 @@ def _f27_ots_skips_amt_preferential_worksheet(
     )
 
 
+def _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F28: TaxCalc elects to itemize below the standard deduction to cut AMT.
+
+    IRC 63(e) lets a taxpayer itemize even when itemized deductions are smaller
+    than the standard deduction, and TaxCalc keeps whichever choice strictly
+    lowers total tax (the F19 rule). Since TaxCalc 6.7.3 adds the standard
+    deduction back into AMTI, that choice can favour itemizing when the AMT
+    binds, through two channels: itemized deductions other than taxes still
+    reduce AMTI where the standard deduction does not, and the higher regular
+    taxable income lifts the QBI deduction's 20% taxable-income cap. tenforty's
+    automatic choice takes the larger deduction, so it reports lower taxable
+    income and higher tax.
+
+    With ``shift`` the deduction given up, taxable income falls by at most
+    ``shift``, plus any QBI deduction TaxCalc loses in the phase-in range. AMTI
+    falls by at most TaxCalc's itemized deduction plus 20% of ``shift``, so
+    tentative minimum tax falls by at most 35% of that; AMT also absorbs the
+    regular-tax change, at most 37% of the taxable-income change. Excuses both
+    backends: it is the open deduction-choice contract (tenforty-z31), not an
+    engine defect.
+    """
+    std = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")))
+    if (
+        std is None
+        or not case.get("iso", 0.0)
+        or case.get("std_or_item", "Standard") != "Standard"
+        or case.get("itemized", 0.0) > std
+        or reference is None
+        or reference.get("standard_deduction") != 0.0
+    ):
+        return {}
+    itemized = reference.get("itemized_deduction", max(0.0, case.get("itemized", 0.0)))
+    shift = std - itemized
+    if shift <= 0.0:
+        return {}
+    # Below the QBI threshold the higher taxable income can only lift the 20%
+    # cap, so TaxCalc's QBI deduction grows by 0 to 20% of shift. TaxCalc's path
+    # has the higher pre-QBI income; only once it reaches the phase-in range can
+    # its QBI deduction instead shrink, by at most the 20% component.
+    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), case.get("status")))
+    pre_qbi_taxable = reference.get("taxable_income", 0.0) + reference.get(
+        "qbi_deduction", 0.0
+    )
+    below_phase_in = threshold is not None and pre_qbi_taxable <= threshold
+    qbi_loss = 0.0 if below_phase_in else 0.2 * max(0.0, case.get("se", 0.0))
+    tentative_minimum_tax_cut = 0.35 * (itemized + 0.2 * shift)
+    # tenforty's taxable income floors at zero, so it cannot fall further than
+    # TaxCalc's.
+    smallest_drop = (
+        max(-0.8 * shift, -reference.get("taxable_income", 0.0))
+        if below_phase_in
+        else 0.0
+    )
+    return {
+        "taxable_income": DeltaRange(-shift - qbi_loss, smallest_drop),
+        "amt": DeltaRange(
+            -0.35 * qbi_loss,
+            0.37 * (shift + qbi_loss) + tentative_minimum_tax_cut,
+        ),
+        "income_tax": DeltaRange(0.0, tentative_minimum_tax_cut),
+        "total_tax": DeltaRange(0.0, tentative_minimum_tax_cut),
+    }
+
+
 SIGNATURES = [
     KnownDefect("F7", _f7_itemized_semantics),
     KnownDefect("F11", _f11_ots_hoh_bracket),
     KnownDefect("F12", _f12_itemized_category_amt),
-    KnownDefect("F14", _f14_taxcalc_omits_amt_std_addback),
     KnownDefect("F19", _f19_deduction_choice_rule),
-    KnownDefect("F21", _f21_taxcalc_qw_qbi_phase_range),
-    KnownDefect("F23", _f23_taxcalc_omits_mfs_amt_increase),
     KnownDefect("F24", _f24_ots_2024_mfs_amt_constants),
     KnownDefect("F27", _f27_ots_skips_amt_preferential_worksheet),
+    KnownDefect("F28", _f28_taxcalc_elects_itemizing_below_the_standard_deduction),
 ]
 
 
@@ -498,7 +492,9 @@ GAINS_WORKSHEET_MIN = 1_000.0
 # credits, AMT and total tax move at most dollar for dollar with line 16. The
 # allowance is added to COMPONENT_TOL, so a table-priced quantity gets $2 + $6.
 # It applies only to the years whose spec carries the table (2024 and 2025), and
-# only to cases that state their year and filing status.
+# only to cases that state their year and filing status. OTS prices line 16 from
+# the same table; its income and total tax keep TAX_TABLE_TOL, and its AMT,
+# tentative minimum tax less that line 16, takes this allowance.
 GRAPH_TAX_TABLE_YEARS = frozenset({2024, 2025})
 GRAPH_TAX_TABLE_MAX_RATE = 0.22
 GRAPH_TAX_TABLE_HALF_ROW = 25.0
@@ -517,9 +513,12 @@ def tolerance(
     backend: str, quantity: str, taxable_income: float, case: dict | None = None
 ) -> float:
     """Return the allowed absolute disagreement for one quantity of one case."""
+    table_priced_quantities = (
+        GRAPH_TAX_TABLE_QUANTITIES if backend == "graph" else frozenset({"amt"})
+    )
     if (
-        backend == "graph"
-        and quantity in GRAPH_TAX_TABLE_QUANTITIES
+        backend in {"graph", "ots"}
+        and quantity in table_priced_quantities
         and case is not None
         and case.get("year") in GRAPH_TAX_TABLE_YEARS
         and case.get("status") is not None

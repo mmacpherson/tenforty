@@ -32,7 +32,7 @@ check-uv: ## Check if uv is installed
 
 clean: ## Remove all environment and build files
 	rm -rf $(VENV)
-	rm -rf tenforty.log .ruff_cache .mypy_cache .ipynb_checkpoints dist tenforty.egg-info uv.lock
+	rm -rf tenforty.log .ruff_cache .mypy_cache .ipynb_checkpoints dist tenforty.egg-info
 	rm -rf .hypothesis .pytest_cache build tenforty/*.so **/__pycache__
 
 env: check-uv ## Install package and dependencies

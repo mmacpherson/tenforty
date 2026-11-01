@@ -108,7 +108,6 @@ def test_iso_reaches_taxcalc_as_amt_preference():
         "is not carrying `iso` through to `cmbtp`, so taxcalc is being asked "
         "a different question than tenforty."
     )
-    assert amt == pytest.approx(39_725.50, abs=1.0)
 
 
 def test_iso_changes_the_taxcalc_result():
@@ -167,13 +166,6 @@ def test_taxcalc_can_match_tenforty_forced_itemization():
     assert result["taxable_income"] == pytest.approx(90_000.0, abs=0.01)
 
 
-@pytest.mark.xfail(
-    reason="F14: taxcalc leaves the standard deduction in AMTI for non-itemizers "
-    "(no Form 6251 line 2a add-back), so its AMT is short by 28% x 14,600. "
-    "Adjudicated in docs/taxcalc-differential-audit.md; upstream question "
-    "drafted in docs/upstream-taxcalc-reports.md",
-    strict=True,
-)
 def test_taxcalc_amt_matches_form_6251():
     """Taxcalc's AMT on an ISO case, against a hand-worked Form 6251.
 
@@ -182,27 +174,18 @@ def test_taxcalc_amt_matches_form_6251():
     tentative minimum tax is 26% x $232,600 + 28% x $31,700 = $69,352 against
     regular tax of $25,538.50.
 
-    This is the burn-in for F14 on the taxcalc side: it flips if Tax-Calculator
-    adopts the add-back.
+    This was F14's strict-xfail burn-in until Tax-Calculator 6.7.3 adopted the
+    add-back (PSLmodels/Tax-Calculator#3109); it now pins that correction.
     """
     assert taxcalc_batch([F14_CASE])[0]["amt"] == pytest.approx(43_813.50, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="F21: TaxCalc 6.7.2 gives qualifying widow(er) a $100,000 QBI "
-    "phase-in range instead of the official $50,000 range",
-    strict=True,
-)
 def test_taxcalc_qw_qbi_uses_the_all_other_returns_phase_in_range():
     """The QW midpoint must apply 50%, not 25%, of the wage-limit reduction."""
     result = taxcalc_batch([F21_QW_QBI_PHASE_IN_CASE])[0]
     assert result["taxable_income"] == pytest.approx(207_656.4775, abs=0.01)
 
 
-@pytest.mark.xfail(
-    reason="F23: TaxCalc omits the Form 6251 high-income MFS increase on line 4",
-    strict=True,
-)
 def test_taxcalc_applies_the_high_income_mfs_amt_increase():
     """The 2025 line-4 increase raises AMT to the official $68,380.75."""
     result = taxcalc_batch([F23_MFS_AMT_LINE4_CASE])[0]
@@ -397,7 +380,7 @@ def test_raw_iitax_remains_net_of_refundable_credits():
 
     assert single["refund"] == pytest.approx(0.0, abs=0.001)
     assert single["iitax"] == pytest.approx(0.0, abs=0.001)
-    # Pinned to TaxCalc 6.7.2; its row-derived credit_claim_urn may change on upgrade.
+    # Pinned to TaxCalc 6.9.0; its row-derived credit_claim_urn may change on upgrade.
     assert second_in_batch["refund"] == pytest.approx(61.353, abs=0.001)
     assert second_in_batch["iitax"] == pytest.approx(
         -second_in_batch["refund"], abs=0.001

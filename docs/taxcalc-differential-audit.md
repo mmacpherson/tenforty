@@ -5,7 +5,7 @@ immediately before PR #279 merged.
 Update 2026-07-21: PR #279 has since merged, fixing F1/F2; the remaining
 findings are burned into the suite as strict xfails in
 `tests/known_defects_test.py`.
-Reference: [Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator) (`taxcalc` 6.7.2, CC0),
+Reference: [Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator) (`taxcalc` 6.9.0, CC0; 6.7.2 until the 6.9.0 upgrade),
 federal only, tax years 2024 and 2025.
 
 ## Findings ledger
@@ -30,18 +30,21 @@ signature, and update this table in the same PR.
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
 | F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
 | F13 | 2025 MFS 15%-rate ceiling wrong (266,700 vs 300,000), inline in 1040 not Tables | graph spec | fixed | differential grid |
-| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); taxcalc omits add-back, upstream note pending | H_amt stratum |
+| F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); TaxCalc fixed upstream in 6.7.3 ([#3109](https://github.com/PSLmodels/Tax-Calculator/pull/3109), from [#3108](https://github.com/PSLmodels/Tax-Calculator/issues/3108)) | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
 | F17 | Graph charges SE tax below the \$400 de-minimis floor | graph spec | fixed (tenforty-dw0, #297) | differential sweep |
 | F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
 | F20 | Suite adapter compares post-refund `iitax` with pre-refund tenforty tax | taxcalc harness | fixed (tenforty-jte) | differential sweep |
-| F21 | 199A QBI phase-in range is doubled for qualifying widow(er) | upstream TaxCalc parameter | open (tenforty-2jg; upstream report pending) | Form 8995-A adjudication |
+| F21 | 199A QBI phase-in range is doubled for qualifying widow(er) | upstream TaxCalc parameter | fixed upstream in TaxCalc 6.8.4 ([#3149](https://github.com/PSLmodels/Tax-Calculator/pull/3149)) | Form 8995-A adjudication |
 | F22 | ~~OTS cancels the AMT standard-deduction add-back when taxable income floors at zero~~ | withdrawn: graph spec | withdrawn — OTS follows Form 6251 line 1; graph floored it (tenforty-nng) | randomized ISO differential |
-| F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | graph fixed (tenforty-3bt); TaxCalc open (tenforty-doo) | randomized high-income ISO differential |
+| F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | graph fixed (tenforty-3bt); TaxCalc fixed upstream in 6.9.0 ([#3198](https://github.com/PSLmodels/Tax-Calculator/pull/3198), from [#3196](https://github.com/PSLmodels/Tax-Calculator/pull/3196)) | randomized high-income ISO differential |
 | F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
 | F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | fixed (tenforty-c9a) | randomized MFS ISO/gain differential |
 | F26 | ~~TaxCalc lets unused itemization reduce AMTI below the taxable-income floor~~ | withdrawn: graph spec | withdrawn — TaxCalc follows Form 6251 line 1; graph floored it (tenforty-nng) | randomized itemized ISO/loss differential |
 | F27 | OTS skips the AMT preferential-rate worksheet when regular taxable income is zero | upstream OpenTaxSolver | open (tenforty-909.1; upstream report pending) | randomized zero-taxable-income ISO/dividend differential |
+| F28 | TaxCalc elects to itemize below the standard deduction when that lowers AMT; tenforty takes the larger deduction | API contract, both backends | open (deduction-choice contract; tenforty-z31) | taxcalc 6.9.0 upgrade differential |
+| F29 | Form 8959 line 8 ignores the Schedule SE $400 stop rule | OTS mapping + graph spec | fixed (tenforty-j0f) | taxcalc 6.9.0 upgrade differential |
+| F30 | Graph Schedule A line 3 goes negative with negative AGI, creating a medical deduction | graph spec | fixed (tenforty-kzm) | taxcalc 6.9.0 upgrade differential |
 
 ## Method
 
@@ -288,7 +291,12 @@ breakpoint error for MFS in the 2025 spec parameters (MFS thresholds are
 not always half of Single). 2-vs-1 against the graph; fix and adjudicate in
 the spec bundle.
 
-### F14. FIXED (graph) — AMT standard-deduction add-back divergence
+### F14. FIXED (graph; TaxCalc 6.7.3) — AMT standard-deduction add-back divergence
+
+Update 2026-10-31: TaxCalc 6.7.3 adopted the add-back in
+[PSLmodels/Tax-Calculator#3109](https://github.com/PSLmodels/Tax-Calculator/pull/3109),
+resolving [#3108](https://github.com/PSLmodels/Tax-Calculator/issues/3108). The
+signature is retired and the former strict-xfail now pins TaxCalc to $43,813.50.
 
 Found by the first AMT-positive stratum (H_amt: ISO exercise spread carried
 to taxcalc as `cmbtp`). Single, $150k wages + $200k ISO: OTS computes AMT
@@ -559,7 +567,13 @@ net-loss return now falls by at most the cap. The strict-xfail
 `test_graph_niit_honors_the_capital_loss_limitation` flipped to a passing
 guard. Closed by `tenforty-kf4`.
 
-### F21. NEW, ADJUDICATED — TaxCalc doubles the QBI phase-in range for qualifying widow(er)
+### F21. FIXED UPSTREAM (TaxCalc 6.8.4) — TaxCalc doubled the QBI phase-in range for qualifying widow(er)
+
+Update 2026-10-31: corrected by Martin Holmer's MARS=5 parameter audit,
+[PSLmodels/Tax-Calculator#3149](https://github.com/PSLmodels/Tax-Calculator/pull/3149),
+released in 6.8.4. The signature and its policy tests are retired; the former
+strict-xfail now pins TaxCalc's taxable income to the official
+$207,656.48.
 
 TaxCalc 6.7.2 gives qualifying widow(er) the correct all-other-returns
 section 199A threshold, but the married-filing-jointly phase-in range. Its
@@ -609,7 +623,14 @@ $21,900 standard deduction, which is F14 alone; the "unused part of the
 deduction" term that F14's model carried for below-floor cases measured the
 graph's floor, and is removed with it.
 
-### F23. ADJUDICATED — TaxCalc omits the MFS AMTI increase; graph fixed
+### F23. FIXED (graph; TaxCalc 6.9.0) — the MFS AMTI increase was omitted
+
+Update 2026-10-31: TaxCalc 6.9.0 adds the increase inside `c62100`
+([PSLmodels/Tax-Calculator#3198](https://github.com/PSLmodels/Tax-Calculator/pull/3198),
+refactoring [#3196](https://github.com/PSLmodels/Tax-Calculator/pull/3196)). The
+signature is retired, and the former strict-xfail now pins TaxCalc to $68,380.75.
+Because the reference AMTI now includes the official addition, F24 inverts it
+back to the pre-addition AMTI before comparing OTS's stale constants.
 
 The 2025 Form 6251 instructions have a special line-4 rule for married filing
 separately: above $900,350 of AMTI, add 25% of the excess to line 4, capped at
@@ -732,3 +753,60 @@ as an unclassified failure. The strict-xfail uses the exact-standard-deduction
 boundary where line 1 is zero, while a passing companion pins the correct result
 one dollar above it. Tracked by `tenforty-909.1`; the vendored source is
 unchanged.
+
+### F28. NEW — TaxCalc elects to itemize below the standard deduction to cut AMT
+
+Surfaced by the TaxCalc 6.9.0 upgrade. Since 6.7.3 (F14) TaxCalc adds the
+standard deduction back into AMTI, so the F19 rule, which keeps whichever
+deduction strictly lowers total tax, can now favour itemizing *less* than the
+standard deduction. IRC 63(e) permits that election.
+
+Two channels lower AMTI when itemizing: itemized deductions other than taxes
+still reduce AMTI, where the standard deduction is added back; and the higher
+regular taxable income lifts the QBI deduction's 20% taxable-income cap. The
+cleanest witness isolates the second channel by itemizing nothing. 2024
+Head of Household with $125,000 of self-employment profit and a $50,000 ISO
+spread: SE tax is $17,661.94, and AGI and QBI are $116,169.03. With the
+$21,900 standard deduction, the QBI deduction is capped at 20% of $94,269.03,
+$18,853.81, and AMTI is $147,315.22, for a $16,019.96 tentative minimum tax.
+Itemizing $0 raises the cap to $23,233.81, lowering AMTI to $142,935.22 and the
+tentative minimum tax to **$14,881.16**. The AMT binds both ways, so the
+election saves $1,138.80. tenforty's automatic choice takes the larger deduction
+and reports $16,019.96; forced `Itemized` on either backend reports $14,881.16.
+
+The signature excuses both backends, bounded by the mechanism with ``shift``
+the deduction given up: taxable income lower by at most ``shift``, plus any
+QBI deduction TaxCalc loses inside the phase-in range; income and
+total tax higher by at most 35% of TaxCalc's itemized deduction plus 20% of
+``shift``; AMT higher by at most that plus 37% of ``shift``. F7, which excuses
+forced itemization below the standard deduction, steps aside when TaxCalc has
+elected the same itemization itself. The strict-xfail asks the automatic choice for the
+derived $14,881.16. Like F19, this is the deduction-choice contract
+(`tenforty-z31`; [`docs/deduction-choice-contract.md`](deduction-choice-contract.md)),
+not an engine defect: an `Auto` mode that minimizes tax would retire both.
+
+### F29. FIXED — Form 8959 line 8 ignored the Schedule SE $400 stop rule
+
+Surfaced by the TaxCalc 6.9.0 upgrade; TaxCalc 6.7.2 had the same gap, which
+is why the differential stayed quiet. Schedule SE line 4c says that below $400,
+"stop; you don't owe self-employment tax", so line 6 is never reached, and Form
+8959 line 8 takes line 6. Both backends instead carried the sub-$400 earnings
+into Part II: the OTS mapping (`_se_income_to_8959_l8`) passed 92.35% of the
+profit unconditionally, and the graph imported Schedule SE line 4a. With $1.2M
+of wages exhausting the threshold, $288 of profit added $2.39 to Additional
+Medicare Tax.
+
+Both now apply the floor, and the graph's Schedule SE tax line uses the same
+`>= $400` test, so exactly $400 of earnings is taxed as the form requires. A
+passing test pins $9,000.00 at $288 and $9,008.31 at $1,000.
+
+### F30. FIXED — negative AGI created a graph medical deduction
+
+Exposed once F7 stopped excusing forced itemization that TaxCalc elects too.
+Schedule A line 3 is 7.5% of AGI, and the graph let it go negative: with AGI of
+-$2,761, line 3 was -$207.08 and line 4, line 1 less line 3, deducted $207.08
+of medical expenses that were never paid. IRC 213(a) allows medical expenses
+only to the extent they exceed 7.5% of AGI, so the deduction cannot exceed
+line 1; TaxCalc applies the percentage to AGI floored at zero. The graph now
+does the same. A passing test pins the 2025 qualifying-surviving-spouse witness
+at the derived $15,618.46 AMT.

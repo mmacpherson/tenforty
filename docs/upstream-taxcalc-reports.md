@@ -5,11 +5,17 @@ Questions and observations staged for
 convention as `docs/upstream-ots-reports.md`: what we saw, how we checked it,
 and the text to file.
 
-**Status: drafted, not sent.** Filing is Mike's, in his own time.
+**Status (2026-10-31): nothing here needs sending.** Reports 1–3 were fixed
+upstream before we filed them, and report 4 was withdrawn as our own error.
+Filing remains Mike's, in his own time.
 
 ---
 
 ## 1. Question: is the standard deduction intentionally left in AMTI for non-itemizers?
+
+**Fixed upstream, do not send.** Raised independently as
+[#3108](https://github.com/PSLmodels/Tax-Calculator/issues/3108) and fixed by
+[#3109](https://github.com/PSLmodels/Tax-Calculator/pull/3109) in 6.7.3.
 
 **Where:** `taxcalc/calcfunctions.py`, where `c62100` (Form 6251 line 4) is
 built.
@@ -128,6 +134,9 @@ relevant, or in case we've misunderstood the treatment.
 
 ## 2. Bug: qualifying widow(er) receives the MFJ-sized QBI phase-in range
 
+**Fixed upstream, do not send.** Fixed by
+[#3149](https://github.com/PSLmodels/Tax-Calculator/pull/3149) in 6.8.4.
+
 **Where:** `taxcalc/policy_current_law.json`, parameter
 `PT_qbid_taxinc_gap`.
 
@@ -188,6 +197,10 @@ only Married/Joint receives $100,000.
 ---
 
 ## 3. Bug: high-income MFS Form 6251 line-4 increase is omitted
+
+**Fixed upstream, do not send.** Fixed by
+[#3198](https://github.com/PSLmodels/Tax-Calculator/pull/3198) (refactoring
+[#3196](https://github.com/PSLmodels/Tax-Calculator/pull/3196)) in 6.9.0.
 
 **Where:** `taxcalc/calcfunctions.py`, the `c62100` / Form 6251 Part II path.
 

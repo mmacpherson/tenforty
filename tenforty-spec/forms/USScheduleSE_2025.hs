@@ -40,6 +40,12 @@ usScheduleSE_2025 = form "us_schedule_se" 2025 $ do
     interior "L4c" "total_se_earnings" $
       max0 (l4a .+. l4b)
 
+  -- Line 4c stop rule: under $400 there is no self-employment tax and no
+  -- line 6, which is what Form 8959 line 8 reads (IRC 1402(b)(2)).
+  _l4cTaxable <-
+    interior "L4c_taxable" "se_earnings_subject_to_tax" $
+      ifGte l4c (lit 400) l4c (dollars 0)
+
   -- Line 5: Enter total W-2 wages subject to social security tax
   l5 <- keyInput "L5" "w2_ss_wages" "Total W-2 wages subject to social security tax"
 
@@ -73,11 +79,11 @@ usScheduleSE_2025 = form "us_schedule_se" 2025 $ do
     keyOutput "L10" "se_tax" "Self-employment tax" $
       -- No SE tax when net earnings (line 4c, after the 92.35% factor)
       -- are under $400 (IRC 1402(b)(2), Schedule SE line 4c stop rule).
-      ifPos (l4c .-. lit 400) (l8b .+. l9) (dollars 0)
+      ifGte l4c (lit 400) (l8b .+. l9) (dollars 0)
 
   -- Line 11: Deductible part of SE tax. Multiply line 10 by 50%
   _l11 <-
     keyOutput "L11" "se_tax_deduction" "Deductible part of self-employment tax" $
       l10 .*. lit 0.5
 
-  outputs ["L3", "L4a", "L4c", "L8a", "L8b", "L9", "L10", "L11"]
+  outputs ["L3", "L4a", "L4c", "L4c_taxable", "L8a", "L8b", "L9", "L10", "L11"]
