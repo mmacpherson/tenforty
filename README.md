@@ -22,8 +22,7 @@ return affect what you owe. It's built for an individual interrogating *their
 own return*: sensitivity analysis, what-if sweeps, and optimization.
 
 The package wraps [Open Tax Solver](https://opentaxsolver.sourceforge.net/) in a
-Python library, alongside a second graph backend with exact marginal rates via
-automatic differentiation. The ideas behind it are discussed in a blog post
+Python library. The ideas behind it are discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
 
 You can try `tenforty` out immediately in your browser via the included Colab
@@ -35,8 +34,6 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 
 - Compute US federal taxes and state taxes, back to the 2018 tax year.
 - Explore how taxes vary as a function of income, state, filing status, and year.
-- Get the marginal rate of every input at once, and solve for the input that
-  hits a target tax.
 - Evaluate "what if" tax scenarios efficiently and reproducibly, with results in
   a `polars` dataframe.
 - Validated inputs with informative error messages, which make it a good
@@ -59,10 +56,10 @@ pip install tenforty
 Python 3.10–3.14 is supported on Linux and macOS. Windows is not supported; see
 [Known Limitations](#known-limitations) for workarounds.
 
-Python 3.15 is experimental. CI builds and tests a wheel from source on both
-platforms, but prebuilt 3.15 wheels are not published yet, so installing on 3.15
-needs a C++ compiler and Rust. Full support will be reconsidered after the final
-Python release.
+Python 3.15 is experimental. Prebuilt 3.15 wheels are not published yet, so
+installing on 3.15 builds from source; see the
+[Development Guide](./docs/develop.md) for the toolchain. Full support will be
+reconsidered after the final Python release.
 
 
 ## Quick Start
@@ -154,50 +151,13 @@ One common trap: `ordinary_dividends` is the *total* (1099-DIV box 1a) and
 already includes `qualified_dividends` (box 1b).
 
 Once the baseline matches your expectations, the follow-ups are where the
-package earns its keep: marginal rates on each input, sweeps over a gain you
+package earns its keep: sweeps over a gain you
 haven't realized yet, or how close you are to AMT.
 
 
 ## Examples
 
 Here are some more examples of what you can do with `tenforty`:
-
-### Marginal Rates for Every Input
-
-The graph backend can differentiate a selected output with respect to every
-continuous public input at once:
-
-``` python
-from tenforty import marginal_rates
-
-rates = marginal_rates(
-    year=2024,
-    state="CA",
-    filing_status="Single",
-    w2_income=100_000,
-)
-
-rates["w2_income"]
-```
-
-The returned dictionary uses the same natural input names as
-`evaluate_return`. It includes federal inputs and any continuous inputs mapped
-by the selected state; discrete choices such as filing status and number of
-dependents are omitted. The existing `marginal_rate(..., wrt="w2_income")`
-function remains available for one input at a time.
-
-Tax calculations are piecewise functions. At a bracket, phase-out, or other
-active boundary, both marginal-rate APIs report the composed function's
-right-hand derivative: the change implied by adding a small amount to that
-input. Smooth entries in `marginal_rates` share one reverse-mode traversal per
-resolved output.
-
-The reproducible
-[autodiff planning examples](docs/autodiff-applications.md) show a full
-next-dollar table, the interaction between wages and long-term-gain stacking,
-and a bounded ordinary-income sizing exercise. They also measure where forward
-simulation remains competitive and explain why derivatives alone cannot find
-true tax cliffs.
 
 ### Creating Tax Tables: Federal/State Tax Brackets as a Function of W2 Income
 
@@ -383,29 +343,14 @@ is misspelled, you'll get an informative error message along with a list of the
 valid options. [Error Handling](./docs/error-handling.md) describes the
 `on_error` policies and exception types.
 
-Three graph-backend functions take the same return arguments:
-
-- `marginal_rates(...)` — the derivative of an output with respect to every
-  continuous input at once; `marginal_rate(..., wrt=...)` does one input.
-- `solve_for_income(target_tax, ..., for_input="w2_income")` — the value of one
-  input that produces a target output.
-
-### Backends
-
-`backend="ots"` (the default) runs Open Tax Solver and covers tax years
-2018–2025. `backend="graph"` runs the compiled tax graphs, covers 2024 and 2025,
-and supports more states. Not every input is mapped on every backend and state;
-the graph backend raises on an input it can't represent rather than dropping it.
-
 ### Arguments
 
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
-| `year`                       | int                      | 2025                | 2018-2025 inclusive (graph backend: 2024-2025) |
-| `state`                      | str \| None               | None                | Two-letter state code. OTS backend income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. The graph backend also covers AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) are accepted on both. |
+| `year`                       | int                      | 2025                | 2018-2025 inclusive                |
+| `state`                      | str \| None               | None                | Two-letter state code. Income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   |                                    |
-| `dependent_exemptions`       | float                    | 0.0                 | State exemption dollars, not a count, for states that take them (graph backend) |
 | `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
@@ -423,7 +368,7 @@ the graph backend raises on an input it can't represent rather than dropping it.
 | `state_adjustment`           | float                    | 0.0                 |                                    |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
 | `on_error`                   | str                      | raise               | See [Error Handling](./docs/error-handling.md) |
-| `backend`                    | str                      | ots                 | "ots" or "graph"; see [Backends](#backends) |
+| `backend`                    | str                      | ots                 | See [Experimental: Graph Backend](#experimental-graph-backend) |
 
 The three `qbi_` inputs describe one trade or business, or businesses the
 taxpayer has validly aggregated for section 199A. They are not totals across
@@ -455,6 +400,78 @@ orchestration layer before rerunning Form 1040.
 | state_total_tax                 | Total state tax liability                             |
 | state_tax_bracket               | Marginal state tax bracket                            |
 | state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
+
+
+## Experimental: Graph Backend
+
+Alongside Open Tax Solver, `tenforty` ships a second backend, which is still
+experimental. Tax forms are written in a Haskell DSL
+([`tenforty-spec/`](./tenforty-spec/)), compiled to JSON graphs, and evaluated
+by a Rust runtime exposed to Python. Because the whole return is one
+differentiable graph, it can report exact marginal rates and solve for inputs,
+which OTS can't. It is included in the published wheels; select it per call
+with `backend="graph"`:
+
+``` python
+evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
+```
+
+Compared with the default OTS backend:
+
+- It covers the 2024 and 2025 tax years only.
+- It supports many more states: in addition to the OTS states, AL, AR, CO,
+  CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT, ND,
+  NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV.
+- Not every input is mapped for every state. It raises on an input it can't
+  represent rather than dropping it.
+- It takes one extra input, `dependent_exemptions`: state exemption dollars
+  (not a count) for states that use them. See its docstring in
+  `TaxReturnInput` for the per-state rules.
+
+Two function families exist only on this backend and take the same return
+arguments as `evaluate_return`:
+
+- `marginal_rates(...)` gives the derivative of an output with respect to every
+  continuous input at once; `marginal_rate(..., wrt=...)` does one input.
+- `solve_for_income(target_tax, ..., for_input="w2_income")` finds the value of
+  one input that produces a target output.
+
+### Marginal Rates for Every Input
+
+`marginal_rates` differentiates a selected output with respect to every
+continuous public input at once:
+
+``` python
+from tenforty import marginal_rates
+
+rates = marginal_rates(
+    year=2024,
+    state="CA",
+    filing_status="Single",
+    w2_income=100_000,
+)
+
+rates["w2_income"]
+```
+
+The returned dictionary uses the same natural input names as
+`evaluate_return`. It includes federal inputs and any continuous inputs mapped
+by the selected state; discrete choices such as filing status and number of
+dependents are omitted. The existing `marginal_rate(..., wrt="w2_income")`
+function remains available for one input at a time.
+
+Tax calculations are piecewise functions. At a bracket, phase-out, or other
+active boundary, both marginal-rate APIs report the composed function's
+right-hand derivative: the change implied by adding a small amount to that
+input. Smooth entries in `marginal_rates` share one reverse-mode traversal per
+resolved output.
+
+The reproducible
+[autodiff planning examples](docs/autodiff-applications.md) show a full
+next-dollar table, the interaction between wages and long-term-gain stacking,
+and a bounded ordinary-income sizing exercise. They also measure where forward
+simulation remains competitive and explain why derivatives alone cannot find
+true tax cliffs.
 
 
 ## Known Limitations
@@ -496,9 +513,9 @@ different angles, and one of them may fit your task better:
   policy-reform focus similar to Tax-Calculator's.
 
 What `tenforty` brings to this neighborhood: state returns computed locally,
-form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
-rates via automatic differentiation, an input solver, and a deliberately
-simple API. If your question is "what would *this return* look like, federal
+form-level fidelity (actual form lines, via Open Tax Solver), a deliberately
+simple API, and, on the experimental graph backend, exact marginal rates and an
+input solver. If your question is "what would *this return* look like, federal
 and state, and how does it change as inputs move?" — that's the job this
 package is built for.
 
