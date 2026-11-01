@@ -14,10 +14,8 @@ from .taxcalc_policy import (
     _f14_taxcalc_omits_amt_std_addback,
     _f19_deduction_choice_rule,
     _f21_taxcalc_qw_qbi_phase_range,
-    _f22_ots_amt_taxable_income_floor,
     _f23_taxcalc_omits_mfs_amt_increase,
     _f24_ots_2024_mfs_amt_constants,
-    _f26_taxcalc_itemized_amt_floor,
     _f27_ots_skips_amt_preferential_worksheet,
     tolerance,
 )
@@ -103,8 +101,8 @@ def test_f11_models_the_exact_hoh_bracket_overcharge(taxable_income, expected_de
         }
 
 
-def test_f14_accounts_for_the_taxable_income_floor():
-    """TaxCalc's AMTI gap includes the unused standard deduction below zero."""
+def test_f14_gap_is_one_standard_deduction_below_the_taxable_income_floor():
+    """Form 6251 line 1 goes negative, so the unused deduction adds no gap."""
     case = _case(
         status="Head_of_House",
         iso=200_000.0,
@@ -114,7 +112,7 @@ def test_f14_accounts_for_the_taxable_income_floor():
 
     model = _f14_taxcalc_omits_amt_std_addback("graph", case, {"agi": 0.0})
 
-    assert model["amt"] == DeltaRange(0.0, 0.35 * 43_800.0)
+    assert model["amt"] == DeltaRange(0.0, 0.35 * 21_900.0)
 
 
 def test_f12_reserves_the_preferential_worksheet_displacement():
@@ -230,28 +228,6 @@ def test_f19_does_not_assume_the_future_auto_mode_has_been_implemented():
     assert _f19_deduction_choice_rule("graph", case, reference) == {}
 
 
-def test_f22_is_a_signed_correction_to_the_correct_amt_path():
-    """OTS can remove only the tax effect of the unused deduction floor."""
-    case = _case(
-        status="Head_of_House",
-        iso=200_000.0,
-        itemized=0.0,
-        std_or_item="Standard",
-    )
-
-    model = _f22_ots_amt_taxable_income_floor(
-        "ots", case, {"agi": 0.0, "qbi_deduction": 0.0}
-    )
-
-    assert model["amt"] == DeltaRange(-0.35 * 21_900.0, 0.0)
-    assert (
-        _f22_ots_amt_taxable_income_floor(
-            "graph", case, {"agi": 0.0, "qbi_deduction": 0.0}
-        )
-        == {}
-    )
-
-
 def test_f23_models_the_official_mfs_line4_increase():
     """The reference defect contributes at most 28% of the required addition."""
     case = _case(year=2025, status="Married/Sep")
@@ -280,26 +256,6 @@ def test_f24_fires_between_the_stale_and_official_thresholds_without_f23():
     assert _f23_taxcalc_omits_mfs_amt_increase("ots", case, reference) == {}
     assert model["amt"].minimum == 0.0
     assert model["amt"].maximum == pytest.approx(1_649.375)
-
-
-def test_f26_bounds_only_the_unused_itemized_deduction():
-    """The Form 1040 line-15 floor prevents the excess from reducing AMTI."""
-    case = _case(
-        status="Married/Sep",
-        itemized=50_061.0,
-        qual_div=16_556.0,
-        iso=300_000.0,
-    )
-    reference = {
-        "agi": 46_691.0,
-        "taxable_income": 0.0,
-        "qbi_deduction": 0.0,
-    }
-
-    model = _f26_taxcalc_itemized_amt_floor("graph", case, reference)
-
-    assert model["amt"].minimum == 0.0
-    assert model["amt"].maximum == pytest.approx(0.55 * 3_370.0)
 
 
 def test_f27_bounds_the_uninitialized_amt_preferential_worksheet():

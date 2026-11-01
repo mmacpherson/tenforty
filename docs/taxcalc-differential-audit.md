@@ -36,11 +36,11 @@ signature, and update this table in the same PR.
 | F19 | Deduction choice: taxcalc minimizes tax; tenforty maximizes the deduction | API contract, both backends | open (documented signature; tenforty-z31) | differential sweep |
 | F20 | Suite adapter compares post-refund `iitax` with pre-refund tenforty tax | taxcalc harness | fixed (tenforty-jte) | differential sweep |
 | F21 | 199A QBI phase-in range is doubled for qualifying widow(er) | upstream TaxCalc parameter | open (tenforty-2jg; upstream report pending) | Form 8995-A adjudication |
-| F22 | OTS cancels the AMT standard-deduction add-back when taxable income floors at zero | upstream OpenTaxSolver | open (tenforty-by2; upstream report pending) | randomized ISO differential |
+| F22 | ~~OTS cancels the AMT standard-deduction add-back when taxable income floors at zero~~ | withdrawn: graph spec | withdrawn — OTS follows Form 6251 line 1; graph floored it (tenforty-nng) | randomized ISO differential |
 | F23 | MFS high-income AMTI increase omitted | graph spec + upstream TaxCalc | graph fixed (tenforty-3bt); TaxCalc open (tenforty-doo) | randomized high-income ISO differential |
 | F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
 | F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | fixed (tenforty-c9a) | randomized MFS ISO/gain differential |
-| F26 | TaxCalc lets unused itemization reduce AMTI below the taxable-income floor | upstream TaxCalc | open (tenforty-w7t; upstream report pending) | randomized itemized ISO/loss differential |
+| F26 | ~~TaxCalc lets unused itemization reduce AMTI below the taxable-income floor~~ | withdrawn: graph spec | withdrawn — TaxCalc follows Form 6251 line 1; graph floored it (tenforty-nng) | randomized itemized ISO/loss differential |
 | F27 | OTS skips the AMT preferential-rate worksheet when regular taxable income is zero | upstream OpenTaxSolver | open (tenforty-909.1; upstream report pending) | randomized zero-taxable-income ISO/dividend differential |
 
 ## Method
@@ -583,32 +583,31 @@ incorrect deduction can propagate through both regular taxable income and AMTI.
 The upstream report is staged in `docs/upstream-taxcalc-reports.md`; tracked by
 `tenforty-2jg`.
 
-### F22. NEW, ADJUDICATED — OTS loses the AMT taxable-income floor
+### F22. WITHDRAWN — the floor was the graph's error, not OTS's
 
 The randomized ISO strategy found a case below the regular taxable-income
 floor: 2024 Head of Household, no regular income, the standard deduction, and
-a $200,000 ISO exercise spread. Form 1040 line 15 is zero. Form 6251 then adds
-the $21,900 standard deduction on line 2a, so AMTI is $221,900. After the
-$85,700 exemption, tentative minimum tax and AMT are **$35,412.00**.
+a $200,000 ISO exercise spread. Form 1040 line 15 is zero. OTS reports
+**$29,718.00** and the graph reported **$35,412.00**.
 
-The graph follows that form path. OTS reports **$29,718.00** because
-`form6251_AlternativeMinimumTax` replaces line 1 with the unfloored
-`L11 - L14` whenever Form 1040 line 15 is zero. Here that is -$21,900; line
-2a adds $21,900 back and the two cancel, leaving AMTI at $200,000. This is an
-upstream tax-logic defect, so the vendored source remains unchanged.
+F22 was adjudicated against OTS on the premise that Form 6251 line 1 is Form
+1040 line 15, floored at zero. It is not. The 2024 line 1 reads: "If Form 1040
+or 1040-SR, line 15, is zero, subtract line 14 of Form 1040 or 1040-SR from line
+11 of Form 1040 or 1040-SR and enter the result here. (If less than zero, enter
+as a negative amount.)" The 2025 line 1b says the same. Line 1 is therefore
+-$21,900, line 2a adds the $21,900 standard deduction back, and AMTI is the
+$200,000 spread. After the $85,700 exemption, 26% of $114,300 is **$29,718.00**:
+OTS's `L11 - L14` substitution is the form, line for line.
 
-TaxCalc 6.7.2 reports **$24,024.00** for the same return. That is the already
-adjudicated F14 defect: it starts AMTI from AGI less the standard deduction,
-producing $178,100. Below the regular taxable-income floor, the full gap between
-TaxCalc and the Form 6251 path is the standard deduction plus its unused part,
-not merely one standard deduction. F14's bounded model now reflects that; F22
-adds a separate negative OTS correction, so the two mechanisms compose without
-a blanket waiver.
+The graph imported the floored Form 1040 line 15 into line 1. `tenforty-nng`
+makes line 1 the unfloored line 11 less line 14 in both years, and the former
+strict-xfail is now a passing test that pins both backends to the derived
+amount. The staged OpenTaxSolver report was withdrawn unsent.
 
-The strict-xfail compares OTS directly with the hand-worked graph value and
-will flip when an OTS release preserves the Form 1040 line-15 floor. The
-upstream report is staged in `docs/upstream-ots-reports.md`; tracked by
-`tenforty-by2`.
+TaxCalc 6.7.2 reports **$24,024.00**, AMTI $178,100. That gap is exactly the
+$21,900 standard deduction, which is F14 alone; the "unused part of the
+deduction" term that F14's model carried for below-floor cases measured the
+graph's floor, and is removed with it.
 
 ### F23. ADJUDICATED — TaxCalc omits the MFS AMTI increase; graph fixed
 
@@ -672,27 +671,26 @@ the Form 1040 worksheet. The strict-xfail and differential signature were
 retired together; the dedicated golden witness now passes without an
 allowance.
 
-### F26. NEW, ADJUDICATED — TaxCalc loses the itemized taxable-income floor
-
-TaxCalc's itemizer AMTI branch reconstructs Form 6251 line 4 directly from AGI
-less itemized deductions plus AMT add-backs. When allowed itemized deductions
-exceed AGI, their unused portion therefore makes the base negative. Form 6251
-line 1 is Form 1040 line 15, which has already floored taxable income at zero;
-unused itemization cannot carry through that line.
+### F26. WITHDRAWN — TaxCalc keeps the negative line 1; the graph floored it
 
 The witness is 2024 MFS with a large net capital loss, $15,079 interest,
 $33,112 ordinary dividends ($16,556 qualified), $50,061 itemized deductions,
 and a $300,000 ISO spread. AGI is $46,691, so $3,370 of itemization is unused.
-Graph starts line 1 at zero and reports AMT **$58,376.32**. TaxCalc carries the
--$3,370 through AMTI and reports **$57,432.72**, lower by $943.60 (28%).
+The graph started line 1 at zero and reported AMT **$58,376.32**. TaxCalc
+carries the -$3,370 through AMTI and reports **$57,432.72**.
 
-F26 applies only to the positive graph-minus-TaxCalc effect of that unused
-deduction, bounded by the same AMT/preferential slopes as F12. A TaxCalc
-strict-xfail, upstream draft, and golden witness track `tenforty-w7t`.
+F26 was adjudicated against TaxCalc on the same false premise as F22, that
+Form 6251 line 1 floors at zero. The form enters line 11 less line 14 "as a
+negative amount" when it is less than zero, so TaxCalc's AMTI of $296,630 is
+correct. Less the $66,650 exemption, line 6 is $229,980; the qualified dividends
+sit in the $47,025 zero-rate band, and 28% of the remaining $213,424 less $2,326
+is **$57,432.72**. The graph now reports the same amount (`tenforty-nng`). The
+former strict-xfail is a passing TaxCalc test pinned to the derived amount,
+and the staged TaxCalc report was withdrawn unsent.
 
 ### F27. NEW, ADJUDICATED — OTS skips the AMT preferential-rate worksheet at zero taxable income
 
-The zero-taxable-income path exposes a second OTS defect independent of F22.
+The zero-taxable-income path exposes an OTS defect.
 The 2024 1040 routine does not run its qualified-dividend or Schedule D tax
 worksheet when line 15 is zero. Form 6251 Part III nevertheless reads the
 worksheet arrays when qualified dividends or gains are present. Their
@@ -702,7 +700,7 @@ routine has the same control flow.
 
 The cleanest isolated witness is 2024 Head of Household with a $200,000 ISO
 spread and ordinary dividends all reported as qualified. At exactly the
-$21,900 standard deduction, F22's unused-deduction error is zero, but F27 makes
+$21,900 standard deduction, Form 6251 line 1 is zero, but F27 makes
 OTS tax the entire AMT base at 26%. One additional dollar activates the
 regular-tax worksheet and makes the defect disappear:
 
@@ -717,24 +715,20 @@ zero to one dollar, a $6,142.50 drop equal to 26% of the $23,625 standard
 deduction.
 
 The randomized differential originally exposed a composite 2024 witness with
-$17,322 of qualified dividends. Its official path has AMTI $221,900 and AMT
-taxable income $136,200. Removing the $17,322 preferential component leaves
-$118,878 taxed at 26%, for AMT **$30,908.28**.
-
-OTS also carries F22 on this return, putting AMT taxable income at $131,622.
-With only F22, Part III would tax $114,300 of ordinary AMT income and report
-**$29,718.00**. Instead the uninitialized worksheet makes OTS tax the full
-$131,622 at 26%, reporting **$34,221.72**. Thus F27 contributes exactly
-$4,503.72, while F22 separately contributes -$1,190.28 relative to the
-official path. TaxCalc's **$24,024.00** remains the already-adjudicated F14
-standard-deduction defect.
+$17,322 of qualified dividends. Form 6251 line 1 is -$4,578, so AMTI is
+$217,322 and AMT taxable income $131,622. Part III taxes the $114,300 ordinary
+part at 26% and the $17,322 of qualified dividends at zero, for AMT
+**$29,718.00**. The uninitialized worksheet instead makes OTS tax the full
+$131,622 at 26%, reporting **$34,221.72**; F27 contributes exactly $4,503.72,
+26% of the qualified dividends. TaxCalc's **$24,024.00** remains the
+already-adjudicated F14 standard-deduction defect.
 
 The F27 signature is a nonnegative OTS correction bounded by 28% of the
 preferential income, the largest amount skipping Part III can add. It applies
 only when TaxCalc regular taxable income is zero, preference income and an ISO
-adjustment are present, and composes with F14 and F22. A deterministic
+adjustment are present, and composes with F14. A deterministic
 differential anchor prevents the randomized suite from rediscovering the case
 as an unclassified failure. The strict-xfail uses the exact-standard-deduction
-boundary where F22 is inert, while a passing companion pins the correct result
+boundary where line 1 is zero, while a passing companion pins the correct result
 one dollar above it. Tracked by `tenforty-909.1`; the vendored source is
 unchanged.
