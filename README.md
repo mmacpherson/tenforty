@@ -535,7 +535,7 @@ policy and populations, and for that work one of them may fit better:
 who wants to know what it comes to, and what happens if something changes,
 without clicking back through seven screens of tax software to find out. That
 is its express purpose, not a side use. It's a library first: one function
-call, named inputs that match the lines on your documents, validated
+call, plainly named inputs (`w2_income`, `long_term_capital_gains`), validated
 arguments with error messages that tell you (or your agent) what to fix,
 federal and state computed together, and a dataframe out when you sweep a
 grid of scenarios. The research models above can evaluate a single return
