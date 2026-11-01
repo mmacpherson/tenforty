@@ -16,22 +16,15 @@
 ## Overview
 
 `tenforty` is an open-source Python package designed to help demystify US
-federal and state tax computations. This project offers an accessible way to
-explore tax scenarios, compare different tax situations, and understand the
-impact of various factors on tax liabilities. It's particularly useful for those
-who would like to understand or optimize their taxes by evaluating how tax form
-inputs affect their outputs.
+federal and state tax computations. It offers an accessible way to explore tax
+scenarios, compare different tax situations, and understand how the inputs to a
+return affect what you owe. It's built for an individual interrogating *their
+own return*: sensitivity analysis, what-if sweeps, and optimization.
 
-The package is built on top of the
-[Open Tax Solver](https://opentaxsolver.sourceforge.net/)
-project, wrapping its
-functionality into a Python library.
-
-The package and the ideas behind it are discussed in a blog post
+The package wraps [Open Tax Solver](https://opentaxsolver.sourceforge.net/) in a
+Python library, alongside a second graph backend with exact marginal rates via
+automatic differentiation. The ideas behind it are discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
-`tenforty` also works well driven by a coding agent (Claude Code, Codex, and
-friends) — the validated inputs and informative error messages make it a good
-tool-call target.
 
 You can try `tenforty` out immediately in your browser via the included Colab
 notebook: [![Try In
@@ -40,150 +33,39 @@ Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.
 
 ## Features
 
-- Compute US federal taxes, as well as taxes for several US states.
+- Compute US federal taxes and state taxes, back to the 2018 tax year.
 - Explore how taxes vary as a function of income, state, filing status, and year.
-- Easily integrate with data analysis and visualization tools in Python with `polars` support.
-- Evaluate "what if" tax scenarios efficiently and reproducibly.
-
-
-## Related Projects
-
-If you've landed here while looking for open-source US tax computation, it's
-worth knowing the landscape — a few excellent projects approach this problem
-from different angles, and one of them may fit your task better:
-
-- **[Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator)** (Policy
-  Simulation Library) is a federal income and payroll tax microsimulation
-  model with a long pedigree in the policy-economics world. Its special power
-  is *counterfactual law*: every rate, bracket, and phase-out is a reformable
-  parameter, so it can answer "what would this filer (or the whole country)
-  pay under a proposed reform?" It models per-spouse income attribution and
-  has been validated against NBER's TAXSIM for years. If your question is
-  about policy analysis, revenue estimation, or distributional effects, start
-  there. `tenforty` uses Tax-Calculator as an independent validation oracle
-  for its own federal results — see
-  [docs/taxcalc-differential-audit.md](./docs/taxcalc-differential-audit.md).
-- **[TAXSIM](https://taxsim.nber.org/)** (NBER) is the long-standing academic
-  reference model for US federal and state income taxes, callable remotely.
-- **[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us)**
-  models federal and many state taxes alongside benefit programs, with a
-  policy-reform focus similar to Tax-Calculator's.
-
-What `tenforty` brings to this neighborhood: state returns computed locally,
-form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
-rates via automatic differentiation, an input solver, and a deliberately
-simple API. It's built for an individual interrogating *their own return* —
-sensitivity analysis, what-if sweeps, optimization. Performance depends on
-the backend, graph, and API path: a small Rust demo-graph benchmark is not a
-measurement of a complete return through Python or the browser. The shipped
-Python and browser graph paths use the interpreter, not the experimental JIT.
-If your
-question is "what would *this return* look like, federal and state, and how
-does it change as inputs move?" — that's the job this package is built for.
+- Get the marginal rate of every input at once, and solve for the input that
+  hits a target tax.
+- Evaluate "what if" tax scenarios efficiently and reproducibly, with results in
+  a `polars` dataframe.
+- Validated inputs with informative error messages, which make it a good
+  tool-call target for a coding agent.
 
 
 ## Disclaimer
 
 `tenforty` is an open-source tool intended for informational and educational
-purposes only and does not provide tax advice.
+purposes only and does not provide tax advice. Known limitations are detailed
+in the [Limitations](#known-limitations) section below.
 
-Known limitations of this package are detailed in the
-[Limitations](#known-limitations) section below.
 
 ## Installation
-
-Python 3.10–3.14 is supported on Linux and macOS. Python 3.15 is experimental:
-CI builds and installs a wheel on both platforms, requires both the OTS and
-Rust graph backends, and runs the standard test suite. These checks cover the
-regular CPython build, not the free-threaded build or optional notebook and
-Tax-Calculator dependencies.
-
-Use Python 3.10–3.14 for supported installations. Prebuilt Python 3.15 wheels
-are not published yet; testing 3.15 from source requires a C++ compiler and Rust,
-and dependencies may also need to compile from source. Full 3.15 support will
-be reconsidered after the final Python release and wheel validation.
 
 ```sh
 pip install tenforty
 ```
 
+Python 3.10–3.14 is supported on Linux and macOS. Windows is not supported; see
+[Known Limitations](#known-limitations) for workarounds.
 
-## Main Functions Documentation
-
-The two functions `evaluate_return` and `evaluate_returns` are the main
-interface to `tenforty`. They take exactly the same arguments, except that any
-of the arguments to `evaluate_returns` may either be a single value, or a list
-of values. `evaluate_return` is for evaluating one single return, and
-`evaluate_returns` evaluates all combinations of inputs subtended by the
-provided values and collects the results into a dataframe.
-
-The inputs to either function are validated, and if for example a filing status
-is misspelled, you'll get an informative error message along with a list of the
-valid options.
-
-Here are all arguments available for those two functions:
+Python 3.15 is experimental. CI builds and tests a wheel from source on both
+platforms, but prebuilt 3.15 wheels are not published yet, so installing on 3.15
+needs a C++ compiler and Rust. Full support will be reconsidered after the final
+Python release.
 
 
-| Argument                     | Type                     | Default             | Notes                              |
-|------------------------------|--------------------------|---------------------|------------------------------------|
-| `year`                       | int                      | 2025                | 2018-2025 inclusive                |
-| `state`                      | str \| None               | None                | Two-letter state code. Income-tax states with OTS support: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. Other states unsupported for now. |
-| `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
-| `num_dependents`             | int                      | 0                   |                                    |
-| `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
-| `w2_income`                  | float                    | 0.0                 |                                    |
-| `taxable_interest`           | float                    | 0.0                 |                                    |
-| `qualified_dividends`        | float                    | 0.0                 |                                    |
-| `ordinary_dividends`         | float                    | 0.0                 |                                    |
-| `short_term_capital_gains`   | float                    | 0.0                 |                                    |
-| `long_term_capital_gains`    | float                    | 0.0                 |                                    |
-| `self_employment_income`     | float                    | 0.0                 | Schedule C profit used by Schedule SE and QBI |
-| `qbi_w2_wages`               | float                    | 0.0                 | W-2 wages paid by the QBI business or aggregation |
-| `qbi_ubia`                   | float                    | 0.0                 | UBIA of qualified property for that business or aggregation |
-| `qbi_is_sstb`                | bool                     | False               | Whether that business or aggregation is an SSTB |
-| `schedule_1_income`          | float                    | 0.0                 |                                    |
-| `itemized_deductions`        | float                    | 0.0                 |                                    |
-| `state_adjustment`           | float                    | 0.0                 |                                    |
-| `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
-
-The three `qbi_` inputs describe one trade or business, or businesses the
-taxpayer has validly aggregated for section 199A. They are not totals across
-unrelated businesses, because Form 8995-A applies its wage and UBIA limitation
-per business or valid aggregation. Their defaults model a non-SSTB business
-with no business W-2 wages or qualified property. The OTS backend uses OTS's
-Form 8995 for the independent QBI base and taxable-income ceiling, then applies
-the missing Form 8995-A wage, property, and SSTB limitation in tenforty's
-orchestration layer before rerunning Form 1040.
-
-The functions output these fields:
-
-| Output Field                    | Description                                           |
-|---------------------------------|-------------------------------------------------------|
-| total_tax                       | Combined federal and state tax liability              |
-| federal_adjusted_gross_income   | Federal Adjusted Gross Income (Form 1040 Line 11)     |
-| federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
-| federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
-| federal_taxable_income          | Income subject to federal tax after deductions        |
-| federal_qbi_deduction           | Qualified business income deduction (Form 8995/8995-A) |
-| federal_amt                     | Federal Alternative Minimum Tax                       |
-| federal_income_tax              | Federal income tax + AMT (excludes SE tax, NIIT, Additional Medicare Tax) |
-| federal_se_tax                  | Federal self-employment tax (Schedule SE)             |
-| federal_niit                    | Net Investment Income Tax (Form 8960)                 |
-| federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
-| federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
-| state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
-| state_taxable_income            | Income subject to state tax after deductions          |
-| state_total_tax                 | Total state tax liability                             |
-| state_tax_bracket               | Marginal state tax bracket                            |
-| state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
-
-
-
-## Examples
-
-Here are some examples of what you can do with `tenforty`:
-
-### Basic Evaluation
+## Quick Start
 
 The `evaluate_return` function computes the outputs for a single tax return
 given some inputs:
@@ -219,8 +101,66 @@ This results in the following:
 
 No `year=` argument was specified here, so the current tax year, 2025, was used.
 The output is a pydantic model, and we've called its `.model_dump()` method to
-show the result as a dictionary.
+show the result as a dictionary. Every argument and output field is listed in
+the [API Reference](#api-reference).
 
+
+## Previewing Your Own Return with a Coding Agent
+
+The most practical way to use `tenforty` on your own taxes today is to let a
+coding agent drive it — [Claude Code](https://claude.com/claude-code),
+[Codex](https://github.com/openai/codex), [pi](https://github.com/badlogic/pi-mono),
+or similar. You describe your situation in plain language, and the agent maps
+your figures onto `tenforty`'s inputs, runs the return, and answers follow-up
+questions by changing inputs and re-running.
+
+Treat the result as a **preview**, not as your filed return. `tenforty` models
+a subset of the return (see the [API Reference](#api-reference) and
+[Known Limitations](#known-limitations)), and the agent's mapping from your
+documents to its inputs can be wrong. It's well suited to "roughly what will I
+owe, and why?" and "what happens if I sell this stock in December?" before you
+file with your usual software or preparer, and to cross-checking that software
+afterwards.
+
+**1. Pick a private model endpoint first.** Your return is about as sensitive
+as personal data gets. Point the agent at an endpoint whose terms commit to not
+retaining or training on your data — an API account under a zero-data-retention
+agreement, or a model you run locally. Check your provider's data-retention
+terms before you start; don't assume a consumer plan's defaults.
+
+**2. Give it numbers, not documents.** Transcribe the figures you need (W-2 box
+1, 1099-INT and 1099-DIV totals, net short- and long-term gains, and so on)
+rather than handing over scans that carry your SSN and account numbers.
+
+**3. Work in a scratch directory** and let the agent install `tenforty` there:
+
+```sh
+mkdir tax-preview && cd tax-preview
+uv venv && uv pip install tenforty
+```
+
+**4. Ask, and ask for the mapping back.** For example:
+
+> Use the `tenforty` Python package (read its README for the inputs) to
+> estimate my 2025 federal and California taxes. Married filing jointly, two
+> kids. W-2 box 1: $182,400 and $64,100. 1099-INT: $1,150. 1099-DIV: $3,200
+> ordinary, $2,600 qualified. Long-term gains: $12,000. Before running anything,
+> show me how you mapped each of my figures to a `tenforty` input, and list
+> anything I gave you that `tenforty` can't represent.
+
+The last instruction matters most. A figure the agent silently drops, or puts
+in the wrong input, is the most likely way to get a confidently wrong answer.
+One common trap: `ordinary_dividends` is the *total* (1099-DIV box 1a) and
+already includes `qualified_dividends` (box 1b).
+
+Once the baseline matches your expectations, the follow-ups are where the
+package earns its keep: marginal rates on each input, sweeps over a gain you
+haven't realized yet, or how close you are to AMT.
+
+
+## Examples
+
+Here are some more examples of what you can do with `tenforty`:
 
 ### Marginal Rates for Every Input
 
@@ -323,7 +263,7 @@ df = evaluate_returns(w2_income=list(range(0, 250_001, 1_000)))
 The good people at Open Tax Solver have published editions each year for 21
 years, so one can just as easily vary the year as any other parameter. At the
 moment `tenforty` supports back to the 2018 tax year. Here we show the federal
-tax on $100K of W2 income for the past five years.
+tax on $100K of W2 income for each supported year.
 
 ``` python
 import polars as pl
@@ -352,7 +292,7 @@ it's only about a 3% drop over the years.*
 
 ### Plot: Impact of Long-Term Capital Gains
 
-Because Open Tax Solver supports short- and long-term capitals gains
+Because Open Tax Solver supports short- and long-term capital gains
 calculations -- although, see the [Limitations](#known-limitations) section
 below -- you can ask questions about the impact on your taxes of selling some
 appreciated stock this year, and show the breakdown between state and federal
@@ -403,7 +343,7 @@ money in taxes on paper gains, via the alternative minimum tax. With
 import polars as pl
 
 df = (
-    tenforty.evaluate_returns(
+    evaluate_returns(
         w2_income=100_000, incentive_stock_option_gains=list(range(0, 100_001, 2500))
     )
     .select(["incentive_stock_option_gains", "federal_total_tax", "federal_amt"])
@@ -429,6 +369,93 @@ df = (
 ![Image: Am I in AMT?](images/example4.svg)
 
 
+## API Reference
+
+The two functions `evaluate_return` and `evaluate_returns` are the main
+interface to `tenforty`. They take exactly the same arguments, except that any
+of the arguments to `evaluate_returns` may either be a single value, or a list
+of values. `evaluate_return` evaluates one single return, and
+`evaluate_returns` evaluates all combinations of inputs subtended by the
+provided values and collects the results into a dataframe.
+
+The inputs to either function are validated, and if for example a filing status
+is misspelled, you'll get an informative error message along with a list of the
+valid options. [Error Handling](./docs/error-handling.md) describes the
+`on_error` policies and exception types.
+
+Three graph-backend functions take the same return arguments:
+
+- `marginal_rates(...)` — the derivative of an output with respect to every
+  continuous input at once; `marginal_rate(..., wrt=...)` does one input.
+- `solve_for_income(target_tax, ..., for_input="w2_income")` — the value of one
+  input that produces a target output.
+
+### Backends
+
+`backend="ots"` (the default) runs Open Tax Solver and covers tax years
+2018–2025. `backend="graph"` runs the compiled tax graphs, covers 2024 and 2025,
+and supports more states. Not every input is mapped on every backend and state;
+the graph backend raises on an input it can't represent rather than dropping it.
+
+### Arguments
+
+| Argument                     | Type                     | Default             | Notes                              |
+|------------------------------|--------------------------|---------------------|------------------------------------|
+| `year`                       | int                      | 2025                | 2018-2025 inclusive (graph backend: 2024-2025) |
+| `state`                      | str \| None               | None                | Two-letter state code. OTS backend income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. The graph backend also covers AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) are accepted on both. |
+| `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
+| `num_dependents`             | int                      | 0                   |                                    |
+| `dependent_exemptions`       | float                    | 0.0                 | State exemption dollars, not a count, for states that take them (graph backend) |
+| `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
+| `w2_income`                  | float                    | 0.0                 |                                    |
+| `taxable_interest`           | float                    | 0.0                 |                                    |
+| `qualified_dividends`        | float                    | 0.0                 |                                    |
+| `ordinary_dividends`         | float                    | 0.0                 | Total ordinary dividends, including qualified |
+| `short_term_capital_gains`   | float                    | 0.0                 |                                    |
+| `long_term_capital_gains`    | float                    | 0.0                 |                                    |
+| `self_employment_income`     | float                    | 0.0                 | Schedule C profit used by Schedule SE and QBI |
+| `qbi_w2_wages`               | float                    | 0.0                 | W-2 wages paid by the QBI business or aggregation |
+| `qbi_ubia`                   | float                    | 0.0                 | UBIA of qualified property for that business or aggregation |
+| `qbi_is_sstb`                | bool                     | False               | Whether that business or aggregation is an SSTB |
+| `rental_income`              | float                    | 0.0                 |                                    |
+| `schedule_1_income`          | float                    | 0.0                 |                                    |
+| `itemized_deductions`        | float                    | 0.0                 |                                    |
+| `state_adjustment`           | float                    | 0.0                 |                                    |
+| `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
+| `on_error`                   | str                      | raise               | See [Error Handling](./docs/error-handling.md) |
+| `backend`                    | str                      | ots                 | "ots" or "graph"; see [Backends](#backends) |
+
+The three `qbi_` inputs describe one trade or business, or businesses the
+taxpayer has validly aggregated for section 199A. They are not totals across
+unrelated businesses, because Form 8995-A applies its wage and UBIA limitation
+per business or valid aggregation. Their defaults model a non-SSTB business
+with no business W-2 wages or qualified property. The OTS backend uses OTS's
+Form 8995 for the independent QBI base and taxable-income ceiling, then applies
+the missing Form 8995-A wage, property, and SSTB limitation in tenforty's
+orchestration layer before rerunning Form 1040.
+
+### Outputs
+
+| Output Field                    | Description                                           |
+|---------------------------------|-------------------------------------------------------|
+| total_tax                       | Combined federal and state tax liability              |
+| federal_adjusted_gross_income   | Federal Adjusted Gross Income (Form 1040 Line 11)     |
+| federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
+| federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
+| federal_taxable_income          | Income subject to federal tax after deductions        |
+| federal_qbi_deduction           | Qualified business income deduction (Form 8995/8995-A) |
+| federal_amt                     | Federal Alternative Minimum Tax                       |
+| federal_income_tax              | Federal income tax + AMT (excludes SE tax, NIIT, Additional Medicare Tax) |
+| federal_se_tax                  | Federal self-employment tax (Schedule SE)             |
+| federal_niit                    | Net Investment Income Tax (Form 8960)                 |
+| federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
+| federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
+| state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
+| state_taxable_income            | Income subject to state tax after deductions          |
+| state_total_tax                 | Total state tax liability                             |
+| state_tax_bracket               | Marginal state tax bracket                            |
+| state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
+
 
 ## Known Limitations
 
@@ -436,14 +463,44 @@ df = (
   WSL are workarounds. Attempts have been made to get Windows builds working, but
   runtime crashes persist due to compiler interoperability challenges; see
   [Windows Build Research](./docs/windows-build-research.md) for details.
-- Medicare and Net Investment Income Tax are not automatically computed on
-  capital gains, so if those apply to your situation the output tax will be
+- Net Investment Income Tax (Form 8960) and Additional Medicare Tax (Form 8959)
+  are computed for the 2024 and 2025 tax years only. For earlier years they are
+  reported as zero, so if they apply to your situation the total tax will be
   underestimated.
-- State income tax is supported for a growing number of states, with more being
-  added. No-income-tax states (e.g. Texas, Nevada) are also accepted. Only
-  California has been tested against tax returns prepared independently by
-  professional tax software; other states have formula-derived and property-based
-  testing. See [IRS Validation](./docs/irs-validation.md) for details.
+- Only California has been tested against tax returns prepared independently by
+  professional tax software; other states have formula-derived and
+  property-based testing. See [IRS Validation](./docs/irs-validation.md) for
+  details.
+
+
+## Related Projects
+
+A few excellent open-source projects approach US tax computation from
+different angles, and one of them may fit your task better:
+
+- **[Tax-Calculator](https://github.com/PSLmodels/Tax-Calculator)** (Policy
+  Simulation Library) is a federal income and payroll tax microsimulation
+  model with a long pedigree in the policy-economics world. Its special power
+  is *counterfactual law*: every rate, bracket, and phase-out is a reformable
+  parameter, so it can answer "what would this filer (or the whole country)
+  pay under a proposed reform?" It models per-spouse income attribution and
+  has been validated against NBER's TAXSIM for years. If your question is
+  about policy analysis, revenue estimation, or distributional effects, start
+  there. `tenforty` runs a differential test of its own federal results
+  against Tax-Calculator — see
+  [docs/taxcalc-differential-audit.md](./docs/taxcalc-differential-audit.md).
+- **[TAXSIM](https://taxsim.nber.org/)** (NBER) is the long-standing academic
+  reference model for US federal and state income taxes, callable remotely.
+- **[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us)**
+  models federal and many state taxes alongside benefit programs, with a
+  policy-reform focus similar to Tax-Calculator's.
+
+What `tenforty` brings to this neighborhood: state returns computed locally,
+form-level fidelity (actual form lines, via Open Tax Solver), exact marginal
+rates via automatic differentiation, an input solver, and a deliberately
+simple API. If your question is "what would *this return* look like, federal
+and state, and how does it change as inputs move?" — that's the job this
+package is built for.
 
 
 ## Development & Contributing
