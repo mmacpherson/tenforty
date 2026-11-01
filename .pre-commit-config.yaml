@@ -24,7 +24,7 @@ repos:
     exclude: ^tests/(fixtures/|taxcalc/(taxcalc_policy|__init__)\.py|parity/state_parity_policy\.py)
   - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.17.1
+  rev: v0.17.2
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]
@@ -33,7 +33,7 @@ repos:
     # printed output and verbatim quotes of upstream source, so keep it to code.
     types_or: [python, pyi, jupyter]
 - repo: https://github.com/crate-ci/typos
-  rev: v1.46.0
+  rev: v1.51.1
   hooks:
   - id: typos
     files: \.(md|txt)$
