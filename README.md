@@ -531,10 +531,9 @@ policy and populations, and for that work one of them may fit better:
   models federal and many state taxes alongside benefit programs, with a
   policy-reform focus similar to Tax-Calculator's.
 
-`tenforty` is built for a different person: someone filing their own return
-who wants to know what it comes to, and what would happen if you changed
-something, without clicking back through five screens of tax software to find
-out. That
+`tenforty` is built for a different use case: evaluating an individual
+return, what it comes to and what would happen if something changed, without
+clicking back through five screens of tax software to find out. That
 is its express purpose, not a side use. It's a library first: one function
 call, plainly named inputs (`w2_income`, `long_term_capital_gains`), validated
 arguments with error messages that tell you (or your agent) what to fix,
