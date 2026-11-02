@@ -1,17 +1,10 @@
 # /// script
-# dependencies = ["marimo", "seaborn", "tenforty"]
+# dependencies = ["marimo", "pyarrow", "seaborn", "tenforty"]
 # ///
 import marimo
 
 __generated_with = "0.25.2"
 app = marimo.App()
-
-
-@app.cell
-def _():
-    import marimo as mo
-
-    return (mo,)
 
 
 @app.cell(hide_code=True)
@@ -26,15 +19,8 @@ def _(mo):
 
 @app.cell
 def _():
-    import sys
-
-    if "google.colab" in sys.modules:
-        import subprocess
-
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-q", "-U", "tenforty", "seaborn"],
-            check=True,
-        )
+    # On Colab, uncomment the next line to install the dependencies.
+    # !pip install -q tenforty seaborn
     return
 
 
@@ -44,7 +30,7 @@ def _():
     import seaborn.objects as so
 
     from tenforty import evaluate_return, evaluate_returns
-    from tenforty.models import OTSFilingStatus, OTSState, OTSYear
+    from tenforty.models import OTSFilingStatus, OTSYear
 
     def currency_formatter(x, pos):
         """Format axis tick values as currency (e.g., $50K)."""
@@ -59,7 +45,6 @@ def _():
     }
     return (
         OTSFilingStatus,
-        OTSState,
         OTSYear,
         PLOT_THEME,
         currency_formatter,
@@ -73,14 +58,18 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    For convenience we show the available states, years, and filing statuses:
+    With the default backend, `state` can be any of AZ, CA, MA, MI, NC, NJ, NY,
+    OH, OR, PA, or VA, or one of the states without an income tax: AK, FL, NV,
+    SD, TN, TX, WA, or WY. Pass `backend="graph"` for many more states, for the
+    2024 and 2025 tax years; the README lists them.
+
+    The available tax years and filing statuses:
     """)
     return
 
 
 @app.cell
-def _(OTSFilingStatus, OTSState, OTSYear):
-    print(f"Supported states: {[e.value for e in OTSState]}")
+def _(OTSFilingStatus, OTSYear):
     print(f"Supported tax years: {[e.value for e in OTSYear]}")
     print(f"Filing statuses: {[e.value for e in OTSFilingStatus]}")
     return
@@ -189,6 +178,13 @@ def _(PLOT_THEME, currency_formatter, evaluate_returns, pl, so):
         title="Impact of LTCG on Total Tax for California Resident",
     ).theme(PLOT_THEME).layout(size=(8, 6))
     return
+
+
+@app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
 
 
 if __name__ == "__main__":

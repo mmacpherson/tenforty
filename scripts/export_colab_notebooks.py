@@ -39,6 +39,8 @@ def export(source: Path) -> dict:
                 "marimo",
                 "export",
                 "ipynb",
+                "--sort",
+                "top-down",
                 str(source),
                 "-o",
                 str(exported),

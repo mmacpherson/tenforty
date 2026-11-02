@@ -88,13 +88,12 @@ make test   # or: uv run pytest
 The notebooks are [marimo](https://marimo.io) files under `notebooks/`, plain
 Python that diffs cleanly:
 
-- `tenforty_explorer.py`: interactive controls for one return. `make explorer`
-  opens it against this checkout.
 - `tenforty_demo.py`: the walkthrough behind the Colab badge. It is written in
   Jupyter order, top to bottom with imports first and no interactive widgets,
   because Colab runs the exported `tenforty_Package_Demo.ipynb` that way. Edit
   the `.py`, then run `make notebooks` to regenerate the `.ipynb`; CI fails if
-  the two drift apart.
+  the two drift apart. Its install cell stays commented out, so the notebook runs
+  as is against a local checkout; on Colab, uncomment it first.
 - `readme_plots.py`: regenerates `images/example*.svg` with `make readme-plots`.
 
 Each notebook declares its own dependencies, so none of them need a package extra.
