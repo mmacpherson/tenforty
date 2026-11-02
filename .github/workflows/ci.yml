@@ -153,6 +153,23 @@ jobs:
         uv run python scripts/taxcalc_audit.py
         --check-goldens tests/taxcalc/fixtures/taxcalc_goldens.json
 
+  notebooks:
+    name: Colab notebook matches its marimo source
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: '3.13'
+
+    - name: Check the exported .ipynb is current
+      run: make notebooks-check
+
   # The shipped extension is built features=["python"] (setup.py), so the JIT +
   # SIMD batch path — including reachability-slicing in compile_batch — is
   # compiled out of every other job here and of pip installs. Without this job
