@@ -19,8 +19,8 @@ def _(mo):
 
 @app.cell
 def _():
-    # On Colab, uncomment the next line to install the dependencies.
-    # !pip install -q tenforty seaborn
+    # The exported Colab notebook runs this line; here it stays a comment.
+    # !pip install -q tenforty seaborn pyarrow
     return
 
 
