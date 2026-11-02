@@ -4,7 +4,8 @@
 The marimo source is the one we edit; the exported .ipynb exists only so Colab
 can open it. marimo writes markdown cells as Jupyter markdown, so the exported
 notebook never needs marimo itself, and its `import marimo as mo` cell is
-dropped. `make notebooks` writes it and `make notebooks-check` verifies it, with
+dropped. A `# !pip install` line, a comment in marimo, becomes the live install
+cell in the export, so Colab installs tenforty on Run all. `make notebooks` writes it and `make notebooks-check` verifies it, with
 marimo pinned in the Makefile so the export format cannot drift.
 """
 
@@ -29,6 +30,16 @@ def _is_marimo_import(cell: dict) -> bool:
     )
 
 
+def _colab_cell(cell: dict) -> dict:
+    lines = "".join(cell["source"]).splitlines()
+    installs = [
+        line.removeprefix("# ") for line in lines if line.startswith("# !pip install")
+    ]
+    if cell["cell_type"] == "code" and installs:
+        return {**cell, "source": "\n".join(installs).splitlines(keepends=True)}
+    return cell
+
+
 def export(source: Path) -> dict:
     with tempfile.TemporaryDirectory() as scratch:
         exported = Path(scratch) / "notebook.ipynb"
@@ -50,7 +61,7 @@ def export(source: Path) -> dict:
         )
         notebook = json.loads(exported.read_text())
     notebook["cells"] = [
-        cell for cell in notebook["cells"] if not _is_marimo_import(cell)
+        _colab_cell(cell) for cell in notebook["cells"] if not _is_marimo_import(cell)
     ]
     return notebook
 

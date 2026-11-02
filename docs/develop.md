@@ -92,8 +92,9 @@ Python that diffs cleanly:
   Jupyter order, top to bottom with imports first and no interactive widgets,
   because Colab runs the exported `tenforty_Package_Demo.ipynb` that way. Edit
   the `.py`, then run `make notebooks` to regenerate the `.ipynb`; CI fails if
-  the two drift apart. Its install cell stays commented out, so the notebook runs
-  as is against a local checkout; on Colab, uncomment it first.
+  the two drift apart. Its `# !pip install` line stays a comment in marimo, so the
+  notebook runs against a local checkout, and the export makes it the live
+  install cell that Colab runs.
 - `readme_plots.py`: regenerates `images/example*.svg` with `make readme-plots`.
 
 The make targets supply each notebook's dependencies, so none of them need a package extra.
