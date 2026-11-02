@@ -96,7 +96,7 @@ Python that diffs cleanly:
   as is against a local checkout; on Colab, uncomment it first.
 - `readme_plots.py`: regenerates `images/example*.svg` with `make readme-plots`.
 
-Each notebook declares its own dependencies, so none of them need a package extra.
+The make targets supply each notebook's dependencies, so none of them need a package extra.
 
 ### With pip
 

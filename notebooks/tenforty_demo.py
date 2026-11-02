@@ -58,10 +58,18 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    With the default backend, `state` can be any of AZ, CA, MA, MI, NC, NJ, NY,
-    OH, OR, PA, or VA, or one of the states without an income tax: AK, FL, NV,
-    SD, TN, TX, WA, or WY. Pass `backend="graph"` for many more states, for the
-    2024 and 2025 tax years; the README lists them.
+    With the default backend, which states have an income tax return depends on
+    the tax year:
+
+    | Tax years | States |
+    |---|---|
+    | 2024 to 2025 | AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA |
+    | 2023 | CA, MA, NC, NJ, NY, OH, PA, VA |
+    | 2018 to 2022 | CA, MA, NY |
+
+    The states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) work in
+    every year. Pass `backend="graph"` for many more states, for the 2024 and
+    2025 tax years; the README lists them.
 
     The available tax years and filing statuses:
     """)
