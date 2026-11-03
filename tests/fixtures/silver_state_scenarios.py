@@ -93,7 +93,7 @@ def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDef
         quantity="state_total_tax",
         minimum=center - 0.50,
         maximum=center + 0.50,
-        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
+        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-tj2.20)",
     )
 
 
@@ -141,7 +141,7 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     minimum=-0.50,
     maximum=0.50,
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
-    "(tenforty-xew, not a table-band difference)",
+    "(tenforty-b72.42, not a table-band difference)",
 )
 
 
@@ -373,7 +373,7 @@ def la_2024_table_gap(
         maximum=center + 0.50,
         reason=(
             "LA 2024 line 10 is the tax-table value; the graph prices the exact "
-            "bracket formula rather than the table row (tenforty-xew)"
+            "bracket formula rather than the table row (tenforty-tj2.20)"
         ),
     )
 
