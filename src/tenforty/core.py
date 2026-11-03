@@ -1077,6 +1077,27 @@ def evaluate_returns(
     for engine in dict.fromkeys(engines.values()):
         _require_available(engine)
 
+    if mode == "cross":
+        group_params = {
+            (y, s): list(
+                _graph_cross_order(y, s, columns)
+                if engine == "graph"
+                else _cross_params(y, s, columns, parameter_names)
+            )
+            for (y, s), engine in engines.items()
+        }
+    else:
+        zip_groups: dict[tuple, list[int]] = defaultdict(list)
+        for i, group in enumerate(groups):
+            zip_groups[group].append(i)
+        group_params = {
+            group: [
+                {name: columns[name][i] for name in parameter_names} for i in indices
+            ]
+            for group, indices in zip_groups.items()
+        }
+    _preflight(group_params, engines)
+
     batched = True
     if mode == "cross":
         results = []
@@ -1085,19 +1106,12 @@ def evaluate_returns(
                 group_rows = _graph_cross_rows(y, s, columns, policy)
                 if group_rows is None:
                     batched = False
-                    group_rows = _scalar_rows(
-                        _graph_cross_order(y, s, columns), "graph", policy
-                    )
+                    group_rows = _scalar_rows(group_params[(y, s)], "graph", policy)
             else:
-                group_rows = _scalar_rows(
-                    _cross_params(y, s, columns, parameter_names), "ots", policy
-                )
+                group_rows = _scalar_rows(group_params[(y, s)], "ots", policy)
             results.extend(group_rows)
     else:
         results_indexed: list[dict | None] = [None] * n
-        zip_groups: dict[tuple, list[int]] = defaultdict(list)
-        for i, group in enumerate(groups):
-            zip_groups[group].append(i)
         for (y, s), indices in zip_groups.items():
             engine = engines[(y, s)]
             group_rows = (
@@ -1107,14 +1121,7 @@ def evaluate_returns(
             )
             if group_rows is None:
                 batched = batched and engine == "ots"
-                group_rows = _scalar_rows(
-                    (
-                        {name: columns[name][i] for name in parameter_names}
-                        for i in indices
-                    ),
-                    engine,
-                    policy,
-                )
+                group_rows = _scalar_rows(group_params[(y, s)], engine, policy)
             for idx, row in zip(indices, group_rows, strict=True):
                 results_indexed[idx] = row
         results = results_indexed
@@ -1124,6 +1131,31 @@ def evaluate_returns(
     return pl.DataFrame(results, infer_schema_length=None, strict=False).cast(
         {"state": pl.Utf8}
     )
+
+
+def _preflight(
+    group_params: dict[tuple, list[dict]], engines: dict[tuple, Engine]
+) -> None:
+    """Refuse the whole batch before any return is computed.
+
+    Every row is validated first, then each graph group's inputs are checked
+    with the same support rule graph applies when it evaluates, so a refusal in
+    a later group cannot follow, or be masked by, an earlier group's work.
+    """
+    validated = {
+        group: [TaxReturnInput(**params) for params in rows]
+        for group, rows in group_params.items()
+    }
+    graph_inputs = [
+        tax_input
+        for group, tax_inputs in validated.items()
+        if engines[group] == "graph"
+        for tax_input in tax_inputs
+    ]
+    if graph_inputs:
+        from .backends.graph import require_supported_inputs
+
+        require_supported_inputs(graph_inputs)
 
 
 _BATCH_AXIS_FIELDS = frozenset(

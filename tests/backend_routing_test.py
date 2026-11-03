@@ -401,3 +401,72 @@ def test_graph_batches_pass_every_return_input():
     batch_inputs -= core._BATCH_OPTIONS
     assert set(core._GRAPH_PASSTHROUGH_FIELDS) == batch_inputs - core._BATCH_AXIS_FIELDS
     assert batch_inputs == set(TaxReturnInput.model_fields)
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_later_group_unsupported_input_refuses_before_any_group_runs(
+    engine_calls, mode, on_error
+):
+    """A graph input refusal in a later group stops the batch before 2023 runs."""
+    from tenforty import UnsupportedInputError
+
+    with pytest.raises(UnsupportedInputError, match="dependent_exemptions"):
+        tenforty.evaluate_returns(
+            year=[2023, 2024],
+            w2_income=50_000.0,
+            dependent_exemptions=1.0,
+            backend="auto",
+            mode=mode,
+            on_error=on_error,
+        )
+    assert engine_calls == []
+
+
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_earlier_engine_failure_cannot_mask_a_later_refusal(monkeypatch, mode):
+    """The contract error wins even when an earlier group's engine would fail."""
+    from tenforty import UnsupportedInputError
+
+    def failing_ots(*args, **kwargs):
+        raise RuntimeError("earlier engine failure")
+
+    monkeypatch.setattr(core, "evaluate_natural_input_form", failing_ots)
+    with pytest.raises(UnsupportedInputError):
+        tenforty.evaluate_returns(
+            year=[2023, 2024],
+            w2_income=50_000.0,
+            dependent_exemptions=1.0,
+            backend="auto",
+            mode=mode,
+        )
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+def test_later_row_validation_error_refuses_before_any_row_runs(engine_calls, on_error):
+    """A row the input model refuses fails the batch before earlier rows run."""
+    with pytest.raises(ValueError, match="qualified_tips"):
+        tenforty.evaluate_returns(
+            year=[2025, 2024],
+            w2_income=[50_000.0, 60_000.0],
+            qualified_tips=1_000.0,
+            backend="auto",
+            mode="zip",
+            on_error=on_error,
+        )
+    assert engine_calls == []
+
+
+def test_batch_preflight_uses_the_graph_support_rule(monkeypatch, engine_calls):
+    """The preflight asks graph's own rule, not a second copy of it."""
+    from tenforty.backends import graph
+
+    def refuse_w2(natural_name, node_names):
+        return natural_name != "w2_income"
+
+    monkeypatch.setattr(graph, "_reads_nonzero", refuse_w2)
+    with pytest.raises(UnsupportedReturnError, match="w2_income"):
+        tenforty.evaluate_returns(
+            year=[2023, 2024], w2_income=50_000.0, backend="auto", mode="zip"
+        )
+    assert engine_calls == []
