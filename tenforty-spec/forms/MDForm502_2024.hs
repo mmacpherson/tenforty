@@ -83,8 +83,8 @@ mdForm502_2024 = form "md_502" 2024 $ do
       l14 `subtractNotBelowZero` l15
 
   -- Line 17: Deductions (itemized or standard)
-  -- Standard deduction is 15% of MD AGI, min $1,800, max $2,700
-  -- Maryland has two different bracket schedules, so deduction varies by status
+  -- Standard deduction is 15% of MD AGI, bounded by status (Worksheet 16A):
+  -- \$1,800-\$2,700 Single/MFS; \$3,650-\$5,450 Joint/HoH/QSS
   itemized <- keyInput "L17_itemized" "md_itemized" "Maryland itemized deductions"
 
   stdDed15Pct <-
@@ -93,7 +93,9 @@ mdForm502_2024 = form "md_502" 2024 $ do
 
   stdDedClamped <-
     interior "StdDedClamped" "std_ded_clamped" $
-      smallerOf (greaterOf stdDed15Pct (lit mdStandardDeductionMin2024)) (lit mdStandardDeductionMax2024)
+      smallerOf
+        (greaterOf stdDed15Pct (byStatusE (fmap lit mdStandardDeductionMin2024)))
+        (byStatusE (fmap lit mdStandardDeductionMax2024))
 
   l17 <- interior "L17" "deduction" $ greaterOf itemized stdDedClamped
 
