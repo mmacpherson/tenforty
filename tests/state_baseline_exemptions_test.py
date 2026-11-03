@@ -132,7 +132,7 @@ def test_cross_batch_threshold_matches_scalar(year, state, threshold):
         w2_income=wages,
     )
     for index, (wage, status) in enumerate(
-        (wage, status) for wage in wages for status in statuses
+        (wage, status) for status in statuses for wage in wages
     ):
         scalar = evaluate_return(
             backend="graph",
