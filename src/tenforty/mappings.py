@@ -14,7 +14,9 @@ NATURAL_TO_NODE = {
     "taxable_interest": "us_1040_L2b_taxable_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
     "ordinary_dividends": "us_1040_L3b_ordinary_dividends",
-    # Schedule 8812 qualifying children (form line 4; the spec numbers it L1).
+    # num_dependents is the household total, also used by OR's regular credit.
+    # This legacy federal mapping treats the count as Schedule 8812 qualifying
+    # children (form line 4; the spec numbers it L1), without age classification.
     "num_dependents": "us_form_8812_L1_num_qualifying_children",
     # Schedule D (capital gains/losses)
     "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
@@ -794,7 +796,9 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # ($8,250/$8,500 limit for 2024/2025, phases out above $125k/$250k AGI).
         # Standard deduction is filing-status based (Single: $2,745/$2,835,
         # MFJ: $5,495/$5,670, HoH: $4,420/$4,560 for 2024/2025).
-        # Progressive tax brackets (4 brackets, 4.75% to 9.9%).
+        # num_dependents is the total regular dependent count; the spec adds the
+        # taxpayer/spouse base. dependent_exemptions stays unmapped because it
+        # is a dollar amount. Additional/disability OR exemptions are unsupported.
         natural_to_node={"num_dependents": "or_40_RegularExemptions"},
         outputs={
             "state_adjusted_gross_income": "us_1040_L11_agi",

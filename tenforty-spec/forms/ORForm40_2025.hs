@@ -99,18 +99,13 @@ orForm40_2025 = form "or_40" 2025 $ do
         (oregonTaxTable2025 l24)
         (roundE chartTax)
 
-  regularExemptions <- keyInput "RegularExemptions" "additional_regular_exemptions" "Dependents and eligible MFS spouse"
-  disabilityExemptions <- keyInput "DisabilityExemptions" "disability_exemptions" "Severe disability and qualifying disabled child exemptions"
-  claimableTaxpayers <- keyInput "ClaimableTaxpayers" "claimable_taxpayers" "Taxpayer/spouse regular exemptions unavailable because claimable"
+  regularExemptions <- keyInput "RegularExemptions" "dependent_count" "Total number of dependents for the regular exemption credit"
   let regularBase = byStatusE $ lit <$> byStatus 1 2 1 1 1
       regularLimit = byStatusE $ lit <$> byStatus 100000 200000 100000 200000 200000
-      regularCount = max0 $ regularBase .+. regularExemptions .-. claimableTaxpayers
+      regularCount = regularBase .+. max0 regularExemptions
   exemptionCredit <-
     interior "ExemptionCredit" "exemption_credit" $
-      ( ifPos (federalAgi .-. regularLimit) (lit 0) regularCount
-          .+. ifPos (federalAgi .-. lit 100000) (lit 0) disabilityExemptions
-      )
-        .*. rate 256
+      ifPos (federalAgi .-. regularLimit) (lit 0) (regularCount .*. rate 256)
 
   -- Lines 26-29: Credits
   l26 <- keyInput "L26" "or_working_family_credit" "Working family household and dependent care credit"

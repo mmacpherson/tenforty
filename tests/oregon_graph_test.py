@@ -175,29 +175,11 @@ def test_natural_witnesses_scalar_and_batch(wages, taxable, tax):
     assert batch["state_total_tax"][0] == tax
 
 
-@pytest.mark.parametrize("year,credit", [(2024, 249), (2025, 256)])
-@pytest.mark.parametrize("status", STATUSES)
-def test_additional_regular_and_disability_exemptions(year, credit, status):
-    """Disability exemptions have their own universal $100,000 ceiling."""
-    for agi in (100_000, 100_001):
-        runtime = _runtime(year, status, agi)
-        runtime.set("or_40_RegularExemptions", 2)
-        runtime.set("or_40_DisabilityExemptions", 1)
-        count = (2 if status == "Married/Joint" else 1) + 2
-        if agi > 100_000:
-            count = 0 if status in ("Single", "Married/Sep") else count
-        else:
-            count += 1
-        assert runtime.eval("or_40_ExemptionCredit") == count * credit
-
-
 @pytest.mark.parametrize("year", [2024, 2025])
-def test_claimable_taxpayer_and_nonrefundable_floor(year):
-    """Claimability removes a regular exemption; credits cannot create a refund."""
+def test_exemption_credit_is_nonrefundable(year):
+    """The regular exemption credit cannot create negative tax."""
     runtime = _runtime(year, "Single", 100)
     assert runtime.eval("or_40_L32_or_total_tax") == 0
-    runtime.set("or_40_ClaimableTaxpayers", 1)
-    assert runtime.eval("or_40_ExemptionCredit") == 0
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -259,28 +241,15 @@ def test_2025_refundable_adoption_reduces_federal_subtraction():
     assert runtime.eval("or_40_L18_federal_tax_subtraction") == 600
 
 
-@pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("status", STATUSES)
-def test_ots_regular_spouse_checkbox_mapping(year, status):
-    """OR-40 p.12 grants a spouse regular exemption automatically only on MFJ."""
-    from tenforty.core import map_natural_to_ots_input
-    from tenforty.models import NATURAL_FORM_CONFIG
-
-    mapping = NATURAL_FORM_CONFIG[(year, "OR_40")].input_map
-    mapped = map_natural_to_ots_input({"filing_status": status}, mapping)
-    assert mapped["CkL6bRegular"] == ("Yes" if status == "Married/Joint" else "No")
-
-
 @pytest.mark.parametrize("year,credit", [(2024, 249), (2025, 256)])
-@pytest.mark.parametrize("backend", ["graph", "ots"])
-def test_natural_dependents_reach_oregon_credit(year, credit, backend):
+def test_natural_dependents_reach_oregon_credit(year, credit):
     """With federal subtraction capped, two dependents add exactly two OR credits."""
     kwargs = dict(
         year=year,
         state="OR",
         filing_status="Married/Joint",
         w2_income=150_000,
-        backend=backend,
+        backend="graph",
     )
     baseline = evaluate_return(**kwargs)
     dependents = evaluate_return(**kwargs, num_dependents=2)
@@ -291,3 +260,32 @@ def test_natural_dependents_reach_oregon_credit(year, credit, backend):
         baseline.state_total_tax,
         dependents.state_total_tax,
     ]
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_extra_oregon_exemption_inputs_are_not_exposed(year):
+    """The supported credit uses regular taxpayer/spouse and total dependents only."""
+    inputs = _load_resolved_graph(year).input_names()
+    assert "or_40_DisabilityExemptions" not in inputs
+    assert "or_40_ClaimableTaxpayers" not in inputs
+
+
+def test_oregon_total_dependents_mapping_excludes_dollar_exemptions():
+    """A count maps to the OR credit; the generic dollar exemption field does not."""
+    from tenforty.mappings import STATE_GRAPH_CONFIGS
+    from tenforty.models import OTSState
+
+    mapping = STATE_GRAPH_CONFIGS[OTSState.OR].natural_to_node
+    assert mapping["num_dependents"] == "or_40_RegularExemptions"
+    assert "dependent_exemptions" not in mapping
+
+
+@pytest.mark.parametrize("year,credit", [(2024, 249), (2025, 256)])
+@pytest.mark.parametrize("status", STATUSES)
+@pytest.mark.parametrize("dependents", [0, 1, 3])
+def test_regular_dependent_count_adds_to_status_base(year, credit, status, dependents):
+    """The total dependent count adds one regular credit per dependent."""
+    runtime = _runtime(year, status, 90_000)
+    runtime.set("or_40_RegularExemptions", dependents)
+    base = 2 if status == "Married/Joint" else 1
+    assert runtime.eval("or_40_ExemptionCredit") == (base + dependents) * credit

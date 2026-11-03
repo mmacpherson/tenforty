@@ -308,16 +308,10 @@ def test_ots_form_maps_filing_status_when_its_template_reads_one(year, form_id):
         key for key, cfg in _ots_configs().items() if "filing_status" in cfg.input_map
     ),
 )
-def test_ots_filing_status_mapping_targets_a_template_field(year, form_id):
-    """Status-derived controls must target fields the template really has."""
-    mapping = _ots_configs()[(year, form_id)].input_map
-    mapped = map_natural_to_ots_input(
-        {"filing_status": OTSFilingStatus.SINGLE}, mapping
-    )
-    template_fields = {field.key for field in OTS_FORM_CONFIG[(year, form_id)].fields}
-    assert mapped and mapped.keys() <= template_fields
-    if _template_reads_filing_status(year, form_id):
-        assert _maps_filing_status(mapping)
+def test_ots_filing_status_mapping_targets_a_template_status_line(year, form_id):
+    """A mapped filing_status must land on a Status line the template really has."""
+    assert _template_reads_filing_status(year, form_id)
+    assert _maps_filing_status(_ots_configs()[(year, form_id)].input_map)
 
 
 @pytest.mark.parametrize(
