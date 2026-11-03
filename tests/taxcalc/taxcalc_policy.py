@@ -11,6 +11,7 @@ burn-in in tests/known_defects_test.py in the same PR.
 Finding IDs refer to docs/taxcalc-differential-audit.md.
 """
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -51,6 +52,48 @@ class KnownDefect:
 
     finding_id: str
     signature: Signature
+
+
+# Optional OBBBA case keys (2025 inputs). Absent keys mean zero / under 65, so
+# every pre-OBBBA case and golden is unchanged.
+OBBBA_CASE_KEYS = {
+    "salt": "state_and_local_taxes",
+    "tips": "qualified_tips",
+    "overtime": "qualified_overtime",
+    "car_loan": "vehicle_loan_interest",
+    "age65": "filer_65_or_older",
+    "spouse65": "spouse_65_or_older",
+}
+# Age that makes TaxCalc treat a person as 65 or older at the end of the year;
+# 40 keeps the adapter's historical under-65 default.
+_AGE_65 = 65
+_AGE_UNDER_65 = 40
+
+
+def tenforty_obbba_inputs(case: dict) -> dict:
+    """Map a case's optional OBBBA keys to tenforty keyword inputs."""
+    return {name: case[key] for key, name in OBBBA_CASE_KEYS.items() if key in case}
+
+
+def taxcalc_obbba_fields(case: dict, mars: int) -> dict:
+    """TaxCalc record fields for the OBBBA keys (records_variables.json, 6.9.0).
+
+    e18400 is itemizable state and local income/sales taxes (Schedule A line 5a,
+    where tenforty enters state_and_local_taxes); tip_income, overtime_income and
+    auto_loan_interest are the OBBBA-qualified amounts, already inside e00200 as
+    tenforty's are inside w2_income. TaxCalc reads ages, so the 65+ flags become
+    age 65; a spouse exists only on a joint return (MARS 2).
+    """
+    joint = mars == 2
+    spouse_age = (_AGE_65 if case.get("spouse65") else _AGE_UNDER_65) if joint else 0
+    return {
+        "age_head": _AGE_65 if case.get("age65") else _AGE_UNDER_65,
+        "age_spouse": spouse_age,
+        "e18400": case.get("salt", 0.0),
+        "tip_income": case.get("tips", 0.0),
+        "overtime_income": case.get("overtime", 0.0),
+        "auto_loan_interest": case.get("car_loan", 0.0),
+    }
 
 
 def _same_delta(quantities: set[str], delta: DeltaRange) -> DeltaModel:
@@ -443,6 +486,276 @@ def _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
     }
 
 
+# --- OTS 2025 OBBBA defects (taxsolve_US_1040_2025.c, OTS 23.06) -------------
+# Reported upstream in docs/upstream-ots-reports.md items 11-14; strict burn-ins
+# in tests/known_defects_test.py. Each signature recomputes, from the case and the
+# published 2025 rules, the deduction OTS takes and the one the law takes, and
+# allows exactly the consequences of that shift. Every one is inactive unless its
+# OBBBA input is present, so pre-OBBBA cases and goldens are untouched.
+
+_TOP_REGULAR_RATE = 0.37
+# AMT rate 28% plus the 25% exemption phase-out on top: 0.28 x 1.25.
+_TOP_AMT_MARGINAL_RATE = 0.35
+_AGE_BOX_2025 = {
+    "Single": 2_000.0,
+    "Head_of_House": 2_000.0,
+    "Married/Joint": 1_600.0,
+    "Married/Sep": 1_600.0,
+    "Widow(er)": 1_600.0,
+}
+
+
+def _standard_deduction_2025(case: dict) -> float:
+    """f1040 2025 line 12e for the case's 65+ boxes (i1040gi 2025 PDF p.35)."""
+    status = case.get("status", "")
+    boxes = bool(case.get("age65")) + (
+        bool(case.get("spouse65")) and status in {"Married/Joint", "Married/Sep"}
+    )
+    return STANDARD_DEDUCTION[(2025, status)] + _AGE_BOX_2025[status] * boxes
+
+
+def _line_12e_2025(case: dict, schedule_a: float) -> float:
+    """Return the deduction tenforty takes: forced Schedule A, else the larger."""
+    if case.get("std_or_item", "Standard") == "Itemized":
+        return schedule_a
+    return max(_standard_deduction_2025(case), schedule_a)
+
+
+_QBI_TAXABLE_INCOME_CAP_RATE = 0.20
+# Form 8995-A Part III phase-in width above the threshold, 2024 and 2025.
+_QBI_PHASE_IN_RANGE = {"Married/Joint": 100_000.0}
+_QBI_PHASE_IN_RANGE_OTHER = 50_000.0
+
+
+def _touches_qbi_phase_in(case: dict, reference: dict, shift: float) -> bool:
+    """Whether lawful or OTS pre-QBI taxable income reaches the phase-in range."""
+    threshold = QBI_SIMPLIFIED_THRESHOLD.get((case.get("year"), case.get("status")))
+    if threshold is None:
+        return True
+    width = _QBI_PHASE_IN_RANGE.get(case.get("status"), _QBI_PHASE_IN_RANGE_OTHER)
+    lawful = reference.get("taxable_income", 0.0) + reference.get("qbi_deduction", 0.0)
+    ots = lawful - shift
+    return max(lawful, ots) >= threshold and min(lawful, ots) <= threshold + width
+
+
+def _between_zero_and(value: float) -> DeltaRange:
+    return DeltaRange(min(0.0, value), max(0.0, value))
+
+
+def _deduction_shift(
+    case: dict, reference: dict, shift: float, *, amt_base_moves: bool
+) -> DeltaModel:
+    """Consequences of OTS deducting `shift` more (or less) below AGI than the law.
+
+    Taxable income moves by exactly -shift, floored at zero. The regular tax moves
+    the other way by at most the 37% top rate.
+
+    With business income the QBI deduction can respond too. Outside the Form
+    8995-A phase-in range its slope in pre-QBI taxable income is 0 or the 20%
+    taxable-income cap (line 33 / Form 8995 line 15), so taxable income moves by
+    0.8 to 1 times -shift and the QBI deduction by 0 to 20% of shift. Inside the
+    phase-in range (lines 19-26: $50,000 nonjoint, $100,000 joint, above the
+    threshold) the wage/property reduction scales with taxable income, so the
+    QBI deduction can move by more than the shift itself and taxable income by
+    more than -shift. That is not bounded here: a return whose lawful or OTS
+    pre-QBI taxable income touches the phase-in range is NOT claimed (returns
+    {}), so any disagreement there surfaces instead of being excused.
+
+    The AMT depends on whether the deduction also leaves AMTI. A Schedule A tax
+    is added back on Form 6251 line 2a, so it leaves AMTI only through the QBI
+    deduction it moves: by 0 to 20% of shift, the other way
+    (`amt_base_moves=False`). Schedule 1-A car loan interest stays deducted for
+    the AMT (Form 6251 line 1a removes only line 37), so AMTI moves by 0.8 to 1
+    times -shift (`amt_base_moves=True`). The tentative minimum tax moves by at
+    most the 35% top AMT marginal rate on the AMTI change. AMT = max(0, TMT -
+    regular), so its change lies between zero and the change in TMT - regular,
+    and cannot fall below minus the lawful AMT. Total tax = max(regular, TMT)
+    moves within the hull of the two.
+    """
+    if shift == 0.0:
+        return {}
+    business_income = case.get("se", 0.0) > 0.0
+    if business_income and _touches_qbi_phase_in(case, reference, shift):
+        return {}
+    taxable = max(0.0, reference.get("taxable_income", 0.0))
+    if shift > 0.0:
+        drop = min(shift, taxable)
+        taxable_delta = DeltaRange.exact(-drop)
+    elif taxable > 0.0:
+        taxable_delta = DeltaRange.exact(-shift)
+    else:
+        taxable_delta = DeltaRange(0.0, -shift)
+    if business_income:
+        taxable_delta = DeltaRange(
+            min(taxable_delta.minimum, 0.8 * taxable_delta.minimum),
+            max(taxable_delta.maximum, 0.8 * taxable_delta.maximum),
+        )
+    regular = _between_zero_and(-_TOP_REGULAR_RATE * shift)
+    if amt_base_moves:
+        tentative = _between_zero_and(-_TOP_AMT_MARGINAL_RATE * shift)
+    elif business_income:
+        tentative = _between_zero_and(
+            _TOP_AMT_MARGINAL_RATE * _QBI_TAXABLE_INCOME_CAP_RATE * shift
+        )
+    else:
+        tentative = ZERO_DELTA
+    amt_change = DeltaRange(
+        tentative.minimum - regular.maximum, tentative.maximum - regular.minimum
+    )
+    amt_delta = DeltaRange(
+        max(min(0.0, amt_change.minimum), -max(0.0, reference.get("amt", 0.0))),
+        max(0.0, amt_change.maximum),
+    )
+    tax_delta = DeltaRange(
+        min(regular.minimum, tentative.minimum),
+        max(regular.maximum, tentative.maximum),
+    )
+    return {
+        "taxable_income": taxable_delta,
+        "amt": amt_delta,
+        **_same_delta({"income_tax", "total_tax"}, tax_delta),
+    }
+
+
+def _lawful_salt_cap_2025(status: str, magi: float) -> float:
+    """State and Local Tax Deduction Worksheet, i1040sca 2025 PDF p.7."""
+    threshold = 250_000.0 if status == "Married/Sep" else 500_000.0
+    limit = max(10_000.0, 40_000.0 - 0.30 * max(0.0, magi - threshold))
+    return limit / 2.0 if status == "Married/Sep" else limit
+
+
+def _f31_ots_mfs_salt_worksheet_trigger(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F31: OTS 2025 enters the SALT worksheet only above $500,000, MFS too.
+
+    For MFS with line 11b in ($250,000, $500,000] OTS keeps the flat $20,000
+    cap where the worksheet gives max(5,000, 20,000 - 15% of the excess). The
+    shift is the difference in the deduction actually taken, after the larger-of
+    choice, so a return whose taxes fit under the lawful cap is untouched.
+    """
+    salt = case.get("salt", 0.0)
+    if (
+        backend != "ots"
+        or case.get("year") != 2025
+        or case.get("status") != "Married/Sep"
+        or salt <= 0.0
+        or reference is None
+    ):
+        return {}
+    magi = reference["agi"]
+    if not 250_000.0 < magi <= 500_000.0:
+        return {}
+    other = max(0.0, case.get("itemized", 0.0))
+    lawful = _line_12e_2025(
+        case, min(salt, _lawful_salt_cap_2025("Married/Sep", magi)) + other
+    )
+    ots = _line_12e_2025(case, min(salt, 20_000.0) + other)
+    return _deduction_shift(case, reference, ots - lawful, amt_base_moves=False)
+
+
+def _car_loan_deduction_2025(
+    status: str, magi: float, interest: float, *, step: float, rounding
+) -> float:
+    threshold = 200_000.0 if status == "Married/Joint" else 100_000.0
+    thousands = rounding(max(0.0, magi - threshold) / 1_000.0)
+    return max(0.0, min(interest, 10_000.0) - step * thousands)
+
+
+def _lawful_car_loan_2025(status: str, magi: float, interest: float) -> float:
+    """Schedule 1-A lines 24-30: $200 per $1,000 or part of $1,000 of excess."""
+    return _car_loan_deduction_2025(
+        status, magi, interest, step=200.0, rounding=math.ceil
+    )
+
+
+def _f32_ots_car_loan_phaseout(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F32: OTS 2025 Schedule 1-A truncates line 28 and uses $300 on line 29.
+
+    Non-MFS only; the MFS exclusion is F33.
+    """
+    interest = case.get("car_loan", 0.0)
+    status = case.get("status")
+    if (
+        backend != "ots"
+        or case.get("year") != 2025
+        or status == "Married/Sep"
+        or interest <= 0.0
+        or reference is None
+    ):
+        return {}
+    magi = reference["agi"]
+    ots = _car_loan_deduction_2025(
+        status, magi, interest, step=300.0, rounding=math.floor
+    )
+    return _deduction_shift(
+        case,
+        reference,
+        ots - _lawful_car_loan_2025(status, magi, interest),
+        amt_base_moves=True,
+    )
+
+
+def _f33_ots_skips_schedule_1a_for_mfs(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F33: OTS 2025 skips Schedule 1-A Parts II-V for MFS, Part IV included.
+
+    Tips, overtime and the senior deduction are lawfully zero for MFS, so the
+    only shift is the car loan interest deduction MFS may claim.
+    """
+    interest = case.get("car_loan", 0.0)
+    if (
+        backend != "ots"
+        or case.get("year") != 2025
+        or case.get("status") != "Married/Sep"
+        or interest <= 0.0
+        or reference is None
+    ):
+        return {}
+    lawful = _lawful_car_loan_2025("Married/Sep", reference["agi"], interest)
+    return _deduction_shift(case, reference, -lawful, amt_base_moves=True)
+
+
+def _senior_deduction_2025(case: dict, magi: float) -> float:
+    """Schedule 1-A Part V line 37 (MFS may not claim it)."""
+    status = case.get("status")
+    if status == "Married/Sep":
+        return 0.0
+    threshold = 150_000.0 if status == "Married/Joint" else 75_000.0
+    per_person = max(0.0, 6_000.0 - 0.06 * max(0.0, magi - threshold))
+    people = bool(case.get("age65")) + (
+        bool(case.get("spouse65")) and status == "Married/Joint"
+    )
+    return per_person * people
+
+
+def _f34_ots_amt_omits_senior_add_back(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F34: OTS 2025 Form 6251 line 1a never subtracts Schedule 1-A line 37.
+
+    OTS's AMTI is lower by the senior deduction, so its tentative minimum tax is
+    lower by at most the 35% top AMT marginal rate on it. That changes the
+    return only where the AMT binds lawfully; where it does not, OTS's lower
+    AMTI cannot create AMT either.
+    """
+    if (
+        backend != "ots"
+        or case.get("year") != 2025
+        or reference is None
+        or reference.get("amt", 0.0) <= 0.0
+    ):
+        return {}
+    senior = _senior_deduction_2025(case, reference["agi"])
+    if senior == 0.0:
+        return {}
+    drop = min(_TOP_AMT_MARGINAL_RATE * senior, reference["amt"])
+    return _same_delta({"amt", "income_tax", "total_tax"}, DeltaRange(-drop, 0.0))
+
+
 SIGNATURES = [
     KnownDefect("F7", _f7_itemized_semantics),
     KnownDefect("F11", _f11_ots_hoh_bracket),
@@ -451,6 +764,10 @@ SIGNATURES = [
     KnownDefect("F24", _f24_ots_2024_mfs_amt_constants),
     KnownDefect("F27", _f27_ots_skips_amt_preferential_worksheet),
     KnownDefect("F28", _f28_taxcalc_elects_itemizing_below_the_standard_deduction),
+    KnownDefect("F31", _f31_ots_mfs_salt_worksheet_trigger),
+    KnownDefect("F32", _f32_ots_car_loan_phaseout),
+    KnownDefect("F33", _f33_ots_skips_schedule_1a_for_mfs),
+    KnownDefect("F34", _f34_ots_amt_omits_senior_add_back),
 ]
 
 
@@ -571,6 +888,7 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
         itemized_deductions=case["itemized"],
         incentive_stock_option_gains=case.get("iso", 0.0),
         standard_or_itemized=case["std_or_item"],
+        **tenforty_obbba_inputs(case),
     )
     return {
         "agi": r.federal_adjusted_gross_income,

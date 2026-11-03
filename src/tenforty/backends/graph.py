@@ -16,6 +16,7 @@ from ..mappings import (
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
     derived_chain_factor,
+    federal_nodes_for,
     state_natural_to_node,
     state_output_lines,
 )
@@ -100,7 +101,7 @@ def _lowered_input_nodes(
     Scalar and batch evaluation both lower through this, so a natural reaches the
     same nodes, and is unsupported in the same cases, on either path.
     """
-    nodes = list(NATURAL_TO_NODES.get(natural_name, []))
+    nodes = federal_nodes_for(natural_name, year)
     state_node = state_natural_to_node(state, year).get(natural_name)
     if state_node:
         nodes.append(state_node)
@@ -340,17 +341,6 @@ class GraphBackend:
                     f"Graph backend does not support state returns for {state.value}"
                 )
 
-        unsupported: list[tuple[str, object]] = []
-        for natural_name, values in inputs.items():
-            if _reads_nonzero(
-                natural_name, _lowered_input_nodes(natural_name, state, year)
-            ):
-                continue
-            sample = next((v for v in values if v not in (0, 0.0, None)), None)
-            if sample is not None:
-                unsupported.append((natural_name, sample))
-        _raise_unsupported(unsupported, state, year)
-
         if mode == "cross":
             # A natural input fans out to several graph nodes, and the Rust
             # cross API treats every node column as an independent axis — so
@@ -393,6 +383,20 @@ class GraphBackend:
             for name, value in dumped.items():
                 normalized.setdefault(name, []).append(float(value))
         inputs = normalized
+
+        # Checked on the normalized rows, so a value the input model refuses
+        # (a Schedule 1-A amount before 2025) raises its ValueError first, as
+        # the single-return path does.
+        unsupported: list[tuple[str, object]] = []
+        for natural_name, values in inputs.items():
+            if _reads_nonzero(
+                natural_name, _lowered_input_nodes(natural_name, state, year)
+            ):
+                continue
+            sample = next((v for v in values if v not in (0, 0.0, None)), None)
+            if sample is not None:
+                unsupported.append((natural_name, sample))
+        _raise_unsupported(unsupported, state, year)
 
         graph = _load_resolved_graph(year)
 
@@ -667,11 +671,12 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         state_mapping = state_natural_to_node(tax_input.state, tax_input.year.value)
+        year = tax_input.year.value
         natural_names = [
             name
             for name, field in TaxReturnInput.model_fields.items()
             if field.annotation is float
-            and (name in NATURAL_TO_NODES or name in state_mapping)
+            and (federal_nodes_for(name, year) or name in state_mapping)
         ]
         input_groups = [
             self._input_nodes(tax_input, name, output_nodes[0])

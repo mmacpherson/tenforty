@@ -385,3 +385,27 @@ def test_raw_iitax_remains_net_of_refundable_credits():
     assert second_in_batch["iitax"] == pytest.approx(
         -second_in_batch["refund"], abs=0.001
     )
+
+
+_OBBBA_BASE = {**F14_CASE, "year": 2025, "iso": 0.0, "w2": 100_000.0}
+# Each optional OBBBA key on a 2025 return where its deduction applies; SALT on a
+# Head of Household return whose taxes exceed the $23,625 standard deduction.
+OBBBA_KEY_CASES = {
+    "salt": ({**_OBBBA_BASE, "status": "Head_of_House"}, 30_000.0),
+    "tips": (_OBBBA_BASE, 10_000.0),
+    "overtime": (_OBBBA_BASE, 10_000.0),
+    "car_loan": (_OBBBA_BASE, 5_000.0),
+    "age65": (_OBBBA_BASE, True),
+    "spouse65": ({**_OBBBA_BASE, "status": "Married/Joint"}, True),
+}
+
+
+@pytest.mark.parametrize("key", sorted(OBBBA_KEY_CASES))
+def test_obbba_case_keys_reach_taxcalc(key):
+    """Every optional OBBBA key changes TaxCalc's taxable income where it applies."""
+    case, value = OBBBA_KEY_CASES[key]
+
+    without = taxcalc_batch([case])[0]["taxable_income"]
+    with_key = taxcalc_batch([{**case, key: value}])[0]["taxable_income"]
+
+    assert with_key < without, f"{key} did not reach TaxCalc"

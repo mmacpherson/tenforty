@@ -5,6 +5,8 @@ module Tables2024
 
     -- * Standard Deduction
     standardDeduction2024,
+    additionalStdDedPerBox2024,
+    saltCap2024,
 
     -- * Qualified Dividends / Long-Term Capital Gains
     qualifiedDividend0PctMax2024,
@@ -110,6 +112,19 @@ federalBracketsTable2024 =
 -- Order: Single, MFJ, MFS, HoH, QW
 standardDeduction2024 :: ByStatus (Amount Dollars)
 standardDeduction2024 = byStatus 14600 29200 14600 21900 29200
+
+-- | Additional standard deduction per box checked for age 65 or older,
+-- unmarried ($1,950) or married / qualifying surviving spouse ($1,550): the
+-- "Standard Deduction Chart for People Who Were Born Before January 2, 1960,
+-- or Were Blind", 2024 Instructions for Form 1040, printed p.34, less the
+-- basic amounts above (Single 16,550 - 14,600; MFJ 32,300 - 29,200 for two
+-- boxes). Order: Single, MFJ, MFS, HoH, QW
+additionalStdDedPerBox2024 :: ByStatus (Amount Dollars)
+additionalStdDedPerBox2024 = byStatus 1950 1550 1550 1950 1550
+
+-- | Schedule A (2024) line 5e: the smaller of line 5d or $10,000 ($5,000 MFS).
+saltCap2024 :: ByStatus (Amount Dollars)
+saltCap2024 = byStatus 10000 10000 5000 10000 10000
 
 -- Qualified Dividends and Capital Gain Tax Worksheet, lines 6 and 13: the
 -- maximum taxable income taxed at the 0% and 15% preferential rates. Above the

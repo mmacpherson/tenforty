@@ -4,4 +4,6 @@
 # misspelling of "Dead", and rewrites the symbol — silently corrupting quoted
 # upstream source.
 Ded = "Ded"
+# Health savings account; typos would rewrite it to "HAS".
+HSA = "HSA"
 ND = "ND"

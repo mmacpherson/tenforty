@@ -33,6 +33,14 @@ usSchedule1IncomeAdjustmentMagnitude = lineRef "us_schedule_1" "IncomeAdjustment
 usScheduleDCapitalFactsMagnitude :: LineRef Dollars
 usScheduleDCapitalFactsMagnitude = lineRef "us_schedule_d" "CapitalFactsMagnitude"
 
+-- | Age-65 checkboxes (Form 1040 line 12a in 2025; the page-1 Standard
+-- Deduction boxes in 2024), one when checked.
+us1040Filer65 :: LineRef Dollars
+us1040Filer65 = lineRef "us_1040" "Filer65"
+
+us1040Spouse65 :: LineRef Dollars
+us1040Spouse65 = lineRef "us_1040" "Spouse65"
+
 us1040L12final :: LineRef Dollars
 us1040L12final = lineRef "us_1040" "L12Final"
 
@@ -119,6 +127,15 @@ usSchedule3L15 = lineRef "us_schedule_3" "L15"
 
 usSchedule3L8 :: LineRef Dollars
 usSchedule3L8 = lineRef "us_schedule_3" "L8"
+
+usSchedule1AL37 :: LineRef Dollars
+usSchedule1AL37 = lineRef "us_schedule_1a" "L37"
+
+usSchedule1AL38 :: LineRef Dollars
+usSchedule1AL38 = lineRef "us_schedule_1a" "L38"
+
+usScheduleAL7 :: LineRef Dollars
+usScheduleAL7 = lineRef "us_schedule_a" "L7"
 
 usScheduleAL17 :: LineRef Dollars
 usScheduleAL17 = lineRef "us_schedule_a" "L17"

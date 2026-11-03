@@ -10,6 +10,7 @@ from .taxcalc_policy import (
     QBI_SIMPLIFIED_THRESHOLD,
     DeltaRange,
     _amti_before_mfs_line4_addition,
+    _deduction_shift,
     _f7_itemized_semantics,
     _f11_ots_hoh_bracket,
     _f12_itemized_category_amt,
@@ -17,6 +18,11 @@ from .taxcalc_policy import (
     _f24_ots_2024_mfs_amt_constants,
     _f27_ots_skips_amt_preferential_worksheet,
     _f28_taxcalc_elects_itemizing_below_the_standard_deduction,
+    _f31_ots_mfs_salt_worksheet_trigger,
+    _f32_ots_car_loan_phaseout,
+    _f33_ots_skips_schedule_1a_for_mfs,
+    _f34_ots_amt_omits_senior_add_back,
+    modeled_deltas,
     tolerance,
 )
 
@@ -442,3 +448,321 @@ def test_f28_respects_the_taxable_income_floor():
     )
 
     assert model["taxable_income"] == DeltaRange(-28_720.0, -20_674.0)
+
+
+# --- F31-F34: OTS 2025 OBBBA defects ---------------------------------------------
+# Witness arithmetic from the 2025 forms; see tests/known_defects_test.py.
+
+
+def _obbba_case(**updates):
+    defaults = {"year": 2025, "itemized": 0.0, "iso": 0.0, "std_or_item": "Standard"}
+    return _case(**{**defaults, **updates})
+
+
+def _reference(agi, taxable_income, amt=0.0):
+    return {"agi": agi, "taxable_income": taxable_income, "amt": amt}
+
+
+def test_f31_passes_the_exact_shift_in_the_deduction_taken():
+    """MFS 300,000, taxes 25,000, other 10,000: OTS 30,000 vs lawful 22,500."""
+    case = _obbba_case(
+        status="Married/Sep", w2=300_000.0, salt=25_000.0, itemized=10_000.0
+    )
+    delta = _f31_ots_mfs_salt_worksheet_trigger(
+        "ots", case, _reference(300_000.0, 277_500.0)
+    )
+
+    assert delta["taxable_income"] == DeltaRange.exact(-7_500.0)
+    assert delta["total_tax"] == DeltaRange(-0.37 * 7_500.0, 0.0)
+    assert delta["amt"] == DeltaRange(0.0, 0.37 * 7_500.0)
+
+
+def test_f31_counts_only_the_excess_over_the_standard_deduction():
+    """Taxes 25,000 alone: lawful 12,500 < 15,750 standard, OTS 20,000 itemized."""
+    case = _obbba_case(status="Married/Sep", w2=300_000.0, salt=25_000.0)
+    delta = _f31_ots_mfs_salt_worksheet_trigger(
+        "ots", case, _reference(300_000.0, 284_250.0)
+    )
+
+    assert delta["taxable_income"] == DeltaRange.exact(-4_250.0)
+
+
+@pytest.mark.parametrize(
+    ("backend", "updates", "agi"),
+    [
+        ("graph", {}, 300_000.0),
+        ("ots", {"year": 2024}, 300_000.0),
+        ("ots", {"status": "Single"}, 300_000.0),
+        ("ots", {}, 250_000.0),
+        ("ots", {}, 520_000.0),
+        # Both caps admit the whole 6,000 (review witness).
+        ("ots", {"salt": 6_000.0}, 300_000.0),
+        ("ots", {"salt": 0.0}, 300_000.0),
+    ],
+)
+def test_f31_is_silent_where_the_cap_does_not_change_the_return(backend, updates, agi):
+    """No shift outside MFS (250k, 500k] or where taxes fit both caps."""
+    case = {
+        **_obbba_case(status="Married/Sep", w2=agi, salt=25_000.0, itemized=10_000.0),
+        **updates,
+    }
+
+    assert (
+        _f31_ots_mfs_salt_worksheet_trigger(backend, case, _reference(agi, 1.0)) == {}
+    )
+
+
+def test_f32_passes_the_rounding_and_rate_shift():
+    """MFJ 215,000, interest 12,000: OTS 5,500 vs lawful 7,000; C-1 OTS 900 vs 1,900."""
+    mfj = _obbba_case(status="Married/Joint", w2=215_000.0, car_loan=12_000.0)
+    single = _obbba_case(status="Single", w2=112_300.0, car_loan=4_500.0)
+
+    assert _f32_ots_car_loan_phaseout("ots", mfj, _reference(215_000.0, 176_500.0))[
+        "taxable_income"
+    ] == DeltaRange.exact(1_500.0)
+    assert _f32_ots_car_loan_phaseout("ots", single, _reference(112_300.0, 94_650.0))[
+        "taxable_income"
+    ] == DeltaRange.exact(1_000.0)
+
+
+@pytest.mark.parametrize(
+    ("backend", "updates"),
+    [
+        ("graph", {}),
+        ("ots", {"car_loan": 0.0}),
+        ("ots", {"year": 2024}),
+        ("ots", {"status": "Married/Sep"}),
+        # At or below the threshold both formulas give the full interest.
+        ("ots", {"w2": 100_000.0}),
+    ],
+)
+def test_f32_negative_controls(backend, updates):
+    """No shift without interest, outside 2025, for MFS (F33), or with no excess."""
+    case = {**_obbba_case(status="Single", w2=112_300.0, car_loan=4_500.0), **updates}
+
+    assert _f32_ots_car_loan_phaseout(backend, case, _reference(case["w2"], 1.0)) == {}
+
+
+def test_f33_passes_the_whole_lawful_mfs_deduction():
+    """MFS 100,000, interest 5,000: OTS deducts nothing, so line 15 is 5,000 higher."""
+    case = _obbba_case(status="Married/Sep", w2=100_000.0, car_loan=5_000.0)
+    delta = _f33_ots_skips_schedule_1a_for_mfs(
+        "ots", case, _reference(100_000.0, 79_250.0)
+    )
+
+    assert delta["taxable_income"] == DeltaRange.exact(5_000.0)
+    assert delta["total_tax"] == DeltaRange(0.0, 0.37 * 5_000.0)
+
+
+@pytest.mark.parametrize(
+    ("backend", "updates"),
+    [
+        ("graph", {}),
+        ("ots", {"status": "Single"}),
+        ("ots", {"car_loan": 0.0}),
+        # Lawfully phased out: 9,000 - 200 x 60 < 0 (inventory C-3).
+        ("ots", {"w2": 160_000.0, "car_loan": 9_000.0}),
+        # Tips are lawfully zero for MFS; only Part IV shifts.
+        ("ots", {"car_loan": 0.0, "tips": 10_000.0}),
+    ],
+)
+def test_f33_negative_controls(backend, updates):
+    """No shift off MFS, without interest, or once the deduction is phased out."""
+    case = {
+        **_obbba_case(status="Married/Sep", w2=100_000.0, car_loan=5_000.0),
+        **updates,
+    }
+
+    assert (
+        _f33_ots_skips_schedule_1a_for_mfs(backend, case, _reference(case["w2"], 1.0))
+        == {}
+    )
+
+
+def test_f34_bounds_the_missing_senior_add_back_where_amt_binds():
+    """Single 65+, AGI 90,000: senior deduction 5,100; the AMT drop is at most 35%."""
+    case = _obbba_case(status="Single", w2=90_000.0, iso=200_000.0, age65=True)
+    delta = _f34_ots_amt_omits_senior_add_back(
+        "ots", case, _reference(90_000.0, 67_150.0, amt=42_801.0)
+    )
+
+    assert delta["amt"] == DeltaRange(-0.35 * 5_100.0, 0.0)
+    assert delta["total_tax"] == DeltaRange(-0.35 * 5_100.0, 0.0)
+    assert "taxable_income" not in delta
+
+
+@pytest.mark.parametrize(
+    ("backend", "updates", "amt"),
+    [
+        ("graph", {}, 42_801.0),
+        ("ots", {}, 0.0),
+        ("ots", {"age65": False}, 42_801.0),
+        ("ots", {"status": "Married/Sep"}, 42_801.0),
+        ("ots", {"year": 2024}, 42_801.0),
+        # Phased out: 6,000 - 0.06 x 100,000 = 0.
+        ("ots", {"w2": 175_000.0}, 42_801.0),
+    ],
+)
+def test_f34_negative_controls(backend, updates, amt):
+    """Silent without AMT, a senior deduction, or outside 2025 OTS."""
+    case = {
+        **_obbba_case(status="Single", w2=90_000.0, iso=200_000.0, age65=True),
+        **updates,
+    }
+    reference = _reference(case["w2"], 1.0, amt=amt)
+
+    assert _f34_ots_amt_omits_senior_add_back(backend, case, reference) == {}
+
+
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+def test_obbba_signatures_are_inactive_without_obbba_inputs(backend):
+    """A pre-OBBBA 2025 case draws no F31-F34 delta whatever its size."""
+    case = _obbba_case(status="Married/Sep", w2=300_000.0, iso=200_000.0)
+    reference = _reference(300_000.0, 284_250.0, amt=10_000.0)
+
+    for signature in (
+        _f31_ots_mfs_salt_worksheet_trigger,
+        _f32_ots_car_loan_phaseout,
+        _f33_ots_skips_schedule_1a_for_mfs,
+        _f34_ots_amt_omits_senior_add_back,
+    ):
+        assert signature(backend, case, reference) == {}
+    assert modeled_deltas(backend, _obbba_case(status="Single", w2=50_000.0)) == {}
+
+
+def test_f32_lets_amt_rise_when_the_car_loan_shortfall_raises_amti():
+    """Single 101,000, interest 10,000, ISO 200,000 (Codex round-two witness).
+
+    Lawful line 30 = 10,000 - 200 x 1 = 9,800; OTS 10,000 - 300 x 1 = 9,700. The
+    $100 shortfall raises regular tax $22 (Tax Table rows 75,450 / 75,550 Single:
+    11,519 / 11,541) and, because car loan interest stays deducted for the AMT,
+    AMTI by $100 and the 26% tentative minimum tax by $26: AMT 41,287 -> 41,291.
+    """
+    case = _obbba_case(status="Single", w2=101_000.0, car_loan=10_000.0, iso=200_000.0)
+    reference = _reference(101_000.0, 75_450.0, amt=41_287.0)
+    delta = _f32_ots_car_loan_phaseout("ots", case, reference)
+
+    assert delta["taxable_income"] == DeltaRange.exact(100.0)
+    assert delta["amt"] == DeltaRange(-0.37 * 100.0, 0.35 * 100.0)
+    assert delta["amt"].minimum <= 41_291.0 - 41_287.0 <= delta["amt"].maximum
+    assert delta["total_tax"] == DeltaRange(0.0, 0.37 * 100.0)
+    assert (
+        delta["total_tax"].minimum <= 52_832.0 - 52_806.0 <= delta["total_tax"].maximum
+    )
+
+
+def test_f33_lets_amt_rise_when_the_missing_deduction_raises_amti():
+    """MFS 100,000, interest 5,000, ISO 200,000.
+
+    Lawful AMTI = 100,000 - 5,000 + 200,000 = 295,000; less the 68,500 MFS
+    exemption, 226,500: 26% of 119,550 plus 28% of 106,950 = 61,029. OTS deducts
+    no interest, so AMTI is 300,000 and the tentative minimum tax 62,429 (+1,400),
+    while regular tax on 5,000 more taxable income rises about 1,100: AMT +300.
+    """
+    case = _obbba_case(
+        status="Married/Sep", w2=100_000.0, car_loan=5_000.0, iso=200_000.0
+    )
+    reference = _reference(100_000.0, 79_250.0, amt=48_674.0)
+    delta = _f33_ots_skips_schedule_1a_for_mfs("ots", case, reference)
+
+    assert delta["taxable_income"] == DeltaRange.exact(5_000.0)
+    assert delta["amt"] == DeltaRange(-0.37 * 5_000.0, 0.35 * 5_000.0)
+    assert delta["amt"].minimum <= 300.0 <= delta["amt"].maximum
+    assert (
+        delta["total_tax"].minimum <= 62_429.0 - 61_029.0 <= delta["total_tax"].maximum
+    )
+
+
+def test_salt_shift_keeps_amt_one_sided_because_salt_is_added_back():
+    """Negative control: the F31 (SALT) shift does not move the AMT base.
+
+    The same $100 shortfall treated as a Schedule A tax could only lower AMT, so
+    the car loan witness's +$4 lies outside it; the car loan mechanism admits it.
+    """
+    reference = _reference(101_000.0, 75_450.0, amt=41_287.0)
+    case = _obbba_case(status="Single")
+
+    salt_like = _deduction_shift(case, reference, -100.0, amt_base_moves=False)
+    car_loan = _deduction_shift(case, reference, -100.0, amt_base_moves=True)
+
+    assert salt_like["amt"] == DeltaRange(-37.0, 0.0)
+    assert not salt_like["amt"].maximum >= 4.0
+    assert car_loan["amt"].maximum >= 4.0
+
+
+def test_deduction_shift_amt_cannot_fall_below_the_lawful_amt():
+    """Negative control: with no lawful AMT, OTS's AMT cannot be lower than zero."""
+    case = _obbba_case(status="Single")
+    delta = _deduction_shift(
+        case, _reference(101_000.0, 75_450.0), -100.0, amt_base_moves=True
+    )
+
+    assert delta["amt"] == DeltaRange(0.0, 35.0)
+
+
+# The QBI phase-in range: Codex round-three witness. 2025 MFS, self-employment
+# profit 270,000, SALT 25,000. AGI = 270,000 less half the SE tax (255,466.30);
+# lawful Schedule A line 5e = 20,000 - 0.15 x 5,466.30 = 19,180.06 > 15,750, so
+# pre-QBI taxable income is 236,286.24, inside the MFS phase-in range
+# (197,300, 247,300] of Form 8995-A lines 19-26. There a larger deduction also
+# raises the QBI deduction, so taxable income falls by more than the shift; F31
+# does not bound that and must not claim the return.
+_PHASE_IN_AGI = 255_466.30
+_PHASE_IN_PRE_QBI = 236_286.24
+
+
+def _phase_in_reference(qbi_deduction=11_254.58):
+    return {
+        "agi": _PHASE_IN_AGI,
+        "taxable_income": _PHASE_IN_PRE_QBI - qbi_deduction,
+        "qbi_deduction": qbi_deduction,
+        "amt": 0.0,
+    }
+
+
+def test_f31_does_not_claim_a_return_in_the_qbi_phase_in_range():
+    """Codex witness: the QBI amplification is outside the signature's domain."""
+    case = _obbba_case(status="Married/Sep", se=270_000.0, salt=25_000.0)
+
+    assert _f31_ots_mfs_salt_worksheet_trigger("ots", case, _phase_in_reference()) == {}
+
+
+def test_car_loan_signatures_do_not_claim_the_qbi_phase_in_range_either():
+    """Schedule 1-A reduces Form 8995 line 11 too, so the same limit applies."""
+    case = _obbba_case(status="Married/Sep", se=270_000.0, car_loan=5_000.0)
+
+    assert _f33_ots_skips_schedule_1a_for_mfs("ots", case, _phase_in_reference()) == {}
+
+
+def test_f31_still_claims_business_income_below_the_phase_in_range():
+    """Below the threshold the QBI slope is 0 or the 20% cap: a bounded response.
+
+    MFS, AGI 255,466.30 is fixed; with pre-QBI taxable income 150,000 the shift of
+    819.94 (OTS 20,000 vs lawful 19,180.06) moves taxable income by 0.8 to 1 times
+    it, and AMTI up by at most 20% of it through the QBI deduction.
+    """
+    case = _obbba_case(status="Married/Sep", se=270_000.0, salt=25_000.0)
+    reference = {
+        "agi": _PHASE_IN_AGI,
+        "taxable_income": 140_000.0,
+        "qbi_deduction": 10_000.0,
+        "amt": 0.0,
+    }
+    delta = _f31_ots_mfs_salt_worksheet_trigger("ots", case, reference)
+    shift = 20_000.0 - (20_000.0 - 0.15 * (_PHASE_IN_AGI - 250_000.0))
+
+    assert delta["taxable_income"].minimum == pytest.approx(-shift)
+    assert delta["taxable_income"].maximum == pytest.approx(-0.8 * shift)
+    assert delta["amt"].maximum == pytest.approx(0.35 * 0.2 * shift + 0.37 * shift)
+
+
+def test_f31_without_business_income_keeps_amti_fixed():
+    """Negative control: no QBI, so the SALT add-back leaves AMTI unchanged."""
+    case = _obbba_case(
+        status="Married/Sep", w2=300_000.0, salt=25_000.0, itemized=10_000.0
+    )
+    delta = _f31_ots_mfs_salt_worksheet_trigger(
+        "ots", case, _reference(300_000.0, 277_500.0)
+    )
+
+    assert delta["amt"] == DeltaRange(0.0, 0.37 * 7_500.0)

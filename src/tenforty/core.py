@@ -784,6 +784,13 @@ def evaluate_return(
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
     backend: Literal["ots", "graph"] = "ots",
+    *,
+    state_and_local_taxes: float = 0.0,
+    qualified_tips: float = 0.0,
+    qualified_overtime: float = 0.0,
+    vehicle_loan_interest: float = 0.0,
+    filer_65_or_older: bool = False,
+    spouse_65_or_older: bool = False,
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters."""
     input_data = TaxReturnInput(
@@ -808,6 +815,12 @@ def evaluate_return(
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        state_and_local_taxes=state_and_local_taxes,
+        qualified_tips=qualified_tips,
+        qualified_overtime=qualified_overtime,
+        vehicle_loan_interest=vehicle_loan_interest,
+        filer_65_or_older=filer_65_or_older,
+        spouse_65_or_older=spouse_65_or_older,
     )
 
     if backend == "ots":
@@ -866,6 +879,13 @@ def evaluate_returns(
     on_error: str = "raise",
     backend: Literal["ots", "graph"] = "ots",
     mode: Literal["cross", "zip"] = "cross",
+    *,
+    state_and_local_taxes: list[float] | float = 0.0,
+    qualified_tips: list[float] | float = 0.0,
+    qualified_overtime: list[float] | float = 0.0,
+    vehicle_loan_interest: list[float] | float = 0.0,
+    filer_65_or_older: list[bool] | bool = False,
+    spouse_65_or_older: list[bool] | bool = False,
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
 
@@ -909,6 +929,12 @@ def evaluate_returns(
     item_deductions = ensure_list(itemized_deductions)
     state_adjs = ensure_list(state_adjustment)
     iso_gains = ensure_list(incentive_stock_option_gains)
+    state_and_local_taxes_values = ensure_list(state_and_local_taxes)
+    qualified_tips_values = ensure_list(qualified_tips)
+    qualified_overtime_values = ensure_list(qualified_overtime)
+    vehicle_loan_interest_values = ensure_list(vehicle_loan_interest)
+    filer_65_or_older_values = ensure_list(filer_65_or_older)
+    spouse_65_or_older_values = ensure_list(spouse_65_or_older)
 
     if mode == "zip":
         all_lists = [
@@ -933,6 +959,12 @@ def evaluate_returns(
             ("itemized_deductions", item_deductions),
             ("state_adjustment", state_adjs),
             ("incentive_stock_option_gains", iso_gains),
+            ("state_and_local_taxes", state_and_local_taxes_values),
+            ("qualified_tips", qualified_tips_values),
+            ("qualified_overtime", qualified_overtime_values),
+            ("vehicle_loan_interest", vehicle_loan_interest_values),
+            ("filer_65_or_older", filer_65_or_older_values),
+            ("spouse_65_or_older", spouse_65_or_older_values),
         ]
         lengths = {name: len(vals) for name, vals in all_lists if len(vals) > 1}
         if lengths:
@@ -970,6 +1002,12 @@ def evaluate_returns(
         item_deductions = broadcast(item_deductions)
         state_adjs = broadcast(state_adjs)
         iso_gains = broadcast(iso_gains)
+        state_and_local_taxes_values = broadcast(state_and_local_taxes_values)
+        qualified_tips_values = broadcast(qualified_tips_values)
+        qualified_overtime_values = broadcast(qualified_overtime_values)
+        vehicle_loan_interest_values = broadcast(vehicle_loan_interest_values)
+        filer_65_or_older_values = broadcast(filer_65_or_older_values)
+        spouse_65_or_older_values = broadcast(spouse_65_or_older_values)
 
     if backend == "graph":
         from .backends.graph import GraphBackend
@@ -997,6 +1035,12 @@ def evaluate_returns(
                                 "itemized_deductions": item_deductions,
                                 "state_adjustment": state_adjs,
                                 "incentive_stock_option_gains": iso_gains,
+                                "state_and_local_taxes": state_and_local_taxes_values,
+                                "qualified_tips": qualified_tips_values,
+                                "qualified_overtime": qualified_overtime_values,
+                                "vehicle_loan_interest": vehicle_loan_interest_values,
+                                "filer_65_or_older": filer_65_or_older_values,
+                                "spouse_65_or_older": spouse_65_or_older_values,
                                 "num_dependents": [nd],
                                 "dependent_exemptions": dep_exemptions,
                                 "standard_or_itemized": [soi],
@@ -1044,6 +1088,24 @@ def evaluate_returns(
                             "state_adjustment": [state_adjs[i] for i in indices],
                             "incentive_stock_option_gains": [
                                 iso_gains[i] for i in indices
+                            ],
+                            "state_and_local_taxes": [
+                                state_and_local_taxes_values[i] for i in indices
+                            ],
+                            "qualified_tips": [
+                                qualified_tips_values[i] for i in indices
+                            ],
+                            "qualified_overtime": [
+                                qualified_overtime_values[i] for i in indices
+                            ],
+                            "vehicle_loan_interest": [
+                                vehicle_loan_interest_values[i] for i in indices
+                            ],
+                            "filer_65_or_older": [
+                                filer_65_or_older_values[i] for i in indices
+                            ],
+                            "spouse_65_or_older": [
+                                spouse_65_or_older_values[i] for i in indices
                             ],
                             "num_dependents": [
                                 float(nums_dependents[i]) for i in indices
@@ -1104,6 +1166,12 @@ def evaluate_returns(
         "itemized_deductions",
         "state_adjustment",
         "incentive_stock_option_gains",
+        "state_and_local_taxes",
+        "qualified_tips",
+        "qualified_overtime",
+        "vehicle_loan_interest",
+        "filer_65_or_older",
+        "spouse_65_or_older",
     ]
     all_vals = [
         years,
@@ -1127,6 +1195,12 @@ def evaluate_returns(
         item_deductions,
         state_adjs,
         iso_gains,
+        state_and_local_taxes_values,
+        qualified_tips_values,
+        qualified_overtime_values,
+        vehicle_loan_interest_values,
+        filer_65_or_older_values,
+        spouse_65_or_older_values,
     ]
 
     if mode == "cross":
@@ -1153,6 +1227,13 @@ def evaluate_returns(
     return pl.DataFrame(results).cast({"state": pl.Utf8})
 
 
+_DISCRETE_INPUTS = frozenset(
+    name
+    for name, field in TaxReturnInput.model_fields.items()
+    if field.annotation is bool
+)
+
+
 def marginal_rate(
     year: int = 2025,
     state: str | None = None,
@@ -1176,6 +1257,12 @@ def marginal_rate(
     incentive_stock_option_gains: float = 0.0,
     dependent_exemptions: float = 0.0,
     *,
+    state_and_local_taxes: float = 0.0,
+    qualified_tips: float = 0.0,
+    qualified_overtime: float = 0.0,
+    vehicle_loan_interest: float = 0.0,
+    filer_65_or_older: bool = False,
+    spouse_65_or_older: bool = False,
     wrt: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
@@ -1183,8 +1270,8 @@ def marginal_rate(
 
     This computes the derivative of `output` with respect to `wrt`.
     """
-    if wrt == "qbi_is_sstb":
-        raise ValueError("qbi_is_sstb is discrete and cannot be differentiated")
+    if wrt in _DISCRETE_INPUTS:
+        raise ValueError(f"{wrt} is discrete and cannot be differentiated")
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1206,6 +1293,12 @@ def marginal_rate(
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        state_and_local_taxes=state_and_local_taxes,
+        qualified_tips=qualified_tips,
+        qualified_overtime=qualified_overtime,
+        vehicle_loan_interest=vehicle_loan_interest,
+        filer_65_or_older=filer_65_or_older,
+        spouse_65_or_older=spouse_65_or_older,
         dependent_exemptions=dependent_exemptions,
     )
 
@@ -1245,6 +1338,12 @@ def marginal_rates(
     incentive_stock_option_gains: float = 0.0,
     dependent_exemptions: float = 0.0,
     *,
+    state_and_local_taxes: float = 0.0,
+    qualified_tips: float = 0.0,
+    qualified_overtime: float = 0.0,
+    vehicle_loan_interest: float = 0.0,
+    filer_65_or_older: bool = False,
+    spouse_65_or_older: bool = False,
     output: str = "total_tax",
 ) -> dict[str, float]:
     """Compute marginal rates for every continuous public input.
@@ -1274,6 +1373,12 @@ def marginal_rates(
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        state_and_local_taxes=state_and_local_taxes,
+        qualified_tips=qualified_tips,
+        qualified_overtime=qualified_overtime,
+        vehicle_loan_interest=vehicle_loan_interest,
+        filer_65_or_older=filer_65_or_older,
+        spouse_65_or_older=spouse_65_or_older,
         dependent_exemptions=dependent_exemptions,
     )
 
@@ -1313,12 +1418,18 @@ def solve_for_income(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     *,
+    state_and_local_taxes: float = 0.0,
+    qualified_tips: float = 0.0,
+    qualified_overtime: float = 0.0,
+    vehicle_loan_interest: float = 0.0,
+    filer_65_or_older: bool = False,
+    spouse_65_or_older: bool = False,
     for_input: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
     """Solve for an input value that produces a target output (graph backend only)."""
-    if for_input == "qbi_is_sstb":
-        raise ValueError("qbi_is_sstb is discrete and cannot be solved continuously")
+    if for_input in _DISCRETE_INPUTS:
+        raise ValueError(f"{for_input} is discrete and cannot be solved continuously")
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1340,6 +1451,12 @@ def solve_for_income(
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        state_and_local_taxes=state_and_local_taxes,
+        qualified_tips=qualified_tips,
+        qualified_overtime=qualified_overtime,
+        vehicle_loan_interest=vehicle_loan_interest,
+        filer_65_or_older=filer_65_or_older,
+        spouse_65_or_older=spouse_65_or_older,
     )
 
     from .backends.graph import GraphBackend
