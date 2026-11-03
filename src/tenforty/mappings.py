@@ -495,19 +495,21 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.MA: StateGraphConfig(
-        # MA Form 1 imports federal AGI and applies Massachusetts-specific
-        # exemptions. Massachusetts uses a flat 5% base rate on most income
-        # plus a 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025).
-        # Also applies 8.5% rate on short-term capital gains and 12% on long-term
-        # collectibles. Exemptions are filing-status based (Single: $4,400,
-        # MFJ: $8,800, HoH: $6,800) plus $1,000 per dependent, $700 for age 65+,
-        # and $2,200 for blindness. All exemptions are accepted as total input
-        # (num_dependents cannot map to dollar amounts).
-        # Note: L10 is an import node (imports federal AGI) so we use L17
-        # (income after deductions) as state AGI proxy.
+        # MA Form 1 builds line 10 (5% income) from the federal income lines,
+        # not federal AGI, and routes interest, dividends and capital gains
+        # through Schedules B and D: 5% on interest/dividends and long-term
+        # gains, 8.5% on short-term gains, 12% on collectibles (raw input only),
+        # plus a 4% surtax over $1,053,750 (2024) / $1,083,150 (2025). Line 11,
+        # Social Security/Medicare/SE tax paid capped at $2,000 per person, is
+        # derived; w2_income is a household aggregate, so a joint return takes
+        # the one-earner reading (at most $100 high for two earners).
+        # Exemptions are filing-status based (Single: $4,400, MFJ: $8,800,
+        # HoH: $6,800); other exemptions are accepted as total input
+        # (num_dependents cannot map to dollar amounts). State AGI is line 10,
+        # the figure OTS reports for MA_1.
         natural_to_node={},
         outputs={
-            "state_adjusted_gross_income": "L17_ma_income_after_deductions",
+            "state_adjusted_gross_income": "L10_ma_total_income",
             "state_taxable_income": "L19_ma_taxable_income",
             "state_total_tax": "L28_ma_total_tax",
         },

@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "ceb8763958f8f5615495825cbe2306c4685c418a9e5ab8dc5a2165adfb5de78a"
+        "sha256": "0bf1b796eec0f56559260be02d27d71c404eaa8921dd16c40b4353ec39d22d4d"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "33fd6a8d4fcf1ede3eb8b63461584170a835ad0593403b0ac361029c8754ae5f"
+        "sha256": "65354d956e215ed15e986cf19037702c95972cdb8a7cc5488988411add61e04a"
       }
     }
   },
@@ -800,12 +800,12 @@
       },
       "output_nodes": {
         "2024": {
-          "state_adjusted_gross_income": "ma_1_L17_ma_income_after_deductions",
+          "state_adjusted_gross_income": "ma_1_L10_ma_total_income",
           "state_taxable_income": "ma_1_L19_ma_taxable_income",
           "state_total_tax": "ma_1_L28_ma_total_tax"
         },
         "2025": {
-          "state_adjusted_gross_income": "ma_1_L17_ma_income_after_deductions",
+          "state_adjusted_gross_income": "ma_1_L10_ma_total_income",
           "state_taxable_income": "ma_1_L19_ma_taxable_income",
           "state_total_tax": "ma_1_L28_ma_total_tax"
         }
