@@ -5,6 +5,8 @@ module TablesME2025
 
     -- * Standard Deduction
     meStandardDeduction2025,
+    meStandardDeductionPhaseoutThreshold2025,
+    meStandardDeductionPhaseoutRange2025,
 
     -- * Personal Exemption
     mePersonalExemption2025,
@@ -37,13 +39,30 @@ maineBracketsTable2025 =
     Right bt -> TableBracket "me_brackets_2025" bt
     Left err -> error $ "Invalid Maine brackets: " ++ err
 
--- | 2025 Maine state standard deduction amounts
+-- | 2025 Maine state standard deduction amounts, before the line 17 phase-out
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Maine Revenue Services, Individual Income Tax 2025 Rates
--- Standard deduction equals federal standard deduction for 2025:
--- \$15,750 (Single/MFS), $31,500 (MFJ), $23,625 (HoH)
+-- Not the OBBBA federal 15,750/31,500/23,625. The 2025 forms were printed under
+-- IRC conformity as of 2024-12-31 (36 M.R.S. 111(1-A)), before OBBBA. P.L. 2025,
+-- c. 650 later moved conformity to 2025-12-31 but also fixed the 2025 basic
+-- amount in 36 M.R.S. 5124-C(1-B): \$15,000 (Single/MFS), x1.5 HoH, x2 MFJ/QSS.
+-- Either way the amount is \$15,000 / \$30,000 / \$22,500.
+-- Source: Maine Revenue Services, Individual Income Tax 2025 Rates; 2025 Form
+-- 1040ME instructions, Standard Deduction Chart (PDF p.5).
 meStandardDeduction2025 :: ByStatus (Amount Dollars)
-meStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500
+meStandardDeduction2025 = byStatus 15000 30000 15000 22500 30000
+
+-- | Line 17 phase-out worksheet, line 2 (\$100,000 Single/MFS; \$200,050 MFJ/QSS;
+-- \$150,000 HoH).
+-- Source: 2025 Form 1040ME instructions, Worksheet for Standard/Itemized
+-- Deductions (PDF p.5),
+-- https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_1040me_gen_instr_w_cover_pg.pdf
+meStandardDeductionPhaseoutThreshold2025 :: ByStatus (Amount Dollars)
+meStandardDeductionPhaseoutThreshold2025 = byStatus 100000 200050 100000 150000 200050
+
+-- | Line 17 phase-out worksheet, line 4: \$75,000 Single/MFS, \$150,000 MFJ/QSS,
+-- \$112,500 HoH (36 M.R.S. 5124-C(2)).
+meStandardDeductionPhaseoutRange2025 :: ByStatus (Amount Dollars)
+meStandardDeductionPhaseoutRange2025 = byStatus 75000 150000 75000 112500 150000
 
 -- | 2025 Maine personal exemption amount ($5,150 per exemption)
 -- Source: Maine Revenue Services, Individual Income Tax 2025 Rates
