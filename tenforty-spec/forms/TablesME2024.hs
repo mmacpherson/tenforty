@@ -5,6 +5,8 @@ module TablesME2024
 
     -- * Standard Deduction
     meStandardDeduction2024,
+    meStandardDeductionPhaseoutThreshold2024,
+    meStandardDeductionPhaseoutRange2024,
 
     -- * Personal Exemption
     mePersonalExemption2024,
@@ -43,6 +45,19 @@ maineBracketsTable2024 =
 -- \$14,600 (Single/MFS), $29,200 (MFJ), $21,900 (HoH)
 meStandardDeduction2024 :: ByStatus (Amount Dollars)
 meStandardDeduction2024 = byStatus 14600 29200 14600 21900 29200
+
+-- | Line 17 phase-out worksheet, line 2 (\$97,150 Single/MFS; \$194,300 MFJ/QSS;
+-- \$145,750 HoH).
+-- Source: 2024 Form 1040ME instructions, Worksheet for Standard/Itemized
+-- Deductions (p.4),
+-- https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/24_1040me_book_gen_instr.pdf
+meStandardDeductionPhaseoutThreshold2024 :: ByStatus (Amount Dollars)
+meStandardDeductionPhaseoutThreshold2024 = byStatus 97150 194300 97150 145750 194300
+
+-- | Line 17 phase-out worksheet, line 4: \$75,000 Single/MFS, \$150,000 MFJ/QSS,
+-- \$112,500 HoH (36 M.R.S. 5124-C(2)).
+meStandardDeductionPhaseoutRange2024 :: ByStatus (Amount Dollars)
+meStandardDeductionPhaseoutRange2024 = byStatus 75000 150000 75000 112500 150000
 
 -- | 2024 Maine personal exemption amount ($5,000 per exemption)
 -- Source: Maine Revenue Services, Individual Income Tax 2024 Rates

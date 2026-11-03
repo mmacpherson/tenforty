@@ -236,14 +236,7 @@ def md_2024_joint_std_deduction_gap(schedule_delta: float) -> KnownDefect:
     )
 
 
-# ME residuals outside b72.36, bounded below until their beads land.
-ME_2025_STD_DED = (
-    "graph 2025 ME standard deduction is the OBBBA federal 15,750/31,500/23,625; "
-    "Maine's is 15,000/30,000/22,500 (tenforty-b72.43)"
-)
-ME_STD_DED_PHASEOUT = (
-    "graph applies no ME standard-deduction phase-out (tenforty-b72.44)"
-)
+# ME residuals, bounded below until their beads land.
 ME_TABLE_METHOD = (
     "table-method compatibility difference: 1040ME line 20 permits the table or "
     "the schedule (no mandatory cutoff); expected is the table row, graph uses "
@@ -265,28 +258,29 @@ def me_tax_gap(
     *,
     taxable_income: float | None = None,
     row_low: float | None = None,
-    deduction_shortfall: float = 0.0,
     base_offset: float = 0.0,
+    deduction_slack: float = 0.0,
     reasons: tuple[str, ...],
 ) -> KnownDefect:
     """Signed graph-minus-official bound on ME line 20 for one blind case.
 
     A $100 table row prices its midpoint on the printed schedule; the graph
     prices actual taxable income at ``rate``. ``base_offset`` is the graph's
-    bracket arithmetic minus the printed whole-dollar base. A graph deduction
-    too large by ``deduction_shortfall`` lowers graph taxable income by that
-    much, taxed at ``rate``; each case keeps both incomes in one bracket. The
-    remaining half-width is line 20's whole-dollar rounding alone.
+    bracket arithmetic minus the printed whole-dollar base. The half-width is
+    line 20's whole-dollar rounding, widened by ``rate`` times
+    ``deduction_slack``: the line 17 worksheet's four-place ratio and whole-
+    dollar line 8 against the statute's unrounded fraction, which the graph
+    uses (record A1).
     """
     table_offset = 0.0
     if row_low is not None:
         assert taxable_income is not None
         assert row_low <= taxable_income < row_low + 100
         table_offset = rate * (taxable_income - (row_low + 50))
-    center = table_offset + base_offset - rate * deduction_shortfall
+    center = table_offset + base_offset
     # Case 11's cell rounds an exact half (2,885.50 -> 2,886), landing on the
     # bound; 1e-6 only absorbs binary floating-point error there.
-    half_width = 0.50 + 1e-6
+    half_width = 0.50 + rate * deduction_slack + 1e-6
     return KnownDefect(
         quantity="state_total_tax",
         minimum=center - half_width,
@@ -6836,9 +6830,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             me_tax_gap(
                 0.0715,
-                deduction_shortfall=4_449,
                 base_offset=-0.475,
-                reasons=(ME_STD_DED_PHASEOUT, ME_PRINTED_BASES),
+                deduction_slack=14_600 * 0.0001 + 0.50,
+                reasons=(ME_PRINTED_BASES,),
             ),
         ),
         backend="graph",
@@ -6856,9 +6850,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             me_tax_gap(
                 0.0715,
-                deduction_shortfall=14_600,
                 base_offset=-0.475,
-                reasons=(ME_STD_DED_PHASEOUT, ME_PRINTED_BASES),
+                reasons=(ME_PRINTED_BASES,),
             ),
         ),
         backend="graph",
@@ -6876,9 +6869,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             me_tax_gap(
                 0.0715,
-                deduction_shortfall=29_200,
                 base_offset=-0.575,
-                reasons=(ME_STD_DED_PHASEOUT, ME_PRINTED_BASES),
+                reasons=(ME_PRINTED_BASES,),
             ),
         ),
         backend="graph",
@@ -6898,9 +6890,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
                 0.0675,
                 taxable_income=29_850,
                 row_low=29_800,
-                deduction_shortfall=750,
                 base_offset=0.4,
-                reasons=(ME_TABLE_METHOD, ME_2025_STD_DED, ME_PRINTED_BASES),
+                reasons=(ME_TABLE_METHOD, ME_PRINTED_BASES),
             ),
         ),
         backend="graph",
@@ -6920,8 +6911,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
                 0.058,
                 taxable_income=49_700,
                 row_low=49_700,
-                deduction_shortfall=1_500,
-                reasons=(ME_TABLE_METHOD, ME_2025_STD_DED),
+                reasons=(ME_TABLE_METHOD,),
             ),
         ),
         backend="graph",
@@ -6941,8 +6931,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
                 0.058,
                 taxable_income=17_350,
                 row_low=17_300,
-                deduction_shortfall=1_125,
-                reasons=(ME_TABLE_METHOD, ME_2025_STD_DED),
+                reasons=(ME_TABLE_METHOD,),
             ),
         ),
         backend="graph",
@@ -6962,8 +6951,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
                 0.058,
                 taxable_income=19_850,
                 row_low=19_800,
-                deduction_shortfall=750,
-                reasons=(ME_TABLE_METHOD, ME_2025_STD_DED),
+                reasons=(ME_TABLE_METHOD,),
             ),
         ),
         backend="graph",
@@ -6983,8 +6971,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
                 0.058,
                 taxable_income=34_850,
                 row_low=34_800,
-                deduction_shortfall=1_500,
-                reasons=(ME_TABLE_METHOD, ME_2025_STD_DED),
+                reasons=(ME_TABLE_METHOD,),
             ),
         ),
         backend="graph",
@@ -7014,9 +7001,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             me_tax_gap(
                 0.0715,
-                deduction_shortfall=4_750,
                 base_offset=0.275,
-                reasons=(ME_2025_STD_DED, ME_STD_DED_PHASEOUT, ME_PRINTED_BASES),
+                reasons=(ME_PRINTED_BASES,),
             ),
         ),
         backend="graph",
@@ -7034,9 +7020,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             me_tax_gap(
                 0.0715,
-                deduction_shortfall=15_750,
                 base_offset=0.275,
-                reasons=(ME_2025_STD_DED, ME_STD_DED_PHASEOUT, ME_PRINTED_BASES),
+                reasons=(ME_PRINTED_BASES,),
             ),
         ),
         backend="graph",
@@ -7054,9 +7039,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             me_tax_gap(
                 0.0715,
-                deduction_shortfall=31_500,
                 base_offset=-0.45,
-                reasons=(ME_2025_STD_DED, ME_STD_DED_PHASEOUT, ME_PRINTED_BASES),
+                reasons=(ME_PRINTED_BASES,),
             ),
         ),
         backend="graph",
