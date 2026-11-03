@@ -54,7 +54,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.KS: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
     S.LA: {2024: ("tenforty-tj2.20",)},
     S.MA: _both_years("tenforty-b72.6", "tenforty-b72.39", "tenforty-b72.40"),
-    S.MD: {2024: ("tenforty-b72.45", "tenforty-tj2.20"), 2025: ("tenforty-tj2.20",)},
+    S.MD: _both_years("tenforty-tj2.20"),
     S.ME: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
     S.MO: _both_years("tenforty-b72.46"),
     S.MT: _both_years("tenforty-b72.7"),
