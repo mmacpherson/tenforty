@@ -40,10 +40,6 @@ JOINT_CHART_EDGES = [
     (200_001, 0),
 ]
 
-# Graph uses the Single standard deduction for 2024 Joint/HoH/QSS.
-MD_2024_JOINT_STD_DEDUCTION_BEAD = "tenforty-b72.45"
-MD_2024_JOINT_STD_DEDUCTION_SHORTFALL = 5_450 - 2_700
-
 # Independent derivation, Line 20: (year, status, wages, Line 19 total if
 # dependents are claimed else None, taxable income).
 DERIVED_TAXABLE_INCOME = [
@@ -151,15 +147,6 @@ def test_derived_taxable_income(year, status, wages, line_19_total, taxable_inco
     if line_19_total is not None:
         inputs["dependent_exemptions"] = line_19_total
     result = _scalar_and_zip(**inputs)
-    if year == 2024 and status in JOINT_COLUMN:
-        assert (
-            result.state_taxable_income - taxable_income
-            == MD_2024_JOINT_STD_DEDUCTION_SHORTFALL
-        )
-        pytest.xfail(
-            "Graph uses the Single standard deduction for 2024 Joint/HoH/QSS "
-            f"({MD_2024_JOINT_STD_DEDUCTION_BEAD})"
-        )
     assert result.state_taxable_income == taxable_income
 
 

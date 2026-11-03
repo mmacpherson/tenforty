@@ -69,13 +69,17 @@ marylandBracketsJointTable2024 =
 mdStandardDeductionRate2024 :: Double
 mdStandardDeductionRate2024 = 0.15
 
--- | Minimum standard deduction: $1,800
-mdStandardDeductionMin2024 :: Amount Dollars
-mdStandardDeductionMin2024 = 1800
+-- | Standard deduction minimum and maximum, by status
+-- Order: Single, MFJ, MFS, HoH, QW
+-- Worksheet 16A (2024 Resident Booklet, printed p.12): Single/MFS \$1,800 to
+-- \$2,700; Joint, Head of Household and Qualifying Surviving Spouse \$3,650 to
+-- \$5,450.
+-- https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/2024/Resident-Booklet.pdf
+mdStandardDeductionMin2024 :: ByStatus (Amount Dollars)
+mdStandardDeductionMin2024 = byStatus 1800 3650 1800 3650 3650
 
--- | Maximum standard deduction: $2,700
-mdStandardDeductionMax2024 :: Amount Dollars
-mdStandardDeductionMax2024 = 2700
+mdStandardDeductionMax2024 :: ByStatus (Amount Dollars)
+mdStandardDeductionMax2024 = byStatus 2700 5450 2700 5450 5450
 
 -- | 2024 Maryland personal exemption amount
 -- Source: Maryland Form 502 Instructions (2024), page 11
