@@ -322,7 +322,7 @@ class TaxReturnInput(BaseModel):
             "dependents, the refundable additional child tax credit (a payment, "
             "not part of total tax), the earned income credit and the dependent "
             "care credit. Some state returns also read this count as their "
-            "dependent count (graph: CA and WI; OTS: the state forms that map "
+            "dependent count (graph: CA, OR and WI; OTS: the state forms that map "
             "it); graph returns for other states take dependents through "
             "dependent_exemptions."
         ),
@@ -576,6 +576,15 @@ def _filer_65_box(value):
     return ("You_65+Over?", "Y" if value else "N")
 
 
+def _oregon_regular_spouse_box(
+    filing_status: OTSFilingStatus | str,
+) -> tuple[str, str]:
+    return (
+        "CkL6bRegular",
+        "Yes" if filing_status == OTSFilingStatus.MARRIED_JOINT else "No",
+    )
+
+
 def _spouse_65_box(value):
     return ("Spouse_65+Over?", "Y" if value else "N")
 
@@ -811,7 +820,10 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2024,
         "form_id": "OR_40",
-        "input_map": {},
+        "input_map": {
+            "filing_status": _oregon_regular_spouse_box,
+            "num_dependents": "L6c",
+        },
         "output_map": {
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",
@@ -985,7 +997,10 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2025,
         "form_id": "OR_40",
-        "input_map": {},
+        "input_map": {
+            "filing_status": _oregon_regular_spouse_box,
+            "num_dependents": "L6c",
+        },
         "output_map": {
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",

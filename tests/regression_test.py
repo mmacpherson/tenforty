@@ -1825,8 +1825,8 @@ OR_SCENARIOS = [
         "w2_income": 60000,
         "expected_federal_min": 5000,
         "expected_federal_max": 5500,
-        "expected_state_min": 4500,
-        "expected_state_max": 5000,
+        "expected_state_min": 4002,
+        "expected_state_max": 4002,
     },
     {
         "year": 2024,
@@ -1845,8 +1845,8 @@ OR_SCENARIOS = [
         "w2_income": 100000,
         "expected_federal_min": 7800,
         "expected_federal_max": 8300,
-        "expected_state_min": 7400,
-        "expected_state_max": 7900,
+        "expected_state_min": 6467,
+        "expected_state_max": 6467,
     },
     {
         "year": 2025,
@@ -1855,8 +1855,8 @@ OR_SCENARIOS = [
         "w2_income": 80000,
         "expected_federal_min": 8700,
         "expected_federal_max": 9500,
-        "expected_state_min": 6000,
-        "expected_state_max": 6700,
+        "expected_state_min": 5442,
+        "expected_state_max": 5442,
     },
 ]
 
@@ -1868,7 +1868,7 @@ OR_SCENARIOS = [
     ids=lambda s: f"OR-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
 def test_or_tax_ranges(scenario):
-    """Sanity check: OR tax falls within expected ranges (graph backend)."""
+    """Retained legacy cases use the archived conditional DOR state arithmetic."""
     scenario_with_backend = {**scenario, "backend": "graph"}
     _run_range_scenario(scenario_with_backend)
 
