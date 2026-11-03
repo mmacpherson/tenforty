@@ -5,6 +5,25 @@ module Tables2025
 
     -- * Standard Deduction
     standardDeduction2025,
+    additionalStdDedPerBox2025,
+
+    -- * Schedule A State and Local Tax Deduction Worksheet
+    saltLimitationAmount2025,
+    saltFloor2025,
+    saltThreshold2025,
+    saltPhaseDownRate2025,
+
+    -- * Schedule 1-A
+    tipsCap2025,
+    overtimeCap2025,
+    tipsOvertimeThreshold2025,
+    tipsOvertimeStepReduction2025,
+    carLoanInterestCap2025,
+    carLoanThreshold2025,
+    carLoanStepReduction2025,
+    seniorDeductionAmount2025,
+    seniorThreshold2025,
+    seniorPhaseOutRate2025,
 
     -- * Qualified Dividends / Long-Term Capital Gains
     qualifiedDividend0PctMax2025,
@@ -105,6 +124,73 @@ federalBracketsTable2025 =
 
 standardDeduction2025 :: ByStatus (Amount Dollars)
 standardDeduction2025 = byStatus 15750 31500 15750 23625 31500
+
+-- | Additional standard deduction per box checked for age 65 or older,
+-- unmarried ($2,000) or married / qualifying surviving spouse ($1,600): the
+-- 2025 Instructions for Form 1040, PDF p.35 age-65/blind chart, less the
+-- basic amounts above (Single 17,750 - 15,750; MFJ 34,700 - 31,500 for two
+-- boxes). Order: Single, MFJ, MFS, HoH, QW
+additionalStdDedPerBox2025 :: ByStatus (Amount Dollars)
+additionalStdDedPerBox2025 = byStatus 2000 1600 1600 2000 1600
+
+-- | State and Local Tax Deduction Worksheet, 2025 Instructions for Schedule A,
+-- PDF p.7. Line 1 is $40,000 for every status, MFS included; line 5 is the
+-- MAGI threshold ($250,000 MFS); line 7 is 30% of the excess; line 9 floors
+-- at $10,000; line 10 halves line 9 for MFS, which is where the flat
+-- 20,000 MFS cap on Schedule A line 5e comes from at or below the threshold.
+saltLimitationAmount2025 :: Amount Dollars
+saltLimitationAmount2025 = 40000
+
+saltFloor2025 :: Amount Dollars
+saltFloor2025 = 10000
+
+saltThreshold2025 :: ByStatus (Amount Dollars)
+saltThreshold2025 = byStatus 500000 500000 250000 500000 500000
+
+saltPhaseDownRate2025 :: Amount Rate
+saltPhaseDownRate2025 = 0.30
+
+-- | Schedule 1-A (2025) Part II line 7 and Part III line 15: $25,000 of tips
+-- for every status; overtime $12,500 ($25,000 MFJ). Married filing
+-- separately may not claim either (2025 Instructions for Form 1040, pp.101
+-- and 106), so its cap is zero. Order: Single, MFJ, MFS, HoH, QW
+tipsCap2025 :: ByStatus (Amount Dollars)
+tipsCap2025 = byStatus 25000 25000 0 25000 25000
+
+overtimeCap2025 :: ByStatus (Amount Dollars)
+overtimeCap2025 = byStatus 12500 25000 0 12500 12500
+
+-- | Schedule 1-A lines 9 and 17: $150,000 ($300,000 MFJ).
+tipsOvertimeThreshold2025 :: ByStatus (Amount Dollars)
+tipsOvertimeThreshold2025 = byStatus 150000 300000 150000 150000 150000
+
+-- | Schedule 1-A lines 12 and 20: $100 per whole $1,000 of excess MAGI.
+tipsOvertimeStepReduction2025 :: Amount Dollars
+tipsOvertimeStepReduction2025 = 100
+
+-- | Schedule 1-A Part IV line 24: $10,000 for every status, MFS included.
+carLoanInterestCap2025 :: Amount Dollars
+carLoanInterestCap2025 = 10000
+
+-- | Schedule 1-A line 26: $200,000 MFJ; $100,000 for every other status.
+carLoanThreshold2025 :: ByStatus (Amount Dollars)
+carLoanThreshold2025 = byStatus 100000 200000 100000 100000 100000
+
+-- | Schedule 1-A line 29: $200 per $1,000 of excess MAGI, or part of $1,000.
+carLoanStepReduction2025 :: Amount Dollars
+carLoanStepReduction2025 = 200
+
+-- | Schedule 1-A Part V: $6,000 per qualifying person (line 35), reduced by
+-- 6% (line 34) of MAGI over $75,000 ($150,000 MFJ, line 32). Married filing
+-- separately may not claim it (2025 Instructions for Form 1040, p.110).
+seniorDeductionAmount2025 :: ByStatus (Amount Dollars)
+seniorDeductionAmount2025 = byStatus 6000 6000 0 6000 6000
+
+seniorThreshold2025 :: ByStatus (Amount Dollars)
+seniorThreshold2025 = byStatus 75000 150000 75000 75000 75000
+
+seniorPhaseOutRate2025 :: Amount Rate
+seniorPhaseOutRate2025 = 0.06
 
 -- Qualified Dividends and Capital Gain Tax Worksheet, lines 6 and 13: the
 -- maximum taxable income taxed at the 0% and 15% preferential rates. Above the

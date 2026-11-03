@@ -25,10 +25,12 @@ us1040_2024 = form "us_1040" 2024 $ do
   l1h <- keyInput "L1h" "other_earned_income" "Other earned income"
   l1i <- keyInput "L1i" "nontaxable_combat_pay" "Nontaxable combat pay election"
 
-  -- Add lines 1a through 1i.
+  -- Line 1z: add lines 1a through 1h (Form 1040 line 1z). Line 1i, the
+  -- nontaxable combat pay election, is not income: it only feeds the earned
+  -- income credit and Schedule 8812.
   l1z <-
     interior "L1z" "total_wages" $
-      sumOf [l1a, l1b, l1c, l1d, l1e, l1f, l1g, l1h, l1i]
+      sumOf [l1a, l1b, l1c, l1d, l1e, l1f, l1g, l1h]
 
   _l2a <- keyInput "L2a" "tax_exempt_interest" "Tax-exempt interest (informational only)"
   l2b <- keyInput "L2b" "taxable_interest" "Taxable interest from 1099-INT"
@@ -64,8 +66,26 @@ us1040_2024 = form "us_1040" 2024 $ do
   -- Lines 12-14: Deductions
   l12 <- interior "L12" "itemized_deductions" $ importForm usScheduleAL17
 
-  -- Additional standard deduction for blind/65+ (from 1040 line 12 worksheet)
-  additionalStdDed <- keyInput "AddStdDed" "additional_std_ded" "Additional standard deduction for blind/65+"
+  -- Age-65 checkboxes (the page-1 Standard Deduction boxes): born before January 2, 1960. One when
+  -- checked. The spouse box counts toward the standard deduction only for
+  -- married filing jointly or separately (the chart's MFS footnote: a spouse
+  -- with no income who is not filing and cannot be claimed as a dependent).
+  -- The blind boxes and the dependent-filer limit are not modeled.
+  filer65 <- keyInput "Filer65" "filer_65_or_older" "Filer was born before January 2, 1960"
+  spouse65 <- keyInput "Spouse65" "spouse_65_or_older" "Spouse was born before January 2, 1960"
+
+  -- Additional standard deduction: the age-65/blind chart less the basic
+  -- amount, a fixed amount per box checked.
+  additionalStdDedPerBox <-
+    interior "AddStdDedPerBox" "additional_std_ded_per_box" $
+      byStatusE (fmap lit additionalStdDedPerBox2024)
+  spouseBox <-
+    interior "SpouseBox65" "spouse_age_box_counts" $
+      byStatusE (byStatus (dollars 0) spouse65 spouse65 (dollars 0) (dollars 0))
+  additionalStdDed <-
+    interior "AddStdDed" "additional_std_ded" $
+      ifPos filer65 additionalStdDedPerBox (dollars 0)
+        .+. ifPos spouseBox additionalStdDedPerBox (dollars 0)
 
   baseStdDed <-
     interior "BaseStdDed" "base_standard_deduction" $

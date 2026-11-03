@@ -586,6 +586,29 @@ cdef f_type lookup_ots_call(int year, str form):
     return NULL
 
 
+# TEMPORARY WORKAROUND for an upstream OTS 2025 defect (docs/upstream-ots-reports.md,
+# item 15). The 2025 US 1040 program declares these flags at file scope with a zero
+# initializer and sets each to 1 only on a Y answer to its age-65 question; nothing
+# sets it back to 0. OTS expects one return per process, so the initializer is the
+# reset. tenforty runs many returns in one process, so without this a return
+# answering N would inherit an earlier Y and take Schedule 1-A senior deduction
+# lines 36a/36b it does not claim. The vendored source is not modified: the binding
+# layer restores the fresh-process value before each call. Remove this block (and
+# its call below) once an OTS release resets the flags itself;
+# tests/ots_age_flag_reset_test.py has a strict-xfail tripwire that flips then.
+cdef extern from "ots_amalgamation.cpp" namespace "OpenTaxSolver2025::taxsolve_US_1040_2025":
+    int over65you
+    int over65spouse
+
+
+cdef void _restore_fresh_process_state(int year, str form):
+    """Reset file-scope OTS state that a fresh process would start at zero."""
+    global over65you, over65spouse
+    if year == 2025 and form == "US_1040":
+        over65you = 0
+        over65spouse = 0
+
+
 def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):
     """Evaluate an OTS tax form given year, form, and form content.
 
@@ -636,6 +659,7 @@ def _evaluate_form(year, form, form_text, fed_form_text=None, on_error="raise"):
             c_argv[0] = program_name
             c_argv[1] = file_path_bytes
             c_argv[2] = NULL  # NULL-terminate argv
+            _restore_fresh_process_state(year, form)
             result_code = ots_form_function(2, c_argv)
             if result_code != 0:
                 error_msg = f"OTS returned non-zero exit code: {result_code}"

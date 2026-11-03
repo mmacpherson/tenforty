@@ -45,7 +45,13 @@ from hypothesis import strategies as st  # noqa: E402
 
 import tenforty  # noqa: E402
 
-from .taxcalc_policy import ZERO_DELTA, modeled_deltas, tolerance  # noqa: E402
+from .taxcalc_policy import (  # noqa: E402
+    ZERO_DELTA,
+    modeled_deltas,
+    taxcalc_obbba_fields,
+    tenforty_obbba_inputs,
+    tolerance,
+)
 
 MARS = {
     "Single": 1,
@@ -220,8 +226,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "RECID": i + 1,
                     "MARS": mars,
                     "XTOT": 2 if mars == 2 else 1,
-                    "age_head": 40,
-                    "age_spouse": 40 if mars == 2 else 0,
+                    **taxcalc_obbba_fields(c, mars),
                     "e00200": c["w2"],
                     "e00200p": 0.0 if wages_on_spouse else c["w2"],
                     "e00200s": c["w2"] if wages_on_spouse else 0.0,
@@ -302,6 +307,7 @@ def tenforty_components(case, backend):
         itemized_deductions=case["itemized"],
         incentive_stock_option_gains=case.get("iso", 0.0),
         standard_or_itemized=case["std_or_item"],
+        **tenforty_obbba_inputs(case),
     )
     return {
         "agi": r.federal_adjusted_gross_income,

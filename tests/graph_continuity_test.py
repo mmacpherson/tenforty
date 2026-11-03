@@ -15,6 +15,7 @@ from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
     STATE_GRAPH_CONFIGS,
+    federal_nodes_for,
     state_natural_to_node,
 )
 from tenforty.models import OTSState
@@ -84,8 +85,8 @@ def test_federal_inputs_reach_total_tax() -> None:
     for year, data in _resolved_graphs():
         reachable = _reachable(data, [FEDERAL_TOTAL_TAX])
         name_to_id = _name_to_id(data)
-        for field, node_names in NATURAL_TO_NODES.items():
-            for node_name in node_names:
+        for field in NATURAL_TO_NODES:
+            for node_name in federal_nodes_for(field, year):
                 node_id = name_to_id.get(node_name)
                 assert node_id is not None, (
                     f"{year}: federal input node {node_name!r} (field {field!r}) "

@@ -123,6 +123,7 @@ import USForm8960_2024
 import USForm8960_2025
 import USForm8995_2024
 import USForm8995_2025
+import USSchedule1A_2025
 import USSchedule1_2024
 import USSchedule1_2025
 import USSchedule2_2024
@@ -162,6 +163,7 @@ allForms =
     ("us_1040_2025.json", us1040_2025),
     ("us_schedule_1_2024.json", usSchedule1_2024),
     ("us_schedule_1_2025.json", usSchedule1_2025),
+    ("us_schedule_1a_2025.json", usSchedule1A_2025),
     ("us_schedule_2_2024.json", usSchedule2_2024),
     ("us_schedule_2_2025.json", usSchedule2_2025),
     ("us_schedule_3_2024.json", usSchedule3_2024),
@@ -398,7 +400,7 @@ main = do
             Just res -> compileAndOutput opts res
             Nothing -> do
               hPutStrLn stderr $ "Unknown form: " ++ T.unpack formName
-              hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ak_notax, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ct_1, dc_d40, de_pit_res, fl_notax, ga_500, hi_n11, ia_ia1040, id_form40, il_1040, in_it40, ks_k40, ky_740, la_it540, ma_1, md_502, me_1040me, mi_1040, ms_80105, mn_m1, mo_1040, mt_form2, nc_d400, nd_1, ne_1040n, nh_dp10, nj_1040, nm_pit1, nv_notax, ny_it201, oh_it1040, ok_511, or_40, pa_40, ri_1040, sc_1040, sd_notax, tn_notax, tx_notax, ut_tc40, va_760, vt_in111, wa_notax, wv_it140, wi_form1, wy_notax (append _2024 or _2025), all"
+              hPutStrLn stderr "Available forms: us_1040, us_schedule_1, us_schedule_1a (2025 only), us_schedule_2, us_schedule_3, us_schedule_a, us_schedule_b, us_schedule_d, us_schedule_eic, us_schedule_se, us_form_2441, us_form_6251, us_form_8812, us_form_8863, us_form_8959, us_form_8960, us_form_8995, ak_notax, al_40, ar_ar1000f, az_140, ca_540, ca_schedule_ca, ca_ftb_3506, ca_ftb_3514, co_form104, ct_1, dc_d40, de_pit_res, fl_notax, ga_500, hi_n11, ia_ia1040, id_form40, il_1040, in_it40, ks_k40, ky_740, la_it540, ma_1, md_502, me_1040me, mi_1040, ms_80105, mn_m1, mo_1040, mt_form2, nc_d400, nd_1, ne_1040n, nh_dp10, nj_1040, nm_pit1, nv_notax, ny_it201, oh_it1040, ok_511, or_40, pa_40, ri_1040, sc_1040, sd_notax, tn_notax, tx_notax, ut_tc40, va_760, vt_in111, wa_notax, wv_it140, wi_form1, wy_notax (append _2024 or _2025), all"
               exitFailure
 
 compileAndOutput :: Options -> Either FormError Form -> IO ()

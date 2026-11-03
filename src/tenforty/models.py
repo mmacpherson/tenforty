@@ -296,6 +296,13 @@ OTS_FORM_CONFIG = dict(
 )
 
 
+SCHEDULE_1A_FIRST_YEAR = 2025
+SCHEDULE_1A_INPUTS = ("qualified_tips", "qualified_overtime", "vehicle_loan_interest")
+_SPOUSE_BOX_STATUSES = frozenset(
+    {OTSFilingStatus.MARRIED_JOINT, OTSFilingStatus.MARRIED_SEPARATE}
+)
+
+
 class TaxReturnInput(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
 
@@ -334,6 +341,95 @@ class TaxReturnInput(BaseModel):
     rental_income: float = 0.0
     schedule_1_income: float = 0.0
     itemized_deductions: float = 0.0
+    state_and_local_taxes: float = Field(
+        default=0.0,
+        ge=0.0,
+        description=(
+            "State and local income (or general sales), real estate and personal "
+            "property taxes paid: the Schedule A line 5d total, entered on line 5a "
+            "(the backends treat lines 5a-5c alike, so the split does not matter). "
+            "The federal return limits it on line 5e: for 2018-2024 to $10,000 ($5,000 "
+            "married filing separately). For 2025 the State and Local Tax Deduction "
+            "Worksheet starts from $40,000 for every status, reduces it by 30% of "
+            "modified AGI over $500,000 ($250,000 MFS), floors it at $10,000, and "
+            "only then halves the result for MFS: equivalently $20,000 less 15% of "
+            "modified AGI over $250,000, not below $5,000. "
+            "Modified AGI is taken to be AGI (no Puerto Rico, Form 2555 or Form 4563 "
+            "exclusions). It only lowers taxable income when Schedule A is used, "
+            "chosen automatically or by standard_or_itemized='Itemized', and the "
+            "capped amount is added back for the AMT. itemized_deductions stays "
+            "outside the cap. State returns do not read it."
+        ),
+    )
+    qualified_tips: float = Field(
+        default=0.0,
+        ge=0.0,
+        description=(
+            "Qualified tips already included in w2_income (W-2 box 7), for the 2025 "
+            "Schedule 1-A Part II deduction: up to $25,000, reduced by $100 per whole "
+            "$1,000 of modified AGI over $150,000 ($300,000 married filing jointly); "
+            "married filing separately cannot claim it. The deduction enters Form "
+            "1040 line 13b, below AGI, with the standard or itemized deduction. "
+            "Eligibility (a listed tipped occupation, valid SSN, not an SSTB) is the "
+            "caller's fact. Self-employed tips are not modeled. 2025 only; a nonzero "
+            "value for an earlier year raises ValueError."
+        ),
+    )
+    qualified_overtime: float = Field(
+        default=0.0,
+        ge=0.0,
+        description=(
+            "Qualified overtime compensation already included in w2_income: the FLSA "
+            "section 7 premium above the regular rate, not the whole overtime pay. "
+            "For the 2025 Schedule 1-A Part III deduction: up to $12,500 ($25,000 "
+            "married filing jointly), reduced by $100 per whole $1,000 of modified "
+            "AGI over $150,000 ($300,000 MFJ); married filing separately cannot "
+            "claim it. Enters Form 1040 line 13b. 2025 only; a nonzero value for an "
+            "earlier year raises ValueError."
+        ),
+    )
+    vehicle_loan_interest: float = Field(
+        default=0.0,
+        ge=0.0,
+        description=(
+            "Qualified passenger vehicle loan interest paid (Schedule 1-A line 23, "
+            "the column (iii) total: loans after 2024 for a new, US-assembled "
+            "personal-use vehicle, net of any interest deducted on Schedule C, E or "
+            "F). For the 2025 Schedule 1-A Part IV deduction: up to $10,000, reduced "
+            "by $200 per $1,000 (or part of $1,000) of modified AGI over $100,000 "
+            "($200,000 married filing jointly). Married filing separately may claim "
+            "it. Enters Form 1040 line 13b. 2025 only; a nonzero value for an "
+            "earlier year raises ValueError."
+        ),
+    )
+    filer_65_or_older: bool = Field(
+        default=False,
+        description=(
+            "The filer was 65 or older at the end of the year (born before January "
+            "2, 1960 for 2024; January 2, 1961 for 2025). Adds the additional "
+            "standard deduction for age ($1,950 unmarried / $1,550 married for 2024; "
+            "$2,000 / $1,600 for 2025; OTS applies its own year's chart for "
+            "2018-2023) and, for 2025, the Schedule 1-A senior "
+            "deduction: $6,000 reduced by 6% of modified AGI over $75,000 ($150,000 "
+            "married filing jointly), not for married filing separately. The senior "
+            "deduction is taken with either the standard or itemized deduction and "
+            "is added back for the AMT. Blindness and dependent-filer limits are not "
+            "modeled. State returns do not read it."
+        ),
+    )
+    spouse_65_or_older: bool = Field(
+        default=False,
+        description=(
+            "The spouse was 65 or older at the end of the year (see "
+            "filer_65_or_older). Married filing jointly: adds the spouse's "
+            "additional standard deduction and, for 2025, the spouse's senior "
+            "deduction. Married filing separately: adds only the spouse's additional "
+            "standard deduction, which the IRS allows when the spouse had no income, "
+            "is not filing and cannot be claimed as a dependent; the senior "
+            "deduction is not allowed. Any other filing status has no spouse box, "
+            "so True raises ValueError."
+        ),
+    )
     state_adjustment: float = 0.0
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = Field(
@@ -385,6 +481,25 @@ class TaxReturnInput(BaseModel):
         if self.filing_status == OTSFilingStatus.MARRIED_JOINT:
             return 0.0
         return float(self.w2_income)
+
+    @model_validator(mode="after")
+    def refuse_inputs_the_year_lacks(self) -> "TaxReturnInput":
+        """Reject Schedule 1-A amounts before 2025 and a spouse box without a spouse."""
+        first_year = SCHEDULE_1A_FIRST_YEAR
+        if self.year.value < first_year:
+            for name in SCHEDULE_1A_INPUTS:
+                if getattr(self, name):
+                    raise ValueError(
+                        f"{name} feeds Schedule 1-A, which first exists for "
+                        f"{first_year} (P.L. 119-21); {self.year.value} has no such "
+                        f"deduction. Pass {name}=0 for {self.year.value}."
+                    )
+        if self.spouse_65_or_older and self.filing_status not in _SPOUSE_BOX_STATUSES:
+            raise ValueError(
+                "spouse_65_or_older applies only to Married/Joint and Married/Sep; "
+                f"filing status {self.filing_status.value!r} has no spouse box."
+            )
+        return self
 
     @model_validator(mode="after")
     def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
@@ -455,6 +570,14 @@ def capital_gains(term: str, amount: float) -> str:
 
 def _force_itemize(value):
     return ("A18", "Y" if value == "Itemized" else "N")
+
+
+def _filer_65_box(value):
+    return ("You_65+Over?", "Y" if value else "N")
+
+
+def _spouse_65_box(value):
+    return ("Spouse_65+Over?", "Y" if value else "N")
 
 
 def _restricted_filing_status(
@@ -557,6 +680,11 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
+            # applies the line 5e cap to the sum.
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
@@ -717,6 +845,19 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
+            # runs the State and Local Tax Deduction Worksheet on the sum.
+            "state_and_local_taxes": "A5a",
+            # Schedule 1-A (OTS reads it when the return carries S1A_2a, which
+            # the template always does): line 4a W-2 box 7 tips, line 14a
+            # W-2 box 1 overtime, and line 22 column (iii) for one vehicle,
+            # which line 23 totals. The senior deduction (Part V) comes from
+            # the age-65 boxes.
+            "qualified_tips": "S1A_4a",
+            "qualified_overtime": "S1A_14a",
+            "vehicle_loan_interest": "S1A_22aiii",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
@@ -878,6 +1019,9 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
@@ -1007,6 +1151,9 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
@@ -1072,6 +1219,9 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "itemized_deductions": "A6",
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
@@ -1137,6 +1287,9 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # This assumes 'schedule_1_income' consolidates all other income reported in Schedule 1
             "itemized_deductions": "A6",
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
             "incentive_stock_option_gains": "AMTws3",
         },
@@ -1202,6 +1355,9 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # Assumes 'schedule_1_income' consolidates all Schedule 1 income types
             "itemized_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "incentive_stock_option_gains": "AMTws3",
         },
         "output_map": {
@@ -1266,6 +1422,9 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_21",  # Assuming 'Other income' covers Schedule 1 income types
             "itemized_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
+            "state_and_local_taxes": "A5a",
+            "filer_65_or_older": _filer_65_box,
+            "spouse_65_or_older": _spouse_65_box,
             "incentive_stock_option_gains": "AMTws3",  # Other adjustments under AMT
         },
         "output_map": {

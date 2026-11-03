@@ -442,3 +442,192 @@ may want the same change.
 
 We may be misreading the threshold's inclusivity, so we offer this tentatively.
 Not patched locally, for the same reason as report 6.
+
+---
+
+## 11. 2025 SALT worksheet is not entered for MFS between $250,000 and $500,000
+
+**Release:** OpenTaxSolver2025_23.06
+**File:** `src/taxsolve_US_1040_2025.c:2462-2463`
+
+```c
+ if (((L[11] > 500000.0) &&  (localtax[4] > 10000.0)) ||
+     ((status ==  MARRIED_FILING_SEPARATE) && (L[11] > 500000.0) && (localtax[4] > 5000.0)))
+```
+
+As we read the 2025 Instructions for Schedule A (PDF p.7, line 5e and the State
+and Local Tax Deduction Worksheet), the worksheet applies when Form 1040 line
+11b is more than $500,000, **or more than $250,000 if married filing
+separately**. The worksheet body already uses the $250,000 MFS threshold on line
+5 (`ws[5] = 250000.0`), but the entry test above requires line 11b > $500,000
+for MFS too. An MFS return with line 11b between $250,000 and $500,000 therefore
+keeps the flat $20,000 cap.
+
+**Minimal reproducers** (2025, MFS, wages only, forced itemizing, nothing else on
+Schedule A; worksheet arithmetic from the instructions):
+
+| line 11b | line 5d | worksheet line 10 (expected 5e) | OTS line 5e |
+|---:|---:|---:|---:|
+| $300,000 | $25,000 | 40,000 − 0.30 × 50,000 = 25,000; half = **$12,500** | **$20,000** |
+| $400,000 | $30,000 | max(40,000 − 45,000, 10,000) = 10,000; half = **$5,000** | **$20,000** |
+
+Above $500,000 the MFS path already gives the expected results, so the effect is
+confined to that band.
+
+**Possible fix:** use `250000.0` in the MFS clause of the entry test, e.g.
+`((status == MARRIED_FILING_SEPARATE) && (L[11] > 250000.0) && (localtax[4] > 5000.0))`,
+and exclude MFS from the first clause. We may be missing a reason for the
+current form; offered tentatively.
+
+Not patched locally: it changes a computed figure. Recorded as strict-xfails
+(`tests/obbba_2025_test.py`, cases S-3 and S-4).
+
+---
+
+## 12. 2025 Schedule 1-A line 28 truncates instead of rounding up; line 29 uses $300
+
+**Release:** OpenTaxSolver2025_23.06
+**File:** `src/taxsolve_US_1040_2025.c:1890-1894`
+
+```c
+    j = sched1A_L[27] / 1000.0;
+    sched1A_L[28] = j;
+    fprintf(outfile, "S1A_28 = %d\n", j );
+    sched1A_L[29] = 300.0 * sched1A_L[28];
+    showline_wlabelnz( "S1A_20", sched1A_L[20] );
+```
+
+Two things here look different from the 2025 Schedule 1-A Part IV as we read it:
+
+- **Line 28** says to divide line 27 by $1,000 and, if the result is not a whole
+  number, **increase it to the next whole number** (the statute's "$200 for each
+  $1,000 (or portion thereof)" in IRC 163(h)(4)). The integer assignment
+  truncates instead, as lines 11 and 19 correctly do for tips and overtime.
+- **Line 29** multiplies line 28 by **$200** on the form; the code uses `300.0`.
+
+**Minimal reproducers** (2025, wages only, under 65, standard deduction):
+
+| case | line 27 | expected 28 / 29 / 30 | OTS 28 / 29 / 30 |
+|---|---:|---|---|
+| Single, AGI $112,300, interest $4,500 | 12,300 | 13 / 2,600 / **1,900** | 12 / 3,600 / **900** |
+| MFJ, AGI $215,000, interest $12,000 | 15,000 | 15 / 3,000 / **7,000** | 15 / 4,500 / **5,500** |
+
+**Possible fix:**
+
+```c
+    j = (int)ceil( sched1A_L[27] / 1000.0 );
+    ...
+    sched1A_L[29] = 200.0 * sched1A_L[28];
+    showline_wlabelnz( "S1A_29", sched1A_L[29] );
+```
+
+The last line is a separate cosmetic slip: the line-29 amount is printed under
+the `S1A_20` label. tenforty relabels that output line locally
+(`patch_sched1a_line29_label`), which changes no computed figure.
+
+Not patched locally. Recorded as strict-xfails (`tests/obbba_2025_test.py`,
+cases C-1 and C-2).
+
+---
+
+## 13. 2025 Schedule 1-A Part IV (car loan interest) is skipped for MFS
+
+**Release:** OpenTaxSolver2025_23.06
+**File:** `src/taxsolve_US_1040_2025.c:1824`
+
+```c
+ if (status != MARRIED_FILING_SEPARATE)	/* Now do the Part II-V calculations only if not MFS. */
+```
+
+Married filing separately may not claim the tips (Part II), overtime (Part III)
+or senior (Part V) deductions. As far as we can tell, the car loan interest
+deduction (Part IV) has no such restriction: IRC 163(h)(4) has no joint-return
+requirement, and the 2025 Instructions for Form 1040 (p.109, line 26) give the
+threshold as "Married filing jointly — $200,000; all other filing statuses —
+$100,000". Because the one `if` wraps all four parts, an MFS return gets no Part
+IV deduction at all.
+
+**Minimal reproducer:** 2025 MFS, wages $100,000, $5,000 of qualified interest on
+`S1A_22aiii`. Expected: line 24 $5,000, line 27 $0, line 30 **$5,000**, taxable
+income $79,250. OTS: line 30 **$0**, taxable income $84,250.
+
+**Possible fix:** move Part IV (lines 23-30) outside the MFS test, keeping Parts
+II, III and V inside it.
+
+Not patched locally. Recorded as a strict-xfail
+(`test_married_filing_separately_claims_car_loan_interest`).
+
+---
+
+## 14. 2025 Form 6251 line 1a does not add back the senior deduction
+
+**Release:** OpenTaxSolver2025_23.06
+**File:** `src/taxsolve_US_1040_2025.c:228-237`
+
+```c
+ double sched1a_l38=0.0;
+ ...
+ amtws1a = L[14] - sched1a_l38;
+ amtws[1] = L[11] - amtws1a;
+```
+
+2025 Form 6251 line 1a is Form 1040 line 14 **minus Schedule 1-A line 37** (the
+enhanced deduction for seniors, which the 2025 Instructions for Form 6251, p.1,
+treat as a personal exemption added back to AMTI). Here `sched1a_l38` is a local
+initialized to zero and never assigned, so line 1a is line 14 and the senior
+deduction stays deducted for the AMT. (The name also suggests line 38, the total
+of all four Schedule 1-A deductions; the form subtracts only line 37, so tips,
+overtime and car loan interest stay deducted.)
+
+**Minimal reproducer:** 2025 Single, born 1959, wages $90,000, $200,000 on
+`AMTws3` (an ISO-style adjustment). Senior deduction 6,000 − 0.06 × 15,000 =
+$5,100. Expected: line 1a 17,750, line 1b 72,250, AMTI 290,000, line 6 201,900,
+tentative minimum tax 0.26 × 201,900 = **$52,494**, which is line 24. OTS: AMTI
+284,900, line 24 **$51,168**.
+
+**Possible fix:** keep Schedule 1-A line 37 in a file-scope variable (as `L13b`
+holds line 38) when `sched_1A()` computes it, and subtract that on line 1a.
+
+Not patched locally. Recorded as a strict-xfail
+(`test_amt_adds_back_the_senior_deduction`).
+
+---
+
+## 15. 2025 `over65you` / `over65spouse` are set on Y but never reset on N
+
+**Release:** OpenTaxSolver2025_23.06
+**File:** `src/taxsolve_US_1040_2025.c:73, 2053, 2070`
+
+```c
+int over65you=0, over65spouse=0;
+...
+   over65you = 1;
+...
+   over65spouse = 1;
+```
+
+Both flags are file-scope, and the age questions set them to 1 on a Y answer;
+nothing assigns 0 on an N answer. In OTS's usual one-return-per-process use the
+initializer makes this harmless. A host that runs several returns in one process
+(as tenforty does, through an in-process build of the source) sees a later N
+return inherit an earlier Y, and that return then takes Schedule 1-A lines
+36a/36b (the senior deduction) it does not claim.
+
+**Reproducer (in one process):** 2025 Single, wages $95,000, You_65+Over? Y;
+then 2025 Single, wages $162,500, qualified tips (S1A_4a) $20,000,
+You_65+Over? N. The second return should have taxable income $127,950; it gets
+$127,200, the extra $750 being a senior deduction of 6,000 − 0.06 × 87,500.
+
+**Possible fix:** assign both in either branch, e.g. `over65you = (j != 0);`
+and `over65spouse = (j != 0);`. Low priority, since a standalone run is not
+affected; offered in case embedding matters to you.
+
+*Local note (not for sending):* the vendored source is unchanged. tenforty's
+Cython binding (`ots/ots.template.pyx`, `_restore_fresh_process_state`) sets both
+flags back to 0 before each 2025 US 1040 call, restoring the fresh-process state
+OTS assumes. It is a temporary workaround. Its only removal gate is the
+strict-xfail tripwire in `tests/ots_age_flag_reset_test.py`: it compiles the
+unmodified vendored program and runs, through one process, an age-65 filer then
+an under-65 filer, and a spouse-only-65 joint return then an under-65 joint
+return. It flips only when neither flag leaks, whatever form the upstream fix
+takes; a one-flag fix or a comment does not flip it.

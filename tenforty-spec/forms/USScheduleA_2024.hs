@@ -6,6 +6,7 @@ module USScheduleA_2024
 where
 
 import FormRefs
+import Tables2024
 import TenForty
 
 usScheduleA_2024 :: Either FormError Form
@@ -25,10 +26,10 @@ usScheduleA_2024 = form "us_schedule_a" 2024 $ do
   l5b <- keyInput "L5b" "state_local_real_estate" "State and local real estate taxes"
   l5c <- keyInput "L5c" "state_local_personal_property" "State and local personal property taxes"
   l5d <- interior "L5d" "salt_total" $ l5a .+. l5b .+. l5c
-  -- SALT cap: $10,000 ($5,000 if MFS)
+  -- Line 5e: the smaller of line 5d or $10,000 ($5,000 if MFS).
   saltCap <-
     interior "SALTCap" "salt_cap" $
-      byStatusE (fmap lit (byStatus 10000 10000 5000 10000 10000))
+      byStatusE (fmap lit saltCap2024)
   l5e <- interior "L5e" "salt_limited" $ smallerOf l5d saltCap
   l6 <- keyInput "L6" "other_taxes" "Other taxes (list type and amount)"
   _l7 <-
