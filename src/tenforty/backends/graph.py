@@ -5,6 +5,7 @@ from __future__ import annotations
 import itertools
 import logging
 import pathlib
+from collections.abc import Iterable
 from functools import lru_cache
 
 from ..mappings import (
@@ -27,7 +28,9 @@ from ..models import (
     OTSDeductionType,
     OTSState,
     TaxReturnInput,
+    UnsupportedInputError,
 )
+from ..routing import GRAPH_YEARS
 
 _STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
 _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
@@ -174,11 +177,46 @@ def _raise_unsupported(
             "Provide these as 0; the OTS backend does not compute them for this "
             "return either."
         )
-    raise NotImplementedError(
+    raise UnsupportedInputError(
         "Graph backend does not yet support some non-zero inputs.\n"
         f"{remedy}\n"
         f"Unsupported inputs:\n{details}"
     )
+
+
+def unsupported_inputs(
+    tax_inputs: Iterable[TaxReturnInput],
+) -> list[tuple[OTSState, int, str, object]]:
+    """Find every nonzero input the graph cannot apply to its return.
+
+    Returns ``(state, year, natural_name, first_nonzero_value)`` for each
+    refused natural, per year and state. Scalar and batch evaluation, and the
+    whole-batch preflight in ``evaluate_returns``, all decide support here.
+    """
+    reads: dict[tuple[OTSState, int, str], bool] = {}
+    found: dict[tuple[OTSState, int, str], object] = {}
+    for tax_input in tax_inputs:
+        state, year = tax_input.state, tax_input.year.value
+        for natural_name, value in _natural_values(tax_input).items():
+            key = (state, year, natural_name)
+            if key in found or value == 0 or value is None:
+                continue
+            if key not in reads:
+                reads[key] = _reads_nonzero(
+                    natural_name, _lowered_input_nodes(natural_name, state, year)
+                )
+            if not reads[key]:
+                found[key] = value
+    return [(state, year, name, value) for (state, year, name), value in found.items()]
+
+
+def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
+    """Raise ``UnsupportedInputError`` if the graph refuses any nonzero input."""
+    by_return: dict[tuple[OTSState, int], list[tuple[str, object]]] = {}
+    for state, year, name, value in unsupported_inputs(tax_inputs):
+        by_return.setdefault((state, year), []).append((name, value))
+    for (state, year), unsupported in by_return.items():
+        _raise_unsupported(unsupported, state, year)
 
 
 def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
@@ -226,7 +264,7 @@ class GraphBackend:
     """Backend using tax computation graph with autodiff and solver support."""
 
     name = "graph"
-    supported_years = (2024, 2025)
+    supported_years = GRAPH_YEARS
 
     def __init__(self) -> None:
         """Initialize the graph backend."""
@@ -248,7 +286,7 @@ class GraphBackend:
         """Create an evaluator for the given input."""
         from ..graphlib import FilingStatus, Runtime
 
-        # Determine required forms based on inputs and state
+        require_supported_inputs([tax_input])
         inputs_dict = _natural_values(tax_input)
         graph = _load_resolved_graph(tax_input.year.value)
         filing_status = FilingStatus.from_str(
@@ -261,19 +299,13 @@ class GraphBackend:
         natural_values = inputs_dict
 
         year = tax_input.year.value
-        unsupported: list[tuple[str, object]] = []
         for natural_name, value in natural_values.items():
             node_names = _lowered_input_nodes(natural_name, tax_input.state, year)
             _require_input_nodes(natural_name, node_names, tax_input.state, year)
             if value == 0 or value is None:
                 continue
-            if not _reads_nonzero(natural_name, node_names):
-                unsupported.append((natural_name, value))
-                continue
             for node_name in node_names:
                 evaluator.set(node_name, float(value))
-
-        _raise_unsupported(unsupported, tax_input.state, year)
 
         return evaluator, graph
 
@@ -371,32 +403,24 @@ class GraphBackend:
         # line-8a derivation can be done per row on the Python side.
         model_fields = set(TaxReturnInput.model_fields)
         scenario_fields = [name for name in inputs if name in model_fields]
-        normalized: dict[str, list[float]] = {}
-        for i, status in enumerate(statuses):
-            tax_input = TaxReturnInput(
+        tax_inputs = [
+            TaxReturnInput(
                 year=year,
                 state=state or OTSState.NONE,
                 filing_status=status,
                 **{name: inputs[name][i] for name in scenario_fields},
             )
-            dumped = _natural_values(tax_input)
-            for name, value in dumped.items():
-                normalized.setdefault(name, []).append(float(value))
-        inputs = normalized
-
+            for i, status in enumerate(statuses)
+        ]
         # Checked on the normalized rows, so a value the input model refuses
         # (a Schedule 1-A amount before 2025) raises its ValueError first, as
         # the single-return path does.
-        unsupported: list[tuple[str, object]] = []
-        for natural_name, values in inputs.items():
-            if _reads_nonzero(
-                natural_name, _lowered_input_nodes(natural_name, state, year)
-            ):
-                continue
-            sample = next((v for v in values if v not in (0, 0.0, None)), None)
-            if sample is not None:
-                unsupported.append((natural_name, sample))
-        _raise_unsupported(unsupported, state, year)
+        require_supported_inputs(tax_inputs)
+        normalized: dict[str, list[float]] = {}
+        for tax_input in tax_inputs:
+            for name, value in _natural_values(tax_input).items():
+                normalized.setdefault(name, []).append(float(value))
+        inputs = normalized
 
         graph = _load_resolved_graph(year)
 

@@ -7,4 +7,11 @@ from .core import (  # noqa: F401
     marginal_rates,
     solve_for_income,
 )
-from .models import OTSError, OTSErrorPolicy, OTSParseError  # noqa: F401
+from .models import (  # noqa: F401
+    BackendUnavailableError,
+    OTSError,
+    OTSErrorPolicy,
+    OTSParseError,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+)

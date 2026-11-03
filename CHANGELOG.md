@@ -1,4 +1,31 @@
 ## [Unreleased]
+### Added
+- `backend="auto"` selects the backend by tax year: graph for 2024-2025 (within
+  graph state scope), OTS for 2018-2023. The default is still `"ots"`, and an
+  explicit `"ots"` or `"graph"` is never reinterpreted. `evaluate_return`,
+  `evaluate_returns` and `get_backend` share one selector; a mixed-year batch
+  is split by year and keeps its row order.
+
+### Changed (both backends)
+- **A failed computation under `on_error="warn"` or `"ignore"` now returns NaN
+  in every output field, never zeros.** The graph backend used to return an
+  all-zero return, indistinguishable from a real $0 return. A failed row in
+  `evaluate_returns` keeps its place and input columns, with NaN outputs. See
+  [Failures and on_error](docs/error-handling.md#failures-and-on_error).
+- On OTS under warn/ignore, a non-zero OTS exit and a failed required
+  subordinate form (Schedule SE, Forms 8812, 8959, 8960, 8995, 6781) now fail
+  the return. Before, OTS's output after a non-zero exit was used, and a failed
+  subordinate form was skipped, giving a wrong nonzero return.
+- Requests no backend can serve raise before evaluation under every
+  `on_error` policy: `backend="graph"` for 2018-2023 raises
+  `UnsupportedReturnError` (a `ValueError`) instead of `FileNotFoundError`, and
+  a graph refusal of a nonzero input raises `UnsupportedInputError` (still a
+  `NotImplementedError`) instead of returning zeros under warn/ignore. A batch
+  is checked whole before any row runs.
+- A backend that is not installed raises `BackendUnavailableError` (an
+  `ImportError`, still a `RuntimeError`).
+- An unknown `on_error` value raises `ValueError` instead of behaving like
+  `"ignore"`.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)
