@@ -144,67 +144,27 @@ class TestGraphBackend:
             if "num_dependents" in state_natural_to_node(state, year)
         ],
     )
-    def test_dependents_a_state_reads_are_refused_while_federal_ignores_them(
-        self, year, state
-    ):
-        """A state mapping must not let the federal return drop num_dependents.
+    def test_dependents_a_state_reads_also_reach_the_federal_return(self, year, state):
+        """A state mapping of num_dependents must not be its only destination.
 
-        The federal graph does not read num_dependents, so accepting it because a
-        state does would silently omit the child tax credit (tenforty-aqx.4.1.6).
+        Accepting the count because a state reads it would silently omit the
+        child tax credit if the federal graph did not read it too
+        (tenforty-aqx.4.1.6).
         """
-        from tenforty import evaluate_return, evaluate_returns
+        from tenforty.backends.graph import _lowered_input_nodes
 
-        with pytest.raises(NotImplementedError, match="num_dependents"):
-            evaluate_return(
-                year=year,
-                state=state.value,
-                filing_status="Married/Joint",
-                w2_income=60_000,
-                num_dependents=2,
-                backend="graph",
-            )
-        with pytest.raises(NotImplementedError, match="num_dependents"):
-            evaluate_returns(
-                year=[year],
-                state=[state.value],
-                filing_status=["Married/Joint"],
-                w2_income=[60_000],
-                num_dependents=[2],
-                backend="graph",
-            )
+        nodes = _lowered_input_nodes("num_dependents", state, year)
+        assert "us_form_8812_L1_num_qualifying_children" in nodes
+        assert len(nodes) == 2
 
-    @pytest.mark.parametrize(
-        ("year", "state", "output"),
-        [
-            (year, state, output)
-            for year in (2024, 2025)
-            for state in ("WI", "CA", None)
-            for output in ("federal_total_tax", "state_total_tax", "total_tax")
-            if state or output != "state_total_tax"
-        ],
-    )
-    def test_dependents_cannot_be_varied_while_federal_ignores_them(
-        self, year, state, output
-    ):
-        """Gradient and solve must not differentiate num_dependents state-only.
+    def test_federal_law_natural_reaching_only_a_state_is_refused(self, monkeypatch):
+        """The guard still refuses a state-only lowering of num_dependents."""
+        from tenforty.backends import graph
 
-        Evaluation at zero dependents is allowed, so the refusal has to come from
-        choosing num_dependents as the variable (tenforty-aqx.4.1.6).
-        """
-        from tenforty.backends import GraphBackend
-
-        backend = GraphBackend()
-        tax_input = TaxReturnInput(
-            year=year,
-            state=state,
-            filing_status="Married/Joint",
-            w2_income=60_000,
+        monkeypatch.delitem(graph.NATURAL_TO_NODES, "num_dependents")
+        assert not graph._reads_nonzero(
+            "num_dependents", ["ca_ftb_3514_L2_num_children"]
         )
-        backend.evaluate(tax_input)
-        with pytest.raises(NotImplementedError, match="num_dependents"):
-            backend.gradient(tax_input, output, "num_dependents")
-        with pytest.raises(NotImplementedError, match="num_dependents"):
-            backend.solve(tax_input, output, 3_000.0, "num_dependents")
 
     def test_graph_refusal_points_to_ots_only_where_ots_reads_the_input(self):
         """The OTS hint appears only when OTS computes the return and the input."""
@@ -213,21 +173,6 @@ class TestGraphBackend:
         with pytest.raises(NotImplementedError) as refusal:
             evaluate_return(
                 year=2024, w2_income=50_000, dependent_exemptions=1.0, backend="graph"
-            )
-        assert "backend='ots'" not in str(refusal.value)
-
-    @pytest.mark.parametrize("state", [None, "WI"])
-    def test_dependents_refusal_does_not_point_to_ots(self, state):
-        """OTS reads Dependents federally but never computes with it."""
-        from tenforty import evaluate_return
-
-        with pytest.raises(NotImplementedError, match="num_dependents") as refusal:
-            evaluate_return(
-                year=2024,
-                state=state,
-                w2_income=50_000,
-                num_dependents=1,
-                backend="graph",
             )
         assert "backend='ots'" not in str(refusal.value)
 

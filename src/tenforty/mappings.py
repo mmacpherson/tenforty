@@ -14,6 +14,8 @@ NATURAL_TO_NODE = {
     "taxable_interest": "us_1040_L2b_taxable_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
     "ordinary_dividends": "us_1040_L3b_ordinary_dividends",
+    # Schedule 8812 qualifying children (form line 4; the spec numbers it L1).
+    "num_dependents": "us_form_8812_L1_num_qualifying_children",
     # Schedule D (capital gains/losses)
     "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
     "long_term_capital_gains": "us_schedule_d_L8a_long_term_totals",
@@ -235,8 +237,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.CA: StateGraphConfig(
-        # num_dependents reaches FTB 3514 here, but the graph backend refuses a
-        # nonzero count while the federal return ignores it (tenforty-aqx.4.1.6).
+        # num_dependents reaches FTB 3514 here as well as federal Schedule 8812.
         natural_to_node={
             "itemized_deductions": "ca_540_L18_itemized",
             "num_dependents": "ca_ftb_3514_L2_num_children",
@@ -828,8 +829,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # The graph computes the sliding-scale standard deduction and the $700
         # filer and per-dependent exemptions; num_dependents is a count that the
         # form multiplies by $700. The $250 age-65 exemption needs an age input.
-        # The graph backend still refuses a nonzero count while the federal
-        # return ignores it (tenforty-aqx.4.1.6).
+        # The same count also reaches federal Schedule 8812.
         natural_to_node={
             "itemized_deductions": "wi_form1_L23_itemized",
             "num_dependents": "wi_form1_L38_dependents",

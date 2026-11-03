@@ -18,18 +18,18 @@ usForm8812_2025 = form "us_form_8812" 2025 $ do
   -- Line 1: Number of qualifying children under age 17 with required SSN
   l1 <- keyInput "L1" "num_qualifying_children" "Number of qualifying children under age 17"
 
-  -- Line 2: Multiply line 1 by $2,000
+  -- Line 2: Multiply line 1 by the per-child credit
   l2 <-
     interior "L2" "ctc_amount" $
-      l1 .*. rate 2000
+      l1 .*. rate (unAmount ctcPerChild2025)
 
   -- Line 3: Number of other dependents (including qualifying children without SSN)
   l3 <- keyInput "L3" "num_other_dependents" "Number of other dependents"
 
-  -- Line 4: Multiply line 3 by $500
+  -- Line 4: Multiply line 3 by the per-dependent credit
   l4 <-
     interior "L4" "odc_amount" $
-      l3 .*. rate 500
+      l3 .*. rate (unAmount ctcOtherDependent2025)
 
   -- Line 5: Add lines 2 and 4
   l5 <-
@@ -94,10 +94,10 @@ usForm8812_2025 = form "us_form_8812" 2025 $ do
   -- Line 16a: Number of qualifying children from line 1
   l16a <- interior "L16a" "actc_children" l1
 
-  -- Line 16b: Multiply line 16a by $1,700 (max refundable amount per child)
+  -- Line 16b: Multiply line 16a by the maximum refundable amount per child
   l16b <-
     interior "L16b" "max_actc" $
-      l16a .*. rate 1700
+      l16a .*. rate (unAmount actcPerChild2025)
 
   -- Line 17: Enter the smaller of line 15 or line 16b
   l17 <-

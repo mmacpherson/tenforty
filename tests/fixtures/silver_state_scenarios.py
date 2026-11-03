@@ -2071,7 +2071,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # standard deduction, KAGI = federal AGI. Every rule and table row is identical
     # in 2024 and 2025. Cases without dependents rely on the derived status base
     # (dependent_exemptions omitted); cases with dependents pass the TOTAL line-5
-    # allowance, base included (the KS graph refuses num_dependents). Federal
+    # allowance, base included (KS does not map num_dependents). Federal
     # values are not part of this record.
     # Blind case 1: 50,000 - 3,605 - 9,160 = 37,235; row 37,201-37,250 -> 1,990.
     TaxScenario(
@@ -3752,8 +3752,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # HoH rows are the literal "Head of Family box, zero dependents" reading
     # (Line 11 = $8,000, Line 10 = $0). A legal HoH return needs a dependent
     # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4), but the graph
-    # backend rejects nonzero num_dependents and MS maps no dependent-exemption
-    # input (tenforty-avr.1), so that variant is not expressible here.
+    # backend does not lower num_dependents (the federal CTC count) to MS, and MS
+    # maps no dependent-exemption input (tenforty-avr.1), so that variant is not
+    # expressible here.
     #
     # MFJ: the Schedule of Tax Computation applies the $10,000 zero band per
     # spouse column; the API carries no spouse split, and the graph applies one

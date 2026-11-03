@@ -307,9 +307,13 @@ def test_evaluate_return_properties(
         "State taxable income should not exceed state adjusted gross income"
     )
 
-    assert result.federal_amt <= result.federal_total_tax, (
-        f"AMT ({result.federal_amt}) should not be more than total federal tax ({result.federal_total_tax})."
-    )
+    # The child tax credit is limited by Form 1040 line 18, which includes AMT
+    # (line 17), so with children the credit can offset AMT and total tax can
+    # fall below it. Without children no nonrefundable credit is modeled.
+    if num_dependents == 0:
+        assert result.federal_amt <= result.federal_total_tax, (
+            f"AMT ({result.federal_amt}) should not be more than total federal tax ({result.federal_total_tax})."
+        )
 
     decomposition = (
         result.federal_income_tax

@@ -109,8 +109,9 @@ def _lowered_input_nodes(
 
 # Naturals that federal law reads as well as some states. A nonzero value is
 # supported only when the federal graph reads it too: a state node alone would
-# let the federal return silently ignore it (num_dependents dropped the child
-# tax credit for CA and WI, tenforty-aqx.4.1.6).
+# let the federal return silently ignore it (num_dependents once dropped the
+# child tax credit for CA and WI, tenforty-aqx.4.1.6; it now reaches Schedule
+# 8812).
 _FEDERAL_LAW_NATURALS = frozenset({"num_dependents"})
 
 
@@ -147,15 +148,8 @@ def _require_input_nodes(
         )
 
 
-# OTS reads the federal Dependents count in every year but no federal
-# computation uses it, so mapping it is not support (tenforty-aqx.4.1.6).
-_OTS_IGNORED_NATURALS = frozenset({"num_dependents"})
-
-
 def _ots_maps_inputs(names: list[str], state: OTSState | None, year: int) -> bool:
     """Whether OTS computes this year's return for the state and reads every input."""
-    if any(name in _OTS_IGNORED_NATURALS for name in names):
-        return False
     forms = ["US_1040"]
     state_form = STATE_TO_FORM.get(state) if state is not None else None
     if state_form is not None:

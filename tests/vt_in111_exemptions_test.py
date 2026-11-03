@@ -9,8 +9,8 @@ filing status is Qualifying Widow(er) or Married Filing Separately"; Line 5c
 counts dependents; Line 5e multiplies the count by $5,100 (2024) or $5,300
 (2025). Taxable income differences below are those amounts, not observed values.
 The graph derives 5a and 5b. Dependents enter through the dependent_exemptions
-total, because a mapped num_dependents would be silently dropped by the federal
-graph (tenforty-aqx.4.1.6).
+total; num_dependents is the federal child tax credit count and is not lowered
+to VT exemptions (tests/child_tax_credit_test.py).
 """
 
 import json
@@ -78,32 +78,6 @@ def test_taxable_income_subtracts_line_5e(year, status, count, dependents):
         - (count + dependents) * EXEMPTION[year]
     )
     assert result.state_taxable_income == expected
-
-
-@pytest.mark.parametrize("year", [2024, 2025])
-def test_num_dependents_is_refused_not_dropped(year):
-    """VT does not map num_dependents: the federal graph would ignore it.
-
-    Refusal is the contract until the federal return reads dependents (tenforty-avr.1).
-    """
-    with pytest.raises(NotImplementedError, match="num_dependents"):
-        evaluate_return(
-            year=year,
-            state="VT",
-            filing_status="Married/Joint",
-            w2_income=90_000,
-            num_dependents=2,
-            backend="graph",
-        )
-    with pytest.raises(NotImplementedError, match="num_dependents"):
-        evaluate_returns(
-            year=[year],
-            state=["VT"],
-            filing_status=["Married/Joint"],
-            w2_income=[90_000],
-            num_dependents=[2],
-            backend="graph",
-        )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])

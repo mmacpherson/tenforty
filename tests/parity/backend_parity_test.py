@@ -341,6 +341,63 @@ def test_subordinate_tax_parity(
 
 
 @skip_if_backends_unavailable
+@given(
+    year=st.sampled_from([2024, 2025]),
+    w2_income=st.integers(0, 500_000),
+    num_dependents=st.integers(0, 5),
+    filing_status=st.sampled_from(
+        ["Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)"]
+    ),
+)
+# Two-backend oracle: bounded, it does not scale with the deep profile.
+@settings(max_examples=200, deadline=None)
+def test_child_tax_credit_parity(year, w2_income, num_dependents, filing_status):
+    """Schedule 8812 on both backends: the credit limit, phase-out and amount.
+
+    The credit is compared as each backend's own drop in line 24 from the same
+    return without children, so a tax-computation difference that both returns
+    share cancels and cannot hide a phase-out error. Schedule 8812 works in whole
+    dollars (line 9 rounds up to the next $1,000; lines 2, 4 and 10 are multiples
+    of whole dollars), and line 12 caps it at the same backend's line 18, so the
+    two credits agree to the cent.
+
+    Line 24 itself is also compared. Its allowance is the optional whole-dollar
+    rounding of lines 16 and 23 ($0.50 each), plus the 2024 OTS head-of-household
+    bracket error (KNOWN_ISSUES) only where that error applies: taxable income
+    above OTS's $191,150 threshold.
+    """
+    common = dict(year=year, w2_income=w2_income, filing_status=filing_status)
+    ots = evaluate_return(**common, num_dependents=num_dependents, backend="ots")
+    graph = evaluate_return(**common, num_dependents=num_dependents, backend="graph")
+    ots_base = evaluate_return(**common, backend="ots")
+    graph_base = evaluate_return(**common, backend="graph")
+
+    ots_credit = ots_base.federal_total_tax - ots.federal_total_tax
+    graph_credit = graph_base.federal_total_tax - graph.federal_total_tax
+    assert ots_credit == pytest.approx(graph_credit, abs=0.005), (
+        f"Credit diff for {year} {filing_status} w2=${w2_income} "
+        f"children={num_dependents} (OTS=${ots_credit:.2f}, "
+        f"Graph=${graph_credit:.2f})"
+    )
+
+    tolerance = EXACT_TOLERANCE
+    hoh_bracket_error_applies = (
+        filing_status == "Head_of_House"
+        and year == 2024
+        and graph.federal_taxable_income > 191_150
+    )
+    if hoh_bracket_error_applies:
+        tolerance += KNOWN_ISSUES["hoh_bracket"]
+
+    diff = abs(ots.federal_total_tax - graph.federal_total_tax)
+    assert diff <= tolerance, (
+        f"Tax diff ${diff:.2f} for {year} {filing_status} w2=${w2_income} "
+        f"children={num_dependents} (OTS=${ots.federal_total_tax:.2f}, "
+        f"Graph=${graph.federal_total_tax:.2f})"
+    )
+
+
+@skip_if_backends_unavailable
 def test_federal_only_can_use_graph():
     """Verify federal-only returns can use graph backend."""
     from tenforty.backends import GraphBackend, get_backend

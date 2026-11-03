@@ -91,20 +91,6 @@ def test_line_8_is_state_tax_and_line_9_is_county_tax(year):
 
 
 @pytest.mark.parametrize("year", YEARS)
-def test_num_dependents_is_not_silently_lowered_to_indiana_exemptions(year):
-    """IN-DEP Boxes 5 and 6 are distinct tests one count cannot carry (avr.1)."""
-    with pytest.raises(NotImplementedError, match="num_dependents"):
-        evaluate_return(
-            year=year,
-            state="IN",
-            filing_status="Married/Joint",
-            w2_income=90_000,
-            num_dependents=2,
-            backend="graph",
-        )
-
-
-@pytest.mark.parametrize("year", YEARS)
 def test_removing_the_base_reintroduces_the_original_gap(year):
     """An in-memory negative control must fail the base-exemption witness."""
     data = json.loads(_load_resolved_graph(year).to_json())

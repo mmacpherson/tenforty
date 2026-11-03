@@ -302,7 +302,24 @@ class TaxReturnInput(BaseModel):
     year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
-    num_dependents: int = 0
+    num_dependents: int = Field(
+        default=0,
+        description=(
+            "Qualifying children for the federal child tax credit: under 17 at the "
+            "end of the year, each with a valid SSN (Schedule 8812 line 4). For "
+            "2025, OBBBA also requires an SSN for the filer (at least one spouse "
+            "on a joint return); that is not checked. The credit is applied to "
+            "Form 1040 line 19 for 2023-2025 on the OTS backend and 2024-2025 on "
+            "the graph backend. For 2018-2022 OTS reads the count but applies no "
+            "federal child tax credit. Not modeled: the $500 credit for other "
+            "dependents, the refundable additional child tax credit (a payment, "
+            "not part of total tax), the earned income credit and the dependent "
+            "care credit. Some state returns also read this count as their "
+            "dependent count (graph: CA and WI; OTS: the state forms that map "
+            "it); graph returns for other states take dependents through "
+            "dependent_exemptions."
+        ),
+    )
     standard_or_itemized: OTSDeductionType = OTSDeductionType.STANDARD
     w2_income: float = 0.0
     taxable_interest: float = 0.0
@@ -1312,6 +1329,16 @@ def _se_income_to_8959_l8(se_income):
 
 
 _SUBORDINATE_FORM_CONFIG = [
+    # 2023 Schedule 8812 — Phase 2 (needs AGI and tax from a preliminary
+    # 1040). See the 2024 entry.
+    {
+        "year": 2023,
+        "form_id": "Form_8812",
+        "phase": 2,
+        "input_map": {"num_dependents": "L4", "filing_status": "Status"},
+        "fed_import_map": {"L11": "L1", "L18": "L13"},
+        "export_map": {"L14": "L19"},
+    },
     # 2024 Schedule SE — Phase 1 (no federal dependency)
     {
         "year": 2024,
@@ -1355,6 +1382,20 @@ _SUBORDINATE_FORM_CONFIG = [
             "qbi_is_sstb",
         ],
         "output_map": {"L15": "qbi_deduction"},
+    },
+    # 2024 Schedule 8812 — Phase 2, after Form 8995 so the credit limit sees
+    # the QBI deduction. Line 13 is Credit Limit Worksheet A, which
+    # is Form 1040 line 18 less Schedule 3 credits no tenforty input reaches,
+    # so it is line 18. Line 6 (other dependents) is not an input. Line 14 is
+    # the nonrefundable credit, Form 1040 line 19; the refundable ACTC (line
+    # 27, Form 1040 line 28) is a payment and does not change line 24.
+    {
+        "year": 2024,
+        "form_id": "Form_8812",
+        "phase": 2,
+        "input_map": {"num_dependents": "L4", "filing_status": "Status"},
+        "fed_import_map": {"L11": "L1", "L18": "L13"},
+        "export_map": {"L14": "L19"},
     },
     # 2024 Form 8960 — Phase 3 (needs AGI from 1040)
     {
@@ -1433,6 +1474,16 @@ _SUBORDINATE_FORM_CONFIG = [
             "qbi_is_sstb",
         ],
         "output_map": {"L15": "qbi_deduction"},
+    },
+    # 2025 Schedule 8812 — Phase 2, after Form 8995 so the credit limit sees
+    # the QBI deduction. See the 2024 entry; AGI is L11b from 2025.
+    {
+        "year": 2025,
+        "form_id": "Form_8812",
+        "phase": 2,
+        "input_map": {"num_dependents": "L4", "filing_status": "Status"},
+        "fed_import_map": {"L11b": "L1", "L18": "L13"},
+        "export_map": {"L14": "L19"},
     },
     # 2025 Form 8960 — Phase 3
     {

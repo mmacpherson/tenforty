@@ -48,11 +48,6 @@ MO_HOH_EXEMPTION_NOT_COMPUTED = (
     "$1,400 (tenforty-b72.46)"
 )
 
-FEDERAL_CTC_2025_PRE_OBBBA = (
-    "The 2025 federal graph allows $2,000 per child rather than $2,200 "
-    "(tenforty-aqx.2.1), so 1040 line 22 and MO line 13 are overstated"
-)
-
 
 @pytest.mark.parametrize(
     ("year", "taxable_income", "expected_tax"),
@@ -277,8 +272,7 @@ def _graph_with_children(year, filing_status, wages, children):
     return evaluator
 
 
-# Returns with children, through the raw graph: the natural API does not yet
-# accept num_dependents on the graph backend. Same derivation and sources as
+# Returns with children, through the raw graph. Same derivation and sources as
 # above, plus Schedule 8812 2024/2025 line 5 ($2,000 / $2,200 per child) and the
 # IRS 2024/2025 EIC Table. MFJ assumes one earner (MO line 7Y = 100%), so the
 # graph's single chart pass equals MO's per-spouse computation.
@@ -291,16 +285,7 @@ MO_DEDUCTION_WITH_CHILDREN_SCENARIOS = [
     (2024, "married_joint", 90_000.0, 2, 425.0, 60_375.0, 2_718.0),
     # 1040 L22 = 6,546 - CTC 4,400 = 2,146; 15% = 321.90 -> 322; MO TI 58,178;
     # 256 + 4.7% x 48,987 = $2,558.
-    pytest.param(
-        2025,
-        "married_joint",
-        90_000.0,
-        2,
-        322.0,
-        58_178.0,
-        2_558.0,
-        marks=pytest.mark.xfail(strict=True, reason=FEDERAL_CTC_2025_PRE_OBBBA),
-    ),
+    (2025, "married_joint", 90_000.0, 2, 322.0, 58_178.0, 2_558.0),
 ]
 
 

@@ -228,17 +228,3 @@ def test_removing_mandatory_base_reintroduces_the_default_gap(year):
         runtime.set("us_1040_L1a_wages", 50_000)
         amounts.append(runtime.eval("md_502_L20_md_taxable_income"))
     assert amounts[1] - amounts[0] == 3_200
-
-
-@pytest.mark.parametrize("year", YEARS)
-def test_num_dependents_is_rejected_not_silently_dropped(year):
-    """MD dependents enter only through the Line 19 total (tenforty-aqx.4.1.6)."""
-    with pytest.raises(NotImplementedError, match="num_dependents"):
-        evaluate_return(
-            year=year,
-            state="MD",
-            filing_status="Married/Joint",
-            w2_income=90_000,
-            num_dependents=2,
-            backend="graph",
-        )
