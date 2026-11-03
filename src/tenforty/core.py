@@ -1,12 +1,14 @@
 """Functions to prepare and return tax calculations from the OTS cython module."""
 
+import inspect
 import itertools
 import logging
 import os
 import pathlib
 import re
+import warnings
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Iterator
 from typing import Any, Literal
 
 import dotenv
@@ -21,6 +23,7 @@ from .models import (
     SUBORDINATE_FORM_CONFIG,
     TAX_RETURN_FLOAT_FIELDS,
     InterpretedTaxReturn,
+    OTSErrorPolicy,
     OTSFieldTerminator,
     OTSFilingStatus,
     OTSForm,
@@ -31,7 +34,10 @@ from .models import (
     StrEnum,
     SubordinateFormConfig,
     TaxReturnInput,
+    UnsupportedReturnError,
+    validate_on_error,
 )
+from .routing import BackendChoice, Engine, select_backend
 
 dotenv.load_dotenv()
 
@@ -562,21 +568,9 @@ def evaluate_natural_input_form(
         sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
             natural_form_values, sub_cfg.input_map
         )
-        try:
-            sub_result = _evaluate_subordinate(
-                year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
-            )
-        except Exception:
-            if on_error == "raise":
-                raise
-            if on_error == "warn":
-                logger.warning(
-                    "Subordinate form %s/%s failed; skipping.",
-                    year.value,
-                    sub_cfg.form_id,
-                    exc_info=True,
-                )
-            continue
+        sub_result = _evaluate_subordinate(
+            year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
+        )
         for sub_key, fed_key in sub_cfg.export_map.items():
             if sub_key in sub_result:
                 federal_form_values[fed_key] = sub_result[sub_key]
@@ -636,25 +630,13 @@ def evaluate_natural_input_form(
             for fed_key, sub_key in sub_cfg.fed_import_map.items():
                 if fed_key in preliminary_return:
                     sub_form_values[sub_key] = preliminary_return[fed_key]
-        try:
-            sub_result = _evaluate_subordinate(
-                year.value,
-                sub_cfg.form_id,
-                sub_form_values,
-                on_error=on_error,
-                fed_form_text=preliminary_output,
-            )
-        except Exception:
-            if on_error == "raise":
-                raise
-            if on_error == "warn":
-                logger.warning(
-                    "Subordinate form %s/%s failed; skipping.",
-                    year.value,
-                    sub_cfg.form_id,
-                    exc_info=True,
-                )
-            continue
+        sub_result = _evaluate_subordinate(
+            year.value,
+            sub_cfg.form_id,
+            sub_form_values,
+            on_error=on_error,
+            fed_form_text=preliminary_output,
+        )
 
         if not is_form_8995:
             for sub_key, fed_key in sub_cfg.export_map.items():
@@ -706,21 +688,9 @@ def evaluate_natural_input_form(
         for fed_key, sub_key in sub_cfg.fed_import_map.items():
             if fed_key in federal_return:
                 sub_form_values[sub_key] = federal_return[fed_key]
-        try:
-            sub_result = _evaluate_subordinate(
-                year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
-            )
-        except Exception:
-            if on_error == "raise":
-                raise
-            if on_error == "warn":
-                logger.warning(
-                    "Subordinate form %s/%s failed; skipping.",
-                    year.value,
-                    sub_cfg.form_id,
-                    exc_info=True,
-                )
-            continue
+        sub_result = _evaluate_subordinate(
+            year.value, sub_cfg.form_id, sub_form_values, on_error=on_error
+        )
         for ots_key, natural_name in sub_cfg.output_map.items():
             if ots_key in sub_result:
                 subordinate_natural_outputs[natural_name] = sub_result[ots_key]
@@ -758,6 +728,48 @@ def evaluate_natural_input_form(
     )
 
 
+def _require_available(engine: Engine) -> None:
+    from .backends import require_available
+
+    require_available(engine)
+
+
+def _warn_failed(engine: Engine, tax_input: TaxReturnInput, error: Exception) -> None:
+    state = tax_input.state.value if tax_input.state else None
+    message = (
+        f"{engine} backend failed for {tax_input.year.value}/{state} "
+        f"({tax_input.filing_status.value}); returning a failed return with every "
+        f"field NaN: {error!r}"
+    )
+    logger.warning(message, exc_info=error)
+    warnings.warn(message, RuntimeWarning, stacklevel=4)
+
+
+def _evaluate_with_engine(
+    tax_input: TaxReturnInput, engine: Engine, policy: OTSErrorPolicy
+) -> InterpretedTaxReturn:
+    try:
+        if engine == "ots":
+            return InterpretedTaxReturn(
+                **evaluate_natural_input_form(
+                    tax_input.year,
+                    tax_input.state,
+                    tax_input.model_dump(exclude={"year", "state"}),
+                )
+            )
+        from .backends.graph import GraphBackend
+
+        return GraphBackend().evaluate(tax_input)
+    except UnsupportedReturnError:
+        raise
+    except Exception as error:
+        if policy == OTSErrorPolicy.RAISE:
+            raise
+        if policy == OTSErrorPolicy.WARN:
+            _warn_failed(engine, tax_input, error)
+        return InterpretedTaxReturn.failed()
+
+
 ## LEVEL 2: Map from validated user models to natural description.
 def evaluate_return(
     year: int = 2025,
@@ -783,7 +795,7 @@ def evaluate_return(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
-    backend: Literal["ots", "graph"] = "ots",
+    backend: BackendChoice = "ots",
     *,
     state_and_local_taxes: float = 0.0,
     qualified_tips: float = 0.0,
@@ -792,7 +804,17 @@ def evaluate_return(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
 ) -> InterpretedTaxReturn:
-    """Calculate an estimated tax return based on the provided parameters."""
+    """Calculate an estimated tax return based on the provided parameters.
+
+    ``backend`` is "ots" (default), "graph", or "auto" (graph for 2024-2025
+    within graph scope, OTS otherwise); an explicit backend is never
+    reinterpreted. A request no backend can serve raises
+    ``UnsupportedReturnError`` before evaluation, whatever ``on_error`` says. A
+    computation that fails raises under ``on_error="raise"``; under "warn" or
+    "ignore" it returns ``InterpretedTaxReturn.failed()``, whose every field is
+    NaN, never a zero that could pass for a real return.
+    """
+    policy = validate_on_error(on_error)
     input_data = TaxReturnInput(
         year=year,
         state=state,
@@ -823,35 +845,9 @@ def evaluate_return(
         spouse_65_or_older=spouse_65_or_older,
     )
 
-    if backend == "ots":
-        return InterpretedTaxReturn(
-            **evaluate_natural_input_form(
-                input_data.year,
-                input_data.state,
-                input_data.model_dump(exclude={"year", "state"}),
-                on_error=on_error,
-            )
-        )
-
-    if backend == "graph":
-        from .backends.graph import GraphBackend
-
-        try:
-            return GraphBackend().evaluate(input_data)
-        except Exception:
-            if on_error == "raise":
-                raise
-            if on_error == "warn":
-                logger.warning(
-                    "Graph backend failed for %s/%s (%s); returning defaults.",
-                    year,
-                    state,
-                    filing_status,
-                    exc_info=True,
-                )
-            return InterpretedTaxReturn()
-
-    raise ValueError(f"Unknown backend: {backend}")
+    engine = select_backend(backend, input_data.year, input_data.state)
+    _require_available(engine)
+    return _evaluate_with_engine(input_data, engine, policy)
 
 
 def evaluate_returns(
@@ -877,7 +873,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
-    backend: Literal["ots", "graph"] = "ots",
+    backend: BackendChoice = "ots",
     mode: Literal["cross", "zip"] = "cross",
     *,
     state_and_local_taxes: list[float] | float = 0.0,
@@ -900,6 +896,7 @@ def evaluate_returns(
 
     """
     arguments = dict(locals())
+    policy = validate_on_error(on_error)
 
     def ensure_list(x):
         return x if isinstance(x, list) else [x]
@@ -1009,141 +1006,6 @@ def evaluate_returns(
         filer_65_or_older_values = broadcast(filer_65_or_older_values)
         spouse_65_or_older_values = broadcast(spouse_65_or_older_values)
 
-    if backend == "graph":
-        from .backends.graph import GraphBackend
-
-        graph_backend = GraphBackend()
-        if graph_backend.is_available():
-            try:
-                results = []
-                if mode == "cross":
-                    for y, s in itertools.product(years, states_of_residence):
-                        for nd, soi in itertools.product(nums_dependents, std_or_items):
-                            batch_inputs = {
-                                "w2_income": w2_incomes,
-                                "taxable_interest": taxable_interests,
-                                "qualified_dividends": qual_dividends,
-                                "ordinary_dividends": ord_dividends,
-                                "short_term_capital_gains": st_cap_gains,
-                                "long_term_capital_gains": lt_cap_gains,
-                                "self_employment_income": se_incomes,
-                                "qbi_w2_wages": qbi_w2_wage_values,
-                                "qbi_ubia": qbi_ubia_values,
-                                "qbi_is_sstb": qbi_sstb_values,
-                                "rental_income": rental_incomes,
-                                "schedule_1_income": sched1_incomes,
-                                "itemized_deductions": item_deductions,
-                                "state_adjustment": state_adjs,
-                                "incentive_stock_option_gains": iso_gains,
-                                "state_and_local_taxes": state_and_local_taxes_values,
-                                "qualified_tips": qualified_tips_values,
-                                "qualified_overtime": qualified_overtime_values,
-                                "vehicle_loan_interest": vehicle_loan_interest_values,
-                                "filer_65_or_older": filer_65_or_older_values,
-                                "spouse_65_or_older": spouse_65_or_older_values,
-                                "num_dependents": [nd],
-                                "dependent_exemptions": dep_exemptions,
-                                "standard_or_itemized": [soi],
-                            }
-                            batch_results = graph_backend.evaluate_batch(
-                                y,
-                                OTSState(s) if s else OTSState.NONE,
-                                batch_inputs,
-                                filing_statuses,
-                            )
-                            batch_size = len(next(iter(batch_results.values())))
-                            for i in range(batch_size):
-                                row = {k: v[i] for k, v in batch_results.items()}
-                                row["year"] = y
-                                row["state"] = s
-                                row["num_dependents"] = nd
-                                row["standard_or_itemized"] = soi
-                                results.append(row)
-                else:
-                    groups: dict[tuple, list[int]] = defaultdict(list)
-                    for i in range(n):
-                        groups[(years[i], states_of_residence[i])].append(i)
-                    results_indexed: list[dict | None] = [None] * n
-                    for (y, s), indices in groups.items():
-                        group_inputs = {
-                            "w2_income": [w2_incomes[i] for i in indices],
-                            "taxable_interest": [taxable_interests[i] for i in indices],
-                            "qualified_dividends": [qual_dividends[i] for i in indices],
-                            "ordinary_dividends": [ord_dividends[i] for i in indices],
-                            "short_term_capital_gains": [
-                                st_cap_gains[i] for i in indices
-                            ],
-                            "long_term_capital_gains": [
-                                lt_cap_gains[i] for i in indices
-                            ],
-                            "self_employment_income": [se_incomes[i] for i in indices],
-                            "qbi_w2_wages": [qbi_w2_wage_values[i] for i in indices],
-                            "qbi_ubia": [qbi_ubia_values[i] for i in indices],
-                            "qbi_is_sstb": [qbi_sstb_values[i] for i in indices],
-                            "rental_income": [rental_incomes[i] for i in indices],
-                            "schedule_1_income": [sched1_incomes[i] for i in indices],
-                            "itemized_deductions": [
-                                item_deductions[i] for i in indices
-                            ],
-                            "state_adjustment": [state_adjs[i] for i in indices],
-                            "incentive_stock_option_gains": [
-                                iso_gains[i] for i in indices
-                            ],
-                            "state_and_local_taxes": [
-                                state_and_local_taxes_values[i] for i in indices
-                            ],
-                            "qualified_tips": [
-                                qualified_tips_values[i] for i in indices
-                            ],
-                            "qualified_overtime": [
-                                qualified_overtime_values[i] for i in indices
-                            ],
-                            "vehicle_loan_interest": [
-                                vehicle_loan_interest_values[i] for i in indices
-                            ],
-                            "filer_65_or_older": [
-                                filer_65_or_older_values[i] for i in indices
-                            ],
-                            "spouse_65_or_older": [
-                                spouse_65_or_older_values[i] for i in indices
-                            ],
-                            "num_dependents": [
-                                float(nums_dependents[i]) for i in indices
-                            ],
-                            "dependent_exemptions": [
-                                dep_exemptions[i] for i in indices
-                            ],
-                            "standard_or_itemized": [std_or_items[i] for i in indices],
-                        }
-                        group_statuses = [filing_statuses[i] for i in indices]
-                        batch_results = graph_backend.evaluate_batch(
-                            y,
-                            OTSState(s) if s else OTSState.NONE,
-                            group_inputs,
-                            group_statuses,
-                            mode="zip",
-                        )
-                        batch_size = len(next(iter(batch_results.values())))
-                        for j in range(batch_size):
-                            idx = indices[j]
-                            row = {k: v[j] for k, v in batch_results.items()}
-                            row["year"] = y
-                            row["state"] = s
-                            row["num_dependents"] = nums_dependents[idx]
-                            row["standard_or_itemized"] = std_or_items[idx]
-                            results_indexed[idx] = row
-                    results = results_indexed
-
-                return pl.DataFrame(results).cast({"state": pl.Utf8})
-            except Exception:
-                if on_error == "raise":
-                    raise
-                if on_error == "warn":
-                    logger.warning(
-                        "Graph batch evaluation failed; falling back to per-scenario evaluation.",
-                        exc_info=True,
-                    )
-
     parameter_names = [
         "year",
         "state",
@@ -1203,28 +1065,249 @@ def evaluate_returns(
         spouse_65_or_older_values,
     ]
 
-    if mode == "cross":
-        combinations = itertools.product(*all_vals)
-        results = []
-        for combo in combinations:
-            combo_map = dict(zip(parameter_names, combo, strict=False))
-            result = evaluate_return(
-                **combo_map, on_error=on_error, backend=backend
-            ).model_dump()
-            results.append(combo_map | result)
-    else:
-        results = []
-        for i in range(n):
-            params = {
-                name: vals[i]
-                for name, vals in zip(parameter_names, all_vals, strict=False)
-            }
-            result = evaluate_return(
-                **params, on_error=on_error, backend=backend
-            ).model_dump()
-            results.append(params | result)
+    columns = dict(zip(parameter_names, all_vals, strict=True))
 
-    return pl.DataFrame(results).cast({"state": pl.Utf8})
+    if mode == "cross":
+        groups = list(itertools.product(years, states_of_residence))
+    else:
+        groups = list(zip(years, states_of_residence, strict=True))
+    engines = {
+        group: select_backend(backend, *group) for group in dict.fromkeys(groups)
+    }
+    for engine in dict.fromkeys(engines.values()):
+        _require_available(engine)
+
+    if mode == "cross":
+        group_params = {
+            (y, s): list(
+                _graph_cross_order(y, s, columns)
+                if engine == "graph"
+                else _cross_params(y, s, columns, parameter_names)
+            )
+            for (y, s), engine in engines.items()
+        }
+    else:
+        zip_groups: dict[tuple, list[int]] = defaultdict(list)
+        for i, group in enumerate(groups):
+            zip_groups[group].append(i)
+        group_params = {
+            group: [
+                {name: columns[name][i] for name in parameter_names} for i in indices
+            ]
+            for group, indices in zip_groups.items()
+        }
+    _preflight(group_params, engines)
+
+    batched = True
+    if mode == "cross":
+        results = []
+        for y, s in groups:
+            if engines[(y, s)] == "graph":
+                group_rows = _graph_cross_rows(y, s, columns, policy)
+                if group_rows is None:
+                    batched = False
+                    group_rows = _scalar_rows(group_params[(y, s)], "graph", policy)
+            else:
+                group_rows = _scalar_rows(group_params[(y, s)], "ots", policy)
+            results.extend(group_rows)
+    else:
+        results_indexed: list[dict | None] = [None] * n
+        for (y, s), indices in zip_groups.items():
+            engine = engines[(y, s)]
+            group_rows = (
+                _graph_zip_rows(y, s, columns, indices, policy)
+                if engine == "graph"
+                else None
+            )
+            if group_rows is None:
+                batched = batched and engine == "ots"
+                group_rows = _scalar_rows(group_params[(y, s)], engine, policy)
+            for idx, row in zip(indices, group_rows, strict=True):
+                results_indexed[idx] = row
+        results = results_indexed
+
+    if batched and len(set(engines.values())) == 1:
+        return pl.DataFrame(results).cast({"state": pl.Utf8})
+    return pl.DataFrame(results, infer_schema_length=None, strict=False).cast(
+        {"state": pl.Utf8}
+    )
+
+
+def _preflight(
+    group_params: dict[tuple, list[dict]], engines: dict[tuple, Engine]
+) -> None:
+    """Refuse the whole batch before any return is computed.
+
+    Every row is validated first, then each graph group's inputs are checked
+    with the same support rule graph applies when it evaluates, so a refusal in
+    a later group cannot follow, or be masked by, an earlier group's work.
+    """
+    validated = {
+        group: [TaxReturnInput(**params) for params in rows]
+        for group, rows in group_params.items()
+    }
+    graph_inputs = [
+        tax_input
+        for group, tax_inputs in validated.items()
+        if engines[group] == "graph"
+        for tax_input in tax_inputs
+    ]
+    if graph_inputs:
+        from .backends.graph import require_supported_inputs
+
+        require_supported_inputs(graph_inputs)
+
+
+_BATCH_AXIS_FIELDS = frozenset(
+    {
+        "year",
+        "state",
+        "filing_status",
+        "num_dependents",
+        "dependent_exemptions",
+        "standard_or_itemized",
+    }
+)
+_BATCH_OPTIONS = frozenset({"on_error", "backend", "mode"})
+_GRAPH_PASSTHROUGH_FIELDS = tuple(
+    name
+    for name in inspect.signature(evaluate_returns).parameters
+    if name not in _BATCH_AXIS_FIELDS | _BATCH_OPTIONS
+)
+
+
+def _graph_cross_inputs(
+    columns: dict[str, list], num_dependents: int, standard_or_itemized: str
+) -> dict[str, list]:
+    return {name: columns[name] for name in _GRAPH_PASSTHROUGH_FIELDS} | {
+        "num_dependents": [num_dependents],
+        "dependent_exemptions": columns["dependent_exemptions"],
+        "standard_or_itemized": [standard_or_itemized],
+    }
+
+
+def _graph_batch_failed(
+    error: Exception, policy: OTSErrorPolicy, year: int, state: str | None
+) -> None:
+    if policy == OTSErrorPolicy.RAISE:
+        raise error
+    if policy == OTSErrorPolicy.WARN:
+        logger.warning(
+            "Graph batch evaluation failed for %s/%s; evaluating its rows one by one.",
+            year,
+            state,
+            exc_info=error,
+        )
+
+
+def _graph_cross_rows(
+    year: int, state: str | None, columns: dict[str, list], policy: OTSErrorPolicy
+) -> list[dict] | None:
+    """Evaluate one (year, state) cross group as graph batches; None on failure."""
+    from .backends.graph import GraphBackend
+
+    graph_backend = GraphBackend()
+    rows = []
+    try:
+        for nd, soi in itertools.product(
+            columns["num_dependents"], columns["standard_or_itemized"]
+        ):
+            batch_results = graph_backend.evaluate_batch(
+                year,
+                OTSState(state) if state else OTSState.NONE,
+                _graph_cross_inputs(columns, nd, soi),
+                columns["filing_status"],
+            )
+            batch_size = len(next(iter(batch_results.values())))
+            for i in range(batch_size):
+                row = {k: v[i] for k, v in batch_results.items()}
+                row["year"] = year
+                row["state"] = state
+                row["num_dependents"] = nd
+                row["standard_or_itemized"] = soi
+                rows.append(row)
+    except UnsupportedReturnError:
+        raise
+    except Exception as error:
+        _graph_batch_failed(error, policy, year, state)
+        return None
+    return rows
+
+
+def _graph_cross_order(
+    year: int, state: str | None, columns: dict[str, list]
+) -> Iterator[dict]:
+    """Yield a graph cross group's scalar parameters in its batch row order."""
+    for nd, soi in itertools.product(
+        columns["num_dependents"], columns["standard_or_itemized"]
+    ):
+        axes = _graph_cross_inputs(columns, nd, soi)
+        for combo in itertools.product(*axes.values()):
+            for status in columns["filing_status"]:
+                yield {"year": year, "state": state, "filing_status": status} | dict(
+                    zip(axes, combo, strict=True)
+                )
+
+
+def _graph_zip_rows(
+    year: int,
+    state: str | None,
+    columns: dict[str, list],
+    indices: list[int],
+    policy: OTSErrorPolicy,
+) -> list[dict] | None:
+    """Evaluate one (year, state) zip group as a graph batch; None on failure."""
+    from .backends.graph import GraphBackend
+
+    group_inputs = {
+        name: [columns[name][i] for i in indices] for name in _GRAPH_PASSTHROUGH_FIELDS
+    } | {
+        "num_dependents": [float(columns["num_dependents"][i]) for i in indices],
+        "dependent_exemptions": [columns["dependent_exemptions"][i] for i in indices],
+        "standard_or_itemized": [columns["standard_or_itemized"][i] for i in indices],
+    }
+    try:
+        batch_results = GraphBackend().evaluate_batch(
+            year,
+            OTSState(state) if state else OTSState.NONE,
+            group_inputs,
+            [columns["filing_status"][i] for i in indices],
+            mode="zip",
+        )
+    except UnsupportedReturnError:
+        raise
+    except Exception as error:
+        _graph_batch_failed(error, policy, year, state)
+        return None
+    rows = []
+    for j, idx in enumerate(indices):
+        row = {k: v[j] for k, v in batch_results.items()}
+        row["year"] = year
+        row["state"] = state
+        row["num_dependents"] = columns["num_dependents"][idx]
+        row["standard_or_itemized"] = columns["standard_or_itemized"][idx]
+        rows.append(row)
+    return rows
+
+
+def _cross_params(
+    year: int,
+    state: str | None,
+    columns: dict[str, list],
+    parameter_names: list[str],
+) -> Iterator[dict]:
+    rest = parameter_names[2:]
+    for combo in itertools.product(*(columns[name] for name in rest)):
+        yield {"year": year, "state": state} | dict(zip(rest, combo, strict=True))
+
+
+def _scalar_rows(
+    params_rows: Iterable[dict], engine: Engine, policy: OTSErrorPolicy
+) -> list[dict]:
+    return [
+        params | evaluate_return(**params, on_error=policy, backend=engine).model_dump()
+        for params in params_rows
+    ]
 
 
 _DISCRETE_INPUTS = frozenset(
@@ -1302,11 +1385,10 @@ def marginal_rate(
         dependent_exemptions=dependent_exemptions,
     )
 
-    from .backends.graph import GraphBackend
+    from .backends import require_available
 
-    backend = GraphBackend()
-    if not backend.is_available():
-        raise RuntimeError("Graph backend is not available")
+    select_backend("graph", tax_input.year, tax_input.state)
+    backend = require_available("graph")
 
     result = backend.gradient(tax_input, output, wrt)
     if result is None:
@@ -1382,11 +1464,10 @@ def marginal_rates(
         dependent_exemptions=dependent_exemptions,
     )
 
-    from .backends.graph import GraphBackend
+    from .backends import require_available
 
-    backend = GraphBackend()
-    if not backend.is_available():
-        raise RuntimeError("Graph backend is not available")
+    select_backend("graph", tax_input.year, tax_input.state)
+    backend = require_available("graph")
 
     result = backend.gradients(tax_input, output)
     if result is None:
@@ -1459,11 +1540,10 @@ def solve_for_income(
         spouse_65_or_older=spouse_65_or_older,
     )
 
-    from .backends.graph import GraphBackend
+    from .backends import require_available
 
-    backend = GraphBackend()
-    if not backend.is_available():
-        raise RuntimeError("Graph backend is not available")
+    select_backend("graph", tax_input.year, tax_input.state)
+    backend = require_available("graph")
 
     result = backend.solve(tax_input, output=output, target=target_tax, var=for_input)
     if result is None:

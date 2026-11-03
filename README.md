@@ -392,8 +392,8 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `vehicle_loan_interest`      | float                    | 0.0                 | 2025 only. Qualified passenger vehicle loan interest; Schedule 1-A Part IV |
 | `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
-| `on_error`                   | str                      | raise               | See [Error Handling](./docs/error-handling.md) |
-| `backend`                    | str                      | ots                 | See [Experimental: Graph Backend](#experimental-graph-backend) |
+| `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
+| `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for 2024-2025, OTS for 2018-2023); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
 
 The three `qbi_` inputs describe one trade or business, or businesses the
 taxpayer has validly aggregated for section 199A. They are not totals across

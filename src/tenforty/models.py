@@ -6,6 +6,7 @@ used primarily for structuring and organizing configuration data.
 """
 
 # ruff: noqa: D101
+import math
 from collections.abc import Callable
 from enum import Enum
 from functools import partial
@@ -61,6 +62,34 @@ class OTSParseError(Exception):
     def __init__(self, message: str, raw_output: str | None = None):  # noqa: D107
         self.raw_output = raw_output
         super().__init__(message)
+
+
+class UnsupportedReturnError(ValueError):
+    """Raised before evaluation when no requested backend can compute the return.
+
+    It covers an unsupported year, state or input concept for the selected
+    backend, and is raised whatever ``on_error`` says: it describes the request,
+    not a failed computation.
+    """
+
+
+class UnsupportedInputError(UnsupportedReturnError, NotImplementedError):
+    """Raised when a backend does not compute a nonzero input it was given."""
+
+
+class BackendUnavailableError(ImportError, RuntimeError):
+    """Raised when the selected backend's compiled extension is not installed."""
+
+
+def validate_on_error(on_error: str) -> OTSErrorPolicy:
+    """Return the policy for ``on_error``, rejecting anything not a policy."""
+    try:
+        return OTSErrorPolicy(on_error)
+    except ValueError:
+        choices = ", ".join(repr(policy.value) for policy in OTSErrorPolicy)
+        raise ValueError(
+            f"Unknown on_error policy: {on_error!r}; expected one of {choices}"
+        ) from None
 
 
 class OutputFieldSpec(BaseModel):
@@ -547,6 +576,11 @@ class InterpretedTaxReturn(BaseModel):
     state_total_tax: float = 0.0
     state_tax_bracket: float = 0.0
     state_effective_tax_rate: float = 0.0
+
+    @classmethod
+    def failed(cls) -> "InterpretedTaxReturn":
+        """Return a failed computation: every output is NaN, never 0."""
+        return cls(**dict.fromkeys(cls.model_fields, math.nan))
 
     @model_validator(mode="after")
     def compute_federal_income_tax(self) -> "InterpretedTaxReturn":  # noqa: D102

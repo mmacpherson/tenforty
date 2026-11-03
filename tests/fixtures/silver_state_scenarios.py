@@ -183,56 +183,23 @@ def ks_worksheet_gap(statute_minus_worksheet: float, rounding: float) -> KnownDe
     )
 
 
-# 2024 MD standard deduction (tenforty-b72.45): Worksheet 16A gives
-# Joint/HoH/QSS $3,650-$5,450; the graph uses the Single $1,800-$2,700 bounds
-# for every status.
-MD_2024_JOINT_STD_DEDUCTION_BEAD = "tenforty-b72.45"
-MD_2024_JOINT_STD_DEDUCTION_SHORTFALL = 5_450.0 - 2_700.0
-
-
-def md_table_gap(
-    taxable_income: float, row_low: float, std_deduction_shortfall: float = 0.0
-) -> KnownDefect:
+def md_table_gap(taxable_income: float, row_low: float) -> KnownDefect:
     """Signed schedule-minus-table bound for a non-kink $50 MD tax-table row.
 
     MD requires its state tax table below $100,000 of taxable income (2024/2025
     resident booklets, Instruction 17). Every row used here lies in the 4.75%
     band of both schedules. The graph prices the schedule at its own taxable
     income rather than the row, with at most $0.50 of printed-row rounding.
-    ``std_deduction_shortfall`` is the graph's excess taxable income from the
-    2024 Joint/HoH/QSS standard-deduction defect; it stays in the same band.
     """
     assert row_low <= taxable_income < row_low + 50
-    graph_income = taxable_income + std_deduction_shortfall
-    assert 3_000 <= graph_income < 100_000
-    center = 0.0475 * (graph_income - (row_low + 25))
+    assert 3_000 <= taxable_income < 100_000
+    center = 0.0475 * (taxable_income - (row_low + 25))
     reason = "MD requires the tax-table row; graph uses the schedule (tenforty-tj2.20)"
-    if std_deduction_shortfall:
-        reason += (
-            "; graph uses the Single standard deduction for 2024 Joint/HoH/QSS "
-            f"({MD_2024_JOINT_STD_DEDUCTION_BEAD})"
-        )
     return KnownDefect(
         quantity="state_total_tax",
         minimum=center - 0.50,
         maximum=center + 0.50,
         reason=reason,
-    )
-
-
-def md_2024_joint_std_deduction_gap(schedule_delta: float) -> KnownDefect:
-    """Graph-minus-legal tax at or above $100k for the 2024 joint std-ded defect.
-
-    ``schedule_delta`` is Schedule II tax on $2,750 of extra taxable income at
-    the return's position, from the published schedule. The window is the
-    booklet's cent rounding.
-    """
-    return KnownDefect(
-        quantity="state_total_tax",
-        minimum=schedule_delta - 0.01,
-        maximum=schedule_delta + 0.01,
-        reason="Graph uses the Single standard deduction for 2024 Joint/HoH/QSS "
-        f"({MD_2024_JOINT_STD_DEDUCTION_BEAD})",
     )
 
 
@@ -5560,9 +5527,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
         expected_state_tax=3357.0,
         expected_federal_agi=90000.0,
-        known_defects=(
-            md_table_gap(71750, 71750, MD_2024_JOINT_STD_DEDUCTION_SHORTFALL),
-        ),
+        known_defects=(md_table_gap(71750, 71750),),
         backend="graph",
     ),
     # 2024 #3: HoH 45,000, 1 dependents. 45,000 - 5,450 std - 2 x 3,200 = 33,150; row 33,150-33,200, PDF p. 36.
@@ -5577,9 +5542,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=1523.0,
         expected_federal_agi=45000.0,
-        known_defects=(
-            md_table_gap(33150, 33150, MD_2024_JOINT_STD_DEDUCTION_SHORTFALL),
-        ),
+        known_defects=(md_table_gap(33150, 33150),),
         backend="graph",
     ),
     # 2024 #4: MFS 40,000, 0 dependents. 40,000 - 2,700 std - 1 x 3,200 = 34,100; row 34,100-34,150, PDF p. 36.
@@ -5608,9 +5571,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=2711.0,
         expected_federal_agi=70000.0,
-        known_defects=(
-            md_table_gap(58150, 58150, MD_2024_JOINT_STD_DEDUCTION_SHORTFALL),
-        ),
+        known_defects=(md_table_gap(58150, 58150),),
         backend="graph",
     ),
     # 2024 #6: Single 20,000, 0 dependents. 20,000 - 2,700 std - 1 x 3,200 = 14,100; row 14,100-14,150, PDF p. 34.
@@ -5654,7 +5615,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # 2024 #9: MFJ 160,000, 2 dependents. 160,000 - 5,450 std - 4 x 1,600 = 148,150; Schedule II: 90 + 4.75% x 145,150 = 6,984.625.
-    # Graph TI is 150,900 (Single 2024 std ded); Schedule II on the extra 2,750 = 132.875.
     TaxScenario(
         source="MD 2024 Form 502 (blind derivation)",
         state_evidence=MD_EVIDENCE,
@@ -5666,11 +5626,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 4 x 1,600, Line 19 total
         expected_state_tax=6984.63,
         expected_federal_agi=160000.0,
-        known_defects=(md_2024_joint_std_deduction_gap(132.875),),
         backend="graph",
     ),
     # 2024 #10: MFJ 250,000, 3 dependents. 250,000 - 5,450 std - 5 x 0 = 244,550; Schedule II: 10,947.50 + 5.5% x 19,550.
-    # Graph TI is 247,300 (Single 2024 std ded); Schedule II on the extra 2,750 = 151.25.
     TaxScenario(
         source="MD 2024 Form 502 (blind derivation)",
         state_evidence=MD_EVIDENCE,
@@ -5681,7 +5639,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=250000.0,
         expected_state_tax=12022.75,
         expected_federal_agi=250000.0,
-        known_defects=(md_2024_joint_std_deduction_gap(151.25),),
         backend="graph",
     ),
     # 2025 #1: Single 50,000, 0 dependents. 50,000 - 3,350 std - 1 x 3,200 = 43,450; row 43,450-43,500, PDF p. 36.
