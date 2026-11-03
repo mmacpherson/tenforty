@@ -391,3 +391,13 @@ def test_graph_only_apis_refuse_historical_years_up_front(function):
     """Autodiff and the solver raise the routing error, not FileNotFoundError."""
     with pytest.raises(UnsupportedReturnError, match="2023"):
         function(year=2023, w2_income=50_000.0)
+
+
+def test_graph_batches_pass_every_return_input():
+    """A new evaluate_returns input reaches graph batches with no second list."""
+    from tenforty.models import TaxReturnInput
+
+    batch_inputs = set(inspect.signature(tenforty.evaluate_returns).parameters)
+    batch_inputs -= core._BATCH_OPTIONS
+    assert set(core._GRAPH_PASSTHROUGH_FIELDS) == batch_inputs - core._BATCH_AXIS_FIELDS
+    assert batch_inputs == set(TaxReturnInput.model_fields)

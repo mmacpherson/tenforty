@@ -1,5 +1,6 @@
 """Functions to prepare and return tax calculations from the OTS cython module."""
 
+import inspect
 import itertools
 import logging
 import os
@@ -1125,28 +1126,21 @@ def evaluate_returns(
     )
 
 
-_GRAPH_PASSTHROUGH_FIELDS = (
-    "w2_income",
-    "taxable_interest",
-    "qualified_dividends",
-    "ordinary_dividends",
-    "short_term_capital_gains",
-    "long_term_capital_gains",
-    "self_employment_income",
-    "qbi_w2_wages",
-    "qbi_ubia",
-    "qbi_is_sstb",
-    "rental_income",
-    "schedule_1_income",
-    "itemized_deductions",
-    "state_adjustment",
-    "incentive_stock_option_gains",
-    "state_and_local_taxes",
-    "qualified_tips",
-    "qualified_overtime",
-    "vehicle_loan_interest",
-    "filer_65_or_older",
-    "spouse_65_or_older",
+_BATCH_AXIS_FIELDS = frozenset(
+    {
+        "year",
+        "state",
+        "filing_status",
+        "num_dependents",
+        "dependent_exemptions",
+        "standard_or_itemized",
+    }
+)
+_BATCH_OPTIONS = frozenset({"on_error", "backend", "mode"})
+_GRAPH_PASSTHROUGH_FIELDS = tuple(
+    name
+    for name in inspect.signature(evaluate_returns).parameters
+    if name not in _BATCH_AXIS_FIELDS | _BATCH_OPTIONS
 )
 
 
