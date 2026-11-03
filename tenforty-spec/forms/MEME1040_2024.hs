@@ -56,7 +56,25 @@ meme1040_2024 = form "me_1040me" 2024 $ do
   stdDed <-
     interior "StdDed" "me_std_deduction" $
       byStatusE (fmap lit meStandardDeduction2024)
-  l19 <- interior "L19" "deduction" $ greaterOf itemized stdDed
+  deductionBeforePhaseout <-
+    interior "DeductionBeforePhaseout" "deduction_before_phaseout" $
+      greaterOf itemized stdDed
+
+  -- Line 17 phase-out worksheet: reduce by (ME AGI - threshold) / range,
+  -- capped at 1, using the statute's unrounded fraction (36 M.R.S. 5124-C(2)),
+  -- as line 18 does. The worksheet's 4-place line-5 ratio and whole-dollar
+  -- line 8 are not modelled (tenforty-b72.42).
+  deductionPhaseoutExcess <-
+    interior "DeductionPhaseoutExcess" "deduction_phaseout_excess" $
+      l16 `excessOf` byStatusE (fmap lit meStandardDeductionPhaseoutThreshold2024)
+  l19 <-
+    interior "L19" "deduction" $
+      deductionBeforePhaseout
+        .*. ( rate 1.0
+                .-. minE
+                  (deductionPhaseoutExcess ./. byStatusE (fmap lit meStandardDeductionPhaseoutRange2024))
+                  (rate 1.0)
+            )
 
   -- Line 20: Maine AGI minus deductions
   l20 <-

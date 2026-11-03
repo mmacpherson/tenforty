@@ -57,26 +57,10 @@ BLIND_CASES = [
     (18, 2025, "Married/Joint", 500_000, 2_068, 497_932),
 ]
 
-# Graph standard deduction minus the record's, for cases where an adjacent,
-# not-yet-filed defect makes graph taxable income lower by exactly that much.
-# tenforty-b72.43: graph 2025 uses OBBBA 15,750/31,500/23,625, not Maine's
-# 15,000/30,000/22,500. tenforty-b72.44: graph never phases the deduction.
-# Cases 7 and 16 carry +/-$2 for the worksheet's unstated ratio rounding
-# (record A1); cases 17 and 18 carry line 18's $0.50 whole-dollar rounding
-# (tenforty-b72.42).
-DEDUCTION_SHORTFALL = {
-    7: (14_600 - 10_151, 2.0, "tenforty-b72.44"),
-    8: (14_600, 0.0, "tenforty-b72.44"),
-    9: (29_200, 0.0, "tenforty-b72.44"),
-    10: (750, 0.0, "tenforty-b72.43"),
-    11: (1_500, 0.0, "tenforty-b72.43"),
-    12: (1_125, 0.0, "tenforty-b72.43"),
-    13: (750, 0.0, "tenforty-b72.43"),
-    14: (1_500, 0.0, "tenforty-b72.43"),
-    16: (15_750 - 11_000, 2.0, "tenforty-b72.43, tenforty-b72.44"),
-    17: (15_750, LINE_18_ROUNDING, "tenforty-b72.43, tenforty-b72.44, tenforty-b72.42"),
-    18: (31_500, LINE_18_ROUNDING, "tenforty-b72.43, tenforty-b72.44, tenforty-b72.42"),
-}
+# Cases whose line 17 worksheet ratio does not terminate at four places
+# (record A1): line 5's four-place field, rounded or truncated, moves line 17
+# by up to the standard deduction times 0.0001, plus line 8's whole dollar.
+WORKSHEET_RATIO_SLACK = {7: 14_600 * 0.0001 + 0.50, 16: 15_000 * 0.0001 + 0.50}
 
 BASELINE = {2024: 5_000, 2025: 5_150}
 PHASEOUT_THRESHOLD = {
@@ -129,21 +113,14 @@ def test_line_18_matches_the_blind_derivation(case, year, status, wages, exempti
 def test_line_19_matches_the_blind_derivation(
     case, year, status, wages, _, taxable_income
 ):
-    """Taxable income, with adjacent deduction defects as bounded xfails."""
+    """Taxable income: the standard deduction and its phase-out (b72.43, b72.44)."""
     result = evaluate_return(
         backend="graph", year=year, state="ME", filing_status=status, w2_income=wages
     )
-    delta = result.state_taxable_income - taxable_income
-    if case not in DEDUCTION_SHORTFALL:
-        assert delta == pytest.approx(0, abs=LINE_18_ROUNDING)
-        return
-    shortfall, slack, signature = DEDUCTION_SHORTFALL[case]
-    assert (
-        -shortfall - slack - LINE_18_ROUNDING
-        <= delta
-        <= -shortfall + slack + (LINE_18_ROUNDING)
-    ), f"delta {delta:+.2f} outside the {signature} signature"
-    pytest.xfail(f"{signature}: graph standard deduction exceeds Maine's")
+    slack = WORKSHEET_RATIO_SLACK.get(case, 0.0)
+    assert result.state_taxable_income == pytest.approx(
+        taxable_income, abs=LINE_18_ROUNDING + slack
+    )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
