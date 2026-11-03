@@ -192,24 +192,17 @@ def test_line_17_is_within_the_worksheet_quantum(
     assert abs(runtime.eval(f"{PREFIX}_L19_deduction") - worksheet_l17) <= bound
 
 
+# The derivation prices the marginal integral only on the worksheet line 19.
+CASES_WHERE_READINGS_AGREE = [case for case in CASES if not case[-1]]
+
+
 @pytest.mark.parametrize(
-    "year,status,case,agi,_l17,_l18,_l19,_s17,_s18,_s19,marginal_tax,readings_differ",
-    CASES,
+    "year,status,case,agi,_l17,_l18,_l19,_s17,_s18,_s19,marginal_tax,_alt",
+    CASES_WHERE_READINGS_AGREE,
     ids=_case_id,
 )
 def test_tax_is_the_marginal_rate_integral(
-    year,
-    status,
-    case,
-    agi,
-    _l17,
-    _l18,
-    _l19,
-    _s17,
-    _s18,
-    _s19,
-    marginal_tax,
-    readings_differ,
+    year, status, case, agi, _l17, _l18, _l19, _s17, _s18, _s19, marginal_tax, _alt
 ):
     """Where both readings agree on line 19, line 20 is the exact bracket integral.
 
@@ -217,8 +210,6 @@ def test_tax_is_the_marginal_rate_integral(
     (tenforty-b72.42, tenforty-tj2.20); the derivation reports the marginal
     integral alongside them.
     """
-    if readings_differ:
-        pytest.skip("the derivation prices only the worksheet line 19")
     result = evaluate_return(
         backend="graph", year=year, state="ME", filing_status=status, w2_income=agi
     )
