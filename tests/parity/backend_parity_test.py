@@ -4,7 +4,7 @@ import math
 from pathlib import Path
 
 import pytest
-from hypothesis import assume, example, given, settings
+from hypothesis import example, given, settings
 from hypothesis import strategies as st
 
 from tenforty import evaluate_return
@@ -1758,9 +1758,6 @@ def test_or_state_agi_parity_2024(w2_income, filing_status):
 @settings(max_examples=100)
 def test_or_state_tax_parity_2024(w2_income, filing_status):
     """OR 2024 tax agrees within the existing table and rounding tolerance."""
-    # tenforty-r91.6: OTS omits the spouse exemption below the credit ceiling.
-    # Independent graph cases cover joint returns within that excluded OTS domain.
-    assume(filing_status != "Married/Joint" or w2_income > 200_000)
     assert_state_parity("OR", 2024, filing_status, w2_income)
 
 
@@ -1804,9 +1801,6 @@ def test_or_state_agi_parity(w2_income, filing_status):
 @settings(max_examples=100)
 def test_or_state_tax_parity(w2_income, filing_status):
     """OR 2025 tax agrees within the existing table and rounding tolerance."""
-    # tenforty-r91.6: OTS omits the spouse exemption below the credit ceiling.
-    # Independent graph cases cover joint returns within that excluded OTS domain.
-    assume(filing_status != "Married/Joint" or w2_income > 200_000)
     assert_state_parity("OR", 2025, filing_status, w2_income)
 
 
@@ -2057,11 +2051,6 @@ def test_ots_ny_married_joint_household_credit_counts_both_spouses():
     assert result.state_total_tax == pytest.approx(534.0, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="MAP-OR-SPOUSE-EXEMPTION (tenforty-r91.6): the OR_40 input map leaves CkL6bRegular at "
-    "its 'No' default, so OTS gives a joint return one exemption credit",
-    strict=True,
-)
 def test_ots_or_married_joint_gets_two_exemption_credits():
     """OR 2024 MFJ, $13,000 wages: two $249 credits exceed the tax, so none is due.
 

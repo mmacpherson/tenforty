@@ -294,14 +294,14 @@ def test_regular_dependent_count_adds_to_status_base(year, credit, status, depen
 
 
 @pytest.mark.parametrize("year,taxable", [(2024, 7505), (2025, 7330)])
-def test_graph_joint_regular_exemptions_zero_the_published_row_tax(year, taxable):
+def test_ots_joint_regular_exemptions_zero_the_published_row_tax(year, taxable):
     """Archived J rows 359/349 are below the two regular credits 498/512."""
     kwargs = dict(
         year=year,
         state="OR",
         filing_status="Married/Joint",
         w2_income=13_000,
-        backend="graph",
+        backend="ots",
     )
     scalar = evaluate_return(**kwargs)
     batch = evaluate_returns(**kwargs, mode="zip")
@@ -309,3 +309,15 @@ def test_graph_joint_regular_exemptions_zero_the_published_row_tax(year, taxable
     assert scalar.state_taxable_income == taxable
     assert scalar.state_total_tax == 0
     assert batch["state_total_tax"][0] == 0
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("status", STATUSES)
+def test_ots_spouse_regular_checkbox_follows_joint_status(year, status):
+    """Only joint status automatically grants the ordinary spouse exemption."""
+    from tenforty.core import map_natural_to_ots_input
+    from tenforty.models import NATURAL_FORM_CONFIG
+
+    mapping = NATURAL_FORM_CONFIG[(year, "OR_40")].input_map
+    fields = map_natural_to_ots_input({"filing_status": status}, mapping)
+    assert fields["CkL6bRegular"] == ("Yes" if status == "Married/Joint" else "No")
