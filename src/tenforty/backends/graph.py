@@ -27,7 +27,9 @@ from ..models import (
     OTSDeductionType,
     OTSState,
     TaxReturnInput,
+    UnsupportedInputError,
 )
+from ..routing import GRAPH_YEARS
 
 _STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
 _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
@@ -174,7 +176,7 @@ def _raise_unsupported(
             "Provide these as 0; the OTS backend does not compute them for this "
             "return either."
         )
-    raise NotImplementedError(
+    raise UnsupportedInputError(
         "Graph backend does not yet support some non-zero inputs.\n"
         f"{remedy}\n"
         f"Unsupported inputs:\n{details}"
@@ -226,7 +228,7 @@ class GraphBackend:
     """Backend using tax computation graph with autodiff and solver support."""
 
     name = "graph"
-    supported_years = (2024, 2025)
+    supported_years = GRAPH_YEARS
 
     def __init__(self) -> None:
         """Initialize the graph backend."""

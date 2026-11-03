@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import platform
 from functools import lru_cache
-from typing import Literal
 
+from ..models import BackendUnavailableError
+from ..routing import BackendChoice, Engine, select_backend
 from .ots import OTSBackend
 from .protocol import TaxBackend
 
@@ -15,11 +16,13 @@ except ImportError:
     GraphBackend = None
 
 __all__ = [
+    "BackendUnavailableError",
     "GraphBackend",
     "OTSBackend",
     "TaxBackend",
     "available_backends",
     "get_backend",
+    "require_available",
 ]
 
 
@@ -46,38 +49,42 @@ def available_backends() -> list[str]:
     return backends
 
 
-def get_backend(
-    backend: Literal["ots", "graph"] = "ots",
-    year: int = 2024,
-    state: str | None = None,
-) -> TaxBackend:
-    """Get a backend instance.
-
-    Args:
-        backend: Backend to use ("ots" or "graph"). Default is "ots".
-        year: Tax year (kept for compatibility with callers; not used for selection)
-        state: State code (e.g., "CA") or None for federal only
-
-    Returns:
-        TaxBackend instance
-
-    Raises:
-        RuntimeError: If requested backend is not available
-
-    """
-    if backend == "ots":
+def require_available(engine: Engine) -> TaxBackend:
+    """Return the engine's backend instance, or raise if it is not installed."""
+    if engine == "ots":
         ots = _ots_backend()
         if not ots.is_available():
             msg = "OTS backend is not available"
             if platform.system() == "Windows":
                 msg += " (OTS requires C++ compilation which may not be configured on Windows)"
-            raise RuntimeError(msg)
+            raise BackendUnavailableError(msg)
         return ots
+    graph = _graph_backend()
+    if graph is None or not graph.is_available():
+        raise BackendUnavailableError("Graph backend is not available")
+    return graph
 
-    if backend == "graph":
-        graph = _graph_backend()
-        if graph is None or not graph.is_available():
-            raise RuntimeError("Graph backend is not available")
-        return graph
 
-    raise ValueError(f"Unknown backend: {backend}")
+def get_backend(
+    backend: BackendChoice = "ots",
+    year: int = 2024,
+    state: str | None = None,
+) -> TaxBackend:
+    """Get the backend instance that computes this year's return.
+
+    Args:
+        backend: "ots", "graph", or "auto" (graph for 2024-2025 within graph
+            scope, OTS otherwise). Default is "ots".
+        year: Tax year.
+        state: State code (e.g., "CA") or None for federal only.
+
+    Returns:
+        TaxBackend instance
+
+    Raises:
+        ValueError: If ``backend`` is not a known backend name.
+        UnsupportedReturnError: If the backend cannot compute this year/state.
+        BackendUnavailableError: If the selected backend is not installed.
+
+    """
+    return require_available(select_backend(backend, year, state))

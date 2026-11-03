@@ -1,52 +1,91 @@
 # Error Handling
 
-This document covers OTS backend error handling. The graph backend uses
-different error semantics; see `src/tenforty/backends/graph.py`.
+`tenforty` separates two kinds of error, and `on_error` governs only the
+second:
 
-`tenforty` provides configurable error handling for dealing with OTS processing
-issues. This document covers the `on_error` parameter and the exception types
-available.
+- A **request no backend can serve** — an unsupported year, state or input for
+  the selected backend, an unknown backend or `on_error` value, or a backend
+  that is not installed — raises before anything is evaluated, under every
+  `on_error` policy. In `evaluate_returns` the whole batch is checked first, so
+  it fails before any row runs.
+- A **computation that fails** — an engine exception, a non-zero OTS exit, or a
+  required OTS subordinate form (Schedule SE, Forms 8812, 8959, 8960, 8995,
+  6781) that fails — is handled by `on_error`.
 
-## The `on_error` Parameter
+## Failures and `on_error`
 
-Both `evaluate_return` and `evaluate_returns` accept an `on_error` parameter
-that controls how errors from the underlying OTS engine are handled.
+| Mode | A failed computation |
+|------|----------------------|
+| `"raise"` (default) | Raises the engine's own exception (`OTSError` for a non-zero OTS exit) |
+| `"warn"` | Logs the failure with its year, state and filing status, emits a `RuntimeWarning`, and returns a **failed return** |
+| `"ignore"` | Returns a **failed return** silently |
 
-### Available Modes
-
-| Mode | Behavior |
-|------|----------|
-| `"raise"` | Raise an `OTSError` exception (default) |
-| `"warn"` | Emit a `RuntimeWarning` and continue |
-| `"ignore"` | Silently continue |
-
-### Examples
+A **failed return** has every field set to NaN: `InterpretedTaxReturn.failed()`.
+NaN means "this return failed". It is never a $0 that could pass for a real
+return, and it propagates through sums, so check for it before aggregating:
 
 ```python
-from tenforty import evaluate_return
+import math
 
-# Default: raise exceptions on OTS errors
-result = evaluate_return(w2_income=50000)
+from tenforty import evaluate_return, evaluate_returns
+import polars as pl
 
-# Emit warnings instead of raising
-result = evaluate_return(w2_income=50000, on_error="warn")
-
-# Silently ignore OTS errors
 result = evaluate_return(w2_income=50000, on_error="ignore")
+if math.isnan(result.total_tax):
+    ...  # the computation failed
+
+df = evaluate_returns(w2_income=[50000, 80000], on_error="warn")
+failed = df.filter(pl.col("total_tax").is_nan())
+succeeded = df.filter(~pl.col("total_tax").is_nan())
 ```
 
-### When to Use Each Mode
+`evaluate_returns` keeps one row per requested return, in the requested order,
+with its inputs echoed; only a failed row's output columns are NaN. When a
+graph batch fails under `"warn"` or `"ignore"`, its rows are re-evaluated one by
+one, so one failing return does not fail its neighbours.
 
-- **`"raise"` (default)**: Use for interactive exploration and debugging. You'll
-  immediately see when something goes wrong.
+OTS output written after a non-zero exit is not used, and a required
+subordinate form that fails is never skipped: either would produce a wrong
+number that looks like a result.
 
-- **`"warn"`**: Use when processing many returns in batch where you want to know
-  about issues but don't want to stop processing.
+`"warn"` and `"ignore"` are for batch work where you want the remaining returns
+even when some fail. Use `"raise"` (the default) to stop at the first failure.
 
-- **`"ignore"`**: Use when you've already validated inputs and want maximum
-  performance, or when you're intentionally testing edge cases.
+## Choosing a backend
+
+`backend` is `"ots"` (the default), `"graph"`, or `"auto"`:
+
+| `backend` | 2018-2023 | 2024-2025 |
+|-----------|-----------|-----------|
+| `"ots"` | OTS | OTS |
+| `"graph"` | raises `UnsupportedReturnError` | graph |
+| `"auto"` | OTS | graph, for states in graph scope; OTS otherwise |
+
+An explicit `"ots"` or `"graph"` is never reinterpreted: it is honoured or
+refused before evaluation. `"auto"` splits a mixed-year batch by year and
+keeps the row order. `tenforty.backends.get_backend(backend, year, state)`
+applies the same selection.
 
 ## Exception Types
+
+### `UnsupportedReturnError`
+
+A `ValueError` raised before evaluation when the selected backend cannot
+compute the requested return: for example `backend="graph"` for 2023, or a
+state the backend has no return for. The message names what is supported and
+which backend to use instead.
+
+`UnsupportedInputError` is the subclass raised when a backend does not compute
+a nonzero input it was given (for example the graph backend and
+`dependent_exemptions`). It is also a `NotImplementedError`, which is what that
+refusal raised before.
+
+### `BackendUnavailableError`
+
+Raised when the selected backend's compiled extension is not installed. It is
+an `ImportError`, and also a `RuntimeError` for callers that caught the earlier
+`RuntimeError("Graph backend is not available")`.
+
 
 ### `OTSError`
 
@@ -105,7 +144,11 @@ Values: `OTSErrorPolicy.RAISE`, `OTSErrorPolicy.WARN`, `OTSErrorPolicy.IGNORE`
 
 ## Handling Invalid Inputs
 
-Invalid year/form combinations raise `ValueError` before OTS is invoked:
+An unknown `on_error` value raises `ValueError`, so a typo cannot select
+`"ignore"`.
+
+At the form level, invalid year/form combinations raise `ValueError` before OTS
+is invoked:
 
 ```python
 from tenforty import otslib
