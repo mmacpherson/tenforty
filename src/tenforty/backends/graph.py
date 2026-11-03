@@ -38,11 +38,17 @@ _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 logger = logging.getLogger(__name__)
 
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
+# Computed fields that exist only to fill an OTS form line the graph derives in
+# its own spec from the same naturals: Massachusetts line 11a comes from
+# w2_income on both backends.
+_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
 
 
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     """Lower a validated public input model to graph-compatible natural values."""
-    values = tax_input.model_dump(exclude=_MODEL_CONTEXT_FIELDS)
+    values = tax_input.model_dump(
+        exclude=_MODEL_CONTEXT_FIELDS | _OTS_ONLY_DERIVED_FIELDS
+    )
     values["standard_or_itemized"] = float(
         tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
     )
