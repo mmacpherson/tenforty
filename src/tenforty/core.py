@@ -963,7 +963,7 @@ def evaluate_returns(
             ("filer_65_or_older", filer_65_or_older_values),
             ("spouse_65_or_older", spouse_65_or_older_values),
         ]
-        lengths = {name: len(vals) for name, vals in all_lists if len(vals) > 1}
+        lengths = {name: len(vals) for name, vals in all_lists if len(vals) != 1}
         if lengths:
             unique_lengths = set(lengths.values())
             if len(unique_lengths) > 1:
@@ -1079,12 +1079,8 @@ def evaluate_returns(
 
     if mode == "cross":
         group_params = {
-            (y, s): list(
-                _graph_cross_order(y, s, columns)
-                if engine == "graph"
-                else _cross_params(y, s, columns, parameter_names)
-            )
-            for (y, s), engine in engines.items()
+            (y, s): list(_cross_params(y, s, columns, parameter_names))
+            for (y, s) in engines
         }
     else:
         zip_groups: dict[tuple, list[int]] = defaultdict(list)
@@ -1098,39 +1094,28 @@ def evaluate_returns(
         }
     _preflight(group_params, engines)
 
-    batched = True
+    def evaluate_group(group: tuple) -> list[dict]:
+        rows = group_params[group]
+        engine = engines[group]
+        if engine == "graph":
+            outputs = _graph_batch_outputs(*group, rows, policy)
+            if outputs is not None:
+                return [
+                    params | output
+                    for params, output in zip(rows, outputs, strict=True)
+                ]
+        return _scalar_rows(rows, engine, policy)
+
     if mode == "cross":
-        results = []
-        for y, s in groups:
-            if engines[(y, s)] == "graph":
-                group_rows = _graph_cross_rows(y, s, columns, policy)
-                if group_rows is None:
-                    batched = False
-                    group_rows = _scalar_rows(group_params[(y, s)], "graph", policy)
-            else:
-                group_rows = _scalar_rows(group_params[(y, s)], "ots", policy)
-            results.extend(group_rows)
+        results = [row for group in groups for row in evaluate_group(group)]
     else:
         results_indexed: list[dict | None] = [None] * n
-        for (y, s), indices in zip_groups.items():
-            engine = engines[(y, s)]
-            group_rows = (
-                _graph_zip_rows(y, s, columns, indices, policy)
-                if engine == "graph"
-                else None
-            )
-            if group_rows is None:
-                batched = batched and engine == "ots"
-                group_rows = _scalar_rows(group_params[(y, s)], engine, policy)
-            for idx, row in zip(indices, group_rows, strict=True):
+        for group, indices in zip_groups.items():
+            for idx, row in zip(indices, evaluate_group(group), strict=True):
                 results_indexed[idx] = row
         results = results_indexed
 
-    if batched and len(set(engines.values())) == 1:
-        return pl.DataFrame(results).cast({"state": pl.Utf8})
-    return pl.DataFrame(results, infer_schema_length=None, strict=False).cast(
-        {"state": pl.Utf8}
-    )
+    return _batch_frame(results)
 
 
 def _preflight(
@@ -1176,14 +1161,54 @@ _GRAPH_PASSTHROUGH_FIELDS = tuple(
 )
 
 
-def _graph_cross_inputs(
-    columns: dict[str, list], num_dependents: int, standard_or_itemized: str
-) -> dict[str, list]:
-    return {name: columns[name] for name in _GRAPH_PASSTHROUGH_FIELDS} | {
-        "num_dependents": [num_dependents],
-        "dependent_exemptions": columns["dependent_exemptions"],
-        "standard_or_itemized": [standard_or_itemized],
-    }
+_INPUT_COLUMNS = tuple(
+    name
+    for name in inspect.signature(evaluate_returns).parameters
+    if name not in _BATCH_OPTIONS
+)
+_OUTPUT_COLUMNS = tuple(InterpretedTaxReturn.model_fields)
+
+
+def _input_dtype(name: str) -> pl.DataType:
+    if name in {"year", "num_dependents"}:
+        return pl.Int64
+    if name in {"state", "filing_status", "standard_or_itemized"}:
+        return pl.String
+    if TaxReturnInput.model_fields[name].annotation is bool:
+        return pl.Boolean
+    return pl.Float64
+
+
+BATCH_SCHEMA = pl.Schema(
+    [(name, _input_dtype(name)) for name in _INPUT_COLUMNS]
+    + [(name, pl.Float64) for name in _OUTPUT_COLUMNS]
+)
+"""The evaluate_returns frame: request inputs in signature order, then outputs."""
+
+
+def _enum_value(value: object) -> object:
+    return getattr(value, "value", value)
+
+
+def _converter(dtype: pl.DataType) -> Callable[[object], object]:
+    if dtype == pl.Int64:
+        return lambda value: int(_enum_value(value))
+    if dtype == pl.Float64:
+        return float
+    if dtype == pl.Boolean:
+        return bool
+    return lambda value: None if value is None else str(_enum_value(value))
+
+
+def _batch_frame(rows: list[dict]) -> pl.DataFrame:
+    """Build the frame in BATCH_SCHEMA, converting values; nothing is inferred."""
+    return pl.DataFrame(
+        {
+            name: list(map(_converter(dtype), (row[name] for row in rows)))
+            for name, dtype in BATCH_SCHEMA.items()
+        },
+        schema=BATCH_SCHEMA,
+    )
 
 
 def _graph_batch_failed(
@@ -1200,94 +1225,40 @@ def _graph_batch_failed(
         )
 
 
-def _graph_cross_rows(
-    year: int, state: str | None, columns: dict[str, list], policy: OTSErrorPolicy
+def _graph_batch_outputs(
+    year: int, state: str | None, rows: list[dict], policy: OTSErrorPolicy
 ) -> list[dict] | None:
-    """Evaluate one (year, state) cross group as graph batches; None on failure."""
+    """Evaluate one (year, state) group's rows as a graph batch; None on failure.
+
+    The rows are already in the frame's order, so the batch runs them as given
+    (zip) and contributes only the return fields; the caller's request supplies
+    the input columns.
+    """
     from .backends.graph import GraphBackend
 
-    graph_backend = GraphBackend()
-    rows = []
+    if not rows:
+        return []
+    inputs = {name: [row[name] for row in rows] for name in _GRAPH_PASSTHROUGH_FIELDS}
+    inputs["num_dependents"] = [float(row["num_dependents"]) for row in rows]
+    inputs["dependent_exemptions"] = [row["dependent_exemptions"] for row in rows]
+    inputs["standard_or_itemized"] = [row["standard_or_itemized"] for row in rows]
     try:
-        for nd, soi in itertools.product(
-            columns["num_dependents"], columns["standard_or_itemized"]
-        ):
-            batch_results = graph_backend.evaluate_batch(
-                year,
-                OTSState(state) if state else OTSState.NONE,
-                _graph_cross_inputs(columns, nd, soi),
-                columns["filing_status"],
-            )
-            batch_size = len(next(iter(batch_results.values())))
-            for i in range(batch_size):
-                row = {k: v[i] for k, v in batch_results.items()}
-                row["year"] = year
-                row["state"] = state
-                row["num_dependents"] = nd
-                row["standard_or_itemized"] = soi
-                rows.append(row)
-    except UnsupportedReturnError:
-        raise
-    except Exception as error:
-        _graph_batch_failed(error, policy, year, state)
-        return None
-    return rows
-
-
-def _graph_cross_order(
-    year: int, state: str | None, columns: dict[str, list]
-) -> Iterator[dict]:
-    """Yield a graph cross group's scalar parameters in its batch row order."""
-    for nd, soi in itertools.product(
-        columns["num_dependents"], columns["standard_or_itemized"]
-    ):
-        axes = _graph_cross_inputs(columns, nd, soi)
-        for combo in itertools.product(*axes.values()):
-            for status in columns["filing_status"]:
-                yield {"year": year, "state": state, "filing_status": status} | dict(
-                    zip(axes, combo, strict=True)
-                )
-
-
-def _graph_zip_rows(
-    year: int,
-    state: str | None,
-    columns: dict[str, list],
-    indices: list[int],
-    policy: OTSErrorPolicy,
-) -> list[dict] | None:
-    """Evaluate one (year, state) zip group as a graph batch; None on failure."""
-    from .backends.graph import GraphBackend
-
-    group_inputs = {
-        name: [columns[name][i] for i in indices] for name in _GRAPH_PASSTHROUGH_FIELDS
-    } | {
-        "num_dependents": [float(columns["num_dependents"][i]) for i in indices],
-        "dependent_exemptions": [columns["dependent_exemptions"][i] for i in indices],
-        "standard_or_itemized": [columns["standard_or_itemized"][i] for i in indices],
-    }
-    try:
-        batch_results = GraphBackend().evaluate_batch(
+        batch = GraphBackend().evaluate_batch(
             year,
             OTSState(state) if state else OTSState.NONE,
-            group_inputs,
-            [columns["filing_status"][i] for i in indices],
+            inputs,
+            [row["filing_status"] for row in rows],
             mode="zip",
         )
+        return [
+            {field: batch[field][i] for field in _OUTPUT_COLUMNS}
+            for i in range(len(rows))
+        ]
     except UnsupportedReturnError:
         raise
     except Exception as error:
         _graph_batch_failed(error, policy, year, state)
         return None
-    rows = []
-    for j, idx in enumerate(indices):
-        row = {k: v[j] for k, v in batch_results.items()}
-        row["year"] = year
-        row["state"] = state
-        row["num_dependents"] = columns["num_dependents"][idx]
-        row["standard_or_itemized"] = columns["standard_or_itemized"][idx]
-        rows.append(row)
-    return rows
 
 
 def _cross_params(
