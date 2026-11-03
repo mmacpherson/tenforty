@@ -13,19 +13,29 @@ usForm6251_2025 :: Either FormError Form
 usForm6251_2025 = form "us_form_6251" 2025 $ do
   -- Part I: Alternative Minimum Taxable Income (AMTI)
 
-  -- Lines 1a-1b: Form 1040 line 14 less Schedule 1-A line 37, subtracted
-  -- from line 11b; if less than zero, entered as a negative amount. Schedule
-  -- 1-A is not modeled, so line 1a is line 14.
+  -- Line 1a: Form 1040 line 14 less Schedule 1-A line 37. The senior
+  -- deduction is treated as a personal exemption and added back (2025
+  -- Instructions for Form 6251, p.1); the tips, overtime and car loan
+  -- interest deductions stay deducted.
+  l1a <-
+    interior "L1a" "deductions_less_senior" $
+      importForm us1040L14 .-. importForm usSchedule1AL37
+
+  -- Line 1b: Form 1040 line 11b less line 1a; if less than zero, entered as a
+  -- negative amount.
   l1 <-
     interior "L1" "taxable_income" $
-      importForm us1040L11 .-. importForm us1040L14
+      importForm us1040L11 .-. l1a
 
-  -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A taxes when
-  -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E)). Import
-  -- the 1040's actual choice because a forced itemized deduction can be less
-  -- than the standard deduction. When the 1040 did not itemize, L12Final is
-  -- also the exact standard deduction it used, including any additions.
-  l2aSalt <- keyInput "L2a" "salt_addback" "State and local taxes from Schedule A, line 5d"
+  -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A line 7
+  -- taxes (the capped line 5e plus line 6) when itemizing, OR the standard
+  -- deduction when not (IRC 56(b)(1)(E)). Import the 1040's actual choice
+  -- because a forced itemized deduction can be less than the standard
+  -- deduction. When the 1040 did not itemize, L12Final is also the exact
+  -- standard deduction it used, including any additions.
+  l2aSalt <-
+    interior "L2a_schedule_a_taxes" "Taxes from Schedule A, line 7" $
+      importForm usScheduleAL7
   deductionTaken <-
     interior "deduction_taken" "Deduction the 1040 used" $
       importForm us1040L12final

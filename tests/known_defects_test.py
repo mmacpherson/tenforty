@@ -613,3 +613,88 @@ def test_negative_agi_creates_no_medical_deduction():
     )
 
     assert result.federal_amt == pytest.approx(15_618.46, abs=0.01)
+
+
+# --- OTS 2025 OBBBA defects (F31-F34) ------------------------------------------
+# Expected values: independent derivations from the 2025 IRS forms
+# (docs/validation/derivations/obbba-2025.md), not backend output; TaxCalc 6.9.0
+# reproduces each on these whole-$1,000 witnesses (golden tag R_obbba). The
+# value-level tests with full arithmetic are in tests/obbba_2025_test.py.
+
+
+@pytest.mark.xfail(
+    reason="F31: OTS 2025 enters the SALT worksheet only above $500,000 for MFS",
+    strict=True,
+)
+def test_ots_mfs_salt_worksheet_starts_at_250k():
+    """MFS, AGI 300,000, taxes 25,000, other itemized 10,000.
+
+    Worksheet: 40,000 - 0.30 x 50,000 = 25,000, half = 12,500 = line 5e; line 17
+    = 22,500 > 15,750, so line 15 = 277,500.
+    """
+    result = evaluate_return(
+        backend="ots",
+        year=2025,
+        filing_status="Married/Sep",
+        w2_income=300_000,
+        state_and_local_taxes=25_000,
+        itemized_deductions=10_000,
+    )
+
+    assert result.federal_taxable_income == pytest.approx(277_500.0, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F32: OTS 2025 Schedule 1-A line 28 truncates and line 29 uses $300",
+    strict=True,
+)
+def test_ots_car_loan_phaseout_rounds_up_at_200_per_thousand():
+    """MFJ, AGI 215,000, interest 12,000 (inventory C-2).
+
+    Line 24 10,000; line 27 15,000; line 28 15; line 29 3,000; line 30 7,000;
+    line 15 = 215,000 - 31,500 - 7,000 = 176,500.
+    """
+    result = evaluate_return(
+        backend="ots",
+        year=2025,
+        filing_status="Married/Joint",
+        w2_income=215_000,
+        vehicle_loan_interest=12_000,
+    )
+
+    assert result.federal_taxable_income == pytest.approx(176_500.0, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F33: OTS 2025 skips Schedule 1-A Parts II-V, car loan included, for MFS",
+    strict=True,
+)
+def test_ots_mfs_claims_car_loan_interest():
+    """MFS, AGI 100,000, interest 5,000: line 30 = 5,000; line 15 = 79,250."""
+    result = evaluate_return(
+        backend="ots",
+        year=2025,
+        filing_status="Married/Sep",
+        w2_income=100_000,
+        vehicle_loan_interest=5_000,
+    )
+
+    assert result.federal_taxable_income == pytest.approx(79_250.0, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F34: OTS 2025 Form 6251 line 1a does not add back the senior deduction",
+    strict=True,
+)
+def test_ots_amt_adds_back_the_senior_deduction():
+    """Single 65+, wages 90,000, ISO 200,000: AMTI 290,000; line 24 = 52,494."""
+    result = evaluate_return(
+        backend="ots",
+        year=2025,
+        filing_status="Single",
+        w2_income=90_000,
+        incentive_stock_option_gains=200_000,
+        filer_65_or_older=True,
+    )
+
+    assert result.federal_total_tax == pytest.approx(52_494.0, abs=0.01)

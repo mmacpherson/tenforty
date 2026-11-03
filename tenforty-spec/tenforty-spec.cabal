@@ -277,6 +277,7 @@ executable tenforty-compile
     USForm8995_2025
     USSchedule1_2024
     USSchedule1_2025
+    USSchedule1A_2025
     USSchedule2_2024
     USSchedule2_2025
     USSchedule3_2024
@@ -565,6 +566,7 @@ test-suite tenforty-spec-test
     USForm8995_2025
     USSchedule1_2024
     USSchedule1_2025
+    USSchedule1A_2025
     USSchedule2_2024
     USSchedule2_2025
     USSchedule3_2024

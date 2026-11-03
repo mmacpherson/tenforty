@@ -21,12 +21,15 @@ usForm6251_2024 = form "us_form_6251" 2024 $ do
     interior "L1" "taxable_income" $
       importForm us1040L11 .-. importForm us1040L14
 
-  -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A taxes when
-  -- itemizing, OR the standard deduction when not (IRC 56(b)(1)(E)). Import
-  -- the 1040's actual choice because a forced itemized deduction can be less
-  -- than the standard deduction. When the 1040 did not itemize, L12Final is
-  -- also the exact standard deduction it used, including any additions.
-  l2aSalt <- keyInput "L2a" "salt_addback" "State and local taxes from Schedule A, line 5d"
+  -- Line 2a: taxes added back. Form 6251 line 2a is the Schedule A line 7
+  -- taxes (the capped line 5e plus line 6) when itemizing, OR the standard
+  -- deduction when not (IRC 56(b)(1)(E)). Import the 1040's actual choice
+  -- because a forced itemized deduction can be less than the standard
+  -- deduction. When the 1040 did not itemize, L12Final is also the exact
+  -- standard deduction it used, including any additions.
+  l2aSalt <-
+    interior "L2a_schedule_a_taxes" "Taxes from Schedule A, line 7" $
+      importForm usScheduleAL7
   deductionTaken <-
     interior "deduction_taken" "Deduction the 1040 used" $
       importForm us1040L12final

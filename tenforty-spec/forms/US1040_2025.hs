@@ -25,10 +25,12 @@ us1040_2025 = form "us_1040" 2025 $ do
   l1h <- keyInput "L1h" "other_earned_income" "Other earned income"
   l1i <- keyInput "L1i" "nontaxable_combat_pay" "Nontaxable combat pay election"
 
-  -- Add lines 1a through 1i.
+  -- Line 1z: add lines 1a through 1h (Form 1040 line 1z). Line 1i, the
+  -- nontaxable combat pay election, is not income: it only feeds the earned
+  -- income credit and Schedule 8812.
   l1z <-
     interior "L1z" "total_wages" $
-      sumOf [l1a, l1b, l1c, l1d, l1e, l1f, l1g, l1h, l1i]
+      sumOf [l1a, l1b, l1c, l1d, l1e, l1f, l1g, l1h]
 
   _l2a <- keyInput "L2a" "tax_exempt_interest" "Tax-exempt interest (informational only)"
   l2b <- keyInput "L2b" "taxable_interest" "Taxable interest from 1099-INT"
@@ -64,8 +66,26 @@ us1040_2025 = form "us_1040" 2025 $ do
   -- Lines 12-14: Deductions
   l12 <- interior "L12" "itemized_deductions" $ importForm usScheduleAL17
 
-  -- Additional standard deduction for blind/65+ (from 1040 line 12 worksheet)
-  additionalStdDed <- keyInput "AddStdDed" "additional_std_ded" "Additional standard deduction for blind/65+"
+  -- Age-65 checkboxes (line 12a): born before January 2, 1961. One when
+  -- checked. The spouse box counts toward the standard deduction only for
+  -- married filing jointly or separately (the chart's MFS footnote: a spouse
+  -- with no income who is not filing and cannot be claimed as a dependent).
+  -- The blind boxes and the dependent-filer limit are not modeled.
+  filer65 <- keyInput "Filer65" "filer_65_or_older" "Filer was born before January 2, 1961"
+  spouse65 <- keyInput "Spouse65" "spouse_65_or_older" "Spouse was born before January 2, 1961"
+
+  -- Additional standard deduction: the age-65/blind chart less the basic
+  -- amount, a fixed amount per box checked.
+  additionalStdDedPerBox <-
+    interior "AddStdDedPerBox" "additional_std_ded_per_box" $
+      byStatusE (fmap lit additionalStdDedPerBox2025)
+  spouseBox <-
+    interior "SpouseBox65" "spouse_age_box_counts" $
+      byStatusE (byStatus (dollars 0) spouse65 spouse65 (dollars 0) (dollars 0))
+  additionalStdDed <-
+    interior "AddStdDed" "additional_std_ded" $
+      ifPos filer65 additionalStdDedPerBox (dollars 0)
+        .+. ifPos spouseBox additionalStdDedPerBox (dollars 0)
 
   baseStdDed <-
     interior "BaseStdDed" "base_standard_deduction" $
@@ -90,18 +110,25 @@ us1040_2025 = form "us_1040" 2025 $ do
     keyOutput "L12Final" "deduction_amount" "Standard or itemized deduction" $
       ifPos usesItemized l12 stdDed
 
-  -- Taxable income before the QBI deduction (used by Form 8995). This avoids
-  -- a cross-form cycle where 1040 imports the QBI deduction from 8995 while
-  -- 8995 tries to compute its limit using 1040 taxable income.
+  -- Line 13b: additional deductions from Schedule 1-A line 38 (OBBBA). Below
+  -- AGI, and taken whether the return itemizes or not.
+  l13b <- interior "L13b" "schedule_1a_deductions" $ importForm usSchedule1AL38
+
+  -- Taxable income before the QBI deduction (used by Form 8995): 2025 Form
+  -- 8995 line 11 is 1040 line 11a less lines 12e and 13b (Instructions for
+  -- Form 8995, p.4). This avoids a cross-form cycle where 1040 imports the
+  -- QBI deduction from 8995 while 8995 tries to compute its limit using 1040
+  -- taxable income.
   _l15PreQbi <-
     interior "L15_pre_qbi" "taxable_income_before_qbi" $
-      l11 `subtractNotBelowZero` l12Final
+      l11 `subtractNotBelowZero` (l12Final .+. l13b)
 
   l13 <- interior "L13" "qbi_deduction" $ importForm usForm8995L16
 
+  -- Line 14: add lines 12e, 13a and 13b.
   l14 <-
     interior "L14" "total_deductions" $
-      l12Final .+. l13
+      l12Final .+. l13 .+. l13b
 
   -- Line 15: Subtract line 14 from line 11. If zero or less, enter -0-.
   l15 <-
@@ -249,6 +276,8 @@ us1040_2025 = form "us_1040" 2025 $ do
 
   outputs
     [ "L1z",
+      "Filer65",
+      "Spouse65",
       "NonWageIncomeMagnitude",
       "L6b",
       "L9",

@@ -50,6 +50,7 @@ import USForm8960_2024
 import USForm8960_2025
 import USForm8995_2024
 import USForm8995_2025
+import USSchedule1A_2025
 import USSchedule1_2024
 import USSchedule1_2025
 import USSchedule2_2024
@@ -276,6 +277,25 @@ spec n = do
     it "US Schedule 1 2025 is valid" $
       case usSchedule1_2025 of
         Right _ -> pure ()
+        Left err -> expectationFailure $ show err
+
+    it "US Schedule 1-A 2025 is valid" $
+      case usSchedule1A_2025 of
+        Right _ -> pure ()
+        Left err -> expectationFailure $ show err
+
+    it "US 1040 2025 imports Schedule 1-A line 38 for line 13b" $
+      case us1040_2025 of
+        Right frm ->
+          cgImports (compileForm frm) `shouldContain` [("us_schedule_1a", "L38", 2025)]
+        Left err -> expectationFailure $ show err
+
+    it "US Form 6251 2025 adds back only the Schedule 1-A senior deduction" $
+      case usForm6251_2025 of
+        Right frm -> do
+          let imports = cgImports (compileForm frm)
+          imports `shouldContain` [("us_schedule_1a", "L37", 2025)]
+          imports `shouldNotContain` [("us_schedule_1a", "L38", 2025)]
         Left err -> expectationFailure $ show err
 
     it "US Schedule 2 2024 is valid" $

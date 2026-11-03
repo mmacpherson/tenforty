@@ -6,6 +6,7 @@ module USScheduleA_2025
 where
 
 import FormRefs
+import Tables2025
 import TenForty
 
 usScheduleA_2025 :: Either FormError Form
@@ -25,10 +26,28 @@ usScheduleA_2025 = form "us_schedule_a" 2025 $ do
   l5b <- keyInput "L5b" "state_local_real_estate" "State and local real estate taxes"
   l5c <- keyInput "L5c" "state_local_personal_property" "State and local personal property taxes"
   l5d <- interior "L5d" "salt_total" $ l5a .+. l5b .+. l5c
-  -- SALT cap: $10,000 ($5,000 if MFS)
+  -- Line 5e: the smaller of line 5d or the State and Local Tax Deduction
+  -- Worksheet limit (2025 Instructions for Schedule A, PDF p.7). MAGI is line
+  -- 11b; the Puerto Rico, Form 2555 and Form 4563 additions (worksheet lines
+  -- 3a-3d) are not modeled. Worksheet line 1 is $40,000 for every status;
+  -- lines 6-8 reduce it by 30% of MAGI over $500,000 ($250,000 MFS); line 9
+  -- floors it at $10,000; line 10 halves it for MFS. At or below the
+  -- threshold this is the form's flat $40,000 ($20,000 MFS), and with 5d at
+  -- or below $10,000 ($5,000 MFS) the smaller-of gives 5d, as the worksheet's
+  -- "before you begin" step does.
+  saltExcessMagi <-
+    interior "SALT_WS6" "salt_excess_magi" $
+      l2 `subtractNotBelowZero` byStatusE (fmap lit saltThreshold2025)
+  saltReducedLimit <-
+    interior "SALT_WS8" "salt_reduced_limit" $
+      lit saltLimitationAmount2025 .-. (saltExcessMagi .*. lit saltPhaseDownRate2025)
+  saltFlooredLimit <-
+    interior "SALT_WS9" "salt_floored_limit" $
+      greaterOf saltReducedLimit (lit saltFloor2025)
   saltCap <-
     interior "SALTCap" "salt_cap" $
-      byStatusE (fmap lit (byStatus 10000 10000 5000 10000 10000))
+      saltFlooredLimit
+        .*. byStatusE (byStatus (rate 1) (rate 1) (rate 0.5) (rate 1) (rate 1))
   l5e <- interior "L5e" "salt_limited" $ smallerOf l5d saltCap
   l6 <- keyInput "L6" "other_taxes" "Other taxes (list type and amount)"
   _l7 <-

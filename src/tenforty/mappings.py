@@ -28,6 +28,16 @@ NATURAL_TO_NODE = {
     "rental_income": "us_schedule_1_L5_rental_income",
     # Schedule A (approximation): map aggregate value into "other deductions".
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
+    # Schedule A line 5d, entered on line 5a; line 5e applies the cap.
+    "state_and_local_taxes": "us_schedule_a_L5a_state_local_income_or_sales",
+    # Form 1040 age-65 boxes: the additional standard deduction, and for 2025
+    # the Schedule 1-A senior deduction.
+    "filer_65_or_older": "us_1040_Filer65",
+    "spouse_65_or_older": "us_1040_Spouse65",
+    # Schedule 1-A (2025 onward; see FEDERAL_NATURAL_FIRST_YEAR).
+    "qualified_tips": "us_schedule_1a_L4a_qualified_tips",
+    "qualified_overtime": "us_schedule_1a_L14a_qualified_overtime",
+    "vehicle_loan_interest": "us_schedule_1a_L23_qualified_car_loan_interest",
     # AMT (Form 6251)
     "incentive_stock_option_gains": "us_form_6251_L2k_iso_adjustment",
 }
@@ -62,6 +72,23 @@ NATURAL_TO_NODES: dict[str, list[str]] = {
 for name, nodes in _SUBORDINATE_NODES.items():
     if name not in NATURAL_TO_NODES:
         NATURAL_TO_NODES[name] = list(nodes)
+
+# Federal naturals whose form first exists in a given tax year. An earlier year's
+# graph has no node for them, so they lower to no node there; the input model
+# refuses a nonzero value for those years.
+FEDERAL_NATURAL_FIRST_YEAR: dict[str, int] = {
+    "qualified_tips": 2025,
+    "qualified_overtime": 2025,
+    "vehicle_loan_interest": 2025,
+}
+
+
+def federal_nodes_for(natural_name: str, year: int) -> list[str]:
+    """List the federal graph input nodes one natural input reaches in one tax year."""
+    if year < FEDERAL_NATURAL_FIRST_YEAR.get(natural_name, year):
+        return []
+    return list(NATURAL_TO_NODES.get(natural_name, []))
+
 
 # Naturals that are derived from another natural rather than supplied independently
 # by the caller, mapped to the natural they derive from. Evaluation reaches their

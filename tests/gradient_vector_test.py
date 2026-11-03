@@ -52,6 +52,7 @@ def test_gradient_vector_matches_scalar_api(graph_backend):
         "rental_income",
         "schedule_1_income",
         "itemized_deductions",
+        "state_and_local_taxes",
         "incentive_stock_option_gains",
     ]
     for natural_name, vector_gradient in gradients.items():

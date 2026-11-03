@@ -1,9 +1,10 @@
 """Property-based parity testing between OTS and Graph backends."""
 
+import math
 from pathlib import Path
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import example, given, settings
 from hypothesis import strategies as st
 
 from tenforty import evaluate_return
@@ -394,6 +395,218 @@ def test_child_tax_credit_parity(year, w2_income, num_dependents, filing_status)
         f"Tax diff ${diff:.2f} for {year} {filing_status} w2=${w2_income} "
         f"children={num_dependents} (OTS=${ots.federal_total_tax:.2f}, "
         f"Graph=${graph.federal_total_tax:.2f})"
+    )
+
+
+# Read from taxsolve_US_1040_2025.c (OTS 23.06), reported in
+# docs/upstream-ots-reports.md items 11-13, strict xfails in tests/obbba_2025_test.py.
+# Each returns the amount OTS deducts where the law deducts `lawful`, so the parity
+# test can bound exactly the returns the defect reaches and compare the rest.
+_STD_2025 = {
+    "Single": 15_750.0,
+    "Married/Joint": 31_500.0,
+    "Married/Sep": 15_750.0,
+    "Head_of_House": 23_625.0,
+    "Widow(er)": 31_500.0,
+}
+_AGE_BOX_2025 = {
+    "Single": 2_000.0,
+    "Married/Joint": 1_600.0,
+    "Married/Sep": 1_600.0,
+    "Head_of_House": 2_000.0,
+    "Widow(er)": 1_600.0,
+}
+
+
+def _lawful_salt_cap_2025(filing_status, magi):
+    """Schedule A line 5e limit, 2025 Instructions for Schedule A PDF p.7."""
+    threshold = 250_000.0 if filing_status == "Married/Sep" else 500_000.0
+    limit = max(10_000.0, 40_000.0 - 0.30 * max(0.0, magi - threshold))
+    return limit / 2 if filing_status == "Married/Sep" else limit
+
+
+def _ots_salt_cap_2025(filing_status, magi):
+    """OTS enters the worksheet only above $500,000 of line 11b, MFS included."""
+    if filing_status == "Married/Sep" and magi <= 500_000.0:
+        return 20_000.0
+    return _lawful_salt_cap_2025(filing_status, magi)
+
+
+def _car_loan_2025(filing_status, magi, interest, *, step, rounding, mfs_allowed):
+    if filing_status == "Married/Sep" and not mfs_allowed:
+        return 0.0
+    threshold = 200_000.0 if filing_status == "Married/Joint" else 100_000.0
+    thousands = rounding(max(0.0, magi - threshold) / 1_000.0)
+    return max(0.0, min(interest, 10_000.0) - step * thousands)
+
+
+def _ots_deduction_shortfall_2025(common, std):
+    """Lawful minus OTS deduction (lines 12e + 13b) from the three OTS defects."""
+    status, magi = common["filing_status"], common["w2_income"]
+    salt = common["state_and_local_taxes"]
+    forced = common["standard_or_itemized"] == "Itemized"
+
+    def line_12e(cap):
+        schedule_a = min(salt, cap)
+        return schedule_a if forced else max(std, schedule_a)
+
+    lawful = line_12e(_lawful_salt_cap_2025(status, magi)) + _car_loan_2025(
+        status,
+        magi,
+        common["vehicle_loan_interest"],
+        step=200.0,
+        rounding=math.ceil,
+        mfs_allowed=True,
+    )
+    ots = line_12e(_ots_salt_cap_2025(status, magi)) + _car_loan_2025(
+        status,
+        magi,
+        common["vehicle_loan_interest"],
+        step=300.0,
+        rounding=math.floor,
+        mfs_allowed=False,
+    )
+    return lawful - ots
+
+
+@skip_if_backends_unavailable
+@given(
+    year=st.sampled_from([2024, 2025]),
+    w2_income=st.integers(0, 700_000),
+    filing_status=st.sampled_from(
+        ["Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)"]
+    ),
+    state_and_local_taxes=st.integers(0, 80_000),
+    itemize=st.booleans(),
+    filer_65_or_older=st.booleans(),
+    spouse_65_or_older=st.booleans(),
+    qualified_tips=st.integers(0, 30_000),
+    qualified_overtime=st.integers(0, 30_000),
+    vehicle_loan_interest=st.integers(0, 15_000),
+)
+# Witnesses: S-3 (MFS SALT the defect changes); MFS $300,000 with $6,000 of taxes,
+# which both caps admit in full (review witness); C-1 (line 28/29); MFS car loan.
+@example(
+    year=2025,
+    w2_income=300_000,
+    filing_status="Married/Sep",
+    state_and_local_taxes=25_000,
+    itemize=True,
+    filer_65_or_older=False,
+    spouse_65_or_older=False,
+    qualified_tips=0,
+    qualified_overtime=0,
+    vehicle_loan_interest=0,
+)
+@example(
+    year=2025,
+    w2_income=300_000,
+    filing_status="Married/Sep",
+    state_and_local_taxes=6_000,
+    itemize=True,
+    filer_65_or_older=False,
+    spouse_65_or_older=False,
+    qualified_tips=0,
+    qualified_overtime=0,
+    vehicle_loan_interest=0,
+)
+@example(
+    year=2025,
+    w2_income=112_300,
+    filing_status="Single",
+    state_and_local_taxes=0,
+    itemize=False,
+    filer_65_or_older=False,
+    spouse_65_or_older=False,
+    qualified_tips=0,
+    qualified_overtime=0,
+    vehicle_loan_interest=4_500,
+)
+@example(
+    year=2025,
+    w2_income=100_000,
+    filing_status="Married/Sep",
+    state_and_local_taxes=0,
+    itemize=False,
+    filer_65_or_older=False,
+    spouse_65_or_older=False,
+    qualified_tips=0,
+    qualified_overtime=0,
+    vehicle_loan_interest=5_000,
+)
+# Two-backend oracle: bounded, it does not scale with the deep profile.
+@settings(max_examples=200, deadline=None)
+def test_obbba_inputs_parity(
+    year,
+    w2_income,
+    filing_status,
+    state_and_local_taxes,
+    itemize,
+    filer_65_or_older,
+    spouse_65_or_older,
+    qualified_tips,
+    qualified_overtime,
+    vehicle_loan_interest,
+):
+    """SALT, the age-65 boxes and 2025 Schedule 1-A agree across backends.
+
+    Where an OTS 2025 defect changes the deduction OTS takes (MFS SALT between
+    $250,000 and $500,000; car loan line 28/29; MFS car loan), the return is still
+    compared: OTS's taxable income must be the graph's less the shortfall the defect's
+    mechanism predicts, from the published rules, and its total tax may differ by at
+    most the 37% top rate on that shortfall. Everything else must agree: whole-dollar
+    inputs give the same taxable income, and line 24 allows the optional whole-dollar
+    rounding plus the 2024 OTS head-of-household bracket error where it applies.
+    No ISO input is drawn, so the OTS senior AMT add-back defect cannot bind here.
+    """
+    married = filing_status in ("Married/Joint", "Married/Sep")
+    spouse = spouse_65_or_older and married
+    tips = min(qualified_tips, w2_income) if year == 2025 else 0
+    overtime = min(qualified_overtime, w2_income - tips) if year == 2025 else 0
+    common = dict(
+        year=year,
+        w2_income=w2_income,
+        filing_status=filing_status,
+        state_and_local_taxes=state_and_local_taxes,
+        standard_or_itemized="Itemized" if itemize else "Standard",
+        filer_65_or_older=filer_65_or_older,
+        spouse_65_or_older=spouse,
+        qualified_tips=tips,
+        qualified_overtime=overtime,
+        vehicle_loan_interest=vehicle_loan_interest if year == 2025 else 0,
+    )
+    ots = evaluate_return(**common, backend="ots")
+    graph = evaluate_return(**common, backend="graph")
+
+    shortfall = 0.0
+    if year == 2025:
+        std = _STD_2025[filing_status] + _AGE_BOX_2025[filing_status] * (
+            filer_65_or_older + spouse
+        )
+        shortfall = _ots_deduction_shortfall_2025(common, std)
+
+    if graph.federal_taxable_income > 0:
+        expected_ots_taxable = max(0.0, graph.federal_taxable_income + shortfall)
+        assert ots.federal_taxable_income == pytest.approx(
+            expected_ots_taxable, abs=EXACT_TOLERANCE
+        ), f"Taxable income for {common} (OTS shortfall {shortfall})"
+    else:
+        assert ots.federal_taxable_income <= max(0.0, shortfall) + EXACT_TOLERANCE
+
+    tolerance = EXACT_TOLERANCE
+    if (
+        filing_status == "Head_of_House"
+        and year == 2024
+        and graph.federal_taxable_income > 191_150
+    ):
+        tolerance += KNOWN_ISSUES["hoh_bracket"]
+    tax_effect = 0.37 * shortfall
+    low = min(0.0, tax_effect) - tolerance
+    high = max(0.0, tax_effect) + tolerance
+    diff = ots.federal_total_tax - graph.federal_total_tax
+    assert low <= diff <= high, (
+        f"Tax diff ${diff:.2f} for {common} (OTS=${ots.federal_total_tax:.2f}, "
+        f"Graph=${graph.federal_total_tax:.2f}, shortfall {shortfall})"
     )
 
 

@@ -45,6 +45,11 @@ signature, and update this table in the same PR.
 | F28 | TaxCalc elects to itemize below the standard deduction when that lowers AMT; tenforty takes the larger deduction | API contract, both backends | open (deduction-choice contract; tenforty-z31) | taxcalc 6.9.0 upgrade differential |
 | F29 | Form 8959 line 8 ignores the Schedule SE $400 stop rule | OTS mapping + graph spec | fixed (tenforty-j0f) | taxcalc 6.9.0 upgrade differential |
 | F30 | Graph Schedule A line 3 goes negative with negative AGI, creating a medical deduction | graph spec | fixed (tenforty-kzm) | taxcalc 6.9.0 upgrade differential |
+| F31 | OTS 2025 enters the SALT worksheet only above \$500,000, MFS included | upstream OpenTaxSolver | open (upstream report 11 pending) — not patched locally | OBBBA implementation, source reading |
+| F32 | OTS 2025 Schedule 1-A line 28 truncates; line 29 uses \$300 | upstream OpenTaxSolver | open (upstream report 12 pending) — not patched locally | OBBBA implementation, source reading |
+| F33 | OTS 2025 skips Schedule 1-A Parts II-V for MFS, denying MFS car loan interest | upstream OpenTaxSolver | open (upstream report 13 pending) — not patched locally | OBBBA implementation, source reading |
+| F34 | OTS 2025 Form 6251 line 1a omits the senior-deduction add-back | upstream OpenTaxSolver | open (upstream report 14 pending) — not patched locally | OBBBA implementation, source reading |
+| F35 | TaxCalc 6.9.0 phases tips, overtime and car loan interest continuously, not per \$1,000 | TaxCalc | observed; not exercised (R_obbba witnesses use whole-\$1,000 excesses) | OBBBA golden witnesses |
 
 ## Method
 
@@ -810,3 +815,51 @@ only to the extent they exceed 7.5% of AGI, so the deduction cannot exceed
 line 1; TaxCalc applies the percentage to AGI floored at zero. The graph now
 does the same. A passing test pins the 2025 qualifying-surviving-spouse witness
 at the derived $15,618.46 AMT.
+
+### F31-F34. NEW — OTS 2025 OBBBA defects, read from the source
+
+Found while adding the 2025 OBBBA inputs (`state_and_local_taxes`,
+`qualified_tips`, `qualified_overtime`, `vehicle_loan_interest`, the age-65
+flags), by reading `taxsolve_US_1040_2025.c` (OTS 23.06). Full write-ups and
+reproducers are upstream reports 11-14 in `docs/upstream-ots-reports.md`; the
+values come from docs/validation/derivations/obbba-2025.md.
+
+- **F31** (:2462): the SALT worksheet entry test requires line 11b > \$500,000
+  even for MFS, whose threshold is \$250,000. MFS between the two keeps the flat
+  \$20,000 cap. The signature recomputes the lawful and OTS line 5e and passes
+  the shift in the deduction actually taken (after the larger-of choice), so a
+  return whose taxes fit under the lawful cap is not excused.
+- **F32** (:1890-1893): line 28 truncates where the form rounds up, and line 29
+  multiplies by \$300 where the form uses \$200. Non-MFS only.
+- **F33** (:1824): one MFS test wraps Parts II-V, so MFS loses the Part IV car
+  loan interest deduction it may claim. Tips, overtime and the senior deduction
+  are lawfully zero for MFS, so only Part IV shifts.
+- **F34** (:228-236): Form 6251 line 1a subtracts a local that is never set, so
+  the senior deduction is not added back to AMTI. Active only where the AMT
+  binds lawfully; OTS's lower AMTI cannot create AMT where none is owed.
+
+The shift signatures (F31-F33) move taxable income by exactly the deduction
+difference (floored at zero; QBI may absorb a fifth when there is business
+income) and regular tax by at most 37% of it. SALT is added back for the AMT,
+so it moves AMTI only through the QBI deduction (at most 20% of the shift);
+car loan interest stays deducted, so it moves AMTI by 0.8 to 1 times the shift.
+The AMT change is derived from both the tentative minimum tax (at most 35% of
+the AMTI change) and the regular tax. **Limit:** with business income in the
+Form 8995-A phase-in range (lines 19-26), a larger deduction also raises the QBI
+deduction and taxable income can fall by more than the shift. That is not
+bounded, so the signatures do not claim any return whose lawful or OTS pre-QBI
+taxable income touches the range; a disagreement there is reported, not excused.
+No golden or randomized case currently draws business income with an OBBBA input. F34 bounds the AMT drop by 35% (28% plus the 25% exemption
+phase-out) of the senior deduction. All four are inactive without their OBBBA
+input. The golden witnesses are tag `R_obbba`; the strict burn-ins are in
+`tests/known_defects_test.py`.
+
+### F35. OBSERVED — TaxCalc phases the Schedule 1-A deductions continuously
+
+TaxCalc 6.9.0 reduces qualified tips and overtime by 10% of the excess MAGI,
+and car loan interest by 20%, where Schedule 1-A lines 11, 19 and 28 step per
+whole \$1,000 (down for tips and overtime, up for car loan interest). Inventory
+T-1 (Single, AGI \$162,500, tips \$20,000) gets \$18,750 from TaxCalc against
+the form's \$18,800. At whole-\$1,000 excesses the two agree, which is why the
+R_obbba witnesses use them. Not a tenforty defect and not exercised by the
+randomized differential, which draws no OBBBA inputs; no signature.

@@ -21,7 +21,8 @@ Scope notes:
   w2_income is a household aggregate. taxcalc runs under both attributions
   (all wages on the self-employed primary / all on the other spouse); a
   tenforty MFJ value passes if it falls within the bounds.
-- Ages set to 40 to avoid 65+ standard deduction and EITC age edges.
+- Ages set to 40 to avoid 65+ standard deduction and EITC age edges, except
+  the R_obbba cases that set the 65+ flags.
 """
 
 import argparse
@@ -93,6 +94,13 @@ def build_cases() -> list[dict]:
                 "itemized": float(kw.pop("itemized", 0.0)),
                 "iso": float(kw.pop("iso", 0.0)),
                 "std_or_item": kw.pop("std_or_item", "Standard"),
+                # Optional OBBBA keys are stored only when given, so every
+                # pre-OBBBA case keeps its exact shape.
+                **{
+                    key: kw.pop(key)
+                    for key in list(kw)
+                    if key in taxcalc_policy.OBBBA_CASE_KEYS
+                },
             }
         )
         assert not kw, kw
@@ -310,6 +318,36 @@ def build_cases() -> list[dict]:
             itemized=50_000 if year == 2024 else 56_000,
         )
 
+    # R_obbba: 2025 OBBBA witnesses. Each uses whole-$1,000 MAGI excesses where a
+    # phase-out applies, because TaxCalc 6.9.0 reduces tips, overtime and car loan
+    # interest continuously while the IRS form steps per $1,000 (lines 11, 19,
+    # 28); at whole thousands the two agree, so the oracle is the form here.
+    # The first four are the OTS-defect witnesses (F31-F34); the rest pin the
+    # adapter mappings where no defect applies.
+    for kw in (
+        # F31: MFS between $250,000 and $500,000; Schedule A line 5e is 12,500
+        # lawfully, 20,000 in OTS, with 10,000 of other itemized deductions.
+        dict(status="Married/Sep", w2=300_000, salt=25_000, itemized=10_000),
+        # F32: line 27 = 15,000; line 30 is 7,000 lawfully, 5,500 in OTS.
+        dict(status="Married/Joint", w2=215_000, car_loan=12_000),
+        # F33: MFS car loan interest at the $100,000 threshold: 5,000 lawfully,
+        # 0 in OTS.
+        dict(status="Married/Sep", w2=100_000, car_loan=5_000),
+        # F34: senior deduction 5,100 with the AMT binding.
+        dict(status="Single", w2=90_000, iso=200_000, age65=True),
+        # F32 and F33 with the AMT binding: car loan interest stays deducted for
+        # the AMT, so OTS's smaller deduction raises AMTI as well as regular
+        # tax. F32: lawful 9,800 vs OTS 9,700; F33: lawful 5,000 vs OTS 0.
+        dict(status="Single", w2=101_000, car_loan=10_000, iso=200_000),
+        dict(status="Married/Sep", w2=100_000, car_loan=5_000, iso=200_000),
+        dict(status="Single", w2=160_000, tips=20_000),
+        dict(status="Married/Joint", w2=310_000, overtime=30_000),
+        dict(status="Married/Joint", w2=180_000, age65=True, spouse65=True),
+        dict(status="Married/Joint", w2=560_000, salt=52_500, itemized=20_000),
+        dict(status="Head_of_House", w2=120_000, salt=30_000),
+    ):
+        add(2025, "R_obbba", **kw)
+
     for i, c in enumerate(cases):
         c["case_id"] = i
     return cases
@@ -336,6 +374,7 @@ def run_tenforty(cases, backend):
                 itemized_deductions=c["itemized"],
                 incentive_stock_option_gains=c["iso"],
                 standard_or_itemized=c["std_or_item"],
+                **taxcalc_policy.tenforty_obbba_inputs(c),
             )
             rows[c["case_id"]] = {
                 "agi": r.federal_adjusted_gross_income,
@@ -370,8 +409,7 @@ def run_taxcalc(cases, wage_attribution="primary"):
                     "RECID": c["case_id"] + 1,
                     "MARS": mars,
                     "XTOT": 2 if mars == 2 else 1,
-                    "age_head": 40,
-                    "age_spouse": 40 if mars == 2 else 0,
+                    **taxcalc_policy.taxcalc_obbba_fields(c, mars),
                     "e00200": c["w2"],
                     "e00200p": 0.0 if wages_on_spouse else c["w2"],
                     "e00200s": c["w2"] if wages_on_spouse else 0.0,

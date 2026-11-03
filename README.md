@@ -383,9 +383,15 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `qbi_is_sstb`                | bool                     | False               | Whether that business or aggregation is an SSTB |
 | `rental_income`              | float                    | 0.0                 |                                    |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
-| `itemized_deductions`        | float                    | 0.0                 |                                    |
+| `itemized_deductions`        | float                    | 0.0                 | Aggregate approximation of other itemized deductions, outside the SALT cap. OTS enters it as Schedule A line 6 (other taxes) and the graph as line 16 (other deductions), so their AMT add-back differs |
 | `state_adjustment`           | float                    | 0.0                 |                                    |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
+| `state_and_local_taxes`      | float                    | 0.0                 | Schedule A line 5d (entered on 5a), capped on line 5e: $10,000 ($5,000 MFS) through 2024. For 2025, $40,000 less 30% of AGI over $500,000 ($250,000 MFS), not below $10,000; MFS then halves that result (equivalently $20,000 less 15% of AGI over $250,000, not below $5,000) |
+| `qualified_tips`             | float                    | 0.0                 | 2025 only. W-2 box 7 tips already in `w2_income`; Schedule 1-A Part II, Form 1040 line 13b |
+| `qualified_overtime`         | float                    | 0.0                 | 2025 only. FLSA overtime premium already in `w2_income`; Schedule 1-A Part III |
+| `vehicle_loan_interest`      | float                    | 0.0                 | 2025 only. Qualified passenger vehicle loan interest; Schedule 1-A Part IV |
+| `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
+| `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
 | `on_error`                   | str                      | raise               | See [Error Handling](./docs/error-handling.md) |
 | `backend`                    | str                      | ots                 | See [Experimental: Graph Backend](#experimental-graph-backend) |
 
