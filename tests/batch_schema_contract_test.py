@@ -248,3 +248,45 @@ def test_schema_is_identical_for_every_kind_of_batch(request, kind, backend, mod
             for row in frame.select(OUTPUT_COLUMNS).rows()
             for value in row
         )
+
+
+ECHO_COERCION_CASES = [
+    pytest.param({"qbi_is_sstb": "false"}, "qbi_is_sstb", False, id="bool-string"),
+    pytest.param({"num_dependents": "1.0"}, "num_dependents", 1, id="int-string"),
+    pytest.param({"state": "NONE-ENUM"}, "state", None, id="state-none-enum"),
+]
+
+
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.parametrize(("inputs", "column", "echoed"), ECHO_COERCION_CASES)
+def test_echo_uses_the_validated_field_value(
+    inputs, column, echoed, mode, backend, on_error
+):
+    """The echo is the value validation accepted, in the declared dtype."""
+    from tenforty.models import OTSState
+
+    call = {
+        name: OTSState.NONE if value == "NONE-ENUM" else value
+        for name, value in inputs.items()
+    }
+    frame = tenforty.evaluate_returns(
+        year=2024,
+        w2_income=[50_000.0, 60_000.0],
+        **call,
+        mode=mode,
+        backend=backend,
+        on_error=on_error,
+    )
+    assert frame.schema == SCHEMA
+    assert frame[column].to_list() == [echoed, echoed]
+    assert _none_nan_outputs(frame)
+
+
+def _none_nan_outputs(frame: pl.DataFrame) -> bool:
+    return not any(
+        math.isnan(value)
+        for row in frame.select(OUTPUT_COLUMNS).rows()
+        for value in row
+    )

@@ -13,6 +13,7 @@ from typing import Any, Literal
 
 import dotenv
 import polars as pl
+from pydantic import TypeAdapter
 
 from . import otslib
 from .models import (
@@ -1186,26 +1187,38 @@ BATCH_SCHEMA = pl.Schema(
 """The evaluate_returns frame: request inputs in signature order, then outputs."""
 
 
-def _enum_value(value: object) -> object:
-    return getattr(value, "value", value)
+def _echo_converter(name: str) -> Callable[[object], object]:
+    """Coerce one input as its TaxReturnInput field does, without model validators.
+
+    The echo is the caller's value in the field's declared type: "false" is
+    False and "1.0" is 1, as validation accepted them, while model-level
+    normalization (the qualified-into-ordinary dividend lift) is not applied.
+    An enum echoes its value, so OTSState.NONE is a null state.
+    """
+    adapter = TypeAdapter(TaxReturnInput.model_fields[name].annotation)
+
+    def convert(value: object) -> object:
+        validated = adapter.validate_python(value)
+        return getattr(validated, "value", validated)
+
+    return convert
 
 
-def _converter(dtype: pl.DataType) -> Callable[[object], object]:
-    if dtype == pl.Int64:
-        return lambda value: int(_enum_value(value))
-    if dtype == pl.Float64:
-        return float
-    if dtype == pl.Boolean:
-        return bool
-    return lambda value: None if value is None else str(_enum_value(value))
+def _output_converter(value: object) -> float:
+    return float(value)
+
+
+_COLUMN_CONVERTERS = {name: _echo_converter(name) for name in _INPUT_COLUMNS} | {
+    name: _output_converter for name in _OUTPUT_COLUMNS
+}
 
 
 def _batch_frame(rows: list[dict]) -> pl.DataFrame:
     """Build the frame in BATCH_SCHEMA, converting values; nothing is inferred."""
     return pl.DataFrame(
         {
-            name: list(map(_converter(dtype), (row[name] for row in rows)))
-            for name, dtype in BATCH_SCHEMA.items()
+            name: list(map(_COLUMN_CONVERTERS[name], (row[name] for row in rows)))
+            for name in BATCH_SCHEMA
         },
         schema=BATCH_SCHEMA,
     )
