@@ -135,6 +135,13 @@ us1040_2025 = form "us_1040" 2025 $ do
     keyOutput "L15" "taxable_income" "Taxable income (AGI minus deductions)" $
       l11 `subtractNotBelowZero` l14
 
+  -- The rate-schedule bracket that holds line 15, as tax per dollar. Rate
+  -- schedules say "over X but not over Y", so an exact threshold stays in the
+  -- lower bracket. Preferential capital-gain rates are not this bracket.
+  _ <-
+    keyOutput "L15BracketRate" "ordinary_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt federalBracketsTable2025 l15
+
   -- Lines 16-18: Tax Computation
 
   -- Qualified Dividends and Capital Gain Tax Worksheet
@@ -287,6 +294,7 @@ us1040_2025 = form "us_1040" 2025 $ do
       "L14",
       "L15_pre_qbi",
       "L15",
+      "L15BracketRate",
       "L16",
       "L18",
       "L21",

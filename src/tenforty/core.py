@@ -718,7 +718,7 @@ def evaluate_natural_input_form(
             transforms=state_natural_config.output_transforms,
         )
 
-    return (
+    return _rates_not_defined_as_none(
         prefix_keys(federal_natural_output, "federal")
         | prefix_keys(subordinate_natural_outputs, "federal")
         | prefix_keys(state_natural_output, "state")
@@ -769,6 +769,29 @@ def _evaluate_with_engine(
         if policy == OTSErrorPolicy.WARN:
             _warn_failed(engine, tax_input, error)
         return InterpretedTaxReturn.failed()
+
+
+RATE_FIELDS = (
+    "federal_tax_bracket",
+    "federal_effective_tax_rate",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+
+
+def _rates_not_defined_as_none(result: dict[str, Any]) -> dict[str, Any]:
+    """Mark the rate fields OTS did not report, or cannot define, as None.
+
+    OTS prints a bracket line only for some forms; a missing line is "not
+    defined", not a 0% rate. An effective rate divides by taxable income, so
+    it is not defined when that income is not positive.
+    """
+    rates = {field: None for field in RATE_FIELDS} | result
+    if rates.get("federal_taxable_income", 0) <= 0:
+        rates["federal_effective_tax_rate"] = None
+    if rates.get("state_taxable_income", 1) <= 0:
+        rates["state_effective_tax_rate"] = None
+    return rates
 
 
 ## LEVEL 2: Map from validated user models to natural description.
@@ -1204,8 +1227,8 @@ def _echo_converter(name: str) -> Callable[[object], object]:
     return convert
 
 
-def _output_converter(value: object) -> float:
-    return float(value)
+def _output_converter(value: object) -> float | None:
+    return None if value is None else float(value)
 
 
 _COLUMN_CONVERTERS = {name: _echo_converter(name) for name in _INPUT_COLUMNS} | {

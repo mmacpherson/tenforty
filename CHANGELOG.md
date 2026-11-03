@@ -43,6 +43,28 @@
   `ImportError`, still a `RuntimeError`).
 - An unknown `on_error` value raises `ValueError` instead of behaving like
   `"ignore"`.
+- **The four rate fields are now `float | None`.** `federal_tax_bracket`,
+  `federal_effective_tax_rate`, `state_tax_bracket` and
+  `state_effective_tax_rate` are `None` when the rate is not defined, where they
+  used to be `0.0`. That covers a return with no state, an OTS state program
+  that prints no bracket line (every state but CA, NJ, NY, OH, OR and VA), and
+  an effective rate whose taxable income is zero or negative. A real 0% stays
+  `0.0`. `NaN` still means a failed return. In `evaluate_returns` these columns
+  are `Float64` with nulls.
+- An effective rate is tax as a percent of **taxable income** (federal Form
+  1040 line 15, or the state's taxable-income line), which is what OTS has
+  always reported. The README called it a percentage of AGI, which was wrong.
+
+### Fixed (graph backend: opt-in, experimental)
+- `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
+  It used to be hard-coded to 0. Income exactly at a threshold stays in the
+  lower bracket, as the schedules' "over X but not over Y" wording requires.
+  The rate comes from the same bracket table that computes the tax. It is the
+  statutory bracket, not `marginal_rate()`, which is the derivative of the
+  computed tax.
+- `federal_effective_tax_rate` divides by taxable income, as OTS does. It used
+  to divide by AGI.
+- `state_effective_tax_rate` is computed for graph states. It used to be 0.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)

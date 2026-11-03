@@ -71,15 +71,15 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_form_8960_L17_niit": "federal_niit",
     "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
 }
+FEDERAL_BRACKET_RATE_NODE = "us_1040_L15BracketRate_ordinary_bracket_rate"
 _FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}
 
 _STATE_ZERO_FIELDS = (
     "state_adjusted_gross_income",
     "state_taxable_income",
     "state_total_tax",
-    "state_tax_bracket",
-    "state_effective_tax_rate",
 )
+_STATE_RATE_FIELDS = ("state_tax_bracket", "state_effective_tax_rate")
 
 
 def _state_output_node(form_name: str, line_name: str) -> str:
@@ -233,9 +233,13 @@ def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
     return _state_output_node(form_name, line_name)
 
 
-def _federal_effective_tax_rate(total_tax: float, agi: float) -> float:
-    """Effective rate as a percent; 0 when AGI is non-positive (avoid div-by-0)."""
-    return (total_tax / agi * 100.0) if agi > 0 else 0.0
+def _effective_tax_rate(tax: float, taxable_income: float) -> float | None:
+    """Tax as a percent of taxable income; not defined unless income is positive."""
+    return tax / taxable_income * 100.0 if taxable_income > 0 else None
+
+
+def _bracket_percent(rate_per_dollar: float | None) -> float | None:
+    return None if rate_per_dollar is None else rate_per_dollar * 100.0
 
 
 def _forms_dir() -> pathlib.Path:
@@ -326,25 +330,35 @@ class GraphBackend:
         # unset inputs read as 0, so every node in FEDERAL_OUTPUT_NODES is present
         # and evaluates — a missing one is a real graph defect and should surface,
         # not be swallowed to 0.
-        result: dict[str, float] = {
+        result: dict[str, float | None] = {
             field: evaluator.eval(node) for node, field in FEDERAL_OUTPUT_NODES.items()
         }
 
         total_tax = result["federal_total_tax"]
         result["total_tax"] = total_tax
-        result["federal_effective_tax_rate"] = _federal_effective_tax_rate(
-            total_tax, result["federal_adjusted_gross_income"]
+        result["federal_effective_tax_rate"] = _effective_tax_rate(
+            total_tax, result["federal_taxable_income"]
         )
-        result["federal_tax_bracket"] = 0.0
+        result["federal_tax_bracket"] = _bracket_percent(
+            evaluator.eval(FEDERAL_BRACKET_RATE_NODE)
+        )
 
         for field in _STATE_ZERO_FIELDS:
             result[field] = 0.0
+        for field in _STATE_RATE_FIELDS:
+            result[field] = None
 
         if tax_input.state and tax_input.state != OTSState.NONE:
             state_result = self._evaluate_state(
                 evaluator, tax_input.state, tax_input.year.value
             )
             result.update(state_result)
+            result["state_tax_bracket"] = _bracket_percent(
+                state_result.get("state_tax_bracket")
+            )
+            result["state_effective_tax_rate"] = _effective_tax_rate(
+                result["state_total_tax"], result["state_taxable_income"]
+            )
             result["total_tax"] = result["federal_total_tax"] + result.get(
                 "state_total_tax", 0.0
             )
@@ -358,7 +372,7 @@ class GraphBackend:
         inputs: dict[str, list[object]],
         statuses: list[str],
         mode: str = "cross",
-    ) -> dict[str, list[float]]:
+    ) -> dict[str, list[float | None]]:
         """Evaluate multiple scenarios efficiently using graph batch API.
 
         With mode="cross" (default), computes Cartesian product of inputs x statuses.
@@ -438,6 +452,7 @@ class GraphBackend:
         # (CT/NE/NM/OR reuse us_1040_L11_agi for both federal and state AGI),
         # which the single path handles by evaluating that node into each.
         output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
+        output_pairs.append((FEDERAL_BRACKET_RATE_NODE, "federal_tax_bracket"))
         if state and state != OTSState.NONE:
             state_form = STATE_FORM_NAMES.get(state)
             if state_form:
@@ -487,21 +502,34 @@ class GraphBackend:
 
         count = len(status_col)
 
-        # Federal derived fields — mirror the single path exactly.
-        final_results["federal_tax_bracket"] = [0.0] * count
+        # Derived fields: the same definitions as the single path.
+        final_results["federal_tax_bracket"] = [
+            _bracket_percent(rate) for rate in final_results["federal_tax_bracket"]
+        ]
         final_results["federal_effective_tax_rate"] = [
-            _federal_effective_tax_rate(ft, agi)
-            for ft, agi in zip(
+            _effective_tax_rate(tax, taxable)
+            for tax, taxable in zip(
                 final_results["federal_total_tax"],
-                final_results["federal_adjusted_gross_income"],
+                final_results["federal_taxable_income"],
                 strict=True,
             )
         ]
 
-        # State fields default to 0 when no state was requested (matching the
-        # single path); tax_bracket / effective_rate stay 0 even with a state.
         for field in _STATE_ZERO_FIELDS:
             final_results.setdefault(field, [0.0] * count)
+        has_state = bool(state and state != OTSState.NONE)
+        final_results["state_tax_bracket"] = [
+            _bracket_percent(rate)
+            for rate in final_results.get("state_tax_bracket", [None] * count)
+        ]
+        final_results["state_effective_tax_rate"] = [
+            _effective_tax_rate(tax, taxable) if has_state else None
+            for tax, taxable in zip(
+                final_results["state_total_tax"],
+                final_results["state_taxable_income"],
+                strict=True,
+            )
+        ]
 
         final_results["total_tax"] = [
             f + s

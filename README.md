@@ -432,8 +432,8 @@ orchestration layer before rerunning Form 1040.
 |---------------------------------|-------------------------------------------------------|
 | total_tax                       | Combined federal and state tax liability              |
 | federal_adjusted_gross_income   | Federal Adjusted Gross Income (Form 1040 Line 11)     |
-| federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
-| federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
+| federal_effective_tax_rate      | Federal total tax as a percent of federal taxable income; None when taxable income is not positive |
+| federal_tax_bracket             | Rate-schedule bracket (percent) holding federal taxable income; a threshold amount stays in the lower bracket |
 | federal_taxable_income          | Income subject to federal tax after deductions        |
 | federal_qbi_deduction           | Qualified business income deduction (Form 8995/8995-A) |
 | federal_amt                     | Federal Alternative Minimum Tax                       |
@@ -445,8 +445,8 @@ orchestration layer before rerunning Form 1040.
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |
 | state_total_tax                 | Total state tax liability                             |
-| state_tax_bracket               | Marginal state tax bracket                            |
-| state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
+| state_tax_bracket               | Rate-schedule bracket (percent) holding state taxable income; None when not defined (no state, or not reported for that state) |
+| state_effective_tax_rate        | State tax as a percent of state taxable income; None when not defined |
 
 
 ## Experimental: Graph Backend
