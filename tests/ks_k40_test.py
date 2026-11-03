@@ -176,17 +176,3 @@ def test_removing_the_base_reintroduces_the_default_gap(year):
         runtime.set("us_1040_L1a_wages", 100_000)
         amounts.append(runtime.eval("ks_k40_L7_ks_taxable_income"))
     assert amounts[1] - amounts[0] == STATUS_BASE["Single"]
-
-
-@pytest.mark.parametrize("year", YEARS)
-def test_num_dependents_is_rejected_not_silently_dropped(year):
-    """KS dependents enter only through the line-5 total (tenforty-aqx.4.1.6)."""
-    with pytest.raises(NotImplementedError, match="num_dependents"):
-        evaluate_return(
-            year=year,
-            state="KS",
-            filing_status="Married/Joint",
-            w2_income=90_000,
-            num_dependents=2,
-            backend="graph",
-        )

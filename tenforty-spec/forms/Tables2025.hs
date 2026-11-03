@@ -159,18 +159,19 @@ seMedicareRate2025 = 0.029
 seNetEarningsRate2025 :: Amount Rate
 seNetEarningsRate2025 = 0.9235
 
--- | 2025 Child Tax Credit per qualifying child
+-- | 2025 Child Tax Credit per qualifying child (OBBBA; 2025 Schedule 8812 line 5)
 ctcPerChild2025 :: Amount Dollars
-ctcPerChild2025 = 2000
+ctcPerChild2025 = 2200
 
 -- | 2025 Credit for other dependents
 ctcOtherDependent2025 :: Amount Dollars
 ctcOtherDependent2025 = 500
 
--- | 2025 CTC phase-out threshold
+-- | 2025 CTC phase-out threshold (Schedule 8812 line 9: $400,000 if married
+-- filing jointly, $200,000 for all other filing statuses, QSS included)
 -- Order: Single, MFJ, MFS, HoH, QW
 ctcThreshold2025 :: ByStatus (Amount Dollars)
-ctcThreshold2025 = byStatus 200000 400000 200000 200000 400000
+ctcThreshold2025 = byStatus 200000 400000 200000 200000 200000
 
 -- | CTC phase-out rate ($50 per $1,000 over threshold)
 ctcPhaseOutRate2025 :: Amount Rate

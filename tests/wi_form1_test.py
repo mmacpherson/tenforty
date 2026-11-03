@@ -81,8 +81,7 @@ def test_worked_example_exact_tax_is_within_the_table_row(year):
 def test_each_dependent_adds_a_700_exemption(year, filing_status):
     """Form 1 line 38 dependents reach line 10a at $700 each (Wis. Stat. 71.05(23)).
 
-    Through the raw graph: the natural API refuses nonzero num_dependents until the
-    federal return reads it too (tenforty-aqx.4.1.6).
+    Through the raw graph, so only the WI line is set.
     """
     from tenforty.backends.graph import _load_resolved_graph
     from tenforty.graphlib import FilingStatus, Runtime

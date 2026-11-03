@@ -10,8 +10,8 @@ Taxable income is whole dollars here, so it is compared exactly. Tax values,
 which still carry table/schedule-method residuals, live in the silver fixtures.
 
 The graph derives only the 6a/6b base. Dependents enter through the
-dependent_exemptions TOTAL; num_dependents is deliberately unmapped for HI
-(tenforty-aqx.4.1.6). Unsupported: a filer or joint spouse claimable as another
+dependent_exemptions TOTAL; num_dependents, the federal child tax credit count,
+is deliberately unmapped for HI (tests/child_tax_credit_test.py). Unsupported: a filer or joint spouse claimable as another
 taxpayer's dependent (p.9), whose total falls below the base, which
 max(base, total) cannot express.
 """
@@ -145,24 +145,6 @@ def test_removing_the_base_reintroduces_the_default_gap(year):
         runtime.set("us_1040_L1a_wages", 50_000)
         amounts.append(runtime.eval("hi_n11_L25_hi_taxable_income"))
     assert amounts == [44_456, 44_456 + EXEMPTION]
-
-
-@pytest.mark.parametrize("year", [2024, 2025])
-def test_nonzero_num_dependents_is_still_rejected_for_hi(year):
-    """HI must not map num_dependents (tenforty-aqx.4.1.6).
-
-    A state mapping would let the count through while the federal graph silently
-    ignores it (no CTC, no error). Unmapped, the graph backend rejects it.
-    """
-    with pytest.raises(NotImplementedError, match="num_dependents"):
-        evaluate_return(
-            backend="graph",
-            year=year,
-            state="HI",
-            filing_status="Single",
-            w2_income=50_000,
-            num_dependents=1,
-        )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])

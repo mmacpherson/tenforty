@@ -67,13 +67,13 @@ Source: `facts/scenarios/ats-1.json` (Tax Year 2023)
 | Standard Deduction | $27,700 | $27,700 | Match |
 | Taxable Income | $9,993 | $9,993 | Match |
 | Pre-credit Tax | $998 | ~$998 | Match |
-| CTC Credit | $500 | N/A | Not computed |
+| Credit for other dependents | $500 | N/A | Not computed |
 | EITC Credit | $2,468 | N/A | Not computed |
 | **Federal Tax (post-credits)** | **$498** | **~$998** | **Credits not implemented** |
 
 Source: `facts/scenarios/ats-2.json` (Tax Year 2023)
 
-**Note**: tenforty does not currently compute refundable credits (EITC, CTC). The pre-credit tax calculation matches.
+**Note**: the $500 credit is the credit for other dependents (a child tax credit would be limited to the $998 tax), so the fixture passes `num_dependents=0`; tenforty computes the child tax credit for 2023-2025 but not the other-dependent credit or the EITC. The pre-credit tax calculation matches.
 
 ### Single Filer, $110,000 W2 Income
 
@@ -278,7 +278,7 @@ Household credit: Up to $75 (Single), $180 (MFJ) depending on FAGI
 ## Future Work
 
 1. **More gold-standard sources**: Find official state tax worked examples
-2. **Credits implementation**: Add EITC/CTC computation to enable more MeF ATS scenarios
+2. **Credits implementation**: Add EITC and other-dependent credit computation to enable more MeF ATS scenarios
 3. **Additional states**: Expand silver-standard coverage to more states
 4. **PA OTS crash**: Investigate OTS PA_40 segfault so PA can use the OTS backend; currently graph-backend only
 5. **PA gold standard**: PA joined IRS Direct File for 2025; future test fixtures may become available

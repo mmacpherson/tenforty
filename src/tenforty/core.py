@@ -365,6 +365,7 @@ def evaluate_form(
 
 _FORM_DISPATCH_ALIASES = {
     "Form_6781": "f6781",
+    "Form_8812": "f8812",
     "Form_8995": "f8995",
     "Form_8959": "f8959",
     "Form_8960": "f8960",
@@ -598,6 +599,8 @@ def evaluate_natural_input_form(
     logger.debug(f"{state_form_values=}")
 
     # Phase 2: Run a preliminary 1040 for forms whose result feeds back into it.
+    # Each form gets a fresh preliminary 1040 carrying every earlier phase-2
+    # export, so Schedule 8812's tax limit sees the QBI deduction from Form 8995.
     for sub_cfg in subordinate_configs:
         if sub_cfg.phase != 2:
             continue
@@ -621,9 +624,18 @@ def evaluate_natural_input_form(
             year=year.value,
             form_id=federal_form_id,
         )
-        sub_form_values = sub_cfg.defaults | _form_8995_input_values(
-            year.value, preliminary_return
-        )
+        is_form_8995 = sub_cfg.form_id == "Form_8995"
+        if is_form_8995:
+            sub_form_values = sub_cfg.defaults | _form_8995_input_values(
+                year.value, preliminary_return
+            )
+        else:
+            sub_form_values = sub_cfg.defaults | map_natural_to_ots_input(
+                natural_form_values, sub_cfg.input_map
+            )
+            for fed_key, sub_key in sub_cfg.fed_import_map.items():
+                if fed_key in preliminary_return:
+                    sub_form_values[sub_key] = preliminary_return[fed_key]
         try:
             sub_result = _evaluate_subordinate(
                 year.value,
@@ -642,6 +654,15 @@ def evaluate_natural_input_form(
                     sub_cfg.form_id,
                     exc_info=True,
                 )
+            continue
+
+        if not is_form_8995:
+            for sub_key, fed_key in sub_cfg.export_map.items():
+                if sub_key in sub_result:
+                    federal_form_values[fed_key] = sub_result[sub_key]
+            for ots_key, natural_name in sub_cfg.output_map.items():
+                if ots_key in sub_result:
+                    subordinate_natural_outputs[natural_name] = sub_result[ots_key]
             continue
 
         qbi_deduction = _form_8995a_deduction(

@@ -177,10 +177,11 @@ ctcPerChild2024 = 2000
 ctcOtherDependent2024 :: Amount Dollars
 ctcOtherDependent2024 = 500
 
--- | 2024 CTC phase-out threshold
+-- | 2024 CTC phase-out threshold (Schedule 8812 line 9: $400,000 if married
+-- filing jointly, $200,000 for all other filing statuses, QSS included)
 -- Order: Single, MFJ, MFS, HoH, QW
 ctcThreshold2024 :: ByStatus (Amount Dollars)
-ctcThreshold2024 = byStatus 200000 400000 200000 200000 400000
+ctcThreshold2024 = byStatus 200000 400000 200000 200000 200000
 
 -- | CTC phase-out rate ($50 per $1,000 over threshold)
 ctcPhaseOutRate2024 :: Amount Rate

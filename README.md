@@ -78,22 +78,23 @@ evaluate_return(
 This results in the following:
 
 ``` python
-{'total_tax': 8484.0,
+{'total_tax': 4476.0,
  'federal_adjusted_gross_income': 100000.0,
- 'federal_effective_tax_rate': 11.4,
+ 'federal_effective_tax_rate': 4.9,
  'federal_tax_bracket': 12.0,
- 'federal_taxable_income': 74100.0,
+ 'federal_taxable_income': 68500.0,
+ 'federal_qbi_deduction': 0.0,
  'federal_amt': 0.0,
- 'federal_income_tax': 8484.0,
+ 'federal_income_tax': 3346.0,
  'federal_se_tax': 0.0,
  'federal_niit': 0.0,
  'federal_additional_medicare_tax': 0.0,
- 'federal_total_tax': 8484.0,
- 'state_adjusted_gross_income': 0.0,
- 'state_taxable_income': 0.0,
- 'state_total_tax': 0.0,
- 'state_tax_bracket': 0.0,
- 'state_effective_tax_rate': 0.0}
+ 'federal_total_tax': 3346.0,
+ 'state_adjusted_gross_income': 100000.0,
+ 'state_taxable_income': 88588.0,
+ 'state_total_tax': 1130.0,
+ 'state_tax_bracket': 6.0,
+ 'state_effective_tax_rate': 2.7}
 ```
 
 No `year=` argument was specified here, so the current tax year, 2025, was used.
@@ -204,13 +205,13 @@ evaluate_returns(
 
 This results in a `polars.DataFrame` (use `.to_pandas()` if you need pandas compatibility):
 
-|   w2_income |   federal_effective_tax_rate |   federal_tax_bracket |   state_effective_tax_rate |   state_tax_bracket |
-|------------:|-----------------------------:|----------------------:|---------------------------:|--------------------:|
-|       50000 |                         10.3 |                    12 |                        1.5 |                 2   |
-|      100000 |                         11.4 |                    12 |                        3   |                 6   |
-|      150000 |                         14.9 |                    22 |                        4.6 |                 9.3 |
-|      200000 |                         17   |                    22 |                        5.9 |                 9.3 |
-|      250000 |                         18.5 |                    24 |                        6.6 |                 9.3 |
+| w2_income | federal_effective_tax_rate | federal_tax_bracket | state_effective_tax_rate | state_tax_bracket |
+|----------:|---------------------------:|--------------------:|-------------------------:|------------------:|
+|     50000 |                          0 |                  10 |                      1.4 |                 2 |
+|    100000 |                        4.9 |                  12 |                      2.7 |                 6 |
+|    150000 |                        9.7 |                  22 |                      4.2 |                 8 |
+|    200000 |                       13.4 |                  22 |                      5.5 |               9.3 |
+|    250000 |                       15.4 |                  24 |                      6.3 |               9.3 |
 
 
 ### Plot: Federal Tax as a Function of W2 Income
@@ -368,7 +369,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
 | `state`                      | str \| None               | None                | Two-letter state code. Income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
-| `num_dependents`             | int                      | 0                   |                                    |
+| `num_dependents`             | int                      | 0                   | Child tax credit qualifying children (under 17, with SSN; Schedule 8812 line 4). Federal CTC applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies none. Other-dependent credit, EITC and dependent care are not modeled. |
 | `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
