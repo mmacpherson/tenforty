@@ -1,6 +1,8 @@
-"""Independent DOR values; derivation and source locators: docs/validation/derivations/or-2024-2025.md.
+"""DOR-source checks; derivation, provenance and dated errata: docs/validation/derivations/or-2024-2025.md.
 
-Retrieved 2026-11-03 by Codex Sol before reading the Oregon implementation.
+Sources and original operands were archived 2026-11-03 before implementation
+inspection. Corrected worked-case answers follow errata E1-E7; all seven moved
+toward eventual graph output and await independent re-derivation.
 Federal AGI/liability are stipulated inputs in component tests. CSVs transcribe
 published OR-40 tax table rows, not backend-generated expectations.
 """
@@ -163,7 +165,7 @@ def test_published_full_year_chart_boundaries(
     "wages,taxable,tax", [(110_000, 99_005, 8361), (13_000, 10_255, 357)]
 )
 def test_natural_witnesses_scalar_and_batch(wages, taxable, tax):
-    """Independent whole-return witnesses reach both Python surfaces."""
+    """Archived witnesses reach both Python surfaces; E1 corrects the $110,000 case."""
     kwargs = dict(
         year=2024, state="OR", filing_status="Single", w2_income=wages, backend="graph"
     )
@@ -219,8 +221,8 @@ def test_federal_worksheet_adjustments_and_zero_floors(
         (2025, "Widow(er)", 95830, 7510),
     ],
 )
-def test_independently_derived_whole_returns(year, status, taxable, tax):
-    """Archived $110,000 AGI cases stipulate $20,000 eligible federal liability."""
+def test_archived_worked_cases_with_errata(year, status, taxable, tax):
+    """Archived $110,000 cases use the dated errata, with federal liability stipulated."""
     runtime = _runtime(year, status, 110_000, 20_000)
     assert runtime.eval("or_40_L23_or_taxable_income") == taxable
     assert runtime.eval("or_40_L32_or_total_tax") == tax
