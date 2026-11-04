@@ -780,18 +780,28 @@ RATE_FIELDS = (
 
 
 def _rates_not_defined_as_none(result: dict[str, Any]) -> dict[str, Any]:
-    """Mark the rate fields OTS did not report, or cannot define, as None.
+    """Apply the public rate contract to an OTS result.
 
-    OTS prints a bracket line only for some forms; a missing line is "not
-    defined", not a 0% rate. An effective rate divides by taxable income, so
-    it is not defined when that income is not positive.
+    A bracket OTS did not print is "not defined" (None), not a 0% rate. An
+    effective rate is the returned tax as a percent of taxable income, computed
+    here: OTS prints a pre-credit rate rounded to 0.1%, which is a different
+    quantity. It is not defined when taxable income is not positive or, for the
+    state rate, when there is no state return.
     """
     rates = {field: None for field in RATE_FIELDS} | result
-    if rates.get("federal_taxable_income", 0) <= 0:
-        rates["federal_effective_tax_rate"] = None
-    if rates.get("state_taxable_income", 1) <= 0:
-        rates["state_effective_tax_rate"] = None
+    rates["federal_effective_tax_rate"] = _effective_rate(
+        rates.get("federal_total_tax"), rates.get("federal_taxable_income")
+    )
+    rates["state_effective_tax_rate"] = _effective_rate(
+        rates.get("state_total_tax"), rates.get("state_taxable_income")
+    )
     return rates
+
+
+def _effective_rate(tax: float | None, taxable_income: float | None) -> float | None:
+    if tax is None or taxable_income is None or taxable_income <= 0:
+        return None
+    return tax / taxable_income * 100.0
 
 
 ## LEVEL 2: Map from validated user models to natural description.

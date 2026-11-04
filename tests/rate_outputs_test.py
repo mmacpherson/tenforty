@@ -165,11 +165,13 @@ def test_graph_batch_rates_match_scalar():
 
 
 def test_ots_state_without_bracket_report_is_not_defined():
-    """An OTS state that prints no bracket line reports None."""
+    """An OTS state that prints no bracket line has no bracket, but an effective rate."""
     result = evaluate_return(year=2024, state="PA", w2_income=85000, backend="ots")
     assert result.state_total_tax > 0
     assert result.state_tax_bracket is None
-    assert result.state_effective_tax_rate is None
+    assert result.state_effective_tax_rate == pytest.approx(
+        100 * result.state_total_tax / result.state_taxable_income
+    )
 
 
 def test_ots_reporting_state_keeps_its_rates():
@@ -202,3 +204,38 @@ def test_failed_return_stays_distinguishable_from_not_defined():
         isinstance(result.state_tax_bracket, float)
         and math.isnan(result.state_tax_bracket)
     )
+
+
+OTS_CREDIT_WITNESSES = [("OR", 2024, 85_000), ("CA", 2024, 85_000)]
+
+
+@pytest.mark.parametrize(("state", "year", "wages"), OTS_CREDIT_WITNESSES)
+def test_ots_effective_rates_use_returned_tax(state, year, wages):
+    """OTS effective rates are returned tax over taxable income, not the printed rate.
+
+    OTS prints a pre-credit state rate rounded to 0.1% (OR 8.3, CA 4.9 here);
+    the contract divides the returned, after-credit tax.
+    """
+    result = evaluate_return(year=year, state=state, w2_income=wages, backend="ots")
+    assert result.state_effective_tax_rate == pytest.approx(
+        100 * result.state_total_tax / result.state_taxable_income, rel=1e-12
+    )
+    assert result.federal_effective_tax_rate == pytest.approx(
+        100 * result.federal_total_tax / result.federal_taxable_income, rel=1e-12
+    )
+
+
+@pytest.mark.parametrize("mode", ["zip", "cross"])
+def test_ots_batch_effective_rates_use_returned_tax(mode):
+    """The OTS batch frame applies the same effective-rate definition per row."""
+    frame = evaluate_returns(
+        year=2024,
+        state=["OR", "CA"] if mode == "zip" else "OR",
+        w2_income=[85_000, 85_000] if mode == "zip" else [85_000],
+        mode=mode,
+        backend="ots",
+    )
+    for row in frame.iter_rows(named=True):
+        assert row["state_effective_tax_rate"] == pytest.approx(
+            100 * row["state_total_tax"] / row["state_taxable_income"], rel=1e-12
+        )
