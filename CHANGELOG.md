@@ -87,6 +87,8 @@
   legacy OTS-only package, with no graph backend.
 
 ### Fixed (installation)
+- Wheels are now built and tested for Linux aarch64 and Intel macOS, so those
+  platforms no longer need Rust to install.
 - The sdist now ships the Rust graph crate. It previously omitted it, so every
   install from the sdist (any platform without a prebuilt wheel) lacked the
   graph backend.

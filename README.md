@@ -63,7 +63,9 @@ reconsidered after the final Python release.
 
 ### Building from source
 
-`pip install tenforty` uses a prebuilt wheel where one matches your platform.
+`pip install tenforty` uses a prebuilt wheel where one matches your platform:
+CPython 3.10–3.15 on Linux x86_64 and aarch64 (glibc 2.28+ and musl) and on
+macOS arm64 and x86_64.
 Elsewhere it builds from the source distribution, and that build needs a
 [Rust toolchain](https://rustup.rs) as well as a C++ compiler, because the graph
 backend is compiled from Rust. Without Rust the build stops and explains why;

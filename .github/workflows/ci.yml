@@ -68,14 +68,16 @@ jobs:
       run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
 
   # Installs the built wheel (not an editable build) and checks both native
-  # backends load from it, on the newest Python.
+  # backends load from it, on the newest Python, on every platform a wheel
+  # ships for, so a new platform is tested on every pull request rather than
+  # first at release.
   wheel-install:
     name: installed wheel, Python 3.15 (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -309,9 +311,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Windows excluded due to runtime crashes. See docs/windows-build-research.md
+        # Windows excluded due to runtime crashes (tenforty-aqx.6.1). See
+        # docs/windows-build-research.md.
+        # Each runner builds its native architecture: ubuntu-latest x86_64,
+        # ubuntu-24.04-arm aarch64, macos-latest arm64, macos-15-intel x86_64.
         # Linux builds one Python at a time in containers, so each version gets
-        # its own job; macOS stays one job, since few macOS runners run at once.
+        # its own job; each macOS runner stays one job, since few macOS runners
+        # run at once.
         include:
         - {os: ubuntu-latest, build: cp310-*}
         - {os: ubuntu-latest, build: cp311-*}
@@ -319,7 +325,14 @@ jobs:
         - {os: ubuntu-latest, build: cp313-*}
         - {os: ubuntu-latest, build: cp314-*}
         - {os: ubuntu-latest, build: cp315-*}
+        - {os: ubuntu-24.04-arm, build: cp310-*}
+        - {os: ubuntu-24.04-arm, build: cp311-*}
+        - {os: ubuntu-24.04-arm, build: cp312-*}
+        - {os: ubuntu-24.04-arm, build: cp313-*}
+        - {os: ubuntu-24.04-arm, build: cp314-*}
+        - {os: ubuntu-24.04-arm, build: cp315-*}
         - {os: macos-latest, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*}
+        - {os: macos-15-intel, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
