@@ -149,19 +149,32 @@ class TestGraphBackend:
 
         Accepting the count because a state reads it would silently omit the
         child tax credit if the federal graph did not read it too
-        (tenforty-aqx.4.1.6).
+        (tenforty-aqx.4.1.6). The federal return reads it through the two
+        Schedule 8812 counts derived from it.
         """
-        from tenforty.backends.graph import _lowered_input_nodes
-
-        nodes = _lowered_input_nodes("num_dependents", state, year)
-        assert "us_form_8812_L1_num_qualifying_children" in nodes
-        assert len(nodes) == 2
-
-    def test_federal_law_natural_reaching_only_a_state_is_refused(self, monkeypatch):
-        """The guard still refuses a state-only lowering of num_dependents."""
         from tenforty.backends import graph
 
-        monkeypatch.delitem(graph.NATURAL_TO_NODES, "num_dependents")
+        assert len(graph._lowered_input_nodes("num_dependents", state, year)) == 1
+        carriers = graph._federal_carriers("num_dependents")
+        assert sorted(
+            node for carrier in carriers for node in graph.NATURAL_TO_NODES[carrier]
+        ) == [
+            "us_form_8812_L1_num_qualifying_children",
+            "us_form_8812_L3_num_other_dependents",
+        ]
+        assert graph._reads_nonzero("num_dependents", ["ca_ftb_3514_L2_num_children"])
+
+    @pytest.mark.parametrize(
+        "carrier",
+        ["schedule_8812_qualifying_children", "schedule_8812_other_dependents"],
+    )
+    def test_federal_law_natural_reaching_only_a_state_is_refused(
+        self, monkeypatch, carrier
+    ):
+        """The guard refuses num_dependents if either federal count is unmapped."""
+        from tenforty.backends import graph
+
+        monkeypatch.delitem(graph.NATURAL_TO_NODES, carrier)
         assert not graph._reads_nonzero(
             "num_dependents", ["ca_ftb_3514_L2_num_children"]
         )
