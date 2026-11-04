@@ -277,6 +277,10 @@ us1040_2024 = form "us_1040" 2024 $ do
   outputs
     [ "L1z",
       "NonWageIncomeMagnitude",
+      "L2b",
+      "L3b",
+      "L4b",
+      "L5b",
       "L6b",
       "L9",
       "L11",

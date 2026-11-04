@@ -61,6 +61,28 @@ installing on 3.15 builds from source; see the
 [Development Guide](./docs/develop.md) for the toolchain. Full support will be
 reconsidered after the final Python release.
 
+### Building from source
+
+`pip install tenforty` uses a prebuilt wheel where one matches your platform.
+Elsewhere it builds from the source distribution, and that build needs a
+[Rust toolchain](https://rustup.rs) as well as a C++ compiler, because the graph
+backend is compiled from Rust. Without Rust the build stops and explains why;
+it no longer installs a package that lacks the graph backend.
+
+Requiring Rust for a source build is an intermediate measure. The long-term
+answer is a prebuilt wheel for every platform, so that building from source is
+only the fallback for platforms without one.
+
+To build the legacy OTS-only package instead, without Rust, set
+`TENFORTY_WITHOUT_GRAPH=1`:
+
+```sh
+TENFORTY_WITHOUT_GRAPH=1 pip install tenforty
+```
+
+That package has no graph backend: `backend="ots"` works, and any return routed
+to the graph backend raises an error instead of falling back to OTS.
+
 
 ## Quick Start
 

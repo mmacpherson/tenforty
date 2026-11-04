@@ -11,21 +11,51 @@ import TenForty
 
 maForm1_2024 :: Either FormError Form
 maForm1_2024 = form "ma_1" 2024 $ do
-  -- Line 3: Wages, salaries, tips (from US 1040)
-  -- Line 4: Taxable pensions and annuities (from US 1040)
-  -- Lines 5-9: Various income sources
-  -- Line 10: Total income (approximated by federal AGI for this implementation)
-  let federalAgi = importForm us1040L11
+  -- Lines 3-10: Massachusetts 5% income, built from the federal income lines
+  -- rather than federal AGI (tenforty-b72.39), so federal Schedule 1 Part II
+  -- adjustments do not reach Massachusetts: M.G.L. c.62 2(d)(1)(K) disallows
+  -- the one-half self-employment tax deduction, and the instructions disallow
+  -- IRA/Keogh/SEP/SIMPLE deductions. Massachusetts allows its own deductions on
+  -- lines 11-15 and Schedule Y. Interest, dividends and capital gains are not 5%
+  -- income here: they go through Schedules B and D below. Taxable Social
+  -- Security is exempt, and state income tax refunds (Schedule 1 line 1) are
+  -- not Massachusetts income. Interest is treated as non-Massachusetts-bank
+  -- (Schedule B); long-term gains as non-collectible (no public input).
+  -- Blind derivation: docs/validation/derivations/ma-2024-2025.md.
+  wages <-
+    interior "L3" "wages" $
+      importForm us1040L1z
+  pensions <-
+    interior "L4" "pensions" $
+      importForm us1040L4b .+. importForm us1040L5b
+  otherFivePercentIncome <-
+    interior "L5to9" "other_five_percent_income" $
+      importForm usSchedule1L10 .-. importForm usSchedule1L1
   l10 <-
-    keyOutput
-      "L10"
-      "ma_total_income"
-      "Total Massachusetts income"
-      federalAgi
+    keyOutput "L10" "ma_total_income" "Total Massachusetts 5% income" $
+      sumOf [wages, pensions, otherFivePercentIncome]
 
-  -- Lines 11-16: Deductions (Social Security, alimony, rental deduction, etc.)
-  -- For simplicity, we accept total deductions as an input
-  deductions <- keyInput "L16" "ma_deductions" "Total Massachusetts deductions"
+  -- Line 11: Social Security, Medicare and self-employment tax paid, not more
+  -- than \$2,000 per person (instructions line 11; c.62 3.B(a)(3)-(4)). The
+  -- statute names FICA and RRTA; the DOR instruction includes self-employment
+  -- tax "as reported on your U.S. Form 1040", which this follows. w2_income is
+  -- a household aggregate, so a joint return takes the one-earner reading
+  -- (11a = min(\$2,000, paid), 11b = 0), as schedule_se_ss_wages does; a
+  -- two-earner couple over-pays by at most the marginal rate on \$2,000: 5%,
+  -- or 9% once the 4% surtax applies (\$100 / \$180).
+  ficaPaid <-
+    interior "L11_fica" "fica_paid" $
+      (smallerOf (greaterOf wages (dollars 0)) (lit maSocialSecurityWageBase2024) .*. rate maSocialSecurityRate)
+        .+. (greaterOf wages (dollars 0) .*. rate maMedicareRate)
+  l11 <-
+    interior "L11" "contribution_deduction" $
+      smallerOf (ficaPaid .+. importForm usScheduleSeL10) (lit maContributionDeductionCap2024)
+
+  -- Lines 12-15: other Massachusetts deductions, accepted as a raw total.
+  otherDeductions <- keyInput "L16" "ma_deductions" "Massachusetts deductions other than line 11 (lines 12-15)"
+  deductions <-
+    interior "L16_total" "total_deductions" $
+      l11 .+. otherDeductions
 
   -- Line 17: 5.0% Income After Deductions
   l17 <-
@@ -63,8 +93,61 @@ maForm1_2024 = form "ma_1" 2024 $ do
     keyOutput "L19" "ma_taxable_income" "Massachusetts taxable income (5.0% income after exemptions)" $
       l17 `subtractNotBelowZero` l18
 
-  -- Line 20: Interest and dividend income (taxed separately at 5.0%)
-  l20 <- keyInput "L20" "interest_dividend_income" "Interest and dividend income"
+  -- Schedules B and D (tenforty-b72.6). Part 1 is interest and dividends; short-
+  -- term gains are 8.5% income. A net short-term loss offsets interest and
+  -- dividends first, then long-term gains; a net long-term loss offsets short-
+  -- term gains first, then interest and dividends. Together the two offset at
+  -- most \$2,000 of interest and dividends (Schedule B lines 20-32; c.62 2(c)).
+  -- Capital losses never offset 5% income; unused losses carry forward, which
+  -- this does not model (no carryover input).
+  interestDividends <-
+    interior "SchB_L9" "interest_dividends" $
+      greaterOf (importForm us1040L2b .+. importForm us1040L3b) (dollars 0)
+  netShortTerm <- interior "SchB_ShortTerm" "net_short_term" $ importForm usScheduleDL7
+  netLongTerm <- interior "SchD_LongTerm" "net_long_term" $ importForm usScheduleDL15
+  let shortTermGain = greaterOf netShortTerm (dollars 0)
+      shortTermLoss = greaterOf (dollars 0 .-. netShortTerm) (dollars 0)
+      longTermGain = greaterOf netLongTerm (dollars 0)
+      longTermLoss = greaterOf (dollars 0 .-. netLongTerm) (dollars 0)
+      lossOffsetCap = smallerOf interestDividends (lit maCapitalLossInterestDividendCap2024)
+  shortTermLossAgainstInterest <-
+    interior "SchB_L20" "short_term_loss_against_interest_dividends" $
+      smallerOf shortTermLoss lossOffsetCap
+  shortTermLossAgainstLongTerm <-
+    interior "SchB_L22" "short_term_loss_against_long_term" $
+      smallerOf (shortTermLoss .-. shortTermLossAgainstInterest) longTermGain
+  longTermLossAgainstShortTerm <-
+    interior "SchB_L25" "long_term_loss_against_short_term" $
+      smallerOf longTermLoss shortTermGain
+  longTermLossAgainstInterest <-
+    interior "SchB_L32" "long_term_loss_against_interest_dividends" $
+      smallerOf
+        (longTermLoss .-. longTermLossAgainstShortTerm)
+        (lossOffsetCap .-. shortTermLossAgainstInterest)
+  interestDividendsAfterLosses <-
+    interior "SchB_InterestDividendsAfterLosses" "interest_dividends_after_losses" $
+      interestDividends .-. shortTermLossAgainstInterest .-. longTermLossAgainstInterest
+  schB35 <-
+    interior "SchB_L35" "schedule_b_income" $
+      interestDividendsAfterLosses .+. (shortTermGain .-. longTermLossAgainstShortTerm)
+
+  -- Excess exemptions (Form 1 line 18 over line 17) reduce Schedule B line 36
+  -- first, then Schedule D line 20. Married filing separately gets none.
+  excessExemptions <-
+    interior "ExcessExemptions" "excess_exemptions" $
+      let excess = l18 `subtractNotBelowZero` l17
+       in byStatusE (byStatus excess excess (dollars 0) excess excess)
+  schB36 <-
+    interior "SchB_L36" "schedule_b_excess_exemptions" $
+      smallerOf excessExemptions schB35
+  schB37 <-
+    interior "SchB_L37" "schedule_b_taxable" $
+      schB35 .-. schB36
+
+  -- Line 20: Schedule B line 38, interest and dividends taxed at 5.0%
+  l20 <-
+    interior "L20" "interest_dividend_income" $
+      smallerOf schB37 interestDividendsAfterLosses
 
   -- Line 21: Combined income for tax computation
   l21 <-
@@ -76,8 +159,10 @@ maForm1_2024 = form "ma_1" 2024 $ do
     keyOutput "L22" "ma_base_tax" "5.0% tax" $
       l21 .*. rate maBaseRate2024
 
-  -- Line 23a: Short-term capital gains (taxed at 8.5%)
-  l23a <- keyInput "L23a" "short_term_gains" "8.5% income from short-term capital gains"
+  -- Line 23a: Schedule B line 39, short-term gains taxed at 8.5%
+  l23a <-
+    interior "L23a" "short_term_gains" $
+      schB37 .-. l20
 
   l23a_tax <-
     interior "L23a_tax" "short_term_gains_tax" $
@@ -90,8 +175,13 @@ maForm1_2024 = form "ma_1" 2024 $ do
     interior "L23b_tax" "collectibles_tax" $
       l23b .*. rate maLongTermCollectiblesRate2024
 
-  -- Line 24: Schedule D long-term capital gains (taxed at 5.0%)
-  l24 <- keyInput "L24" "long_term_gains" "Long-term capital gains"
+  -- Line 24: Schedule D line 21 (after line 20 excess exemptions), taxed at 5.0%
+  schD20 <-
+    interior "SchD_L20" "schedule_d_excess_exemptions" $
+      smallerOf (excessExemptions .-. schB36) (longTermGain .-. shortTermLossAgainstLongTerm)
+  l24 <-
+    interior "L24" "long_term_gains" $
+      longTermGain .-. shortTermLossAgainstLongTerm .-. schD20
 
   l24_tax <-
     interior "L24_tax" "long_term_gains_tax" $

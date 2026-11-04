@@ -56,6 +56,23 @@ skip_if_graph_unavailable = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _graph_years_warm():
+    """Evaluate one graph return per year before any example is timed.
+
+    A year's first graph evaluation parses its resolved graph and fills the
+    lowering caches: about 40 ms on an idle host, over a second on a loaded one
+    (tenforty-cqwa). Charged to one Hypothesis example, that one-off cost trips
+    the 200 ms deadline even though each later example takes about 3 ms.
+    """
+    if not graph_available():
+        return
+    from tenforty.backends import GraphBackend
+
+    for year in GraphBackend.supported_years:
+        evaluate_return(year=year, w2_income=50_000, backend="graph")
+
+
 def assert_state_parity(state, year, filing_status, w2_income):
     """Fail on any state divergence no known-defect signature or tolerance explains."""
     case = {"state": state, "year": year, "status": filing_status, "w2": w2_income}
@@ -1963,7 +1980,10 @@ def test_ots_ny_uses_the_rate_schedule_from_65000():
 
 
 def test_ots_ma_married_joint_gets_joint_exemption():
-    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800, so line 19 is $11,200.
+    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800.
+
+    Line 19 is line 10 less line 11 (7.65% of wages, $1,530; tenforty-b72.6)
+    and the $8,800 joint exemption: $9,670.
 
     Regression for MAP-MA-STATUS (tenforty-r91.2): without filing_status in the
     MA_1 input map OTS read its template default and computed every return as Single.
@@ -1975,7 +1995,7 @@ def test_ots_ma_married_joint_gets_joint_exemption():
         w2_income=20_000,
         backend="ots",
     )
-    assert result.state_taxable_income == pytest.approx(11_200.0, abs=1.0)
+    assert result.state_taxable_income == pytest.approx(9_670.0, abs=1.0)
 
 
 def test_ots_nj_married_joint_gets_two_exemptions():
