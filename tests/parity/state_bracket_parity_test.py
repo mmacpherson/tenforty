@@ -25,6 +25,8 @@ STATUSES = ("Single", "Married/Joint", "Married/Sep", "Head_of_House")
 WAGES = (15_000, 40_000, 85_000, 160_000, 320_000, 700_000, 1_300_000, 3_000_000)
 
 OTS_UNSUPPORTED_STATUS = {("VA", "Head_of_House")}
+# The graph refuses NY married-filing-separately returns (#426).
+GRAPH_UNSUPPORTED_STATUS = {("NY", "Married/Sep")}
 
 NJ_SCHEDULE_B_STATUSES = {"Married/Joint", "Head_of_House", "Widow(er)"}
 
@@ -45,7 +47,7 @@ CASES = [
     for year in YEARS
     for status in STATUSES
     for wages in WAGES
-    if (state, status) not in OTS_UNSUPPORTED_STATUS
+    if (state, status) not in OTS_UNSUPPORTED_STATUS | GRAPH_UNSUPPORTED_STATUS
 ]
 
 pytestmark = pytest.mark.skipif(

@@ -317,29 +317,6 @@ NY_SCHEDULE_BASE_ROUNDING = 0.5
 # Worksheet 7 (Single) and worksheet 1 (Married/Joint) recapture toward a flat
 # 6% and 5.5% of taxable income respectively.
 NY_FIRST_WORKSHEET_RATE = {"Single": 0.06, "Married/Joint": 0.055}
-# Household credit by federal AGI, "over ... but not over" each row ceiling.
-# Single is Table 1; Married/Joint is Table 2's two-exemption column (you and
-# your spouse, no dependents).
-NY_2024_HOUSEHOLD_CREDIT = {
-    "Single": (
-        (5_000.0, 75.0),
-        (6_000.0, 60.0),
-        (7_000.0, 50.0),
-        (20_000.0, 45.0),
-        (25_000.0, 40.0),
-        (28_000.0, 20.0),
-    ),
-    "Married/Joint": (
-        (5_000.0, 105.0),
-        (6_000.0, 90.0),
-        (7_000.0, 80.0),
-        (20_000.0, 75.0),
-        (22_000.0, 70.0),
-        (25_000.0, 60.0),
-        (28_000.0, 45.0),
-        (32_000.0, 25.0),
-    ),
-}
 
 
 def _ny_case(case: dict) -> bool:
@@ -377,29 +354,6 @@ def _ny_table_tolerance(case: dict) -> float:
     if _ny_taxable_income(case) >= NY_TAX_TABLE_CEILING:
         return 0.0
     return _ny_table_half_width(case)
-
-
-def _ny24_household_credit(case: dict) -> DeltaModel:
-    """Graph omits the NYS household credit that OTS computes.
-
-    IT-201 line 40 is the household credit from Tables 1-3, a function of
-    filing status, federal AGI and household size. The graph spec takes it as a
-    zero-default input (tenforty-spec/forms/NYIT201_2024.hs:79); OTS computes
-    it (ots_amalgamation.cpp:83389-83418). The graph departs from the form
-    (tenforty-b72.25).
-
-    Bound: graph tax is higher by the credit OTS applies, limited to the tax,
-    so the delta lies in [0, credit], capped at the form's credit for the case
-    (the higher row at an exact row ceiling). OTS's Married/Joint credit is a
-    column short of the form's -- our NY input map never sets OTS's
-    ``Exemptions`` (MAP-NY-EXEMPTIONS, tenforty-r91.5) -- which keeps it inside the bound.
-    """
-    if not _ny_case(case):
-        return {}
-    for ceiling, credit in NY_2024_HOUSEHOLD_CREDIT[case["status"]]:
-        if case["w2"] <= ceiling:
-            return {"state_total_tax": DeltaRange(0.0, credit)}
-    return {}
 
 
 def _ny24_ots_table_above_ceiling(case: dict) -> DeltaModel:
@@ -917,14 +871,6 @@ SIGNATURES = [
         "tenforty-r91.7",
         _nc_taxable_income_representation,
         {"state": "NC", "year": 2024, "status": "Single", "w2": 0},
-    ),
-    KnownParityDefect(
-        "NY-HOUSEHOLD-CREDIT",
-        "graph",
-        "tenforty-b72.25",
-        _ny24_household_credit,
-        # Table 1's $45 row; taxable income $1,000 keeps the tax below it.
-        {"state": "NY", "year": 2024, "status": "Single", "w2": 9_000},
     ),
     KnownParityDefect(
         "NY-OTS-TABLE-ABOVE-65K",

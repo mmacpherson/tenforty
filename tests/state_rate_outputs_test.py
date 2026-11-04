@@ -67,7 +67,16 @@ W2_UNREACHABLE = {
     for year in (2024, 2025)
     for taxable in (249_999, 250_000, 250_001)
 }
-PLACEABLE_VECTORS = [v for v in STATE_VECTORS if tuple(v[:4]) not in W2_UNREACHABLE]
+# The graph refuses NY married-filing-separately returns (#426: the household
+# credit needs spouse inputs the public API lacks), so they have no bracket.
+GRAPH_UNSUPPORTED_STATUS = {("NY", "Married/Sep")}
+
+PLACEABLE_VECTORS = [
+    v
+    for v in STATE_VECTORS
+    if tuple(v[:4]) not in W2_UNREACHABLE
+    and (v[0], v[2]) not in GRAPH_UNSUPPORTED_STATUS
+]
 
 
 def _return_at_state_taxable_income(state, year, status, taxable_income):

@@ -6,6 +6,7 @@ module NYIT201_2024
 where
 
 import FormRefs
+import NYHouseholdCredit
 import TablesNY2024
 import TenForty
 
@@ -75,8 +76,36 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
     keyOutput "L39" "ny_bracket_tax" "Tax from New York State tax rate schedule" $
       bracketTax "ny_brackets_2024" l38
 
-  -- Line 40: Household credit (input; depends on complex lookup tables)
-  l40 <- keyInput "L40" "household_credit" "New York State household credit"
+  -- IT-201-I p.12 tables1-3; p.13 notes1-5; p.2 whole-dollar entries.
+  dependents <- keyInput "HouseholdDependents" "household_dependents" "Dependents on this return for the household credit"
+  spouseAgi <- keyInput "HouseholdSpouseAgi" "household_spouse_agi" "MFS spouse federal AGI for the household credit (raw graph only)"
+  spouseDependents <- keyInput "HouseholdSpouseDependents" "household_spouse_dependents" "MFS spouse dependents for the household credit (raw graph only)"
+  claimable <- keyInput "HouseholdClaimable" "household_claimable" "Item C: taxpayer can be claimed as a dependent (1=yes)"
+  buildAmericaBondInterest <- keyInput "HouseholdBuildAmericaBondInterest" "household_build_america_bond_interest" "Included Build America Bond interest, special condition A6"
+  spouseBuildAmericaBondInterest <- keyInput "HouseholdSpouseBuildAmericaBondInterest" "household_spouse_build_america_bond_interest" "MFS spouse included Build America Bond interest, condition A6"
+  ownHouseholdAgi <-
+    interior "HouseholdOwnAgi" "household_own_agi" $
+      roundE l19 .-. roundE buildAmericaBondInterest
+  householdAgi <-
+    interior "HouseholdAgi" "household_agi" $
+      byStatusE $
+        byStatus
+          ownHouseholdAgi
+          ownHouseholdAgi
+          (ownHouseholdAgi .+. roundE spouseAgi .-. roundE spouseBuildAmericaBondInterest)
+          ownHouseholdAgi
+          ownHouseholdAgi
+  householdCount <-
+    interior "HouseholdCount" "household_count" $
+      max0 dependents
+        .+. byStatusE (byStatus (dollars 1) (dollars 2) (dollars 2 .+. max0 spouseDependents) (dollars 1) (dollars 1))
+  singleCredit <- interior "HouseholdSingleCredit" "household_single_credit" $ singleHouseholdCredit householdAgi
+  jointCredit <- interior "HouseholdJointCredit" "household_joint_credit" $ jointHouseholdCredit householdAgi householdCount
+  separateCredit <- interior "HouseholdSeparateCredit" "household_separate_credit" $ separateHouseholdCredit householdAgi householdCount
+  let householdCredit = byStatusE $ byStatus singleCredit jointCredit separateCredit jointCredit jointCredit
+  l40 <-
+    keyOutput "L40" "household_credit" "New York State household credit (Tables 1-3)" $
+      ifPos claimable (dollars 0) householdCredit
 
   -- Line 41: Resident credit
   l41 <- keyInput "L41" "resident_credit" "Resident credit (Form IT-112-R or IT-112-C)"
@@ -202,6 +231,7 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
       "L33",
       "L37",
       "L39",
+      "L40",
       "L46",
       "L47a",
       "L58",
