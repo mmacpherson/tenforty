@@ -2338,8 +2338,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Federal values equal the IRS 2024 Tax Table Single column (i1040tt--2024).
     #
     # The graph's IT-201 (tenforty-spec/forms/NYIT201_2024.hs) computes line 39
-    # as the exact bracket formula, and line 40 household credit is a keyInput
-    # defaulting to 0. IT-201-I p. 12 requires the Tax Table when NYAGI <=
+    # as the exact bracket formula; line 40 now computes the household credit.
+    # IT-201-I p. 12 requires the Tax Table when NYAGI <=
     # $107,650 and TI < $65,000, and the rate schedule (p. 33) publishes
     # whole-dollar bases ($600 over $13,900) where exact bracket arithmetic gives
     # $599.50. The known_defects below record the resulting residuals.
@@ -2366,11 +2366,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.5,
-                44.5,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $16,500): +$45. Graph line 39 is "
-                "the exact formula, not Tax Table row 8,500-8,550 ($341): -$1. Net +$44.",
+                -1.5,
+                -0.5,
+                "Graph line 39 uses the exact formula $340 rather than Tax Table "
+                "row 8,500-8,550 ($341): -$1 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
@@ -2391,12 +2391,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.0,
-                44.0,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $18,000): +$45. Graph line 39 is "
-                "the exact formula $407.50, not Tax Table row 10,000-10,050 ($409): "
-                "-$1.50. Net +$43.50.",
+                -2.0,
+                -1.0,
+                "Graph line 39 uses the exact formula $407.50 rather than Tax Table "
+                "row 10,000-10,050 ($409): -$1.50 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),

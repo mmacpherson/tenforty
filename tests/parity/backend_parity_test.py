@@ -4,7 +4,7 @@ import math
 from pathlib import Path
 
 import pytest
-from hypothesis import example, given, settings
+from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
 from tenforty import evaluate_return
@@ -54,6 +54,23 @@ skip_if_graph_unavailable = pytest.mark.skipif(
     not graph_available(),
     reason="Graph backend required for this test",
 )
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _graph_years_warm():
+    """Evaluate one graph return per year before any example is timed.
+
+    A year's first graph evaluation parses its resolved graph and fills the
+    lowering caches: about 40 ms on an idle host, over a second on a loaded one
+    (tenforty-cqwa). Charged to one Hypothesis example, that one-off cost trips
+    the 200 ms deadline even though each later example takes about 3 ms.
+    """
+    if not graph_available():
+        return
+    from tenforty.backends import GraphBackend
+
+    for year in GraphBackend.supported_years:
+        evaluate_return(year=year, w2_income=50_000, backend="graph")
 
 
 def assert_state_parity(state, year, filing_status, w2_income):
@@ -984,7 +1001,10 @@ def test_ny_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=200)
 def test_ny_state_tax_parity(w2_income, filing_status):
-    """NY 2024 tax agrees up to the tax table, household credit and tax benefit recapture."""
+    """NY 2024 tax agrees within the existing table/recapture policy."""
+    # tenforty-r91.5: OTS does not receive the joint household exemption count.
+    # Independent graph cases cover the excluded rounded-AGI credit domain.
+    assume(filing_status != "Married/Joint" or w2_income >= 32_000.5)
     assert_state_parity("NY", 2024, filing_status, w2_income)
 
 
