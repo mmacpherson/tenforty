@@ -14,7 +14,9 @@ NATURAL_TO_NODE = {
     "taxable_interest": "us_1040_L2b_taxable_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
     "ordinary_dividends": "us_1040_L3b_ordinary_dividends",
-    # Schedule 8812 qualifying children (form line 4; the spec numbers it L1).
+    # num_dependents is the household total, also used by OR's regular credit.
+    # This legacy federal mapping treats the count as Schedule 8812 qualifying
+    # children (form line 4; the spec numbers it L1), without age classification.
     "num_dependents": "us_form_8812_L1_num_qualifying_children",
     # Schedule D (capital gains/losses)
     "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
@@ -495,19 +497,22 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.MA: StateGraphConfig(
-        # MA Form 1 imports federal AGI and applies Massachusetts-specific
-        # exemptions. Massachusetts uses a flat 5% base rate on most income
-        # plus a 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025).
-        # Also applies 8.5% rate on short-term capital gains and 12% on long-term
-        # collectibles. Exemptions are filing-status based (Single: $4,400,
-        # MFJ: $8,800, HoH: $6,800) plus $1,000 per dependent, $700 for age 65+,
-        # and $2,200 for blindness. All exemptions are accepted as total input
-        # (num_dependents cannot map to dollar amounts).
-        # Note: L10 is an import node (imports federal AGI) so we use L17
-        # (income after deductions) as state AGI proxy.
+        # MA Form 1 builds line 10 (5% income) from the federal income lines,
+        # not federal AGI, and routes interest, dividends and capital gains
+        # through Schedules B and D: 5% on interest/dividends and long-term
+        # gains, 8.5% on short-term gains, 12% on collectibles (raw input only),
+        # plus a 4% surtax over $1,053,750 (2024) / $1,083,150 (2025). Line 11,
+        # Social Security/Medicare/SE tax paid capped at $2,000 per person, is
+        # derived; w2_income is a household aggregate, so a joint return takes
+        # the one-earner reading: for two earners at most the marginal rate on
+        # $2,000 high, $100 at 5% or $180 once the 4% surtax applies.
+        # Exemptions are filing-status based (Single: $4,400, MFJ: $8,800,
+        # HoH: $6,800); other exemptions are accepted as total input
+        # (num_dependents cannot map to dollar amounts). State AGI is line 10,
+        # the figure OTS reports for MA_1.
         natural_to_node={},
         outputs={
-            "state_adjusted_gross_income": "L17_ma_income_after_deductions",
+            "state_adjusted_gross_income": "L10_ma_total_income",
             "state_taxable_income": "L19_ma_taxable_income",
             "state_total_tax": "L28_ma_total_tax",
         },
@@ -696,11 +701,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NY: StateGraphConfig(
-        # NY IT-201 exemptions involve age and dependent count; natural_to_node
-        # cannot map these correctly because the graph expects dollar
-        # values directly (no arithmetic): num_dependents is a count (e.g. 2)
-        # but L36 expects a dollar amount ($2,000 = 2 * $1,000/dependent).
+        # The household credit reads total dependents directly, independently
+        # of the federal qualifying-child count. L36 exemption dollars remain
+        # separate (tenforty-b72.49). Natural NY MFS needs spouse information
+        # available only as raw graph inputs and is refused by the backend.
         natural_to_node={
+            "num_dependents": "ny_it201_HouseholdDependents",
             "itemized_deductions": "ny_it201_L34_itemized",
         },
         outputs={
@@ -794,10 +800,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # ($8,250/$8,500 limit for 2024/2025, phases out above $125k/$250k AGI).
         # Standard deduction is filing-status based (Single: $2,745/$2,835,
         # MFJ: $5,495/$5,670, HoH: $4,420/$4,560 for 2024/2025).
-        # Progressive tax brackets (4 brackets, 4.75% to 9.9%).
-        natural_to_node={},
+        # num_dependents is the total regular dependent count; the spec adds the
+        # taxpayer/spouse base. dependent_exemptions stays unmapped because it
+        # is a dollar amount. Additional/disability OR exemptions are unsupported.
+        natural_to_node={"num_dependents": "or_40_RegularExemptions"},
         outputs={
-            "state_adjusted_gross_income": "us_1040_L11_agi",
+            "state_adjusted_gross_income": "L7_federal_agi",
             "state_taxable_income": "L23_or_taxable_income",
             "state_total_tax": "L32_or_total_tax",
         },

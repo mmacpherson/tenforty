@@ -263,8 +263,8 @@ def test_mixed_year_auto_cross_batch_groups_years_in_request_order(engine_calls)
 
 def test_single_backend_auto_batch_matches_explicit_backend():
     """Auto over one engine yields the same frame as naming that engine."""
-    for year, explicit in ((2022, "ots"), (2024, "graph")):
-        call = {"year": year, "w2_income": [50_000.0, 150_000.0], "state": "CA"}
+    for year, state, explicit in ((2022, "CA", "ots"), (2024, "MS", "graph")):
+        call = {"year": year, "w2_income": [50_000.0, 150_000.0], "state": state}
         auto = tenforty.evaluate_returns(**call, backend="auto")
         named = tenforty.evaluate_returns(**call, backend=explicit)
         assert set(auto.columns) == set(named.columns)
@@ -293,15 +293,6 @@ def test_out_of_scope_state_without_ots_coverage_raises(monkeypatch):
     monkeypatch.setattr(routing, "ots_covers", lambda year, state: False)
     with pytest.raises(UnsupportedReturnError, match="CA"):
         routing.select_backend("auto", 2024, "CA")
-
-
-def test_every_graph_state_is_in_scope_for_now():
-    """Until state scope gates close, every graph state is in scope."""
-    from tenforty.mappings import STATE_FORM_NAMES
-
-    for year in GRAPH_DEFAULT_YEARS:
-        for state in STATE_FORM_NAMES:
-            assert routing.graph_state_in_scope(state, year)
 
 
 def test_explicit_ots_state_ots_lacks_raises_up_front(monkeypatch, engine_calls):
@@ -470,3 +461,39 @@ def test_batch_preflight_uses_the_graph_support_rule(monkeypatch, engine_calls):
             year=[2023, 2024], w2_income=50_000.0, backend="auto", mode="zip"
         )
     assert engine_calls == []
+
+
+@pytest.mark.parametrize("backend", ["auto", "ots", "graph"])
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_enum_year_matches_integer_year_in_batches(backend, mode):
+    """An OTSYear member is the same request as its integer year."""
+    from tenforty.models import OTSYear
+
+    call = {"w2_income": [50_000.0, 60_000.0], "backend": backend, "mode": mode}
+    by_enum = tenforty.evaluate_returns(year=OTSYear.YEAR_2025, **call)
+    by_int = tenforty.evaluate_returns(year=2025, **call)
+    assert by_enum.equals(by_int)
+
+
+def test_mixed_enum_and_integer_years_form_one_group(engine_calls):
+    """OTSYear.YEAR_2024 and 2024 are one (year, state) group, not two."""
+    from tenforty.models import OTSYear
+
+    frame = tenforty.evaluate_returns(
+        year=[OTSYear.YEAR_2024, 2024],
+        w2_income=[50_000.0, 60_000.0],
+        backend="graph",
+        mode="zip",
+    )
+    assert frame["year"].to_list() == [2024, 2024]
+    assert engine_calls == [("graph", 2024)]
+
+
+def test_graph_evaluate_batch_accepts_an_enum_year():
+    """The backend's own batch boundary unwraps the year."""
+    from tenforty.models import OTSState, OTSYear
+
+    results = GraphBackend().evaluate_batch(
+        OTSYear.YEAR_2024, OTSState.NONE, {"w2_income": [50_000.0]}, ["Single"]
+    )
+    assert len(results["total_tax"]) == 1

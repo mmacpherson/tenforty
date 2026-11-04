@@ -93,7 +93,7 @@ def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDef
         quantity="state_total_tax",
         minimum=center - 0.50,
         maximum=center + 0.50,
-        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
+        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-tj2.20)",
     )
 
 
@@ -141,7 +141,7 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     minimum=-0.50,
     maximum=0.50,
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
-    "(tenforty-xew, not a table-band difference)",
+    "(tenforty-b72.42, not a table-band difference)",
 )
 
 
@@ -340,7 +340,7 @@ def la_2024_table_gap(
         maximum=center + 0.50,
         reason=(
             "LA 2024 line 10 is the tax-table value; the graph prices the exact "
-            "bracket formula rather than the table row (tenforty-xew)"
+            "bracket formula rather than the table row (tenforty-tj2.20)"
         ),
     )
 
@@ -848,6 +848,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
+    # Legacy MA rows, unverified legacy, kept for their federal checks only.
+    # Their state values priced line 10 as federal AGI with no line 11
+    # deduction (Social Security/Medicare paid, up to $2,000), so they were
+    # retired in b72.6/b72.39. Blind MA values: tests/ma_form1_income_test.py
+    # and docs/validation/derivations/ma-2024-2025.md. The arithmetic notes
+    # below are the original, superseded reasoning.
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
     # 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025)
     # Also: 8.5% on short-term capital gains, 12% on long-term collectibles
@@ -869,7 +875,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=20000.0,
         expected_federal_tax=543.0,  # Tax Table row 5,400-5,450
-        expected_state_tax=780.0,
         backend="graph",
     ),
     # MA Single, middle income (2024)
@@ -887,7 +892,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2280.0,
         backend="graph",
     ),
     # MA Single, higher income (2024)
@@ -905,7 +909,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=100000.0,
         expected_federal_tax=13847.0,  # Tax Table row 85,400-85,450
-        expected_state_tax=4780.0,
         backend="graph",
     ),
     # MA MFJ, middle income (2024)
@@ -923,7 +926,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=4560.0,
         backend="graph",
     ),
     # MA Head_of_House, middle income (2024)
@@ -941,7 +943,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=3410.0,
         backend="graph",
     ),
     # MA Single, surtax income (2025)
@@ -965,7 +966,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=1200000.0,
         expected_federal_tax=404192.75,
-        expected_state_tax=64278.0,
         backend="graph",
     ),
     # ========== CONNECTICUT SCENARIOS ==========
@@ -2250,132 +2250,78 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(ks_worksheet_gap(0.20, 11_904.584 - 11_905),),
         backend="graph",
     ),
-    # ========== OREGON SCENARIOS ==========
-    # OR 2024 Single, low income (2024)
-    # Federal AGI: $30,000
-    # OR additions: $0, OR subtractions: $0
-    # OR income before deductions: $30,000
-    # OR standard deduction: $2,745
-    # OR taxable: $30,000 - $2,745 = $27,255
-    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($27,255 - $11,050) * 0.0875
-    #       = $209 + $448.875 + $1,417.9375 = $2,075.8125
-    # Federal standard deduction (2024): $14,600
-    # Federal taxable: $30,000 - $14,600 = $15,400
-    # Federal tax: $11,600 * 0.10 + $3,800 * 0.12 = $1,160 + $456 = $1,616
+    # Federal assertions remain unverified legacy. State arithmetic is conditional
+    # on those retained federal amounts, not evidence of federal tax law.
+    # Non-blind source arithmetic: docs/validation/derivations/or-2024-2025.md.
     TaxScenario(
-        source="OR 2024 Tax Brackets (computed)",
+        source="OR-40 conditional worksheet (non-blind legacy correction)",
         description="OR Single, $30,000 income (2024)",
         year=2024,
         state="OR",
         filing_status="Single",
         w2_income=30000.0,
-        expected_federal_tax=1619.0,  # Tax Table row 15,400-15,450
-        expected_state_tax=2075.81,
+        expected_federal_tax=1619,
+        expected_state_tax=1694.0,
         expected_federal_agi=30000.0,
         backend="graph",
     ),
-    # OR Single, middle income (2024)
-    # Federal AGI: $60,000
-    # OR income before deductions: $60,000
-    # OR standard deduction: $2,745
-    # OR taxable: $60,000 - $2,745 = $57,255
-    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($57,255 - $11,050) * 0.0875
-    #       = $209 + $448.875 + $4,042.9375 = $4,700.8125
-    # Federal taxable: $60,000 - $14,600 = $45,400
-    # Federal tax: $11,600 * 0.10 + $33,800 * 0.12 = $1,160 + $4,056 = $5,216
     TaxScenario(
-        source="OR 2024 Tax Brackets (computed)",
+        source="OR-40 conditional worksheet (non-blind legacy correction)",
         description="OR Single, $60,000 income (2024)",
         year=2024,
         state="OR",
         filing_status="Single",
         w2_income=60000.0,
-        expected_federal_tax=5219.0,  # Tax Table row 45,400-45,450
-        expected_state_tax=4700.81,
+        expected_federal_tax=5219,
+        expected_state_tax=4002.0,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
-    # OR Single, high income - top bracket (2024)
-    # Federal AGI: $150,000
-    # OR income before deductions: $150,000
-    # OR standard deduction: $2,745
-    # OR taxable: $150,000 - $2,745 = $147,255
-    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($125,000 - $11,050) * 0.0875 + ($147,255 - $125,000) * 0.099
-    #       = $209 + $448.875 + $9,970.625 + $2,203.245 = $12,831.745
-    # Federal taxable: $150,000 - $14,600 = $135,400
-    # Federal tax (formula, graph backend): $25,538.50
     TaxScenario(
-        source="OR 2024 Tax Brackets (computed)",
-        description="OR Single, $150,000 income, top bracket (2024)",
+        source="OR-40 conditional worksheet (non-blind legacy correction)",
+        description="OR Single, $150,000 income (2024)",
         year=2024,
         state="OR",
         filing_status="Single",
         w2_income=150000.0,
-        expected_federal_tax=25538.50,
-        expected_state_tax=12831.75,
+        expected_federal_tax=25538.5,
+        expected_state_tax=12839.0,
         expected_federal_agi=150000.0,
         backend="graph",
     ),
-    # OR MFJ, middle income (2024)
-    # Federal AGI: $100,000
-    # OR income before deductions: $100,000
-    # OR standard deduction (MFJ): $5,495
-    # OR taxable: $100,000 - $5,495 = $94,505
-    # OR tax: $8,800 * 0.0475 + ($22,100 - $8,800) * 0.0675 + ($94,505 - $22,100) * 0.0875
-    #       = $418 + $897.75 + $6,335.4375 = $7,651.1875
-    # Federal taxable: $100,000 - $29,200 = $70,800
-    # Federal tax: $23,200 * 0.10 + $47,600 * 0.12 = $2,320 + $5,712 = $8,032
     TaxScenario(
-        source="OR 2024 Tax Brackets (computed)",
-        description="OR MFJ, $100,000 income (2024)",
+        source="OR-40 conditional worksheet (non-blind legacy correction)",
+        description="OR Married/Joint, $100,000 income (2024)",
         year=2024,
         state="OR",
         filing_status="Married/Joint",
         w2_income=100000.0,
-        expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=7651.19,
+        expected_federal_tax=8035,
+        expected_state_tax=6467.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
-    # OR HoH, middle income (2024)
-    # Federal AGI: $75,000
-    # OR income before deductions: $75,000
-    # OR standard deduction (HoH): $4,420
-    # OR taxable: $75,000 - $4,420 = $70,580
-    # OR tax: $8,600 * 0.0475 + ($21,500 - $8,600) * 0.0675 + ($70,580 - $21,500) * 0.0875
-    #       = $408.50 + $870.75 + $4,294.50 = $5,573.75
-    # Federal taxable: $75,000 - $21,900 = $53,100
-    # Federal tax: $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
     TaxScenario(
-        source="OR 2024 Tax Brackets (computed)",
-        description="OR HoH, $75,000 income (2024)",
+        source="OR-40 conditional worksheet (non-blind legacy correction)",
+        description="OR Head_of_House, $75,000 income (2024)",
         year=2024,
         state="OR",
         filing_status="Head_of_House",
         w2_income=75000.0,
-        expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=5573.75,
+        expected_federal_tax=6044,
+        expected_state_tax=4797.0,
         expected_federal_agi=75000.0,
         backend="graph",
     ),
-    # OR Single, 2025 with increased standard deduction
-    # Federal AGI: $80,000
-    # OR income before deductions: $80,000
-    # OR standard deduction (2025): $2,835
-    # OR taxable: $80,000 - $2,835 = $77,165
-    # OR tax: $4,400 * 0.0475 + ($11,050 - $4,400) * 0.0675 + ($77,165 - $11,050) * 0.0875
-    #       = $209 + $448.875 + $5,785.0625 = $6,442.9375
-    # Federal taxable (2025): $80,000 - $15,000 = $65,000
-    # Federal tax (formula, graph backend): $9,214.00
     TaxScenario(
-        source="OR 2025 Tax Brackets (computed)",
+        source="OR-40 conditional worksheet (non-blind legacy correction)",
         description="OR Single, $80,000 income (2025)",
         year=2025,
         state="OR",
         filing_status="Single",
         w2_income=80000.0,
-        expected_federal_tax=9055.0,  # Tax Table row 64,250-64,300
-        expected_state_tax=6442.94,
+        expected_federal_tax=9055,
+        expected_state_tax=5442.0,
         expected_federal_agi=80000.0,
         backend="graph",
     ),
@@ -2399,8 +2345,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Federal values equal the IRS 2024 Tax Table Single column (i1040tt--2024).
     #
     # The graph's IT-201 (tenforty-spec/forms/NYIT201_2024.hs) computes line 39
-    # as the exact bracket formula, and line 40 household credit is a keyInput
-    # defaulting to 0. IT-201-I p. 12 requires the Tax Table when NYAGI <=
+    # as the exact bracket formula; line 40 now computes the household credit.
+    # IT-201-I p. 12 requires the Tax Table when NYAGI <=
     # $107,650 and TI < $65,000, and the rate schedule (p. 33) publishes
     # whole-dollar bases ($600 over $13,900) where exact bracket arithmetic gives
     # $599.50. The known_defects below record the resulting residuals.
@@ -2427,11 +2373,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.5,
-                44.5,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $16,500): +$45. Graph line 39 is "
-                "the exact formula, not Tax Table row 8,500-8,550 ($341): -$1. Net +$44.",
+                -1.5,
+                -0.5,
+                "Graph line 39 uses the exact formula $340 rather than Tax Table "
+                "row 8,500-8,550 ($341): -$1 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
@@ -2452,12 +2398,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.0,
-                44.0,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $18,000): +$45. Graph line 39 is "
-                "the exact formula $407.50, not Tax Table row 10,000-10,050 ($409): "
-                "-$1.50. Net +$43.50.",
+                -2.0,
+                -1.0,
+                "Graph line 39 uses the exact formula $407.50 rather than Tax Table "
+                "row 10,000-10,050 ($409): -$1.50 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
