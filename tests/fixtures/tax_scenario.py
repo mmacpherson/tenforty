@@ -45,6 +45,7 @@ class TaxScenario:
     long_term_capital_gains: float = 0.0
     short_term_capital_gains: float = 0.0
     num_dependents: int = 0
+    num_ctc_dependents: int | None = None
     dependent_exemptions: float = 0.0
     state_adjustment: float = 0.0
     expected_federal_tax: float | None = None

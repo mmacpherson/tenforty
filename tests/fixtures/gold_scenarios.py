@@ -18,21 +18,21 @@ IRS_DIRECT_FILE_SCENARIOS = [
     ),
     # ATS-2: Samuel Smith + Judy Johnson - MFJ in Florida with 1 dependent
     # Source: direct-file/backend/src/test/resources/facts/scenarios/ats-2.json
-    # Note: This scenario includes a $500 dependent credit and EITC ($2,468).
-    # $500 against $998 of tax is the credit for other dependents, not the
-    # child tax credit (which would be limited to $998), so the dependent is
-    # not a CTC qualifying child and num_dependents (the CTC count) is 0.
-    # tenforty does not model the other-dependent credit, so it computes the
-    # pre-credit tax ($998), not post-credit ($498).
+    # Published worked example. The dependent (daughter, born 2005, 18 at the
+    # end of 2023) is not a CTC qualifying child but is claimed for the credit
+    # for other dependents: ctcEligibleDependents=0, odcEligibleDependents=1,
+    # totalCtcAndOdc=$500, tentativeTaxFromTaxableIncome=$998, totalTax=$498.
+    # The $2,468 EITC is a refundable payment and does not lower total tax.
     TaxScenario(
         source="IRS Direct File ATS-2 (Smith/Johnson)",
-        description="FL MFJ filers with $37,693 W2, 1 dependent, includes EITC/CTC",
+        description="FL MFJ filers with $37,693 W2, 1 dependent, includes EITC/ODC",
         year=2023,
         state=None,  # FL has no state income tax
         filing_status="Married/Joint",
         w2_income=37693.0,
-        num_dependents=0,
-        expected_federal_tax=998.0,  # Pre-credit tax
+        num_dependents=1,
+        num_ctc_dependents=0,
+        expected_federal_tax=498.0,  # $998 tax less the $500 other-dependent credit
         expected_federal_agi=37693.0,
     ),
     # Single filer with two W2s totaling $110k

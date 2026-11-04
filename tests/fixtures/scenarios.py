@@ -56,6 +56,7 @@ def run_tax_scenario(scenario: TaxScenario):
         long_term_capital_gains=scenario.long_term_capital_gains,
         short_term_capital_gains=scenario.short_term_capital_gains,
         num_dependents=scenario.num_dependents,
+        num_ctc_dependents=scenario.num_ctc_dependents,
         dependent_exemptions=scenario.dependent_exemptions,
         state_adjustment=scenario.state_adjustment,
     )
