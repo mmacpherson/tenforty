@@ -410,7 +410,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `rental_income`              | float                    | 0.0                 |                                    |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
 | `itemized_deductions`        | float                    | 0.0                 | Aggregate approximation of other itemized deductions, outside the SALT cap. OTS enters it as Schedule A line 6 (other taxes) and the graph as line 16 (other deductions), so their AMT add-back differs |
-| `state_adjustment`           | float                    | 0.0                 |                                    |
+| `state_adjustment`           | float                    | 0.0                 | **Deprecated; avoid.** Meaning depends on state and backend; see [`state_adjustment`](#state_adjustment-deprecated) |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
 | `state_and_local_taxes`      | float                    | 0.0                 | Schedule A line 5d (entered on 5a), capped on line 5e: $10,000 ($5,000 MFS) through 2024. For 2025, $40,000 less 30% of AGI over $500,000 ($250,000 MFS), not below $10,000; MFS then halves that result (equivalently $20,000 less 15% of AGI over $250,000, not below $5,000) |
 | `qualified_tips`             | float                    | 0.0                 | 2025 only. W-2 box 7 tips already in `w2_income`; Schedule 1-A Part II, Form 1040 line 13b |
@@ -420,6 +420,21 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
 | `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for 2024-2025, OTS for 2018-2023); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
+
+### `state_adjustment` (deprecated)
+
+`state_adjustment` is a legacy escape hatch with no single meaning, and a
+nonzero value emits a `DeprecationWarning`. We recommend against new use; named
+single-meaning inputs will replace it (tenforty-tj2.1, tenforty-tj2.2). CA and
+AL stay out of `backend="auto"` graph scope while it means different things on
+the two backends (tenforty-yu51).
+
+| Backend and state | What `state_adjustment` does |
+|---|---|
+| OTS, CA | Schedule CA Part II addition to itemized deductions (`CA540_P2_Add_6`); no effect with the standard deduction |
+| Graph, CA | Schedule CA Part I addition to income (`ca_schedule_ca_A22_24`): the opposite direction |
+| Graph, AL | The Form 40 standard deduction amount (`al_40_L12_std`) |
+| Everywhere else | OTS ignores it; the graph refuses a nonzero value |
 
 ### The `evaluate_returns` frame
 
