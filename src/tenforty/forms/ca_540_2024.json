@@ -86,11 +86,144 @@
                 "type": "max"
             }
         },
+        "103": {
+            "id": 103,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "104": {
+            "id": 104,
+            "op": {
+                "type": "literal",
+                "value": 10756
+            }
+        },
+        "105": {
+            "id": 105,
+            "op": {
+                "type": "literal",
+                "value": 21512
+            }
+        },
+        "106": {
+            "id": 106,
+            "op": {
+                "type": "literal",
+                "value": 10756
+            }
+        },
+        "107": {
+            "id": 107,
+            "op": {
+                "type": "literal",
+                "value": 21527
+            }
+        },
+        "108": {
+            "id": 108,
+            "op": {
+                "type": "literal",
+                "value": 21512
+            }
+        },
+        "109": {
+            "id": 109,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 107,
+                    "married_joint": 105,
+                    "married_separate": 106,
+                    "qualifying_widow": 108,
+                    "single": 104
+                }
+            }
+        },
         "11": {
             "id": 11,
             "name": "L94_other_refundable_credits",
             "op": {
                 "type": "input"
+            }
+        },
+        "110": {
+            "id": 110,
+            "op": {
+                "left": 26,
+                "right": 109,
+                "type": "sub"
+            }
+        },
+        "111": {
+            "id": 111,
+            "op": {
+                "type": "literal",
+                "value": 25499
+            }
+        },
+        "112": {
+            "id": 112,
+            "op": {
+                "type": "literal",
+                "value": 50998
+            }
+        },
+        "113": {
+            "id": 113,
+            "op": {
+                "type": "literal",
+                "value": 25499
+            }
+        },
+        "114": {
+            "id": 114,
+            "op": {
+                "type": "literal",
+                "value": 51000
+            }
+        },
+        "115": {
+            "id": 115,
+            "op": {
+                "type": "literal",
+                "value": 50998
+            }
+        },
+        "116": {
+            "id": 116,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 114,
+                    "married_joint": 112,
+                    "married_separate": 113,
+                    "qualifying_widow": 115,
+                    "single": 111
+                }
+            }
+        },
+        "117": {
+            "id": 117,
+            "op": {
+                "left": 26,
+                "right": 116,
+                "type": "sub"
+            }
+        },
+        "118": {
+            "id": 118,
+            "op": {
+                "type": "literal",
+                "value": 40245
+            }
+        },
+        "119": {
+            "id": 119,
+            "op": {
+                "type": "literal",
+                "value": 80490
             }
         },
         "12": {
@@ -103,6 +236,83 @@
                 "year": 2024
             }
         },
+        "120": {
+            "id": 120,
+            "op": {
+                "type": "literal",
+                "value": 40245
+            }
+        },
+        "121": {
+            "id": 121,
+            "op": {
+                "type": "literal",
+                "value": 65744
+            }
+        },
+        "122": {
+            "id": 122,
+            "op": {
+                "type": "literal",
+                "value": 80490
+            }
+        },
+        "123": {
+            "id": 123,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 121,
+                    "married_joint": 119,
+                    "married_separate": 120,
+                    "qualifying_widow": 122,
+                    "single": 118
+                }
+            }
+        },
+        "124": {
+            "id": 124,
+            "op": {
+                "left": 26,
+                "right": 123,
+                "type": "sub"
+            }
+        },
+        "125": {
+            "id": 125,
+            "op": {
+                "type": "literal",
+                "value": 55866
+            }
+        },
+        "126": {
+            "id": 126,
+            "op": {
+                "type": "literal",
+                "value": 111732
+            }
+        },
+        "127": {
+            "id": 127,
+            "op": {
+                "type": "literal",
+                "value": 55866
+            }
+        },
+        "128": {
+            "id": 128,
+            "op": {
+                "type": "literal",
+                "value": 81364
+            }
+        },
+        "129": {
+            "id": 129,
+            "op": {
+                "type": "literal",
+                "value": 111732
+            }
+        },
         "13": {
             "id": 13,
             "name": "L14_ca_subtractions",
@@ -113,6 +323,90 @@
                 "year": 2024
             }
         },
+        "130": {
+            "id": 130,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 128,
+                    "married_joint": 126,
+                    "married_separate": 127,
+                    "qualifying_widow": 129,
+                    "single": 125
+                }
+            }
+        },
+        "131": {
+            "id": 131,
+            "op": {
+                "left": 26,
+                "right": 130,
+                "type": "sub"
+            }
+        },
+        "132": {
+            "id": 132,
+            "op": {
+                "type": "literal",
+                "value": 70606
+            }
+        },
+        "133": {
+            "id": 133,
+            "op": {
+                "type": "literal",
+                "value": 141212
+            }
+        },
+        "134": {
+            "id": 134,
+            "op": {
+                "type": "literal",
+                "value": 70606
+            }
+        },
+        "135": {
+            "id": 135,
+            "op": {
+                "type": "literal",
+                "value": 96107
+            }
+        },
+        "136": {
+            "id": 136,
+            "op": {
+                "type": "literal",
+                "value": 141212
+            }
+        },
+        "137": {
+            "id": 137,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 135,
+                    "married_joint": 133,
+                    "married_separate": 134,
+                    "qualifying_widow": 136,
+                    "single": 132
+                }
+            }
+        },
+        "138": {
+            "id": 138,
+            "op": {
+                "left": 26,
+                "right": 137,
+                "type": "sub"
+            }
+        },
+        "139": {
+            "id": 139,
+            "op": {
+                "type": "literal",
+                "value": 360659
+            }
+        },
         "14": {
             "id": 14,
             "name": "L15_agi_minus_subtractions",
@@ -120,6 +414,83 @@
                 "left": 12,
                 "right": 13,
                 "type": "sub"
+            }
+        },
+        "140": {
+            "id": 140,
+            "op": {
+                "type": "literal",
+                "value": 721318
+            }
+        },
+        "141": {
+            "id": 141,
+            "op": {
+                "type": "literal",
+                "value": 360659
+            }
+        },
+        "142": {
+            "id": 142,
+            "op": {
+                "type": "literal",
+                "value": 490493
+            }
+        },
+        "143": {
+            "id": 143,
+            "op": {
+                "type": "literal",
+                "value": 721318
+            }
+        },
+        "144": {
+            "id": 144,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 142,
+                    "married_joint": 140,
+                    "married_separate": 141,
+                    "qualifying_widow": 143,
+                    "single": 139
+                }
+            }
+        },
+        "145": {
+            "id": 145,
+            "op": {
+                "left": 26,
+                "right": 144,
+                "type": "sub"
+            }
+        },
+        "146": {
+            "id": 146,
+            "op": {
+                "type": "literal",
+                "value": 432787
+            }
+        },
+        "147": {
+            "id": 147,
+            "op": {
+                "type": "literal",
+                "value": 865574
+            }
+        },
+        "148": {
+            "id": 148,
+            "op": {
+                "type": "literal",
+                "value": 432787
+            }
+        },
+        "149": {
+            "id": 149,
+            "op": {
+                "type": "literal",
+                "value": 588593
             }
         },
         "15": {
@@ -132,6 +503,90 @@
                 "year": 2024
             }
         },
+        "150": {
+            "id": 150,
+            "op": {
+                "type": "literal",
+                "value": 865574
+            }
+        },
+        "151": {
+            "id": 151,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 149,
+                    "married_joint": 147,
+                    "married_separate": 148,
+                    "qualifying_widow": 150,
+                    "single": 146
+                }
+            }
+        },
+        "152": {
+            "id": 152,
+            "op": {
+                "left": 26,
+                "right": 151,
+                "type": "sub"
+            }
+        },
+        "153": {
+            "id": 153,
+            "op": {
+                "type": "literal",
+                "value": 721314
+            }
+        },
+        "154": {
+            "id": 154,
+            "op": {
+                "type": "literal",
+                "value": 1442628
+            }
+        },
+        "155": {
+            "id": 155,
+            "op": {
+                "type": "literal",
+                "value": 721314
+            }
+        },
+        "156": {
+            "id": 156,
+            "op": {
+                "type": "literal",
+                "value": 980987
+            }
+        },
+        "157": {
+            "id": 157,
+            "op": {
+                "type": "literal",
+                "value": 1442628
+            }
+        },
+        "158": {
+            "id": 158,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 156,
+                    "married_joint": 154,
+                    "married_separate": 155,
+                    "qualifying_widow": 157,
+                    "single": 153
+                }
+            }
+        },
+        "159": {
+            "id": 159,
+            "op": {
+                "left": 26,
+                "right": 158,
+                "type": "sub"
+            }
+        },
         "16": {
             "id": 16,
             "name": "L17_ca_agi",
@@ -141,11 +596,155 @@
                 "type": "add"
             }
         },
+        "160": {
+            "id": 160,
+            "op": {
+                "type": "literal",
+                "value": 0.123
+            }
+        },
+        "161": {
+            "id": 161,
+            "op": {
+                "type": "literal",
+                "value": 0.113
+            }
+        },
+        "162": {
+            "id": 162,
+            "op": {
+                "cond": 159,
+                "otherwise": 161,
+                "then": 160,
+                "type": "if_positive"
+            }
+        },
+        "163": {
+            "id": 163,
+            "op": {
+                "type": "literal",
+                "value": 0.103
+            }
+        },
+        "164": {
+            "id": 164,
+            "op": {
+                "cond": 152,
+                "otherwise": 163,
+                "then": 162,
+                "type": "if_positive"
+            }
+        },
+        "165": {
+            "id": 165,
+            "op": {
+                "type": "literal",
+                "value": 9.3e-2
+            }
+        },
+        "166": {
+            "id": 166,
+            "op": {
+                "cond": 145,
+                "otherwise": 165,
+                "then": 164,
+                "type": "if_positive"
+            }
+        },
+        "167": {
+            "id": 167,
+            "op": {
+                "type": "literal",
+                "value": 8.0e-2
+            }
+        },
+        "168": {
+            "id": 168,
+            "op": {
+                "cond": 138,
+                "otherwise": 167,
+                "then": 166,
+                "type": "if_positive"
+            }
+        },
+        "169": {
+            "id": 169,
+            "op": {
+                "type": "literal",
+                "value": 6.0e-2
+            }
+        },
         "17": {
             "id": 17,
             "op": {
                 "type": "literal",
                 "value": 5540
+            }
+        },
+        "170": {
+            "id": 170,
+            "op": {
+                "cond": 131,
+                "otherwise": 169,
+                "then": 168,
+                "type": "if_positive"
+            }
+        },
+        "171": {
+            "id": 171,
+            "op": {
+                "type": "literal",
+                "value": 4.0e-2
+            }
+        },
+        "172": {
+            "id": 172,
+            "op": {
+                "cond": 124,
+                "otherwise": 171,
+                "then": 170,
+                "type": "if_positive"
+            }
+        },
+        "173": {
+            "id": 173,
+            "op": {
+                "type": "literal",
+                "value": 2.0e-2
+            }
+        },
+        "174": {
+            "id": 174,
+            "op": {
+                "cond": 117,
+                "otherwise": 173,
+                "then": 172,
+                "type": "if_positive"
+            }
+        },
+        "175": {
+            "id": 175,
+            "op": {
+                "type": "literal",
+                "value": 1.0e-2
+            }
+        },
+        "176": {
+            "id": 176,
+            "op": {
+                "cond": 110,
+                "otherwise": 175,
+                "then": 174,
+                "type": "if_positive"
+            }
+        },
+        "177": {
+            "id": 177,
+            "name": "L19BracketRate_ca_bracket_rate",
+            "op": {
+                "left": 103,
+                "right": 176,
+                "type": "mul"
             }
         },
         "18": {
@@ -872,6 +1471,7 @@
         12,
         16,
         26,
+        177,
         27,
         75,
         78,

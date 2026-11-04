@@ -275,6 +275,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L17_ca_agi",
             "state_taxable_income": "L19_ca_taxable_income",
+            "state_tax_bracket": "L19BracketRate_ca_bracket_rate",
             "state_total_tax": "L64_ca_total_tax",
         },
     ),
@@ -683,6 +684,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L14_federal_agi",
             "state_taxable_income": "L39_nj_taxable_income",
+            "state_tax_bracket": "L39BracketRate_nj_bracket_rate",
             "state_total_tax": "L46_nj_total_tax",
         },
     ),
@@ -712,6 +714,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L33_ny_agi",
             "state_taxable_income": "L37_ny_taxable_income",
+            "state_tax_bracket": "L38BracketRate_ny_bracket_rate",
             "state_total_tax": "L46_ny_total_state_tax",
         },
     ),
@@ -780,6 +783,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L4_oh_agi",
             "state_taxable_income": "L9_oh_taxable_nonbusiness_income",
+            "state_tax_bracket": "L9BracketRate_oh_bracket_rate",
             "state_total_tax": "L25_total_tax_liability",
         },
     ),
@@ -807,6 +811,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L7_federal_agi",
             "state_taxable_income": "L23_or_taxable_income",
+            "state_tax_bracket": "L24BracketRate_or_bracket_rate",
             "state_total_tax": "L32_or_total_tax",
         },
     ),
@@ -823,6 +828,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L8_va_agi",
             "state_taxable_income": "L13_va_taxable_income",
+            "state_tax_bracket": "L13BracketRate_va_bracket_rate",
             "state_total_tax": "L18_total_tax",
         },
     ),
