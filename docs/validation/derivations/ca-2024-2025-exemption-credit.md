@@ -87,3 +87,24 @@ Income-key controls, both years: a Single line13 amount one dollar below its thr
 The companion `ca-2024-2025-exemption-credit-cases.csv` contains 7326 source-derived cases: every status/year; no age/blind additions and0/1/3 dependents; each interval boundary n×B for n0–80, at boundary−1/boundary/boundary+1; plus eligible blind/senior group cases. This covers the first drop, exact-multiple behavior, personal exhaustion and the last dependent dollar. Expected values were fixed before implementation inspection.
 
 Cases use externally eligible counts and whole-dollar line13 premises. Later code work must use existing input meanings; this archive does not authorize new natural fields or silently supply eligibility. If the existing surface cannot express a case, record that limitation rather than inventing an input. Mandatory CA tax-table work is separate from this credit computation; no whole-return exactness is claimed here.
+
+## Implementation-domain note after inspection, 2026-11-03
+
+Everything above and all CSV values were committed at `dde6f7d` before opening
+the CA implementation. The existing line32 models personal exemptions only.
+This fix keeps that surface: the2,430 zero-dependent/no-age/no-blind rows are
+the independent passing-value target. The other archived rows remain source
+evidence, not a claim of implemented support. Missing dependent credits for an
+already accepted total-dependent input are tracked separately as
+**tenforty-b72.54**, with strict source witnesses610/628. Age/blind and
+claimability variants remain unsupported; no new natural or raw count input is
+introduced. CA stays excluded for its remaining defects.
+
+Inspection also showed the phase-out used CA AGI (line17), contrary to p.14
+line a’s federal AGI (line13); the pre-archived income-key controls cover that
+correction. The worksheet consumes a whole-dollar entry. Additional
+**metamorphic convention checks**, written after inspection and before changing
+the calculation, compare fractional inputs with the existing `roundE` positive
+half-up entry convention (.49→same dollar;.50→next dollar), including exact
+interval edges. They do not add a new independently sourced FTB fractional
+expected-tax value. No source expected credit is changed.
