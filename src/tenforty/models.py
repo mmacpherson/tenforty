@@ -7,6 +7,7 @@ used primarily for structuring and organizing configuration data.
 
 # ruff: noqa: D101
 import math
+import warnings
 from collections.abc import Callable
 from enum import Enum
 from functools import partial
@@ -486,7 +487,20 @@ class TaxReturnInput(BaseModel):
             "so True raises ValueError."
         ),
     )
-    state_adjustment: float = 0.0
+    state_adjustment: float = Field(
+        default=0.0,
+        description=(
+            "Deprecated legacy escape hatch; avoid in new code. Its meaning depends "
+            "on the state and the backend, and a nonzero value emits a "
+            "DeprecationWarning (tenforty-yu51). OTS CA: Schedule CA Part II "
+            "itemized-deduction addition (CA540_P2_Add_6). Graph CA: Schedule CA "
+            "Part I income addition (ca_schedule_ca_A22_24), so the same value moves "
+            "CA taxable income the opposite way. Graph AL: the Form 40 standard "
+            "deduction amount (al_40_L12_std). Everywhere else OTS ignores it and "
+            "the graph refuses it. Named single-meaning inputs will replace it "
+            "(tenforty-tj2.1, tenforty-tj2.2)."
+        ),
+    )
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = Field(
         default=0.0,
@@ -605,6 +619,20 @@ class TaxReturnInput(BaseModel):
             raise ValueError(
                 "spouse_65_or_older applies only to Married/Joint and Married/Sep; "
                 f"filing status {self.filing_status.value!r} has no spouse box."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def warn_deprecated_state_adjustment(self) -> "TaxReturnInput":
+        """Warn on a nonzero state_adjustment, whose meaning is backend-specific."""
+        if self.state_adjustment:
+            warnings.warn(
+                "state_adjustment is deprecated: its meaning depends on the state and "
+                "the backend (CA: an itemized-deduction addition on OTS but an income "
+                "addition on graph; AL graph: the standard deduction amount). See "
+                "docs/migrating-to-graph-default.md.",
+                DeprecationWarning,
+                stacklevel=2,
             )
         return self
 

@@ -20,6 +20,11 @@
     argument; they run on the graph backend, as before.
 
 ### Added
+- **[Migrating to the graph default](docs/migrating-to-graph-default.md):** every
+  caller-visible change on the way to `backend="auto"` as the default, the
+  rollback (`backend="ots"`), and each known OTS/auto difference. A
+  compatibility corpus (`tests/graph_default_compat_test.py`) runs the same
+  public calls both ways and requires every difference to be one of them.
 - **Graph state scope for `backend="auto"`.** A state return goes to graph only
   when its known graph-side defects are closed and official-value fixtures
   support it: for 2024-2025, Mississippi and the eight states without an
@@ -34,6 +39,12 @@
   is split by year and keeps its row order.
 
 ### Changed (both backends)
+- **`state_adjustment` is deprecated.** Its meaning depends on the state and the
+  backend (OTS CA: a Schedule CA Part II itemized addition; graph CA: a Part I
+  income addition; graph AL: the standard deduction amount; ignored or refused
+  elsewhere), so a nonzero value now emits a `DeprecationWarning`. No mapping
+  changed. CA and AL stay out of `backend="auto"` graph scope until it is
+  resolved (tenforty-yu51).
 - **`evaluate_returns` frames now have one declared schema.** Columns are the
   inputs in signature order, then the `InterpretedTaxReturn` fields, with
   declared dtypes, for both backends, both modes, and empty, failed and
