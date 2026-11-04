@@ -119,6 +119,113 @@ jobs:
     - name: Run tests against the installed wheel
       run: uv run --no-sync pytest --hypothesis-profile=ci
 
+  # Builds a wheel from the sdist, as any platform without a prebuilt wheel
+  # does, in each supported source-build mode: with Rust it must ship the graph
+  # backend; without Rust it must fail and say why; with the legacy
+  # TENFORTY_WITHOUT_GRAPH=1 opt-out it must build OTS only.
+  sdist-install:
+    name: install from sdist (${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [with-rust, without-rust, without-graph]
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: '3.14'
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install Rust toolchain
+      if: matrix.mode == 'with-rust'
+      uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+
+    - name: Build the sdist
+      run: uv build --sdist --out-dir sdist
+
+    - name: Hide the runner's Rust toolchain
+      if: matrix.mode != 'with-rust'
+      run: |
+        set -euo pipefail
+        path_without_rust=$(printf '%s' "$PATH" | tr ':' '\n' | grep -v -e '\.cargo' -e '\.rustup' | paste -sd:)
+        echo "PATH=$path_without_rust" >> "$GITHUB_ENV"
+
+    - name: Build a wheel from the sdist, with Rust
+      if: matrix.mode == 'with-rust'
+      run: uv build --wheel --out-dir wheel sdist/*.tar.gz
+
+    - name: Build a wheel from the sdist without Rust, which must fail clearly
+      if: matrix.mode == 'without-rust'
+      run: |
+        set -uo pipefail
+        if command -v cargo || command -v rustc; then
+          echo "::error::the Rust toolchain is still on PATH"
+          exit 1
+        fi
+        if uv build --wheel --out-dir wheel sdist/*.tar.gz > build.log 2>&1; then
+          echo "::error::the sdist built without a Rust toolchain"
+          exit 1
+        fi
+        tail -n 40 build.log
+        grep -q 'tenforty requires a Rust toolchain to build from source' build.log
+        grep -q 'TENFORTY_WITHOUT_GRAPH=1' build.log
+
+    - name: Build a legacy OTS-only wheel from the sdist without Rust
+      if: matrix.mode == 'without-graph'
+      env:
+        TENFORTY_WITHOUT_GRAPH: '1'
+      run: |
+        set -euo pipefail
+        if command -v cargo || command -v rustc; then
+          echo "::error::the Rust toolchain is still on PATH"
+          exit 1
+        fi
+        uv build --wheel --out-dir wheel sdist/*.tar.gz
+
+    - name: Install the wheel outside the source tree
+      if: matrix.mode != 'without-rust'
+      run: |
+        uv venv "$RUNNER_TEMP/venv"
+        uv pip install --python "$RUNNER_TEMP/venv/bin/python" wheel/*.whl
+
+    - name: Smoke-check the installed graph and OTS backends
+      if: matrix.mode == 'with-rust'
+      working-directory: ${{ runner.temp }}
+      run: '"$RUNNER_TEMP/venv/bin/python" "$GITHUB_WORKSPACE/scripts/smoke_installed.py"'
+
+    - name: Check the OTS-only install computes OTS and refuses graph
+      if: matrix.mode == 'without-graph'
+      working-directory: ${{ runner.temp }}
+      run: |
+        "$RUNNER_TEMP/venv/bin/python" - <<'PY'
+        import math
+
+        import tenforty
+        from tenforty import BackendUnavailableError
+        from tenforty.backends import available_backends, get_backend
+
+        assert available_backends() == ["ots"], available_backends()
+        result = tenforty.evaluate_return(year=2024, w2_income=75_000, backend="ots")
+        assert math.isfinite(result.federal_total_tax) and result.federal_total_tax > 0
+        for route in (
+            lambda: get_backend("graph"),
+            lambda: tenforty.evaluate_return(year=2024, w2_income=75_000, backend="graph"),
+            lambda: tenforty.evaluate_return(year=2024, w2_income=75_000, backend="auto"),
+        ):
+            try:
+                route()
+            except BackendUnavailableError as error:
+                print(f"graph refused: {type(error).__name__}: {error}")
+            else:
+                raise AssertionError("the OTS-only install routed a return to graph")
+        PY
+
   # The taxcalc adapter conformance tests are gated behind TENFORTY_TAXCALC,
   # which the job above never sets — so without this job they would never run
   # anywhere. That is the same failure they exist to catch: F16 happened
@@ -228,6 +335,8 @@ jobs:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_BEFORE_BUILD: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && pip install setuptools-rust>=1.7
         CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
+        # Every shipped wheel must load and evaluate both backends.
+        CIBW_TEST_COMMAND: python {project}/scripts/smoke_installed.py
 
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
