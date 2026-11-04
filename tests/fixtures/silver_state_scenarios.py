@@ -824,14 +824,13 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # CA Single $250,000 W2 (2024). Fixture kind: derived-arithmetic.
-    # Implementer-derived from the same booklet's rules, not by the blind deriver.
+    # Unverified legacy: implementer-derived, absent from the blind CA record.
     # TI $244,460; Schedule X (p. 75): $3,108.72 + 9.3% x $173,854 = $19,277.14
     # -> $19,277. AGI Limitation Worksheet (p. 14): excess $5,143 / $2,500 = 2.06,
     # rounded UP to 3; 3 x $6 = $18; exemption credit $149 - $18 = $131.
     # Net $19,277 - $131 = $19,146.
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
-        state_evidence=CA_EVIDENCE,
         description="CA Single, $250,000 W2, exemption credit in phase-out (2024)",
         year=2024,
         state="CA",
@@ -840,12 +839,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=19146.0,
         state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
         backend="graph",
-        known_failure=(
-            "CA 540 line 32 phase-out is continuous in the graph ($0.0024 per "
-            "excess AGI dollar); FTB AGI Limitation Worksheet rounds excess/$2,500 "
-            "UP to a whole step, $6 per step. Graph credit $136.66 vs official "
-            "$131; graph net $19,140.48 vs $19,146 (tenforty-b72.17)."
-        ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
     # Legacy MA rows, unverified legacy, kept for their federal checks only.

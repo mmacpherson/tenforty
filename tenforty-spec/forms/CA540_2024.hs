@@ -52,13 +52,17 @@ ca540_2024 = form "ca_540" 2024 $ do
   -- Phase-out: credit reduced by $6 per $2,500 excess AGI per exemption
   let exemptionBase = byStatusE (fmap lit caPersonalExemptionCredit2024)
   let exemptionThreshold = byStatusE (fmap lit caExemptionPhaseoutThreshold2024)
-  let exemptionRate = byStatusE (fmap lit caExemptionPhaseoutRate2024)
+  let exemptionInterval = byStatusE (fmap lit caExemptionPhaseoutInterval2024)
   exemptionExcess <-
     interior "L32_excess" "exemption_excess_agi" $
-      max0 (l17 .-. exemptionThreshold)
+      max0 (roundE l13 .-. exemptionThreshold)
+  exemptionIntervals <-
+    interior "L32_intervals" "started_exemption_intervals" $
+      neg (floorE (neg (dollars 1 .*. (exemptionExcess ./. exemptionInterval))))
   exemptionReduction <-
     interior "L32_reduction" "exemption_reduction" $
-      exemptionExcess .*. exemptionRate
+      (exemptionIntervals .*. rate 6)
+        .*. (exemptionBase ./. lit caPersonalExemption2024)
   l32 <-
     interior "L32" "exemption_credits" $
       max0 (exemptionBase .-. exemptionReduction)

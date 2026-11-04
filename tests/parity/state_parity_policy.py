@@ -146,21 +146,6 @@ CA_2024_SCHEDULE = {
 }
 CA_TAX_TABLE_CEILING = 100_000.0
 CA_TAX_TABLE_HALF_ROW = 50.0
-CA_2024_EXEMPTION_PHASEOUT_THRESHOLD = {
-    "Single": 244_857.0,
-    "Married/Sep": 244_857.0,
-    "Head_of_House": 367_291.0,
-    "Married/Joint": 489_719.0,
-    "Widow(er)": 489_719.0,
-}
-CA_PERSONAL_EXEMPTION_CREDITS = {
-    "Single": 1,
-    "Married/Sep": 1,
-    "Head_of_House": 1,
-    "Married/Joint": 2,
-    "Widow(er)": 2,
-}
-CA_PHASEOUT_STEP_REDUCTION = 6.0
 
 
 def _ca_case(case: dict) -> bool:
@@ -183,29 +168,6 @@ def _ca_table_tolerance(case: dict) -> float:
     return _table_half_width(
         CA_2024_SCHEDULE[case["status"]], taxable_income, CA_TAX_TABLE_HALF_ROW
     )
-
-
-def _ca24_stepped_exemption_phaseout(case: dict) -> DeltaModel:
-    """Graph phases the exemption credit out continuously; Form 540 steps it.
-
-    Form 540 line 32: above the AGI threshold each personal exemption credit is
-    reduced by $6 for each $2,500 of excess AGI "or fraction thereof" ($1,250
-    married filing separately). OTS rounds the excess up to whole steps; the
-    graph spec reduces by $6/$2,500 per dollar (tenforty-b72.17). The graph is
-    the side that departs from the form.
-
-    Bound: per credit, the stepped reduction exceeds the continuous one by at
-    least $0 and less than one $6 step, so OTS's tax is higher by up to $6 per
-    credit: delta in [-$6 x credits, 0]. Once a reduction exhausts the $149
-    credit the gap only narrows.
-    """
-    if not _ca_case(case):
-        return {}
-    status = case["status"]
-    if case["w2"] <= CA_2024_EXEMPTION_PHASEOUT_THRESHOLD[status]:
-        return {}
-    widest_gap = CA_PHASEOUT_STEP_REDUCTION * CA_PERSONAL_EXEMPTION_CREDITS[status]
-    return {"state_total_tax": DeltaRange(-widest_gap, 0.0)}
 
 
 # --- North Carolina Form D-400 (2024, 2025) ----------------------------------
@@ -896,14 +858,6 @@ def _or_table_tolerance(case: dict) -> float:
 
 
 SIGNATURES = [
-    KnownParityDefect(
-        "CA-EXEMPTION-STEP",
-        "graph",
-        "tenforty-b72.17",
-        _ca24_stepped_exemption_phaseout,
-        # $1 over the threshold: Form 540 takes a full $6 step, the graph $0.0024.
-        {"state": "CA", "year": 2024, "status": "Single", "w2": 244_858},
-    ),
     KnownParityDefect(
         "NC-OTS-NEGATIVE-TAX",
         "ots",
