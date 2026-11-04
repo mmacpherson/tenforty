@@ -406,7 +406,10 @@ partly failed, or mixed engines under `backend="auto"`:
 - `year` and `num_dependents` are Int64; `state`, `filing_status` and
   `standard_or_itemized` are String (`state` is null for a federal-only
   return); boolean inputs are Boolean; float inputs and every output are
-  Float64, even when you pass whole numbers.
+  Float64, even when you pass whole numbers. The four rate columns
+  (`federal_tax_bracket`, `federal_effective_tax_rate`, `state_tax_bracket`,
+  `state_effective_tax_rate`) are null where the rate is not defined; a failed
+  row is NaN.
 
 The input columns echo **your request**, after broadcasting: they identify
 which return a row answers, not the values the engine used. For example, an
@@ -447,6 +450,11 @@ orchestration layer before rerunning Form 1040.
 | state_total_tax                 | Total state tax liability                             |
 | state_tax_bracket               | Rate-schedule bracket (percent) holding state taxable income; None when not defined (no state, or not reported for that state) |
 | state_effective_tax_rate        | State tax as a percent of state taxable income; None when not defined |
+
+The bracket fields are the rate schedule's own bracket, not `marginal_rate()`,
+which differentiates the computed tax. The graph reports state brackets for CA,
+NJ, NY, OH, OR and VA at full precision; OTS prints its bracket to 0.1%, so
+the two can differ in the last digit (NY 6.85% is 6.9 on OTS).
 
 
 ## Experimental: Graph Backend
