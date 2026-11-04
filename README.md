@@ -113,6 +113,7 @@ This results in the following:
  'federal_se_tax': 0.0,
  'federal_niit': 0.0,
  'federal_additional_medicare_tax': 0.0,
+ 'federal_child_tax_credit': 4400.0,
  'federal_total_tax': 3346.0,
  'state_adjusted_gross_income': 100000.0,
  'state_taxable_income': 88588.0,
@@ -393,7 +394,8 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
 | `state`                      | str \| None               | None                | Two-letter state code. Income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
-| `num_dependents`             | int                      | 0                   | Child tax credit qualifying children (under 17, with SSN; Schedule 8812 line 4). Federal CTC applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies none. Other-dependent credit, EITC and dependent care are not modeled. |
+| `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC, EITC and dependent care are not modeled. |
+| `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
 | `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
@@ -468,6 +470,7 @@ orchestration layer before rerunning Form 1040.
 | federal_se_tax                  | Federal self-employment tax (Schedule SE)             |
 | federal_niit                    | Net Investment Income Tax (Form 8960)                 |
 | federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
+| federal_child_tax_credit        | Nonrefundable child tax credit + credit for other dependents (Schedule 8812 line 14, Form 1040 line 19); already subtracted in federal_total_tax. Excludes the refundable ACTC |
 | federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |

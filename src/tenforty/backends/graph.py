@@ -40,6 +40,9 @@ _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 logger = logging.getLogger(__name__)
 
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
+# Inputs that reach the graph only through naturals derived from them:
+# num_ctc_dependents is carried by the two Schedule 8812 counts.
+_CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
@@ -49,7 +52,9 @@ _OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     """Lower a validated public input model to graph-compatible natural values."""
     values = tax_input.model_dump(
-        exclude=_MODEL_CONTEXT_FIELDS | _OTS_ONLY_DERIVED_FIELDS
+        exclude=_MODEL_CONTEXT_FIELDS
+        | _CARRIED_BY_DERIVED_FIELDS
+        | _OTS_ONLY_DERIVED_FIELDS
     )
     values["standard_or_itemized"] = float(
         tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
@@ -78,6 +83,7 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_schedule_se_L10_se_tax": "federal_se_tax",
     "us_form_8960_L17_niit": "federal_niit",
     "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
+    "us_form_8812_L14_ctc_odc": "federal_child_tax_credit",
 }
 FEDERAL_BRACKET_RATE_NODE = "us_1040_L15BracketRate_ordinary_bracket_rate"
 _FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}
@@ -122,15 +128,27 @@ def _lowered_input_nodes(
 # Naturals that federal law reads as well as some states. A nonzero value is
 # supported only when the federal graph reads it too: a state node alone would
 # let the federal return silently ignore it (num_dependents once dropped the
-# child tax credit for CA and WI, tenforty-aqx.4.1.6; it now reaches Schedule
-# 8812).
+# child tax credit for CA and WI, tenforty-aqx.4.1.6). num_dependents reaches
+# Schedule 8812 through the counts derived from it (DERIVED_NATURAL_SOURCES).
 _FEDERAL_LAW_NATURALS = frozenset({"num_dependents"})
+
+
+def _federal_carriers(natural_name: str) -> list[str]:
+    """List the natural itself, or the derived naturals that carry it to the graph."""
+    if natural_name in NATURAL_TO_NODES:
+        return [natural_name]
+    return [
+        derived
+        for derived, source in DERIVED_NATURAL_SOURCES.items()
+        if source == natural_name
+    ]
 
 
 def _reads_nonzero(natural_name: str, node_names: list[str]) -> bool:
     """Whether every return that legally reads this natural is given its value."""
-    if natural_name in _FEDERAL_LAW_NATURALS and natural_name not in NATURAL_TO_NODES:
-        return False
+    if natural_name in _FEDERAL_LAW_NATURALS:
+        carriers = _federal_carriers(natural_name)
+        return bool(carriers) and all(c in NATURAL_TO_NODES for c in carriers)
     return bool(node_names)
 
 

@@ -837,6 +837,7 @@ def evaluate_return(
     vehicle_loan_interest: float = 0.0,
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
+    num_ctc_dependents: int | None = None,
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
 
@@ -854,6 +855,7 @@ def evaluate_return(
         state=state,
         filing_status=filing_status,
         num_dependents=num_dependents,
+        num_ctc_dependents=num_ctc_dependents,
         dependent_exemptions=dependent_exemptions,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
@@ -916,6 +918,7 @@ def evaluate_returns(
     vehicle_loan_interest: list[float] | float = 0.0,
     filer_65_or_older: list[bool] | bool = False,
     spouse_65_or_older: list[bool] | bool = False,
+    num_ctc_dependents: list[int | None] | int | None = None,
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
 
@@ -943,6 +946,7 @@ def evaluate_returns(
     states_of_residence = ensure_list(state)
     filing_statuses = ensure_list(filing_status)
     nums_dependents = ensure_list(num_dependents)
+    nums_ctc_dependents = ensure_list(num_ctc_dependents)
     dep_exemptions = ensure_list(dependent_exemptions)
     std_or_items = ensure_list(standard_or_itemized)
     w2_incomes = ensure_list(w2_income)
@@ -973,6 +977,7 @@ def evaluate_returns(
             ("state", states_of_residence),
             ("filing_status", filing_statuses),
             ("num_dependents", nums_dependents),
+            ("num_ctc_dependents", nums_ctc_dependents),
             ("dependent_exemptions", dep_exemptions),
             ("standard_or_itemized", std_or_items),
             ("w2_income", w2_incomes),
@@ -1016,6 +1021,7 @@ def evaluate_returns(
         states_of_residence = broadcast(states_of_residence)
         filing_statuses = broadcast(filing_statuses)
         nums_dependents = broadcast(nums_dependents)
+        nums_ctc_dependents = broadcast(nums_ctc_dependents)
         dep_exemptions = broadcast(dep_exemptions)
         std_or_items = broadcast(std_or_items)
         w2_incomes = broadcast(w2_incomes)
@@ -1068,6 +1074,7 @@ def evaluate_returns(
         "vehicle_loan_interest",
         "filer_65_or_older",
         "spouse_65_or_older",
+        "num_ctc_dependents",
     ]
     all_vals = [
         years,
@@ -1097,6 +1104,7 @@ def evaluate_returns(
         vehicle_loan_interest_values,
         filer_65_or_older_values,
         spouse_65_or_older_values,
+        nums_ctc_dependents,
     ]
 
     columns = dict(zip(parameter_names, all_vals, strict=True))
@@ -1204,7 +1212,7 @@ _OUTPUT_COLUMNS = tuple(InterpretedTaxReturn.model_fields)
 
 
 def _input_dtype(name: str) -> pl.DataType:
-    if name in {"year", "num_dependents"}:
+    if name in {"year", "num_dependents", "num_ctc_dependents"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String
@@ -1363,6 +1371,7 @@ def marginal_rate(
     vehicle_loan_interest: float = 0.0,
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
+    num_ctc_dependents: int | None = None,
     wrt: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
@@ -1377,6 +1386,7 @@ def marginal_rate(
         state=state,
         filing_status=filing_status,
         num_dependents=num_dependents,
+        num_ctc_dependents=num_ctc_dependents,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
@@ -1443,6 +1453,7 @@ def marginal_rates(
     vehicle_loan_interest: float = 0.0,
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
+    num_ctc_dependents: int | None = None,
     output: str = "total_tax",
 ) -> dict[str, float]:
     """Compute marginal rates for every continuous public input.
@@ -1456,6 +1467,7 @@ def marginal_rates(
         state=state,
         filing_status=filing_status,
         num_dependents=num_dependents,
+        num_ctc_dependents=num_ctc_dependents,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
@@ -1522,6 +1534,7 @@ def solve_for_income(
     vehicle_loan_interest: float = 0.0,
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
+    num_ctc_dependents: int | None = None,
     for_input: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
@@ -1533,6 +1546,7 @@ def solve_for_income(
         state=state,
         filing_status=filing_status,
         num_dependents=num_dependents,
+        num_ctc_dependents=num_ctc_dependents,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
