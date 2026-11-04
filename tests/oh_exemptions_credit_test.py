@@ -139,3 +139,54 @@ def test_published_exemption_bands_and_filing_status_counts(
     assert runtime.eval("oh_it1040_L8_personal_exemptions") == amount * (
         base + dependents
     )
+
+
+@pytest.mark.parametrize("year,expected", [(2024, 650), (2025, 0)])
+def test_published_joint_credit_cap_and_2025_magi_limit(year, expected):
+    """Archived p.29: credit capped at 650; 2025 excludes MAGI >=750000."""
+    runtime = _runtime(year, "married_joint", 1_000_000, 0, 500_000, 500_000)
+    assert runtime.eval("oh_it1040_L13_joint_filing_credit") == expected
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize(
+    "status", ["single", "married_separate", "head_of_household", "qualifying_widow"]
+)
+def test_joint_credit_is_only_for_joint_filing_status(year, status):
+    """Archived p.29 eligibility: two qualifying incomes alone do not make MFJ."""
+    runtime = _runtime(year, status, 60_000, 0, 30_000, 30_000)
+    assert runtime.eval("oh_it1040_L13_joint_filing_credit") == 0
+
+
+@pytest.mark.parametrize("year,tax", [(2024, 1589), (2025, 1570)])
+def test_natural_zip_preserves_total_dependent_exemptions(year, tax):
+    """Archived cases 8 and 14 through the natural batch lowering path."""
+    from tenforty import evaluate_returns
+
+    result = evaluate_returns(
+        year=year,
+        state="OH",
+        filing_status=["Single", "Head_of_House"],
+        w2_income=[28_450, 75_000],
+        num_dependents=[0, 1],
+        num_ctc_dependents=[0, 0],
+        backend="graph",
+        mode="zip",
+    )
+    assert result["state_taxable_income"].to_list() == [26_050, 70_700]
+    assert result["state_total_tax"].to_list() == [0, tax]
+
+
+@pytest.mark.parametrize("year,one,two", [(2024, 1176, 1058), (2025, 1157, 1041)])
+def test_raw_zip_keeps_spouse_qualifying_incomes_per_row(year, one, two):
+    """Archived cases 5/5b as separate raw scenarios, without a natural split."""
+    _, _, outputs = _component_graph(year).eval_scenarios_zip(
+        {
+            "us_1040_L11_agi": [60_000, 60_000],
+            "oh_it1040_FilerQualifyingIncome": [60_000, 30_000],
+            "oh_it1040_SpouseQualifyingIncome": [0, 30_000],
+        },
+        ["married_joint", "married_joint"],
+        ["oh_it1040_L25_total_tax_liability"],
+    )
+    assert outputs["oh_it1040_L25_total_tax_liability"] == [one, two]

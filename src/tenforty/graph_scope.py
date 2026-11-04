@@ -103,6 +103,7 @@ UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
         "tenforty-b72.40",
         "tenforty-b72.46",
         "tenforty-b72.47",
+        "tenforty-b72.53",  # Natural MFJ joint-credit policy remains pending.
         "tenforty-b72.54",
     }
 )

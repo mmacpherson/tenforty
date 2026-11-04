@@ -354,6 +354,30 @@ OH_CASES = [
 ]
 
 
+OH_CASES += [
+    _oh(
+        2024,
+        "HoH75dep1",
+        70_700,
+        1589,
+        status="HoH",
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _oh(
+        2025,
+        "HoH75dep1",
+        70_700,
+        1570,
+        status="HoH",
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+]
+
+
 def _co(year, label, status, outcomes, **inputs) -> OfficialCase:
     return _case("CO", year, label, status, outcomes, **inputs)
 
@@ -422,8 +446,10 @@ UNPINNED = [
         ("MFJ400split", "joint filing credit needs each spouse's income"),
         ("MFJ79300split", "joint filing credit needs each spouse's income"),
         ("MFJ79301split", "joint filing credit needs each spouse's income"),
-        ("HoH75dep1", "OH dependent exemptions have no public input"),
-        ("MFJ100dep2", "OH dependent exemptions have no public input"),
+        (
+            "MFJ100dep2",
+            "joint filing credit needs each spouse's income; dependent count is supported",
+        ),
     )
 ]
 
@@ -432,7 +458,6 @@ TABLE = "tenforty-tj2.20"
 IL_EXEMPTION = "tenforty-b72.50"
 CO_ADDBACK = "tenforty-b72.51"
 NC_CHILD_DEDUCTION = "tenforty-b72.52"
-OH_EXEMPTION = "tenforty-b72.53"
 
 RATE = {
     ("CO", 2024): 0.0425,
@@ -458,10 +483,6 @@ CO_FEDERAL_STANDARD_DEDUCTION = {
 CO_ADDBACK_CAP = {"Single": 12_000, "Married/Joint": 16_000, "Head_of_House": 12_000}
 CO_TABLE_CEILING = 50_000
 CO_TABLE_ROW = 100
-OH_ZERO_BRACKET = 26_050
-OH_CLIFF_BASE = 361
-OH_TOP_RATE = 0.035
-OH_EXEMPTION_CREDIT = 20
 
 
 def _agi(case: OfficialCase) -> float:
@@ -516,25 +537,6 @@ def _defects(case: OfficialCase) -> dict[str, GraphDefect]:
         return _deduction_missing(
             case, NC_CHILD_DEDUCTION, child_deduction, RATE[("NC", case.year)]
         )
-    if case.state == "OH":
-        exemptions = agi - taxable
-        persons = 2 if case.filing_status == "Married/Joint" else 1
-        defects = {
-            "state_taxable_income": GraphDefect(
-                OH_EXEMPTION, "state_taxable_income", exemptions, exemptions
-            )
-        }
-        if agi > OH_ZERO_BRACKET:
-            ceiling = (
-                exemptions * OH_TOP_RATE
-                + OH_EXEMPTION_CREDIT * persons
-                + OH_CLIFF_BASE
-                + 1
-            )
-            defects["state_total_tax"] = GraphDefect(
-                OH_EXEMPTION, "state_total_tax", 0.0, ceiling
-            )
-        return defects
     if case.state == "CO":
         rate = RATE[("CO", case.year)]
         status = case.filing_status

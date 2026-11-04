@@ -49,6 +49,15 @@ _CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
 _OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
 
 
+def _ohio_natural_joint_credit_values(tax_input: TaxReturnInput) -> dict[str, object]:
+    """Natural OH joint-credit policy switch point, pending the spouse convention.
+
+    Preserve the existing unset spouse controls until that policy is decided.
+    Raw graph users can supply each spouse's qualifying income independently.
+    """
+    return {}
+
+
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     """Lower a validated public input model to graph-compatible natural values."""
     values = tax_input.model_dump(
@@ -59,6 +68,8 @@ def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     values["standard_or_itemized"] = float(
         tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
     )
+    if tax_input.state == OTSState.OH:
+        values.update(_ohio_natural_joint_credit_values(tax_input))
     return values
 
 

@@ -636,8 +636,8 @@ OH_SCENARIOS = [
         "w2_income": 75000,
         "expected_federal_min": 8000,
         "expected_federal_max": 10000,
-        "expected_state_min": 1700,
-        "expected_state_max": 1750,
+        "expected_state_min": 1625,
+        "expected_state_max": 1675,
     },
     {
         "year": 2024,
@@ -646,8 +646,8 @@ OH_SCENARIOS = [
         "w2_income": 150000,
         "expected_federal_min": 24000,
         "expected_federal_max": 28000,
-        "expected_state_min": 4100,
-        "expected_state_max": 4200,
+        "expected_state_min": 4000,
+        "expected_state_max": 4100,
     },
     {
         "year": 2024,
