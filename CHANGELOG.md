@@ -56,6 +56,8 @@
   $100,000 of taxable income (Instruction 17), as published, instead of the
   unrounded rate schedule; Worksheet 17A still applies to the cent at
   $100,000 and above. Every one of the table's 2,001 rows is checked.
+  Maryland 2024 and 2025 have no open graph defects left and join the graph
+  scope for `backend="auto"`.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)
