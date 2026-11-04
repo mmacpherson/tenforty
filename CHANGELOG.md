@@ -51,6 +51,22 @@
 - An unknown `on_error` value raises `ValueError` instead of behaving like
   `"ignore"`.
 
+### Changed (installation)
+- **Building from source requires Rust.** The graph backend is no longer an
+  optional part of a source build: without setuptools-rust or a Rust toolchain
+  the build fails with an explanation, where it used to install silently
+  without the graph backend. This is an intermediate measure; the long-term
+  answer is prebuilt wheels for every platform, leaving the source build as the
+  fallback for platforms without one. `TENFORTY_WITHOUT_GRAPH=1` builds the
+  legacy OTS-only package, with no graph backend.
+
+### Fixed (installation)
+- The sdist now ships the Rust graph crate. It previously omitted it, so every
+  install from the sdist (any platform without a prebuilt wheel) lacked the
+  graph backend.
+- CI tests every shipped wheel, and installs from the sdist with Rust, without
+  Rust, and in OTS-only mode.
+
 ### Fixed (OTS backend, the default)
 - **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
   MA_1 input map set only wages, so OTS never received line 11 (Social
