@@ -7,7 +7,7 @@ and the text to send.
 
 **Status: drafted, not sent.** Sending is Mike's, in his own time.
 
-**Bundle for one email (2026-11-04):** reports 1, 2, 4–16. Report 3 is withdrawn
+**Bundle for one email (2026-11-04):** reports 1, 2, 4–17. Report 3 is withdrawn
 (our own error), and report 9 is offered tentatively because it is not
 reproduced end to end. The "Pending adjudication" section at the end lists
 OTS-vs-Tax-Calculator disagreements that are **not** yet established as OTS
@@ -674,6 +674,63 @@ prints a 10.8% marginal bracket; Schedule B gives 8.97%.
 
 Offered tentatively: we may have missed a reason for the figure. Recorded locally
 as a strict-xfail in `tests/parity/state_bracket_parity_test.py`, not patched.
+
+---
+
+## 17. Form 6251 lines 2b and 2e read Schedule 1 line 8z (finding OTS-6251-8Z)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_US_1040_2024.c:243`, `:248` (Form 6251), `:2063-2107` (Schedule 1 read loop)
+- `src/taxsolve_US_1040_2025.c:244`, `:249` (Form 6251), `:2257-2301` (Schedule 1 read loop)
+
+The Schedule 1 read loop reads each of lines 8a through 8z into `Sched1[8]`
+and adds it to `Sched1[9]`:
+
+```c
+ GetLineFnz( "S1_8a", &Sched1[8] );	/* Net operating loss */
+ Sched1[9] = -absolutev( Sched1[8] );
+ ...
+ GetLineFnz( "S1_8z", &Sched1[8] );	/* Other income. */
+ Sched1[9] = Sched1[9] + Sched1[8];
+```
+
+so after the loop `Sched1[8]` holds line **8z**. Form 6251 then uses it as if
+it were the refund on line 8z and the NOL on line 8a:
+
+```c
+ amtws2b = -(Sched1[1] + Sched1[8]);
+ ...
+ amtws2e = absolutev( Sched1[8] );
+```
+
+Line 2b is "Tax refund from Schedule 1, line 1 or line 8z", and the
+instructions limit the 8z part to refunds of certain taxes. Line 2e is the "Net
+operating loss deduction from Schedule 1, line 8a". With line 8z holding
+ordinary other income `x`, line 2b becomes `-x` and line 2e `|x|`:
+
+- **Positive 8z:** the two cancel, so AMTI is right by coincidence.
+- **Negative 8z:** AMTI rises by `2|x|`.
+- **Real NOL on 8a:** it never reaches line 2e, because line 2e reads line 8z.
+
+**Minimal reproducer:** 2024 Married filing separately, wages $80,000,
+`S1_8z` −15,000. AGI is 65,000, taxable income 50,400 and Tax Table tax $6,147.
+Lines 2b and 2e are 0, so AMTI is 65,000, below the $66,650 exemption, and AMT
+is **$0**. OTS: AMTI 95,000, tentative minimum tax (95,000 − 66,650) × 26% =
+7,371, AMT **$1,224**. For 2025 the same return gives $0 against OTS's
+**$1,135** (exemption $68,500, Tax Table tax $5,755).
+
+**Possible fix:** keep line 8a and the 8z tax refund in their own variables in
+the read loop, and use those for lines 2e and 2b. (We are not sure how OTS
+means a user to mark an 8z amount as a refund.)
+
+The same two Form 6251 statements appear in the 2020–2023 programs. We have not
+reproduced the effect for those years.
+
+Not patched locally. Recorded as a strict-xfail
+(`test_ots_negative_other_income_adds_nothing_to_amti`). The expected values
+are an independent derivation from IRS sources
+(`docs/validation/derivations/form-6251-line-8z-2024-2025.md`).
 
 ---
 

@@ -174,6 +174,7 @@ def test_auto_routes_by_scope(year):
     assert routing.select_backend("auto", year, "MS") == "graph"
     assert routing.select_backend("auto", year, "OR") == "graph"
     assert routing.select_backend("auto", year, "IL") == "graph"
+    assert routing.select_backend("auto", year, "NC") == "graph"
     assert routing.select_backend("auto", year, "TX") == "graph"
     assert routing.select_backend("auto", year, "CA") == "ots"
     assert routing.select_backend("auto", year, None) == "graph"

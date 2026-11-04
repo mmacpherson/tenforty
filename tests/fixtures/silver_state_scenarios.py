@@ -4910,7 +4910,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # NC Single, $50,000 W2
     # Fed AGI: $50,000
     # NC Taxable: $50,000 - $12,750 = $37,250
-    # NC Tax: $37,250 * 0.045 = $1,676.25
+    # NC Tax: $37,250 * 0.045 = $1,676.25 -> $1,676 (D-401 p.4).
     TaxScenario(
         source="NC 2024 Tax Brackets (computed)",
         description="NC Single, $50,000 income",
@@ -4919,14 +4919,14 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=1676.25,
+        expected_state_tax=1676.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
     # NC MFJ, $100,000 W2
     # Fed AGI: $100,000
     # NC Taxable: $100,000 - $25,500 = $74,500
-    # NC Tax: $74,500 * 0.045 = $3,352.50
+    # NC Tax: $74,500 * 0.045 = $3,352.50 -> $3,353 (D-401 p.4).
     TaxScenario(
         source="NC 2024 Tax Brackets (computed)",
         description="NC MFJ, $100,000 income",
@@ -4935,7 +4935,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=3352.50,
+        expected_state_tax=3353.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -4945,7 +4945,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # NC Single, $50,000 W2
     # Fed AGI: $50,000
     # NC Taxable: $50,000 - $12,750 = $37,250
-    # NC Tax: $37,250 * 0.0425 = $1,583.125
+    # NC Tax: $37,250 * 0.0425 = $1,583.125 -> $1,583 (D-401 p.4).
     # Federal: $15,000 std ded, taxable $35,000
     # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
     TaxScenario(
@@ -4956,7 +4956,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1583.125,
+        expected_state_tax=1583.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),

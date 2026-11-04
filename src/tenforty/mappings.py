@@ -637,8 +637,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NC: StateGraphConfig(
+        # D-400 line 10a uses CTC qualifying children, not total dependents.
+        # The same derived count feeds Schedule 8812: num_ctc_dependents when
+        # specified, otherwise num_dependents. Qualifying relatives get no NC
+        # child deduction. D-401 p.13 and archived nc-2024-2025.md case8/A6.
         natural_to_node={
             "itemized_deductions": "nc_d400_L10_itemized",
+            "schedule_8812_qualifying_children": "nc_d400_QualifyingChildren",
         },
         outputs={
             "state_adjusted_gross_income": "L6_federal_agi",

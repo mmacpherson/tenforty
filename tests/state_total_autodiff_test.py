@@ -165,12 +165,13 @@ def test_solver_targets_the_public_total_in_every_state(state):
     library does not expose. For 2024 CA Single it returned the income for
     $20,000 of FEDERAL tax, whose public total is $27,792 -- off by 39%.
 
-    The $40,000 target keeps every state's federal taxable income above the
-    $100,000 Tax Table ceiling. Below it the public total moves in table steps,
-    so an arbitrary cent-exact target may be unattainable and the solver must
-    report that rather than a nearby row.
+    A target observed at $200,000 of wages is attainable and keeps federal
+    taxable income above the $100,000 Tax Table ceiling. State whole-dollar
+    rounding can still create gaps above that ceiling (NC's formerly arbitrary
+    $40,000 target falls in one), so a fixed cent-exact target is insufficient.
+    This is a structural round trip, not an independent tax-value expectation.
     """
-    target = 40_000.0
+    target = _total_tax_at_wages(state, 200_000.0)
 
     wages = solve_for_income(
         target_tax=target, year=2024, state=state, filing_status="Single"
