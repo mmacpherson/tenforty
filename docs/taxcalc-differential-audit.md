@@ -49,7 +49,7 @@ signature, and update this table in the same PR.
 | F32 | OTS 2025 Schedule 1-A line 28 truncates; line 29 uses \$300 | upstream OpenTaxSolver | open (upstream report 12 pending) — not patched locally | OBBBA implementation, source reading |
 | F33 | OTS 2025 skips Schedule 1-A Parts II-V for MFS, denying MFS car loan interest | upstream OpenTaxSolver | open (upstream report 13 pending) — not patched locally | OBBBA implementation, source reading |
 | F34 | OTS 2025 Form 6251 line 1a omits the senior-deduction add-back | upstream OpenTaxSolver | open (upstream report 14 pending) — not patched locally | OBBBA implementation, source reading |
-| F35 | TaxCalc 6.9.0 phases tips, overtime and car loan interest continuously, not per \$1,000 | taxcalc harness (adapter omits `exact_calculations=True`) | explained, not upstream; adapter fix open (tenforty-253f) | OBBBA golden witnesses |
+| F35 | TaxCalc 6.9.0 phases tips, overtime and car loan interest continuously, not per \$1,000 | taxcalc harness (adapter omits `exact_calculations=True`) | explained, not upstream; adapter change tracked as tenforty-253f | OBBBA golden witnesses |
 
 ## Method
 
