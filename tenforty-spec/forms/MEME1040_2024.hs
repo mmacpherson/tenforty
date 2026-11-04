@@ -6,6 +6,7 @@ module MEME1040_2024
 where
 
 import FormRefs
+import MaineTax
 import TablesME2024
 import TenForty
 
@@ -60,21 +61,15 @@ meme1040_2024 = form "me_1040me" 2024 $ do
     interior "DeductionBeforePhaseout" "deduction_before_phaseout" $
       greaterOf itemized stdDed
 
-  -- Line 17 phase-out worksheet: reduce by (ME AGI - threshold) / range,
-  -- capped at 1, using the statute's unrounded fraction (36 M.R.S. 5124-C(2)),
-  -- as line 18 does. The worksheet's 4-place line-5 ratio and whole-dollar
-  -- line 8 are not modelled (tenforty-b72.42).
-  deductionPhaseoutExcess <-
-    interior "DeductionPhaseoutExcess" "deduction_phaseout_excess" $
-      l16 `excessOf` byStatusE (fmap lit meStandardDeductionPhaseoutThreshold2024)
+  -- Line 17 phase-out worksheet (Worksheet for Standard/Itemized
+  -- Deductions): four-place line 5 rounded half up, whole-dollar line 7.
   l19 <-
     interior "L19" "deduction" $
-      deductionBeforePhaseout
-        .*. ( rate 1.0
-                .-. minE
-                  (deductionPhaseoutExcess ./. byStatusE (fmap lit meStandardDeductionPhaseoutRange2024))
-                  (rate 1.0)
-            )
+      phaseoutWorksheet
+        meStandardDeductionPhaseoutThreshold2024
+        meStandardDeductionPhaseoutRange2024
+        l16
+        deductionBeforePhaseout
 
   -- Line 20: Maine AGI minus deductions
   l20 <-
@@ -99,24 +94,15 @@ meme1040_2024 = form "me_1040me" 2024 $ do
     interior "L21_total" "total_exemptions_before_phaseout" $
       greaterOf mandatoryExemptions exemptionTotal
 
-  -- Phase-out worksheet: reduce by (ME AGI - threshold) / range, capped at
-  -- 1, using the statute's unrounded fraction (5126-A(2)). Two worksheet
-  -- precision rules are deliberately not modelled, and this line introduces
-  -- both residuals (tenforty-b72.42): the line-5 ratio entered to 4 decimal
-  -- places, and the whole-dollar line 8. Near the threshold the ratio's
-  -- quantization alone can exceed $0.50 (2025 MFJ, AGI 400,131: worksheet
-  -- 10,298, graph 10,297.45).
-  exemptionPhaseoutExcess <-
-    interior "ExemptionPhaseoutExcess" "exemption_phaseout_excess" $
-      l16 `excessOf` byStatusE (fmap lit mePersonalExemptionPhaseoutThreshold2024)
+  -- Phase-out worksheet (Worksheet for Phaseout of Personal Exemption
+  -- Deduction Amount): four-place line 5 rounded half up, whole-dollar line 7.
   l21 <-
     interior "L21_allowed" "exemptions_after_phaseout" $
-      exemptionsBeforePhaseout
-        .*. ( rate 1.0
-                .-. minE
-                  (exemptionPhaseoutExcess ./. byStatusE (fmap lit mePersonalExemptionPhaseoutRange2024))
-                  (rate 1.0)
-            )
+      phaseoutWorksheet
+        mePersonalExemptionPhaseoutThreshold2024
+        mePersonalExemptionPhaseoutRange2024
+        l16
+        exemptionsBeforePhaseout
 
   -- Line 22: Maine taxable income
   _l22 <-
@@ -126,10 +112,11 @@ meme1040_2024 = form "me_1040me" 2024 $ do
   -- Line 23: Same as L22 (for tax computation)
   l23 <- interior "L23" "me_taxable_for_computation" $ line "L22"
 
-  -- Line 24: Tax from brackets
+  -- Line 24 (official line 20): the tax table below \$100,000, the printed
+  -- rate schedule at and above it (MaineTax).
   l24 <-
-    keyOutput "L24" "me_bracket_tax" "Tax from Maine tax rate schedule" $
-      bracketTax "me_brackets_2024" l23
+    keyOutput "L24" "me_bracket_tax" "Maine income tax (tax table or rate schedule)" $
+      maineIncomeTax maineSchedule2024 l23
 
   -- Lines 25-28: Credits
   l25 <- keyInput "L25" "me_tax_credit_property" "Property tax fairness credit"

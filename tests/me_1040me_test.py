@@ -15,10 +15,9 @@ boundary values transcribe the published worksheet parameters, retrieved
 - 36 M.R.S. 5126-A: https://legislature.maine.gov/statutes/36/title36sec5126-A.html
 
 Line 18 is whole dollars (instructions printed p.3, "Use whole dollar
-amounts"); the graph keeps cents and uses the statute's unrounded phase-out
-fraction rather than the worksheet's 4-place ratio. For the 18 blind cases the
-combined difference is within $0.50; that is a property of these fixtures, not
-a global bound (see the ratio-quantization witness below, tenforty-b72.42).
+amounts"). The worksheet's line 5 is entered to four places, rounded half up,
+and line 7 is whole dollars (ruling on tenforty-tj2.20; the statute's
+unrounded fraction is not followed), so the blind cases are pinned exactly.
 """
 
 import json
@@ -32,7 +31,6 @@ from tenforty.models import TaxReturnInput
 
 pytestmark = pytest.mark.requires_graph
 
-LINE_18_ROUNDING = 0.50
 PREFIX = "me_1040me"
 
 # Blind cases: (case, year, status, wages, line 18, line 19).
@@ -57,10 +55,13 @@ BLIND_CASES = [
     (18, 2025, "Married/Joint", 500_000, 2_068, 497_932),
 ]
 
-# Cases whose line 17 worksheet ratio does not terminate at four places
-# (record A1): line 5's four-place field, rounded or truncated, moves line 17
-# by up to the standard deduction times 0.0001, plus line 8's whole dollar.
-WORKSHEET_RATIO_SLACK = {7: 14_600 * 0.0001 + 0.50, 16: 15_000 * 0.0001 + 0.50}
+# Case 16's line 7 is an exact half: 15,000 x 0.2667 = 4,000.50. Rounding
+# line 7 (4,001; line 8 10,999) gives line 19 103,851; this record instead
+# rounds line 8 (10,999.50 -> 11,000), giving 103,850. The 2026-11-03
+# derivation (me-2024-2025.md, 2024 Single case f) rounds line 7, as the graph
+# does; the instructions do not say which line takes the half. Line 20 is
+# 6,917 either way.
+LINE_19_ALTERNATIVES = {16: {103_850, 103_851}}
 
 BASELINE = {2024: 5_000, 2025: 5_150}
 PHASEOUT_THRESHOLD = {
@@ -102,9 +103,7 @@ def _base(year, status):
 def test_line_18_matches_the_blind_derivation(case, year, status, wages, exemption, _):
     """Default returns get the status exemption, phased out on Maine AGI."""
     runtime = _runtime(year, status, wages)
-    assert runtime.eval(f"{PREFIX}_L21_allowed") == pytest.approx(
-        exemption, abs=LINE_18_ROUNDING
-    )
+    assert runtime.eval(f"{PREFIX}_L21_allowed") == exemption
 
 
 @pytest.mark.parametrize(
@@ -117,10 +116,8 @@ def test_line_19_matches_the_blind_derivation(
     result = evaluate_return(
         backend="graph", year=year, state="ME", filing_status=status, w2_income=wages
     )
-    slack = WORKSHEET_RATIO_SLACK.get(case, 0.0)
-    assert result.state_taxable_income == pytest.approx(
-        taxable_income, abs=LINE_18_ROUNDING + slack
-    )
+    accepted = LINE_19_ALTERNATIVES.get(case, {taxable_income})
+    assert result.state_taxable_income in accepted
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -268,19 +265,14 @@ def test_mfj_with_one_claimable_spouse_is_outside_the_supported_domain():
     pytest.xfail("outside the supported domain: claimable spouse (tenforty-avr.3)")
 
 
-def test_worksheet_ratio_quantization_witness():
-    """Codex witness: the worksheet's 4-place ratio can move line 18 past $0.50.
+def test_worksheet_ratio_is_entered_to_four_places():
+    """Codex witness: the four-place line 5 moves line 18 past $0.50.
 
     2025 MFJ, ME AGI 400,131 (2025 instructions, printed p.5 worksheet):
     line 3 = 31; line 5 = 31 / 125,000 = 0.000248, entered as 0.0002 (rounded
-    or truncated); line 7 = 10,300 x 0.0002 = 2.06; line 8 = 10,297.94, which
-    is 10,298 in whole dollars. The statute's unrounded fraction (5126-A(2),
-    which the graph follows deliberately) gives 10,300 x (1 - 0.000248) =
-    10,297.4456: -0.5544 against the worksheet. Owned by tenforty-b72.42.
+    or truncated); line 7 = 10,300 x 0.0002 = 2.06, which is 2 in whole
+    dollars; line 8 = 10,298. The statute's unrounded fraction would give
+    10,297.4456 (tenforty-b72.42).
     """
     runtime = _runtime(2025, "Married/Joint", 400_131)
-    delta = runtime.eval(f"{PREFIX}_L21_allowed") - 10_298
-    if abs(delta) <= LINE_18_ROUNDING:
-        pytest.fail("worksheet ratio quantization now modelled; remove this xfail")
-    assert delta == pytest.approx(-0.5544, abs=1e-6)
-    pytest.xfail("worksheet 4-place ratio and whole-dollar line 8 (tenforty-b72.42)")
+    assert runtime.eval(f"{PREFIX}_L21_allowed") == 10_298

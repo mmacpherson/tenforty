@@ -109,6 +109,7 @@ executable tenforty-compile
     LAIT540_2025
     MAForm1_2024
     MAForm1_2025
+    MaineTax
     MDForm502_2024
     MDForm502_2025
     MEME1040_2024
@@ -399,6 +400,7 @@ test-suite tenforty-spec-test
     LAIT540_2025
     MAForm1_2024
     MAForm1_2025
+    MaineTax
     MDForm502_2024
     MDForm502_2025
     MEME1040_2024
