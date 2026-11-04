@@ -48,9 +48,11 @@
 - **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
   MA_1 input map set only wages, so OTS never received line 11 (Social
   Security and Medicare paid, up to $2,000 per person) and over-taxed every
-  W-2 return by up to $100, in every year 2018-2025. Line 11a is now 7.65% of
-  `w2_income`, capped at $2,000; a joint return takes the one-earner reading
-  because `w2_income` is a household total. **This changes default-backend MA
+  W-2 return by up to $100 ($180 once the 4% surtax applies), in every year
+  2018-2025. Line 11a is now 7.65% of `w2_income`, capped at $2,000; a joint
+  return takes the one-earner reading because `w2_income` is a household
+  total, so a two-earner couple can still be up to $100 high ($180 with the
+  surtax). **This changes default-backend MA
   results.** OTS MA still maps only wages: interest, dividends, capital gains
   and self-employment income are not reflected there.
 

@@ -501,7 +501,8 @@ class TaxReturnInput(BaseModel):
         $2,000 cap binds near $26,144 of wages, below every year's Social
         Security wage base, so the base never enters. `w2_income` is a household
         aggregate, so a joint return takes the one-earner reading (all on 11a),
-        as `schedule_se_ss_wages` does and as the graph's line 11 does. MA_1 maps
+        as `schedule_se_ss_wages` does and as the graph's line 11 does; a two-earner
+        couple is then at most $100 high, or $180 once the 4% surtax applies. MA_1 maps
         no self-employment income, so its SE-tax share is not added here.
         """
         return min(2_000.0, 0.0765 * max(0.0, float(self.w2_income)))

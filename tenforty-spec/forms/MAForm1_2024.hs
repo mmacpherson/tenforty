@@ -41,7 +41,8 @@ maForm1_2024 = form "ma_1" 2024 $ do
   -- tax "as reported on your U.S. Form 1040", which this follows. w2_income is
   -- a household aggregate, so a joint return takes the one-earner reading
   -- (11a = min(\$2,000, paid), 11b = 0), as schedule_se_ss_wages does; a
-  -- two-earner couple over-pays by at most 5% of \$2,000.
+  -- two-earner couple over-pays by at most the marginal rate on \$2,000: 5%,
+  -- or 9% once the 4% surtax applies (\$100 / \$180).
   ficaPaid <-
     interior "L11_fica" "fica_paid" $
       (smallerOf (greaterOf wages (dollars 0)) (lit maSocialSecurityWageBase2024) .*. rate maSocialSecurityRate)

@@ -504,7 +504,8 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # plus a 4% surtax over $1,053,750 (2024) / $1,083,150 (2025). Line 11,
         # Social Security/Medicare/SE tax paid capped at $2,000 per person, is
         # derived; w2_income is a household aggregate, so a joint return takes
-        # the one-earner reading (at most $100 high for two earners).
+        # the one-earner reading: for two earners at most the marginal rate on
+        # $2,000 high, $100 at 5% or $180 once the 4% surtax applies.
         # Exemptions are filing-status based (Single: $4,400, MFJ: $8,800,
         # HoH: $6,800); other exemptions are accepted as total input
         # (num_dependents cannot map to dollar amounts). State AGI is line 10,

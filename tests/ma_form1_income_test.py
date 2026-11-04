@@ -325,9 +325,14 @@ def test_total_tax_matches_the_derivation(
     assert result.state_total_tax == pytest.approx(l28[year], abs=tolerance)
 
 
+# 4% surtax thresholds (blind derivation, Parameters): Form 1 line 28b.
+SURTAX_THRESHOLD = {2024: 1_053_750, 2025: 1_083_150}
+
+
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize(
-    "split", [(75_000, 75_000), (140_000, 10_000), (149_000, 1_000)]
+    "split",
+    [(75_000, 75_000), (140_000, 10_000), (149_000, 1_000), (700_000, 700_000)],
 )
 def test_two_earner_joint_return_stays_within_the_approximation_bound(year, split):
     """An approximation, not a defect: the one-earner reading of line 11.
@@ -335,27 +340,34 @@ def test_two_earner_joint_return_stays_within_the_approximation_bound(year, spli
     Line 11 is "not more than $2,000" per spouse, but w2_income is a household
     aggregate, so the graph takes the one-earner reading (11a = min(2,000,
     FICA), 11b = 0), as schedule_se_ss_wages does. Against the legal per-spouse
-    figure a two-earner couple over-pays by at most 5% x $2,000 = $100.
+    figure a two-earner couple over-pays by at most the marginal rate on the
+    missing line 11: 5% x $2,000 = $100, or 9% x $2,000 = $180 where the 4%
+    surtax (line 28b) applies.
 
-    Case C2 (75,000 + 75,000, derived tax 6,860) anchors the bound; the uneven
-    splits use the derivation's per-spouse rule: each spouse's 7.65% of wages,
-    capped at $2,000.
+    Case C2 (75,000 + 75,000, derived tax 6,860) anchors the arithmetic; the
+    other splits use the derivation's per-spouse rule: each spouse's 7.65% of
+    wages, capped at $2,000.
     """
     first, second = split
+    wages = first + second
 
-    def spouse_line_11(wages):
-        return min(2_000, round(wages * 0.0765))
+    def spouse_line_11(spouse_wages):
+        return min(2_000, round(spouse_wages * 0.0765))
 
     legal_line_11 = spouse_line_11(first) + spouse_line_11(second)
-    legal_tax = 0.05 * (150_000 - legal_line_11 - 8_800)
+    legal_taxable = wages - legal_line_11 - 8_800
+    surtaxable = max(0, legal_taxable - SURTAX_THRESHOLD[year])
+    legal_tax = 0.05 * legal_taxable + 0.04 * surtaxable
     if split == (75_000, 75_000):
         assert legal_tax == pytest.approx(6_860)
+    marginal_rate = 0.05 + (0.04 if surtaxable > 0 else 0.0)
     result = evaluate_return(
         backend="graph",
         year=year,
         state="MA",
         filing_status="Married/Joint",
-        w2_income=first + second,
+        w2_income=wages,
     )
     excess = result.state_total_tax - legal_tax
-    assert -LINE_11_TAX_ROUNDING <= excess <= 0.05 * 2_000 + LINE_11_TAX_ROUNDING
+    ceiling = marginal_rate * 2_000
+    assert -LINE_11_TAX_ROUNDING <= excess <= ceiling + LINE_11_TAX_ROUNDING
