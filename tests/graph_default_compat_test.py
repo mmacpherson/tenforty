@@ -1,0 +1,556 @@
+"""Graph-default compatibility corpus: the same public calls on "ots" and "auto".
+
+Under ``backend="auto"`` a 2024-2025 return in graph scope (federal-only, the
+no-income-tax states, MD, MS, OR) computes on the graph backend; everything
+else stays on OTS. This module runs one grid of public calls both ways and
+requires every difference to be explained by an entry in ``LEDGER``. An entry
+is a known OTS defect, a mapping gap of ours that the graph does not share, or
+a documented contract difference. Each bound comes from the mechanism and the
+published constants that entry cites, never from observed output, and the
+bounds of all entries that apply to a case add up. A difference no entry
+explains fails: it is a possible graph defect and a blocker for the flip.
+
+Fields the contract defines from other fields are checked by that identity on
+each backend instead of being compared: total_tax, federal_income_tax and the
+two effective rates.
+
+See docs/migrating-to-graph-default.md for the caller-facing account.
+"""
+
+from collections.abc import Callable
+from dataclasses import dataclass
+
+import polars as pl
+import pytest
+
+from tenforty import evaluate_return, evaluate_returns
+from tenforty.backends import available_backends
+from tenforty.models import UnsupportedInputError, UnsupportedReturnError
+from tests.parity.state_parity_policy import (
+    OR_RATE_CHART_TOLERANCE,
+    OR_TAX_TABLE_CEILING,
+    OR_TAX_TABLE_TOLERANCE,
+)
+
+pytestmark = pytest.mark.skipif(
+    not {"ots", "graph"} <= set(available_backends()),
+    reason="both backends required",
+)
+
+YEARS = (2024, 2025)
+STATUSES = ("Single", "Married/Joint", "Married/Sep", "Head_of_House", "Widow(er)")
+
+PROFILES: dict[str, dict] = {
+    "zero": {},
+    "wages_low": {"w2_income": 18_000},
+    "wages_mid": {"w2_income": 85_000},
+    "wages_high": {"w2_income": 420_000},
+    "interest": {"w2_income": 60_000, "taxable_interest": 4_000},
+    "dividends": {
+        "w2_income": 70_000,
+        "ordinary_dividends": 9_000,
+        "qualified_dividends": 6_000,
+    },
+    "ltcg": {"w2_income": 90_000, "long_term_capital_gains": 30_000},
+    "stcg_loss": {"w2_income": 90_000, "short_term_capital_gains": -5_000},
+    "se": {"self_employment_income": 60_000},
+    "qbi": {
+        "self_employment_income": 150_000,
+        "qbi_w2_wages": 40_000,
+        "qbi_ubia": 20_000,
+    },
+    "rental": {"w2_income": 70_000, "rental_income": 12_000},
+    "itemized": {
+        "w2_income": 200_000,
+        "itemized_deductions": 45_000,
+        "standard_or_itemized": "Itemized",
+    },
+    "dependents": {"w2_income": 80_000, "num_dependents": 2},
+    "ctc_split": {"w2_income": 90_000, "num_dependents": 3, "num_ctc_dependents": 1},
+    "iso": {"w2_income": 150_000, "incentive_stock_option_gains": 120_000},
+    "iso_ltcg": {
+        "w2_income": 90_000,
+        "long_term_capital_gains": 50_000,
+        "incentive_stock_option_gains": 200_000,
+    },
+    "salt_itemized": {
+        "w2_income": 260_000,
+        "state_and_local_taxes": 35_000,
+        "itemized_deductions": 20_000,
+        "standard_or_itemized": "Itemized",
+    },
+}
+OBBBA_2025 = {
+    "w2_income": 120_000,
+    "qualified_tips": 8_000,
+    "qualified_overtime": 5_000,
+    "vehicle_loan_interest": 4_000,
+    "state_and_local_taxes": 25_000,
+    "filer_65_or_older": True,
+}
+
+GRAPH_ROUTED_STATES = (None, "OR", "AK", "FL", "NV", "SD", "TN", "TX", "WA", "WY")
+OTS_ROUTED_STATES = ("AZ", "CA", "MA", "MI", "NC", "NJ", "NY", "OH", "PA", "VA")
+GRAPH_ONLY_STATES = ("MD", "MS")
+
+COMPARED_FIELDS = (
+    "federal_adjusted_gross_income",
+    "federal_taxable_income",
+    "federal_qbi_deduction",
+    "federal_amt",
+    "federal_se_tax",
+    "federal_niit",
+    "federal_additional_medicare_tax",
+    "federal_total_tax",
+    "federal_child_tax_credit",
+    "federal_tax_bracket",
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+    "state_tax_bracket",
+)
+
+
+def _case_args(year, state, status, profile):
+    return {"year": year, "state": state, "filing_status": status, **profile}
+
+
+def _graph_routed_cases():
+    cases = []
+    for year in YEARS:
+        for state in ("OR", None, "AK"):
+            for status in STATUSES:
+                for name, profile in PROFILES.items():
+                    cases.append(
+                        (
+                            f"{year}-{state}-{status}-{name}",
+                            year,
+                            state,
+                            status,
+                            profile,
+                        )
+                    )
+        for state in GRAPH_ROUTED_STATES[3:]:
+            for status in STATUSES:
+                cases.append(
+                    (
+                        f"{year}-{state}-{status}-wages_mid",
+                        year,
+                        state,
+                        status,
+                        PROFILES["wages_mid"],
+                    )
+                )
+        for status in STATUSES:
+            cases.append((f"2025-None-{status}-obbba", 2025, None, status, OBBBA_2025))
+    return cases
+
+
+GRAPH_ROUTED_CASES = _graph_routed_cases()
+
+
+# --- Ledger ------------------------------------------------------------------
+
+Bounds = dict[str, tuple[float, float]]
+
+
+@dataclass(frozen=True)
+class LedgerEntry:
+    """One explained source of difference, as bounds on ots minus auto."""
+
+    entry_id: str
+    kind: str
+    source: str
+    bounds: Callable[[dict, dict, dict], Bounds]
+
+
+def _profile(case: dict, key: str) -> float:
+    return float(case.get(key, 0) or 0)
+
+
+def _ots_cent_import(case, ots, auto) -> Bounds:
+    """Bound the cent rounding of OTS subordinate-form imports.
+
+    OTS passes Schedule SE and Form 8995 amounts between programs as text at
+    cents, so each import rounds by up to half a cent; two imports bound it.
+    """
+    if _profile(case, "self_employment_income") <= 0:
+        return {}
+    cent = (-0.01, 0.01)
+    return dict.fromkeys(
+        (
+            "federal_total_tax",
+            "federal_taxable_income",
+            "federal_qbi_deduction",
+            "federal_se_tax",
+            "federal_additional_medicare_tax",
+            "federal_niit",
+            "state_total_tax",
+            "state_taxable_income",
+            "state_adjusted_gross_income",
+            "federal_adjusted_gross_income",
+        ),
+        cent,
+    )
+
+
+def _f11(case, ots, auto) -> Bounds:
+    """Bound F11, the OTS 2024 HoH 32% bracket floor.
+
+    F11 / upstream report 1: OTS 2024 HoH 32% bracket starts at $191,150,
+    not $191,950, so up to $800 is taxed at 32% instead of 24%.
+    """
+    if case["year"] != 2024 or case["filing_status"] != "Head_of_House":
+        return {}
+    misplaced = min(800.0, max(0.0, auto["federal_taxable_income"] - 191_150.0))
+    if misplaced <= 0:
+        return {}
+    return {"federal_total_tax": (0.0, 0.08 * misplaced)}
+
+
+def _f12(case, ots, auto) -> Bounds:
+    """Bound F12, the itemized-deduction category difference.
+
+    F12 (docs/taxcalc-differential-audit.md): OTS carries itemized_deductions
+    as Schedule A line 6 "other taxes", added back on Form 6251; the graph as
+    line 16 "other deductions", not added back. Each dollar of extra AMTI costs
+    at most 28% plus 7% through the exemption phase-out (35%), or 55% when the
+    preferential worksheet moves gain into its 20% band (taxcalc_policy F12).
+    """
+    itemized = _profile(case, "itemized_deductions")
+    if itemized <= 0 or case.get("standard_or_itemized") != "Itemized":
+        return {}
+    preferential = _profile(case, "long_term_capital_gains") + _profile(
+        case, "qualified_dividends"
+    )
+    rate = 0.55 if preferential > 0 else 0.35
+    return {
+        "federal_amt": (0.0, rate * itemized),
+        "federal_total_tax": (0.0, rate * itemized),
+    }
+
+
+def _f31(case, ots, auto) -> Bounds:
+    """Bound F31, the OTS 2025 MFS SALT worksheet trigger.
+
+    F31 / upstream report 11: OTS 2025 enters the SALT worksheet only above
+    $500,000 of MAGI, even for MFS, whose threshold is $250,000. Between the two
+    OTS keeps the flat $20,000 MFS cap where the lawful cap is
+    $20,000 - 15% x (MAGI - $250,000), floored at $5,000 (obbba-2025.md row 7).
+    The shift moves taxable income by up to the cap difference and regular tax
+    by at most 37% of it; SALT is added back for the AMT.
+    """
+    if case["year"] != 2025 or case["filing_status"] != "Married/Sep":
+        return {}
+    salt = _profile(case, "state_and_local_taxes")
+    magi = auto["federal_adjusted_gross_income"]
+    if salt <= 0 or not 250_000 < magi <= 500_000:
+        return {}
+    lawful_cap = max(5_000.0, 20_000.0 - 0.15 * (magi - 250_000.0))
+    shift = max(0.0, min(salt, 20_000.0) - min(salt, lawful_cap))
+    return {
+        "federal_taxable_income": (-shift, 0.0),
+        "federal_total_tax": (-0.37 * shift, 0.37 * shift),
+        "federal_amt": (-0.37 * shift, 0.37 * shift),
+    }
+
+
+def _or_rate_chart(case, ots, auto) -> Bounds:
+    """Bound OTS's Oregon table and rate-chart rounding.
+
+    Oregon tax pricing (tests/parity/state_parity_policy.py): below $50,000
+    OTS prices the OR-40 tax table's $100 rows; at or above, it rounds each
+    rate-chart increment to the dollar. Tolerance policy, not a defect.
+    """
+    if case["state"] != "OR":
+        return {}
+    taxable = auto["state_taxable_income"]
+    tolerance = (
+        OR_TAX_TABLE_TOLERANCE
+        if taxable < OR_TAX_TABLE_CEILING
+        else OR_RATE_CHART_TOLERANCE[case["year"]]
+    )
+    return {"state_total_tax": (-tolerance, tolerance)}
+
+
+OR_EXEMPTION_CREDIT = {2024: 249.0, 2025: 256.0}
+OR_EXEMPTION_AGI_LIMIT = {"Married/Joint": 200_000.0, "Widow(er)": 200_000.0}
+
+
+def _or_dependents(case, ots, auto) -> Bounds:
+    """Bound the OR dependent exemption credits our OTS map drops.
+
+    tenforty-3nvf (MAP-OR-DEPENDENTS): our OTS OR_40 input map never passes
+    num_dependents, so OTS claims none of the OR-40 dependent exemption credits
+    ($249 each for 2024, $256 for 2025; none above federal AGI $100,000, or
+    $200,000 joint; OR-40 instructions p.18). The graph claims them.
+    """
+    dependents = _profile(case, "num_dependents")
+    if case["state"] != "OR" or dependents <= 0:
+        return {}
+    limit = OR_EXEMPTION_AGI_LIMIT.get(case["filing_status"], 100_000.0)
+    if auto["federal_adjusted_gross_income"] > limit:
+        return {}
+    credit = dependents * OR_EXEMPTION_CREDIT[case["year"]]
+    return {"state_total_tax": (0.0, credit)}
+
+
+def _ots_bracket_print(case, ots, auto) -> Bounds:
+    """Bound OTS's 0.1% bracket print precision.
+
+    #424 contract: OTS prints its bracket with printf "%2.1f"; the graph
+    reports the schedule rate at full precision.
+    """
+    return {"state_tax_bracket": (-0.05 - 1e-9, 0.05 + 1e-9)}
+
+
+LEDGER = (
+    LedgerEntry(
+        "OTS-CENT-IMPORT",
+        "precision",
+        "OTS subordinate-form text at cents",
+        _ots_cent_import,
+    ),
+    LedgerEntry("F11", "OTS defect", "upstream report 1; taxcalc_policy F11", _f11),
+    LedgerEntry(
+        "F12", "contract", "itemized category; audit F12, input model v2", _f12
+    ),
+    LedgerEntry("F31", "OTS defect", "upstream report 11; taxcalc_policy F31", _f31),
+    LedgerEntry(
+        "OR-RATE-CHART",
+        "precision",
+        "state_parity_policy OR tolerances",
+        _or_rate_chart,
+    ),
+    LedgerEntry("MAP-OR-DEPENDENTS", "ours (OTS map)", "tenforty-3nvf", _or_dependents),
+    LedgerEntry(
+        "OTS-BRACKET-PRINT", "contract", "#424 rate fields", _ots_bracket_print
+    ),
+)
+
+
+def _allowed(case, ots, auto) -> Bounds:
+    total: Bounds = {}
+    for entry in LEDGER:
+        for field, (low, high) in entry.bounds(case, ots, auto).items():
+            prior_low, prior_high = total.get(field, (0.0, 0.0))
+            total[field] = (prior_low + low, prior_high + high)
+    return total
+
+
+def _unexplained(case, ots, auto) -> list[str]:
+    allowed = _allowed(case, ots, auto)
+    problems = []
+    for field in COMPARED_FIELDS:
+        ots_value, auto_value = ots[field], auto[field]
+        if (ots_value is None) or (auto_value is None):
+            if (ots_value is None) != (auto_value is None):
+                problems.append(f"{field}: ots={ots_value} auto={auto_value}")
+            continue
+        delta = ots_value - auto_value
+        low, high = allowed.get(field, (0.0, 0.0))
+        if not low - 1e-9 <= delta <= high + 1e-9:
+            problems.append(
+                f"{field}: ots={ots_value:,.2f} auto={auto_value:,.2f} "
+                f"delta={delta:,.2f} allowed=[{low:,.2f}, {high:,.2f}]"
+            )
+    return problems
+
+
+def _assert_identities(result: dict, label: str) -> None:
+    assert result["total_tax"] == pytest.approx(
+        result["federal_total_tax"] + result["state_total_tax"], abs=1e-6
+    ), label
+    taxable = result["federal_taxable_income"]
+    if taxable > 0:
+        assert result["federal_effective_tax_rate"] == pytest.approx(
+            100 * result["federal_total_tax"] / taxable, rel=1e-9
+        ), label
+    else:
+        assert result["federal_effective_tax_rate"] is None, label
+    state_taxable = result["state_taxable_income"]
+    if result["state_effective_tax_rate"] is not None:
+        assert state_taxable > 0, label
+        assert result["state_effective_tax_rate"] == pytest.approx(
+            100 * result["state_total_tax"] / state_taxable, rel=1e-9
+        ), label
+
+
+# --- Scalar: graph-routed returns --------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("year", "state", "status", "profile"),
+    [case[1:] for case in GRAPH_ROUTED_CASES],
+    ids=[case[0] for case in GRAPH_ROUTED_CASES],
+)
+def test_auto_differs_from_ots_only_as_the_ledger_explains(
+    year, state, status, profile
+):
+    """Every ots/auto difference on a graph-routed return has a ledger entry."""
+    args = _case_args(year, state, status, profile)
+    ots = evaluate_return(**args, backend="ots").model_dump()
+    auto = evaluate_return(**args, backend="auto").model_dump()
+    _assert_identities(ots, "ots")
+    _assert_identities(auto, "auto")
+    problems = _unexplained({**args}, ots, auto)
+    assert not problems, "\n".join(problems)
+
+
+# --- Scalar: routing ----------------------------------------------------------
+
+
+@pytest.mark.parametrize("year", YEARS)
+@pytest.mark.parametrize("state", OTS_ROUTED_STATES)
+@pytest.mark.parametrize("status", ("Single", "Married/Joint"))
+def test_auto_equals_ots_outside_graph_scope(year, state, status):
+    """A state outside graph scope computes on OTS under auto: identical results."""
+    args = _case_args(year, state, status, {"w2_income": 85_000, "num_dependents": 1})
+    assert evaluate_return(**args, backend="auto") == evaluate_return(
+        **args, backend="ots"
+    )
+
+
+@pytest.mark.parametrize("year", (2018, 2021, 2023))
+@pytest.mark.parametrize("state", (None, "CA", "NY"))
+def test_auto_equals_ots_before_2024(year, state):
+    """Years before 2024 stay on OTS under auto."""
+    args = _case_args(year, state, "Single", {"w2_income": 85_000})
+    assert evaluate_return(**args, backend="auto") == evaluate_return(
+        **args, backend="ots"
+    )
+
+
+@pytest.mark.parametrize("year", YEARS)
+@pytest.mark.parametrize("state", GRAPH_ONLY_STATES)
+def test_auto_computes_states_ots_cannot(year, state):
+    """MD and MS have no OTS program: OTS refuses them; auto computes on graph."""
+    args = _case_args(year, state, "Single", {"w2_income": 85_000})
+    with pytest.raises(UnsupportedReturnError):
+        evaluate_return(**args, backend="ots")
+    result = evaluate_return(**args, backend="auto")
+    assert result.state_total_tax > 0
+    _assert_identities(result.model_dump(), "auto")
+
+
+@pytest.mark.parametrize("field", ("state_adjustment", "dependent_exemptions"))
+@pytest.mark.parametrize("state", ("OR", "TX", None))
+def test_auto_refuses_inputs_ots_silently_ignored(field, state):
+    """OTS drops these inputs on graph-routed returns; auto refuses them."""
+    args = _case_args(2025, state, "Single", {"w2_income": 80_000, field: 3_000})
+    baseline = _case_args(2025, state, "Single", {"w2_income": 80_000})
+    assert evaluate_return(**args, backend="ots") == evaluate_return(
+        **baseline, backend="ots"
+    )
+    with pytest.raises(UnsupportedInputError):
+        evaluate_return(**args, backend="auto")
+
+
+# --- Batch --------------------------------------------------------------------
+
+BATCH_WAGES = [18_000.0, 85_000.0, 420_000.0]
+
+
+def _frame_rows(frame: pl.DataFrame) -> list[dict]:
+    return frame.to_dicts()
+
+
+@pytest.mark.parametrize("mode", ("cross", "zip"))
+def test_batch_frames_share_schema_and_match_scalars(mode):
+    """Ots and auto frames share one schema, and each row equals its scalar call."""
+    if mode == "cross":
+        kwargs = {
+            "year": [2024, 2025],
+            "state": [None, "OR", "CA"],
+            "filing_status": ["Single", "Married/Joint"],
+            "w2_income": BATCH_WAGES,
+        }
+    else:
+        kwargs = {
+            "year": [2024, 2025, 2025, 2025, 2024],
+            "state": [None, "OR", "CA", "MD", "TX"],
+            "filing_status": [
+                "Single",
+                "Married/Joint",
+                "Single",
+                "Head_of_House",
+                "Single",
+            ],
+            "w2_income": [85_000.0, 140_000.0, 60_000.0, 95_000.0, 30_000.0],
+        }
+    frames = {}
+    for backend in ("ots", "auto"):
+        if backend == "ots" and mode == "zip":
+            ots_kwargs = {
+                key: [v for i, v in enumerate(values) if kwargs["state"][i] != "MD"]
+                for key, values in kwargs.items()
+            }
+            frames[backend] = evaluate_returns(**ots_kwargs, mode=mode, backend=backend)
+        else:
+            frames[backend] = evaluate_returns(**kwargs, mode=mode, backend=backend)
+    assert frames["ots"].schema == frames["auto"].schema
+    for backend, frame in frames.items():
+        for row in _frame_rows(frame):
+            scalar = evaluate_return(
+                year=row["year"],
+                state=row["state"],
+                filing_status=row["filing_status"],
+                w2_income=row["w2_income"],
+                backend=backend,
+            ).model_dump()
+            for field, value in scalar.items():
+                if value is None:
+                    assert row[field] is None, (backend, field)
+                else:
+                    assert row[field] == pytest.approx(value, abs=1e-6), (
+                        backend,
+                        field,
+                    )
+
+
+def test_auto_batch_keeps_row_order_across_engines():
+    """A zip batch mixing graph- and OTS-routed rows returns rows in request order."""
+    states = ["CA", "OR", None, "NY", "TX", "AZ"]
+    frame = evaluate_returns(
+        year=2025,
+        state=states,
+        filing_status="Single",
+        w2_income=[50_000.0 + 1_000 * i for i in range(len(states))],
+        mode="zip",
+        backend="auto",
+    )
+    assert frame["state"].to_list() == states
+    assert frame["w2_income"].to_list() == [
+        50_000.0 + 1_000 * i for i in range(len(states))
+    ]
+
+
+def test_ledger_entries_are_cited():
+    """Every ledger entry names its kind and a source."""
+    for entry in LEDGER:
+        assert entry.kind and entry.source, entry.entry_id
+
+
+def test_auto_refuses_oregon_before_2024_like_ots():
+    """No backend computes Oregon before 2024; auto refuses it as OTS does."""
+    args = _case_args(2023, "OR", "Single", {"w2_income": 85_000})
+    for backend in ("ots", "auto"):
+        with pytest.raises(UnsupportedReturnError):
+            evaluate_return(**args, backend=backend)
+
+
+def test_every_ledger_entry_explains_a_real_difference():
+    """No dormant allowance: each entry applies where the backends really differ."""
+    used = set()
+    for _, year, state, status, profile in GRAPH_ROUTED_CASES:
+        args = _case_args(year, state, status, profile)
+        ots = evaluate_return(**args, backend="ots").model_dump()
+        auto = evaluate_return(**args, backend="auto").model_dump()
+        for entry in LEDGER:
+            for field in entry.bounds(args, ots, auto):
+                ots_value, auto_value = ots[field], auto[field]
+                if ots_value is None or auto_value is None:
+                    continue
+                if abs(ots_value - auto_value) > 1e-9:
+                    used.add(entry.entry_id)
+    assert used == {entry.entry_id for entry in LEDGER}

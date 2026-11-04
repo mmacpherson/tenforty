@@ -1,0 +1,145 @@
+# Migrating to the graph default
+
+## Decisions
+
+- **The default becomes `backend="auto"`.** Auto computes a 2024 or 2025 return
+  on the graph backend when it is in graph scope, and on OTS otherwise. Today
+  the default is still `"ots"`; this note describes the flip and everything
+  already in place for it.
+- **Graph scope (2024–2025):** federal-only returns; the eight states without
+  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and MD, MS and OR. Every other
+  state, and every year from 2018 to 2023, stays on OTS. `src/tenforty/graph_scope.py`
+  is the list, and each excluded state names the open defect or missing
+  evidence that keeps it out.
+- **An explicit backend is never reinterpreted.** `backend="ots"` is the
+  rollback: it gives you exactly the OTS results of today. `backend="graph"`
+  ignores scope.
+- **What you should do:**
+  1. Run your workload with `backend="auto"` before the flip and compare it with
+     `backend="ots"`. The differences you can expect are listed under
+     [Known differences](#known-differences-between-ots-and-auto); anything else
+     is a bug we want to hear about.
+  2. Treat a `None` rate as "not defined" and a `NaN` field as "this return
+     failed". Neither is ever a real zero.
+  3. Stop passing `state_adjustment` or `dependent_exemptions` where they do not
+     apply. Auto refuses them on graph-routed returns where OTS silently
+     ignored them. `state_adjustment` is deprecated everywhere (see the table
+     under Known differences).
+  4. If you cast `evaluate_returns` columns, note that whole-number float inputs
+     are now `Float64`, not `Int64`.
+  5. If you install from source, you now need a Rust toolchain, or
+     `TENFORTY_WITHOUT_GRAPH=1` for an OTS-only build.
+
+## What changes for callers
+
+These are the caller-visible changes from #416 to #431, then the flip itself.
+The CHANGELOG has the full wording.
+
+### Routing
+
+- `backend="auto"` picks the backend by year and state scope. `evaluate_return`,
+  `evaluate_returns` and `get_backend` share one selector. A mixed batch is split
+  by engine and keeps its row order.
+- Auto computes MD and MS, which OTS cannot: under `backend="ots"` they raise
+  `UnsupportedReturnError`.
+- A request no backend can serve raises `UnsupportedReturnError` before
+  evaluation, under every `on_error` policy. `backend="graph"` for 2018–2023
+  used to raise `FileNotFoundError`. A batch is checked whole before any row
+  runs.
+
+### Inputs refused where they do not apply
+
+The graph backend refuses a nonzero input it cannot apply, with
+`UnsupportedInputError` (a `NotImplementedError` and a `ValueError`), instead of
+dropping it. On the returns auto sends to graph that matters for two inputs:
+
+| Input | OTS today | Auto (graph-routed) |
+|---|---|---|
+| `dependent_exemptions` | No OTS form maps it; silently ignored everywhere | Refused, except where a graph state maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV) |
+| `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused, except AL and CA |
+
+No OTS-covered return that auto sends to graph uses either input on OTS, so
+refusing them loses nothing that was computed before. Checked empirically for
+every OTS-covered state and year (tenforty-aqx.4.1.2).
+
+### Results
+
+- **Failures are NaN, never zero.** Under `on_error="warn"` or `"ignore"`, a
+  failed return has NaN in every output field. The graph backend used to return
+  all zeros. A failed batch row keeps its place and input columns.
+- **Rates can be `None`.** `federal_tax_bracket`, `federal_effective_tax_rate`,
+  `state_tax_bracket` and `state_effective_tax_rate` are `float | None`. `None`
+  means the rate is not defined: no state, a state whose bracket is not reported
+  (both backends report brackets only for CA, NJ, NY, OH, OR and VA), or a
+  non-positive taxable income. They used to be `0.0`.
+- **Effective rates divide by taxable income** (Form 1040 line 15, or the
+  state's taxable-income line), on both backends, using the tax actually
+  returned. The README used to say AGI. On OTS the state rate used to be OTS's
+  printed pre-credit rate.
+- **Brackets are the rate-schedule bracket**, at full precision on graph. OTS
+  prints them to 0.1%, so NY's 6.85% reads 6.9 there.
+- **Errors:** a backend that is not installed raises `BackendUnavailableError`
+  (an `ImportError` and a `RuntimeError`). An unknown `on_error` raises
+  `ValueError`. On OTS, a non-zero OTS exit or a failed required subordinate
+  form now fails the return instead of producing a wrong one.
+
+### Batch frames
+
+- One declared schema for every `evaluate_returns` frame, on both backends, in
+  both modes, including empty, failed and mixed-engine batches.
+- Whole-number float inputs are `Float64`, not `Int64`. Values are unchanged.
+- The four rate columns are `Float64` with nulls where a rate is not defined.
+
+### Installation
+
+- **Source builds need Rust.** Without setuptools-rust and a Rust toolchain the
+  build stops with an explanation. `TENFORTY_WITHOUT_GRAPH=1` builds the legacy
+  OTS-only package; in it, anything routed to graph, including auto for a
+  graph-scope return, raises `BackendUnavailableError`. This is interim: the
+  goal is a prebuilt wheel for every platform.
+- Wheels ship for CPython 3.10–3.15 on Linux x86_64 and aarch64 (glibc 2.28+
+  and musl) and macOS arm64 and x86_64. Every wheel is smoke-tested on both
+  backends before release.
+- **Windows is not supported.** No Windows wheels are built while graph runtime
+  crashes there are root-caused (tenforty-aqx.6.1).
+
+### Rollback
+
+Pass `backend="ots"`. It is never reinterpreted, and it gives the OTS results
+described above. Nothing about the flip changes what `"ots"` computes.
+
+## Known differences between OTS and auto
+
+`tests/graph_default_compat_test.py` runs the same public calls both ways over
+2024–2025, all five filing statuses, and income profiles covering wages,
+interest, dividends, capital gains and losses, self-employment, QBI, rental
+income, itemized deductions, dependents (including the child/other-dependent
+split), ISO/AMT and the 2025 OBBBA inputs. It covers federal-only returns, OR,
+the no-income-tax states, routing for every other OTS state, and scalar and
+batch calls in both modes. Every difference must be one of these; each bound
+comes from the cited mechanism, not from observed output.
+
+| Entry | Kind | Where | What you see on auto |
+|---|---|---|---|
+| F11 (OTS upstream report 1) | OTS defect | 2024 head of household, taxable income above $191,150 | Up to $64 less federal tax: OTS starts the 32% bracket $800 early |
+| F12 | Contract | `itemized_deductions` with itemizing | Less or no AMT. OTS treats the aggregate as Schedule A "other taxes", added back for the AMT; graph treats it as "other deductions". Neither is wrong: the input does not say which kind of deduction it is |
+| F31 (OTS upstream report 11) | OTS defect | 2025 MFS, SALT, MAGI between $250,000 and $500,000 | Smaller SALT deduction: graph applies the MFS phase-down OTS skips |
+| MAP-OR-DEPENDENTS (tenforty-3nvf) | Our OTS mapping | OR with `num_dependents` | Lower OR tax by the $249 (2024) / $256 (2025) exemption credit per dependent, which our OTS map never passed |
+| OR rate chart | Precision | OR | A dollar or two of OR tax: OTS rounds each rate-chart increment |
+| OTS bracket print | Precision | Brackets | Full-precision brackets where OTS prints 0.1% |
+| OTS cent import | Precision | Self-employment returns | A cent: OTS passes Schedule SE and Form 8995 amounts between programs at cents |
+
+**Outside auto today: `state_adjustment` (tenforty-yu51).** It is deprecated:
+a nonzero value emits a `DeprecationWarning`, and we recommend against new use.
+Its meaning depends on the state and the backend:
+
+| Backend and state | What `state_adjustment` does |
+|---|---|
+| OTS, CA | Schedule CA Part II addition to itemized deductions (`CA540_P2_Add_6`); no effect with the standard deduction |
+| Graph, CA | Schedule CA Part I addition to income (`ca_schedule_ca_A22_24`): the opposite direction |
+| Graph, AL | The Form 40 standard deduction amount (`al_40_L12_std`) |
+| Everywhere else | OTS ignores it; the graph refuses a nonzero value |
+
+In CA the same value moves taxable income in opposite directions on the two
+backends. CA and AL stay out of graph scope under auto until this is resolved.
+Named single-meaning inputs will replace it (tenforty-tj2.1, tenforty-tj2.2).
