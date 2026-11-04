@@ -17,19 +17,55 @@ CENT = 0.005
 QUANTITIES = ("state_taxable_income", "state_total_tax")
 
 
-def _permitted(case: OfficialCase, quantity: str) -> set[float]:
-    index = QUANTITIES.index(quantity)
-    return {outcome[index] for outcome in case.outcomes}
+def _judge_candidate(
+    case: OfficialCase,
+    observed: dict[str, float],
+    candidate: tuple[float, float],
+) -> tuple[list[str], list[str]]:
+    """Compare one whole permitted outcome; return (failures, xfail reasons).
+
+    Every checked quantity is judged against the same candidate, so taxable
+    income from one reading cannot pair with tax from another.
+    """
+    defects = GRAPH_DEFECTS.get(case.case_id, {})
+    failures, signed = [], []
+    for index, quantity in enumerate(QUANTITIES):
+        if quantity == "state_taxable_income" and not case.check_taxable_income:
+            continue
+        delta = observed[quantity] - candidate[index]
+        defect = defects.get(quantity)
+        if defect is None:
+            if abs(delta) > CENT:
+                failures.append(
+                    f"{quantity} {observed[quantity]:,.2f} != {candidate[index]:,}"
+                )
+        elif abs(delta) <= CENT:
+            failures.append(f"{quantity} matches now; drop the {defect.bead} signature")
+        elif defect.minimum <= delta <= defect.maximum:
+            signed.append(f"{quantity}: {defect.bead}")
+        else:
+            failures.append(
+                f"{quantity} delta {delta:,.2f} outside the {defect.bead} signature "
+                f"[{defect.minimum}, {defect.maximum}]"
+            )
+    return failures, signed
 
 
-def _matches(observed: float, permitted: set[float]) -> bool:
-    return any(abs(observed - value) <= CENT for value in permitted)
+def judge(case: OfficialCase, observed: dict[str, float]) -> tuple[bool, list[str]]:
+    """Whether some single permitted outcome explains the graph's whole return."""
+    reports = []
+    for candidate in case.outcomes:
+        failures, signed = _judge_candidate(case, observed, candidate)
+        if not failures:
+            return True, signed
+        reports.append(f"{candidate}: " + "; ".join(failures))
+    return False, reports
 
 
 @pytest.mark.requires_graph
 @pytest.mark.parametrize("case", OFFICIAL_CASES, ids=lambda case: case.case_id)
 def test_graph_matches_official_values(case: OfficialCase):
-    """The graph return equals a value the official sources permit."""
+    """The graph return equals one whole outcome the official sources permit."""
     result = evaluate_return(
         year=case.year,
         state=case.state,
@@ -37,34 +73,35 @@ def test_graph_matches_official_values(case: OfficialCase):
         backend="graph",
         **case.inputs,
     )
-    defects = GRAPH_DEFECTS.get(case.case_id, {})
-    failures = []
-    for quantity in QUANTITIES:
-        if quantity == "state_taxable_income" and not case.check_taxable_income:
-            continue
-        observed = getattr(result, quantity)
-        permitted = _permitted(case, quantity)
-        defect = defects.get(quantity)
-        if defect is None:
-            if not _matches(observed, permitted):
-                failures.append(
-                    f"{quantity}: graph {observed:,.2f}, permitted {sorted(permitted)}"
-                )
-            continue
-        delta = min((observed - value for value in permitted), key=abs)
-        if _matches(observed, permitted):
-            failures.append(
-                f"{quantity}: matches now; drop the {defect.bead} signature"
-            )
-        elif not defect.minimum <= delta <= defect.maximum:
-            failures.append(
-                f"{quantity}: delta {delta:,.2f} outside the {defect.bead} signature "
-                f"[{defect.minimum}, {defect.maximum}]"
-            )
-    if failures:
-        pytest.fail(f"{case.case_id} ({case.evidence.record}): " + "; ".join(failures))
-    if defects:
-        pytest.xfail("; ".join(f"{q}: {d.bead}" for q, d in defects.items()))
+    observed = {quantity: getattr(result, quantity) for quantity in QUANTITIES}
+    explained, detail = judge(case, observed)
+    if not explained:
+        pytest.fail(f"{case.case_id} ({case.evidence.record}): " + " | ".join(detail))
+    if detail:
+        pytest.xfail("; ".join(detail))
+
+
+def test_outcomes_are_judged_as_whole_pairs():
+    """A taxable income from one reading cannot pass with tax from another."""
+    case = next(case for case in OFFICIAL_CASES if case.case_id == "CO-2025-T1")
+    (_, statute_tax), (booklet_ti, _) = case.outcomes
+    for consistent in case.outcomes:
+        assert judge(case, dict(zip(QUANTITIES, consistent, strict=True)))[0]
+    mixed = {"state_taxable_income": booklet_ti, "state_total_tax": statute_tax}
+    assert not judge(case, mixed)[0]
+
+
+def test_only_colorado_enumerates_alternative_outcomes():
+    """NC, IL and OH fix their rounding; only CO's sources leave readings open."""
+    with_alternatives = {
+        case.case_id for case in OFFICIAL_CASES if len(case.outcomes) > 1
+    }
+    assert with_alternatives == {
+        "CO-2024-S150",
+        "CO-2025-HoH75",
+        "CO-2024-T1",
+        "CO-2025-T1",
+    }
 
 
 def test_case_ids_are_unique_and_unpinned_cases_are_not_pinned():
@@ -91,3 +128,19 @@ def test_defect_signatures_name_pinned_cases_and_checked_quantities():
             assert quantity in QUANTITIES
             assert defect.minimum <= defect.maximum
             assert defect.bead.startswith("tenforty-")
+
+
+@pytest.mark.parametrize(
+    ("case_id", "truncated"),
+    [
+        ("NC-2024-c10", (8_500, 382)),
+        ("IL-2024-c2", (57_225, 2_832)),
+        ("IL-2025-c2", (57_150, 2_828)),
+        ("OH-2025-S60", (57_850, 1_216)),
+        ("OH-2025-S80000", (77_850, 1_766)),
+    ],
+)
+def test_truncation_is_not_an_accepted_outcome(case_id, truncated):
+    """Where the source rounds .50 up, a truncated return is a defect."""
+    case = next(case for case in OFFICIAL_CASES if case.case_id == case_id)
+    assert not judge(case, dict(zip(QUANTITIES, truncated, strict=True)))[0]

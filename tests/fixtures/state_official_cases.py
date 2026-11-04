@@ -2,10 +2,12 @@
 
 Every value below is transcribed from a preserved blind derivation in
 docs/validation/derivations/ (summary tables), never from tenforty output.
-Each case lists its permitted (state taxable income, state tax) outcomes: the
-deriver's primary reading first, then any reading the source equally permits
-(a half-dollar tie, truncation under an unstated rounding rule, or a
-statute/booklet threshold split), as the record's ambiguities section names.
+Each case lists its permitted (state taxable income, state tax) outcomes as
+whole, consistent pairs: the deriver's primary reading first, then a reading
+the sources genuinely leave open. Only Colorado has any: it states no tie rule
+for its three exact halves, and its statute and booklets disagree at AGI
+exactly $300,000. Where a source fixes the rounding (NC, IL, OH), the record's
+value is the only one, whatever alternative the record mentions.
 
 Graph-side departures are recorded in ``GRAPH_DEFECTS`` as bounded strict
 signatures: the test fails if the departure leaves its bound, and also if the
@@ -173,8 +175,9 @@ def _nc(year, label, status, ti, tax, alternate=None, **inputs) -> OfficialCase:
     )
 
 
-# NC: D-400 L14 and L15. U1: the nine 2024 cases at exactly $0.50 round half up
-# under the general rule; truncation (also permitted) is $1 lower.
+# NC: D-400 L14 and L15. Line 15 rounds half up (D-401 p.4: "increase amounts
+# from 50 cents to 99 cents to the next whole dollar"), so the nine 2024 cases at
+# exactly $0.50 have one value; the record's U1 alternatives are not permitted.
 # Qualifying children are federal CTC children (Line 10a): num_dependents.
 NC_CASES = [
     _nc(2024, "c1", "S", 7_250, 326, w2_income=20_000),
@@ -185,35 +188,35 @@ NC_CASES = [
     _nc(2025, "c3", "S", 137_250, 5_833, w2_income=150_000),
     _nc(2024, "c4", "S", 387_250, 17_426, w2_income=400_000),
     _nc(2025, "c4", "S", 387_250, 16_458, w2_income=400_000),
-    _nc(2024, "c5", "MFJ", 34_500, 1_553, 1_552, w2_income=60_000),
+    _nc(2024, "c5", "MFJ", 34_500, 1_553, w2_income=60_000),
     _nc(2025, "c5", "MFJ", 34_500, 1_466, w2_income=60_000),
-    _nc(2024, "c6", "MFJ", 124_500, 5_603, 5_602, w2_income=150_000),
+    _nc(2024, "c6", "MFJ", 124_500, 5_603, w2_income=150_000),
     _nc(2025, "c6", "MFJ", 124_500, 5_291, w2_income=150_000),
-    _nc(2024, "c7", "MFJ", 374_500, 16_853, 16_852, w2_income=400_000),
+    _nc(2024, "c7", "MFJ", 374_500, 16_853, w2_income=400_000),
     _nc(2025, "c7", "MFJ", 374_500, 15_916, w2_income=400_000),
     _nc(2024, "c8", "HoH", 54_375, 2_447, w2_income=75_000, num_dependents=1),
     _nc(2025, "c8", "HoH", 54_375, 2_311, w2_income=75_000, num_dependents=1),
-    _nc(2024, "c9", "MFJ", 71_500, 3_218, 3_217, w2_income=100_000, num_dependents=2),
+    _nc(2024, "c9", "MFJ", 71_500, 3_218, w2_income=100_000, num_dependents=2),
     _nc(2025, "c9", "MFJ", 71_500, 3_039, w2_income=100_000, num_dependents=2),
-    _nc(2024, "c10", "MFJ", 8_500, 383, 382, w2_income=40_000, num_dependents=2),
+    _nc(2024, "c10", "MFJ", 8_500, 383, w2_income=40_000, num_dependents=2),
     _nc(2025, "c10", "MFJ", 8_500, 361, w2_income=40_000, num_dependents=2),
     _nc(2024, "c11", "MFJ", 9_501, 428, w2_income=40_001, num_dependents=2),
     _nc(2025, "c11", "MFJ", 9_501, 404, w2_income=40_001, num_dependents=2),
-    _nc(2024, "c12", "MFJ", 29_500, 1_328, 1_327, w2_income=60_000, num_dependents=2),
+    _nc(2024, "c12", "MFJ", 29_500, 1_328, w2_income=60_000, num_dependents=2),
     _nc(2025, "c12", "MFJ", 29_500, 1_254, w2_income=60_000, num_dependents=2),
     _nc(2024, "c13", "MFJ", 30_501, 1_373, w2_income=60_001, num_dependents=2),
     _nc(2025, "c13", "MFJ", 30_501, 1_296, w2_income=60_001, num_dependents=2),
-    _nc(2024, "c14", "MFJ", 50_500, 2_273, 2_272, w2_income=80_000, num_dependents=2),
+    _nc(2024, "c14", "MFJ", 50_500, 2_273, w2_income=80_000, num_dependents=2),
     _nc(2025, "c14", "MFJ", 50_500, 2_146, w2_income=80_000, num_dependents=2),
     _nc(2024, "c15", "MFJ", 51_501, 2_318, w2_income=80_001, num_dependents=2),
     _nc(2025, "c15", "MFJ", 51_501, 2_189, w2_income=80_001, num_dependents=2),
     _nc(2024, "c16", "MFJ", 72_501, 3_263, w2_income=100_001, num_dependents=2),
     _nc(2025, "c16", "MFJ", 72_501, 3_081, w2_income=100_001, num_dependents=2),
-    _nc(2024, "c17", "MFJ", 92_500, 4_163, 4_162, w2_income=120_000, num_dependents=2),
+    _nc(2024, "c17", "MFJ", 92_500, 4_163, w2_income=120_000, num_dependents=2),
     _nc(2025, "c17", "MFJ", 92_500, 3_931, w2_income=120_000, num_dependents=2),
     _nc(2024, "c18", "MFJ", 93_501, 4_208, w2_income=120_001, num_dependents=2),
     _nc(2025, "c18", "MFJ", 93_501, 3_974, w2_income=120_001, num_dependents=2),
-    _nc(2024, "c19", "MFJ", 113_500, 5_108, 5_107, w2_income=140_000, num_dependents=2),
+    _nc(2024, "c19", "MFJ", 113_500, 5_108, w2_income=140_000, num_dependents=2),
     _nc(2025, "c19", "MFJ", 113_500, 4_824, w2_income=140_000, num_dependents=2),
     _nc(2024, "c20", "MFJ", 114_501, 5_153, w2_income=140_001, num_dependents=2),
     _nc(2025, "c20", "MFJ", 114_501, 4_866, w2_income=140_001, num_dependents=2),
@@ -246,29 +249,29 @@ def _il(year, label, status, ti, tax, alternate=None, **inputs) -> OfficialCase:
     )
 
 
-# IL: IL-1040 L11 and L12. Ambiguity 1: L12 rounds half up under the general
-# rule; truncation is $1 lower wherever the product rounded up.
+# IL: IL-1040 L11 and L12. L12 rounds half up (IL-1040 instructions p.4); a
+# truncating engine is wrong, not an alternative.
 IL_CASES = [
-    _il(2024, "c1", "S", 17_225, 853, 852, w2_income=20_000),
-    _il(2025, "c1", "S", 17_150, 849, 848, w2_income=20_000),
-    _il(2024, "c2", "S", 57_225, 2_833, 2_832, w2_income=60_000),
-    _il(2025, "c2", "S", 57_150, 2_829, 2_828, w2_income=60_000),
-    _il(2024, "c3", "S", 147_225, 7_288, 7_287, w2_income=150_000),
-    _il(2025, "c3", "S", 147_150, 7_284, 7_283, w2_income=150_000),
+    _il(2024, "c1", "S", 17_225, 853, w2_income=20_000),
+    _il(2025, "c1", "S", 17_150, 849, w2_income=20_000),
+    _il(2024, "c2", "S", 57_225, 2_833, w2_income=60_000),
+    _il(2025, "c2", "S", 57_150, 2_829, w2_income=60_000),
+    _il(2024, "c3", "S", 147_225, 7_288, w2_income=150_000),
+    _il(2025, "c3", "S", 147_150, 7_284, w2_income=150_000),
     _il(2024, "c4", "S", 400_000, 19_800, w2_income=400_000),
     _il(2025, "c4", "S", 400_000, 19_800, w2_income=400_000),
     _il(2024, "c5", "MFJ", 54_450, 2_695, w2_income=60_000),
-    _il(2025, "c5", "MFJ", 54_300, 2_688, 2_687, w2_income=60_000),
+    _il(2025, "c5", "MFJ", 54_300, 2_688, w2_income=60_000),
     _il(2024, "c6", "MFJ", 144_450, 7_150, w2_income=150_000),
-    _il(2025, "c6", "MFJ", 144_300, 7_143, 7_142, w2_income=150_000),
+    _il(2025, "c6", "MFJ", 144_300, 7_143, w2_income=150_000),
     _il(2024, "c7", "MFJ", 394_450, 19_525, w2_income=400_000),
-    _il(2025, "c7", "MFJ", 394_300, 19_518, 19_517, w2_income=400_000),
-    _il(2024, "c10", "S", 247_225, 12_238, 12_237, w2_income=250_000),
-    _il(2025, "c10", "S", 247_150, 12_234, 12_233, w2_income=250_000),
+    _il(2025, "c7", "MFJ", 394_300, 19_518, w2_income=400_000),
+    _il(2024, "c10", "S", 247_225, 12_238, w2_income=250_000),
+    _il(2025, "c10", "S", 247_150, 12_234, w2_income=250_000),
     _il(2024, "c11", "S", 250_001, 12_375, w2_income=250_001),
     _il(2025, "c11", "S", 250_001, 12_375, w2_income=250_001),
     _il(2024, "c12", "MFJ", 494_450, 24_475, w2_income=500_000),
-    _il(2025, "c12", "MFJ", 494_300, 24_468, 24_467, w2_income=500_000),
+    _il(2025, "c12", "MFJ", 494_300, 24_468, w2_income=500_000),
     _il(2024, "c13", "MFJ", 500_001, 24_750, w2_income=500_001),
     _il(2025, "c13", "MFJ", 500_001, 24_750, w2_income=500_001),
     _il(2024, "c14", "S", 92_225, 4_565, w2_income=80_000, **INTEREST_GAIN),
@@ -282,8 +285,8 @@ def _oh(year, label, ti, tax, alternate=None, status="S", **inputs) -> OfficialC
     )
 
 
-# OH: IT 1040 line 5 and line 10. A3: two 2025 rows land on $0.50; the record
-# rounds half up, and $1 lower is equally permitted.
+# OH: IT 1040 line 5 and line 10. The two 2025 rows at exactly $0.50 round up
+# (ORC 5703.055 resolves half-dollar ties upward), so each has one value.
 OH_CASES = [
     case
     for year, row in (
@@ -312,13 +315,13 @@ OH_CASES = [
             2025,
             {
                 "S20": (17_600, 0, None),
-                "S60": (57_850, 1_217, 1_216),
+                "S60": (57_850, 1_217, None),
                 "S150": (148_100, 3_897, None),
                 "S400": (398_100, 11_710, None),
                 "MFJ60one": (55_700, 1_157, None),
                 "S40000": (37_600, 660, None),
                 "S40001": (37_851, 667, None),
-                "S80000": (77_850, 1_767, 1_766),
+                "S80000": (77_850, 1_767, None),
                 "S80001": (78_101, 1_773, None),
                 "S28450": (26_050, 0, None),
                 "S28451": (26_051, 322, None),
