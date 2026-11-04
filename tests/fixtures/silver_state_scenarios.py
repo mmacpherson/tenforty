@@ -4339,6 +4339,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # Legacy values below were source-corrected after implementation inspection.
+    # Labels stay UNVERIFIED; no backend output generated the new amounts.
     # ========== ILLINOIS SCENARIOS ==========
     # IL 2024: Flat 4.95% rate, Personal exemption $2,775
     # IL 2025: Flat 4.95% rate (unchanged), Personal exemption $2,850
@@ -4347,11 +4349,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # IL tax = (Federal AGI - exemptions) * 0.0495
     # These use graph backend with exemptions set to 0 (not auto-computed).
     #
-    # IL 2024 Single, $50,000 W2 only, no exemptions
+    # IL 2024 Single, $50,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $50,000
     # IL Base Income: $50,000 (no additions/subtractions)
-    # IL Net Income: $50,000 (exemption = $0)
-    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # IL Net Income: $50,000 - $2,775 = $47,225
+    # IL Tax: $47,225 * 0.0495 = $2,337.6375 -> $2,338
     # Federal taxable: $35,400, Federal tax: $4,016
     TaxScenario(
         source="IL 2024 Tax Rate (computed)",
@@ -4361,15 +4363,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2475.0,
+        expected_state_tax=2338.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
-    # IL 2024 Single, $100,000 W2 only, no exemptions
+    # IL 2024 Single, $100,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $100,000
     # IL Base Income: $100,000
-    # IL Net Income: $100,000 (exemption = $0)
-    # IL Tax: $100,000 * 0.0495 = $4,950.00
+    # IL Net Income: $100,000 - $2,775 = $97,225
+    # IL Tax: $97,225 * 0.0495 = $4,812.6375 -> $4,813
     # Federal taxable: $85,400, Federal tax: $13,841
     TaxScenario(
         source="IL 2024 Tax Rate (computed)",
@@ -4379,15 +4381,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=100000.0,
         expected_federal_tax=13847.0,  # Tax Table row 85,400-85,450
-        expected_state_tax=4950.0,
+        expected_state_tax=4813.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
-    # IL 2024 MFJ, $120,000 W2 only, no exemptions
+    # IL 2024 MFJ, $120,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $120,000
     # IL Base Income: $120,000
-    # IL Net Income: $120,000 (exemption = $0)
-    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # IL Net Income: $120,000 - $5,550 = $114,450
+    # IL Tax: $114,450 * 0.0495 = $5,665.275 -> $5,665
     # Federal taxable: $90,800, Federal tax: $10,432
     TaxScenario(
         source="IL 2024 Tax Rate (computed)",
@@ -4397,15 +4399,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=120000.0,
         expected_federal_tax=10435.0,  # Tax Table row 90,800-90,850
-        expected_state_tax=5940.0,
+        expected_state_tax=5665.0,
         expected_federal_agi=120000.0,
         backend="graph",
     ),
-    # IL 2024 Head_of_House, $75,000 W2 only, no exemptions
+    # IL 2024 Head_of_House, $75,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $75,000
     # IL Base Income: $75,000
-    # IL Net Income: $75,000 (exemption = $0)
-    # IL Tax: $75,000 * 0.0495 = $3,712.50
+    # IL Net Income: $75,000 - $2,775 = $72,225
+    # IL Tax: $72,225 * 0.0495 = $3,575.1375 -> $3,575
     # Federal taxable: $53,100 ($75K - $21.9K std ded)
     # Federal tax (HoH 2024): $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
     TaxScenario(
@@ -4416,15 +4418,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=3712.5,
+        expected_state_tax=3575.0,
         expected_federal_agi=75000.0,
         backend="graph",
     ),
-    # IL 2025 Single, $50,000 W2 only, no exemptions
+    # IL 2025 Single, $50,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $50,000
     # IL Base Income: $50,000
-    # IL Net Income: $50,000 (exemption = $0)
-    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # IL Net Income: $50,000 - $2,850 = $47,150
+    # IL Tax: $47,150 * 0.0495 = $2,333.925 -> $2,334
     # Federal taxable: $35,000 (AGI - $15,000 std ded)
     # Federal tax (2025): $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
     TaxScenario(
@@ -4435,15 +4437,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=2475.0,
+        expected_state_tax=2334.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
-    # IL 2025 MFJ, $120,000 W2 only, no exemptions
+    # IL 2025 MFJ, $120,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $120,000
     # IL Base Income: $120,000
-    # IL Net Income: $120,000 (exemption = $0)
-    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # IL Net Income: $120,000 - $5,700 = $114,300
+    # IL Tax: $114,300 * 0.0495 = $5,657.85 -> $5,658
     # Federal taxable: $90,000 (AGI - $30,000 std ded)
     # Federal tax (2025 MFJ): $23,850 * 0.10 + $66,150 * 0.12 = $2,385 + $7,938 = $10,323
     TaxScenario(
@@ -4454,7 +4456,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=120000.0,
         expected_federal_tax=10146.0,  # Tax Table row 88,500-88,550
-        expected_state_tax=5940.0,
+        expected_state_tax=5658.0,
         expected_federal_agi=120000.0,
         backend="graph",
     ),

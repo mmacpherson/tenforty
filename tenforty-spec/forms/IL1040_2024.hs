@@ -15,7 +15,7 @@ il1040_2024 = form "il_1040" 2024 $ do
   let federalAgi = importForm us1040L11
   l1 <-
     keyOutput "L1" "federal_agi" "Federal adjusted gross income" $
-      federalAgi .+. dollars 0
+      roundE federalAgi
 
   -- Line 2: Federally tax-exempt interest and dividend income
   l2 <- keyInput "L2" "tax_exempt_interest" "Federally tax-exempt interest and dividend income"
@@ -26,7 +26,7 @@ il1040_2024 = form "il_1040" 2024 $ do
   -- Line 4: Total income
   l4 <-
     interior "L4" "total_income" $
-      sumOf [l1, l2, l3]
+      sumOf [l1, roundE l2, roundE l3]
 
   -- Line 5: Social Security and retirement income subtraction
   l5 <- keyInput "L5" "retirement_subtraction" "Social Security benefits and certain retirement income"
@@ -40,17 +40,25 @@ il1040_2024 = form "il_1040" 2024 $ do
   -- Line 8: Total subtractions
   l8 <-
     interior "L8" "total_subtractions" $
-      sumOf [l5, l6, l7]
+      sumOf [roundE l5, roundE l6, roundE l7]
 
   -- Line 9: Illinois base income
   l9 <-
     keyOutput "L9" "il_base_income" "Illinois base income" $
       l4 `subtractNotBelowZero` l8
 
-  -- Line 10: Exemption allowance
-  -- Note: In the DSL, we accept total exemption allowance as input since the
-  -- natural_to_node limitation prevents computing from num_dependents
-  l10 <- keyInput "L10" "exemption_allowance" "Total exemption allowance"
+  dependents <- keyInput "Dependents" "dependents" "Total federally claimed dependents"
+  filer65 <- keyInput "Filer65" "filer_65_or_older" "Filer age-65 exemption box"
+  spouse65 <- keyInput "Spouse65" "spouse_65_or_older" "Spouse age-65 exemption box (MFJ only)"
+  let personalCount = byStatusE (fmap lit (byStatus 1 2 1 1 1))
+      exemptionCount = personalCount .+. max0 (roundE dependents)
+      regularAllowance = lit ilPersonalExemption2024 .*. (exemptionCount ./. dollars 1)
+      filerAgeAllowance = ifPos filer65 (dollars 1000) (dollars 0)
+      spouseAgeAllowance = byStatusE $ byStatus (dollars 0) (ifPos spouse65 (dollars 1000) (dollars 0)) (dollars 0) (dollars 0) (dollars 0)
+      incomeLimit = byStatusE (fmap lit (byStatus 250000 500000 250000 250000 250000))
+  l10 <-
+    keyOutput "L10" "exemption_allowance" "Personal, dependent and age-65 exemptions" $
+      ifPos (l1 .-. incomeLimit) (dollars 0) (sumOf [regularAllowance, filerAgeAllowance, spouseAgeAllowance])
 
   -- Line 11: Net income
   l11 <-
@@ -60,7 +68,7 @@ il1040_2024 = form "il_1040" 2024 $ do
   -- Line 12: Illinois income tax
   l12 <-
     keyOutput "L12" "il_tax" "Illinois income tax" $
-      l11 .*. rate ilTaxRate2024
+      roundE (l11 .*. rate ilTaxRate2024)
 
   -- Payments and Credits
   -- Line 13: Illinois income tax withheld
@@ -90,6 +98,7 @@ il1040_2024 = form "il_1040" 2024 $ do
   outputs
     [ "L1",
       "L9",
+      "L10",
       "L11",
       "L12",
       "L16",

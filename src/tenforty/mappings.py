@@ -399,9 +399,16 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.IL: StateGraphConfig(
         # IL-1040 imports federal AGI and applies additions/subtractions.
-        # Exemptions are accepted as total input (num_dependents cannot map to
-        # dollar amounts due to natural_to_node limitation).
-        natural_to_node={},
+        # Line 10 counts the filer/spouse base plus TOTAL dependents, independent
+        # of the federal CTC subset. Existing age facts add $1,000 per eligible
+        # box; the IL spouse age box applies only to MFJ. The federal-AGI income
+        # exception removes the whole allowance. dependent_exemptions is not
+        # mapped; claimable-filer and blind variants remain unsupported.
+        natural_to_node={
+            "num_dependents": "il_1040_Dependents",
+            "filer_65_or_older": "il_1040_Filer65",
+            "spouse_65_or_older": "il_1040_Spouse65",
+        },
         outputs={
             "state_adjusted_gross_income": "L9_il_base_income",
             "state_taxable_income": "L11_il_net_income",
