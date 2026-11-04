@@ -364,6 +364,7 @@ class GraphBackend:
         With mode="cross" (default), computes Cartesian product of inputs x statuses.
         With mode="zip", evaluates pre-formed scenarios by zipping input columns.
         """
+        year = getattr(year, "value", year)
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
 
