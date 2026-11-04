@@ -89,6 +89,28 @@ every OTS-covered state and year (tenforty-aqx.4.1.2).
   both modes, including empty, failed and mixed-engine batches.
 - Whole-number float inputs are `Float64`, not `Int64`. Values are unchanged.
 - The four rate columns are `Float64` with nulls where a rate is not defined.
+- Graph frames, which auto now produces for graph-routed rows, change more
+  than OTS frames, because they now match OTS:
+  - the derived `schedule_se_ss_wages` column is gone;
+  - `dependent_exemptions`, `state_adjustment` and the Schedule 1-A inputs are
+    always present;
+  - `qbi_is_sstb`, `filer_65_or_older` and `spouse_65_or_older` are Boolean,
+    not `Float64`;
+  - the column order is fixed, and cross-mode rows follow signature order
+    (filing status before income), as OTS's do;
+  - input columns echo the request rather than normalized values. In
+    particular `ordinary_dividends` is no longer raised to
+    `qualified_dividends` in the frame (the computation still does that).
+
+### New inputs and outputs
+
+- `num_ctc_dependents` (default: every dependent) says how many of
+  `num_dependents` are qualifying children for the child tax credit; the rest
+  get the $500 credit for other dependents. It must not exceed
+  `num_dependents`.
+- `federal_child_tax_credit` is the new output: the two credits together after
+  the phase-out and the tax-liability limit (Form 1040 line 19), on both
+  backends. Not modeled: the refundable additional child tax credit.
 
 ### Installation
 
@@ -112,22 +134,28 @@ described above. Nothing about the flip changes what `"ots"` computes.
 
 `tests/graph_default_compat_test.py` runs the same public calls both ways over
 2024–2025, all five filing statuses, and income profiles covering wages,
-interest, dividends, capital gains and losses, self-employment, QBI, rental
-income, itemized deductions, dependents (including the child/other-dependent
-split), ISO/AMT and the 2025 OBBBA inputs. It covers federal-only returns, OR,
+interest, dividends, capital gains and losses, self-employment, QBI (in the
+phase-in, wage- and property-limited, and specified service businesses inside
+and above the phase-out), Schedule 1 other income (positive and negative),
+rental income, itemized deductions, dependents (including the
+child/other-dependent split), ISO/AMT and the 2025 OBBBA inputs. It covers federal-only returns, OR,
 the no-income-tax states, routing for every other OTS state, and scalar and
 batch calls in both modes. Every difference must be one of these; each bound
-comes from the cited mechanism, not from observed output.
+comes from the cited mechanism, not from observed output. Every output field
+is either compared or checked by its defining identity on both backends, and
+every entry below is necessary: removing any one of them leaves some
+difference in the corpus unexplained.
 
 | Entry | Kind | Where | What you see on auto |
 |---|---|---|---|
 | F11 (OTS upstream report 1) | OTS defect | 2024 head of household, taxable income above $191,150 | Up to $64 less federal tax: OTS starts the 32% bracket $800 early |
 | F12 | Contract | `itemized_deductions` with itemizing | Less or no AMT. OTS treats the aggregate as Schedule A "other taxes", added back for the AMT; graph treats it as "other deductions". Neither is wrong: the input does not say which kind of deduction it is |
 | F31 (OTS upstream report 11) | OTS defect | 2025 MFS, SALT, MAGI between $250,000 and $500,000 | Smaller SALT deduction: graph applies the MFS phase-down OTS skips |
+| OTS-6251-8Z (OTS upstream report 17) | OTS defect | Negative `schedule_1_income` | Less or no AMT. OTS reads Schedule 1 line 8z into Form 6251 lines 2b and 2e, so a negative 8z adds twice its size to AMTI. Example: 2024 MFS, wages $80,000, `schedule_1_income=-15000`: OTS AMT $1,224, auto $0 |
 | MAP-OR-DEPENDENTS (tenforty-3nvf) | Our OTS mapping | OR with `num_dependents` | Lower OR tax by the $249 (2024) / $256 (2025) exemption credit per dependent, which our OTS map never passed |
-| OR rate chart | Precision | OR | A dollar or two of OR tax: OTS rounds each rate-chart increment |
+| OR rate chart | Precision | OR | Up to $5.88 of OR tax below $50,000 of OR taxable income (OTS prices the tax table's $100 rows differently), up to $2 (2024) or $3.50 (2025) above it (OTS rounds each rate-chart increment) |
 | OTS bracket print | Precision | Brackets | Full-precision brackets where OTS prints 0.1% |
-| OTS cent import | Precision | Self-employment returns | A cent: OTS passes Schedule SE and Form 8995 amounts between programs at cents |
+| OTS cent import | Precision | Self-employment returns | A few cents: OTS passes Schedule SE and Form 8995 amounts between programs at cents. Inside the QBI phase-in the rounding is amplified, so taxable income can differ by a few cents more |
 
 **Outside auto today: `state_adjustment` (tenforty-yu51).** It is deprecated:
 a nonzero value emits a `DeprecationWarning`, and we recommend against new use.

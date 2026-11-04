@@ -17,15 +17,20 @@ two effective rates.
 See docs/migrating-to-graph-default.md for the caller-facing account.
 """
 
+import functools
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import polars as pl
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends import available_backends
-from tenforty.models import UnsupportedInputError, UnsupportedReturnError
+from tenforty.models import (
+    InterpretedTaxReturn,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+)
 from tests.parity.state_parity_policy import (
     OR_RATE_CHART_TOLERANCE,
     OR_TAX_TABLE_CEILING,
@@ -79,6 +84,24 @@ PROFILES: dict[str, dict] = {
         "itemized_deductions": 20_000,
         "standard_or_itemized": "Itemized",
     },
+    "sched1_negative": {"w2_income": 80_000, "schedule_1_income": -15_000},
+    "sched1_positive": {"w2_income": 80_000, "schedule_1_income": 12_000},
+    "qbi_sstb_phase_in": {
+        "self_employment_income": 260_000,
+        "qbi_w2_wages": 40_000,
+        "qbi_ubia": 20_000,
+        "qbi_is_sstb": True,
+    },
+    "qbi_wage_limited": {
+        "self_employment_income": 330_000,
+        "qbi_w2_wages": 150_000,
+        "qbi_ubia": 300_000,
+    },
+    "qbi_sstb_phased_out": {
+        "self_employment_income": 480_000,
+        "qbi_is_sstb": True,
+    },
+    "qbi_phase_in_no_wages": {"self_employment_income": 210_000},
 }
 OBBBA_2025 = {
     "w2_income": 120_000,
@@ -102,6 +125,7 @@ COMPARED_FIELDS = (
     "federal_niit",
     "federal_additional_medicare_tax",
     "federal_total_tax",
+    "federal_income_tax",
     "federal_child_tax_credit",
     "federal_tax_bracket",
     "state_adjusted_gross_income",
@@ -109,6 +133,16 @@ COMPARED_FIELDS = (
     "state_total_tax",
     "state_tax_bracket",
 )
+IDENTITY_FIELDS = (
+    "total_tax",
+    "federal_income_tax",
+    "federal_effective_tax_rate",
+    "state_effective_tax_rate",
+)
+"""Fields checked by their defining identity on each backend (federal_income_tax
+is also compared directly). The two effective rates are also compared for
+availability: both backends must agree on whether each is defined."""
+RATE_FIELDS = ("federal_effective_tax_rate", "state_effective_tax_rate")
 
 
 def _case_args(year, state, status, profile):
@@ -141,8 +175,8 @@ def _graph_routed_cases():
                         PROFILES["wages_mid"],
                     )
                 )
-        for status in STATUSES:
-            cases.append((f"2025-None-{status}-obbba", 2025, None, status, OBBBA_2025))
+    for status in STATUSES:
+        cases.append((f"2025-None-{status}-obbba", 2025, None, status, OBBBA_2025))
     return cases
 
 
@@ -168,30 +202,86 @@ def _profile(case: dict, key: str) -> float:
     return float(case.get(key, 0) or 0)
 
 
-def _ots_cent_import(case, ots, auto) -> Bounds:
-    """Bound the cent rounding of OTS subordinate-form imports.
+HALF_CENT = 0.005
+QBI_THRESHOLD = {2024: 191_950.0, 2025: 197_300.0}
+"""Section 199A threshold, all statuses but MFJ (Rev. Proc. 2023-34 sec. 3.27,
+Rev. Proc. 2024-40 sec. 3.27); doubled for MFJ, as is the $50,000 range."""
+QBI_PHASE_RANGE = 50_000.0
+JOINT_STATUSES = {"Married/Joint", "Widow(er)"}
 
-    OTS passes Schedule SE and Form 8995 amounts between programs as text at
-    cents, so each import rounds by up to half a cent; two imports bound it.
+
+def _ots_cent_import(case, ots, auto) -> Bounds:
+    """Bound OTS's cent rounding on a self-employment return.
+
+    OTS passes amounts between its programs, and prints its results, as text at
+    cents, each rounding by up to half a cent. On the taxable-income path those
+    are: the final print; the Schedule SE half-tax deduction imported into
+    AGI; Form 8995 line 5, which also carries a fifth of the SE rounding; and
+    the preliminary line 15 our orchestration reads to place the return in the
+    section 199A phase-in. Inside the phase-in range that last one moves the
+    deduction by up to 2 x line 5 / range per dollar (the phase-in fraction and,
+    for a specified service, the applicable percentage), with line 5 at most
+    20% of SE income.
     """
-    if _profile(case, "self_employment_income") <= 0:
+    self_employment = _profile(case, "self_employment_income")
+    if self_employment <= 0:
         return {}
-    cent = (-0.01, 0.01)
-    return dict.fromkeys(
-        (
-            "federal_total_tax",
-            "federal_taxable_income",
-            "federal_qbi_deduction",
-            "federal_se_tax",
-            "federal_additional_medicare_tax",
-            "federal_niit",
-            "state_total_tax",
-            "state_taxable_income",
-            "state_adjusted_gross_income",
-            "federal_adjusted_gross_income",
-        ),
-        cent,
+    joint = case["filing_status"] in JOINT_STATUSES
+    threshold = QBI_THRESHOLD[case["year"]] * (2 if joint else 1)
+    phase_range = QBI_PHASE_RANGE * (2 if joint else 1)
+    before_qbi = auto["federal_taxable_income"] + auto["federal_qbi_deduction"]
+    qbi = HALF_CENT + 0.2 * HALF_CENT + HALF_CENT
+    if threshold < before_qbi <= threshold + phase_range:
+        qbi += 2 * (0.2 * self_employment) / phase_range * HALF_CENT
+    agi = 2 * HALF_CENT
+    taxable = agi + qbi
+    total = 0.37 * taxable + 3 * HALF_CENT
+    income_tax = total + 2 * HALF_CENT + 2 * HALF_CENT
+    state_taxable = agi + total
+    state_total = 0.1 * state_taxable + HALF_CENT
+
+    def symmetric(bound):
+        return (-bound, bound)
+
+    return {
+        "federal_adjusted_gross_income": symmetric(agi),
+        "federal_qbi_deduction": symmetric(qbi),
+        "federal_taxable_income": symmetric(taxable),
+        "federal_se_tax": symmetric(2 * HALF_CENT),
+        "federal_additional_medicare_tax": symmetric(2 * HALF_CENT),
+        "federal_niit": symmetric(2 * HALF_CENT),
+        "federal_total_tax": symmetric(total),
+        "federal_income_tax": symmetric(income_tax),
+        "state_adjusted_gross_income": symmetric(agi),
+        "state_taxable_income": symmetric(state_taxable),
+        "state_total_tax": symmetric(state_total),
+    }
+
+
+def _ots_6251_line_8z(case, ots, auto) -> Bounds:
+    """Bound OTS-6251-8Z, a new OTS defect (upstream report 17).
+
+    OTS reuses Sched1[8] as a scratch variable while reading Schedule 1 lines
+    8a-8z, so after the loop it holds line 8z. Form 6251 line 2b ("tax refund
+    from Schedule 1, line 1 or line 8z") subtracts it and line 2e ("net
+    operating loss deduction from Schedule 1, line 8a") adds its absolute
+    value. A positive 8z cancels; a negative one adds 2 x |8z| to AMTI, which
+    costs at most 35 cents per dollar (28% plus 7% through the exemption
+    phase-out), or 55 cents with preferential income in the 20% band.
+    """
+    other_income = _profile(case, "schedule_1_income")
+    if other_income >= 0:
+        return {}
+    preferential = _profile(case, "long_term_capital_gains") + _profile(
+        case, "qualified_dividends"
     )
+    rate = 0.55 if preferential > 0 else 0.35
+    maximum = rate * 2 * -other_income
+    return {
+        "federal_amt": (0.0, maximum),
+        "federal_total_tax": (0.0, maximum),
+        "federal_income_tax": (0.0, maximum),
+    }
 
 
 def _f11(case, ots, auto) -> Bounds:
@@ -205,7 +295,10 @@ def _f11(case, ots, auto) -> Bounds:
     misplaced = min(800.0, max(0.0, auto["federal_taxable_income"] - 191_150.0))
     if misplaced <= 0:
         return {}
-    return {"federal_total_tax": (0.0, 0.08 * misplaced)}
+    return {
+        "federal_total_tax": (0.0, 0.08 * misplaced),
+        "federal_income_tax": (0.0, 0.08 * misplaced),
+    }
 
 
 def _f12(case, ots, auto) -> Bounds:
@@ -227,6 +320,7 @@ def _f12(case, ots, auto) -> Bounds:
     return {
         "federal_amt": (0.0, rate * itemized),
         "federal_total_tax": (0.0, rate * itemized),
+        "federal_income_tax": (0.0, rate * itemized),
     }
 
 
@@ -251,6 +345,7 @@ def _f31(case, ots, auto) -> Bounds:
     return {
         "federal_taxable_income": (-shift, 0.0),
         "federal_total_tax": (-0.37 * shift, 0.37 * shift),
+        "federal_income_tax": (-0.37 * shift, 0.37 * shift),
         "federal_amt": (-0.37 * shift, 0.37 * shift),
     }
 
@@ -326,21 +421,31 @@ LEDGER = (
     LedgerEntry(
         "OTS-BRACKET-PRINT", "contract", "#424 rate fields", _ots_bracket_print
     ),
+    LedgerEntry(
+        "OTS-6251-8Z",
+        "OTS defect",
+        "upstream report 17; known_defects_test OTS-6251-8Z",
+        _ots_6251_line_8z,
+    ),
 )
 
 
-def _allowed(case, ots, auto) -> Bounds:
+def _allowed(case, ots, auto, ledger=LEDGER) -> Bounds:
     total: Bounds = {}
-    for entry in LEDGER:
+    for entry in ledger:
         for field, (low, high) in entry.bounds(case, ots, auto).items():
             prior_low, prior_high = total.get(field, (0.0, 0.0))
             total[field] = (prior_low + low, prior_high + high)
     return total
 
 
-def _unexplained(case, ots, auto) -> list[str]:
-    allowed = _allowed(case, ots, auto)
-    problems = []
+def _unexplained(case, ots, auto, ledger=LEDGER) -> list[str]:
+    allowed = _allowed(case, ots, auto, ledger)
+    problems = [
+        f"{field} availability: ots={ots[field]} auto={auto[field]}"
+        for field in RATE_FIELDS
+        if (ots[field] is None) != (auto[field] is None)
+    ]
     for field in COMPARED_FIELDS:
         ots_value, auto_value = ots[field], auto[field]
         if (ots_value is None) or (auto_value is None):
@@ -357,9 +462,22 @@ def _unexplained(case, ots, auto) -> list[str]:
     return problems
 
 
-def _assert_identities(result: dict, label: str) -> None:
+def _assert_identities(result: dict, label: str, state: str | None) -> None:
+    """Check the fields the contract defines from other fields.
+
+    federal_income_tax is income tax plus AMT: the federal total less SE tax,
+    NIIT and Additional Medicare Tax (README Outputs). A state effective rate is
+    defined exactly when there is a state and a positive state taxable income.
+    """
     assert result["total_tax"] == pytest.approx(
         result["federal_total_tax"] + result["state_total_tax"], abs=1e-6
+    ), label
+    assert result["federal_income_tax"] == pytest.approx(
+        result["federal_total_tax"]
+        - result["federal_se_tax"]
+        - result["federal_niit"]
+        - result["federal_additional_medicare_tax"],
+        abs=1e-6,
     ), label
     taxable = result["federal_taxable_income"]
     if taxable > 0:
@@ -369,11 +487,12 @@ def _assert_identities(result: dict, label: str) -> None:
     else:
         assert result["federal_effective_tax_rate"] is None, label
     state_taxable = result["state_taxable_income"]
-    if result["state_effective_tax_rate"] is not None:
-        assert state_taxable > 0, label
+    if state is not None and state_taxable > 0:
         assert result["state_effective_tax_rate"] == pytest.approx(
             100 * result["state_total_tax"] / state_taxable, rel=1e-9
         ), label
+    else:
+        assert result["state_effective_tax_rate"] is None, label
 
 
 # --- Scalar: graph-routed returns --------------------------------------------
@@ -391,8 +510,8 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
     args = _case_args(year, state, status, profile)
     ots = evaluate_return(**args, backend="ots").model_dump()
     auto = evaluate_return(**args, backend="auto").model_dump()
-    _assert_identities(ots, "ots")
-    _assert_identities(auto, "auto")
+    _assert_identities(ots, "ots", state)
+    _assert_identities(auto, "auto", state)
     problems = _unexplained({**args}, ots, auto)
     assert not problems, "\n".join(problems)
 
@@ -430,7 +549,7 @@ def test_auto_computes_states_ots_cannot(year, state):
         evaluate_return(**args, backend="ots")
     result = evaluate_return(**args, backend="auto")
     assert result.state_total_tax > 0
-    _assert_identities(result.model_dump(), "auto")
+    _assert_identities(result.model_dump(), "auto", state)
 
 
 @pytest.mark.parametrize("field", ("state_adjustment", "dependent_exemptions"))
@@ -539,18 +658,111 @@ def test_auto_refuses_oregon_before_2024_like_ots():
             evaluate_return(**args, backend=backend)
 
 
-def test_every_ledger_entry_explains_a_real_difference():
-    """No dormant allowance: each entry applies where the backends really differ."""
-    used = set()
+@functools.cache
+def _corpus() -> tuple[tuple[dict, dict, dict], ...]:
+    results = []
     for _, year, state, status, profile in GRAPH_ROUTED_CASES:
         args = _case_args(year, state, status, profile)
-        ots = evaluate_return(**args, backend="ots").model_dump()
-        auto = evaluate_return(**args, backend="auto").model_dump()
-        for entry in LEDGER:
-            for field in entry.bounds(args, ots, auto):
-                ots_value, auto_value = ots[field], auto[field]
-                if ots_value is None or auto_value is None:
-                    continue
-                if abs(ots_value - auto_value) > 1e-9:
-                    used.add(entry.entry_id)
-    assert used == {entry.entry_id for entry in LEDGER}
+        results.append(
+            (
+                args,
+                evaluate_return(**args, backend="ots").model_dump(),
+                evaluate_return(**args, backend="auto").model_dump(),
+            )
+        )
+    return tuple(results)
+
+
+def _unnecessary_entries(ledger) -> list[str]:
+    """Entries whose removal leaves every corpus case still explained.
+
+    An entry that is dormant, zero, or redundant with another entry explains
+    nothing the rest of the ledger does not, so it is unnecessary.
+    """
+    unnecessary = []
+    for index, entry in enumerate(ledger):
+        rest = ledger[:index] + ledger[index + 1 :]
+        if not any(_unexplained(*case, ledger=rest) for case in _corpus()):
+            unnecessary.append(entry.entry_id)
+    return unnecessary
+
+
+def test_every_ledger_entry_is_necessary():
+    """Removing any one entry leaves some corpus difference unexplained."""
+    assert all(not _unexplained(*case) for case in _corpus())
+    assert _unnecessary_entries(LEDGER) == []
+
+
+def test_necessity_rejects_a_zero_entry():
+    """Negative control: an entry that allows nothing is caught as unnecessary."""
+    zero = LedgerEntry(
+        "DORMANT-ZERO",
+        "control",
+        "test",
+        lambda case, ots, auto: {"federal_total_tax": (0.0, 0.0)},
+    )
+    assert _unnecessary_entries((*LEDGER, zero)) == ["DORMANT-ZERO"]
+
+
+def test_necessity_rejects_a_duplicate_entry():
+    """Negative control: a duplicated entry doubles an allowance and is caught."""
+    f11 = next(entry for entry in LEDGER if entry.entry_id == "F11")
+    duplicate = replace(f11, entry_id="F11-DUPLICATE")
+    assert set(_unnecessary_entries((*LEDGER, duplicate))) == {"F11", "F11-DUPLICATE"}
+
+
+def test_every_output_field_is_compared_or_checked_by_identity():
+    """No output field escapes the corpus."""
+    covered = set(COMPARED_FIELDS) | set(IDENTITY_FIELDS)
+    assert covered == set(InterpretedTaxReturn.model_fields)
+
+
+def _real_case(year, state, status, profile_name):
+    args = _case_args(year, state, status, PROFILES[profile_name])
+    ots = evaluate_return(**args, backend="ots").model_dump()
+    auto = evaluate_return(**args, backend="auto").model_dump()
+    return args, ots, auto
+
+
+def test_mutation_income_tax_shift_is_caught():
+    """Regression: +10,000 on auto's federal_income_tax fails identity and ledger."""
+    args, ots, auto = _real_case(2024, None, "Single", "wages_mid")
+    mutated = {**auto, "federal_income_tax": auto["federal_income_tax"] + 10_000}
+    with pytest.raises(AssertionError):
+        _assert_identities(mutated, "mutated", None)
+    assert _unexplained(args, ots, mutated)
+
+
+def test_mutation_missing_state_rate_is_caught():
+    """Regression: a None state rate where one is defined fails both checks."""
+    args, ots, auto = _real_case(2024, "OR", "Single", "wages_mid")
+    assert auto["state_effective_tax_rate"] is not None
+    mutated = {**auto, "state_effective_tax_rate": None}
+    with pytest.raises(AssertionError):
+        _assert_identities(mutated, "mutated", "OR")
+    assert _unexplained(args, ots, mutated)
+
+
+def test_mutation_spurious_state_rate_is_caught():
+    """Regression: a state rate on a federal-only return fails the identity."""
+    _, _, auto = _real_case(2024, None, "Single", "wages_mid")
+    mutated = {**auto, "state_effective_tax_rate": 0.0}
+    with pytest.raises(AssertionError):
+        _assert_identities(mutated, "mutated", None)
+
+
+def test_mutation_total_tax_shift_is_caught():
+    """Regression: total_tax that is not federal plus state fails the identity."""
+    _, _, auto = _real_case(2025, "OR", "Married/Joint", "wages_mid")
+    mutated = {**auto, "total_tax": auto["total_tax"] + 1}
+    with pytest.raises(AssertionError):
+        _assert_identities(mutated, "mutated", "OR")
+
+
+def test_mutation_unledgered_amt_is_caught():
+    """Regression: an AMT difference with no entry that covers it is unexplained."""
+    args, ots, auto = _real_case(2024, None, "Single", "wages_high")
+    mutated = {**auto, "federal_amt": auto["federal_amt"] + 50}
+    assert any(
+        line.startswith("federal_amt") for line in _unexplained(args, ots, mutated)
+    )
