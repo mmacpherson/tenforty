@@ -118,8 +118,15 @@ vaForm760_2024 = form "va_760" 2024 $ do
     keyOutput "L24" "amount_owed" "Amount you owe" $
       l18 `subtractNotBelowZero` l22
 
+  -- The rate-schedule bracket that holds l13, as tax per dollar: the
+  -- same table as the tax, with a threshold amount in the lower bracket.
+  _ <-
+    keyOutput "L13BracketRate" "va_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt virginiaBracketsTable2024 l13
+
   outputs
-    [ "L1",
+    [ "L13BracketRate",
+      "L1",
       "L8",
       "L13",
       "L14",

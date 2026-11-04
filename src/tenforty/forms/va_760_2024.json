@@ -510,11 +510,144 @@
                 "type": "max"
             }
         },
+        "63": {
+            "id": 63,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "64": {
+            "id": 64,
+            "op": {
+                "type": "literal",
+                "value": 3000
+            }
+        },
+        "65": {
+            "id": 65,
+            "op": {
+                "type": "literal",
+                "value": 3000
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "type": "literal",
+                "value": 3000
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "type": "literal",
+                "value": 3000
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "type": "literal",
+                "value": 3000
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 67,
+                    "married_joint": 65,
+                    "married_separate": 66,
+                    "qualifying_widow": 68,
+                    "single": 64
+                }
+            }
+        },
         "7": {
             "id": 7,
             "name": "L15_credits",
             "op": {
                 "type": "input"
+            }
+        },
+        "70": {
+            "id": 70,
+            "op": {
+                "left": 39,
+                "right": 69,
+                "type": "sub"
+            }
+        },
+        "71": {
+            "id": 71,
+            "op": {
+                "type": "literal",
+                "value": 5000
+            }
+        },
+        "72": {
+            "id": 72,
+            "op": {
+                "type": "literal",
+                "value": 5000
+            }
+        },
+        "73": {
+            "id": 73,
+            "op": {
+                "type": "literal",
+                "value": 5000
+            }
+        },
+        "74": {
+            "id": 74,
+            "op": {
+                "type": "literal",
+                "value": 5000
+            }
+        },
+        "75": {
+            "id": 75,
+            "op": {
+                "type": "literal",
+                "value": 5000
+            }
+        },
+        "76": {
+            "id": 76,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 74,
+                    "married_joint": 72,
+                    "married_separate": 73,
+                    "qualifying_widow": 75,
+                    "single": 71
+                }
+            }
+        },
+        "77": {
+            "id": 77,
+            "op": {
+                "left": 39,
+                "right": 76,
+                "type": "sub"
+            }
+        },
+        "78": {
+            "id": 78,
+            "op": {
+                "type": "literal",
+                "value": 17000
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "type": "literal",
+                "value": 17000
             }
         },
         "8": {
@@ -524,17 +657,124 @@
                 "type": "input"
             }
         },
+        "80": {
+            "id": 80,
+            "op": {
+                "type": "literal",
+                "value": 17000
+            }
+        },
+        "81": {
+            "id": 81,
+            "op": {
+                "type": "literal",
+                "value": 17000
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "type": "literal",
+                "value": 17000
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 81,
+                    "married_joint": 79,
+                    "married_separate": 80,
+                    "qualifying_widow": 82,
+                    "single": 78
+                }
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "left": 39,
+                "right": 83,
+                "type": "sub"
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "type": "literal",
+                "value": 5.75e-2
+            }
+        },
+        "86": {
+            "id": 86,
+            "op": {
+                "type": "literal",
+                "value": 5.0e-2
+            }
+        },
+        "87": {
+            "id": 87,
+            "op": {
+                "cond": 84,
+                "otherwise": 86,
+                "then": 85,
+                "type": "if_positive"
+            }
+        },
+        "88": {
+            "id": 88,
+            "op": {
+                "type": "literal",
+                "value": 3.0e-2
+            }
+        },
+        "89": {
+            "id": 89,
+            "op": {
+                "cond": 77,
+                "otherwise": 88,
+                "then": 87,
+                "type": "if_positive"
+            }
+        },
         "9": {
             "id": 9,
             "name": "L19_va_withholding",
             "op": {
                 "type": "input"
             }
+        },
+        "90": {
+            "id": 90,
+            "op": {
+                "type": "literal",
+                "value": 2.0e-2
+            }
+        },
+        "91": {
+            "id": 91,
+            "op": {
+                "cond": 70,
+                "otherwise": 90,
+                "then": 89,
+                "type": "if_positive"
+            }
+        },
+        "92": {
+            "id": 92,
+            "name": "L13BracketRate_va_bracket_rate",
+            "op": {
+                "left": 63,
+                "right": 91,
+                "type": "mul"
+            }
         }
     },
     "outputs": [
         14,
         39,
+        92,
         49,
         53,
         55,

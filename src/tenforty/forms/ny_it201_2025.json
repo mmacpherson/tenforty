@@ -83,16 +83,77 @@
             "id": 100,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 17150
             }
         },
         "101": {
             "id": 101,
-            "name": "L62_total_tax",
             "op": {
-                "left": 79,
-                "right": 100,
-                "type": "add"
+                "type": "literal",
+                "value": 8500
+            }
+        },
+        "102": {
+            "id": 102,
+            "op": {
+                "type": "literal",
+                "value": 12800
+            }
+        },
+        "103": {
+            "id": 103,
+            "op": {
+                "type": "literal",
+                "value": 17150
+            }
+        },
+        "104": {
+            "id": 104,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 102,
+                    "married_joint": 100,
+                    "married_separate": 101,
+                    "qualifying_widow": 103,
+                    "single": 99
+                }
+            }
+        },
+        "105": {
+            "id": 105,
+            "op": {
+                "left": 60,
+                "right": 104,
+                "type": "sub"
+            }
+        },
+        "106": {
+            "id": 106,
+            "op": {
+                "type": "literal",
+                "value": 11700
+            }
+        },
+        "107": {
+            "id": 107,
+            "op": {
+                "type": "literal",
+                "value": 23600
+            }
+        },
+        "108": {
+            "id": 108,
+            "op": {
+                "type": "literal",
+                "value": 11700
+            }
+        },
+        "109": {
+            "id": 109,
+            "op": {
+                "type": "literal",
+                "value": 17650
             }
         },
         "11": {
@@ -102,11 +163,172 @@
                 "type": "input"
             }
         },
+        "110": {
+            "id": 110,
+            "op": {
+                "type": "literal",
+                "value": 23600
+            }
+        },
+        "111": {
+            "id": 111,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 109,
+                    "married_joint": 107,
+                    "married_separate": 108,
+                    "qualifying_widow": 110,
+                    "single": 106
+                }
+            }
+        },
+        "112": {
+            "id": 112,
+            "op": {
+                "left": 60,
+                "right": 111,
+                "type": "sub"
+            }
+        },
+        "113": {
+            "id": 113,
+            "op": {
+                "type": "literal",
+                "value": 13900
+            }
+        },
+        "114": {
+            "id": 114,
+            "op": {
+                "type": "literal",
+                "value": 27900
+            }
+        },
+        "115": {
+            "id": 115,
+            "op": {
+                "type": "literal",
+                "value": 13900
+            }
+        },
+        "116": {
+            "id": 116,
+            "op": {
+                "type": "literal",
+                "value": 20900
+            }
+        },
+        "117": {
+            "id": 117,
+            "op": {
+                "type": "literal",
+                "value": 27900
+            }
+        },
+        "118": {
+            "id": 118,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 116,
+                    "married_joint": 114,
+                    "married_separate": 115,
+                    "qualifying_widow": 117,
+                    "single": 113
+                }
+            }
+        },
+        "119": {
+            "id": 119,
+            "op": {
+                "left": 60,
+                "right": 118,
+                "type": "sub"
+            }
+        },
         "12": {
             "id": 12,
             "name": "L41_resident_credit",
             "op": {
                 "type": "input"
+            }
+        },
+        "120": {
+            "id": 120,
+            "op": {
+                "type": "literal",
+                "value": 80650
+            }
+        },
+        "121": {
+            "id": 121,
+            "op": {
+                "type": "literal",
+                "value": 161550
+            }
+        },
+        "122": {
+            "id": 122,
+            "op": {
+                "type": "literal",
+                "value": 80650
+            }
+        },
+        "123": {
+            "id": 123,
+            "op": {
+                "type": "literal",
+                "value": 107650
+            }
+        },
+        "124": {
+            "id": 124,
+            "op": {
+                "type": "literal",
+                "value": 161550
+            }
+        },
+        "125": {
+            "id": 125,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 123,
+                    "married_joint": 121,
+                    "married_separate": 122,
+                    "qualifying_widow": 124,
+                    "single": 120
+                }
+            }
+        },
+        "126": {
+            "id": 126,
+            "op": {
+                "left": 60,
+                "right": 125,
+                "type": "sub"
+            }
+        },
+        "127": {
+            "id": 127,
+            "op": {
+                "type": "literal",
+                "value": 215400
+            }
+        },
+        "128": {
+            "id": 128,
+            "op": {
+                "type": "literal",
+                "value": 323200
+            }
+        },
+        "129": {
+            "id": 129,
+            "op": {
+                "type": "literal",
+                "value": 215400
             }
         },
         "13": {
@@ -116,11 +338,172 @@
                 "type": "input"
             }
         },
+        "130": {
+            "id": 130,
+            "op": {
+                "type": "literal",
+                "value": 269300
+            }
+        },
+        "131": {
+            "id": 131,
+            "op": {
+                "type": "literal",
+                "value": 323200
+            }
+        },
+        "132": {
+            "id": 132,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 130,
+                    "married_joint": 128,
+                    "married_separate": 129,
+                    "qualifying_widow": 131,
+                    "single": 127
+                }
+            }
+        },
+        "133": {
+            "id": 133,
+            "op": {
+                "left": 60,
+                "right": 132,
+                "type": "sub"
+            }
+        },
+        "134": {
+            "id": 134,
+            "op": {
+                "type": "literal",
+                "value": 1077550
+            }
+        },
+        "135": {
+            "id": 135,
+            "op": {
+                "type": "literal",
+                "value": 2155350
+            }
+        },
+        "136": {
+            "id": 136,
+            "op": {
+                "type": "literal",
+                "value": 1077550
+            }
+        },
+        "137": {
+            "id": 137,
+            "op": {
+                "type": "literal",
+                "value": 1616450
+            }
+        },
+        "138": {
+            "id": 138,
+            "op": {
+                "type": "literal",
+                "value": 2155350
+            }
+        },
+        "139": {
+            "id": 139,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 137,
+                    "married_joint": 135,
+                    "married_separate": 136,
+                    "qualifying_widow": 138,
+                    "single": 134
+                }
+            }
+        },
         "14": {
             "id": 14,
             "name": "L45_other_ny_taxes",
             "op": {
                 "type": "input"
+            }
+        },
+        "140": {
+            "id": 140,
+            "op": {
+                "left": 60,
+                "right": 139,
+                "type": "sub"
+            }
+        },
+        "141": {
+            "id": 141,
+            "op": {
+                "type": "literal",
+                "value": 5000000
+            }
+        },
+        "142": {
+            "id": 142,
+            "op": {
+                "type": "literal",
+                "value": 5000000
+            }
+        },
+        "143": {
+            "id": 143,
+            "op": {
+                "type": "literal",
+                "value": 5000000
+            }
+        },
+        "144": {
+            "id": 144,
+            "op": {
+                "type": "literal",
+                "value": 5000000
+            }
+        },
+        "145": {
+            "id": 145,
+            "op": {
+                "type": "literal",
+                "value": 5000000
+            }
+        },
+        "146": {
+            "id": 146,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 144,
+                    "married_joint": 142,
+                    "married_separate": 143,
+                    "qualifying_widow": 145,
+                    "single": 141
+                }
+            }
+        },
+        "147": {
+            "id": 147,
+            "op": {
+                "left": 60,
+                "right": 146,
+                "type": "sub"
+            }
+        },
+        "148": {
+            "id": 148,
+            "op": {
+                "type": "literal",
+                "value": 25000000
+            }
+        },
+        "149": {
+            "id": 149,
+            "op": {
+                "type": "literal",
+                "value": 25000000
             }
         },
         "15": {
@@ -130,6 +513,87 @@
                 "type": "input"
             }
         },
+        "150": {
+            "id": 150,
+            "op": {
+                "type": "literal",
+                "value": 25000000
+            }
+        },
+        "151": {
+            "id": 151,
+            "op": {
+                "type": "literal",
+                "value": 25000000
+            }
+        },
+        "152": {
+            "id": 152,
+            "op": {
+                "type": "literal",
+                "value": 25000000
+            }
+        },
+        "153": {
+            "id": 153,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 151,
+                    "married_joint": 149,
+                    "married_separate": 150,
+                    "qualifying_widow": 152,
+                    "single": 148
+                }
+            }
+        },
+        "154": {
+            "id": 154,
+            "op": {
+                "left": 60,
+                "right": 153,
+                "type": "sub"
+            }
+        },
+        "155": {
+            "id": 155,
+            "op": {
+                "type": "literal",
+                "value": 0.109
+            }
+        },
+        "156": {
+            "id": 156,
+            "op": {
+                "type": "literal",
+                "value": 0.103
+            }
+        },
+        "157": {
+            "id": 157,
+            "op": {
+                "cond": 154,
+                "otherwise": 156,
+                "then": 155,
+                "type": "if_positive"
+            }
+        },
+        "158": {
+            "id": 158,
+            "op": {
+                "type": "literal",
+                "value": 9.65e-2
+            }
+        },
+        "159": {
+            "id": 159,
+            "op": {
+                "cond": 147,
+                "otherwise": 158,
+                "then": 157,
+                "type": "if_positive"
+            }
+        },
         "16": {
             "id": 16,
             "name": "L48_nyc_household_credit",
@@ -137,11 +601,148 @@
                 "type": "input"
             }
         },
+        "160": {
+            "id": 160,
+            "op": {
+                "type": "literal",
+                "value": 6.85e-2
+            }
+        },
+        "161": {
+            "id": 161,
+            "op": {
+                "cond": 140,
+                "otherwise": 160,
+                "then": 159,
+                "type": "if_positive"
+            }
+        },
+        "162": {
+            "id": 162,
+            "op": {
+                "type": "literal",
+                "value": 6.0e-2
+            }
+        },
+        "163": {
+            "id": 163,
+            "op": {
+                "cond": 133,
+                "otherwise": 162,
+                "then": 161,
+                "type": "if_positive"
+            }
+        },
+        "164": {
+            "id": 164,
+            "op": {
+                "type": "literal",
+                "value": 5.5e-2
+            }
+        },
+        "165": {
+            "id": 165,
+            "op": {
+                "cond": 126,
+                "otherwise": 164,
+                "then": 163,
+                "type": "if_positive"
+            }
+        },
+        "166": {
+            "id": 166,
+            "op": {
+                "type": "literal",
+                "value": 5.25e-2
+            }
+        },
+        "167": {
+            "id": 167,
+            "op": {
+                "cond": 119,
+                "otherwise": 166,
+                "then": 165,
+                "type": "if_positive"
+            }
+        },
+        "168": {
+            "id": 168,
+            "op": {
+                "type": "literal",
+                "value": 4.5e-2
+            }
+        },
+        "169": {
+            "id": 169,
+            "op": {
+                "cond": 112,
+                "otherwise": 168,
+                "then": 167,
+                "type": "if_positive"
+            }
+        },
         "17": {
             "id": 17,
             "name": "L50_nyc_part_year_tax",
             "op": {
                 "type": "input"
+            }
+        },
+        "170": {
+            "id": 170,
+            "op": {
+                "type": "literal",
+                "value": 4.0e-2
+            }
+        },
+        "171": {
+            "id": 171,
+            "op": {
+                "cond": 105,
+                "otherwise": 170,
+                "then": 169,
+                "type": "if_positive"
+            }
+        },
+        "172": {
+            "id": 172,
+            "name": "L38BracketRate_ny_bracket_rate",
+            "op": {
+                "left": 98,
+                "right": 171,
+                "type": "mul"
+            }
+        },
+        "173": {
+            "id": 173,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "174": {
+            "id": 174,
+            "name": "L58_nyc_total_taxes",
+            "op": {
+                "left": 76,
+                "right": 173,
+                "type": "add"
+            }
+        },
+        "175": {
+            "id": 175,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "176": {
+            "id": 176,
+            "name": "L62_total_tax",
+            "op": {
+                "left": 79,
+                "right": 175,
+                "type": "add"
             }
         },
         "18": {
@@ -850,16 +1451,14 @@
             "id": 98,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 1
             }
         },
         "99": {
             "id": 99,
-            "name": "L58_nyc_total_taxes",
             "op": {
-                "left": 76,
-                "right": 98,
-                "type": "add"
+                "type": "literal",
+                "value": 8500
             }
         }
     },
@@ -867,11 +1466,12 @@
         34,
         47,
         60,
+        172,
         61,
         67,
         68,
-        99,
-        101,
+        174,
+        176,
         85,
         89,
         90,

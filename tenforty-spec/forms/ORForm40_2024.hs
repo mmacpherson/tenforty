@@ -106,8 +106,15 @@ orForm40_2024 = form "or_40" 2024 $ do
     keyOutput "L32" "or_total_tax" "Total Oregon tax" $
       l30 .+. l31
 
+  -- The rate-schedule bracket that holds l24, as tax per dollar: the
+  -- same table as the tax, with a threshold amount in the lower bracket.
+  _ <-
+    keyOutput "L24BracketRate" "or_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt oregonBracketsTable2024 l24
+
   outputs
-    [ "L7",
+    [ "L24BracketRate",
+      "L7",
       "L23",
       "L25",
       "L32"

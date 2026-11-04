@@ -136,8 +136,15 @@ ca540_2025 = form "ca_540" 2025 $ do
     keyOutput "L111" "amount_owed" "Amount you owe" $
       l64 `subtractNotBelowZero` l96
 
+  -- The rate-schedule bracket that holds l19, as tax per dollar: the
+  -- same table as the tax, with a threshold amount in the lower bracket.
+  _ <-
+    keyOutput "L19BracketRate" "ca_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt californiaBracketsTable2025 l19
+
   outputs
-    [ "L13",
+    [ "L19BracketRate",
+      "L13",
       "L17",
       "L19",
       "L31",

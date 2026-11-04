@@ -239,7 +239,7 @@ def _effective_tax_rate(tax: float, taxable_income: float) -> float | None:
 
 
 def _bracket_percent(rate_per_dollar: float | None) -> float | None:
-    return None if rate_per_dollar is None else rate_per_dollar * 100.0
+    return None if rate_per_dollar is None else round(rate_per_dollar * 100.0, 10)
 
 
 def _forms_dir() -> pathlib.Path:
