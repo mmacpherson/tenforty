@@ -1760,7 +1760,7 @@ def test_or_state_agi_parity_2024(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_or_state_tax_parity_2024(w2_income, filing_status):
-    """OR 2024 tax agrees up to the federal tax subtraction, exemption credit and bracket floors."""
+    """OR 2024 tax agrees within the existing table and rounding tolerance."""
     assert_state_parity("OR", 2024, filing_status, w2_income)
 
 
@@ -1803,7 +1803,7 @@ def test_or_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_or_state_tax_parity(w2_income, filing_status):
-    """OR 2025 tax agrees up to the federal tax subtraction, exemption credit and bracket floors."""
+    """OR 2025 tax agrees within the existing table and rounding tolerance."""
     assert_state_parity("OR", 2025, filing_status, w2_income)
 
 
@@ -2054,16 +2054,13 @@ def test_ots_ny_married_joint_household_credit_counts_both_spouses():
     assert result.state_total_tax == pytest.approx(534.0, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="MAP-OR-SPOUSE-EXEMPTION (tenforty-r91.6): the OR_40 input map leaves CkL6bRegular at "
-    "its 'No' default, so OTS gives a joint return one exemption credit",
-    strict=True,
-)
 def test_ots_or_married_joint_gets_two_exemption_credits():
     """OR 2024 MFJ, $13,000 wages: two $249 credits exceed the tax, so none is due.
 
     No federal tax to subtract; taxable income is $13,000 - $5,495 = $7,505,
-    whose tax at the 4.75% bottom rate is about $358, below $498.
+    whose published [7,500,7,600) column-J tax is $359, below $498.
+    Conditional source derivation: docs/validation/derivations/or-2024-2025.md,
+    spouse-credit witnesses (2024 OR-40 instructions p.26; credit p.18).
     """
     result = evaluate_return(
         year=2024,

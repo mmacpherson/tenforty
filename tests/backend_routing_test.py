@@ -470,3 +470,39 @@ def test_batch_preflight_uses_the_graph_support_rule(monkeypatch, engine_calls):
             year=[2023, 2024], w2_income=50_000.0, backend="auto", mode="zip"
         )
     assert engine_calls == []
+
+
+@pytest.mark.parametrize("backend", ["auto", "ots", "graph"])
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_enum_year_matches_integer_year_in_batches(backend, mode):
+    """An OTSYear member is the same request as its integer year."""
+    from tenforty.models import OTSYear
+
+    call = {"w2_income": [50_000.0, 60_000.0], "backend": backend, "mode": mode}
+    by_enum = tenforty.evaluate_returns(year=OTSYear.YEAR_2025, **call)
+    by_int = tenforty.evaluate_returns(year=2025, **call)
+    assert by_enum.equals(by_int)
+
+
+def test_mixed_enum_and_integer_years_form_one_group(engine_calls):
+    """OTSYear.YEAR_2024 and 2024 are one (year, state) group, not two."""
+    from tenforty.models import OTSYear
+
+    frame = tenforty.evaluate_returns(
+        year=[OTSYear.YEAR_2024, 2024],
+        w2_income=[50_000.0, 60_000.0],
+        backend="graph",
+        mode="zip",
+    )
+    assert frame["year"].to_list() == [2024, 2024]
+    assert engine_calls == [("graph", 2024)]
+
+
+def test_graph_evaluate_batch_accepts_an_enum_year():
+    """The backend's own batch boundary unwraps the year."""
+    from tenforty.models import OTSState, OTSYear
+
+    results = GraphBackend().evaluate_batch(
+        OTSYear.YEAR_2024, OTSState.NONE, {"w2_income": [50_000.0]}, ["Single"]
+    )
+    assert len(results["total_tax"]) == 1
