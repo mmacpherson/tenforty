@@ -21,6 +21,7 @@ from tenforty.graph_scope import (
 from tenforty.mappings import STATE_FORM_NAMES
 from tenforty.models import OTSState
 
+from .fixtures.state_official_cases import GRAPH_DEFECTS, OFFICIAL_CASES
 from .fixtures.tax_scenario import TaxScenario
 from .parity.state_parity_policy import SIGNATURES
 
@@ -58,6 +59,12 @@ def _signed_returns() -> dict[tuple[OTSState, int], set[str]]:
             beads = signed.setdefault(key, set())
             for text in texts:
                 beads.update(BEAD.findall(text))
+    cases = {case.case_id: case for case in OFFICIAL_CASES}
+    for case_id, defects in GRAPH_DEFECTS.items():
+        case = cases[case_id]
+        key = (OTSState(case.state), case.year)
+        for defect in defects.values():
+            signed.setdefault(key, set()).update(BEAD.findall(defect.bead))
     return signed
 
 
@@ -173,9 +180,9 @@ def test_auto_routes_by_scope(year):
 @pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
 def test_auto_refuses_out_of_scope_state_ots_lacks_with_its_reason(year):
     """Without OTS coverage, auto names the scope reason and the graph escape."""
-    assert not routing.ots_covers(year, OTSState.CO)
+    assert not routing.ots_covers(year, OTSState.UT)
     with pytest.raises(UnsupportedReturnError) as refusal:
-        routing.select_backend("auto", year, "CO")
+        routing.select_backend("auto", year, "UT")
     message = str(refusal.value)
     assert EVIDENCE in message
     assert "backend='graph'" in message

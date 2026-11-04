@@ -35,7 +35,23 @@ OFFICIAL_FIXTURES: frozenset[tuple[OTSState, int]] = frozenset(
     {(S.CA, 2024), (S.LA, 2024)}
     | {
         (state, year)
-        for state in (S.HI, S.IN, S.KS, S.MA, S.MD, S.ME, S.MO, S.MS, S.NJ, S.VA)
+        for state in (
+            S.CO,
+            S.GA,
+            S.HI,
+            S.IL,
+            S.IN,
+            S.KS,
+            S.MA,
+            S.MD,
+            S.ME,
+            S.MO,
+            S.MS,
+            S.NC,
+            S.NJ,
+            S.OH,
+            S.VA,
+        )
         for year in GRAPH_SCOPE_YEARS
     }
     | {(state, year) for state in (S.VT, S.WI) for year in GRAPH_SCOPE_YEARS}
@@ -49,7 +65,10 @@ def _both_years(*beads: str) -> dict[int, tuple[str, ...]]:
 
 _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.CA: _both_years("tenforty-b72.17", "tenforty-tj2.20"),
+    S.CO: _both_years("tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"),
+    S.GA: _both_years("tenforty-b72.42"),
     S.HI: _both_years("tenforty-b72.41", "tenforty-tj2.20"),
+    S.IL: _both_years("tenforty-b72.42", "tenforty-b72.50"),
     S.IN: _both_years("tenforty-b72.42"),
     S.KS: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
     S.LA: {2024: ("tenforty-tj2.20",)},
@@ -58,8 +77,10 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.ME: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
     S.MO: _both_years("tenforty-b72.46"),
     S.MT: _both_years("tenforty-b72.7"),
+    S.NC: _both_years("tenforty-b72.42", "tenforty-b72.52"),
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
     S.NY: _both_years("tenforty-b72.4", "tenforty-b72.25", "tenforty-tj2.20"),
+    S.OH: _both_years("tenforty-b72.53"),
     S.OR: _both_years(
         "tenforty-b72.5", "tenforty-b72.27", "tenforty-b72.28", "tenforty-b72.29"
     ),
