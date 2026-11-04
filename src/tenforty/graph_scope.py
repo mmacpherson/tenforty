@@ -27,12 +27,21 @@ NO_INCOME_TAX_STATES: frozenset[OTSState] = frozenset(
 )
 
 IN_SCOPE: frozenset[tuple[OTSState, int]] = frozenset(
-    {(S.MS, 2024), (S.MS, 2025), (S.MD, 2024), (S.MD, 2025), (S.OR, 2024), (S.OR, 2025)}
+    {
+        (S.MS, 2024),
+        (S.MS, 2025),
+        (S.MD, 2024),
+        (S.MD, 2025),
+        (S.OR, 2024),
+        (S.OR, 2025),
+        (S.NC, 2024),
+        (S.NC, 2025),
+    }
     | {(state, year) for state in NO_INCOME_TAX_STATES for year in GRAPH_SCOPE_YEARS}
 )
 
 OFFICIAL_FIXTURES: frozenset[tuple[OTSState, int]] = frozenset(
-    {(S.CA, 2024), (S.LA, 2024), (S.OR, 2024), (S.OR, 2025)}
+    {(S.CA, 2024), (S.LA, 2024), (S.OR, 2024), (S.OR, 2025), (S.NC, 2024), (S.NC, 2025)}
     | {
         (state, year)
         for state in (
@@ -77,7 +86,6 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.ME: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
     S.MO: _both_years("tenforty-b72.46"),
     S.MT: _both_years("tenforty-b72.7"),
-    S.NC: _both_years("tenforty-b72.42", "tenforty-b72.52"),
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
     S.NY: _both_years("tenforty-b72.4", "tenforty-tj2.20"),
     S.OH: _both_years("tenforty-b72.53"),
