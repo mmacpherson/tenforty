@@ -59,7 +59,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.MO: _both_years("tenforty-b72.46"),
     S.MT: _both_years("tenforty-b72.7"),
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
-    S.NY: _both_years("tenforty-b72.4", "tenforty-b72.25", "tenforty-tj2.20"),
+    S.NY: _both_years("tenforty-b72.4", "tenforty-tj2.20"),
     S.VA: _both_years("tenforty-b72.37", "tenforty-b72.42"),
     S.VT: _both_years(
         "tenforty-b72.20", "tenforty-b72.42", "tenforty-b72.47", "tenforty-tj2.20"
