@@ -51,6 +51,26 @@
 - An unknown `on_error` value raises `ValueError` instead of behaving like
   `"ignore"`.
 
+### Fixed (OTS backend, the default)
+- **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
+  MA_1 input map set only wages, so OTS never received line 11 (Social
+  Security and Medicare paid, up to $2,000 per person) and over-taxed every
+  W-2 return by up to $100 ($180 once the 4% surtax applies), in every year
+  2018-2025. Line 11a is now 7.65% of `w2_income`, capped at $2,000; a joint
+  return takes the one-earner reading because `w2_income` is a household
+  total, so a two-earner couple can still be up to $100 high ($180 with the
+  surtax). **This changes default-backend MA
+  results.** OTS MA still maps only wages: interest, dividends, capital gains
+  and self-employment income are not reflected there.
+
+### Fixed (graph backend)
+- Massachusetts Form 1 line 10 is built from the federal income lines instead
+  of federal AGI, so interest, dividends and capital gains go through Schedules
+  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
+  exemptions) and federal-only adjustments no longer reduce Massachusetts
+  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
+  MA is now line 10, as on OTS.
+
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)
 - **Filing status now reaches OTS for Massachusetts, New Jersey and Virginia.**
