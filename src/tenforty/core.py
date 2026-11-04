@@ -909,7 +909,7 @@ def evaluate_returns(
         {name: ensure_list(arguments[name]) for name in TAX_RETURN_FLOAT_FIELDS}
     )
 
-    years = ensure_list(year)
+    years = [getattr(y, "value", y) for y in ensure_list(year)]
     states_of_residence = ensure_list(state)
     filing_statuses = ensure_list(filing_status)
     nums_dependents = ensure_list(num_dependents)

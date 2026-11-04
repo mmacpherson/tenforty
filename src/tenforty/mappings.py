@@ -799,10 +799,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # ($8,250/$8,500 limit for 2024/2025, phases out above $125k/$250k AGI).
         # Standard deduction is filing-status based (Single: $2,745/$2,835,
         # MFJ: $5,495/$5,670, HoH: $4,420/$4,560 for 2024/2025).
-        # Progressive tax brackets (4 brackets, 4.75% to 9.9%).
-        natural_to_node={},
+        # num_dependents is the total regular dependent count; the spec adds the
+        # taxpayer/spouse base. dependent_exemptions stays unmapped because it
+        # is a dollar amount. Additional/disability OR exemptions are unsupported.
+        natural_to_node={"num_dependents": "or_40_RegularExemptions"},
         outputs={
-            "state_adjusted_gross_income": "us_1040_L11_agi",
+            "state_adjusted_gross_income": "L7_federal_agi",
             "state_taxable_income": "L23_or_taxable_income",
             "state_total_tax": "L32_or_total_tax",
         },

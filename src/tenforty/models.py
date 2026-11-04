@@ -352,9 +352,13 @@ class TaxReturnInput(BaseModel):
             "neither credit. Not modeled: the refundable additional child tax "
             "credit (a payment, not part of total tax), the earned income credit "
             "and the dependent care credit. Some state returns also read this "
-            "count as their dependent count (graph: CA and WI; OTS: the state "
+            "count as their dependent count (graph: CA, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
-            "through dependent_exemptions."
+            "through dependent_exemptions. The OR graph uses it for its regular "
+            "exemption credit and derives the taxpayer/spouse base from filing "
+            "status; dependent_exemptions is not mapped for OR, and additional "
+            "Oregon exemptions, including severe-disability exemptions, are "
+            "unsupported."
         ),
     )
     num_ctc_dependents: int | None = Field(
@@ -483,7 +487,9 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. For NJ, VA, HI, IN, KS, "
+            "State exemption dollars, not a dependent count. The OR graph does not "
+            "map this field; use num_dependents for its regular exemption credit. "
+            "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "
             "extra), not additional-only dollars. The effective total is "
@@ -668,6 +674,15 @@ def _force_itemize(value):
 
 def _filer_65_box(value):
     return ("You_65+Over?", "Y" if value else "N")
+
+
+def _oregon_regular_spouse_box(
+    filing_status: OTSFilingStatus | str,
+) -> tuple[str, str]:
+    return (
+        "CkL6bRegular",
+        "Yes" if filing_status == OTSFilingStatus.MARRIED_JOINT else "No",
+    )
 
 
 def _spouse_65_box(value):
@@ -905,7 +920,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2024,
         "form_id": "OR_40",
-        "input_map": {},
+        "input_map": {"filing_status": _oregon_regular_spouse_box},
         "output_map": {
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",
@@ -1079,7 +1094,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2025,
         "form_id": "OR_40",
-        "input_map": {},
+        "input_map": {"filing_status": _oregon_regular_spouse_box},
         "output_map": {
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",
