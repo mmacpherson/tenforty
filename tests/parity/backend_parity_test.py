@@ -4,7 +4,7 @@ import math
 from pathlib import Path
 
 import pytest
-from hypothesis import example, given, settings
+from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
 from tenforty import evaluate_return
@@ -984,7 +984,10 @@ def test_ny_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=200)
 def test_ny_state_tax_parity(w2_income, filing_status):
-    """NY 2024 tax agrees up to the tax table, household credit and tax benefit recapture."""
+    """NY 2024 tax agrees within the existing table/recapture policy."""
+    # tenforty-r91.5: OTS does not receive the joint household exemption count.
+    # Independent graph cases cover the excluded rounded-AGI credit domain.
+    assume(filing_status != "Married/Joint" or w2_income >= 32_000.5)
     assert_state_parity("NY", 2024, filing_status, w2_income)
 
 
@@ -2208,45 +2211,22 @@ def test_ca_graph_requires_all_imports():
 
 
 def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
-    """Evaluate 2025 using graph backend directly (bypasses OTSYear validation)."""
-    from tenforty.backends.graph import (
-        FILING_STATUS_MAP,
-        GraphBackend,
-        _load_resolved_graph,
+    """Evaluate 2025 through its supported public graph API."""
+    result = evaluate_return(
+        year=2025,
+        w2_income=w2_income,
+        filing_status=filing_status,
+        state=state,
+        backend="graph",
     )
-    from tenforty.models import OTSFilingStatus
-
-    backend = GraphBackend()
-    if not backend.is_available():
-        pytest.skip("Graph backend not available")
-
-    from tenforty.graphlib import FilingStatus, Runtime
-
-    graph = _load_resolved_graph(2025)
-
-    fs_enum = OTSFilingStatus(filing_status)
-    fs = FilingStatus.from_str(FILING_STATUS_MAP.get(fs_enum, "single"))
-    evaluator = Runtime(graph, fs)
-
-    for inp in graph.input_names():
-        evaluator.set(inp, 0.0)
-    evaluator.set("us_1040_L1a_wages", float(w2_income))
-
-    federal_agi = evaluator.eval("us_1040_L11_agi")
-    federal_tax = evaluator.eval("us_1040_L24_total_tax")
-
-    result = {
-        "federal_adjusted_gross_income": federal_agi,
-        "federal_total_tax": federal_tax,
-        "state_adjusted_gross_income": 0.0,
-        "state_total_tax": 0.0,
+    return {
+        "federal_adjusted_gross_income": result.federal_adjusted_gross_income,
+        "federal_total_tax": result.federal_total_tax,
+        "state_adjusted_gross_income": result.state_adjusted_gross_income
+        if state == "CA"
+        else 0.0,
+        "state_total_tax": result.state_total_tax if state == "CA" else 0.0,
     }
-
-    if state == "CA":
-        result["state_adjusted_gross_income"] = evaluator.eval("ca_540_L17_ca_agi")
-        result["state_total_tax"] = evaluator.eval("ca_540_L64_ca_total_tax")
-
-    return result
 
 
 @skip_if_graph_unavailable

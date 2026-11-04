@@ -26,9 +26,11 @@ from ..models import (
     STATE_TO_FORM,
     InterpretedTaxReturn,
     OTSDeductionType,
+    OTSFilingStatus,
     OTSState,
     TaxReturnInput,
     UnsupportedInputError,
+    UnsupportedReturnError,
 )
 from ..routing import GRAPH_YEARS
 
@@ -211,9 +213,19 @@ def unsupported_inputs(
 
 
 def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
-    """Raise ``UnsupportedInputError`` if the graph refuses any nonzero input."""
+    """Refuse unsupported natural returns and nonzero inputs the graph cannot read."""
+    returns = tuple(tax_inputs)
+    for tax_input in returns:
+        if (
+            tax_input.state == OTSState.NY
+            and tax_input.filing_status == OTSFilingStatus.MARRIED_SEPARATE
+        ):
+            raise UnsupportedReturnError(
+                "NY married filing separately returns need spouse AGI/dependents, "
+                "available only as raw graph inputs."
+            )
     by_return: dict[tuple[OTSState, int], list[tuple[str, object]]] = {}
-    for state, year, name, value in unsupported_inputs(tax_inputs):
+    for state, year, name, value in unsupported_inputs(returns):
         by_return.setdefault((state, year), []).append((name, value))
     for (state, year), unsupported in by_return.items():
         _raise_unsupported(unsupported, state, year)

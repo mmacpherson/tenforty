@@ -341,8 +341,14 @@ class TaxReturnInput(BaseModel):
     num_dependents: int = Field(
         default=0,
         description=(
-            "Qualifying children for the federal child tax credit: under 17 at the "
-            "end of the year, each with a valid SSN (Schedule 8812 line 4). For "
+            "Total number of dependents. The NY graph uses this total for its "
+            "household credit, independently of the federal qualifying-child "
+            "count; conversion to NY line 36 exemption dollars is not mapped. "
+            "Natural NY graph MFS returns need spouse AGI/dependents available "
+            "only as raw graph inputs and are unsupported. Claimable-filer and A6 "
+            "household-credit controls are also raw graph only. The legacy "
+            "federal mapping currently treats this count as children under 17 "
+            "with valid SSNs (Schedule 8812 line 4). For "
             "2025, OBBBA also requires an SSN for the filer (at least one spouse "
             "on a joint return); that is not checked. The credit is applied to "
             "Form 1040 line 19 for 2023-2025 on the OTS backend and 2024-2025 on "
@@ -351,7 +357,7 @@ class TaxReturnInput(BaseModel):
             "dependents, the refundable additional child tax credit (a payment, "
             "not part of total tax), the earned income credit and the dependent "
             "care credit. Some state returns also read this count as their "
-            "dependent count (graph: CA and WI; OTS: the state forms that map "
+            "dependent count (graph: CA, NY, and WI; OTS: the state forms that map "
             "it); graph returns for other states take dependents through "
             "dependent_exemptions."
         ),
