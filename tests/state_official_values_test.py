@@ -1,4 +1,5 @@
 # ruff: noqa: D100
+import math
 import pathlib
 
 import pytest
@@ -52,7 +53,19 @@ def _judge_candidate(
 
 
 def judge(case: OfficialCase, observed: dict[str, float]) -> tuple[bool, list[str]]:
-    """Whether some single permitted outcome explains the graph's whole return."""
+    """Whether some single permitted outcome explains the graph's whole return.
+
+    A non-finite output is a failed return (NaN since the failure contract), so
+    it is refused before any comparison: NaN compares false with everything and
+    would otherwise slip through every tolerance test.
+    """
+    non_finite = [
+        f"{quantity} is {observed[quantity]!r}, a failed return"
+        for quantity in QUANTITIES
+        if not math.isfinite(observed[quantity])
+    ]
+    if non_finite:
+        return False, non_finite
     reports = []
     for candidate in case.outcomes:
         failures, signed = _judge_candidate(case, observed, candidate)
@@ -144,3 +157,23 @@ def test_truncation_is_not_an_accepted_outcome(case_id, truncated):
     """Where the source rounds .50 up, a truncated return is a defect."""
     case = next(case for case in OFFICIAL_CASES if case.case_id == case_id)
     assert not judge(case, dict(zip(QUANTITIES, truncated, strict=True)))[0]
+
+
+@pytest.mark.parametrize(
+    "failed",
+    [
+        {"state_taxable_income": math.nan},
+        {"state_total_tax": math.nan},
+        {"state_taxable_income": math.nan, "state_total_tax": math.nan},
+        {"state_total_tax": math.inf},
+    ],
+    ids=["nan-taxable-income", "nan-tax", "nan-both", "inf-tax"],
+)
+def test_a_failed_return_never_matches_a_fixture(failed):
+    """NaN (or infinity) in any output is refused, even beside a matching value."""
+    for case_id in ("CO-2025-T1", "GA-2024-c1", "NC-2024-c22"):
+        case = next(case for case in OFFICIAL_CASES if case.case_id == case_id)
+        observed = dict(zip(QUANTITIES, case.outcomes[0], strict=True)) | failed
+        explained, detail = judge(case, observed)
+        assert not explained, case_id
+        assert any("a failed return" in line for line in detail), detail
