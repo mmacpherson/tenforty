@@ -4220,7 +4220,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # MI 2025: Flat 4.25% rate, Personal exemption $5,800
     # No standard deduction for most taxpayers (only age-based for 67+)
     # MI tax = (Federal AGI - exemptions) * 0.0425
-    # These use graph backend with exemptions set to 0 (not auto-computed).
+    # Graph returns derive the regular filer/spouse exemption allowance.
     #
     # MI 2024 Single, $50,000 W2 only, no exemptions
     # Federal AGI: $50,000, MI AGI: $50,000, MI taxable: $50,000
@@ -4347,7 +4347,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # No standard deduction (uses personal exemptions instead)
     # Exemption phase-out: $250k (Single/MFS/HoH/QW), $500k (MFJ)
     # IL tax = (Federal AGI - exemptions) * 0.0495
-    # These use graph backend with exemptions set to 0 (not auto-computed).
+    # Graph returns derive the regular filer/spouse exemption allowance.
     #
     # IL 2024 Single, $50,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $50,000
