@@ -1,9 +1,8 @@
 """Graph-default compatibility corpus: the same public calls on "ots" and "auto".
 
-Under ``backend="auto"`` a 2024-2025 return in graph scope (federal-only, the
-no-income-tax states, MD, MS, OR) computes on the graph backend; everything
-else stays on OTS. This module runs one grid of public calls both ways and
-requires every difference to be explained by an entry in ``LEDGER``. An entry
+Under ``backend="auto"`` a 2024-2025 return admitted by ``graph_scope``
+computes on the graph backend; other OTS-supported returns stay on OTS.
+This module runs one grid of public calls both ways and requires every difference to be explained by an entry in ``LEDGER``. An entry
 is a known OTS defect, a mapping gap of ours that the graph does not share, or
 a documented contract difference. Each bound comes from the mechanism and the
 published constants that entry cites, never from observed output, and the
@@ -26,11 +25,14 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends import available_backends
+from tenforty.graph_scope import exclusion_reasons
 from tenforty.models import (
     InterpretedTaxReturn,
+    OTSState,
     UnsupportedInputError,
     UnsupportedReturnError,
 )
+from tenforty.routing import ots_covers
 from tests.parity.state_parity_policy import (
     OR_RATE_CHART_TOLERANCE,
     OR_TAX_TABLE_CEILING,
@@ -113,7 +115,12 @@ OBBBA_2025 = {
 }
 
 GRAPH_ROUTED_STATES = (None, "OR", "AK", "FL", "NV", "SD", "TN", "TX", "WA", "WY")
-OTS_ROUTED_STATES = ("AZ", "CA", "MA", "MI", "NC", "NJ", "NY", "OH", "PA", "VA")
+OTS_ROUTED_CASES = tuple(
+    (year, state.value)
+    for year in YEARS
+    for state in OTSState
+    if exclusion_reasons(state, year) and ots_covers(year, state)
+)
 GRAPH_ONLY_STATES = ("MD", "MS")
 
 COMPARED_FIELDS = (
@@ -519,8 +526,7 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
 # --- Scalar: routing ----------------------------------------------------------
 
 
-@pytest.mark.parametrize("year", YEARS)
-@pytest.mark.parametrize("state", OTS_ROUTED_STATES)
+@pytest.mark.parametrize("year,state", OTS_ROUTED_CASES)
 @pytest.mark.parametrize("status", ("Single", "Married/Joint"))
 def test_auto_equals_ots_outside_graph_scope(year, state, status):
     """A state outside graph scope computes on OTS under auto: identical results."""
