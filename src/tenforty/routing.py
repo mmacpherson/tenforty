@@ -3,13 +3,14 @@
 ``backend="ots"`` and ``backend="graph"`` are never reinterpreted: each is
 validated against what that backend covers and either honoured or refused.
 ``backend="auto"`` selects graph for the years in ``AUTO_GRAPH_YEARS`` when the
-state is in graph scope, and OTS otherwise.
+state is in graph scope (``graph_scope``), and OTS otherwise.
 """
 
 from __future__ import annotations
 
 from typing import Literal
 
+from .graph_scope import exclusion_reasons, graph_state_in_scope
 from .mappings import STATE_FORM_NAMES
 from .models import (
     NATURAL_FORM_CONFIG,
@@ -58,16 +59,6 @@ def ots_covers(year: int, state: OTSState | None) -> bool:
     return state_form is None or (year, state_form) in NATURAL_FORM_CONFIG
 
 
-def graph_state_in_scope(state: OTSState | None, year: int) -> bool:
-    """Whether ``backend="auto"`` may send this state's return to graph.
-
-    A state enters graph scope once its known graph-side defects are closed;
-    out-of-scope states route to OTS. Until the state scope gates land, every
-    state the graph covers is in scope.
-    """
-    return True
-
-
 def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedReturnError:
     where = f"{year}" if state is None else f"{year}/{state.value}"
     if backend == "graph":
@@ -95,6 +86,18 @@ def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedRetur
         if graph_covers(year, state):
             reason += f" Use backend='graph' for {where}."
         return UnsupportedReturnError(reason)
+    reasons = (
+        exclusion_reasons(state, year)
+        if year in AUTO_GRAPH_YEARS and graph_covers(year, state)
+        else ()
+    )
+    if reasons:
+        return UnsupportedReturnError(
+            f"backend='auto' keeps the {state.value} {year} return off the graph "
+            f"backend, which is not yet validated for it ({', '.join(reasons)}), and "
+            f"OTS has no {state.value} return for {year}. Use backend='graph' to "
+            "compute it on the graph backend anyway."
+        )
     return UnsupportedReturnError(f"No backend computes the return for {where}.")
 
 

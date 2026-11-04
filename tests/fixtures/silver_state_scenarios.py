@@ -93,7 +93,7 @@ def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDef
         quantity="state_total_tax",
         minimum=center - 0.50,
         maximum=center + 0.50,
-        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
+        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-tj2.20)",
     )
 
 
@@ -141,7 +141,7 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     minimum=-0.50,
     maximum=0.50,
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
-    "(tenforty-xew, not a table-band difference)",
+    "(tenforty-b72.42, not a table-band difference)",
 )
 
 
@@ -340,7 +340,7 @@ def la_2024_table_gap(
         maximum=center + 0.50,
         reason=(
             "LA 2024 line 10 is the tax-table value; the graph prices the exact "
-            "bracket formula rather than the table row (tenforty-xew)"
+            "bracket formula rather than the table row (tenforty-tj2.20)"
         ),
     )
 
@@ -848,6 +848,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
+    # Legacy MA rows, unverified legacy, kept for their federal checks only.
+    # Their state values priced line 10 as federal AGI with no line 11
+    # deduction (Social Security/Medicare paid, up to $2,000), so they were
+    # retired in b72.6/b72.39. Blind MA values: tests/ma_form1_income_test.py
+    # and docs/validation/derivations/ma-2024-2025.md. The arithmetic notes
+    # below are the original, superseded reasoning.
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
     # 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025)
     # Also: 8.5% on short-term capital gains, 12% on long-term collectibles
@@ -869,7 +875,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=20000.0,
         expected_federal_tax=543.0,  # Tax Table row 5,400-5,450
-        expected_state_tax=780.0,
         backend="graph",
     ),
     # MA Single, middle income (2024)
@@ -887,7 +892,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2280.0,
         backend="graph",
     ),
     # MA Single, higher income (2024)
@@ -905,7 +909,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=100000.0,
         expected_federal_tax=13847.0,  # Tax Table row 85,400-85,450
-        expected_state_tax=4780.0,
         backend="graph",
     ),
     # MA MFJ, middle income (2024)
@@ -923,7 +926,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=4560.0,
         backend="graph",
     ),
     # MA Head_of_House, middle income (2024)
@@ -941,7 +943,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=3410.0,
         backend="graph",
     ),
     # MA Single, surtax income (2025)
@@ -965,7 +966,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=1200000.0,
         expected_federal_tax=404192.75,
-        expected_state_tax=64278.0,
         backend="graph",
     ),
     # ========== CONNECTICUT SCENARIOS ==========

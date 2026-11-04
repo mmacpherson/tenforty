@@ -552,6 +552,8 @@ MA_2024_NO_TAX_STATUS_AGI = {
     "Married/Joint": 16_400.0,
 }
 MA_RATE = 0.05
+MA_FICA_RATE = 0.0765
+MA_LINE_11_CAP = 2_000.0
 MA_TAX_TABLE_CEILING = 24_000.0
 MA_TAX_TABLE_HALF_ROW = 25.0
 
@@ -564,8 +566,20 @@ def _ma_case(case: dict) -> bool:
     )
 
 
+def _ma_line_11(case: dict) -> float:
+    """Form 1 line 11 for W-2 wages: 7.65% paid, at most $2,000 (tenforty-b72.6).
+
+    Both backends take it (the OTS input map fills L11a), so it moves taxable
+    income, and with it the $24,000 tax-table ceiling, on both sides.
+    """
+    return min(MA_LINE_11_CAP, MA_FICA_RATE * case["w2"])
+
+
 def _ma_taxable_income(case: dict) -> float:
-    return max(0.0, case["w2"] - MA_2024_PERSONAL_EXEMPTION[case["status"]])
+    return max(
+        0.0,
+        case["w2"] - _ma_line_11(case) - MA_2024_PERSONAL_EXEMPTION[case["status"]],
+    )
 
 
 def _ma_no_tax_status(case: dict) -> bool:

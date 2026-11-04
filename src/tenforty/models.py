@@ -497,6 +497,23 @@ class TaxReturnInput(BaseModel):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
+    def ma_contribution_deduction(self) -> float:
+        """Massachusetts Form 1 line 11a for the OTS MA_1 form.
+
+        Line 11 is the Social Security and Medicare paid, "not more than $2,000"
+        per person (2024 instructions PDF p.10, 2025 PDF p.11; M.G.L. c.62
+        3.B(a)(3)-(4)). For W-2 wages that is 6.2% + 1.45% = 7.65% of wages; the
+        $2,000 cap binds near $26,144 of wages, below every year's Social
+        Security wage base, so the base never enters. `w2_income` is a household
+        aggregate, so a joint return takes the one-earner reading (all on 11a),
+        as `schedule_se_ss_wages` does and as the graph's line 11 does; a two-earner
+        couple is then at most $100 high, or $180 once the 4% surtax applies. MA_1 maps
+        no self-employment income, so its SE-tax share is not added here.
+        """
+        return min(2_000.0, 0.0765 * max(0.0, float(self.w2_income)))
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
     def schedule_se_ss_wages(self) -> float:
         """The filer's own W-2 social security wages, for Schedule SE line 8a.
 
@@ -766,6 +783,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -940,6 +958,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1103,6 +1122,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1235,6 +1255,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1303,6 +1324,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1371,6 +1393,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1438,6 +1461,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1505,6 +1529,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
