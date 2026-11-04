@@ -160,3 +160,36 @@ def test_half_dollar_entry_crosses_into_the_next_child_band(year, tax):
         backend="graph",
     )
     assert (result.state_taxable_income, result.state_total_tax) == (9501, tax)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize(
+    "agi,adjustment,deduction",
+    [(40_000, "L7_additions", 6000), (40_001, "L8_deductions", 5000)],
+)
+def test_child_band_uses_federal_agi_before_nc_adjustments(
+    year, agi, adjustment, deduction
+):
+    """Archived p.13 worksheet line2 copies federal AGI (D-400 line6)."""
+    runtime = _runtime(year, "married_joint", agi, 2)
+    runtime.set(f"nc_d400_{adjustment}", 100_000)
+    assert runtime.eval("nc_d400_L9_child_deduction") == deduction
+
+
+@pytest.mark.parametrize(
+    "year,tax_without,tax_with", [(2024, 1553, 1328), (2025, 1466, 1254)]
+)
+def test_natural_cross_expands_the_explicit_ctc_subset(year, tax_without, tax_with):
+    """Blind cases5/12 through cross expansion, retaining one total-dependent count."""
+    result = evaluate_returns(
+        year=year,
+        state="NC",
+        filing_status="Married/Joint",
+        w2_income=60_000,
+        num_dependents=2,
+        num_ctc_dependents=[0, 2],
+        mode="cross",
+        backend="graph",
+    )
+    assert result["state_taxable_income"].to_list() == [34_500, 29_500]
+    assert result["state_total_tax"].to_list() == [tax_without, tax_with]
