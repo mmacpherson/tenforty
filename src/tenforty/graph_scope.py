@@ -64,7 +64,7 @@ def _both_years(*beads: str) -> dict[int, tuple[str, ...]]:
 
 
 _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
-    S.CA: _both_years("tenforty-b72.17", "tenforty-tj2.20"),
+    S.CA: _both_years("tenforty-b72.54", "tenforty-tj2.20"),
     S.CO: _both_years("tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"),
     S.GA: _both_years("tenforty-b72.42"),
     S.HI: _both_years("tenforty-b72.41", "tenforty-tj2.20"),
@@ -104,6 +104,7 @@ UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
         "tenforty-b72.40",
         "tenforty-b72.46",
         "tenforty-b72.47",
+        "tenforty-b72.54",
     }
 )
 """Open defect beads no test signature records yet (tenforty-b72.23).
