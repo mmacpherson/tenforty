@@ -1,4 +1,4 @@
-module TenForty.TaxTable (TaxTable, mkTaxTable, taxTableBandTax) where
+module TenForty.TaxTable (TaxTable, mkTaxTable, taxTableBandTax, taxTableBandIncome) where
 
 import TenForty.Expr
 import TenForty.Types
@@ -12,6 +12,10 @@ mkTaxTable step midpointOffset@(Amount offset) rateTable
   | otherwise = Right (TaxTable step midpointOffset rateTable)
 
 taxTableBandTax :: TaxTable -> Expr Dollars -> Expr Dollars
-taxTableBandTax (TaxTable step (Amount midpointOffset) rateTable) income =
+taxTableBandTax table@(TaxTable _ _ rateTable) income =
   TaxTableQuantize TableRound 1 0 $
-    BracketTax rateTable (TaxTableQuantize TableFloor (fromIntegral step) midpointOffset income)
+    BracketTax rateTable (taxTableBandIncome table income)
+
+taxTableBandIncome :: TaxTable -> Expr Dollars -> Expr Dollars
+taxTableBandIncome (TaxTable step (Amount midpointOffset) _) =
+  TaxTableQuantize TableFloor (fromIntegral step) midpointOffset

@@ -81,9 +81,6 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
     S.NY: _both_years("tenforty-b72.4", "tenforty-b72.25", "tenforty-tj2.20"),
     S.OH: _both_years("tenforty-b72.53"),
-    S.OR: _both_years(
-        "tenforty-b72.5", "tenforty-b72.27", "tenforty-b72.28", "tenforty-b72.29"
-    ),
     S.VA: _both_years("tenforty-b72.37", "tenforty-b72.42"),
     S.VT: _both_years(
         "tenforty-b72.20", "tenforty-b72.42", "tenforty-b72.47", "tenforty-tj2.20"
@@ -100,7 +97,6 @@ KNOWN_GRAPH_DEFECTS: dict[tuple[OTSState, int], tuple[str, ...]] = {
 
 UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
     {
-        "tenforty-b72.5",
         "tenforty-b72.6",
         "tenforty-b72.7",
         "tenforty-b72.20",
