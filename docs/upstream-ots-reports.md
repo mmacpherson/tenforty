@@ -7,6 +7,12 @@ and the text to send.
 
 **Status: drafted, not sent.** Sending is Mike's, in his own time.
 
+**Bundle for one email (2026-11-04):** reports 1, 2, 4–16. Report 3 is withdrawn
+(our own error), and report 9 is offered tentatively because it is not
+reproduced end to end. The "Pending adjudication" section at the end lists
+OTS-vs-Tax-Calculator disagreements that are **not** yet established as OTS
+defects; leave them out of the email.
+
 Maintainer: Aston Roberts (OpenTaxSolver).
 
 ---
@@ -668,3 +674,25 @@ prints a 10.8% marginal bracket; Schedule B gives 8.97%.
 
 Offered tentatively: we may have missed a reason for the figure. Recorded locally
 as a strict-xfail in `tests/parity/state_bracket_parity_test.py`, not patched.
+
+---
+
+## Pending adjudication — do not send
+
+These are disagreements between OTS and PSL Tax-Calculator found by the
+differential, where we have not yet worked through the IRS form to decide which
+side is wrong. Each needs that adjudication first; if OTS is at fault it gets a
+numbered report above, a strict-xfail and a known-defect signature. None is a
+claim about OTS yet.
+
+| Bead | Case | Observed |
+|---|---|---|
+| `tenforty-k3ns` | 2025 HoH; ISO $200,000, long-term capital loss −$8,289, SE $84, itemized | OTS AMT $28,961.32 vs Tax-Calculator $28,335.84: $625.48 higher, $617.48 past the $8 tolerance. Form 6251 capital-loss / Part III interaction to check. |
+| `tenforty-ifa0` (OTS half) | 2025 Single; SE $212, short-term capital loss −$231,428, ISO $200,000, itemized $1,039 | OTS total tax $28,967.15 vs $28,098.98 from both Tax-Calculator and the graph backend: $868.17 higher, $489.52 beyond the known-defect signature allowances. |
+| `tenforty-w4m7` | 2024 HoH; ISO $200,000, itemized, SSTB QBI | OTS AMT $31 beyond tolerance. Form 6251 / 8995-A to check. |
+| `tenforty-kji5` | 2025 MFS; wages $111,988, ordinary dividends $4,943 (qualified $2,471.50), SE $1,119 | OTS income tax $17,180.72 vs Tax-Calculator $17,183.85: $3.13 lower, past the $2 tolerance; the graph backend passes. QDCG worksheet / Tax Table rounding to check. |
+| `tenforty-04c` | 2024 HoH; wages $98,094, ordinary = qualified dividends $29,711 | OTS income tax $14,574.65 vs Tax-Calculator $14,578.33: $3.68 lower, $1.68 past the $2 tolerance. Same family as kji5. |
+
+Not upstream, and so not listed: mapping-layer findings in our own OTS input
+maps (for example `tenforty-r91.5`, NY exemptions; `tenforty-r91.6`, the OR
+spouse exemption; the MA_1 map passing only wages). Those are tenforty's to fix.
