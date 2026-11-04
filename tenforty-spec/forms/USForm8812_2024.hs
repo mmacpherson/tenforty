@@ -14,6 +14,12 @@ usForm8812_2024 = form "us_form_8812" 2024 $ do
   -- Schedule 8812: Credits for Qualifying Children and Other Dependents
 
   -- Part I: Child Tax Credit and Credit for Other Dependents
+  --
+  -- The node keys number this part's lines sequentially and do not match the
+  -- form: L1 is form line 4 (qualifying children), L2 line 5, L3 line 6
+  -- (other dependents), L4 line 7, L5 line 8, L6 lines 1-3, L7 line 9, L8-L9
+  -- line 10 (L9 counts the thousands, rounded up), L10 line 11, L11 line 12,
+  -- L12 line 13 and L14 line 14. L13 has no form line.
 
   -- Line 1: Number of qualifying children under age 17 with required SSN
   l1 <- keyInput "L1" "num_qualifying_children" "Number of qualifying children under age 17"
@@ -23,7 +29,9 @@ usForm8812_2024 = form "us_form_8812" 2024 $ do
     interior "L2" "ctc_amount" $
       l1 .*. rate (unAmount ctcPerChild2024)
 
-  -- Line 3: Number of other dependents (including qualifying children without SSN)
+  -- Line 3: Number of other dependents (form line 6): dependents who are not
+  -- CTC qualifying children, e.g. children 17 or older, dependents without an
+  -- SSN valid for employment, and qualifying relatives
   l3 <- keyInput "L3" "num_other_dependents" "Number of other dependents"
 
   -- Line 4: Multiply line 3 by the per-dependent credit

@@ -144,7 +144,7 @@ def test_state_returns_keep_the_federal_credit(backend, state, year):
 @pytest.mark.parametrize("state", ["VT", "IN", "MD", "KS", "HI"])
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_unmapped_states_do_not_lower_the_count_to_exemptions(state, year):
-    """num_dependents is the CTC count, not these states' dependent exemptions."""
+    """num_dependents is a dependent count, not these states' exemption dollars."""
     common = dict(
         year=year,
         state=state,

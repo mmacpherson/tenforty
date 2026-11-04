@@ -30,7 +30,7 @@ COLUMNS = INPUT_COLUMNS + OUTPUT_COLUMNS
 
 
 def _input_dtype(name: str) -> pl.DataType:
-    if name in {"year", "num_dependents"}:
+    if name in {"year", "num_dependents", "num_ctc_dependents"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String
@@ -164,6 +164,8 @@ def test_derived_inputs_are_not_columns():
     """Graph-internal derived inputs stay out of the public frame."""
     frame = tenforty.evaluate_returns(year=2024, w2_income=1.0, backend="graph")
     assert "schedule_se_ss_wages" not in frame.columns
+    assert "schedule_8812_qualifying_children" not in frame.columns
+    assert "schedule_8812_other_dependents" not in frame.columns
 
 
 @pytest.mark.parametrize("mode", ["cross", "zip"])

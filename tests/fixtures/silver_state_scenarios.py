@@ -3659,9 +3659,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # HoH rows are the literal "Head of Family box, zero dependents" reading
     # (Line 11 = $8,000, Line 10 = $0). A legal HoH return needs a dependent
     # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4), but the graph
-    # backend does not lower num_dependents (the federal CTC count) to MS, and MS
-    # maps no dependent-exemption input (tenforty-avr.1), so that variant is not
-    # expressible here.
+    # backend does not lower num_dependents (the federal dependent count) to MS,
+    # and MS maps no dependent-exemption input (tenforty-avr.1), so that variant
+    # is not expressible here.
     #
     # MFJ: the Schedule of Tax Computation applies the $10,000 zero band per
     # spouse column; the API carries no spouse split, and the graph applies one

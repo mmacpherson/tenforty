@@ -341,21 +341,42 @@ class TaxReturnInput(BaseModel):
     num_dependents: int = Field(
         default=0,
         description=(
-            "Total number of dependents. The OR graph uses this count for its "
-            "regular exemption credit and derives the taxpayer/spouse base from "
-            "filing status. dependent_exemptions is not mapped for OR. Additional "
+            "Total number of dependents claimed on the return (the Form 1040 "
+            "Dependents section): qualifying children and qualifying relatives "
+            "alike. Each is either a child tax credit qualifying child (see "
+            "num_ctc_dependents) or gets the $500 credit for other dependents "
+            "(Schedule 8812 lines 6-7). Both credits share the phase-out and the "
+            "tax-liability limit, and together are federal_child_tax_credit (Form "
+            "1040 line 19). Applied for 2023-2025 on the OTS backend and 2024-2025 "
+            "on the graph backend; for 2018-2022 OTS reads the count but applies "
+            "neither credit. Not modeled: the refundable additional child tax "
+            "credit (a payment, not part of total tax), the earned income credit "
+            "and the dependent care credit. Some state returns also read this "
+            "count as their dependent count (graph: CA, OR and WI; OTS: the state "
+            "forms that map it); graph returns for other states take dependents "
+            "through dependent_exemptions. The OR graph uses it for its regular "
+            "exemption credit and derives the taxpayer/spouse base from filing "
+            "status; dependent_exemptions is not mapped for OR, and additional "
             "Oregon exemptions, including severe-disability exemptions, are "
-            "unsupported. The current federal Schedule 8812 mapping treats this "
-            "count as qualifying children under 17 with valid SSNs and does not "
-            "distinguish other dependents. For 2025, OBBBA also requires an SSN "
-            "for the filer (at least one spouse on a joint return); that is not "
-            "checked. The credit reaches Form 1040 line 19 for 2023-2025 on OTS "
-            "and 2024-2025 on graph. For 2018-2022 OTS reads the count but applies "
-            "no federal child tax credit. The federal other-dependent credit, "
-            "refundable additional child tax credit, earned income credit and "
-            "dependent care credit are not modeled here. CA and WI graphs and "
-            "some OTS state forms also consume this dependent count; other graph "
-            "states generally take exemptions through dependent_exemptions."
+            "unsupported."
+        ),
+    )
+    num_ctc_dependents: int | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "How many of num_dependents are qualifying children for the federal "
+            "child tax credit: under 17 at the end of the year, each with a valid "
+            "SSN, and meeting the qualifying-child tests (Schedule 8812 line 4; "
+            "$2,000 each for 2024, $2,200 for 2025). Unset means every dependent "
+            "is one. Set it lower when some dependents only get the $500 credit "
+            "for other dependents: children 17 or older (including students), "
+            "dependents without an SSN valid for employment (e.g. with an ITIN or "
+            "ATIN), and qualifying relatives such as a parent. For example, two "
+            "children aged 10 and 18 are num_dependents=2, num_ctc_dependents=1. "
+            "Must not exceed num_dependents (ValueError). For 2025, OBBBA also "
+            "requires an SSN for the filer (at least one spouse on a joint "
+            "return) to claim the child tax credit; that is not checked."
         ),
     )
     standard_or_itemized: OTSDeductionType = OTSDeductionType.STANDARD
@@ -515,6 +536,38 @@ class TaxReturnInput(BaseModel):
             return 0.0
         return float(self.w2_income)
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_8812_qualifying_children(self) -> int:
+        """Child tax credit qualifying children, Schedule 8812 line 4.
+
+        num_ctc_dependents, or every dependent when it is unset.
+        """
+        if self.num_ctc_dependents is None:
+            return self.num_dependents
+        return self.num_ctc_dependents
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_8812_other_dependents(self) -> int:
+        """Dependents who get the credit for other dependents, Schedule 8812 line 6."""
+        return self.num_dependents - self.schedule_8812_qualifying_children
+
+    @model_validator(mode="after")
+    def refuse_more_ctc_dependents_than_dependents(self) -> "TaxReturnInput":
+        """num_ctc_dependents counts a subset of num_dependents."""
+        if (
+            self.num_ctc_dependents is not None
+            and self.num_ctc_dependents > self.num_dependents
+        ):
+            raise ValueError(
+                f"num_ctc_dependents={self.num_ctc_dependents} exceeds "
+                f"num_dependents={self.num_dependents}: num_dependents is the total "
+                "number of dependents, and the child tax credit children are among "
+                "them."
+            )
+        return self
+
     @model_validator(mode="after")
     def refuse_inputs_the_year_lacks(self) -> "TaxReturnInput":
         """Reject Schedule 1-A amounts before 2025 and a spouse box without a spouse."""
@@ -569,6 +622,15 @@ class InterpretedTaxReturn(BaseModel):
     federal_se_tax: float = 0.0
     federal_niit: float = 0.0
     federal_additional_medicare_tax: float = 0.0
+    federal_child_tax_credit: float = Field(
+        default=0.0,
+        description=(
+            "Nonrefundable child tax credit plus credit for other dependents: "
+            "Schedule 8812 line 14, entered on Form 1040 line 19. Already "
+            "subtracted in federal_total_tax. Excludes the refundable additional "
+            "child tax credit (line 28), which is a payment."
+        ),
+    )
     federal_total_tax: float = 0.0
 
     state_adjusted_gross_income: float = 0.0
@@ -1541,9 +1603,14 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2023,
         "form_id": "Form_8812",
         "phase": 2,
-        "input_map": {"num_dependents": "L4", "filing_status": "Status"},
+        "input_map": {
+            "schedule_8812_qualifying_children": "L4",
+            "schedule_8812_other_dependents": "L6",
+            "filing_status": "Status",
+        },
         "fed_import_map": {"L11": "L1", "L18": "L13"},
         "export_map": {"L14": "L19"},
+        "output_map": {"L14": "child_tax_credit"},
     },
     # 2024 Schedule SE — Phase 1 (no federal dependency)
     {
@@ -1592,16 +1659,22 @@ _SUBORDINATE_FORM_CONFIG = [
     # 2024 Schedule 8812 — Phase 2, after Form 8995 so the credit limit sees
     # the QBI deduction. Line 13 is Credit Limit Worksheet A, which
     # is Form 1040 line 18 less Schedule 3 credits no tenforty input reaches,
-    # so it is line 18. Line 6 (other dependents) is not an input. Line 14 is
-    # the nonrefundable credit, Form 1040 line 19; the refundable ACTC (line
+    # so it is line 18. Line 4 takes the CTC children, line 6 the other
+    # dependents (both counts derived from num_dependents and
+    # num_ctc_dependents). Line 14 is the nonrefundable credit, Form 1040 line 19; the refundable ACTC (line
     # 27, Form 1040 line 28) is a payment and does not change line 24.
     {
         "year": 2024,
         "form_id": "Form_8812",
         "phase": 2,
-        "input_map": {"num_dependents": "L4", "filing_status": "Status"},
+        "input_map": {
+            "schedule_8812_qualifying_children": "L4",
+            "schedule_8812_other_dependents": "L6",
+            "filing_status": "Status",
+        },
         "fed_import_map": {"L11": "L1", "L18": "L13"},
         "export_map": {"L14": "L19"},
+        "output_map": {"L14": "child_tax_credit"},
     },
     # 2024 Form 8960 — Phase 3 (needs AGI from 1040)
     {
@@ -1687,9 +1760,14 @@ _SUBORDINATE_FORM_CONFIG = [
         "year": 2025,
         "form_id": "Form_8812",
         "phase": 2,
-        "input_map": {"num_dependents": "L4", "filing_status": "Status"},
+        "input_map": {
+            "schedule_8812_qualifying_children": "L4",
+            "schedule_8812_other_dependents": "L6",
+            "filing_status": "Status",
+        },
         "fed_import_map": {"L11b": "L1", "L18": "L13"},
         "export_map": {"L14": "L19"},
+        "output_map": {"L14": "child_tax_credit"},
     },
     # 2025 Form 8960 — Phase 3
     {
