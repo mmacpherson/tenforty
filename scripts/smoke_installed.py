@@ -53,6 +53,9 @@ def _check_installed_location(allow_source_tree: bool) -> None:
 def _check_return(result, *, backend: str, year: int, state: str | None) -> None:
     label = f"{backend} {year} {state or 'federal'}"
     for field, value in result.model_dump().items():
+        # None is a rate the return does not define; NaN marks a failed return.
+        if value is None:
+            continue
         _require(math.isfinite(value), f"{label}: {field} is not finite ({value})")
     _require(result.federal_total_tax > 0, f"{label}: no federal tax on $75k wages")
     if state is not None:
