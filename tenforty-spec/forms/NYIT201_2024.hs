@@ -219,8 +219,15 @@ nyIT201_2024 = form "ny_it201" 2024 $ do
     keyOutput "L81" "amount_owed" "Amount you owe" $
       l62 `subtractNotBelowZero` l78
 
+  -- The rate-schedule bracket that holds l38, as tax per dollar: the
+  -- same table as the tax, with a threshold amount in the lower bracket.
+  _ <-
+    keyOutput "L38BracketRate" "ny_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt newYorkBracketsTable2024 l38
+
   outputs
-    [ "L19",
+    [ "L38BracketRate",
+      "L19",
       "L33",
       "L37",
       "L39",

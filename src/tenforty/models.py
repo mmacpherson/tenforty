@@ -582,8 +582,8 @@ class InterpretedTaxReturn(BaseModel):
     total_tax: float = 0.0
 
     federal_adjusted_gross_income: float = 0.0
-    federal_effective_tax_rate: float = 0.0
-    federal_tax_bracket: float = 0.0
+    federal_effective_tax_rate: float | None = None
+    federal_tax_bracket: float | None = None
     federal_taxable_income: float = 0.0
     federal_qbi_deduction: float = 0.0
     federal_amt: float = 0.0
@@ -596,8 +596,8 @@ class InterpretedTaxReturn(BaseModel):
     state_adjusted_gross_income: float = 0.0
     state_taxable_income: float = 0.0
     state_total_tax: float = 0.0
-    state_tax_bracket: float = 0.0
-    state_effective_tax_rate: float = 0.0
+    state_tax_bracket: float | None = None
+    state_effective_tax_rate: float | None = None
 
     @classmethod
     def failed(cls) -> "InterpretedTaxReturn":
