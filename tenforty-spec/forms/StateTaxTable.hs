@@ -15,7 +15,7 @@ module StateTaxTable
 where
 
 import TenForty
-import TenForty.Expr (Expr (BracketTax, TaxTableQuantize), TaxTableQuantizeMode (..))
+import TenForty.TaxTable (taxTableBandIncome)
 
 data TableSegment
   = -- | Rows of @step@ dollars anchored at zero, priced at row start + offset.
@@ -25,21 +25,24 @@ data TableSegment
 
 -- | A table whose rows price the bracket table @rateSchedule@.
 stateTaxTable :: [TableSegment] -> TableId -> Expr Dollars -> Expr Dollars -> Expr Dollars
-stateTaxTable segments rateSchedule = stateTaxTableBy segments (BracketTax rateSchedule)
+stateTaxTable segments rateSchedule =
+  segmentedTable segments rateSchedule taxTableBandTax
 
--- | A table whose rows price @schedule@, for states whose printed schedule is
--- not the bracket integral (whole-dollar bracket bases, for example).
-stateTaxTableBy :: [TableSegment] -> (Expr Dollars -> Expr Dollars) -> Expr Dollars -> Expr Dollars -> Expr Dollars
-stateTaxTableBy segments schedule aboveTable amount =
+-- | A table whose rows price @schedule@ at the row midpoint, rounded half up,
+-- for states whose printed schedule is not the bracket integral of
+-- @rateSchedule@ (whole-dollar bracket bases, for example), as OR-40 does.
+stateTaxTableBy :: [TableSegment] -> TableId -> (Expr Dollars -> Expr Dollars) -> Expr Dollars -> Expr Dollars -> Expr Dollars
+stateTaxTableBy segments rateSchedule schedule =
+  segmentedTable segments rateSchedule (\table amount -> roundE (schedule (taxTableBandIncome table amount)))
+
+segmentedTable :: [TableSegment] -> TableId -> (TaxTable -> Expr Dollars -> Expr Dollars) -> Expr Dollars -> Expr Dollars -> Expr Dollars
+segmentedTable segments rateSchedule rowPrice aboveTable amount =
   foldr selectSegment aboveTable segments
   where
     selectSegment segment =
       ifPos (dollars (segmentLessThan segment) .-. amount) (rowTax segment)
     rowTax (FixedRow _ tax) = dollars tax
-    rowTax (GridRows _ step offset)
-      | step <= 0 = error "stateTaxTable: step must be a positive integer number of dollars"
-      | isNaN offset || isInfinite offset || offset < 0 || offset >= fromIntegral step =
-          error "stateTaxTable: midpoint offset must be finite and inside the row"
-      | otherwise =
-          TaxTableQuantize TableRound 1 0 $
-            schedule (TaxTableQuantize TableFloor (fromIntegral step) offset amount)
+    rowTax (GridRows _ step offset) =
+      case mkTaxTable step (Amount offset) rateSchedule of
+        Right table -> rowPrice table amount
+        Left err -> error ("stateTaxTable: " ++ err)

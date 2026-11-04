@@ -116,7 +116,7 @@ meme1040_2024 = form "me_1040me" 2024 $ do
   -- rate schedule at and above it (MaineTax).
   l24 <-
     keyOutput "L24" "me_bracket_tax" "Maine income tax (tax table or rate schedule)" $
-      maineIncomeTax maineSchedule2024 l23
+      maineIncomeTax maineSchedule2024 "me_brackets_2024" l23
 
   -- Lines 25-28: Credits
   l25 <- keyInput "L25" "me_tax_credit_property" "Property tax fairness credit"

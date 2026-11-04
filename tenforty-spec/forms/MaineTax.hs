@@ -29,7 +29,6 @@ where
 
 import StateTaxTable
 import TenForty
-import TenForty.Expr (Expr (TaxTableQuantize), TaxTableQuantizeMode (..))
 
 -- | One year's printed Tax Rate Schedules #1-#3, by filing status.
 data MaineSchedule = MaineSchedule
@@ -57,12 +56,13 @@ printedScheduleTax schedule income =
   where
     byStatus' field = byStatusE (fmap lit (field schedule))
 
-maineIncomeTax :: MaineSchedule -> Expr Dollars -> Expr Dollars
-maineIncomeTax schedule taxableIncome =
+maineIncomeTax :: MaineSchedule -> TableId -> Expr Dollars -> Expr Dollars
+maineIncomeTax schedule rateSchedule taxableIncome =
   stateTaxTableBy
     [FixedRow 50 0, FixedRow 100 3, GridRows 100000 100 50]
+    rateSchedule
     (printedScheduleTax schedule)
-    (wholeDollars (printedScheduleTax schedule taxableIncome))
+    (roundE (printedScheduleTax schedule taxableIncome))
     taxableIncome
 
 -- | Worksheet lines 3-8: the allowed part of @amount@ (line 6) at Maine AGI
@@ -75,10 +75,7 @@ phaseoutWorksheet threshold range agi amount = amount .-. line7
     line3 = agi `excessOf` byStatusE (fmap lit threshold)
     line5BasisPoints =
       minE
-        (wholeDollars (quotient (line3 .*. rate 10000) (byStatusE (fmap lit range))))
+        (roundE (quotient (line3 .*. rate 10000) (byStatusE (fmap lit range))))
         (dollars 10000)
-    line7 = wholeDollars (quotient (amount .*. (line5BasisPoints ./. dollars 1)) (dollars 10000))
+    line7 = roundE (quotient (amount .*. (line5BasisPoints ./. dollars 1)) (dollars 10000))
     quotient numerator denominator = dollars 1 .*. (numerator ./. denominator)
-
-wholeDollars :: Expr Dollars -> Expr Dollars
-wholeDollars = TaxTableQuantize TableRound 1 0
