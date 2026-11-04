@@ -67,13 +67,13 @@ Source: `facts/scenarios/ats-1.json` (Tax Year 2023)
 | Standard Deduction | $27,700 | $27,700 | Match |
 | Taxable Income | $9,993 | $9,993 | Match |
 | Pre-credit Tax | $998 | ~$998 | Match |
-| Credit for other dependents | $500 | N/A | Not computed |
+| Credit for other dependents | $500 | $500 | Match |
 | EITC Credit | $2,468 | N/A | Not computed |
-| **Federal Tax (post-credits)** | **$498** | **~$998** | **Credits not implemented** |
+| **Federal Tax (post-credits)** | **$498** | **$498** | **Match** |
 
 Source: `facts/scenarios/ats-2.json` (Tax Year 2023)
 
-**Note**: the $500 credit is the credit for other dependents (a child tax credit would be limited to the $998 tax), so the fixture passes `num_dependents=0`; tenforty computes the child tax credit for 2023-2025 but not the other-dependent credit or the EITC. The pre-credit tax calculation matches.
+**Note**: the dependent (born 2005, 18 at the end of 2023) is not a child tax credit qualifying child but gets the $500 credit for other dependents (`ctcEligibleDependents` 0, `odcEligibleDependents` 1), so the fixture passes `num_dependents=1, num_ctc_dependents=0`. Total tax is $998 less $500 = $498. The $2,468 EITC is a refundable payment: tenforty does not compute it, and it does not change total tax.
 
 ### Single Filer, $110,000 W2 Income
 
@@ -198,9 +198,9 @@ The source PDFs are available from the [IRS MeF ATS page](https://www.irs.gov/e-
 
 | Source | Tax Year | Scenarios | Exact Matches | Minor Discrepancies |
 |--------|----------|-----------|---------------|---------------------|
-| IRS Direct File | 2023 | 2 | 1 (ATS-1) | 1 (ATS-2 - credits) |
+| IRS Direct File | 2023 | 2 | 2 (ATS-1, ATS-2) | 0 |
 | IRS Direct File | 2022 | 2 | 0 | 2 ($6 each) |
-| **Total Gold** | | **4** | **1** | **3** |
+| **Total Gold** | | **4** | **2** | **2** |
 
 ### Silver Standard (Formula-Derived)
 
