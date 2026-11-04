@@ -7,7 +7,10 @@
   (OTS for every 2018-2023 return). An out-of-scope state OTS does not compute
   raises `UnsupportedReturnError` naming the reason, where the old default
   raised for any state OTS does not compute. See
-  [Choosing a backend](docs/error-handling.md#choosing-a-backend).
+  [Choosing a backend](docs/error-handling.md#choosing-a-backend), and
+  [Migrating to the graph default](docs/migrating-to-graph-default.md) for
+  every difference you can expect between `"ots"` and `"auto"` and how to
+  check your own workload.
   - **Rollback:** pass `backend="ots"` to get exactly the old default. An
     explicit `"ots"` or `"graph"` is unchanged and never reinterpreted.
   - Results for 2024-2025 calls that relied on the default can change, because

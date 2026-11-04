@@ -2,10 +2,10 @@
 
 ## Decisions
 
-- **The default becomes `backend="auto"`.** Auto computes a 2024 or 2025 return
-  on the graph backend when it is in graph scope, and on OTS otherwise. Today
-  the default is still `"ots"`; this note describes the flip and everything
-  already in place for it.
+- **The default is now `backend="auto"`.** Auto computes a 2024 or 2025 return
+  on the graph backend when it is in graph scope, and on OTS otherwise. Earlier
+  releases defaulted to `"ots"`; this note describes the flip and everything
+  that came with it.
 - **Graph scope (2024–2025):** federal-only returns; the eight states without
   an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and MD, MS and OR. Every other
   state, and every year from 2018 to 2023, stays on OTS. `src/tenforty/graph_scope.py`
@@ -15,7 +15,7 @@
   rollback: it gives you exactly the OTS results of today. `backend="graph"`
   ignores scope.
 - **What you should do:**
-  1. Run your workload with `backend="auto"` before the flip and compare it with
+  1. Run your workload on the default (`"auto"`) and compare it with
      `backend="ots"`. The differences you can expect are listed under
      [Known differences](#known-differences-between-ots-and-auto); anything else
      is a bug we want to hear about.

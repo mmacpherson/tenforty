@@ -79,7 +79,7 @@ applies the same selection.
 **graph scope**: its known graph-side defects are closed and official-value
 fixtures support it. For 2024 and 2025 that is currently:
 
-- Mississippi;
+- Maryland, Mississippi and Oregon;
 - the states without an income tax: Alaska, Florida, Nevada, South Dakota,
   Tennessee, Texas, Washington and Wyoming.
 
@@ -87,7 +87,7 @@ A federal-only return (`state=None`) is always in scope.
 
 For any other state, `"auto"` uses OTS if OTS computes that state's return
 (Arizona, California, Massachusetts, Michigan, North Carolina, New Jersey,
-New York, Ohio, Oregon, Pennsylvania and Virginia). Otherwise it raises
+New York, Ohio, Pennsylvania and Virginia). Otherwise it raises
 `UnsupportedReturnError`, and the message names the reason: the open defect
 (a `tenforty-...` issue) or `evidence: tenforty-b72.12` (no official-value
 fixtures yet).

@@ -514,7 +514,8 @@ backend when the return is federal-only or its state is in
 OTS otherwise; every 2018-2023 return goes to OTS. To force one backend, pass
 it explicitly. `backend="ots"` is the rollback to the behavior of earlier
 releases, whose default was OTS; `backend="graph"` computes any state the graph
-covers, in scope or not:
+covers, in scope or not. [Migrating to the graph default](./docs/migrating-to-graph-default.md)
+lists every difference to expect between `"ots"` and `"auto"`:
 
 ``` python
 evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
