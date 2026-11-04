@@ -165,6 +165,7 @@ def test_no_income_tax_states_levy_no_state_tax(state, year, w2_income, filing_s
 def test_auto_routes_by_scope(year):
     """In scope goes to graph; out of scope to OTS where OTS has the state."""
     assert routing.select_backend("auto", year, "MS") == "graph"
+    assert routing.select_backend("auto", year, "OR") == "graph"
     assert routing.select_backend("auto", year, "TX") == "graph"
     assert routing.select_backend("auto", year, "CA") == "ots"
     assert routing.select_backend("auto", year, None) == "graph"
