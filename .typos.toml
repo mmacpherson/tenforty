@@ -11,3 +11,6 @@ Ded = "Ded"
 # Health savings account; typos would rewrite it to "HAS".
 HSA = "HSA"
 ND = "ND"
+# Colorado form DR 0104PN (part-year resident / nonresident); typos rewrites
+# "PN" to "ON", corrupting verbatim derivation records.
+PN = "PN"
