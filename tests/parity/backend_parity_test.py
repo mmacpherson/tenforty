@@ -56,6 +56,23 @@ skip_if_graph_unavailable = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _graph_years_warm():
+    """Evaluate one graph return per year before any example is timed.
+
+    A year's first graph evaluation parses its resolved graph and fills the
+    lowering caches: about 40 ms on an idle host, over a second on a loaded one
+    (tenforty-cqwa). Charged to one Hypothesis example, that one-off cost trips
+    the 200 ms deadline even though each later example takes about 3 ms.
+    """
+    if not graph_available():
+        return
+    from tenforty.backends import GraphBackend
+
+    for year in GraphBackend.supported_years:
+        evaluate_return(year=year, w2_income=50_000, backend="graph")
+
+
 def assert_state_parity(state, year, filing_status, w2_income):
     """Fail on any state divergence no known-defect signature or tolerance explains."""
     case = {"state": state, "year": year, "status": filing_status, "w2": w2_income}

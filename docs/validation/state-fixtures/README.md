@@ -12,6 +12,7 @@ Their inputs and federal expectations are unchanged.
 | --- | --- | --- |
 | New CA whole returns | Independent derivation, including table lookups | [CA 2024](CA-2024.md) |
 | New MS whole returns | Independent derivation | [MS 2024–2025](MS-2024-2025.md) |
+| OR 2024–2025 subtraction, regular exemption credit, charts and all 1,004 tax-table rows | Independent state derivations (Sol and fresh Astra review), with stipulated eligible federal liabilities; published table rows | [OR 2024–2025](OR-2024-2025.md), with links to the original archive, errata, and Astra’s thirteen-value/rounding records |
 | New VT whole returns | Independent derivation, including table lookups | [VT 2024–2025](VT-2024-2025.md) |
 | VT Line 5 exemption returns, 16 wage-only cases incl. MFS/QW/dependents (b72.19) | Independent derivation, including table lookups; second blind deriver, 2026-10-07 | Same VT record, second section |
 | VT parameter assertions | Published table rows / instruction amounts | Same VT record; parameters are not whole-return examples |

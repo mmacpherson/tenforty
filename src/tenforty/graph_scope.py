@@ -27,12 +27,12 @@ NO_INCOME_TAX_STATES: frozenset[OTSState] = frozenset(
 )
 
 IN_SCOPE: frozenset[tuple[OTSState, int]] = frozenset(
-    {(S.MS, 2024), (S.MS, 2025)}
+    {(S.MS, 2024), (S.MS, 2025), (S.OR, 2024), (S.OR, 2025)}
     | {(state, year) for state in NO_INCOME_TAX_STATES for year in GRAPH_SCOPE_YEARS}
 )
 
 OFFICIAL_FIXTURES: frozenset[tuple[OTSState, int]] = frozenset(
-    {(S.CA, 2024), (S.LA, 2024)}
+    {(S.CA, 2024), (S.LA, 2024), (S.OR, 2024), (S.OR, 2025)}
     | {
         (state, year)
         for state in (

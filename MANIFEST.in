@@ -1,0 +1,6 @@
+# The Rust graph extension builds from the Cargo workspace, so the sdist ships
+# the workspace manifest, the lockfile and the crate sources it compiles.
+include Cargo.toml Cargo.lock
+include crates/tenforty-graph/Cargo.toml
+recursive-include crates/tenforty-graph/src *.rs
+recursive-include crates/tenforty-graph/benches *.rs
