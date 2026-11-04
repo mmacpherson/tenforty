@@ -59,13 +59,15 @@ STATE_VECTORS = _derived_state_vectors()
 
 # Oregon's federal tax subtraction steps down at $260,000 of head-of-household
 # AGI, so W-2-only state taxable income jumps from about $248,980 to $250,630
-# and these amounts have no W-2-only return. The same chart J thresholds are
-# exercised by the joint-return vectors.
+# and these amounts have no W-2-only return. They are left out rather than
+# skipped (CI's --require-graph fails on a skipped graph test); the same chart J
+# thresholds are exercised by the joint-return vectors.
 W2_UNREACHABLE = {
     ("OR", year, "Head_of_House", taxable)
     for year in (2024, 2025)
     for taxable in (249_999, 250_000, 250_001)
 }
+PLACEABLE_VECTORS = [v for v in STATE_VECTORS if tuple(v[:4]) not in W2_UNREACHABLE]
 
 
 def _return_at_state_taxable_income(state, year, status, taxable_income):
@@ -103,15 +105,13 @@ def test_derivation_supplies_every_state_and_year():
 
 @pytest.mark.parametrize(
     ("state", "year", "filing_status", "taxable_income", "expected_rate"),
-    STATE_VECTORS,
-    ids=[f"{st}-{y}-{s}-{t}" for st, y, s, t, _ in STATE_VECTORS],
+    PLACEABLE_VECTORS,
+    ids=[f"{st}-{y}-{s}-{t}" for st, y, s, t, _ in PLACEABLE_VECTORS],
 )
 def test_graph_state_bracket_matches_rate_schedule(
     state, year, filing_status, taxable_income, expected_rate
 ):
     """The graph's state bracket is the schedule rate at each derived boundary."""
-    if (state, year, filing_status, taxable_income) in W2_UNREACHABLE:
-        pytest.skip("no W-2-only return has this state taxable income")
     result = _return_at_state_taxable_income(state, year, filing_status, taxable_income)
     assert result is not None, "no W-2 return reaches this state taxable income"
     assert result.state_tax_bracket == pytest.approx(expected_rate, abs=1e-9)
