@@ -13,47 +13,52 @@ orForm40_2024 :: Either FormError Form
 orForm40_2024 = form "or_40" 2024 $ do
   defineTable oregonBracketsTable2024
 
+  -- OR-40 instructions p.14 require whole-dollar entries before arithmetic.
   -- Line 7: Federal AGI (imported from US 1040)
-  let federalAgi = importForm us1040L11
+  let federalAgi = roundE $ importForm us1040L11
   l7 <- keyOutput "L7" "federal_agi" "Federal adjusted gross income" federalAgi
 
   -- Lines 8-12: Oregon additions to income
-  l8 <- keyInput "L8" "or_addition_interest" "Interest from obligations of other states"
-  l9 <- keyInput "L9" "or_addition_federal_sub" "Federal income tax subtracted on last year's OR return"
-  l10 <- keyInput "L10" "or_addition_depreciation" "Depreciation adjustments"
-  l11 <- keyInput "L11" "or_addition_other" "Other additions to income"
+  l8 <- roundE <$> keyInput "L8" "or_addition_interest" "Interest from obligations of other states"
+  l9 <- roundE <$> keyInput "L9" "or_addition_federal_sub" "Federal income tax subtracted on last year's OR return"
+  l10 <- roundE <$> keyInput "L10" "or_addition_depreciation" "Depreciation adjustments"
+  l11 <- roundE <$> keyInput "L11" "or_addition_other" "Other additions to income"
 
   l12 <-
     interior "L12" "or_total_additions" $
       sumOf [l8, l9, l10, l11]
 
   -- Lines 13-19: Oregon subtractions from income
-  l13 <- keyInput "L13" "or_sub_state_refund" "State income tax refund from prior year"
-  l14 <- keyInput "L14" "or_sub_us_interest" "Interest from U.S. obligations"
-  l15 <- keyInput "L15" "or_sub_socsec" "Social Security included in federal AGI"
-  l16 <- keyInput "L16" "or_sub_federal_pension" "Federal pension income subtraction"
-  l17 <- keyInput "L17" "or_sub_military_pension" "Oregon active duty pay/military pension subtraction"
+  l13 <- roundE <$> keyInput "L13" "or_sub_state_refund" "State income tax refund from prior year"
+  l14 <- roundE <$> keyInput "L14" "or_sub_us_interest" "Interest from U.S. obligations"
+  l15 <- roundE <$> keyInput "L15" "or_sub_socsec" "Social Security included in federal AGI"
+  l16 <- roundE <$> keyInput "L16" "or_sub_federal_pension" "Federal pension income subtraction"
+  l17 <- roundE <$> keyInput "L17" "or_sub_military_pension" "Oregon active duty pay/military pension subtraction"
 
-  -- Line 18: Federal tax subtraction with AGI-based phaseout
-  -- The phaseout is linear: $8,250 at AGI $0-$125k (Single/MFS) or $0-$250k (MFJ/HoH/QW),
-  -- then reduces by $1,650 per $5,000 of AGI until $0 at $145k (Single/MFS) or $290k (MFJ/HoH/QW).
-  -- This is a 20% reduction per $5,000 increment: rate = $1,650 / $5,000 = 0.33
-  let _federalTaxFromReturn = importForm us1040L22
-  let fedTaxPhaseoutSpec =
-        PhaseOutSpec
-          { poBase = 8250,
-            poThreshold = byStatus 125000 250000 125000 250000 250000,
-            poRate = 0.33,
-            poFloor = 0,
-            poRoundTo = Nothing
-          }
-  _fedTaxSubAllowable <-
-    interior "L18_allowable" "federal_tax_subtraction_allowable" $
-      applyPhaseOut fedTaxPhaseoutSpec federalAgi
+  excessPremiumRepayment <- roundE <$> keyInput "ExcessPremiumRepayment" "excess_premium_repayment" "Excess advance premium tax credit repayment"
+  additionalFederalIncomeTax <- roundE <$> keyInput "AdditionalFederalIncomeTax" "additional_federal_income_tax" "Other federal income taxes eligible for subtraction"
+  premiumTaxCredit <- roundE <$> keyInput "PremiumTaxCredit" "premium_tax_credit" "Total premium tax credit from Form 8962 line 24"
+  let eligibleFederalTax =
+        max0 $
+          (roundE (importForm us1040L22) `subtractNotBelowZero` excessPremiumRepayment)
+            .+. additionalFederalIncomeTax
+            .-. roundE (importForm usForm8863L9)
+            .-. premiumTaxCredit
+      phaseoutStart = byStatusE $ fmap lit orFederalTaxSubtractionPhaseoutStart2024
+      phaseoutBand = byStatusE $ lit <$> byStatus 5000 10000 5000 10000 10000
+      cap = byStatusE $ fmap lit orFederalTaxSubtractionLimit2024
+      capFraction =
+        ifNeg (federalAgi .-. phaseoutStart) (lit 1) $
+          ifNeg (federalAgi .-. phaseoutStart .-. phaseoutBand) (lit 0.8) $
+            ifNeg (federalAgi .-. phaseoutStart .-. phaseoutBand .-. phaseoutBand) (lit 0.6) $
+              ifNeg (federalAgi .-. phaseoutStart .-. phaseoutBand .-. phaseoutBand .-. phaseoutBand) (lit 0.4) $
+                ifNeg (federalAgi .-. byStatusE (fmap lit orFederalTaxSubtractionPhaseoutEnd2024)) (lit 0.2) (lit 0)
   l18 <-
-    keyInput "L18" "federal_tax_subtraction" "Federal income tax subtraction (limited)"
+    keyOutput "L18" "federal_tax_subtraction" "Federal income tax subtraction (Table 4)" $
+      roundE $
+        smallerOf eligibleFederalTax (cap .*. capFraction)
 
-  l19 <- keyInput "L19" "or_sub_other" "Other subtractions from income"
+  l19 <- roundE <$> keyInput "L19" "or_sub_other" "Other subtractions from income"
 
   l20 <-
     interior "L20" "or_total_subtractions" $
@@ -65,7 +70,7 @@ orForm40_2024 = form "or_40" 2024 $ do
       l7 .+. l12 .-. l20
 
   -- Line 22: Deduction (larger of OR itemized or OR standard)
-  itemized <- keyInput "L22_itemized" "or_itemized" "Oregon itemized deductions (from Schedule OR-A)"
+  itemized <- roundE <$> keyInput "L22_itemized" "or_itemized" "Oregon itemized deductions (from Schedule OR-A)"
   stdDed <-
     interior "StdDed" "or_std_deduction" $
       byStatusE (fmap lit orStandardDeduction2024)
@@ -74,24 +79,43 @@ orForm40_2024 = form "or_40" 2024 $ do
   -- Line 23: Oregon taxable income
   _l23 <-
     keyOutput "L23" "or_taxable_income" "Oregon taxable income" $
-      l21 `subtractNotBelowZero` l22
+      roundE $
+        l21 `subtractNotBelowZero` l22
 
   -- Line 24: Same as L23 (for tax computation)
   l24 <- interior "L24" "or_taxable_for_computation" $ line "L23"
 
-  -- Line 25: OR State tax from brackets
+  let chartCeiling = byStatusE $ lit <$> byStatus 125000 250000 125000 250000 250000
+      chartBase = byStatusE $ lit <$> byStatus 4073 3774 4073 3774 3774
+      topBase = byStatusE $ lit <$> byStatus 10636 21274 10636 21274 21274
+      chartTax =
+        ifPos
+          (l24 .-. chartCeiling)
+          (topBase .+. (l24 .-. chartCeiling) .*. rate 0.099)
+          (chartBase .+. (l24 .-. lit 50000) .*. rate 0.0875)
   l25 <-
-    keyOutput "L25" "or_bracket_tax" "Tax from Oregon tax rate schedule" $
-      bracketTax "or_brackets_2024" l24
+    keyOutput "L25" "or_bracket_tax" "Tax from Oregon tax table or rate chart" $
+      ifNeg
+        (l24 .-. lit 50000)
+        (oregonTaxTable2024 l24)
+        (roundE chartTax)
+
+  regularExemptions <- keyInput "RegularExemptions" "dependent_count" "Total number of dependents for the regular exemption credit"
+  let regularBase = byStatusE $ lit <$> byStatus 1 2 1 1 1
+      regularLimit = byStatusE $ lit <$> byStatus 100000 200000 100000 200000 200000
+      regularCount = regularBase .+. max0 regularExemptions
+  exemptionCredit <-
+    interior "ExemptionCredit" "exemption_credit" $
+      ifPos (federalAgi .-. regularLimit) (lit 0) (regularCount .*. rate 249)
 
   -- Lines 26-29: Credits
-  l26 <- keyInput "L26" "or_working_family_credit" "Working family household and dependent care credit"
-  l27 <- keyInput "L27" "or_political_contribution_credit" "Political contribution credit"
-  l28 <- keyInput "L28" "or_other_credits" "Other Oregon credits"
+  l26 <- roundE <$> keyInput "L26" "or_working_family_credit" "Working family household and dependent care credit"
+  l27 <- roundE <$> keyInput "L27" "or_political_contribution_credit" "Political contribution credit"
+  l28 <- roundE <$> keyInput "L28" "or_other_credits" "Other Oregon credits"
 
   l29 <-
     interior "L29" "or_total_credits" $
-      sumOf [l26, l27, l28]
+      sumOf [exemptionCredit, l26, l27, l28]
 
   -- Line 30: Tax after credits
   l30 <-
@@ -99,7 +123,7 @@ orForm40_2024 = form "or_40" 2024 $ do
       l25 `subtractNotBelowZero` l29
 
   -- Line 31: Other Oregon taxes
-  l31 <- keyInput "L31" "or_other_taxes" "Other Oregon taxes"
+  l31 <- roundE <$> keyInput "L31" "or_other_taxes" "Other Oregon taxes"
 
   -- Line 32: Total Oregon tax
   _l32 <-
