@@ -353,7 +353,7 @@ class TaxReturnInput(BaseModel):
             "neither credit. Not modeled: the refundable additional child tax "
             "credit (a payment, not part of total tax), the earned income credit "
             "and the dependent care credit. Some state returns also read this "
-            "count as their dependent count (graph: CA, NY, OR and WI; OTS: the state "
+            "count as their dependent count (graph: CA, IL, NY, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
             "through dependent_exemptions. The OR graph uses it for its regular "
             "exemption credit and derives the taxpayer/spouse base from filing "
@@ -474,7 +474,8 @@ class TaxReturnInput(BaseModel):
             "married filing jointly), not for married filing separately. The senior "
             "deduction is taken with either the standard or itemized deduction and "
             "is added back for the AMT. Blindness and dependent-filer limits are not "
-            "modeled. State returns do not read it."
+            "modeled. The IL graph also adds the $1,000 age-65 exemption allowance, "
+            "subject to its federal-AGI limit; other states do not read it."
         ),
     )
     spouse_65_or_older: bool = Field(
@@ -487,7 +488,8 @@ class TaxReturnInput(BaseModel):
             "standard deduction, which the IRS allows when the spouse had no income, "
             "is not filing and cannot be claimed as a dependent; the senior "
             "deduction is not allowed. Any other filing status has no spouse box, "
-            "so True raises ValueError."
+            "so True raises ValueError. The IL graph adds the spouse's $1,000 "
+            "age allowance only for MFJ, subject to its federal-AGI limit."
         ),
     )
     state_adjustment: float = Field(
@@ -508,8 +510,9 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. The OR graph does not "
-            "map this field; use num_dependents for its regular exemption credit. "
+            "State exemption dollars, not a dependent count. The IL and OR graphs "
+            "do not map this field; use num_dependents for IL's personal/dependent "
+            "allowance and the OR regular exemption credit. "
             "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "

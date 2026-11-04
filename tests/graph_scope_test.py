@@ -173,6 +173,7 @@ def test_auto_routes_by_scope(year):
     """In scope goes to graph; out of scope to OTS where OTS has the state."""
     assert routing.select_backend("auto", year, "MS") == "graph"
     assert routing.select_backend("auto", year, "OR") == "graph"
+    assert routing.select_backend("auto", year, "IL") == "graph"
     assert routing.select_backend("auto", year, "NC") == "graph"
     assert routing.select_backend("auto", year, "TX") == "graph"
     assert routing.select_backend("auto", year, "CA") == "ots"
