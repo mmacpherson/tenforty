@@ -69,6 +69,17 @@ def _runtime(year, status, agi=0, liability=0):
     return runtime
 
 
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_negative_half_agi_entry_accepts_both_source_readings(year):
+    """Independent derivation: negative-half-rounding-ny-or.md (B), R1/R2.
+
+    OR p.14 does not decide negative ties; the current half-up convention
+    and half away from zero give the two permitted whole-dollar entries.
+    """
+    runtime = _runtime(year, "Single", agi=-999.50)
+    assert runtime.eval("or_40_L7_federal_agi") in {-999, -1000}
+
+
 @pytest.mark.parametrize("year,cap", [(2024, 8250), (2025, 8500)])
 @pytest.mark.parametrize("status", STATUSES)
 @pytest.mark.parametrize("step", range(5))

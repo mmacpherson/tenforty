@@ -137,6 +137,7 @@ executable tenforty-compile
     NMPIT1_2025
     NVNoTax_2024
     NVNoTax_2025
+    NYHouseholdCredit
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024
@@ -426,6 +427,7 @@ test-suite tenforty-spec-test
     NMPIT1_2025
     NVNoTax_2024
     NVNoTax_2025
+    NYHouseholdCredit
     NYIT201_2024
     NYIT201_2025
     OHIT1040_2024

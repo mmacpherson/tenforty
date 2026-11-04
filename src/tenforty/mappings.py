@@ -701,11 +701,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NY: StateGraphConfig(
-        # NY IT-201 exemptions involve age and dependent count; natural_to_node
-        # cannot map these correctly because the graph expects dollar
-        # values directly (no arithmetic): num_dependents is a count (e.g. 2)
-        # but L36 expects a dollar amount ($2,000 = 2 * $1,000/dependent).
+        # The household credit reads total dependents directly, independently
+        # of the federal qualifying-child count. L36 exemption dollars remain
+        # separate (tenforty-b72.49). Natural NY MFS needs spouse information
+        # available only as raw graph inputs and is refused by the backend.
         natural_to_node={
+            "num_dependents": "ny_it201_HouseholdDependents",
             "itemized_deductions": "ny_it201_L34_itemized",
         },
         outputs={
