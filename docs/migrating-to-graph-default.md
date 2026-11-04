@@ -7,7 +7,7 @@
   releases defaulted to `"ots"`; this note describes the flip and everything
   that came with it.
 - **Graph scope (2024–2025):** federal-only returns; the eight states without
-  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and MD, MS and OR. Every other
+  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and MD, MS, NC and OR. Every other
   state, and every year from 2018 to 2023, stays on OTS. `src/tenforty/graph_scope.py`
   is the list, and each excluded state names the open defect or missing
   evidence that keeps it out.
