@@ -88,16 +88,33 @@ def _dependent_cases():
         "qualifying_widow": (2, 1),
         "married_separate": (3, 2),
     }
-    for row in _all_rows():
+    rows = _all_rows()
+    for index, row in enumerate(rows):
         year, table, upper = (int(row[key]) for key in ("year", "table", "upper"))
+        next_row = next(
+            (
+                candidate
+                for candidate in rows[index + 1 :]
+                if int(candidate["year"]) == year and int(candidate["table"]) == table
+            ),
+            None,
+        )
         for status, (status_table, base) in statuses.items():
             if table != status_table:
                 continue
             for count in range(base, 13):
-                expected = int(row["count1" if table == 1 else f"count{min(count, 7)}"])
-                if table != 1 and count > 7:
-                    expected += (count - 7) * int(row["over7"])
-                yield year, status, upper, count - base, expected
+                for agi, source_row in (
+                    (upper - 1, row),
+                    (upper, row),
+                    (upper + 1, next_row),
+                ):
+                    expected = 0
+                    if source_row is not None:
+                        column = "count1" if table == 1 else f"count{min(count, 7)}"
+                        expected = int(source_row[column])
+                        if table != 1 and count > 7:
+                            expected += (count - 7) * int(source_row["over7"])
+                    yield year, status, agi, count - base, expected
 
 
 @pytest.mark.parametrize(
