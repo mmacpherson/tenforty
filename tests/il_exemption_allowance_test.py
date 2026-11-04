@@ -108,3 +108,63 @@ def test_exemption_limit_uses_federal_agi_not_illinois_base_income(
     runtime = _runtime(year, "single", agi)
     runtime.set(f"il_1040_{adjustment}", 100_000)
     assert runtime.eval("il_1040_L10_exemption_allowance") == (amount if allowed else 0)
+
+
+@pytest.mark.parametrize("year,amount", [(2024, 2775), (2025, 2850)])
+@pytest.mark.parametrize(
+    "status,filer65,spouse65,base,age_boxes",
+    [
+        ("Single", True, False, 1, 1),
+        ("Married/Joint", False, True, 2, 1),
+        ("Married/Joint", True, True, 2, 2),
+        ("Married/Sep", False, True, 1, 0),
+    ],
+)
+def test_existing_age_facts_reach_only_the_eligible_illinois_boxes(
+    year, amount, status, filer65, spouse65, base, age_boxes
+):
+    """Published p.8 component:1000 per age box; spouse box only for MFJ.
+
+    Archived per-box amounts; 2025 IDOR p.8 checked after implementation
+    inspection for the existing-field binding, not a new blind tax derivation.
+    """
+    from tenforty.backends.graph import GraphBackend
+    from tenforty.models import TaxReturnInput
+
+    evaluator, _ = GraphBackend()._create_evaluator(
+        TaxReturnInput(
+            year=year,
+            state="IL",
+            filing_status=status,
+            w2_income=60_000,
+            filer_65_or_older=filer65,
+            spouse_65_or_older=spouse65,
+        )
+    )
+    assert (
+        evaluator.eval("il_1040_L10_exemption_allowance")
+        == base * amount + age_boxes * 1000
+    )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize(
+    "status,limit", [("Single", 250_000), ("Married/Joint", 500_000)]
+)
+def test_income_exception_also_removes_age_allowances(year, status, limit):
+    """The published income exception sets the entire line10 to zero."""
+    from tenforty.backends.graph import GraphBackend
+    from tenforty.models import TaxReturnInput
+
+    evaluator, _ = GraphBackend()._create_evaluator(
+        TaxReturnInput(
+            year=year,
+            state="IL",
+            filing_status=status,
+            w2_income=limit + 1,
+            num_dependents=2,
+            filer_65_or_older=True,
+            spouse_65_or_older=status == "Married/Joint",
+        )
+    )
+    assert evaluator.eval("il_1040_L10_exemption_allowance") == 0
