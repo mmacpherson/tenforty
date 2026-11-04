@@ -57,45 +57,15 @@ def _derived_state_vectors() -> list[tuple[str, int, str, int, float]]:
 
 STATE_VECTORS = _derived_state_vectors()
 
-# tenforty-b72.29: the graph's Oregon tables carry the wrong lower thresholds
-# in both years (fixed by PR #415). These are those defective thresholds, so a
-# vector is marked only where they put it in a different bracket than the law.
-_OR_B72_29_THRESHOLDS = {
-    "Single": (4_400, 11_050),
-    "Married/Sep": (4_400, 11_050),
-    "Married/Joint": (8_800, 22_100),
-    "Head_of_House": (8_600, 21_500),
+# Oregon's federal tax subtraction steps down at $260,000 of head-of-household
+# AGI, so W-2-only state taxable income jumps from about $248,980 to $250,630
+# and these amounts have no W-2-only return. The same chart J thresholds are
+# exercised by the joint-return vectors.
+W2_UNREACHABLE = {
+    ("OR", year, "Head_of_House", taxable)
+    for year in (2024, 2025)
+    for taxable in (249_999, 250_000, 250_001)
 }
-
-
-def _or_b72_29_misplaces(state, status, taxable_income, expected_rate):
-    if state != "OR" or expected_rate > 8.75:
-        return False
-    first, second = _OR_B72_29_THRESHOLDS[status]
-    defective_rate = (
-        4.75 if taxable_income <= first else 6.75 if taxable_income <= second else 8.75
-    )
-    return defective_rate != expected_rate
-
-
-def _case(state, year, status, taxable_income, expected_rate):
-    marks = []
-    if _or_b72_29_misplaces(state, status, taxable_income, expected_rate):
-        marks.append(
-            pytest.mark.xfail(
-                reason="tenforty-b72.29: graph Oregon bracket thresholds (PR #415)",
-                strict=True,
-            )
-        )
-    return pytest.param(
-        state,
-        year,
-        status,
-        taxable_income,
-        expected_rate,
-        marks=marks,
-        id=f"{state}-{year}-{status}-{taxable_income}",
-    )
 
 
 def _return_at_state_taxable_income(state, year, status, taxable_income):
@@ -133,12 +103,15 @@ def test_derivation_supplies_every_state_and_year():
 
 @pytest.mark.parametrize(
     ("state", "year", "filing_status", "taxable_income", "expected_rate"),
-    [_case(*vector) for vector in STATE_VECTORS],
+    STATE_VECTORS,
+    ids=[f"{st}-{y}-{s}-{t}" for st, y, s, t, _ in STATE_VECTORS],
 )
 def test_graph_state_bracket_matches_rate_schedule(
     state, year, filing_status, taxable_income, expected_rate
 ):
     """The graph's state bracket is the schedule rate at each derived boundary."""
+    if (state, year, filing_status, taxable_income) in W2_UNREACHABLE:
+        pytest.skip("no W-2-only return has this state taxable income")
     result = _return_at_state_taxable_income(state, year, filing_status, taxable_income)
     assert result is not None, "no W-2 return reaches this state taxable income"
     assert result.state_tax_bracket == pytest.approx(expected_rate, abs=1e-9)

@@ -239,6 +239,11 @@ def _effective_tax_rate(tax: float, taxable_income: float) -> float | None:
 
 
 def _bracket_percent(rate_per_dollar: float | None) -> float | None:
+    """Per-dollar bracket rate as a percent, rounded to 10 places.
+
+    Rounding removes binary noise from the x100 (0.0637 -> 6.370000000000001);
+    published rates carry at most four decimals in percent, so no rate moves.
+    """
     return None if rate_per_dollar is None else round(rate_per_dollar * 100.0, 10)
 
 
@@ -378,6 +383,7 @@ class GraphBackend:
         With mode="cross" (default), computes Cartesian product of inputs x statuses.
         With mode="zip", evaluates pre-formed scenarios by zipping input columns.
         """
+        year = getattr(year, "value", year)
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
 
@@ -449,7 +455,7 @@ class GraphBackend:
         # map the single path uses (so federal_amt is actually requested, not
         # zero-filled), plus this state's output lines resolved through the
         # shared helper. A pair list, not a dict: one node can feed two fields
-        # (CT/NE/NM/OR reuse us_1040_L11_agi for both federal and state AGI),
+        # (CT/NE/NM reuse us_1040_L11_agi for both federal and state AGI),
         # which the single path handles by evaluating that node into each.
         output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         output_pairs.append((FEDERAL_BRACKET_RATE_NODE, "federal_tax_bracket"))
@@ -463,7 +469,7 @@ class GraphBackend:
 
         # Reject a requested output node that isn't in the graph rather than let
         # eval_scenarios silently return a 0.0 column for it (the failure mode
-        # that returned state_adjusted_gross_income=0 for CT/NE/NM/OR).
+        # that returned state_adjusted_gross_income=0 for imported federal AGI).
         graph_nodes = set(graph.node_names())
         missing_outputs = sorted(n for n in requested_nodes if n not in graph_nodes)
         if missing_outputs:

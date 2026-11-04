@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "a0e90cf412cbeaa6a06b143651be3505f4f957a775722fb49a4907e4e462e0be"
+        "sha256": "71b628c7f9f8281ca8f3ce59d66d345fcfe75b05192e00f4df9fd8f29516c1c3"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "6101e381e5203554115f8bf7732f6a75649c9e2a96a058d652ed840e2f604732"
+        "sha256": "77a53fbf09bf0a1b045c50f6a1a50926d8127580a1a54dcfc1f098c5944b51a8"
       }
     }
   },
@@ -1258,12 +1258,12 @@
       },
       "output_nodes": {
         "2024": {
-          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_adjusted_gross_income": "or_40_L7_federal_agi",
           "state_taxable_income": "or_40_L23_or_taxable_income",
           "state_total_tax": "or_40_L32_or_total_tax"
         },
         "2025": {
-          "state_adjusted_gross_income": "us_1040_L11_agi",
+          "state_adjusted_gross_income": "or_40_L7_federal_agi",
           "state_taxable_income": "or_40_L23_or_taxable_income",
           "state_total_tax": "or_40_L32_or_total_tax"
         }
