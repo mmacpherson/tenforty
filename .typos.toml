@@ -1,3 +1,7 @@
+[default]
+# Preserve the source PDF hash in the verbatim negative-half derivation archive.
+extend-ignore-re = ["\\b19113ba3\\b"]
+
 [default.extend-words]
 # "Ded" abbreviates "Deduction" in upstream OpenTaxSolver identifiers such as
 # getAZStdDedAmt. typos splits identifiers into words, reads "Ded" as a
