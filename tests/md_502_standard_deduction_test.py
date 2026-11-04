@@ -16,8 +16,9 @@ Worksheet 16A states its bounds as whole-dollar AGI thresholds ($36,333 for
 the joint maximum) where 15% crosses the bound at a fraction (36,333.33). Within
 one dollar of AGI of a crossover, the worksheet and the graph's clamped 15% can
 differ by 15% of that dollar; the bound below is that, not observed output.
-Line 21 is pinned to the exact rate schedule; the mandatory table below
-$100,000 is a separate known difference (tenforty-tj2.20).
+Line 21 is pinned to the official figure: the mandatory tax-table row below
+$100,000 (tenforty-tj2.20; every row checked in tests/md_502_tax_table_test.py),
+Worksheet 17A to the cent at or above.
 """
 
 import pytest
@@ -31,81 +32,81 @@ PREFIX = "md_502"
 CENT = 0.005 + 1e-6
 STANDARD_DEDUCTION_RATE = 0.15
 WORKSHEET_THRESHOLD_CROSSOVERS = (24_333 + 1 / 3, 36_333 + 1 / 3)
-LOWEST_BRACKET_ABOVE_3000 = 0.0475
 
-# (year, status, line 16 AGI, line 17, line 20, exact schedule tax on line 20)
+# (year, status, line 16 AGI, line 17, line 20, exact schedule tax on line 20,
+#  official line 21: the tax-table row below $100,000, Worksheet 17A at or above)
 # fmt: off
 CASES = [
-    (2024, "Single", 10_000, 1_800.00, 5_000.00, 185),
-    (2024, "Single", 15_000, 2_250.00, 9_550.00, 401.125),
-    (2024, "Single", 17_999, 2_699.85, 12_099.15, 522.2096),
-    (2024, "Single", 18_000, 2_700.00, 12_100.00, 522.25),
-    (2024, "Single", 100_000, 2_700.00, 94_100.00, 4417.25),
-    (2024, "Single", 130_000, 2_700.00, 126_500.00, 6026.25),
-    (2024, "Single", 175_000, 2_700.00, 172_300.00, 8486.5),
-    (2024, "Married/Sep", 10_000, 1_800.00, 5_000.00, 185),
-    (2024, "Married/Sep", 15_000, 2_250.00, 9_550.00, 401.125),
-    (2024, "Married/Sep", 17_999, 2_699.85, 12_099.15, 522.2096),
-    (2024, "Married/Sep", 18_000, 2_700.00, 12_100.00, 522.25),
-    (2024, "Married/Sep", 100_000, 2_700.00, 94_100.00, 4417.25),
-    (2024, "Married/Sep", 130_000, 2_700.00, 126_500.00, 6026.25),
-    (2024, "Married/Sep", 175_000, 2_700.00, 172_300.00, 8486.5),
-    (2024, "Married/Joint", 10_000, 3_650.00, 0.00, 0),
-    (2024, "Married/Joint", 30_000, 4_500.00, 19_100.00, 854.75),
-    (2024, "Married/Joint", 36_332, 5_449.80, 24_482.20, 1110.4045),
-    (2024, "Married/Joint", 36_333, 5_450.00, 24_483.00, 1110.4425),
-    (2024, "Married/Joint", 100_000, 5_450.00, 88_150.00, 4134.625),
-    (2024, "Married/Joint", 180_000, 5_450.00, 172_950.00, 8220),
-    (2024, "Married/Joint", 210_000, 5_450.00, 204_550.00, 9873.875),
-    (2024, "Head_of_House", 10_000, 3_650.00, 3_150.00, 97.125),
-    (2024, "Head_of_House", 30_000, 4_500.00, 22_300.00, 1006.75),
-    (2024, "Head_of_House", 36_332, 5_449.80, 27_682.20, 1262.4045),
-    (2024, "Head_of_House", 36_333, 5_450.00, 27_683.00, 1262.4425),
-    (2024, "Head_of_House", 100_000, 5_450.00, 91_350.00, 4286.625),
-    (2024, "Head_of_House", 180_000, 5_450.00, 173_750.00, 8260),
-    (2024, "Head_of_House", 210_000, 5_450.00, 204_550.00, 9873.875),
-    (2024, "Widow(er)", 10_000, 3_650.00, 3_150.00, 97.125),
-    (2024, "Widow(er)", 30_000, 4_500.00, 22_300.00, 1006.75),
-    (2024, "Widow(er)", 36_332, 5_449.80, 27_682.20, 1262.4045),
-    (2024, "Widow(er)", 36_333, 5_450.00, 27_683.00, 1262.4425),
-    (2024, "Widow(er)", 100_000, 5_450.00, 91_350.00, 4286.625),
-    (2024, "Widow(er)", 180_000, 5_450.00, 173_750.00, 8260),
-    (2024, "Widow(er)", 210_000, 5_450.00, 204_550.00, 9873.875),
-    (2025, "Single", 10_000, 3_350.00, 3_450.00, 111.375),
-    (2025, "Single", 15_000, 3_350.00, 8_450.00, 348.875),
-    (2025, "Single", 17_999, 3_350.00, 11_449.00, 491.3275),
-    (2025, "Single", 18_000, 3_350.00, 11_450.00, 491.375),
-    (2025, "Single", 100_000, 3_350.00, 93_450.00, 4386.375),
-    (2025, "Single", 130_000, 3_350.00, 125_850.00, 5992.125),
-    (2025, "Single", 175_000, 3_350.00, 171_650.00, 8450.75),
-    (2025, "Married/Sep", 10_000, 3_350.00, 3_450.00, 111.375),
-    (2025, "Married/Sep", 15_000, 3_350.00, 8_450.00, 348.875),
-    (2025, "Married/Sep", 17_999, 3_350.00, 11_449.00, 491.3275),
-    (2025, "Married/Sep", 18_000, 3_350.00, 11_450.00, 491.375),
-    (2025, "Married/Sep", 100_000, 3_350.00, 93_450.00, 4386.375),
-    (2025, "Married/Sep", 130_000, 3_350.00, 125_850.00, 5992.125),
-    (2025, "Married/Sep", 175_000, 3_350.00, 171_650.00, 8450.75),
-    (2025, "Married/Joint", 10_000, 6_700.00, 0.00, 0),
-    (2025, "Married/Joint", 30_000, 6_700.00, 16_900.00, 750.25),
-    (2025, "Married/Joint", 36_332, 6_700.00, 23_232.00, 1051.02),
-    (2025, "Married/Joint", 36_333, 6_700.00, 23_233.00, 1051.0675),
-    (2025, "Married/Joint", 100_000, 6_700.00, 86_900.00, 4075.25),
-    (2025, "Married/Joint", 180_000, 6_700.00, 171_700.00, 8157.5),
-    (2025, "Married/Joint", 210_000, 6_700.00, 203_300.00, 9808.25),
-    (2025, "Head_of_House", 10_000, 6_700.00, 100.00, 2),
-    (2025, "Head_of_House", 30_000, 6_700.00, 20_100.00, 902.25),
-    (2025, "Head_of_House", 36_332, 6_700.00, 26_432.00, 1203.02),
-    (2025, "Head_of_House", 36_333, 6_700.00, 26_433.00, 1203.0675),
-    (2025, "Head_of_House", 100_000, 6_700.00, 90_100.00, 4227.25),
-    (2025, "Head_of_House", 180_000, 6_700.00, 172_500.00, 8197.5),
-    (2025, "Head_of_House", 210_000, 6_700.00, 203_300.00, 9808.25),
-    (2025, "Widow(er)", 10_000, 6_700.00, 100.00, 2),
-    (2025, "Widow(er)", 30_000, 6_700.00, 20_100.00, 902.25),
-    (2025, "Widow(er)", 36_332, 6_700.00, 26_432.00, 1203.02),
-    (2025, "Widow(er)", 36_333, 6_700.00, 26_433.00, 1203.0675),
-    (2025, "Widow(er)", 100_000, 6_700.00, 90_100.00, 4227.25),
-    (2025, "Widow(er)", 180_000, 6_700.00, 172_500.00, 8197.5),
-    (2025, "Widow(er)", 210_000, 6_700.00, 203_300.00, 9808.25),
+    (2024, "Single", 10_000, 1_800.00, 5_000.00, 185, 186),
+    (2024, "Single", 15_000, 2_250.00, 9_550.00, 401.125, 402),
+    (2024, "Single", 17_999, 2_699.85, 12_099.15, 522.2096, 521),
+    (2024, "Single", 18_000, 2_700.00, 12_100.00, 522.25, 523),
+    (2024, "Single", 100_000, 2_700.00, 94_100.00, 4417.25, 4418),
+    (2024, "Single", 130_000, 2_700.00, 126_500.00, 6026.25, 6026.25),
+    (2024, "Single", 175_000, 2_700.00, 172_300.00, 8486.5, 8486.50),
+    (2024, "Married/Sep", 10_000, 1_800.00, 5_000.00, 185, 186),
+    (2024, "Married/Sep", 15_000, 2_250.00, 9_550.00, 401.125, 402),
+    (2024, "Married/Sep", 17_999, 2_699.85, 12_099.15, 522.2096, 521),
+    (2024, "Married/Sep", 18_000, 2_700.00, 12_100.00, 522.25, 523),
+    (2024, "Married/Sep", 100_000, 2_700.00, 94_100.00, 4417.25, 4418),
+    (2024, "Married/Sep", 130_000, 2_700.00, 126_500.00, 6026.25, 6026.25),
+    (2024, "Married/Sep", 175_000, 2_700.00, 172_300.00, 8486.5, 8486.50),
+    (2024, "Married/Joint", 10_000, 3_650.00, 0.00, 0, 0),
+    (2024, "Married/Joint", 30_000, 4_500.00, 19_100.00, 854.75, 856),
+    (2024, "Married/Joint", 36_332, 5_449.80, 24_482.20, 1110.4045, 1110),
+    (2024, "Married/Joint", 36_333, 5_450.00, 24_483.00, 1110.4425, 1110),
+    (2024, "Married/Joint", 100_000, 5_450.00, 88_150.00, 4134.625, 4136),
+    (2024, "Married/Joint", 180_000, 5_450.00, 172_950.00, 8220, 8220.00),
+    (2024, "Married/Joint", 210_000, 5_450.00, 204_550.00, 9873.875, 9873.88),
+    (2024, "Head_of_House", 10_000, 3_650.00, 3_150.00, 97.125, 98),
+    (2024, "Head_of_House", 30_000, 4_500.00, 22_300.00, 1006.75, 1008),
+    (2024, "Head_of_House", 36_332, 5_449.80, 27_682.20, 1262.4045, 1262),
+    (2024, "Head_of_House", 36_333, 5_450.00, 27_683.00, 1262.4425, 1262),
+    (2024, "Head_of_House", 100_000, 5_450.00, 91_350.00, 4286.625, 4288),
+    (2024, "Head_of_House", 180_000, 5_450.00, 173_750.00, 8260, 8260.00),
+    (2024, "Head_of_House", 210_000, 5_450.00, 204_550.00, 9873.875, 9873.88),
+    (2024, "Widow(er)", 10_000, 3_650.00, 3_150.00, 97.125, 98),
+    (2024, "Widow(er)", 30_000, 4_500.00, 22_300.00, 1006.75, 1008),
+    (2024, "Widow(er)", 36_332, 5_449.80, 27_682.20, 1262.4045, 1262),
+    (2024, "Widow(er)", 36_333, 5_450.00, 27_683.00, 1262.4425, 1262),
+    (2024, "Widow(er)", 100_000, 5_450.00, 91_350.00, 4286.625, 4288),
+    (2024, "Widow(er)", 180_000, 5_450.00, 173_750.00, 8260, 8260.00),
+    (2024, "Widow(er)", 210_000, 5_450.00, 204_550.00, 9873.875, 9873.88),
+    (2025, "Single", 10_000, 3_350.00, 3_450.00, 111.375, 113),
+    (2025, "Single", 15_000, 3_350.00, 8_450.00, 348.875, 350),
+    (2025, "Single", 17_999, 3_350.00, 11_449.00, 491.3275, 490),
+    (2025, "Single", 18_000, 3_350.00, 11_450.00, 491.375, 493),
+    (2025, "Single", 100_000, 3_350.00, 93_450.00, 4386.375, 4388),
+    (2025, "Single", 130_000, 3_350.00, 125_850.00, 5992.125, 5992.13),
+    (2025, "Single", 175_000, 3_350.00, 171_650.00, 8450.75, 8450.75),
+    (2025, "Married/Sep", 10_000, 3_350.00, 3_450.00, 111.375, 113),
+    (2025, "Married/Sep", 15_000, 3_350.00, 8_450.00, 348.875, 350),
+    (2025, "Married/Sep", 17_999, 3_350.00, 11_449.00, 491.3275, 490),
+    (2025, "Married/Sep", 18_000, 3_350.00, 11_450.00, 491.375, 493),
+    (2025, "Married/Sep", 100_000, 3_350.00, 93_450.00, 4386.375, 4388),
+    (2025, "Married/Sep", 130_000, 3_350.00, 125_850.00, 5992.125, 5992.13),
+    (2025, "Married/Sep", 175_000, 3_350.00, 171_650.00, 8450.75, 8450.75),
+    (2025, "Married/Joint", 10_000, 6_700.00, 0.00, 0, 0),
+    (2025, "Married/Joint", 30_000, 6_700.00, 16_900.00, 750.25, 751),
+    (2025, "Married/Joint", 36_332, 6_700.00, 23_232.00, 1051.02, 1051),
+    (2025, "Married/Joint", 36_333, 6_700.00, 23_233.00, 1051.0675, 1051),
+    (2025, "Married/Joint", 100_000, 6_700.00, 86_900.00, 4075.25, 4076),
+    (2025, "Married/Joint", 180_000, 6_700.00, 171_700.00, 8157.5, 8157.50),
+    (2025, "Married/Joint", 210_000, 6_700.00, 203_300.00, 9808.25, 9808.25),
+    (2025, "Head_of_House", 10_000, 6_700.00, 100.00, 2, 3),
+    (2025, "Head_of_House", 30_000, 6_700.00, 20_100.00, 902.25, 903),
+    (2025, "Head_of_House", 36_332, 6_700.00, 26_432.00, 1203.02, 1203),
+    (2025, "Head_of_House", 36_333, 6_700.00, 26_433.00, 1203.0675, 1203),
+    (2025, "Head_of_House", 100_000, 6_700.00, 90_100.00, 4227.25, 4228),
+    (2025, "Head_of_House", 180_000, 6_700.00, 172_500.00, 8197.5, 8197.50),
+    (2025, "Head_of_House", 210_000, 6_700.00, 203_300.00, 9808.25, 9808.25),
+    (2025, "Widow(er)", 10_000, 6_700.00, 100.00, 2, 3),
+    (2025, "Widow(er)", 30_000, 6_700.00, 20_100.00, 902.25, 903),
+    (2025, "Widow(er)", 36_332, 6_700.00, 26_432.00, 1203.02, 1203),
+    (2025, "Widow(er)", 36_333, 6_700.00, 26_433.00, 1203.0675, 1203),
+    (2025, "Widow(er)", 100_000, 6_700.00, 90_100.00, 4227.25, 4228),
+    (2025, "Widow(er)", 180_000, 6_700.00, 172_500.00, 8197.5, 8197.50),
+    (2025, "Widow(er)", 210_000, 6_700.00, 203_300.00, 9808.25, 9808.25),
 ]
 # fmt: on
 
@@ -126,8 +127,8 @@ def _deduction_tolerance(year, agi):
     return CENT
 
 
-@pytest.mark.parametrize("year,status,agi,deduction,_ti,_tax", CASES, ids=str)
-def test_line_17_matches_the_derivation(year, status, agi, deduction, _ti, _tax):
+@pytest.mark.parametrize("year,status,agi,deduction,_ti,_tax,_l21", CASES, ids=str)
+def test_line_17_matches_the_derivation(year, status, agi, deduction, _ti, _tax, _l21):
     """Worksheet 16A bounds by status in 2024; flat amounts in 2025."""
     runtime = _runtime(year, status, agi)
     assert runtime.eval(f"{PREFIX}_L17_deduction") == pytest.approx(
@@ -135,8 +136,10 @@ def test_line_17_matches_the_derivation(year, status, agi, deduction, _ti, _tax)
     )
 
 
-@pytest.mark.parametrize("year,status,agi,_sd,taxable_income,_tax", CASES, ids=str)
-def test_line_20_matches_the_derivation(year, status, agi, _sd, taxable_income, _tax):
+@pytest.mark.parametrize("year,status,agi,_sd,taxable_income,_tax,_l21", CASES, ids=str)
+def test_line_20_matches_the_derivation(
+    year, status, agi, _sd, taxable_income, _tax, _l21
+):
     """Taxable net income: line 16 minus lines 17 and 19."""
     runtime = _runtime(year, status, agi)
     assert runtime.eval(f"{PREFIX}_L20_md_taxable_income") == pytest.approx(
@@ -144,11 +147,10 @@ def test_line_20_matches_the_derivation(year, status, agi, _sd, taxable_income, 
     )
 
 
-@pytest.mark.parametrize("year,status,agi,_sd,_ti,schedule_tax", CASES, ids=str)
-def test_line_21_is_the_exact_schedule(year, status, agi, _sd, _ti, schedule_tax):
-    """Line 21 on the exact rate schedule, before the table's rounding."""
+@pytest.mark.parametrize("year,status,agi,_sd,_ti,_tax,line_21", CASES, ids=str)
+def test_line_21_matches_the_derivation(year, status, agi, _sd, _ti, _tax, line_21):
+    """Line 21: the tax-table row below $100,000, Worksheet 17A to the cent above."""
     runtime = _runtime(year, status, agi)
-    slack = (_deduction_tolerance(year, agi) - CENT) * LOWEST_BRACKET_ABOVE_3000
     assert runtime.eval(f"{PREFIX}_L21_md_state_tax") == pytest.approx(
-        schedule_tax, abs=CENT + slack
+        line_21, abs=CENT
     )

@@ -183,26 +183,6 @@ def ks_worksheet_gap(statute_minus_worksheet: float, rounding: float) -> KnownDe
     )
 
 
-def md_table_gap(taxable_income: float, row_low: float) -> KnownDefect:
-    """Signed schedule-minus-table bound for a non-kink $50 MD tax-table row.
-
-    MD requires its state tax table below $100,000 of taxable income (2024/2025
-    resident booklets, Instruction 17). Every row used here lies in the 4.75%
-    band of both schedules. The graph prices the schedule at its own taxable
-    income rather than the row, with at most $0.50 of printed-row rounding.
-    """
-    assert row_low <= taxable_income < row_low + 50
-    assert 3_000 <= taxable_income < 100_000
-    center = 0.0475 * (taxable_income - (row_low + 25))
-    reason = "MD requires the tax-table row; graph uses the schedule (tenforty-tj2.20)"
-    return KnownDefect(
-        quantity="state_total_tax",
-        minimum=center - 0.50,
-        maximum=center + 0.50,
-        reason=reason,
-    )
-
-
 # ME residuals, bounded below until their beads land.
 ME_TABLE_METHOD = (
     "table-method compatibility difference: 1040ME line 20 permits the table or "
@@ -5504,7 +5484,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         expected_state_tax=2043.0,
         expected_federal_agi=50000.0,
-        known_defects=(md_table_gap(44100, 44100),),
         backend="graph",
     ),
     # 2024 #2: MFJ 90,000, 2 dependents. 90,000 - 5,450 std - 4 x 3,200 = 71,750; row 71,750-71,800, PDF p. 38.
@@ -5519,7 +5498,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
         expected_state_tax=3357.0,
         expected_federal_agi=90000.0,
-        known_defects=(md_table_gap(71750, 71750),),
         backend="graph",
     ),
     # 2024 #3: HoH 45,000, 1 dependents. 45,000 - 5,450 std - 2 x 3,200 = 33,150; row 33,150-33,200, PDF p. 36.
@@ -5534,7 +5512,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=1523.0,
         expected_federal_agi=45000.0,
-        known_defects=(md_table_gap(33150, 33150),),
         backend="graph",
     ),
     # 2024 #4: MFS 40,000, 0 dependents. 40,000 - 2,700 std - 1 x 3,200 = 34,100; row 34,100-34,150, PDF p. 36.
@@ -5548,7 +5525,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=40000.0,
         expected_state_tax=1568.0,
         expected_federal_agi=40000.0,
-        known_defects=(md_table_gap(34100, 34100),),
         backend="graph",
     ),
     # 2024 #5: QSS 70,000, 1 dependents. 70,000 - 5,450 std - 2 x 3,200 = 58,150; row 58,150-58,200, PDF p. 37.
@@ -5563,7 +5539,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=2711.0,
         expected_federal_agi=70000.0,
-        known_defects=(md_table_gap(58150, 58150),),
         backend="graph",
     ),
     # 2024 #6: Single 20,000, 0 dependents. 20,000 - 2,700 std - 1 x 3,200 = 14,100; row 14,100-14,150, PDF p. 34.
@@ -5577,7 +5552,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=20000.0,
         expected_state_tax=618.0,
         expected_federal_agi=20000.0,
-        known_defects=(md_table_gap(14100, 14100),),
         backend="graph",
     ),
     # 2024 #7: Single 120,000, 0 dependents. 120,000 - 2,700 std - 1 x 1,600 = 115,700; Schedule I: 4,697.50 + 5% x 15,700.
@@ -5644,7 +5618,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         expected_state_tax=2013.0,
         expected_federal_agi=50000.0,
-        known_defects=(md_table_gap(43450, 43450),),
         backend="graph",
     ),
     # 2025 #2: MFJ 90,000, 2 dependents. 90,000 - 6,700 std - 4 x 3,200 = 70,500; row 70,500-70,550, PDF p. 38.
@@ -5659,7 +5632,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
         expected_state_tax=3297.0,
         expected_federal_agi=90000.0,
-        known_defects=(md_table_gap(70500, 70500),),
         backend="graph",
     ),
     # 2025 #3: HoH 45,000, 1 dependents. 45,000 - 6,700 std - 2 x 3,200 = 31,900; row 31,900-31,950, PDF p. 36.
@@ -5674,7 +5646,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=1464.0,
         expected_federal_agi=45000.0,
-        known_defects=(md_table_gap(31900, 31900),),
         backend="graph",
     ),
     # 2025 #4: MFS 40,000, 0 dependents. 40,000 - 3,350 std - 1 x 3,200 = 33,450; row 33,450-33,500, PDF p. 36.
@@ -5688,7 +5659,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=40000.0,
         expected_state_tax=1538.0,
         expected_federal_agi=40000.0,
-        known_defects=(md_table_gap(33450, 33450),),
         backend="graph",
     ),
     # 2025 #5: QSS 70,000, 1 dependents. 70,000 - 6,700 std - 2 x 3,200 = 56,900; row 56,900-56,950, PDF p. 37.
@@ -5703,7 +5673,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=2651.0,
         expected_federal_agi=70000.0,
-        known_defects=(md_table_gap(56900, 56900),),
         backend="graph",
     ),
     # 2025 #6: Single 20,000, 0 dependents. 20,000 - 3,350 std - 1 x 3,200 = 13,450; row 13,450-13,500, PDF p. 34.
@@ -5717,7 +5686,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=20000.0,
         expected_state_tax=588.0,
         expected_federal_agi=20000.0,
-        known_defects=(md_table_gap(13450, 13450),),
         backend="graph",
     ),
     # 2025 #7: Single 120,000, 0 dependents. 120,000 - 3,350 std - 1 x 1,600 = 115,050; Schedule I: 4,697.50 + 5% x 15,050.

@@ -114,6 +114,12 @@
   exemptions) and federal-only adjustments no longer reduce Massachusetts
   income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
   MA is now line 10, as on OTS.
+- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
+  $100,000 of taxable income (Instruction 17), as published, instead of the
+  unrounded rate schedule; Worksheet 17A still applies to the cent at
+  $100,000 and above. Every one of the table's 2,001 rows is checked.
+  Maryland 2024 and 2025 have no open graph defects left and join the graph
+  scope for `backend="auto"`.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)
