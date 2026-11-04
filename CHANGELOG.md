@@ -1,5 +1,12 @@
 ## [Unreleased]
 ### Added
+- **Graph state scope for `backend="auto"`.** A state return goes to graph only
+  when its known graph-side defects are closed and official-value fixtures
+  support it: for 2024-2025, Mississippi and the eight states without an
+  income tax. Other states route to OTS where OTS computes them, and otherwise
+  raise `UnsupportedReturnError` naming the open defect or the missing
+  evidence. `backend="graph"` ignores scope. See
+  [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
 - `backend="auto"` selects the backend by tax year: graph for 2024-2025 (within
   graph state scope), OTS for 2018-2023. The default is still `"ots"`, and an
   explicit `"ots"` or `"graph"` is never reinterpreted. `evaluate_return`,
