@@ -1018,7 +1018,6 @@ def evaluate_returns(
         "state",
         "filing_status",
         "num_dependents",
-        "num_ctc_dependents",
         "dependent_exemptions",
         "standard_or_itemized",
         "w2_income",
@@ -1042,13 +1041,13 @@ def evaluate_returns(
         "vehicle_loan_interest",
         "filer_65_or_older",
         "spouse_65_or_older",
+        "num_ctc_dependents",
     ]
     all_vals = [
         years,
         states_of_residence,
         filing_statuses,
         nums_dependents,
-        nums_ctc_dependents,
         dep_exemptions,
         std_or_items,
         w2_incomes,
@@ -1072,6 +1071,7 @@ def evaluate_returns(
         vehicle_loan_interest_values,
         filer_65_or_older_values,
         spouse_65_or_older_values,
+        nums_ctc_dependents,
     ]
 
     columns = dict(zip(parameter_names, all_vals, strict=True))
