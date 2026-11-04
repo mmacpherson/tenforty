@@ -62,10 +62,11 @@ class TestBackendSelection:
         backend = get_backend("ots")
         assert backend.name == "ots"
 
-    def test_get_backend_default_is_ots(self):
-        """Default backend should be OTS."""
-        backend = get_backend()
-        assert backend.name == "ots"
+    @pytest.mark.requires_graph
+    def test_get_backend_default_is_auto(self):
+        """The default backend is "auto": graph for 2024, OTS for 2023."""
+        assert get_backend().name == "graph"
+        assert get_backend(year=2023).name == "ots"
 
 
 @pytest.mark.requires_graph

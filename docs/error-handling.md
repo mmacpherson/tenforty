@@ -55,13 +55,18 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 
 ## Choosing a backend
 
-`backend` is `"ots"` (the default), `"graph"`, or `"auto"`:
+`backend` is `"auto"` (the default), `"ots"`, or `"graph"`:
 
 | `backend` | 2018-2023 | 2024-2025 |
 |-----------|-----------|-----------|
 | `"ots"` | OTS | OTS |
 | `"graph"` | raises `UnsupportedReturnError` | graph |
 | `"auto"` | OTS | graph for federal-only returns and states in graph scope; otherwise OTS, or `UnsupportedReturnError` |
+
+`"auto"` picks the backend per return: graph for a 2024 or 2025 return that
+is federal-only or whose state is in graph scope (below), OTS otherwise. To get
+the behavior of earlier releases, whose default was `"ots"`, pass
+`backend="ots"`; that is the rollback if a default result surprises you.
 
 An explicit `"ots"` or `"graph"` is never reinterpreted: it is honoured or
 refused before evaluation. `"auto"` splits a mixed-year batch by year and
@@ -113,6 +118,11 @@ Raised when the selected backend's compiled extension is not installed. It is
 an `ImportError`, and also a `RuntimeError` for callers that caught the earlier
 `RuntimeError("Graph backend is not available")`.
 
+The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
+under the default `"auto"` it raises this for any 2024 or 2025 return that
+`"auto"` routes to graph; it never falls back to OTS. Pass `backend="ots"` with
+that package.
+
 
 ### `OTSError`
 
@@ -123,7 +133,7 @@ indicates a problem with the input data that OTS couldn't process.
 from tenforty import OTSError
 
 try:
-    result = evaluate_return(w2_income=50000)
+    result = evaluate_return(w2_income=50000, backend="ots")
 except OTSError as e:
     print(f"Exit code: {e.exit_code}")
     print(f"Year: {e.year}")
@@ -144,7 +154,7 @@ output format from OTS.
 from tenforty import OTSParseError
 
 try:
-    result = evaluate_return(w2_income=50000)
+    result = evaluate_return(w2_income=50000, backend="ots")
 except OTSParseError as e:
     print(f"Message: {e}")
     if e.raw_output:

@@ -1,4 +1,24 @@
 ## [Unreleased]
+### Changed (default backend)
+- **The default backend is now `"auto"`**, in `evaluate_return`,
+  `evaluate_returns` and `tenforty.backends.get_backend`. A call that does not
+  pass `backend` computes 2024 and 2025 returns on the graph backend when the
+  return is federal-only or its state is in graph scope, and on OTS otherwise
+  (OTS for every 2018-2023 return). An out-of-scope state OTS does not compute
+  raises `UnsupportedReturnError` naming the reason, where the old default
+  raised for any state OTS does not compute. See
+  [Choosing a backend](docs/error-handling.md#choosing-a-backend).
+  - **Rollback:** pass `backend="ots"` to get exactly the old default. An
+    explicit `"ots"` or `"graph"` is unchanged and never reinterpreted.
+  - Results for 2024-2025 calls that relied on the default can change, because
+    graph and OTS do not compute every return identically.
+  - The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
+    under the new default a 2024-2025 return that `"auto"` routes to graph
+    raises `BackendUnavailableError` there instead of falling back to OTS.
+    Pass `backend="ots"` with that package.
+  - `marginal_rate`, `marginal_rates` and `solve_for_income` take no `backend`
+    argument; they run on the graph backend, as before.
+
 ### Added
 - **Graph state scope for `backend="auto"`.** A state return goes to graph only
   when its known graph-side defects are closed and official-value fixtures
@@ -8,8 +28,8 @@
   evidence. `backend="graph"` ignores scope. See
   [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
 - `backend="auto"` selects the backend by tax year: graph for 2024-2025 (within
-  graph state scope), OTS for 2018-2023. The default is still `"ots"`, and an
-  explicit `"ots"` or `"graph"` is never reinterpreted. `evaluate_return`,
+  graph state scope), OTS for 2018-2023. An explicit `"ots"` or `"graph"` is
+  never reinterpreted. `evaluate_return`,
   `evaluate_returns` and `get_backend` share one selector; a mixed-year batch
   is split by year and keeps its row order.
 
@@ -66,7 +86,7 @@
   every OTS state with a taxable income now has one. The README called it a
   percentage of AGI, which was wrong.
 
-### Fixed (graph backend: opt-in, experimental)
+### Fixed (graph backend)
 - `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
   It used to be hard-coded to 0. Income exactly at a threshold stays in the
   lower bracket, as the schedules' "over X but not over Y" wording requires.
@@ -76,6 +96,19 @@
 - `federal_effective_tax_rate` divides by taxable income, as OTS does. It used
   to divide by AGI.
 - `state_effective_tax_rate` is computed for graph states. It used to be 0.
+
+- Massachusetts Form 1 line 10 is built from the federal income lines instead
+  of federal AGI, so interest, dividends and capital gains go through Schedules
+  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
+  exemptions) and federal-only adjustments no longer reduce Massachusetts
+  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
+  MA is now line 10, as on OTS.
+- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
+  $100,000 of taxable income (Instruction 17), as published, instead of the
+  unrounded rate schedule; Worksheet 17A still applies to the cent at
+  $100,000 and above. Every one of the table's 2,001 rows is checked.
+  Maryland 2024 and 2025 have no open graph defects left and join the graph
+  scope for `backend="auto"`.
 
 ### Changed (installation)
 - **Building from source requires Rust.** The graph backend is no longer an
@@ -95,7 +128,7 @@
 - CI tests every shipped wheel, and installs from the sdist with Rust, without
   Rust, and in OTS-only mode.
 
-### Fixed (OTS backend, the default)
+### Fixed (OTS backend)
 - **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
   MA_1 input map set only wages, so OTS never received line 11 (Social
   Security and Medicare paid, up to $2,000 per person) and over-taxed every
@@ -103,23 +136,9 @@
   2018-2025. Line 11a is now 7.65% of `w2_income`, capped at $2,000; a joint
   return takes the one-earner reading because `w2_income` is a household
   total, so a two-earner couple can still be up to $100 high ($180 with the
-  surtax). **This changes default-backend MA
-  results.** OTS MA still maps only wages: interest, dividends, capital gains
-  and self-employment income are not reflected there.
-
-### Fixed (graph backend)
-- Massachusetts Form 1 line 10 is built from the federal income lines instead
-  of federal AGI, so interest, dividends and capital gains go through Schedules
-  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
-  exemptions) and federal-only adjustments no longer reduce Massachusetts
-  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
-  MA is now line 10, as on OTS.
-- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
-  $100,000 of taxable income (Instruction 17), as published, instead of the
-  unrounded rate schedule; Worksheet 17A still applies to the cent at
-  $100,000 and above. Every one of the table's 2,001 rows is checked.
-  Maryland 2024 and 2025 have no open graph defects left and join the graph
-  scope for `backend="auto"`.
+  surtax). **This changes OTS MA results,** which `"auto"` also uses for
+  Massachusetts. OTS MA still maps only wages: interest, dividends, capital
+  gains and self-employment income are not reflected there.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)

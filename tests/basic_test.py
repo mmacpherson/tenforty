@@ -41,6 +41,7 @@ def test_basic_evaluation():
                     state=state,
                     filing_status=filing_status,
                     w2_income=100_000,
+                    backend="ots",
                 )
 
                 assert result.federal_total_tax > 5000
@@ -51,6 +52,7 @@ def test_basic_evaluation():
                     filing_status=filing_status,
                     w2_income=100_000,
                     short_term_capital_gains=50_000,
+                    backend="ots",
                 )
 
                 result_long = evaluate_return(
@@ -59,6 +61,7 @@ def test_basic_evaluation():
                     filing_status=filing_status,
                     w2_income=100_000,
                     long_term_capital_gains=50_000,
+                    backend="ots",
                 )
 
                 assert (

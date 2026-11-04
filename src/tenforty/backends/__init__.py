@@ -66,15 +66,15 @@ def require_available(engine: Engine) -> TaxBackend:
 
 
 def get_backend(
-    backend: BackendChoice = "ots",
+    backend: BackendChoice = "auto",
     year: int = 2024,
     state: str | None = None,
 ) -> TaxBackend:
     """Get the backend instance that computes this year's return.
 
     Args:
-        backend: "ots", "graph", or "auto" (graph for 2024-2025 within graph
-            scope, OTS otherwise). Default is "ots".
+        backend: "auto" (default; graph for 2024-2025 within graph scope,
+            OTS otherwise), "ots", or "graph".
         year: Tax year.
         state: State code (e.g., "CA") or None for federal only.
 

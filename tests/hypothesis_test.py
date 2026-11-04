@@ -50,12 +50,14 @@ def test_w2_monotonicity(
         year=year,
         filing_status=filing_status,
         w2_income=w2_income,
+        backend="ots",
     )
 
     result2 = tenforty.evaluate_return(
         year=year,
         filing_status=filing_status,
         w2_income=w2_income + w2_increment,
+        backend="ots",
     )
     assert result1.total_tax <= result2.total_tax
 
@@ -160,6 +162,7 @@ def test_federal_tax_monotonicity(
         long_term_capital_gains=long_term_capital_gains,
         schedule_1_income=schedule_1_income,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        backend="ots",
     )
 
     incremented_result = tenforty.evaluate_return(
@@ -172,6 +175,7 @@ def test_federal_tax_monotonicity(
         long_term_capital_gains=long_term_capital_gains + long_term_increment,
         schedule_1_income=schedule_1_income + schedule_1_increment,
         incentive_stock_option_gains=incentive_stock_option_gains + iso_gains_increment,
+        backend="ots",
     )
 
     assert base_result.total_tax <= incremented_result.total_tax
@@ -280,6 +284,7 @@ def test_evaluate_return_properties(
         itemized_deductions=itemized_deductions,
         state_adjustment=state_adjustment,
         incentive_stock_option_gains=incentive_stock_option_gains,
+        backend="ots",
     )
 
     assert (
@@ -348,6 +353,7 @@ def test_az_widow_standard_deduction():
         state="AZ",
         filing_status="Widow(er)",
         w2_income=50000.0,
+        backend="ots",
     )
     hoh_result = tenforty.evaluate_return(
         year=2024,
@@ -355,6 +361,7 @@ def test_az_widow_standard_deduction():
         filing_status="Head_of_House",
         w2_income=50000.0,
         num_dependents=1,
+        backend="ots",
     )
     assert result.state_taxable_income == hoh_result.state_taxable_income
     assert result.state_total_tax == hoh_result.state_total_tax
@@ -389,6 +396,7 @@ def test_qualified_dividends_properly_taxed(
         filing_status=filing_status,
         w2_income=0,
         qualified_dividends=qualified_dividends,
+        backend="ots",
     )
 
     # Compare with ordinary dividends explicitly set
@@ -399,6 +407,7 @@ def test_qualified_dividends_properly_taxed(
         w2_income=0,
         qualified_dividends=qualified_dividends,
         ordinary_dividends=qualified_dividends,  # Explicitly set ordinary = qualified
+        backend="ots",
     )
 
     # Main test: Results should be identical when ordinary = qualified is explicit
@@ -429,11 +438,13 @@ def test_qualified_dividends_preferential_rates(year, filing_status, amount):
         year=year,
         filing_status=filing_status,
         qualified_dividends=amount,
+        backend="ots",
     )
     ordinary_result = tenforty.evaluate_return(
         year=year,
         filing_status=filing_status,
         taxable_interest=amount,
+        backend="ots",
     )
     assert qualified_result.total_tax <= ordinary_result.total_tax, (
         f"Qualified dividends ({qualified_result.total_tax}) should be taxed at "

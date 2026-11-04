@@ -419,7 +419,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
-| `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for 2024-2025, OTS for 2018-2023); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
+| `backend`                    | str                      | auto                | "auto", "ots", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; pass "ots" for the pre-release default; see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
 
 ### The `evaluate_returns` frame
 
@@ -491,14 +491,22 @@ experimental. Tax forms are written in a Haskell DSL
 ([`tenforty-spec/`](./tenforty-spec/)), compiled to JSON graphs, and evaluated
 by a Rust runtime exposed to Python. Because the whole return is one
 differentiable graph, it can report exact marginal rates and solve for inputs,
-which OTS can't. It is included in the published wheels; select it per call
-with `backend="graph"`:
+which OTS can't. It is included in the published wheels.
+
+The default, `backend="auto"`, computes a 2024 or 2025 return on the graph
+backend when the return is federal-only or its state is in
+[graph scope](./docs/error-handling.md#graph-state-scope-under-auto), and on
+OTS otherwise; every 2018-2023 return goes to OTS. To force one backend, pass
+it explicitly. `backend="ots"` is the rollback to the behavior of earlier
+releases, whose default was OTS; `backend="graph"` computes any state the graph
+covers, in scope or not:
 
 ``` python
 evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
+evaluate_return(year=2025, w2_income=100_000, backend="ots")
 ```
 
-Compared with the default OTS backend:
+Compared with the OTS backend:
 
 - It covers the 2024 and 2025 tax years only.
 - It supports many more states: in addition to the OTS states, AL, AR, CO,

@@ -910,8 +910,7 @@ def _run_range_scenario(scenario):
         kwargs["taxable_interest"] = scenario["taxable_interest"]
     if scenario.get("ordinary_dividends"):
         kwargs["ordinary_dividends"] = scenario["ordinary_dividends"]
-    if scenario.get("backend"):
-        kwargs["backend"] = scenario["backend"]
+    kwargs["backend"] = scenario.get("backend") or "ots"
     result = evaluate_return(**kwargs)
 
     assert (
@@ -2162,9 +2161,9 @@ def test_wv_tax_ranges(scenario):
 def test_state_tax_increases_with_income(state, backend):
     """Verify that state tax increases monotonically with income."""
     incomes = [50000, 100000, 150000, 200000]
-    kwargs_base = dict(year=2024, state=state, filing_status="Single")
-    if backend:
-        kwargs_base["backend"] = backend
+    kwargs_base = dict(
+        year=2024, state=state, filing_status="Single", backend=backend or "ots"
+    )
 
     results = [evaluate_return(w2_income=income, **kwargs_base) for income in incomes]
 
