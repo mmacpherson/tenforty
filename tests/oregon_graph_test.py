@@ -321,3 +321,125 @@ def test_ots_spouse_regular_checkbox_follows_joint_status(year, status):
     mapping = NATURAL_FORM_CONFIG[(year, "OR_40")].input_map
     fields = map_natural_to_ots_input({"filing_status": status}, mapping)
     assert fields["CkL6bRegular"] == ("Yes" if status == "Married/Joint" else "No")
+
+
+def test_astra_fractional_wages_round_before_tax_table_scalar_and_batch():
+    """Independent derivation (Astra): OR-40 2024 p.14/p.26 [10300,10400) S."""
+    kwargs = dict(
+        year=2024,
+        state="OR",
+        filing_status="Single",
+        w2_income=13_044.90,
+        backend="graph",
+    )
+    scalar = evaluate_return(**kwargs)
+    batch = evaluate_returns(**kwargs, mode="zip")
+    assert scalar.state_adjusted_gross_income == 13_045
+    assert scalar.state_taxable_income == 10_300
+    assert scalar.state_total_tax == 363
+    assert batch["state_adjusted_gross_income"][0] == 13_045
+    assert batch["state_taxable_income"][0] == 10_300
+    assert batch["state_total_tax"][0] == 363
+
+
+def test_astra_fractional_federal_subtraction_rounds_before_tax_table():
+    """Independent derivation (Astra): 2024 p.14/p.27 [25600,25700) S."""
+    runtime = _runtime(2024, "Single", 30_000, 1655.10)
+    assert runtime.eval("or_40_L18_federal_tax_subtraction") == 1655
+    assert runtime.eval("or_40_L23_or_taxable_income") == 25_600
+    assert runtime.eval("or_40_L25_or_bracket_tax") == 1943
+    assert runtime.eval("or_40_L32_or_total_tax") == 1694
+
+
+def test_2025_fractional_wages_follow_published_whole_dollar_row():
+    """Non-blind source derivation: round(13134.90)=13135; 13135-2835=10300; row611-256=355."""
+    kwargs = dict(
+        year=2025,
+        state="OR",
+        filing_status="Single",
+        w2_income=13_134.90,
+        backend="graph",
+    )
+    scalar = evaluate_return(**kwargs)
+    batch = evaluate_returns(**kwargs, mode="zip")
+    assert scalar.state_taxable_income == 10_300
+    assert scalar.state_total_tax == 355
+    assert batch["state_taxable_income"][0] == 10_300
+    assert batch["state_total_tax"][0] == 355
+
+
+def test_2025_fractional_federal_subtraction_follow_published_row():
+    """Non-blind source derivation: 30090-1655-2835=25600; row1934-256=1678."""
+    runtime = _runtime(2025, "Single", 30_090, 1655.10)
+    assert runtime.eval("or_40_L18_federal_tax_subtraction") == 1655
+    assert runtime.eval("or_40_L23_or_taxable_income") == 25_600
+    assert runtime.eval("or_40_L25_or_bracket_tax") == 1934
+    assert runtime.eval("or_40_L32_or_total_tax") == 1678
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("status", STATUSES)
+def test_fractional_table_chart_transition_scalar_and_zip(year, status):
+    """Published final table row/chart bases, with p.14 entry rounding first."""
+    deduction = {
+        2024: [2745, 5495, 2745, 4420, 5495],
+        2025: [2835, 5670, 2835, 4560, 5670],
+    }[year][STATUSES.index(status)]
+    single = status in ("Single", "Married/Sep")
+    table_tax = {2024: (4069, 3769), 2025: (4060, 3751)}[year][0 if single else 1]
+    chart_tax = {2024: (4073, 3774), 2025: (4065, 3756)}[year][0 if single else 1]
+    fractional = [49_999.49, 49_999.50, 49_999.90, 50_000.49]
+    taxable = [49_999, 50_000, 50_000, 50_000]
+    tax = [table_tax, chart_tax, chart_tax, chart_tax]
+    for amount, expected_income, expected_tax in zip(
+        fractional, taxable, tax, strict=True
+    ):
+        runtime = _runtime(year, status, amount + deduction)
+        assert runtime.eval("or_40_L23_or_taxable_income") == expected_income
+        assert runtime.eval("or_40_L25_or_bracket_tax") == expected_tax
+    inputs = {name: [0.0] * 4 for name in _zero_inputs(year)}
+    inputs["us_1040_L11_agi"] = [amount + deduction for amount in fractional]
+    inputs["us_1040_L22_tax_after_credits"] = [0.0] * 4
+    _, _, outputs = _component_graph(year).eval_scenarios_zip(
+        inputs,
+        [
+            [
+                "single",
+                "married_joint",
+                "married_separate",
+                "head_of_household",
+                "qualifying_widow",
+            ][STATUSES.index(status)]
+        ]
+        * 4,
+        ["or_40_L23_or_taxable_income", "or_40_L25_or_bracket_tax"],
+    )
+    assert outputs["or_40_L23_or_taxable_income"] == taxable
+    assert outputs["or_40_L25_or_bracket_tax"] == tax
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("addition,expected_taxable", [(0.49, 10_300), (0.50, 10_302)])
+def test_separate_form_entries_round_before_adding(year, addition, expected_taxable):
+    """OR-40 p.14 rounds each entered amount, not just the final sum."""
+    deduction = {2024: 2745, 2025: 2835}[year]
+    runtime = _runtime(year, "Single", 10_300 + deduction)
+    runtime.set("or_40_L8_or_addition_interest", addition)
+    runtime.set("or_40_L11_or_addition_other", addition)
+    assert runtime.eval("or_40_L23_or_taxable_income") == expected_taxable
+
+
+@pytest.mark.parametrize(
+    "year,cap,reduced,credit", [(2024, 8250, 6600, 249), (2025, 8500, 6800, 256)]
+)
+@pytest.mark.parametrize("fraction,reduce", [(0.49, False), (0.50, True)])
+def test_rounded_agi_controls_subtraction_and_credit_boundaries(
+    year, cap, reduced, credit, fraction, reduce
+):
+    """Published Table4/credit ceilings apply to the whole-dollar AGI entry."""
+    runtime = _runtime(year, "Single", 124_999 + fraction, 20_000)
+    assert runtime.eval("or_40_L18_federal_tax_subtraction") == (
+        reduced if reduce else cap
+    )
+    runtime = _runtime(year, "Single", 100_000 + fraction)
+    assert runtime.eval("or_40_ExemptionCredit") == (0 if reduce else credit)

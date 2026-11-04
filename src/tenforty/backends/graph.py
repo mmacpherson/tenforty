@@ -435,7 +435,7 @@ class GraphBackend:
         # map the single path uses (so federal_amt is actually requested, not
         # zero-filled), plus this state's output lines resolved through the
         # shared helper. A pair list, not a dict: one node can feed two fields
-        # (CT/NE/NM/OR reuse us_1040_L11_agi for both federal and state AGI),
+        # (CT/NE/NM reuse us_1040_L11_agi for both federal and state AGI),
         # which the single path handles by evaluating that node into each.
         output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         if state and state != OTSState.NONE:
@@ -448,7 +448,7 @@ class GraphBackend:
 
         # Reject a requested output node that isn't in the graph rather than let
         # eval_scenarios silently return a 0.0 column for it (the failure mode
-        # that returned state_adjusted_gross_income=0 for CT/NE/NM/OR).
+        # that returned state_adjusted_gross_income=0 for imported federal AGI).
         graph_nodes = set(graph.node_names())
         missing_outputs = sorted(n for n in requested_nodes if n not in graph_nodes)
         if missing_outputs:
