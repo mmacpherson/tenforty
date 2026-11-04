@@ -44,6 +44,12 @@
 - An unknown `on_error` value raises `ValueError` instead of behaving like
   `"ignore"`.
 
+### Fixed (graph backend)
+- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
+  $100,000 of taxable income (Instruction 17), as published, instead of the
+  unrounded rate schedule; Worksheet 17A still applies to the cent at
+  $100,000 and above. Every one of the table's 2,001 rows is checked.
+
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)
 - **Filing status now reaches OTS for Massachusetts, New Jersey and Virginia.**

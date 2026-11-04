@@ -532,66 +532,57 @@
         },
         "153": {
             "id": 153,
-            "name": "TaxSingle",
             "op": {
-                "income": 152,
-                "table": "md_brackets_single_2024",
-                "type": "bracket_tax"
+                "type": "literal",
+                "value": 50
             }
         },
         "154": {
             "id": 154,
-            "name": "TaxJoint",
             "op": {
-                "income": 152,
-                "table": "md_brackets_joint_2024",
-                "type": "bracket_tax"
+                "left": 153,
+                "right": 152,
+                "type": "sub"
             }
         },
         "155": {
             "id": 155,
-            "name": "L21_md_state_tax",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 154,
-                    "married_joint": 154,
-                    "married_separate": 153,
-                    "qualifying_widow": 154,
-                    "single": 153
-                }
+                "type": "literal",
+                "value": 0
             }
         },
         "156": {
             "id": 156,
             "op": {
-                "left": 30,
-                "right": 31,
-                "type": "add"
+                "type": "literal",
+                "value": 100
             }
         },
         "157": {
             "id": 157,
             "op": {
-                "left": 29,
-                "right": 156,
-                "type": "add"
+                "left": 156,
+                "right": 152,
+                "type": "sub"
             }
         },
         "158": {
             "id": 158,
             "op": {
-                "left": 28,
-                "right": 157,
-                "type": "add"
+                "arg": 152,
+                "mode": "floor",
+                "output_offset": 12.5,
+                "step": 25,
+                "type": "tax_table_quantize"
             }
         },
         "159": {
             "id": 159,
             "op": {
-                "left": 27,
-                "right": 158,
-                "type": "add"
+                "income": 158,
+                "table": "md_brackets_single_2024",
+                "type": "bracket_tax"
             }
         },
         "16": {
@@ -603,85 +594,91 @@
         },
         "160": {
             "id": 160,
-            "name": "L28_total_credits",
             "op": {
-                "left": 26,
-                "right": 159,
-                "type": "add"
+                "arg": 159,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
             }
         },
         "161": {
             "id": 161,
-            "name": "L29_total_state_local_tax",
             "op": {
-                "left": 155,
-                "right": 25,
-                "type": "add"
+                "type": "literal",
+                "value": 100000
             }
         },
         "162": {
             "id": 162,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 161,
+                "right": 152,
+                "type": "sub"
             }
         },
         "163": {
             "id": 163,
             "op": {
-                "left": 161,
-                "right": 160,
-                "type": "sub"
+                "arg": 152,
+                "mode": "floor",
+                "output_offset": 25,
+                "step": 50,
+                "type": "tax_table_quantize"
             }
         },
         "164": {
             "id": 164,
-            "name": "L30_tax_after_credits",
             "op": {
-                "left": 162,
-                "right": 163,
-                "type": "max"
+                "income": 163,
+                "table": "md_brackets_single_2024",
+                "type": "bracket_tax"
             }
         },
         "165": {
             "id": 165,
-            "name": "L32_md_total_tax",
             "op": {
-                "left": 164,
-                "right": 32,
-                "type": "add"
+                "arg": 164,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
             }
         },
         "166": {
             "id": 166,
-            "name": "L35_total_payments",
             "op": {
-                "left": 33,
-                "right": 34,
-                "type": "add"
+                "income": 152,
+                "table": "md_brackets_single_2024",
+                "type": "bracket_tax"
             }
         },
         "167": {
             "id": 167,
             "op": {
-                "left": 166,
-                "right": 165,
-                "type": "sub"
+                "cond": 162,
+                "otherwise": 166,
+                "then": 165,
+                "type": "if_positive"
             }
         },
         "168": {
             "id": 168,
             "op": {
-                "left": 166,
-                "right": 165,
-                "type": "sub"
+                "cond": 157,
+                "otherwise": 167,
+                "then": 160,
+                "type": "if_positive"
             }
         },
         "169": {
             "id": 169,
+            "name": "TaxSingle",
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 154,
+                "otherwise": 168,
+                "then": 155,
+                "type": "if_positive"
             }
         },
         "17": {
@@ -693,36 +690,82 @@
         },
         "170": {
             "id": 170,
-            "name": "L36_overpayment",
             "op": {
-                "cond": 167,
-                "otherwise": 169,
-                "then": 168,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 50
             }
         },
         "171": {
             "id": 171,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 170,
+                "right": 152,
+                "type": "sub"
             }
         },
         "172": {
             "id": 172,
             "op": {
-                "left": 165,
-                "right": 166,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "173": {
             "id": 173,
-            "name": "L37_amount_owed",
             "op": {
-                "left": 171,
-                "right": 172,
-                "type": "max"
+                "type": "literal",
+                "value": 100
+            }
+        },
+        "174": {
+            "id": 174,
+            "op": {
+                "left": 173,
+                "right": 152,
+                "type": "sub"
+            }
+        },
+        "175": {
+            "id": 175,
+            "op": {
+                "arg": 152,
+                "mode": "floor",
+                "output_offset": 12.5,
+                "step": 25,
+                "type": "tax_table_quantize"
+            }
+        },
+        "176": {
+            "id": 176,
+            "op": {
+                "income": 175,
+                "table": "md_brackets_joint_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "177": {
+            "id": 177,
+            "op": {
+                "arg": 176,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
+            }
+        },
+        "178": {
+            "id": 178,
+            "op": {
+                "type": "literal",
+                "value": 100000
+            }
+        },
+        "179": {
+            "id": 179,
+            "op": {
+                "left": 178,
+                "right": 152,
+                "type": "sub"
             }
         },
         "18": {
@@ -732,11 +775,189 @@
                 "type": "input"
             }
         },
+        "180": {
+            "id": 180,
+            "op": {
+                "arg": 152,
+                "mode": "floor",
+                "output_offset": 25,
+                "step": 50,
+                "type": "tax_table_quantize"
+            }
+        },
+        "181": {
+            "id": 181,
+            "op": {
+                "income": 180,
+                "table": "md_brackets_joint_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "182": {
+            "id": 182,
+            "op": {
+                "arg": 181,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
+            }
+        },
+        "183": {
+            "id": 183,
+            "op": {
+                "income": 152,
+                "table": "md_brackets_joint_2024",
+                "type": "bracket_tax"
+            }
+        },
+        "184": {
+            "id": 184,
+            "op": {
+                "cond": 179,
+                "otherwise": 183,
+                "then": 182,
+                "type": "if_positive"
+            }
+        },
+        "185": {
+            "id": 185,
+            "op": {
+                "cond": 174,
+                "otherwise": 184,
+                "then": 177,
+                "type": "if_positive"
+            }
+        },
+        "186": {
+            "id": 186,
+            "name": "TaxJoint",
+            "op": {
+                "cond": 171,
+                "otherwise": 185,
+                "then": 172,
+                "type": "if_positive"
+            }
+        },
+        "187": {
+            "id": 187,
+            "name": "L21_md_state_tax",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 186,
+                    "married_joint": 186,
+                    "married_separate": 169,
+                    "qualifying_widow": 186,
+                    "single": 169
+                }
+            }
+        },
+        "188": {
+            "id": 188,
+            "op": {
+                "left": 30,
+                "right": 31,
+                "type": "add"
+            }
+        },
+        "189": {
+            "id": 189,
+            "op": {
+                "left": 29,
+                "right": 188,
+                "type": "add"
+            }
+        },
         "19": {
             "id": 19,
             "name": "L15i_md_sub_long_term_care",
             "op": {
                 "type": "input"
+            }
+        },
+        "190": {
+            "id": 190,
+            "op": {
+                "left": 28,
+                "right": 189,
+                "type": "add"
+            }
+        },
+        "191": {
+            "id": 191,
+            "op": {
+                "left": 27,
+                "right": 190,
+                "type": "add"
+            }
+        },
+        "192": {
+            "id": 192,
+            "name": "L28_total_credits",
+            "op": {
+                "left": 26,
+                "right": 191,
+                "type": "add"
+            }
+        },
+        "193": {
+            "id": 193,
+            "name": "L29_total_state_local_tax",
+            "op": {
+                "left": 187,
+                "right": 25,
+                "type": "add"
+            }
+        },
+        "194": {
+            "id": 194,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "195": {
+            "id": 195,
+            "op": {
+                "left": 193,
+                "right": 192,
+                "type": "sub"
+            }
+        },
+        "196": {
+            "id": 196,
+            "name": "L30_tax_after_credits",
+            "op": {
+                "left": 194,
+                "right": 195,
+                "type": "max"
+            }
+        },
+        "197": {
+            "id": 197,
+            "name": "L32_md_total_tax",
+            "op": {
+                "left": 196,
+                "right": 32,
+                "type": "add"
+            }
+        },
+        "198": {
+            "id": 198,
+            "name": "L35_total_payments",
+            "op": {
+                "left": 33,
+                "right": 34,
+                "type": "add"
+            }
+        },
+        "199": {
+            "id": 199,
+            "op": {
+                "left": 198,
+                "right": 197,
+                "type": "sub"
             }
         },
         "2": {
@@ -751,6 +972,55 @@
             "name": "L15j_md_sub_pension_exclusion",
             "op": {
                 "type": "input"
+            }
+        },
+        "200": {
+            "id": 200,
+            "op": {
+                "left": 198,
+                "right": 197,
+                "type": "sub"
+            }
+        },
+        "201": {
+            "id": 201,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "202": {
+            "id": 202,
+            "name": "L36_overpayment",
+            "op": {
+                "cond": 199,
+                "otherwise": 201,
+                "then": 200,
+                "type": "if_positive"
+            }
+        },
+        "203": {
+            "id": 203,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "204": {
+            "id": 204,
+            "op": {
+                "left": 197,
+                "right": 198,
+                "type": "sub"
+            }
+        },
+        "205": {
+            "id": 205,
+            "name": "L37_amount_owed",
+            "op": {
+                "left": 203,
+                "right": 204,
+                "type": "max"
             }
         },
         "21": {
@@ -1424,11 +1694,11 @@
         35,
         60,
         152,
-        155,
-        165,
-        166,
-        170,
-        173
+        187,
+        197,
+        198,
+        202,
+        205
     ],
     "tables": {
         "md_brackets_joint_2024": {

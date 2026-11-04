@@ -153,6 +153,7 @@ executable tenforty-compile
     SCForm1040_2025
     SDNoTax_2024
     SDNoTax_2025
+    StateTaxTable
     Tables2024
     Tables2025
     TablesAK2024
@@ -442,6 +443,7 @@ test-suite tenforty-spec-test
     SCForm1040_2025
     SDNoTax_2024
     SDNoTax_2025
+    StateTaxTable
     Tables2024
     Tables2025
     TablesAK2024
