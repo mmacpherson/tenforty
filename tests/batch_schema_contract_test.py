@@ -285,8 +285,9 @@ def test_echo_uses_the_validated_field_value(
 
 
 def _none_nan_outputs(frame: pl.DataFrame) -> bool:
+    """No output is NaN; a null rate means "not defined", not a failed return."""
     return not any(
-        math.isnan(value)
+        value is not None and math.isnan(value)
         for row in frame.select(OUTPUT_COLUMNS).rows()
         for value in row
     )

@@ -94,6 +94,12 @@ caTaxYears =
     CATaxYear 2025 californiaBrackets2025 caStandardDeduction2025 ca540_2025
   ]
 
+evalBracketRateAt :: Table -> FilingStatus -> Double -> Double
+evalBracketRateAt table status income =
+  case form "rate_probe" 2025 (void (compute "result" "Result" "Result" Interior (dollars 1 .*. bracketRateAt table (dollars income)))) of
+    Left err -> error ("evalBracketRateAt: " ++ show err)
+    Right frm -> evalGraphNode (compileForm frm) status 0 "result"
+
 getExampleCount :: IO Int
 getExampleCount = do
   env <- lookupEnv "QUICKCHECK_EXAMPLES"
@@ -180,6 +186,25 @@ spec n = do
               let r = marginalRate bt status (Amount inc)
                in r >= 0 && r <= 0.37
             Left _ -> False
+
+      it ("bracketRateAt agrees with marginalRate (" ++ yr ++ ")") $ property $ \(NonNegative inc) ->
+        forAll (elements allFilingStatuses) $ \status ->
+          case mkBracketTable (tyBrackets ty) of
+            Right bt ->
+              evalBracketRateAt (TableBracket "rate_probe" bt) status inc
+                === unAmount (marginalRate bt status (Amount inc))
+            Left _ -> property False
+
+      it ("bracketRateAt puts an exact breakpoint in the lower bracket (" ++ yr ++ ")") $
+        forM_ allFilingStatuses $ \status ->
+          case mkBracketTable (tyBrackets ty) of
+            Right bt ->
+              forM_ (zip (bracketTableList bt) (drop 1 (bracketTableList bt))) $ \(lower, upper) -> do
+                let threshold = unAmount (forStatus (bracketThreshold lower) status)
+                    probe = evalBracketRateAt (TableBracket "rate_probe" bt) status
+                probe threshold `shouldBe` unAmount (bracketRate lower)
+                probe (threshold + 1) `shouldBe` unAmount (bracketRate upper)
+            Left err -> expectationFailure err
 
   describe "California BracketTable" $ do
     forM_ caTaxYears $ \cty -> do

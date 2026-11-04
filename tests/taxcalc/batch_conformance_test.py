@@ -59,8 +59,13 @@ def _assert_full_output_row(df, row: int, scalar: InterpretedTaxReturn) -> None:
     assert not missing, f"batch dropped public output columns: {sorted(missing)}"
     mismatches = []
     for field in OUTPUT_FIELDS:
-        batch_value = float(df[field][row])
-        scalar_value = float(getattr(scalar, field))
+        batch_raw, scalar_raw = df[field][row], getattr(scalar, field)
+        if batch_raw is None or scalar_raw is None:
+            if batch_raw is not scalar_raw:
+                mismatches.append(f"{field}: batch={batch_raw} scalar={scalar_raw}")
+            continue
+        batch_value = float(batch_raw)
+        scalar_value = float(scalar_raw)
         if abs(batch_value - scalar_value) > 0.02:
             mismatches.append(
                 f"{field}: batch={batch_value:,.2f} scalar={scalar_value:,.2f}"

@@ -21,7 +21,9 @@ second:
 | `"ignore"` | Returns a **failed return** silently |
 
 A **failed return** has every field set to NaN: `InterpretedTaxReturn.failed()`.
-NaN means "this return failed". It is never a $0 that could pass for a real
+NaN means "this return failed". (A rate field that is `None`, null in a frame,
+is a different thing: the rate is not defined for a successful return.) It is
+never a $0 that could pass for a real
 return, and it propagates through sums, so check for it before aggregating:
 
 ```python

@@ -631,3 +631,40 @@ unmodified vendored program and runs, through one process, an age-65 filer then
 an under-65 filer, and a spouse-only-65 joint return then an under-65 joint
 return. It flips only when neither flag leaks, whatever form the upstream fix
 takes; a one-flag fix or a comment does not flip it.
+
+---
+
+## 16. NJ-1040 bracket report skips the 8.97% band for joint filers (finding NJ-OTS-MFJ-897)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_NJ_1040_2024.c:93`
+- `src/taxsolve_NJ_1040_2025.c:93`
+
+In `Report_bracket_info()`, the branch for married/joint, head of household and
+widow(er) filers reads:
+
+```c
+   if (x < 500000.0)  rate = 0.0637;    else
+   if (x < 100000.0)  rate = 0.0897;
+   else		      rate = 0.1075;
+```
+
+The second test can never succeed once the first has failed, so we think
+`100000.0` was meant to be `1000000.0`. As written, a joint filer with taxable
+income between $500,000 and $1,000,000 is told "You are in the 10.8% marginal
+tax bracket", where Tax Rate Schedule B (NJ-1040 instructions, p.63, both years)
+puts that income in the 8.97% band. The single/separate branch just above reads
+`if (x < 1000000.0) rate = 0.0897;` and looks right.
+
+**Effect:** only the informational bracket line. The tax itself comes from
+`TaxRateFormula()`, which we believe has the right breakpoint, so no tax amount
+changes.
+
+**Minimal reproducer:** 2024 or 2025 Married/Joint, $700,000 of wages. OTS
+prints a 10.8% marginal bracket; Schedule B gives 8.97%.
+
+**Possible fix:** `if (x < 1000000.0) rate = 0.0897;` in both files.
+
+Offered tentatively: we may have missed a reason for the figure. Recorded locally
+as a strict-xfail in `tests/parity/state_bracket_parity_test.py`, not patched.

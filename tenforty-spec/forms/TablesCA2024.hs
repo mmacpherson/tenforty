@@ -11,7 +11,7 @@ module TablesCA2024
     caDependentExemption2024,
     caExemptionPhaseoutThreshold2024,
     caPersonalExemptionCredit2024,
-    caExemptionPhaseoutRate2024,
+    caExemptionPhaseoutInterval2024,
 
     -- * Mental Health Services Tax
     caMentalHealthThreshold2024,
@@ -84,11 +84,10 @@ caExemptionPhaseoutThreshold2024 = byStatus 244857 489719 244857 367291 489719
 caPersonalExemptionCredit2024 :: ByStatus (Amount Dollars)
 caPersonalExemptionCredit2024 = byStatus 149 298 149 149 298
 
--- | 2024 exemption credit phase-out rate per dollar of excess AGI
--- FTB: $6 per $2,500 excess per exemption ($6/$1,250 for MFS)
--- Single/HoH: 1 × $6/$2,500; MFJ/QW: 2 × $6/$2,500; MFS: 1 × $6/$1,250
-caExemptionPhaseoutRate2024 :: ByStatus (Amount Rate)
-caExemptionPhaseoutRate2024 = byStatus 0.0024 0.0048 0.0048 0.0024 0.0048
+-- | Excess federal AGI per started exemption phase-out interval (FTB p.14).
+-- Order: Single, MFJ, MFS, HoH, QW.
+caExemptionPhaseoutInterval2024 :: ByStatus (Amount Dollars)
+caExemptionPhaseoutInterval2024 = byStatus 2500 2500 1250 2500 2500
 
 -- | 2024 Mental Health Services Tax threshold ($1M)
 caMentalHealthThreshold2024 :: Amount Dollars

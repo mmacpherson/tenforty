@@ -149,8 +149,15 @@ ohIT1040_2025 = form "oh_it1040" 2025 $ do
     keyOutput "L33" "overpayment" "Overpayment" $
       l31 `excessOf` l25
 
+  -- The rate-schedule bracket that holds l9, as tax per dollar: the
+  -- same table as the tax, with a threshold amount in the lower bracket.
+  _ <-
+    keyOutput "L9BracketRate" "oh_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt ohioBracketsTable2025 l9
+
   outputs
-    [ "L1",
+    [ "L9BracketRate",
+      "L1",
       "L4",
       "L9",
       "L10",

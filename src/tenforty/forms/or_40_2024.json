@@ -2969,11 +2969,144 @@
                 "type": "add"
             }
         },
+        "433": {
+            "id": 433,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "434": {
+            "id": 434,
+            "op": {
+                "type": "literal",
+                "value": 4300
+            }
+        },
+        "435": {
+            "id": 435,
+            "op": {
+                "type": "literal",
+                "value": 8600
+            }
+        },
+        "436": {
+            "id": 436,
+            "op": {
+                "type": "literal",
+                "value": 4300
+            }
+        },
+        "437": {
+            "id": 437,
+            "op": {
+                "type": "literal",
+                "value": 8600
+            }
+        },
+        "438": {
+            "id": 438,
+            "op": {
+                "type": "literal",
+                "value": 8600
+            }
+        },
+        "439": {
+            "id": 439,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 437,
+                    "married_joint": 435,
+                    "married_separate": 436,
+                    "qualifying_widow": 438,
+                    "single": 434
+                }
+            }
+        },
         "44": {
             "id": 44,
             "op": {
                 "type": "literal",
                 "value": 0.5
+            }
+        },
+        "440": {
+            "id": 440,
+            "op": {
+                "left": 228,
+                "right": 439,
+                "type": "sub"
+            }
+        },
+        "441": {
+            "id": 441,
+            "op": {
+                "type": "literal",
+                "value": 10750
+            }
+        },
+        "442": {
+            "id": 442,
+            "op": {
+                "type": "literal",
+                "value": 21500
+            }
+        },
+        "443": {
+            "id": 443,
+            "op": {
+                "type": "literal",
+                "value": 10750
+            }
+        },
+        "444": {
+            "id": 444,
+            "op": {
+                "type": "literal",
+                "value": 21500
+            }
+        },
+        "445": {
+            "id": 445,
+            "op": {
+                "type": "literal",
+                "value": 21500
+            }
+        },
+        "446": {
+            "id": 446,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 444,
+                    "married_joint": 442,
+                    "married_separate": 443,
+                    "qualifying_widow": 445,
+                    "single": 441
+                }
+            }
+        },
+        "447": {
+            "id": 447,
+            "op": {
+                "left": 228,
+                "right": 446,
+                "type": "sub"
+            }
+        },
+        "448": {
+            "id": 448,
+            "op": {
+                "type": "literal",
+                "value": 125000
+            }
+        },
+        "449": {
+            "id": 449,
+            "op": {
+                "type": "literal",
+                "value": 250000
             }
         },
         "45": {
@@ -2984,11 +3117,117 @@
                 "type": "add"
             }
         },
+        "450": {
+            "id": 450,
+            "op": {
+                "type": "literal",
+                "value": 125000
+            }
+        },
+        "451": {
+            "id": 451,
+            "op": {
+                "type": "literal",
+                "value": 250000
+            }
+        },
+        "452": {
+            "id": 452,
+            "op": {
+                "type": "literal",
+                "value": 250000
+            }
+        },
+        "453": {
+            "id": 453,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 451,
+                    "married_joint": 449,
+                    "married_separate": 450,
+                    "qualifying_widow": 452,
+                    "single": 448
+                }
+            }
+        },
+        "454": {
+            "id": 454,
+            "op": {
+                "left": 228,
+                "right": 453,
+                "type": "sub"
+            }
+        },
+        "455": {
+            "id": 455,
+            "op": {
+                "type": "literal",
+                "value": 9.9e-2
+            }
+        },
+        "456": {
+            "id": 456,
+            "op": {
+                "type": "literal",
+                "value": 8.75e-2
+            }
+        },
+        "457": {
+            "id": 457,
+            "op": {
+                "cond": 454,
+                "otherwise": 456,
+                "then": 455,
+                "type": "if_positive"
+            }
+        },
+        "458": {
+            "id": 458,
+            "op": {
+                "type": "literal",
+                "value": 6.75e-2
+            }
+        },
+        "459": {
+            "id": 459,
+            "op": {
+                "cond": 447,
+                "otherwise": 458,
+                "then": 457,
+                "type": "if_positive"
+            }
+        },
         "46": {
             "id": 46,
             "op": {
                 "arg": 45,
                 "type": "floor"
+            }
+        },
+        "460": {
+            "id": 460,
+            "op": {
+                "type": "literal",
+                "value": 4.75e-2
+            }
+        },
+        "461": {
+            "id": 461,
+            "op": {
+                "cond": 440,
+                "otherwise": 460,
+                "then": 459,
+                "type": "if_positive"
+            }
+        },
+        "462": {
+            "id": 462,
+            "name": "L24BracketRate_or_bracket_rate",
+            "op": {
+                "left": 433,
+                "right": 461,
+                "type": "mul"
             }
         },
         "47": {
@@ -3444,6 +3683,7 @@
     },
     "outputs": [
         228,
+        462,
         389,
         432,
         22
