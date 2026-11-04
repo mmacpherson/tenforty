@@ -341,19 +341,21 @@ class TaxReturnInput(BaseModel):
     num_dependents: int = Field(
         default=0,
         description=(
-            "Qualifying children for the federal child tax credit: under 17 at the "
-            "end of the year, each with a valid SSN (Schedule 8812 line 4). For "
-            "2025, OBBBA also requires an SSN for the filer (at least one spouse "
-            "on a joint return); that is not checked. The credit is applied to "
-            "Form 1040 line 19 for 2023-2025 on the OTS backend and 2024-2025 on "
-            "the graph backend. For 2018-2022 OTS reads the count but applies no "
-            "federal child tax credit. Not modeled: the $500 credit for other "
-            "dependents, the refundable additional child tax credit (a payment, "
-            "not part of total tax), the earned income credit and the dependent "
-            "care credit. Some state returns also read this count as their "
-            "dependent count (graph: CA and WI; OTS: the state forms that map "
-            "it); graph returns for other states take dependents through "
-            "dependent_exemptions."
+            "Total number of dependents. The OR graph uses this count for its "
+            "regular exemption credit and derives the taxpayer/spouse base from "
+            "filing status. dependent_exemptions is not mapped for OR. Additional "
+            "Oregon exemptions, including severe-disability exemptions, are "
+            "unsupported. The current federal Schedule 8812 mapping treats this "
+            "count as qualifying children under 17 with valid SSNs and does not "
+            "distinguish other dependents. For 2025, OBBBA also requires an SSN "
+            "for the filer (at least one spouse on a joint return); that is not "
+            "checked. The credit reaches Form 1040 line 19 for 2023-2025 on OTS "
+            "and 2024-2025 on graph. For 2018-2022 OTS reads the count but applies "
+            "no federal child tax credit. The federal other-dependent credit, "
+            "refundable additional child tax credit, earned income credit and "
+            "dependent care credit are not modeled here. CA and WI graphs and "
+            "some OTS state forms also consume this dependent count; other graph "
+            "states generally take exemptions through dependent_exemptions."
         ),
     )
     standard_or_itemized: OTSDeductionType = OTSDeductionType.STANDARD
@@ -464,7 +466,9 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. For NJ, VA, HI, IN, KS, "
+            "State exemption dollars, not a dependent count. The OR graph does not "
+            "map this field; use num_dependents for its regular exemption credit. "
+            "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "
             "extra), not additional-only dollars. The effective total is "
@@ -624,6 +628,15 @@ def _force_itemize(value):
 
 def _filer_65_box(value):
     return ("You_65+Over?", "Y" if value else "N")
+
+
+def _oregon_regular_spouse_box(
+    filing_status: OTSFilingStatus | str,
+) -> tuple[str, str]:
+    return (
+        "CkL6bRegular",
+        "Yes" if filing_status == OTSFilingStatus.MARRIED_JOINT else "No",
+    )
 
 
 def _spouse_65_box(value):
@@ -862,7 +875,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2024,
         "form_id": "OR_40",
-        "input_map": {},
+        "input_map": {"filing_status": _oregon_regular_spouse_box},
         "output_map": {
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",
@@ -1037,7 +1050,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2025,
         "form_id": "OR_40",
-        "input_map": {},
+        "input_map": {"filing_status": _oregon_regular_spouse_box},
         "output_map": {
             "L7": "adjusted_gross_income",
             "L19": "taxable_income",

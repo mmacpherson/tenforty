@@ -7,6 +7,23 @@
   is split by year and keeps its row order.
 
 ### Changed (both backends)
+- **`evaluate_returns` frames now have one declared schema.** Columns are the
+  inputs in signature order, then the `InterpretedTaxReturn` fields, with
+  declared dtypes, for both backends, both modes, and empty, failed and
+  mixed-engine batches. See [the frame](README.md#the-evaluate_returns-frame).
+  - **Float inputs passed as whole numbers are now Float64, not Int64.** For
+    example `w2_income=[50000, 60000]` used to give an Int64 `w2_income`
+    column on OTS. Values are unchanged; code that relied on an integer dtype
+    must cast.
+  - Graph frames (opt-in) change more: they now match OTS. The derived
+    `schedule_se_ss_wages` column is gone; `dependent_exemptions`,
+    `state_adjustment` and the Schedule 1-A inputs are always present;
+    `qbi_is_sstb`, `filer_65_or_older` and `spouse_65_or_older` are Boolean,
+    not Float64; the column order is fixed; cross rows follow signature order
+    (filing status before income), as OTS's do; and inputs echo the request
+    rather than normalized values (`ordinary_dividends` is no longer lifted to
+    `qualified_dividends` in the frame).
+  - An empty input list gives an empty frame with the full schema.
 - **A failed computation under `on_error="warn"` or `"ignore"` now returns NaN
   in every output field, never zeros.** The graph backend used to return an
   all-zero return, indistinguishable from a real $0 return. A failed row in

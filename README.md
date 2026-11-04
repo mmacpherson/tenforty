@@ -395,6 +395,28 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
 | `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for 2024-2025, OTS for 2018-2023); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
 
+### The `evaluate_returns` frame
+
+Every frame has the same columns, in the same order, with the same dtypes,
+whichever backend computed it and whether the batch is empty, succeeded,
+partly failed, or mixed engines under `backend="auto"`:
+
+- the inputs, in the order of the `evaluate_returns` signature (`year` through
+  `spouse_65_or_older`), then the return fields of `InterpretedTaxReturn`;
+- `year` and `num_dependents` are Int64; `state`, `filing_status` and
+  `standard_or_itemized` are String (`state` is null for a federal-only
+  return); boolean inputs are Boolean; float inputs and every output are
+  Float64, even when you pass whole numbers.
+
+The input columns echo **your request**, after broadcasting: they identify
+which return a row answers, not the values the engine used. For example, an
+`ordinary_dividends` below `qualified_dividends` is lifted before computing,
+but the frame shows the value you passed.
+
+In `mode="cross"` the rows are the Cartesian product of the inputs, taken in
+signature order (the first argument varies slowest). In `mode="zip"` row *i*
+answers the *i*-th element of each list.
+
 The three `qbi_` inputs describe one trade or business, or businesses the
 taxpayer has validly aggregated for section 199A. They are not totals across
 unrelated businesses, because Form 8995-A applies its wage and UBIA limitation
