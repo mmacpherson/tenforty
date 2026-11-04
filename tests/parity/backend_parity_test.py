@@ -1757,7 +1757,7 @@ def test_or_state_agi_parity_2024(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_or_state_tax_parity_2024(w2_income, filing_status):
-    """OR 2024 tax agrees up to the federal tax subtraction, exemption credit and bracket floors."""
+    """OR 2024 tax agrees within the existing table and rounding tolerance."""
     assert_state_parity("OR", 2024, filing_status, w2_income)
 
 
@@ -1800,7 +1800,7 @@ def test_or_state_agi_parity(w2_income, filing_status):
 )
 @settings(max_examples=100)
 def test_or_state_tax_parity(w2_income, filing_status):
-    """OR 2025 tax agrees up to the federal tax subtraction, exemption credit and bracket floors."""
+    """OR 2025 tax agrees within the existing table and rounding tolerance."""
     assert_state_parity("OR", 2025, filing_status, w2_income)
 
 
@@ -1963,7 +1963,10 @@ def test_ots_ny_uses_the_rate_schedule_from_65000():
 
 
 def test_ots_ma_married_joint_gets_joint_exemption():
-    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800, so line 19 is $11,200.
+    """MA 2024 MFJ, $20,000 wages: Form 1 line 2a allows $8,800.
+
+    Line 19 is line 10 less line 11 (7.65% of wages, $1,530; tenforty-b72.6)
+    and the $8,800 joint exemption: $9,670.
 
     Regression for MAP-MA-STATUS (tenforty-r91.2): without filing_status in the
     MA_1 input map OTS read its template default and computed every return as Single.
@@ -1975,7 +1978,7 @@ def test_ots_ma_married_joint_gets_joint_exemption():
         w2_income=20_000,
         backend="ots",
     )
-    assert result.state_taxable_income == pytest.approx(11_200.0, abs=1.0)
+    assert result.state_taxable_income == pytest.approx(9_670.0, abs=1.0)
 
 
 def test_ots_nj_married_joint_gets_two_exemptions():
@@ -2051,16 +2054,13 @@ def test_ots_ny_married_joint_household_credit_counts_both_spouses():
     assert result.state_total_tax == pytest.approx(534.0, abs=1.0)
 
 
-@pytest.mark.xfail(
-    reason="MAP-OR-SPOUSE-EXEMPTION (tenforty-r91.6): the OR_40 input map leaves CkL6bRegular at "
-    "its 'No' default, so OTS gives a joint return one exemption credit",
-    strict=True,
-)
 def test_ots_or_married_joint_gets_two_exemption_credits():
     """OR 2024 MFJ, $13,000 wages: two $249 credits exceed the tax, so none is due.
 
     No federal tax to subtract; taxable income is $13,000 - $5,495 = $7,505,
-    whose tax at the 4.75% bottom rate is about $358, below $498.
+    whose published [7,500,7,600) column-J tax is $359, below $498.
+    Conditional source derivation: docs/validation/derivations/or-2024-2025.md,
+    spouse-credit witnesses (2024 OR-40 instructions p.26; credit p.18).
     """
     result = evaluate_return(
         year=2024,
@@ -2208,45 +2208,22 @@ def test_ca_graph_requires_all_imports():
 
 
 def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
-    """Evaluate 2025 using graph backend directly (bypasses OTSYear validation)."""
-    from tenforty.backends.graph import (
-        FILING_STATUS_MAP,
-        GraphBackend,
-        _load_resolved_graph,
+    """Evaluate 2025 through its supported public graph API."""
+    result = evaluate_return(
+        year=2025,
+        w2_income=w2_income,
+        filing_status=filing_status,
+        state=state,
+        backend="graph",
     )
-    from tenforty.models import OTSFilingStatus
-
-    backend = GraphBackend()
-    if not backend.is_available():
-        pytest.skip("Graph backend not available")
-
-    from tenforty.graphlib import FilingStatus, Runtime
-
-    graph = _load_resolved_graph(2025)
-
-    fs_enum = OTSFilingStatus(filing_status)
-    fs = FilingStatus.from_str(FILING_STATUS_MAP.get(fs_enum, "single"))
-    evaluator = Runtime(graph, fs)
-
-    for inp in graph.input_names():
-        evaluator.set(inp, 0.0)
-    evaluator.set("us_1040_L1a_wages", float(w2_income))
-
-    federal_agi = evaluator.eval("us_1040_L11_agi")
-    federal_tax = evaluator.eval("us_1040_L24_total_tax")
-
-    result = {
-        "federal_adjusted_gross_income": federal_agi,
-        "federal_total_tax": federal_tax,
-        "state_adjusted_gross_income": 0.0,
-        "state_total_tax": 0.0,
+    return {
+        "federal_adjusted_gross_income": result.federal_adjusted_gross_income,
+        "federal_total_tax": result.federal_total_tax,
+        "state_adjusted_gross_income": result.state_adjusted_gross_income
+        if state == "CA"
+        else 0.0,
+        "state_total_tax": result.state_total_tax if state == "CA" else 0.0,
     }
-
-    if state == "CA":
-        result["state_adjusted_gross_income"] = evaluator.eval("ca_540_L17_ca_agi")
-        result["state_total_tax"] = evaluator.eval("ca_540_L64_ca_total_tax")
-
-    return result
 
 
 @skip_if_graph_unavailable

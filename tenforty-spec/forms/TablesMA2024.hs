@@ -11,6 +11,15 @@ module TablesMA2024
     maDependentExemption2024,
     maAge65Exemption2024,
     maBlindnessExemption2024,
+
+    -- * Line 11 contribution deduction
+    maContributionDeductionCap2024,
+    maSocialSecurityWageBase2024,
+    maSocialSecurityRate,
+    maMedicareRate,
+
+    -- * Schedule B capital loss offset
+    maCapitalLossInterestDividendCap2024,
   )
 where
 
@@ -72,3 +81,24 @@ maAge65Exemption2024 = 700
 -- \$2,200 for each taxpayer who is legally blind.
 maBlindnessExemption2024 :: Amount Dollars
 maBlindnessExemption2024 = 2200
+
+-- | Line 11: Social Security, Medicare and self-employment tax paid, "not more
+-- than \$2,000" per person (Form 1 instructions 2024, PDF p.10; M.G.L. c.62
+-- 3.B(a)(3)-(4)).
+maContributionDeductionCap2024 :: Amount Dollars
+maContributionDeductionCap2024 = 2000
+
+-- | Social Security wage base for the 6.2% employee share (2024 Schedule SE line 7).
+maSocialSecurityWageBase2024 :: Amount Dollars
+maSocialSecurityWageBase2024 = 168600
+
+maSocialSecurityRate :: Double
+maSocialSecurityRate = 0.062
+
+maMedicareRate :: Double
+maMedicareRate = 0.0145
+
+-- | Capital losses offset at most \$2,000 of interest and dividends, short- and
+-- long-term losses together (Schedule B lines 20 and 32; M.G.L. c.62 2(c)(4)).
+maCapitalLossInterestDividendCap2024 :: Amount Dollars
+maCapitalLossInterestDividendCap2024 = 2000

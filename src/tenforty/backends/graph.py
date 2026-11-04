@@ -38,11 +38,17 @@ _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
 logger = logging.getLogger(__name__)
 
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
+# Computed fields that exist only to fill an OTS form line the graph derives in
+# its own spec from the same naturals: Massachusetts line 11a comes from
+# w2_income on both backends.
+_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
 
 
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     """Lower a validated public input model to graph-compatible natural values."""
-    values = tax_input.model_dump(exclude=_MODEL_CONTEXT_FIELDS)
+    values = tax_input.model_dump(
+        exclude=_MODEL_CONTEXT_FIELDS | _OTS_ONLY_DERIVED_FIELDS
+    )
     values["standard_or_itemized"] = float(
         tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
     )
@@ -364,6 +370,7 @@ class GraphBackend:
         With mode="cross" (default), computes Cartesian product of inputs x statuses.
         With mode="zip", evaluates pre-formed scenarios by zipping input columns.
         """
+        year = getattr(year, "value", year)
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
 
@@ -435,7 +442,7 @@ class GraphBackend:
         # map the single path uses (so federal_amt is actually requested, not
         # zero-filled), plus this state's output lines resolved through the
         # shared helper. A pair list, not a dict: one node can feed two fields
-        # (CT/NE/NM/OR reuse us_1040_L11_agi for both federal and state AGI),
+        # (CT/NE/NM reuse us_1040_L11_agi for both federal and state AGI),
         # which the single path handles by evaluating that node into each.
         output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         if state and state != OTSState.NONE:
@@ -448,7 +455,7 @@ class GraphBackend:
 
         # Reject a requested output node that isn't in the graph rather than let
         # eval_scenarios silently return a 0.0 column for it (the failure mode
-        # that returned state_adjusted_gross_income=0 for CT/NE/NM/OR).
+        # that returned state_adjusted_gross_income=0 for imported federal AGI).
         graph_nodes = set(graph.node_names())
         missing_outputs = sorted(n for n in requested_nodes if n not in graph_nodes)
         if missing_outputs:
