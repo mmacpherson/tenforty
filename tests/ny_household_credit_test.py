@@ -192,6 +192,21 @@ def test_credit_income_uses_whole_dollar_entries(year, status, agi, expected):
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
+def test_negative_half_spouse_entry_accepts_both_source_readings(year):
+    """Independent derivation: negative-half-rounding-ny-or.md (A), R1/R2.
+
+    The instructions do not settle negative ties. roundE currently chooses
+    half up toward positive infinity; half away from zero is also permitted.
+    """
+    runtime = _runtime(year, "married_separate", 33_000)
+    runtime.set("ny_it201_HouseholdSpouseAgi", -999.50)
+    assert (
+        runtime.eval("ny_it201_HouseholdAgi"),
+        runtime.eval("ny_it201_L40_household_credit"),
+    ) in {(32_001, 0), (32_000, 13)}
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
 def test_mfs_raw_zip_uses_printed_over_seven_increment(year):
     """Published table3: count9 at20000/28000 gives75+2*8=91/35+2*3=41."""
     graph = _component_graph(year)
