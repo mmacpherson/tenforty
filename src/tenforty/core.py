@@ -718,7 +718,7 @@ def evaluate_natural_input_form(
             transforms=state_natural_config.output_transforms,
         )
 
-    return (
+    return _rates_not_defined_as_none(
         prefix_keys(federal_natural_output, "federal")
         | prefix_keys(subordinate_natural_outputs, "federal")
         | prefix_keys(state_natural_output, "state")
@@ -769,6 +769,39 @@ def _evaluate_with_engine(
         if policy == OTSErrorPolicy.WARN:
             _warn_failed(engine, tax_input, error)
         return InterpretedTaxReturn.failed()
+
+
+RATE_FIELDS = (
+    "federal_tax_bracket",
+    "federal_effective_tax_rate",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+
+
+def _rates_not_defined_as_none(result: dict[str, Any]) -> dict[str, Any]:
+    """Apply the public rate contract to an OTS result.
+
+    A bracket OTS did not print is "not defined" (None), not a 0% rate. An
+    effective rate is the returned tax as a percent of taxable income, computed
+    here: OTS prints a pre-credit rate rounded to 0.1%, which is a different
+    quantity. It is not defined when taxable income is not positive or, for the
+    state rate, when there is no state return.
+    """
+    rates = {field: None for field in RATE_FIELDS} | result
+    rates["federal_effective_tax_rate"] = _effective_rate(
+        rates.get("federal_total_tax"), rates.get("federal_taxable_income")
+    )
+    rates["state_effective_tax_rate"] = _effective_rate(
+        rates.get("state_total_tax"), rates.get("state_taxable_income")
+    )
+    return rates
+
+
+def _effective_rate(tax: float | None, taxable_income: float | None) -> float | None:
+    if tax is None or taxable_income is None or taxable_income <= 0:
+        return None
+    return tax / taxable_income * 100.0
 
 
 ## LEVEL 2: Map from validated user models to natural description.
@@ -1212,8 +1245,8 @@ def _echo_converter(name: str) -> Callable[[object], object]:
     return convert
 
 
-def _output_converter(value: object) -> float:
-    return float(value)
+def _output_converter(value: object) -> float | None:
+    return None if value is None else float(value)
 
 
 _COLUMN_CONVERTERS = {name: _echo_converter(name) for name in _INPUT_COLUMNS} | {

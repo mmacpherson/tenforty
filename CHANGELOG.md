@@ -1,5 +1,12 @@
 ## [Unreleased]
 ### Added
+- **Graph state scope for `backend="auto"`.** A state return goes to graph only
+  when its known graph-side defects are closed and official-value fixtures
+  support it: for 2024-2025, Mississippi and the eight states without an
+  income tax. Other states route to OTS where OTS computes them, and otherwise
+  raise `UnsupportedReturnError` naming the open defect or the missing
+  evidence. `backend="graph"` ignores scope. See
+  [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
 - `backend="auto"` selects the backend by tax year: graph for 2024-2025 (within
   graph state scope), OTS for 2018-2023. The default is still `"ots"`, and an
   explicit `"ots"` or `"graph"` is never reinterpreted. `evaluate_return`,
@@ -43,6 +50,70 @@
   `ImportError`, still a `RuntimeError`).
 - An unknown `on_error` value raises `ValueError` instead of behaving like
   `"ignore"`.
+- **The four rate fields are now `float | None`.** `federal_tax_bracket`,
+  `federal_effective_tax_rate`, `state_tax_bracket` and
+  `state_effective_tax_rate` are `None` when the rate is not defined, where they
+  used to be `0.0`. That covers a return with no state, a state bracket that
+  is not reported (OTS prints one only for CA, NJ, NY, OH, OR and VA, and the
+  graph reports the same six), and an effective rate whose taxable income is
+  zero or negative. A real 0% stays `0.0`. `NaN` still means a failed return.
+  In `evaluate_returns` these columns are `Float64` with nulls.
+- An effective rate is the returned tax as a percent of **taxable income**
+  (federal Form 1040 line 15, or the state's taxable-income line), on both
+  backends. On OTS it is now computed from the returned fields rather than
+  taken from OTS's printed line, which used pre-credit state tax rounded to
+  0.1% (OR at $85,000: 8.3% printed, 8.0062% of the tax actually returned), so
+  every OTS state with a taxable income now has one. The README called it a
+  percentage of AGI, which was wrong.
+
+### Fixed (graph backend: opt-in, experimental)
+- `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
+  It used to be hard-coded to 0. Income exactly at a threshold stays in the
+  lower bracket, as the schedules' "over X but not over Y" wording requires.
+  The rate comes from the same bracket table that computes the tax. It is the
+  statutory bracket, not `marginal_rate()`, which is the derivative of the
+  computed tax.
+- `federal_effective_tax_rate` divides by taxable income, as OTS does. It used
+  to divide by AGI.
+- `state_effective_tax_rate` is computed for graph states. It used to be 0.
+
+### Changed (installation)
+- **Building from source requires Rust.** The graph backend is no longer an
+  optional part of a source build: without setuptools-rust or a Rust toolchain
+  the build fails with an explanation, where it used to install silently
+  without the graph backend. This is an intermediate measure; the long-term
+  answer is prebuilt wheels for every platform, leaving the source build as the
+  fallback for platforms without one. `TENFORTY_WITHOUT_GRAPH=1` builds the
+  legacy OTS-only package, with no graph backend.
+
+### Fixed (installation)
+- Wheels are now built and tested for Linux aarch64 and Intel macOS, so those
+  platforms no longer need Rust to install.
+- The sdist now ships the Rust graph crate. It previously omitted it, so every
+  install from the sdist (any platform without a prebuilt wheel) lacked the
+  graph backend.
+- CI tests every shipped wheel, and installs from the sdist with Rust, without
+  Rust, and in OTS-only mode.
+
+### Fixed (OTS backend, the default)
+- **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
+  MA_1 input map set only wages, so OTS never received line 11 (Social
+  Security and Medicare paid, up to $2,000 per person) and over-taxed every
+  W-2 return by up to $100 ($180 once the 4% surtax applies), in every year
+  2018-2025. Line 11a is now 7.65% of `w2_income`, capped at $2,000; a joint
+  return takes the one-earner reading because `w2_income` is a household
+  total, so a two-earner couple can still be up to $100 high ($180 with the
+  surtax). **This changes default-backend MA
+  results.** OTS MA still maps only wages: interest, dividends, capital gains
+  and self-employment income are not reflected there.
+
+### Fixed (graph backend)
+- Massachusetts Form 1 line 10 is built from the federal income lines instead
+  of federal AGI, so interest, dividends and capital gains go through Schedules
+  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
+  exemptions) and federal-only adjustments no longer reduce Massachusetts
+  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
+  MA is now line 10, as on OTS.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)

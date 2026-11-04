@@ -146,21 +146,6 @@ CA_2024_SCHEDULE = {
 }
 CA_TAX_TABLE_CEILING = 100_000.0
 CA_TAX_TABLE_HALF_ROW = 50.0
-CA_2024_EXEMPTION_PHASEOUT_THRESHOLD = {
-    "Single": 244_857.0,
-    "Married/Sep": 244_857.0,
-    "Head_of_House": 367_291.0,
-    "Married/Joint": 489_719.0,
-    "Widow(er)": 489_719.0,
-}
-CA_PERSONAL_EXEMPTION_CREDITS = {
-    "Single": 1,
-    "Married/Sep": 1,
-    "Head_of_House": 1,
-    "Married/Joint": 2,
-    "Widow(er)": 2,
-}
-CA_PHASEOUT_STEP_REDUCTION = 6.0
 
 
 def _ca_case(case: dict) -> bool:
@@ -183,29 +168,6 @@ def _ca_table_tolerance(case: dict) -> float:
     return _table_half_width(
         CA_2024_SCHEDULE[case["status"]], taxable_income, CA_TAX_TABLE_HALF_ROW
     )
-
-
-def _ca24_stepped_exemption_phaseout(case: dict) -> DeltaModel:
-    """Graph phases the exemption credit out continuously; Form 540 steps it.
-
-    Form 540 line 32: above the AGI threshold each personal exemption credit is
-    reduced by $6 for each $2,500 of excess AGI "or fraction thereof" ($1,250
-    married filing separately). OTS rounds the excess up to whole steps; the
-    graph spec reduces by $6/$2,500 per dollar (tenforty-b72.17). The graph is
-    the side that departs from the form.
-
-    Bound: per credit, the stepped reduction exceeds the continuous one by at
-    least $0 and less than one $6 step, so OTS's tax is higher by up to $6 per
-    credit: delta in [-$6 x credits, 0]. Once a reduction exhausts the $149
-    credit the gap only narrows.
-    """
-    if not _ca_case(case):
-        return {}
-    status = case["status"]
-    if case["w2"] <= CA_2024_EXEMPTION_PHASEOUT_THRESHOLD[status]:
-        return {}
-    widest_gap = CA_PHASEOUT_STEP_REDUCTION * CA_PERSONAL_EXEMPTION_CREDITS[status]
-    return {"state_total_tax": DeltaRange(-widest_gap, 0.0)}
 
 
 # --- North Carolina Form D-400 (2024, 2025) ----------------------------------
@@ -317,29 +279,6 @@ NY_SCHEDULE_BASE_ROUNDING = 0.5
 # Worksheet 7 (Single) and worksheet 1 (Married/Joint) recapture toward a flat
 # 6% and 5.5% of taxable income respectively.
 NY_FIRST_WORKSHEET_RATE = {"Single": 0.06, "Married/Joint": 0.055}
-# Household credit by federal AGI, "over ... but not over" each row ceiling.
-# Single is Table 1; Married/Joint is Table 2's two-exemption column (you and
-# your spouse, no dependents).
-NY_2024_HOUSEHOLD_CREDIT = {
-    "Single": (
-        (5_000.0, 75.0),
-        (6_000.0, 60.0),
-        (7_000.0, 50.0),
-        (20_000.0, 45.0),
-        (25_000.0, 40.0),
-        (28_000.0, 20.0),
-    ),
-    "Married/Joint": (
-        (5_000.0, 105.0),
-        (6_000.0, 90.0),
-        (7_000.0, 80.0),
-        (20_000.0, 75.0),
-        (22_000.0, 70.0),
-        (25_000.0, 60.0),
-        (28_000.0, 45.0),
-        (32_000.0, 25.0),
-    ),
-}
 
 
 def _ny_case(case: dict) -> bool:
@@ -377,29 +316,6 @@ def _ny_table_tolerance(case: dict) -> float:
     if _ny_taxable_income(case) >= NY_TAX_TABLE_CEILING:
         return 0.0
     return _ny_table_half_width(case)
-
-
-def _ny24_household_credit(case: dict) -> DeltaModel:
-    """Graph omits the NYS household credit that OTS computes.
-
-    IT-201 line 40 is the household credit from Tables 1-3, a function of
-    filing status, federal AGI and household size. The graph spec takes it as a
-    zero-default input (tenforty-spec/forms/NYIT201_2024.hs:79); OTS computes
-    it (ots_amalgamation.cpp:83389-83418). The graph departs from the form
-    (tenforty-b72.25).
-
-    Bound: graph tax is higher by the credit OTS applies, limited to the tax,
-    so the delta lies in [0, credit], capped at the form's credit for the case
-    (the higher row at an exact row ceiling). OTS's Married/Joint credit is a
-    column short of the form's -- our NY input map never sets OTS's
-    ``Exemptions`` (MAP-NY-EXEMPTIONS, tenforty-r91.5) -- which keeps it inside the bound.
-    """
-    if not _ny_case(case):
-        return {}
-    for ceiling, credit in NY_2024_HOUSEHOLD_CREDIT[case["status"]]:
-        if case["w2"] <= ceiling:
-            return {"state_total_tax": DeltaRange(0.0, credit)}
-    return {}
 
 
 def _ny24_ots_table_above_ceiling(case: dict) -> DeltaModel:
@@ -598,6 +514,8 @@ MA_2024_NO_TAX_STATUS_AGI = {
     "Married/Joint": 16_400.0,
 }
 MA_RATE = 0.05
+MA_FICA_RATE = 0.0765
+MA_LINE_11_CAP = 2_000.0
 MA_TAX_TABLE_CEILING = 24_000.0
 MA_TAX_TABLE_HALF_ROW = 25.0
 
@@ -610,8 +528,20 @@ def _ma_case(case: dict) -> bool:
     )
 
 
+def _ma_line_11(case: dict) -> float:
+    """Form 1 line 11 for W-2 wages: 7.65% paid, at most $2,000 (tenforty-b72.6).
+
+    Both backends take it (the OTS input map fills L11a), so it moves taxable
+    income, and with it the $24,000 tax-table ceiling, on both sides.
+    """
+    return min(MA_LINE_11_CAP, MA_FICA_RATE * case["w2"])
+
+
 def _ma_taxable_income(case: dict) -> float:
-    return max(0.0, case["w2"] - MA_2024_PERSONAL_EXEMPTION[case["status"]])
+    return max(
+        0.0,
+        case["w2"] - _ma_line_11(case) - MA_2024_PERSONAL_EXEMPTION[case["status"]],
+    )
 
 
 def _ma_no_tax_status(case: dict) -> bool:
@@ -883,14 +813,6 @@ def _or_table_tolerance(case: dict) -> float:
 
 SIGNATURES = [
     KnownParityDefect(
-        "CA-EXEMPTION-STEP",
-        "graph",
-        "tenforty-b72.17",
-        _ca24_stepped_exemption_phaseout,
-        # $1 over the threshold: Form 540 takes a full $6 step, the graph $0.0024.
-        {"state": "CA", "year": 2024, "status": "Single", "w2": 244_858},
-    ),
-    KnownParityDefect(
         "NC-OTS-NEGATIVE-TAX",
         "ots",
         "upstream report 6",
@@ -903,14 +825,6 @@ SIGNATURES = [
         "tenforty-r91.7",
         _nc_taxable_income_representation,
         {"state": "NC", "year": 2024, "status": "Single", "w2": 0},
-    ),
-    KnownParityDefect(
-        "NY-HOUSEHOLD-CREDIT",
-        "graph",
-        "tenforty-b72.25",
-        _ny24_household_credit,
-        # Table 1's $45 row; taxable income $1,000 keeps the tax below it.
-        {"state": "NY", "year": 2024, "status": "Single", "w2": 9_000},
     ),
     KnownParityDefect(
         "NY-OTS-TABLE-ABOVE-65K",

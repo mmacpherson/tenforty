@@ -21,7 +21,9 @@ second:
 | `"ignore"` | Returns a **failed return** silently |
 
 A **failed return** has every field set to NaN: `InterpretedTaxReturn.failed()`.
-NaN means "this return failed". It is never a $0 that could pass for a real
+NaN means "this return failed". (A rate field that is `None`, null in a frame,
+is a different thing: the rate is not defined for a successful return.) It is
+never a $0 that could pass for a real
 return, and it propagates through sums, so check for it before aggregating:
 
 ```python
@@ -59,12 +61,37 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 |-----------|-----------|-----------|
 | `"ots"` | OTS | OTS |
 | `"graph"` | raises `UnsupportedReturnError` | graph |
-| `"auto"` | OTS | graph, for states in graph scope; OTS otherwise |
+| `"auto"` | OTS | graph for federal-only returns and states in graph scope; otherwise OTS, or `UnsupportedReturnError` |
 
 An explicit `"ots"` or `"graph"` is never reinterpreted: it is honoured or
 refused before evaluation. `"auto"` splits a mixed-year batch by year and
 keeps the row order. `tenforty.backends.get_backend(backend, year, state)`
 applies the same selection.
+
+### Graph state scope under `"auto"`
+
+`"auto"` sends a state return to graph only when that state and year are in
+**graph scope**: its known graph-side defects are closed and official-value
+fixtures support it. For 2024 and 2025 that is currently:
+
+- Mississippi;
+- the states without an income tax: Alaska, Florida, Nevada, South Dakota,
+  Tennessee, Texas, Washington and Wyoming.
+
+A federal-only return (`state=None`) is always in scope.
+
+For any other state, `"auto"` uses OTS if OTS computes that state's return
+(Arizona, California, Massachusetts, Michigan, North Carolina, New Jersey,
+New York, Ohio, Oregon, Pennsylvania and Virginia). Otherwise it raises
+`UnsupportedReturnError`, and the message names the reason: the open defect
+(a `tenforty-...` issue) or `evidence: tenforty-b72.12` (no official-value
+fixtures yet).
+
+`backend="graph"` ignores scope and computes any state the graph covers. Use
+it when you accept the graph's current state of validation for that state.
+
+`tenforty.graph_scope.graph_state_in_scope(state, year)` and
+`exclusion_reasons(state, year)` report the same decision.
 
 ## Exception Types
 

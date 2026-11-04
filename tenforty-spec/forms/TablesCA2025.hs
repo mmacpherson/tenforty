@@ -11,7 +11,7 @@ module TablesCA2025
     caDependentExemption2025,
     caExemptionPhaseoutThreshold2025,
     caPersonalExemptionCredit2025,
-    caExemptionPhaseoutRate2025,
+    caExemptionPhaseoutInterval2025,
 
     -- * Behavioral Health Services Tax
     caBehavioralHealthThreshold2025,
@@ -73,20 +73,19 @@ caPersonalExemption2025 = 153
 caDependentExemption2025 :: Amount Dollars
 caDependentExemption2025 = 475
 
--- | 2025 AGI threshold above which exemption credits phase out
+-- | 2025 federal AGI limits: FTB Form 540 booklet p.14, line 32 worksheet.
 caExemptionPhaseoutThreshold2025 :: ByStatus (Amount Dollars)
-caExemptionPhaseoutThreshold2025 = byStatus 252203 504406 252203 378305 504406
+caExemptionPhaseoutThreshold2025 = byStatus 252203 504411 252203 378310 504411
 
 -- | 2025 total personal exemption credit by filing status
 -- Single/MFS/HoH: 1 × $153 = $153; MFJ/QW: 2 × $153 = $306
 caPersonalExemptionCredit2025 :: ByStatus (Amount Dollars)
 caPersonalExemptionCredit2025 = byStatus 153 306 153 153 306
 
--- | 2025 exemption credit phase-out rate per dollar of excess AGI
--- FTB: $6 per $2,500 excess per exemption ($6/$1,250 for MFS)
--- Single/HoH: 1 × $6/$2,500; MFJ/QW: 2 × $6/$2,500; MFS: 1 × $6/$1,250
-caExemptionPhaseoutRate2025 :: ByStatus (Amount Rate)
-caExemptionPhaseoutRate2025 = byStatus 0.0024 0.0048 0.0048 0.0024 0.0048
+-- | Excess federal AGI per started exemption phase-out interval (FTB p.14).
+-- Order: Single, MFJ, MFS, HoH, QW.
+caExemptionPhaseoutInterval2025 :: ByStatus (Amount Dollars)
+caExemptionPhaseoutInterval2025 = byStatus 2500 2500 1250 2500 2500
 
 -- | 2025 Behavioral Health Services Tax threshold ($1M)
 -- Note: Renamed from "Mental Health Services Tax" in 2024

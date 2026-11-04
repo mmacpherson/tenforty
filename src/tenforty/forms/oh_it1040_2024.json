@@ -536,6 +536,27 @@
                 "type": "if_positive"
             }
         },
+        "67": {
+            "id": 67,
+            "op": {
+                "type": "literal",
+                "value": 1
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "type": "literal",
+                "value": 26050
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "type": "literal",
+                "value": 26050
+            }
+        },
         "7": {
             "id": 7,
             "name": "L15_senior_citizen_credit",
@@ -543,11 +564,157 @@
                 "type": "input"
             }
         },
+        "70": {
+            "id": 70,
+            "op": {
+                "type": "literal",
+                "value": 26050
+            }
+        },
+        "71": {
+            "id": 71,
+            "op": {
+                "type": "literal",
+                "value": 26050
+            }
+        },
+        "72": {
+            "id": 72,
+            "op": {
+                "type": "literal",
+                "value": 26050
+            }
+        },
+        "73": {
+            "id": 73,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 71,
+                    "married_joint": 69,
+                    "married_separate": 70,
+                    "qualifying_widow": 72,
+                    "single": 68
+                }
+            }
+        },
+        "74": {
+            "id": 74,
+            "op": {
+                "left": 33,
+                "right": 73,
+                "type": "sub"
+            }
+        },
+        "75": {
+            "id": 75,
+            "op": {
+                "type": "literal",
+                "value": 100000
+            }
+        },
+        "76": {
+            "id": 76,
+            "op": {
+                "type": "literal",
+                "value": 100000
+            }
+        },
+        "77": {
+            "id": 77,
+            "op": {
+                "type": "literal",
+                "value": 100000
+            }
+        },
+        "78": {
+            "id": 78,
+            "op": {
+                "type": "literal",
+                "value": 100000
+            }
+        },
+        "79": {
+            "id": 79,
+            "op": {
+                "type": "literal",
+                "value": 100000
+            }
+        },
         "8": {
             "id": 8,
             "name": "L16_child_care_credit",
             "op": {
                 "type": "input"
+            }
+        },
+        "80": {
+            "id": 80,
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 78,
+                    "married_joint": 76,
+                    "married_separate": 77,
+                    "qualifying_widow": 79,
+                    "single": 75
+                }
+            }
+        },
+        "81": {
+            "id": 81,
+            "op": {
+                "left": 33,
+                "right": 80,
+                "type": "sub"
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "type": "literal",
+                "value": 3.5e-2
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "type": "literal",
+                "value": 2.75e-2
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "cond": 81,
+                "otherwise": 83,
+                "then": 82,
+                "type": "if_positive"
+            }
+        },
+        "85": {
+            "id": 85,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "86": {
+            "id": 86,
+            "op": {
+                "cond": 74,
+                "otherwise": 85,
+                "then": 84,
+                "type": "if_positive"
+            }
+        },
+        "87": {
+            "id": 87,
+            "name": "L9BracketRate_oh_bracket_rate",
+            "op": {
+                "left": 67,
+                "right": 86,
+                "type": "mul"
             }
         },
         "9": {
@@ -567,7 +734,8 @@
         62,
         66,
         24,
-        33
+        33,
+        87
     ],
     "tables": {
         "oh_brackets_2024": {

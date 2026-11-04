@@ -93,7 +93,7 @@ def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDef
         quantity="state_total_tax",
         minimum=center - 0.50,
         maximum=center + 0.50,
-        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
+        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-tj2.20)",
     )
 
 
@@ -141,7 +141,7 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     minimum=-0.50,
     maximum=0.50,
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
-    "(tenforty-xew, not a table-band difference)",
+    "(tenforty-b72.42, not a table-band difference)",
 )
 
 
@@ -340,7 +340,7 @@ def la_2024_table_gap(
         maximum=center + 0.50,
         reason=(
             "LA 2024 line 10 is the tax-table value; the graph prices the exact "
-            "bracket formula rather than the table row (tenforty-xew)"
+            "bracket formula rather than the table row (tenforty-tj2.20)"
         ),
     )
 
@@ -824,14 +824,13 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # CA Single $250,000 W2 (2024). Fixture kind: derived-arithmetic.
-    # Implementer-derived from the same booklet's rules, not by the blind deriver.
+    # Unverified legacy: implementer-derived, absent from the blind CA record.
     # TI $244,460; Schedule X (p. 75): $3,108.72 + 9.3% x $173,854 = $19,277.14
     # -> $19,277. AGI Limitation Worksheet (p. 14): excess $5,143 / $2,500 = 2.06,
     # rounded UP to 3; 3 x $6 = $18; exemption credit $149 - $18 = $131.
     # Net $19,277 - $131 = $19,146.
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
-        state_evidence=CA_EVIDENCE,
         description="CA Single, $250,000 W2, exemption credit in phase-out (2024)",
         year=2024,
         state="CA",
@@ -840,14 +839,14 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=19146.0,
         state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
         backend="graph",
-        known_failure=(
-            "CA 540 line 32 phase-out is continuous in the graph ($0.0024 per "
-            "excess AGI dollar); FTB AGI Limitation Worksheet rounds excess/$2,500 "
-            "UP to a whole step, $6 per step. Graph credit $136.66 vs official "
-            "$131; graph net $19,140.48 vs $19,146 (tenforty-b72.17)."
-        ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
+    # Legacy MA rows, unverified legacy, kept for their federal checks only.
+    # Their state values priced line 10 as federal AGI with no line 11
+    # deduction (Social Security/Medicare paid, up to $2,000), so they were
+    # retired in b72.6/b72.39. Blind MA values: tests/ma_form1_income_test.py
+    # and docs/validation/derivations/ma-2024-2025.md. The arithmetic notes
+    # below are the original, superseded reasoning.
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
     # 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025)
     # Also: 8.5% on short-term capital gains, 12% on long-term collectibles
@@ -869,7 +868,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=20000.0,
         expected_federal_tax=543.0,  # Tax Table row 5,400-5,450
-        expected_state_tax=780.0,
         backend="graph",
     ),
     # MA Single, middle income (2024)
@@ -887,7 +885,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2280.0,
         backend="graph",
     ),
     # MA Single, higher income (2024)
@@ -905,7 +902,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=100000.0,
         expected_federal_tax=13847.0,  # Tax Table row 85,400-85,450
-        expected_state_tax=4780.0,
         backend="graph",
     ),
     # MA MFJ, middle income (2024)
@@ -923,7 +919,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=4560.0,
         backend="graph",
     ),
     # MA Head_of_House, middle income (2024)
@@ -941,7 +936,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=3410.0,
         backend="graph",
     ),
     # MA Single, surtax income (2025)
@@ -965,7 +959,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=1200000.0,
         expected_federal_tax=404192.75,
-        expected_state_tax=64278.0,
         backend="graph",
     ),
     # ========== CONNECTICUT SCENARIOS ==========
@@ -2345,8 +2338,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Federal values equal the IRS 2024 Tax Table Single column (i1040tt--2024).
     #
     # The graph's IT-201 (tenforty-spec/forms/NYIT201_2024.hs) computes line 39
-    # as the exact bracket formula, and line 40 household credit is a keyInput
-    # defaulting to 0. IT-201-I p. 12 requires the Tax Table when NYAGI <=
+    # as the exact bracket formula; line 40 now computes the household credit.
+    # IT-201-I p. 12 requires the Tax Table when NYAGI <=
     # $107,650 and TI < $65,000, and the rate schedule (p. 33) publishes
     # whole-dollar bases ($600 over $13,900) where exact bracket arithmetic gives
     # $599.50. The known_defects below record the resulting residuals.
@@ -2373,11 +2366,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.5,
-                44.5,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $16,500): +$45. Graph line 39 is "
-                "the exact formula, not Tax Table row 8,500-8,550 ($341): -$1. Net +$44.",
+                -1.5,
+                -0.5,
+                "Graph line 39 uses the exact formula $340 rather than Tax Table "
+                "row 8,500-8,550 ($341): -$1 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
@@ -2398,12 +2391,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.0,
-                44.0,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $18,000): +$45. Graph line 39 is "
-                "the exact formula $407.50, not Tax Table row 10,000-10,050 ($409): "
-                "-$1.50. Net +$43.50.",
+                -2.0,
+                -1.0,
+                "Graph line 39 uses the exact formula $407.50 rather than Tax Table "
+                "row 10,000-10,050 ($409): -$1.50 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
