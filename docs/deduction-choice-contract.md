@@ -14,7 +14,8 @@ by `tenforty-q3r`. It replaces the 2026-08-01 legacy contract
 | `"Standard"` | Take the standard deduction, even when Schedule A is larger. |
 | `"Itemized"` | Take Schedule A, even when it is smaller or zero. |
 
-`itemized_deductions` and `state_and_local_taxes` supply Schedule A. They
+`federal_itemized` (or the deprecated `itemized_deductions`) and
+`state_and_local_taxes` supply Schedule A. They
 reach Form 1040 line 12 under `"Auto"` (when larger) and `"Itemized"`, and
 never under `"Standard"`.
 

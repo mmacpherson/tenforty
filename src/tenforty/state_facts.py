@@ -276,6 +276,46 @@ _CONVENTIONS: tuple[Convention, ...] = (
     ),
 )
 
+LEGACY_ITEMIZED_ID = "federal.itemized_deductions.legacy_amt"
+_LEGACY_ITEMIZED_TEXT: dict[Engine, tuple[str, str]] = {
+    "ots": (
+        "added_back",
+        (
+            "The deprecated itemized_deductions does not say how much of it the AMT "
+            "allows. OTS entered it as Schedule A line 6 'other taxes', which Form "
+            "6251 line 2a adds back in full: none of it reduced AMTI. Pass "
+            "federal_itemized with the amount the AMT allows."
+        ),
+    ),
+    "graph": (
+        "allowed",
+        (
+            "The deprecated itemized_deductions does not say how much of it the AMT "
+            "allows. Graph entered it as Schedule A line 16 'other itemized "
+            "deductions', which Form 6251 does not add back: all of it reduced "
+            "AMTI. Pass federal_itemized with the amount the AMT allows."
+        ),
+    ),
+}
+
+
+def legacy_itemized_assumption(engine: Engine) -> Assumption:
+    """Return the legacy aggregate's AMT convention, as this engine applied it.
+
+    Reported only where it was applied: a nonzero itemized_deductions on a
+    return whose Form 1040 used Schedule A. It is the approved compatibility
+    exception for shipped behaviour (DEFAULT_INVENTORY), not a precedent, and
+    it never stands in for a state amount a state requires.
+    """
+    value, text = _LEGACY_ITEMIZED_TEXT[engine]
+    return Assumption(
+        id=LEGACY_ITEMIZED_ID,
+        state=None,
+        input_path="federal_itemized.amt",
+        value=value,
+        text=text,
+    )
+
 
 @dataclass(frozen=True)
 class DefaultDecision:
@@ -325,6 +365,17 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "baseline",
         None,
         "Nobody can claim the filer as a dependent; that regime is not modelled.",
+    ),
+    DefaultDecision(
+        LEGACY_ITEMIZED_ID,
+        "transition",
+        "federal_itemized",
+        "Approved by Mike, 2026-11-05, as a compatibility exception for shipped "
+        "behaviour, not an AMT default: each backend keeps its shipped AMT "
+        "treatment of the deprecated itemized_deductions and reports it where "
+        "applied. Owner: tenforty-75 under tenforty-nuc6. Removed in the first "
+        "release after the NC, MD and ME itemized slices and the OTS AZ/CA/NY "
+        "Schedule A follow-ups land.",
     ),
     DefaultDecision(
         "state_facts.OH.spouses_both_have_qualifying_income",

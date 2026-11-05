@@ -14,3 +14,6 @@ ND = "ND"
 # Colorado form DR 0104PN (part-year resident / nonresident); typos rewrites
 # "PN" to "ON", corrupting verbatim derivation records.
 PN = "PN"
+# "Pease" names the pre-2018 overall limitation on itemized deductions
+# (IRC 68), cited in the archived Form 6251 derivations.
+Pease = "Pease"

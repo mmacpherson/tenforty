@@ -28,7 +28,7 @@ signature, and update this table in the same PR.
 | F9 | Batch path bypasses TaxReturnInput | graph batch path | fixed (tenforty-tve) | batch-conformance tests |
 | F10 | Short-term gains taxed at preferential rates (QCGWS line 3) | graph spec | fixed | differential grid |
 | F11 | 2024 HoH 32% bracket starts \$191,150, not \$191,950 | upstream OpenTaxSolver | adjudicated vs IRS; upstream report pending — not patched locally, we vendor OTS unmodified | differential grid |
-| F12 | Itemized-deduction category changes AMT | API (input model v2) | open (design) | adversarial search |
+| F12 | Itemized-deduction category changes AMT | API (input model v2) | resolved for `federal_itemized` (tenforty-nuc6); open for the deprecated `itemized_deductions` only | adversarial search |
 | F13 | 2025 MFS 15%-rate ceiling wrong (266,700 vs 300,000), inline in 1040 not Tables | graph spec | fixed | differential grid |
 | F14 | AMT std-deduction add-back divergence (ISO cases) | taxcalc (and graph, now fixed) | graph fixed (tenforty-8ik); TaxCalc fixed upstream in 6.7.3 ([#3109](https://github.com/PSLmodels/Tax-Calculator/pull/3109), from [#3108](https://github.com/PSLmodels/Tax-Calculator/issues/3108)) | H_amt stratum |
 | F16 | Suite adapter drops `iso`, so taxcalc sees no AMT preference | taxcalc harness | fixed (#295) | F14 adjudication |
@@ -248,6 +248,16 @@ interest paid through e19200 (not added back). None is wrong; the input model
 cannot say which kind of deduction it is. This is the categorized-deductions
 API gap made concrete, resolved by input model v2; until then the divergence
 is a documented assumption, excused by signature.
+
+**Resolution (tenforty-nuc6).** `federal_itemized=FederalItemized(regular_tax=...,
+amt=...)` states the amount the AMT allows, and both engines honour it: graph
+adds `regular_tax - amt` to AMTI when the return itemizes; OTS splits it across
+Schedule A lines 6 (added back) and 16 (not). Blind derivations from IRS sources
+(docs/validation/derivations/federal-itemized-amt-*.md) witness every OTS year
+and both graph years. The divergence remains only for the deprecated
+`itemized_deductions`, whose per-engine treatment is reported in `assumptions`
+until its removal. This resolves F12; it does not make every federal output
+identical between engines, since the other entries here remain.
 
 ### F19. NEW — deduction choice: taxcalc minimizes tax, tenforty maximizes the deduction
 

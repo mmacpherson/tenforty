@@ -79,28 +79,41 @@ def _both_years(*beads: str) -> dict[int, tuple[str, ...]]:
     return dict.fromkeys(GRAPH_SCOPE_YEARS, beads)
 
 
+# tenforty-nuc6 on a state other than MD, ME and NC: its graph form feeds the
+# deprecated itemized_deductions (and, for now, federal_itemized.regular_tax)
+# straight into its own itemized line, which no state's law defines that way.
 _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
-    S.AL: _both_years("tenforty-yu51"),
-    S.CA: _both_years("tenforty-b72.54", "tenforty-tj2.20", "tenforty-yu51"),
+    S.AL: _both_years("tenforty-yu51", "tenforty-nuc6"),
+    S.AR: _both_years("tenforty-nuc6"),
+    S.AZ: _both_years("tenforty-nuc6"),
+    S.CA: _both_years(
+        "tenforty-b72.54", "tenforty-tj2.20", "tenforty-yu51", "tenforty-nuc6"
+    ),
     S.CO: _both_years("tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"),
-    S.GA: _both_years("tenforty-b72.42"),
-    S.HI: _both_years("tenforty-b72.41", "tenforty-tj2.20"),
+    S.DE: _both_years("tenforty-nuc6"),
+    S.GA: _both_years("tenforty-b72.42", "tenforty-nuc6"),
+    S.HI: _both_years("tenforty-b72.41", "tenforty-tj2.20", "tenforty-nuc6"),
     S.IN: _both_years("tenforty-b72.42"),
-    S.KS: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
+    S.KS: _both_years("tenforty-b72.42", "tenforty-tj2.20", "tenforty-nuc6"),
     S.LA: {2024: ("tenforty-tj2.20",)},
     S.MA: _both_years("tenforty-b72.40"),
     S.MD: _both_years("tenforty-nuc6"),
     S.ME: _both_years("tenforty-nuc6"),
-    S.MO: _both_years("tenforty-b72.46"),
+    S.MN: _both_years("tenforty-nuc6"),
+    S.MO: _both_years("tenforty-b72.46", "tenforty-nuc6"),
     S.MT: _both_years("tenforty-b72.7"),
     S.NC: _both_years("tenforty-nuc6"),
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
-    S.NY: _both_years("tenforty-b72.4", "tenforty-tj2.20"),
-    S.VA: _both_years("tenforty-b72.37", "tenforty-b72.42"),
+    S.NY: _both_years("tenforty-b72.4", "tenforty-tj2.20", "tenforty-nuc6"),
+    S.VA: _both_years("tenforty-b72.37", "tenforty-b72.42", "tenforty-nuc6"),
     S.VT: _both_years(
-        "tenforty-b72.20", "tenforty-b72.42", "tenforty-b72.47", "tenforty-tj2.20"
+        "tenforty-b72.20",
+        "tenforty-b72.42",
+        "tenforty-b72.47",
+        "tenforty-tj2.20",
+        "tenforty-nuc6",
     ),
-    S.WI: _both_years("tenforty-b72.20"),
+    S.WI: _both_years("tenforty-b72.20", "tenforty-nuc6"),
 }
 
 KNOWN_GRAPH_DEFECTS: dict[tuple[OTSState, int], tuple[str, ...]] = {

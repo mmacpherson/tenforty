@@ -52,8 +52,9 @@ through the federal return.
 `TaxReturnInput` field values directly to graph nodes without arithmetic
 transformation. This means `num_dependents` (a count) cannot map to
 state form inputs that expect dollar amounts (e.g., NY L36 expects
-$1,000 per dependent, not the count). Use `itemized_deductions` and
-other dollar-valued fields where possible.
+$1,000 per dependent, not the count). Use dollar-valued fields where
+possible. Don't route the federal itemized amount into a state's itemized
+line: a state defines its own (tenforty-nuc6).
 
 ### Multi-form states (CA)
 Imports federal AGI plus uses state sub-forms (schedules, credits). The CA

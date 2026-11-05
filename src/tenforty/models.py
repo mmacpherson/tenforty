@@ -168,7 +168,66 @@ DEDUCTION_CHOICE_ENCODING = {"Auto": 0.0, "Standard": -1.0, "Itemized": 1.0}
 OTS_INPUT_CARRIERS = {
     "itemized_deductions": "schedule_a_other_deductions",
     "state_and_local_taxes": "schedule_a_state_and_local_taxes",
+    "federal_itemized": "schedule_a_other_itemized",
 }
+
+
+class FederalItemized(BaseModel):
+    """Federal itemized deductions other than taxes, as already-allowable amounts.
+
+    Both amounts are prepared by the caller, net of every federal floor, cap
+    and limitation (the 7.5%-of-AGI medical floor, charitable limits and so
+    on), and both **exclude** every tax that ``state_and_local_taxes`` carries
+    (Schedule A line 5d): those are taken, capped and added back for the AMT
+    from that input alone, and must not be counted twice.
+
+    - ``regular_tax``: the amount allowed for the regular tax.
+    - ``amt``: the same deductions as allowed for the alternative minimum tax,
+      the amount that stays deducted in alternative minimum taxable income.
+      Where Form 6251 refigures one of them (investment interest on line 2c,
+      for example), ``amt`` is the refigured amount; it may exceed
+      ``regular_tax``. ``regular_tax - amt`` enters AMTI only when the return
+      itemizes.
+
+    Neither has a default: there is no assumed AMT treatment. This is the
+    federal amount only; it is not a state's itemized deduction, which a state
+    defines by its own rules. The amounts are held fixed in derivatives and in
+    the solver; a floor inside them (the medical floor) does not move with
+    income.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    regular_tax: FiniteFloat = Field(ge=0.0)
+    amt: FiniteFloat = Field(ge=0.0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_integers(cls, data: object) -> object:
+        """Take whole-number amounts as floats; strict mode refuses bool and str."""
+        if isinstance(data, dict):
+            return {
+                key: float(value)
+                if isinstance(value, int) and not isinstance(value, bool)
+                else value
+                for key, value in data.items()
+            }
+        return data
+
+
+class LegacyItemizedDeductionsWarning(DeprecationWarning):
+    """``itemized_deductions`` is deprecated in favour of ``federal_itemized``."""
+
+
+LEGACY_ITEMIZED_MESSAGE = (
+    "itemized_deductions is deprecated and will be removed in the first release "
+    "after the NC, MD and ME itemized slices and the OTS AZ/CA/NY follow-ups "
+    "(tenforty-nuc6). It does not say how much of the amount the AMT allows, so "
+    "its AMT treatment is a backend convention, reported in result.assumptions. "
+    "Pass federal_itemized=tenforty.FederalItemized(regular_tax=..., amt=...) "
+    "instead; you must determine the amount the AMT allows yourself. "
+    "See docs/itemized-deductions.md."
+)
 
 
 class OTSState(Enum):
@@ -438,7 +497,26 @@ class TaxReturnInput(BaseModel):
     qbi_is_sstb: bool = False
     rental_income: float = 0.0
     schedule_1_income: float = 0.0
-    itemized_deductions: float = 0.0
+    itemized_deductions: float = Field(
+        default=0.0,
+        description=(
+            "Deprecated; use federal_itemized. An aggregate of itemized deductions "
+            "other than state_and_local_taxes, whose AMT treatment it does not "
+            "state: OTS enters it as Schedule A 'other taxes' (added back for the "
+            "AMT), graph as 'other itemized deductions' (allowed for the AMT). "
+            "Kept, with each backend's shipped numbers, as an approved "
+            "compatibility exception reported in assumptions; it cannot be "
+            "combined with federal_itemized."
+        ),
+    )
+    federal_itemized: FederalItemized | None = Field(
+        default=None,
+        description=(
+            "Federal itemized deductions other than taxes, as the amounts allowed "
+            "for the regular tax and for the AMT (FederalItemized). None: not "
+            "supplied."
+        ),
+    )
     state_and_local_taxes: float = Field(
         default=0.0,
         ge=0.0,
@@ -635,14 +713,45 @@ class TaxReturnInput(BaseModel):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def schedule_a_other_deductions(self) -> float:
-        """itemized_deductions as OTS receives it: none when Standard is forced.
+        """Schedule A line 6 as OTS receives it: none when Standard is forced.
 
         OTS has no switch that forces the standard deduction; it takes the
         larger unless itemizing is forced, so an empty Schedule A forces it.
+        Line 6 sits outside the line 5e cap and is added back for the AMT
+        (Form 6251 line 2a is line 7, line 5e plus line 6), so it carries the
+        part of federal_itemized the AMT does not allow, and the legacy
+        aggregate whole.
         """
         if self.standard_or_itemized == OTSDeductionType.STANDARD:
             return 0.0
+        if self.federal_itemized is not None:
+            return self.federal_itemized.regular_tax - self.federal_itemized.amt
         return self.itemized_deductions
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_a_other_itemized(self) -> float:
+        """Schedule A line 16 as OTS receives it: the AMT-allowed federal_itemized.
+
+        Line 16 enters line 17 and is not added back for the AMT, so with line
+        6 above the regular tax deducts regular_tax and the AMT allows amt.
+        """
+        if (
+            self.standard_or_itemized == OTSDeductionType.STANDARD
+            or self.federal_itemized is None
+        ):
+            return 0.0
+        return self.federal_itemized.amt
+
+    @model_validator(mode="after")
+    def refuse_two_itemized_representations(self) -> "TaxReturnInput":
+        """One authoritative amount: federal_itemized or the legacy scalar."""
+        if self.federal_itemized is not None and self.itemized_deductions != 0:
+            raise ValueError(
+                "Pass federal_itemized or the deprecated itemized_deductions, not "
+                f"both (itemized_deductions={self.itemized_deductions!r})."
+            )
+        return self
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -764,6 +873,10 @@ class Assumption(BaseModel):
 
 
 class InterpretedTaxReturn(BaseModel):
+    _federal_itemizes: bool | None = PrivateAttr(default=None)
+    """Whether the engine's Form 1040 used Schedule A; None when not reported.
+    Internal: it decides whether the legacy itemized convention was applied."""
+
     total_tax: float = 0.0
 
     federal_adjusted_gross_income: float = 0.0
@@ -953,6 +1066,7 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
             # applies the line 5e cap to the sum.
             "schedule_a_state_and_local_taxes": "A5a",
@@ -1119,6 +1233,7 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
             # runs the State and Local Tax Deduction Worksheet on the sum.
             "schedule_a_state_and_local_taxes": "A5a",
@@ -1294,6 +1409,7 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
@@ -1427,6 +1543,7 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
@@ -1496,6 +1613,7 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
             "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
@@ -1565,6 +1683,7 @@ _NATURAL_FORM_CONFIG = [
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # This assumes 'schedule_1_income' consolidates all other income reported in Schedule 1
             "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
@@ -1633,7 +1752,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # Assumes 'schedule_1_income' consolidates all Schedule 1 income types
-            "schedule_a_other_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
@@ -1701,7 +1821,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_21",  # Assuming 'Other income' covers Schedule 1 income types
-            "schedule_a_other_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_other_itemized": "A16",
             "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,

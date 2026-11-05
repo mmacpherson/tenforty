@@ -21,6 +21,7 @@ from . import otslib
 from . import state_facts as _facts
 from .models import (
     FINITE_FLOAT_COLUMNS,
+    LEGACY_ITEMIZED_MESSAGE,
     NATURAL_FORM_CONFIG,
     NUMERIC_OUTPUT_FIELDS,
     OTS_FORM_CONFIG,
@@ -28,7 +29,10 @@ from .models import (
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
     TAX_RETURN_FLOAT_FIELDS,
+    Assumption,
+    FederalItemized,
     InterpretedTaxReturn,
+    LegacyItemizedDeductionsWarning,
     OTSDeductionType,
     OTSErrorPolicy,
     OTSFieldTerminator,
@@ -45,7 +49,7 @@ from .models import (
     UnsupportedReturnError,
     validate_on_error,
 )
-from .routing import BackendChoice, Engine, select_backend
+from .routing import BackendChoice, Engine, graph_covers, select_backend
 from .state_facts import StateFacts
 
 dotenv.load_dotenv()
@@ -97,6 +101,12 @@ _AMT_PREFIX = "Your Alternative Minimum Tax"
 _AMT_RE = re.compile(r"Your Alternative Minimum Tax =\s*(\d+(\.\d+)?)")
 _BRACKET_RE = re.compile(r"You are in the (\d+(\.\d+)?)% marginal tax bracket")
 _EFFECTIVE_RE = re.compile(r"you are paying an effective (\d+(\.\d+)?)% tax")
+# The OTS federal 1040 prints exactly one of these after choosing its deduction
+# (every year 2018-2025): "Itemizing." when it used Schedule A line 17.
+_DEDUCTION_CHOICE_LINES = {"Itemizing.": 1, "Use standard deduction.": 0}
+_ITEMIZING_FIELD = "Itemizing"
+FEDERAL_ITEMIZES = "federal_itemizes"
+"""Key of evaluate_natural_input_form's internal itemizing flag (not a field)."""
 
 
 ## LEVEL 0: Generate and parse OTS textfile format.
@@ -225,6 +235,8 @@ def parse_ots_return(
                 fields[identifier] = parse_value(rhs)
             else:
                 logger.debug(f"Uninterpreted line: [{line}]")
+        elif line.strip() in _DEDUCTION_CHOICE_LINES:
+            fields[_ITEMIZING_FIELD] = _DEDUCTION_CHOICE_LINES[line.strip()]
         elif bracket_match := _BRACKET_RE.search(line):
             fields["tax_bracket"] = parse_value(bracket_match.group(1))
         elif effective_match := _EFFECTIVE_RE.search(line):
@@ -556,17 +568,67 @@ _OTS_STATES_READING_FEDERAL_SCHEDULE_A = frozenset(
 )
 
 
-def require_ots_supports(state: OTSState, natural_form_values: dict[str, Any]) -> None:
-    """Refuse a forced standard deduction OTS cannot give this state's program."""
+def _schedule_a_inputs(natural_form_values: dict[str, Any]) -> dict[str, object]:
+    """Return the nonzero public inputs OTS enters on the federal Schedule A."""
+    found: dict[str, object] = {}
+    for name in OTS_INPUT_CARRIERS:
+        value = natural_form_values.get(name)
+        if isinstance(value, dict):
+            if any(value.values()):
+                found[name] = value
+        elif value:
+            found[name] = value
+    return found
+
+
+def _graph_remedy(year: int | None, state: OTSState) -> str:
+    """Suggest graph only where it computes the whole requested return."""
+    tax_state = None if state in (None, OTSState.NONE) else state
+    if year is not None and graph_covers(year, tax_state):
+        return " backend='graph' computes it."
+    return " No other backend computes this return."
+
+
+def _require_ots_federal_itemized(
+    state: OTSState, natural_form_values: dict[str, Any], year: int | None
+) -> None:
+    """Refuse federal_itemized combinations OTS cannot carry exactly."""
+    model = natural_form_values.get("federal_itemized")
+    if not model:
+        return
+    regular, amt = model["regular_tax"], model["amt"]
+    if amt > regular:
+        raise UnsupportedInputError(
+            f"OTS cannot take federal_itemized with amt ({amt!r}) above "
+            f"regular_tax ({regular!r}): it carries regular_tax - amt on Schedule "
+            "A line 6, which cannot be negative." + _graph_remedy(year, state)
+        )
+    if state in _OTS_STATES_READING_FEDERAL_SCHEDULE_A and (regular or amt):
+        raise UnsupportedInputError(
+            f"OTS cannot yet take a nonzero federal_itemized for {state.value}: its "
+            f"{state.value} program reads the federal Schedule A by line, and the "
+            "split OTS uses for federal_itemized (lines 6 and 16) would change its "
+            "state deduction in ways not yet established (tenforty-nuc6). The "
+            "deprecated itemized_deductions keeps working for "
+            f"{state.value} on OTS during the transition." + _graph_remedy(year, state)
+        )
+
+
+def require_ots_supports(
+    state: OTSState, natural_form_values: dict[str, Any], year: int | None = None
+) -> None:
+    """Refuse inputs OTS cannot give this return, before it is evaluated.
+
+    A forced standard deduction for a state program that builds its own
+    itemized deduction from the federal Schedule A, and the federal_itemized
+    combinations OTS cannot carry.
+    """
+    _require_ots_federal_itemized(state, natural_form_values, year)
     if state not in _OTS_STATES_READING_FEDERAL_SCHEDULE_A:
         return
     if natural_form_values.get("standard_or_itemized") != OTSDeductionType.STANDARD:
         return
-    schedule_a = {
-        name: natural_form_values.get(name, 0.0)
-        for name in OTS_INPUT_CARRIERS
-        if natural_form_values.get(name, 0.0)
-    }
+    schedule_a = _schedule_a_inputs(natural_form_values)
     if not schedule_a:
         return
     details = ", ".join(f"{name}={value!r}" for name, value in schedule_a.items())
@@ -586,7 +648,7 @@ def evaluate_natural_input_form(
     on_error: str = "raise",
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
-    require_ots_supports(state, natural_form_values)
+    require_ots_supports(state, natural_form_values, year.value)
     federal_form_id = "US_1040"
     federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
     if federal_natural_config is None:
@@ -758,13 +820,15 @@ def evaluate_natural_input_form(
             transforms=state_natural_config.output_transforms,
         )
 
+    itemizing = ots_output["federal"].get(_ITEMIZING_FIELD)
     return _rates_not_defined_as_none(
         prefix_keys(federal_natural_output, "federal")
         | prefix_keys(subordinate_natural_outputs, "federal")
         | prefix_keys(state_natural_output, "state")
         | {
             "total_tax": federal_natural_output["total_tax"]
-            + state_natural_output.get("total_tax", 0)
+            + state_natural_output.get("total_tax", 0),
+            FEDERAL_ITEMIZES: None if itemizing is None else bool(itemizing),
         }
     )
 
@@ -803,6 +867,40 @@ def _attach_facts(
     tax_input._state_facts = _facts.active_facts(models.get(row.state or ""), row)
 
 
+def recorded_assumptions(
+    legacy_itemized: float,
+    engine: Engine,
+    row: _facts.FactRow,
+    itemizes: bool | None,
+) -> tuple[Assumption, ...]:
+    """Every convention this engine applied to this return, ordered by id.
+
+    The legacy itemized convention is applied only when the aggregate is
+    nonzero and the engine's Form 1040 itemized. An engine that does not report
+    its choice is a defect, not a reason to stay silent.
+    """
+    records = list(_facts.recorded_assumptions(row))
+    if legacy_itemized != 0:
+        if itemizes is None:
+            raise RuntimeError(
+                f"The {engine} backend did not report whether the return itemized, "
+                "so the legacy itemized_deductions convention cannot be reported."
+            )
+        if itemizes:
+            records.append(_facts.legacy_itemized_assumption(engine))
+    return tuple(sorted(records, key=lambda record: record.id))
+
+
+def warn_legacy_itemized(values: Iterable[float], stacklevel: int = 3) -> None:
+    """Warn once when any requested itemized_deductions is nonzero."""
+    if any(value != 0 for value in values):
+        warnings.warn(
+            LEGACY_ITEMIZED_MESSAGE,
+            LegacyItemizedDeductionsWarning,
+            stacklevel=stacklevel,
+        )
+
+
 def _evaluate_with_engine(
     tax_input: TaxReturnInput,
     engine: Engine,
@@ -811,19 +909,24 @@ def _evaluate_with_engine(
 ) -> InterpretedTaxReturn:
     try:
         if engine == "ots":
-            result = InterpretedTaxReturn(
-                **evaluate_natural_input_form(
-                    tax_input.year,
-                    tax_input.state,
-                    tax_input.model_dump(exclude={"year", "state"}),
-                )
+            values = evaluate_natural_input_form(
+                tax_input.year,
+                tax_input.state,
+                tax_input.model_dump(exclude={"year", "state"}),
             )
+            itemizes = values.pop(FEDERAL_ITEMIZES, None)
+            result = InterpretedTaxReturn(**values)
         else:
             from .backends.graph import GraphBackend
 
             result = GraphBackend().evaluate(tax_input)
+            itemizes = result._federal_itemizes
         return result.model_copy(
-            update={"assumptions": _facts.recorded_assumptions(row)}
+            update={
+                "assumptions": recorded_assumptions(
+                    tax_input.itemized_deductions, engine, row, itemizes
+                )
+            }
         )
     except UnsupportedReturnError:
         raise
@@ -902,6 +1005,7 @@ def evaluate_return(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
@@ -919,9 +1023,15 @@ def evaluate_return(
     that the selected backend cannot honour, and a required fact left out, all
     raise ``UnsupportedInputError`` before evaluation. ``result.assumptions``
     lists the recorded conventions the computation used.
+
+    ``federal_itemized`` takes ``tenforty.FederalItemized(regular_tax=...,
+    amt=...)``: the federal itemized deductions other than taxes, net of every
+    federal limit, as allowed for the regular tax and for the AMT. It replaces
+    the deprecated ``itemized_deductions``; passing both raises ``ValueError``.
     """
     policy = validate_on_error(on_error)
     models = _facts.normalize(state_facts)
+    warn_legacy_itemized([itemized_deductions])
     input_data = TaxReturnInput(
         year=year,
         state=state,
@@ -951,6 +1061,7 @@ def evaluate_return(
         vehicle_loan_interest=vehicle_loan_interest,
         filer_65_or_older=filer_65_or_older,
         spouse_65_or_older=spouse_65_or_older,
+        federal_itemized=federal_itemized,
     )
 
     row = _facts.fact_row(
@@ -960,6 +1071,12 @@ def evaluate_return(
     engine = select_backend(backend, input_data.year, input_data.state)
     row = replace(row, engine=engine)
     _check_routed_facts(models, [row])
+    if engine == "ots":
+        require_ots_supports(
+            input_data.state,
+            input_data.model_dump(exclude={"year", "state"}),
+            input_data.year.value,
+        )
     _require_available(engine)
     _attach_facts(input_data, models, row)
     return _evaluate_with_engine(input_data, engine, policy, row)
@@ -998,6 +1115,7 @@ def evaluate_returns(
     filer_65_or_older: list[bool] | bool = False,
     spouse_65_or_older: list[bool] | bool = False,
     num_ctc_dependents: list[int | None] | int | None = None,
+    federal_itemized: list[FederalItemized | None] | FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
@@ -1017,6 +1135,12 @@ def evaluate_returns(
     and is ignored, by that projection, on the others; it must apply to at
     least one row. Every check runs before any row is evaluated.
 
+    ``federal_itemized`` is one ``FederalItemized`` (or None), or a list of
+    them: each model is one axis value, crossed or zipped like any list input,
+    and echoed as ``federal_itemized_regular_tax`` and ``federal_itemized_amt``
+    (null when not supplied). A call that passes any model may not pass a
+    nonzero ``itemized_deductions`` in any row.
+
     """
     arguments = dict(locals())
     policy = validate_on_error(on_error)
@@ -1028,6 +1152,17 @@ def evaluate_returns(
     FINITE_FLOAT_COLUMNS.validate_python(
         {name: ensure_list(arguments[name]) for name in TAX_RETURN_FLOAT_FIELDS}
     )
+    federal_itemized_values = ensure_list(federal_itemized)
+    legacy_values = ensure_list(itemized_deductions)
+    if any(value is not None for value in federal_itemized_values) and any(
+        value != 0 for value in legacy_values
+    ):
+        raise ValueError(
+            "Pass federal_itemized or the deprecated itemized_deductions, not both: "
+            "a call with a federal_itemized model may not give any row a nonzero "
+            "itemized_deductions."
+        )
+    warn_legacy_itemized(legacy_values)
 
     years = [getattr(y, "value", y) for y in ensure_list(year)]
     states_of_residence = ensure_list(state)
@@ -1088,6 +1223,7 @@ def evaluate_returns(
             ("vehicle_loan_interest", vehicle_loan_interest_values),
             ("filer_65_or_older", filer_65_or_older_values),
             ("spouse_65_or_older", spouse_65_or_older_values),
+            ("federal_itemized", federal_itemized_values),
         ]
         lengths = {name: len(vals) for name, vals in all_lists if len(vals) != 1}
         if lengths:
@@ -1132,6 +1268,7 @@ def evaluate_returns(
         vehicle_loan_interest_values = broadcast(vehicle_loan_interest_values)
         filer_65_or_older_values = broadcast(filer_65_or_older_values)
         spouse_65_or_older_values = broadcast(spouse_65_or_older_values)
+        federal_itemized_values = broadcast(federal_itemized_values)
 
     parameter_names = [
         "year",
@@ -1162,6 +1299,7 @@ def evaluate_returns(
         "filer_65_or_older",
         "spouse_65_or_older",
         "num_ctc_dependents",
+        "federal_itemized",
     ]
     all_vals = [
         years,
@@ -1192,6 +1330,7 @@ def evaluate_returns(
         filer_65_or_older_values,
         spouse_65_or_older_values,
         nums_ctc_dependents,
+        federal_itemized_values,
     ]
 
     columns = dict(zip(parameter_names, all_vals, strict=True))
@@ -1268,11 +1407,16 @@ def evaluate_returns(
             if outputs is not None:
                 evaluated = [
                     params
-                    | output
+                    | {name: output[name] for name in _OUTPUT_COLUMNS}
                     | {
                         "assumptions": [
                             record.to_json()
-                            for record in _facts.recorded_assumptions(row)
+                            for record in recorded_assumptions(
+                                params["itemized_deductions"],
+                                engine,
+                                row,
+                                output[FEDERAL_ITEMIZES],
+                            )
                         ]
                     }
                     for params, output, row in zip(
@@ -1326,7 +1470,9 @@ def _preflight(
             continue
         for tax_input in tax_inputs:
             require_ots_supports(
-                tax_input.state, tax_input.model_dump(exclude={"year", "state"})
+                tax_input.state,
+                tax_input.model_dump(exclude={"year", "state"}),
+                tax_input.year.value,
             )
 
 
@@ -1348,10 +1494,17 @@ _GRAPH_PASSTHROUGH_FIELDS = tuple(
 )
 
 
-_INPUT_COLUMNS = tuple(
+_INPUT_PARAMETERS = tuple(
     name
     for name in inspect.signature(evaluate_returns).parameters
     if name not in _BATCH_OPTIONS
+)
+FEDERAL_ITEMIZED_COLUMNS = ("federal_itemized_regular_tax", "federal_itemized_amt")
+"""The echo of federal_itemized: its two amounts, at its signature position."""
+_INPUT_COLUMNS = tuple(
+    column
+    for name in _INPUT_PARAMETERS
+    for column in (FEDERAL_ITEMIZED_COLUMNS if name == "federal_itemized" else (name,))
 )
 _OUTPUT_COLUMNS = NUMERIC_OUTPUT_FIELDS
 
@@ -1371,6 +1524,8 @@ def _echo_facts(models: dict[str, StateFacts], row: _facts.FactRow) -> str | Non
 def _input_dtype(name: str) -> pl.DataType:
     if name == "state_facts":
         return pl.String
+    if name in FEDERAL_ITEMIZED_COLUMNS:
+        return pl.Float64
     if name in {"year", "num_dependents", "num_ctc_dependents"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
@@ -1398,7 +1553,7 @@ def _echo_converter(name: str) -> Callable[[object], object]:
     normalization (the qualified-into-ordinary dividend lift) is not applied.
     An enum echoes its value, so OTSState.NONE is a null state.
     """
-    if name == "state_facts":
+    if name == "state_facts" or name in FEDERAL_ITEMIZED_COLUMNS:
         return lambda value: value
     adapter = TypeAdapter(TaxReturnInput.model_fields[name].annotation)
 
@@ -1420,8 +1575,18 @@ _COLUMN_CONVERTERS = (
 )
 
 
+def _federal_itemized_echo(row: dict) -> dict:
+    model = row["federal_itemized"]
+    if model is None:
+        return dict.fromkeys(FEDERAL_ITEMIZED_COLUMNS)
+    return dict(
+        zip(FEDERAL_ITEMIZED_COLUMNS, (model.regular_tax, model.amt), strict=True)
+    )
+
+
 def _batch_frame(rows: list[dict]) -> pl.DataFrame:
     """Build the frame in BATCH_SCHEMA, converting values; nothing is inferred."""
+    rows = [row | _federal_itemized_echo(row) for row in rows]
     return pl.DataFrame(
         {
             name: list(map(_COLUMN_CONVERTERS[name], (row[name] for row in rows)))
@@ -1476,7 +1641,7 @@ def _graph_batch_outputs(
             facts=facts,
         )
         return [
-            {field: batch[field][i] for field in _OUTPUT_COLUMNS}
+            {field: batch[field][i] for field in (*_OUTPUT_COLUMNS, FEDERAL_ITEMIZES)}
             for i in range(len(rows))
         ]
     except UnsupportedReturnError:
@@ -1509,12 +1674,14 @@ def _scalar_rows(
     for params, row in zip(params_rows, fact_rows, strict=True):
         model = models.get(row.state or "")
         active = _facts.active_facts(model, row)
-        result = evaluate_return(
-            **params,
-            on_error=policy,
-            backend=engine,
-            state_facts=type(model)(**active) if active else None,
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", LegacyItemizedDeductionsWarning)
+            result = evaluate_return(
+                **params,
+                on_error=policy,
+                backend=engine,
+                state_facts=type(model)(**active) if active else None,
+            )
         output = result.model_dump(exclude={"assumptions"})
         output["assumptions"] = (
             None
@@ -1530,6 +1697,20 @@ _DISCRETE_INPUTS = frozenset(
     for name, field in TaxReturnInput.model_fields.items()
     if field.annotation is bool
 )
+
+
+def _require_differentiable(tax_input: TaxReturnInput, name: str) -> None:
+    """Refuse a derivative or solve axis the itemized contract does not offer."""
+    if name.split(".")[0] == "federal_itemized":
+        raise ValueError(
+            f"{name} is unsupported as a derivative or solve axis: federal_itemized "
+            "amounts are prepared amounts, held fixed."
+        )
+    if name == "itemized_deductions" and tax_input.federal_itemized is not None:
+        raise ValueError(
+            "itemized_deductions is not an axis of a call that passes "
+            "federal_itemized, whose amounts are held fixed."
+        )
 
 
 def _graph_facts(tax_input: TaxReturnInput, state_facts: StateFactsArgument) -> None:
@@ -1575,6 +1756,7 @@ def marginal_rate(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
     wrt: str = "w2_income",
     output: str = "total_tax",
@@ -1585,6 +1767,7 @@ def marginal_rate(
     """
     if wrt in _DISCRETE_INPUTS:
         raise ValueError(f"{wrt} is discrete and cannot be differentiated")
+    warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1613,6 +1796,7 @@ def marginal_rate(
         vehicle_loan_interest=vehicle_loan_interest,
         filer_65_or_older=filer_65_or_older,
         spouse_65_or_older=spouse_65_or_older,
+        federal_itemized=federal_itemized,
         dependent_exemptions=dependent_exemptions,
     )
 
@@ -1621,6 +1805,7 @@ def marginal_rate(
     _graph_facts(tax_input, state_facts)
     backend = require_available("graph")
 
+    _require_differentiable(tax_input, wrt)
     result = backend.gradient(tax_input, output, wrt)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
@@ -1658,6 +1843,7 @@ def marginal_rates(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
     output: str = "total_tax",
 ) -> dict[str, float]:
@@ -1667,6 +1853,7 @@ def marginal_rates(
     output. At a piecewise boundary, affected entries use the composed
     function's right-hand derivative, matching :func:`marginal_rate`.
     """
+    warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1695,6 +1882,7 @@ def marginal_rates(
         vehicle_loan_interest=vehicle_loan_interest,
         filer_65_or_older=filer_65_or_older,
         spouse_65_or_older=spouse_65_or_older,
+        federal_itemized=federal_itemized,
         dependent_exemptions=dependent_exemptions,
     )
 
@@ -1740,6 +1928,7 @@ def solve_for_income(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
     for_input: str = "w2_income",
     output: str = "total_tax",
@@ -1747,6 +1936,7 @@ def solve_for_income(
     """Solve for an input value that produces a target output (graph backend only)."""
     if for_input in _DISCRETE_INPUTS:
         raise ValueError(f"{for_input} is discrete and cannot be solved continuously")
+    warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
         year=year,
         state=state,
@@ -1775,6 +1965,7 @@ def solve_for_income(
         vehicle_loan_interest=vehicle_loan_interest,
         filer_65_or_older=filer_65_or_older,
         spouse_65_or_older=spouse_65_or_older,
+        federal_itemized=federal_itemized,
     )
 
     from .backends import require_available
@@ -1782,6 +1973,7 @@ def solve_for_income(
     _graph_facts(tax_input, state_facts)
     backend = require_available("graph")
 
+    _require_differentiable(tax_input, for_input)
     result = backend.solve(tax_input, output=output, target=target_tax, var=for_input)
     if result is None:
         raise RuntimeError("Graph backend solver did not converge")

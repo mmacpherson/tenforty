@@ -67,7 +67,8 @@
         17,
         18,
         19,
-        20
+        20,
+        21
     ],
     "meta": {
         "form_id": "us_form_6251",
@@ -100,85 +101,84 @@
             "id": 100,
             "op": {
                 "type": "literal",
-                "value": 0.26
+                "value": 239100
             }
         },
         "101": {
             "id": 101,
-            "name": "L7b_amt_26_tax",
             "op": {
-                "left": 99,
-                "right": 100,
-                "type": "mul"
+                "type": "literal",
+                "value": 239100
             }
         },
         "102": {
             "id": 102,
+            "name": "L7_threshold",
+            "op": {
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 100,
+                    "married_joint": 98,
+                    "married_separate": 99,
+                    "qualifying_widow": 101,
+                    "single": 97
+                }
+            }
+        },
+        "103": {
+            "id": 103,
+            "name": "L7a_amt_26_taxable",
+            "op": {
+                "left": 96,
+                "right": 102,
+                "type": "min"
+            }
+        },
+        "104": {
+            "id": 104,
+            "op": {
+                "type": "literal",
+                "value": 0.26
+            }
+        },
+        "105": {
+            "id": 105,
+            "name": "L7b_amt_26_tax",
+            "op": {
+                "left": 103,
+                "right": 104,
+                "type": "mul"
+            }
+        },
+        "106": {
+            "id": 106,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "103": {
-            "id": 103,
-            "op": {
-                "left": 92,
-                "right": 98,
-                "type": "sub"
-            }
-        },
-        "104": {
-            "id": 104,
-            "name": "L7c_amt_28_taxable",
-            "op": {
-                "left": 102,
-                "right": 103,
-                "type": "max"
-            }
-        },
-        "105": {
-            "id": 105,
-            "op": {
-                "type": "literal",
-                "value": 0.28
-            }
-        },
-        "106": {
-            "id": 106,
-            "name": "L7d_amt_28_tax",
-            "op": {
-                "left": 104,
-                "right": 105,
-                "type": "mul"
-            }
-        },
         "107": {
             "id": 107,
-            "name": "L7_simple",
             "op": {
-                "left": 101,
-                "right": 106,
-                "type": "add"
+                "left": 96,
+                "right": 102,
+                "type": "sub"
             }
         },
         "108": {
             "id": 108,
-            "name": "P3_pref_income",
+            "name": "L7c_amt_28_taxable",
             "op": {
-                "form": "us_1040",
-                "line": "qcgws_4",
-                "type": "import",
-                "year": 2025
+                "left": 106,
+                "right": 107,
+                "type": "max"
             }
         },
         "109": {
             "id": 109,
-            "name": "P3_ord_taxable",
             "op": {
-                "form": "us_1040",
-                "line": "qcgws_5",
-                "type": "import",
-                "year": 2025
+                "type": "literal",
+                "value": 0.28
             }
         },
         "11": {
@@ -190,43 +190,48 @@
         },
         "110": {
             "id": 110,
-            "name": "P3_pref_in_amt",
+            "name": "L7d_amt_28_tax",
             "op": {
-                "left": 92,
-                "right": 108,
-                "type": "min"
+                "left": 108,
+                "right": 109,
+                "type": "mul"
             }
         },
         "111": {
             "id": 111,
+            "name": "L7_simple",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 105,
+                "right": 110,
+                "type": "add"
             }
         },
         "112": {
             "id": 112,
+            "name": "P3_pref_income",
             "op": {
-                "left": 92,
-                "right": 110,
-                "type": "sub"
+                "form": "us_1040",
+                "line": "qcgws_4",
+                "type": "import",
+                "year": 2025
             }
         },
         "113": {
             "id": 113,
-            "name": "P3_ord_amt",
+            "name": "P3_ord_taxable",
             "op": {
-                "left": 111,
-                "right": 112,
-                "type": "max"
+                "form": "us_1040",
+                "line": "qcgws_5",
+                "type": "import",
+                "year": 2025
             }
         },
         "114": {
             "id": 114,
-            "name": "P3_ord_26",
+            "name": "P3_pref_in_amt",
             "op": {
-                "left": 113,
-                "right": 98,
+                "left": 96,
+                "right": 112,
                 "type": "min"
             }
         },
@@ -240,14 +245,14 @@
         "116": {
             "id": 116,
             "op": {
-                "left": 113,
-                "right": 98,
+                "left": 96,
+                "right": 114,
                 "type": "sub"
             }
         },
         "117": {
             "id": 117,
-            "name": "P3_ord_28",
+            "name": "P3_ord_amt",
             "op": {
                 "left": 115,
                 "right": 116,
@@ -256,17 +261,18 @@
         },
         "118": {
             "id": 118,
+            "name": "P3_ord_26",
             "op": {
-                "type": "literal",
-                "value": 0.26
+                "left": 117,
+                "right": 102,
+                "type": "min"
             }
         },
         "119": {
             "id": 119,
             "op": {
-                "left": 114,
-                "right": 118,
-                "type": "mul"
+                "type": "literal",
+                "value": 0
             }
         },
         "12": {
@@ -279,81 +285,78 @@
         "120": {
             "id": 120,
             "op": {
-                "type": "literal",
-                "value": 0.28
+                "left": 117,
+                "right": 102,
+                "type": "sub"
             }
         },
         "121": {
             "id": 121,
+            "name": "P3_ord_28",
             "op": {
-                "left": 117,
+                "left": 119,
                 "right": 120,
-                "type": "mul"
+                "type": "max"
             }
         },
         "122": {
             "id": 122,
-            "name": "P3_ord_tax",
             "op": {
-                "left": 119,
-                "right": 121,
-                "type": "add"
+                "type": "literal",
+                "value": 0.26
             }
         },
         "123": {
             "id": 123,
             "op": {
-                "type": "literal",
-                "value": 48350
+                "left": 118,
+                "right": 122,
+                "type": "mul"
             }
         },
         "124": {
             "id": 124,
             "op": {
                 "type": "literal",
-                "value": 96700
+                "value": 0.28
             }
         },
         "125": {
             "id": 125,
             "op": {
-                "type": "literal",
-                "value": 48350
+                "left": 121,
+                "right": 124,
+                "type": "mul"
             }
         },
         "126": {
             "id": 126,
+            "name": "P3_ord_tax",
             "op": {
-                "type": "literal",
-                "value": 64750
+                "left": 123,
+                "right": 125,
+                "type": "add"
             }
         },
         "127": {
             "id": 127,
             "op": {
                 "type": "literal",
-                "value": 96700
+                "value": 48350
             }
         },
         "128": {
             "id": 128,
-            "name": "P3_zero_bracket",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 126,
-                    "married_joint": 124,
-                    "married_separate": 125,
-                    "qualifying_widow": 127,
-                    "single": 123
-                }
+                "type": "literal",
+                "value": 96700
             }
         },
         "129": {
             "id": 129,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 48350
             }
         },
         "13": {
@@ -366,83 +369,83 @@
         "130": {
             "id": 130,
             "op": {
-                "left": 128,
-                "right": 109,
-                "type": "sub"
+                "type": "literal",
+                "value": 64750
             }
         },
         "131": {
             "id": 131,
-            "name": "P3_zero_room",
             "op": {
-                "left": 129,
-                "right": 130,
-                "type": "max"
+                "type": "literal",
+                "value": 96700
             }
         },
         "132": {
             "id": 132,
-            "name": "P3_zero_amt",
+            "name": "P3_zero_bracket",
             "op": {
-                "left": 131,
-                "right": 110,
-                "type": "min"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 130,
+                    "married_joint": 128,
+                    "married_separate": 129,
+                    "qualifying_widow": 131,
+                    "single": 127
+                }
             }
         },
         "133": {
             "id": 133,
             "op": {
                 "type": "literal",
-                "value": 533400
+                "value": 0
             }
         },
         "134": {
             "id": 134,
             "op": {
-                "type": "literal",
-                "value": 600050
+                "left": 132,
+                "right": 113,
+                "type": "sub"
             }
         },
         "135": {
             "id": 135,
+            "name": "P3_zero_room",
             "op": {
-                "type": "literal",
-                "value": 300000
+                "left": 133,
+                "right": 134,
+                "type": "max"
             }
         },
         "136": {
             "id": 136,
+            "name": "P3_zero_amt",
             "op": {
-                "type": "literal",
-                "value": 566700
+                "left": 135,
+                "right": 114,
+                "type": "min"
             }
         },
         "137": {
             "id": 137,
             "op": {
                 "type": "literal",
-                "value": 600050
+                "value": 533400
             }
         },
         "138": {
             "id": 138,
-            "name": "P3_15_bracket",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 136,
-                    "married_joint": 134,
-                    "married_separate": 135,
-                    "qualifying_widow": 137,
-                    "single": 133
-                }
+                "type": "literal",
+                "value": 600050
             }
         },
         "139": {
             "id": 139,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 300000
             }
         },
         "14": {
@@ -455,27 +458,29 @@
         "140": {
             "id": 140,
             "op": {
-                "left": 110,
-                "right": 132,
-                "type": "sub"
+                "type": "literal",
+                "value": 566700
             }
         },
         "141": {
             "id": 141,
-            "name": "P3_after_zero",
             "op": {
-                "left": 139,
-                "right": 140,
-                "type": "max"
+                "type": "literal",
+                "value": 600050
             }
         },
         "142": {
             "id": 142,
-            "name": "P3_15_used",
+            "name": "P3_15_bracket",
             "op": {
-                "left": 131,
-                "right": 109,
-                "type": "add"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 140,
+                    "married_joint": 138,
+                    "married_separate": 139,
+                    "qualifying_widow": 141,
+                    "single": 137
+                }
             }
         },
         "143": {
@@ -488,14 +493,14 @@
         "144": {
             "id": 144,
             "op": {
-                "left": 138,
-                "right": 142,
+                "left": 114,
+                "right": 136,
                 "type": "sub"
             }
         },
         "145": {
             "id": 145,
-            "name": "P3_15_room",
+            "name": "P3_after_zero",
             "op": {
                 "left": 143,
                 "right": 144,
@@ -504,34 +509,35 @@
         },
         "146": {
             "id": 146,
-            "name": "P3_15_amt",
+            "name": "P3_15_used",
             "op": {
-                "left": 141,
-                "right": 145,
-                "type": "min"
+                "left": 135,
+                "right": 113,
+                "type": "add"
             }
         },
         "147": {
             "id": 147,
             "op": {
                 "type": "literal",
-                "value": 0.15
+                "value": 0
             }
         },
         "148": {
             "id": 148,
-            "name": "P3_15_tax",
             "op": {
-                "left": 146,
-                "right": 147,
-                "type": "mul"
+                "left": 142,
+                "right": 146,
+                "type": "sub"
             }
         },
         "149": {
             "id": 149,
+            "name": "P3_15_room",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 147,
+                "right": 148,
+                "type": "max"
             }
         },
         "15": {
@@ -543,85 +549,83 @@
         },
         "150": {
             "id": 150,
+            "name": "P3_15_amt",
             "op": {
-                "left": 132,
-                "right": 146,
-                "type": "add"
+                "left": 145,
+                "right": 149,
+                "type": "min"
             }
         },
         "151": {
             "id": 151,
             "op": {
-                "left": 110,
-                "right": 150,
-                "type": "sub"
+                "type": "literal",
+                "value": 0.15
             }
         },
         "152": {
             "id": 152,
-            "name": "P3_20_amt",
+            "name": "P3_15_tax",
             "op": {
-                "left": 149,
+                "left": 150,
                 "right": 151,
-                "type": "max"
+                "type": "mul"
             }
         },
         "153": {
             "id": 153,
             "op": {
                 "type": "literal",
-                "value": 0.2
+                "value": 0
             }
         },
         "154": {
             "id": 154,
-            "name": "P3_20_tax",
             "op": {
-                "left": 152,
-                "right": 153,
-                "type": "mul"
+                "left": 136,
+                "right": 150,
+                "type": "add"
             }
         },
         "155": {
             "id": 155,
             "op": {
-                "left": 122,
-                "right": 148,
-                "type": "add"
+                "left": 114,
+                "right": 154,
+                "type": "sub"
             }
         },
         "156": {
             "id": 156,
-            "name": "P3_pref_tax",
+            "name": "P3_20_amt",
             "op": {
-                "left": 155,
-                "right": 154,
-                "type": "add"
+                "left": 153,
+                "right": 155,
+                "type": "max"
             }
         },
         "157": {
             "id": 157,
             "op": {
-                "left": 156,
-                "right": 107,
-                "type": "min"
+                "type": "literal",
+                "value": 0.2
             }
         },
         "158": {
             "id": 158,
-            "name": "L7_tentative_min_tax_before_cg",
+            "name": "P3_20_tax",
             "op": {
-                "cond": 108,
-                "otherwise": 107,
-                "then": 157,
-                "type": "if_positive"
+                "left": 156,
+                "right": 157,
+                "type": "mul"
             }
         },
         "159": {
             "id": 159,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 126,
+                "right": 152,
+                "type": "add"
             }
         },
         "16": {
@@ -633,29 +637,29 @@
         },
         "160": {
             "id": 160,
+            "name": "P3_pref_tax",
             "op": {
-                "left": 158,
-                "right": 20,
-                "type": "sub"
+                "left": 159,
+                "right": 158,
+                "type": "add"
             }
         },
         "161": {
             "id": 161,
-            "name": "L9_tentative_min_tax",
             "op": {
-                "left": 159,
-                "right": 160,
-                "type": "max"
+                "left": 160,
+                "right": 111,
+                "type": "min"
             }
         },
         "162": {
             "id": 162,
-            "name": "L10_regular_tax",
+            "name": "L7_tentative_min_tax_before_cg",
             "op": {
-                "form": "us_1040",
-                "line": "L16",
-                "type": "import",
-                "year": 2025
+                "cond": 112,
+                "otherwise": 111,
+                "then": 161,
+                "type": "if_positive"
             }
         },
         "163": {
@@ -668,17 +672,51 @@
         "164": {
             "id": 164,
             "op": {
-                "left": 161,
-                "right": 162,
+                "left": 162,
+                "right": 21,
                 "type": "sub"
             }
         },
         "165": {
             "id": 165,
-            "name": "L11_amt",
+            "name": "L9_tentative_min_tax",
             "op": {
                 "left": 163,
                 "right": 164,
+                "type": "max"
+            }
+        },
+        "166": {
+            "id": 166,
+            "name": "L10_regular_tax",
+            "op": {
+                "form": "us_1040",
+                "line": "L16",
+                "type": "import",
+                "year": 2025
+            }
+        },
+        "167": {
+            "id": 167,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "168": {
+            "id": 168,
+            "op": {
+                "left": 165,
+                "right": 166,
+                "type": "sub"
+            }
+        },
+        "169": {
+            "id": 169,
+            "name": "L11_amt",
+            "op": {
+                "left": 167,
+                "right": 168,
                 "type": "max"
             }
         },
@@ -712,13 +750,20 @@
         },
         "20": {
             "id": 20,
-            "name": "L8_amt_ftc",
+            "name": "ItemizedAmtDifference",
             "op": {
                 "type": "input"
             }
         },
         "21": {
             "id": 21,
+            "name": "L8_amt_ftc",
+            "op": {
+                "type": "input"
+            }
+        },
+        "22": {
+            "id": 22,
             "op": {
                 "form": "us_1040",
                 "line": "L14",
@@ -726,8 +771,8 @@
                 "year": 2025
             }
         },
-        "22": {
-            "id": 22,
+        "23": {
+            "id": 23,
             "op": {
                 "form": "us_schedule_1a",
                 "line": "L37",
@@ -735,17 +780,17 @@
                 "year": 2025
             }
         },
-        "23": {
-            "id": 23,
+        "24": {
+            "id": 24,
             "name": "L1a_deductions_less_senior",
             "op": {
-                "left": 21,
-                "right": 22,
+                "left": 22,
+                "right": 23,
                 "type": "sub"
             }
         },
-        "24": {
-            "id": 24,
+        "25": {
+            "id": 25,
             "op": {
                 "form": "us_1040",
                 "line": "L11",
@@ -753,17 +798,17 @@
                 "year": 2025
             }
         },
-        "25": {
-            "id": 25,
+        "26": {
+            "id": 26,
             "name": "L1_taxable_income",
             "op": {
-                "left": 24,
-                "right": 23,
+                "left": 25,
+                "right": 24,
                 "type": "sub"
             }
         },
-        "26": {
-            "id": 26,
+        "27": {
+            "id": 27,
             "name": "L2a_schedule_a_taxes",
             "op": {
                 "form": "us_schedule_a",
@@ -772,8 +817,8 @@
                 "year": 2025
             }
         },
-        "27": {
-            "id": 27,
+        "28": {
+            "id": 28,
             "name": "deduction_taken",
             "op": {
                 "form": "us_1040",
@@ -782,24 +827,14 @@
                 "year": 2025
             }
         },
-        "28": {
-            "id": 28,
+        "29": {
+            "id": 29,
             "name": "uses_itemized",
             "op": {
                 "form": "us_1040",
                 "line": "UsesItemized",
                 "type": "import",
                 "year": 2025
-            }
-        },
-        "29": {
-            "id": 29,
-            "name": "L2a_taxes_addback",
-            "op": {
-                "cond": 28,
-                "otherwise": 27,
-                "then": 26,
-                "type": "if_positive"
             }
         },
         "3": {
@@ -811,41 +846,44 @@
         },
         "30": {
             "id": 30,
+            "name": "L2a_taxes_addback",
             "op": {
-                "left": 25,
-                "right": 29,
-                "type": "add"
+                "cond": 29,
+                "otherwise": 28,
+                "then": 27,
+                "type": "if_positive"
             }
         },
         "31": {
             "id": 31,
             "op": {
-                "left": 30,
-                "right": 0,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "32": {
             "id": 32,
+            "name": "ItemizedAmtAdjustment",
             "op": {
-                "left": 31,
-                "right": 1,
-                "type": "add"
+                "cond": 29,
+                "otherwise": 31,
+                "then": 20,
+                "type": "if_positive"
             }
         },
         "33": {
             "id": 33,
             "op": {
-                "left": 32,
-                "right": 2,
-                "type": "sub"
+                "left": 26,
+                "right": 30,
+                "type": "add"
             }
         },
         "34": {
             "id": 34,
             "op": {
                 "left": 33,
-                "right": 3,
+                "right": 0,
                 "type": "add"
             }
         },
@@ -853,7 +891,7 @@
             "id": 35,
             "op": {
                 "left": 34,
-                "right": 4,
+                "right": 1,
                 "type": "add"
             }
         },
@@ -861,23 +899,23 @@
             "id": 36,
             "op": {
                 "left": 35,
-                "right": 5,
-                "type": "add"
+                "right": 2,
+                "type": "sub"
             }
         },
         "37": {
             "id": 37,
             "op": {
                 "left": 36,
-                "right": 6,
-                "type": "sub"
+                "right": 3,
+                "type": "add"
             }
         },
         "38": {
             "id": 38,
             "op": {
                 "left": 37,
-                "right": 7,
+                "right": 4,
                 "type": "add"
             }
         },
@@ -885,7 +923,7 @@
             "id": 39,
             "op": {
                 "left": 38,
-                "right": 8,
+                "right": 5,
                 "type": "add"
             }
         },
@@ -900,15 +938,15 @@
             "id": 40,
             "op": {
                 "left": 39,
-                "right": 9,
-                "type": "add"
+                "right": 6,
+                "type": "sub"
             }
         },
         "41": {
             "id": 41,
             "op": {
                 "left": 40,
-                "right": 10,
+                "right": 7,
                 "type": "add"
             }
         },
@@ -916,7 +954,7 @@
             "id": 42,
             "op": {
                 "left": 41,
-                "right": 11,
+                "right": 8,
                 "type": "add"
             }
         },
@@ -924,7 +962,7 @@
             "id": 43,
             "op": {
                 "left": 42,
-                "right": 12,
+                "right": 9,
                 "type": "add"
             }
         },
@@ -932,7 +970,7 @@
             "id": 44,
             "op": {
                 "left": 43,
-                "right": 13,
+                "right": 10,
                 "type": "add"
             }
         },
@@ -940,7 +978,7 @@
             "id": 45,
             "op": {
                 "left": 44,
-                "right": 14,
+                "right": 11,
                 "type": "add"
             }
         },
@@ -948,7 +986,7 @@
             "id": 46,
             "op": {
                 "left": 45,
-                "right": 15,
+                "right": 12,
                 "type": "add"
             }
         },
@@ -956,7 +994,7 @@
             "id": 47,
             "op": {
                 "left": 46,
-                "right": 16,
+                "right": 13,
                 "type": "add"
             }
         },
@@ -964,7 +1002,7 @@
             "id": 48,
             "op": {
                 "left": 47,
-                "right": 17,
+                "right": 14,
                 "type": "add"
             }
         },
@@ -972,7 +1010,7 @@
             "id": 49,
             "op": {
                 "left": 48,
-                "right": 18,
+                "right": 15,
                 "type": "add"
             }
         },
@@ -985,39 +1023,43 @@
         },
         "50": {
             "id": 50,
-            "name": "L4_before_mfs_increase",
             "op": {
                 "left": 49,
-                "right": 19,
+                "right": 16,
                 "type": "add"
             }
         },
         "51": {
             "id": 51,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 50,
+                "right": 17,
+                "type": "add"
             }
         },
         "52": {
             "id": 52,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 51,
+                "right": 18,
+                "type": "add"
             }
         },
         "53": {
             "id": 53,
             "op": {
-                "type": "literal",
-                "value": 900350
+                "left": 52,
+                "right": 19,
+                "type": "add"
             }
         },
         "54": {
             "id": 54,
+            "name": "L4_before_mfs_increase",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 53,
+                "right": 32,
+                "type": "add"
             }
         },
         "55": {
@@ -1029,23 +1071,16 @@
         },
         "56": {
             "id": 56,
-            "name": "L4_mfs_threshold",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 54,
-                    "married_joint": 52,
-                    "married_separate": 53,
-                    "qualifying_widow": 55,
-                    "single": 51
-                }
+                "type": "literal",
+                "value": 0
             }
         },
         "57": {
             "id": 57,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 900350
             }
         },
         "58": {
@@ -1059,7 +1094,7 @@
             "id": 59,
             "op": {
                 "type": "literal",
-                "value": 68500
+                "value": 0
             }
         },
         "6": {
@@ -1071,9 +1106,16 @@
         },
         "60": {
             "id": 60,
+            "name": "L4_mfs_threshold",
             "op": {
-                "type": "literal",
-                "value": 0
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 58,
+                    "married_joint": 56,
+                    "married_separate": 57,
+                    "qualifying_widow": 59,
+                    "single": 55
+                }
             }
         },
         "61": {
@@ -1085,72 +1127,67 @@
         },
         "62": {
             "id": 62,
-            "name": "L4_mfs_cap",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 60,
-                    "married_joint": 58,
-                    "married_separate": 59,
-                    "qualifying_widow": 61,
-                    "single": 57
-                }
+                "type": "literal",
+                "value": 0
             }
         },
         "63": {
             "id": 63,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 68500
             }
         },
         "64": {
             "id": 64,
             "op": {
-                "left": 50,
-                "right": 56,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "65": {
             "id": 65,
             "op": {
-                "left": 63,
-                "right": 64,
-                "type": "max"
+                "type": "literal",
+                "value": 0
             }
         },
         "66": {
             "id": 66,
+            "name": "L4_mfs_cap",
             "op": {
-                "type": "literal",
-                "value": 0.25
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 64,
+                    "married_joint": 62,
+                    "married_separate": 63,
+                    "qualifying_widow": 65,
+                    "single": 61
+                }
             }
         },
         "67": {
             "id": 67,
             "op": {
-                "left": 65,
-                "right": 66,
-                "type": "mul"
+                "type": "literal",
+                "value": 0
             }
         },
         "68": {
             "id": 68,
-            "name": "L4_mfs_increase",
             "op": {
-                "left": 67,
-                "right": 62,
-                "type": "min"
+                "left": 54,
+                "right": 60,
+                "type": "sub"
             }
         },
         "69": {
             "id": 69,
-            "name": "L4_amti",
             "op": {
-                "left": 50,
+                "left": 67,
                 "right": 68,
-                "type": "add"
+                "type": "max"
             }
         },
         "7": {
@@ -1164,77 +1201,82 @@
             "id": 70,
             "op": {
                 "type": "literal",
-                "value": 88100
+                "value": 0.25
             }
         },
         "71": {
             "id": 71,
             "op": {
-                "type": "literal",
-                "value": 137000
+                "left": 69,
+                "right": 70,
+                "type": "mul"
             }
         },
         "72": {
             "id": 72,
+            "name": "L4_mfs_increase",
             "op": {
-                "type": "literal",
-                "value": 68500
+                "left": 71,
+                "right": 66,
+                "type": "min"
             }
         },
         "73": {
             "id": 73,
+            "name": "L4_amti",
             "op": {
-                "type": "literal",
-                "value": 88100
+                "left": 54,
+                "right": 72,
+                "type": "add"
             }
         },
         "74": {
             "id": 74,
             "op": {
                 "type": "literal",
-                "value": 137000
+                "value": 88100
             }
         },
         "75": {
             "id": 75,
-            "name": "L5_exemption",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 73,
-                    "married_joint": 71,
-                    "married_separate": 72,
-                    "qualifying_widow": 74,
-                    "single": 70
-                }
+                "type": "literal",
+                "value": 137000
             }
         },
         "76": {
             "id": 76,
             "op": {
                 "type": "literal",
-                "value": 626350
+                "value": 68500
             }
         },
         "77": {
             "id": 77,
             "op": {
                 "type": "literal",
-                "value": 1252700
+                "value": 88100
             }
         },
         "78": {
             "id": 78,
             "op": {
                 "type": "literal",
-                "value": 626350
+                "value": 137000
             }
         },
         "79": {
             "id": 79,
+            "name": "L5_exemption",
             "op": {
-                "type": "literal",
-                "value": 626350
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 77,
+                    "married_joint": 75,
+                    "married_separate": 76,
+                    "qualifying_widow": 78,
+                    "single": 74
+                }
             }
         },
         "8": {
@@ -1248,85 +1290,80 @@
             "id": 80,
             "op": {
                 "type": "literal",
-                "value": 1252700
+                "value": 626350
             }
         },
         "81": {
             "id": 81,
-            "name": "L5_threshold",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 79,
-                    "married_joint": 77,
-                    "married_separate": 78,
-                    "qualifying_widow": 80,
-                    "single": 76
-                }
+                "type": "literal",
+                "value": 1252700
             }
         },
         "82": {
             "id": 82,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 626350
             }
         },
         "83": {
             "id": 83,
             "op": {
-                "left": 69,
-                "right": 81,
-                "type": "sub"
+                "type": "literal",
+                "value": 626350
             }
         },
         "84": {
             "id": 84,
-            "name": "L5_excess",
             "op": {
-                "left": 82,
-                "right": 83,
-                "type": "max"
+                "type": "literal",
+                "value": 1252700
             }
         },
         "85": {
             "id": 85,
+            "name": "L5_threshold",
             "op": {
-                "type": "literal",
-                "value": 0.25
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 83,
+                    "married_joint": 81,
+                    "married_separate": 82,
+                    "qualifying_widow": 84,
+                    "single": 80
+                }
             }
         },
         "86": {
             "id": 86,
-            "name": "L5_reduction",
-            "op": {
-                "left": 84,
-                "right": 85,
-                "type": "mul"
-            }
-        },
-        "87": {
-            "id": 87,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "87": {
+            "id": 87,
+            "op": {
+                "left": 73,
+                "right": 85,
+                "type": "sub"
+            }
+        },
         "88": {
             "id": 88,
+            "name": "L5_excess",
             "op": {
-                "left": 75,
-                "right": 86,
-                "type": "sub"
+                "left": 86,
+                "right": 87,
+                "type": "max"
             }
         },
         "89": {
             "id": 89,
-            "name": "L5_amt_exemption",
             "op": {
-                "left": 87,
-                "right": 88,
-                "type": "max"
+                "type": "literal",
+                "value": 0.25
             }
         },
         "9": {
@@ -1338,54 +1375,59 @@
         },
         "90": {
             "id": 90,
+            "name": "L5_reduction",
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 88,
+                "right": 89,
+                "type": "mul"
             }
         },
         "91": {
             "id": 91,
             "op": {
-                "left": 69,
-                "right": 89,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "92": {
             "id": 92,
-            "name": "L6_amt_taxable",
             "op": {
-                "left": 90,
-                "right": 91,
-                "type": "max"
+                "left": 79,
+                "right": 90,
+                "type": "sub"
             }
         },
         "93": {
             "id": 93,
+            "name": "L5_amt_exemption",
             "op": {
-                "type": "literal",
-                "value": 239100
+                "left": 91,
+                "right": 92,
+                "type": "max"
             }
         },
         "94": {
             "id": 94,
             "op": {
                 "type": "literal",
-                "value": 239100
+                "value": 0
             }
         },
         "95": {
             "id": 95,
             "op": {
-                "type": "literal",
-                "value": 119550
+                "left": 73,
+                "right": 93,
+                "type": "sub"
             }
         },
         "96": {
             "id": 96,
+            "name": "L6_amt_taxable",
             "op": {
-                "type": "literal",
-                "value": 239100
+                "left": 94,
+                "right": 95,
+                "type": "max"
             }
         },
         "97": {
@@ -1397,35 +1439,26 @@
         },
         "98": {
             "id": 98,
-            "name": "L7_threshold",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 96,
-                    "married_joint": 94,
-                    "married_separate": 95,
-                    "qualifying_widow": 97,
-                    "single": 93
-                }
+                "type": "literal",
+                "value": 239100
             }
         },
         "99": {
             "id": 99,
-            "name": "L7a_amt_26_taxable",
             "op": {
-                "left": 92,
-                "right": 98,
-                "type": "min"
+                "type": "literal",
+                "value": 119550
             }
         }
     },
     "outputs": [
-        165,
-        69,
-        89,
-        92,
-        158,
-        161
+        169,
+        73,
+        93,
+        96,
+        162,
+        165
     ],
     "tables": {}
 }
