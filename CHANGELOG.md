@@ -53,8 +53,11 @@
   public calls both ways and requires every difference to be one of them.
 - **Graph state scope for `backend="auto"`.** A state return goes to graph only
   when its known graph-side defects are closed and official-value fixtures
-  support it: for 2024-2025, Mississippi and the eight states without an
-  income tax. Other states route to OTS where OTS computes them, and otherwise
+  support it: for 2024-2025, Illinois, Mississippi, Oregon and the eight states
+  without an income tax. Maryland, Maine and North Carolina stay outside it
+  pending the itemized-deduction contract (tenforty-nuc6), and Ohio pending its
+  joint filing credit (tenforty-b72.53). Other states route to OTS where OTS
+  computes them, and otherwise
   raise `UnsupportedReturnError` naming the open defect or the missing
   evidence. `backend="graph"` ignores scope. See
   [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
@@ -87,8 +90,9 @@
   backend (OTS CA: a Schedule CA Part II itemized addition; graph CA: a Part I
   income addition; graph AL: the standard deduction amount; ignored or refused
   elsewhere), so a nonzero value now emits a `DeprecationWarning`. No mapping
-  changed. CA and AL stay out of `backend="auto"` graph scope until it is
-  resolved (tenforty-yu51).
+  changed. AL stays out of `backend="auto"` graph scope until it is resolved
+  (tenforty-yu51); CA stays out until it and CA's other open graph defects
+  (tenforty-b72.54, tenforty-tj2.20) are resolved.
 - **`evaluate_returns` frames now have one declared schema.** Columns are the
   inputs in signature order, then the `InterpretedTaxReturn` fields, with
   declared dtypes, for both backends, both modes, and empty, failed and
@@ -168,9 +172,9 @@
 - Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
   $100,000 of taxable income (Instruction 17), as published, instead of the
   unrounded rate schedule; Worksheet 17A still applies to the cent at
-  $100,000 and above. Every one of the table's 2,001 rows is checked.
-  Maryland 2024 and 2025 have no open graph defects left and join the graph
-  scope for `backend="auto"`.
+  $100,000 and above. Every one of the table's 2,001 rows is checked
+  (tenforty-tj2.20). Maryland stays outside `backend="auto"` scope pending the
+  itemized-deduction contract (tenforty-nuc6).
 - Maine Form 1040ME line 20 uses the published Maine Income Tax Table below
   $100,000 of taxable income and the printed rate schedule (whole-dollar
   bracket bases), in whole dollars, at and above it, instead of the unrounded
