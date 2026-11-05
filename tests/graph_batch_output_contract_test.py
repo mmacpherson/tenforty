@@ -60,6 +60,9 @@ def test_batch_matches_single_all_fields(state, filing_status, income):
 
     for field in OUTPUT_FIELDS:
         assert field in df.columns, f"batch dropped column {field!r}"
+        if field == "assumptions":
+            assert df[field][0].to_list() == [r.to_json() for r in single.assumptions]
+            continue
         sv = getattr(single, field) or 0.0
         bv = df[field][0] or 0.0
         assert abs(sv - bv) < 0.01, (

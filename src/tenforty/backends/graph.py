@@ -5,7 +5,7 @@ from __future__ import annotations
 import itertools
 import logging
 import pathlib
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from functools import lru_cache
 
 from ..mappings import (
@@ -236,6 +236,55 @@ def unsupported_inputs(
     return [(state, year, name, value) for (state, year, name), value in found.items()]
 
 
+FactLowering = Callable[[TaxReturnInput, object], dict[str, float]]
+
+
+def _oh_joint_filing_credit_interim(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Interim OH lowering: only "the spouses do not both qualify" is computed.
+
+    The OH spec on main has no joint filing credit (IT 1040 line 13 is a raw
+    input left at 0; tenforty-b72.53), which is exactly the credit when the
+    spouses do not both have $500 of qualifying income. True needs the credit
+    itself and is refused until b72.53's switch point replaces this lowering.
+    """
+    return {}
+
+
+FACT_LOWERINGS: dict[tuple[str, str], FactLowering] = {
+    ("OH", "spouses_both_have_qualifying_income"): _oh_joint_filing_credit_interim,
+}
+"""How each state fact reaches the graph, keyed by (state, field name).
+
+A lowering receives the validated return and the supplied value (only when the
+field is active on that return, under tenforty.state_facts' projection rule)
+and returns raw graph input node values to set. A fact the graph honours but
+that has no lowering here is refused, never ignored."""
+
+FACT_LOWERING_VALUES: dict[tuple[str, str], frozenset[object]] = {
+    ("OH", "spouses_both_have_qualifying_income"): frozenset({False}),
+}
+"""Lowerings that compute only some values; any other value is refused before
+evaluation. A lowering absent here computes every valid value."""
+
+FACT_LOWERING_PENDING: dict[tuple[str, str], str] = {
+    ("OH", "spouses_both_have_qualifying_income"): "tenforty-b72.53",
+}
+"""The work that will compute the values a restricted lowering refuses."""
+
+
+def _fact_node_values(tax_input: TaxReturnInput) -> dict[str, float]:
+    state = tax_input.state.value if tax_input.state else None
+    values: dict[str, float] = {}
+    for name, value in tax_input._state_facts.items():
+        for node, node_value in FACT_LOWERINGS[(state, name)](tax_input, value).items():
+            if node in values:
+                raise RuntimeError(f"Two state facts set graph input {node!r}")
+            values[node] = float(node_value)
+    return values
+
+
 def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
     """Refuse unsupported natural returns and nonzero inputs the graph cannot read."""
     returns = tuple(tax_inputs)
@@ -351,6 +400,8 @@ class GraphBackend:
                 continue
             for node_name in node_names:
                 evaluator.set(node_name, float(value))
+        for node_name, value in _fact_node_values(tax_input).items():
+            evaluator.set(node_name, value)
 
         return evaluator, graph
 
@@ -413,12 +464,16 @@ class GraphBackend:
         inputs: dict[str, list[object]],
         statuses: list[str],
         mode: str = "cross",
+        facts: list[dict[str, object]] | None = None,
     ) -> dict[str, list[float | None]]:
         """Evaluate multiple scenarios efficiently using graph batch API.
 
         With mode="cross" (default), computes Cartesian product of inputs x statuses.
         With mode="zip", evaluates pre-formed scenarios by zipping input columns.
+        ``facts`` (zip only) gives each row's active state facts.
         """
+        if facts is not None and mode != "zip":
+            raise ValueError("Per-row state facts need mode='zip'")
         year = getattr(year, "value", year)
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
@@ -472,6 +527,10 @@ class GraphBackend:
         # (a Schedule 1-A amount before 2025) raises its ValueError first, as
         # the single-return path does.
         require_supported_inputs(tax_inputs)
+        if facts is not None:
+            for tax_input, row_facts in zip(tax_inputs, facts, strict=True):
+                tax_input._state_facts = dict(row_facts)
+        fact_rows = [_fact_node_values(tax_input) for tax_input in tax_inputs]
         normalized: dict[str, list[float]] = {}
         for tax_input in tax_inputs:
             for name, value in _natural_values(tax_input).items():
@@ -486,6 +545,10 @@ class GraphBackend:
             _require_input_nodes(natural_name, node_names, state, year)
             for node_name in node_names:
                 graph_inputs[node_name] = values
+        for node_name in sorted({node for row in fact_rows for node in row}):
+            if node_name in graph_inputs:
+                raise RuntimeError(f"A state fact and an input both set {node_name!r}")
+            graph_inputs[node_name] = [row.get(node_name, 0.0) for row in fact_rows]
 
         # Output contract as (node, field) pairs — the same federal node->field
         # map the single path uses (so federal_amt is actually requested, not
