@@ -68,6 +68,18 @@ No OTS-covered return that auto sends to graph uses either input on OTS, so
 refusing them loses nothing that was computed before. Checked empirically for
 every OTS-covered state and year (tenforty-aqx.4.1.2).
 
+### Deduction choice
+
+`standard_or_itemized` now defaults to `"Auto"`, the larger of the standard
+deduction and Schedule A. `"Auto"` is what the old default `"Standard"` meant,
+so default callers see no change. An explicit `"Standard"` now forces the
+standard deduction even when Schedule A is larger, and `"Itemized"` still
+forces Schedule A. Pass `"Auto"` to keep an old explicit-`"Standard"` result.
+On both backends the election also sets Form 6251 line 2a. OTS refuses a forced
+`"Standard"` with Schedule A inputs for AZ, CA and NY, whose OTS programs build
+state itemizing from the federal Schedule A. See
+[the deduction-choice contract](deduction-choice-contract.md).
+
 ### Results
 
 - **Failures are NaN, never zero.** Under `on_error="warn"` or `"ignore"`, a

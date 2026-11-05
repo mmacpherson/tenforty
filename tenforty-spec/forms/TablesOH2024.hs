@@ -39,8 +39,7 @@ ohioBracketsTable2024 =
 -- - $1,900 if MAGI > $80,000
 -- Source: Ohio Department of Taxation, 2024 IT-1040 Instructions
 -- https://dam.assets.ohio.gov/image/upload/v1735920104/tax.ohio.gov/forms/ohio_individual/individual/2024/it1040-booklet.pdf
--- Note: These are income-based, so cannot be automatically applied in the form spec.
--- User must calculate and input total exemption amount.
+-- Applied to the taxpayer/spouse base plus the total dependent count in the spec.
 ohioPersonalExemption2024 :: [(Amount Dollars, Amount Dollars)]
 ohioPersonalExemption2024 =
   [ (40000, 2400),
