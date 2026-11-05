@@ -1,8 +1,8 @@
 """Which state returns ``backend="auto"`` may compute on the graph backend.
 
 A state's return enters graph scope only once its known graph-side defects are
-closed and official-value fixtures support it (tenforty-du9, approved
-2026-11-03). Scope is inferred down, never up: a (state, year) is in scope only
+closed, official-value fixtures support it (tenforty-du9, approved 2026-11-03),
+and no policy decision holds it out. Scope is inferred down, never up: a (state, year) is in scope only
 by an explicit entry in ``IN_SCOPE``, and every other graph return is excluded
 for the reasons ``exclusion_reasons`` gives. ``backend="graph"`` ignores scope.
 
@@ -96,7 +96,6 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.NC: _both_years("tenforty-nuc6"),
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
     S.NY: _both_years("tenforty-b72.4", "tenforty-tj2.20"),
-    S.OH: _both_years("tenforty-b72.53"),
     S.VA: _both_years("tenforty-b72.37", "tenforty-b72.42"),
     S.VT: _both_years(
         "tenforty-b72.20", "tenforty-b72.42", "tenforty-b72.47", "tenforty-tj2.20"
@@ -120,7 +119,6 @@ UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
         "tenforty-b72.40",
         "tenforty-b72.46",
         "tenforty-b72.47",
-        "tenforty-b72.53",  # Natural MFJ joint-credit policy remains pending.
         "tenforty-b72.54",
         "tenforty-nuc6",
         "tenforty-yu51",
@@ -133,11 +131,30 @@ so the scope test notices when its last signature goes away.
 """
 
 
+OH_REQUIRED_FACT = (
+    "policy: graph Ohio Married/Joint requires the explicit state_facts OH "
+    "joint-credit fact, which has no default (decided 2026-11-04); admitting "
+    "OH to auto scope is a separate decision"
+)
+
+POLICY_EXCLUSIONS: dict[tuple[OTSState, int], str] = {
+    (S.OH, year): OH_REQUIRED_FACT for year in GRAPH_SCOPE_YEARS
+}
+"""Returns held out of scope by decision, not by a defect.
+
+These are not defect beads: closing a bead never admits them, and the
+staleness checks on ``KNOWN_GRAPH_DEFECTS`` do not apply to them. Removing one
+is the decision to admit the return.
+"""
+
+
 def exclusion_reasons(state: OTSState | None, year: int) -> tuple[str, ...]:
     """Why ``backend="auto"`` keeps this return off graph; empty when in scope."""
     if state is None or state == OTSState.NONE or (state, year) in IN_SCOPE:
         return ()
     reasons = KNOWN_GRAPH_DEFECTS.get((state, year), ())
+    if (state, year) in POLICY_EXCLUSIONS:
+        reasons = (*reasons, POLICY_EXCLUSIONS[(state, year)])
     if (state, year) not in OFFICIAL_FIXTURES:
         reasons = (*reasons, EVIDENCE)
     return reasons
