@@ -33,7 +33,7 @@ COLUMNS = INPUT_COLUMNS + OUTPUT_COLUMNS + METADATA_COLUMNS
 def _input_dtype(name: str) -> pl.DataType:
     if name == "state_facts":
         return pl.String
-    if name in {"year", "num_dependents", "num_ctc_dependents"}:
+    if name in {"year", "num_dependents", "num_ctc_dependents", "num_eitc_children"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String

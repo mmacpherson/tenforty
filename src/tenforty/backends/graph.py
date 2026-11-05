@@ -42,8 +42,9 @@ logger = logging.getLogger(__name__)
 
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
 # Inputs that reach the graph only through naturals derived from them:
-# num_ctc_dependents is carried by the two Schedule 8812 counts.
-_CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
+# num_ctc_dependents is carried by the two Schedule 8812 counts, and
+# num_eitc_children by the Schedule EIC count.
+_CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents", "num_eitc_children"}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
@@ -101,6 +102,8 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_form_8960_L17_niit": "federal_niit",
     "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
     "us_form_8812_L14_ctc_odc": "federal_child_tax_credit",
+    # Form 1040 line 27 imports it; the resolver inlines that alias away.
+    "us_schedule_eic_EITC": "federal_earned_income_credit",
 }
 FEDERAL_BRACKET_RATE_NODE = "us_1040_L15BracketRate_ordinary_bracket_rate"
 _FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}

@@ -1,5 +1,23 @@
 ## [Unreleased]
 ### Added
+- **The federal earned income credit** (graph backend, 2024-2025):
+  `federal_earned_income_credit`, Form 1040 line 27 (2025: line 27a). It is
+  read from the EIC Table, as the worksheets direct, and every row of the
+  published 2024 and 2025 tables is checked at $0. Refundable, so it is a
+  payment and not part of `federal_total_tax`; `None` on OTS.
+  - New keyword-only inputs: `num_eitc_children` (unset: the child tax credit
+    children, all of whom also qualify) and `tax_exempt_interest` (Form 1040
+    line 2a, investment income for the EIC limit). Both are nullable or float
+    batch columns.
+  - Earned income is computed (wages, the line 1i combat pay election, and net
+    self-employment earnings less the deductible half of SE tax) and now also
+    feeds Schedule 8812 line 18a, which was an unset input.
+  - Not modeled: the childless credit's minimum age of 25 (there is no age
+    input; filers 65 or older are excluded), the married-filing-separately
+    separated-spouse exception (MFS gets 0), and the other eligibility facts
+    (valid SSNs, U.S. residence, not someone else's qualifying child).
+  - Missouri's federal tax deduction now subtracts the computed EIC (MO-1040
+    line 9).
 - **`state_facts`: explicit state-specific facts, and reported assumptions.**
   `evaluate_return`, `evaluate_returns`, `marginal_rate(s)` and
   `solve_for_income` take `state_facts=`, typed per-state models from
@@ -119,6 +137,9 @@
   percentage of AGI, which was wrong.
 
 ### Fixed (graph backend: opt-in, experimental)
+- The graph resolver follows an import of a line that itself imports another
+  form's line. It used to stop at the first hop and leave a dangling operand,
+  so Missouri's line 9 could not read Form 1040 line 27.
 - `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
   It used to be hard-coded to 0. Income exactly at a threshold stays in the
   lower bracket, as the schedules' "over X but not over Y" wording requires.

@@ -12,6 +12,7 @@ NATURAL_TO_NODE = {
     "standard_or_itemized": "us_1040_DeductionChoice",
     "w2_income": "us_1040_L1a_wages",
     "taxable_interest": "us_1040_L2b_taxable_interest",
+    "tax_exempt_interest": "us_1040_L2a_tax_exempt_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
     "ordinary_dividends": "us_1040_L3b_ordinary_dividends",
     # Schedule 8812, derived from num_dependents and num_ctc_dependents: CTC
@@ -19,6 +20,8 @@ NATURAL_TO_NODE = {
     # dependents (form line 6; the spec's L3).
     "schedule_8812_qualifying_children": "us_form_8812_L1_num_qualifying_children",
     "schedule_8812_other_dependents": "us_form_8812_L3_num_other_dependents",
+    # Schedule EIC, derived from num_eitc_children (unset: the 8812 line 4 count).
+    "schedule_eic_qualifying_children": "us_schedule_eic_NUM_QC",
     # Schedule D (capital gains/losses)
     "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
     "long_term_capital_gains": "us_schedule_d_L8a_long_term_totals",
@@ -110,6 +113,7 @@ DERIVED_NATURAL_SOURCES: dict[str, str] = {
     "ordinary_dividends": "qualified_dividends",
     "schedule_8812_qualifying_children": "num_dependents",
     "schedule_8812_other_dependents": "num_dependents",
+    "schedule_eic_qualifying_children": "num_dependents",
 }
 
 

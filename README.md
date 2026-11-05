@@ -114,6 +114,7 @@ This results in the following:
  'federal_niit': 0.0,
  'federal_additional_medicare_tax': 0.0,
  'federal_child_tax_credit': 4400.0,
+ 'federal_earned_income_credit': None,
  'federal_total_tax': 3346.0,
  'state_adjusted_gross_income': 100000.0,
  'state_taxable_income': 88588.0,
@@ -394,11 +395,13 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
 | `state`                      | str \| None               | None                | Two-letter state code. Income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
-| `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC, EITC and dependent care are not modeled. |
+| `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC and dependent care are not modeled; the EITC is `federal_earned_income_credit` (see `num_eitc_children`). |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
+| `num_eitc_children`          | int \| None              | None                | Keyword-only. Earned income credit qualifying children (Schedule EIC; at most 3 count): under 19, a student under 24, or disabled, with a valid SSN, living with you over half the year. Unset means the child tax credit children, who all qualify, so unset never overstates. May exceed `num_dependents` (an EIC child need not be your dependent). Graph only; changes `federal_earned_income_credit`, not tax |
 | `standard_or_itemized`       | str                      | Auto                | Federal deduction election: "Auto" takes the larger; "Standard" or "Itemized" forces that choice ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
+| `tax_exempt_interest`        | float                    | 0.0                 | Keyword-only. Form 1040 line 2a. Not taxed; counts toward the EIC investment income limit. Graph only |
 | `qualified_dividends`        | float                    | 0.0                 |                                    |
 | `ordinary_dividends`         | float                    | 0.0                 | Total ordinary dividends, including qualified |
 | `short_term_capital_gains`   | float                    | 0.0                 |                                    |
@@ -487,6 +490,7 @@ orchestration layer before rerunning Form 1040.
 | federal_niit                    | Net Investment Income Tax (Form 8960)                 |
 | federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
 | federal_child_tax_credit        | Nonrefundable child tax credit + credit for other dependents (Schedule 8812 line 14, Form 1040 line 19); already subtracted in federal_total_tax. Excludes the refundable ACTC |
+| federal_earned_income_credit    | Earned income credit (Form 1040 line 27; 2025 line 27a), read from the EIC Table. Refundable: a payment, not subtracted in federal_total_tax. Graph (2024-2025); None on OTS |
 | federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |

@@ -5,10 +5,18 @@
 -- The credit is read from the EIC Table, as the worksheets direct ("Look up
 -- the amount ... in the EIC Table"), not computed from the statutory formula:
 -- rows are $50 wide, and each entry is the formula at the row midpoint,
--- rounded to whole dollars. The last row before a completed phase-out amount
--- is cut short at that amount (the table's footnote rows), so its midpoint is
--- the midpoint of the shortened row. The full published tables are checked
--- row by row in tests/eic_table_test.py.
+-- rounded to whole dollars, with two edge rules the published tables follow:
+--
+-- * The row that holds a kink of the formula (the earned income amount, where
+--   phase-in ends, or the threshold phase-out amount) shows the maximum credit:
+--   phase-in counts as complete once the row reaches the earned income amount,
+--   and phase-out starts with the first row at or above the threshold.
+-- * The last row before a completed phase-out amount is cut short at that
+--   amount (the table's footnote rows), so its midpoint is the midpoint of the
+--   shortened row.
+--
+-- Neither rule is stated in the IRS documents; both are what every row of the
+-- 2024 and 2025 tables shows. tests/eic_table_test.py checks every row.
 module ScheduleEICCommon
   ( EicYear (..),
     EicColumn (..),
@@ -23,6 +31,8 @@ import TenForty
 data EicColumn = EicColumn
   { colPhaseInRate :: Amount Rate,
     colPhaseOutRate :: Amount Rate,
+    -- | Earned income amount: where phase-in reaches the maximum credit.
+    colEarnedIncomeAmount :: Amount Dollars,
     colMaxCredit :: Amount Dollars,
     -- | Threshold phase-out amount (Worksheet A line 5 / B line 10).
     colThreshold :: ByStatus (Amount Dollars),
@@ -38,7 +48,7 @@ data EicYear = EicYear
     eicInvestmentIncomeLimit :: Amount Dollars,
     -- | 1 for each filing status that may claim the credit (MFS: 0; the
     -- separated-spouse exception is not modeled).
-    eicEligibleStatus :: ByStatus (Amount Dollars)
+    eicEligibleStatus :: ByStatus (Amount Rate)
   }
 
 -- | The EIC Table entry for an amount in one column.
@@ -48,11 +58,25 @@ tableEntry col amount =
   where
     limit = byStatusE (fmap lit (colLimit col))
     threshold = byStatusE (fmap lit (colThreshold col))
+    maxCredit = lit (colMaxCredit col)
     rowMidpoint = tableBandMidpoint 50 amount
-    shortRowMidpoint = (rowMidpoint .-. dollars 25 .+. limit) .*. rate 0.5
+    rowStart = rowMidpoint .-. dollars 25
+    rowEnd = rowMidpoint .+. dollars 25
+    shortRowMidpoint = (rowStart .+. limit) .*. rate 0.5
     midpoint = smallerOf rowMidpoint shortRowMidpoint
-    phaseIn = smallerOf (lit (colMaxCredit col)) (midpoint .*. lit (colPhaseInRate col))
-    phaseOut = (midpoint `subtractNotBelowZero` threshold) .*. lit (colPhaseOutRate col)
+    -- A row ending exactly at the earned income amount is still phase-in.
+    phaseIn =
+      ifGte
+        (lit (colEarnedIncomeAmount col))
+        rowEnd
+        (smallerOf maxCredit (midpoint .*. lit (colPhaseInRate col)))
+        maxCredit
+    phaseOut =
+      ifGte
+        rowStart
+        threshold
+        ((midpoint `subtractNotBelowZero` threshold) .*. lit (colPhaseOutRate col))
+        (dollars 0)
     formula = phaseIn `subtractNotBelowZero` phaseOut
     withinTable = ifGte amount limit (dollars 0) (tableRoundToDollar formula)
 
@@ -64,11 +88,15 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
     keyInput "NUM_QC" "num_qualifying_children" "Number of EIC qualifying children (the credit counts at most 3)"
   taxExemptInterest <- interior "TAX_EXEMPT_INTEREST" "tax_exempt_interest" $ importForm us1040L2a
 
-  -- Worksheet A line 1 / Worksheet B line 1e: wages, plus net earnings from
-  -- self-employment less the deductible part of SE tax.
+  -- Step 5 earned income: Form 1040 line 1z plus any nontaxable combat pay
+  -- elected on line 1i; Worksheet B adds Schedule SE line 3 less the
+  -- deductible part of SE tax (Schedule SE line 13, this spec's L11).
   earnedIncome <-
-    keyOutput "EARNED_INCOME" "earned_income" "Earned income (EIC Worksheet A line 1 / B line 1e)" $
-      importForm us1040L1z .+. importForm usScheduleSeL3 .-. importForm usScheduleSeL11
+    keyOutput "EARNED_INCOME" "earned_income" "Earned income (EIC Worksheet A line 1 / B line 4b)" $
+      importForm us1040L1z
+        .+. importForm us1040L1i
+        .+. importForm usScheduleSeL3
+        .-. importForm usScheduleSeL11
 
   -- Pub 596 Worksheet 1: interest (taxable and tax-exempt), ordinary
   -- dividends, capital gain net income, and net rent and royalty income.
@@ -95,15 +123,20 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
   c2 <- interior "C2" "credit_2qc" $ creditFor col2
   c3 <- interior "C3" "credit_3plus_qc" $ creditFor col3
 
-  -- Without a qualifying child, the filer (or a spouse) must be under 65.
-  let everyoneIs65 =
+  -- Without a qualifying child, the filer (on a joint return, either spouse)
+  -- must be under 65 at the end of the year (Pub 596 Rule 11). The 65-or-older
+  -- boxes are 0/1, so on a joint return both are 65 or older when the smaller
+  -- is 1. The other half of the age test, at least 25, is not modeled: there is
+  -- no input for it.
+  let filer65 = importForm us1040Filer65
+      everyoneIs65 =
         byStatusE
           ( byStatus
-              (importForm us1040Filer65)
-              (importForm us1040Filer65 .*. importForm us1040Spouse65)
-              (importForm us1040Filer65)
-              (importForm us1040Filer65)
-              (importForm us1040Filer65)
+              filer65
+              (smallerOf filer65 (importForm us1040Spouse65))
+              filer65
+              filer65
+              filer65
           )
   childlessCredit <-
     interior "C0_AGE" "credit_0qc_age_tested" $

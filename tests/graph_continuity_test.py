@@ -21,6 +21,10 @@ from tenforty.mappings import (
 from tenforty.models import OTSState
 
 FEDERAL_TOTAL_TAX = "us_1040_L24_total_tax"
+# The refundable EIC sits below the tax line (Form 1040 line 27, a payment).
+# Its own inputs, tax-exempt interest and the EIC child count, reach it and
+# nothing else on the federal return.
+FEDERAL_PAYMENT_OUTPUTS = ["us_schedule_eic_EITC"]
 
 # State inputs that map from a user field but reach no output today, keyed by
 # (year, state, natural_field). When one is fixed its case starts passing and
@@ -81,9 +85,9 @@ def test_resolved_graphs_present() -> None:
 
 
 def test_federal_inputs_reach_total_tax() -> None:
-    """Every federal user-input node must feed us_1040_L24_total_tax."""
+    """Every federal user-input node feeds total tax or the refundable EIC."""
     for year, data in _resolved_graphs():
-        reachable = _reachable(data, [FEDERAL_TOTAL_TAX])
+        reachable = _reachable(data, [FEDERAL_TOTAL_TAX, *FEDERAL_PAYMENT_OUTPUTS])
         name_to_id = _name_to_id(data)
         for field in NATURAL_TO_NODES:
             for node_name in federal_nodes_for(field, year):

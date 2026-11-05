@@ -902,6 +902,8 @@ def evaluate_return(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    tax_exempt_interest: float = 0.0,
+    num_eitc_children: int | None = None,
     state_facts: StateFactsArgument = None,
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
@@ -928,6 +930,8 @@ def evaluate_return(
         filing_status=filing_status,
         num_dependents=num_dependents,
         num_ctc_dependents=num_ctc_dependents,
+        num_eitc_children=num_eitc_children,
+        tax_exempt_interest=tax_exempt_interest,
         dependent_exemptions=dependent_exemptions,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
@@ -998,6 +1002,8 @@ def evaluate_returns(
     filer_65_or_older: list[bool] | bool = False,
     spouse_65_or_older: list[bool] | bool = False,
     num_ctc_dependents: list[int | None] | int | None = None,
+    tax_exempt_interest: list[float] | float = 0.0,
+    num_eitc_children: list[int | None] | int | None = None,
     state_facts: StateFactsArgument = None,
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
@@ -1034,6 +1040,8 @@ def evaluate_returns(
     filing_statuses = ensure_list(filing_status)
     nums_dependents = ensure_list(num_dependents)
     nums_ctc_dependents = ensure_list(num_ctc_dependents)
+    tax_exempt_interests = ensure_list(tax_exempt_interest)
+    nums_eitc_children = ensure_list(num_eitc_children)
     dep_exemptions = ensure_list(dependent_exemptions)
     std_or_items = ensure_list(standard_or_itemized)
     w2_incomes = ensure_list(w2_income)
@@ -1088,6 +1096,8 @@ def evaluate_returns(
             ("vehicle_loan_interest", vehicle_loan_interest_values),
             ("filer_65_or_older", filer_65_or_older_values),
             ("spouse_65_or_older", spouse_65_or_older_values),
+            ("tax_exempt_interest", tax_exempt_interests),
+            ("num_eitc_children", nums_eitc_children),
         ]
         lengths = {name: len(vals) for name, vals in all_lists if len(vals) != 1}
         if lengths:
@@ -1132,6 +1142,8 @@ def evaluate_returns(
         vehicle_loan_interest_values = broadcast(vehicle_loan_interest_values)
         filer_65_or_older_values = broadcast(filer_65_or_older_values)
         spouse_65_or_older_values = broadcast(spouse_65_or_older_values)
+        tax_exempt_interests = broadcast(tax_exempt_interests)
+        nums_eitc_children = broadcast(nums_eitc_children)
 
     parameter_names = [
         "year",
@@ -1162,6 +1174,8 @@ def evaluate_returns(
         "filer_65_or_older",
         "spouse_65_or_older",
         "num_ctc_dependents",
+        "tax_exempt_interest",
+        "num_eitc_children",
     ]
     all_vals = [
         years,
@@ -1192,6 +1206,8 @@ def evaluate_returns(
         filer_65_or_older_values,
         spouse_65_or_older_values,
         nums_ctc_dependents,
+        tax_exempt_interests,
+        nums_eitc_children,
     ]
 
     columns = dict(zip(parameter_names, all_vals, strict=True))
@@ -1371,7 +1387,7 @@ def _echo_facts(models: dict[str, StateFacts], row: _facts.FactRow) -> str | Non
 def _input_dtype(name: str) -> pl.DataType:
     if name == "state_facts":
         return pl.String
-    if name in {"year", "num_dependents", "num_ctc_dependents"}:
+    if name in {"year", "num_dependents", "num_ctc_dependents", "num_eitc_children"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String
@@ -1575,6 +1591,8 @@ def marginal_rate(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    tax_exempt_interest: float = 0.0,
+    num_eitc_children: int | None = None,
     state_facts: StateFactsArgument = None,
     wrt: str = "w2_income",
     output: str = "total_tax",
@@ -1591,6 +1609,8 @@ def marginal_rate(
         filing_status=filing_status,
         num_dependents=num_dependents,
         num_ctc_dependents=num_ctc_dependents,
+        num_eitc_children=num_eitc_children,
+        tax_exempt_interest=tax_exempt_interest,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
@@ -1658,6 +1678,8 @@ def marginal_rates(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    tax_exempt_interest: float = 0.0,
+    num_eitc_children: int | None = None,
     state_facts: StateFactsArgument = None,
     output: str = "total_tax",
 ) -> dict[str, float]:
@@ -1673,6 +1695,8 @@ def marginal_rates(
         filing_status=filing_status,
         num_dependents=num_dependents,
         num_ctc_dependents=num_ctc_dependents,
+        num_eitc_children=num_eitc_children,
+        tax_exempt_interest=tax_exempt_interest,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
@@ -1740,6 +1764,8 @@ def solve_for_income(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    tax_exempt_interest: float = 0.0,
+    num_eitc_children: int | None = None,
     state_facts: StateFactsArgument = None,
     for_input: str = "w2_income",
     output: str = "total_tax",
@@ -1753,6 +1779,8 @@ def solve_for_income(
         filing_status=filing_status,
         num_dependents=num_dependents,
         num_ctc_dependents=num_ctc_dependents,
+        num_eitc_children=num_eitc_children,
+        tax_exempt_interest=tax_exempt_interest,
         standard_or_itemized=standard_or_itemized,
         w2_income=w2_income,
         taxable_interest=taxable_interest,
