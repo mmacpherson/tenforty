@@ -569,7 +569,8 @@ class TaxReturnInput(BaseModel):
             "returns where the filer or spouse can be claimed as another's dependent "
             "(a total below the baseline) are unsupported. Maryland "
             "dependent-taxpayer filers, whose exemption is $0, are unsupported. Other "
-            "state/year and backend support varies."
+            "state/year and backend support varies. OTS maps it for no state or "
+            "year, and refuses a nonzero value."
         ),
     )
 
