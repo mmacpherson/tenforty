@@ -345,9 +345,10 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "eitc_eligible",
         "required",
         None,
-        "Mike, 2026-11-05 (AST-44): the EIC conditions the inputs cannot show "
-        "(age 25 for no child, SSN, not another taxpayer's qualifying child, "
-        "...). Unset, federal_earned_income_credit is None; graph MO refuses.",
+        "Mike, 2026-11-05 (AST-44, AST-48): the EIC conditions the inputs "
+        "cannot show (all of Pub 596 Rule 11 for no child, SSN, not another "
+        "taxpayer's qualifying child, ...). Unset, federal_earned_income_credit "
+        "is None; graph MO and EIC derivatives and solves refuse.",
     ),
     DefaultDecision(
         "state_facts.OH.spouses_both_have_qualifying_income",

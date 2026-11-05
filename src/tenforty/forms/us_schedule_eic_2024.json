@@ -49,36 +49,6 @@
             "form": "us_1040",
             "line": "L11",
             "year": 2024
-        },
-        {
-            "form": "us_1040",
-            "line": "Filer65",
-            "year": 2024
-        },
-        {
-            "form": "us_1040",
-            "line": "Filer65",
-            "year": 2024
-        },
-        {
-            "form": "us_1040",
-            "line": "Spouse65",
-            "year": 2024
-        },
-        {
-            "form": "us_1040",
-            "line": "Filer65",
-            "year": 2024
-        },
-        {
-            "form": "us_1040",
-            "line": "Filer65",
-            "year": 2024
-        },
-        {
-            "form": "us_1040",
-            "line": "Filer65",
-            "year": 2024
         }
     ],
     "inputs": [
@@ -186,28 +156,23 @@
         "1007": {
             "id": 1007,
             "op": {
-                "form": "us_1040",
-                "line": "Filer65",
-                "type": "import",
-                "year": 2024
+                "type": "literal",
+                "value": 3
             }
         },
         "1008": {
             "id": 1008,
             "op": {
-                "form": "us_1040",
-                "line": "Filer65",
-                "type": "import",
-                "year": 2024
+                "left": 1007,
+                "right": 0,
+                "type": "sub"
             }
         },
         "1009": {
             "id": 1009,
             "op": {
-                "form": "us_1040",
-                "line": "Spouse65",
-                "type": "import",
-                "year": 2024
+                "type": "literal",
+                "value": 2
             }
         },
         "101": {
@@ -220,88 +185,81 @@
         "1010": {
             "id": 1010,
             "op": {
-                "left": 1008,
-                "right": 1009,
-                "type": "min"
+                "left": 1009,
+                "right": 0,
+                "type": "sub"
             }
         },
         "1011": {
             "id": 1011,
             "op": {
-                "form": "us_1040",
-                "line": "Filer65",
-                "type": "import",
-                "year": 2024
+                "type": "literal",
+                "value": 1
             }
         },
         "1012": {
             "id": 1012,
             "op": {
-                "form": "us_1040",
-                "line": "Filer65",
-                "type": "import",
-                "year": 2024
+                "left": 1011,
+                "right": 0,
+                "type": "sub"
             }
         },
         "1013": {
             "id": 1013,
             "op": {
-                "form": "us_1040",
-                "line": "Filer65",
-                "type": "import",
-                "year": 2024
+                "cond": 1012,
+                "otherwise": 514,
+                "then": 268,
+                "type": "if_positive"
             }
         },
         "1014": {
             "id": 1014,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 1012,
-                    "married_joint": 1010,
-                    "married_separate": 1011,
-                    "qualifying_widow": 1013,
-                    "single": 1007
-                }
+                "cond": 1010,
+                "otherwise": 760,
+                "then": 1013,
+                "type": "if_positive"
             }
         },
         "1015": {
             "id": 1015,
+            "name": "CREDIT_BY_QC",
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 1008,
+                "otherwise": 1006,
+                "then": 1014,
+                "type": "if_positive"
             }
         },
         "1016": {
             "id": 1016,
-            "name": "C0_AGE",
             "op": {
-                "cond": 1014,
-                "otherwise": 268,
-                "then": 1015,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 11600
             }
         },
         "1017": {
             "id": 1017,
             "op": {
-                "type": "literal",
-                "value": 3
+                "left": 21,
+                "right": 1016,
+                "type": "sub"
             }
         },
         "1018": {
             "id": 1018,
             "op": {
-                "left": 1017,
-                "right": 0,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "1019": {
             "id": 1019,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 1
             }
         },
         "102": {
@@ -316,81 +274,76 @@
         "1020": {
             "id": 1020,
             "op": {
-                "left": 1019,
-                "right": 0,
-                "type": "sub"
+                "type": "literal",
+                "value": 1
             }
         },
         "1021": {
             "id": 1021,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 0
             }
         },
         "1022": {
             "id": 1022,
             "op": {
-                "left": 1021,
-                "right": 0,
-                "type": "sub"
+                "type": "literal",
+                "value": 1
             }
         },
         "1023": {
             "id": 1023,
             "op": {
-                "cond": 1022,
-                "otherwise": 514,
-                "then": 1016,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "1024": {
             "id": 1024,
             "op": {
-                "cond": 1020,
-                "otherwise": 760,
-                "then": 1023,
-                "type": "if_positive"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 1022,
+                    "married_joint": 1020,
+                    "married_separate": 1021,
+                    "qualifying_widow": 1023,
+                    "single": 1019
+                }
             }
         },
         "1025": {
             "id": 1025,
-            "name": "CREDIT_BY_QC",
             "op": {
-                "cond": 1018,
-                "otherwise": 1006,
-                "then": 1024,
-                "type": "if_positive"
+                "left": 1015,
+                "right": 1024,
+                "type": "mul"
             }
         },
         "1026": {
             "id": 1026,
             "op": {
-                "type": "literal",
-                "value": 11600
+                "cond": 1017,
+                "otherwise": 1025,
+                "then": 1018,
+                "type": "if_positive"
             }
         },
         "1027": {
             "id": 1027,
             "op": {
-                "left": 21,
-                "right": 1026,
-                "type": "sub"
-            }
-        },
-        "1028": {
-            "id": 1028,
-            "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "1029": {
-            "id": 1029,
+        "1028": {
+            "id": 1028,
+            "name": "EITC",
             "op": {
-                "type": "literal",
-                "value": 1
+                "cond": 1,
+                "otherwise": 1027,
+                "then": 1026,
+                "type": "if_positive"
             }
         },
         "103": {
@@ -399,81 +352,6 @@
                 "left": 65,
                 "right": 102,
                 "type": "sub"
-            }
-        },
-        "1030": {
-            "id": 1030,
-            "op": {
-                "type": "literal",
-                "value": 1
-            }
-        },
-        "1031": {
-            "id": 1031,
-            "op": {
-                "type": "literal",
-                "value": 0
-            }
-        },
-        "1032": {
-            "id": 1032,
-            "op": {
-                "type": "literal",
-                "value": 1
-            }
-        },
-        "1033": {
-            "id": 1033,
-            "op": {
-                "type": "literal",
-                "value": 1
-            }
-        },
-        "1034": {
-            "id": 1034,
-            "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 1032,
-                    "married_joint": 1030,
-                    "married_separate": 1031,
-                    "qualifying_widow": 1033,
-                    "single": 1029
-                }
-            }
-        },
-        "1035": {
-            "id": 1035,
-            "op": {
-                "left": 1025,
-                "right": 1034,
-                "type": "mul"
-            }
-        },
-        "1036": {
-            "id": 1036,
-            "op": {
-                "cond": 1027,
-                "otherwise": 1035,
-                "then": 1028,
-                "type": "if_positive"
-            }
-        },
-        "1037": {
-            "id": 1037,
-            "op": {
-                "type": "literal",
-                "value": 0
-            }
-        },
-        "1038": {
-            "id": 1038,
-            "name": "EITC",
-            "op": {
-                "cond": 1,
-                "otherwise": 1037,
-                "then": 1036,
-                "type": "if_positive"
             }
         },
         "104": {
@@ -8452,9 +8330,9 @@
         514,
         760,
         1006,
-        1025,
+        1015,
         9,
-        1038,
+        1028,
         21
     ],
     "tables": {}

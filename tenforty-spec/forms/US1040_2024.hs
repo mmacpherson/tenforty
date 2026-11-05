@@ -299,8 +299,6 @@ us1040_2024 = form "us_1040" 2024 $ do
       "L1i",
       "L2a",
       "L7",
-      "Filer65",
-      "Spouse65",
       "NonWageIncomeMagnitude",
       "L2b",
       "L3b",

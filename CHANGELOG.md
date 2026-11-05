@@ -7,9 +7,11 @@
   payment and not part of `federal_total_tax`; `None` on OTS.
   - New keyword-only inputs: `num_eitc_children` (EIC qualifying children),
     `eitc_eligible` (the filer meets the EIC conditions the inputs cannot
-    show: at least 25 with no qualifying child, valid SSNs, not another
-    taxpayer's qualifying child, and the rest of Pub 596 Rules 2, 4, 5, 10
-    and 11-14) and `tax_exempt_interest` (Form 1040 line 2a, investment
+    show: valid SSNs, not another taxpayer's qualifying child, and the rest
+    of Pub 596 Rules 2, 4, 5 and 10; with no qualifying child, also all of
+    Rule 11, where one person, the filer or a joint spouse, is at least 25
+    and under 65 by Rule 11's own birth-date bounds, and Rules 12-14) and
+    `tax_exempt_interest` (Form 1040 line 2a, investment
     income for the EIC limit). Nullable batch columns, except
     `tax_exempt_interest`, which is a float.
   - **No default guesses the credit.** `eitc_eligible=False` gives 0;
@@ -19,6 +21,14 @@
     The EIC child count is never inferred from `num_dependents` or the child
     tax credit count: a noncustodial parent claiming the child tax credit
     under Form 8332 cannot claim that child for the EIC.
+  - `filer_65_or_older` and `spouse_65_or_older` never affect the EIC. They
+    follow the standard deduction's birthday convention (a January 1 birthday
+    counts as 65), and they cannot say whether one spouse meets both of Rule
+    11's age bounds.
+  - `marginal_rate(s)` and `solve_for_income` raise `UnsupportedInputError`
+    for an output that reads an undetermined credit (found from the resolved
+    graph, so raw node names are covered too), rather than treating it as 0.
+    `federal_total_tax` is unaffected.
   - Earned income is computed (wages, the line 1i combat pay election, and net
     self-employment earnings less the deductible half of SE tax) and now also
     feeds Schedule 8812 line 18a, which was an unset input.

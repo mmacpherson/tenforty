@@ -89,11 +89,14 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
   -- The Pub 596 conditions this form cannot compute: Rules 2 (SSN), 4
   -- (citizen or resident alien all year), 5 (no Form 2555) and 10 (not
   -- another taxpayer's qualifying child), not barred after a disallowance,
-  -- and with no qualifying child Rules 11 (at least 25), 12 (not a dependent),
-  -- 13 (not a qualifying child) and 14 (U.S. home over half the year). 1
-  -- confirms them; at 0 there is no credit. Rules 1, 6, 7 and 15 (the income
-  -- limits), the filing status and the 65 cap of Rule 11 are computed;
-  -- NUM_QC carries Rules 8 and 9.
+  -- and with no qualifying child Rules 11 (one person, the filer or a joint
+  -- spouse, at least 25 and under 65, by Rule 11's own birth-date bounds),
+  -- 12 (not a dependent), 13 (not a qualifying child) and 14 (U.S. home over
+  -- half the year). 1 confirms them; at 0 there is no credit. The Form 1040
+  -- age-65 boxes follow the standard deduction's birthday convention and
+  -- cannot express Rule 11, so they play no part here. Rules 1, 6, 7 and 15
+  -- (the income limits) and the filing status are computed; NUM_QC carries
+  -- Rules 8 and 9.
   eligible <-
     keyInput "ELIGIBLE" "eligible" "1 when the filer meets the EIC conditions not computed here (Pub 596 Rules 2, 4, 5, 10; childless 11-14)"
   taxExemptInterest <- interior "TAX_EXEMPT_INTEREST" "tax_exempt_interest" $ importForm us1040L2a
@@ -133,29 +136,11 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
   c2 <- interior "C2" "credit_2qc" $ creditFor col2
   c3 <- interior "C3" "credit_3plus_qc" $ creditFor col3
 
-  -- Without a qualifying child, the filer (on a joint return, either spouse)
-  -- must be under 65 at the end of the year (Pub 596 Rule 11). The 65-or-older
-  -- boxes are 0/1, so on a joint return both are 65 or older when the smaller
-  -- is 1. The other half of the age test, at least 25, is part of ELIGIBLE.
-  let filer65 = importForm us1040Filer65
-      everyoneIs65 =
-        byStatusE
-          ( byStatus
-              filer65
-              (smallerOf filer65 (importForm us1040Spouse65))
-              filer65
-              filer65
-              filer65
-          )
-  childlessCredit <-
-    interior "C0_AGE" "credit_0qc_age_tested" $
-      ifPos everyoneIs65 (dollars 0) c0
-
   creditByQC <-
     interior "CREDIT_BY_QC" "credit_by_qc" $
       ifGte numQC (dollars 3) c3 $
         ifGte numQC (dollars 2) c2 $
-          ifGte numQC (dollars 1) c1 childlessCredit
+          ifGte numQC (dollars 1) c1 c0
 
   let eligibleStatus = byStatusE (fmap lit (eicEligibleStatus params))
       overInvestmentLimit = investmentIncome .-. lit (eicInvestmentIncomeLimit params)
