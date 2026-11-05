@@ -444,7 +444,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC, EITC and dependent care are not modeled. |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
-| `dependent_exemptions`       | float                    | 0.0                 | Graph only. State exemption dollars (not a count) for states that use them; see its docstring in `TaxReturnInput` for the per-state rules. OTS ignores it |
+| `dependent_exemptions`       | float                    | 0.0                 | State exemption dollars (not a count). A nonzero value is refused on OTS and under `backend="auto"` for every state and year; only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV. See its docstring in `TaxReturnInput` for the per-state rules |
 | `standard_or_itemized`       | str                      | Auto                | Federal deduction election: "Auto" takes the larger; "Standard" or "Itemized" forces that choice ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
@@ -585,7 +585,7 @@ Compared with the OTS backend:
 - Not every input is mapped for every state. It raises on an input it can't
   represent rather than dropping it.
 - It takes `dependent_exemptions`, state exemption dollars (not a count), for
-  the states that use them. OTS has no such input.
+  the states that use them. OTS has no such input and refuses a nonzero value.
 
 Two function families exist only on this backend and take the same return
 arguments as `evaluate_return`:

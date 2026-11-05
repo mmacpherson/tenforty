@@ -215,6 +215,20 @@
   Rust, and in OTS-only mode.
 
 ### Fixed (OTS backend)
+- **OTS now refuses a nonzero `dependent_exemptions` instead of ignoring it.**
+  No OTS program in any year maps the input, federal or state, so a nonzero
+  value was dropped and the return computed without it. Every OTS return
+  (2018-2025, every state and federal-only) now raises
+  `UnsupportedInputError` naming the input, state and year, under every
+  `on_error` policy and before any return in an `evaluate_returns` batch is
+  computed. `backend="auto"` returns routed to OTS refuse identically.
+  **This breaks callers that pass a nonzero `dependent_exemptions` on OTS**
+  (`backend="ots"`, the previous default), which previously got a number that
+  ignored it. Pass `0` (or omit it) where no state exemption amount is
+  intended, pass a dependent count as `num_dependents` (dollars are not
+  converted to a count), or use an explicit `backend="graph"` for a 2024-2025
+  state whose graph maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV).
+  Zero is unchanged.
 - **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
   MA_1 input map set only wages, so OTS never received line 11 (Social
   Security and Medicare paid, up to $2,000 per person) and over-taxed every

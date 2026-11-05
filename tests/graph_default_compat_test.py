@@ -566,17 +566,25 @@ def test_auto_computes_states_ots_cannot(year, state):
     _assert_identities(result.model_dump(), "auto", state)
 
 
-@pytest.mark.parametrize("field", ("state_adjustment", "dependent_exemptions"))
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("state", ("OR", "TX", None))
-def test_auto_refuses_inputs_ots_silently_ignored(field, state):
-    """OTS drops these inputs on graph-routed returns; auto refuses them."""
-    args = _case_args(2025, state, "Single", {"w2_income": 80_000, field: 3_000})
-    baseline = _case_args(2025, state, "Single", {"w2_income": 80_000})
-    assert evaluate_return(**args, backend="ots") == evaluate_return(
-        **baseline, backend="ots"
-    )
+def test_auto_refuses_inputs_ots_silently_ignored(state):
+    """OTS drops state_adjustment on graph-routed returns; auto refuses it."""
+    args = _case_args(2025, state, "Single", {"w2_income": 80_000})
+    assert evaluate_return(
+        **args, state_adjustment=3_000, backend="ots"
+    ) == evaluate_return(**args, backend="ots")
     with pytest.raises(UnsupportedInputError):
-        evaluate_return(**args, backend="auto")
+        evaluate_return(**args, state_adjustment=3_000, backend="auto")
+
+
+@pytest.mark.parametrize("backend", ("ots", "auto"))
+@pytest.mark.parametrize("state", ("OR", "TX", None))
+def test_both_backends_refuse_dependent_exemptions_neither_reads(state, backend):
+    """Neither engine reads dependent_exemptions here; both refuse a nonzero one."""
+    args = _case_args(2025, state, "Single", {"w2_income": 80_000})
+    with pytest.raises(UnsupportedInputError, match="dependent_exemptions"):
+        evaluate_return(**args, dependent_exemptions=3_000, backend=backend)
 
 
 # --- Batch --------------------------------------------------------------------

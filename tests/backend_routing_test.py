@@ -459,6 +459,9 @@ def test_graph_batches_pass_every_return_input():
     assert batch_inputs == set(TaxReturnInput.model_fields)
 
 
+# state_adjustment is the input here because OTS ignores it on a 2023 federal
+# return while the graph refuses it on 2024, so only the later group refuses.
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
 @pytest.mark.parametrize("mode", ["cross", "zip"])
 def test_later_group_unsupported_input_refuses_before_any_group_runs(
@@ -467,11 +470,11 @@ def test_later_group_unsupported_input_refuses_before_any_group_runs(
     """A graph input refusal in a later group stops the batch before 2023 runs."""
     from tenforty import UnsupportedInputError
 
-    with pytest.raises(UnsupportedInputError, match="dependent_exemptions"):
+    with pytest.raises(UnsupportedInputError, match="state_adjustment"):
         tenforty.evaluate_returns(
             year=[2023, 2024],
             w2_income=50_000.0,
-            dependent_exemptions=1.0,
+            state_adjustment=1.0,
             backend="auto",
             mode=mode,
             on_error=on_error,
@@ -479,6 +482,7 @@ def test_later_group_unsupported_input_refuses_before_any_group_runs(
     assert engine_calls == []
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("mode", ["cross", "zip"])
 def test_earlier_engine_failure_cannot_mask_a_later_refusal(monkeypatch, mode):
     """The contract error wins even when an earlier group's engine would fail."""
@@ -488,11 +492,11 @@ def test_earlier_engine_failure_cannot_mask_a_later_refusal(monkeypatch, mode):
         raise RuntimeError("earlier engine failure")
 
     monkeypatch.setattr(core, "evaluate_natural_input_form", failing_ots)
-    with pytest.raises(UnsupportedInputError):
+    with pytest.raises(UnsupportedInputError, match="state_adjustment"):
         tenforty.evaluate_returns(
             year=[2023, 2024],
             w2_income=50_000.0,
-            dependent_exemptions=1.0,
+            state_adjustment=1.0,
             backend="auto",
             mode=mode,
         )
