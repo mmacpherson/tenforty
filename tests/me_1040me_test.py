@@ -60,8 +60,8 @@ BLIND_CASES = [
 # rounds line 8 (10,999.50 -> 11,000), giving 103,850. The 2026-11-03
 # derivation (me-2024-2025.md, 2024 Single case f) rounds line 7, as the graph
 # does; the instructions do not say which line takes the half. Line 20 is
-# 6,917 either way.
-LINE_19_ALTERNATIVES = {16: {103_850, 103_851}}
+# 6,917 either way. Each reading is matched whole: (line 17, line 19).
+LINE_17_AND_19_READINGS = {16: {(10_999, 103_851), (11_000, 103_850)}}
 
 BASELINE = {2024: 5_000, 2025: 5_150}
 PHASEOUT_THRESHOLD = {
@@ -116,8 +116,12 @@ def test_line_19_matches_the_blind_derivation(
     result = evaluate_return(
         backend="graph", year=year, state="ME", filing_status=status, w2_income=wages
     )
-    accepted = LINE_19_ALTERNATIVES.get(case, {taxable_income})
-    assert result.state_taxable_income in accepted
+    if case in LINE_17_AND_19_READINGS:
+        line_17 = _runtime(year, status, wages).eval(f"{PREFIX}_L19_deduction")
+        observed = (line_17, result.state_taxable_income)
+        assert observed in LINE_17_AND_19_READINGS[case]
+    else:
+        assert result.state_taxable_income == taxable_income
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -275,4 +279,62 @@ def test_worksheet_ratio_is_entered_to_four_places():
     10,297.4456 (tenforty-b72.42).
     """
     runtime = _runtime(2025, "Married/Joint", 400_131)
+    assert runtime.eval(f"{PREFIX}_L21_allowed") == 10_298
+
+
+# Whole-dollar entries (instructions printed p.3: "Use whole dollar amounts.
+# Round down ... less than 50 cents. Round up ... 50 cents or more"). Line 14
+# takes federal AGI, so fractional wages reach Maine rounded half up.
+# (case label, year, status, wages, line 19, line 20)
+FRACTIONAL_CASES = [
+    # Independent derivation ME25-SINGLE-FRACTIONAL-65249.50 (Astra, source-only;
+    # docs/validation/derivations/me-tax-table-2024-2025.md): line 14 65,250,
+    # line 19 45,100, row 45,100-45,200 Single = 2,793 (row 45,000-45,100 is
+    # 2,786, what unrounded 45,099.50 would select).
+    ("witness", 2025, "Single", 65_249.50, 45_100, 2_793),
+    # Blind cases 1 and 10 at wages 50,000, approached from both sides.
+    ("case 1 up", 2024, "Single", 49_999.50, 30_400, 1_808),
+    ("case 1 down", 2024, "Single", 50_000.49, 30_400, 1_808),
+    ("case 10 up", 2025, "Single", 49_999.50, 29_850, 1_760),
+    ("case 10 down", 2025, "Single", 50_000.49, 29_850, 1_760),
+]
+
+
+@pytest.mark.parametrize(
+    "label,year,status,wages,taxable_income,tax", FRACTIONAL_CASES, ids=lambda v: str(v)
+)
+def test_fractional_wages_enter_maine_in_whole_dollars(
+    label, year, status, wages, taxable_income, tax
+):
+    """Line 19 and the table row use the rounded line 14, not cents."""
+    result = evaluate_return(
+        backend="graph", year=year, state="ME", filing_status=status, w2_income=wages
+    )
+    assert (result.state_taxable_income, result.state_total_tax) == (
+        taxable_income,
+        tax,
+    )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_fractional_wages_in_a_batch(year):
+    """Batch (zip) evaluation rounds the same entries as scalar evaluation."""
+    cases = [case for case in FRACTIONAL_CASES if case[1] == year]
+    batch = evaluate_returns(
+        backend="graph",
+        year=[year] * len(cases),
+        state=["ME"] * len(cases),
+        filing_status=[case[2] for case in cases],
+        w2_income=[case[3] for case in cases],
+        mode="zip",
+    )
+    for index, (_, _, _, _, taxable_income, tax) in enumerate(cases):
+        assert batch["state_taxable_income"][index] == taxable_income
+        assert batch["state_total_tax"][index] == tax
+
+
+def test_fractional_agi_reaches_the_worksheet_rounded():
+    """2025 MFJ wages 400,130.50 enter as 400,131: the Codex witness, 10,298."""
+    runtime = _runtime(2025, "Married/Joint", 400_130.50)
+    assert runtime.eval(f"{PREFIX}_L16_me_agi") == 400_131
     assert runtime.eval(f"{PREFIX}_L21_allowed") == 10_298

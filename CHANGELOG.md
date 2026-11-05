@@ -158,7 +158,9 @@
   $100,000 of taxable income and the printed rate schedule (whole-dollar
   bracket bases), in whole dollars, at and above it, instead of the unrounded
   bracket integral. The line 17 and line 18 phase-out worksheets enter line 5
-  to four places, rounded half up, with whole-dollar lines 7 and 8. Every
+  to four places, rounded half up, with whole-dollar lines 7 and 8, and every
+  Form 1040ME money entry (including federal AGI on line 14) is rounded to
+  whole dollars before the worksheets and the table lookup. Every
   table row is checked. Maine stays outside the graph scope for
   `backend="auto"` until the itemized-deductions contract lands, because its
   graph takes `itemized_deductions` directly as its own itemized line.

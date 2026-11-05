@@ -18,7 +18,9 @@ tables do. The booklet is followed (ruling 2 in the derivation notes).
 Taxable income is steered onto each point exactly: federal wages are set
 where the line 17 deduction is fully phased out and the line 18 phase-out has
 not begun, and the explicit total-exemption input (worksheet line 6) takes up
-the rest. Every case asserts the deduction and taxable income first.
+the rest. Every case asserts the deduction and taxable income first. Form
+entries are whole dollars ("Use whole dollar amounts"), so taxable income is
+too: each row is checked at its first, middle and last whole dollar.
 """
 
 import csv
@@ -107,7 +109,7 @@ def _tax_at(year, status, taxable_income):
     runtime = _runtime(year, status)
     runtime.set(EXEMPTION_TOTAL, STEERING_WAGES[status] - taxable_income)
     assert runtime.eval(DEDUCTION) == 0
-    assert runtime.eval(TAXABLE_INCOME) == pytest.approx(taxable_income, abs=1e-6)
+    assert runtime.eval(TAXABLE_INCOME) == taxable_income
     return runtime.eval(STATE_TAX)
 
 
@@ -125,10 +127,10 @@ def test_fixture_is_the_whole_table(year):
 @pytest.mark.parametrize("status", list(STEERING_WAGES))
 @pytest.mark.parametrize("year", YEARS)
 def test_every_published_row(year, status):
-    """Each row's start, midpoint and last cent price at the printed amount."""
+    """Each row's first, middle and last whole dollar price at the printed amount."""
     mismatches = []
     for low, high, tax in _rows(year, COLUMN[status]):
-        for point in (low, (low + high) / 2, high - 0.01):
+        for point in (low, (low + high) // 2, high - 1):
             actual = _tax_at(year, status, point)
             if actual != tax:
                 mismatches.append((low, high, point, tax, actual))
@@ -140,4 +142,4 @@ def test_rate_schedule_applies_at_the_ceiling(year, status):
     """At $100,000 the table ends and the printed schedule applies to line 19."""
     assert _tax_at(year, status, TABLE_CEILING) == SCHEDULE_AT_CEILING[year, status]
     last_row_tax = _rows(year, COLUMN[status])[-1][2]
-    assert _tax_at(year, status, TABLE_CEILING - 0.01) == last_row_tax
+    assert _tax_at(year, status, TABLE_CEILING - 1) == last_row_tax

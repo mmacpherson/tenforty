@@ -169,3 +169,13 @@ rational arithmetic, then round half up to whole dollars (`me-table-scripts/chec
 4. **Phase-out worksheets (lines 17 and 18).** Line 5 rounded half up to four places; lines 7 and 8
    whole dollars. Where truncating line 5 instead would change line 20, the tests accept both; those
    cases are enumerated in me-2024-2025.md ("Alternative readings") and in the tests.
+
+## Whole-dollar entries: independent fractional witness (Codex Astra, source-only review of #441, 2026-11-04)
+
+Evidence kind: independent derivation from the MRS booklets and published table only. Quoted from the reviewer's source record:
+
+> Both booklets printed p3 mandate whole-dollar amounts: below50 cents down,50 cents or more up. This is an imperative under Specific Instructions—Form1040ME, not an optional election. Printed p4 line14 transfers federal AGI. Form entries must therefore be whole-dollar before selecting the table using line19. High confidence. The paragraph concerns form completion; its reach into unfiled intermediate worksheet arithmetic is less explicit.
+>
+> Independent derivation ME25-SINGLE-FRACTIONAL-65249.50: Single, under65, not blind, not another person's dependent, wages/federal AGI65249.50, no Maine modifications, standard deduction, one personal exemption, no credits. Maine line14=65250 after required half-up rounding; line16=65250; line17=15000 (2025 booklet p4 standard deduction chart); line18=5150 (p4); line19=45100. Published table row45100–45200, Single, gives2793 (2025 booklet p12, standalone p3). Adjacent row45000–45100 gives2786. Carrying45100's pre-rounding predecessor45099.50 into lookup would select2786 and contradict whole-dollar form entry requirements. This result does not depend on any ambiguous phaseout rounding because phaseouts are inactive.
+
+The graph therefore rounds every Form 1040ME money entry half up to whole dollars, including the federal AGI import on line 14, before any worksheet or table lookup (as OR-40 does).
