@@ -6,7 +6,9 @@ used primarily for structuring and organizing configuration data.
 """
 
 # ruff: noqa: D101
+import json
 import math
+import warnings
 from collections.abc import Callable
 from enum import Enum
 from functools import partial
@@ -16,6 +18,7 @@ from pydantic import (
     ConfigDict,
     Field,
     FiniteFloat,
+    PrivateAttr,
     TypeAdapter,
     computed_field,
     model_validator,
@@ -348,6 +351,10 @@ _SPOUSE_BOX_STATUSES = frozenset(
 class TaxReturnInput(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
 
+    _state_facts: dict[str, object] = PrivateAttr(default_factory=dict)
+    """The state facts active for this return (tenforty.state_facts), set by the
+    public API after validation; read by the graph backend's fact lowerings."""
+
     year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
@@ -365,7 +372,7 @@ class TaxReturnInput(BaseModel):
             "neither credit. Not modeled: the refundable additional child tax "
             "credit (a payment, not part of total tax), the earned income credit "
             "and the dependent care credit. Some state returns also read this "
-            "count as their dependent count (graph: CA, NY, OR and WI; OTS: the state "
+            "count as their dependent count (graph: CA, IL, NY, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
             "through dependent_exemptions. The OR graph uses it for its regular "
             "exemption credit and derives the taxpayer/spouse base from filing "
@@ -391,6 +398,9 @@ class TaxReturnInput(BaseModel):
             "dependents without an SSN valid for employment (e.g. with an ITIN or "
             "ATIN), and qualifying relatives such as a parent. For example, two "
             "children aged 10 and 18 are num_dependents=2, num_ctc_dependents=1. "
+            "The NC graph uses this same qualifying-child count for D-400 line "
+            "10a and its income-tiered line 10b child deduction; other dependents "
+            "do not qualify. The default to num_dependents applies there too. "
             "Must not exceed num_dependents (ValueError). For 2025, OBBBA also "
             "requires an SSN for the filer (at least one spouse on a joint "
             "return) to claim the child tax credit; that is not checked."
@@ -498,7 +508,8 @@ class TaxReturnInput(BaseModel):
             "married filing jointly), not for married filing separately. The senior "
             "deduction is taken with either the standard or itemized deduction and "
             "is added back for the AMT. Blindness and dependent-filer limits are not "
-            "modeled. State returns do not read it."
+            "modeled. The IL graph also adds the $1,000 age-65 exemption allowance, "
+            "subject to its federal-AGI limit; other states do not read it."
         ),
     )
     spouse_65_or_older: bool = Field(
@@ -511,16 +522,31 @@ class TaxReturnInput(BaseModel):
             "standard deduction, which the IRS allows when the spouse had no income, "
             "is not filing and cannot be claimed as a dependent; the senior "
             "deduction is not allowed. Any other filing status has no spouse box, "
-            "so True raises ValueError."
+            "so True raises ValueError. The IL graph adds the spouse's $1,000 "
+            "age allowance only for MFJ, subject to its federal-AGI limit."
         ),
     )
-    state_adjustment: float = 0.0
+    state_adjustment: float = Field(
+        default=0.0,
+        description=(
+            "Deprecated legacy escape hatch; avoid in new code. Its meaning depends "
+            "on the state and the backend, and a nonzero value emits a "
+            "DeprecationWarning (tenforty-yu51). OTS CA: Schedule CA Part II "
+            "itemized-deduction addition (CA540_P2_Add_6). Graph CA: Schedule CA "
+            "Part I income addition (ca_schedule_ca_A22_24), so the same value moves "
+            "CA taxable income the opposite way. Graph AL: the Form 40 standard "
+            "deduction amount (al_40_L12_std). Everywhere else OTS ignores it and "
+            "the graph refuses it. Named single-meaning inputs will replace it "
+            "(tenforty-tj2.1, tenforty-tj2.2)."
+        ),
+    )
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. The OR graph does not "
-            "map this field; use num_dependents for its regular exemption credit. "
+            "State exemption dollars, not a dependent count. The IL and OR graphs "
+            "do not map this field; use num_dependents for IL's personal/dependent "
+            "allowance and the OR regular exemption credit. "
             "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "
@@ -657,6 +683,20 @@ class TaxReturnInput(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def warn_deprecated_state_adjustment(self) -> "TaxReturnInput":
+        """Warn on a nonzero state_adjustment, whose meaning is backend-specific."""
+        if self.state_adjustment:
+            warnings.warn(
+                "state_adjustment is deprecated: its meaning depends on the state and "
+                "the backend (CA: an itemized-deduction addition on OTS but an income "
+                "addition on graph; AL graph: the standard deduction amount). See "
+                "docs/migrating-to-graph-default.md.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        return self
+
+    @model_validator(mode="after")
     def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
         """Handle case where only qualified dividends is provided."""
         # On the 1040, the "ordinary dividends" box, recently Line 3b, includes
@@ -676,6 +716,47 @@ TAX_RETURN_FLOAT_FIELDS = tuple(
 )
 
 FINITE_FLOAT_COLUMNS = TypeAdapter(dict[str, list[FiniteFloat]])
+
+
+def canonical_json(value: object) -> str:
+    """Deterministic project JSON: sorted keys, compact, UTF-8, no NaN.
+
+    A stable serialization for metadata columns; not an RFC 8785 claim.
+    """
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+
+
+class Assumption(BaseModel):
+    """A convention that entered the selected engine's computation of a return.
+
+    Recorded because no input supplied the value. ``id`` and ``value`` are
+    semantic and stable; ``text`` explains and may be reworded. ``input_path``
+    names the public input that would replace the convention, or is None when
+    no such input exists yet. ``value`` is a JSON scalar.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    id: str
+    state: str | None
+    input_path: str | None
+    value: bool | int | FiniteFloat | str | None
+    text: str
+
+    def to_json(self) -> str:
+        """Canonical JSON of the complete record."""
+        return canonical_json(self.model_dump())
+
+    @classmethod
+    def from_json(cls, encoded: str) -> "Assumption":
+        """Decode a record written by ``to_json``."""
+        return cls.model_validate_json(encoded)
 
 
 class InterpretedTaxReturn(BaseModel):
@@ -708,10 +789,20 @@ class InterpretedTaxReturn(BaseModel):
     state_tax_bracket: float | None = None
     state_effective_tax_rate: float | None = None
 
+    assumptions: tuple[Assumption, ...] | None = Field(
+        default=(),
+        description=(
+            "Recorded state conventions that entered this computation because no "
+            "input supplied them (see tenforty.state_facts). () when none was "
+            "recorded, which is not a claim that the return makes no assumptions; "
+            "None on a failed return."
+        ),
+    )
+
     @classmethod
     def failed(cls) -> "InterpretedTaxReturn":
-        """Return a failed computation: every output is NaN, never 0."""
-        return cls(**dict.fromkeys(cls.model_fields, math.nan))
+        """Return a failed computation: every number NaN, never 0; no metadata."""
+        return cls(**dict.fromkeys(NUMERIC_OUTPUT_FIELDS, math.nan), assumptions=None)
 
     @model_validator(mode="after")
     def compute_federal_income_tax(self) -> "InterpretedTaxReturn":  # noqa: D102
@@ -1889,3 +1980,31 @@ def _build_subordinate_config() -> dict[int, list[SubordinateFormConfig]]:
 
 
 SUBORDINATE_FORM_CONFIG = _build_subordinate_config()
+
+
+METADATA_OUTPUT_FIELDS: tuple[str, ...] = ("assumptions",)
+"""InterpretedTaxReturn fields that describe the computation rather than report a
+number; None on a failed return."""
+
+NUMERIC_OUTPUT_FIELDS: tuple[str, ...] = (
+    "total_tax",
+    "federal_adjusted_gross_income",
+    "federal_effective_tax_rate",
+    "federal_tax_bracket",
+    "federal_taxable_income",
+    "federal_qbi_deduction",
+    "federal_amt",
+    "federal_income_tax",
+    "federal_se_tax",
+    "federal_niit",
+    "federal_additional_medicare_tax",
+    "federal_child_tax_credit",
+    "federal_total_tax",
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+"""The numeric outputs, NaN on a failed return. Written out, not derived, so a
+field added to InterpretedTaxReturn must be classified (state_facts_test)."""

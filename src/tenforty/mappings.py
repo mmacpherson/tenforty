@@ -399,9 +399,16 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.IL: StateGraphConfig(
         # IL-1040 imports federal AGI and applies additions/subtractions.
-        # Exemptions are accepted as total input (num_dependents cannot map to
-        # dollar amounts due to natural_to_node limitation).
-        natural_to_node={},
+        # Line 10 counts the filer/spouse base plus TOTAL dependents, independent
+        # of the federal CTC subset. Existing age facts add $1,000 per eligible
+        # box; the IL spouse age box applies only to MFJ. The federal-AGI income
+        # exception removes the whole allowance. dependent_exemptions is not
+        # mapped; claimable-filer and blind variants remain unsupported.
+        natural_to_node={
+            "num_dependents": "il_1040_Dependents",
+            "filer_65_or_older": "il_1040_Filer65",
+            "spouse_65_or_older": "il_1040_Spouse65",
+        },
         outputs={
             "state_adjusted_gross_income": "L9_il_base_income",
             "state_taxable_income": "L11_il_net_income",
@@ -630,8 +637,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NC: StateGraphConfig(
+        # D-400 line 10a uses CTC qualifying children, not total dependents.
+        # The same derived count feeds Schedule 8812: num_ctc_dependents when
+        # specified, otherwise num_dependents. Qualifying relatives get no NC
+        # child deduction. D-401 p.13 and archived nc-2024-2025.md case8/A6.
         natural_to_node={
             "itemized_deductions": "nc_d400_L10_itemized",
+            "schedule_8812_qualifying_children": "nc_d400_QualifyingChildren",
         },
         outputs={
             "state_adjusted_gross_income": "L6_federal_agi",
