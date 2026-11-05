@@ -25,8 +25,7 @@ from tenforty import evaluate_return
 from tenforty.backends import GraphBackend
 from tenforty.models import TaxReturnInput
 
-from .fixtures.helpers import federal_tax_table_applies
-from .fixtures.planning_twin import row_offsets, twin_output
+from .fixtures.planning_twin import linear_path_slope
 
 
 def _graph_backend_available() -> bool:
@@ -154,21 +153,19 @@ def _slopes(
     return backward, forward, central
 
 
-def _graph_oracle_slopes(
+def _graph_linear_slope(
     case: dict[str, float | int | str], wrt: str, output: str, step: float
-) -> tuple[float, float, float]:
-    """Evaluation-path slopes, or the planning twin's where the table applies."""
-    value = float(case.get(wrt, 0.0))
-    probes = [{**case, wrt: value + delta} for delta in (-step, 0.0, step)]
-    if not federal_tax_table_applies(probes):
-        return _slopes("graph", case, wrt, output, step)
-    offsets = row_offsets(case)
-    below, center, above = (twin_output(probe, output, offsets) for probe in probes)
-    return (
-        (center - below) / step,
-        (above - center) / step,
-        (above - below) / (2 * step),
-    )
+) -> float | None:
+    """Evaluation-path slope (the planning twin's on the Tax Table).
+
+    None where the path is not linear over ``[x - step, x + step]``; see
+    ``linear_path_slope``.
+    """
+
+    def evaluate(probe: dict[str, float | int | str]) -> float:
+        return float(getattr(evaluate_return(backend="graph", **probe), output))
+
+    return linear_path_slope(case, wrt, output, step, evaluate)
 
 
 def _gradient(case: dict[str, float | int | str], wrt: str, output: str) -> float:
@@ -189,7 +186,7 @@ def _failure(
 
 @skip_if_graph_unavailable
 def test_full_graph_gradient_matrix_matches_evaluation_path():
-    """Every locally linear cell agrees with a central finite difference."""
+    """Every locally linear cell agrees with its evaluation-path slope."""
     failures = []
     checked = 0
 
@@ -197,16 +194,14 @@ def test_full_graph_gradient_matrix_matches_evaluation_path():
         case = _case(region)
         for wrt in INCOME_NATURALS:
             for output in OUTPUTS:
-                backward, forward, central = _graph_oracle_slopes(
-                    case, wrt, output, _GRAPH_STEP
-                )
-                if abs(forward - backward) >= _GRAPH_TOLERANCE:
+                right = _graph_linear_slope(case, wrt, output, _GRAPH_STEP)
+                if right is None:
                     continue
 
                 checked += 1
                 analytical = _gradient(case, wrt, output)
-                if analytical != pytest.approx(central, abs=_GRAPH_TOLERANCE):
-                    failures.append(_failure(region, wrt, output, analytical, central))
+                if analytical != pytest.approx(right, abs=_GRAPH_TOLERANCE):
+                    failures.append(_failure(region, wrt, output, analytical, right))
 
     assert checked >= 550, f"matrix coverage fell unexpectedly: {checked} cells"
     assert not failures, "\n".join(failures)
@@ -233,8 +228,8 @@ def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset)
     case = _case(region)
     value = float(case.get(wrt, 0.0)) + offset
     case[wrt] = value if wrt in _SIGNED_INCOMES else max(0.0, value)
-    backward, forward, central = _graph_oracle_slopes(case, wrt, output, _GRAPH_STEP)
-    assume(abs(forward - backward) < _GRAPH_TOLERANCE)
+    right = _graph_linear_slope(case, wrt, output, _GRAPH_STEP)
+    assume(right is not None)
 
     analytical = _gradient(case, wrt, output)
     vector = GraphBackend().gradients(TaxReturnInput(**case), output)
@@ -242,8 +237,8 @@ def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset)
     assert vector[wrt] == pytest.approx(analytical, abs=1e-12, rel=0.0), _failure(
         region, wrt, output, vector[wrt], analytical
     )
-    assert analytical == pytest.approx(central, abs=_GRAPH_TOLERANCE), _failure(
-        region, wrt, output, analytical, central
+    assert analytical == pytest.approx(right, abs=_GRAPH_TOLERANCE), _failure(
+        region, wrt, output, analytical, right
     )
 
 

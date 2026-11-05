@@ -37,8 +37,7 @@ from hypothesis import strategies as st
 from tenforty import evaluate_return
 from tenforty.models import OTSFilingStatus, TaxReturnInput
 
-from .fixtures.helpers import federal_tax_table_applies
-from .fixtures.planning_twin import row_offsets, twin_output
+from .fixtures.planning_twin import linear_path_slope
 
 
 def graph_backend_available():
@@ -160,34 +159,25 @@ def _gradient(wrt: str, case: dict) -> float:
     incomes=_INCOME_VECTOR,
 )
 def test_autodiff_matches_finite_difference(filing_status, wrt, incomes):
-    """Away from a kink, the analytical gradient equals the evaluation-path slope."""
+    """Where the path is locally linear, the gradient equals its slope.
+
+    Linearity is checked forward and backward over the step and over a much
+    shorter one (``linear_path_slope``). The step-wide slopes alone cannot see
+    a jump on each side that happens to match (tenforty-fd1j: the planning twin
+    switches opening Tax Table rows at 5, 15 and 25). Kinks at the point itself
+    are pinned directly in graph_autodiff_ties_test.py.
+    """
     case = dict(year=2024, filing_status=filing_status, **incomes)
     # Leave room for a symmetric step without pushing the input negative.
     case[wrt] = max(case[wrt], _STEP)
 
-    plus = {**case, wrt: case[wrt] + _STEP}
-    minus = {**case, wrt: case[wrt] - _STEP}
-    if federal_tax_table_applies([minus, case, plus]):
-        offsets = row_offsets(case)
-        f0, f_plus, f_minus = (
-            twin_output(probe, "total_tax", offsets) for probe in (case, plus, minus)
-        )
-    else:
-        f0 = _total_tax(case)
-        f_plus = _total_tax(plus)
-        f_minus = _total_tax(minus)
+    slope = linear_path_slope(case, wrt, "total_tax", _STEP, _total_tax)
+    assume(slope is not None)
 
-    forward = (f_plus - f0) / _STEP
-    backward = (f0 - f_minus) / _STEP
-    # A kink in [x-h, x+h] shows up as the one-sided slopes disagreeing; a central
-    # difference is meaningless there, so only assert on the locally linear points.
-    assume(abs(forward - backward) < 1e-4)
-
-    central = (f_plus - f_minus) / (2 * _STEP)
     analytical = _gradient(wrt, case)
-    assert analytical == pytest.approx(central, abs=1e-4), (
+    assert analytical == pytest.approx(slope, abs=1e-4), (
         f"d(total_tax)/d({wrt}) = {analytical:.8f} but the evaluation path moves "
-        f"{central:.8f} per dollar at {case}"
+        f"{slope:.8f} per dollar at {case}"
     )
 
 
