@@ -14,7 +14,8 @@
   evidence that keeps it out.
 - **An explicit backend is never reinterpreted.** `backend="ots"` is the
   rollback: it gives you the OTS results of today, except that OTS now
-  refuses a nonzero `dependent_exemptions` it used to ignore (see
+  refuses a nonzero `dependent_exemptions` it used to ignore, and a nonzero
+  `incentive_stock_option_gains` on 2018 and 2019 returns (see
   [Inputs refused](#inputs-refused-where-they-do-not-apply)).
   `backend="graph"` ignores scope.
 - **What you should do:**
@@ -81,6 +82,13 @@ ignored the amount. Pass `0` (or omit it) where no exemption amount is
 intended; pass a dependent count as `num_dependents`, since tenforty does not
 convert exemption dollars to a count; or use `backend="graph"` for a state
 listed above. Zero is unchanged everywhere.
+
+The same rule covers `incentive_stock_option_gains` on 2018 and 2019 OTS
+returns. It is mapped to the Form 6251 line OTS calls AMTws3, but those two
+years' federal programs parse that line and never store it, so the ISO
+adjustment was dropped and the AMT computed without it. A nonzero value there
+now raises `UnsupportedInputError`; no backend computes those years with the
+adjustment. 2020 onward read the line and are unchanged.
 
 ### Deduction choice
 

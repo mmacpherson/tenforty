@@ -170,6 +170,16 @@ OTS_INPUT_CARRIERS = {
     "state_and_local_taxes": "schedule_a_state_and_local_taxes",
 }
 
+# OTS input keys that a year's program accepts but never uses, so a natural
+# mapped to one is dropped. The 2018 and 2019 US_1040 programs keep an AMTwsN
+# line only when 3 <= N < 3, which no N satisfies, and their `amtws[3]`
+# assignment is commented out; 2020 onward read AMTws3 with GetLine. AMTws3 is
+# where incentive_stock_option_gains is mapped (Form 6251 line 2i).
+OTS_UNREAD_INPUT_KEYS: dict[tuple[int, str], frozenset[str]] = {
+    (2018, "US_1040"): frozenset({"AMTws3"}),
+    (2019, "US_1040"): frozenset({"AMTws3"}),
+}
+
 
 class OTSState(Enum):
     NONE = None
