@@ -20,6 +20,10 @@ from dataclasses import dataclass, field
 
 from .evidence import EvidenceKind, TaxEvidence
 
+OH_ONE_EARNER = {"spouses_both_have_qualifying_income": False}
+"""A one-earner couple: the spouses do not both have $500 of qualifying income
+(fields of tenforty.state_facts.OH; the test runner builds the model)."""
+
 Outcome = tuple[float, float]
 
 
@@ -383,7 +387,14 @@ OH_CASES = [
         _oh(year, "S60", *row["S60"], w2_income=60_000),
         _oh(year, "S150", *row["S150"], w2_income=150_000),
         _oh(year, "S400", *row["S400"], w2_income=400_000),
-        _oh(year, "MFJ60one", *row["MFJ60one"], status="MFJ", w2_income=60_000),
+        _oh(
+            year,
+            "MFJ60one",
+            *row["MFJ60one"],
+            status="MFJ",
+            w2_income=60_000,
+            state_facts=OH_ONE_EARNER,
+        ),
         _oh(year, "S40000", *row["S40000"], w2_income=40_000),
         _oh(year, "S40001", *row["S40001"], w2_income=40_001),
         _oh(year, "S80000", *row["S80000"], w2_income=80_000),

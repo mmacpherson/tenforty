@@ -7,8 +7,9 @@
   the default is still `"ots"`; this note describes the flip and everything
   already in place for it.
 - **Graph scope (2024–2025):** federal-only returns; the eight states without
-  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and MD, MS and OR. Every other
-  state, and every year from 2018 to 2023, stays on OTS. `src/tenforty/graph_scope.py`
+  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and IL, MS and OR. Other
+  states use OTS where covered, or raise `UnsupportedReturnError`. Years
+  2018–2023 stay on OTS. `src/tenforty/graph_scope.py`
   is the list, and each excluded state names the open defect or missing
   evidence that keeps it out.
 - **An explicit backend is never reinterpreted.** `backend="ots"` is the
@@ -40,8 +41,13 @@ The CHANGELOG has the full wording.
 - `backend="auto"` picks the backend by year and state scope. `evaluate_return`,
   `evaluate_returns` and `get_backend` share one selector. A mixed batch is split
   by engine and keeps its row order.
-- Auto computes MD and MS, which OTS cannot: under `backend="ots"` they raise
+- Auto computes IL and MS, which OTS cannot: under `backend="ots"` they raise
   `UnsupportedReturnError`.
+- MD and NC leave auto graph scope until their itemized-deduction contract is
+  implemented (`tenforty-nuc6`). Their graph mappings currently treat the
+  generic federal aggregate as a state itemized amount. NC therefore uses OTS;
+  MD has no OTS program and auto raises `UnsupportedReturnError`. Explicit
+  `backend="graph"` remains available.
 - A request no backend can serve raises `UnsupportedReturnError` before
   evaluation, under every `on_error` policy. `backend="graph"` for 2018–2023
   used to raise `FileNotFoundError`. A batch is checked whole before any row
@@ -82,6 +88,22 @@ every OTS-covered state and year (tenforty-aqx.4.1.2).
   (an `ImportError` and a `RuntimeError`). An unknown `on_error` raises
   `ValueError`. On OTS, a non-zero OTS exit or a failed required subordinate
   form now fails the return instead of producing a wrong one.
+
+### State facts and assumptions
+
+- `state_facts=` takes explicit state-specific facts ([State facts](state-facts.md)).
+  A graph Ohio Married/Joint return now **requires**
+  `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=...)`
+  and raises `UnsupportedInputError` without it, where it used to compute with
+  no joint filing credit. OH is outside auto scope, so only `backend="graph"`
+  callers see this.
+- Results gain `assumptions`: recorded conventions used because no input
+  supplied them (`()` if none, `None` on failure). Massachusetts joint returns
+  now report the one-earner line 11 convention on both backends; no value
+  changes.
+- Frames gain a `state_facts` echo column (`String`, in signature order) and
+  an `assumptions` column (`List(String)`, after the numeric outputs). Code
+  that iterates every output column as a float must skip `assumptions`.
 
 ### Batch frames
 
