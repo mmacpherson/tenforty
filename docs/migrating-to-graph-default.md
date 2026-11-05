@@ -123,6 +123,13 @@ state itemizing from the federal Schedule A. See
   and raises `UnsupportedInputError` without it, where it used to compute with
   no joint filing credit. OH is outside auto scope, so only `backend="graph"`
   callers see this.
+- MS remains in auto scope. MS MFJ requires both actual rounded line-13 AGIs
+  through `state_facts.MS(taxpayer_adjusted_gross_income=..., spouse_adjusted_gross_income=...)`.
+  Federal QSS requires `MS(head_of_family_eligible=...)`; HoH has the documented
+  resident-dependent baseline True and an optional False override. Missing or inconsistent
+  facts refuse the whole request. State/total-tax MS MFJ household-income
+  derivatives and solves are unsupported; explicit federal-only outputs remain
+  available. See [State facts](state-facts.md) for the validity bound and limits.
 - Results gain `assumptions`: recorded conventions used because no input
   supplied them (`()` if none, `None` on failure). Massachusetts joint returns
   now report the one-earner line 11 convention on both backends; no value

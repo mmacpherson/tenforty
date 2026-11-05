@@ -618,6 +618,8 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
                 "Single",
             ],
             "w2_income": [85_000.0, 140_000.0, 60_000.0, 95_000.0, 30_000.0],
+            "num_dependents": [0, 0, 0, 1, 0],
+            "num_ctc_dependents": [0, 0, 0, 0, 0],
         }
     frames = {}
     for backend in ("ots", "auto"):
@@ -644,6 +646,8 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
                 state=row["state"],
                 filing_status=row["filing_status"],
                 w2_income=row["w2_income"],
+                num_dependents=row["num_dependents"],
+                num_ctc_dependents=row["num_ctc_dependents"],
                 backend=backend,
             ).model_dump()
             for field, value in scalar.items():

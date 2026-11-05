@@ -1302,7 +1302,7 @@ def evaluate_returns(
             ]
             for group, indices in zip_groups.items()
         }
-    _preflight(group_params, engines)
+    _preflight(group_params, engines, models)
 
     def evaluate_group(group: tuple) -> list[dict]:
         rows = group_params[group]
@@ -1353,7 +1353,9 @@ def evaluate_returns(
 
 
 def _preflight(
-    group_params: dict[tuple, list[dict]], engines: dict[tuple, Engine]
+    group_params: dict[tuple, list[dict]],
+    engines: dict[tuple, Engine],
+    models: dict[str, StateFacts],
 ) -> None:
     """Refuse the whole batch before any return is computed.
 
@@ -1365,6 +1367,12 @@ def _preflight(
         group: [TaxReturnInput(**params) for params in rows]
         for group, rows in group_params.items()
     }
+    for group, tax_inputs in validated.items():
+        for tax_input in tax_inputs:
+            row = _facts.fact_row(
+                tax_input.year, tax_input.state, tax_input.filing_status, engines[group]
+            )
+            _attach_facts(tax_input, models, row)
     graph_inputs = [
         tax_input
         for group, tax_inputs in validated.items()

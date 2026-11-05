@@ -24,7 +24,14 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, replace
 from typing import ClassVar, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    FiniteFloat,
+    TypeAdapter,
+    field_validator,
+)
 
 from .models import (
     Assumption,
@@ -37,6 +44,7 @@ from .models import (
 
 __all__ = [
     "DEFAULT_INVENTORY",
+    "MS",
     "OH",
     "Assumption",
     "Convention",
@@ -98,7 +106,66 @@ class OH(StateFacts):
     )
 
 
-MODELS: dict[str, type[StateFacts]] = {"OH": OH}
+MS_COLUMN_AGI = (
+    "Actual Mississippi Form 80-105 line-13 AGI from the corresponding page-2 "
+    "line-66 column, before deductions and exemptions, for a full-year joint "
+    "or combined return. Finite signed whole dollars; explicit 0 is supplied, "
+    "None is missing. Both taxpayer and spouse AGIs are required and used "
+    "exactly. Neither column is inferred from household rounding. The sum is "
+    "validated against the household entries within their source-derived "
+    "per-entry rounding bound. The computation chooses the exact minimum "
+    "lawful deduction/exemption allocation (2024/2025 instructions pp. 5/7). "
+    "No default or assumption is used."
+)
+MS_TAXPAYER_AGI = "Taxpayer Column A. " + MS_COLUMN_AGI
+MS_SPOUSE_AGI = "Spouse Column B. " + MS_COLUMN_AGI
+MS_SPOUSE_AGI_SOURCE = (
+    "Mississippi Form 80-105 page 2 and Form 80-100 instructions pp. 5-7, "
+    "2024 and 2025; docs/validation/derivations/ms-pr447-review-independent.md"
+)
+MS_HEAD_OF_FAMILY = (
+    "For federal Head_of_House or qualifying surviving spouse (Widow(er)), True asserts all "
+    "Mississippi Head of Family conditions: maintaining the household and an "
+    "actual federally qualifying dependent residing there for the required "
+    "year. True selects MS Head of Family and requires num_dependents >= 1. "
+    "False computes MS Single amounts; it does not certify lawful Single "
+    "status. Still-married federal HoH filers may need an MS married return "
+    "and prepared state handling instead. MS married HoF requires living "
+    "apart from the spouse all year, not only the federal last-six-month test. "
+    "Head_of_House has the documented "
+    "resident-dependent baseline True when this fact is absent; a parent "
+    "living elsewhere is a special circumstance supplied as False. No "
+    "assumption is recorded for that baseline. Federal QSS or a positive dependent "
+    "count alone never establishes QSS qualification. None is missing and "
+    "refused for QSS. No dependent is synthesized."
+)
+
+
+class MS(StateFacts):
+    """Facts for the Mississippi full-year resident Form 80-105."""
+
+    state: ClassVar[str] = "MS"
+
+    taxpayer_adjusted_gross_income: FiniteFloat | None = Field(
+        default=None, multiple_of=1, description=MS_TAXPAYER_AGI
+    )
+    spouse_adjusted_gross_income: FiniteFloat | None = Field(
+        default=None, multiple_of=1, description=MS_SPOUSE_AGI
+    )
+    head_of_family_eligible: bool | None = Field(
+        default=None, description=MS_HEAD_OF_FAMILY
+    )
+
+    @field_validator("taxpayer_adjusted_gross_income", "spouse_adjusted_gross_income")
+    @classmethod
+    def require_whole_dollar_entry(cls, value: float | None) -> float | None:
+        """Require actual rounded line-13 amounts without a float tolerance."""
+        if value is not None and not value.is_integer():
+            raise ValueError("MS line-13 AGIs must be whole dollars")
+        return value
+
+
+MODELS: dict[str, type[StateFacts]] = {"MS": MS, "OH": OH}
 
 
 @dataclass(frozen=True)
@@ -110,7 +177,9 @@ class FactDescriptor:
     value, a tuple for only those (``pending`` names the work for the rest).
     It comes from the same registry the preflight check uses. ``required_by``
     lists the engines that refuse an applicable return when the fact is not
-    supplied. ``convention`` is the id of the convention used when it is
+    supplied, restricted to ``required_statuses`` when specified. ``baselines``
+    lists silent documented defaults by status; they are not assumptions.
+    ``convention`` is the id of the convention used when it is
     absent, or None when there is none (a required fact has none).
     """
 
@@ -127,6 +196,8 @@ class FactDescriptor:
     source: str
     supported_values: tuple[tuple[Engine, tuple[object, ...] | None], ...] = ()
     pending: str | None = None
+    required_statuses: tuple[str, ...] | None = None
+    baselines: tuple[tuple[str, object], ...] = ()
 
     @property
     def input_path(self) -> str:
@@ -146,6 +217,48 @@ class FactDescriptor:
 
 
 _DESCRIPTORS: tuple[FactDescriptor, ...] = (
+    FactDescriptor(
+        state="MS",
+        name="taxpayer_adjusted_gross_income",
+        value_type="number",
+        constraints=(("finite", True), ("multiple_of", 1)),
+        statuses=("Married/Joint",),
+        years=(2024, 2025),
+        convention=None,
+        honoured_by=("graph",),
+        required_by=("graph",),
+        description=MS_TAXPAYER_AGI,
+        source=MS_SPOUSE_AGI_SOURCE,
+    ),
+    FactDescriptor(
+        state="MS",
+        name="head_of_family_eligible",
+        value_type="boolean",
+        constraints=(),
+        statuses=("Head_of_House", "Widow(er)"),
+        required_statuses=("Widow(er)",),
+        baselines=(("Head_of_House", True),),
+        years=(2024, 2025),
+        convention=None,
+        honoured_by=("graph",),
+        required_by=("graph",),
+        description=MS_HEAD_OF_FAMILY,
+        source="MS Form 80-100 pp. 5-6; IRS QSS condition 2; "
+        "docs/validation/derivations/ms-pr447-review-independent.md",
+    ),
+    FactDescriptor(
+        state="MS",
+        name="spouse_adjusted_gross_income",
+        value_type="number",
+        constraints=(("finite", True), ("multiple_of", 1)),
+        statuses=("Married/Joint",),
+        years=(2024, 2025),
+        convention=None,
+        honoured_by=("graph",),
+        required_by=("graph",),
+        description=MS_SPOUSE_AGI,
+        source=MS_SPOUSE_AGI_SOURCE,
+    ),
     FactDescriptor(
         state="OH",
         name="spouses_both_have_qualifying_income",
@@ -327,6 +440,32 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "Nobody can claim the filer as a dependent; that regime is not modelled.",
     ),
     DefaultDecision(
+        "state_facts.MS.taxpayer_adjusted_gross_income",
+        "required",
+        None,
+        "Mike, SOL-35: both actual MS MFJ AGI columns are required; no household subtraction.",
+    ),
+    DefaultDecision(
+        "ms.head_of_family.resident_dependent",
+        "baseline",
+        "state_facts.MS.head_of_family_eligible",
+        "Mike, SOL-36: federal HoH assumes the qualifying person lives in the home "
+        "all year. False supplies the known special circumstance; no assumption record.",
+    ),
+    DefaultDecision(
+        "state_facts.MS.head_of_family_eligible",
+        "required",
+        None,
+        "Mike, SOL-35: federal QSS does not establish MS Head of Family; require the fact.",
+    ),
+    DefaultDecision(
+        "state_facts.MS.spouse_adjusted_gross_income",
+        "required",
+        None,
+        "Mike, 2026-11-05: MS MFJ needs the actual spouse MS AGI; no inferred "
+        "split or assumption. Graph and auto refuse it when absent.",
+    ),
+    DefaultDecision(
         "state_facts.OH.spouses_both_have_qualifying_income",
         "required",
         None,
@@ -473,6 +612,10 @@ def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> No
                 descriptor.state == row.state
                 and row.year in descriptor.years
                 and row.status in descriptor.statuses
+                and (
+                    descriptor.required_statuses is None
+                    or row.status in descriptor.required_statuses
+                )
                 and row.engine in descriptor.required_by
                 and (model is None or getattr(model, descriptor.name) is None)
             ):
@@ -480,7 +623,13 @@ def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> No
                     f"{row.state} {row.status} returns on the {row.engine} backend "
                     f"need {descriptor.name}, which has no default: pass "
                     f"state_facts=tenforty.state_facts.{row.state}("
-                    f"{descriptor.name}=True) or =False. {descriptor.description}"
+                    f"{descriptor.name}="
+                    + (
+                        "True) or =False. "
+                        if descriptor.value_type == "boolean"
+                        else "<actual whole-dollar amount>). "
+                    )
+                    + descriptor.description
                 )
 
 

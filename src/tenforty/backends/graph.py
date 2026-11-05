@@ -79,6 +79,30 @@ def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     return values
 
 
+def _mississippi_taxpayer_agi_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Use the actual taxpayer column without inferring it from household sums."""
+    return {"ms_80105_TaxpayerAGI": float(value), "ms_80105_UseAGIFacts": 1.0}
+
+
+def _mississippi_head_of_family_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Encode the explicitly asserted state qualification for federal QSS."""
+    return {
+        "ms_80105_HeadOfFamilyEligible": float(value),
+        "ms_80105_UseHeadOfFamilyFact": 1.0,
+    }
+
+
+def _mississippi_spouse_agi_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Preserve the supplied Column B MS AGI; the spec rounds each column."""
+    return {"ms_80105_SpouseAGI": float(value)}
+
+
 _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
     s
     for s, form_id in STATE_TO_FORM.items()
@@ -111,6 +135,15 @@ _STATE_ZERO_FIELDS = (
     "state_total_tax",
 )
 _STATE_RATE_FIELDS = ("state_tax_bracket", "state_effective_tax_rate")
+_MS_AMBIGUOUS_NATURALS = frozenset(
+    {
+        "schedule_1_income",
+        "state_adjustment",
+        "dependent_exemptions",
+        "itemized_deductions",
+        "state_and_local_taxes",
+    }
+)
 
 
 def _state_output_node(form_name: str, line_name: str) -> str:
@@ -219,6 +252,14 @@ def _raise_unsupported(
     if not unsupported:
         return
     details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
+    if state == OTSState.MS and any(
+        name in _MS_AMBIGUOUS_NATURALS for name, _ in unsupported
+    ):
+        raise UnsupportedInputError(
+            "MS cannot lower these natural aggregates to clean Mississippi "
+            "form lines. Use prepared raw MS form inputs for those amounts.\n"
+            f"Unsupported inputs:\n{details}"
+        )
     if _ots_maps_inputs([name for name, _ in unsupported], state, year):
         remedy = "Provide these as 0 for now, or use backend='ots'."
     else:
@@ -251,7 +292,9 @@ def unsupported_inputs(
             if key in found or value == 0 or value is None:
                 continue
             if key not in reads:
-                reads[key] = _reads_nonzero(
+                reads[key] = not (
+                    state == OTSState.MS and natural_name in _MS_AMBIGUOUS_NATURALS
+                ) and _reads_nonzero(
                     natural_name, _lowered_input_nodes(natural_name, state, year)
                 )
             if not reads[key]:
@@ -263,6 +306,9 @@ FactLowering = Callable[[TaxReturnInput, object], dict[str, float]]
 
 
 FACT_LOWERINGS: dict[tuple[str, str], FactLowering] = {
+    ("MS", "taxpayer_adjusted_gross_income"): _mississippi_taxpayer_agi_values,
+    ("MS", "head_of_family_eligible"): _mississippi_head_of_family_values,
+    ("MS", "spouse_adjusted_gross_income"): _mississippi_spouse_agi_values,
     ("OH", "spouses_both_have_qualifying_income"): _ohio_natural_joint_credit_values,
 }
 """How each state fact reaches the graph, keyed by (state, field name).
@@ -308,6 +354,92 @@ def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
         by_return.setdefault((state, year), []).append((name, value))
     for (state, year), unsupported in by_return.items():
         _raise_unsupported(unsupported, state, year)
+    for tax_input in returns:
+        _require_ms_fact_consistency(tax_input)
+
+
+def _require_ms_fact_consistency(tax_input: TaxReturnInput) -> None:
+    """Validate actual MS facts before any tax output or batch result is produced."""
+    if tax_input.state != OTSState.MS:
+        return
+    facts = tax_input._state_facts
+    if tax_input.filing_status in (
+        OTSFilingStatus.HEAD_OF_HOUSEHOLD,
+        OTSFilingStatus.WIDOW_WIDOWER,
+    ):
+        baseline = (
+            True
+            if tax_input.filing_status == OTSFilingStatus.HEAD_OF_HOUSEHOLD
+            else None
+        )
+        eligible = facts.get("head_of_family_eligible", baseline)
+        if eligible is None:
+            raise UnsupportedInputError(
+                "MS QSS needs state_facts.MS.head_of_family_eligible"
+            )
+        if eligible and tax_input.num_dependents < 1:
+            raise UnsupportedInputError(
+                "MS Head of Family requires num_dependents >= 1"
+            )
+    if tax_input.filing_status != OTSFilingStatus.MARRIED_JOINT:
+        return
+    names = ("taxpayer_adjusted_gross_income", "spouse_adjusted_gross_income")
+    for name in names:
+        if facts.get(name) is None:
+            raise UnsupportedInputError(f"MS MFJ needs state_facts.MS.{name}")
+    evaluator, _ = _input_runtime(tax_input, include_facts=False)
+    reference = int(evaluator.eval("ms_80105_L66_page2_ms_agi"))
+    bound = int(evaluator.eval("ms_80105_AGIConsistencyBound"))
+    supplied = sum(int(facts[name]) for name in names)
+    if abs(supplied - reference) > bound:
+        raise UnsupportedInputError(
+            "MS line-13 AGI facts are inconsistent with the household entries' "
+            f"rounding bound: column sum {supplied}, household reference {reference}, "
+            f"maximum difference {bound}. Supply both actual whole-dollar columns."
+        )
+
+
+_MS_HOUSEHOLD_INCOMES = frozenset(
+    {
+        "w2_income",
+        "taxable_interest",
+        "ordinary_dividends",
+        "qualified_dividends",
+        "short_term_capital_gains",
+        "long_term_capital_gains",
+        "self_employment_income",
+        "rental_income",
+        "schedule_1_income",
+    }
+)
+
+
+def _require_ms_perturbation_ownership(
+    tax_input: TaxReturnInput, outputs: list[str], inputs: list[str] | None
+) -> None:
+    """Check resolved input nodes so every alias has the same ownership rule."""
+    if (
+        tax_input.state != OTSState.MS
+        or tax_input.filing_status != OTSFilingStatus.MARRIED_JOINT
+        or not any(node.startswith("ms_80105_") for node in outputs)
+    ):
+        return
+    income_nodes = {
+        node
+        for name in _MS_HOUSEHOLD_INCOMES
+        | {
+            derived
+            for derived, source in DERIVED_NATURAL_SOURCES.items()
+            if source in _MS_HOUSEHOLD_INCOMES
+        }
+        for node in _lowered_input_nodes(name, tax_input.state, tax_input.year.value)
+    }
+    if inputs is None or income_nodes.intersection(inputs):
+        raise UnsupportedInputError(
+            "MS MFJ state/total-tax income derivatives and solves need to know "
+            "which spouse owns the hypothetical change; the two fixed AGI facts "
+            "do not identify that owner. Explicit federal-only outputs are supported."
+        )
 
 
 def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
@@ -360,6 +492,36 @@ def _load_resolved_graph(year: int):
     return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
 
 
+def _input_runtime(tax_input: TaxReturnInput, *, include_facts: bool = True):
+    """Populate a runtime for tax evaluation or the independent validity reference."""
+    from ..graphlib import FilingStatus, Runtime
+
+    inputs_dict = _natural_values(tax_input)
+    graph = _load_resolved_graph(tax_input.year.value)
+    filing_status = FilingStatus.from_str(
+        FILING_STATUS_MAP.get(tax_input.filing_status, "single")
+    )
+    evaluator = Runtime(graph, filing_status)
+
+    # Unset inputs default to 0 in eval; only the provided values are set
+    # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
+    natural_values = inputs_dict
+
+    year = tax_input.year.value
+    for natural_name, value in natural_values.items():
+        node_names = _lowered_input_nodes(natural_name, tax_input.state, year)
+        _require_input_nodes(natural_name, node_names, tax_input.state, year)
+        if value == 0 or value is None:
+            continue
+        for node_name in node_names:
+            evaluator.set(node_name, float(value))
+    if include_facts:
+        for node_name, value in _fact_node_values(tax_input).items():
+            evaluator.set(node_name, value)
+
+    return evaluator, graph
+
+
 class GraphBackend:
     """Backend using tax computation graph with autodiff and solver support."""
 
@@ -384,32 +546,8 @@ class GraphBackend:
 
     def _create_evaluator(self, tax_input: TaxReturnInput):
         """Create an evaluator for the given input."""
-        from ..graphlib import FilingStatus, Runtime
-
         require_supported_inputs([tax_input])
-        inputs_dict = _natural_values(tax_input)
-        graph = _load_resolved_graph(tax_input.year.value)
-        filing_status = FilingStatus.from_str(
-            FILING_STATUS_MAP.get(tax_input.filing_status, "single")
-        )
-        evaluator = Runtime(graph, filing_status)
-
-        # Unset inputs default to 0 in eval; only the provided values are set
-        # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
-        natural_values = inputs_dict
-
-        year = tax_input.year.value
-        for natural_name, value in natural_values.items():
-            node_names = _lowered_input_nodes(natural_name, tax_input.state, year)
-            _require_input_nodes(natural_name, node_names, tax_input.state, year)
-            if value == 0 or value is None:
-                continue
-            for node_name in node_names:
-                evaluator.set(node_name, float(value))
-        for node_name, value in _fact_node_values(tax_input).items():
-            evaluator.set(node_name, value)
-
-        return evaluator, graph
+        return _input_runtime(tax_input)
 
     def evaluate(self, tax_input: TaxReturnInput) -> InterpretedTaxReturn:
         """Evaluate tax return using graph evaluator."""
@@ -532,10 +670,10 @@ class GraphBackend:
         # Checked on the normalized rows, so a value the input model refuses
         # (a Schedule 1-A amount before 2025) raises its ValueError first, as
         # the single-return path does.
-        require_supported_inputs(tax_inputs)
         if facts is not None:
             for tax_input, row_facts in zip(tax_inputs, facts, strict=True):
                 tax_input._state_facts = dict(row_facts)
+        require_supported_inputs(tax_inputs)
         fact_rows = [_fact_node_values(tax_input) for tax_input in tax_inputs]
         normalized: dict[str, list[float]] = {}
         for tax_input in tax_inputs:
@@ -815,6 +953,7 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
+        _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
@@ -833,6 +972,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
+        _require_ms_perturbation_ownership(tax_input, output_nodes, None)
         state_mapping = state_natural_to_node(tax_input.state, tax_input.year.value)
         year = tax_input.year.value
         natural_names = [
@@ -870,6 +1010,7 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
+        _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         natural_values = _natural_values(tax_input)
         current_val = natural_values.get(var, 0)
