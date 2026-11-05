@@ -22,6 +22,7 @@ from .taxcalc_policy import (
     _f32_ots_car_loan_phaseout,
     _f33_ots_skips_schedule_1a_for_mfs,
     _f34_ots_amt_omits_senior_add_back,
+    _f36_ots_schedule_a_with_negative_agi,
     _line_12e_2025,
     modeled_deltas,
     taxcalc_obbba_fields,
@@ -233,7 +234,11 @@ def test_f24_inverts_taxcalcs_official_line4_addition(
 
 
 def test_f27_bounds_the_uninitialized_amt_preferential_worksheet():
-    """Skipping Part III can overstate AMT by at most 28% of preference income."""
+    """Skipping Part III can overstate AMT by at most 28% of preference income.
+
+    It keys on OTS's own Form 1040 line 15: AGI 17,322 is below the $21,900
+    standard deduction, so line 15 is zero; one dollar above it is not.
+    """
     case = _case(
         year=2024,
         status="Head_of_House",
@@ -241,16 +246,83 @@ def test_f27_bounds_the_uninitialized_amt_preferential_worksheet():
         qual_div=17_322.0,
         iso=200_000.0,
     )
-    reference = {"taxable_income": 0.0}
+    reference = {"agi": 17_322.0, "taxable_income": 0.0}
 
     model = _f27_ots_skips_amt_preferential_worksheet("ots", case, reference)
 
     assert model["amt"] == DeltaRange(0.0, 0.28 * 17_322.0)
     assert _f27_ots_skips_amt_preferential_worksheet("graph", case, reference) == {}
-    assert (
-        _f27_ots_skips_amt_preferential_worksheet("ots", case, {"taxable_income": 1.0})
-        == {}
+    above = {"agi": 21_901.0, "taxable_income": 1.0}
+    assert _f27_ots_skips_amt_preferential_worksheet("ots", case, above) == {}
+
+
+def test_f27_follows_ots_when_taxcalc_itemizes():
+    """k3ns K2: TaxCalc itemizes (F28) and has taxable income; OTS's is zero."""
+    case = _case(
+        year=2025,
+        status="Married/Joint",
+        w2=2_731.0,
+        se=1_606.0,
+        interest=2_146.0,
+        ord_div=24_007.0,
+        qual_div=24_007.0,
+        iso=200_000.0,
+        itemized=2_025.0,
     )
+    reference = {"agi": 30_376.54, "taxable_income": 28_351.54}
+
+    model = _f27_ots_skips_amt_preferential_worksheet("ots", case, reference)
+
+    assert model["amt"] == DeltaRange(0.0, 0.28 * 24_007.0)
+    assert _f27_ots_skips_amt_preferential_worksheet("graph", case, reference) == {}
+
+
+def test_f36_bounds_the_negative_agi_schedule_a():
+    """2025: up to 35% of 82.5% of |AGI| over; other years up to 35% of 7.5% under."""
+    case = _case(
+        year=2025,
+        status="Head_of_House",
+        se=84.0,
+        ltcg=-8_289.0,
+        iso=200_000.0,
+        std_or_item="Itemized",
+    )
+    reference = {"agi": -2_916.0}
+
+    model = _f36_ots_schedule_a_with_negative_agi("ots", case, reference)
+    assert model["amt"] == DeltaRange(0.0, 0.35 * 0.825 * 2_916.0)
+    model = _f36_ots_schedule_a_with_negative_agi(
+        "ots", case | {"year": 2024}, reference
+    )
+    assert model["amt"] == DeltaRange(-0.35 * 0.075 * 2_916.0, 0.0)
+
+
+@pytest.mark.parametrize(
+    ("backend", "update", "agi"),
+    [
+        ("graph", {}, -2_916.0),
+        ("ots", {}, 0.0),
+        ("ots", {}, 5_000.0),
+        ("ots", {"std_or_item": "Auto"}, -2_916.0),
+        ("ots", {"std_or_item": "Standard"}, -2_916.0),
+    ],
+    ids=["graph", "zero-agi", "positive-agi", "auto", "standard"],
+)
+def test_f36_negative_controls(backend, update, agi):
+    """F36 never fires on graph, at a non-negative AGI, or without forced itemizing."""
+    case = (
+        _case(
+            year=2025,
+            status="Head_of_House",
+            se=84.0,
+            ltcg=-8_289.0,
+            iso=200_000.0,
+            std_or_item="Itemized",
+        )
+        | update
+    )
+
+    assert _f36_ots_schedule_a_with_negative_agi(backend, case, {"agi": agi}) == {}
 
 
 def test_f7_bounds_the_qbi_cap_response_to_forced_itemization():

@@ -203,6 +203,43 @@ ANCHOR_AMT_ZERO_TI_QUALIFIED_DIVIDENDS = _anchor(
     qual_div=17_322.0,
     iso=200_000.0,
 )
+# tenforty-k3ns witnesses (2025, Form 1040 line 15 zero, ISO): K1 is F36 (OTS
+# Schedule A with a negative AGI); K2 and K3 are F27 composed with TaxCalc's
+# F28 itemizing election. Values: ots-amt-zero-taxable-income-2025.md.
+ANCHOR_K3NS_NEGATIVE_AGI = _anchor(
+    year=2025,
+    status="Head_of_House",
+    se=84.0,
+    ltcg=-8_289.0,
+    iso=200_000.0,
+    std_or_item="Itemized",
+    qbi_ubia=1_292.0,
+)
+ANCHOR_K3NS_DIVIDENDS = _anchor(
+    year=2025,
+    status="Married/Joint",
+    w2=2_731.0,
+    se=1_606.0,
+    interest=2_146.0,
+    ord_div=24_007.0,
+    qual_div=24_007.0,
+    iso=200_000.0,
+    itemized=2_025.0,
+    qbi_ubia=48_835.0,
+)
+ANCHOR_K3NS_DIVIDENDS_AND_LOSSES = _anchor(
+    year=2025,
+    status="Widow(er)",
+    se=14_104.0,
+    interest=204.0,
+    ord_div=7_919.0,
+    qual_div=7_919.0,
+    stcg=-23_224.0,
+    ltcg=-8_939.0,
+    iso=200_000.0,
+    std_or_item="Standard",
+    qbi_w2_wages=2.0,
+)
 ANCHOR_CAPITAL_LOSS = _anchor(
     w2=300_000.0,
     interest=100_000.0,
@@ -387,6 +424,13 @@ def test_qbi_business_inputs_match_taxcalc(cases):
     suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large],
 )
 @given(cases=st.lists(_qbi_case_strategy(), min_size=5, max_size=30))
+@example(
+    cases=[
+        ANCHOR_K3NS_NEGATIVE_AGI,
+        ANCHOR_K3NS_DIVIDENDS,
+        ANCHOR_K3NS_DIVIDENDS_AND_LOSSES,
+    ]
+)
 def test_ots_qbi_business_inputs_match_taxcalc(cases):
     """Generated OTS wages, UBIA, and SSTB inputs agree with TaxCalc."""
     _assert_components_match_taxcalc("ots", cases)

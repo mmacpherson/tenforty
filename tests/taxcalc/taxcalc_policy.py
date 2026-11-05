@@ -416,23 +416,92 @@ def _f24_ots_2024_mfs_amt_constants(
     return _same_delta({"amt", "income_tax", "total_tax"}, delta)
 
 
+def _tenforty_deduction(case: dict) -> float | None:
+    """Form 1040 line 12 as tenforty chooses it: the election, else the larger."""
+    std = standard_deduction(case)
+    if std is None:
+        return None
+    itemized = max(0.0, case.get("itemized", 0.0))
+    election = case.get("std_or_item", "Auto")
+    if election == "Standard":
+        return std
+    if election == "Itemized":
+        return itemized
+    return max(std, itemized)
+
+
+def _ots_taxable_income_is_zero(case: dict, reference: dict[str, float]) -> bool:
+    """Whether OTS's own Form 1040 line 15 is zero (tenforty-k3ns).
+
+    AGI agrees across engines; tenforty's deduction is its election. A positive
+    amount before the QBI deduction stays positive after it (the deduction is
+    at most 20% of it), so line 15 is zero exactly when AGI less the deduction
+    is not positive. This is OTS's condition, not TaxCalc's: when TaxCalc
+    elects to itemize (F28) its taxable income can be positive while OTS's is
+    zero.
+    """
+    deduction = _tenforty_deduction(case)
+    return deduction is not None and reference["agi"] - deduction <= 0.0
+
+
 def _f27_ots_skips_amt_preferential_worksheet(
     backend: str, case: dict, reference: dict[str, float] | None
 ) -> DeltaModel:
-    """F27: OTS leaves Form 6251's preferential-rate inputs uninitialized."""
+    """F27: OTS leaves Form 6251's preferential-rate inputs uninitialized.
+
+    It applies when OTS's own taxable income is zero, which is what makes OTS
+    skip its worksheet; keying it on TaxCalc's taxable income missed the
+    tenforty-k3ns witnesses, where TaxCalc itemizes (F28) and OTS does not.
+    """
     preferential = _preferential_income(case)
     if (
         backend != "ots"
         or not case.get("iso", 0.0)
         or preferential <= 0.0
         or reference is None
-        or reference.get("taxable_income") != 0.0
+        or not _ots_taxable_income_is_zero(case, reference)
     ):
         return {}
     return _same_delta(
         {"amt", "income_tax", "total_tax"},
         DeltaRange(0.0, 0.28 * preferential),
     )
+
+
+def _f36_ots_schedule_a_with_negative_agi(
+    backend: str, case: dict, reference: dict[str, float] | None
+) -> DeltaModel:
+    """F36: OTS prices Schedule A limits off a negative AGI (tenforty-k3ns).
+
+    With AGI below zero and itemizing elected, OTS's Schedule A computes the
+    medical floor as 7.5% of the negative AGI, so line 4 becomes 7.5% of |AGI|
+    with no medical expenses (every year), and, in 2025 only, caps cash and
+    other charity at 60% and 30% of the negative AGI, entering -90% of |AGI|
+    with no contributions. Line 15 stays zero, so only Form 6251 line 1b moves:
+    by -7.5% of |AGI| in 2024 and by +82.5% of |AGI| in 2025, at most 35% of
+    which (28%, plus 7% through the exemption phase-out) reaches the AMT.
+    Only an elected (forced) itemization reaches it: under Auto OTS takes the
+    larger standard deduction. Upstream report 19 (docs/upstream-ots-reports.md).
+
+    The medical half rests on the statute reading of Schedule A line 4 (IRC
+    213(a) allows only expenses paid in excess of the floor, so no expenses,
+    no deduction); the literal form arithmetic with a negative AGI differs.
+    F30 settled the same reading for the graph, as TaxCalc applies it.
+    Derivation: docs/validation/derivations/ots-amt-zero-taxable-income-2025.md.
+    """
+    if (
+        backend != "ots"
+        or case.get("std_or_item") != "Itemized"
+        or reference is None
+        or reference["agi"] >= 0.0
+    ):
+        return {}
+    magnitude = -reference["agi"]
+    if case.get("year") == 2025:
+        delta = DeltaRange(0.0, 0.35 * 0.825 * magnitude)
+    else:
+        delta = DeltaRange(-0.35 * 0.075 * magnitude, 0.0)
+    return _same_delta({"amt", "income_tax", "total_tax"}, delta)
 
 
 def _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
@@ -791,6 +860,7 @@ SIGNATURES = [
     KnownDefect("F32", _f32_ots_car_loan_phaseout),
     KnownDefect("F33", _f33_ots_skips_schedule_1a_for_mfs),
     KnownDefect("F34", _f34_ots_amt_omits_senior_add_back),
+    KnownDefect("F36", _f36_ots_schedule_a_with_negative_agi),
 ]
 
 
