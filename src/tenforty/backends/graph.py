@@ -415,9 +415,9 @@ _MS_HOUSEHOLD_INCOMES = frozenset(
 
 
 def _require_ms_perturbation_ownership(
-    tax_input: TaxReturnInput, outputs: list[str], variable: str | None
+    tax_input: TaxReturnInput, outputs: list[str], inputs: list[str] | None
 ) -> None:
-    """Refuse income perturbations whose owning spouse cannot be identified."""
+    """Check resolved input nodes so every alias has the same ownership rule."""
     if (
         tax_input.state != OTSState.MS
         or tax_input.filing_status != OTSFilingStatus.MARRIED_JOINT
@@ -427,13 +427,14 @@ def _require_ms_perturbation_ownership(
     income_nodes = {
         node
         for name in _MS_HOUSEHOLD_INCOMES
+        | {
+            derived
+            for derived, source in DERIVED_NATURAL_SOURCES.items()
+            if source in _MS_HOUSEHOLD_INCOMES
+        }
         for node in _lowered_input_nodes(name, tax_input.state, tax_input.year.value)
     }
-    if (
-        variable is None
-        or variable in _MS_HOUSEHOLD_INCOMES
-        or variable in income_nodes
-    ):
+    if inputs is None or income_nodes.intersection(inputs):
         raise UnsupportedInputError(
             "MS MFJ state/total-tax income derivatives and solves need to know "
             "which spouse owns the hypothetical change; the two fixed AGI facts "
@@ -951,8 +952,8 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
-        _require_ms_perturbation_ownership(tax_input, output_nodes, wrt)
         input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
+        _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
@@ -1008,8 +1009,8 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
-        _require_ms_perturbation_ownership(tax_input, output_nodes, var)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
+        _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         natural_values = _natural_values(tax_input)
         current_val = natural_values.get(var, 0)

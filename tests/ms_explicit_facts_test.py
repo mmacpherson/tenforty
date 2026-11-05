@@ -326,3 +326,89 @@ def test_retained_zero_dependent_literal_hof_components_are_raw_only(
     runtime.set("ms_80105_L38_wages", wages)
     assert runtime.eval("ms_80105_L16_ms_taxable_income") == taxable
     assert runtime.eval("ms_80105_L21_tax_after_credits") == tax
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("output", ["total_tax", "state_total_tax"])
+@pytest.mark.parametrize("operation", ["gradient", "solve"])
+@pytest.mark.parametrize("request_kind", ["scalar", "zip_rows"])
+@pytest.mark.parametrize(
+    "alias",
+    [
+        "w2_income",
+        "L1a_wages",
+        "us_1040_L1a_wages",
+        "us_form_8959_L1_medicare_wages",
+        "schedule_se_ss_wages",
+        "us_schedule_se_L5_w2_ss_wages",
+        "ms_80105_L38_wages",
+        "taxable_interest",
+        "L2b_taxable_interest",
+        "us_1040_L2b_taxable_interest",
+        "ordinary_dividends",
+        "L3b_ordinary_dividends",
+        "qualified_dividends",
+        "L3a_qualified_dividends",
+        "short_term_capital_gains",
+        "us_schedule_d_L1a_short_term_totals",
+        "long_term_capital_gains",
+        "us_schedule_d_L8a_long_term_totals",
+        "self_employment_income",
+        "us_schedule_1_L3_business_income",
+        "rental_income",
+        "us_schedule_1_L5_rental_income",
+    ],
+)
+def test_income_aliases_cannot_bypass_joint_ownership(
+    year, output, operation, request_kind, alias
+):
+    """Astra v2 alias regression; structural refusal, no expected tax snapshot.
+
+    Sensitivity/solve APIs are scalar. Zip coverage feeds each vectorized
+    return's inputs through those same public operations.
+    """
+    args = dict(year=year, state="MS", filing_status="Married/Joint", w2_income=61611.8)
+    if request_kind == "zip_rows":
+        frame = evaluate_returns(
+            **(args | {"w2_income": [61611.8, 61612.8]}),
+            mode="zip",
+            state_facts=_joint(),
+            backend="graph",
+        )
+        rows = frame.select(list(args)).to_dicts()
+    else:
+        rows = [args]
+    for row in rows:
+        with pytest.raises(UnsupportedInputError, match="which spouse"):
+            if operation == "gradient":
+                marginal_rate(**row, state_facts=_joint(), output=output, wrt=alias)
+            else:
+                solve_for_income(
+                    **row,
+                    state_facts=_joint(),
+                    output=output,
+                    target_tax=5000,
+                    for_input=alias,
+                )
+
+
+@pytest.mark.parametrize("alias", ["w2_income", "L1a_wages", "us_1040_L1a_wages"])
+@pytest.mark.parametrize("operation", ["gradient", "solve"])
+def test_federal_only_wage_aliases_remain_supported(alias, operation):
+    """The alias guard must preserve explicit federal-only operations."""
+    args = dict(
+        year=2025,
+        filing_status="Married/Joint",
+        w2_income=61611.8,
+        output="federal_total_tax",
+    )
+    ms_args = args | dict(state="MS", state_facts=_joint())
+    if operation == "gradient":
+        assert marginal_rate(**ms_args, wrt=alias) == marginal_rate(**args, wrt=alias)
+    else:
+        target = evaluate_return(
+            year=2025, filing_status="Married/Joint", w2_income=61611.8, backend="graph"
+        ).federal_total_tax
+        assert solve_for_income(**ms_args, target_tax=target, for_input=alias) == (
+            solve_for_income(**args, target_tax=target, for_input=alias)
+        )

@@ -79,6 +79,10 @@ remain in that budget because signed owner-specific amounts may offset.
 A column sum outside the source-derived bound refuses the whole request.
 This is not a tax tolerance: the actual supplied columns determine tax.
 The bound neither proves ownership nor selects a value from an interval.
+It covers only additive state-recognized totals within the supported income
+model, including the actual claimed federal SE deduction. It does not cover
+arbitrary MS adjustments, basis/exclusion differences or independently
+recomputed per-spouse SE taxes; those require prepared state handling.
 
 `MS(head_of_family_eligible=...)` applies to federal HoH and QSS. For
 `Head_of_House`, it is optional: the documented no-special-circumstances
@@ -91,13 +95,23 @@ the federal status alone does not establish the MS dependent condition.
 True asserts all MS Head of Family conditions, including an actual qualifying
 dependent residing in the maintained household for the required year; it
 selects MS HoF and requires `num_dependents >= 1`. False explicitly selects
-MS Single. None refuses graph/auto QSS and uses the resident-dependent
+MS Single amounts; it does not certify that Single is a lawful MS status.
+A still-married federal HoH filer can be considered unmarried federally after
+six months apart, while MS married HoF requires living apart from the spouse
+for the entire year (MS instructions p. 6). Such a filer may require an MS
+married return, not Single: neither the HoH baseline nor False represents
+that special circumstance. Use prepared state handling with the actual MS
+status and spouse information. Other residence exceptions (part-year residence,
+birth/death, temporary absence) also require checking actual MS qualification;
+False is appropriate only when Single itself is lawful.
+None refuses graph/auto QSS and uses the resident-dependent
 baseline for HoH. True or baseline eligibility requires an actual dependent;
 a zero count refuses rather than inventing one. For QSS neither the federal
 label nor a positive dependent count implies eligibility. No dependent is synthesized.
 Death-year federal MFJ remains MFJ and requires the two AGI facts.
 
-There is no default or assumption record. Mississippi stays in auto scope.
+The two MFJ AGI facts and QSS qualification have no default. The documented
+HoH baseline produces no assumption record. Mississippi stays in auto scope.
 The independent ambiguity and QSS witnesses are archived in
 [the review derivation](validation/derivations/ms-pr447-review-independent.md).
 
