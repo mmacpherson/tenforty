@@ -296,7 +296,9 @@ def test_graph_error_for_uncomputed_value_names_no_other_backend(monkeypatch):
         graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), frozenset({False})
     )
     monkeypatch.setitem(
-        graph_backend.FACT_LOWERING_PENDING, ("OH", OH_FIELD), "tenforty-b72.53"
+        graph_backend.FACT_LOWERING_PENDING,
+        ("OH", OH_FIELD),
+        "tenforty-example-pending",
     )
     with pytest.raises(UnsupportedInputError) as refusal:
         evaluate_return(
@@ -305,7 +307,7 @@ def test_graph_error_for_uncomputed_value_names_no_other_backend(monkeypatch):
     message = str(refusal.value)
     assert "not yet computed by the graph backend" in message
     assert "backend='ots'" not in message
-    assert "no backend computes it yet (tenforty-b72.53)" in message
+    assert "no backend computes it yet (tenforty-example-pending)" in message
 
 
 def test_no_rows_and_no_facts_is_the_normal_empty_frame():
@@ -589,11 +591,13 @@ def test_discovery_follows_the_preflight_registry(monkeypatch):
         graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), frozenset({False})
     )
     monkeypatch.setitem(
-        graph_backend.FACT_LOWERING_PENDING, ("OH", OH_FIELD), "tenforty-b72.53"
+        graph_backend.FACT_LOWERING_PENDING,
+        ("OH", OH_FIELD),
+        "tenforty-example-pending",
     )
     (descriptor,) = state_facts.available("OH", 2025)
     assert descriptor.supported_values == (("graph", (False,)),)
-    assert descriptor.pending == "tenforty-b72.53"
+    assert descriptor.pending == "tenforty-example-pending"
     assert descriptor.engines_computing(True) == ()
 
 
