@@ -41,7 +41,7 @@ gives `()`.
 
 | Model | Field | Applies to | Graph | OTS |
 |---|---|---|---|---|
-| `MS` | `spouse_adjusted_gross_income` | Married/Joint, 2024–2025 | **Required**; finite signed dollars, including explicit zero | No MS program |
+| `MS` | `spouse_adjusted_gross_income` | Married/Joint, 2024–2025 | **Required**; finite signed whole dollars, including explicit zero | No MS program |
 | `OH` | `spouses_both_have_qualifying_income` | Married/Joint, 2024–2025 | **Required**; both boolean values compute; the spec applies the percentage, cap and 2025 MAGI limit | Not taken |
 
 `spouses_both_have_qualifying_income` is true when each spouse separately has
@@ -55,8 +55,10 @@ Social Security, are not in Ohio AGI and do not count.
 `MS(spouse_adjusted_gross_income=...)` supplies the spouse's **Column B
 Mississippi AGI, Form 80-105 line 13**, before deductions and exemptions, on
 a full-year joint/combined return. It is not federal AGI, wages, taxable
-income, or a ratio. The taxpayer's column is household MS AGI minus the fact;
-the graph then rounds each column's entry independently. Explicit `0` states
+income, or a ratio. This fact is an already-rounded whole-dollar line-13
+entry. The graph computes household MS AGI from individually rounded page-2
+entries; the taxpayer's column is that household total minus the fact. A
+per-category spouse split is not modelled. Fractional facts are refused. Explicit `0` states
 that the spouse has zero MS AGI; `None` is missing and raises
 `UnsupportedInputError` for both graph and auto MS MFJ. There is no inferred
 split, default, or assumption record. Mississippi stays in auto scope.
@@ -74,6 +76,32 @@ can use raw `UsePreparedAllocation`, `PreparedSpouseDeduction`, and
 `PreparedSpouseExemption` controls instead. The source arithmetic and proof
 are archived in
 [the MS derivation](validation/derivations/ms-2024-2025-exemptions-rounding.md).
+
+## Mississippi income entries and limits
+
+The MS graph rounds each supported page-2 entry before adding income and
+subtracting adjustments. Wages feed line 38; net business income line 39;
+federal capped net capital gain/loss line 40; rental/Schedule E line 41;
+taxable interest line 43; total ordinary dividends line 44. Qualified
+dividends are included in that total once. Line 61 carries the claimed
+federal half-SE-tax deduction, rounded to MS whole dollars. The current
+natural API carries no other named above-AGI adjustment inputs. Prepared
+raw MS adjustment lines 50-64 are rounded individually. Ordinary state-taxable
+income is assumed; special MS/federal basis differences and excluded income
+need prepared state data.
+
+For MS, a nonzero `schedule_1_income`, `state_adjustment`,
+`dependent_exemptions`, `itemized_deductions`, or `state_and_local_taxes`
+raises `UnsupportedInputError`. Those aggregates cannot identify a clean MS
+amount/category: the generic federal other-income bucket may include MS-exempt
+income, and the itemized/tax aggregates cannot reconstruct MS Schedule A.
+Prepared raw MS form inputs can represent those categories. Other states'
+contracts are unchanged. Federal-only QBI, AMT and below-AGI Schedule 1-A
+inputs retain their federal effects and are not MS AGI deductions.
+
+Raw prepared-AGI callers can supply `UsePreparedAGI` and
+`PreparedHouseholdAGI` with `SpouseAGI` for direct form-entry rounding checks.
+Those graph controls do not replace or default a missing natural MS fact.
 
 ## Rules
 

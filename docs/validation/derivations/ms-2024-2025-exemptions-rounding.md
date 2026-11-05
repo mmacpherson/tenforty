@@ -104,3 +104,15 @@ therefore has 2024 tax 15,000 × .047 = 705 and 2025 tax 15,000 × .044 = 660.
 This contrasts with the already-blind equal-allocation/minimum case 630/590.
 These extra arithmetic values were written before running the new prepared
 allocation test, but after implementation inspection; they are not blind.
+
+
+## SOL-33 clarification: natural versus raw pre-entry AGI, 2026-11-05
+
+The natural spouse fact supplies an already-rounded, whole-dollar Form80-105
+line13 MS AGI entry. Fractions are refused. Household MS AGI now comes from
+MS page2 entries rounded individually, with no per-category spouse split
+modelled. The original `J-columns-round-up/down` cases describe raw form
+entries before rounding and remain raw graph tests through an explicit
+prepared-AGI control. Their arithmetic and expected values above are unchanged;
+they are not valid fractional natural facts. See the page2 source-audit record
+for natural multi-category cases under the clarified contract.

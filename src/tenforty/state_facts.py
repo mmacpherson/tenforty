@@ -24,7 +24,14 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, replace
 from typing import ClassVar, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, TypeAdapter
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    FiniteFloat,
+    TypeAdapter,
+    field_validator,
+)
 
 from .models import (
     Assumption,
@@ -102,10 +109,13 @@ class OH(StateFacts):
 MS_SPOUSE_AGI = (
     "The spouse's Column B Mississippi adjusted gross income, Form 80-105 "
     "line 13, before deductions and exemptions, on a full-year married joint "
-    "or combined return. Finite signed dollars; explicit 0 is supplied, None "
+    "or combined return. Finite signed whole dollars, already entered on "
+    "line 13; explicit 0 is supplied, None "
     "is missing. The taxpayer's Column A MS AGI is the household MS AGI minus "
     "this amount. This is not federal AGI, wages, taxable income or a ratio. "
-    "No split is inferred. The computation chooses the minimum lawful tax "
+    "No per-category spouse split is modelled or inferred. Household MS AGI "
+    "is computed from the individually rounded MS page-2 entries. The "
+    "computation chooses the minimum lawful tax "
     "across the deduction/exemption allocations permitted on pp. 5/7 of the "
     "2024 and 2025 instructions; a suboptimal prepared allocation needs raw "
     "graph controls. There is no default or assumption."
@@ -123,8 +133,16 @@ class MS(StateFacts):
     state: ClassVar[str] = "MS"
 
     spouse_adjusted_gross_income: FiniteFloat | None = Field(
-        default=None, description=MS_SPOUSE_AGI
+        default=None, multiple_of=1, description=MS_SPOUSE_AGI
     )
+
+    @field_validator("spouse_adjusted_gross_income")
+    @classmethod
+    def require_whole_dollar_entry(cls, value: float | None) -> float | None:
+        """Require the already-rounded line-13 amount without a float tolerance."""
+        if value is not None and not value.is_integer():
+            raise ValueError("spouse_adjusted_gross_income must be whole dollars")
+        return value
 
 
 MODELS: dict[str, type[StateFacts]] = {"MS": MS, "OH": OH}
@@ -179,7 +197,7 @@ _DESCRIPTORS: tuple[FactDescriptor, ...] = (
         state="MS",
         name="spouse_adjusted_gross_income",
         value_type="number",
-        constraints=(("finite", True),),
+        constraints=(("finite", True), ("multiple_of", 1)),
         statuses=("Married/Joint",),
         years=(2024, 2025),
         convention=None,

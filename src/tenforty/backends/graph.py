@@ -118,6 +118,15 @@ _STATE_ZERO_FIELDS = (
     "state_total_tax",
 )
 _STATE_RATE_FIELDS = ("state_tax_bracket", "state_effective_tax_rate")
+_MS_AMBIGUOUS_NATURALS = frozenset(
+    {
+        "schedule_1_income",
+        "state_adjustment",
+        "dependent_exemptions",
+        "itemized_deductions",
+        "state_and_local_taxes",
+    }
+)
 
 
 def _state_output_node(form_name: str, line_name: str) -> str:
@@ -226,6 +235,14 @@ def _raise_unsupported(
     if not unsupported:
         return
     details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
+    if state == OTSState.MS and any(
+        name in _MS_AMBIGUOUS_NATURALS for name, _ in unsupported
+    ):
+        raise UnsupportedInputError(
+            "MS cannot lower these natural aggregates to clean Mississippi "
+            "form lines. Use prepared raw MS form inputs for those amounts.\n"
+            f"Unsupported inputs:\n{details}"
+        )
     if _ots_maps_inputs([name for name, _ in unsupported], state, year):
         remedy = "Provide these as 0 for now, or use backend='ots'."
     else:
@@ -258,7 +275,9 @@ def unsupported_inputs(
             if key in found or value == 0 or value is None:
                 continue
             if key not in reads:
-                reads[key] = _reads_nonzero(
+                reads[key] = not (
+                    state == OTSState.MS and natural_name in _MS_AMBIGUOUS_NATURALS
+                ) and _reads_nonzero(
                     natural_name, _lowered_input_nodes(natural_name, state, year)
                 )
             if not reads[key]:

@@ -586,6 +586,11 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         # eligibility does not limit MS dependents. MFJ spouse MS AGI is a
         # required state fact; the spec minimizes over lawful allocations.
         natural_to_node={
+            "w2_income": "ms_80105_L38_wages",
+            "self_employment_income": "ms_80105_L39_business_income",
+            "rental_income": "ms_80105_L41_rental_income",
+            "taxable_interest": "ms_80105_L43_interest_income",
+            "ordinary_dividends": "ms_80105_L44_dividend_income",
             "num_dependents": "ms_80105_Dependents",
             "filer_65_or_older": "ms_80105_Filer65",
             "spouse_65_or_older": "ms_80105_Spouse65",

@@ -553,9 +553,10 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. The IL, OH and OR "
+            "State exemption dollars, not a dependent count. The IL, MS, OH and OR "
             "graphs do not map this field; use num_dependents for IL personal/dependent "
-            "allowances, OH exemptions/credit and the OR regular exemption credit. "
+            "allowances, MS additional exemptions, OH exemptions/credit and the OR "
+            "regular exemption credit. "
             "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "

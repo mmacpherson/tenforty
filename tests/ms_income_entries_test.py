@@ -8,7 +8,7 @@ Literal expected values were derived from the sources, never engine output.
 import pytest
 from pydantic import ValidationError
 
-from tenforty import evaluate_return, state_facts
+from tenforty import evaluate_return, evaluate_returns, state_facts
 from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import UnsupportedInputError
@@ -212,3 +212,19 @@ def test_prepared_adjustments_round_before_the_adjustment_sum(year, tax):
     runtime.set("ms_80105_L51_sep_simple", 0.49)
     assert runtime.eval("ms_80105_L13_ms_agi") == 50_000
     assert runtime.eval("ms_80105_L21_tax_after_credits") == tax
+
+
+@pytest.mark.parametrize("backend", ["auto", "graph"])
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+def test_ambiguous_ms_batch_is_refused_whole_under_every_policy(backend, on_error):
+    """An invalid MS aggregate cannot become a partial batch or a NaN row."""
+    with pytest.raises(UnsupportedInputError, match="schedule_1_income"):
+        evaluate_returns(
+            year=2025,
+            state="MS",
+            w2_income=[50_000, 50_000],
+            schedule_1_income=[0, 1],
+            backend=backend,
+            mode="zip",
+            on_error=on_error,
+        )

@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "b584f98c813e3eb5371541f921a5324b74c925a98202da3127c096c7d1cd15c1"
+        "sha256": "da7021cde8bfe6b6432aa97bc10bf05378adb2452ee712962674fa218e2fbb4e"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "1fded7dcc99210bf8c1248d362f1b665c358c0c2ae16f7aa3d25b910c2fe67eb"
+        "sha256": "db8b2b020b1b52e66abcc27bdb0b1372f2d44080a9c793a52fa59ff162a93ed2"
       }
     }
   },
@@ -956,8 +956,20 @@
       "name": "Mississippi",
       "kind": "state_income_tax",
       "input_nodes": {
-        "2024": {},
-        "2025": {}
+        "2024": {
+          "w2_income": ["ms_80105_L38_wages"],
+          "self_employment_income": ["ms_80105_L39_business_income"],
+          "rental_income": ["ms_80105_L41_rental_income"],
+          "taxable_interest": ["ms_80105_L43_interest_income"],
+          "ordinary_dividends": ["ms_80105_L44_dividend_income"]
+        },
+        "2025": {
+          "w2_income": ["ms_80105_L38_wages"],
+          "self_employment_income": ["ms_80105_L39_business_income"],
+          "rental_income": ["ms_80105_L41_rental_income"],
+          "taxable_interest": ["ms_80105_L43_interest_income"],
+          "ordinary_dividends": ["ms_80105_L44_dividend_income"]
+        }
       },
       "output_nodes": {
         "2024": {

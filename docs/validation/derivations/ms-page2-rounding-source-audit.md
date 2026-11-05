@@ -107,3 +107,12 @@ MS AGI49000, TI40700, balance30700, tax1442.90→1443 (2024) /1350.80→1351
 (2025). Two prepared adjustments.49 on lines50/51 each round0 before the
 sum, preserving the original wage-only result. These are prepared-component
 checks, not new natural deduction inputs.
+
+
+## Disposition, SOL-33
+
+The initial reproduction describes checkpoint1c57430. This PR extends the
+repair to page2 line-by-line lowering, not a tolerance/signature. The numeric
+case records above were preserved unchanged before the extension's tests.
+The unsupported aggregate list and whole-dollar fact requirement are explicit
+contracts; no per-category spouse allocation is inferred.
