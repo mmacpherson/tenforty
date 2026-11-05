@@ -33,9 +33,10 @@
     situations with a material effect, there is none: graph Ohio
     Married/Joint returns now raise `UnsupportedInputError` naming the fact
     and how to pass it, where they used to compute with no joint filing
-    credit. `False` reproduces that computation; `True` is refused until the
-    credit is wired (tenforty-b72.53). OH stays outside `backend="auto"`
-    scope, so default callers are unaffected.
+    credit. Both values compute: `False` gives no joint filing credit, and
+    `True` applies the credit's percentage, cap and 2025 MAGI limit. OH is
+    kept outside `backend="auto"` scope by design, so default callers never
+    meet the requirement.
   - **`assumptions` output.** `InterpretedTaxReturn.assumptions` lists the
     recorded conventions a computation used because no input supplied them;
     `None` on a failed return. `evaluate_returns` frames gain a `state_facts`
@@ -55,9 +56,11 @@
   when its known graph-side defects are closed and official-value fixtures
   support it: for 2024-2025, Illinois, Mississippi, Oregon and the eight states
   without an income tax. Maryland, Maine and North Carolina stay outside it
-  pending the itemized-deduction contract (tenforty-nuc6), and Ohio pending its
-  joint filing credit (tenforty-b72.53). Other states route to OTS where OTS
-  computes them, and otherwise
+  pending the itemized-deduction contract (tenforty-nuc6). Ohio stays outside
+  by design: its graph Married/Joint return requires the explicit
+  `state_facts` joint-credit fact, so admitting it would make `"auto"` raise
+  for those callers, and admitting it is a separate decision. Other states
+  route to OTS where OTS computes them, and otherwise
   raise `UnsupportedReturnError` naming the open defect or the missing
   evidence. `backend="graph"` ignores scope. See
   [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
