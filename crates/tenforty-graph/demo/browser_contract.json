@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "90b84edf65b88bc2120ff6a119d9556a0edf6577043c4b24109959360088640f"
+        "sha256": "cf8a929eb4cc0fe048e4c8df29b5641f8d518d5ae4b3787f05c17000172d2b89"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "0df6dd3f2e221410aba0307251a8113c2cbd76e7e9a9c994c360beaf225ae2a4"
+        "sha256": "ad34bce5345d804a2cc2fb1e3157335667d96c54344920621207b76a1b65d118"
       }
     }
   },
