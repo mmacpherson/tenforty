@@ -2,14 +2,19 @@
 
 F28 must allow TaxCalc to itemize zero under a forced Standard, and that
 allowance is wide enough to admit a backend that treats forced Standard as
-Auto (PR #442 review). The election invariant checks tenforty's own deduction
-against the election, so the allowance cannot excuse the wrong election. Runs
-without TaxCalc installed.
+Auto (PR #442 review). The election invariant checks tenforty's own Form 1040
+line 12 against the election, so the allowance cannot excuse the wrong
+election. On graph line 12 is read from the graph, so Schedule 1-A and SALT
+leave nothing unchecked. Runs without TaxCalc installed.
 """
 
 import pytest
 
-from .taxcalc_policy import election_violations, evaluate_components, required_deduction
+from .taxcalc_policy import (
+    election_violations,
+    evaluate_components,
+    required_deduction,
+)
 
 # PR #442 review witness: 2025 head of household, self-employment 125,000,
 # ISO 50,000, state and local taxes 24,000, forced Standard.
@@ -28,6 +33,8 @@ WITNESS = {
     "salt": 24_000.0,
     "std_or_item": "Standard",
 }
+# Second review witness: $1 of car-loan interest opens Schedule 1-A.
+CAR_LOAN_WITNESS = {**WITNESS, "car_loan": 1.0}
 
 # Independent derivation from IRS sources by the PR #442 reviewer: AGI
 # 116,169.03125 (Schedule SE deduction 8,830.96875); forced Standard takes
@@ -36,65 +43,86 @@ WITNESS = {
 AGI = 116_169.03125
 FORCED_STANDARD = {
     "agi": AGI,
-    "qbi_deduction": 18_508.80625,
     "taxable_income": 74_035.225,
+    "deduction_taken": 23_625.0,
 }
 WRONGLY_ITEMIZED = {
     "agi": AGI,
-    "qbi_deduction": 18_433.80625,
     "taxable_income": 73_735.225,
+    "deduction_taken": 24_000.0,
 }
 
 
-def test_forced_standard_requires_the_standard_deduction_even_with_salt():
-    """SALT is irrelevant under forced Standard, so line 12 is always checkable."""
-    assert required_deduction(WITNESS) == 23_625.0
+@pytest.mark.parametrize("backend", ["graph", "ots"])
+def test_the_correct_forced_standard_return_passes(backend):
+    """Line 12 of the derived return is the 2025 HoH standard deduction."""
+    assert election_violations(WITNESS, backend, FORCED_STANDARD) == []
 
 
-def test_the_correct_forced_standard_return_passes():
-    """Line 12 implied by the derived return is the 2025 HoH standard deduction."""
-    assert election_violations(WITNESS, FORCED_STANDARD) == []
-
-
-def test_auto_results_under_a_forced_standard_case_fail():
+@pytest.mark.parametrize("backend", ["graph", "ots"])
+def test_auto_results_under_a_forced_standard_case_fail(backend):
     """The mutant itemizes 24,000 where the election requires 23,625."""
-    violations = election_violations(WITNESS, WRONGLY_ITEMIZED)
+    violations = election_violations(WITNESS, backend, WRONGLY_ITEMIZED)
 
     assert len(violations) == 1
     assert "election requires 23,625.00" in violations[0]
 
 
+def test_schedule_1a_does_not_hide_the_graph_election():
+    """The car-loan variant is still checked on graph: line 12 is read directly."""
+    assert election_violations(CAR_LOAN_WITNESS, "graph", WRONGLY_ITEMIZED)
+
+
+# Published amounts: 2025 HoH standard deduction 23,625 and 65+ box 2,000
+# (2025 Form 1040 instructions, line 12e); 2024 Single 14,600 and 65+ box
+# 1,950 (Rev. Proc. 2023-34 section 3.15); 2024 SALT cap 5,000 for MFS
+# (Schedule A line 5e); 2025 SALT worksheet 40,000 less 30% of MAGI over
+# 500,000, not below 10,000 (2025 Schedule A instructions).
 @pytest.mark.parametrize(
-    ("case", "expected"),
+    ("case", "magi", "expected"),
     [
-        ({**WITNESS, "std_or_item": "Auto"}, None),
+        (WITNESS, AGI, 23_625.0),
+        (CAR_LOAN_WITNESS, AGI, 23_625.0),
+        ({**WITNESS, "std_or_item": "Auto"}, AGI, 24_000.0),
+        ({**WITNESS, "std_or_item": "Auto", "salt": 1_000.0}, AGI, 23_625.0),
+        ({**WITNESS, "std_or_item": "Itemized", "salt": 1_000.0}, AGI, 1_000.0),
+        ({**WITNESS, "age65": True}, AGI, 25_625.0),
         (
-            {**WITNESS, "std_or_item": "Auto", "salt": 0.0, "itemized": 30_000.0},
-            30_000.0,
+            {
+                **WITNESS,
+                "status": "Single",
+                "std_or_item": "Itemized",
+                "salt": 50_000.0,
+            },
+            600_000.0,
+            10_000.0,
         ),
         (
-            {**WITNESS, "std_or_item": "Auto", "salt": 0.0, "itemized": 1_000.0},
-            23_625.0,
+            {
+                **WITNESS,
+                "year": 2024,
+                "status": "Married/Sep",
+                "std_or_item": "Itemized",
+                "salt": 9_000.0,
+            },
+            AGI,
+            5_000.0,
         ),
-        (
-            {**WITNESS, "std_or_item": "Itemized", "salt": 0.0, "itemized": 1_000.0},
-            1_000.0,
-        ),
-        ({**WITNESS, "tips": 5_000.0}, None),
-        ({**WITNESS, "age65": True}, None),
+        ({**WITNESS, "year": 2024, "status": "Single", "age65": True}, AGI, 16_550.0),
     ],
 )
-def test_required_deduction_only_where_line_12_is_determined(case, expected):
-    """SALT caps and Schedule 1-A deductions leave line 12 undetermined here."""
-    assert required_deduction(case) == expected
+def test_required_deduction(case, magi, expected):
+    """Line 12 the election dictates, from published amounts only."""
+    assert required_deduction(case, magi) == expected
 
 
-def test_graph_mutant_treating_standard_as_auto_is_caught(monkeypatch):
+@pytest.mark.parametrize("case", [WITNESS, CAR_LOAN_WITNESS], ids=["salt", "car-loan"])
+def test_graph_mutant_treating_standard_as_auto_is_caught(monkeypatch, case):
     """Lower forced Standard to the Auto encoding: the invariant must fire."""
     from tenforty.backends import graph
 
-    assert election_violations(WITNESS, evaluate_components(WITNESS, "graph")) == []
+    assert election_violations(case, "graph", evaluate_components(case, "graph")) == []
 
     monkeypatch.setitem(graph.DEDUCTION_CHOICE_ENCODING, "Standard", 0.0)
 
-    assert election_violations(WITNESS, evaluate_components(WITNESS, "graph"))
+    assert election_violations(case, "graph", evaluate_components(case, "graph"))

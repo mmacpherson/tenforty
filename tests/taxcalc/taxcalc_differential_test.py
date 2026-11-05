@@ -43,15 +43,13 @@ pd = pytest.importorskip("pandas")
 from hypothesis import HealthCheck, example, given, settings, target  # noqa: E402
 from hypothesis import strategies as st  # noqa: E402
 
-import tenforty  # noqa: E402
-
 from .taxcalc_policy import (  # noqa: E402
     ZERO_DELTA,
     election_violations,
+    evaluate_components,
     modeled_deltas,
     taxcalc_obbba_fields,
     taxcalc_schedule_a_fields,
-    tenforty_obbba_inputs,
     tolerance,
 )
 
@@ -306,36 +304,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
 
 def tenforty_components(case, backend):
     """Evaluate one case on a tenforty backend, returning compared quantities."""
-    r = tenforty.evaluate_return(
-        year=case["year"],
-        filing_status=case["status"],
-        backend=backend,
-        w2_income=case["w2"],
-        self_employment_income=case["se"],
-        qbi_w2_wages=case.get("qbi_w2_wages", 0.0),
-        qbi_ubia=case.get("qbi_ubia", 0.0),
-        qbi_is_sstb=case.get("qbi_is_sstb", False),
-        short_term_capital_gains=case["stcg"],
-        long_term_capital_gains=case["ltcg"],
-        taxable_interest=case["interest"],
-        ordinary_dividends=case["ord_div"],
-        qualified_dividends=case["qual_div"],
-        itemized_deductions=case["itemized"],
-        incentive_stock_option_gains=case.get("iso", 0.0),
-        standard_or_itemized=case["std_or_item"],
-        **tenforty_obbba_inputs(case),
-    )
-    return {
-        "agi": r.federal_adjusted_gross_income,
-        "taxable_income": r.federal_taxable_income,
-        "se_tax": r.federal_se_tax,
-        "niit": r.federal_niit,
-        "addl_medicare": r.federal_additional_medicare_tax,
-        "amt": r.federal_amt,
-        "income_tax": r.federal_income_tax,
-        "total_tax": r.federal_total_tax,
-        "qbi_deduction": r.federal_qbi_deduction,
-    }
+    return evaluate_components(case, backend)
 
 
 def _assert_components_match_taxcalc(backend, cases):
@@ -347,7 +316,7 @@ def _assert_components_match_taxcalc(backend, cases):
     worst_excess = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
-        failures.extend(election_violations(case, ours))
+        failures.extend(election_violations(case, backend, ours))
         deltas = modeled_deltas(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])

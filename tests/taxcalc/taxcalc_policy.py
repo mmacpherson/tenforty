@@ -890,29 +890,60 @@ QUANTITIES = (
 )
 
 
+def tenforty_inputs(case: dict) -> dict:
+    """Keyword inputs for tenforty for one canonical case."""
+    return {
+        "year": case["year"],
+        "filing_status": case["status"],
+        "w2_income": case["w2"],
+        "self_employment_income": case["se"],
+        "qbi_w2_wages": case.get("qbi_w2_wages", 0.0),
+        "qbi_ubia": case.get("qbi_ubia", 0.0),
+        "qbi_is_sstb": case.get("qbi_is_sstb", False),
+        "short_term_capital_gains": case["stcg"],
+        "long_term_capital_gains": case["ltcg"],
+        "taxable_interest": case["interest"],
+        "ordinary_dividends": case["ord_div"],
+        "qualified_dividends": case["qual_div"],
+        "itemized_deductions": case["itemized"],
+        "incentive_stock_option_gains": case.get("iso", 0.0),
+        "standard_or_itemized": case["std_or_item"],
+        **tenforty_obbba_inputs(case),
+    }
+
+
+GRAPH_DEDUCTION_NODE = "us_1040_L12Final_deduction_amount"
+
+
+def graph_deduction_taken(case: dict) -> float:
+    """Form 1040 line 12 as the graph computed it, read from its own node."""
+    from tenforty.backends.graph import GraphBackend
+    from tenforty.models import TaxReturnInput
+
+    evaluator, _ = GraphBackend()._create_evaluator(
+        TaxReturnInput(**tenforty_inputs(case))
+    )
+    return evaluator.eval(GRAPH_DEDUCTION_NODE)
+
+
 def evaluate_components(case: dict, backend: str) -> dict[str, float]:
-    """Evaluate one canonical case on a tenforty backend."""
+    """Evaluate one canonical case on a tenforty backend.
+
+    Besides the compared quantities, `deduction_taken` is Form 1040 line 12:
+    the graph's own node, or on OTS (which exposes no line 12) AGI less the
+    QBI deduction less taxable income, which holds only without Schedule 1-A.
+    """
     import tenforty
 
-    r = tenforty.evaluate_return(
-        year=case["year"],
-        filing_status=case["status"],
-        backend=backend,
-        w2_income=case["w2"],
-        self_employment_income=case["se"],
-        qbi_w2_wages=case.get("qbi_w2_wages", 0.0),
-        qbi_ubia=case.get("qbi_ubia", 0.0),
-        qbi_is_sstb=case.get("qbi_is_sstb", False),
-        short_term_capital_gains=case["stcg"],
-        long_term_capital_gains=case["ltcg"],
-        taxable_interest=case["interest"],
-        ordinary_dividends=case["ord_div"],
-        qualified_dividends=case["qual_div"],
-        itemized_deductions=case["itemized"],
-        incentive_stock_option_gains=case.get("iso", 0.0),
-        standard_or_itemized=case["std_or_item"],
-        **tenforty_obbba_inputs(case),
-    )
+    r = tenforty.evaluate_return(backend=backend, **tenforty_inputs(case))
+    if backend == "graph":
+        deduction_taken = graph_deduction_taken(case)
+    else:
+        deduction_taken = (
+            r.federal_adjusted_gross_income
+            - r.federal_qbi_deduction
+            - r.federal_taxable_income
+        )
     return {
         "agi": r.federal_adjusted_gross_income,
         "taxable_income": r.federal_taxable_income,
@@ -922,59 +953,95 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
         "amt": r.federal_amt,
         "income_tax": r.federal_income_tax,
         "total_tax": r.federal_total_tax,
-        "qbi_deduction": r.federal_qbi_deduction,
+        "deduction_taken": deduction_taken,
     }
 
 
-# Inputs that open a deduction between AGI and taxable income other than line
-# 12 and the QBI deduction (2025 Schedule 1-A: tips, overtime, car loan
-# interest, and the senior deduction the 65+ boxes bring).
+# Rev. Proc. 2023-34 section 3.15(3): 2024 additional standard deduction per
+# 65-or-older box.
+_AGE_BOX_2024 = {
+    "Single": 1_950.0,
+    "Head_of_House": 1_950.0,
+    "Married/Joint": 1_550.0,
+    "Married/Sep": 1_550.0,
+    "Widow(er)": 1_550.0,
+}
+# 2024 Schedule A line 5e: $10,000, $5,000 married filing separately.
+_SALT_CAP_2024 = {"Married/Sep": 5_000.0}
+# Inputs that open a 2025 Schedule 1-A deduction, which sits between AGI and
+# taxable income (line 13b) beside line 12.
 _SCHEDULE_1A_CASE_KEYS = ("tips", "overtime", "car_loan", "age65", "spouse65")
 ELECTION_TOL = 1.0
 
 
-def required_deduction(case: dict) -> float | None:
-    """Form 1040 line 12 the case's election dictates, where it is checkable.
-
-    Independent of TaxCalc: the standard deduction is a published amount, and
-    the itemized aggregate enters Schedule A uncapped. None where line 12 is
-    not determined from the case alone: Schedule 1-A inputs also sit between
-    AGI and taxable income, and Auto or Itemized with SALT needs the capped
-    line 5e.
-    """
-    if any(case.get(key) for key in _SCHEDULE_1A_CASE_KEYS):
+def standard_deduction(case: dict) -> float | None:
+    """Form 1040 line 12 standard deduction, with the 65-or-older boxes."""
+    year, status = case.get("year"), case.get("status", "")
+    if (year, status) not in STANDARD_DEDUCTION:
         return None
-    standard = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")))
+    if year == 2025:
+        return _standard_deduction_2025(case)
+    boxes = bool(case.get("age65")) + (
+        bool(case.get("spouse65")) and status in {"Married/Joint", "Married/Sep"}
+    )
+    return STANDARD_DEDUCTION[(year, status)] + _AGE_BOX_2024[status] * boxes
+
+
+def schedule_a_total(case: dict, magi: float) -> float:
+    """Schedule A: the uncapped aggregate plus state and local taxes after 5e."""
+    status = case.get("status", "")
+    salt = max(0.0, case.get("salt", 0.0))
+    if case.get("year") == 2025:
+        cap = _lawful_salt_cap_2025(status, magi)
+    else:
+        cap = _SALT_CAP_2024.get(status, 10_000.0)
+    return max(0.0, case.get("itemized", 0.0)) + min(salt, cap)
+
+
+def required_deduction(case: dict, magi: float) -> float | None:
+    """Form 1040 line 12 the case's election dictates, independent of TaxCalc.
+
+    Modified AGI for the 2025 SALT worksheet is AGI (no excluded foreign or
+    territory income in these cases).
+    """
+    standard = standard_deduction(case)
     if standard is None:
         return None
     election = case.get("std_or_item", "Auto")
     if election == "Standard":
         return standard
-    if case.get("salt", 0.0):
-        return None
-    schedule_a = max(0.0, case.get("itemized", 0.0))
+    schedule_a = schedule_a_total(case, magi)
     if election == "Itemized":
         return schedule_a
     return max(standard, schedule_a)
 
 
-def election_violations(case: dict, ours: dict[str, float]) -> list[str]:
+def election_violations(case: dict, backend: str, ours: dict[str, float]) -> list[str]:
     """Report a deduction tenforty took that the case's election does not allow.
 
     TaxCalc allowances such as F19 and F28 excuse differences in the deduction
-    TaxCalc chooses; this checks tenforty's own choice so an allowance can
-    never excuse the wrong election. With positive taxable income, line 12 is
-    AGI less the QBI deduction less taxable income.
+    TaxCalc chooses; this checks tenforty's own line 12 so an allowance can
+    never excuse the wrong election. On graph line 12 is read from the graph
+    and every case is checked. OTS is checked under forced Standard, the path
+    this contract added, wherever its derived line 12 holds (no Schedule 1-A,
+    positive taxable income); its Auto and Itemized line 12 carries known SALT
+    defects (F31) the TaxCalc comparison already bounds.
     """
-    required = required_deduction(case)
-    if required is None or ours["taxable_income"] <= ELECTION_TOL:
-        return []
-    taken = ours["agi"] - ours["qbi_deduction"] - ours["taxable_income"]
-    if abs(taken - required) <= ELECTION_TOL:
+    required = required_deduction(case, ours["agi"])
+    if required is None:
         return []
     election = case.get("std_or_item", "Auto")
+    if backend != "graph" and (
+        election != "Standard"
+        or any(case.get(key) for key in _SCHEDULE_1A_CASE_KEYS)
+        or ours["taxable_income"] <= ELECTION_TOL
+    ):
+        return []
+    taken = ours["deduction_taken"]
+    if abs(taken - required) <= ELECTION_TOL:
+        return []
     message = (
-        f"{case}: deduction taken {taken:,.2f} under {election!r}, "
+        f"{case}: {backend} line 12 {taken:,.2f} under {election!r}, "
         f"election requires {required:,.2f}"
     )
     return [message]
@@ -991,7 +1058,7 @@ def unexcused_violations(
     """
     ours = evaluate_components(case, backend)
     deltas = modeled_deltas(backend, case, expected)
-    violations = election_violations(case, ours)
+    violations = election_violations(case, backend, ours)
     for quantity in QUANTITIES:
         exp_alt = expected_alt or expected
         lo = min(expected[quantity], exp_alt[quantity])
