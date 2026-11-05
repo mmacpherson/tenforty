@@ -1,5 +1,12 @@
 # IRS Validation: tenforty vs IRS Direct File
 
+> **Historical record.** This page documents the 2022–2023 IRS Direct File and
+> MeF ATS work against the OTS backend, and some of its statements are out of
+> date: tenforty now computes self-employment tax, QBI and the credit for other
+> dependents, and the default computes 2024–2025 on the graph backend. For what
+> is evidenced today, per kind of return, see the
+> [evidence summary](evidence-summary.md).
+
 This document summarizes validation testing of the **tenforty library** against official IRS test scenarios from the [IRS Direct File repository](https://github.com/IRS-Public/direct-file).
 
 **Note**: We have verified that tenforty correctly passes through Open Tax Solver's calculations. The small discrepancies documented below ($6 in 2022 tax year scenarios) originate in OTS's tax table implementation, not in tenforty's input mapping or output parsing. See [Discrepancy Analysis](#discrepancy-analysis) for details.
