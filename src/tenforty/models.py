@@ -695,7 +695,7 @@ class Assumption(BaseModel):
     id: str
     state: str | None
     input_path: str | None
-    value: bool | int | float | str | None
+    value: bool | int | FiniteFloat | str | None
     text: str
 
     def to_json(self) -> str:

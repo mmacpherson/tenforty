@@ -14,14 +14,14 @@ this is checked before any return is computed, under every ``on_error``.
 
 ``available(state, year)`` lists the facts for a return. Conventions without a
 supplyable input are reported per return in
-``InterpretedTaxReturn.assumptions`` (see ``CONVENTIONS``), and
+``InterpretedTaxReturn.assumptions`` (from an internal convention inventory), and
 ``DEFAULT_INVENTORY`` records which kind of default each one is.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
@@ -36,7 +36,6 @@ from .models import (
 )
 
 __all__ = [
-    "CONVENTIONS",
     "DEFAULT_INVENTORY",
     "OH",
     "Assumption",
@@ -46,6 +45,7 @@ __all__ = [
     "StateFacts",
     "available",
     "registered_descriptors",
+    "wired_fact_lowerings",
 ]
 
 Engine = Literal["ots", "graph"]
@@ -105,10 +105,13 @@ MODELS: dict[str, type[StateFacts]] = {"OH": OH}
 class FactDescriptor:
     """What a fact is, where it applies, and which engines honour or need it.
 
-    ``honoured_by`` is capability, not installation. ``required_by`` lists the
-    engines that refuse an applicable return when the fact is not supplied.
-    ``convention`` is the id of the convention used when it is absent, or None
-    when there is none (a required fact has none).
+    ``honoured_by`` is capability, not installation. ``supported_values`` says,
+    per honouring engine, which values it computes today: None for every valid
+    value, a tuple for only those (``pending`` names the work for the rest).
+    It comes from the same registry the preflight check uses. ``required_by``
+    lists the engines that refuse an applicable return when the fact is not
+    supplied. ``convention`` is the id of the convention used when it is
+    absent, or None when there is none (a required fact has none).
     """
 
     state: str
@@ -122,11 +125,24 @@ class FactDescriptor:
     required_by: tuple[Engine, ...]
     description: str
     source: str
+    supported_values: tuple[tuple[Engine, tuple[object, ...] | None], ...] = ()
+    pending: str | None = None
 
     @property
     def input_path(self) -> str:
         """The public path that supplies this fact."""
         return f"state_facts.{self.state}.{self.name}"
+
+    def computes(self, engine: Engine | None, value: object) -> bool:
+        """Whether this engine computes the fact at this value today."""
+        for supported_engine, values in self.supported_values:
+            if supported_engine == engine:
+                return values is None or value in values
+        return False
+
+    def engines_computing(self, value: object) -> tuple[Engine, ...]:
+        """Return the engines that compute the fact at this value today."""
+        return tuple(e for e, _ in self.supported_values if self.computes(e, value))
 
 
 _DESCRIPTORS: tuple[FactDescriptor, ...] = (
@@ -146,9 +162,49 @@ _DESCRIPTORS: tuple[FactDescriptor, ...] = (
 )
 
 
+def wired_fact_lowerings() -> dict[
+    tuple[str, str], tuple[frozenset | None, str | None]
+]:
+    """Graph fact lowerings: the values each computes (None: all) and why not."""
+    try:
+        from .backends.graph import (
+            FACT_LOWERING_PENDING,
+            FACT_LOWERING_VALUES,
+            FACT_LOWERINGS,
+        )
+    except ImportError:
+        return {}
+    return {
+        key: (FACT_LOWERING_VALUES.get(key), FACT_LOWERING_PENDING.get(key))
+        for key in FACT_LOWERINGS
+    }
+
+
+def _with_support(
+    descriptor: FactDescriptor,
+    wired: dict[tuple[str, str], tuple[frozenset | None, str | None]],
+) -> FactDescriptor:
+    supported: list[tuple[Engine, tuple[object, ...] | None]] = []
+    pending = None
+    for engine in descriptor.honoured_by:
+        if engine == "ots":
+            supported.append(("ots", None))
+            continue
+        values, reason = wired.get((descriptor.state, descriptor.name), ((), None))
+        pending = pending or reason
+        supported.append(
+            ("graph", None if values is None else tuple(sorted(values, key=repr)))
+        )
+    return replace(descriptor, supported_values=tuple(supported), pending=pending)
+
+
 def registered_descriptors() -> tuple[FactDescriptor, ...]:
-    """Every fact descriptor, in (state, name) order."""
-    return tuple(sorted(_DESCRIPTORS, key=lambda d: (d.state, d.name)))
+    """Every fact descriptor, in (state, name) order, with current support."""
+    wired = wired_fact_lowerings()
+    return tuple(
+        _with_support(descriptor, wired)
+        for descriptor in sorted(_DESCRIPTORS, key=lambda d: (d.state, d.name))
+    )
 
 
 _STATE = TypeAdapter(OTSState)
@@ -165,7 +221,7 @@ def available(state: str, year: int) -> tuple[FactDescriptor, ...]:
     year_value = _YEAR.validate_python(year).value
     return tuple(
         descriptor
-        for descriptor in sorted(_DESCRIPTORS, key=lambda d: d.name)
+        for descriptor in sorted(registered_descriptors(), key=lambda d: d.name)
         if descriptor.state == state_value and year_value in descriptor.years
     )
 
@@ -199,7 +255,7 @@ class Convention:
         )
 
 
-CONVENTIONS: tuple[Convention, ...] = (
+_CONVENTIONS: tuple[Convention, ...] = (
     Convention(
         id="ma.form_1.line_11.one_earner",
         state="MA",
@@ -370,39 +426,42 @@ def active_facts(model: StateFacts | None, row: FactRow) -> dict[str, object]:
 def check_capability(
     models: dict[str, StateFacts],
     rows: Sequence[FactRow],
-    wired: dict[tuple[str, str], frozenset[object] | None],
+    wired: dict[tuple[str, str], tuple[frozenset | None, str | None]],
 ) -> None:
-    """Phase 4: every active field is honoured, and wired, on its row's engine.
+    """Phase 4: every active field is computed, at its value, on its row's engine.
 
-    ``wired`` maps each graph lowering to the values it computes (None: all).
+    The error names another backend only if that backend computes this value;
+    when none does, it says so and names the pending work.
     """
     for row in rows:
         model = models.get(row.state or "")
-        for descriptor in _active(model, row):
-            if row.engine not in descriptor.honoured_by:
-                capable = " or ".join(f"backend={e!r}" for e in descriptor.honoured_by)
-                raise UnsupportedInputError(
-                    f"The {row.engine} backend does not take {descriptor.input_path} "
-                    f"({row.year} {row.state} {row.status}); {capable} does. Facts "
-                    "never change which backend computes a return."
-                )
-            if row.engine != "graph":
-                continue
-            key = (row.state, descriptor.name)
-            if key not in wired:
-                raise UnsupportedInputError(
-                    f"{descriptor.input_path} is not yet wired into the graph "
-                    "backend's computation."
-                )
+        for declared in _active(model, row):
+            descriptor = _with_support(declared, wired)
             value = getattr(model, descriptor.name)
-            values = wired[key]
-            if values is not None and value not in values:
-                computed = " or ".join(repr(v) for v in sorted(values, key=repr))
-                raise UnsupportedInputError(
-                    f"{descriptor.input_path}={value!r} is not yet computed by the "
-                    f"graph backend for {row.state} (tenforty-b72.53); only "
-                    f"{computed} is."
+            if descriptor.computes(row.engine, value):
+                continue
+            requested = f"{descriptor.input_path}={value!r}"
+            where = f"{row.year} {row.state} {row.status}"
+            if row.engine not in descriptor.honoured_by:
+                problem = (
+                    f"The {row.engine} backend does not take {requested} ({where})"
                 )
+            else:
+                problem = (
+                    f"{requested} is not yet computed by the {row.engine} backend "
+                    f"({where})"
+                )
+            others = [e for e in descriptor.engines_computing(value) if e != row.engine]
+            if others:
+                remedy = " or ".join(f"backend={e!r}" for e in others) + " does"
+            else:
+                remedy = "no backend computes it yet" + (
+                    f" ({descriptor.pending})" if descriptor.pending else ""
+                )
+            raise UnsupportedInputError(
+                f"{problem}; {remedy}. Facts never change which backend computes "
+                "a return."
+            )
 
 
 def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> None:
@@ -429,7 +488,7 @@ def recorded_assumptions(row: FactRow) -> tuple[Assumption, ...]:
     """Return the conventions this row's engine uses for it, ordered by id."""
     return tuple(
         convention.record()
-        for convention in sorted(CONVENTIONS, key=lambda c: c.id)
+        for convention in sorted(_CONVENTIONS, key=lambda c: c.id)
         if convention.state == row.state
         and row.status in convention.statuses
         and row.year in convention.years

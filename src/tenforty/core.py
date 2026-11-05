@@ -754,20 +754,11 @@ def _warn_failed(engine: Engine, tax_input: TaxReturnInput, error: Exception) ->
 StateFactsArgument = StateFacts | tuple[StateFacts, ...] | None
 
 
-def _wired_fact_lowerings() -> dict[tuple[str, str], frozenset[object] | None]:
-    """Graph fact lowerings, each with the values it computes (None: all)."""
-    try:
-        from .backends.graph import FACT_LOWERING_VALUES, FACT_LOWERINGS
-    except ImportError:
-        return {}
-    return {key: FACT_LOWERING_VALUES.get(key) for key in FACT_LOWERINGS}
-
-
 def _check_routed_facts(
     models: dict[str, StateFacts], rows: list[_facts.FactRow]
 ) -> None:
     """Phases 4 and 4b: capability of active facts, then required facts."""
-    _facts.check_capability(models, rows, _wired_fact_lowerings())
+    _facts.check_capability(models, rows, _facts.wired_fact_lowerings())
     _facts.check_required(models, rows)
 
 

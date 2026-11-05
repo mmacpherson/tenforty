@@ -28,7 +28,11 @@ tenforty.evaluate_return(
 - the filing statuses and years it applies to;
 - whether it has a default convention;
 - which backends honour it (a capability, not whether that backend is
-  installed);
+  installed), and `supported_values`: per backend, the values it computes
+  today (`None` for all), with `pending` naming the work for the rest.
+  `computes(backend, value)` and `engines_computing(value)` answer directly,
+  and an error suggests another backend only if it computes the value you
+  passed;
 - which backends require it;
 - its source.
 

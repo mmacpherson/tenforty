@@ -268,6 +268,11 @@ FACT_LOWERING_VALUES: dict[tuple[str, str], frozenset[object]] = {
 """Lowerings that compute only some values; any other value is refused before
 evaluation. A lowering absent here computes every valid value."""
 
+FACT_LOWERING_PENDING: dict[tuple[str, str], str] = {
+    ("OH", "spouses_both_have_qualifying_income"): "tenforty-b72.53",
+}
+"""The work that will compute the values a restricted lowering refuses."""
+
 
 def _fact_node_values(tax_input: TaxReturnInput) -> dict[str, float]:
     state = tax_input.state.value if tax_input.state else None
