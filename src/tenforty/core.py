@@ -556,8 +556,62 @@ _OTS_STATES_READING_FEDERAL_SCHEDULE_A = frozenset(
 )
 
 
-def require_ots_supports(state: OTSState, natural_form_values: dict[str, Any]) -> None:
-    """Refuse a forced standard deduction OTS cannot give this state's program."""
+# Inputs OTS must not drop silently: a nonzero value is refused for any return
+# whose OTS programs have no mapping for it, rather than computed without it.
+_OTS_REFUSED_WHEN_UNREAD = ("dependent_exemptions",)
+
+
+def ots_reads_input(name: str, year: int, state: OTSState) -> bool:
+    """Whether any OTS program in this year's return maps the natural input.
+
+    The return is the federal 1040, the state's program and the year's
+    subordinate forms; a computed carrier field counts as reading its input.
+    """
+    carrier = OTS_INPUT_CARRIERS.get(name)
+    form_ids = ["US_1040"]
+    if (state_form_id := STATE_TO_FORM.get(state)) is not None:
+        form_ids.append(state_form_id)
+    input_maps = [
+        config.input_map
+        for form_id in form_ids
+        if (config := NATURAL_FORM_CONFIG.get((year, form_id))) is not None
+    ]
+    for sub_cfg in SUBORDINATE_FORM_CONFIG.get(year, []):
+        if name in sub_cfg.activation_naturals:
+            return True
+        input_maps.append(sub_cfg.input_map)
+    return any(name in m or (carrier is not None and carrier in m) for m in input_maps)
+
+
+def _require_ots_reads_inputs(
+    year: int, state: OTSState, natural_form_values: dict[str, Any]
+) -> None:
+    for name in _OTS_REFUSED_WHEN_UNREAD:
+        value = natural_form_values.get(name, 0.0)
+        if not value or ots_reads_input(name, year, state):
+            continue
+        state_form_id = STATE_TO_FORM.get(state)
+        if state_form_id is not None:
+            where = f"{state.value} {year} ({state_form_id})"
+        elif state == OTSState.NONE:
+            where = f"the {year} federal return with no state"
+        else:
+            where = f"{state.value} {year}, which has no state income tax return"
+        raise UnsupportedInputError(
+            f"OTS has no mapping for {name}={value!r} on {where}, so it would "
+            f"compute the return without it. Pass {name}=0 if no state exemption "
+            "amount is intended. If you meant a number of dependents, pass it as "
+            "num_dependents; exemption dollars are not converted to a count. "
+            "Otherwise use backend='graph' for a 2024 or later state and year "
+            f"whose graph maps {name}."
+        )
+
+
+def require_ots_supports(
+    year: int, state: OTSState, natural_form_values: dict[str, Any]
+) -> None:
+    """Refuse an OTS return that would drop an input or misstate an election."""
+    _require_ots_reads_inputs(year, state, natural_form_values)
     if state not in _OTS_STATES_READING_FEDERAL_SCHEDULE_A:
         return
     if natural_form_values.get("standard_or_itemized") != OTSDeductionType.STANDARD:
@@ -586,7 +640,7 @@ def evaluate_natural_input_form(
     on_error: str = "raise",
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
-    require_ots_supports(state, natural_form_values)
+    require_ots_supports(year.value, state, natural_form_values)
     federal_form_id = "US_1040"
     federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
     if federal_natural_config is None:
@@ -1272,7 +1326,7 @@ def evaluate_returns(
             ]
             for group, indices in zip_groups.items()
         }
-    _preflight(group_params, engines)
+    _preflight(group_params, engines, models)
 
     def evaluate_group(group: tuple) -> list[dict]:
         rows = group_params[group]
@@ -1323,7 +1377,9 @@ def evaluate_returns(
 
 
 def _preflight(
-    group_params: dict[tuple, list[dict]], engines: dict[tuple, Engine]
+    group_params: dict[tuple, list[dict]],
+    engines: dict[tuple, Engine],
+    models: dict[str, StateFacts],
 ) -> None:
     """Refuse the whole batch before any return is computed.
 
@@ -1335,6 +1391,12 @@ def _preflight(
         group: [TaxReturnInput(**params) for params in rows]
         for group, rows in group_params.items()
     }
+    for group, tax_inputs in validated.items():
+        for tax_input in tax_inputs:
+            row = _facts.fact_row(
+                tax_input.year, tax_input.state, tax_input.filing_status, engines[group]
+            )
+            _attach_facts(tax_input, models, row)
     graph_inputs = [
         tax_input
         for group, tax_inputs in validated.items()
@@ -1350,7 +1412,9 @@ def _preflight(
             continue
         for tax_input in tax_inputs:
             require_ots_supports(
-                tax_input.state, tax_input.model_dump(exclude={"year", "state"})
+                tax_input.year.value,
+                tax_input.state,
+                tax_input.model_dump(exclude={"year", "state"}),
             )
 
 

@@ -374,7 +374,7 @@ class TaxReturnInput(BaseModel):
             "credit. The earned income credit is reported separately "
             "(federal_earned_income_credit; see num_eitc_children and "
             "eitc_eligible). Some state returns also read this "
-            "count as their dependent count (graph: CA, IL, NY, OH, OR and WI; OTS: the state "
+            "count as their dependent count (graph: CA, IL, MS, NY, OH, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
             "through dependent_exemptions. The OR graph uses it for its regular "
             "exemption credit and derives the taxpayer/spouse base from filing "
@@ -385,7 +385,9 @@ class TaxReturnInput(BaseModel):
             "personal/dependent exemptions and the exemption credit, adding the "
             "filing-status taxpayer/spouse base; dependent_exemptions is not "
             "mapped for OH. OH claimable-filer and business-income adjustments "
-            "are unsupported. Conversion to NY line 36 exemption dollars is not "
+            "are unsupported. The MS graph adds $1,500 per total dependent to "
+            "the additional exemption amount, with the form's half-share rule "
+            "for MFS. Conversion to NY line 36 exemption dollars is not "
             "mapped. Natural NY graph MFS returns require spouse AGI/dependents "
             "available only as raw graph inputs and are unsupported. Claimable "
             "filer and A6 household-credit controls are also raw graph only."
@@ -574,7 +576,8 @@ class TaxReturnInput(BaseModel):
             "deduction is taken with either the standard or itemized deduction and "
             "is added back for the AMT. Blindness and dependent-filer limits are not "
             "modeled. The IL graph also adds the $1,000 age-65 exemption allowance, "
-            "subject to its federal-AGI limit; other states do not read it."
+            "subject to its federal-AGI limit. The MS graph adds the $1,500 "
+            "age exemption before the MFS half-share rule."
         ),
     )
     spouse_65_or_older: bool = Field(
@@ -588,7 +591,9 @@ class TaxReturnInput(BaseModel):
             "is not filing and cannot be claimed as a dependent; the senior "
             "deduction is not allowed. Any other filing status has no spouse box, "
             "so True raises ValueError. The IL graph adds the spouse's $1,000 "
-            "age allowance only for MFJ, subject to its federal-AGI limit."
+            "age allowance only for MFJ, subject to its federal-AGI limit. "
+            "The MS graph counts the spouse's $1,500 age exemption for MFJ "
+            "and MFS, applying the form's half-share rule for MFS."
         ),
     )
     state_adjustment: float = Field(
@@ -609,9 +614,10 @@ class TaxReturnInput(BaseModel):
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. The IL, OH and OR "
+            "State exemption dollars, not a dependent count. The IL, MS, OH and OR "
             "graphs do not map this field; use num_dependents for IL personal/dependent "
-            "allowances, OH exemptions/credit and the OR regular exemption credit. "
+            "allowances, MS additional exemptions, OH exemptions/credit and the OR "
+            "regular exemption credit. "
             "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "
@@ -630,7 +636,8 @@ class TaxReturnInput(BaseModel):
             "returns where the filer or spouse can be claimed as another's dependent "
             "(a total below the baseline) are unsupported. Maryland "
             "dependent-taxpayer filers, whose exemption is $0, are unsupported. Other "
-            "state/year and backend support varies."
+            "state/year and backend support varies. OTS maps it for no state or "
+            "year, and refuses a nonzero value."
         ),
     )
 
