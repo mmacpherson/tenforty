@@ -593,3 +593,157 @@ def test_marginal_rate_sees_the_amt_difference():
     ):
         rate = tenforty.marginal_rate(**common, federal_itemized=model)
         assert rate > 0
+
+
+# --- AST-55: dictionary input and carrier aliases -----------------------------
+
+DICT_MODEL = {"regular_tax": 30_000, "amt": 12_000}
+
+
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.parametrize(
+    "backend", ["ots", pytest.param("graph", marks=requires_graph)]
+)
+def test_batch_accepts_a_dictionary_and_echoes_it_as_the_model(backend, mode, on_error):
+    """A dict validates to the model before evaluation; the echo holds its amounts."""
+    frame = evaluate_returns(
+        year=2025,
+        w2_income=[100_000, 150_000],
+        federal_itemized=DICT_MODEL,
+        backend=backend,
+        mode=mode,
+        on_error=on_error,
+    )
+    assert frame.select(ECHO).rows() == [(30_000.0, 12_000.0)] * 2
+    scalar = evaluate_return(
+        year=2025, w2_income=150_000, federal_itemized=DICT_MODEL, backend=backend
+    )
+    assert frame["federal_total_tax"][1] == scalar.federal_total_tax
+
+
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.parametrize(
+    "backend", ["ots", pytest.param("graph", marks=requires_graph)]
+)
+def test_batch_mixes_dictionaries_models_and_none(backend, mode):
+    """Each list element is validated on its own; None stays not supplied."""
+    values = [DICT_MODEL, FederalItemized(regular_tax=30_000, amt=30_000), None]
+    frame = evaluate_returns(
+        year=2025,
+        w2_income=150_000 if mode == "cross" else [150_000] * 3,
+        federal_itemized=values,
+        backend=backend,
+        mode=mode,
+    )
+    assert frame.select(ECHO).rows() == [
+        (30_000.0, 12_000.0),
+        (30_000.0, 30_000.0),
+        (None, None),
+    ]
+
+
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"regular_tax": 1.0},
+        {"regular_tax": -1.0, "amt": 0.0},
+        {"regular_tax": "1", "amt": 0},
+    ],
+    ids=["missing-amt", "negative", "string"],
+)
+def test_an_invalid_late_dictionary_refuses_the_batch_before_evaluation(
+    engine_calls, mode, on_error, bad
+):
+    """Validation happens up front, under every error policy."""
+    with pytest.raises(ValidationError):
+        evaluate_returns(
+            year=2025,
+            w2_income=[100_000, 150_000],
+            federal_itemized=[DICT_MODEL, bad],
+            backend="ots",
+            mode=mode,
+            on_error=on_error,
+        )
+    assert engine_calls == []
+
+
+CARRIER_ALIASES = [
+    "itemized_amt_difference",
+    "us_form_6251_ItemizedAmtDifference",
+    "us_schedule_a_L16_other_deductions",
+]
+AMT_BINDING = {
+    "year": 2025,
+    "w2_income": 150_000,
+    "incentive_stock_option_gains": 200_000,
+}
+
+
+@requires_graph
+@pytest.mark.parametrize("alias", CARRIER_ALIASES)
+def test_carrier_aliases_are_not_derivative_axes(alias):
+    """Natural and node names of a prepared amount are refused as wrt."""
+    with pytest.raises(ValueError, match="unsupported"):
+        tenforty.marginal_rate(**AMT_BINDING, federal_itemized=DICT_MODEL, wrt=alias)
+
+
+@requires_graph
+@pytest.mark.parametrize("alias", CARRIER_ALIASES)
+def test_carrier_aliases_are_not_solve_axes(alias):
+    """The same aliases are refused as for_input."""
+    with pytest.raises(ValueError, match="unsupported"):
+        tenforty.solve_for_income(
+            65_000, **AMT_BINDING, federal_itemized=DICT_MODEL, for_input=alias
+        )
+
+
+@requires_graph
+@pytest.mark.parametrize("alias", ["nc_d400_L10_itemized", "itemized_deductions"])
+def test_forwarded_state_carrier_is_held_fixed(alias):
+    """A state line federal_itemized is forwarded to is a carrier as well."""
+    with pytest.raises(ValueError):
+        tenforty.marginal_rate(
+            year=2025,
+            state="NC",
+            w2_income=150_000,
+            federal_itemized=DICT_MODEL,
+            wrt=alias,
+            output="state_total_tax",
+        )
+
+
+@requires_graph
+@pytest.mark.parametrize(
+    "alias", ["itemized_amt_difference", "us_form_6251_ItemizedAmtDifference"]
+)
+def test_the_amt_difference_carrier_is_never_an_axis(alias):
+    """It is internal to federal_itemized, so a legacy call cannot name it either."""
+    with pytest.raises(ValueError, match="unsupported"):
+        with pytest.warns(LegacyItemizedDeductionsWarning):
+            tenforty.marginal_rate(**AMT_BINDING, itemized_deductions=30_000, wrt=alias)
+
+
+@requires_graph
+@pytest.mark.parametrize(
+    "wrt", ["itemized_deductions", "us_schedule_a_L16_other_deductions"]
+)
+def test_legacy_axis_is_preserved_without_the_model(wrt):
+    """With the legacy scalar in use, its axis and node alias still differentiate."""
+    with pytest.warns(LegacyItemizedDeductionsWarning):
+        rate = tenforty.marginal_rate(
+            **AMT_BINDING, itemized_deductions=30_000, wrt=wrt
+        )
+    assert isinstance(rate, float)
+
+
+@requires_graph
+def test_income_derivatives_still_work_with_the_model():
+    """Ordinary axes are unaffected by the carrier guard."""
+    assert tenforty.marginal_rate(**AMT_BINDING, federal_itemized=DICT_MODEL) > 0
+    assert (
+        tenforty.solve_for_income(60_000, **AMT_BINDING, federal_itemized=DICT_MODEL)
+        > 0
+    )

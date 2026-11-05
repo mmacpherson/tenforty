@@ -942,6 +942,11 @@ def recorded_assumptions(
     return tuple(sorted(records, key=lambda record: record.id))
 
 
+_FEDERAL_ITEMIZED = TypeAdapter(FederalItemized | None)
+"""Normalize each federal_itemized batch value to the model (a dict included)
+before anything is evaluated, so the expanded rows and the echo hold models."""
+
+
 def warn_legacy_itemized(values: Iterable[float], stacklevel: int = 3) -> None:
     """Warn once when any requested itemized_deductions is nonzero."""
     if any(value != 0 for value in values):
@@ -1203,7 +1208,10 @@ def evaluate_returns(
     FINITE_FLOAT_COLUMNS.validate_python(
         {name: ensure_list(arguments[name]) for name in TAX_RETURN_FLOAT_FIELDS}
     )
-    federal_itemized_values = ensure_list(federal_itemized)
+    federal_itemized_values = [
+        _FEDERAL_ITEMIZED.validate_python(value)
+        for value in ensure_list(federal_itemized)
+    ]
     legacy_values = ensure_list(itemized_deductions)
     if any(value is not None for value in federal_itemized_values) and any(
         value != 0 for value in legacy_values

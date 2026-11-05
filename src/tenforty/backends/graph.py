@@ -459,6 +459,35 @@ def _require_ms_perturbation_ownership(
         )
 
 
+def _require_prepared_amounts_fixed(
+    tax_input: TaxReturnInput, inputs: list[str]
+) -> None:
+    """Refuse a derivative or solve axis that carries a prepared itemized amount.
+
+    Checked on resolved input nodes, so a natural name, a bare node and a
+    prefixed node are refused alike. The AMT-difference carrier is internal to
+    federal_itemized and is never an axis. When federal_itemized is supplied,
+    its regular-tax carriers (Schedule A line 16 and any state line it is
+    forwarded to) are held fixed too; the legacy itemized_deductions axis
+    stays available when it is the input in use.
+    """
+    year = tax_input.year.value
+    carriers = set(
+        _lowered_input_nodes("itemized_amt_difference", tax_input.state, year)
+    )
+    if tax_input.federal_itemized is not None:
+        carriers |= set(
+            _lowered_input_nodes("itemized_deductions", tax_input.state, year)
+        )
+    named = sorted(carriers.intersection(inputs))
+    if named:
+        raise ValueError(
+            f"{', '.join(named)} carries a federal_itemized amount, which is "
+            "unsupported as a derivative or solve axis: federal_itemized amounts "
+            "are prepared amounts, held fixed."
+        )
+
+
 def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
     """Resolve a public state output field to its selected state's graph node."""
     form_name = STATE_FORM_NAMES.get(state)
@@ -977,6 +1006,7 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
+        _require_prepared_amounts_fixed(tax_input, input_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
@@ -1037,6 +1067,7 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
+        _require_prepared_amounts_fixed(tax_input, input_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         natural_values = _natural_values(tax_input)
