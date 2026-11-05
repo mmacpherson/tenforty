@@ -49,6 +49,22 @@ _CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
 _OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
 
 
+def _ohio_natural_joint_credit_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Encode the supplied eligibility fact in the raw income controls.
+
+    The spec uses these controls only to test each spouse's $500 threshold.
+    They are threshold witnesses, not an inferred or reported income split.
+    The credit's percentage, cap and MAGI limit remain computations in the spec.
+    """
+    qualifying_income = 500.0 if value else 0.0
+    return {
+        "oh_it1040_FilerQualifyingIncome": qualifying_income,
+        "oh_it1040_SpouseQualifyingIncome": qualifying_income,
+    }
+
+
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     """Lower a validated public input model to graph-compatible natural values."""
     values = tax_input.model_dump(
@@ -239,21 +255,8 @@ def unsupported_inputs(
 FactLowering = Callable[[TaxReturnInput, object], dict[str, float]]
 
 
-def _oh_joint_filing_credit_interim(
-    tax_input: TaxReturnInput, value: object
-) -> dict[str, float]:
-    """Interim OH lowering: only "the spouses do not both qualify" is computed.
-
-    The OH spec on main has no joint filing credit (IT 1040 line 13 is a raw
-    input left at 0; tenforty-b72.53), which is exactly the credit when the
-    spouses do not both have $500 of qualifying income. True needs the credit
-    itself and is refused until b72.53's switch point replaces this lowering.
-    """
-    return {}
-
-
 FACT_LOWERINGS: dict[tuple[str, str], FactLowering] = {
-    ("OH", "spouses_both_have_qualifying_income"): _oh_joint_filing_credit_interim,
+    ("OH", "spouses_both_have_qualifying_income"): _ohio_natural_joint_credit_values,
 }
 """How each state fact reaches the graph, keyed by (state, field name).
 
@@ -262,15 +265,11 @@ field is active on that return, under tenforty.state_facts' projection rule)
 and returns raw graph input node values to set. A fact the graph honours but
 that has no lowering here is refused, never ignored."""
 
-FACT_LOWERING_VALUES: dict[tuple[str, str], frozenset[object]] = {
-    ("OH", "spouses_both_have_qualifying_income"): frozenset({False}),
-}
+FACT_LOWERING_VALUES: dict[tuple[str, str], frozenset[object]] = {}
 """Lowerings that compute only some values; any other value is refused before
 evaluation. A lowering absent here computes every valid value."""
 
-FACT_LOWERING_PENDING: dict[tuple[str, str], str] = {
-    ("OH", "spouses_both_have_qualifying_income"): "tenforty-b72.53",
-}
+FACT_LOWERING_PENDING: dict[tuple[str, str], str] = {}
 """The work that will compute the values a restricted lowering refuses."""
 
 

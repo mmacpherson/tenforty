@@ -19,7 +19,7 @@ import TenForty.Types
 --
 -- Rates: 0% on income $0-$26,050; 2.75% on $26,051-$100,000; 3.125% on income over $100,000
 -- Base tax: $342 for income above $26,050 (added to bracket tax computation)
--- Top bracket rate reduced from 3.5% (2024) to 3.125% (2025) per HB 33 (2024-2025 biennial budget).
+-- Top rate: 3.125%, 2025 booklet p.18 and ORC 5747.02(A)(3)(b).
 ohioBrackets2025 :: NonEmpty Bracket
 ohioBrackets2025 =
   Bracket (byStatus 26050 26050 26050 26050 26050) 0.0
@@ -35,17 +35,16 @@ ohioBracketsTable2025 =
 
 -- | 2025 Ohio personal exemption amounts (per taxpayer/spouse/dependent)
 -- Exemption amounts vary by modified adjusted gross income (MAGI):
--- - $2,350 if MAGI ≤ $40,000
--- - $2,100 if $40,000 < MAGI ≤ $80,000
--- - $1,850 if MAGI > $80,000
+-- - $2,400 if MAGI ≤ $40,000
+-- - $2,150 if $40,000 < MAGI ≤ $80,000
+-- - $1,900 if $80,000 < MAGI < $750,000; $0 at $750,000 and above
 -- Source: Ohio Revised Code Section 5747.025
 -- https://codes.ohio.gov/ohio-revised-code/section-5747.025
--- Inflation-adjusted from 2024 amounts per ORC 5747.025(B).
--- Note: These are income-based, so cannot be automatically applied in the form spec.
--- User must calculate and input total exemption amount.
+-- 2025 IT 1040 booklet p.17 preserves the 2024 amounts and adds the $750,000 cliff.
+-- Applied to the taxpayer/spouse base plus the total dependent count in the spec.
 ohioPersonalExemption2025 :: [(Amount Dollars, Amount Dollars)]
 ohioPersonalExemption2025 =
-  [ (40000, 2350),
-    (80000, 2100),
-    (1e12, 1850)
+  [ (40000, 2400),
+    (80000, 2150),
+    (1e12, 1900)
   ]
