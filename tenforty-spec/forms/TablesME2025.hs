@@ -2,6 +2,7 @@ module TablesME2025
   ( -- * Maine State Income Tax Brackets
     maineBrackets2025,
     maineBracketsTable2025,
+    maineSchedule2025,
 
     -- * Standard Deduction
     meStandardDeduction2025,
@@ -17,6 +18,7 @@ module TablesME2025
 where
 
 import Data.List.NonEmpty (NonEmpty (..))
+import MaineTax (MaineSchedule (..))
 import TenForty.Table
 import TenForty.Types
 
@@ -38,6 +40,24 @@ maineBracketsTable2025 =
   case mkBracketTable maineBrackets2025 of
     Right bt -> TableBracket "me_brackets_2025" bt
     Left err -> error $ "Invalid Maine brackets: " ++ err
+
+-- | 2025 Tax Rate Schedules #1-#3 as printed, with whole-dollar bracket bases
+-- (line 20 at \$100,000 and over, and every tax table row).
+-- Order: Single, MFJ, MFS, HoH, QW
+-- Source: Maine Revenue Services, Individual Income Tax 2025 Rates (prepared
+-- February 3, 2026),
+-- https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/ind_tax_rate_sched_2025.pdf
+maineSchedule2025 :: MaineSchedule
+maineSchedule2025 =
+  MaineSchedule
+    { lowRate = 0.058,
+      middleRate = 0.0675,
+      topRate = 0.0715,
+      middleStart = byStatus 26800 53600 26800 40200 53600,
+      middleBase = byStatus 1554 3109 1554 2332 3109,
+      topStart = byStatus 63450 126900 63450 95150 126900,
+      topBase = byStatus 4028 8057 4028 6041 8057
+    }
 
 -- | 2025 Maine state standard deduction amounts, before the line 17 phase-out
 -- Order: Single, MFJ, MFS, HoH, QW

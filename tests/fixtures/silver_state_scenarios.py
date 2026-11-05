@@ -183,59 +183,6 @@ def ks_worksheet_gap(statute_minus_worksheet: float, rounding: float) -> KnownDe
     )
 
 
-# ME residuals, bounded below until their beads land.
-ME_TABLE_METHOD = (
-    "table-method compatibility difference: 1040ME line 20 permits the table or "
-    "the schedule (no mandatory cutoff); expected is the table row, graph uses "
-    "the schedule (tenforty-tj2.20)"
-)
-ME_PRINTED_BASES = (
-    "ME schedules print whole-dollar bracket bases and line 20 is whole "
-    "dollars; graph uses exact bracket arithmetic, unrounded (tenforty-b72.42)"
-)
-# Graph-minus-printed base per bracket, from the published schedules only:
-# 2024 Single: 6.75% 1,510.90 - 1,511 = -0.10; 7.15% 3,910.525 - 3,911 = -0.475.
-# 2024 MFJ 7.15%: 7,824.425 - 7,825 = -0.575.
-# 2025 Single: 6.75% 1,554.40 - 1,554 = +0.40; 7.15% 4,028.275 - 4,028 = +0.275.
-# 2025 MFJ 7.15%: 8,056.55 - 8,057 = -0.45. Every 5.8% bracket: 0.
-
-
-def me_tax_gap(
-    rate: float,
-    *,
-    taxable_income: float | None = None,
-    row_low: float | None = None,
-    base_offset: float = 0.0,
-    deduction_slack: float = 0.0,
-    reasons: tuple[str, ...],
-) -> KnownDefect:
-    """Signed graph-minus-official bound on ME line 20 for one blind case.
-
-    A $100 table row prices its midpoint on the printed schedule; the graph
-    prices actual taxable income at ``rate``. ``base_offset`` is the graph's
-    bracket arithmetic minus the printed whole-dollar base. The half-width is
-    line 20's whole-dollar rounding, widened by ``rate`` times
-    ``deduction_slack``: the line 17 worksheet's four-place ratio and whole-
-    dollar line 8 against the statute's unrounded fraction, which the graph
-    uses (record A1).
-    """
-    table_offset = 0.0
-    if row_low is not None:
-        assert taxable_income is not None
-        assert row_low <= taxable_income < row_low + 100
-        table_offset = rate * (taxable_income - (row_low + 50))
-    center = table_offset + base_offset
-    # Case 11's cell rounds an exact half (2,885.50 -> 2,886), landing on the
-    # bound; 1e-6 only absorbs binary floating-point error there.
-    half_width = 0.50 + rate * deduction_slack + 1e-6
-    return KnownDefect(
-        quantity="state_total_tax",
-        minimum=center - half_width,
-        maximum=center + half_width,
-        reason="; ".join(reasons),
-    )
-
-
 IN_LINE8_ROUNDING_GAP = KnownDefect(
     quantity="state_total_tax",
     minimum=-0.50,
@@ -6578,7 +6525,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Record: docs/validation/state-fixtures/ME-2024-2025.md (blind, 2026-10-07).
     # Wage-only residents; neither the filer nor spouse claimable as a
     # dependent. Line 20 below $100,000 is the deriver's published table row;
-    # above it the deriver's rate-schedule value. Line 20 permits either method.
+    # above it the deriver's printed rate-schedule value in whole dollars
+    # (rulings on tenforty-tj2.20; the graph follows both exactly).
     # Blind case 1: 50,000 - 14,600 - 5,000 = 30,400; row 30,400-30,500 = 1,808.
     TaxScenario(
         source="ME 2024 official tax table (blind derivation)",
@@ -6589,15 +6537,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_state_tax=1808.0,
-        known_defects=(
-            me_tax_gap(
-                0.0675,
-                taxable_income=30_400,
-                row_low=30_400,
-                base_offset=-0.1,
-                reasons=(ME_TABLE_METHOD, ME_PRINTED_BASES),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 2: 90,000 - 29,200 - 10,000 = 50,800; row 50,800-50,900 = 2,949.
@@ -6610,11 +6549,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=90000.0,
         expected_state_tax=2949.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=50_800, row_low=50_800, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 3: 45,000 - 21,900 - 5,000 = 18,100; row 18,100-18,200 = 1,053.
@@ -6627,11 +6561,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=45000.0,
         expected_state_tax=1053.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=18_100, row_low=18_100, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 4: 40,000 - 14,600 - 5,000 = 20,400; row 20,400-20,500 = 1,186.
@@ -6644,11 +6573,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Sep",
         w2_income=40000.0,
         expected_state_tax=1186.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=20_400, row_low=20_400, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 5: 70,000 - 29,200 - 5,000 (QSS: one exemption) = 35,800; MFJ column = 2,079.
@@ -6661,11 +6585,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Widow(er)",
         w2_income=70000.0,
         expected_state_tax=2079.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=35_800, row_low=35_800, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 6: 20,000 - 14,600 - 5,000 = 400; row 400-500 = 26.
@@ -6678,11 +6597,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=20000.0,
         expected_state_tax=26.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=400, row_low=400, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 7: deduction 14,600 x (1 - 0.3047) = 10,151; TI 104,849; schedule 7,003.
@@ -6695,14 +6609,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=120000.0,
         expected_state_tax=7003.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.475,
-                deduction_slack=14_600 * 0.0001 + 0.50,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 8: deduction 0; exemption 5,000 x (1 - 0.2088) = 3,956; schedule 24,249.
@@ -6715,13 +6621,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=350000.0,
         expected_state_tax=24249.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.475,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 9: deduction 0; exemption 10,000 x (1 - 0.8908) = 1,092; schedule 34,685.
@@ -6734,13 +6633,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=500000.0,
         expected_state_tax=34685.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.575,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 10: 50,000 - 15,000 - 5,150 = 29,850; row 29,800-29,900 = 1,760.
@@ -6753,15 +6645,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_state_tax=1760.0,
-        known_defects=(
-            me_tax_gap(
-                0.0675,
-                taxable_income=29_850,
-                row_low=29_800,
-                base_offset=0.4,
-                reasons=(ME_TABLE_METHOD, ME_PRINTED_BASES),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 11: 90,000 - 30,000 - 10,300 = 49,700; row 49,700-49,800 = 2,886.
@@ -6774,14 +6657,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=90000.0,
         expected_state_tax=2886.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=49_700,
-                row_low=49_700,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 12: 45,000 - 22,500 - 5,150 = 17,350; row 17,300-17,400 = 1,006.
@@ -6794,14 +6669,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=45000.0,
         expected_state_tax=1006.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=17_350,
-                row_low=17_300,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 13: 40,000 - 15,000 - 5,150 = 19,850; row 19,800-19,900 = 1,151.
@@ -6814,14 +6681,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Sep",
         w2_income=40000.0,
         expected_state_tax=1151.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=19_850,
-                row_low=19_800,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 14: 70,000 - 30,000 - 5,150 (QSS: one exemption) = 34,850; row = 2,021.
@@ -6834,14 +6693,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Widow(er)",
         w2_income=70000.0,
         expected_state_tax=2021.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=34_850,
-                row_low=34_800,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 15: 20,000 - 15,000 - 5,150 < 0, floored; tax 0 (record A3).
@@ -6866,13 +6717,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=120000.0,
         expected_state_tax=6917.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=0.275,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 17: deduction 0; exemption 5,150 x (1 - 0.1324) = 4,468; schedule 24,197.
@@ -6885,13 +6729,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=350000.0,
         expected_state_tax=24197.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=0.275,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 18: deduction 0; exemption 10,300 x (1 - 0.7992) = 2,068; schedule 34,586.
@@ -6904,13 +6741,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=500000.0,
         expected_state_tax=34586.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.45,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Legacy ME rows, kept for their federal tax/AGI checks only (unverified

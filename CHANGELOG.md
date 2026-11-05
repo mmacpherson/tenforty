@@ -151,7 +151,14 @@
 - `federal_effective_tax_rate` divides by taxable income, as OTS does. It used
   to divide by AGI.
 - `state_effective_tax_rate` is computed for graph states. It used to be 0.
-
+- `marginal_rate()` and the gradients no longer report 10-12% on qualified
+  dividends or capital gains that fall inside the 0% band when the Qualified
+  Dividends and Capital Gain Tax Worksheet's line 23 equals line 24 (taxable
+  income and line 5 in the same Tax Table row); they report 0, the right-hand
+  rate. Computed as printed, lines 9-21 left a floating-point residue that put
+  line 23 a few ulps above line 24. The spec now computes those lines in an
+  algebraically equal form whose tie is exact. Tax values are unchanged beyond
+  floating-point rounding (at most 6e-11 dollars across 20,000 sampled returns).
 - Massachusetts Form 1 line 10 is built from the federal income lines instead
   of federal AGI, so interest, dividends and capital gains go through Schedules
   B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
@@ -164,6 +171,16 @@
   $100,000 and above. Every one of the table's 2,001 rows is checked.
   Maryland 2024 and 2025 have no open graph defects left and join the graph
   scope for `backend="auto"`.
+- Maine Form 1040ME line 20 uses the published Maine Income Tax Table below
+  $100,000 of taxable income and the printed rate schedule (whole-dollar
+  bracket bases), in whole dollars, at and above it, instead of the unrounded
+  bracket integral. The line 17 and line 18 phase-out worksheets enter line 5
+  to four places, rounded half up, with whole-dollar lines 7 and 8, and every
+  Form 1040ME money entry (including federal AGI on line 14) is rounded to
+  whole dollars before the worksheets and the table lookup. Every
+  table row is checked. Maine stays outside the graph scope for
+  `backend="auto"` until the itemized-deductions contract lands, because its
+  graph takes `itemized_deductions` directly as its own itemized line.
 
 ### Changed (installation)
 - **Building from source requires Rust.** The graph backend is no longer an
