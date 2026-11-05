@@ -13,8 +13,10 @@
   is the list, and each excluded state names the open defect or missing
   evidence that keeps it out.
 - **An explicit backend is never reinterpreted.** `backend="ots"` is the
-  rollback: it gives you exactly the OTS results of today. `backend="graph"`
-  ignores scope.
+  rollback: it gives you the OTS results of today, except that OTS now
+  refuses a nonzero `dependent_exemptions` it used to ignore (see
+  [Inputs refused](#inputs-refused-where-they-do-not-apply)).
+  `backend="graph"` ignores scope.
 - **What you should do:**
   1. Run your workload with `backend="auto"` before the flip and compare it with
      `backend="ots"`. The differences you can expect are listed under
@@ -24,8 +26,9 @@
      failed". Neither is ever a real zero.
   3. Stop passing `state_adjustment` or `dependent_exemptions` where they do not
      apply. Auto refuses them on graph-routed returns where OTS silently
-     ignored them. `state_adjustment` is deprecated everywhere (see the table
-     under Known differences).
+     ignored them, and OTS itself now refuses a nonzero `dependent_exemptions`
+     on every return. `state_adjustment` is deprecated everywhere (see the
+     table under Known differences).
   4. If you cast `evaluate_returns` columns, note that whole-number float inputs
      are now `Float64`, not `Int64`.
   5. If you install from source, you now need a Rust toolchain, or
@@ -61,12 +64,23 @@ dropping it. On the returns auto sends to graph that matters for two inputs:
 
 | Input | OTS today | Auto (graph-routed) |
 |---|---|---|
-| `dependent_exemptions` | No OTS form maps it; silently ignored everywhere | Refused, except where a graph state maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV) |
+| `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused, except where a graph state maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV) |
 | `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused, except AL and CA |
 
 No OTS-covered return that auto sends to graph uses either input on OTS, so
 refusing them loses nothing that was computed before. Checked empirically for
 every OTS-covered state and year (tenforty-aqx.4.1.2).
+
+OTS refuses a nonzero `dependent_exemptions` too, on every return in every
+year, with `UnsupportedInputError` naming the input, state and year. That
+holds for `backend="ots"` and for the returns auto sends to OTS alike, under
+every `on_error` policy, and an `evaluate_returns` batch is refused before any
+return in it is computed. A caller who broadcasts one nonzero exemption amount
+across states therefore gets an error where it used to get a number that
+ignored the amount. Pass `0` (or omit it) where no exemption amount is
+intended; pass a dependent count as `num_dependents`, since tenforty does not
+convert exemption dollars to a count; or use `backend="graph"` for a state
+listed above. Zero is unchanged everywhere.
 
 ### Deduction choice
 

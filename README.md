@@ -531,7 +531,8 @@ Compared with the default OTS backend:
   represent rather than dropping it.
 - It takes one extra input, `dependent_exemptions`: state exemption dollars
   (not a count) for states that use them. See its docstring in
-  `TaxReturnInput` for the per-state rules.
+  `TaxReturnInput` for the per-state rules. OTS cannot use it and refuses a
+  nonzero value.
 
 Two function families exist only on this backend and take the same return
 arguments as `evaluate_return`:
