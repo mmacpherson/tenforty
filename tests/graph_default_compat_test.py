@@ -25,7 +25,7 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends import available_backends
-from tenforty.graph_scope import exclusion_reasons
+from tenforty.graph_scope import IN_SCOPE, exclusion_reasons
 from tenforty.models import (
     METADATA_OUTPUT_FIELDS,
     NUMERIC_OUTPUT_FIELDS,
@@ -122,7 +122,12 @@ OTS_ROUTED_CASES = tuple(
     for state in OTSState
     if exclusion_reasons(state, year) and ots_covers(year, state)
 )
-GRAPH_ONLY_STATES = ("MD", "MS")
+GRAPH_ONLY_CASES = tuple(
+    (year, state.value)
+    for year in YEARS
+    for state in OTSState
+    if (state, year) in IN_SCOPE and not ots_covers(year, state)
+)
 
 COMPARED_FIELDS = (
     "federal_adjusted_gross_income",
@@ -550,10 +555,9 @@ def test_auto_equals_ots_before_2024(year, state):
     )
 
 
-@pytest.mark.parametrize("year", YEARS)
-@pytest.mark.parametrize("state", GRAPH_ONLY_STATES)
+@pytest.mark.parametrize("year,state", GRAPH_ONLY_CASES)
 def test_auto_computes_states_ots_cannot(year, state):
-    """MD and MS have no OTS program: OTS refuses them; auto computes on graph."""
+    """In-scope states without an OTS program compute on graph under auto."""
     args = _case_args(year, state, "Single", {"w2_income": 85_000})
     with pytest.raises(UnsupportedReturnError):
         evaluate_return(**args, backend="ots")
@@ -597,7 +601,7 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
     else:
         kwargs = {
             "year": [2024, 2025, 2025, 2025, 2024],
-            "state": [None, "OR", "CA", "MD", "TX"],
+            "state": [None, "OR", "CA", "MS", "TX"],
             "filing_status": [
                 "Single",
                 "Married/Joint",
@@ -610,8 +614,15 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
     frames = {}
     for backend in ("ots", "auto"):
         if backend == "ots" and mode == "zip":
+            supported_rows = [
+                i
+                for i, (year, state) in enumerate(
+                    zip(kwargs["year"], kwargs["state"], strict=True)
+                )
+                if ots_covers(year, OTSState(state) if state else None)
+            ]
             ots_kwargs = {
-                key: [v for i, v in enumerate(values) if kwargs["state"][i] != "MD"]
+                key: [values[i] for i in supported_rows]
                 for key, values in kwargs.items()
             }
             frames[backend] = evaluate_returns(**ots_kwargs, mode=mode, backend=backend)

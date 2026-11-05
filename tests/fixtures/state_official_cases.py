@@ -287,6 +287,50 @@ IL_CASES = [
 ]
 
 
+IL_CASES += [
+    _il(
+        2024,
+        "c8",
+        "HoH",
+        69_450,
+        3438,
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2025,
+        "c8",
+        "HoH",
+        69_300,
+        3430,
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2024,
+        "c9",
+        "MFJ",
+        88_900,
+        4401,
+        w2_income=100_000,
+        num_dependents=2,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2025,
+        "c9",
+        "MFJ",
+        88_600,
+        4386,
+        w2_income=100_000,
+        num_dependents=2,
+        num_ctc_dependents=0,
+    ),
+]
+
+
 def _oh(year, label, ti, tax, alternate=None, status="S", **inputs) -> OfficialCase:
     return _case(
         "OH", year, label, status, _with_alternate(ti, tax, alternate), **inputs
@@ -469,19 +513,10 @@ OFFICIAL_CASES: list[OfficialCase] = (
     CO_CASES + GA_CASES + IL_CASES + NC_CASES + OH_CASES
 )
 
-UNPINNED = [
-    UnpinnedCase(
-        f"IL-{year}-{label}",
-        "IL exemptions for dependents (IL-1040 line 10c) have no public input: "
-        "the graph maps no exemption natural and num_dependents is CTC children",
-    )
-    for year in (2024, 2025)
-    for label in ("c8", "c9")
-]
+UNPINNED: list[UnpinnedCase] = []
 
 ROUNDING = "tenforty-b72.42"
 TABLE = "tenforty-tj2.20"
-IL_EXEMPTION = "tenforty-b72.50"
 CO_ADDBACK = "tenforty-b72.51"
 
 RATE = {
@@ -489,8 +524,6 @@ RATE = {
     ("CO", 2025): 0.044,
     ("GA", 2024): 0.0539,
     ("GA", 2025): 0.0519,
-    ("IL", 2024): 0.0495,
-    ("IL", 2025): 0.0495,
 }
 """Flat rates, as each record cites them."""
 
@@ -545,9 +578,6 @@ def _defects(case: OfficialCase) -> dict[str, GraphDefect]:
     taxable = case.outcomes[0][0]
     if case.state == "GA":
         return _rounding(case)
-    if case.state == "IL":
-        exemptions = agi - taxable
-        return _deduction_missing(case, IL_EXEMPTION, exemptions, 0.0495)
     if case.state == "CO":
         rate = RATE[("CO", case.year)]
         status = case.filing_status

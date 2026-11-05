@@ -173,7 +173,8 @@ def test_auto_routes_by_scope(year):
     """In scope goes to graph; out of scope to OTS where OTS has the state."""
     assert routing.select_backend("auto", year, "MS") == "graph"
     assert routing.select_backend("auto", year, "OR") == "graph"
-    assert routing.select_backend("auto", year, "NC") == "graph"
+    assert routing.select_backend("auto", year, "IL") == "graph"
+    assert routing.select_backend("auto", year, "NC") == "ots"
     assert routing.select_backend("auto", year, "TX") == "graph"
     assert routing.select_backend("auto", year, "CA") == "ots"
     assert routing.select_backend("auto", year, None) == "graph"
@@ -202,6 +203,20 @@ def test_explicit_graph_ignores_scope(year):
     """backend='graph' computes an out-of-scope state; scope only steers auto."""
     assert routing.select_backend("graph", year, "CO") == "graph"
     assert routing.select_backend("graph", year, "CA") == "graph"
+
+
+@pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
+@pytest.mark.parametrize("state", [OTSState.MD, OTSState.NC])
+def test_aggregate_itemized_contract_exclusion_is_explicit(year, state):
+    """nuc6 excludes auto while explicit graph remains available."""
+    assert not graph_state_in_scope(state, year)
+    assert exclusion_reasons(state, year) == ("tenforty-nuc6",)
+    assert routing.select_backend("graph", year, state) == "graph"
+    if state == OTSState.NC:
+        assert routing.select_backend("auto", year, state) == "ots"
+    else:
+        with pytest.raises(UnsupportedReturnError, match="tenforty-nuc6"):
+            routing.select_backend("auto", year, state)
 
 
 def test_scope_module_is_the_predicate_routing_uses():

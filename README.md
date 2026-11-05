@@ -420,7 +420,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
 | `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio Married/Joint returns raise until the fact is given. See [State facts](./docs/state-facts.md) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
-| `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for 2024-2025, OTS for 2018-2023); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
+| `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for in-scope 2024-2025 returns; OTS otherwise where covered); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
 
 ### `state_adjustment` (deprecated)
 
@@ -514,6 +514,12 @@ with `backend="graph"`:
 ``` python
 evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
 ```
+
+For `backend="auto"`, graph scope in 2024–2025 includes federal-only returns,
+IL, MS, OR and the eight no-income-tax states. MD and NC are excluded pending
+the itemized-deduction contract (`tenforty-nuc6`): NC uses OTS, while MD auto
+returns raise `UnsupportedReturnError` because OTS does not cover Maryland.
+See [graph state scope](./docs/error-handling.md#graph-state-scope-under-auto).
 
 Compared with the default OTS backend:
 
