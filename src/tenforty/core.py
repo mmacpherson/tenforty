@@ -24,10 +24,12 @@ from .models import (
     NATURAL_FORM_CONFIG,
     NUMERIC_OUTPUT_FIELDS,
     OTS_FORM_CONFIG,
+    OTS_INPUT_CARRIERS,
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
     TAX_RETURN_FLOAT_FIELDS,
     InterpretedTaxReturn,
+    OTSDeductionType,
     OTSErrorPolicy,
     OTSFieldTerminator,
     OTSFilingStatus,
@@ -39,6 +41,7 @@ from .models import (
     StrEnum,
     SubordinateFormConfig,
     TaxReturnInput,
+    UnsupportedInputError,
     UnsupportedReturnError,
     validate_on_error,
 )
@@ -545,6 +548,37 @@ def map_ots_to_natural_output(
     return {k: v for k, v in ots_output.items() if k in retained_keys} | named
 
 
+# OTS state programs that build their own itemized deduction from the Schedule A
+# lines of the federal return they read. OTS forces the standard deduction only
+# by receiving no Schedule A, which would empty theirs too.
+_OTS_STATES_READING_FEDERAL_SCHEDULE_A = frozenset(
+    {OTSState.AZ, OTSState.CA, OTSState.NY}
+)
+
+
+def require_ots_supports(state: OTSState, natural_form_values: dict[str, Any]) -> None:
+    """Refuse a forced standard deduction OTS cannot give this state's program."""
+    if state not in _OTS_STATES_READING_FEDERAL_SCHEDULE_A:
+        return
+    if natural_form_values.get("standard_or_itemized") != OTSDeductionType.STANDARD:
+        return
+    schedule_a = {
+        name: natural_form_values.get(name, 0.0)
+        for name in OTS_INPUT_CARRIERS
+        if natural_form_values.get(name, 0.0)
+    }
+    if not schedule_a:
+        return
+    details = ", ".join(f"{name}={value!r}" for name, value in schedule_a.items())
+    raise UnsupportedInputError(
+        f"OTS cannot force standard_or_itemized='Standard' for {state.value} "
+        f"with Schedule A inputs ({details}): its {state.value} program builds the "
+        "state itemized deduction from the federal Schedule A, which OTS must "
+        "leave empty to force the standard deduction. Use backend='graph' where "
+        "it covers the year, or standard_or_itemized='Auto'."
+    )
+
+
 def evaluate_natural_input_form(
     year: OTSYear,
     state: OTSState,
@@ -552,6 +586,7 @@ def evaluate_natural_input_form(
     on_error: str = "raise",
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
+    require_ots_supports(state, natural_form_values)
     federal_form_id = "US_1040"
     federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
     if federal_natural_config is None:
@@ -841,7 +876,7 @@ def evaluate_return(
     filing_status: str = "Single",
     num_dependents: int = 0,
     dependent_exemptions: float = 0.0,
-    standard_or_itemized: str = "Standard",
+    standard_or_itemized: str = "Auto",
     w2_income: float = 0.0,
     taxable_interest: float = 0.0,
     qualified_dividends: float = 0.0,
@@ -938,7 +973,7 @@ def evaluate_returns(
     filing_status: list[str] | str = "Single",
     num_dependents: list[int] | int = 0,
     dependent_exemptions: list[float] | float = 0.0,
-    standard_or_itemized: list[str] | str = "Standard",
+    standard_or_itemized: list[str] | str = "Auto",
     w2_income: list[float] | float = 0.0,
     taxable_interest: list[float] | float = 0.0,
     qualified_dividends: list[float] | float = 0.0,
@@ -1290,6 +1325,13 @@ def _preflight(
         from .backends.graph import require_supported_inputs
 
         require_supported_inputs(graph_inputs)
+    for group, tax_inputs in validated.items():
+        if engines[group] != "ots":
+            continue
+        for tax_input in tax_inputs:
+            require_ots_supports(
+                tax_input.state, tax_input.model_dump(exclude={"year", "state"})
+            )
 
 
 _BATCH_AXIS_FIELDS = frozenset(
@@ -1512,7 +1554,7 @@ def marginal_rate(
     state: str | None = None,
     filing_status: str = "Single",
     num_dependents: int = 0,
-    standard_or_itemized: str = "Standard",
+    standard_or_itemized: str = "Auto",
     w2_income: float = 0.0,
     taxable_interest: float = 0.0,
     qualified_dividends: float = 0.0,
@@ -1595,7 +1637,7 @@ def marginal_rates(
     state: str | None = None,
     filing_status: str = "Single",
     num_dependents: int = 0,
-    standard_or_itemized: str = "Standard",
+    standard_or_itemized: str = "Auto",
     w2_income: float = 0.0,
     taxable_interest: float = 0.0,
     qualified_dividends: float = 0.0,
@@ -1678,7 +1720,7 @@ def solve_for_income(
     state: str | None = None,
     filing_status: str = "Single",
     num_dependents: int = 0,
-    standard_or_itemized: str = "Standard",
+    standard_or_itemized: str = "Auto",
     w2_income: float = 0.0,
     taxable_interest: float = 0.0,
     qualified_dividends: float = 0.0,

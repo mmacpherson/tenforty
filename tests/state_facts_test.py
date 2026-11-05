@@ -65,7 +65,9 @@ def oh_lowering(monkeypatch):
         return {}
 
     monkeypatch.setitem(graph_backend.FACT_LOWERINGS, ("OH", OH_FIELD), lower)
-    monkeypatch.delitem(graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD))
+    monkeypatch.delitem(
+        graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), raising=False
+    )
     return received
 
 
@@ -182,27 +184,23 @@ def test_every_graph_honoured_fact_has_a_lowering():
             assert key in graph_backend.FACT_LOWERINGS, key
 
 
-@pytest.mark.xfail(
-    reason="OH True needs the joint filing credit itself: b72.53 (Sol's switch point)",
-    strict=True,
-)
 def test_every_graph_lowering_computes_every_value():
     """No lowering is restricted to some values."""
     assert graph_backend.FACT_LOWERING_VALUES == {}
 
 
 @requires_graph
-def test_interim_oh_lowering_computes_false_and_refuses_true(engine_calls):
-    """False is exact on the current OH spec (no credit); True is refused first."""
-    with pytest.raises(UnsupportedInputError, match=r"b72\.53"):
-        evaluate_return(
-            **_oh(), state_facts=OH(spouses_both_have_qualifying_income=True)
+@pytest.mark.parametrize("year,one,two", [(2024, 1176, 1058), (2025, 1157, 1041)])
+def test_oh_lowering_computes_both_supplied_values(engine_calls, year, one, two):
+    """Independent archived OH cases 5/5b; no OH assumption is recorded."""
+    for value, expected in [(False, one), (True, two)]:
+        result = evaluate_return(
+            **_oh(year=year, w2_income=60_000),
+            state_facts=OH(spouses_both_have_qualifying_income=value),
         )
-    assert engine_calls == []
-    result = evaluate_return(
-        **_oh(), state_facts=OH(spouses_both_have_qualifying_income=False)
-    )
-    assert result.state_total_tax > 0
+        assert result.state_total_tax == expected
+        assert result.assumptions == ()
+    assert engine_calls == ["graph", "graph"]
 
 
 @requires_graph
@@ -280,27 +278,26 @@ def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
 
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
-def test_ots_error_names_graph_only_for_a_value_graph_computes(backend):
-    """False: graph computes it, so the error names graph. True: nobody does."""
-    with pytest.raises(UnsupportedInputError) as false_refusal:
+@pytest.mark.parametrize("value", [False, True])
+def test_ots_error_names_graph_for_both_computed_values(backend, value):
+    """Graph computes both supplied values; OTS computes neither."""
+    with pytest.raises(UnsupportedInputError) as refusal:
         evaluate_return(
             **_oh(backend=backend),
-            state_facts=OH(spouses_both_have_qualifying_income=False),
+            state_facts=OH(spouses_both_have_qualifying_income=value),
         )
-    assert "backend='graph' does" in str(false_refusal.value)
-    with pytest.raises(UnsupportedInputError) as true_refusal:
-        evaluate_return(
-            **_oh(backend=backend),
-            state_facts=OH(spouses_both_have_qualifying_income=True),
-        )
-    message = str(true_refusal.value)
-    assert "backend='graph'" not in message
-    assert "no backend computes it yet (tenforty-b72.53)" in message
+    assert "backend='graph' does" in str(refusal.value)
 
 
 @requires_graph
-def test_graph_error_for_true_names_no_other_backend():
-    """Graph refuses True and does not send the caller to OTS, which refuses too."""
+def test_graph_error_for_uncomputed_value_names_no_other_backend(monkeypatch):
+    """A restricted lowering cannot send the caller to an incapable backend."""
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), frozenset({False})
+    )
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_PENDING, ("OH", OH_FIELD), "tenforty-b72.53"
+    )
     with pytest.raises(UnsupportedInputError) as refusal:
         evaluate_return(
             **_oh(), state_facts=OH(spouses_both_have_qualifying_income=True)
@@ -577,20 +574,27 @@ def test_available_describes_the_oh_fact():
     assert descriptor.honoured_by == ("graph",)
     assert descriptor.required_by == ("graph",)
     assert "5747.05" in descriptor.source
-    assert descriptor.supported_values == (("graph", (False,)),)
-    assert descriptor.pending == "tenforty-b72.53"
+    assert descriptor.supported_values == (("graph", None),)
+    assert descriptor.pending is None
     assert descriptor.computes("graph", False)
-    assert not descriptor.computes("graph", True)
+    assert descriptor.computes("graph", True)
     assert not descriptor.computes("ots", False)
-    assert descriptor.engines_computing(True) == ()
+    assert descriptor.engines_computing(True) == ("graph",)
     assert descriptor.engines_computing(False) == ("graph",)
 
 
-def test_discovery_follows_the_preflight_registry(oh_lowering):
-    """With the value restriction lifted, available() reports every value."""
+def test_discovery_follows_the_preflight_registry(monkeypatch):
+    """A restricted lowering is reported with its supported values and reason."""
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), frozenset({False})
+    )
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_PENDING, ("OH", OH_FIELD), "tenforty-b72.53"
+    )
     (descriptor,) = state_facts.available("OH", 2025)
-    assert descriptor.supported_values == (("graph", None),)
-    assert descriptor.engines_computing(True) == ("graph",)
+    assert descriptor.supported_values == (("graph", (False,)),)
+    assert descriptor.pending == "tenforty-b72.53"
+    assert descriptor.engines_computing(True) == ()
 
 
 def test_assumption_values_must_be_finite():

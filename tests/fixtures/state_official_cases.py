@@ -24,6 +24,9 @@ OH_ONE_EARNER = {"spouses_both_have_qualifying_income": False}
 """A one-earner couple: the spouses do not both have $500 of qualifying income
 (fields of tenforty.state_facts.OH; the test runner builds the model)."""
 
+OH_TWO_EARNERS = {"spouses_both_have_qualifying_income": True}
+"""The archived split-earner cases explicitly give each spouse at least $500."""
+
 Outcome = tuple[float, float]
 
 
@@ -410,6 +413,58 @@ OH_CASES = [
 ]
 
 
+OH_CASES += [
+    _oh(
+        2024,
+        "HoH75dep1",
+        70_700,
+        1589,
+        status="HoH",
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _oh(
+        2025,
+        "HoH75dep1",
+        70_700,
+        1570,
+        status="HoH",
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+]
+
+
+OH_CASES += [
+    _oh(
+        year,
+        label,
+        taxable,
+        tax,
+        status="MFJ",
+        w2_income=wages,
+        num_dependents=dependents,
+        state_facts=OH_TWO_EARNERS,
+    )
+    for year, label, wages, dependents, taxable, tax in (
+        (2024, "MFJ60split", 60_000, 0, 55_700, 1058),
+        (2025, "MFJ60split", 60_000, 0, 55_700, 1041),
+        (2024, "MFJ150split", 150_000, 0, 146_200, 3810),
+        (2025, "MFJ150split", 150_000, 0, 146_200, 3646),
+        (2024, "MFJ400split", 400_000, 0, 396_200, 12123),
+        (2025, "MFJ400split", 400_000, 0, 396_200, 11068),
+        (2024, "MFJ100dep2", 100_000, 2, 92_400, 2076),
+        (2025, "MFJ100dep2", 100_000, 2, 92_400, 2059),
+        (2024, "MFJ79300split", 79_300, 0, 75_000, 1536),
+        (2025, "MFJ79300split", 79_300, 0, 75_000, 1519),
+        (2024, "MFJ79301split", 79_301, 0, 75_001, 1622),
+        (2025, "MFJ79301split", 79_301, 0, 75_001, 1604),
+    )
+]
+
+
 def _co(year, label, status, outcomes, **inputs) -> OfficialCase:
     return _case("CO", year, label, status, outcomes, **inputs)
 
@@ -458,27 +513,11 @@ OFFICIAL_CASES: list[OfficialCase] = (
     CO_CASES + GA_CASES + IL_CASES + NC_CASES + OH_CASES
 )
 
-UNPINNED = [
-    UnpinnedCase(
-        f"OH-{year}-{label}",
-        reason,
-    )
-    for year in (2024, 2025)
-    for label, reason in (
-        ("MFJ60split", "joint filing credit needs each spouse's income"),
-        ("MFJ150split", "joint filing credit needs each spouse's income"),
-        ("MFJ400split", "joint filing credit needs each spouse's income"),
-        ("MFJ79300split", "joint filing credit needs each spouse's income"),
-        ("MFJ79301split", "joint filing credit needs each spouse's income"),
-        ("HoH75dep1", "OH dependent exemptions have no public input"),
-        ("MFJ100dep2", "OH dependent exemptions have no public input"),
-    )
-]
+UNPINNED: list[UnpinnedCase] = []
 
 ROUNDING = "tenforty-b72.42"
 TABLE = "tenforty-tj2.20"
 CO_ADDBACK = "tenforty-b72.51"
-OH_EXEMPTION = "tenforty-b72.53"
 
 RATE = {
     ("CO", 2024): 0.0425,
@@ -495,10 +534,6 @@ CO_FEDERAL_STANDARD_DEDUCTION = {
 CO_ADDBACK_CAP = {"Single": 12_000, "Married/Joint": 16_000, "Head_of_House": 12_000}
 CO_TABLE_CEILING = 50_000
 CO_TABLE_ROW = 100
-OH_ZERO_BRACKET = 26_050
-OH_CLIFF_BASE = 361
-OH_TOP_RATE = 0.035
-OH_EXEMPTION_CREDIT = 20
 
 
 def _agi(case: OfficialCase) -> float:
@@ -543,25 +578,6 @@ def _defects(case: OfficialCase) -> dict[str, GraphDefect]:
     taxable = case.outcomes[0][0]
     if case.state == "GA":
         return _rounding(case)
-    if case.state == "OH":
-        exemptions = agi - taxable
-        persons = 2 if case.filing_status == "Married/Joint" else 1
-        defects = {
-            "state_taxable_income": GraphDefect(
-                OH_EXEMPTION, "state_taxable_income", exemptions, exemptions
-            )
-        }
-        if agi > OH_ZERO_BRACKET:
-            ceiling = (
-                exemptions * OH_TOP_RATE
-                + OH_EXEMPTION_CREDIT * persons
-                + OH_CLIFF_BASE
-                + 1
-            )
-            defects["state_total_tax"] = GraphDefect(
-                OH_EXEMPTION, "state_total_tax", 0.0, ceiling
-            )
-        return defects
     if case.state == "CO":
         rate = RATE[("CO", case.year)]
         status = case.filing_status

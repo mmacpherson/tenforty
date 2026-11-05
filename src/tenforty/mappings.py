@@ -9,7 +9,7 @@ from .models import STATE_TO_FORM, OTSFilingStatus, OTSState, TaxReturnInput
 
 NATURAL_TO_NODE = {
     # Federal (1040)
-    "standard_or_itemized": "us_1040_ForceItemized",
+    "standard_or_itemized": "us_1040_DeductionChoice",
     "w2_income": "us_1040_L1a_wages",
     "taxable_interest": "us_1040_L2b_taxable_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
@@ -791,10 +791,12 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.OH: StateGraphConfig(
         # OH IT-1040 imports federal AGI and applies state additions/deductions.
-        # Personal exemptions are income-based (tiered by MAGI) and must be
-        # calculated by user, so they are accepted as total input.
-        # Ohio has no standard deduction system.
-        natural_to_node={},
+        # The spec tiers personal/spouse and total dependent exemptions by MAGI.
+        # num_dependents is independent of the federal Schedule 8812 CTC subset.
+        # dependent_exemptions is not mapped. Claimable-filer cases and business
+        # income/deduction adjustments are outside this ordinary-income surface.
+        # Joint-credit spouse qualifying incomes remain raw graph controls.
+        natural_to_node={"num_dependents": "oh_it1040_Dependents"},
         outputs={
             "state_adjusted_gross_income": "L4_oh_agi",
             "state_taxable_income": "L9_oh_taxable_nonbusiness_income",

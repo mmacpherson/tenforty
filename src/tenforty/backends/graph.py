@@ -22,10 +22,11 @@ from ..mappings import (
     state_output_lines,
 )
 from ..models import (
+    DEDUCTION_CHOICE_ENCODING,
     NATURAL_FORM_CONFIG,
+    OTS_INPUT_CARRIERS,
     STATE_TO_FORM,
     InterpretedTaxReturn,
-    OTSDeductionType,
     OTSFilingStatus,
     OTSState,
     TaxReturnInput,
@@ -46,7 +47,23 @@ _CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
-_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
+_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction", *OTS_INPUT_CARRIERS.values()}
+
+
+def _ohio_natural_joint_credit_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Encode the supplied eligibility fact in the raw income controls.
+
+    The spec uses these controls only to test each spouse's $500 threshold.
+    They are threshold witnesses, not an inferred or reported income split.
+    The credit's percentage, cap and MAGI limit remain computations in the spec.
+    """
+    qualifying_income = 500.0 if value else 0.0
+    return {
+        "oh_it1040_FilerQualifyingIncome": qualifying_income,
+        "oh_it1040_SpouseQualifyingIncome": qualifying_income,
+    }
 
 
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
@@ -56,9 +73,9 @@ def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
         | _CARRIED_BY_DERIVED_FIELDS
         | _OTS_ONLY_DERIVED_FIELDS
     )
-    values["standard_or_itemized"] = float(
-        tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
-    )
+    values["standard_or_itemized"] = DEDUCTION_CHOICE_ENCODING[
+        tax_input.standard_or_itemized
+    ]
     return values
 
 
@@ -187,7 +204,13 @@ def _ots_maps_inputs(names: list[str], state: OTSState | None, year: int) -> boo
     configs = [NATURAL_FORM_CONFIG.get((year, form)) for form in forms]
     if any(config is None for config in configs):
         return False
-    return all(any(name in config.input_map for config in configs) for name in names)
+    return all(
+        any(
+            name in config.input_map or OTS_INPUT_CARRIERS.get(name) in config.input_map
+            for config in configs
+        )
+        for name in names
+    )
 
 
 def _raise_unsupported(
@@ -239,21 +262,8 @@ def unsupported_inputs(
 FactLowering = Callable[[TaxReturnInput, object], dict[str, float]]
 
 
-def _oh_joint_filing_credit_interim(
-    tax_input: TaxReturnInput, value: object
-) -> dict[str, float]:
-    """Interim OH lowering: only "the spouses do not both qualify" is computed.
-
-    The OH spec on main has no joint filing credit (IT 1040 line 13 is a raw
-    input left at 0; tenforty-b72.53), which is exactly the credit when the
-    spouses do not both have $500 of qualifying income. True needs the credit
-    itself and is refused until b72.53's switch point replaces this lowering.
-    """
-    return {}
-
-
 FACT_LOWERINGS: dict[tuple[str, str], FactLowering] = {
-    ("OH", "spouses_both_have_qualifying_income"): _oh_joint_filing_credit_interim,
+    ("OH", "spouses_both_have_qualifying_income"): _ohio_natural_joint_credit_values,
 }
 """How each state fact reaches the graph, keyed by (state, field name).
 
@@ -262,15 +272,11 @@ field is active on that return, under tenforty.state_facts' projection rule)
 and returns raw graph input node values to set. A fact the graph honours but
 that has no lowering here is refused, never ignored."""
 
-FACT_LOWERING_VALUES: dict[tuple[str, str], frozenset[object]] = {
-    ("OH", "spouses_both_have_qualifying_income"): frozenset({False}),
-}
+FACT_LOWERING_VALUES: dict[tuple[str, str], frozenset[object]] = {}
 """Lowerings that compute only some values; any other value is refused before
 evaluation. A lowering absent here computes every valid value."""
 
-FACT_LOWERING_PENDING: dict[tuple[str, str], str] = {
-    ("OH", "spouses_both_have_qualifying_income"): "tenforty-b72.53",
-}
+FACT_LOWERING_PENDING: dict[tuple[str, str], str] = {}
 """The work that will compute the values a restricted lowering refuses."""
 
 

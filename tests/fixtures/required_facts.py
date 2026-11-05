@@ -8,7 +8,7 @@ def credit_neutral_facts(state: str | None, filing_status: str) -> StateFacts | 
 
     OH Married/Joint on graph requires the joint filing credit fact. A bracket
     or taxable-income check does not depend on that credit, so these tests pass
-    False, the value the graph computes today (tenforty-b72.53).
+    False to state that irrelevant eligibility explicitly.
     """
     if state == "OH" and filing_status == "Married/Joint":
         return OH(spouses_both_have_qualifying_income=False)

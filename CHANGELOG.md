@@ -65,6 +65,24 @@
   is split by year and keeps its row order.
 
 ### Changed (both backends)
+- **`standard_or_itemized` gains `"Auto"`, now the default, and `"Standard"`
+  forces the standard deduction.** `"Auto"` takes the larger of the standard
+  deduction and Schedule A, which is what `"Standard"` used to mean.
+  `"Standard"` now takes the standard deduction even when Schedule A is larger
+  (IRC 63(e)); `"Itemized"` still forces Schedule A. The choice also sets Form
+  6251 line 2a and the Form 8995 taxable-income cap.
+  - **Migration:** callers who use the default see no number change. Callers
+    who pass `"Standard"` explicitly and give a Schedule A larger than the
+    standard deduction now get the standard deduction; pass `"Auto"` for the
+    old result.
+  - On OTS, a forced `"Standard"` with nonzero `itemized_deductions` or
+    `state_and_local_taxes` raises `UnsupportedInputError` for Arizona,
+    California and New York, whose OTS programs build their own itemized
+    deduction from the federal Schedule A.
+  - The browser contract's choice input gains `"Auto"` (encoded 0, the
+    default); `"Standard"` is encoded -1. The graph input
+    `us_1040_ForceItemized` is renamed `us_1040_DeductionChoice`.
+  - See [the deduction-choice contract](docs/deduction-choice-contract.md).
 - **`state_adjustment` is deprecated.** Its meaning depends on the state and the
   backend (OTS CA: a Schedule CA Part II itemized addition; graph CA: a Part I
   income addition; graph AL: the standard deduction amount; ignored or refused
