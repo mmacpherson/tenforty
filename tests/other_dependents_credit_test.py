@@ -261,3 +261,27 @@ def test_num_ctc_dependents_is_keyword_only(function):
         "num_ctc_dependents"
     ]
     assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_cross_rows_follow_signature_order(backend):
+    """num_ctc_dependents is last in the signature, so it varies fastest in cross.
+
+    The evaluate_returns contract is the Cartesian product in signature order
+    (#418); a list-valued num_ctc_dependents must not move ahead of w2_income.
+    """
+    result = evaluate_returns(
+        year=2024,
+        num_dependents=2,
+        w2_income=[60_000.0, 80_000.0],
+        num_ctc_dependents=[0, 1],
+        backend=backend,
+    )
+    assert list(
+        zip(result["w2_income"], result["num_ctc_dependents"], strict=True)
+    ) == [
+        (60_000.0, 0),
+        (60_000.0, 1),
+        (80_000.0, 0),
+        (80_000.0, 1),
+    ]

@@ -49,7 +49,7 @@ signature, and update this table in the same PR.
 | F32 | OTS 2025 Schedule 1-A line 28 truncates; line 29 uses \$300 | upstream OpenTaxSolver | open (upstream report 12 pending) — not patched locally | OBBBA implementation, source reading |
 | F33 | OTS 2025 skips Schedule 1-A Parts II-V for MFS, denying MFS car loan interest | upstream OpenTaxSolver | open (upstream report 13 pending) — not patched locally | OBBBA implementation, source reading |
 | F34 | OTS 2025 Form 6251 line 1a omits the senior-deduction add-back | upstream OpenTaxSolver | open (upstream report 14 pending) — not patched locally | OBBBA implementation, source reading |
-| F35 | TaxCalc 6.9.0 phases tips, overtime and car loan interest continuously, not per \$1,000 | TaxCalc | observed; not exercised (R_obbba witnesses use whole-\$1,000 excesses) | OBBBA golden witnesses |
+| F35 | TaxCalc 6.9.0 phases tips, overtime and car loan interest continuously, not per \$1,000 | taxcalc harness (adapter omits `exact_calculations=True`) | explained, not upstream; adapter change tracked as tenforty-253f | OBBBA golden witnesses |
 
 ## Method
 
@@ -441,6 +441,11 @@ misleading legacy field with an explicit
 `Auto / Standard / Itemized` choice. See
 [`docs/deduction-choice-contract.md`](deduction-choice-contract.md).
 
+**Superseded (`tenforty-q3r`, 2026-11-04):** `"Auto"` is now the larger-of
+default and `"Standard"` forces the standard deduction. Under a forced
+`"Standard"` the adapter sends TaxCalc no Schedule A, so both engines file
+the same return and no signature is needed.
+
 ### Clean areas
 
 Dividends (including the qualified-subset normalization), interest, AMT (no
@@ -469,8 +474,9 @@ bugs are batch-path defects this scalar harness deliberately did not probe.
 4. **API decisions**:
    - per-spouse wage/SE fields (completes F1 for MFJ; taxcalc's
      `e00200p`/`e00200s` is a working reference);
-   - **implemented:** legacy `"Standard"` is automatic greater-of and
-     `"Itemized"` forces itemization in both backends (F7, `tenforty-435`);
+   - **implemented:** `"Auto"` (the default) is greater-of, and `"Standard"`
+     and `"Itemized"` force their choice in both backends (F7, `tenforty-435`,
+     `tenforty-q3r`);
 5. **Keep the reference**: promote the harness to `scripts/`, commit a pinned
    golden fixture set at the semantic boundaries, and run the three-way sweep
    as a scheduled/pre-release job. Parity catches divergence; only an
@@ -854,7 +860,16 @@ phase-out) of the senior deduction. All four are inactive without their OBBBA
 input. The golden witnesses are tag `R_obbba`; the strict burn-ins are in
 `tests/known_defects_test.py`.
 
-### F35. OBSERVED — TaxCalc phases the Schedule 1-A deductions continuously
+### F35. EXPLAINED — TaxCalc phases the Schedule 1-A deductions continuously
+
+**Cause (2026-11-04):** this is Tax-Calculator's default, not a defect. Its
+Schedule 1-A code steps per \$1,000 exactly as the form does (floor for tips and
+overtime, ceil for car loan interest) when `exact == 1`, and smooths otherwise
+for marginal-rate work. Our adapter builds `Records` without
+`exact_calculations=True`; with it, 6.9.0 gives T-1's \$18,800 and \$7,400 for
+Single, AGI \$112,500, car loan interest \$10,000. The same flag gates CTC,
+education-credit and dependent-care rounding. Adapter fix: tenforty-253f.
+
 
 TaxCalc 6.9.0 reduces qualified tips and overtime by 10% of the excess MAGI,
 and car loan interest by 20%, where Schedule 1-A lines 11, 19 and 28 step per

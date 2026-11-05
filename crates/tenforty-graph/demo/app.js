@@ -26,6 +26,11 @@ let calculationSequence = 0;
 let toastTimer;
 let selectedCurveInput = "w2_income";
 const graphCache = new Map();
+const CHOICE_LABELS = {
+  Auto: "Automatic (larger)",
+  Standard: "Standard deduction",
+  Itemized: "Itemized deductions",
+};
 
 function byId(id) {
   return document.getElementById(id);
@@ -114,7 +119,7 @@ function createChoiceField(name, specification) {
   for (const choice of specification.choices) {
     const option = document.createElement("option");
     option.value = choice;
-    option.textContent = choice === "Standard" ? "Automatic (larger)" : choice;
+    option.textContent = CHOICE_LABELS[choice] ?? choice;
     select.appendChild(option);
   }
 

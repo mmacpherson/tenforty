@@ -6,6 +6,7 @@ module NCFormD400_2024
 where
 
 import FormRefs
+import NCChildDeduction
 import TablesNC2024
 import TenForty
 
@@ -15,7 +16,7 @@ ncFormD400_2024 = form "nc_d400" 2024 $ do
   let federalAgi = importForm us1040L11
   l6 <-
     keyOutput "L6" "federal_agi" "Federal adjusted gross income" $
-      federalAgi .+. dollars 0
+      roundE federalAgi
 
   -- Line 7: Additions to federal adjusted gross income
   l7 <- keyInput "L7" "additions" "Additions to federal adjusted gross income"
@@ -23,8 +24,10 @@ ncFormD400_2024 = form "nc_d400" 2024 $ do
   -- Line 8: Deductions from federal adjusted gross income
   l8 <- keyInput "L8" "deductions" "Deductions from federal adjusted gross income"
 
-  -- Line 9: Child Deduction
-  l9 <- keyInput "L9" "child_deduction" "Child Deduction"
+  qualifyingChildren <- keyInput "QualifyingChildren" "qualifying_children" "CTC qualifying-child count (D-400 line 10a)"
+  l9 <-
+    keyOutput "L9" "child_deduction" "Child deduction (D-400 line 10b)" $
+      max0 (roundE qualifyingChildren) .*. (ncChildDeductionPerChild l6 ./. dollars 1)
 
   -- Line 10: NC Standard Deduction or NC Itemized Deductions
   -- Compare itemized (input) vs standard (table)
@@ -32,12 +35,12 @@ ncFormD400_2024 = form "nc_d400" 2024 $ do
   l10_std <-
     interior "L10_std" "standard_deduction" $
       byStatusE (fmap lit ncStandardDeduction2024)
-  l10 <- interior "L10" "deduction_amount" $ greaterOf l10_itemized l10_std
+  l10 <- interior "L10" "deduction_amount" $ roundE (greaterOf l10_itemized l10_std)
 
   -- Line 11: NC Taxable Income
   -- (L6 + L7) - (L8 + L9 + L10)
-  let adjustedIncome = l6 .+. l7
-  let totalDeductions = sumOf [l8, l9, l10]
+  let adjustedIncome = l6 .+. roundE l7
+  let totalDeductions = sumOf [roundE l8, l9, l10]
 
   l11 <-
     keyOutput "L11" "nc_taxable_income" "North Carolina Taxable Income" $
@@ -46,7 +49,7 @@ ncFormD400_2024 = form "nc_d400" 2024 $ do
   -- Line 12: NC Tax
   l12 <-
     keyOutput "L12" "nc_tax" "North Carolina Income Tax" $
-      l11 .*. rate ncTaxRate2024
+      roundE (l11 .*. rate ncTaxRate2024)
 
   -- Payments and Credits
   -- Line 13: NC Income Tax Withheld
@@ -75,6 +78,7 @@ ncFormD400_2024 = form "nc_d400" 2024 $ do
 
   outputs
     [ "L6",
+      "L9",
       "L11",
       "L12",
       "L16",

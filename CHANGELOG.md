@@ -1,5 +1,40 @@
 ## [Unreleased]
 ### Added
+- **`state_facts`: explicit state-specific facts, and reported assumptions.**
+  `evaluate_return`, `evaluate_returns`, `marginal_rate(s)` and
+  `solve_for_income` take `state_facts=`, typed per-state models from
+  `tenforty.state_facts` (first: `OH(spouses_both_have_qualifying_income=...)`).
+  `tenforty.state_facts.available(state, year)` lists the facts for a return.
+  See [State facts](docs/state-facts.md).
+  - **Required facts.** Where a default would guess between two common
+    situations with a material effect, there is none: graph Ohio
+    Married/Joint returns now raise `UnsupportedInputError` naming the fact
+    and how to pass it, where they used to compute with no joint filing
+    credit. `False` reproduces that computation; `True` is refused until the
+    credit is wired (tenforty-b72.53). OH stays outside `backend="auto"`
+    scope, so default callers are unaffected.
+  - **`assumptions` output.** `InterpretedTaxReturn.assumptions` lists the
+    recorded conventions a computation used because no input supplied them;
+    `None` on a failed return. `evaluate_returns` frames gain a `state_facts`
+    input echo column (canonical JSON, or null) and an `assumptions` column
+    (a list of each record's canonical JSON, `[]` if none, null on failure)
+    after the numeric outputs.
+  - **Massachusetts joint returns now report the one-earner convention**
+    (`ma.form_1.line_11.one_earner`) on both backends: Form 1 line 11 is capped
+    at one person's $2,000 because `w2_income` is a household total. No
+    computed value changes; the convention was silent before.
+- **[Migrating to the graph default](docs/migrating-to-graph-default.md):** every
+  caller-visible change on the way to `backend="auto"` as the default, the
+  rollback (`backend="ots"`), and each known OTS/auto difference. A
+  compatibility corpus (`tests/graph_default_compat_test.py`) runs the same
+  public calls both ways and requires every difference to be one of them.
+- **Graph state scope for `backend="auto"`.** A state return goes to graph only
+  when its known graph-side defects are closed and official-value fixtures
+  support it: for 2024-2025, Mississippi and the eight states without an
+  income tax. Other states route to OTS where OTS computes them, and otherwise
+  raise `UnsupportedReturnError` naming the open defect or the missing
+  evidence. `backend="graph"` ignores scope. See
+  [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
 - `backend="auto"` selects the backend by tax year: graph for 2024-2025 (within
   graph state scope), OTS for 2018-2023. The default is still `"ots"`, and an
   explicit `"ots"` or `"graph"` is never reinterpreted. `evaluate_return`,
@@ -7,6 +42,30 @@
   is split by year and keeps its row order.
 
 ### Changed (both backends)
+- **`standard_or_itemized` gains `"Auto"`, now the default, and `"Standard"`
+  forces the standard deduction.** `"Auto"` takes the larger of the standard
+  deduction and Schedule A, which is what `"Standard"` used to mean.
+  `"Standard"` now takes the standard deduction even when Schedule A is larger
+  (IRC 63(e)); `"Itemized"` still forces Schedule A. The choice also sets Form
+  6251 line 2a and the Form 8995 taxable-income cap.
+  - **Migration:** callers who use the default see no number change. Callers
+    who pass `"Standard"` explicitly and give a Schedule A larger than the
+    standard deduction now get the standard deduction; pass `"Auto"` for the
+    old result.
+  - On OTS, a forced `"Standard"` with nonzero `itemized_deductions` or
+    `state_and_local_taxes` raises `UnsupportedInputError` for Arizona,
+    California and New York, whose OTS programs build their own itemized
+    deduction from the federal Schedule A.
+  - The browser contract's choice input gains `"Auto"` (encoded 0, the
+    default); `"Standard"` is encoded -1. The graph input
+    `us_1040_ForceItemized` is renamed `us_1040_DeductionChoice`.
+  - See [the deduction-choice contract](docs/deduction-choice-contract.md).
+- **`state_adjustment` is deprecated.** Its meaning depends on the state and the
+  backend (OTS CA: a Schedule CA Part II itemized addition; graph CA: a Part I
+  income addition; graph AL: the standard deduction amount; ignored or refused
+  elsewhere), so a nonzero value now emits a `DeprecationWarning`. No mapping
+  changed. CA and AL stay out of `backend="auto"` graph scope until it is
+  resolved (tenforty-yu51).
 - **`evaluate_returns` frames now have one declared schema.** Columns are the
   inputs in signature order, then the `InterpretedTaxReturn` fields, with
   declared dtypes, for both backends, both modes, and empty, failed and
@@ -43,6 +102,94 @@
   `ImportError`, still a `RuntimeError`).
 - An unknown `on_error` value raises `ValueError` instead of behaving like
   `"ignore"`.
+- **The four rate fields are now `float | None`.** `federal_tax_bracket`,
+  `federal_effective_tax_rate`, `state_tax_bracket` and
+  `state_effective_tax_rate` are `None` when the rate is not defined, where they
+  used to be `0.0`. That covers a return with no state, a state bracket that
+  is not reported (OTS prints one only for CA, NJ, NY, OH, OR and VA, and the
+  graph reports the same six), and an effective rate whose taxable income is
+  zero or negative. A real 0% stays `0.0`. `NaN` still means a failed return.
+  In `evaluate_returns` these columns are `Float64` with nulls.
+- An effective rate is the returned tax as a percent of **taxable income**
+  (federal Form 1040 line 15, or the state's taxable-income line), on both
+  backends. On OTS it is now computed from the returned fields rather than
+  taken from OTS's printed line, which used pre-credit state tax rounded to
+  0.1% (OR at $85,000: 8.3% printed, 8.0062% of the tax actually returned), so
+  every OTS state with a taxable income now has one. The README called it a
+  percentage of AGI, which was wrong.
+
+### Fixed (graph backend: opt-in, experimental)
+- `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
+  It used to be hard-coded to 0. Income exactly at a threshold stays in the
+  lower bracket, as the schedules' "over X but not over Y" wording requires.
+  The rate comes from the same bracket table that computes the tax. It is the
+  statutory bracket, not `marginal_rate()`, which is the derivative of the
+  computed tax.
+- `federal_effective_tax_rate` divides by taxable income, as OTS does. It used
+  to divide by AGI.
+- `state_effective_tax_rate` is computed for graph states. It used to be 0.
+- `marginal_rate()` and the gradients no longer report 10-12% on qualified
+  dividends or capital gains that fall inside the 0% band when the Qualified
+  Dividends and Capital Gain Tax Worksheet's line 23 equals line 24 (taxable
+  income and line 5 in the same Tax Table row); they report 0, the right-hand
+  rate. Computed as printed, lines 9-21 left a floating-point residue that put
+  line 23 a few ulps above line 24. The spec now computes those lines in an
+  algebraically equal form whose tie is exact. Tax values are unchanged beyond
+  floating-point rounding (at most 6e-11 dollars across 20,000 sampled returns).
+
+### Changed (installation)
+- **Building from source requires Rust.** The graph backend is no longer an
+  optional part of a source build: without setuptools-rust or a Rust toolchain
+  the build fails with an explanation, where it used to install silently
+  without the graph backend. This is an intermediate measure; the long-term
+  answer is prebuilt wheels for every platform, leaving the source build as the
+  fallback for platforms without one. `TENFORTY_WITHOUT_GRAPH=1` builds the
+  legacy OTS-only package, with no graph backend.
+
+### Fixed (installation)
+- Wheels are now built and tested for Linux aarch64 and Intel macOS, so those
+  platforms no longer need Rust to install.
+- The sdist now ships the Rust graph crate. It previously omitted it, so every
+  install from the sdist (any platform without a prebuilt wheel) lacked the
+  graph backend.
+- CI tests every shipped wheel, and installs from the sdist with Rust, without
+  Rust, and in OTS-only mode.
+
+### Fixed (OTS backend, the default)
+- **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
+  MA_1 input map set only wages, so OTS never received line 11 (Social
+  Security and Medicare paid, up to $2,000 per person) and over-taxed every
+  W-2 return by up to $100 ($180 once the 4% surtax applies), in every year
+  2018-2025. Line 11a is now 7.65% of `w2_income`, capped at $2,000; a joint
+  return takes the one-earner reading because `w2_income` is a household
+  total, so a two-earner couple can still be up to $100 high ($180 with the
+  surtax). **This changes default-backend MA
+  results.** OTS MA still maps only wages: interest, dividends, capital gains
+  and self-employment income are not reflected there.
+
+### Fixed (graph backend)
+- Massachusetts Form 1 line 10 is built from the federal income lines instead
+  of federal AGI, so interest, dividends and capital gains go through Schedules
+  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
+  exemptions) and federal-only adjustments no longer reduce Massachusetts
+  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
+  MA is now line 10, as on OTS.
+- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
+  $100,000 of taxable income (Instruction 17), as published, instead of the
+  unrounded rate schedule; Worksheet 17A still applies to the cent at
+  $100,000 and above. Every one of the table's 2,001 rows is checked.
+  Maryland 2024 and 2025 have no open graph defects left and join the graph
+  scope for `backend="auto"`.
+- Maine Form 1040ME line 20 uses the published Maine Income Tax Table below
+  $100,000 of taxable income and the printed rate schedule (whole-dollar
+  bracket bases), in whole dollars, at and above it, instead of the unrounded
+  bracket integral. The line 17 and line 18 phase-out worksheets enter line 5
+  to four places, rounded half up, with whole-dollar lines 7 and 8, and every
+  Form 1040ME money entry (including federal AGI on line 14) is rounded to
+  whole dollars before the worksheets and the table lookup. Every
+  table row is checked. Maine stays outside the graph scope for
+  `backend="auto"` until the itemized-deductions contract lands, because its
+  graph takes `itemized_deductions` directly as its own itemized line.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)

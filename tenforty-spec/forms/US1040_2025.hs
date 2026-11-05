@@ -95,8 +95,11 @@ us1040_2025 = form "us_1040" 2025 $ do
     interior "StdDed" "standard_deduction" $
       baseStdDed .+. additionalStdDed
 
-  forceItemized <-
-    keyInput "ForceItemized" "force_itemized" "Use Schedule A even when it is less than the standard deduction"
+  -- The itemize election (IRC 63(e)): negative elects the standard deduction
+  -- even when Schedule A is larger; positive elects Schedule A even when it
+  -- is smaller (Schedule A line 18); zero takes the larger.
+  deductionChoice <-
+    keyInput "DeductionChoice" "deduction_choice" "Deduction election: -1 standard, 0 the larger, 1 Schedule A"
 
   automaticUsesItemized <-
     interior "AutomaticUsesItemized" "Automatic choice selected Schedule A" $
@@ -104,7 +107,8 @@ us1040_2025 = form "us_1040" 2025 $ do
 
   usesItemized <-
     keyOutput "UsesItemized" "uses_itemized" "Whether Form 1040 uses Schedule A" $
-      ifPos forceItemized (dollars 1) automaticUsesItemized
+      ifPos deductionChoice (dollars 1) $
+        ifNeg deductionChoice (dollars 0) automaticUsesItemized
 
   l12Final <-
     keyOutput "L12Final" "deduction_amount" "Standard or itemized deduction" $
@@ -135,6 +139,13 @@ us1040_2025 = form "us_1040" 2025 $ do
     keyOutput "L15" "taxable_income" "Taxable income (AGI minus deductions)" $
       l11 `subtractNotBelowZero` l14
 
+  -- The rate-schedule bracket that holds line 15, as tax per dollar. Rate
+  -- schedules say "over X but not over Y", so an exact threshold stays in the
+  -- lower bracket. Preferential capital-gain rates are not this bracket.
+  _ <-
+    keyOutput "L15BracketRate" "ordinary_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. bracketRateAt federalBracketsTable2025 l15
+
   -- Lines 16-18: Tax Computation
 
   -- Qualified Dividends and Capital Gain Tax Worksheet
@@ -160,27 +171,43 @@ us1040_2025 = form "us_1040" 2025 $ do
     interior "qcgws_6" "work_l6" $
       byStatusE (fmap lit qualifiedDividend0PctMax2025)
 
-  qcgws7 <- interior "qcgws_7" "work_l7" $ minE qcgws1 qcgws6
-  qcgws8 <- interior "qcgws_8" "work_l8" $ minE qcgws5 qcgws7
-  qcgws9 <- interior "qcgws_9" "work_l9" $ qcgws7 .-. qcgws8 -- Taxed at 0%
+  -- Lines 7-20 are computed in an algebraically equal form that never
+  -- subtracts two nearly equal amounts. As printed, line 9 is line 7 minus
+  -- line 8, and when line 8 is line 1 minus line 4 the difference only
+  -- approximates line 4 in floating point. The residue reaches lines 12, 20
+  -- and 21, so line 23 lands a few ulps above line 24 where the two are equal
+  -- (tenforty-0hg). Writing G for line 10 (the smaller of lines 1 and 4), so
+  -- that line 5 is line 1 minus G, and E0 and E15 for the excess of line 1
+  -- over lines 6 and 13:
+  --   line 9  = line 7 - line 8 = max(0, G - E0)
+  --   line 12 = G - line 9      = min(G, E0)
+  --   line 16 = max(0, line 14 - line 5 - line 9) = max(0, line 12 - E15)
+  --   line 17 = min(line 12, line 16) = line 16
+  --   line 20 = G - line 9 - line 17  = min(line 12, E15)
+  -- using line 7 = line 1 - E0 and line 14 = line 1 - E15. Below the 0% band
+  -- top E0 is exactly zero, so line 12, line 17 and line 20 are exactly zero
+  -- and line 23 is line 22 alone.
   qcgws10 <- interior "qcgws_10" "work_l10" $ minE qcgws1 qcgws4
-  let qcgws11 = qcgws9
-  qcgws12 <- interior "qcgws_12" "work_l12" $ qcgws10 .-. qcgws11
+  excessOver0Pct <-
+    interior "qcgws_excess_over_l6" "work_excess_over_l6" $
+      qcgws1 `subtractNotBelowZero` qcgws6
+  qcgws9 <- interior "qcgws_9" "work_l9" $ qcgws10 `subtractNotBelowZero` excessOver0Pct -- Taxed at 0%
+  qcgws12 <- interior "qcgws_12" "work_l12" $ minE qcgws10 excessOver0Pct
 
   -- Line 13 Thresholds (15% bracket)
   qcgws13 <-
     interior "qcgws_13" "work_l13" $
       byStatusE (fmap lit qualifiedDividend15PctMax2025)
 
-  qcgws14 <- interior "qcgws_14" "work_l14" $ minE qcgws1 qcgws13
-  qcgws15 <- interior "qcgws_15" "work_l15" $ qcgws5 .+. qcgws9
-  qcgws16 <- interior "qcgws_16" "work_l16" $ qcgws14 `subtractNotBelowZero` qcgws15
+  excessOver15Pct <-
+    interior "qcgws_excess_over_l13" "work_excess_over_l13" $
+      qcgws1 `subtractNotBelowZero` qcgws13
+  qcgws16 <- interior "qcgws_16" "work_l16" $ qcgws12 `subtractNotBelowZero` excessOver15Pct
   qcgws17 <- interior "qcgws_17" "work_l17" $ minE qcgws12 qcgws16
 
   qcgws18 <- interior "qcgws_18" "work_l18" $ qcgws17 .*. lit 0.15
 
-  qcgws19 <- interior "qcgws_19" "work_l19" $ qcgws9 .+. qcgws17
-  qcgws20 <- interior "qcgws_20" "work_l20" $ qcgws10 .-. qcgws19
+  qcgws20 <- interior "qcgws_20" "work_l20" $ minE qcgws12 excessOver15Pct
   qcgws21 <- interior "qcgws_21" "work_l21" $ qcgws20 .*. lit 0.20
 
   qcgws22 <- interior "qcgws_22" "work_l22" $ form1040TaxOnAmount "federal_brackets_2025" qcgws5
@@ -279,6 +306,10 @@ us1040_2025 = form "us_1040" 2025 $ do
       "Filer65",
       "Spouse65",
       "NonWageIncomeMagnitude",
+      "L2b",
+      "L3b",
+      "L4b",
+      "L5b",
       "L6b",
       "L9",
       "L11",
@@ -287,6 +318,7 @@ us1040_2025 = form "us_1040" 2025 $ do
       "L14",
       "L15_pre_qbi",
       "L15",
+      "L15BracketRate",
       "L16",
       "L18",
       "L21",

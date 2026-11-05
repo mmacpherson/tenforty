@@ -181,3 +181,12 @@ usScheduleEicEarnedIncome = lineRef "us_schedule_eic" "EARNED_INCOME"
 
 usScheduleEicEitc :: LineRef Dollars
 usScheduleEicEitc = lineRef "us_schedule_eic" "EITC"
+
+us1040L4b :: LineRef Dollars
+us1040L4b = lineRef "us_1040" "L4b"
+
+us1040L5b :: LineRef Dollars
+us1040L5b = lineRef "us_1040" "L5b"
+
+usScheduleDL7 :: LineRef Dollars
+usScheduleDL7 = lineRef "us_schedule_d" "L7"

@@ -1,4 +1,4 @@
-"""The graph backend must honor the legacy deduction-choice contract."""
+"""The graph backend must honor forced itemization and the automatic choice."""
 
 import pytest
 
@@ -11,7 +11,7 @@ from tenforty.models import TaxReturnInput
     ("year", "standard_deduction"), [(2024, 14_600.0), (2025, 15_750.0)]
 )
 def test_graph_automatic_and_forced_itemization(year, standard_deduction):
-    """Legacy Standard is automatic; Itemized forces even zero or a smaller amount."""
+    """Auto takes the larger; Itemized forces even zero or a smaller amount."""
     common = dict(
         year=year,
         filing_status="Single",
@@ -73,7 +73,7 @@ def test_forced_itemization_survives_graph_batch_evaluation():
     results = evaluate_returns(
         year=2024,
         filing_status=["Single", "Single"],
-        standard_or_itemized=["Standard", "Itemized"],
+        standard_or_itemized=["Auto", "Itemized"],
         w2_income=[100_000, 100_000],
         itemized_deductions=[10_000, 10_000],
         backend="graph",
@@ -90,13 +90,13 @@ def test_deduction_choice_is_a_graph_batch_cross_axis():
     results = evaluate_returns(
         year=2024,
         filing_status="Single",
-        standard_or_itemized=["Standard", "Itemized"],
+        standard_or_itemized=["Auto", "Itemized"],
         w2_income=100_000,
         itemized_deductions=10_000,
         backend="graph",
     )
 
-    assert results["standard_or_itemized"].to_list() == ["Standard", "Itemized"]
+    assert results["standard_or_itemized"].to_list() == ["Auto", "Itemized"]
     assert results["federal_taxable_income"].to_list() == [85_400.0, 90_000.0]
 
 

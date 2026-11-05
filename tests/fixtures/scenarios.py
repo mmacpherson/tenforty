@@ -19,6 +19,7 @@ Three tiers of test scenarios:
 import pytest
 
 from tenforty import evaluate_return
+from tenforty.state_facts import MODELS
 
 from .helpers import graph_backend_available
 from .tax_scenario import KnownDefect, TaxScenario
@@ -62,6 +63,8 @@ def run_tax_scenario(scenario: TaxScenario):
     )
     if scenario.backend:
         kwargs["backend"] = scenario.backend
+    if scenario.state_facts is not None:
+        kwargs["state_facts"] = MODELS[scenario.state](**scenario.state_facts)
     result = evaluate_return(**kwargs)
 
     checks = [

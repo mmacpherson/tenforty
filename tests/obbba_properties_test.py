@@ -46,7 +46,7 @@ def test_more_state_and_local_taxes_never_raise_tax(
         filing_status=filing_status,
         w2_income=w2_income,
         incentive_stock_option_gains=iso,
-        standard_or_itemized="Itemized" if itemized else "Standard",
+        standard_or_itemized="Itemized" if itemized else "Auto",
     )
     low = _graph(**common, state_and_local_taxes=salt)
     high = _graph(**common, state_and_local_taxes=salt + bump)

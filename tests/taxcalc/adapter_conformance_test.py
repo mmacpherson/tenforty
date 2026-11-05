@@ -28,6 +28,7 @@ pytest.importorskip("pandas")
 
 from .taxcalc_differential_test import taxcalc_batch
 from .taxcalc_policy import (
+    QUANTITIES,
     DeltaRange,
     _f19_deduction_choice_rule,
     evaluate_components,
@@ -49,7 +50,7 @@ F14_CASE = {
     "qual_div": 0.0,
     "qual_frac": 0.0,
     "itemized": 0.0,
-    "std_or_item": "Standard",
+    "std_or_item": "Auto",
     "iso": 200_000.0,
 }
 
@@ -126,7 +127,8 @@ def test_iso_changes_the_taxcalc_result():
 NOT_CARRIED = {
     "year": "selects the tax year, not an amount to carry",
     "status": "non-numeric; becomes MARS",
-    "std_or_item": "non-numeric; taxcalc always takes best-of",
+    "std_or_item": "non-numeric; taxcalc takes best-of, so forced Standard is "
+    "carried by sending no Schedule A (taxcalc_schedule_a_fields)",
     "qual_frac": "consumed by _normalize_case into qual_div before the adapter",
 }
 
@@ -335,8 +337,8 @@ def test_f19_equal_output_qbi_case_is_not_a_known_defect_match():
 
     assert result["standard_deduction"] == 0.0
     assert result["itemized_deduction"] == case["itemized"]
-    for quantity, actual in ours.items():
-        assert actual == pytest.approx(result[quantity], abs=0.01), quantity
+    for quantity in QUANTITIES:
+        assert ours[quantity] == pytest.approx(result[quantity], abs=0.01), quantity
     assert _f19_deduction_choice_rule("graph", case, result) == {}
     assert unexcused_violations(case, "graph", result, None) == []
 

@@ -93,7 +93,7 @@ def nj_table_gap(rate: float, taxable_income: float, row_low: float) -> KnownDef
         quantity="state_total_tax",
         minimum=center - 0.50,
         maximum=center + 0.50,
-        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-xew)",
+        reason="NJ requires the tax-table row; graph uses the schedule (tenforty-tj2.20)",
     )
 
 
@@ -141,7 +141,7 @@ VA_SCHEDULE_ROUNDING_GAP = KnownDefect(
     minimum=-0.50,
     maximum=0.50,
     reason="VA Form 760 requires whole-dollar schedule tax; graph is unrounded "
-    "(tenforty-xew, not a table-band difference)",
+    "(tenforty-b72.42, not a table-band difference)",
 )
 
 
@@ -180,79 +180,6 @@ def ks_worksheet_gap(statute_minus_worksheet: float, rounding: float) -> KnownDe
         maximum=center + 0.01,
         reason="KS worksheet uses whole-dollar subtraction amounts and a whole-"
         "dollar line 8; graph is the unrounded statute (tenforty-b72.42)",
-    )
-
-
-def md_table_gap(taxable_income: float, row_low: float) -> KnownDefect:
-    """Signed schedule-minus-table bound for a non-kink $50 MD tax-table row.
-
-    MD requires its state tax table below $100,000 of taxable income (2024/2025
-    resident booklets, Instruction 17). Every row used here lies in the 4.75%
-    band of both schedules. The graph prices the schedule at its own taxable
-    income rather than the row, with at most $0.50 of printed-row rounding.
-    """
-    assert row_low <= taxable_income < row_low + 50
-    assert 3_000 <= taxable_income < 100_000
-    center = 0.0475 * (taxable_income - (row_low + 25))
-    reason = "MD requires the tax-table row; graph uses the schedule (tenforty-tj2.20)"
-    return KnownDefect(
-        quantity="state_total_tax",
-        minimum=center - 0.50,
-        maximum=center + 0.50,
-        reason=reason,
-    )
-
-
-# ME residuals, bounded below until their beads land.
-ME_TABLE_METHOD = (
-    "table-method compatibility difference: 1040ME line 20 permits the table or "
-    "the schedule (no mandatory cutoff); expected is the table row, graph uses "
-    "the schedule (tenforty-tj2.20)"
-)
-ME_PRINTED_BASES = (
-    "ME schedules print whole-dollar bracket bases and line 20 is whole "
-    "dollars; graph uses exact bracket arithmetic, unrounded (tenforty-b72.42)"
-)
-# Graph-minus-printed base per bracket, from the published schedules only:
-# 2024 Single: 6.75% 1,510.90 - 1,511 = -0.10; 7.15% 3,910.525 - 3,911 = -0.475.
-# 2024 MFJ 7.15%: 7,824.425 - 7,825 = -0.575.
-# 2025 Single: 6.75% 1,554.40 - 1,554 = +0.40; 7.15% 4,028.275 - 4,028 = +0.275.
-# 2025 MFJ 7.15%: 8,056.55 - 8,057 = -0.45. Every 5.8% bracket: 0.
-
-
-def me_tax_gap(
-    rate: float,
-    *,
-    taxable_income: float | None = None,
-    row_low: float | None = None,
-    base_offset: float = 0.0,
-    deduction_slack: float = 0.0,
-    reasons: tuple[str, ...],
-) -> KnownDefect:
-    """Signed graph-minus-official bound on ME line 20 for one blind case.
-
-    A $100 table row prices its midpoint on the printed schedule; the graph
-    prices actual taxable income at ``rate``. ``base_offset`` is the graph's
-    bracket arithmetic minus the printed whole-dollar base. The half-width is
-    line 20's whole-dollar rounding, widened by ``rate`` times
-    ``deduction_slack``: the line 17 worksheet's four-place ratio and whole-
-    dollar line 8 against the statute's unrounded fraction, which the graph
-    uses (record A1).
-    """
-    table_offset = 0.0
-    if row_low is not None:
-        assert taxable_income is not None
-        assert row_low <= taxable_income < row_low + 100
-        table_offset = rate * (taxable_income - (row_low + 50))
-    center = table_offset + base_offset
-    # Case 11's cell rounds an exact half (2,885.50 -> 2,886), landing on the
-    # bound; 1e-6 only absorbs binary floating-point error there.
-    half_width = 0.50 + rate * deduction_slack + 1e-6
-    return KnownDefect(
-        quantity="state_total_tax",
-        minimum=center - half_width,
-        maximum=center + half_width,
-        reason="; ".join(reasons),
     )
 
 
@@ -340,7 +267,7 @@ def la_2024_table_gap(
         maximum=center + 0.50,
         reason=(
             "LA 2024 line 10 is the tax-table value; the graph prices the exact "
-            "bracket formula rather than the table row (tenforty-xew)"
+            "bracket formula rather than the table row (tenforty-tj2.20)"
         ),
     )
 
@@ -824,14 +751,13 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         backend="graph",
     ),
     # CA Single $250,000 W2 (2024). Fixture kind: derived-arithmetic.
-    # Implementer-derived from the same booklet's rules, not by the blind deriver.
+    # Unverified legacy: implementer-derived, absent from the blind CA record.
     # TI $244,460; Schedule X (p. 75): $3,108.72 + 9.3% x $173,854 = $19,277.14
     # -> $19,277. AGI Limitation Worksheet (p. 14): excess $5,143 / $2,500 = 2.06,
     # rounded UP to 3; 3 x $6 = $18; exemption credit $149 - $18 = $131.
     # Net $19,277 - $131 = $19,146.
     TaxScenario(
         source="FTB 2024 Form 540 Booklet (official)",
-        state_evidence=CA_EVIDENCE,
         description="CA Single, $250,000 W2, exemption credit in phase-out (2024)",
         year=2024,
         state="CA",
@@ -840,14 +766,14 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=19146.0,
         state_tax_tolerance=CA_WHOLE_DOLLAR_TOLERANCE,
         backend="graph",
-        known_failure=(
-            "CA 540 line 32 phase-out is continuous in the graph ($0.0024 per "
-            "excess AGI dollar); FTB AGI Limitation Worksheet rounds excess/$2,500 "
-            "UP to a whole step, $6 per step. Graph credit $136.66 vs official "
-            "$131; graph net $19,140.48 vs $19,146 (tenforty-b72.17)."
-        ),
     ),
     # ========== MASSACHUSETTS SCENARIOS ==========
+    # Legacy MA rows, unverified legacy, kept for their federal checks only.
+    # Their state values priced line 10 as federal AGI with no line 11
+    # deduction (Social Security/Medicare paid, up to $2,000), so they were
+    # retired in b72.6/b72.39. Blind MA values: tests/ma_form1_income_test.py
+    # and docs/validation/derivations/ma-2024-2025.md. The arithmetic notes
+    # below are the original, superseded reasoning.
     # MA 2024: Flat 5% rate, Personal exemption $4,400 (Single), $8,800 (MFJ), $6,800 (HoH)
     # 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025)
     # Also: 8.5% on short-term capital gains, 12% on long-term collectibles
@@ -869,7 +795,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=20000.0,
         expected_federal_tax=543.0,  # Tax Table row 5,400-5,450
-        expected_state_tax=780.0,
         backend="graph",
     ),
     # MA Single, middle income (2024)
@@ -887,7 +812,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2280.0,
         backend="graph",
     ),
     # MA Single, higher income (2024)
@@ -905,7 +829,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=100000.0,
         expected_federal_tax=13847.0,  # Tax Table row 85,400-85,450
-        expected_state_tax=4780.0,
         backend="graph",
     ),
     # MA MFJ, middle income (2024)
@@ -923,7 +846,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=4560.0,
         backend="graph",
     ),
     # MA Head_of_House, middle income (2024)
@@ -941,7 +863,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=3410.0,
         backend="graph",
     ),
     # MA Single, surtax income (2025)
@@ -965,7 +886,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=1200000.0,
         expected_federal_tax=404192.75,
-        expected_state_tax=64278.0,
         backend="graph",
     ),
     # ========== CONNECTICUT SCENARIOS ==========
@@ -2345,8 +2265,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Federal values equal the IRS 2024 Tax Table Single column (i1040tt--2024).
     #
     # The graph's IT-201 (tenforty-spec/forms/NYIT201_2024.hs) computes line 39
-    # as the exact bracket formula, and line 40 household credit is a keyInput
-    # defaulting to 0. IT-201-I p. 12 requires the Tax Table when NYAGI <=
+    # as the exact bracket formula; line 40 now computes the household credit.
+    # IT-201-I p. 12 requires the Tax Table when NYAGI <=
     # $107,650 and TI < $65,000, and the rate schedule (p. 33) publishes
     # whole-dollar bases ($600 over $13,900) where exact bracket arithmetic gives
     # $599.50. The known_defects below record the resulting residuals.
@@ -2373,11 +2293,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.5,
-                44.5,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $16,500): +$45. Graph line 39 is "
-                "the exact formula, not Tax Table row 8,500-8,550 ($341): -$1. Net +$44.",
+                -1.5,
+                -0.5,
+                "Graph line 39 uses the exact formula $340 rather than Tax Table "
+                "row 8,500-8,550 ($341): -$1 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
@@ -2398,12 +2318,11 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         known_defects=(
             KnownDefect(
                 "state_total_tax",
-                43.0,
-                44.0,
-                "Graph omits NY household credit (IT-201 line 40 is an input, "
-                "default 0; table 1 gives $45 at FAGI $18,000): +$45. Graph line 39 is "
-                "the exact formula $407.50, not Tax Table row 10,000-10,050 ($409): "
-                "-$1.50. Net +$43.50.",
+                -2.0,
+                -1.0,
+                "Graph line 39 uses the exact formula $407.50 rather than Tax Table "
+                "row 10,000-10,050 ($409): -$1.50 (tenforty-tj2.20). The $45 household "
+                "credit is now included; the legacy expected value is unchanged.",
             ),
         ),
     ),
@@ -4367,19 +4286,21 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=100000.0,
         backend="graph",
     ),
+    # Legacy values below were source-corrected after implementation inspection.
+    # Labels stay UNVERIFIED; no backend output generated the new amounts.
     # ========== ILLINOIS SCENARIOS ==========
     # IL 2024: Flat 4.95% rate, Personal exemption $2,775
     # IL 2025: Flat 4.95% rate (unchanged), Personal exemption $2,850
     # No standard deduction (uses personal exemptions instead)
     # Exemption phase-out: $250k (Single/MFS/HoH/QW), $500k (MFJ)
     # IL tax = (Federal AGI - exemptions) * 0.0495
-    # These use graph backend with exemptions set to 0 (not auto-computed).
+    # Graph returns derive the regular filer/spouse exemption allowance.
     #
-    # IL 2024 Single, $50,000 W2 only, no exemptions
+    # IL 2024 Single, $50,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $50,000
     # IL Base Income: $50,000 (no additions/subtractions)
-    # IL Net Income: $50,000 (exemption = $0)
-    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # IL Net Income: $50,000 - $2,775 = $47,225
+    # IL Tax: $47,225 * 0.0495 = $2,337.6375 -> $2,338
     # Federal taxable: $35,400, Federal tax: $4,016
     TaxScenario(
         source="IL 2024 Tax Rate (computed)",
@@ -4389,15 +4310,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=2475.0,
+        expected_state_tax=2338.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
-    # IL 2024 Single, $100,000 W2 only, no exemptions
+    # IL 2024 Single, $100,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $100,000
     # IL Base Income: $100,000
-    # IL Net Income: $100,000 (exemption = $0)
-    # IL Tax: $100,000 * 0.0495 = $4,950.00
+    # IL Net Income: $100,000 - $2,775 = $97,225
+    # IL Tax: $97,225 * 0.0495 = $4,812.6375 -> $4,813
     # Federal taxable: $85,400, Federal tax: $13,841
     TaxScenario(
         source="IL 2024 Tax Rate (computed)",
@@ -4407,15 +4328,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=100000.0,
         expected_federal_tax=13847.0,  # Tax Table row 85,400-85,450
-        expected_state_tax=4950.0,
+        expected_state_tax=4813.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
-    # IL 2024 MFJ, $120,000 W2 only, no exemptions
+    # IL 2024 MFJ, $120,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $120,000
     # IL Base Income: $120,000
-    # IL Net Income: $120,000 (exemption = $0)
-    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # IL Net Income: $120,000 - $5,550 = $114,450
+    # IL Tax: $114,450 * 0.0495 = $5,665.275 -> $5,665
     # Federal taxable: $90,800, Federal tax: $10,432
     TaxScenario(
         source="IL 2024 Tax Rate (computed)",
@@ -4425,15 +4346,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=120000.0,
         expected_federal_tax=10435.0,  # Tax Table row 90,800-90,850
-        expected_state_tax=5940.0,
+        expected_state_tax=5665.0,
         expected_federal_agi=120000.0,
         backend="graph",
     ),
-    # IL 2024 Head_of_House, $75,000 W2 only, no exemptions
+    # IL 2024 Head_of_House, $75,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $75,000
     # IL Base Income: $75,000
-    # IL Net Income: $75,000 (exemption = $0)
-    # IL Tax: $75,000 * 0.0495 = $3,712.50
+    # IL Net Income: $75,000 - $2,775 = $72,225
+    # IL Tax: $72,225 * 0.0495 = $3,575.1375 -> $3,575
     # Federal taxable: $53,100 ($75K - $21.9K std ded)
     # Federal tax (HoH 2024): $16,550 * 0.10 + $36,550 * 0.12 = $1,655 + $4,386 = $6,041
     TaxScenario(
@@ -4444,15 +4365,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=75000.0,
         expected_federal_tax=6044.0,  # Tax Table row 53,100-53,150
-        expected_state_tax=3712.5,
+        expected_state_tax=3575.0,
         expected_federal_agi=75000.0,
         backend="graph",
     ),
-    # IL 2025 Single, $50,000 W2 only, no exemptions
+    # IL 2025 Single, $50,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $50,000
     # IL Base Income: $50,000
-    # IL Net Income: $50,000 (exemption = $0)
-    # IL Tax: $50,000 * 0.0495 = $2,475.00
+    # IL Net Income: $50,000 - $2,850 = $47,150
+    # IL Tax: $47,150 * 0.0495 = $2,333.925 -> $2,334
     # Federal taxable: $35,000 (AGI - $15,000 std ded)
     # Federal tax (2025): $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
     TaxScenario(
@@ -4463,15 +4384,15 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=2475.0,
+        expected_state_tax=2334.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
-    # IL 2025 MFJ, $120,000 W2 only, no exemptions
+    # IL 2025 MFJ, $120,000 W2 only, regular filer/spouse exemptions
     # Federal AGI: $120,000
     # IL Base Income: $120,000
-    # IL Net Income: $120,000 (exemption = $0)
-    # IL Tax: $120,000 * 0.0495 = $5,940.00
+    # IL Net Income: $120,000 - $5,700 = $114,300
+    # IL Tax: $114,300 * 0.0495 = $5,657.85 -> $5,658
     # Federal taxable: $90,000 (AGI - $30,000 std ded)
     # Federal tax (2025 MFJ): $23,850 * 0.10 + $66,150 * 0.12 = $2,385 + $7,938 = $10,323
     TaxScenario(
@@ -4482,7 +4403,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=120000.0,
         expected_federal_tax=10146.0,  # Tax Table row 88,500-88,550
-        expected_state_tax=5940.0,
+        expected_state_tax=5658.0,
         expected_federal_agi=120000.0,
         backend="graph",
     ),
@@ -4936,7 +4857,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # NC Single, $50,000 W2
     # Fed AGI: $50,000
     # NC Taxable: $50,000 - $12,750 = $37,250
-    # NC Tax: $37,250 * 0.045 = $1,676.25
+    # NC Tax: $37,250 * 0.045 = $1,676.25 -> $1,676 (D-401 p.4).
     TaxScenario(
         source="NC 2024 Tax Brackets (computed)",
         description="NC Single, $50,000 income",
@@ -4945,14 +4866,14 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=1676.25,
+        expected_state_tax=1676.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
     # NC MFJ, $100,000 W2
     # Fed AGI: $100,000
     # NC Taxable: $100,000 - $25,500 = $74,500
-    # NC Tax: $74,500 * 0.045 = $3,352.50
+    # NC Tax: $74,500 * 0.045 = $3,352.50 -> $3,353 (D-401 p.4).
     TaxScenario(
         source="NC 2024 Tax Brackets (computed)",
         description="NC MFJ, $100,000 income",
@@ -4961,7 +4882,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=3352.50,
+        expected_state_tax=3353.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -4971,7 +4892,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # NC Single, $50,000 W2
     # Fed AGI: $50,000
     # NC Taxable: $50,000 - $12,750 = $37,250
-    # NC Tax: $37,250 * 0.0425 = $1,583.125
+    # NC Tax: $37,250 * 0.0425 = $1,583.125 -> $1,583 (D-401 p.4).
     # Federal: $15,000 std ded, taxable $35,000
     # Federal tax: $11,925 x 0.10 + $23,075 x 0.12 = $1,192.50 + $2,769 = $3,961.50
     TaxScenario(
@@ -4982,7 +4903,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1583.125,
+        expected_state_tax=1583.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -4994,9 +4915,12 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=75000.0,
         expected_federal_tax=4746.0,  # Tax Table row 43,500-43,550
-        expected_state_tax=1688.125,
+        expected_state_tax=1570.0,
         expected_federal_agi=75000.0,
         backend="graph",
+        # Unverified legacy value, set with no joint filing credit: the
+        # spouses-do-not-both-qualify case, now stated (tenforty-b72.53).
+        state_facts={"spouses_both_have_qualifying_income": False},
     ),
     # ========== OKLAHOMA SCENARIOS ==========
     # OK 2024 & 2025: 6-bracket progressive system (0.25%, 0.75%, 1.75%, 2.75%, 3.75%, 4.75%)
@@ -5512,7 +5436,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         expected_state_tax=2043.0,
         expected_federal_agi=50000.0,
-        known_defects=(md_table_gap(44100, 44100),),
         backend="graph",
     ),
     # 2024 #2: MFJ 90,000, 2 dependents. 90,000 - 5,450 std - 4 x 3,200 = 71,750; row 71,750-71,800, PDF p. 38.
@@ -5527,7 +5450,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
         expected_state_tax=3357.0,
         expected_federal_agi=90000.0,
-        known_defects=(md_table_gap(71750, 71750),),
         backend="graph",
     ),
     # 2024 #3: HoH 45,000, 1 dependents. 45,000 - 5,450 std - 2 x 3,200 = 33,150; row 33,150-33,200, PDF p. 36.
@@ -5542,7 +5464,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=1523.0,
         expected_federal_agi=45000.0,
-        known_defects=(md_table_gap(33150, 33150),),
         backend="graph",
     ),
     # 2024 #4: MFS 40,000, 0 dependents. 40,000 - 2,700 std - 1 x 3,200 = 34,100; row 34,100-34,150, PDF p. 36.
@@ -5556,7 +5477,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=40000.0,
         expected_state_tax=1568.0,
         expected_federal_agi=40000.0,
-        known_defects=(md_table_gap(34100, 34100),),
         backend="graph",
     ),
     # 2024 #5: QSS 70,000, 1 dependents. 70,000 - 5,450 std - 2 x 3,200 = 58,150; row 58,150-58,200, PDF p. 37.
@@ -5571,7 +5491,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=2711.0,
         expected_federal_agi=70000.0,
-        known_defects=(md_table_gap(58150, 58150),),
         backend="graph",
     ),
     # 2024 #6: Single 20,000, 0 dependents. 20,000 - 2,700 std - 1 x 3,200 = 14,100; row 14,100-14,150, PDF p. 34.
@@ -5585,7 +5504,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=20000.0,
         expected_state_tax=618.0,
         expected_federal_agi=20000.0,
-        known_defects=(md_table_gap(14100, 14100),),
         backend="graph",
     ),
     # 2024 #7: Single 120,000, 0 dependents. 120,000 - 2,700 std - 1 x 1,600 = 115,700; Schedule I: 4,697.50 + 5% x 15,700.
@@ -5652,7 +5570,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=50000.0,
         expected_state_tax=2013.0,
         expected_federal_agi=50000.0,
-        known_defects=(md_table_gap(43450, 43450),),
         backend="graph",
     ),
     # 2025 #2: MFJ 90,000, 2 dependents. 90,000 - 6,700 std - 4 x 3,200 = 70,500; row 70,500-70,550, PDF p. 38.
@@ -5667,7 +5584,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=12800.0,  # 4 x 3,200, Line 19 total
         expected_state_tax=3297.0,
         expected_federal_agi=90000.0,
-        known_defects=(md_table_gap(70500, 70500),),
         backend="graph",
     ),
     # 2025 #3: HoH 45,000, 1 dependents. 45,000 - 6,700 std - 2 x 3,200 = 31,900; row 31,900-31,950, PDF p. 36.
@@ -5682,7 +5598,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=1464.0,
         expected_federal_agi=45000.0,
-        known_defects=(md_table_gap(31900, 31900),),
         backend="graph",
     ),
     # 2025 #4: MFS 40,000, 0 dependents. 40,000 - 3,350 std - 1 x 3,200 = 33,450; row 33,450-33,500, PDF p. 36.
@@ -5696,7 +5611,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=40000.0,
         expected_state_tax=1538.0,
         expected_federal_agi=40000.0,
-        known_defects=(md_table_gap(33450, 33450),),
         backend="graph",
     ),
     # 2025 #5: QSS 70,000, 1 dependents. 70,000 - 6,700 std - 2 x 3,200 = 56,900; row 56,900-56,950, PDF p. 37.
@@ -5711,7 +5625,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         dependent_exemptions=6400.0,  # 2 x 3,200, Line 19 total
         expected_state_tax=2651.0,
         expected_federal_agi=70000.0,
-        known_defects=(md_table_gap(56900, 56900),),
         backend="graph",
     ),
     # 2025 #6: Single 20,000, 0 dependents. 20,000 - 3,350 std - 1 x 3,200 = 13,450; row 13,450-13,500, PDF p. 34.
@@ -5725,7 +5638,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         w2_income=20000.0,
         expected_state_tax=588.0,
         expected_federal_agi=20000.0,
-        known_defects=(md_table_gap(13450, 13450),),
         backend="graph",
     ),
     # 2025 #7: Single 120,000, 0 dependents. 120,000 - 3,350 std - 1 x 1,600 = 115,050; Schedule I: 4,697.50 + 5% x 15,050.
@@ -6613,7 +6525,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Record: docs/validation/state-fixtures/ME-2024-2025.md (blind, 2026-10-07).
     # Wage-only residents; neither the filer nor spouse claimable as a
     # dependent. Line 20 below $100,000 is the deriver's published table row;
-    # above it the deriver's rate-schedule value. Line 20 permits either method.
+    # above it the deriver's printed rate-schedule value in whole dollars
+    # (rulings on tenforty-tj2.20; the graph follows both exactly).
     # Blind case 1: 50,000 - 14,600 - 5,000 = 30,400; row 30,400-30,500 = 1,808.
     TaxScenario(
         source="ME 2024 official tax table (blind derivation)",
@@ -6624,15 +6537,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_state_tax=1808.0,
-        known_defects=(
-            me_tax_gap(
-                0.0675,
-                taxable_income=30_400,
-                row_low=30_400,
-                base_offset=-0.1,
-                reasons=(ME_TABLE_METHOD, ME_PRINTED_BASES),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 2: 90,000 - 29,200 - 10,000 = 50,800; row 50,800-50,900 = 2,949.
@@ -6645,11 +6549,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=90000.0,
         expected_state_tax=2949.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=50_800, row_low=50_800, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 3: 45,000 - 21,900 - 5,000 = 18,100; row 18,100-18,200 = 1,053.
@@ -6662,11 +6561,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=45000.0,
         expected_state_tax=1053.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=18_100, row_low=18_100, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 4: 40,000 - 14,600 - 5,000 = 20,400; row 20,400-20,500 = 1,186.
@@ -6679,11 +6573,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Sep",
         w2_income=40000.0,
         expected_state_tax=1186.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=20_400, row_low=20_400, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 5: 70,000 - 29,200 - 5,000 (QSS: one exemption) = 35,800; MFJ column = 2,079.
@@ -6696,11 +6585,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Widow(er)",
         w2_income=70000.0,
         expected_state_tax=2079.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=35_800, row_low=35_800, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 6: 20,000 - 14,600 - 5,000 = 400; row 400-500 = 26.
@@ -6713,11 +6597,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=20000.0,
         expected_state_tax=26.0,
-        known_defects=(
-            me_tax_gap(
-                0.058, taxable_income=400, row_low=400, reasons=(ME_TABLE_METHOD,)
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 7: deduction 14,600 x (1 - 0.3047) = 10,151; TI 104,849; schedule 7,003.
@@ -6730,14 +6609,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=120000.0,
         expected_state_tax=7003.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.475,
-                deduction_slack=14_600 * 0.0001 + 0.50,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 8: deduction 0; exemption 5,000 x (1 - 0.2088) = 3,956; schedule 24,249.
@@ -6750,13 +6621,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=350000.0,
         expected_state_tax=24249.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.475,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 9: deduction 0; exemption 10,000 x (1 - 0.8908) = 1,092; schedule 34,685.
@@ -6769,13 +6633,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=500000.0,
         expected_state_tax=34685.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.575,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 10: 50,000 - 15,000 - 5,150 = 29,850; row 29,800-29,900 = 1,760.
@@ -6788,15 +6645,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_state_tax=1760.0,
-        known_defects=(
-            me_tax_gap(
-                0.0675,
-                taxable_income=29_850,
-                row_low=29_800,
-                base_offset=0.4,
-                reasons=(ME_TABLE_METHOD, ME_PRINTED_BASES),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 11: 90,000 - 30,000 - 10,300 = 49,700; row 49,700-49,800 = 2,886.
@@ -6809,14 +6657,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=90000.0,
         expected_state_tax=2886.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=49_700,
-                row_low=49_700,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 12: 45,000 - 22,500 - 5,150 = 17,350; row 17,300-17,400 = 1,006.
@@ -6829,14 +6669,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=45000.0,
         expected_state_tax=1006.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=17_350,
-                row_low=17_300,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 13: 40,000 - 15,000 - 5,150 = 19,850; row 19,800-19,900 = 1,151.
@@ -6849,14 +6681,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Sep",
         w2_income=40000.0,
         expected_state_tax=1151.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=19_850,
-                row_low=19_800,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 14: 70,000 - 30,000 - 5,150 (QSS: one exemption) = 34,850; row = 2,021.
@@ -6869,14 +6693,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Widow(er)",
         w2_income=70000.0,
         expected_state_tax=2021.0,
-        known_defects=(
-            me_tax_gap(
-                0.058,
-                taxable_income=34_850,
-                row_low=34_800,
-                reasons=(ME_TABLE_METHOD,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 15: 20,000 - 15,000 - 5,150 < 0, floored; tax 0 (record A3).
@@ -6901,13 +6717,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=120000.0,
         expected_state_tax=6917.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=0.275,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 17: deduction 0; exemption 5,150 x (1 - 0.1324) = 4,468; schedule 24,197.
@@ -6920,13 +6729,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=350000.0,
         expected_state_tax=24197.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=0.275,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Blind case 18: deduction 0; exemption 10,300 x (1 - 0.7992) = 2,068; schedule 34,586.
@@ -6939,13 +6741,6 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=500000.0,
         expected_state_tax=34586.0,
-        known_defects=(
-            me_tax_gap(
-                0.0715,
-                base_offset=-0.45,
-                reasons=(ME_PRINTED_BASES,),
-            ),
-        ),
         backend="graph",
     ),
     # Legacy ME rows, kept for their federal tax/AGI checks only (unverified

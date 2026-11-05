@@ -19,7 +19,7 @@ from tenforty.mappings import (
     state_natural_to_node,
     state_output_lines,
 )
-from tenforty.models import STATE_TO_FORM
+from tenforty.models import DEDUCTION_CHOICE_ENCODING, STATE_TO_FORM
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
@@ -27,11 +27,16 @@ CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
 INPUTS = {
     "standard_or_itemized": {
         "label": "Deduction choice",
-        "description": "Choose deductions automatically or force the supplied itemized amount.",
+        "description": (
+            "Take the larger deduction automatically, or force the standard "
+            "deduction or the supplied itemized amount."
+        ),
         "type": "choice",
-        "choices": ["Standard", "Itemized"],
-        "encoding": {"Standard": 0, "Itemized": 1},
-        "default": "Standard",
+        "choices": list(DEDUCTION_CHOICE_ENCODING),
+        "encoding": {
+            choice: int(value) for choice, value in DEDUCTION_CHOICE_ENCODING.items()
+        },
+        "default": "Auto",
     },
     "w2_income": {
         "label": "Wages and salary",

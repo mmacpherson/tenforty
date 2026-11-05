@@ -6,7 +6,9 @@ used primarily for structuring and organizing configuration data.
 """
 
 # ruff: noqa: D101
+import json
 import math
+import warnings
 from collections.abc import Callable
 from enum import Enum
 from functools import partial
@@ -16,6 +18,7 @@ from pydantic import (
     ConfigDict,
     Field,
     FiniteFloat,
+    PrivateAttr,
     TypeAdapter,
     computed_field,
     model_validator,
@@ -151,8 +154,21 @@ class OTSFilingStatus(StrEnum):
 
 
 class OTSDeductionType(StrEnum):
+    AUTO = "Auto"
     STANDARD = "Standard"
     ITEMIZED = "Itemized"
+
+
+# Graph encoding of the election on us_1040_DeductionChoice: negative forces
+# the standard deduction, positive forces Schedule A, zero takes the larger.
+DEDUCTION_CHOICE_ENCODING = {"Auto": 0.0, "Standard": -1.0, "Itemized": 1.0}
+
+# Public inputs that reach the OTS federal return through a computed field,
+# so they can be emptied when the standard deduction is forced.
+OTS_INPUT_CARRIERS = {
+    "itemized_deductions": "schedule_a_other_deductions",
+    "state_and_local_taxes": "schedule_a_state_and_local_taxes",
+}
 
 
 class OTSState(Enum):
@@ -335,6 +351,10 @@ _SPOUSE_BOX_STATUSES = frozenset(
 class TaxReturnInput(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
 
+    _state_facts: dict[str, object] = PrivateAttr(default_factory=dict)
+    """The state facts active for this return (tenforty.state_facts), set by the
+    public API after validation; read by the graph backend's fact lowerings."""
+
     year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
     filing_status: OTSFilingStatus = OTSFilingStatus.SINGLE
@@ -352,13 +372,21 @@ class TaxReturnInput(BaseModel):
             "neither credit. Not modeled: the refundable additional child tax "
             "credit (a payment, not part of total tax), the earned income credit "
             "and the dependent care credit. Some state returns also read this "
-            "count as their dependent count (graph: CA, OR and WI; OTS: the state "
+            "count as their dependent count (graph: CA, IL, NY, OH, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
             "through dependent_exemptions. The OR graph uses it for its regular "
             "exemption credit and derives the taxpayer/spouse base from filing "
             "status; dependent_exemptions is not mapped for OR, and additional "
             "Oregon exemptions, including severe-disability exemptions, are "
-            "unsupported."
+            "unsupported. The NY graph uses the same total independently for its "
+            "household credit. The OH graph uses the total for MAGI-tiered "
+            "personal/dependent exemptions and the exemption credit, adding the "
+            "filing-status taxpayer/spouse base; dependent_exemptions is not "
+            "mapped for OH. OH claimable-filer and business-income adjustments "
+            "are unsupported. Conversion to NY line 36 exemption dollars is not "
+            "mapped. Natural NY graph MFS returns require spouse AGI/dependents "
+            "available only as raw graph inputs and are unsupported. Claimable "
+            "filer and A6 household-credit controls are also raw graph only."
         ),
     )
     num_ctc_dependents: int | None = Field(
@@ -374,12 +402,30 @@ class TaxReturnInput(BaseModel):
             "dependents without an SSN valid for employment (e.g. with an ITIN or "
             "ATIN), and qualifying relatives such as a parent. For example, two "
             "children aged 10 and 18 are num_dependents=2, num_ctc_dependents=1. "
+            "The NC graph uses this same qualifying-child count for D-400 line "
+            "10a and its income-tiered line 10b child deduction; other dependents "
+            "do not qualify. The default to num_dependents applies there too. "
             "Must not exceed num_dependents (ValueError). For 2025, OBBBA also "
             "requires an SSN for the filer (at least one spouse on a joint "
             "return) to claim the child tax credit; that is not checked."
         ),
     )
-    standard_or_itemized: OTSDeductionType = OTSDeductionType.STANDARD
+    standard_or_itemized: OTSDeductionType = Field(
+        default=OTSDeductionType.AUTO,
+        description=(
+            "The federal Form 1040 deduction election. 'Auto' (the default) takes "
+            "the larger of the standard deduction and Schedule A. 'Standard' "
+            "forces the standard deduction even when Schedule A is larger; "
+            "'Itemized' forces Schedule A even when it is smaller or zero (IRC "
+            "63(e); Schedule A line 18). Before 'Auto' existed, 'Standard' meant "
+            "the larger of the two. The election sets Form 6251 line 2a. It does "
+            "not choose a state's deduction method: states apply their own rules "
+            "to the same inputs, or import the federal result. On the OTS "
+            "backend, 'Standard' with a nonzero Schedule A input raises "
+            "UnsupportedInputError for AZ, CA and NY, whose OTS programs build "
+            "their own itemized deduction from the federal Schedule A."
+        ),
+    )
     w2_income: float = 0.0
     taxable_interest: float = 0.0
     qualified_dividends: float = 0.0
@@ -466,7 +512,8 @@ class TaxReturnInput(BaseModel):
             "married filing jointly), not for married filing separately. The senior "
             "deduction is taken with either the standard or itemized deduction and "
             "is added back for the AMT. Blindness and dependent-filer limits are not "
-            "modeled. State returns do not read it."
+            "modeled. The IL graph also adds the $1,000 age-65 exemption allowance, "
+            "subject to its federal-AGI limit; other states do not read it."
         ),
     )
     spouse_65_or_older: bool = Field(
@@ -479,16 +526,31 @@ class TaxReturnInput(BaseModel):
             "standard deduction, which the IRS allows when the spouse had no income, "
             "is not filing and cannot be claimed as a dependent; the senior "
             "deduction is not allowed. Any other filing status has no spouse box, "
-            "so True raises ValueError."
+            "so True raises ValueError. The IL graph adds the spouse's $1,000 "
+            "age allowance only for MFJ, subject to its federal-AGI limit."
         ),
     )
-    state_adjustment: float = 0.0
+    state_adjustment: float = Field(
+        default=0.0,
+        description=(
+            "Deprecated legacy escape hatch; avoid in new code. Its meaning depends "
+            "on the state and the backend, and a nonzero value emits a "
+            "DeprecationWarning (tenforty-yu51). OTS CA: Schedule CA Part II "
+            "itemized-deduction addition (CA540_P2_Add_6). Graph CA: Schedule CA "
+            "Part I income addition (ca_schedule_ca_A22_24), so the same value moves "
+            "CA taxable income the opposite way. Graph AL: the Form 40 standard "
+            "deduction amount (al_40_L12_std). Everywhere else OTS ignores it and "
+            "the graph refuses it. Named single-meaning inputs will replace it "
+            "(tenforty-tj2.1, tenforty-tj2.2)."
+        ),
+    )
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. The OR graph does not "
-            "map this field; use num_dependents for its regular exemption credit. "
+            "State exemption dollars, not a dependent count. The IL, OH and OR "
+            "graphs do not map this field; use num_dependents for IL personal/dependent "
+            "allowances, OH exemptions/credit and the OR regular exemption credit. "
             "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "
@@ -510,6 +572,23 @@ class TaxReturnInput(BaseModel):
             "state/year and backend support varies."
         ),
     )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def ma_contribution_deduction(self) -> float:
+        """Massachusetts Form 1 line 11a for the OTS MA_1 form.
+
+        Line 11 is the Social Security and Medicare paid, "not more than $2,000"
+        per person (2024 instructions PDF p.10, 2025 PDF p.11; M.G.L. c.62
+        3.B(a)(3)-(4)). For W-2 wages that is 6.2% + 1.45% = 7.65% of wages; the
+        $2,000 cap binds near $26,144 of wages, below every year's Social
+        Security wage base, so the base never enters. `w2_income` is a household
+        aggregate, so a joint return takes the one-earner reading (all on 11a),
+        as `schedule_se_ss_wages` does and as the graph's line 11 does; a two-earner
+        couple is then at most $100 high, or $180 once the 4% surtax applies. MA_1 maps
+        no self-employment income, so its SE-tax share is not added here.
+        """
+        return min(2_000.0, 0.0765 * max(0.0, float(self.w2_income)))
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -553,6 +632,26 @@ class TaxReturnInput(BaseModel):
         """Dependents who get the credit for other dependents, Schedule 8812 line 6."""
         return self.num_dependents - self.schedule_8812_qualifying_children
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_a_other_deductions(self) -> float:
+        """itemized_deductions as OTS receives it: none when Standard is forced.
+
+        OTS has no switch that forces the standard deduction; it takes the
+        larger unless itemizing is forced, so an empty Schedule A forces it.
+        """
+        if self.standard_or_itemized == OTSDeductionType.STANDARD:
+            return 0.0
+        return self.itemized_deductions
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_a_state_and_local_taxes(self) -> float:
+        """state_and_local_taxes as OTS receives it: none when Standard is forced."""
+        if self.standard_or_itemized == OTSDeductionType.STANDARD:
+            return 0.0
+        return self.state_and_local_taxes
+
     @model_validator(mode="after")
     def refuse_more_ctc_dependents_than_dependents(self) -> "TaxReturnInput":
         """num_ctc_dependents counts a subset of num_dependents."""
@@ -588,6 +687,20 @@ class TaxReturnInput(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def warn_deprecated_state_adjustment(self) -> "TaxReturnInput":
+        """Warn on a nonzero state_adjustment, whose meaning is backend-specific."""
+        if self.state_adjustment:
+            warnings.warn(
+                "state_adjustment is deprecated: its meaning depends on the state and "
+                "the backend (CA: an itemized-deduction addition on OTS but an income "
+                "addition on graph; AL graph: the standard deduction amount). See "
+                "docs/migrating-to-graph-default.md.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        return self
+
+    @model_validator(mode="after")
     def ensure_ordinary_includes_qualified(self) -> "TaxReturnInput":
         """Handle case where only qualified dividends is provided."""
         # On the 1040, the "ordinary dividends" box, recently Line 3b, includes
@@ -609,12 +722,53 @@ TAX_RETURN_FLOAT_FIELDS = tuple(
 FINITE_FLOAT_COLUMNS = TypeAdapter(dict[str, list[FiniteFloat]])
 
 
+def canonical_json(value: object) -> str:
+    """Deterministic project JSON: sorted keys, compact, UTF-8, no NaN.
+
+    A stable serialization for metadata columns; not an RFC 8785 claim.
+    """
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+
+
+class Assumption(BaseModel):
+    """A convention that entered the selected engine's computation of a return.
+
+    Recorded because no input supplied the value. ``id`` and ``value`` are
+    semantic and stable; ``text`` explains and may be reworded. ``input_path``
+    names the public input that would replace the convention, or is None when
+    no such input exists yet. ``value`` is a JSON scalar.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    id: str
+    state: str | None
+    input_path: str | None
+    value: bool | int | FiniteFloat | str | None
+    text: str
+
+    def to_json(self) -> str:
+        """Canonical JSON of the complete record."""
+        return canonical_json(self.model_dump())
+
+    @classmethod
+    def from_json(cls, encoded: str) -> "Assumption":
+        """Decode a record written by ``to_json``."""
+        return cls.model_validate_json(encoded)
+
+
 class InterpretedTaxReturn(BaseModel):
     total_tax: float = 0.0
 
     federal_adjusted_gross_income: float = 0.0
-    federal_effective_tax_rate: float = 0.0
-    federal_tax_bracket: float = 0.0
+    federal_effective_tax_rate: float | None = None
+    federal_tax_bracket: float | None = None
     federal_taxable_income: float = 0.0
     federal_qbi_deduction: float = 0.0
     federal_amt: float = 0.0
@@ -636,13 +790,23 @@ class InterpretedTaxReturn(BaseModel):
     state_adjusted_gross_income: float = 0.0
     state_taxable_income: float = 0.0
     state_total_tax: float = 0.0
-    state_tax_bracket: float = 0.0
-    state_effective_tax_rate: float = 0.0
+    state_tax_bracket: float | None = None
+    state_effective_tax_rate: float | None = None
+
+    assumptions: tuple[Assumption, ...] | None = Field(
+        default=(),
+        description=(
+            "Recorded state conventions that entered this computation because no "
+            "input supplied them (see tenforty.state_facts). () when none was "
+            "recorded, which is not a claim that the return makes no assumptions; "
+            "None on a failed return."
+        ),
+    )
 
     @classmethod
     def failed(cls) -> "InterpretedTaxReturn":
-        """Return a failed computation: every output is NaN, never 0."""
-        return cls(**dict.fromkeys(cls.model_fields, math.nan))
+        """Return a failed computation: every number NaN, never 0; no metadata."""
+        return cls(**dict.fromkeys(NUMERIC_OUTPUT_FIELDS, math.nan), assumptions=None)
 
     @model_validator(mode="after")
     def compute_federal_income_tax(self) -> "InterpretedTaxReturn":  # noqa: D102
@@ -788,10 +952,10 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
+            "schedule_a_other_deductions": "A6",
             # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
             # applies the line 5e cap to the sum.
-            "state_and_local_taxes": "A5a",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -823,6 +987,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -953,10 +1118,10 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
+            "schedule_a_other_deductions": "A6",
             # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
             # runs the State and Local Tax Deduction Worksheet on the sum.
-            "state_and_local_taxes": "A5a",
+            "schedule_a_state_and_local_taxes": "A5a",
             # Schedule 1-A (OTS reads it when the return carries S1A_2a, which
             # the template always does): line 4a W-2 box 7 tips, line 14a
             # W-2 box 1 overtime, and line 22 column (iii) for one vehicle,
@@ -997,6 +1162,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1127,8 +1293,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1160,6 +1326,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1259,8 +1426,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1292,6 +1459,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1327,8 +1495,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1360,6 +1528,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1395,8 +1564,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # This assumes 'schedule_1_income' consolidates all other income reported in Schedule 1
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1428,6 +1597,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1463,8 +1633,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # Assumes 'schedule_1_income' consolidates all Schedule 1 income types
-            "itemized_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "incentive_stock_option_gains": "AMTws3",
@@ -1495,6 +1665,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1530,8 +1701,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_21",  # Assuming 'Other income' covers Schedule 1 income types
-            "itemized_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "incentive_stock_option_gains": "AMTws3",  # Other adjustments under AMT
@@ -1562,6 +1733,7 @@ _NATURAL_FORM_CONFIG = [
         "input_map": {
             "filing_status": _ma_filing_status,
             "w2_income": "L3",
+            "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
         },
         "output_map": {
@@ -1812,3 +1984,31 @@ def _build_subordinate_config() -> dict[int, list[SubordinateFormConfig]]:
 
 
 SUBORDINATE_FORM_CONFIG = _build_subordinate_config()
+
+
+METADATA_OUTPUT_FIELDS: tuple[str, ...] = ("assumptions",)
+"""InterpretedTaxReturn fields that describe the computation rather than report a
+number; None on a failed return."""
+
+NUMERIC_OUTPUT_FIELDS: tuple[str, ...] = (
+    "total_tax",
+    "federal_adjusted_gross_income",
+    "federal_effective_tax_rate",
+    "federal_tax_bracket",
+    "federal_taxable_income",
+    "federal_qbi_deduction",
+    "federal_amt",
+    "federal_income_tax",
+    "federal_se_tax",
+    "federal_niit",
+    "federal_additional_medicare_tax",
+    "federal_child_tax_credit",
+    "federal_total_tax",
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+"""The numeric outputs, NaN on a failed return. Written out, not derived, so a
+field added to InterpretedTaxReturn must be classified (state_facts_test)."""

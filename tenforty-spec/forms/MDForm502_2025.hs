@@ -6,6 +6,7 @@ module MDForm502_2025
 where
 
 import FormRefs
+import StateTaxTable
 import TablesMD2025
 import TenForty
 
@@ -137,15 +138,22 @@ mdForm502_2025 = form "md_502" 2025 $ do
 
   -- Line 21: Maryland state tax
   -- Maryland uses two different bracket schedules based on filing status:
+  -- Instruction 17 (2024 and 2025 resident booklets): "You must use the tax
+  -- tables if your taxable income is less than $100,000"; at $100,000 or more,
+  -- Worksheet 17A applies the rate schedule to the cent. The table (PDF
+  -- pp.34-40) has one column for every status: its rows are the schedule at
+  -- the row midpoint, rounded half up, except the opening 0-50 row, printed 0.
+  -- Rows are 0-50, 50-75, 75-100, then $50 to 100,000; every row is checked in
+  -- tests/md_502_tax_table_test.py (tenforty-tj2.20).
   -- Schedule I: Single, MFS, Dependent
   -- Schedule II: MFJ, HoH, QSS
   taxSingle <-
     interior "TaxSingle" "tax_schedule_i" $
-      bracketTax "md_brackets_single_2025" l20
+      mdTaxOnAmount "md_brackets_single_2025" l20
 
   taxJoint <-
     interior "TaxJoint" "tax_schedule_ii" $
-      bracketTax "md_brackets_joint_2025" l20
+      mdTaxOnAmount "md_brackets_joint_2025" l20
 
   l21 <-
     keyOutput "L21" "md_state_tax" "Maryland State tax" $
@@ -216,3 +224,14 @@ mdForm502_2025 = form "md_502" 2025 $ do
       "L36",
       "L37"
     ]
+
+mdTaxOnAmount :: TableId -> Expr Dollars -> Expr Dollars
+mdTaxOnAmount rateSchedule amount =
+  stateTaxTable
+    [ FixedRow 50 0,
+      GridRows 100 25 12.5,
+      GridRows 100000 50 25
+    ]
+    rateSchedule
+    (bracketTax rateSchedule amount)
+    amount

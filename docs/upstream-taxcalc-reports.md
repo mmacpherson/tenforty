@@ -5,9 +5,11 @@ Questions and observations staged for
 convention as `docs/upstream-ots-reports.md`: what we saw, how we checked it,
 and the text to file.
 
-**Status (2026-10-31): nothing here needs sending.** Reports 1–3 were fixed
-upstream before we filed them, and report 4 was withdrawn as our own error.
-Filing remains Mike's, in his own time.
+**Status (2026-11-04): nothing here needs sending.** Reports 1–3 were fixed
+upstream before we filed them, and report 4 was withdrawn as our own error. The
+2026-11-02–04 sweep found no new confirmed Tax-Calculator defect: F35 below is
+our harness, not Tax-Calculator, and the open differential residuals are
+pending adjudication (end of file). Filing remains Mike's, in his own time.
 
 ---
 
@@ -257,3 +259,37 @@ Form 1040 line 15. The form says otherwise: when line 15 is zero, line 1 is line
 reproducer, are correct. The floored reading was a defect in tenforty's own
 graph backend, fixed by `tenforty-nng`; see F26 in
 `docs/taxcalc-differential-audit.md`.
+
+---
+
+## Checked and not upstream: F35, Schedule 1-A phase-outs
+
+`docs/taxcalc-differential-audit.md` F35 recorded that Tax-Calculator 6.9.0
+phases qualified tips, overtime and car loan interest continuously, where
+Schedule 1-A lines 11, 19 and 28 step per whole $1,000. That is Tax-Calculator's
+documented default, not a defect: `calcfunctions.py` steps exactly as the form
+does when `exact == 1` ("exact calculation as on tax forms"), and smooths
+otherwise for marginal-rate work. Our adapter builds `Records` without
+`exact_calculations=True`. With it, 6.9.0 matches the form on both witnesses:
+Single, AGI $162,500, tips $20,000 gives $18,800 (Schedule 1-A line 13), and
+Single, AGI $112,500, car loan interest $10,000 gives $7,400 (line 30). Do not
+send.
+
+---
+
+## Pending adjudication — do not send
+
+Differential disagreements not yet worked through the IRS form. None is a
+claim about Tax-Calculator yet.
+
+- **OTS vs Tax-Calculator residuals:** `tenforty-k3ns`, `tenforty-w4m7`,
+  `tenforty-kji5`, `tenforty-04c`, and the OTS half of `tenforty-ifa0`. Listed
+  with their cases in `docs/upstream-ots-reports.md` ("Pending adjudication").
+  In each, the graph backend sides with Tax-Calculator or is untested, so OTS is
+  the likelier party, but none is adjudicated.
+- **Graph vs Tax-Calculator, deduction choice with ISO (`tenforty-ifa0`, graph
+  half): resolved on our side by `tenforty-q3r`.** These were 2024 HoH returns
+  with `standard_or_itemized="Standard"`, which then meant larger-of, so the
+  graph itemized to zero taxable income. `"Standard"` now forces the standard
+  deduction, and a blind derivation agrees with Tax-Calculator's taxable income
+  on all three (docs/validation/derivations/deduction-choice-2024-2025.md).

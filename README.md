@@ -61,6 +61,30 @@ installing on 3.15 builds from source; see the
 [Development Guide](./docs/develop.md) for the toolchain. Full support will be
 reconsidered after the final Python release.
 
+### Building from source
+
+`pip install tenforty` uses a prebuilt wheel where one matches your platform:
+CPython 3.10–3.15 on Linux x86_64 and aarch64 (glibc 2.28+ and musl) and on
+macOS arm64 and x86_64.
+Elsewhere it builds from the source distribution, and that build needs a
+[Rust toolchain](https://rustup.rs) as well as a C++ compiler, because the graph
+backend is compiled from Rust. Without Rust the build stops and explains why;
+it no longer installs a package that lacks the graph backend.
+
+Requiring Rust for a source build is an intermediate measure. The long-term
+answer is a prebuilt wheel for every platform, so that building from source is
+only the fallback for platforms without one.
+
+To build the legacy OTS-only package instead, without Rust, set
+`TENFORTY_WITHOUT_GRAPH=1`:
+
+```sh
+TENFORTY_WITHOUT_GRAPH=1 pip install tenforty
+```
+
+That package has no graph backend: `backend="ots"` works, and any return routed
+to the graph backend raises an error instead of falling back to OTS.
+
 
 ## Quick Start
 
@@ -372,7 +396,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC, EITC and dependent care are not modeled. |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
-| `standard_or_itemized`       | str                      | Standard            | Legacy choice: "Standard" is automatic greater-of; "Itemized" forces federal itemization ([contract](docs/deduction-choice-contract.md)) |
+| `standard_or_itemized`       | str                      | Auto                | Federal deduction election: "Auto" takes the larger; "Standard" or "Itemized" forces that choice ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
 | `qualified_dividends`        | float                    | 0.0                 |                                    |
@@ -386,7 +410,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `rental_income`              | float                    | 0.0                 |                                    |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
 | `itemized_deductions`        | float                    | 0.0                 | Aggregate approximation of other itemized deductions, outside the SALT cap. OTS enters it as Schedule A line 6 (other taxes) and the graph as line 16 (other deductions), so their AMT add-back differs |
-| `state_adjustment`           | float                    | 0.0                 |                                    |
+| `state_adjustment`           | float                    | 0.0                 | **Deprecated; avoid.** Meaning depends on state and backend; see [`state_adjustment`](#state_adjustment-deprecated) |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
 | `state_and_local_taxes`      | float                    | 0.0                 | Schedule A line 5d (entered on 5a), capped on line 5e: $10,000 ($5,000 MFS) through 2024. For 2025, $40,000 less 30% of AGI over $500,000 ($250,000 MFS), not below $10,000; MFS then halves that result (equivalently $20,000 less 15% of AGI over $250,000, not below $5,000) |
 | `qualified_tips`             | float                    | 0.0                 | 2025 only. W-2 box 7 tips already in `w2_income`; Schedule 1-A Part II, Form 1040 line 13b |
@@ -394,8 +418,24 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `vehicle_loan_interest`      | float                    | 0.0                 | 2025 only. Qualified passenger vehicle loan interest; Schedule 1-A Part IV |
 | `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
+| `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio Married/Joint returns raise until the fact is given. See [State facts](./docs/state-facts.md) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
-| `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for 2024-2025, OTS for 2018-2023); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
+| `backend`                    | str                      | ots                 | "ots", "graph", or "auto" (graph for in-scope 2024-2025 returns; OTS otherwise where covered); see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
+
+### `state_adjustment` (deprecated)
+
+`state_adjustment` is a legacy escape hatch with no single meaning, and a
+nonzero value emits a `DeprecationWarning`. We recommend against new use; named
+single-meaning inputs will replace it (tenforty-tj2.1, tenforty-tj2.2). CA and
+AL stay out of `backend="auto"` graph scope while it means different things on
+the two backends (tenforty-yu51).
+
+| Backend and state | What `state_adjustment` does |
+|---|---|
+| OTS, CA | Schedule CA Part II addition to itemized deductions (`CA540_P2_Add_6`); no effect with the standard deduction |
+| Graph, CA | Schedule CA Part I addition to income (`ca_schedule_ca_A22_24`): the opposite direction |
+| Graph, AL | The Form 40 standard deduction amount (`al_40_L12_std`) |
+| Everywhere else | OTS ignores it; the graph refuses a nonzero value |
 
 ### The `evaluate_returns` frame
 
@@ -408,7 +448,10 @@ partly failed, or mixed engines under `backend="auto"`:
 - `year` and `num_dependents` are Int64; `state`, `filing_status` and
   `standard_or_itemized` are String (`state` is null for a federal-only
   return); boolean inputs are Boolean; float inputs and every output are
-  Float64, even when you pass whole numbers.
+  Float64, even when you pass whole numbers. The four rate columns
+  (`federal_tax_bracket`, `federal_effective_tax_rate`, `state_tax_bracket`,
+  `state_effective_tax_rate`) are null where the rate is not defined; a failed
+  row is NaN.
 
 The input columns echo **your request**, after broadcasting: they identify
 which return a row answers, not the values the engine used. For example, an
@@ -434,8 +477,8 @@ orchestration layer before rerunning Form 1040.
 |---------------------------------|-------------------------------------------------------|
 | total_tax                       | Combined federal and state tax liability              |
 | federal_adjusted_gross_income   | Federal Adjusted Gross Income (Form 1040 Line 11)     |
-| federal_effective_tax_rate      | Percentage of AGI paid in federal tax                 |
-| federal_tax_bracket             | Marginal federal tax bracket (0-37%)                  |
+| federal_effective_tax_rate      | Federal total tax as a percent of federal taxable income; None when taxable income is not positive |
+| federal_tax_bracket             | Rate-schedule bracket (percent) holding federal taxable income; a threshold amount stays in the lower bracket |
 | federal_taxable_income          | Income subject to federal tax after deductions        |
 | federal_qbi_deduction           | Qualified business income deduction (Form 8995/8995-A) |
 | federal_amt                     | Federal Alternative Minimum Tax                       |
@@ -448,8 +491,14 @@ orchestration layer before rerunning Form 1040.
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |
 | state_total_tax                 | Total state tax liability                             |
-| state_tax_bracket               | Marginal state tax bracket                            |
-| state_effective_tax_rate        | Percentage of state AGI paid in state tax             |
+| state_tax_bracket               | Rate-schedule bracket (percent) holding state taxable income; None when not defined (no state, or not reported for that state) |
+| state_effective_tax_rate        | State tax as a percent of state taxable income; None when not defined |
+| assumptions                     | Recorded state conventions this computation used because no input supplied them, as `Assumption` records (`()` if none were recorded; `None` on a failed return). In `evaluate_returns`, a list of each record's JSON. See [State facts](./docs/state-facts.md) |
+
+The bracket fields are the rate schedule's own bracket, not `marginal_rate()`,
+which differentiates the computed tax. The graph reports state brackets for CA,
+NJ, NY, OH, OR and VA at full precision; OTS prints its bracket to 0.1%, so
+the two can differ in the last digit (NY 6.85% is 6.9 on OTS).
 
 
 ## Experimental: Graph Backend
@@ -465,6 +514,12 @@ with `backend="graph"`:
 ``` python
 evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
 ```
+
+For `backend="auto"`, graph scope in 2024–2025 includes federal-only returns,
+IL, MS, OR and the eight no-income-tax states. MD and NC are excluded pending
+the itemized-deduction contract (`tenforty-nuc6`): NC uses OTS, while MD auto
+returns raise `UnsupportedReturnError` because OTS does not cover Maryland.
+See [graph state scope](./docs/error-handling.md#graph-state-scope-under-auto).
 
 Compared with the default OTS backend:
 

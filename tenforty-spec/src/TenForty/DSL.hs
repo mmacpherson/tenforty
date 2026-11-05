@@ -55,6 +55,7 @@ module TenForty.DSL
 
     -- * Tax Operations
     bracketTax,
+    bracketRateAt,
     tableLookup,
     byStatusE,
     taxTableBandTax,
@@ -155,6 +156,24 @@ importForm (LineRef fid lid) = Import fid lid
 
 bracketTax :: TableId -> Expr Dollars -> Expr Dollars
 bracketTax = BracketTax
+
+-- | The statutory rate of the bracket that holds @income@, read from the same
+-- table 'bracketTax' applies. Rate schedules say "over X but not over Y", so
+-- income exactly at a threshold stays in the lower bracket. This is the rate
+-- schedule's own bracket, not a derivative of the computed tax.
+bracketRateAt :: Table -> Expr Dollars -> Expr Rate
+bracketRateAt table income =
+  case table of
+    TableBracket _ brackets -> rateFrom (bracketTableList brackets)
+    _ -> error ("bracketRateAt: " ++ show (tableId table) ++ " is not a bracket table")
+  where
+    rateFrom [] = error "bracketRateAt: empty bracket table"
+    rateFrom [top] = lit (bracketRate top)
+    rateFrom (b : rest) =
+      ifPos
+        (income .-. byStatusE (fmap lit (bracketThreshold b)))
+        (rateFrom rest)
+        (lit (bracketRate b))
 
 tableLookup :: TableId -> Expr Dollars -> Expr Dollars
 tableLookup = TableLookup

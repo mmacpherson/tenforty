@@ -22,7 +22,10 @@ from .taxcalc_policy import (
     _f32_ots_car_loan_phaseout,
     _f33_ots_skips_schedule_1a_for_mfs,
     _f34_ots_amt_omits_senior_add_back,
+    _line_12e_2025,
     modeled_deltas,
+    taxcalc_obbba_fields,
+    taxcalc_schedule_a_fields,
     tolerance,
 )
 
@@ -97,7 +100,7 @@ def test_f12_reserves_the_preferential_worksheet_displacement():
     assert model["amt"].maximum == pytest.approx(27_500.0)
 
 
-def test_f19_does_not_model_amt_sensitive_deduction_choice():
+def test_f19_does_not_model_amt_sensitive_deduction_choice_without_selection():
     """An ISO preference can make larger itemization lower total tax."""
     case = _case(
         status="Head_of_House",
@@ -118,7 +121,7 @@ def test_f19_does_not_match_when_taxcalc_selected_itemization(backend):
         ltcg=143_748.0,
         qual_div=0.0,
         itemized=21_183.0,
-        std_or_item="Standard",
+        std_or_item="Auto",
         qbi_w2_wages=10_000.0,
         qbi_ubia=231.0,
         qbi_is_sstb=True,
@@ -133,9 +136,9 @@ def test_f19_does_not_match_when_taxcalc_selected_itemization(backend):
 
 
 @pytest.mark.parametrize("backend", ["ots", "graph"])
-@pytest.mark.parametrize("mode", ["Standard", "Itemized"])
+@pytest.mark.parametrize("mode", ["Auto", "Itemized"])
 def test_f19_keeps_the_exact_delta_for_the_real_standard_deduction_tie(backend, mode):
-    """Current Standard means auto; only the reference keeps standard in this tie."""
+    """Auto and Itemized take Schedule A; only the reference keeps standard here."""
     case = _case(
         year=2025,
         status="Head_of_House",
@@ -171,7 +174,7 @@ def test_f19_requires_affirmative_reference_deduction_selection(selection):
         status="Head_of_House",
         ltcg=58_509.0,
         itemized=56_482.0,
-        std_or_item="Standard",
+        std_or_item="Auto",
     )
 
     assert (
@@ -182,14 +185,14 @@ def test_f19_requires_affirmative_reference_deduction_selection(selection):
     )
 
 
-def test_f19_does_not_assume_the_future_auto_mode_has_been_implemented():
-    """q3r must deliberately update the automatic-mode assumption and tie tests."""
+def test_f19_does_not_excuse_forced_standard():
+    """Forced Standard takes the standard deduction, as TaxCalc does here (q3r)."""
     case = _case(
         year=2025,
         status="Head_of_House",
         ltcg=58_509.0,
         itemized=56_482.0,
-        std_or_item="Auto",
+        std_or_item="Standard",
     )
     reference = {
         "taxable_income": 34_884.0,
@@ -455,7 +458,7 @@ def test_f28_respects_the_taxable_income_floor():
 
 
 def _obbba_case(**updates):
-    defaults = {"year": 2025, "itemized": 0.0, "iso": 0.0, "std_or_item": "Standard"}
+    defaults = {"year": 2025, "itemized": 0.0, "iso": 0.0, "std_or_item": "Auto"}
     return _case(**{**defaults, **updates})
 
 
@@ -766,3 +769,85 @@ def test_f31_without_business_income_keeps_amti_fixed():
     )
 
     assert delta["amt"] == DeltaRange(0.0, 0.37 * 7_500.0)
+
+
+# --- Forced standard deduction (tenforty-q3r) -------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("election", "expected"),
+    [
+        ("Auto", {"e19200": 30_000.0, "e18400": 8_000.0}),
+        ("Itemized", {"e19200": 30_000.0, "e18400": 8_000.0}),
+        ("Standard", {"e19200": 0.0, "e18400": 0.0}),
+    ],
+)
+def test_taxcalc_gets_no_schedule_a_when_standard_is_forced(election, expected):
+    """TaxCalc has no election switch; forced Standard files no Schedule A."""
+    case = _case(itemized=30_000.0, salt=8_000.0, std_or_item=election)
+
+    assert taxcalc_schedule_a_fields(case) == expected
+    assert taxcalc_obbba_fields(case, 1)["e18400"] == expected["e18400"]
+
+
+@pytest.mark.parametrize(
+    ("election", "expected"),
+    [("Auto", 40_000.0), ("Itemized", 40_000.0), ("Standard", 15_750.0)],
+)
+def test_line_12e_follows_the_election(election, expected):
+    """The 2025 deduction tenforty takes under each election, Single."""
+    case = _case(year=2025, status="Single", std_or_item=election)
+
+    assert _line_12e_2025(case, 40_000.0) == expected
+
+
+def test_f28_covers_taxcalc_itemizing_zero_under_forced_standard():
+    """With no Schedule A offered, TaxCalc may still elect to itemize zero."""
+    case = _case(
+        status="Head_of_House",
+        se=125_000.0,
+        iso=50_000.0,
+        itemized=60_000.0,
+        std_or_item="Standard",
+    )
+    reference = {
+        "standard_deduction": 0.0,
+        "itemized_deduction": 0.0,
+        "taxable_income": 92_935.23,
+        "qbi_deduction": 0.0,
+    }
+
+    model = _f28_taxcalc_elects_itemizing_below_the_standard_deduction(
+        "graph", case, reference
+    )
+
+    # Below the QBI threshold: the full 2024 HoH standard deduction at most,
+    # and at least 80% of it.
+    assert model["taxable_income"] == DeltaRange(-21_900.0, -0.8 * 21_900.0)
+
+
+@pytest.mark.parametrize("backend", ["ots", "graph"])
+def test_f19_keeps_the_tie_when_taxcalc_kept_standard_despite_an_iso_spread(backend):
+    """Differential witness: forced itemization onto 0%-bracket dividends, ISO 100,001."""
+    case = _case(
+        year=2025,
+        status="Widow(er)",
+        w2=171.0,
+        interest=464.0,
+        se=149.0,
+        ltcg=-31_738.0,
+        ord_div=33_955.0,
+        qual_div=33_955.0,
+        itemized=59_999.0,
+        iso=100_001.0,
+        std_or_item="Itemized",
+    )
+    reference = {
+        "taxable_income": 239.0,
+        "standard_deduction": 31_500.0,
+        "itemized_deduction": 0.0,
+    }
+
+    assert _f19_deduction_choice_rule(backend, case, reference) == {
+        "taxable_income": DeltaRange.exact(-239.0)
+    }

@@ -12,6 +12,7 @@ Their inputs and federal expectations are unchanged.
 | --- | --- | --- |
 | New CA whole returns | Independent derivation, including table lookups | [CA 2024](CA-2024.md) |
 | New MS whole returns | Independent derivation | [MS 2024–2025](MS-2024-2025.md) |
+| OR 2024–2025 subtraction, regular exemption credit, charts and all 1,004 tax-table rows | Independent state derivations (Sol and fresh Astra review), with stipulated eligible federal liabilities; published table rows | [OR 2024–2025](OR-2024-2025.md), with links to the original archive, errata, and Astra’s thirteen-value/rounding records |
 | New VT whole returns | Independent derivation, including table lookups | [VT 2024–2025](VT-2024-2025.md) |
 | VT Line 5 exemption returns, 16 wage-only cases incl. MFS/QW/dependents (b72.19) | Independent derivation, including table lookups; second blind deriver, 2026-10-07 | Same VT record, second section |
 | VT parameter assertions | Published table rows / instruction amounts | Same VT record; parameters are not whole-return examples |
@@ -29,6 +30,11 @@ Their inputs and federal expectations are unchanged.
 | ME 2024–2025, eighteen wage-only returns (b72.36, 2026-10-07; the five legacy ME rows keep only their federal checks, as unverified legacy) | Independent derivation; line 20 below $100k is a published table row (either method is legal) | [ME 2024–2025](ME-2024-2025.md) |
 | IN 2024–2025, sixteen wage-only returns | Independent derivation; Indiana DOR PDFs only, no repository access or software output (2026-10-07) | [IN 2024–2025](IN-2024-2025.md) |
 | HI 2024–2025, fourteen wage-only returns (b72.33) | Independent derivation of taxable income; tax from published table rows below $100,000 and the statutory schedule above. Blind deriver used official PDFs only | [HI 2024–2025](HI-2024-2025.md) |
+| CO 2024–2025, 26 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [CO 2024–2025](CO-2024-2025.md) |
+| GA 2024–2025, 22 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [GA 2024–2025](GA-2024-2025.md) |
+| IL 2024–2025, 24 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [IL 2024–2025](IL-2024-2025.md) |
+| NC 2024–2025, 46 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [NC 2024–2025](NC-2024-2025.md) |
+| OH 2024–2025, 32 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [OH 2024–2025](OH-2024-2025.md) |
 
 For the two VA joint cases, wages are attributed entirely to the primary filer,
 so the official Spouse Tax Adjustment is zero. The simplified graph's

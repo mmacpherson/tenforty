@@ -149,8 +149,23 @@ nj1040_2024 = form "nj_1040" 2024 $ do
     keyOutput "L58" "amount_owed" "Amount owed" $
       l46 `subtractNotBelowZero` l56
 
+  -- The rate-schedule bracket that holds l39, as tax per dollar: the
+  -- same table as the tax, with a threshold amount in the lower bracket.
+  let rateBySchedule =
+        byStatusE $
+          byStatus
+            (bracketRateAt njBracketsSingleTable2024 l39)
+            (bracketRateAt njBracketsMfjTable2024 l39)
+            (bracketRateAt njBracketsSingleTable2024 l39)
+            (bracketRateAt njBracketsMfjTable2024 l39)
+            (bracketRateAt njBracketsMfjTable2024 l39)
+  _ <-
+    keyOutput "L39BracketRate" "nj_bracket_rate" "Rate-schedule bracket at taxable income" $
+      dollars 1 .*. rateBySchedule
+
   outputs
-    [ "L14",
+    [ "L39BracketRate",
+      "L14",
       "L29",
       "L39",
       "L40",

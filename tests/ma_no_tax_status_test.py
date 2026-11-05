@@ -5,8 +5,8 @@ Positive-side checks assert structure, not an independently derived tax amount.
 2024 instructions PDF pp.12-13 and 2025 pp.13-14, retrieved 2026-10-02:
 https://www.mass.gov/doc/2024-form-1-instructions/download
 https://www.mass.gov/doc/2025-form-1-instructions/download
-Raw worksheet facts use the form's income decomposition. These tests do not
-certify the existing MA L10 federal-AGI approximation for arbitrary returns.
+Raw worksheet facts use the form's income decomposition. Line 10 is built from
+the federal income lines (b72.39); see tests/ma_form1_income_test.py.
 NTS activation excludes represented investment/capital facts until b72.40
 models the pre-excess-exemption amounts. This is a capability restriction,
 not a statutory denial of No Tax Status to investment-income filers.
@@ -109,29 +109,29 @@ def test_abandoned_building_addback_precedes_the_worksheet_floor():
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize(
-    "node",
-    [
-        "L20_interest_dividend_income",
-        "L23a_short_term_gains",
-        "L23b_collectibles_gains",
-        "L24_long_term_gains",
-    ],
-)
+@pytest.mark.parametrize("node", ["L23b_collectibles_gains"])
 @pytest.mark.parametrize("amount", [-100, 100])
 def test_non_derivable_raw_capital_facts_disable_nts(year, node, amount):
-    """Nonzero taxable buckets do not certify pre-exemption worksheet income."""
+    """The raw collectibles bucket does not certify pre-exemption income.
+
+    Lines 20, 23a and 24 now derive from federal facts through Schedules B and
+    D (b72.6); those facts disable NTS at their source (see below).
+    """
     runtime = _runtime(year, wages=7_500, **{node: amount})
     assert runtime.eval("ma_1_L27_no_tax_status") == 0
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-def test_raw_long_term_gains_are_not_silently_zeroed(year):
-    """The old $205 computation survives without any new worksheet fact."""
-    runtime = _runtime(year, wages=7_500, L24_long_term_gains=1_000)
+def test_long_term_gains_are_not_silently_zeroed(year):
+    """A federal long-term gain reaches line 24 and its 5% tax, without NTS."""
+    runtime = _runtime(year, wages=7_500)
+    runtime.set("us_schedule_d_L8a_long_term_totals", 1_000)
     assert runtime.eval("ma_1_L27_no_tax_status") == 0
-    # Structural preservation: 5% * (7500 - 4400) + 5% * 1000.
-    assert runtime.eval("ma_1_L28_ma_total_tax") == 205
+    assert runtime.eval("ma_1_L24_long_term_gains") == 1_000
+    # Structure: 5% of line 21 plus 5% of line 24.
+    assert runtime.eval("ma_1_L28_ma_total_tax") == pytest.approx(
+        0.05 * runtime.eval("ma_1_L21_combined_income") + 0.05 * 1_000
+    )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -158,10 +158,10 @@ def test_every_federal_investment_fact_disables_nts(year, amount):
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_signed_capital_cancellation_does_not_enable_nts(year):
     """Neither cross-bucket nor within-schedule cancellation hides raw facts."""
-    raw = _runtime(
-        year, wages=7_500, L23a_short_term_gains=100, L24_long_term_gains=-100
-    )
-    assert raw.eval("ma_1_L27_no_tax_status") == 0
+    across = _runtime(year, wages=7_500)
+    across.set("us_schedule_d_L1a_short_term_totals", 100)
+    across.set("us_schedule_d_L8a_long_term_totals", -100)
+    assert across.eval("ma_1_L27_no_tax_status") == 0
     federal = _runtime(year, wages=7_500)
     federal.set("us_schedule_d_L1a_short_term_totals", 100)
     federal.set("us_schedule_d_L1b_short_term_basis_reported", -100)
@@ -234,8 +234,12 @@ def test_federal_ira_deduction_cannot_create_ma_no_tax_status(year):
     runtime.set("us_schedule_1_L20_ira_deduction", 200)
     assert runtime.eval("us_1040_L11_agi") == 7_900
     assert runtime.eval("ma_1_L27_no_tax_status") == 0
-    # Preserve the inherited non-NTS computation; b72.39 owns its income proxy.
-    assert runtime.eval("ma_1_L28_ma_total_tax") == 175
+    # Line 10 is built from income lines, so the IRA deduction never reaches it
+    # (b72.39); line 11 is 7.65% of wages under the $2,000 cap.
+    assert runtime.eval("ma_1_L10_ma_total_income") == 8_100
+    assert runtime.eval("ma_1_L28_ma_total_tax") == pytest.approx(
+        0.05 * (8_100 - 0.0765 * 8_100 - 4_400)
+    )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -260,8 +264,6 @@ def test_form_4797_loss_cannot_create_ma_no_tax_status(year, node):
     assert runtime.eval("us_1040_L11_agi") == 7_800
     assert runtime.eval("us_1040_NonWageIncomeMagnitude") == 1_000
     assert runtime.eval("ma_1_L27_no_tax_status") == 0
-    # Preserve the old non-NTS calculation, not a fully reconciled MA tax value.
-    assert runtime.eval("ma_1_L28_ma_total_tax") == 170
 
 
 @pytest.mark.parametrize("year", [2024, 2025])

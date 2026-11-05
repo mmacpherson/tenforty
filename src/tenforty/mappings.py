@@ -9,7 +9,7 @@ from .models import STATE_TO_FORM, OTSFilingStatus, OTSState, TaxReturnInput
 
 NATURAL_TO_NODE = {
     # Federal (1040)
-    "standard_or_itemized": "us_1040_ForceItemized",
+    "standard_or_itemized": "us_1040_DeductionChoice",
     "w2_income": "us_1040_L1a_wages",
     "taxable_interest": "us_1040_L2b_taxable_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
@@ -278,6 +278,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L17_ca_agi",
             "state_taxable_income": "L19_ca_taxable_income",
+            "state_tax_bracket": "L19BracketRate_ca_bracket_rate",
             "state_total_tax": "L64_ca_total_tax",
         },
     ),
@@ -398,9 +399,16 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.IL: StateGraphConfig(
         # IL-1040 imports federal AGI and applies additions/subtractions.
-        # Exemptions are accepted as total input (num_dependents cannot map to
-        # dollar amounts due to natural_to_node limitation).
-        natural_to_node={},
+        # Line 10 counts the filer/spouse base plus TOTAL dependents, independent
+        # of the federal CTC subset. Existing age facts add $1,000 per eligible
+        # box; the IL spouse age box applies only to MFJ. The federal-AGI income
+        # exception removes the whole allowance. dependent_exemptions is not
+        # mapped; claimable-filer and blind variants remain unsupported.
+        natural_to_node={
+            "num_dependents": "il_1040_Dependents",
+            "filer_65_or_older": "il_1040_Filer65",
+            "spouse_65_or_older": "il_1040_Spouse65",
+        },
         outputs={
             "state_adjusted_gross_income": "L9_il_base_income",
             "state_taxable_income": "L11_il_net_income",
@@ -500,19 +508,22 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.MA: StateGraphConfig(
-        # MA Form 1 imports federal AGI and applies Massachusetts-specific
-        # exemptions. Massachusetts uses a flat 5% base rate on most income
-        # plus a 4% surtax on income over $1,053,750 (2024) / $1,083,150 (2025).
-        # Also applies 8.5% rate on short-term capital gains and 12% on long-term
-        # collectibles. Exemptions are filing-status based (Single: $4,400,
-        # MFJ: $8,800, HoH: $6,800) plus $1,000 per dependent, $700 for age 65+,
-        # and $2,200 for blindness. All exemptions are accepted as total input
-        # (num_dependents cannot map to dollar amounts).
-        # Note: L10 is an import node (imports federal AGI) so we use L17
-        # (income after deductions) as state AGI proxy.
+        # MA Form 1 builds line 10 (5% income) from the federal income lines,
+        # not federal AGI, and routes interest, dividends and capital gains
+        # through Schedules B and D: 5% on interest/dividends and long-term
+        # gains, 8.5% on short-term gains, 12% on collectibles (raw input only),
+        # plus a 4% surtax over $1,053,750 (2024) / $1,083,150 (2025). Line 11,
+        # Social Security/Medicare/SE tax paid capped at $2,000 per person, is
+        # derived; w2_income is a household aggregate, so a joint return takes
+        # the one-earner reading: for two earners at most the marginal rate on
+        # $2,000 high, $100 at 5% or $180 once the 4% surtax applies.
+        # Exemptions are filing-status based (Single: $4,400, MFJ: $8,800,
+        # HoH: $6,800); other exemptions are accepted as total input
+        # (num_dependents cannot map to dollar amounts). State AGI is line 10,
+        # the figure OTS reports for MA_1.
         natural_to_node={},
         outputs={
-            "state_adjusted_gross_income": "L17_ma_income_after_deductions",
+            "state_adjusted_gross_income": "L10_ma_total_income",
             "state_taxable_income": "L19_ma_taxable_income",
             "state_total_tax": "L28_ma_total_tax",
         },
@@ -626,8 +637,13 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NC: StateGraphConfig(
+        # D-400 line 10a uses CTC qualifying children, not total dependents.
+        # The same derived count feeds Schedule 8812: num_ctc_dependents when
+        # specified, otherwise num_dependents. Qualifying relatives get no NC
+        # child deduction. D-401 p.13 and archived nc-2024-2025.md case8/A6.
         natural_to_node={
             "itemized_deductions": "nc_d400_L10_itemized",
+            "schedule_8812_qualifying_children": "nc_d400_QualifyingChildren",
         },
         outputs={
             "state_adjusted_gross_income": "L6_federal_agi",
@@ -683,6 +699,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L14_federal_agi",
             "state_taxable_income": "L39_nj_taxable_income",
+            "state_tax_bracket": "L39BracketRate_nj_bracket_rate",
             "state_total_tax": "L46_nj_total_tax",
         },
     ),
@@ -701,16 +718,18 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.NY: StateGraphConfig(
-        # NY IT-201 exemptions involve age and dependent count; natural_to_node
-        # cannot map these correctly because the graph expects dollar
-        # values directly (no arithmetic): num_dependents is a count (e.g. 2)
-        # but L36 expects a dollar amount ($2,000 = 2 * $1,000/dependent).
+        # The household credit reads total dependents directly, independently
+        # of the federal qualifying-child count. L36 exemption dollars remain
+        # separate (tenforty-b72.49). Natural NY MFS needs spouse information
+        # available only as raw graph inputs and is refused by the backend.
         natural_to_node={
+            "num_dependents": "ny_it201_HouseholdDependents",
             "itemized_deductions": "ny_it201_L34_itemized",
         },
         outputs={
             "state_adjusted_gross_income": "L33_ny_agi",
             "state_taxable_income": "L37_ny_taxable_income",
+            "state_tax_bracket": "L38BracketRate_ny_bracket_rate",
             "state_total_tax": "L46_ny_total_state_tax",
         },
     ),
@@ -772,13 +791,16 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
     ),
     OTSState.OH: StateGraphConfig(
         # OH IT-1040 imports federal AGI and applies state additions/deductions.
-        # Personal exemptions are income-based (tiered by MAGI) and must be
-        # calculated by user, so they are accepted as total input.
-        # Ohio has no standard deduction system.
-        natural_to_node={},
+        # The spec tiers personal/spouse and total dependent exemptions by MAGI.
+        # num_dependents is independent of the federal Schedule 8812 CTC subset.
+        # dependent_exemptions is not mapped. Claimable-filer cases and business
+        # income/deduction adjustments are outside this ordinary-income surface.
+        # Joint-credit spouse qualifying incomes remain raw graph controls.
+        natural_to_node={"num_dependents": "oh_it1040_Dependents"},
         outputs={
             "state_adjusted_gross_income": "L4_oh_agi",
             "state_taxable_income": "L9_oh_taxable_nonbusiness_income",
+            "state_tax_bracket": "L9BracketRate_oh_bracket_rate",
             "state_total_tax": "L25_total_tax_liability",
         },
     ),
@@ -806,6 +828,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L7_federal_agi",
             "state_taxable_income": "L23_or_taxable_income",
+            "state_tax_bracket": "L24BracketRate_or_bracket_rate",
             "state_total_tax": "L32_or_total_tax",
         },
     ),
@@ -822,6 +845,7 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         outputs={
             "state_adjusted_gross_income": "L8_va_agi",
             "state_taxable_income": "L13_va_taxable_income",
+            "state_tax_bracket": "L13BracketRate_va_bracket_rate",
             "state_total_tax": "L18_total_tax",
         },
     ),

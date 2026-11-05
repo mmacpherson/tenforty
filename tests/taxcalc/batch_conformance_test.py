@@ -15,10 +15,10 @@ from pathlib import Path
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
-from tenforty.models import InterpretedTaxReturn
+from tenforty.models import NUMERIC_OUTPUT_FIELDS, InterpretedTaxReturn
 
 FIXTURE = Path(__file__).parent / "fixtures" / "taxcalc_goldens.json"
-OUTPUT_FIELDS = tuple(InterpretedTaxReturn.model_fields)
+OUTPUT_FIELDS = NUMERIC_OUTPUT_FIELDS
 
 
 def _graph_available() -> bool:
@@ -57,10 +57,18 @@ def _scalar_result(case: dict, backend: str) -> InterpretedTaxReturn:
 def _assert_full_output_row(df, row: int, scalar: InterpretedTaxReturn) -> None:
     missing = set(OUTPUT_FIELDS) - set(df.columns)
     assert not missing, f"batch dropped public output columns: {sorted(missing)}"
+    assert df["assumptions"][row].to_list() == [
+        record.to_json() for record in scalar.assumptions
+    ]
     mismatches = []
     for field in OUTPUT_FIELDS:
-        batch_value = float(df[field][row])
-        scalar_value = float(getattr(scalar, field))
+        batch_raw, scalar_raw = df[field][row], getattr(scalar, field)
+        if batch_raw is None or scalar_raw is None:
+            if batch_raw is not scalar_raw:
+                mismatches.append(f"{field}: batch={batch_raw} scalar={scalar_raw}")
+            continue
+        batch_value = float(batch_raw)
+        scalar_value = float(scalar_raw)
         if abs(batch_value - scalar_value) > 0.02:
             mismatches.append(
                 f"{field}: batch={batch_value:,.2f} scalar={scalar_value:,.2f}"
