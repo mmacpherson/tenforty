@@ -125,3 +125,47 @@ def twin_output(case: dict, output: str, offsets: dict[str, float]) -> float:
         TaxReturnInput(**case), output
     )
     return sum(evaluator.eval(node) for node in output_nodes)
+
+
+# A step short enough to sit inside one piece of the piecewise-linear twin, yet
+# long enough that a rounding error of a few ulps in a value near $200,000 moves
+# the slope by well under the tests' 1e-4 tolerance.
+SMALL_STEP = 1e-3
+_LINEAR_TOLERANCE = 1e-4
+
+
+def linear_path_slope(
+    case: dict, wrt: str, output: str, step: float, evaluate
+) -> float | None:
+    """Slope of the evaluation path where it is linear around ``case``, else None.
+
+    Where the Tax Table prices line 16 the path is the planning twin frozen at
+    ``case``; elsewhere ``evaluate(probe)`` gives the public output. The path is
+    taken as linear only when the forward and backward slopes over ``step`` and
+    over ``SMALL_STEP`` all agree. Comparing the step-wide slopes alone misses a
+    jump on each side that happens to match (tenforty-fd1j: the twin switches
+    between the opening Tax Table rows at 5, 15 and 25), and the short slopes
+    alone miss a kink between the two scales. Agreement at these five points is
+    a rejection heuristic, not a proof that the path is linear between them;
+    known boundaries keep their own direct tests.
+    """
+    from .helpers import federal_tax_table_applies
+
+    value = float(case.get(wrt, 0.0))
+    deltas = (-step, -SMALL_STEP, 0.0, SMALL_STEP, step)
+    probes = [{**case, wrt: value + delta} for delta in deltas]
+    if federal_tax_table_applies(probes):
+        offsets = row_offsets(case)
+        values = [twin_output(p, output, offsets) for p in probes]
+    else:
+        values = [evaluate(p) for p in probes]
+    far_below, near_below, center, near_above, far_above = values
+    slopes = (
+        (center - far_below) / step,
+        (center - near_below) / (value - (value - SMALL_STEP)),
+        (near_above - center) / ((value + SMALL_STEP) - value),
+        (far_above - center) / step,
+    )
+    if max(slopes) - min(slopes) >= _LINEAR_TOLERANCE:
+        return None
+    return (far_above - far_below) / (2 * step)
