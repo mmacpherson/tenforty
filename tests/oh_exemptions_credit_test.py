@@ -10,9 +10,10 @@ from functools import lru_cache
 
 import pytest
 
-from tenforty import evaluate_return
+from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Graph, Runtime
+from tenforty.state_facts import OH
 
 from .fixtures.state_official_cases import OH_CASES
 
@@ -94,6 +95,76 @@ def test_archived_split_earner_returns_through_raw_controls(
     runtime = _runtime(year, "married_joint", agi, dependents, agi / 2, agi / 2)
     assert runtime.eval("oh_it1040_L9_oh_taxable_nonbusiness_income") == taxable
     assert runtime.eval("oh_it1040_L25_total_tax_liability") == tax
+
+
+@pytest.mark.parametrize("year,agi,dependents,taxable,tax", RAW_JOINT_CASES)
+def test_archived_split_earner_returns_through_required_fact(
+    year, agi, dependents, taxable, tax
+):
+    """The same blind cases 5-7, 9, 20-21 through the natural API."""
+    result = evaluate_return(
+        year=year,
+        state="OH",
+        filing_status="Married/Joint",
+        w2_income=agi,
+        num_dependents=dependents,
+        state_facts=OH(spouses_both_have_qualifying_income=True),
+        backend="graph",
+    )
+    assert (result.state_taxable_income, result.state_total_tax) == (taxable, tax)
+    assert result.assumptions == ()
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("agi", [749_999, 750_000, 750_001])
+def test_fact_does_not_bypass_the_2025_magi_limit(year, agi):
+    """Source-only oh-joint-filing-credit-2024-2025.md A5/B5: MAGI <750000.
+
+    A comparison of the supplied facts tests eligibility without inventing a
+    new expected whole-return tax amount. These wage-only inputs have no Ohio
+    adjustments, so MAGI equals wages.
+    """
+    results = [
+        evaluate_return(
+            year=year,
+            state="OH",
+            filing_status="Married/Joint",
+            w2_income=agi,
+            state_facts=OH(spouses_both_have_qualifying_income=value),
+            backend="graph",
+        )
+        for value in [False, True]
+    ]
+    if year == 2025 and agi >= 750_000:
+        assert results[1].state_total_tax == results[0].state_total_tax
+    else:
+        assert results[1].state_total_tax < results[0].state_total_tax
+
+
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.parametrize("value", [False, True])
+@pytest.mark.parametrize(
+    "year,single,one_earner,two_earner",
+    [(2024, 1235, 1176, 1058), (2025, 1217, 1157, 1041)],
+)
+def test_real_fact_lowering_in_mixed_status_batches(
+    mode, value, year, single, one_earner, two_earner
+):
+    """Blind cases 2, 5 and 5b: only the MFJ row reads the supplied fact."""
+    frame = evaluate_returns(
+        year=year,
+        state="OH",
+        filing_status=["Single", "Married/Joint"],
+        w2_income=60_000.0,
+        state_facts=OH(spouses_both_have_qualifying_income=value),
+        backend="graph",
+        mode=mode,
+    )
+    assert frame["state_total_tax"].to_list() == [
+        single,
+        two_earner if value else one_earner,
+    ]
+    assert frame["assumptions"].to_list() == [[], []]
 
 
 @pytest.mark.parametrize("year,one,two", [(2024, 1176, 1058), (2025, 1157, 1041)])

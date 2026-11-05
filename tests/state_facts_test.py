@@ -65,7 +65,9 @@ def oh_lowering(monkeypatch):
         return {}
 
     monkeypatch.setitem(graph_backend.FACT_LOWERINGS, ("OH", OH_FIELD), lower)
-    monkeypatch.delitem(graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD))
+    monkeypatch.delitem(
+        graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), raising=False
+    )
     return received
 
 
@@ -190,17 +192,17 @@ def test_every_graph_lowering_computes_every_value():
 
 
 @requires_graph
-def test_interim_oh_lowering_computes_false_and_refuses_true(engine_calls):
-    """False is exact on the current OH spec (no credit); True is refused first."""
-    with pytest.raises(UnsupportedInputError, match=r"b72\.53"):
-        evaluate_return(
-            **_oh(), state_facts=OH(spouses_both_have_qualifying_income=True)
+@pytest.mark.parametrize("year,one,two", [(2024, 1176, 1058), (2025, 1157, 1041)])
+def test_oh_lowering_computes_both_supplied_values(engine_calls, year, one, two):
+    """Independent archived OH cases 5/5b; no OH assumption is recorded."""
+    for value, expected in [(False, one), (True, two)]:
+        result = evaluate_return(
+            **_oh(year=year, w2_income=60_000),
+            state_facts=OH(spouses_both_have_qualifying_income=value),
         )
-    assert engine_calls == []
-    result = evaluate_return(
-        **_oh(), state_facts=OH(spouses_both_have_qualifying_income=False)
-    )
-    assert result.state_total_tax > 0
+        assert result.state_total_tax == expected
+        assert result.assumptions == ()
+    assert engine_calls == ["graph", "graph"]
 
 
 @requires_graph
