@@ -67,15 +67,29 @@ def _ohio_natural_joint_credit_values(
 
 
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
-    """Lower a validated public input model to graph-compatible natural values."""
+    """Lower a validated public input model to graph-compatible natural values.
+
+    federal_itemized lowers as two naturals: its regular-tax amount through the
+    same nodes as the legacy itemized_deductions (Schedule A line 16, and for
+    now each state line the legacy scalar reaches), and the AMT difference,
+    regular_tax - amt, which Form 6251 adds to AMTI only when the return
+    itemizes. The legacy scalar has no difference: graph allows it all for the
+    AMT, its shipped convention.
+    """
     values = tax_input.model_dump(
         exclude=_MODEL_CONTEXT_FIELDS
         | _CARRIED_BY_DERIVED_FIELDS
         | _OTS_ONLY_DERIVED_FIELDS
+        | {"federal_itemized"}
     )
     values["standard_or_itemized"] = DEDUCTION_CHOICE_ENCODING[
         tax_input.standard_or_itemized
     ]
+    model = tax_input.federal_itemized
+    values["itemized_amt_difference"] = 0.0
+    if model is not None:
+        values["itemized_deductions"] = model.regular_tax
+        values["itemized_amt_difference"] = model.regular_tax - model.amt
     return values
 
 
@@ -127,6 +141,9 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_form_8812_L14_ctc_odc": "federal_child_tax_credit",
 }
 FEDERAL_BRACKET_RATE_NODE = "us_1040_L15BracketRate_ordinary_bracket_rate"
+USES_ITEMIZED_NODE = "us_1040_UsesItemized"
+FEDERAL_ITEMIZES = "federal_itemizes"
+"""Internal batch column: whether each row's Form 1040 used Schedule A."""
 _FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}
 
 _STATE_ZERO_FIELDS = (
@@ -442,6 +459,35 @@ def _require_ms_perturbation_ownership(
         )
 
 
+def _require_prepared_amounts_fixed(
+    tax_input: TaxReturnInput, inputs: list[str]
+) -> None:
+    """Refuse a derivative or solve axis that carries a prepared itemized amount.
+
+    Checked on resolved input nodes, so a natural name, a bare node and a
+    prefixed node are refused alike. The AMT-difference carrier is internal to
+    federal_itemized and is never an axis. When federal_itemized is supplied,
+    its regular-tax carriers (Schedule A line 16 and any state line it is
+    forwarded to) are held fixed too; the legacy itemized_deductions axis
+    stays available when it is the input in use.
+    """
+    year = tax_input.year.value
+    carriers = set(
+        _lowered_input_nodes("itemized_amt_difference", tax_input.state, year)
+    )
+    if tax_input.federal_itemized is not None:
+        carriers |= set(
+            _lowered_input_nodes("itemized_deductions", tax_input.state, year)
+        )
+    named = sorted(carriers.intersection(inputs))
+    if named:
+        raise ValueError(
+            f"{', '.join(named)} carries a federal_itemized amount, which is "
+            "unsupported as a derivative or solve axis: federal_itemized amounts "
+            "are prepared amounts, held fixed."
+        )
+
+
 def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
     """Resolve a public state output field to its selected state's graph node."""
     form_name = STATE_FORM_NAMES.get(state)
@@ -569,6 +615,7 @@ class GraphBackend:
         result: dict[str, float | None] = {
             field: evaluator.eval(node) for node, field in FEDERAL_OUTPUT_NODES.items()
         }
+        itemizes = evaluator.eval(USES_ITEMIZED_NODE) > 0
 
         total_tax = result["federal_total_tax"]
         result["total_tax"] = total_tax
@@ -599,7 +646,9 @@ class GraphBackend:
                 "state_total_tax", 0.0
             )
 
-        return InterpretedTaxReturn(**result)
+        interpreted = InterpretedTaxReturn(**result)
+        interpreted._federal_itemizes = itemizes
+        return interpreted
 
     def evaluate_batch(
         self,
@@ -702,6 +751,7 @@ class GraphBackend:
         # which the single path handles by evaluating that node into each.
         output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         output_pairs.append((FEDERAL_BRACKET_RATE_NODE, "federal_tax_bracket"))
+        output_pairs.append((USES_ITEMIZED_NODE, FEDERAL_ITEMIZES))
         if state and state != OTSState.NONE:
             state_form = STATE_FORM_NAMES.get(state)
             if state_form:
@@ -750,6 +800,9 @@ class GraphBackend:
             final_results[field] = output_cols[node_name]
 
         count = len(status_col)
+        final_results[FEDERAL_ITEMIZES] = [
+            value > 0 for value in final_results[FEDERAL_ITEMIZES]
+        ]
 
         # Derived fields: the same definitions as the single path.
         final_results["federal_tax_bracket"] = [
@@ -953,6 +1006,7 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
+        _require_prepared_amounts_fixed(tax_input, input_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
@@ -980,6 +1034,9 @@ class GraphBackend:
             for name, field in TaxReturnInput.model_fields.items()
             if field.annotation is float
             and (federal_nodes_for(name, year) or name in state_mapping)
+            and not (
+                name == "itemized_deductions" and tax_input.federal_itemized is not None
+            )
         ]
         input_groups = [
             self._input_nodes(tax_input, name, output_nodes[0])
@@ -1010,6 +1067,7 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
+        _require_prepared_amounts_fixed(tax_input, input_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         natural_values = _natural_values(tax_input)

@@ -34,6 +34,8 @@ from tenforty.models import (
     UnsupportedReturnError,
 )
 from tenforty.routing import ots_covers
+from tenforty.state_facts import LEGACY_ITEMIZED_ID as LEGACY_ID
+from tenforty.state_facts import legacy_itemized_assumption
 from tests.parity.state_parity_policy import (
     OR_RATE_CHART_TOLERANCE,
     OR_TAX_TABLE_CEILING,
@@ -317,9 +319,11 @@ def _f11(case, ots, auto) -> Bounds:
 def _f12(case, ots, auto) -> Bounds:
     """Bound F12, the itemized-deduction category difference.
 
-    F12 (docs/taxcalc-differential-audit.md): OTS carries itemized_deductions
-    as Schedule A line 6 "other taxes", added back on Form 6251; the graph as
-    line 16 "other deductions", not added back. Each dollar of extra AMTI costs
+    F12 (docs/taxcalc-differential-audit.md): OTS carries the deprecated
+    itemized_deductions as Schedule A line 6 "other taxes", added back on Form
+    6251; the graph as line 16 "other deductions", not added back. Only the
+    legacy scalar: federal_itemized states the AMT amount and both engines
+    honour it (tests/federal_itemized_amt_values_test.py). Each dollar of extra AMTI costs
     at most 28% plus 7% through the exemption phase-out (35%), or 55% when the
     preferential worksheet moves gain into its 20% band (taxcalc_policy F12).
     """
@@ -508,6 +512,26 @@ def _assert_identities(result: dict, label: str, state: str | None) -> None:
         assert result["state_effective_tax_rate"] is None, label
 
 
+def _assert_metadata(args: dict, assumptions: tuple, engine: str) -> None:
+    """Check assumptions structurally, never through the numeric ledger.
+
+    The only record these profiles can produce is the deprecated
+    itemized_deductions convention, whose value names the engine's shipped AMT
+    treatment. It is reported exactly when the 1040 itemized, which a forced
+    Itemized election guarantees and a forced Standard election rules out.
+    """
+    legacy = [record for record in assumptions if record["id"] == LEGACY_ID]
+    assert len(legacy) == len(assumptions), assumptions
+    expected = legacy_itemized_assumption(engine).model_dump()
+    assert all(record == expected for record in legacy), legacy
+    if not args.get("itemized_deductions"):
+        assert legacy == []
+    elif args.get("standard_or_itemized") == "Itemized":
+        assert legacy == [expected]
+    elif args.get("standard_or_itemized") == "Standard":
+        assert legacy == []
+
+
 # --- Scalar: graph-routed returns --------------------------------------------
 
 
@@ -527,9 +551,8 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
     _assert_identities(auto, "auto", state)
     problems = _unexplained({**args}, ots, auto)
     assert not problems, "\n".join(problems)
-    assert ots["assumptions"] == auto["assumptions"] == (), (
-        "metadata is checked structurally, never through the numeric ledger"
-    )
+    _assert_metadata(args, ots["assumptions"], "ots")
+    _assert_metadata(args, auto["assumptions"], "graph")
 
 
 # --- Scalar: routing ----------------------------------------------------------

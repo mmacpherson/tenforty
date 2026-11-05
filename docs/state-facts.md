@@ -232,6 +232,7 @@ does not mean the return makes no assumptions.
 | Convention | Where | Backends | Replaced by |
 |---|---|---|---|
 | `ma.form_1.line_11.one_earner` | MA Married/Joint, every year | OTS and graph | per-spouse earnings, tenforty-r6ap (not yet an input) |
+| `federal.itemized_deductions.legacy_amt` | Any return whose Form 1040 itemized with a nonzero deprecated `itemized_deductions` (`state` is null) | OTS (`added_back`) and graph (`allowed`) | `federal_itemized` ([Itemized deductions](itemized-deductions.md)) |
 
 ## Batch columns
 
