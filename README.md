@@ -525,9 +525,10 @@ evaluate_return(year=2025, w2_income=100_000, backend="ots")
 ```
 
 For `backend="auto"`, graph scope in 2024–2025 includes federal-only returns,
-IL, MS, OR and the eight no-income-tax states. MD and NC are excluded pending
-the itemized-deduction contract (`tenforty-nuc6`): NC uses OTS, while MD auto
-returns raise `UnsupportedReturnError` because OTS does not cover Maryland.
+IL, MS, OR and the eight no-income-tax states. MD, ME and NC are excluded
+pending the itemized-deduction contract (`tenforty-nuc6`): NC uses OTS, while
+MD and ME auto returns raise `UnsupportedReturnError` because OTS does not
+cover Maryland or Maine.
 See [graph state scope](./docs/error-handling.md#graph-state-scope-under-auto).
 
 Compared with the OTS backend:

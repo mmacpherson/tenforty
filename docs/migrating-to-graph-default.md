@@ -43,10 +43,11 @@ The CHANGELOG has the full wording.
   by engine and keeps its row order.
 - Auto computes IL and MS, which OTS cannot: under `backend="ots"` they raise
   `UnsupportedReturnError`.
-- MD and NC leave auto graph scope until their itemized-deduction contract is
-  implemented (`tenforty-nuc6`). Their graph mappings currently treat the
+- MD, ME and NC leave auto graph scope until their itemized-deduction contract
+  is implemented (`tenforty-nuc6`). Their graph mappings currently treat the
   generic federal aggregate as a state itemized amount. NC therefore uses OTS;
-  MD has no OTS program and auto raises `UnsupportedReturnError`. Explicit
+  MD and ME have no OTS program, and auto raises `UnsupportedReturnError` for
+  them. Explicit
   `backend="graph"` remains available.
 - A request no backend can serve raises `UnsupportedReturnError` before
   evaluation, under every `on_error` policy. `backend="graph"` for 2018–2023

@@ -96,10 +96,10 @@ Ohio is excluded by decision: its graph Married/Joint return requires the
 explicit `state_facts` joint-credit fact, which has no default, so admitting
 it would make auto raise for those callers. Ohio routes to OTS.
 
-Maryland and North Carolina are excluded while the itemized-deduction contract
-is implemented (`tenforty-nuc6`): the generic federal aggregate cannot supply
-their state deduction. North Carolina routes to OTS. Maryland has no OTS
-program, so auto raises `UnsupportedReturnError` naming that bead.
+Maryland, Maine and North Carolina are excluded while the itemized-deduction
+contract is implemented (`tenforty-nuc6`): the generic federal aggregate cannot
+supply their state deduction. North Carolina routes to OTS. Maryland and Maine
+have no OTS program, so auto raises `UnsupportedReturnError` naming that bead.
 
 `backend="graph"` ignores scope and computes any state the graph covers. Use
 it when you accept the graph's current state of validation for that state.
