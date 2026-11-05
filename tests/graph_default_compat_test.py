@@ -27,7 +27,8 @@ from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends import available_backends
 from tenforty.graph_scope import exclusion_reasons
 from tenforty.models import (
-    InterpretedTaxReturn,
+    METADATA_OUTPUT_FIELDS,
+    NUMERIC_OUTPUT_FIELDS,
     OTSState,
     UnsupportedInputError,
     UnsupportedReturnError,
@@ -521,6 +522,9 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
     _assert_identities(auto, "auto", state)
     problems = _unexplained({**args}, ots, auto)
     assert not problems, "\n".join(problems)
+    assert ots["assumptions"] == auto["assumptions"] == (), (
+        "metadata is checked structurally, never through the numeric ledger"
+    )
 
 
 # --- Scalar: routing ----------------------------------------------------------
@@ -718,9 +722,15 @@ def test_necessity_rejects_a_duplicate_entry():
 
 
 def test_every_output_field_is_compared_or_checked_by_identity():
-    """No output field escapes the corpus."""
+    """No numeric output escapes the corpus; metadata is checked structurally.
+
+    Assumption records are compared as whole records per return (the
+    graph-routed corpus has no recorded conventions on either engine), never
+    folded into the numeric interval ledger.
+    """
     covered = set(COMPARED_FIELDS) | set(IDENTITY_FIELDS)
-    assert covered == set(InterpretedTaxReturn.model_fields)
+    assert covered == set(NUMERIC_OUTPUT_FIELDS)
+    assert set(METADATA_OUTPUT_FIELDS) == {"assumptions"}
 
 
 def _real_case(year, state, status, profile_name):

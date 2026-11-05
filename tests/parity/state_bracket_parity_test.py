@@ -16,6 +16,7 @@ import pytest
 
 from tenforty import evaluate_return
 from tenforty.backends import available_backends
+from tests.fixtures.required_facts import credit_neutral_facts
 
 OTS_PRINT_PRECISION = 0.05
 
@@ -59,7 +60,12 @@ pytestmark = pytest.mark.skipif(
 def test_state_bracket_agrees_within_ots_print_precision(state, year, status, wages):
     """Both backends name the same schedule bracket, to OTS's printed precision."""
     graph = evaluate_return(
-        year=year, state=state, filing_status=status, w2_income=wages, backend="graph"
+        year=year,
+        state=state,
+        filing_status=status,
+        w2_income=wages,
+        backend="graph",
+        state_facts=credit_neutral_facts(state, status),
     )
     ots = evaluate_return(
         year=year, state=state, filing_status=status, w2_income=wages, backend="ots"

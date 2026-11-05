@@ -1,5 +1,28 @@
 ## [Unreleased]
 ### Added
+- **`state_facts`: explicit state-specific facts, and reported assumptions.**
+  `evaluate_return`, `evaluate_returns`, `marginal_rate(s)` and
+  `solve_for_income` take `state_facts=`, typed per-state models from
+  `tenforty.state_facts` (first: `OH(spouses_both_have_qualifying_income=...)`).
+  `tenforty.state_facts.available(state, year)` lists the facts for a return.
+  See [State facts](docs/state-facts.md).
+  - **Required facts.** Where a default would guess between two common
+    situations with a material effect, there is none: graph Ohio
+    Married/Joint returns now raise `UnsupportedInputError` naming the fact
+    and how to pass it, where they used to compute with no joint filing
+    credit. `False` reproduces that computation; `True` is refused until the
+    credit is wired (tenforty-b72.53). OH stays outside `backend="auto"`
+    scope, so default callers are unaffected.
+  - **`assumptions` output.** `InterpretedTaxReturn.assumptions` lists the
+    recorded conventions a computation used because no input supplied them;
+    `None` on a failed return. `evaluate_returns` frames gain a `state_facts`
+    input echo column (canonical JSON, or null) and an `assumptions` column
+    (a list of each record's canonical JSON, `[]` if none, null on failure)
+    after the numeric outputs.
+  - **Massachusetts joint returns now report the one-earner convention**
+    (`ma.form_1.line_11.one_earner`) on both backends: Form 1 line 11 is capped
+    at one person's $2,000 because `w2_income` is a household total. No
+    computed value changes; the convention was silent before.
 - **[Migrating to the graph default](docs/migrating-to-graph-default.md):** every
   caller-visible change on the way to `backend="auto"` as the default, the
   rollback (`backend="ots"`), and each known OTS/auto difference. A

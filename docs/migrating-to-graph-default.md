@@ -83,6 +83,22 @@ every OTS-covered state and year (tenforty-aqx.4.1.2).
   `ValueError`. On OTS, a non-zero OTS exit or a failed required subordinate
   form now fails the return instead of producing a wrong one.
 
+### State facts and assumptions
+
+- `state_facts=` takes explicit state-specific facts ([State facts](state-facts.md)).
+  A graph Ohio Married/Joint return now **requires**
+  `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=...)`
+  and raises `UnsupportedInputError` without it, where it used to compute with
+  no joint filing credit. OH is outside auto scope, so only `backend="graph"`
+  callers see this.
+- Results gain `assumptions`: recorded conventions used because no input
+  supplied them (`()` if none, `None` on failure). Massachusetts joint returns
+  now report the one-earner line 11 convention on both backends; no value
+  changes.
+- Frames gain a `state_facts` echo column (`String`, in signature order) and
+  an `assumptions` column (`List(String)`, after the numeric outputs). Code
+  that iterates every output column as a float must skip `assumptions`.
+
 ### Batch frames
 
 - One declared schema for every `evaluate_returns` frame, on both backends, in

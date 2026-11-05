@@ -6,6 +6,7 @@ used primarily for structuring and organizing configuration data.
 """
 
 # ruff: noqa: D101
+import json
 import math
 import warnings
 from collections.abc import Callable
@@ -17,6 +18,7 @@ from pydantic import (
     ConfigDict,
     Field,
     FiniteFloat,
+    PrivateAttr,
     TypeAdapter,
     computed_field,
     model_validator,
@@ -335,6 +337,10 @@ _SPOUSE_BOX_STATUSES = frozenset(
 
 class TaxReturnInput(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
+
+    _state_facts: dict[str, object] = PrivateAttr(default_factory=dict)
+    """The state facts active for this return (tenforty.state_facts), set by the
+    public API after validation; read by the graph backend's fact lowerings."""
 
     year: OTSYear = OTSYear.YEAR_2025
     state: OTSState = OTSState.NONE
@@ -661,6 +667,47 @@ TAX_RETURN_FLOAT_FIELDS = tuple(
 FINITE_FLOAT_COLUMNS = TypeAdapter(dict[str, list[FiniteFloat]])
 
 
+def canonical_json(value: object) -> str:
+    """Deterministic project JSON: sorted keys, compact, UTF-8, no NaN.
+
+    A stable serialization for metadata columns; not an RFC 8785 claim.
+    """
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+
+
+class Assumption(BaseModel):
+    """A convention that entered the selected engine's computation of a return.
+
+    Recorded because no input supplied the value. ``id`` and ``value`` are
+    semantic and stable; ``text`` explains and may be reworded. ``input_path``
+    names the public input that would replace the convention, or is None when
+    no such input exists yet. ``value`` is a JSON scalar.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    id: str
+    state: str | None
+    input_path: str | None
+    value: bool | int | float | str | None
+    text: str
+
+    def to_json(self) -> str:
+        """Canonical JSON of the complete record."""
+        return canonical_json(self.model_dump())
+
+    @classmethod
+    def from_json(cls, encoded: str) -> "Assumption":
+        """Decode a record written by ``to_json``."""
+        return cls.model_validate_json(encoded)
+
+
 class InterpretedTaxReturn(BaseModel):
     total_tax: float = 0.0
 
@@ -691,10 +738,20 @@ class InterpretedTaxReturn(BaseModel):
     state_tax_bracket: float | None = None
     state_effective_tax_rate: float | None = None
 
+    assumptions: tuple[Assumption, ...] | None = Field(
+        default=(),
+        description=(
+            "Recorded state conventions that entered this computation because no "
+            "input supplied them (see tenforty.state_facts). () when none was "
+            "recorded, which is not a claim that the return makes no assumptions; "
+            "None on a failed return."
+        ),
+    )
+
     @classmethod
     def failed(cls) -> "InterpretedTaxReturn":
-        """Return a failed computation: every output is NaN, never 0."""
-        return cls(**dict.fromkeys(cls.model_fields, math.nan))
+        """Return a failed computation: every number NaN, never 0; no metadata."""
+        return cls(**dict.fromkeys(NUMERIC_OUTPUT_FIELDS, math.nan), assumptions=None)
 
     @model_validator(mode="after")
     def compute_federal_income_tax(self) -> "InterpretedTaxReturn":  # noqa: D102
@@ -1872,3 +1929,31 @@ def _build_subordinate_config() -> dict[int, list[SubordinateFormConfig]]:
 
 
 SUBORDINATE_FORM_CONFIG = _build_subordinate_config()
+
+
+METADATA_OUTPUT_FIELDS: tuple[str, ...] = ("assumptions",)
+"""InterpretedTaxReturn fields that describe the computation rather than report a
+number; None on a failed return."""
+
+NUMERIC_OUTPUT_FIELDS: tuple[str, ...] = (
+    "total_tax",
+    "federal_adjusted_gross_income",
+    "federal_effective_tax_rate",
+    "federal_tax_bracket",
+    "federal_taxable_income",
+    "federal_qbi_deduction",
+    "federal_amt",
+    "federal_income_tax",
+    "federal_se_tax",
+    "federal_niit",
+    "federal_additional_medicare_tax",
+    "federal_child_tax_credit",
+    "federal_total_tax",
+    "state_adjusted_gross_income",
+    "state_taxable_income",
+    "state_total_tax",
+    "state_tax_bracket",
+    "state_effective_tax_rate",
+)
+"""The numeric outputs, NaN on a failed return. Written out, not derived, so a
+field added to InterpretedTaxReturn must be classified (state_facts_test)."""

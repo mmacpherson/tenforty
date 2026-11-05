@@ -4969,6 +4969,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_state_tax=1688.125,
         expected_federal_agi=75000.0,
         backend="graph",
+        # Unverified legacy value, set with no joint filing credit: the
+        # spouses-do-not-both-qualify case, now stated (tenforty-b72.53).
+        state_facts={"spouses_both_have_qualifying_income": False},
     ),
     # ========== OKLAHOMA SCENARIOS ==========
     # OK 2024 & 2025: 6-bracket progressive system (0.25%, 0.75%, 1.75%, 2.75%, 3.75%, 4.75%)

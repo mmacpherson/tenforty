@@ -390,6 +390,7 @@ def test_graph_batches_pass_every_return_input():
 
     batch_inputs = set(inspect.signature(tenforty.evaluate_returns).parameters)
     batch_inputs -= core._BATCH_OPTIONS
+    batch_inputs -= {"state_facts"}
     assert set(core._GRAPH_PASSTHROUGH_FIELDS) == batch_inputs - core._BATCH_AXIS_FIELDS
     assert batch_inputs == set(TaxReturnInput.model_fields)
 

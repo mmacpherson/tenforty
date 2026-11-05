@@ -3,12 +3,14 @@
 import inspect
 import itertools
 import logging
+import math
 import os
 import pathlib
 import re
 import warnings
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator
+from dataclasses import replace
 from typing import Any, Literal
 
 import dotenv
@@ -16,9 +18,11 @@ import polars as pl
 from pydantic import TypeAdapter
 
 from . import otslib
+from . import state_facts as _facts
 from .models import (
     FINITE_FLOAT_COLUMNS,
     NATURAL_FORM_CONFIG,
+    NUMERIC_OUTPUT_FIELDS,
     OTS_FORM_CONFIG,
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
@@ -39,6 +43,7 @@ from .models import (
     validate_on_error,
 )
 from .routing import BackendChoice, Engine, select_backend
+from .state_facts import StateFacts
 
 dotenv.load_dotenv()
 
@@ -746,21 +751,54 @@ def _warn_failed(engine: Engine, tax_input: TaxReturnInput, error: Exception) ->
     warnings.warn(message, RuntimeWarning, stacklevel=4)
 
 
+StateFactsArgument = StateFacts | tuple[StateFacts, ...] | None
+
+
+def _wired_fact_lowerings() -> dict[tuple[str, str], frozenset[object] | None]:
+    """Graph fact lowerings, each with the values it computes (None: all)."""
+    try:
+        from .backends.graph import FACT_LOWERING_VALUES, FACT_LOWERINGS
+    except ImportError:
+        return {}
+    return {key: FACT_LOWERING_VALUES.get(key) for key in FACT_LOWERINGS}
+
+
+def _check_routed_facts(
+    models: dict[str, StateFacts], rows: list[_facts.FactRow]
+) -> None:
+    """Phases 4 and 4b: capability of active facts, then required facts."""
+    _facts.check_capability(models, rows, _wired_fact_lowerings())
+    _facts.check_required(models, rows)
+
+
+def _attach_facts(
+    tax_input: TaxReturnInput, models: dict[str, StateFacts], row: _facts.FactRow
+) -> None:
+    tax_input._state_facts = _facts.active_facts(models.get(row.state or ""), row)
+
+
 def _evaluate_with_engine(
-    tax_input: TaxReturnInput, engine: Engine, policy: OTSErrorPolicy
+    tax_input: TaxReturnInput,
+    engine: Engine,
+    policy: OTSErrorPolicy,
+    row: _facts.FactRow,
 ) -> InterpretedTaxReturn:
     try:
         if engine == "ots":
-            return InterpretedTaxReturn(
+            result = InterpretedTaxReturn(
                 **evaluate_natural_input_form(
                     tax_input.year,
                     tax_input.state,
                     tax_input.model_dump(exclude={"year", "state"}),
                 )
             )
-        from .backends.graph import GraphBackend
+        else:
+            from .backends.graph import GraphBackend
 
-        return GraphBackend().evaluate(tax_input)
+            result = GraphBackend().evaluate(tax_input)
+        return result.model_copy(
+            update={"assumptions": _facts.recorded_assumptions(row)}
+        )
     except UnsupportedReturnError:
         raise
     except Exception as error:
@@ -838,6 +876,7 @@ def evaluate_return(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    state_facts: StateFactsArgument = None,
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
 
@@ -848,8 +887,15 @@ def evaluate_return(
     computation that fails raises under ``on_error="raise"``; under "warn" or
     "ignore" it returns ``InterpretedTaxReturn.failed()``, whose every field is
     NaN, never a zero that could pass for a real return.
+
+    ``state_facts`` takes the state-specific facts in ``tenforty.state_facts``
+    (one model, or a tuple for distinct states). A fact that does not apply, or
+    that the selected backend cannot honour, and a required fact left out, all
+    raise ``UnsupportedInputError`` before evaluation. ``result.assumptions``
+    lists the recorded conventions the computation used.
     """
     policy = validate_on_error(on_error)
+    models = _facts.normalize(state_facts)
     input_data = TaxReturnInput(
         year=year,
         state=state,
@@ -881,9 +927,16 @@ def evaluate_return(
         spouse_65_or_older=spouse_65_or_older,
     )
 
+    row = _facts.fact_row(
+        input_data.year, input_data.state, input_data.filing_status, None
+    )
+    _facts.check_projection(models, [row])
     engine = select_backend(backend, input_data.year, input_data.state)
+    row = replace(row, engine=engine)
+    _check_routed_facts(models, [row])
     _require_available(engine)
-    return _evaluate_with_engine(input_data, engine, policy)
+    _attach_facts(input_data, models, row)
+    return _evaluate_with_engine(input_data, engine, policy, row)
 
 
 def evaluate_returns(
@@ -919,6 +972,7 @@ def evaluate_returns(
     filer_65_or_older: list[bool] | bool = False,
     spouse_65_or_older: list[bool] | bool = False,
     num_ctc_dependents: list[int | None] | int | None = None,
+    state_facts: StateFactsArgument = None,
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
 
@@ -931,9 +985,16 @@ def evaluate_returns(
         # mode="cross": 2x2x2 = 8 rows  (Cartesian product)
         # mode="zip":   2 rows           (element-wise)
 
+    ``state_facts`` is one model or a tuple of models for distinct states,
+    applied to each row by its state, never a product or zip axis. Within a
+    state, a supplied field applies to the rows whose filing status it declares
+    and is ignored, by that projection, on the others; it must apply to at
+    least one row. Every check runs before any row is evaluated.
+
     """
     arguments = dict(locals())
     policy = validate_on_error(on_error)
+    models = _facts.normalize(state_facts)
 
     def ensure_list(x):
         return x if isinstance(x, list) else [x]
@@ -1110,12 +1171,39 @@ def evaluate_returns(
     columns = dict(zip(parameter_names, all_vals, strict=True))
 
     if mode == "cross":
+        row_count = math.prod(len(values) for values in all_vals)
+        request_rows = (
+            list(itertools.product(years, states_of_residence, filing_statuses))
+            if row_count
+            else []
+        )
+    else:
+        request_rows = list(
+            zip(years, states_of_residence, filing_statuses, strict=True)
+        )
+    fact_rows = [
+        _facts.fact_row(row_year, row_state, row_status, None)
+        for row_year, row_state, row_status in request_rows
+    ]
+    _facts.check_projection(models, fact_rows)
+
+    if mode == "cross":
         groups = list(itertools.product(years, states_of_residence))
     else:
         groups = list(zip(years, states_of_residence, strict=True))
     engines = {
         group: select_backend(backend, *group) for group in dict.fromkeys(groups)
     }
+    _check_routed_facts(
+        models,
+        [
+            replace(
+                fact_row,
+                engine=engines[(request_row[0], request_row[1])],
+            )
+            for fact_row, request_row in zip(fact_rows, request_rows, strict=True)
+        ],
+    )
     for engine in dict.fromkeys(engines.values()):
         _require_available(engine)
 
@@ -1139,14 +1227,38 @@ def evaluate_returns(
     def evaluate_group(group: tuple) -> list[dict]:
         rows = group_params[group]
         engine = engines[group]
+        row_facts = [_row_fact_rows(params, engine) for params in rows]
+        evaluated = None
         if engine == "graph":
-            outputs = _graph_batch_outputs(*group, rows, policy)
+            outputs = _graph_batch_outputs(
+                *group,
+                rows,
+                policy,
+                [
+                    _facts.active_facts(models.get(row.state or ""), row)
+                    for row in row_facts
+                ],
+            )
             if outputs is not None:
-                return [
-                    params | output
-                    for params, output in zip(rows, outputs, strict=True)
+                evaluated = [
+                    params
+                    | output
+                    | {
+                        "assumptions": [
+                            record.to_json()
+                            for record in _facts.recorded_assumptions(row)
+                        ]
+                    }
+                    for params, output, row in zip(
+                        rows, outputs, row_facts, strict=True
+                    )
                 ]
-        return _scalar_rows(rows, engine, policy)
+        if evaluated is None:
+            evaluated = _scalar_rows(rows, engine, policy, models, row_facts)
+        return [
+            result | {"state_facts": _echo_facts(models, row)}
+            for result, row in zip(evaluated, row_facts, strict=True)
+        ]
 
     if mode == "cross":
         results = [row for group in groups for row in evaluate_group(group)]
@@ -1199,7 +1311,7 @@ _BATCH_OPTIONS = frozenset({"on_error", "backend", "mode"})
 _GRAPH_PASSTHROUGH_FIELDS = tuple(
     name
     for name in inspect.signature(evaluate_returns).parameters
-    if name not in _BATCH_AXIS_FIELDS | _BATCH_OPTIONS
+    if name not in _BATCH_AXIS_FIELDS | _BATCH_OPTIONS | {"state_facts"}
 )
 
 
@@ -1208,10 +1320,24 @@ _INPUT_COLUMNS = tuple(
     for name in inspect.signature(evaluate_returns).parameters
     if name not in _BATCH_OPTIONS
 )
-_OUTPUT_COLUMNS = tuple(InterpretedTaxReturn.model_fields)
+_OUTPUT_COLUMNS = NUMERIC_OUTPUT_FIELDS
+
+
+def _row_fact_rows(params: dict, engine: Engine) -> _facts.FactRow:
+    return _facts.fact_row(
+        params["year"], params["state"], params["filing_status"], engine
+    )
+
+
+def _echo_facts(models: dict[str, StateFacts], row: _facts.FactRow) -> str | None:
+    """Echo the requested model for this row's state, as request metadata."""
+    model = models.get(row.state or "")
+    return None if model is None else model.to_json()
 
 
 def _input_dtype(name: str) -> pl.DataType:
+    if name == "state_facts":
+        return pl.String
     if name in {"year", "num_dependents", "num_ctc_dependents"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
@@ -1224,8 +1350,11 @@ def _input_dtype(name: str) -> pl.DataType:
 BATCH_SCHEMA = pl.Schema(
     [(name, _input_dtype(name)) for name in _INPUT_COLUMNS]
     + [(name, pl.Float64) for name in _OUTPUT_COLUMNS]
+    + [("assumptions", pl.List(pl.String))]
 )
-"""The evaluate_returns frame: request inputs in signature order, then outputs."""
+"""The evaluate_returns frame: request inputs in signature order, then the
+numeric outputs, then ``assumptions``: each recorded convention as the canonical
+JSON of its complete record; [] when none was recorded, null on a failed row."""
 
 
 def _echo_converter(name: str) -> Callable[[object], object]:
@@ -1236,6 +1365,8 @@ def _echo_converter(name: str) -> Callable[[object], object]:
     normalization (the qualified-into-ordinary dividend lift) is not applied.
     An enum echoes its value, so OTSState.NONE is a null state.
     """
+    if name == "state_facts":
+        return lambda value: value
     adapter = TypeAdapter(TaxReturnInput.model_fields[name].annotation)
 
     def convert(value: object) -> object:
@@ -1249,9 +1380,11 @@ def _output_converter(value: object) -> float | None:
     return None if value is None else float(value)
 
 
-_COLUMN_CONVERTERS = {name: _echo_converter(name) for name in _INPUT_COLUMNS} | {
-    name: _output_converter for name in _OUTPUT_COLUMNS
-}
+_COLUMN_CONVERTERS = (
+    {name: _echo_converter(name) for name in _INPUT_COLUMNS}
+    | {name: _output_converter for name in _OUTPUT_COLUMNS}
+    | {"assumptions": lambda value: value}
+)
 
 
 def _batch_frame(rows: list[dict]) -> pl.DataFrame:
@@ -1280,7 +1413,11 @@ def _graph_batch_failed(
 
 
 def _graph_batch_outputs(
-    year: int, state: str | None, rows: list[dict], policy: OTSErrorPolicy
+    year: int,
+    state: str | None,
+    rows: list[dict],
+    policy: OTSErrorPolicy,
+    facts: list[dict[str, object]],
 ) -> list[dict] | None:
     """Evaluate one (year, state) group's rows as a graph batch; None on failure.
 
@@ -1303,6 +1440,7 @@ def _graph_batch_outputs(
             inputs,
             [row["filing_status"] for row in rows],
             mode="zip",
+            facts=facts,
         )
         return [
             {field: batch[field][i] for field in _OUTPUT_COLUMNS}
@@ -1327,12 +1465,31 @@ def _cross_params(
 
 
 def _scalar_rows(
-    params_rows: Iterable[dict], engine: Engine, policy: OTSErrorPolicy
+    params_rows: Iterable[dict],
+    engine: Engine,
+    policy: OTSErrorPolicy,
+    models: dict[str, StateFacts],
+    fact_rows: list[_facts.FactRow],
 ) -> list[dict]:
-    return [
-        params | evaluate_return(**params, on_error=policy, backend=engine).model_dump()
-        for params in params_rows
-    ]
+    """Evaluate rows one by one, each with only the facts active on it."""
+    results = []
+    for params, row in zip(params_rows, fact_rows, strict=True):
+        model = models.get(row.state or "")
+        active = _facts.active_facts(model, row)
+        result = evaluate_return(
+            **params,
+            on_error=policy,
+            backend=engine,
+            state_facts=type(model)(**active) if active else None,
+        )
+        output = result.model_dump(exclude={"assumptions"})
+        output["assumptions"] = (
+            None
+            if result.assumptions is None
+            else [record.to_json() for record in result.assumptions]
+        )
+        results.append(params | output)
+    return results
 
 
 _DISCRETE_INPUTS = frozenset(
@@ -1340,6 +1497,19 @@ _DISCRETE_INPUTS = frozenset(
     for name, field in TaxReturnInput.model_fields.items()
     if field.annotation is bool
 )
+
+
+def _graph_facts(tax_input: TaxReturnInput, state_facts: StateFactsArgument) -> None:
+    """Route a graph-only call and apply its state facts, held fixed throughout."""
+    models = _facts.normalize(state_facts)
+    row = _facts.fact_row(
+        tax_input.year, tax_input.state, tax_input.filing_status, None
+    )
+    _facts.check_projection(models, [row])
+    select_backend("graph", tax_input.year, tax_input.state)
+    row = replace(row, engine="graph")
+    _check_routed_facts(models, [row])
+    _attach_facts(tax_input, models, row)
 
 
 def marginal_rate(
@@ -1372,6 +1542,7 @@ def marginal_rate(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    state_facts: StateFactsArgument = None,
     wrt: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
@@ -1414,7 +1585,7 @@ def marginal_rate(
 
     from .backends import require_available
 
-    select_backend("graph", tax_input.year, tax_input.state)
+    _graph_facts(tax_input, state_facts)
     backend = require_available("graph")
 
     result = backend.gradient(tax_input, output, wrt)
@@ -1454,6 +1625,7 @@ def marginal_rates(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    state_facts: StateFactsArgument = None,
     output: str = "total_tax",
 ) -> dict[str, float]:
     """Compute marginal rates for every continuous public input.
@@ -1495,7 +1667,7 @@ def marginal_rates(
 
     from .backends import require_available
 
-    select_backend("graph", tax_input.year, tax_input.state)
+    _graph_facts(tax_input, state_facts)
     backend = require_available("graph")
 
     result = backend.gradients(tax_input, output)
@@ -1535,6 +1707,7 @@ def solve_for_income(
     filer_65_or_older: bool = False,
     spouse_65_or_older: bool = False,
     num_ctc_dependents: int | None = None,
+    state_facts: StateFactsArgument = None,
     for_input: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
@@ -1573,7 +1746,7 @@ def solve_for_income(
 
     from .backends import require_available
 
-    select_backend("graph", tax_input.year, tax_input.state)
+    _graph_facts(tax_input, state_facts)
     backend = require_available("graph")
 
     result = backend.solve(tax_input, output=output, target=target_tax, var=for_input)

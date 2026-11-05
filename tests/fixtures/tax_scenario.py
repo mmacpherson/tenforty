@@ -59,4 +59,6 @@ class TaxScenario:
     known_failure: str | None = None
     known_defects: tuple[KnownDefect, ...] = ()
     backend: str | None = None
+    state_facts: dict[str, object] | None = None
+    """Fields of the tenforty.state_facts model for this scenario's state."""
     state_evidence: TaxEvidence = UNVERIFIED

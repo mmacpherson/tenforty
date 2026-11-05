@@ -19,6 +19,7 @@ import pytest
 from tenforty import evaluate_return, evaluate_returns
 from tenforty.backends import available_backends
 from tenforty.models import UnsupportedReturnError
+from tests.fixtures.required_facts import credit_neutral_facts
 
 DERIVATION = (
     Path(__file__).resolve().parent.parent
@@ -91,6 +92,7 @@ def _return_at_state_taxable_income(state, year, status, taxable_income):
             filing_status=status,
             w2_income=wages,
             backend="graph",
+            state_facts=credit_neutral_facts(state, status),
         )
         shortfall = taxable_income - result.state_taxable_income
         if shortfall == 0:

@@ -295,7 +295,7 @@ def test_evaluate_return_properties(
         "state_total_tax",
         "state_taxable_income",
     }
-    for key, val in result.model_dump().items():
+    for key, val in result.model_dump(exclude={"assumptions"}).items():
         if key in ots_state_negative_allowed or val is None:
             continue
         assert val >= 0, f"{key} should be non-negative"

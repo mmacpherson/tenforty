@@ -9,16 +9,19 @@ import pytest
 import tenforty
 from tenforty import OTSError, UnsupportedInputError, UnsupportedReturnError, core
 from tenforty.backends import GraphBackend
-from tenforty.models import InterpretedTaxReturn
+from tenforty.models import NUMERIC_OUTPUT_FIELDS, InterpretedTaxReturn
 
 pytestmark = pytest.mark.requires_graph
 
-OUTPUT_FIELDS = tuple(InterpretedTaxReturn.model_fields)
+OUTPUT_FIELDS = NUMERIC_OUTPUT_FIELDS
 FAILING_W2 = 77_777.0
 
 
 def _all_nan(result: InterpretedTaxReturn) -> bool:
-    return all(math.isnan(getattr(result, field)) for field in OUTPUT_FIELDS)
+    """Every number NaN, and no metadata: a failed return claims nothing."""
+    return result.assumptions is None and all(
+        math.isnan(getattr(result, field)) for field in OUTPUT_FIELDS
+    )
 
 
 def _none_nan(values: dict) -> bool:
@@ -69,7 +72,7 @@ def ots_federal_fails(monkeypatch):
 
 
 def test_failed_return_is_nan_in_every_field():
-    """No default zero survives in a failed return, derived fields included."""
+    """No default zero survives in a failed return; it records no assumptions."""
     assert _all_nan(InterpretedTaxReturn.failed())
 
 
@@ -262,8 +265,10 @@ def _assert_one_failed_row(frame: pl.DataFrame, expected_w2: list[float]) -> Non
     for row in frame.iter_rows(named=True):
         if row["w2_income"] == FAILING_W2:
             assert all(math.isnan(row[field]) for field in OUTPUT_FIELDS)
+            assert row["assumptions"] is None
         else:
             assert _none_nan(row)
+            assert row["assumptions"] == []
             assert row["total_tax"] > 0
 
 
