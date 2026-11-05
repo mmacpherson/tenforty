@@ -10,6 +10,7 @@ Also includes range-based sanity checks and monotonicity tests.
 import pytest
 
 from tenforty import evaluate_return
+from tenforty.state_facts import OH
 
 from .fixtures.scenarios import (
     REGRESSION_SCENARIOS,
@@ -654,6 +655,9 @@ OH_SCENARIOS = [
         "state": "OH",
         "filing_status": "Married/Joint",
         "w2_income": 200000,
+        # Unverified legacy range, set with no joint filing credit: the
+        # spouses-do-not-both-qualify case, now stated (tenforty-b72.53).
+        "state_facts": OH(spouses_both_have_qualifying_income=False),
         "expected_federal_min": 27000,
         "expected_federal_max": 29000,
         "expected_state_min": 5850,
@@ -911,6 +915,8 @@ def _run_range_scenario(scenario):
     if scenario.get("ordinary_dividends"):
         kwargs["ordinary_dividends"] = scenario["ordinary_dividends"]
     kwargs["backend"] = scenario.get("backend") or "ots"
+    if scenario.get("state_facts"):
+        kwargs["state_facts"] = scenario["state_facts"]
     result = evaluate_return(**kwargs)
 
     assert (

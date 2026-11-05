@@ -418,6 +418,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `vehicle_loan_interest`      | float                    | 0.0                 | 2025 only. Qualified passenger vehicle loan interest; Schedule 1-A Part IV |
 | `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
+| `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio Married/Joint returns raise until the fact is given. See [State facts](./docs/state-facts.md) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
 | `backend`                    | str                      | auto                | "auto", "ots", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; pass "ots" for the pre-release default; see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
 
@@ -492,6 +493,7 @@ orchestration layer before rerunning Form 1040.
 | state_total_tax                 | Total state tax liability                             |
 | state_tax_bracket               | Rate-schedule bracket (percent) holding state taxable income; None when not defined (no state, or not reported for that state) |
 | state_effective_tax_rate        | State tax as a percent of state taxable income; None when not defined |
+| assumptions                     | Recorded state conventions this computation used because no input supplied them, as `Assumption` records (`()` if none were recorded; `None` on a failed return). In `evaluate_returns`, a list of each record's JSON. See [State facts](./docs/state-facts.md) |
 
 The bracket fields are the rate schedule's own bracket, not `marginal_rate()`,
 which differentiates the computed tax. The graph reports state brackets for CA,
@@ -521,6 +523,12 @@ lists every difference to expect between `"ots"` and `"auto"`:
 evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
 evaluate_return(year=2025, w2_income=100_000, backend="ots")
 ```
+
+For `backend="auto"`, graph scope in 2024–2025 includes federal-only returns,
+IL, MS, OR and the eight no-income-tax states. MD and NC are excluded pending
+the itemized-deduction contract (`tenforty-nuc6`): NC uses OTS, while MD auto
+returns raise `UnsupportedReturnError` because OTS does not cover Maryland.
+See [graph state scope](./docs/error-handling.md#graph-state-scope-under-auto).
 
 Compared with the OTS backend:
 

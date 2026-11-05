@@ -20,6 +20,10 @@ from dataclasses import dataclass, field
 
 from .evidence import EvidenceKind, TaxEvidence
 
+OH_ONE_EARNER = {"spouses_both_have_qualifying_income": False}
+"""A one-earner couple: the spouses do not both have $500 of qualifying income
+(fields of tenforty.state_facts.OH; the test runner builds the model)."""
+
 Outcome = tuple[float, float]
 
 
@@ -280,6 +284,50 @@ IL_CASES = [
 ]
 
 
+IL_CASES += [
+    _il(
+        2024,
+        "c8",
+        "HoH",
+        69_450,
+        3438,
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2025,
+        "c8",
+        "HoH",
+        69_300,
+        3430,
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2024,
+        "c9",
+        "MFJ",
+        88_900,
+        4401,
+        w2_income=100_000,
+        num_dependents=2,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2025,
+        "c9",
+        "MFJ",
+        88_600,
+        4386,
+        w2_income=100_000,
+        num_dependents=2,
+        num_ctc_dependents=0,
+    ),
+]
+
+
 def _oh(year, label, ti, tax, alternate=None, status="S", **inputs) -> OfficialCase:
     return _case(
         "OH", year, label, status, _with_alternate(ti, tax, alternate), **inputs
@@ -339,7 +387,14 @@ OH_CASES = [
         _oh(year, "S60", *row["S60"], w2_income=60_000),
         _oh(year, "S150", *row["S150"], w2_income=150_000),
         _oh(year, "S400", *row["S400"], w2_income=400_000),
-        _oh(year, "MFJ60one", *row["MFJ60one"], status="MFJ", w2_income=60_000),
+        _oh(
+            year,
+            "MFJ60one",
+            *row["MFJ60one"],
+            status="MFJ",
+            w2_income=60_000,
+            state_facts=OH_ONE_EARNER,
+        ),
         _oh(year, "S40000", *row["S40000"], w2_income=40_000),
         _oh(year, "S40001", *row["S40001"], w2_income=40_001),
         _oh(year, "S80000", *row["S80000"], w2_income=80_000),
@@ -405,14 +460,6 @@ OFFICIAL_CASES: list[OfficialCase] = (
 
 UNPINNED = [
     UnpinnedCase(
-        f"IL-{year}-{label}",
-        "IL exemptions for dependents (IL-1040 line 10c) have no public input: "
-        "the graph maps no exemption natural and num_dependents is CTC children",
-    )
-    for year in (2024, 2025)
-    for label in ("c8", "c9")
-] + [
-    UnpinnedCase(
         f"OH-{year}-{label}",
         reason,
     )
@@ -430,7 +477,6 @@ UNPINNED = [
 
 ROUNDING = "tenforty-b72.42"
 TABLE = "tenforty-tj2.20"
-IL_EXEMPTION = "tenforty-b72.50"
 CO_ADDBACK = "tenforty-b72.51"
 OH_EXEMPTION = "tenforty-b72.53"
 
@@ -439,8 +485,6 @@ RATE = {
     ("CO", 2025): 0.044,
     ("GA", 2024): 0.0539,
     ("GA", 2025): 0.0519,
-    ("IL", 2024): 0.0495,
-    ("IL", 2025): 0.0495,
 }
 """Flat rates, as each record cites them."""
 
@@ -499,9 +543,6 @@ def _defects(case: OfficialCase) -> dict[str, GraphDefect]:
     taxable = case.outcomes[0][0]
     if case.state == "GA":
         return _rounding(case)
-    if case.state == "IL":
-        exemptions = agi - taxable
-        return _deduction_missing(case, IL_EXEMPTION, exemptions, 0.0495)
     if case.state == "OH":
         exemptions = agi - taxable
         persons = 2 if case.filing_status == "Married/Joint" else 1

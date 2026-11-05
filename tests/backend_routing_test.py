@@ -5,7 +5,13 @@ import polars as pl
 import pytest
 
 import tenforty
-from tenforty import BackendUnavailableError, UnsupportedReturnError, core, routing
+from tenforty import (
+    BackendUnavailableError,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+    core,
+    routing,
+)
 from tenforty.backends import GraphBackend, OTSBackend, get_backend
 from tenforty.models import OTSState
 
@@ -448,6 +454,7 @@ def test_graph_batches_pass_every_return_input():
 
     batch_inputs = set(inspect.signature(tenforty.evaluate_returns).parameters)
     batch_inputs -= core._BATCH_OPTIONS
+    batch_inputs -= {"state_facts"}
     assert set(core._GRAPH_PASSTHROUGH_FIELDS) == batch_inputs - core._BATCH_AXIS_FIELDS
     assert batch_inputs == set(TaxReturnInput.model_fields)
 
@@ -555,3 +562,59 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
         OTSYear.YEAR_2024, OTSState.NONE, {"w2_income": [50_000.0]}, ["Single"]
     )
     assert len(results["total_tax"]) == 1
+
+
+def test_default_backend_applies_the_state_facts_contract(engine_calls):
+    """Under the "auto" default, facts follow routing and are never a reroute.
+
+    OH is outside auto scope, so a default OH MFJ call goes to OTS: without
+    facts it computes; with the OH fact OTS refuses it, naming graph (which
+    computes False). The graph-only entry points honour the fact.
+    """
+    from tenforty.state_facts import OH
+
+    no_fact = tenforty.evaluate_return(
+        year=2024, state="OH", filing_status="Married/Joint", w2_income=90_000
+    )
+    assert no_fact.assumptions == ()
+    assert _engines(engine_calls) == {2024: {"ots"}}
+    engine_calls.clear()
+
+    fact = OH(spouses_both_have_qualifying_income=False)
+    with pytest.raises(UnsupportedInputError, match="backend='graph' does"):
+        tenforty.evaluate_return(
+            year=2024,
+            state="OH",
+            filing_status="Married/Joint",
+            w2_income=90_000,
+            state_facts=fact,
+        )
+    with pytest.raises(UnsupportedInputError, match="backend='graph' does"):
+        tenforty.evaluate_returns(
+            year=2024,
+            state=["TX", "OH"],
+            filing_status="Married/Joint",
+            w2_income=[50_000.0, 90_000.0],
+            mode="zip",
+            state_facts=fact,
+        )
+    assert engine_calls == []
+
+    oh_mfj = {
+        "year": 2024,
+        "state": "OH",
+        "filing_status": "Married/Joint",
+        "w2_income": 90_000,
+        "state_facts": fact,
+    }
+    assert tenforty.marginal_rate(**oh_mfj) > 0
+    assert tenforty.marginal_rates(**oh_mfj)["w2_income"] > 0
+    target = tenforty.evaluate_return(**(oh_mfj | {"backend": "graph"})).total_tax
+    assert tenforty.solve_for_income(target, **oh_mfj) == pytest.approx(90_000, abs=1.0)
+
+    joint_ma = tenforty.evaluate_return(
+        year=2024, state="MA", filing_status="Married/Joint", w2_income=90_000
+    )
+    assert [record.id for record in joint_ma.assumptions] == [
+        "ma.form_1.line_11.one_earner"
+    ]
