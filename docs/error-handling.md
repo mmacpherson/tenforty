@@ -20,7 +20,8 @@ second:
 | `"warn"` | Logs the failure with its year, state and filing status, emits a `RuntimeWarning`, and returns a **failed return** |
 | `"ignore"` | Returns a **failed return** silently |
 
-A **failed return** has every field set to NaN: `InterpretedTaxReturn.failed()`.
+A **failed return** has NaN in every numeric field and `assumptions` of `None`
+(null in a frame): `InterpretedTaxReturn.failed()`.
 NaN means "this return failed". (A rate field that is `None`, null in a frame,
 is a different thing: the rate is not defined for a successful return.) It is
 never a $0 that could pass for a real
@@ -42,7 +43,8 @@ succeeded = df.filter(~pl.col("total_tax").is_nan())
 ```
 
 `evaluate_returns` keeps one row per requested return, in the requested order,
-with its inputs echoed; only a failed row's output columns are NaN. When a
+with its inputs echoed; only a failed row's numeric output columns are NaN, and
+its `assumptions` is null. When a
 graph batch fails under `"warn"` or `"ignore"`, its rows are re-evaluated one by
 one, so one failing return does not fail its neighbours.
 
@@ -64,9 +66,12 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 | `"auto"` | OTS | graph for federal-only returns and states in graph scope; otherwise OTS, or `UnsupportedReturnError` |
 
 `"auto"` picks the backend per return: graph for a 2024 or 2025 return that
-is federal-only or whose state is in graph scope (below), OTS otherwise. To get
-the behavior of earlier releases, whose default was `"ots"`, pass
-`backend="ots"`; that is the rollback if a default result surprises you.
+is federal-only or whose state is in graph scope (below), OTS otherwise. To compute on
+OTS, as earlier releases did by default, pass `backend="ots"`; that is the
+rollback if a default result surprises you. It rolls back the engine, not
+every earlier contract: the deduction election, the frame schema and the error
+behavior changed for both backends (see
+[Migrating to the graph default](./migrating-to-graph-default.md)).
 
 An explicit `"ots"` or `"graph"` is never reinterpreted: it is honoured or
 refused before evaluation. `"auto"` splits a mixed-year batch by year and

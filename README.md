@@ -21,8 +21,13 @@ scenarios, compare different tax situations, and understand how the inputs to a
 return affect what you owe. It's built for an individual interrogating *their
 own return*: sensitivity analysis, what-if sweeps, and optimization.
 
-The package wraps [Open Tax Solver](https://opentaxsolver.sourceforge.net/) in a
-Python library. The ideas behind it are discussed in a blog post
+It computes returns with two engines. One is
+[Open Tax Solver](https://opentaxsolver.sourceforge.net/) (OTS), wrapped in a
+Python library. The other is tenforty's own graph backend: tax forms written in
+a Haskell DSL, compiled to graphs and evaluated by a Rust runtime. By default
+each return goes to one of them by tax year and state; see
+[Which backend computes your return](#which-backend-computes-your-return). The
+ideas behind the package are discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
 
 You can try `tenforty` out immediately in your browser via the included Colab
@@ -53,13 +58,8 @@ in the [Limitations](#known-limitations) section below.
 pip install tenforty
 ```
 
-Python 3.10–3.14 is supported on Linux and macOS. Windows is not supported; see
+Python 3.10–3.15 is supported on Linux and macOS. Windows is not supported; see
 [Known Limitations](#known-limitations) for workarounds.
-
-Python 3.15 is experimental. Prebuilt 3.15 wheels are not published yet, so
-installing on 3.15 builds from source; see the
-[Development Guide](./docs/develop.md) for the toolchain. Full support will be
-reconsidered after the final Python release.
 
 ### Building from source
 
@@ -86,6 +86,40 @@ That package has no graph backend: `backend="ots"` works, and any return routed
 to the graph backend raises an error instead of falling back to OTS.
 
 
+## Which Backend Computes Your Return
+
+The default, `backend="auto"`, picks the engine for each return before computing
+it:
+
+| Return | Under `backend="auto"` |
+|---|---|
+| Tax years 2018–2023 | OTS, for the states OTS has that year; any other state raises `UnsupportedReturnError` |
+| 2024–2025, federal only (`state=None`) | Graph |
+| 2024–2025 in IL, MS or OR, or a state without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) | Graph |
+| 2024–2025 in AZ, CA, MA, MI, NC, NJ, NY, OH, PA or VA | OTS |
+| 2024–2025 in AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IN, KS, KY, LA, MD, ME, MN, MO, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI or WV | Raises `UnsupportedReturnError`, naming the reason; `backend="graph"` computes it anyway |
+
+- **Graph scope.** A 2024–2025 state goes to graph only when its known
+  graph-side defects are closed and official values support it. The other
+  states stay out for a named reason: an open defect, missing evidence, or a
+  decision. [Graph state scope](./docs/error-handling.md#graph-state-scope-under-auto)
+  has the reasons. MD, ME and NC wait on the itemized-deduction contract
+  (`tenforty-nuc6`). Ohio is out by decision: its graph Married/Joint return
+  requires an explicit [state fact](./docs/state-facts.md) with no default, so
+  admitting it would make the default raise for those callers.
+- **OTS is chosen by coverage, not as a retry.** A state goes to OTS because it
+  is outside graph scope and OTS computes it. A return that fails on the graph
+  backend is not rerun on OTS.
+- **An explicit backend is never reinterpreted.** `backend="ots"` computes on
+  OTS and `backend="graph"` on graph, or the call raises before computing.
+  `backend="ots"` gives the OTS results earlier releases defaulted to. It does
+  not restore every earlier contract: the deduction election, the frame schema
+  and the error behavior changed for both backends. See
+  [Migrating to the graph default](./docs/migrating-to-graph-default.md).
+- **The OTS-only package** (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
+  a return the default routes to graph raises `BackendUnavailableError` there.
+
+
 ## Quick Start
 
 The `evaluate_return` function computes the outputs for a single tax return
@@ -101,10 +135,11 @@ evaluate_return(
 
 This results in the following:
 
+<!-- readme-output: value -->
 ``` python
 {'total_tax': 4476.0,
  'federal_adjusted_gross_income': 100000.0,
- 'federal_effective_tax_rate': 4.9,
+ 'federal_effective_tax_rate': 4.884671532846715,
  'federal_tax_bracket': 12.0,
  'federal_taxable_income': 68500.0,
  'federal_qbi_deduction': 0.0,
@@ -119,11 +154,13 @@ This results in the following:
  'state_taxable_income': 88588.0,
  'state_total_tax': 1130.0,
  'state_tax_bracket': 6.0,
- 'state_effective_tax_rate': 2.7}
+ 'state_effective_tax_rate': 1.2755677969928207,
+ 'assumptions': ()}
 ```
 
-No `year=` argument was specified here, so the current tax year, 2025, was used.
-The output is a pydantic model, and we've called its `.model_dump()` method to
+No `year=` argument was specified here, so the default year, 2025, was used.
+California is outside graph scope, so this return was computed on OTS. The
+output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary. Every argument and output field is listed in
 the [API Reference](#api-reference).
 
@@ -138,13 +175,13 @@ You describe your situation in plain language, and the agent maps your
 figures onto `tenforty`'s inputs, runs the return, and answers follow-up
 questions by changing inputs and re-running.
 
-For a typical personal return, expect a close estimate. The computation is
-extensively tested against IRS and state worked examples
-([IRS Validation](./docs/irs-validation.md)), against Tax-Calculator as an
-independent federal model
-([differential audit](./docs/taxcalc-differential-audit.md)), and with
-property-based invariants. It's still a **preview**, not a
-filing: nothing is guaranteed, and the usual way it goes wrong is a figure from
+How much to trust the result depends on what your return contains. The
+[evidence summary](./docs/evidence-summary.md) says, for each kind of return the
+default computes, what is checked against independent published values and
+what is only checked for agreement between the backends, against snapshots, or
+by property tests. Tax-Calculator serves as an independent federal model
+([differential audit](./docs/taxcalc-differential-audit.md)). It's still a
+**preview**, not a filing: nothing is guaranteed, and the usual way it goes wrong is a figure from
 your documents that the agent maps to the wrong input or that `tenforty`
 doesn't model (see the [API Reference](#api-reference) and
 [Known Limitations](#known-limitations)). It's well suited to "what will I owe,
@@ -228,22 +265,27 @@ evaluate_returns(
 ]
 ```
 
-This results in a `polars.DataFrame` (use `.to_pandas()` if you need pandas compatibility):
+This results in a `polars.DataFrame` (use `.to_pandas()` if you need pandas
+compatibility). The rates are percentages, shown here to two decimals. The
+effective rates divide by taxable income:
 
+<!-- readme-output: table -->
 | w2_income | federal_effective_tax_rate | federal_tax_bracket | state_effective_tax_rate | state_tax_bracket |
 |----------:|---------------------------:|--------------------:|-------------------------:|------------------:|
-|     50000 |                          0 |                  10 |                      1.4 |                 2 |
-|    100000 |                        4.9 |                  12 |                      2.7 |                 6 |
-|    150000 |                        9.7 |                  22 |                      4.2 |                 8 |
-|    200000 |                       13.4 |                  22 |                      5.5 |               9.3 |
-|    250000 |                       15.4 |                  24 |                      6.3 |               9.3 |
+|     50000 |                       0.00 |                  10 |                     0.00 |                 2 |
+|    100000 |                       4.88 |                  12 |                     1.28 |                 6 |
+|    150000 |                       9.70 |                  22 |                     3.32 |                 8 |
+|    200000 |                      13.35 |                  22 |                     4.86 |               9.3 |
+|    250000 |                      15.44 |                  24 |                     5.79 |               9.3 |
 
 
 ### Plot: Federal Tax as a Function of W2 Income
 
 Since the output is a dataframe, one may readily use any of numerous
-visualization tools to make plots. Here we revisit the example above, evaluating
-a wider range of W2 incomes at finer resolution than before.
+visualization tools to make plots. The plots here use seaborn, which takes a
+pandas frame, so they need `pip install seaborn pyarrow` and call
+`.to_pandas()`. Here we revisit the example above, evaluating a wider range of
+W2 incomes at finer resolution than before.
 
 ``` python
 import seaborn.objects as so
@@ -251,7 +293,7 @@ import seaborn.objects as so
 df = evaluate_returns(w2_income=list(range(0, 250_001, 1_000)))
 
 (
-    so.Plot(df, x="w2_income", y="total_tax")
+    so.Plot(df.to_pandas(), x="w2_income", y="total_tax")
     .add(so.Line())
     .label(
         x="W2 Income", y="Federal Tax", title="Federal Tax as a Function of W2 Income"
@@ -264,10 +306,11 @@ df = evaluate_returns(w2_income=list(range(0, 250_001, 1_000)))
 
 ### Plot: Federal Tax Over Time
 
-The good people at Open Tax Solver have published editions each year for 21
-years, so one can just as easily vary the year as any other parameter. At the
-moment `tenforty` supports back to the 2018 tax year. Here we show the federal
-tax on $100K of W2 income for each supported year.
+One can just as easily vary the year as any other parameter. `tenforty`
+supports back to the 2018 tax year; under the default, 2018–2023 are computed
+on OTS (whose authors have published an edition every year for over two
+decades) and 2024–2025 on the graph backend. Here we show the federal tax on
+$100K of W2 income for each supported year.
 
 ``` python
 import polars as pl
@@ -277,7 +320,7 @@ df = evaluate_returns(
 ).cast({"year": pl.Utf8})
 
 (
-    so.Plot(df, x="year", y="total_tax")
+    so.Plot(df.to_pandas(), x="year", y="total_tax")
     .add(so.Line())
     .add(so.Dot())
     .label(
@@ -296,9 +339,8 @@ it's only about a 3% drop over the years.*
 
 ### Plot: Impact of Long-Term Capital Gains
 
-Because Open Tax Solver supports short- and long-term capital gains
-calculations -- although, see the [Limitations](#known-limitations) section
-below -- you can ask questions about the impact on your taxes of selling some
+Both backends compute short- and long-term capital gains -- although, see the
+[Limitations](#known-limitations) section below -- so you can ask questions about the impact on your taxes of selling some
 appreciated stock this year, and show the breakdown between state and federal
 taxes:
 
@@ -321,7 +363,7 @@ df = (
 )
 
 (
-    so.Plot(df, x="long_term_capital_gains", y="tax", color="Type").add(
+    so.Plot(df.to_pandas(), x="long_term_capital_gains", y="tax", color="Type").add(
         so.Area(alpha=0.7), so.Stack()
     )
     .label(
@@ -342,6 +384,9 @@ exercise of which can put them in a situation where they need to pay actual
 money in taxes on paper gains, via the alternative minimum tax. With
 `tenforty`'s help you can see it coming at least: ;)
 
+`federal_total_tax` already includes the AMT, so the stack below splits it into
+the tax excluding AMT and the AMT itself; the two layers sum to the total.
+
 
 ``` python
 import polars as pl
@@ -350,17 +395,20 @@ df = (
     evaluate_returns(
         w2_income=100_000, incentive_stock_option_gains=list(range(0, 100_001, 2500))
     )
-    .select(["incentive_stock_option_gains", "federal_total_tax", "federal_amt"])
+    .with_columns(
+        excluding_amt=pl.col("federal_total_tax") - pl.col("federal_amt")
+    )
+    .select(["incentive_stock_option_gains", "excluding_amt", "federal_amt"])
     .unpivot(index="incentive_stock_option_gains", variable_name="Type", value_name="tax")
     .with_columns(
         pl.col("Type").replace(
-            {"federal_amt": "AMT", "federal_total_tax": '"Regular" Tax'}
+            {"federal_amt": "AMT", "excluding_amt": "Tax excluding AMT"}
         )
     )
 )
 
 (
-    so.Plot(df, x="incentive_stock_option_gains", y="tax", color="Type")
+    so.Plot(df.to_pandas(), x="incentive_stock_option_gains", y="tax", color="Type")
     .add(so.Area(alpha=0.7), so.Stack())
     .label(
         x="Incentive Stock Option Gains",
@@ -392,10 +440,11 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
-| `state`                      | str \| None               | None                | Two-letter state code. Income-tax states: AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA. No-income-tax states (AK, FL, NV, SD, TN, TX, WA, WY) also accepted. |
+| `state`                      | str \| None               | None                | Two-letter state code, or None for a federal-only return. The graph backend computes every state and DC for 2024-2025; OTS computes AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA and the no-income-tax states, for the years it has them. Which one the default uses: [Which backend computes your return](#which-backend-computes-your-return) |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC, EITC and dependent care are not modeled. |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
+| `dependent_exemptions`       | float                    | 0.0                 | Graph only. State exemption dollars (not a count) for states that use them; see its docstring in `TaxReturnInput` for the per-state rules. OTS ignores it |
 | `standard_or_itemized`       | str                      | Auto                | Federal deduction election: "Auto" takes the larger; "Standard" or "Itemized" forces that choice ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
@@ -419,8 +468,8 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
 | `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio Married/Joint returns raise until the fact is given. See [State facts](./docs/state-facts.md) |
-| `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return is all NaN, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
-| `backend`                    | str                      | auto                | "auto", "ots", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; pass "ots" for the pre-release default; see [Choosing a backend](./docs/error-handling.md#choosing-a-backend) and [Experimental: Graph Backend](#experimental-graph-backend) |
+| `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return has NaN in every numeric output and `assumptions` of None, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
+| `backend`                    | str                      | auto                | "auto", "ots", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; pass "ots" for OTS results; see [Which backend computes your return](#which-backend-computes-your-return) and [Choosing a backend](./docs/error-handling.md#choosing-a-backend) |
 
 ### `state_adjustment` (deprecated)
 
@@ -443,15 +492,19 @@ Every frame has the same columns, in the same order, with the same dtypes,
 whichever backend computed it and whether the batch is empty, succeeded,
 partly failed, or mixed engines under `backend="auto"`:
 
-- the inputs, in the order of the `evaluate_returns` signature (`year` through
-  `spouse_65_or_older`), then the return fields of `InterpretedTaxReturn`;
-- `year` and `num_dependents` are Int64; `state`, `filing_status` and
-  `standard_or_itemized` are String (`state` is null for a federal-only
-  return); boolean inputs are Boolean; float inputs and every output are
-  Float64, even when you pass whole numbers. The four rate columns
-  (`federal_tax_bracket`, `federal_effective_tax_rate`, `state_tax_bracket`,
-  `state_effective_tax_rate`) are null where the rate is not defined; a failed
-  row is NaN.
+- the inputs, in the order of the `evaluate_returns` signature (`year`
+  through `spouse_65_or_older`, then the keyword-only `num_ctc_dependents` and
+  `state_facts`), then the return fields of `InterpretedTaxReturn`;
+- `year`, `num_dependents` and `num_ctc_dependents` are Int64; `state`,
+  `filing_status`, `standard_or_itemized` and `state_facts` are String (`state`
+  is null for a federal-only return, `state_facts` the canonical JSON of the
+  model for the row's state, or null); boolean inputs are Boolean; float inputs
+  and every numeric output are Float64, even when you pass whole numbers;
+  `assumptions` is List(String), each element one record's JSON;
+- the four rate columns (`federal_tax_bracket`, `federal_effective_tax_rate`,
+  `state_tax_bracket`, `state_effective_tax_rate`) are null where the rate is
+  not defined. A failed row has NaN in every numeric output and a null
+  `assumptions`.
 
 The input columns echo **your request**, after broadcasting: they identify
 which return a row answers, not the values the engine used. For example, an
@@ -496,40 +549,32 @@ orchestration layer before rerunning Form 1040.
 | assumptions                     | Recorded state conventions this computation used because no input supplied them, as `Assumption` records (`()` if none were recorded; `None` on a failed return). In `evaluate_returns`, a list of each record's JSON. See [State facts](./docs/state-facts.md) |
 
 The bracket fields are the rate schedule's own bracket, not `marginal_rate()`,
-which differentiates the computed tax. The graph reports state brackets for CA,
+which is the graph's planning sensitivity (see
+[Marginal Rates for Every Input](#marginal-rates-for-every-input)). The graph reports state brackets for CA,
 NJ, NY, OH, OR and VA at full precision; OTS prints its bracket to 0.1%, so
 the two can differ in the last digit (NY 6.85% is 6.9 on OTS).
 
 
-## Experimental: Graph Backend
+## The Graph Backend
 
-Alongside Open Tax Solver, `tenforty` ships a second backend, which is still
-experimental. Tax forms are written in a Haskell DSL
-([`tenforty-spec/`](./tenforty-spec/)), compiled to JSON graphs, and evaluated
-by a Rust runtime exposed to Python. Because the whole return is one
-differentiable graph, it can report exact marginal rates and solve for inputs,
-which OTS can't. It is included in the published wheels.
+The graph backend computes the default's 2024–2025 federal returns and its
+graph-scope states (see
+[Which backend computes your return](#which-backend-computes-your-return)).
+Tax forms are written in a Haskell DSL ([`tenforty-spec/`](./tenforty-spec/)),
+compiled to JSON graphs, and evaluated by a Rust runtime exposed to Python.
+Because the whole return is one differentiable graph, it can report planning
+sensitivities and solve for inputs, which OTS can't. It is included in the
+published wheels.
 
-The default, `backend="auto"`, computes a 2024 or 2025 return on the graph
-backend when the return is federal-only or its state is in
-[graph scope](./docs/error-handling.md#graph-state-scope-under-auto), and on
-OTS otherwise; every 2018-2023 return goes to OTS. To force one backend, pass
-it explicitly. `backend="ots"` is the rollback to the behavior of earlier
-releases, whose default was OTS; `backend="graph"` computes any state the graph
-covers, in scope or not. [Migrating to the graph default](./docs/migrating-to-graph-default.md)
-lists every difference to expect between `"ots"` and `"auto"`:
+To force one backend, pass it explicitly. `backend="graph"` computes any state
+the graph covers, in scope or not;
+[Migrating to the graph default](./docs/migrating-to-graph-default.md) lists
+every difference to expect between `"ots"` and `"auto"`:
 
 ``` python
 evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
 evaluate_return(year=2025, w2_income=100_000, backend="ots")
 ```
-
-For `backend="auto"`, graph scope in 2024–2025 includes federal-only returns,
-IL, MS, OR and the eight no-income-tax states. MD, ME and NC are excluded
-pending the itemized-deduction contract (`tenforty-nuc6`): NC uses OTS, while
-MD and ME auto returns raise `UnsupportedReturnError` because OTS does not
-cover Maryland or Maine.
-See [graph state scope](./docs/error-handling.md#graph-state-scope-under-auto).
 
 Compared with the OTS backend:
 
@@ -539,22 +584,21 @@ Compared with the OTS backend:
   NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV.
 - Not every input is mapped for every state. It raises on an input it can't
   represent rather than dropping it.
-- It takes one extra input, `dependent_exemptions`: state exemption dollars
-  (not a count) for states that use them. See its docstring in
-  `TaxReturnInput` for the per-state rules.
+- It takes `dependent_exemptions`, state exemption dollars (not a count), for
+  the states that use them. OTS has no such input.
 
 Two function families exist only on this backend and take the same return
 arguments as `evaluate_return`:
 
-- `marginal_rates(...)` gives the derivative of an output with respect to every
+- `marginal_rates(...)` gives the planning sensitivity of an output to every
   continuous input at once; `marginal_rate(..., wrt=...)` does one input.
 - `solve_for_income(target_tax, ..., for_input="w2_income")` finds the value of
   one input that produces a target output.
 
 ### Marginal Rates for Every Input
 
-`marginal_rates` differentiates a selected output with respect to every
-continuous public input at once:
+`marginal_rates` reports how a selected output responds to every continuous
+public input at once:
 
 ``` python
 from tenforty import marginal_rates
@@ -581,6 +625,15 @@ right-hand derivative: the change implied by adding a small amount to that
 input. Smooth entries in `marginal_rates` share one reverse-mode traversal per
 resolved output.
 
+These are planning sensitivities, not always the literal derivative of the tax
+you file. Below $100,000 of taxable income the federal tax comes from the Tax
+Table, a staircase of $50 rows (and some states use similar tables): the
+literal slope is zero inside a row and a jump at its edge. There the graph
+reports the planning slope, the rate at the table row's midpoint: the bracket
+rate the rows step through, not the zero inside a row. Some comparisons of nearly equal amounts can
+also take the wrong side of a tie in floating point, which is tracked as
+`tenforty-msj2`.
+
 The reproducible
 [autodiff planning examples](docs/autodiff-applications.md) show a full
 next-dollar table, the interaction between wages and long-term-gain stacking,
@@ -599,10 +652,9 @@ true tax cliffs.
   are computed for the 2024 and 2025 tax years only. For earlier years they are
   reported as zero, so if they apply to your situation the total tax will be
   underestimated.
-- Only California has been tested against tax returns prepared independently by
-  professional tax software; other states have formula-derived and
-  property-based testing. See [IRS Validation](./docs/irs-validation.md) for
-  details.
+- Evidence is uneven across states and income types; the
+  [evidence summary](./docs/evidence-summary.md) says what is independently
+  checked for each kind of return the default computes.
 
 
 ## Related Projects
@@ -637,8 +689,8 @@ arguments with error messages that tell you (or your agent) what to fix,
 federal and state computed together, and a dataframe out when you sweep a
 grid of scenarios. The research models above can evaluate a single return
 too, but you or your agent have to learn their input conventions first. With
-`tenforty` that work is already done; on the experimental graph backend it
-also gives exact marginal rates and an input solver.
+`tenforty` that work is already done; on the graph backend it also gives
+planning sensitivities and an input solver.
 
 
 ## Development & Contributing
@@ -648,7 +700,8 @@ Contributions are welcome! See our [Contributing Guidelines](CONTRIBUTING.md) fo
 Documentation for developers:
 - [Development Guide](./docs/develop.md) - Package internals, Cython extensions, and environment setup
 - [Error Handling](./docs/error-handling.md) - Configuring `on_error` policies and exception types
-- [IRS Validation](./docs/irs-validation.md) - Testing methodology against official IRS and state sources
+- [Evidence summary](./docs/evidence-summary.md) - What is independently evidenced, per kind of return
+- [IRS Validation](./docs/irs-validation.md) - Historical record of the official-source test methodology
 
 
 ## License

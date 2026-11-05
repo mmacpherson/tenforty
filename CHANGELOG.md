@@ -11,8 +11,10 @@
   [Migrating to the graph default](docs/migrating-to-graph-default.md) for
   every difference you can expect between `"ots"` and `"auto"` and how to
   check your own workload.
-  - **Rollback:** pass `backend="ots"` to get exactly the old default. An
-    explicit `"ots"` or `"graph"` is unchanged and never reinterpreted.
+  - **Rollback:** pass `backend="ots"` to compute on OTS, as the old default
+    did. It rolls back the engine, not every earlier contract: the deduction
+    election, the frame schema and the error behavior changed for both
+    backends. An explicit `"ots"` or `"graph"` is never reinterpreted.
   - Results for 2024-2025 calls that relied on the default can change, because
     graph and OTS do not compute every return identically.
   - The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
@@ -21,6 +23,11 @@
     Pass `backend="ots"` with that package.
   - `marginal_rate`, `marginal_rates` and `solve_for_income` take no `backend`
     argument; they run on the graph backend, as before.
+  - The README opens with a routing table of which backend computes each
+    return, and its examples are run by `tests/readme_examples_test.py`, so
+    the outputs it shows cannot drift. The AMT example no longer counts the
+    AMT twice. [Evidence summary](docs/evidence-summary.md) replaces the IRS
+    Validation page as the account of what is independently checked.
 
 ### Added
 - **`state_facts`: explicit state-specific facts, and reported assumptions.**

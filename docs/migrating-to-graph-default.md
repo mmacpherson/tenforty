@@ -10,11 +10,13 @@
   an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and IL, MS and OR. Other
   states use OTS where covered, or raise `UnsupportedReturnError`. Years
   2018–2023 stay on OTS. `src/tenforty/graph_scope.py`
-  is the list, and each excluded state names the open defect or missing
-  evidence that keeps it out.
-- **An explicit backend is never reinterpreted.** `backend="ots"` is the
-  rollback: it gives you exactly the OTS results of today. `backend="graph"`
-  ignores scope.
+  is the list, and each excluded state names the open defect, missing evidence
+  or policy decision that keeps it out.
+- **An explicit backend is never reinterpreted.** `backend="ots"` computes on
+  OTS, as the earlier default did, and `backend="graph"` ignores scope.
+  `backend="ots"` is a rollback of the computation engine, not of every earlier
+  contract: the deduction election (`standard_or_itemized="Auto"`), the frame
+  schema and the error behavior changed for both backends.
 - **What you should do:**
   1. Run your workload on the default (`"auto"`) and compare it with
      `backend="ots"`. The differences you can expect are listed under
@@ -43,6 +45,9 @@ The CHANGELOG has the full wording.
   by engine and keeps its row order.
 - Auto computes IL and MS, which OTS cannot: under `backend="ots"` they raise
   `UnsupportedReturnError`.
+- OH stays out of auto graph scope by decision: its graph Married/Joint return
+  requires the explicit `state_facts` joint-credit fact, which has no default,
+  so admitting it would make auto raise for those callers. It uses OTS.
 - MD, ME and NC leave auto graph scope until their itemized-deduction contract
   is implemented (`tenforty-nuc6`). Their graph mappings currently treat the
   generic federal aggregate as a state itemized amount. NC therefore uses OTS;
@@ -184,7 +189,7 @@ difference in the corpus unexplained.
 | Entry | Kind | Where | What you see on auto |
 |---|---|---|---|
 | F11 (OTS upstream report 1) | OTS defect | 2024 head of household, taxable income above $191,150 | Up to $64 less federal tax: OTS starts the 32% bracket $800 early |
-| F12 | Contract | `itemized_deductions` with itemizing | Less or no AMT. OTS treats the aggregate as Schedule A "other taxes", added back for the AMT; graph treats it as "other deductions". Neither is wrong: the input does not say which kind of deduction it is |
+| F12 | Contract | `itemized_deductions` with itemizing | Less or no AMT. OTS treats the aggregate as Schedule A "other taxes", added back for the AMT; graph treats it as "other deductions". This is an unresolved legacy input contract, not two correct readings: the aggregate does not say which kind of deduction it is, so neither backend can establish the AMT add-back the law allows. The explicit itemized-deduction contract (`tenforty-nuc6`) replaces it |
 | F31 (OTS upstream report 11) | OTS defect | 2025 MFS, SALT, MAGI between $250,000 and $500,000 | Smaller SALT deduction: graph applies the MFS phase-down OTS skips |
 | OTS-6251-8Z (OTS upstream report 17) | OTS defect | Negative `schedule_1_income` | Less or no AMT. OTS reads Schedule 1 line 8z into Form 6251 lines 2b and 2e, so a negative 8z adds twice its size to AMTI. Example: 2024 MFS, wages $80,000, `schedule_1_income=-15000`: OTS AMT $1,224, auto $0 |
 | MAP-OR-DEPENDENTS (tenforty-3nvf) | Our OTS mapping | OR with `num_dependents` | Lower OR tax by the $249 (2024) / $256 (2025) exemption credit per dependent, which our OTS map never passed |
