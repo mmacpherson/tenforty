@@ -124,6 +124,7 @@ executable tenforty-compile
     MS80105_2025
     MTForm2_2024
     MTForm2_2025
+    NCChildDeduction
     NCFormD400_2024
     NCFormD400_2025
     NDForm1_2024
@@ -415,6 +416,7 @@ test-suite tenforty-spec-test
     MS80105_2025
     MTForm2_2024
     MTForm2_2025
+    NCChildDeduction
     NCFormD400_2024
     NCFormD400_2025
     NDForm1_2024

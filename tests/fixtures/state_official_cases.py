@@ -178,7 +178,8 @@ def _nc(year, label, status, ti, tax, alternate=None, **inputs) -> OfficialCase:
 # NC: D-400 L14 and L15. Line 15 rounds half up (D-401 p.4: "increase amounts
 # from 50 cents to 99 cents to the next whole dollar"), so the nine 2024 cases at
 # exactly $0.50 have one value; the record's U1 alternatives are not permitted.
-# Qualifying children are federal CTC children (Line 10a): num_dependents.
+# Qualifying children are federal CTC children (Line 10a): num_ctc_dependents,
+# defaulting to num_dependents in these preserved source cases.
 NC_CASES = [
     _nc(2024, "c1", "S", 7_250, 326, w2_income=20_000),
     _nc(2025, "c1", "S", 7_250, 308, w2_income=20_000),
@@ -276,6 +277,50 @@ IL_CASES = [
     _il(2025, "c13", "MFJ", 500_001, 24_750, w2_income=500_001),
     _il(2024, "c14", "S", 92_225, 4_565, w2_income=80_000, **INTEREST_GAIN),
     _il(2025, "c14", "S", 92_150, 4_561, w2_income=80_000, **INTEREST_GAIN),
+]
+
+
+IL_CASES += [
+    _il(
+        2024,
+        "c8",
+        "HoH",
+        69_450,
+        3438,
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2025,
+        "c8",
+        "HoH",
+        69_300,
+        3430,
+        w2_income=75_000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2024,
+        "c9",
+        "MFJ",
+        88_900,
+        4401,
+        w2_income=100_000,
+        num_dependents=2,
+        num_ctc_dependents=0,
+    ),
+    _il(
+        2025,
+        "c9",
+        "MFJ",
+        88_600,
+        4386,
+        w2_income=100_000,
+        num_dependents=2,
+        num_ctc_dependents=0,
+    ),
 ]
 
 
@@ -404,14 +449,6 @@ OFFICIAL_CASES: list[OfficialCase] = (
 
 UNPINNED = [
     UnpinnedCase(
-        f"IL-{year}-{label}",
-        "IL exemptions for dependents (IL-1040 line 10c) have no public input: "
-        "the graph maps no exemption natural and num_dependents is CTC children",
-    )
-    for year in (2024, 2025)
-    for label in ("c8", "c9")
-] + [
-    UnpinnedCase(
         f"OH-{year}-{label}",
         reason,
     )
@@ -429,9 +466,7 @@ UNPINNED = [
 
 ROUNDING = "tenforty-b72.42"
 TABLE = "tenforty-tj2.20"
-IL_EXEMPTION = "tenforty-b72.50"
 CO_ADDBACK = "tenforty-b72.51"
-NC_CHILD_DEDUCTION = "tenforty-b72.52"
 OH_EXEMPTION = "tenforty-b72.53"
 
 RATE = {
@@ -439,18 +474,9 @@ RATE = {
     ("CO", 2025): 0.044,
     ("GA", 2024): 0.0539,
     ("GA", 2025): 0.0519,
-    ("IL", 2024): 0.0495,
-    ("IL", 2025): 0.0495,
-    ("NC", 2024): 0.045,
-    ("NC", 2025): 0.0425,
 }
 """Flat rates, as each record cites them."""
 
-NC_STANDARD_DEDUCTION = {
-    "Single": 12_750,
-    "Married/Joint": 25_500,
-    "Head_of_House": 19_125,
-}
 CO_FEDERAL_STANDARD_DEDUCTION = {
     2024: {"Single": 14_600, "Married/Joint": 29_200, "Head_of_House": 21_900},
     2025: {"Single": 15_750, "Married/Joint": 31_500, "Head_of_House": 23_625},
@@ -506,16 +532,6 @@ def _defects(case: OfficialCase) -> dict[str, GraphDefect]:
     taxable = case.outcomes[0][0]
     if case.state == "GA":
         return _rounding(case)
-    if case.state == "IL":
-        exemptions = agi - taxable
-        return _deduction_missing(case, IL_EXEMPTION, exemptions, 0.0495)
-    if case.state == "NC":
-        if not case.inputs.get("num_dependents"):
-            return _rounding(case)
-        child_deduction = agi - NC_STANDARD_DEDUCTION[case.filing_status] - taxable
-        return _deduction_missing(
-            case, NC_CHILD_DEDUCTION, child_deduction, RATE[("NC", case.year)]
-        )
     if case.state == "OH":
         exemptions = agi - taxable
         persons = 2 if case.filing_status == "Married/Joint" else 1

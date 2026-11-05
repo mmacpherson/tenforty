@@ -7,6 +7,7 @@ used primarily for structuring and organizing configuration data.
 
 # ruff: noqa: D101
 import math
+import warnings
 from collections.abc import Callable
 from enum import Enum
 from functools import partial
@@ -352,7 +353,7 @@ class TaxReturnInput(BaseModel):
             "neither credit. Not modeled: the refundable additional child tax "
             "credit (a payment, not part of total tax), the earned income credit "
             "and the dependent care credit. Some state returns also read this "
-            "count as their dependent count (graph: CA, NY, OR and WI; OTS: the state "
+            "count as their dependent count (graph: CA, IL, NY, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
             "through dependent_exemptions. The OR graph uses it for its regular "
             "exemption credit and derives the taxpayer/spouse base from filing "
@@ -378,6 +379,9 @@ class TaxReturnInput(BaseModel):
             "dependents without an SSN valid for employment (e.g. with an ITIN or "
             "ATIN), and qualifying relatives such as a parent. For example, two "
             "children aged 10 and 18 are num_dependents=2, num_ctc_dependents=1. "
+            "The NC graph uses this same qualifying-child count for D-400 line "
+            "10a and its income-tiered line 10b child deduction; other dependents "
+            "do not qualify. The default to num_dependents applies there too. "
             "Must not exceed num_dependents (ValueError). For 2025, OBBBA also "
             "requires an SSN for the filer (at least one spouse on a joint "
             "return) to claim the child tax credit; that is not checked."
@@ -470,7 +474,8 @@ class TaxReturnInput(BaseModel):
             "married filing jointly), not for married filing separately. The senior "
             "deduction is taken with either the standard or itemized deduction and "
             "is added back for the AMT. Blindness and dependent-filer limits are not "
-            "modeled. State returns do not read it."
+            "modeled. The IL graph also adds the $1,000 age-65 exemption allowance, "
+            "subject to its federal-AGI limit; other states do not read it."
         ),
     )
     spouse_65_or_older: bool = Field(
@@ -483,16 +488,31 @@ class TaxReturnInput(BaseModel):
             "standard deduction, which the IRS allows when the spouse had no income, "
             "is not filing and cannot be claimed as a dependent; the senior "
             "deduction is not allowed. Any other filing status has no spouse box, "
-            "so True raises ValueError."
+            "so True raises ValueError. The IL graph adds the spouse's $1,000 "
+            "age allowance only for MFJ, subject to its federal-AGI limit."
         ),
     )
-    state_adjustment: float = 0.0
+    state_adjustment: float = Field(
+        default=0.0,
+        description=(
+            "Deprecated legacy escape hatch; avoid in new code. Its meaning depends "
+            "on the state and the backend, and a nonzero value emits a "
+            "DeprecationWarning (tenforty-yu51). OTS CA: Schedule CA Part II "
+            "itemized-deduction addition (CA540_P2_Add_6). Graph CA: Schedule CA "
+            "Part I income addition (ca_schedule_ca_A22_24), so the same value moves "
+            "CA taxable income the opposite way. Graph AL: the Form 40 standard "
+            "deduction amount (al_40_L12_std). Everywhere else OTS ignores it and "
+            "the graph refuses it. Named single-meaning inputs will replace it "
+            "(tenforty-tj2.1, tenforty-tj2.2)."
+        ),
+    )
     incentive_stock_option_gains: float = 0.0
     dependent_exemptions: float = Field(
         default=0.0,
         description=(
-            "State exemption dollars, not a dependent count. The OR graph does not "
-            "map this field; use num_dependents for its regular exemption credit. "
+            "State exemption dollars, not a dependent count. The IL and OR graphs "
+            "do not map this field; use num_dependents for IL's personal/dependent "
+            "allowance and the OR regular exemption credit. "
             "For NJ, VA, HI, IN, KS, "
             "MD, ME, VT, and LA 2024 graph returns, this is the total including the "
             "mandatory personal and spouse baseline (and KS's head-of-household "
@@ -605,6 +625,20 @@ class TaxReturnInput(BaseModel):
             raise ValueError(
                 "spouse_65_or_older applies only to Married/Joint and Married/Sep; "
                 f"filing status {self.filing_status.value!r} has no spouse box."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def warn_deprecated_state_adjustment(self) -> "TaxReturnInput":
+        """Warn on a nonzero state_adjustment, whose meaning is backend-specific."""
+        if self.state_adjustment:
+            warnings.warn(
+                "state_adjustment is deprecated: its meaning depends on the state and "
+                "the backend (CA: an itemized-deduction addition on OTS but an income "
+                "addition on graph; AL graph: the standard deduction amount). See "
+                "docs/migrating-to-graph-default.md.",
+                DeprecationWarning,
+                stacklevel=2,
             )
         return self
 
