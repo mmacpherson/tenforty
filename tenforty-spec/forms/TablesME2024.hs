@@ -2,6 +2,7 @@ module TablesME2024
   ( -- * Maine State Income Tax Brackets
     maineBrackets2024,
     maineBracketsTable2024,
+    maineSchedule2024,
 
     -- * Standard Deduction
     meStandardDeduction2024,
@@ -17,6 +18,7 @@ module TablesME2024
 where
 
 import Data.List.NonEmpty (NonEmpty (..))
+import MaineTax (MaineSchedule (..))
 import TenForty.Table
 import TenForty.Types
 
@@ -37,6 +39,24 @@ maineBracketsTable2024 =
   case mkBracketTable maineBrackets2024 of
     Right bt -> TableBracket "me_brackets_2024" bt
     Left err -> error $ "Invalid Maine brackets: " ++ err
+
+-- | 2024 Tax Rate Schedules #1-#3 as printed, with whole-dollar bracket bases
+-- (line 20 at \$100,000 and over, and every tax table row).
+-- Order: Single, MFJ, MFS, HoH, QW
+-- Source: Maine Revenue Services, Individual Income Tax 2024 Rates (prepared
+-- September 15, 2023),
+-- https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/ind_tax_rate_sched_2024.pdf
+maineSchedule2024 :: MaineSchedule
+maineSchedule2024 =
+  MaineSchedule
+    { lowRate = 0.058,
+      middleRate = 0.0675,
+      topRate = 0.0715,
+      middleStart = byStatus 26050 52100 26050 39050 52100,
+      middleBase = byStatus 1511 3022 1511 2265 3022,
+      topStart = byStatus 61600 123250 61600 92450 123250,
+      topBase = byStatus 3911 7825 3911 5870 7825
+    }
 
 -- | 2024 Maine state standard deduction amounts
 -- Order: Single, MFJ, MFS, HoH, QW

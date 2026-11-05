@@ -90,7 +90,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.LA: {2024: ("tenforty-tj2.20",)},
     S.MA: _both_years("tenforty-b72.40"),
     S.MD: _both_years("tenforty-nuc6"),
-    S.ME: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
+    S.ME: _both_years("tenforty-nuc6"),
     S.MO: _both_years("tenforty-b72.46"),
     S.MT: _both_years("tenforty-b72.7"),
     S.NC: _both_years("tenforty-nuc6"),

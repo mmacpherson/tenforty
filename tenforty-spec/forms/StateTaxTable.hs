@@ -10,10 +10,12 @@
 module StateTaxTable
   ( TableSegment (..),
     stateTaxTable,
+    stateTaxTableBy,
   )
 where
 
 import TenForty
+import TenForty.TaxTable (taxTableBandIncome)
 
 data TableSegment
   = -- | Rows of @step@ dollars anchored at zero, priced at row start + offset.
@@ -21,8 +23,20 @@ data TableSegment
   | -- | One printed row whose amount is fixed.
     FixedRow {segmentLessThan :: Double, segmentTax :: Double}
 
+-- | A table whose rows price the bracket table @rateSchedule@.
 stateTaxTable :: [TableSegment] -> TableId -> Expr Dollars -> Expr Dollars -> Expr Dollars
-stateTaxTable segments rateSchedule aboveTable amount =
+stateTaxTable segments rateSchedule =
+  segmentedTable segments rateSchedule taxTableBandTax
+
+-- | A table whose rows price @schedule@ at the row midpoint, rounded half up,
+-- for states whose printed schedule is not the bracket integral of
+-- @rateSchedule@ (whole-dollar bracket bases, for example), as OR-40 does.
+stateTaxTableBy :: [TableSegment] -> TableId -> (Expr Dollars -> Expr Dollars) -> Expr Dollars -> Expr Dollars -> Expr Dollars
+stateTaxTableBy segments rateSchedule schedule =
+  segmentedTable segments rateSchedule (\table amount -> roundE (schedule (taxTableBandIncome table amount)))
+
+segmentedTable :: [TableSegment] -> TableId -> (TaxTable -> Expr Dollars -> Expr Dollars) -> Expr Dollars -> Expr Dollars -> Expr Dollars
+segmentedTable segments rateSchedule rowPrice aboveTable amount =
   foldr selectSegment aboveTable segments
   where
     selectSegment segment =
@@ -30,5 +44,5 @@ stateTaxTable segments rateSchedule aboveTable amount =
     rowTax (FixedRow _ tax) = dollars tax
     rowTax (GridRows _ step offset) =
       case mkTaxTable step (Amount offset) rateSchedule of
-        Right table -> taxTableBandTax table amount
+        Right table -> rowPrice table amount
         Left err -> error ("stateTaxTable: " ++ err)

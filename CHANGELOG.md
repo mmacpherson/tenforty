@@ -172,6 +172,16 @@
   $100,000 and above. Every one of the table's 2,001 rows is checked.
   Maryland 2024 and 2025 have no open graph defects left and join the graph
   scope for `backend="auto"`.
+- Maine Form 1040ME line 20 uses the published Maine Income Tax Table below
+  $100,000 of taxable income and the printed rate schedule (whole-dollar
+  bracket bases), in whole dollars, at and above it, instead of the unrounded
+  bracket integral. The line 17 and line 18 phase-out worksheets enter line 5
+  to four places, rounded half up, with whole-dollar lines 7 and 8, and every
+  Form 1040ME money entry (including federal AGI on line 14) is rounded to
+  whole dollars before the worksheets and the table lookup. Every
+  table row is checked. Maine stays outside the graph scope for
+  `backend="auto"` until the itemized-deductions contract lands, because its
+  graph takes `itemized_deductions` directly as its own itemized line.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)
