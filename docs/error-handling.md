@@ -84,8 +84,12 @@ For any other state, `"auto"` uses OTS if OTS computes that state's return
 (Arizona, California, Massachusetts, Michigan, North Carolina, New Jersey,
 New York, Ohio, Pennsylvania and Virginia). Otherwise it raises
 `UnsupportedReturnError`, and the message names the reason: the open defect
-(a `tenforty-...` issue) or `evidence: tenforty-b72.12` (no official-value
-fixtures yet).
+(a `tenforty-...` issue), `evidence: tenforty-b72.12` (no official-value
+fixtures yet), or a `policy: ...` decision.
+
+Ohio is excluded by decision: its graph Married/Joint return requires the
+explicit `state_facts` joint-credit fact, which has no default, so admitting
+it would make auto raise for those callers. Ohio routes to OTS.
 
 Maryland and North Carolina are excluded while the itemized-deduction contract
 is implemented (`tenforty-nuc6`): the generic federal aggregate cannot supply
