@@ -83,8 +83,8 @@ state itemizing from the federal Schedule A. See
 ### Results
 
 - **Failures are NaN, never zero.** Under `on_error="warn"` or `"ignore"`, a
-  failed return has NaN in every output field. The graph backend used to return
-  all zeros. A failed batch row keeps its place and input columns.
+  failed return has NaN in every numeric output field and `assumptions` is
+  `None`. The graph backend used to return all zeros. A failed batch row keeps its place and input columns.
 - **Rates can be `None`.** `federal_tax_bracket`, `federal_effective_tax_rate`,
   `state_tax_bracket` and `state_effective_tax_rate` are `float | None`. `None`
   means the rate is not defined: no state, a state whose bracket is not reported
