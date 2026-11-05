@@ -66,7 +66,7 @@ def generate_random_inputs():
         schedule_1_income = random.randint(0, 20_000)
 
     itemized_deductions = 0
-    standard_or_itemized = "Standard"
+    standard_or_itemized = "Auto"
     if random.random() < 0.2:
         # Try to force itemized sometimes
         itemized_deductions = random.randint(15_000, 50_000)

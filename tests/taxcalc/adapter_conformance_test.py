@@ -49,7 +49,7 @@ F14_CASE = {
     "qual_div": 0.0,
     "qual_frac": 0.0,
     "itemized": 0.0,
-    "std_or_item": "Standard",
+    "std_or_item": "Auto",
     "iso": 200_000.0,
 }
 
@@ -126,7 +126,8 @@ def test_iso_changes_the_taxcalc_result():
 NOT_CARRIED = {
     "year": "selects the tax year, not an amount to carry",
     "status": "non-numeric; becomes MARS",
-    "std_or_item": "non-numeric; taxcalc always takes best-of",
+    "std_or_item": "non-numeric; taxcalc takes best-of, so forced Standard is "
+    "carried by sending no Schedule A (taxcalc_schedule_a_fields)",
     "qual_frac": "consumed by _normalize_case into qual_div before the adapter",
 }
 

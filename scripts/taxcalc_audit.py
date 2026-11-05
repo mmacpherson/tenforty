@@ -93,7 +93,7 @@ def build_cases() -> list[dict]:
                 "qual_div": float(kw.pop("qual_div", 0.0)),
                 "itemized": float(kw.pop("itemized", 0.0)),
                 "iso": float(kw.pop("iso", 0.0)),
-                "std_or_item": kw.pop("std_or_item", "Standard"),
+                "std_or_item": kw.pop("std_or_item", "Auto"),
                 # Optional OBBBA keys are stored only when given, so every
                 # pre-OBBBA case keeps its exact shape.
                 **{
@@ -421,7 +421,7 @@ def run_taxcalc(cases, wage_attribution="primary"):
                     "e00650": qd,
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
-                    "e19200": c["itemized"],
+                    "e19200": taxcalc_policy.taxcalc_schedule_a_fields(c)["e19200"],
                     "cmbtp": c["iso"],
                 }
             )

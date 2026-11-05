@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "f195e2290d605a2a8a935161a86490b5d78689bc309e429604a2b20a81714317"
+        "sha256": "1de1b45f93cd511eb7b428e987d1fe2545de931f6810fa39c2da554b467c7fd1"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "81d9ce5fc5cb6f4b9e6dfd13e2a9570bcdaa780446398821f1b0d85f9e04af0c"
+        "sha256": "22d71e4529525592474c130d2b671bdf95ee52f24094f3461bc3f4902c25901e"
       }
     }
   },
@@ -30,15 +30,16 @@
   "inputs": {
     "standard_or_itemized": {
       "label": "Deduction choice",
-      "description": "Choose deductions automatically or force the supplied itemized amount.",
+      "description": "Take the larger deduction automatically, or force the standard deduction or the supplied itemized amount.",
       "type": "choice",
-      "choices": ["Standard", "Itemized"],
+      "choices": ["Auto", "Standard", "Itemized"],
       "encoding": {
-        "Standard": 0,
+        "Auto": 0,
+        "Standard": -1,
         "Itemized": 1
       },
-      "default": "Standard",
-      "federal_nodes": ["us_1040_ForceItemized"]
+      "default": "Auto",
+      "federal_nodes": ["us_1040_DeductionChoice"]
     },
     "w2_income": {
       "label": "Wages and salary",

@@ -151,8 +151,21 @@ class OTSFilingStatus(StrEnum):
 
 
 class OTSDeductionType(StrEnum):
+    AUTO = "Auto"
     STANDARD = "Standard"
     ITEMIZED = "Itemized"
+
+
+# Graph encoding of the election on us_1040_DeductionChoice: negative forces
+# the standard deduction, positive forces Schedule A, zero takes the larger.
+DEDUCTION_CHOICE_ENCODING = {"Auto": 0.0, "Standard": -1.0, "Itemized": 1.0}
+
+# Public inputs that reach the OTS federal return through a computed field,
+# so they can be emptied when the standard deduction is forced.
+OTS_INPUT_CARRIERS = {
+    "itemized_deductions": "schedule_a_other_deductions",
+    "state_and_local_taxes": "schedule_a_state_and_local_taxes",
+}
 
 
 class OTSState(Enum):
@@ -383,7 +396,22 @@ class TaxReturnInput(BaseModel):
             "return) to claim the child tax credit; that is not checked."
         ),
     )
-    standard_or_itemized: OTSDeductionType = OTSDeductionType.STANDARD
+    standard_or_itemized: OTSDeductionType = Field(
+        default=OTSDeductionType.AUTO,
+        description=(
+            "The federal Form 1040 deduction election. 'Auto' (the default) takes "
+            "the larger of the standard deduction and Schedule A. 'Standard' "
+            "forces the standard deduction even when Schedule A is larger; "
+            "'Itemized' forces Schedule A even when it is smaller or zero (IRC "
+            "63(e); Schedule A line 18). Before 'Auto' existed, 'Standard' meant "
+            "the larger of the two. The election sets Form 6251 line 2a. It does "
+            "not choose a state's deduction method: states apply their own rules "
+            "to the same inputs, or import the federal result. On the OTS "
+            "backend, 'Standard' with a nonzero Schedule A input raises "
+            "UnsupportedInputError for AZ, CA and NY, whose OTS programs build "
+            "their own itemized deduction from the federal Schedule A."
+        ),
+    )
     w2_income: float = 0.0
     taxable_interest: float = 0.0
     qualified_dividends: float = 0.0
@@ -573,6 +601,26 @@ class TaxReturnInput(BaseModel):
     def schedule_8812_other_dependents(self) -> int:
         """Dependents who get the credit for other dependents, Schedule 8812 line 6."""
         return self.num_dependents - self.schedule_8812_qualifying_children
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_a_other_deductions(self) -> float:
+        """itemized_deductions as OTS receives it: none when Standard is forced.
+
+        OTS has no switch that forces the standard deduction; it takes the
+        larger unless itemizing is forced, so an empty Schedule A forces it.
+        """
+        if self.standard_or_itemized == OTSDeductionType.STANDARD:
+            return 0.0
+        return self.itemized_deductions
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_a_state_and_local_taxes(self) -> float:
+        """state_and_local_taxes as OTS receives it: none when Standard is forced."""
+        if self.standard_or_itemized == OTSDeductionType.STANDARD:
+            return 0.0
+        return self.state_and_local_taxes
 
     @model_validator(mode="after")
     def refuse_more_ctc_dependents_than_dependents(self) -> "TaxReturnInput":
@@ -809,10 +857,10 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
+            "schedule_a_other_deductions": "A6",
             # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
             # applies the line 5e cap to the sum.
-            "state_and_local_taxes": "A5a",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -975,10 +1023,10 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
+            "schedule_a_other_deductions": "A6",
             # Schedule A line 5d is reached through line 5a; OTS sums 5a-5c and
             # runs the State and Local Tax Deduction Worksheet on the sum.
-            "state_and_local_taxes": "A5a",
+            "schedule_a_state_and_local_taxes": "A5a",
             # Schedule 1-A (OTS reads it when the return carries S1A_2a, which
             # the template always does): line 4a W-2 box 7 tips, line 14a
             # W-2 box 1 overtime, and line 22 column (iii) for one vehicle,
@@ -1150,8 +1198,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1283,8 +1331,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1352,8 +1400,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8z",
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1421,8 +1469,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # This assumes 'schedule_1_income' consolidates all other income reported in Schedule 1
-            "itemized_deductions": "A6",
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "standard_or_itemized": _force_itemize,
@@ -1490,8 +1538,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_8",  # Assumes 'schedule_1_income' consolidates all Schedule 1 income types
-            "itemized_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",  # Assumes deductions are itemized; otherwise, standard deduction is used
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "incentive_stock_option_gains": "AMTws3",
@@ -1558,8 +1606,8 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "S1_3",
             "rental_income": "S1_5",
             "schedule_1_income": "S1_21",  # Assuming 'Other income' covers Schedule 1 income types
-            "itemized_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
-            "state_and_local_taxes": "A5a",
+            "schedule_a_other_deductions": "A6",  # Other taxes (if itemized; if standard, this field is not used)
+            "schedule_a_state_and_local_taxes": "A5a",
             "filer_65_or_older": _filer_65_box,
             "spouse_65_or_older": _spouse_65_box,
             "incentive_stock_option_gains": "AMTws3",  # Other adjustments under AMT

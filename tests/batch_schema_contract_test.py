@@ -48,7 +48,7 @@ GRID = {
     "year": 2024,
     "state": [None, "CA"],
     "filing_status": ["Single", "Married/Joint"],
-    "standard_or_itemized": ["Standard", "Itemized"],
+    "standard_or_itemized": ["Auto", "Standard", "Itemized"],
     "w2_income": [50_000, 120_000],
     "qbi_is_sstb": [False, True],
     "self_employment_income": 10_000.0,

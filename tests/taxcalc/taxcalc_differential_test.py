@@ -49,6 +49,7 @@ from .taxcalc_policy import (  # noqa: E402
     ZERO_DELTA,
     modeled_deltas,
     taxcalc_obbba_fields,
+    taxcalc_schedule_a_fields,
     tenforty_obbba_inputs,
     tolerance,
 )
@@ -99,7 +100,7 @@ def _case_strategy():
             "ord_div": small_dollars,
             "qual_frac": st.sampled_from((0.0, 0.5, 1.0)),
             "itemized": small_dollars,
-            "std_or_item": st.sampled_from(("Standard", "Itemized")),
+            "std_or_item": st.sampled_from(("Auto", "Standard", "Itemized")),
             "iso": st.one_of(
                 st.just(0.0),
                 st.sampled_from((50_000.0, 200_000.0)),
@@ -181,7 +182,7 @@ def _anchor(**kw):
         "qual_div": 0.0,
         "itemized": 0.0,
         "iso": 0.0,
-        "std_or_item": "Standard",
+        "std_or_item": "Auto",
     }
     base.update(kw)
     return base
@@ -208,6 +209,23 @@ ANCHOR_CAPITAL_LOSS = _anchor(
     interest=100_000.0,
     stcg=-50_000.0,
     ltcg=10_000.0,
+)
+# tenforty-q3r / tenforty-ifa0: forced Standard with a larger Schedule A and an
+# ISO spread, where 'Standard' used to itemize.
+ANCHOR_FORCED_STANDARD_LTCG = _anchor(
+    status="Head_of_House",
+    ltcg=38_628.0,
+    iso=7_206.0,
+    itemized=38_628.0,
+)
+ANCHOR_FORCED_STANDARD_DIVIDENDS = _anchor(
+    status="Head_of_House",
+    interest=574.0,
+    ord_div=47_644.0,
+    qual_div=47_644.0,
+    stcg=-28_006.0,
+    iso=6_558.0,
+    itemized=60_000.0,
 )
 
 
@@ -241,10 +259,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "e00650": c["qual_div"],
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
-                    # Carry the uncategorized aggregate through an uncapped
-                    # itemized field. Cash charity (e19800) would impose a
-                    # 60%-of-AGI ceiling that tenforty's aggregate does not have.
-                    "e19200": c["itemized"],
+                    "e19200": taxcalc_schedule_a_fields(c)["e19200"],
                     # AMT preference income (ISO exercise spread). Without this
                     # taxcalc is handed no preference at all and reports zero
                     # AMT, so every AMT case would compare tenforty with the
@@ -373,6 +388,8 @@ def _assert_components_match_taxcalc(backend, cases):
 @example(cases=[ANCHOR_AMT_FLOOR])
 @example(cases=[ANCHOR_AMT_ZERO_TI_QUALIFIED_DIVIDENDS])
 @example(cases=[ANCHOR_CAPITAL_LOSS])
+@example(cases=[{**ANCHOR_FORCED_STANDARD_LTCG, "std_or_item": "Standard"}])
+@example(cases=[{**ANCHOR_FORCED_STANDARD_DIVIDENDS, "std_or_item": "Standard"}])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
     """Every quantity falls within its modeled TaxCalc range and tolerance."""

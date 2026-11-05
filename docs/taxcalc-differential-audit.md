@@ -441,6 +441,11 @@ misleading legacy field with an explicit
 `Auto / Standard / Itemized` choice. See
 [`docs/deduction-choice-contract.md`](deduction-choice-contract.md).
 
+**Superseded (`tenforty-q3r`, 2026-11-04):** `"Auto"` is now the larger-of
+default and `"Standard"` forces the standard deduction. Under a forced
+`"Standard"` the adapter sends TaxCalc no Schedule A, so both engines file
+the same return and no signature is needed.
+
 ### Clean areas
 
 Dividends (including the qualified-subset normalization), interest, AMT (no
@@ -469,8 +474,9 @@ bugs are batch-path defects this scalar harness deliberately did not probe.
 4. **API decisions**:
    - per-spouse wage/SE fields (completes F1 for MFJ; taxcalc's
      `e00200p`/`e00200s` is a working reference);
-   - **implemented:** legacy `"Standard"` is automatic greater-of and
-     `"Itemized"` forces itemization in both backends (F7, `tenforty-435`);
+   - **implemented:** `"Auto"` (the default) is greater-of, and `"Standard"`
+     and `"Itemized"` force their choice in both backends (F7, `tenforty-435`,
+     `tenforty-q3r`);
 5. **Keep the reference**: promote the harness to `scripts/`, commit a pinned
    golden fixture set at the semantic boundaries, and run the three-way sweep
    as a scheduled/pre-release job. Parity catches divergence; only an
