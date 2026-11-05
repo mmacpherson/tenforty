@@ -116,3 +116,34 @@ repair to page2 line-by-line lowering, not a tolerance/signature. The numeric
 case records above were preserved unchanged before the extension's tests.
 The unsupported aggregate list and whole-dollar fact requirement are explicit
 contracts; no per-category spouse allocation is inferred.
+
+
+## 2026-11-05 SOL-35 contract correction after independent review
+
+The prior one-spouse-AGI natural contract and unconditional federal-QSS-to-HoF
+inference are withdrawn. Both actual rounded MS line13 columns are required
+for MFJ; QSS requires an explicit MS eligibility fact. See
+[the new independent record](ms-pr447-review-independent.md). The existing
+worked arithmetic assumes its stipulated actual columns/qualification and
+is preserved unchanged. Household rounding is a validity reference only,
+never a reconstruction of an actual column. MS MFJ household-income
+state/total derivatives and solves are refused without perturbation ownership;
+federal-only outputs remain supported.
+
+
+## SOL-36 HoH baseline versus QSS requirement
+
+Non-blind source/policy audit: IRS1040 Head of Household permits a dependent
+parent who does not live with the taxpayer; MS80-100 p.6 requires a dependent
+in the home for Head of Family. Mike's explicit default ruling treats the
+ordinary resident-dependent HoH situation as an acceptable documented
+baseline, with `head_of_family_eligible=False` selecting MS Single for the
+known special circumstance. No assumption record is produced. QSS still
+requires the fact. The $50k2025 parent-elsewhere override reuses the original
+Single-with-one-dependent arithmetic40200/1329; the resident default reuses
+HoF-with-dependent37100/1192. The six old zero-dependent natural silver
+examples are repaired with the original blind archive's legal with-dependent
+rows, and their literal-box component values remain asserted via raw controls.
+Primary IRS source: https://www.irs.gov/instructions/i1040gi , Head of
+Household / Special rule for parent, retrieved2026-11-05. The policy baseline
+is a caller contract, not a claim that federal HoH logically entails MS HoF.

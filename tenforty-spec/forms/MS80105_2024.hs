@@ -23,7 +23,9 @@ ms80105_2024 = form "ms_80105" 2024 $ do
   pensions <- keyInput "L46" "taxable_pensions" "Prepared Mississippi taxable pension distributions"
   unemployment <- keyInput "L47" "unemployment" "Prepared taxable unemployment compensation"
   otherIncome <- keyInput "L48" "other_income" "Prepared Mississippi Schedule N income or loss"
-  totalIncome <- interior "L49" "total_income" (sumOf (fmap roundE [wages, business, capital, rental, farm, interest, dividends, alimonyReceived, pensions, unemployment, otherIncome]))
+  let naturalIncomeEntries = [wages, business, capital, rental, interest, dividends]
+      preparedIncomeEntries = [farm, alimonyReceived, pensions, unemployment, otherIncome]
+  totalIncome <- interior "L49" "total_income" (sumOf (fmap roundE (naturalIncomeEntries ++ preparedIncomeEntries)))
   l50 <- keyInput "L50" "ira" "Prepared IRA deduction"
   l51 <- keyInput "L51" "sep_simple" "Prepared SEP SIMPLE and qualified-plan deduction"
   l52 <- keyInput "L52" "savings_penalty" "Prepared early savings withdrawal penalty"
@@ -41,14 +43,19 @@ ms80105_2024 = form "ms_80105" 2024 $ do
   l61 <- interior "L61" "self_employment_tax_deduction" (roundE (importForm usScheduleSeL11))
   totalAdjustments <- interior "L65" "total_adjustments" (sumOf (fmap roundE [l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64]))
   page2Agi <- interior "L66" "page2_ms_agi" (totalIncome .-. totalAdjustments)
+  -- Each two-column rounded entry differs from its household reference by
+  -- at most one dollar. This validates facts; it never chooses either AGI.
+  _ <- interior "AGIConsistencyBound" "agi_consistency_bound" (dollars (fromIntegral (length naturalIncomeEntries + length [l61])))
 
   usePreparedAgi <- keyInput "UsePreparedAGI" "use_prepared_agi" "Use prepared raw household MS AGI instead of the page-2 inputs"
   preparedAgi <- keyInput "PreparedHouseholdAGI" "prepared_household_agi" "Prepared total MS AGI before entry rounding"
+  useAgiFacts <- keyInput "UseAGIFacts" "use_agi_facts" "Use both actual whole-dollar line-13 AGI columns"
+  taxpayerAgiFact <- keyInput "TaxpayerAGI" "taxpayer_adjusted_gross_income" "Actual taxpayer Column A MS AGI"
   spouseAgi <- keyInput "SpouseAGI" "spouse_adjusted_gross_income" "Spouse Column B MS AGI before deductions and exemptions"
   let householdAgi = ifPos usePreparedAgi preparedAgi page2Agi
       jointOnly value = byStatusE (byStatus (dollars 0) value (dollars 0) (dollars 0) (dollars 0))
-  taxpayerAgi <- interior "L13A" "taxpayer_ms_agi" (roundE (householdAgi .-. jointOnly spouseAgi))
-  spouseColumnAgi <- interior "L13B" "spouse_ms_agi" (jointOnly (roundE spouseAgi))
+  taxpayerAgi <- interior "L13A" "taxpayer_ms_agi" (ifPos (jointOnly useAgiFacts) taxpayerAgiFact (roundE (householdAgi .-. jointOnly spouseAgi)))
+  spouseColumnAgi <- interior "L13B" "spouse_ms_agi" (jointOnly (ifPos useAgiFacts spouseAgi (roundE spouseAgi)))
   l13 <- keyOutput "L13" "ms_agi" "Mississippi adjusted gross income" (taxpayerAgi .+. spouseColumnAgi)
 
   dependents <- keyInput "Dependents" "dependents" "Total federally claimed dependents"
@@ -59,12 +66,18 @@ ms80105_2024 = form "ms_80105" 2024 $ do
       additionalCount = sumOf [max0 (roundE dependents), ifPos filer65 (dollars 1) (dollars 0), spouseAgeCount]
       computedAdditional = lit msAdditionalExemption2024 .*. (additionalCount ./. dollars 1)
   additionalExemptions <- interior "L10Effective" "additional_exemption_amount" (greaterOf computedAdditional (roundE l10))
-  l11 <- interior "L11" "filing_status_exemption" (byStatusE (fmap lit msExemption2024))
+  headOfFamilyEligible <- keyInput "HeadOfFamilyEligible" "head_of_family_eligible" "Explicit MS Head of Family qualification or HoH baseline override"
+  useHeadOfFamilyFact <- keyInput "UseHeadOfFamilyFact" "use_head_of_family_fact" "Use the explicit eligibility fact instead of the HoH resident-dependent baseline"
+  let residentDependentBaseline = byStatusE (byStatus (dollars 0) (dollars 0) (dollars 0) (dollars 1) (dollars 0))
+      effectiveHeadEligibility = ifPos useHeadOfFamilyFact headOfFamilyEligible residentDependentBaseline
+  let exemptionByStatus = (fmap lit msExemption2024) {bsHeadOfHousehold = ifPos effectiveHeadEligibility (lit (bsHeadOfHousehold msExemption2024)) (lit (bsSingle msExemption2024)), bsQualifyingWidow = ifPos effectiveHeadEligibility (lit (bsHeadOfHousehold msExemption2024)) (lit (bsSingle msExemption2024))}
+  l11 <- interior "L11" "filing_status_exemption" (byStatusE exemptionByStatus)
   l12 <- interior "L12" "total_exemptions" (l11 .+. additionalExemptions)
   l15 <- interior "L15" "exemption_allowance" (l12 .*. byStatusE (fmap rate (byStatus 1 1 0.5 1 1)))
 
   l14a <- keyInput "L14a" "itemized_deductions" "Prepared Mississippi itemized deductions"
-  standardDeduction <- interior "L14b_std" "standard_deduction" (byStatusE (fmap lit msStandardDeduction2024))
+  let deductionByStatus = (fmap lit msStandardDeduction2024) {bsHeadOfHousehold = ifPos effectiveHeadEligibility (lit (bsHeadOfHousehold msStandardDeduction2024)) (lit (bsSingle msStandardDeduction2024)), bsQualifyingWidow = ifPos effectiveHeadEligibility (lit (bsHeadOfHousehold msStandardDeduction2024)) (lit (bsSingle msStandardDeduction2024))}
+  standardDeduction <- interior "L14b_std" "standard_deduction" (byStatusE deductionByStatus)
   deductions <- interior "L14b" "deductions" (greaterOf (roundE l14a) standardDeduction)
   allowances <- interior "Allowances" "exemptions_and_deductions" (l15 .+. deductions)
   l16 <- keyOutput "L16" "ms_taxable_income" "Aggregate Mississippi taxable income (not below zero)" (l13 `subtractNotBelowZero` allowances)

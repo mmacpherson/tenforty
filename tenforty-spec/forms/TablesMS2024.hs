@@ -25,21 +25,21 @@ msTaxRate2024 = 0.047
 -- Order: Single, MFJ, MFS, HoH, QW
 -- p.5 "Filing Status and Exemptions": Married filing joint or combined $12,000;
 -- Married filing separate has $12,000 on line 11, halved on line 15;
--- a federal qualifying surviving spouse uses Head of Family, $8,000, not
--- the MS spouse-died-in-current-year status (non-blind source analysis).
+-- federal QSS requires an explicit MS Head of Family eligibility fact.
+-- The form selects the HoF or Single amount; the table has Single as its raw fallback.
 -- Single $6,000. The Head of Family figure excludes the $1,500 for the
 -- required dependent, which is claimed on Line 10.
 msExemption2024 :: ByStatus (Amount Dollars)
-msExemption2024 = byStatus 6000 12000 12000 8000 8000
+msExemption2024 = byStatus 6000 12000 12000 8000 6000
 
 -- | 2024 Mississippi standard deduction
 -- Order: Single, MFJ, MFS, HoH, QW
 -- p.5 "Filing Status and Exemptions": Married filing joint or combined $4,600;
 -- Married filing separate $2,300; Head of Family $3,400; Single $2,300.
--- Federal qualifying surviving spouse uses Head of Family ($3,400).
+-- Federal QSS requires the eligibility fact: HoF $3,400 or Single $2,300.
 -- Death-year federal MFJ retains the married $4,600 amount.
 msStandardDeduction2024 :: ByStatus (Amount Dollars)
-msStandardDeduction2024 = byStatus 2300 4600 2300 3400 3400
+msStandardDeduction2024 = byStatus 2300 4600 2300 3400 2300
 
 -- | 2024 Mississippi additional exemption per dependent, age 65+, or blind box
 -- p.6: "Each dependent, other than yourself or spouse ... $1,500";

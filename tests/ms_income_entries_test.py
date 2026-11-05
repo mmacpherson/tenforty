@@ -158,7 +158,9 @@ def test_page2_entries_round_before_the_income_and_adjustment_sums(case, year, b
     _label, inputs, agi, taxable, tax24, tax25 = case
     inputs = dict(inputs)
     if inputs.get("filing_status") == "Married/Joint":
-        inputs["state_facts"] = state_facts.MS(spouse_adjusted_gross_income=20_000)
+        inputs["state_facts"] = state_facts.MS(
+            taxpayer_adjusted_gross_income=20_000, spouse_adjusted_gross_income=20_000
+        )
     result = evaluate_return(year=year, state="MS", backend=backend, **inputs)
     assert (
         result.state_adjusted_gross_income,

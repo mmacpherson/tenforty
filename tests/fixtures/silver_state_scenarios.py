@@ -3574,11 +3574,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Line 17 uses the archived whole-dollar tax, including mandatory rounding
     # (I24 p.21 / I25 p.22). The original unrounded arithmetic remains below.
     #
-    # HoH rows are the literal "Head of Family box, zero dependents" reading
-    # (Line 11 = $8,000, Line 10 = $0). A legal HoH return needs a dependent
-    # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4). These zero-count
-    # rows remain literal component checks; legal dependent returns are pinned
-    # in ms_exemptions_rounding_test.py from the archived source derivation.
+    # HoH natural rows use the original blind record's legally qualifying
+    # resident-dependent cases and an explicit True qualification fact.
+    # The six old zero-dependent literal-box checks remain raw graph component
+    # tests, labelled not legal-return evidence (ms_explicit_facts_test.py).
     #
     # MFJ: the Schedule of Tax Computation applies the $10,000 zero band per
     # spouse column. These MFJ rows explicitly stipulate a zero spouse MS AGI
@@ -3648,60 +3647,72 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2024,
         state="MS",
         filing_status="Married/Joint",
-        state_facts={"spouse_adjusted_gross_income": 0},
+        state_facts={
+            "taxpayer_adjusted_gross_income": 20000.0,
+            "spouse_adjusted_gross_income": 0,
+        },
         w2_income=20000.0,
         expected_state_tax=0.00,
         backend="graph",
     ),
-    # MS 2024 HoH, $20,000 W2, no dependents
+    # MS 2024 HoH, $20,000 W2, one resident dependent
     # Source: MS DOR Form 80-100-24-1-1-000 instructions,
     #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
     #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
     # Kind: derived-arithmetic; derived blind, session 1b251ce6.
-    # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
+    # Original blind HoF-with-dependent row: TI 20,000 - 9,500 - 3,400 = 7,100; whole-dollar tax 0.
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
         state_evidence=MS_EVIDENCE,
-        description="MS HoH, $20,000 W2, no dependents (2024)",
+        description="MS HoH, $20,000 W2, one resident dependent (2024)",
         year=2024,
         state="MS",
         filing_status="Head_of_House",
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts={"head_of_family_eligible": True},
         w2_income=20000.0,
-        expected_state_tax=0.00,
+        expected_state_tax=0.0,
         backend="graph",
     ),
-    # MS 2024 HoH, $50,000 W2, no dependents
+    # MS 2024 HoH, $50,000 W2, one resident dependent
     # Source: MS DOR Form 80-100-24-1-1-000 instructions,
     #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
     #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
     # Kind: derived-arithmetic; derived blind, session 1b251ce6.
-    # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.047 = 1,344.20
+    # Original blind HoF-with-dependent row: TI 50,000 - 9,500 - 3,400 = 37,100; whole-dollar tax 1,274.
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
         state_evidence=MS_EVIDENCE,
-        description="MS HoH, $50,000 W2, no dependents (2024)",
+        description="MS HoH, $50,000 W2, one resident dependent (2024)",
         year=2024,
         state="MS",
         filing_status="Head_of_House",
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts={"head_of_family_eligible": True},
         w2_income=50000.0,
-        expected_state_tax=1344.0,
+        expected_state_tax=1274.0,
         backend="graph",
     ),
-    # MS 2024 HoH, $150,000 W2, no dependents
+    # MS 2024 HoH, $150,000 W2, one resident dependent
     # Source: MS DOR Form 80-100-24-1-1-000 instructions,
     #   https://www.dor.ms.gov/sites/default/files/Forms/Individual/80100241.pdf
     #   p.5 (exemptions, std deduction), p.21 (rate), p.26 (schedule); retrieved 2026-09-30.
     # Kind: derived-arithmetic; derived blind, session 1b251ce6.
-    # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.047 = 6,044.20
+    # Original blind HoF-with-dependent row: TI 150,000 - 9,500 - 3,400 = 137,100; whole-dollar tax 5,974.
     TaxScenario(
         source="MS 2024 Form 80-100 instructions (derived blind)",
         state_evidence=MS_EVIDENCE,
-        description="MS HoH, $150,000 W2, no dependents (2024)",
+        description="MS HoH, $150,000 W2, one resident dependent (2024)",
         year=2024,
         state="MS",
         filing_status="Head_of_House",
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts={"head_of_family_eligible": True},
         w2_income=150000.0,
-        expected_state_tax=6044.0,
+        expected_state_tax=5974.0,
         backend="graph",
     ),
     # MS 2025 Single, $20,000 W2, no dependents
@@ -3768,60 +3779,72 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2025,
         state="MS",
         filing_status="Married/Joint",
-        state_facts={"spouse_adjusted_gross_income": 0},
+        state_facts={
+            "taxpayer_adjusted_gross_income": 20000.0,
+            "spouse_adjusted_gross_income": 0,
+        },
         w2_income=20000.0,
         expected_state_tax=0.00,
         backend="graph",
     ),
-    # MS 2025 HoH, $20,000 W2, no dependents
+    # MS 2025 HoH, $20,000 W2, one resident dependent
     # Source: MS DOR Form 80-100-25-1-1-000 instructions,
     #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
     #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
     # Kind: derived-arithmetic; derived blind, session 1b251ce6.
-    # TI: 20,000 - 8,000 - 3,400 = 8,600; tax: 0 (under the $10,000 band) = 0.00
+    # Original blind HoF-with-dependent row: TI 20,000 - 9,500 - 3,400 = 7,100; whole-dollar tax 0.
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
         state_evidence=MS_EVIDENCE,
-        description="MS HoH, $20,000 W2, no dependents (2025)",
+        description="MS HoH, $20,000 W2, one resident dependent (2025)",
         year=2025,
         state="MS",
         filing_status="Head_of_House",
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts={"head_of_family_eligible": True},
         w2_income=20000.0,
-        expected_state_tax=0.00,
+        expected_state_tax=0.0,
         backend="graph",
     ),
-    # MS 2025 HoH, $50,000 W2, no dependents
+    # MS 2025 HoH, $50,000 W2, one resident dependent
     # Source: MS DOR Form 80-100-25-1-1-000 instructions,
     #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
     #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
     # Kind: derived-arithmetic; derived blind, session 1b251ce6.
-    # TI: 50,000 - 8,000 - 3,400 = 38,600; tax: 28,600 x 0.044 = 1,258.40
+    # Original blind HoF-with-dependent row: TI 50,000 - 9,500 - 3,400 = 37,100; whole-dollar tax 1,192.
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
         state_evidence=MS_EVIDENCE,
-        description="MS HoH, $50,000 W2, no dependents (2025)",
+        description="MS HoH, $50,000 W2, one resident dependent (2025)",
         year=2025,
         state="MS",
         filing_status="Head_of_House",
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts={"head_of_family_eligible": True},
         w2_income=50000.0,
-        expected_state_tax=1258.0,
+        expected_state_tax=1192.0,
         backend="graph",
     ),
-    # MS 2025 HoH, $150,000 W2, no dependents
+    # MS 2025 HoH, $150,000 W2, one resident dependent
     # Source: MS DOR Form 80-100-25-1-1-000 instructions,
     #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
     #   p.5 (exemptions, std deduction), p.22 (rate), p.27 (schedule); retrieved 2026-09-30.
     # Kind: derived-arithmetic; derived blind, session 1b251ce6.
-    # TI: 150,000 - 8,000 - 3,400 = 138,600; tax: 128,600 x 0.044 = 5,658.40
+    # Original blind HoF-with-dependent row: TI 150,000 - 9,500 - 3,400 = 137,100; whole-dollar tax 5,592.
     TaxScenario(
         source="MS 2025 Form 80-100 instructions (derived blind)",
         state_evidence=MS_EVIDENCE,
-        description="MS HoH, $150,000 W2, no dependents (2025)",
+        description="MS HoH, $150,000 W2, one resident dependent (2025)",
         year=2025,
         state="MS",
         filing_status="Head_of_House",
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts={"head_of_family_eligible": True},
         w2_income=150000.0,
-        expected_state_tax=5658.0,
+        expected_state_tax=5592.0,
         backend="graph",
     ),
     # Scenarios below are formula-derived in-repo (not from the blind deriver).
@@ -3839,7 +3862,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2024,
         state="MS",
         filing_status="Married/Joint",
-        state_facts={"spouse_adjusted_gross_income": 0},
+        state_facts={
+            "taxpayer_adjusted_gross_income": 100000.0,
+            "spouse_adjusted_gross_income": 0,
+        },
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
         expected_state_tax=3450.0,
@@ -3878,7 +3904,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2025,
         state="MS",
         filing_status="Married/Joint",
-        state_facts={"spouse_adjusted_gross_income": 0},
+        state_facts={
+            "taxpayer_adjusted_gross_income": 120000.0,
+            "spouse_adjusted_gross_income": 0,
+        },
         w2_income=120000.0,
         expected_federal_tax=10146.0,  # Tax Table row 88,500-88,550
         expected_state_tax=4110.0,

@@ -4,6 +4,8 @@ Evidence: ms-pr447-review-independent.md, source-only /root/ms447_source,
 2026-11-05; official MS80-105 page2 and80-100 pp.5-7/22/27, IRS QSS rules.
 """
 
+import json
+
 import pytest
 
 from tenforty import (
@@ -14,6 +16,9 @@ from tenforty import (
     solve_for_income,
     state_facts,
 )
+from tenforty.backends import graph as graph_backend
+from tenforty.backends.graph import _load_resolved_graph
+from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import UnsupportedInputError
 
 pytestmark = pytest.mark.requires_graph
@@ -104,7 +109,8 @@ def test_inconsistent_columns_refuse_the_whole_batch_before_results(offset, on_e
 
 @pytest.mark.parametrize("backend", ["auto", "graph"])
 @pytest.mark.parametrize(
-    "eligible,dependents,taxable,tax", [(False, 0, 41700, 1395), (True, 1, 37100, 1192)]
+    "eligible,dependents,taxable,tax",
+    [(False, 0, 41700, 1395), (False, 1, 40200, 1329), (True, 1, 37100, 1192)],
 )
 def test_qss_uses_explicit_ms_qualification(
     backend, eligible, dependents, taxable, tax
@@ -138,7 +144,8 @@ def test_qss_needs_qualification_even_with_a_positive_dependent_count(on_error):
         )
 
 
-def test_head_of_family_true_requires_an_actual_dependent():
+@pytest.mark.parametrize("dependents", [-1, 0])
+def test_head_of_family_true_requires_an_actual_dependent(dependents):
     """A supplied qualification cannot synthesize a dependency exemption."""
     with pytest.raises(UnsupportedInputError, match="num_dependents"):
         evaluate_return(
@@ -146,6 +153,7 @@ def test_head_of_family_true_requires_an_actual_dependent():
             state="MS",
             filing_status="Widow(er)",
             w2_income=50000,
+            num_dependents=dependents,
             state_facts=state_facts.MS(head_of_family_eligible=True),
             backend="graph",
         )
@@ -187,3 +195,134 @@ def test_explicit_federal_only_sensitivity_remains_available():
     assert marginal_rate(**args, state="MS", state_facts=_joint()) == marginal_rate(
         **args
     )
+
+
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+def test_scalar_inconsistent_columns_are_never_masked(on_error):
+    """Scalar error policy cannot hide an invalid state fact sum."""
+    with pytest.raises(UnsupportedInputError, match="rounding"):
+        evaluate_return(
+            year=2025,
+            state="MS",
+            filing_status="Married/Joint",
+            w2_income=61611.8,
+            state_facts=_joint(41620),
+            backend="auto",
+            on_error=on_error,
+        )
+
+
+@pytest.mark.parametrize("operation", ["gradient", "gradients", "solve"])
+def test_each_federal_only_operation_remains_available(operation):
+    """State ownership refusal does not block an explicit federal-only question."""
+    args = dict(
+        year=2025,
+        filing_status="Married/Joint",
+        w2_income=61611.8,
+        output="federal_total_tax",
+    )
+    ms_args = args | dict(state="MS", state_facts=_joint())
+    if operation == "gradient":
+        assert marginal_rate(**ms_args) == marginal_rate(**args)
+    elif operation == "gradients":
+        assert (
+            marginal_rates(**ms_args)["w2_income"]
+            == marginal_rates(**args)["w2_income"]
+        )
+    else:
+        target = evaluate_return(
+            year=2025, filing_status="Married/Joint", w2_income=61611.8, backend="graph"
+        ).federal_total_tax
+        solved = solve_for_income(**ms_args, target_tax=target, for_input="w2_income")
+        assert evaluate_return(
+            year=2025, filing_status="Married/Joint", w2_income=solved, backend="graph"
+        ).federal_total_tax == pytest.approx(target, abs=0.01)
+
+
+def test_both_column_facts_and_qss_qualification_project_in_one_batch(monkeypatch):
+    """Reuse independent joint/QSS/Single outcomes without leaking facts across statuses."""
+    calls = []
+    for name in (
+        "taxpayer_adjusted_gross_income",
+        "spouse_adjusted_gross_income",
+        "head_of_family_eligible",
+    ):
+        original = graph_backend.FACT_LOWERINGS[("MS", name)]
+
+        def capture(tax_input, value, *, name=name, original=original):
+            calls.append((name, tax_input.filing_status.value, value))
+            return original(tax_input, value)
+
+        monkeypatch.setitem(graph_backend.FACT_LOWERINGS, ("MS", name), capture)
+    frame = evaluate_returns(
+        year=2025,
+        state="MS",
+        filing_status=["Married/Joint", "Widow(er)", "Single"],
+        w2_income=[61611.8, 50000, 50000],
+        backend="auto",
+        mode="zip",
+        state_facts=state_facts.MS(
+            taxpayer_adjusted_gross_income=41611,
+            spouse_adjusted_gross_income=20000,
+            head_of_family_eligible=False,
+        ),
+    )
+    assert frame["state_total_tax"].to_list() == [1100, 1395, 1395]
+    assert set(calls) == {
+        ("taxpayer_adjusted_gross_income", "Married/Joint", 41611),
+        ("spouse_adjusted_gross_income", "Married/Joint", 20000),
+        ("head_of_family_eligible", "Widow(er)", False),
+    }
+    echoes = frame["state_facts"].to_list()
+    assert len(set(echoes)) == 1
+    assert json.loads(echoes[0]) == {
+        "state": "MS",
+        "taxpayer_adjusted_gross_income": 41611,
+        "spouse_adjusted_gross_income": 20000,
+        "head_of_family_eligible": False,
+    }
+
+
+@pytest.mark.parametrize("explicit", [None, True, False])
+def test_hoh_resident_dependent_baseline_and_parent_elsewhere_override(explicit):
+    """SOL-36: archived resident-HoF1192 versus Single-with-dependent1329."""
+    facts = (
+        None if explicit is None else state_facts.MS(head_of_family_eligible=explicit)
+    )
+    result = evaluate_return(
+        year=2025,
+        state="MS",
+        filing_status="Head_of_House",
+        w2_income=50000,
+        num_dependents=1,
+        num_ctc_dependents=0,
+        state_facts=facts,
+        backend="auto",
+    )
+    assert (result.state_taxable_income, result.state_total_tax) == (
+        (40200, 1329) if explicit is False else (37100, 1192)
+    )
+    assert result.assumptions == ()
+
+
+@pytest.mark.parametrize(
+    "year,wages,taxable,tax",
+    [
+        (2024, 20000, 8600, 0),
+        (2024, 50000, 38600, 1344),
+        (2024, 150000, 138600, 6044),
+        (2025, 20000, 8600, 0),
+        (2025, 50000, 38600, 1258),
+        (2025, 150000, 138600, 5658),
+    ],
+)
+def test_retained_zero_dependent_literal_hof_components_are_raw_only(
+    year, wages, taxable, tax
+):
+    """Original blind literal-box arithmetic; NOT legally valid-return evidence."""
+    runtime = Runtime(
+        _load_resolved_graph(year), FilingStatus.from_str("head_of_household")
+    )
+    runtime.set("ms_80105_L38_wages", wages)
+    assert runtime.eval("ms_80105_L16_ms_taxable_income") == taxable
+    assert runtime.eval("ms_80105_L21_tax_after_credits") == tax

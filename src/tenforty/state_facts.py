@@ -106,24 +106,34 @@ class OH(StateFacts):
     )
 
 
-MS_SPOUSE_AGI = (
-    "The spouse's Column B Mississippi adjusted gross income, Form 80-105 "
-    "line 13, before deductions and exemptions, on a full-year married joint "
-    "or combined return. Finite signed whole dollars, already entered on "
-    "line 13; explicit 0 is supplied, None "
-    "is missing. The taxpayer's Column A MS AGI is the household MS AGI minus "
-    "this amount. This is not federal AGI, wages, taxable income or a ratio. "
-    "No per-category spouse split is modelled or inferred. Household MS AGI "
-    "is computed from the individually rounded MS page-2 entries. The "
-    "computation chooses the minimum lawful tax "
-    "across the deduction/exemption allocations permitted on pp. 5/7 of the "
-    "2024 and 2025 instructions; a suboptimal prepared allocation needs raw "
-    "graph controls. There is no default or assumption."
+MS_COLUMN_AGI = (
+    "Actual Mississippi Form 80-105 line-13 AGI from the corresponding page-2 "
+    "line-66 column, before deductions and exemptions, for a full-year joint "
+    "or combined return. Finite signed whole dollars; explicit 0 is supplied, "
+    "None is missing. Both taxpayer and spouse AGIs are required and used "
+    "exactly. Neither column is inferred from household rounding. The sum is "
+    "validated against the household entries within their source-derived "
+    "per-entry rounding bound. The computation chooses the exact minimum "
+    "lawful deduction/exemption allocation (2024/2025 instructions pp. 5/7). "
+    "No default or assumption is used."
 )
+MS_TAXPAYER_AGI = "Taxpayer Column A. " + MS_COLUMN_AGI
+MS_SPOUSE_AGI = "Spouse Column B. " + MS_COLUMN_AGI
 MS_SPOUSE_AGI_SOURCE = (
-    "Mississippi Form 80-100 instructions, 2024 and 2025 pp. 5-7, "
-    "Form 80-105 line 13; "
-    "docs/validation/derivations/ms-2024-2025-exemptions-rounding.md"
+    "Mississippi Form 80-105 page 2 and Form 80-100 instructions pp. 5-7, "
+    "2024 and 2025; docs/validation/derivations/ms-pr447-review-independent.md"
+)
+MS_HEAD_OF_FAMILY = (
+    "For federal Head_of_House or qualifying surviving spouse (Widow(er)), True asserts all "
+    "Mississippi Head of Family conditions: maintaining the household and an "
+    "actual federally qualifying dependent residing there for the required "
+    "year. True selects MS Head of Family and requires num_dependents >= 1. "
+    "False explicitly selects MS Single. Head_of_House has the documented "
+    "resident-dependent baseline True when this fact is absent; a parent "
+    "living elsewhere is a special circumstance supplied as False. No "
+    "assumption is recorded for that baseline. Federal QSS or a positive dependent "
+    "count alone never establishes QSS qualification. None is missing and "
+    "refused for QSS. No dependent is synthesized."
 )
 
 
@@ -132,16 +142,22 @@ class MS(StateFacts):
 
     state: ClassVar[str] = "MS"
 
+    taxpayer_adjusted_gross_income: FiniteFloat | None = Field(
+        default=None, multiple_of=1, description=MS_TAXPAYER_AGI
+    )
     spouse_adjusted_gross_income: FiniteFloat | None = Field(
         default=None, multiple_of=1, description=MS_SPOUSE_AGI
     )
+    head_of_family_eligible: bool | None = Field(
+        default=None, description=MS_HEAD_OF_FAMILY
+    )
 
-    @field_validator("spouse_adjusted_gross_income")
+    @field_validator("taxpayer_adjusted_gross_income", "spouse_adjusted_gross_income")
     @classmethod
     def require_whole_dollar_entry(cls, value: float | None) -> float | None:
-        """Require the already-rounded line-13 amount without a float tolerance."""
+        """Require actual rounded line-13 amounts without a float tolerance."""
         if value is not None and not value.is_integer():
-            raise ValueError("spouse_adjusted_gross_income must be whole dollars")
+            raise ValueError("MS line-13 AGIs must be whole dollars")
         return value
 
 
@@ -157,7 +173,9 @@ class FactDescriptor:
     value, a tuple for only those (``pending`` names the work for the rest).
     It comes from the same registry the preflight check uses. ``required_by``
     lists the engines that refuse an applicable return when the fact is not
-    supplied. ``convention`` is the id of the convention used when it is
+    supplied, restricted to ``required_statuses`` when specified. ``baselines``
+    lists silent documented defaults by status; they are not assumptions.
+    ``convention`` is the id of the convention used when it is
     absent, or None when there is none (a required fact has none).
     """
 
@@ -174,6 +192,8 @@ class FactDescriptor:
     source: str
     supported_values: tuple[tuple[Engine, tuple[object, ...] | None], ...] = ()
     pending: str | None = None
+    required_statuses: tuple[str, ...] | None = None
+    baselines: tuple[tuple[str, object], ...] = ()
 
     @property
     def input_path(self) -> str:
@@ -193,6 +213,35 @@ class FactDescriptor:
 
 
 _DESCRIPTORS: tuple[FactDescriptor, ...] = (
+    FactDescriptor(
+        state="MS",
+        name="taxpayer_adjusted_gross_income",
+        value_type="number",
+        constraints=(("finite", True), ("multiple_of", 1)),
+        statuses=("Married/Joint",),
+        years=(2024, 2025),
+        convention=None,
+        honoured_by=("graph",),
+        required_by=("graph",),
+        description=MS_TAXPAYER_AGI,
+        source=MS_SPOUSE_AGI_SOURCE,
+    ),
+    FactDescriptor(
+        state="MS",
+        name="head_of_family_eligible",
+        value_type="boolean",
+        constraints=(),
+        statuses=("Head_of_House", "Widow(er)"),
+        required_statuses=("Widow(er)",),
+        baselines=(("Head_of_House", True),),
+        years=(2024, 2025),
+        convention=None,
+        honoured_by=("graph",),
+        required_by=("graph",),
+        description=MS_HEAD_OF_FAMILY,
+        source="MS Form 80-100 pp. 5-6; IRS QSS condition 2; "
+        "docs/validation/derivations/ms-pr447-review-independent.md",
+    ),
     FactDescriptor(
         state="MS",
         name="spouse_adjusted_gross_income",
@@ -387,6 +436,25 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "Nobody can claim the filer as a dependent; that regime is not modelled.",
     ),
     DefaultDecision(
+        "state_facts.MS.taxpayer_adjusted_gross_income",
+        "required",
+        None,
+        "Mike, SOL-35: both actual MS MFJ AGI columns are required; no household subtraction.",
+    ),
+    DefaultDecision(
+        "ms.head_of_family.resident_dependent",
+        "baseline",
+        "state_facts.MS.head_of_family_eligible",
+        "Mike, SOL-36: federal HoH assumes the qualifying person lives in the home "
+        "all year. False supplies the known special circumstance; no assumption record.",
+    ),
+    DefaultDecision(
+        "state_facts.MS.head_of_family_eligible",
+        "required",
+        None,
+        "Mike, SOL-35: federal QSS does not establish MS Head of Family; require the fact.",
+    ),
+    DefaultDecision(
         "state_facts.MS.spouse_adjusted_gross_income",
         "required",
         None,
@@ -540,6 +608,10 @@ def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> No
                 descriptor.state == row.state
                 and row.year in descriptor.years
                 and row.status in descriptor.statuses
+                and (
+                    descriptor.required_statuses is None
+                    or row.status in descriptor.required_statuses
+                )
                 and row.engine in descriptor.required_by
                 and (model is None or getattr(model, descriptor.name) is None)
             ):
@@ -547,7 +619,13 @@ def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> No
                     f"{row.state} {row.status} returns on the {row.engine} backend "
                     f"need {descriptor.name}, which has no default: pass "
                     f"state_facts=tenforty.state_facts.{row.state}("
-                    f"{descriptor.name}=True) or =False. {descriptor.description}"
+                    f"{descriptor.name}="
+                    + (
+                        "True) or =False. "
+                        if descriptor.value_type == "boolean"
+                        else "<actual whole-dollar amount>). "
+                    )
+                    + descriptor.description
                 )
 
 

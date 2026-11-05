@@ -116,3 +116,32 @@ entries before rounding and remain raw graph tests through an explicit
 prepared-AGI control. Their arithmetic and expected values above are unchanged;
 they are not valid fractional natural facts. See the page2 source-audit record
 for natural multi-category cases under the clarified contract.
+
+
+## 2026-11-05 SOL-35 contract correction after independent review
+
+The prior one-spouse-AGI natural contract and unconditional federal-QSS-to-HoF
+inference are withdrawn. Both actual rounded MS line13 columns are required
+for MFJ; QSS requires an explicit MS eligibility fact. See
+[the new independent record](ms-pr447-review-independent.md). The existing
+worked arithmetic assumes its stipulated actual columns/qualification and
+is preserved unchanged. Household rounding is a validity reference only,
+never a reconstruction of an actual column. MS MFJ household-income
+state/total derivatives and solves are refused without perturbation ownership;
+federal-only outputs remain supported.
+
+
+### Source-derived AGI validity envelope (SOL-35)
+
+For any one entry, each spouse's rounding error has magnitude at most1/2,
+and the household entry's rounding error also has magnitude at most1/2.
+Their difference is an integer with magnitude at most3/2, hence at most1.
+Thus `abs(R(a)+R(b)-R(a+b)) <= 1`, under either permitted negative-tie
+convention. Summing the bounds for supported natural income entries38,39,
+40,41,43,44 and the carried adjustment61 gives7. The spec derives that
+budget from its modeled-entry list. Zero aggregate entries are not discarded
+because signed ownership amounts can offset. The budget is only a necessary
+validity check on the asserted actual AGIs; no tax is selected or excused
+within an interval. Out-of-bound sums are refused. Actual facts are then used
+exactly in the already-proven minimum-allocation expression. Synthetic tests
+at7/outside8 validate this contract, not independent whole-return tax values.

@@ -382,7 +382,12 @@ def test_independent_ms_returns(case, year, backend):
         tax25,
     ) = case
     fact = (
-        state_facts.MS(spouse_adjusted_gross_income=spouse) if status == "J" else None
+        state_facts.MS(
+            taxpayer_adjusted_gross_income=rounded_agi - spouse,
+            spouse_adjusted_gross_income=spouse,
+        )
+        if status == "J"
+        else None
     )
     result = evaluate_return(
         year=year,
@@ -405,8 +410,8 @@ def test_independent_ms_returns(case, year, backend):
 
 
 @pytest.mark.parametrize("year,tax", [(2024, 1274), (2025, 1192)])
-def test_qualifying_surviving_spouse_uses_head_of_family(year, tax):
-    """SOL-32 non-blind status mapping; archived H-dependent arithmetic."""
+def test_eligible_qualifying_surviving_spouse_uses_head_of_family(year, tax):
+    """Explicit MS eligibility; archived H-dependent arithmetic."""
     result = evaluate_return(
         year=year,
         state="MS",
@@ -414,6 +419,7 @@ def test_qualifying_surviving_spouse_uses_head_of_family(year, tax):
         w2_income=50_000,
         num_dependents=1,
         num_ctc_dependents=0,
+        state_facts=state_facts.MS(head_of_family_eligible=True),
         backend="graph",
     )
     assert (result.state_taxable_income, result.state_total_tax) == (37_100, tax)
@@ -426,7 +432,8 @@ def test_qualifying_surviving_spouse_uses_head_of_family(year, tax):
 def test_missing_joint_fact_is_refused_before_computing(backend, year, wages, on_error):
     """Required facts are checked under every error policy, even at zero income."""
     with pytest.raises(
-        UnsupportedInputError, match=r"state_facts.MS.spouse_adjusted_gross_income"
+        UnsupportedInputError,
+        match=r"state_facts.MS.(?:taxpayer|spouse)_adjusted_gross_income",
     ):
         evaluate_returns(
             year=year,
@@ -443,16 +450,26 @@ def test_missing_joint_fact_is_refused_before_computing(backend, year, wages, on
 def test_ms_stays_in_auto_scope_and_discovery_describes_required_fact(year):
     """Discovery exposes the supplied numeric fact without removing MS from auto."""
     assert (OTSState.MS, year) in IN_SCOPE
-    (descriptor,) = state_facts.available("MS", year)
-    assert descriptor.name == "spouse_adjusted_gross_income"
-    assert descriptor.statuses == ("Married/Joint",)
-    assert descriptor.required_by == ("graph",)
-    assert descriptor.honoured_by == ("graph",)
-    assert descriptor.convention is None
-    assert descriptor.supported_values == (("graph", None),)
-    assert descriptor.pending is None
-    assert descriptor.computes("graph", 0)
-    assert descriptor.computes("graph", -5000)
+    descriptors = {d.name: d for d in state_facts.available("MS", year)}
+    for name in ("taxpayer_adjusted_gross_income", "spouse_adjusted_gross_income"):
+        descriptor = descriptors[name]
+        assert descriptor.statuses == ("Married/Joint",)
+        assert descriptor.required_by == ("graph",)
+        assert descriptor.honoured_by == ("graph",)
+        assert descriptor.convention is None
+        assert descriptor.supported_values == (("graph", None),)
+        assert descriptor.pending is None
+        assert descriptor.computes("graph", 0)
+        assert descriptor.computes("graph", -5000)
+    assert descriptors["head_of_family_eligible"].statuses == (
+        "Head_of_House",
+        "Widow(er)",
+    )
+    assert descriptors["head_of_family_eligible"].required_statuses == ("Widow(er)",)
+    assert dict(descriptors["head_of_family_eligible"].baselines) == {
+        "Head_of_House": True
+    }
+    assert descriptors["head_of_family_eligible"].required_by == ("graph",)
 
 
 @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf, True, "25000"])
@@ -471,7 +488,9 @@ def test_fact_projects_to_joint_rows_in_batches(mode, year, taxes):
         state="MS",
         filing_status=["Single", "Married/Joint"],
         w2_income=[50_000, 50_000] if mode == "zip" else 50_000,
-        state_facts=state_facts.MS(spouse_adjusted_gross_income=25_000),
+        state_facts=state_facts.MS(
+            taxpayer_adjusted_gross_income=25_000, spouse_adjusted_gross_income=25_000
+        ),
         backend="graph",
         mode=mode,
     )

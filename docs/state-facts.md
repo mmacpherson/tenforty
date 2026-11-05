@@ -33,7 +33,8 @@ tenforty.evaluate_return(
   `computes(backend, value)` and `engines_computing(value)` answer directly,
   and an error suggests another backend only if it computes the value you
   passed;
-- which backends require it;
+- which backends require it, restricted to `required_statuses` when present;
+- silent documented `baselines` by filing status (distinct from assumptions);
 - its source.
 
 An unknown state or year raises `ValueError`. A known return with no facts
@@ -41,7 +42,8 @@ gives `()`.
 
 | Model | Field | Applies to | Graph | OTS |
 |---|---|---|---|---|
-| `MS` | `spouse_adjusted_gross_income` | Married/Joint, 2024–2025 | **Required**; finite signed whole dollars, including explicit zero | No MS program |
+| `MS` | `taxpayer_adjusted_gross_income`, `spouse_adjusted_gross_income` | Married/Joint, 2024–2025 | **Both required**; actual line-13 whole-dollar columns | No MS program |
+| `MS` | `head_of_family_eligible` | Head_of_House / Widow(er), 2024–2025 | HoH: optional resident-dependent baseline True; QSS: **required**. False selects MS Single | No MS program |
 | `OH` | `spouses_both_have_qualifying_income` | Married/Joint, 2024–2025 | **Required**; both boolean values compute; the spec applies the percentage, cap and 2025 MAGI limit | Not taken |
 
 `spouses_both_have_qualifying_income` is true when each spouse separately has
@@ -52,16 +54,52 @@ Credits line 12). Wages count. Amounts deducted on the Ohio Schedule of
 Adjustments, such as business income under the business income deduction or
 Social Security, are not in Ohio AGI and do not count.
 
-`MS(spouse_adjusted_gross_income=...)` supplies the spouse's **Column B
-Mississippi AGI, Form 80-105 line 13**, before deductions and exemptions, on
-a full-year joint/combined return. It is not federal AGI, wages, taxable
-income, or a ratio. This fact is an already-rounded whole-dollar line-13
-entry. The graph computes household MS AGI from individually rounded page-2
-entries; the taxpayer's column is that household total minus the fact. A
-per-category spouse split is not modelled. Fractional facts are refused. Explicit `0` states
-that the spouse has zero MS AGI; `None` is missing and raises
-`UnsupportedInputError` for both graph and auto MS MFJ. There is no inferred
-split, default, or assumption record. Mississippi stays in auto scope.
+For MS MFJ, supply **both actual Column A/B Mississippi AGIs, Form 80-105
+line 13** (from their respective page-2 line-66 columns), before deductions
+and exemptions:
+
+```python
+from tenforty.state_facts import MS
+
+facts = MS(
+    taxpayer_adjusted_gross_income=41_611,
+    spouse_adjusted_gross_income=20_000,
+)
+```
+
+Each is a finite signed whole-dollar amount. Explicit `0` is supplied;
+`None` is missing and refuses graph/auto MFJ. Both columns are used exactly.
+Neither is derived from a rounded household sum or an inferred ownership
+split. The graph's household page-2 computation is only a consistency
+reference for MFJ. A two-column rounded entry differs from its rounded
+household entry by at most one dollar. The validity bound is the sum of
+those per-entry bounds: six modeled natural income entries plus the claimed
+half-SE-tax adjustment currently give seven dollars. Zero aggregate entries
+remain in that budget because signed owner-specific amounts may offset.
+A column sum outside the source-derived bound refuses the whole request.
+This is not a tax tolerance: the actual supplied columns determine tax.
+The bound neither proves ownership nor selects a value from an interval.
+
+`MS(head_of_family_eligible=...)` applies to federal HoH and QSS. For
+`Head_of_House`, it is optional: the documented no-special-circumstances
+baseline is that the qualifying person lives in the home all year. A
+qualifying parent living elsewhere is a known special circumstance supplied
+as explicit False, selecting MS Single. The baseline is silent and produces
+no assumption record. For federal QSS (`Widow(er)`), the fact is required;
+the federal status alone does not establish the MS dependent condition.
+
+True asserts all MS Head of Family conditions, including an actual qualifying
+dependent residing in the maintained household for the required year; it
+selects MS HoF and requires `num_dependents >= 1`. False explicitly selects
+MS Single. None refuses graph/auto QSS and uses the resident-dependent
+baseline for HoH. True or baseline eligibility requires an actual dependent;
+a zero count refuses rather than inventing one. For QSS neither the federal
+label nor a positive dependent count implies eligibility. No dependent is synthesized.
+Death-year federal MFJ remains MFJ and requires the two AGI facts.
+
+There is no default or assumption record. Mississippi stays in auto scope.
+The independent ambiguity and QSS witnesses are archived in
+[the review derivation](validation/derivations/ms-pr447-review-independent.md).
 
 The MS instructions (2024 and 2025 pp. 5/7) permit allocating deductions and
 exemptions between spouses and direct choosing the least tax. The graph
@@ -79,8 +117,9 @@ are archived in
 
 ## Mississippi income entries and limits
 
-The MS graph rounds each supported page-2 entry before adding income and
-subtracting adjustments. Wages feed line 38; net business income line 39;
+For non-joint returns, the MS graph rounds each supported page-2 entry
+before adding income and subtracting adjustments. For MFJ these household
+entries supply the consistency reference, while the actual columns are facts. Wages feed line 38; net business income line 39;
 federal capped net capital gain/loss line 40; rental/Schedule E line 41;
 taxable interest line 43; total ordinary dividends line 44. Qualified
 dividends are included in that total once. Line 61 carries the claimed
@@ -133,6 +172,11 @@ Those graph controls do not replace or default a missing natural MS fact.
   yields partial results or NaN rows for these errors.
 - **Derivatives and the solver.** `marginal_rate(s)` and `solve_for_income`
   take the same facts. A fact is held fixed and is never a derivative axis.
+  MS MFJ state/total-tax household-income derivatives and solves raise
+  `UnsupportedInputError`: the two fixed AGIs do not identify which spouse
+  owns a hypothetical change. Explicit federal-only outputs remain supported.
+  A federal-only solve does not supply updated MS facts for its prospective
+  income; those must be provided before computing the resulting MS return.
 
 ## Which defaults are acceptable
 

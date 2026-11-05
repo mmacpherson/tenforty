@@ -1747,7 +1747,9 @@ MS_SCENARIOS = [
         "year": 2024,
         "state": "MS",
         "filing_status": "Married/Joint",
-        "state_facts": MS(spouse_adjusted_gross_income=0),
+        "state_facts": MS(
+            taxpayer_adjusted_gross_income=100000, spouse_adjusted_gross_income=0
+        ),
         "w2_income": 100000,
         "expected_federal_min": 7900,
         "expected_federal_max": 8200,
