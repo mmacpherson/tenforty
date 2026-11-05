@@ -14,6 +14,8 @@ from tenforty.graph_scope import (
     KNOWN_GRAPH_DEFECTS,
     NO_INCOME_TAX_STATES,
     OFFICIAL_FIXTURES,
+    OH_REQUIRED_FACT,
+    POLICY_EXCLUSIONS,
     UNSIGNED_DEFECT_BEADS,
     exclusion_reasons,
     graph_state_in_scope,
@@ -132,6 +134,7 @@ def test_in_scope_returns_have_evidence_and_no_known_defect():
     """In scope needs official values (or no income tax) and no open defect."""
     for state, year in IN_SCOPE:
         assert (state, year) not in KNOWN_GRAPH_DEFECTS
+        assert (state, year) not in POLICY_EXCLUSIONS
         assert (state, year) in OFFICIAL_FIXTURES or state in NO_INCOME_TAX_STATES
 
 
@@ -222,3 +225,27 @@ def test_aggregate_itemized_contract_exclusion_is_explicit(year, state):
 def test_scope_module_is_the_predicate_routing_uses():
     """Routing consults graph_scope, not a second copy of the rule."""
     assert routing.graph_state_in_scope is graph_scope.graph_state_in_scope
+
+
+def test_policy_exclusions_are_exactly_the_decided_ones():
+    """Dropping or adding a policy exclusion is a decision, so it fails here."""
+    assert set(POLICY_EXCLUSIONS) == {(OTSState.OH, year) for year in GRAPH_SCOPE_YEARS}
+    assert set(POLICY_EXCLUSIONS.values()) == {OH_REQUIRED_FACT}
+
+
+def test_policy_exclusions_are_not_defect_beads():
+    """A policy reason cites no bead, so a bead closing never admits its return."""
+    for key, reason in POLICY_EXCLUSIONS.items():
+        assert reason.startswith("policy: ")
+        assert not BEAD.findall(reason), (key, reason)
+        assert key not in IN_SCOPE
+        assert reason in exclusion_reasons(*key)
+
+
+@pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
+def test_ohio_is_excluded_by_decision_and_routes_to_ots(year):
+    """OH carries no defect bead; auto still sends it to OTS."""
+    assert (OTSState.OH, year) not in KNOWN_GRAPH_DEFECTS
+    assert exclusion_reasons(OTSState.OH, year) == (OH_REQUIRED_FACT,)
+    assert routing.select_backend("auto", year, "OH") == "ots"
+    assert routing.select_backend("graph", year, "OH") == "graph"
