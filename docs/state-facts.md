@@ -37,7 +37,7 @@ gives `()`.
 
 | Model | Field | Applies to | Graph | OTS |
 |---|---|---|---|---|
-| `OH` | `spouses_both_have_qualifying_income` | Married/Joint, 2024–2025 | **Required**; `True` is refused until the joint filing credit is wired (tenforty-b72.53) | Not taken |
+| `OH` | `spouses_both_have_qualifying_income` | Married/Joint, 2024–2025 | **Required**; both boolean values compute; the spec applies the percentage, cap and 2025 MAGI limit | Not taken |
 
 `spouses_both_have_qualifying_income` is true when each spouse separately has
 at least $500 of qualifying income. Qualifying income is income included in

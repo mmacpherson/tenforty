@@ -182,10 +182,6 @@ def test_every_graph_honoured_fact_has_a_lowering():
             assert key in graph_backend.FACT_LOWERINGS, key
 
 
-@pytest.mark.xfail(
-    reason="OH True needs the joint filing credit itself: b72.53 (Sol's switch point)",
-    strict=True,
-)
 def test_every_graph_lowering_computes_every_value():
     """No lowering is restricted to some values."""
     assert graph_backend.FACT_LOWERING_VALUES == {}

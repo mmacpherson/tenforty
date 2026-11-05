@@ -4966,7 +4966,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=75000.0,
         expected_federal_tax=4746.0,  # Tax Table row 43,500-43,550
-        expected_state_tax=1688.125,
+        expected_state_tax=1570.0,
         expected_federal_agi=75000.0,
         backend="graph",
         # Unverified legacy value, set with no joint filing credit: the

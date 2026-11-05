@@ -24,6 +24,9 @@ OH_ONE_EARNER = {"spouses_both_have_qualifying_income": False}
 """A one-earner couple: the spouses do not both have $500 of qualifying income
 (fields of tenforty.state_facts.OH; the test runner builds the model)."""
 
+OH_TWO_EARNERS = {"spouses_both_have_qualifying_income": True}
+"""The archived split-earner cases explicitly give each spouse at least $500."""
+
 Outcome = tuple[float, float]
 
 
@@ -390,6 +393,34 @@ OH_CASES += [
 ]
 
 
+OH_CASES += [
+    _oh(
+        year,
+        label,
+        taxable,
+        tax,
+        status="MFJ",
+        w2_income=wages,
+        num_dependents=dependents,
+        state_facts=OH_TWO_EARNERS,
+    )
+    for year, label, wages, dependents, taxable, tax in (
+        (2024, "MFJ60split", 60_000, 0, 55_700, 1058),
+        (2025, "MFJ60split", 60_000, 0, 55_700, 1041),
+        (2024, "MFJ150split", 150_000, 0, 146_200, 3810),
+        (2025, "MFJ150split", 150_000, 0, 146_200, 3646),
+        (2024, "MFJ400split", 400_000, 0, 396_200, 12123),
+        (2025, "MFJ400split", 400_000, 0, 396_200, 11068),
+        (2024, "MFJ100dep2", 100_000, 2, 92_400, 2076),
+        (2025, "MFJ100dep2", 100_000, 2, 92_400, 2059),
+        (2024, "MFJ79300split", 79_300, 0, 75_000, 1536),
+        (2025, "MFJ79300split", 79_300, 0, 75_000, 1519),
+        (2024, "MFJ79301split", 79_301, 0, 75_001, 1622),
+        (2025, "MFJ79301split", 79_301, 0, 75_001, 1604),
+    )
+]
+
+
 def _co(year, label, status, outcomes, **inputs) -> OfficialCase:
     return _case("CO", year, label, status, outcomes, **inputs)
 
@@ -446,23 +477,6 @@ UNPINNED = [
     )
     for year in (2024, 2025)
     for label in ("c8", "c9")
-] + [
-    UnpinnedCase(
-        f"OH-{year}-{label}",
-        reason,
-    )
-    for year in (2024, 2025)
-    for label, reason in (
-        ("MFJ60split", "joint filing credit needs each spouse's income"),
-        ("MFJ150split", "joint filing credit needs each spouse's income"),
-        ("MFJ400split", "joint filing credit needs each spouse's income"),
-        ("MFJ79300split", "joint filing credit needs each spouse's income"),
-        ("MFJ79301split", "joint filing credit needs each spouse's income"),
-        (
-            "MFJ100dep2",
-            "joint filing credit needs each spouse's income; dependent count is supported",
-        ),
-    )
 ]
 
 ROUNDING = "tenforty-b72.42"

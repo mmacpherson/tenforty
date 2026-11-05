@@ -660,8 +660,8 @@ OH_SCENARIOS = [
         "state_facts": OH(spouses_both_have_qualifying_income=False),
         "expected_federal_min": 27000,
         "expected_federal_max": 29000,
-        "expected_state_min": 5850,
-        "expected_state_max": 5950,
+        "expected_state_min": 5711,
+        "expected_state_max": 5811,
     },
 ]
 
