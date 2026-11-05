@@ -7,7 +7,7 @@ and the text to send.
 
 **Status: drafted, not sent.** Sending is Mike's, in his own time.
 
-**Bundle for one email (2026-11-04):** reports 1, 2, 4–17. Report 3 is withdrawn
+**Bundle for one email (2026-11-04):** reports 1, 2, 4–18. Report 3 is withdrawn
 (our own error), and report 9 is offered tentatively because it is not
 reproduced end to end. The "Pending adjudication" section at the end lists
 OTS-vs-Tax-Calculator disagreements that are **not** yet established as OTS
@@ -731,6 +731,69 @@ Not patched locally. Recorded as a strict-xfail
 (`test_ots_negative_other_income_adds_nothing_to_amti`). The expected values
 are an independent derivation from IRS sources
 (`docs/validation/derivations/form-6251-line-8z-2024-2025.md`).
+
+---
+
+## 18. 2018 and 2019: an AMTwsN line is parsed but never stored
+
+**Releases:** OpenTaxSolver2018_16.06, OpenTaxSolver2019_17.03
+**Files:**
+- `src/taxsolve_US_1040_2018.c:1807-1816` (read loop), `:258` (line 3)
+- `src/taxsolve_US_1040_2019.c:1832-1841` (read loop), `:263` (line 3)
+
+We may be misreading the intent here, so please treat this as a question. The
+Schedule 2 read loop accepts optional `AMTwsN` lines, but the range test that
+decides whether to keep one appears to be unsatisfiable:
+
+```c
+   if (strstr( labelx, "AMTws" ) != 0)
+    {
+     get_parameters( infile, 'f', &tmpval, labelx );
+     if ((sscanf( &(labelx[5]), "%d", &j) == 1) && (j >= 3) && (j < 3))
+      amtws[j] = tmpval;
+     else
+      {
+        printf("ERROR reading '%s'.\n", labelx );
+        fprintf(outfile,"ERROR reading '%s'.\n", labelx );
+      }
+    }
+```
+
+No `j` satisfies `(j >= 3) && (j < 3)`, so an `AMTws3` line (or any other
+numbered `AMTws` line) is read, reported as an error and dropped. The
+assignment that would otherwise set line 3 is commented out:
+
+```c
+ // amtws[3] = 0.0;	/* Other adjustments, including income-based related adjustments */
+```
+
+Form 6251 line 3 ("Other adjustments") therefore stays 0 whatever the input
+says. A Form 6251 adjustment supplied there, such as an incentive stock
+option spread, has no effect on the AMT: in our runs, a 2018 Single return
+with $150,000 of wages and `AMTws3` 200,000 gives the same result as the
+same return with no `AMTws3` line, and reports no AMT.
+
+The 2020 and later programs read the line directly, which suggests the newer
+form is the intended behavior:
+
+```c
+ GetLine( "AMTws3", &amtws[3] );
+```
+
+(`src/taxsolve_US_1040_2020.c:1992`, and likewise through 2025.)
+
+**Possible fix:** if these releases are still maintained, either widen the
+range test to the lines the 2018/2019 worksheet uses (for example
+`(j >= 3) && (j <= 3)`) or read `AMTws3` with `GetLine` as 2020 does. We
+realize 2018 and 2019 may be past the point where changes are worthwhile; in
+that case this is just for the record.
+
+Not patched locally. tenforty now refuses a nonzero
+`incentive_stock_option_gains` on 2018 and 2019 OTS returns
+(`OTS_UNREAD_INPUT_KEYS`, tenforty-bmem), and
+`test_unread_amtws3_matches_the_vendored_release_source` checks each vendored
+release's source, so a corrected release would fail that test and prompt the
+refusal's removal.
 
 ---
 
