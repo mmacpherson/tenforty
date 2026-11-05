@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 import tenforty
 from tenforty.backends import OTSBackend
 from tenforty.backends.graph import GraphBackend
+from tenforty.core import ots_reads_input
 from tenforty.models import (
     OTSFilingStatus,
     OTSState,
@@ -150,6 +151,8 @@ def test_federal_tax_monotonicity(
     incentive_stock_option_gains,
     iso_gains_increment,
 ):
+    if not ots_reads_input("incentive_stock_option_gains", year, OTSState.NONE):
+        incentive_stock_option_gains = iso_gains_increment = 0.0
     base_result = tenforty.evaluate_return(
         year=year,
         filing_status=filing_status,
@@ -265,6 +268,8 @@ def test_evaluate_return_properties(
     incentive_stock_option_gains,
 ):
     assume(is_state_supported(year, state, filing_status))
+    if not ots_reads_input("incentive_stock_option_gains", year, OTSState.NONE):
+        incentive_stock_option_gains = 0.0
     result = tenforty.evaluate_return(
         year=year,
         state=state,

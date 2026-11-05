@@ -25,6 +25,7 @@ from .models import (
     NUMERIC_OUTPUT_FIELDS,
     OTS_FORM_CONFIG,
     OTS_INPUT_CARRIERS,
+    OTS_UNREAD_INPUT_KEYS,
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
     TAX_RETURN_FLOAT_FIELDS,
@@ -557,36 +558,64 @@ _OTS_STATES_READING_FEDERAL_SCHEDULE_A = frozenset(
 
 
 # Inputs OTS must not drop silently: a nonzero value is refused for any return
-# whose OTS programs have no mapping for it, rather than computed without it.
-_OTS_REFUSED_WHEN_UNREAD = ("dependent_exemptions",)
+# whose OTS programs do not use it, rather than computed without it. Each maps
+# to the remedy the refusal offers.
+_OTS_REFUSED_WHEN_UNREAD = {
+    "dependent_exemptions": (
+        "Pass dependent_exemptions=0 if no state exemption amount is intended. "
+        "If you meant a number of dependents, pass it as num_dependents; "
+        "exemption dollars are not converted to a count. Otherwise use "
+        "backend='graph' for a 2024 or later state and year whose graph maps "
+        "dependent_exemptions."
+    ),
+    "incentive_stock_option_gains": (
+        "No other input carries the Form 6251 incentive stock option "
+        "adjustment, and no backend computes this year with it: the graph "
+        "covers 2024 and later. Pass incentive_stock_option_gains=0 only if the "
+        "return has no such adjustment."
+    ),
+}
 
 
 def ots_reads_input(name: str, year: int, state: OTSState) -> bool:
-    """Whether any OTS program in this year's return maps the natural input.
+    """Whether any OTS program in this year's return uses the natural input.
 
     The return is the federal 1040, the state's program and the year's
     subordinate forms; a computed carrier field counts as reading its input.
+    A mapping onto a key the program accepts but never uses
+    (``OTS_UNREAD_INPUT_KEYS``) does not count.
     """
     carrier = OTS_INPUT_CARRIERS.get(name)
     form_ids = ["US_1040"]
     if (state_form_id := STATE_TO_FORM.get(state)) is not None:
         form_ids.append(state_form_id)
-    input_maps = [
-        config.input_map
+    maps = [
+        (form_id, config.input_map)
         for form_id in form_ids
         if (config := NATURAL_FORM_CONFIG.get((year, form_id))) is not None
     ]
     for sub_cfg in SUBORDINATE_FORM_CONFIG.get(year, []):
         if name in sub_cfg.activation_naturals:
             return True
-        input_maps.append(sub_cfg.input_map)
-    return any(name in m or (carrier is not None and carrier in m) for m in input_maps)
+        maps.append((sub_cfg.form_id, sub_cfg.input_map))
+
+    def used(form_id: str, input_map: dict[str, Any], natural: str | None) -> bool:
+        if natural is None or natural not in input_map:
+            return False
+        ots_key = input_map[natural]
+        unread = OTS_UNREAD_INPUT_KEYS.get((year, form_id), frozenset())
+        return not (isinstance(ots_key, str) and ots_key in unread)
+
+    return any(
+        used(form_id, input_map, name) or used(form_id, input_map, carrier)
+        for form_id, input_map in maps
+    )
 
 
 def _require_ots_reads_inputs(
     year: int, state: OTSState, natural_form_values: dict[str, Any]
 ) -> None:
-    for name in _OTS_REFUSED_WHEN_UNREAD:
+    for name, remedy in _OTS_REFUSED_WHEN_UNREAD.items():
         value = natural_form_values.get(name, 0.0)
         if not value or ots_reads_input(name, year, state):
             continue
@@ -598,12 +627,8 @@ def _require_ots_reads_inputs(
         else:
             where = f"{state.value} {year}, which has no state income tax return"
         raise UnsupportedInputError(
-            f"OTS has no mapping for {name}={value!r} on {where}, so it would "
-            f"compute the return without it. Pass {name}=0 if no state exemption "
-            "amount is intended. If you meant a number of dependents, pass it as "
-            "num_dependents; exemption dollars are not converted to a count. "
-            "Otherwise use backend='graph' for a 2024 or later state and year "
-            f"whose graph maps {name}."
+            f"OTS does not use {name}={value!r} on {where}, so it would "
+            f"compute the return without it. {remedy}"
         )
 
 
