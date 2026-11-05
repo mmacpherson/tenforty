@@ -168,7 +168,9 @@ def test_graph_oh_mfj_with_the_fact_is_accepted(oh_lowering, value):
 def test_graph_oh_fact_is_refused_until_its_lowering_is_wired(monkeypatch):
     """Without a lowering the fact cannot be honoured: refuse, never ignore."""
     monkeypatch.delitem(graph_backend.FACT_LOWERINGS, ("OH", OH_FIELD), raising=False)
-    with pytest.raises(UnsupportedInputError, match="not yet wired"):
+    with pytest.raises(
+        UnsupportedInputError, match="not yet computed by the graph backend"
+    ):
         evaluate_return(
             **_oh(), state_facts=OH(spouses_both_have_qualifying_income=True)
         )
@@ -262,14 +264,48 @@ def test_ots_routed_oh_mfj_needs_no_fact(backend):
 
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
-def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(engine_calls, backend):
+@pytest.mark.parametrize("value", [True, False])
+def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
+    engine_calls, backend, value
+):
     """OTS cannot honour the OH fact: capability error, no fallback to graph."""
-    with pytest.raises(UnsupportedInputError, match="graph"):
+    with pytest.raises(UnsupportedInputError, match="never change which backend"):
         evaluate_return(
             **_oh(backend=backend),
-            state_facts=OH(spouses_both_have_qualifying_income=True),
+            state_facts=OH(spouses_both_have_qualifying_income=value),
         )
     assert engine_calls == []
+
+
+@pytest.mark.parametrize("backend", ["auto", "ots"])
+@pytest.mark.parametrize("value", [False, True])
+def test_ots_error_names_graph_for_both_computed_values(backend, value):
+    """Graph computes both supplied values; OTS computes neither."""
+    with pytest.raises(UnsupportedInputError) as refusal:
+        evaluate_return(
+            **_oh(backend=backend),
+            state_facts=OH(spouses_both_have_qualifying_income=value),
+        )
+    assert "backend='graph' does" in str(refusal.value)
+
+
+@requires_graph
+def test_graph_error_for_uncomputed_value_names_no_other_backend(monkeypatch):
+    """A restricted lowering cannot send the caller to an incapable backend."""
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), frozenset({False})
+    )
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_PENDING, ("OH", OH_FIELD), "tenforty-b72.53"
+    )
+    with pytest.raises(UnsupportedInputError) as refusal:
+        evaluate_return(
+            **_oh(), state_facts=OH(spouses_both_have_qualifying_income=True)
+        )
+    message = str(refusal.value)
+    assert "not yet computed by the graph backend" in message
+    assert "backend='ots'" not in message
+    assert "no backend computes it yet (tenforty-b72.53)" in message
 
 
 def test_no_rows_and_no_facts_is_the_normal_empty_frame():
@@ -374,7 +410,7 @@ def test_derivatives_require_the_fact_and_hold_it_fixed(oh_lowering):
 
 
 def _ma_convention():
-    return next(c for c in state_facts.CONVENTIONS if c.id == MA_ONE_EARNER)
+    return next(c for c in state_facts._CONVENTIONS if c.id == MA_ONE_EARNER)
 
 
 def _ma_args(backend, status="Married/Joint"):
@@ -446,7 +482,7 @@ def test_federal_and_other_states_report_nothing():
 
 def test_records_are_sorted_and_unique():
     """Deterministic emission from the inventory."""
-    ids = [convention.id for convention in state_facts.CONVENTIONS]
+    ids = [convention.id for convention in state_facts._CONVENTIONS]
     assert ids == sorted(set(ids))
 
 
@@ -538,6 +574,34 @@ def test_available_describes_the_oh_fact():
     assert descriptor.honoured_by == ("graph",)
     assert descriptor.required_by == ("graph",)
     assert "5747.05" in descriptor.source
+    assert descriptor.supported_values == (("graph", None),)
+    assert descriptor.pending is None
+    assert descriptor.computes("graph", False)
+    assert descriptor.computes("graph", True)
+    assert not descriptor.computes("ots", False)
+    assert descriptor.engines_computing(True) == ("graph",)
+    assert descriptor.engines_computing(False) == ("graph",)
+
+
+def test_discovery_follows_the_preflight_registry(monkeypatch):
+    """A restricted lowering is reported with its supported values and reason."""
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_VALUES, ("OH", OH_FIELD), frozenset({False})
+    )
+    monkeypatch.setitem(
+        graph_backend.FACT_LOWERING_PENDING, ("OH", OH_FIELD), "tenforty-b72.53"
+    )
+    (descriptor,) = state_facts.available("OH", 2025)
+    assert descriptor.supported_values == (("graph", (False,)),)
+    assert descriptor.pending == "tenforty-b72.53"
+    assert descriptor.engines_computing(True) == ()
+
+
+def test_assumption_values_must_be_finite():
+    """A JSON scalar has no NaN or infinity."""
+    for bad in (math.nan, math.inf):
+        with pytest.raises(ValidationError):
+            Assumption(id="x", state=None, input_path=None, value=bad, text="t")
 
 
 def test_available_is_empty_for_a_recognised_return_without_facts():
@@ -560,7 +624,7 @@ def test_every_default_has_an_explicit_category():
         decision = decisions[descriptor.input_path]
         assert decision.category == "required"
         assert descriptor.convention is None
-    for convention in state_facts.CONVENTIONS:
+    for convention in state_facts._CONVENTIONS:
         decision = decisions[convention.id]
         assert decision.category == "transition"
         assert convention.input_path is None
