@@ -9,11 +9,11 @@ ordinary dividends that include it) raises taxable income and the 0%-band amount
 together and adds no tax: the right-hand derivative is zero (2024 and 2025 Form
 1040 instructions, line 16 worksheet).
 
-In floating point line 9 (line 7 less line 8) cancels imperfectly, and the residue
-reaches line 21, leaving line 23 above line 24 by about 1e-12. The engine reads
-that as a strict inequality and takes line 24's table slope (tenforty-0hg,
-tenforty-ty6q). Those cases are strict xfails until the worksheet computes the
-equal alternatives identically. Uniform sampling lands on this only when qualified dividends are
+Computed as printed, line 9 (line 7 less line 8) cancels imperfectly in floating
+point, and the residue reached line 21, leaving line 23 above line 24 by about
+1e-12; the engine read that as a strict inequality and took line 24's table
+slope (tenforty-0hg, tenforty-ty6q). The spec now computes the worksheet in an
+equal form whose tie is exact. Uniform sampling lands on this only when qualified dividends are
 tiny, so the strategy aims at it: it picks line 5 inside a row, then dividends
 small enough to stay in that row.
 
@@ -58,11 +58,6 @@ ZERO_RATE_BAND_TOP = {
     (2025, "Widow(er)"): 96_700.0,
 }
 ROW = 50.0
-WORKSHEET_TIE = pytest.mark.xfail(
-    raises=AssertionError,
-    strict=True,
-    reason="tenforty-0hg: QDCG line 9 cancellation breaks the line 23/24 tie",
-)
 
 
 @st.composite
@@ -96,7 +91,6 @@ def same_row_zero_band_returns(draw):
 
 
 @skip_if_graph_unavailable
-@WORKSHEET_TIE
 @settings(deadline=None)  # inherit profile count (ci=500, deep=10k, soak=100k)
 @given(case=same_row_zero_band_returns())
 @example(
@@ -152,7 +146,6 @@ def test_zero_band_dividends_add_no_tax_at_a_worksheet_tie(case):
     ],
     ids=["0hg", "0hg-matrix", "ty6q", "hoh-26001"],
 )
-@WORKSHEET_TIE
 def test_recorded_witnesses(case):
     """The deep-sweep witnesses: each is a line 23 / line 24 tie."""
     gradient = GraphBackend().gradient(
@@ -163,7 +156,6 @@ def test_recorded_witnesses(case):
 
 
 @skip_if_graph_unavailable
-@WORKSHEET_TIE
 def test_combined_return_at_a_worksheet_tie_takes_the_right_hand_slope():
     """AST-37, the #433 soak witness: the ty6q return with its California part.
 

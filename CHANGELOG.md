@@ -128,6 +128,14 @@
 - `federal_effective_tax_rate` divides by taxable income, as OTS does. It used
   to divide by AGI.
 - `state_effective_tax_rate` is computed for graph states. It used to be 0.
+- `marginal_rate()` and the gradients no longer report 10-12% on qualified
+  dividends or capital gains that fall inside the 0% band when the Qualified
+  Dividends and Capital Gain Tax Worksheet's line 23 equals line 24 (taxable
+  income and line 5 in the same Tax Table row); they report 0, the right-hand
+  rate. Computed as printed, lines 9-21 left a floating-point residue that put
+  line 23 a few ulps above line 24. The spec now computes those lines in an
+  algebraically equal form whose tie is exact. Tax values are unchanged beyond
+  floating-point rounding (at most 6e-11 dollars across 20,000 sampled returns).
 
 ### Changed (installation)
 - **Building from source requires Rust.** The graph backend is no longer an
