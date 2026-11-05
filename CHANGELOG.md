@@ -5,19 +5,31 @@
   read from the EIC Table, as the worksheets direct, and every row of the
   published 2024 and 2025 tables is checked at $0. Refundable, so it is a
   payment and not part of `federal_total_tax`; `None` on OTS.
-  - New keyword-only inputs: `num_eitc_children` (unset: the child tax credit
-    children, all of whom also qualify) and `tax_exempt_interest` (Form 1040
-    line 2a, investment income for the EIC limit). Both are nullable or float
-    batch columns.
+  - New keyword-only inputs: `num_eitc_children` (EIC qualifying children),
+    `eitc_eligible` (the filer meets the EIC conditions the inputs cannot
+    show: at least 25 with no qualifying child, valid SSNs, not another
+    taxpayer's qualifying child, and the rest of Pub 596 Rules 2, 4, 5, 10
+    and 11-14) and `tax_exempt_interest` (Form 1040 line 2a, investment
+    income for the EIC limit). Nullable batch columns, except
+    `tax_exempt_interest`, which is a float.
+  - **No default guesses the credit.** `eitc_eligible=False` gives 0;
+    `eitc_eligible=True` with `num_eitc_children` computes it; otherwise
+    `federal_earned_income_credit` is `None`, "not determined", while
+    `federal_total_tax`, which the credit never enters, is computed as usual.
+    The EIC child count is never inferred from `num_dependents` or the child
+    tax credit count: a noncustodial parent claiming the child tax credit
+    under Form 8332 cannot claim that child for the EIC.
   - Earned income is computed (wages, the line 1i combat pay election, and net
     self-employment earnings less the deductible half of SE tax) and now also
     feeds Schedule 8812 line 18a, which was an unset input.
-  - Not modeled: the childless credit's minimum age of 25 (there is no age
-    input; filers 65 or older are excluded), the married-filing-separately
-    separated-spouse exception (MFS gets 0), and the other eligibility facts
-    (valid SSNs, U.S. residence, not someone else's qualifying child).
-  - Missouri's federal tax deduction now subtracts the computed EIC (MO-1040
-    line 9).
+  - Married filing separately gets 0: the separated-spouse exception (Pub 596
+    Rule 3) is not modeled.
+  - **Missouri graph returns now need the EIC facts.** MO-1040 line 9
+    subtracts the computed EIC, so a graph MO return without `eitc_eligible`
+    (or with `eitc_eligible=True` but no `num_eitc_children`) raises
+    `UnsupportedInputError` before evaluation, under every `on_error` and for
+    the whole batch. Pass `eitc_eligible=False` for a filer who cannot claim
+    the credit.
 - **`state_facts`: explicit state-specific facts, and reported assumptions.**
   `evaluate_return`, `evaluate_returns`, `marginal_rate(s)` and
   `solve_for_income` take `state_facts=`, typed per-state models from
@@ -138,8 +150,10 @@
 
 ### Fixed (graph backend: opt-in, experimental)
 - The graph resolver follows an import of a line that itself imports another
-  form's line. It used to stop at the first hop and leave a dangling operand,
-  so Missouri's line 9 could not read Form 1040 line 27.
+  form's line. It used to stop at the first hop and leave a dangling operand.
+  Each year's graph has two such chains: Missouri line 9 reads Form 1040 line
+  27 (the EIC), and the EIC's investment income reads Form 1040 line 7
+  (Schedule D line 21). A cycle of imports is a compile error.
 - `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
   It used to be hard-coded to 0. Income exactly at a threshold stays in the
   lower bracket, as the schedules' "over X but not over Y" wording requires.

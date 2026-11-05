@@ -12,7 +12,10 @@ the published whole-dollar rule (1040 instructions, "Rounding Off to Whole
 Dollars") allows $2,120, so $1.
 
 The credit is refundable: it is federal_earned_income_credit (Form 1040 line
-27, a payment) and never reduces federal_total_tax.
+27, a payment) and never reduces federal_total_tax. Each derivation's filer
+meets the conditions the inputs cannot show (at least 25, a valid SSN, not
+anyone's dependent or qualifying child), stated as eitc_eligible=True. Without
+those facts the credit is not determined: None, never a guess.
 """
 
 import math
@@ -53,6 +56,7 @@ INTEREST = {
     "E7b": {2024: 11_601.0, 2025: 11_951.0},
 }
 YEARS = (2024, 2025)
+FACTS = {"eitc_eligible": True}
 
 
 def _inputs(name: str, inputs: dict, year: int) -> dict:
@@ -89,7 +93,7 @@ def test_eic_without_the_child_tax_credit(
 ):
     """Line 24 (A): the children are EIC children only, so no line 19 credit."""
     result = evaluate_return(
-        year=year, backend="graph", num_eitc_children=children, **inputs
+        year=year, backend="graph", num_eitc_children=children, **FACTS, **inputs
     )
 
     assert result.federal_earned_income_credit == eic
@@ -102,12 +106,17 @@ def test_eic_without_the_child_tax_credit(
 @pytest.mark.parametrize(
     CASE_ARGS, [case for case in CASES if case.values[6] is not None]
 )
-def test_eic_children_default_to_the_child_tax_credit_children(
+def test_eic_children_who_are_also_child_tax_credit_children(
     name, inputs, children, year, eic, line_24_a, line_24_b
 ):
-    """Line 24 (B): num_eitc_children unset counts the child tax credit children."""
+    """Line 24 (B): every EIC child is also a dependent and a CTC child."""
     result = evaluate_return(
-        year=year, backend="graph", num_dependents=children, **inputs
+        year=year,
+        backend="graph",
+        num_dependents=children,
+        num_eitc_children=children,
+        **FACTS,
+        **inputs,
     )
 
     assert result.federal_earned_income_credit == eic
@@ -130,6 +139,7 @@ def test_batch_matches_the_derivation(year):
         backend="graph",
         mode="zip",
         num_eitc_children=[children for _, _, children, _ in rows],
+        eitc_eligible=True,
         **{
             column: [inputs.get(column, 0.0) for _, inputs, _, _ in rows]
             if column != "filing_status"
@@ -176,6 +186,7 @@ def test_tax_exempt_interest_counts_toward_the_investment_limit(year):
         year=year,
         backend="graph",
         num_eitc_children=2,
+        **FACTS,
         taxable_interest=at_limit - 1.0,
         tax_exempt_interest=1.0,
         **base,
@@ -184,6 +195,7 @@ def test_tax_exempt_interest_counts_toward_the_investment_limit(year):
         year=year,
         backend="graph",
         num_eitc_children=2,
+        **FACTS,
         taxable_interest=at_limit - 1.0,
         tax_exempt_interest=2.0,
         **base,
@@ -198,7 +210,13 @@ def test_tax_exempt_interest_counts_toward_the_investment_limit(year):
 @pytest.mark.parametrize("year", YEARS)
 def test_the_childless_credit_needs_someone_under_65(year):
     """Without a child, a filer 65 or older (both, if joint) gets no credit."""
-    single = {"year": year, "backend": "graph", "w2_income": 10_000.0}
+    single = {
+        "year": year,
+        "backend": "graph",
+        "w2_income": 10_000.0,
+        "num_eitc_children": 0,
+        **FACTS,
+    }
     joint = {**single, "filing_status": "Married/Joint", "w2_income": 12_000.0}
 
     assert evaluate_return(**single).federal_earned_income_credit > 0
@@ -218,7 +236,7 @@ def test_the_childless_credit_needs_someone_under_65(year):
     )
     assert (
         evaluate_return(
-            **single, filer_65_or_older=True, num_eitc_children=1
+            **{**single, "num_eitc_children": 1}, filer_65_or_older=True
         ).federal_earned_income_credit
         > 0
     )
@@ -227,35 +245,232 @@ def test_the_childless_credit_needs_someone_under_65(year):
 @skip_if_graph_unavailable
 @pytest.mark.parametrize("year", YEARS)
 def test_married_filing_separately_gets_no_credit(year):
-    """MFS is ineligible here; Pub 596 Rule 3's separated-spouse exception is not modeled."""
+    """MFS is 0 on the graph: Pub 596 Rule 3's separated-spouse exception is not modeled.
+
+    So this is not a claim about every MFS return under the law.
+    """
     result = evaluate_return(
         year=year,
         backend="graph",
         filing_status="Married/Sep",
         w2_income=15_000.0,
         num_eitc_children=2,
+        **FACTS,
     )
 
     assert result.federal_earned_income_credit == 0
 
 
+# Independent witness (Astra, AST-44; Pub 596, "Divorced or separated parents"):
+# 2025 Single, age 30, wages $20,000, one child for whom the filer claims the
+# child tax credit under Form 8332 but who never lived with the filer. Only the
+# custodial parent can claim the child for the EIC, so the filer has no EIC
+# qualifying child, and childless the EIC Table gives $0 at $20,000 (E2). The
+# child tax credit count must never stand in for the EIC count: that guess
+# gave this filer $4,328.
+WITNESS = {
+    "year": 2025,
+    "backend": "graph",
+    "filing_status": "Single",
+    "w2_income": 20_000.0,
+    "num_dependents": 1,
+}
+
+
 @skip_if_graph_unavailable
-def test_unset_eic_children_follow_num_ctc_dependents():
-    """Unset, the EIC counts the child tax credit children, not every dependent."""
-    common = {
-        "year": 2025,
-        "backend": "graph",
-        "filing_status": "Head_of_House",
-        "w2_income": 25_000.0,
-        "num_dependents": 2,
-    }
-    one_ctc_child = evaluate_return(**common, num_ctc_dependents=1)
-    one_eic_child = evaluate_return(**common, num_ctc_dependents=1, num_eitc_children=1)
-    two_eic_children = evaluate_return(
-        **common, num_ctc_dependents=1, num_eitc_children=2
+def test_a_child_tax_credit_child_is_not_an_eic_child():
+    """The noncustodial parent: $0 with the facts, None without, never $4,328."""
+    stated = evaluate_return(**WITNESS, num_eitc_children=0, eitc_eligible=True)
+    unstated = evaluate_return(**WITNESS, eitc_eligible=True)
+
+    assert stated.federal_earned_income_credit == 0
+    assert unstated.federal_earned_income_credit is None
+    assert stated.federal_total_tax == unstated.federal_total_tax
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_the_witness_in_a_batch(mode):
+    """Batch rows keep the distinction, and echo the facts as given."""
+    frame = evaluate_returns(
+        **WITNESS, mode=mode, num_eitc_children=[0, None], eitc_eligible=True
     )
 
-    assert one_ctc_child.federal_earned_income_credit == 4_060
-    assert one_eic_child.federal_earned_income_credit == 4_060
-    assert two_eic_children.federal_earned_income_credit > 4_060
-    assert two_eic_children.federal_total_tax == one_ctc_child.federal_total_tax
+    assert frame["num_eitc_children"].to_list() == [0, None]
+    assert frame["eitc_eligible"].to_list() == [True, True]
+    assert frame["federal_earned_income_credit"].to_list() == [0.0, None]
+
+
+# E3 (2025 HoH, $25,000, one child: $4,060; line 24 (A) $139) under each
+# combination of facts.
+E3_2025 = {
+    "year": 2025,
+    "backend": "graph",
+    "filing_status": "Head_of_House",
+    "w2_income": 25_000.0,
+}
+FACT_CASES = [
+    pytest.param({}, None, id="no-facts"),
+    pytest.param({"num_eitc_children": 1}, None, id="count-only"),
+    pytest.param({"eitc_eligible": True}, None, id="eligible-without-count"),
+    pytest.param({"eitc_eligible": False}, 0, id="ineligible"),
+    pytest.param({"eitc_eligible": False, "num_eitc_children": 1}, 0, id="ineligible-with-count"),
+    pytest.param({"eitc_eligible": True, "num_eitc_children": 1}, 4_060, id="determined"),
+]  # fmt: skip
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(("facts", "expected"), FACT_CASES)
+def test_the_credit_is_determined_only_by_both_facts(facts, expected):
+    """None is not determined, 0 a determined zero; total tax is computed either way."""
+    result = evaluate_return(**E3_2025, **facts)
+    baseline = evaluate_return(**E3_2025)
+
+    assert result.federal_earned_income_credit == expected
+    assert result.federal_total_tax == baseline.federal_total_tax == 139
+
+
+@skip_if_graph_unavailable
+def test_the_batch_reports_each_row_as_its_facts_determine():
+    """Scalar and batch agree row by row across the fact combinations."""
+    rows = [case.values[0] for case in FACT_CASES]
+    frame = evaluate_returns(
+        **{
+            key: [value] * len(rows)
+            for key, value in E3_2025.items()
+            if key != "backend"
+        },
+        backend="graph",
+        mode="zip",
+        num_eitc_children=[row.get("num_eitc_children") for row in rows],
+        eitc_eligible=[row.get("eitc_eligible") for row in rows],
+    )
+
+    assert frame["federal_earned_income_credit"].to_list() == [
+        case.values[1] for case in FACT_CASES
+    ]
+    assert frame["eitc_eligible"].to_list() == [
+        row.get("eitc_eligible") for row in rows
+    ]
+
+
+# --- States whose tax reads the credit ---------------------------------------
+
+
+def _depends_on(graph: dict, target: str) -> set[str]:
+    """Names of the nodes whose value depends on the node named ``target``."""
+    nodes = graph["nodes"]
+    operand_keys = ("left", "right", "arg", "cond", "then", "otherwise", "income")
+
+    def operands(op: dict) -> list[int]:
+        found = [op[key] for key in operand_keys if isinstance(op.get(key), int)]
+        return found + list(op.get("values", {}).values())
+
+    target_id = next(int(i) for i, node in nodes.items() if node.get("name") == target)
+    dependents: dict[int, bool] = {target_id: True}
+
+    def reaches(node_id: int) -> bool:
+        stack, order = [node_id], []
+        while stack:
+            current = stack.pop()
+            if current in dependents:
+                continue
+            order.append(current)
+            stack.extend(operands(nodes[str(current)]["op"]))
+        for current in reversed(order):
+            dependents[current] = any(
+                dependents.get(operand, False)
+                for operand in operands(nodes[str(current)]["op"])
+            )
+        return dependents[node_id]
+
+    return {node.get("name", "") for i, node in nodes.items() if reaches(int(i))}
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize("year", YEARS)
+def test_the_states_needing_the_facts_are_exactly_those_reading_the_credit(year):
+    """STATES_READING_FEDERAL_EIC is every state form that depends on the EIC.
+
+    And no federal output but the credit itself does, so total tax never needs
+    the facts.
+    """
+    import json
+
+    from tenforty.backends.graph import (
+        FEDERAL_OUTPUT_NODES,
+        STATES_READING_FEDERAL_EIC,
+        _forms_dir,
+    )
+    from tenforty.mappings import STATE_FORM_NAMES
+
+    graph = json.loads((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
+    dependents = _depends_on(graph, "us_schedule_eic_EITC")
+    reading = {
+        state
+        for state, form in STATE_FORM_NAMES.items()
+        if any(name.startswith(f"{form}_") for name in dependents)
+    }
+
+    assert reading == STATES_READING_FEDERAL_EIC
+    assert dependents & set(FEDERAL_OUTPUT_NODES) == {"us_schedule_eic_EITC"}
+
+
+MO_LOW_INCOME = {"state": "MO", "filing_status": "Single", "w2_income": 16_750.0}
+MISSING_FACTS = [
+    pytest.param({}, "eitc_eligible", id="none"),
+    pytest.param({"num_eitc_children": 0}, "eitc_eligible", id="count-only"),
+    pytest.param({"eitc_eligible": True}, "num_eitc_children", id="no-count"),
+]
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(("facts", "missing"), MISSING_FACTS)
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+@pytest.mark.parametrize("year", YEARS)
+def test_missouri_refuses_a_return_without_the_facts(year, on_error, facts, missing):
+    """MO line 9 subtracts the credit, so its total needs the facts, always.
+
+    Only backend='graph' computes MO (auto keeps it off the graph until
+    tenforty-b72.46, and OTS has no MO return for these years).
+    """
+    from tenforty import UnsupportedInputError
+
+    with pytest.raises(UnsupportedInputError, match=missing):
+        evaluate_return(
+            year=year, backend="graph", on_error=on_error, **MO_LOW_INCOME, **facts
+        )
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_missouri_refusal_covers_the_whole_batch_before_evaluation(monkeypatch, mode):
+    """One MO row without the facts refuses the batch before any return is computed."""
+    from tenforty import UnsupportedInputError
+    from tenforty.backends.graph import GraphBackend
+
+    def never(*args, **kwargs):
+        raise AssertionError("evaluated before the refusal")
+
+    monkeypatch.setattr(GraphBackend, "evaluate", never)
+    monkeypatch.setattr(GraphBackend, "evaluate_batch", never)
+    with pytest.raises(UnsupportedInputError, match="eitc_eligible"):
+        evaluate_returns(
+            year=2025,
+            backend="graph",
+            mode=mode,
+            on_error="ignore",
+            state=[None, "MO"],
+            w2_income=16_750.0,
+            eitc_eligible=[False, None] if mode == "zip" else None,
+        )
+
+
+@skip_if_graph_unavailable
+def test_missouri_refuses_a_marginal_rate_without_the_facts():
+    """The graph-only entry points apply the same refusal."""
+    from tenforty import UnsupportedInputError, marginal_rate
+
+    with pytest.raises(UnsupportedInputError, match="eitc_eligible"):
+        marginal_rate(year=2025, **MO_LOW_INCOME)
+    assert marginal_rate(year=2025, **MO_LOW_INCOME, eitc_eligible=False) >= 0

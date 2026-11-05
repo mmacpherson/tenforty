@@ -86,6 +86,16 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
 
   numQC <-
     keyInput "NUM_QC" "num_qualifying_children" "Number of EIC qualifying children (the credit counts at most 3)"
+  -- The Pub 596 conditions this form cannot compute: Rules 2 (SSN), 4
+  -- (citizen or resident alien all year), 5 (no Form 2555) and 10 (not
+  -- another taxpayer's qualifying child), not barred after a disallowance,
+  -- and with no qualifying child Rules 11 (at least 25), 12 (not a dependent),
+  -- 13 (not a qualifying child) and 14 (U.S. home over half the year). 1
+  -- confirms them; at 0 there is no credit. Rules 1, 6, 7 and 15 (the income
+  -- limits), the filing status and the 65 cap of Rule 11 are computed;
+  -- NUM_QC carries Rules 8 and 9.
+  eligible <-
+    keyInput "ELIGIBLE" "eligible" "1 when the filer meets the EIC conditions not computed here (Pub 596 Rules 2, 4, 5, 10; childless 11-14)"
   taxExemptInterest <- interior "TAX_EXEMPT_INTEREST" "tax_exempt_interest" $ importForm us1040L2a
 
   -- Step 5 earned income: Form 1040 line 1z plus any nontaxable combat pay
@@ -126,8 +136,7 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
   -- Without a qualifying child, the filer (on a joint return, either spouse)
   -- must be under 65 at the end of the year (Pub 596 Rule 11). The 65-or-older
   -- boxes are 0/1, so on a joint return both are 65 or older when the smaller
-  -- is 1. The other half of the age test, at least 25, is not modeled: there is
-  -- no input for it.
+  -- is 1. The other half of the age test, at least 25, is part of ELIGIBLE.
   let filer65 = importForm us1040Filer65
       everyoneIs65 =
         byStatusE
@@ -153,6 +162,6 @@ scheduleEIC params = form "us_schedule_eic" (eicYear params) $ do
 
   _eitc <-
     keyOutput "EITC" "earned_income_credit" "Earned income credit (to Form 1040, line 27)" $
-      ifPos overInvestmentLimit (dollars 0) (creditByQC .*. eligibleStatus)
+      ifPos eligible (ifPos overInvestmentLimit (dollars 0) (creditByQC .*. eligibleStatus)) (dollars 0)
 
   outputs ["EITC", "EARNED_INCOME", "INVESTMENT_INCOME", "C0", "C1", "C2", "C3", "CREDIT_BY_QC"]

@@ -37,7 +37,7 @@ def _input_dtype(name: str) -> pl.DataType:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String
-    if TaxReturnInput.model_fields[name].annotation is bool:
+    if TaxReturnInput.model_fields[name].annotation in (bool, bool | None):
         return pl.Boolean
     return pl.Float64
 

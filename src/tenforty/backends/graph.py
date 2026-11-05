@@ -43,8 +43,12 @@ logger = logging.getLogger(__name__)
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
 # Inputs that reach the graph only through naturals derived from them:
 # num_ctc_dependents is carried by the two Schedule 8812 counts, and
-# num_eitc_children by the Schedule EIC count.
-_CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents", "num_eitc_children"}
+# num_eitc_children and eitc_eligible by the Schedule EIC count and eligibility.
+_CARRIED_BY_DERIVED_FIELDS = {
+    "num_ctc_dependents",
+    "num_eitc_children",
+    "eitc_eligible",
+}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
@@ -294,10 +298,28 @@ def _fact_node_values(tax_input: TaxReturnInput) -> dict[str, float]:
     return values
 
 
+STATES_READING_FEDERAL_EIC = frozenset({OTSState.MO})
+"""States whose graph return reads the federal earned income credit (Form 1040
+line 27). Their tax depends on it, so they need the facts that determine it."""
+
+
+def _require_eic_facts(tax_input: TaxReturnInput) -> None:
+    if tax_input.state not in STATES_READING_FEDERAL_EIC or tax_input.eitc_determined:
+        return
+    missing = "num_eitc_children" if tax_input.eitc_eligible else "eitc_eligible"
+    raise UnsupportedInputError(
+        f"{tax_input.state.value} graph returns subtract the federal earned "
+        f"income credit, which needs {missing}: pass eitc_eligible=False if the "
+        "filer cannot claim it, or eitc_eligible=True with num_eitc_children "
+        "(EIC qualifying children, not dependents). Neither has a default."
+    )
+
+
 def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
     """Refuse unsupported natural returns and nonzero inputs the graph cannot read."""
     returns = tuple(tax_inputs)
     for tax_input in returns:
+        _require_eic_facts(tax_input)
         if (
             tax_input.state == OTSState.NY
             and tax_input.filing_status == OTSFilingStatus.MARRIED_SEPARATE
@@ -435,6 +457,8 @@ class GraphBackend:
             field: evaluator.eval(node) for node, field in FEDERAL_OUTPUT_NODES.items()
         }
 
+        if not tax_input.eitc_determined:
+            result["federal_earned_income_credit"] = None
         total_tax = result["federal_total_tax"]
         result["total_tax"] = total_tax
         result["federal_effective_tax_rate"] = _effective_tax_rate(
@@ -615,6 +639,12 @@ class GraphBackend:
             final_results[field] = output_cols[node_name]
 
         count = len(status_col)
+        final_results["federal_earned_income_credit"] = [
+            credit if tax_input.eitc_determined else None
+            for credit, tax_input in zip(
+                final_results["federal_earned_income_credit"], tax_inputs, strict=True
+            )
+        ]
 
         # Derived fields: the same definitions as the single path.
         final_results["federal_tax_bracket"] = [

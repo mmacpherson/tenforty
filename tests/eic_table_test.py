@@ -6,7 +6,8 @@ Evidence kind: published table rows. tests/fixtures/eic_table/ holds the full
 starred footnote row split at its completed phase-out amount; provenance and
 method are in that directory's README.
 
-With wages as the only income, earned income and AGI are the same amount, so
+Every row is read for a filer who meets the conditions the graph does not
+compute (its ELIGIBLE input, set to 1). With wages as the only income, earned income and AGI are the same amount, so
 EIC Worksheet A reads the table once (lines 1-4) and the credit is the row's
 entry. Each row is checked at its first dollar and at its last cent. The
 worksheet directs the filer to "Look up the amount ... in the EIC Table", so
@@ -34,6 +35,7 @@ YEARS = (2024, 2025)
 EXPECTED_ROWS = {2024: 1_345, 2025: 1_382}
 WAGES = "us_1040_L1a_wages"
 CHILDREN = "us_schedule_eic_NUM_QC"
+ELIGIBLE = "us_schedule_eic_ELIGIBLE"
 CREDIT = "us_schedule_eic_EITC"
 COLUMN_GROUP = {
     "single": "single",
@@ -52,9 +54,13 @@ def _rows(year: int) -> tuple[dict[str, int], ...]:
         )
 
 
-def _credits(year: int, status: str, children: int, amounts) -> list[float]:
+def _credits(
+    year: int, status: str, children: int, amounts, *, eligible: bool = True
+) -> list[float]:
     runtime = Runtime(_load_resolved_graph(year), FilingStatus.from_str(status))
     runtime.set(CHILDREN, float(children))
+    if eligible:
+        runtime.set(ELIGIBLE, 1.0)
     entries = []
     for amount in amounts:
         runtime.set(WAGES, amount)
@@ -113,3 +119,12 @@ def test_married_filing_separately_gets_no_credit(year, children):
     """MFS is ineligible here (Pub 596 Rule 3's exception is not modeled)."""
     amounts = [5_000.0, 12_000.0, 20_000.0]
     assert _credits(year, "married_separate", children, amounts) == [0.0] * 3
+
+
+@pytest.mark.parametrize("children", [0, 1, 2, 3])
+@pytest.mark.parametrize("year", YEARS)
+def test_no_credit_unless_eligibility_is_confirmed(year, children):
+    """ELIGIBLE left at 0 gives no credit, even on the table's maximum rows."""
+    amounts = [5_000.0, 12_000.0, 20_000.0]
+    for status in COLUMN_GROUP:
+        assert _credits(year, status, children, amounts, eligible=False) == [0.0] * 3

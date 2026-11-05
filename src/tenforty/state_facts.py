@@ -327,6 +327,29 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "Nobody can claim the filer as a dependent; that regime is not modelled.",
     ),
     DefaultDecision(
+        "tax_exempt_interest",
+        "baseline",
+        "tax_exempt_interest",
+        "No tax-exempt interest unless set (counts only toward the EIC's "
+        "investment income limit).",
+    ),
+    DefaultDecision(
+        "num_eitc_children",
+        "required",
+        None,
+        "Mike, 2026-11-05 (AST-44): never inferred from num_dependents or the "
+        "child tax credit count. Unset, federal_earned_income_credit is None "
+        "(not determined) unless eitc_eligible is False; graph MO refuses.",
+    ),
+    DefaultDecision(
+        "eitc_eligible",
+        "required",
+        None,
+        "Mike, 2026-11-05 (AST-44): the EIC conditions the inputs cannot show "
+        "(age 25 for no child, SSN, not another taxpayer's qualifying child, "
+        "...). Unset, federal_earned_income_credit is None; graph MO refuses.",
+    ),
+    DefaultDecision(
         "state_facts.OH.spouses_both_have_qualifying_income",
         "required",
         None,

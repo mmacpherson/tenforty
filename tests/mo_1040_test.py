@@ -89,7 +89,9 @@ def test_mo_tax_chart_worked_examples(year, taxable_income, expected_tax):
 
 
 # Whole-return fixtures: W-2 wages only, standard deduction, under 65, no
-# dependents, full-year resident. Kind: derived-arithmetic from the official
+# dependents, full-year resident, eligible for the childless EIC (at least 25,
+# nobody's dependent or qualifying child, valid SSN: eitc_eligible=True with
+# num_eitc_children=0), which the derivation subtracts on line 9. Kind: derived-arithmetic from the official
 # MO chart and line structure, with line 9 (federal tax net of EIC) read from
 # the IRS Tax Table and EIC Table. Sources as in the module docstring,
 # retrieved 2026-09-30, derived blind, session 1b251ce6.
@@ -159,12 +161,73 @@ def test_mo_whole_return_independent_derivation(
         filing_status=filing_status,
         w2_income=wages,
         backend="graph",
+        eitc_eligible=True,
+        num_eitc_children=0,
     )
 
     assert result.state_taxable_income == pytest.approx(
         expected_taxable_income, abs=CHART_TOLERANCE
     )
     assert result.state_total_tax == pytest.approx(expected_tax, abs=CHART_TOLERANCE)
+
+
+# The same derivation's "No EIC" alternative (MO-2024-2025.md, "Alternatives":
+# a filer not eligible, for example under 25), against the eligible rows of
+# MO_WHOLE_RETURN_SCENARIOS. Columns: year, wages, EIC when eligible (IRS EIC
+# Table, no children), MO TI and tax eligible, MO TI and tax not eligible.
+MO_EIC_FACT_SCENARIOS = [
+    (2024, 15_600.0, 227.0, 1_000.0, 0.0, 965.0, 0.0),
+    (2024, 16_750.0, 139.0, 2_123.0, 17.0, 2_074.0, 16.0),
+    (2025, 16_750.0, 178.0, 1_000.0, 0.0, 965.0, 0.0),
+]
+
+
+@pytest.mark.parametrize(
+    ("year", "wages", "eic", "eligible_ti", "eligible_tax", "ineligible_ti", "ineligible_tax"),
+    MO_EIC_FACT_SCENARIOS,
+    ids=lambda v: str(v),
+)  # fmt: skip
+def test_mo_line_9_follows_the_stated_eic_facts(
+    year, wages, eic, eligible_ti, eligible_tax, ineligible_ti, ineligible_tax
+):
+    """Single, no children: the EIC facts decide what MO line 9 subtracts."""
+    common = {
+        "year": year,
+        "state": "MO",
+        "filing_status": "Single",
+        "w2_income": wages,
+        "backend": "graph",
+    }
+    eligible = evaluate_return(**common, eitc_eligible=True, num_eitc_children=0)
+    ineligible = evaluate_return(**common, eitc_eligible=False)
+
+    assert eligible.federal_earned_income_credit == eic
+    assert ineligible.federal_earned_income_credit == 0
+    for result, taxable_income, tax in (
+        (eligible, eligible_ti, eligible_tax),
+        (ineligible, ineligible_ti, ineligible_tax),
+    ):
+        assert result.state_taxable_income == pytest.approx(
+            taxable_income, abs=CHART_TOLERANCE
+        )
+        assert result.state_total_tax == pytest.approx(tax, abs=CHART_TOLERANCE)
+
+
+@pytest.mark.parametrize(("year", "eic"), [(2024, 649.0), (2025, 864.0)])
+def test_mo_hoh_public_return_reports_the_stated_eic(year, eic):
+    """The HoH line-9 scenario through the public API with explicit facts."""
+    result = evaluate_return(
+        year=year,
+        state="MO",
+        filing_status="Head_of_House",
+        w2_income=45_000.0,
+        num_dependents=1,
+        num_eitc_children=1,
+        eitc_eligible=True,
+        backend="graph",
+    )
+
+    assert result.federal_earned_income_credit == eic
 
 
 # MO-1040 line 13 (federal income tax deduction) across every percentage band.
@@ -240,7 +303,12 @@ def test_mo_federal_tax_deduction_bands(
     )
 
     result = evaluate_return(
-        year=year, state="MO", filing_status="Single", w2_income=wages, backend="graph"
+        year=year,
+        state="MO",
+        filing_status="Single",
+        w2_income=wages,
+        backend="graph",
+        eitc_eligible=False,
     )
     assert result.state_taxable_income == pytest.approx(
         expected_taxable_income, abs=CHART_TOLERANCE
@@ -257,6 +325,7 @@ def _graph_with_children(year, filing_status, wages, children):
     evaluator.set("us_1040_L1a_wages", wages)
     evaluator.set("us_form_8812_L1_num_qualifying_children", float(children))
     evaluator.set("us_schedule_eic_NUM_QC", float(children))
+    evaluator.set("us_schedule_eic_ELIGIBLE", 1.0)
     return evaluator
 
 
