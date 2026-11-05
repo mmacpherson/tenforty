@@ -568,6 +568,57 @@ _OTS_STATES_READING_FEDERAL_SCHEDULE_A = frozenset(
 )
 
 
+# Inputs OTS must not drop silently: a nonzero value is refused for any return
+# whose OTS programs have no mapping for it, rather than computed without it.
+_OTS_REFUSED_WHEN_UNREAD = ("dependent_exemptions",)
+
+
+def ots_reads_input(name: str, year: int, state: OTSState) -> bool:
+    """Whether any OTS program in this year's return maps the natural input.
+
+    The return is the federal 1040, the state's program and the year's
+    subordinate forms; a computed carrier field counts as reading its input.
+    """
+    carrier = OTS_INPUT_CARRIERS.get(name)
+    form_ids = ["US_1040"]
+    if (state_form_id := STATE_TO_FORM.get(state)) is not None:
+        form_ids.append(state_form_id)
+    input_maps = [
+        config.input_map
+        for form_id in form_ids
+        if (config := NATURAL_FORM_CONFIG.get((year, form_id))) is not None
+    ]
+    for sub_cfg in SUBORDINATE_FORM_CONFIG.get(year, []):
+        if name in sub_cfg.activation_naturals:
+            return True
+        input_maps.append(sub_cfg.input_map)
+    return any(name in m or (carrier is not None and carrier in m) for m in input_maps)
+
+
+def _require_ots_reads_inputs(
+    year: int, state: OTSState, natural_form_values: dict[str, Any]
+) -> None:
+    for name in _OTS_REFUSED_WHEN_UNREAD:
+        value = natural_form_values.get(name, 0.0)
+        if not value or ots_reads_input(name, year, state):
+            continue
+        state_form_id = STATE_TO_FORM.get(state)
+        if state_form_id is not None:
+            where = f"{state.value} {year} ({state_form_id})"
+        elif state == OTSState.NONE:
+            where = f"the {year} federal return with no state"
+        else:
+            where = f"{state.value} {year}, which has no state income tax return"
+        raise UnsupportedInputError(
+            f"OTS has no mapping for {name}={value!r} on {where}, so it would "
+            f"compute the return without it. Pass {name}=0 if no state exemption "
+            "amount is intended. If you meant a number of dependents, pass it as "
+            "num_dependents; exemption dollars are not converted to a count. "
+            "Otherwise use backend='graph' for a 2024 or later state and year "
+            f"whose graph maps {name}."
+        )
+
+
 def _schedule_a_inputs(natural_form_values: dict[str, Any]) -> dict[str, object]:
     """Return the nonzero public inputs OTS enters on the federal Schedule A."""
     found: dict[str, object] = {}
@@ -615,14 +666,14 @@ def _require_ots_federal_itemized(
 
 
 def require_ots_supports(
-    state: OTSState, natural_form_values: dict[str, Any], year: int | None = None
+    year: int, state: OTSState, natural_form_values: dict[str, Any]
 ) -> None:
-    """Refuse inputs OTS cannot give this return, before it is evaluated.
+    """Refuse an OTS return OTS would compute wrongly, before it is evaluated.
 
-    A forced standard deduction for a state program that builds its own
-    itemized deduction from the federal Schedule A, and the federal_itemized
-    combinations OTS cannot carry.
+    It would drop an input, misstate the deduction election, or misplace a
+    federal_itemized combination OTS cannot carry exactly.
     """
+    _require_ots_reads_inputs(year, state, natural_form_values)
     _require_ots_federal_itemized(state, natural_form_values, year)
     if state not in _OTS_STATES_READING_FEDERAL_SCHEDULE_A:
         return
@@ -648,7 +699,7 @@ def evaluate_natural_input_form(
     on_error: str = "raise",
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
-    require_ots_supports(state, natural_form_values, year.value)
+    require_ots_supports(year.value, state, natural_form_values)
     federal_form_id = "US_1040"
     federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
     if federal_natural_config is None:
@@ -1073,9 +1124,9 @@ def evaluate_return(
     _check_routed_facts(models, [row])
     if engine == "ots":
         require_ots_supports(
+            input_data.year.value,
             input_data.state,
             input_data.model_dump(exclude={"year", "state"}),
-            input_data.year.value,
         )
     _require_available(engine)
     _attach_facts(input_data, models, row)
@@ -1470,9 +1521,9 @@ def _preflight(
             continue
         for tax_input in tax_inputs:
             require_ots_supports(
+                tax_input.year.value,
                 tax_input.state,
                 tax_input.model_dump(exclude={"year", "state"}),
-                tax_input.year.value,
             )
 
 
