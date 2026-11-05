@@ -28,6 +28,7 @@ pytest.importorskip("pandas")
 
 from .taxcalc_differential_test import taxcalc_batch
 from .taxcalc_policy import (
+    QUANTITIES,
     DeltaRange,
     _f19_deduction_choice_rule,
     evaluate_components,
@@ -336,8 +337,8 @@ def test_f19_equal_output_qbi_case_is_not_a_known_defect_match():
 
     assert result["standard_deduction"] == 0.0
     assert result["itemized_deduction"] == case["itemized"]
-    for quantity, actual in ours.items():
-        assert actual == pytest.approx(result[quantity], abs=0.01), quantity
+    for quantity in QUANTITIES:
+        assert ours[quantity] == pytest.approx(result[quantity], abs=0.01), quantity
     assert _f19_deduction_choice_rule("graph", case, result) == {}
     assert unexcused_violations(case, "graph", result, None) == []
 
