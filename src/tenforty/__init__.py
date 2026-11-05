@@ -11,6 +11,8 @@ from .core import (  # noqa: F401
 from .models import (  # noqa: F401
     Assumption,
     BackendUnavailableError,
+    FederalItemized,
+    LegacyItemizedDeductionsWarning,
     OTSError,
     OTSErrorPolicy,
     OTSParseError,

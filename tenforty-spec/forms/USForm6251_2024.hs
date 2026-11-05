@@ -100,6 +100,19 @@ usForm6251_2024 = form "us_form_6251" 2024 $ do
   -- Line 3: Other adjustments
   l3 <- keyInput "L3" "other_adjustments" "Other adjustments including income-based related items"
 
+  -- Itemized deductions other than taxes that the AMT allows differently:
+  -- the caller's regular-tax amount less its AMT amount (federal_itemized).
+  -- Form 6251 has no single line for them; each refigured deduction has its
+  -- own (investment interest on line 2c, which may be negative when the AMT
+  -- amount is larger; mortgage interest on a dwelling that is not a qualified
+  -- dwelling on line 3). They adjust AMTI only when Schedule A was used: a
+  -- return that took the standard deduction never deducted them.
+  itemizedAmtDifference <-
+    keyInput "ItemizedAmtDifference" "itemized_amt_difference" "Other itemized deductions allowed for the regular tax less those allowed for the AMT"
+  itemizedAmtAdjustment <-
+    interior "ItemizedAmtAdjustment" "itemized_amt_adjustment" $
+      ifPos usesItemized itemizedAmtDifference (dollars 0)
+
   -- Line 4: Alternative minimum taxable income (AMTI). Married filing
   -- separately adds 25% of the amount above the MFS threshold, capped at the
   -- MFS exemption amount.
@@ -127,6 +140,7 @@ usForm6251_2024 = form "us_form_6251" 2024 $ do
         .+. l2s
         .+. l2t
         .+. l3
+        .+. itemizedAmtAdjustment
   mfsIncreaseThreshold <-
     interior "L4_mfs_threshold" "MFS special-increase threshold" $
       byStatusE $

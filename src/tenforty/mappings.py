@@ -34,7 +34,7 @@ NATURAL_TO_NODE = {
     "qbi_ubia": "us_form_8995_A_UBIA",
     "qbi_is_sstb": "us_form_8995_A_SSTB",
     "rental_income": "us_schedule_1_L5_rental_income",
-    # Schedule A (approximation): map aggregate value into "other deductions".
+    # Schedule A line 16: the deprecated aggregate, or federal_itemized.regular_tax.
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
     # Schedule A line 5d, entered on line 5a; line 5e applies the cap.
     "state_and_local_taxes": "us_schedule_a_L5a_state_local_income_or_sales",
@@ -48,6 +48,8 @@ NATURAL_TO_NODE = {
     "vehicle_loan_interest": "us_schedule_1a_L23_qualified_car_loan_interest",
     # AMT (Form 6251)
     "incentive_stock_option_gains": "us_form_6251_L2k_iso_adjustment",
+    # federal_itemized.regular_tax - amt, applied to AMTI only when itemizing.
+    "itemized_amt_difference": "us_form_6251_ItemizedAmtDifference",
 }
 
 _SUBORDINATE_NODES: dict[str, list[str]] = {

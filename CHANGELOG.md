@@ -40,6 +40,24 @@
     `UnsupportedInputError` before evaluation, under every `on_error` and for
     the whole batch. Pass `eitc_eligible=False` for a filer who cannot claim
     the credit.
+- **`federal_itemized`: itemized deductions with an explicit AMT amount
+  (tenforty-nuc6).** `evaluate_return`, `evaluate_returns`, `marginal_rate(s)`
+  and `solve_for_income` take
+  `federal_itemized=tenforty.FederalItemized(regular_tax=..., amt=...)`. Both
+  amounts are prepared, net of every federal limit, and exclude the taxes
+  `state_and_local_taxes` carries. `regular_tax - amt` enters AMTI only when
+  the return itemizes. Both are required: there is no assumed AMT treatment.
+  Both backends honour it, which resolves ledger entry F12 for this input; the
+  two engines' other known differences remain. Blind derivations from IRS
+  sources witness every OTS year (2018–2025) and both graph years. See
+  [Itemized deductions](docs/itemized-deductions.md).
+  - **Batch frames** gain `federal_itemized_regular_tax` and
+    `federal_itemized_amt` input echo columns at the parameter's signature
+    position. They are null when the model is not supplied.
+  - **OTS limits.** OTS refuses, before evaluation:
+    - `amt` above `regular_tax`;
+    - any nonzero model for Arizona, California and New York, whose OTS
+      programs read the federal Schedule A by line.
 - **`state_facts`: explicit state-specific facts, and reported assumptions.**
   `evaluate_return`, `evaluate_returns`, `marginal_rate(s)` and
   `solve_for_income` take `state_facts=`, typed per-state models from
@@ -81,6 +99,21 @@
   `evaluate_returns` and `get_backend` share one selector; a mixed-year batch
   is split by year and keeps its row order.
 
+### Deprecated
+- **`itemized_deductions`.** A nonzero value emits
+  `LegacyItemizedDeductionsWarning` (a `DeprecationWarning`), once per call.
+  - **Numbers.** Each backend keeps its shipped numbers (OTS adds the amount
+    back for the AMT; graph allows it). Mike approved this as a compatibility
+    exception, not an AMT default.
+  - **Reporting.** Every return whose Form 1040 itemizes reports the
+    convention in `assumptions` as `federal.itemized_deductions.legacy_amt`.
+  - **Conflicts.** Combining it with `federal_itemized` raises `ValueError`.
+  - **Derivatives.** It cannot be a derivative or solve axis of a call that
+    passes `federal_itemized`.
+  - **Removal.** It goes in the first release after the North Carolina,
+    Maryland and Maine itemized slices and the OTS Arizona/California/New York
+    follow-ups. Each backend's old number can be reproduced with the labelled
+    recipes in the docs.
 ### Changed (both backends)
 - **`standard_or_itemized` gains `"Auto"`, now the default, and `"Standard"`
   forces the standard deduction.** `"Auto"` takes the larger of the standard
