@@ -41,6 +41,7 @@ gives `()`.
 
 | Model | Field | Applies to | Graph | OTS |
 |---|---|---|---|---|
+| `MS` | `spouse_adjusted_gross_income` | Married/Joint, 2024–2025 | **Required**; finite signed dollars, including explicit zero | No MS program |
 | `OH` | `spouses_both_have_qualifying_income` | Married/Joint, 2024–2025 | **Required**; both boolean values compute; the spec applies the percentage, cap and 2025 MAGI limit | Not taken |
 
 `spouses_both_have_qualifying_income` is true when each spouse separately has
@@ -50,6 +51,29 @@ capital gains, and rents and royalties (R.C. 5747.05(E); IT 1040 Schedule of
 Credits line 12). Wages count. Amounts deducted on the Ohio Schedule of
 Adjustments, such as business income under the business income deduction or
 Social Security, are not in Ohio AGI and do not count.
+
+`MS(spouse_adjusted_gross_income=...)` supplies the spouse's **Column B
+Mississippi AGI, Form 80-105 line 13**, before deductions and exemptions, on
+a full-year joint/combined return. It is not federal AGI, wages, taxable
+income, or a ratio. The taxpayer's column is household MS AGI minus the fact;
+the graph then rounds each column's entry independently. Explicit `0` states
+that the spouse has zero MS AGI; `None` is missing and raises
+`UnsupportedInputError` for both graph and auto MS MFJ. There is no inferred
+split, default, or assumption record. Mississippi stays in auto scope.
+
+The MS instructions (2024 and 2025 pp. 5/7) permit allocating deductions and
+exemptions between spouses and direct choosing the least tax. The graph
+computes that minimum exactly. For rounded column AGIs `a,b` and the total
+deduction plus exemption `K`, the taxed balance is
+`max(0, a+b-K-min(10000,max(0,a))-min(10000,max(0,b)))`. Allowances remove the
+income above each available zero-rate band first; the source derivation
+proves that bound is attainable, including the negative-column combination
+rule. There is no numerical optimizer. A suboptimal taxpayer-chosen
+allocation is not reproduced through the natural API; prepared-form callers
+can use raw `UsePreparedAllocation`, `PreparedSpouseDeduction`, and
+`PreparedSpouseExemption` controls instead. The source arithmetic and proof
+are archived in
+[the MS derivation](validation/derivations/ms-2024-2025-exemptions-rounding.md).
 
 ## Rules
 

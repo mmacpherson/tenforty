@@ -11,95 +11,59 @@ import TenForty
 
 ms80105_2024 :: Either FormError Form
 ms80105_2024 = form "ms_80105" 2024 $ do
-  -- Line 13: Mississippi Adjusted Gross Income
-  -- Starts with Federal AGI and applies Mississippi modifications
+  -- Form 80-100 pp. 5-7: separate MS AGI columns before rounding entries.
+  -- The natural MFJ lowering requires the actual Column B line 13 fact.
   let federalAgi = importForm us1040L11
-  l13 <-
-    keyOutput "L13" "ms_agi" "Mississippi adjusted gross income" $
-      federalAgi .+. dollars 0
+      jointOnly value = byStatusE (byStatus (dollars 0) value (dollars 0) (dollars 0) (dollars 0))
+  spouseAgi <- keyInput "SpouseAGI" "spouse_adjusted_gross_income" "Spouse Column B MS AGI before deductions and exemptions"
+  taxpayerAgi <- interior "L13A" "taxpayer_ms_agi" (roundE (federalAgi .-. jointOnly spouseAgi))
+  spouseColumnAgi <- interior "L13B" "spouse_ms_agi" (jointOnly (roundE spouseAgi))
+  l13 <- keyOutput "L13" "ms_agi" "Mississippi adjusted gross income" (taxpayerAgi .+. spouseColumnAgi)
 
-  -- Line 11: Filing Status Exemption
-  -- Personal exemption based on filing status (auto-computed from tables)
-  l11 <-
-    interior "L11" "filing_status_exemption" $
-      byStatusE (fmap lit msExemption2024)
+  dependents <- keyInput "Dependents" "dependents" "Total federally claimed dependents"
+  filer65 <- keyInput "Filer65" "filer_65_or_older" "Filer age-65 exemption box"
+  spouse65 <- keyInput "Spouse65" "spouse_65_or_older" "Spouse age-65 exemption box (married statuses)"
+  l10 <- keyInput "L10" "additional_exemptions" "Prepared total additional exemptions, including any blindness boxes"
+  let spouseAgeCount = byStatusE (byStatus (dollars 0) (ifPos spouse65 (dollars 1) (dollars 0)) (ifPos spouse65 (dollars 1) (dollars 0)) (dollars 0) (dollars 0))
+      additionalCount = sumOf [max0 (roundE dependents), ifPos filer65 (dollars 1) (dollars 0), spouseAgeCount]
+      computedAdditional = lit msAdditionalExemption2024 .*. (additionalCount ./. dollars 1)
+  additionalExemptions <- interior "L10Effective" "additional_exemption_amount" (greaterOf computedAdditional (roundE l10))
+  l11 <- interior "L11" "filing_status_exemption" (byStatusE (fmap lit msExemption2024))
+  l12 <- interior "L12" "total_exemptions" (l11 .+. additionalExemptions)
+  l15 <- interior "L15" "exemption_allowance" (l12 .*. byStatusE (fmap rate (byStatus 1 1 0.5 1 1)))
 
-  -- Line 10: Total Additional Exemptions
-  -- \$1,500 per dependent, age 65+, or blind person
-  -- For simple scenarios with no additional exemptions, defaults to $0
-  l10 <-
-    keyInput "L10" "additional_exemptions" "Total additional exemptions (Line 9 × $1,500)"
+  l14a <- keyInput "L14a" "itemized_deductions" "Prepared Mississippi itemized deductions"
+  standardDeduction <- interior "L14b_std" "standard_deduction" (byStatusE (fmap lit msStandardDeduction2024))
+  deductions <- interior "L14b" "deductions" (greaterOf (roundE l14a) standardDeduction)
+  allowances <- interior "Allowances" "exemptions_and_deductions" (l15 .+. deductions)
+  l16 <- keyOutput "L16" "ms_taxable_income" "Aggregate Mississippi taxable income (not below zero)" (l13 `subtractNotBelowZero` allowances)
 
-  -- Line 12: Total Exemptions
-  l12 <-
-    interior "L12" "total_exemptions" $
-      l10 .+. l11
+  -- Exact minimum over the allocations permitted on pp. 5/7: preserve each
+  -- original AGI column's available zero-rate capacity, spending allowances
+  -- on the excess first. The archive proves this also handles signed AGIs.
+  let threshold = lit msTaxThreshold2024
+      zeroRateCapacity = minE threshold (max0 taxpayerAgi) .+. minE threshold (max0 spouseColumnAgi)
+      minimumBalance = l16 `subtractNotBelowZero` zeroRateCapacity
 
-  -- Line 14a: Itemized Deductions (if taxpayer itemizes)
-  l14a <- keyInput "L14a" "itemized_deductions" "Mississippi itemized deductions"
+  usePrepared <- keyInput "UsePreparedAllocation" "use_prepared_allocation" "Use raw prepared spouse deduction/exemption allocation instead of the lawful minimum"
+  spouseDeduction <- keyInput "PreparedSpouseDeduction" "prepared_spouse_deduction" "Column B deduction from a prepared joint return"
+  spouseExemption <- keyInput "PreparedSpouseExemption" "prepared_spouse_exemption" "Column B exemption from a prepared joint return"
+  let preparedTaxpayer = taxpayerAgi .-. (deductions .-. roundE spouseDeduction) .-. (l15 .-. roundE spouseExemption)
+      preparedSpouse = spouseColumnAgi .-. roundE spouseDeduction .-. roundE spouseExemption
+      combinedBalance = (preparedTaxpayer .+. preparedSpouse) `subtractNotBelowZero` threshold
+      separateBalance = (preparedTaxpayer `subtractNotBelowZero` threshold) .+. (preparedSpouse `subtractNotBelowZero` threshold)
+      preparedBalance = ifPos preparedTaxpayer (ifPos preparedSpouse separateBalance combinedBalance) combinedBalance
+      preparedChoice = ifPos usePrepared preparedBalance minimumBalance
+      chosenBalance = byStatusE (byStatus minimumBalance preparedChoice minimumBalance minimumBalance minimumBalance)
+  taxedBalance <- interior "TaxedBalance" "taxed_balance" chosenBalance
+  l17 <- keyOutput "L17" "ms_computed_tax" "Computed whole-dollar tax" (roundE (taxedBalance .*. rate msTaxRate2024))
+  l18 <- keyOutput "L18" "ms_tax" "Computed tax before credits" l17
 
-  -- Line 14b: Standard or Itemized Deduction
-  -- Use greater of standard deduction (from tables) or itemized deductions
-  l14b_std <-
-    interior "L14b_std" "standard_deduction" $
-      byStatusE (fmap lit msStandardDeduction2024)
-  l14b <-
-    interior "L14b" "deductions" $
-      greaterOf l14a l14b_std
-
-  -- Line 15: Total Exemptions and Deductions
-  l15 <-
-    interior "L15" "total_exemptions_and_deductions" $
-      l12 .+. l14b
-
-  -- Line 16: Mississippi Taxable Income
-  l16 <-
-    keyOutput "L16" "ms_taxable_income" "Mississippi taxable income" $
-      l13 `subtractNotBelowZero` l15
-
-  -- Line 17: Computed Tax
-  -- Tax = max(0, (taxable_income - threshold) × rate)
-  -- 0% on first $10,000, then 4.7% on excess
-  l17 <-
-    keyOutput "L17" "ms_computed_tax" "Computed tax" $
-      (l16 `subtractNotBelowZero` lit msTaxThreshold2024) .*. rate msTaxRate2024
-
-  -- Line 18: Tax from tables or computed tax
-  -- We use computed tax since we're implementing the formula
-  l18 <-
-    keyOutput "L18" "ms_tax" "Tax from tables or line 17" $
-      l17 .+. dollars 0
-
-  -- Line 19: Interest and Penalty
   l19 <- keyInput "L19" "interest_penalty" "Interest and penalty"
-
-  -- Line 20: Credits
   l20 <- keyInput "L20" "credits" "Credits from Schedule C"
-
-  -- Line 21: Tax after credits
-  l21 <-
-    keyOutput "L21" "tax_after_credits" "Tax after credits" $
-      (l18 .+. l19) `subtractNotBelowZero` l20
-
-  -- Line 22: Total payments (withholding, estimated payments, etc.)
+  l21 <- keyOutput "L21" "tax_after_credits" "Tax after credits" ((l18 .+. roundE l19) `subtractNotBelowZero` roundE l20)
   l22 <- keyInput "L22" "total_payments" "Total payments"
+  _ <- keyOutput "L23a" "refund" "Amount to be refunded" (roundE l22 `excessOf` l21)
+  _ <- keyOutput "L25" "amount_due" "Amount due" (l21 `subtractNotBelowZero` roundE l22)
 
-  -- Line 23a: Refund
-  _refund <-
-    keyOutput "L23a" "refund" "Amount to be refunded" $
-      l22 `excessOf` l21
-
-  -- Line 25: Amount due
-  _amountDue <-
-    keyOutput "L25" "amount_due" "Amount due" $
-      l21 `subtractNotBelowZero` l22
-
-  outputs
-    [ "L13",
-      "L16",
-      "L17",
-      "L18",
-      "L21",
-      "L23a",
-      "L25"
-    ]
+  outputs ["L13", "L16", "L17", "L18", "L21", "L23a", "L25"]

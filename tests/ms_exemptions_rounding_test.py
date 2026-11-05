@@ -6,14 +6,18 @@ Astra's release derivation is archived verbatim alongside the supplement.
 No expected amount here comes from a tax engine.
 """
 
+import json
 import math
+from functools import lru_cache
 
 import pytest
 from pydantic import ValidationError
 
 from tenforty import evaluate_return, evaluate_returns, state_facts
+from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graph_scope import IN_SCOPE
-from tenforty.models import UnsupportedInputError
+from tenforty.graphlib import FilingStatus, Graph, Runtime
+from tenforty.models import OTSState, UnsupportedInputError
 
 pytestmark = pytest.mark.requires_graph
 
@@ -436,7 +440,7 @@ def test_missing_joint_fact_is_refused_before_computing(backend, year, wages, on
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_ms_stays_in_auto_scope_and_discovery_describes_required_fact(year):
     """Discovery exposes the supplied numeric fact without removing MS from auto."""
-    assert ("MS", year) in IN_SCOPE
+    assert (OTSState.MS, year) in IN_SCOPE
     (descriptor,) = state_facts.available("MS", year)
     assert descriptor.name == "spouse_adjusted_gross_income"
     assert descriptor.statuses == ("Married/Joint",)
@@ -472,3 +476,82 @@ def test_fact_projects_to_joint_rows_in_batches(mode, year, taxes):
     assert frame["state_taxable_income"].to_list() == [41_700, 33_400]
     assert frame["state_total_tax"].to_list() == taxes
     assert frame["assumptions"].to_list() == [[], []]
+
+
+@lru_cache
+def _component_graph(year):
+    data = json.loads(_load_resolved_graph(year).to_json())
+    for node in data["nodes"].values():
+        if node.get("name") == "us_1040_L11_agi":
+            node["op"] = {"type": "input"}
+            data["inputs"].append(node["id"])
+    return Graph.from_json(json.dumps(data))
+
+
+def _component_runtime(year, status, agi, spouse=0):
+    statuses = {
+        "S": "single",
+        "H": "head_of_household",
+        "MFS": "married_separate",
+        "J": "married_joint",
+    }
+    runtime = Runtime(_component_graph(year), FilingStatus.from_str(statuses[status]))
+    runtime.set("us_1040_L11_agi", agi)
+    runtime.set("ms_80105_SpouseAGI", spouse)
+    return runtime
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("case", SOURCE_CASES, ids=lambda c: c[0])
+def test_archived_taxed_balance_before_the_rate(case, year):
+    """Pin the allocation/band arithmetic separately from tax rounding."""
+    (
+        _,
+        status,
+        agi,
+        spouse,
+        dependents,
+        filer65,
+        spouse65,
+        _rounded_agi,
+        _taxable,
+        balance,
+        _tax24,
+        _tax25,
+    ) = case
+    runtime = _component_runtime(year, status, agi, spouse or 0)
+    runtime.set("ms_80105_Dependents", dependents)
+    runtime.set("ms_80105_Filer65", float(filer65))
+    runtime.set("ms_80105_Spouse65", float(spouse65))
+    assert runtime.eval("ms_80105_TaxedBalance") == balance
+
+
+@pytest.mark.parametrize("year,tax", [(2024, 705), (2025, 660)])
+def test_raw_prepared_allocation_can_preserve_a_suboptimal_choice(year, tax):
+    """Non-blind source arithmetic in the archive's prepared-allocation note."""
+    runtime = _component_runtime(year, "J", 50_000, 25_000)
+    runtime.set("ms_80105_UsePreparedAllocation", 1)
+    runtime.set("ms_80105_PreparedSpouseDeduction", 0)
+    runtime.set("ms_80105_PreparedSpouseExemption", 0)
+    assert runtime.eval("ms_80105_TaxedBalance") == 15_000
+    assert runtime.eval("ms_80105_L21_tax_after_credits") == tax
+
+
+@pytest.mark.parametrize("year,tax", [(2024, 1100), (2025, 1030)])
+@pytest.mark.parametrize("spouse", [-5000, 50001])
+def test_prepared_negative_column_combines_before_the_zero_rate_band(year, tax, spouse):
+    """Archived J-spouse-loss / J-filer-loss, with all allowances in A."""
+    runtime = _component_runtime(year, "J", 50_000, spouse)
+    runtime.set("ms_80105_UsePreparedAllocation", 1)
+    assert runtime.eval("ms_80105_TaxedBalance") == 23_400
+    assert runtime.eval("ms_80105_L21_tax_after_credits") == tax
+
+
+@pytest.mark.parametrize("year,tax", [(2024, 630), (2025, 590)])
+def test_prepared_equal_columns_use_one_rounded_combined_tax(year, tax):
+    """Archived J-equal has two 6,700 balances, taxed together once."""
+    runtime = _component_runtime(year, "J", 50_000, 25_000)
+    runtime.set("ms_80105_UsePreparedAllocation", 1)
+    runtime.set("ms_80105_PreparedSpouseDeduction", 2300)
+    runtime.set("ms_80105_PreparedSpouseExemption", 6000)
+    assert runtime.eval("ms_80105_L21_tax_after_credits") == tax

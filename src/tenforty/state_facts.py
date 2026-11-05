@@ -24,7 +24,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, replace
 from typing import ClassVar, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, TypeAdapter
 
 from .models import (
     Assumption,
@@ -37,6 +37,7 @@ from .models import (
 
 __all__ = [
     "DEFAULT_INVENTORY",
+    "MS",
     "OH",
     "Assumption",
     "Convention",
@@ -98,7 +99,35 @@ class OH(StateFacts):
     )
 
 
-MODELS: dict[str, type[StateFacts]] = {"OH": OH}
+MS_SPOUSE_AGI = (
+    "The spouse's Column B Mississippi adjusted gross income, Form 80-105 "
+    "line 13, before deductions and exemptions, on a full-year married joint "
+    "or combined return. Finite signed dollars; explicit 0 is supplied, None "
+    "is missing. The taxpayer's Column A MS AGI is the household MS AGI minus "
+    "this amount. This is not federal AGI, wages, taxable income or a ratio. "
+    "No split is inferred. The computation chooses the minimum lawful tax "
+    "across the deduction/exemption allocations permitted on pp. 5/7 of the "
+    "2024 and 2025 instructions; a suboptimal prepared allocation needs raw "
+    "graph controls. There is no default or assumption."
+)
+MS_SPOUSE_AGI_SOURCE = (
+    "Mississippi Form 80-100 instructions, 2024 and 2025 pp. 5-7, "
+    "Form 80-105 line 13; "
+    "docs/validation/derivations/ms-2024-2025-exemptions-rounding.md"
+)
+
+
+class MS(StateFacts):
+    """Facts for the Mississippi full-year resident Form 80-105."""
+
+    state: ClassVar[str] = "MS"
+
+    spouse_adjusted_gross_income: FiniteFloat | None = Field(
+        default=None, description=MS_SPOUSE_AGI
+    )
+
+
+MODELS: dict[str, type[StateFacts]] = {"MS": MS, "OH": OH}
 
 
 @dataclass(frozen=True)
@@ -146,6 +175,19 @@ class FactDescriptor:
 
 
 _DESCRIPTORS: tuple[FactDescriptor, ...] = (
+    FactDescriptor(
+        state="MS",
+        name="spouse_adjusted_gross_income",
+        value_type="number",
+        constraints=(("finite", True),),
+        statuses=("Married/Joint",),
+        years=(2024, 2025),
+        convention=None,
+        honoured_by=("graph",),
+        required_by=("graph",),
+        description=MS_SPOUSE_AGI,
+        source=MS_SPOUSE_AGI_SOURCE,
+    ),
     FactDescriptor(
         state="OH",
         name="spouses_both_have_qualifying_income",
@@ -325,6 +367,13 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "baseline",
         None,
         "Nobody can claim the filer as a dependent; that regime is not modelled.",
+    ),
+    DefaultDecision(
+        "state_facts.MS.spouse_adjusted_gross_income",
+        "required",
+        None,
+        "Mike, 2026-11-05: MS MFJ needs the actual spouse MS AGI; no inferred "
+        "split or assumption. Graph and auto refuse it when absent.",
     ),
     DefaultDecision(
         "state_facts.OH.spouses_both_have_qualifying_income",

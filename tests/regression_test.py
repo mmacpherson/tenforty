@@ -10,7 +10,7 @@ Also includes range-based sanity checks and monotonicity tests.
 import pytest
 
 from tenforty import evaluate_return
-from tenforty.state_facts import OH
+from tenforty.state_facts import MS, OH
 
 from .fixtures.scenarios import (
     REGRESSION_SCENARIOS,
@@ -1747,6 +1747,7 @@ MS_SCENARIOS = [
         "year": 2024,
         "state": "MS",
         "filing_status": "Married/Joint",
+        "state_facts": MS(spouse_adjusted_gross_income=0),
         "w2_income": 100000,
         "expected_federal_min": 7900,
         "expected_federal_max": 8200,

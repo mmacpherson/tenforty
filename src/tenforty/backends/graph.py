@@ -79,6 +79,13 @@ def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
     return values
 
 
+def _mississippi_spouse_agi_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Preserve the supplied Column B MS AGI; the spec rounds each column."""
+    return {"ms_80105_SpouseAGI": float(value)}
+
+
 _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
     s
     for s, form_id in STATE_TO_FORM.items()
@@ -263,6 +270,7 @@ FactLowering = Callable[[TaxReturnInput, object], dict[str, float]]
 
 
 FACT_LOWERINGS: dict[tuple[str, str], FactLowering] = {
+    ("MS", "spouse_adjusted_gross_income"): _mississippi_spouse_agi_values,
     ("OH", "spouses_both_have_qualifying_income"): _ohio_natural_joint_credit_values,
 }
 """How each state fact reaches the graph, keyed by (state, field name).

@@ -3571,21 +3571,18 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # MFJ $12,000, HoH $8,000. Standard deduction: Single $2,300, MFJ $4,600,
     # HoH $3,400. MS taxable income = MS AGI - exemptions - deduction.
     #
-    # Precision: Line 17 is rounded half-up to whole dollars on the return
-    # (I24 p.21 / I25 p.22). These fixtures carry the deriver's unrounded product,
-    # matching the silver convention of formula-exact cents (see tenforty-xew).
+    # Line 17 uses the archived whole-dollar tax, including mandatory rounding
+    # (I24 p.21 / I25 p.22). The original unrounded arithmetic remains below.
     #
     # HoH rows are the literal "Head of Family box, zero dependents" reading
     # (Line 11 = $8,000, Line 10 = $0). A legal HoH return needs a dependent
-    # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4), but the graph
-    # backend does not lower num_dependents (the federal dependent count) to MS,
-    # and MS maps no dependent-exemption input (tenforty-avr.1), so that variant
-    # is not expressible here.
+    # ($8,000 + $1,500 = $9,500; I24 p.5-6 / I25 p.6, Line 4). These zero-count
+    # rows remain literal component checks; legal dependent returns are pinned
+    # in ms_exemptions_rounding_test.py from the archived source derivation.
     #
     # MFJ: the Schedule of Tax Computation applies the $10,000 zero band per
-    # spouse column; the API carries no spouse split, and the graph applies one
-    # band to joint taxable income. Only MFJ rows where no split can matter
-    # (taxable income under $10,000) come from the deriver.
+    # spouse column. These MFJ rows explicitly stipulate a zero spouse MS AGI
+    # through the required fact, matching their archived one-column premise.
     #
     # MS 2024 Single, $20,000 W2, no dependents
     # Source: MS DOR Form 80-100-24-1-1-000 instructions,
@@ -3601,7 +3598,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Single",
         w2_income=20000.0,
-        expected_state_tax=79.90,
+        expected_state_tax=80.0,
         backend="graph",
     ),
     # MS 2024 Single, $50,000 W2, no dependents
@@ -3618,7 +3615,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Single",
         w2_income=50000.0,
-        expected_state_tax=1489.90,
+        expected_state_tax=1490.0,
         backend="graph",
     ),
     # MS 2024 Single, $150,000 W2, no dependents
@@ -3635,7 +3632,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Single",
         w2_income=150000.0,
-        expected_state_tax=6189.90,
+        expected_state_tax=6190.0,
         backend="graph",
     ),
     # MS 2024 MFJ, $20,000 W2, no dependents
@@ -3651,6 +3648,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2024,
         state="MS",
         filing_status="Married/Joint",
+        state_facts={"spouse_adjusted_gross_income": 0},
         w2_income=20000.0,
         expected_state_tax=0.00,
         backend="graph",
@@ -3686,7 +3684,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Head_of_House",
         w2_income=50000.0,
-        expected_state_tax=1344.20,
+        expected_state_tax=1344.0,
         backend="graph",
     ),
     # MS 2024 HoH, $150,000 W2, no dependents
@@ -3703,7 +3701,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Head_of_House",
         w2_income=150000.0,
-        expected_state_tax=6044.20,
+        expected_state_tax=6044.0,
         backend="graph",
     ),
     # MS 2025 Single, $20,000 W2, no dependents
@@ -3720,7 +3718,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Single",
         w2_income=20000.0,
-        expected_state_tax=74.80,
+        expected_state_tax=75.0,
         backend="graph",
     ),
     # MS 2025 Single, $50,000 W2, no dependents
@@ -3737,7 +3735,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Single",
         w2_income=50000.0,
-        expected_state_tax=1394.80,
+        expected_state_tax=1395.0,
         backend="graph",
     ),
     # MS 2025 Single, $150,000 W2, no dependents
@@ -3754,7 +3752,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Single",
         w2_income=150000.0,
-        expected_state_tax=5794.80,
+        expected_state_tax=5795.0,
         backend="graph",
     ),
     # MS 2025 MFJ, $20,000 W2, no dependents
@@ -3770,6 +3768,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2025,
         state="MS",
         filing_status="Married/Joint",
+        state_facts={"spouse_adjusted_gross_income": 0},
         w2_income=20000.0,
         expected_state_tax=0.00,
         backend="graph",
@@ -3805,7 +3804,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Head_of_House",
         w2_income=50000.0,
-        expected_state_tax=1258.40,
+        expected_state_tax=1258.0,
         backend="graph",
     ),
     # MS 2025 HoH, $150,000 W2, no dependents
@@ -3822,7 +3821,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         state="MS",
         filing_status="Head_of_House",
         w2_income=150000.0,
-        expected_state_tax=5658.40,
+        expected_state_tax=5658.0,
         backend="graph",
     ),
     # Scenarios below are formula-derived in-repo (not from the blind deriver).
@@ -3840,9 +3839,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2024,
         state="MS",
         filing_status="Married/Joint",
+        state_facts={"spouse_adjusted_gross_income": 0},
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=3449.80,
+        expected_state_tax=3450.0,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -3861,7 +3861,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=60000.0,
         expected_federal_tax=5075.0,  # Tax Table row 44,250-44,300
-        expected_state_tax=1834.80,
+        expected_state_tax=1835.0,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -3878,9 +3878,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         year=2025,
         state="MS",
         filing_status="Married/Joint",
+        state_facts={"spouse_adjusted_gross_income": 0},
         w2_income=120000.0,
         expected_federal_tax=10146.0,  # Tax Table row 88,500-88,550
-        expected_state_tax=4109.60,
+        expected_state_tax=4110.0,
         expected_federal_agi=120000.0,
         backend="graph",
     ),

@@ -581,13 +581,15 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.MS: StateGraphConfig(
-        # MS Form 80-105 imports federal AGI. Mississippi uses a two-bracket system:
-        # 0% on first $10,000 of taxable income, then a flat rate above that
-        # (4.7% for 2024, 4.4% for 2025). Personal exemptions and additional
-        # exemptions (dependents, age 65+, blind) are accepted as total inputs
-        # (num_dependents cannot map to dollar amounts due to natural_to_node
-        # limitation). Standard or itemized deductions are also accepted as total input.
-        natural_to_node={},
+        # Total dependents and each age-65 box feed the $1,500 additional
+        # exemptions; MFS takes half of the joint exemption amount. CTC
+        # eligibility does not limit MS dependents. MFJ spouse MS AGI is a
+        # required state fact; the spec minimizes over lawful allocations.
+        natural_to_node={
+            "num_dependents": "ms_80105_Dependents",
+            "filer_65_or_older": "ms_80105_Filer65",
+            "spouse_65_or_older": "ms_80105_Spouse65",
+        },
         outputs={
             "state_adjusted_gross_income": "L13_ms_agi",
             "state_taxable_income": "L16_ms_taxable_income",

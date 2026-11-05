@@ -78,3 +78,29 @@ Tax schedule: 2024 p.26 / 2025 p.27 first10000 in each applicable column is taxe
 For `J-columns-round-up`, the supplied spouse AGI is25000.50 (rounds25001); taxpayer25000.00 stays25000. For `J-columns-round-down`, supplied spouse25000.49 and taxpayer25000.49 each round25000. The household input is preserved as shown.
 
 The Single band begins after wages18300 (=2300+6000+10000); the zero-tax rounding region extends a few dollars farther and differs by year. The equal-earner joint band ends at household36600 (=4600+12000+2×10000), conditional on both columns having sufficient income. The 2024 positive half-tax case is500×.047=23.50→24; the 2025 case125×.044=5.50→6. Additional exemptions are additive: dependent plus age or two dependents each adds3000 before any MFS half division. No arithmetic is calibrated to implementation results.
+
+## 2026-11-05 mapping note after implementation inspection
+
+Evidence label: **non-blind source analysis**, approved in SOL-32. The existing
+specification equated federal qualifying surviving spouse with Mississippi's
+spouse-died-in-current-year category. Those are different years/statuses. The
+MS instructions pp. 5/6 put a qualifying widowed household in Head of Family:
+8,000 base exemption, 3,400 deduction, plus 1,500 per dependent. The archived
+`H-dependent` case therefore also pins federal QW mapped to MS Head of Family:
+50,000 - 3,400 - 8,000 - 1,500 = 37,100; balance 27,100; 2024 tax
+27,100 × .047 = 1,273.70 → 1,274; 2025 tax 27,100 × .044 = 1,192.40 → 1,192.
+The numeric Head of Family derivation predates the MS spec inspection; the
+mapping rationale does not. Death-year returns remain federal MFJ and keep
+the married allowances and explicit spouse-AGI requirement.
+
+
+## 2026-11-05 prepared-allocation check after implementation inspection
+
+Evidence label: **non-blind source arithmetic from the archived rules**.
+At equal 25,000/25,000 AGIs, allocating all 4,600 deduction and 12,000
+exemption to Column A gives signed line16 entries 8,400 and 25,000. Their
+remaining balances are 0 and 15,000. The chosen, suboptimal prepared return
+therefore has 2024 tax 15,000 × .047 = 705 and 2025 tax 15,000 × .044 = 660.
+This contrasts with the already-blind equal-allocation/minimum case 630/590.
+These extra arithmetic values were written before running the new prepared
+allocation test, but after implementation inspection; they are not blind.
