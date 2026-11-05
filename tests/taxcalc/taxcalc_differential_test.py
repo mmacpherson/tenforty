@@ -43,13 +43,13 @@ pd = pytest.importorskip("pandas")
 from hypothesis import HealthCheck, example, given, settings, target  # noqa: E402
 from hypothesis import strategies as st  # noqa: E402
 
-import tenforty  # noqa: E402
-
 from .taxcalc_policy import (  # noqa: E402
     ZERO_DELTA,
+    election_violations,
+    evaluate_components,
     modeled_deltas,
     taxcalc_obbba_fields,
-    tenforty_obbba_inputs,
+    taxcalc_schedule_a_fields,
     tolerance,
 )
 
@@ -99,7 +99,7 @@ def _case_strategy():
             "ord_div": small_dollars,
             "qual_frac": st.sampled_from((0.0, 0.5, 1.0)),
             "itemized": small_dollars,
-            "std_or_item": st.sampled_from(("Standard", "Itemized")),
+            "std_or_item": st.sampled_from(("Auto", "Standard", "Itemized")),
             "iso": st.one_of(
                 st.just(0.0),
                 st.sampled_from((50_000.0, 200_000.0)),
@@ -181,7 +181,7 @@ def _anchor(**kw):
         "qual_div": 0.0,
         "itemized": 0.0,
         "iso": 0.0,
-        "std_or_item": "Standard",
+        "std_or_item": "Auto",
     }
     base.update(kw)
     return base
@@ -208,6 +208,23 @@ ANCHOR_CAPITAL_LOSS = _anchor(
     interest=100_000.0,
     stcg=-50_000.0,
     ltcg=10_000.0,
+)
+# tenforty-q3r / tenforty-ifa0: forced Standard with a larger Schedule A and an
+# ISO spread, where 'Standard' used to itemize.
+ANCHOR_FORCED_STANDARD_LTCG = _anchor(
+    status="Head_of_House",
+    ltcg=38_628.0,
+    iso=7_206.0,
+    itemized=38_628.0,
+)
+ANCHOR_FORCED_STANDARD_DIVIDENDS = _anchor(
+    status="Head_of_House",
+    interest=574.0,
+    ord_div=47_644.0,
+    qual_div=47_644.0,
+    stcg=-28_006.0,
+    iso=6_558.0,
+    itemized=60_000.0,
 )
 
 
@@ -241,10 +258,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
                     "e00650": c["qual_div"],
                     "p22250": c["stcg"],
                     "p23250": c["ltcg"],
-                    # Carry the uncategorized aggregate through an uncapped
-                    # itemized field. Cash charity (e19800) would impose a
-                    # 60%-of-AGI ceiling that tenforty's aggregate does not have.
-                    "e19200": c["itemized"],
+                    "e19200": taxcalc_schedule_a_fields(c)["e19200"],
                     # AMT preference income (ISO exercise spread). Without this
                     # taxcalc is handed no preference at all and reports zero
                     # AMT, so every AMT case would compare tenforty with the
@@ -290,35 +304,7 @@ def taxcalc_batch(cases, wage_attribution="primary"):
 
 def tenforty_components(case, backend):
     """Evaluate one case on a tenforty backend, returning compared quantities."""
-    r = tenforty.evaluate_return(
-        year=case["year"],
-        filing_status=case["status"],
-        backend=backend,
-        w2_income=case["w2"],
-        self_employment_income=case["se"],
-        qbi_w2_wages=case.get("qbi_w2_wages", 0.0),
-        qbi_ubia=case.get("qbi_ubia", 0.0),
-        qbi_is_sstb=case.get("qbi_is_sstb", False),
-        short_term_capital_gains=case["stcg"],
-        long_term_capital_gains=case["ltcg"],
-        taxable_interest=case["interest"],
-        ordinary_dividends=case["ord_div"],
-        qualified_dividends=case["qual_div"],
-        itemized_deductions=case["itemized"],
-        incentive_stock_option_gains=case.get("iso", 0.0),
-        standard_or_itemized=case["std_or_item"],
-        **tenforty_obbba_inputs(case),
-    )
-    return {
-        "agi": r.federal_adjusted_gross_income,
-        "taxable_income": r.federal_taxable_income,
-        "se_tax": r.federal_se_tax,
-        "niit": r.federal_niit,
-        "addl_medicare": r.federal_additional_medicare_tax,
-        "amt": r.federal_amt,
-        "income_tax": r.federal_income_tax,
-        "total_tax": r.federal_total_tax,
-    }
+    return evaluate_components(case, backend)
 
 
 def _assert_components_match_taxcalc(backend, cases):
@@ -330,6 +316,7 @@ def _assert_components_match_taxcalc(backend, cases):
     worst_excess = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
+        failures.extend(election_violations(case, backend, ours))
         deltas = modeled_deltas(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])
@@ -373,6 +360,8 @@ def _assert_components_match_taxcalc(backend, cases):
 @example(cases=[ANCHOR_AMT_FLOOR])
 @example(cases=[ANCHOR_AMT_ZERO_TI_QUALIFIED_DIVIDENDS])
 @example(cases=[ANCHOR_CAPITAL_LOSS])
+@example(cases=[{**ANCHOR_FORCED_STANDARD_LTCG, "std_or_item": "Standard"}])
+@example(cases=[{**ANCHOR_FORCED_STANDARD_DIVIDENDS, "std_or_item": "Standard"}])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
     """Every quantity falls within its modeled TaxCalc range and tolerance."""

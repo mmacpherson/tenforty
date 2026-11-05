@@ -95,8 +95,11 @@ us1040_2025 = form "us_1040" 2025 $ do
     interior "StdDed" "standard_deduction" $
       baseStdDed .+. additionalStdDed
 
-  forceItemized <-
-    keyInput "ForceItemized" "force_itemized" "Use Schedule A even when it is less than the standard deduction"
+  -- The itemize election (IRC 63(e)): negative elects the standard deduction
+  -- even when Schedule A is larger; positive elects Schedule A even when it
+  -- is smaller (Schedule A line 18); zero takes the larger.
+  deductionChoice <-
+    keyInput "DeductionChoice" "deduction_choice" "Deduction election: -1 standard, 0 the larger, 1 Schedule A"
 
   automaticUsesItemized <-
     interior "AutomaticUsesItemized" "Automatic choice selected Schedule A" $
@@ -104,7 +107,8 @@ us1040_2025 = form "us_1040" 2025 $ do
 
   usesItemized <-
     keyOutput "UsesItemized" "uses_itemized" "Whether Form 1040 uses Schedule A" $
-      ifPos forceItemized (dollars 1) automaticUsesItemized
+      ifPos deductionChoice (dollars 1) $
+        ifNeg deductionChoice (dollars 0) automaticUsesItemized
 
   l12Final <-
     keyOutput "L12Final" "deduction_amount" "Standard or itemized deduction" $

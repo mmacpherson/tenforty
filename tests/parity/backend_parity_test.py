@@ -585,7 +585,7 @@ def test_obbba_inputs_parity(
         w2_income=w2_income,
         filing_status=filing_status,
         state_and_local_taxes=state_and_local_taxes,
-        standard_or_itemized="Itemized" if itemize else "Standard",
+        standard_or_itemized="Itemized" if itemize else "Auto",
         filer_65_or_older=filer_65_or_older,
         spouse_65_or_older=spouse,
         qualified_tips=tips,

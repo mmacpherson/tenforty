@@ -22,10 +22,11 @@ from ..mappings import (
     state_output_lines,
 )
 from ..models import (
+    DEDUCTION_CHOICE_ENCODING,
     NATURAL_FORM_CONFIG,
+    OTS_INPUT_CARRIERS,
     STATE_TO_FORM,
     InterpretedTaxReturn,
-    OTSDeductionType,
     OTSFilingStatus,
     OTSState,
     TaxReturnInput,
@@ -46,7 +47,7 @@ _CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
-_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction"}
+_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction", *OTS_INPUT_CARRIERS.values()}
 
 
 def _ohio_natural_joint_credit_values(
@@ -72,9 +73,9 @@ def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
         | _CARRIED_BY_DERIVED_FIELDS
         | _OTS_ONLY_DERIVED_FIELDS
     )
-    values["standard_or_itemized"] = float(
-        tax_input.standard_or_itemized == OTSDeductionType.ITEMIZED
-    )
+    values["standard_or_itemized"] = DEDUCTION_CHOICE_ENCODING[
+        tax_input.standard_or_itemized
+    ]
     return values
 
 
@@ -203,7 +204,13 @@ def _ots_maps_inputs(names: list[str], state: OTSState | None, year: int) -> boo
     configs = [NATURAL_FORM_CONFIG.get((year, form)) for form in forms]
     if any(config is None for config in configs):
         return False
-    return all(any(name in config.input_map for config in configs) for name in names)
+    return all(
+        any(
+            name in config.input_map or OTS_INPUT_CARRIERS.get(name) in config.input_map
+            for config in configs
+        )
+        for name in names
+    )
 
 
 def _raise_unsupported(

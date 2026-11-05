@@ -288,7 +288,8 @@ claim about Tax-Calculator yet.
   In each, the graph backend sides with Tax-Calculator or is untested, so OTS is
   the likelier party, but none is adjudicated.
 - **Graph vs Tax-Calculator, deduction choice with ISO (`tenforty-ifa0`, graph
-  half):** 2024 HoH returns with `standard_or_itemized="Standard"` (greater-of)
-  where the graph itemizes to zero taxable income and Tax-Calculator takes the
-  HoH standard deduction. Likely our adapter's itemized-as-interest mapping or
-  the F19/F28 deduction-choice contract rather than Tax-Calculator.
+  half): resolved on our side by `tenforty-q3r`.** These were 2024 HoH returns
+  with `standard_or_itemized="Standard"`, which then meant larger-of, so the
+  graph itemized to zero taxable income. `"Standard"` now forces the standard
+  deduction, and a blind derivation agrees with Tax-Calculator's taxable income
+  on all three (docs/validation/derivations/deduction-choice-2024-2025.md).
