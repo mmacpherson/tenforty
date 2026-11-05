@@ -169,6 +169,14 @@
   as `num_dependents` (dollars are not converted to a count), or use
   `backend="graph"` for a 2024-2025 state whose graph maps it (GA, HI, IN, KS,
   LA 2024, MD, ME, NJ, VA, VT, WV). Zero is unchanged.
+- **OTS 2018 and 2019 now refuse a nonzero `incentive_stock_option_gains`.**
+  It is mapped to Form 6251 line AMTws3 every year, but the 2018 and 2019 OTS
+  federal programs parse that line and never store it, so the ISO adjustment
+  was dropped: a 2018 return with $150,000 wages and a $200,000 ISO spread
+  reported no AMT. Those years now raise `UnsupportedInputError` under every
+  `on_error` policy, from the same whole-batch preflight, on `backend="ots"`
+  and `backend="auto"` alike. No backend computes 2018 or 2019 with the
+  adjustment. 2020-2025 and a zero value are unchanged (tenforty-bmem).
 - **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
   MA_1 input map set only wages, so OTS never received line 11 (Social
   Security and Medicare paid, up to $2,000 per person) and over-taxed every
