@@ -15,7 +15,7 @@ import pytest
 
 import tenforty
 from tenforty.backends import GraphBackend
-from tenforty.models import InterpretedTaxReturn, TaxReturnInput
+from tenforty.models import NUMERIC_OUTPUT_FIELDS, TaxReturnInput
 
 pytestmark = pytest.mark.requires_graph
 
@@ -25,11 +25,14 @@ INPUT_COLUMNS = [
     for name in inspect.signature(tenforty.evaluate_returns).parameters
     if name not in _OPTIONS
 ]
-OUTPUT_COLUMNS = list(InterpretedTaxReturn.model_fields)
-COLUMNS = INPUT_COLUMNS + OUTPUT_COLUMNS
+OUTPUT_COLUMNS = list(NUMERIC_OUTPUT_FIELDS)
+METADATA_COLUMNS = ["assumptions"]
+COLUMNS = INPUT_COLUMNS + OUTPUT_COLUMNS + METADATA_COLUMNS
 
 
 def _input_dtype(name: str) -> pl.DataType:
+    if name == "state_facts":
+        return pl.String
     if name in {"year", "num_dependents", "num_ctc_dependents"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
@@ -42,6 +45,7 @@ def _input_dtype(name: str) -> pl.DataType:
 SCHEMA = pl.Schema(
     [(name, _input_dtype(name)) for name in INPUT_COLUMNS]
     + [(name, pl.Float64) for name in OUTPUT_COLUMNS]
+    + [("assumptions", pl.List(pl.String))]
 )
 
 GRID = {
@@ -183,6 +187,7 @@ def test_failed_rows_keep_the_schema(monkeypatch, mode):
     )
     _assert_contract(frame, call, mode)
     assert all(math.isnan(value) for value in frame.select(OUTPUT_COLUMNS).row(0))
+    assert frame["assumptions"][0] is None
 
 
 def test_scalar_and_batch_agree_on_output_fields():

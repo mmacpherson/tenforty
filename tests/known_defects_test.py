@@ -698,3 +698,40 @@ def test_ots_amt_adds_back_the_senior_deduction():
     )
 
     assert result.federal_total_tax == pytest.approx(52_494.0, abs=0.01)
+
+
+# OTS-6251-8Z (upstream report 17): OTS reuses Sched1[8] as scratch while
+# reading Schedule 1 lines 8a-8z, so Form 6251 lines 2b and 2e read line 8z. A
+# negative 8z adds twice its size to AMTI. Expected values are the blind
+# derivation in docs/validation/derivations/form-6251-line-8z-2024-2025.md
+# (2024/2025 Tax Table rows, Form 6251 and its instructions, Rev. Proc. 2023-34
+# and 2024-40), not backend output.
+
+
+@pytest.mark.xfail(
+    reason="OTS-6251-8Z: OTS reads Schedule 1 line 8z into Form 6251 lines 2b and 2e",
+    strict=True,
+)
+@pytest.mark.parametrize(
+    ("year", "regular_tax"),
+    [(2024, 6_147.0), (2025, 5_755.0)],
+    ids=["2024", "2025"],
+)
+def test_ots_negative_other_income_adds_nothing_to_amti(year, regular_tax):
+    """MFS, wages 80,000, Schedule 1 line 8z -15,000: no AMT.
+
+    Line 8z other income is neither a tax refund (line 2b) nor an NOL from line
+    8a (line 2e), so AMTI is AGI 65,000, below the MFS exemption (66,650 for
+    2024, 68,500 for 2025). Tax is the Tax Table row for taxable income 50,400
+    (2024) or 49,250 (2025).
+    """
+    result = evaluate_return(
+        backend="ots",
+        year=year,
+        filing_status="Married/Sep",
+        w2_income=80_000,
+        schedule_1_income=-15_000,
+    )
+
+    assert result.federal_amt == 0.0
+    assert result.federal_income_tax == pytest.approx(regular_tax, abs=0.01)

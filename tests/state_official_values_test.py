@@ -5,6 +5,7 @@ import pathlib
 import pytest
 
 from tenforty import evaluate_return
+from tenforty.state_facts import MODELS
 
 from .fixtures.state_official_cases import (
     GRAPH_DEFECTS,
@@ -79,12 +80,15 @@ def judge(case: OfficialCase, observed: dict[str, float]) -> tuple[bool, list[st
 @pytest.mark.parametrize("case", OFFICIAL_CASES, ids=lambda case: case.case_id)
 def test_graph_matches_official_values(case: OfficialCase):
     """The graph return equals one whole outcome the official sources permit."""
+    inputs = dict(case.inputs)
+    if "state_facts" in inputs:
+        inputs["state_facts"] = MODELS[case.state](**inputs["state_facts"])
     result = evaluate_return(
         year=case.year,
         state=case.state,
         filing_status=case.filing_status,
         backend="graph",
-        **case.inputs,
+        **inputs,
     )
     observed = {quantity: getattr(result, quantity) for quantity in QUANTITIES}
     explained, detail = judge(case, observed)

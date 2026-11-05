@@ -15,10 +15,10 @@ from pathlib import Path
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
-from tenforty.models import InterpretedTaxReturn
+from tenforty.models import NUMERIC_OUTPUT_FIELDS, InterpretedTaxReturn
 
 FIXTURE = Path(__file__).parent / "fixtures" / "taxcalc_goldens.json"
-OUTPUT_FIELDS = tuple(InterpretedTaxReturn.model_fields)
+OUTPUT_FIELDS = NUMERIC_OUTPUT_FIELDS
 
 
 def _graph_available() -> bool:
@@ -57,6 +57,9 @@ def _scalar_result(case: dict, backend: str) -> InterpretedTaxReturn:
 def _assert_full_output_row(df, row: int, scalar: InterpretedTaxReturn) -> None:
     missing = set(OUTPUT_FIELDS) - set(df.columns)
     assert not missing, f"batch dropped public output columns: {sorted(missing)}"
+    assert df["assumptions"][row].to_list() == [
+        record.to_json() for record in scalar.assumptions
+    ]
     mismatches = []
     for field in OUTPUT_FIELDS:
         batch_raw, scalar_raw = df[field][row], getattr(scalar, field)
