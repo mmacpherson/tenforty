@@ -47,6 +47,7 @@ import tenforty  # noqa: E402
 
 from .taxcalc_policy import (  # noqa: E402
     ZERO_DELTA,
+    election_violations,
     modeled_deltas,
     taxcalc_obbba_fields,
     taxcalc_schedule_a_fields,
@@ -333,6 +334,7 @@ def tenforty_components(case, backend):
         "amt": r.federal_amt,
         "income_tax": r.federal_income_tax,
         "total_tax": r.federal_total_tax,
+        "qbi_deduction": r.federal_qbi_deduction,
     }
 
 
@@ -345,6 +347,7 @@ def _assert_components_match_taxcalc(backend, cases):
     worst_excess = dict.fromkeys(QUANTITIES, 0.0)
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
+        failures.extend(election_violations(case, ours))
         deltas = modeled_deltas(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])

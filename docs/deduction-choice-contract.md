@@ -81,9 +81,14 @@ input. The graph backend covers 2024-2025 for all three.
 **TaxCalc differential.** TaxCalc has no election switch; it keeps the
 itemized total when that strictly lowers tax. A filer who elects the
 standard deduction files no Schedule A, so under `"Standard"` the adapter
-sends TaxCalc none (`taxcalc_schedule_a_fields`). F19 and F28 excuse only
-`"Auto"` (F19 also `"Itemized"`); F7 still excuses forced itemization below
-the standard deduction.
+sends TaxCalc none (`taxcalc_schedule_a_fields`). TaxCalc may still elect
+to itemize zero to cut AMT, so F28 excuses `"Auto"` and `"Standard"`; F19
+excuses `"Auto"` and `"Itemized"`; F7 still excuses forced itemization below
+the standard deduction. These allowances cover TaxCalc's choice, not
+tenforty's: the differential separately checks that the deduction tenforty
+took (AGI less the QBI deduction less taxable income) is the one the
+election requires (`election_violations`), so a backend that ignored the
+election would fail even inside an allowance.
 
 ## History
 

@@ -922,7 +922,62 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
         "amt": r.federal_amt,
         "income_tax": r.federal_income_tax,
         "total_tax": r.federal_total_tax,
+        "qbi_deduction": r.federal_qbi_deduction,
     }
+
+
+# Inputs that open a deduction between AGI and taxable income other than line
+# 12 and the QBI deduction (2025 Schedule 1-A: tips, overtime, car loan
+# interest, and the senior deduction the 65+ boxes bring).
+_SCHEDULE_1A_CASE_KEYS = ("tips", "overtime", "car_loan", "age65", "spouse65")
+ELECTION_TOL = 1.0
+
+
+def required_deduction(case: dict) -> float | None:
+    """Form 1040 line 12 the case's election dictates, where it is checkable.
+
+    Independent of TaxCalc: the standard deduction is a published amount, and
+    the itemized aggregate enters Schedule A uncapped. None where line 12 is
+    not determined from the case alone: Schedule 1-A inputs also sit between
+    AGI and taxable income, and Auto or Itemized with SALT needs the capped
+    line 5e.
+    """
+    if any(case.get(key) for key in _SCHEDULE_1A_CASE_KEYS):
+        return None
+    standard = STANDARD_DEDUCTION.get((case.get("year"), case.get("status")))
+    if standard is None:
+        return None
+    election = case.get("std_or_item", "Auto")
+    if election == "Standard":
+        return standard
+    if case.get("salt", 0.0):
+        return None
+    schedule_a = max(0.0, case.get("itemized", 0.0))
+    if election == "Itemized":
+        return schedule_a
+    return max(standard, schedule_a)
+
+
+def election_violations(case: dict, ours: dict[str, float]) -> list[str]:
+    """Report a deduction tenforty took that the case's election does not allow.
+
+    TaxCalc allowances such as F19 and F28 excuse differences in the deduction
+    TaxCalc chooses; this checks tenforty's own choice so an allowance can
+    never excuse the wrong election. With positive taxable income, line 12 is
+    AGI less the QBI deduction less taxable income.
+    """
+    required = required_deduction(case)
+    if required is None or ours["taxable_income"] <= ELECTION_TOL:
+        return []
+    taken = ours["agi"] - ours["qbi_deduction"] - ours["taxable_income"]
+    if abs(taken - required) <= ELECTION_TOL:
+        return []
+    election = case.get("std_or_item", "Auto")
+    message = (
+        f"{case}: deduction taken {taken:,.2f} under {election!r}, "
+        f"election requires {required:,.2f}"
+    )
+    return [message]
 
 
 def unexcused_violations(
@@ -936,7 +991,7 @@ def unexcused_violations(
     """
     ours = evaluate_components(case, backend)
     deltas = modeled_deltas(backend, case, expected)
-    violations = []
+    violations = election_violations(case, ours)
     for quantity in QUANTITIES:
         exp_alt = expected_alt or expected
         lo = min(expected[quantity], exp_alt[quantity])
