@@ -64,7 +64,7 @@ dropping it. On the returns auto sends to graph that matters for two inputs:
 
 | Input | OTS today | Auto (graph-routed) |
 |---|---|---|
-| `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused, except where a graph state maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV) |
+| `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused: no state in auto's graph scope maps it. Only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV, none of which is in auto scope |
 | `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused, except AL and CA |
 
 No OTS-covered return that auto sends to graph uses either input on OTS, so
