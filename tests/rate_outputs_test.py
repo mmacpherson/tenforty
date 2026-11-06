@@ -164,6 +164,7 @@ def test_graph_batch_rates_match_scalar():
         assert frame.schema[field] == pl.Float64
 
 
+@pytest.mark.requires_ots
 def test_ots_state_without_bracket_report_is_not_defined():
     """An OTS state that prints no bracket line has no bracket, but an effective rate."""
     result = evaluate_return(year=2024, state="PA", w2_income=85000, backend="ots")
@@ -174,6 +175,7 @@ def test_ots_state_without_bracket_report_is_not_defined():
     )
 
 
+@pytest.mark.requires_ots
 def test_ots_reporting_state_keeps_its_rates():
     """An OTS state that prints a bracket line keeps its values."""
     result = evaluate_return(year=2024, state="CA", w2_income=85000, backend="ots")
@@ -182,6 +184,7 @@ def test_ots_reporting_state_keeps_its_rates():
     assert result.state_effective_tax_rate is not None
 
 
+@pytest.mark.requires_ots
 def test_ots_rates_not_defined_without_a_state():
     """OTS federal-only returns have no state rates."""
     result = evaluate_return(year=2024, w2_income=85000, backend="ots")
@@ -189,6 +192,7 @@ def test_ots_rates_not_defined_without_a_state():
     assert result.state_effective_tax_rate is None
 
 
+@pytest.mark.requires_ots
 def test_ots_effective_rate_not_defined_without_taxable_income():
     """OTS's divide-by-1e-9 effective rate becomes None."""
     result = evaluate_return(year=2024, self_employment_income=8000, backend="ots")
@@ -210,6 +214,7 @@ OTS_CREDIT_WITNESSES = [("OR", 2024, 85_000), ("CA", 2024, 85_000)]
 
 
 @pytest.mark.parametrize(("state", "year", "wages"), OTS_CREDIT_WITNESSES)
+@pytest.mark.requires_ots
 def test_ots_effective_rates_use_returned_tax(state, year, wages):
     """OTS effective rates are returned tax over taxable income, not the printed rate.
 
@@ -226,6 +231,7 @@ def test_ots_effective_rates_use_returned_tax(state, year, wages):
 
 
 @pytest.mark.parametrize("mode", ["zip", "cross"])
+@pytest.mark.requires_ots
 def test_ots_batch_effective_rates_use_returned_tax(mode):
     """The OTS batch frame applies the same effective-rate definition per row."""
     frame = evaluate_returns(

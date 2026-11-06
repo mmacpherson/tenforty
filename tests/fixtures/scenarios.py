@@ -25,6 +25,25 @@ from .helpers import graph_backend_available
 from .tax_scenario import KnownDefect, TaxScenario
 
 
+def scenario_backend(scenario: TaxScenario) -> str:
+    """Return the backend ``run_tax_scenario`` evaluates the scenario on."""
+    return scenario.backend or "ots"
+
+
+def scenario_params(scenarios) -> list:
+    """Parametrize scenarios, marking each one that runs on OTS ``requires_ots``."""
+    return [
+        pytest.param(
+            scenario,
+            id=scenario_id(scenario),
+            marks=pytest.mark.requires_ots
+            if scenario_backend(scenario) == "ots"
+            else (),
+        )
+        for scenario in scenarios
+    ]
+
+
 def scenario_id(scenario: TaxScenario) -> str:
     """Generate a pytest test ID from a scenario."""
     state_part = scenario.state or "FED"
@@ -61,7 +80,7 @@ def run_tax_scenario(scenario: TaxScenario):
         dependent_exemptions=scenario.dependent_exemptions,
         state_adjustment=scenario.state_adjustment,
     )
-    kwargs["backend"] = scenario.backend or "ots"
+    kwargs["backend"] = scenario_backend(scenario)
     if scenario.state_facts is not None:
         kwargs["state_facts"] = MODELS[scenario.state](**scenario.state_facts)
     result = evaluate_return(**kwargs)

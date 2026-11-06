@@ -561,7 +561,9 @@ def _load_resolved_graph(year: int):
     """
     from ..graphlib import Graph
 
-    return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
+    return Graph.from_json(
+        (_forms_dir() / f"us_tax_graph_{year}.json").read_text(encoding="utf-8")
+    )
 
 
 def _input_runtime(tax_input: TaxReturnInput, *, include_facts: bool = True):
@@ -600,9 +602,9 @@ _OPERAND_KEYS = ("left", "right", "arg", "cond", "then", "otherwise", "income")
 @lru_cache(maxsize=8)
 def nodes_depending_on(year: int, target: str) -> frozenset[str]:
     """Names of the resolved graph's nodes whose value depends on ``target``."""
-    nodes = json.loads((_forms_dir() / f"us_tax_graph_{year}.json").read_text())[
-        "nodes"
-    ]
+    nodes = json.loads(
+        (_forms_dir() / f"us_tax_graph_{year}.json").read_text(encoding="utf-8")
+    )["nodes"]
 
     def operands(node_id: int) -> list[int]:
         op = nodes[str(node_id)]["op"]

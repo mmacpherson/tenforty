@@ -86,6 +86,7 @@ def ots_calls(monkeypatch):
 
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
 @pytest.mark.parametrize("case", OTS_RETURNS, ids=_ots_return_id)
+@pytest.mark.requires_ots
 def test_explicit_ots_refuses_nonzero_dependent_exemptions(case, on_error, ots_calls):
     """Every OTS return refuses it, naming the input, state and year."""
     year, state = case
@@ -112,6 +113,7 @@ def test_explicit_ots_refuses_nonzero_dependent_exemptions(case, on_error, ots_c
     [(2025, OTSState.CA), (2024, OTSState.NJ), (2023, OTSState.NONE)],
     ids=_ots_return_id,
 )
+@pytest.mark.requires_ots
 def test_auto_routed_to_ots_refuses_exactly_as_explicit_ots(case):
     """A fact does not reroute: auto on an OTS return gives the same refusal."""
     year, state = case
@@ -130,6 +132,7 @@ def test_auto_routed_to_ots_refuses_exactly_as_explicit_ots(case):
 
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
 @pytest.mark.parametrize("backend", ("ots", "auto"))
+@pytest.mark.requires_ots
 def test_batch_preflight_refuses_before_any_ots_return_runs(
     backend, on_error, ots_calls
 ):
@@ -153,6 +156,7 @@ def test_batch_preflight_refuses_before_any_ots_return_runs(
     [(2025, OTSState.CA), (2021, OTSState.MA), (2023, OTSState.NONE)],
     ids=_ots_return_id,
 )
+@pytest.mark.requires_ots
 def test_zero_dependent_exemptions_is_accepted(case, backend):
     """Explicit zero computes the same return as omitting the field."""
     year, state = case
@@ -228,6 +232,7 @@ ISO_RETURN = {"w2_income": 150_000, "incentive_stock_option_gains": 200_000}
 
 
 @pytest.mark.parametrize("year", ISO_UNREAD_YEARS)
+@pytest.mark.requires_ots
 def test_ots_drops_iso_in_years_that_never_read_it(year, monkeypatch):
     """Without the refusal, the ISO adjustment changes nothing on these years."""
     monkeypatch.setattr(core, "_OTS_REFUSED_WHEN_UNREAD", {})
@@ -242,6 +247,7 @@ def test_ots_drops_iso_in_years_that_never_read_it(year, monkeypatch):
 @pytest.mark.parametrize("backend", ("ots", "auto"))
 @pytest.mark.parametrize("state", (None, "CA", "TX"))
 @pytest.mark.parametrize("year", ISO_UNREAD_YEARS)
+@pytest.mark.requires_ots
 def test_nonzero_iso_is_refused_where_ots_never_reads_it(
     year, state, backend, on_error, ots_calls
 ):
@@ -257,6 +263,7 @@ def test_nonzero_iso_is_refused_where_ots_never_reads_it(
 
 
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+@pytest.mark.requires_ots
 def test_batch_preflight_refuses_a_later_iso_year(on_error, ots_calls):
     """A 2019 ISO row stops the batch before the 2020 row computes."""
     with pytest.raises(UnsupportedInputError, match="2019"):
@@ -272,6 +279,7 @@ def test_batch_preflight_refuses_a_later_iso_year(on_error, ots_calls):
 
 
 @pytest.mark.parametrize("year", [y for y in OTS_YEARS if y not in ISO_UNREAD_YEARS])
+@pytest.mark.requires_ots
 def test_iso_is_accepted_and_used_from_2020(year):
     """From 2020 OTS reads the adjustment: it computes and raises the AMT."""
     with_iso = tenforty.evaluate_return(year=year, **ISO_RETURN, backend="ots")
@@ -282,6 +290,7 @@ def test_iso_is_accepted_and_used_from_2020(year):
 
 
 @pytest.mark.parametrize("year", ISO_UNREAD_YEARS)
+@pytest.mark.requires_ots
 def test_zero_iso_is_accepted_in_unread_years(year):
     """Zero, explicit or omitted, is unchanged."""
     explicit = tenforty.evaluate_return(

@@ -22,6 +22,37 @@
     dictionary, no longer have `S1A_29`. Upstream prints line 20 again
     under `S1A_20` there instead. No mapped tax result reads either key.
 
+### Fixed (installs without OTS)
+- A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every future Windows
+  wheel) now has a clear contract:
+  - `import tenforty` never imports the OTS extension, so it works without it.
+  - `available_backends()` reports `["graph"]`. It used to report `"ots"` as
+    well, because the `otslib` source directory imports as an empty namespace
+    package when the compiled extension is absent. Availability now checks for
+    the compiled extension itself.
+  - Every route into OTS raises `BackendUnavailableError` before evaluating
+    anything, whatever `on_error` says: `evaluate_return` and
+    `evaluate_returns` (a batch with any OTS row is refused whole),
+    `core.evaluate_form`, `get_backend("ots")` and `OTSBackend.evaluate`. The
+    message names the reason, the returns that need OTS, and the
+    `backend="graph"` remedy where one exists. Before, a 2018-2023 return
+    raised `AttributeError`, or returned an all-NaN row under
+    `on_error="warn"` or `"ignore"`.
+- `TENFORTY_GRAPH_ONLY=1` builds really leave OTS out. A static
+  `ext-modules` entry in `pyproject.toml` added the OTS extension back; it is
+  gone, and `setup.py` alone declares the extensions. Graph-only wheels also
+  ship none of the OTS sources.
+- Windows builds are always graph-only, since OpenTaxSolver does not run
+  reliably there ([docs/windows-build-research.md](docs/windows-build-research.md)).
+- The graph JSON is read as UTF-8 on every platform.
+
+### Added (testing)
+- A `requires_ots` test marker, and `pytest --graph-only`, which deselects
+  those tests on a graph-only install. A case parametrized with
+  `backend="ots"` or `engine="ots"` is marked automatically. CI runs the suite
+  on a graph-only install, and builds and smoke-checks a graph-only wheel from
+  the sdist (`scripts/smoke_installed.py --expect-backends graph`).
+
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)
 - **The default backend is now `"auto"`**, in `evaluate_return`,

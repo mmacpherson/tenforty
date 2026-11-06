@@ -153,6 +153,7 @@ def test_amt_follows_the_amt_amount(
 
 
 @pytest.mark.parametrize(("year", "amt", "expected_amt", "total"), CASES_2018_2023)
+@pytest.mark.requires_ots
 def test_ots_years_before_2024(year, amt, expected_amt, total):
     """Y-eq (Schedule A line 16 only) and Y-part for each OTS year 2018-2023."""
     result = evaluate_return(
@@ -183,6 +184,7 @@ CASES_2018_2019_NO_ISO = [
     CASES_2018_2019_NO_ISO,
     ids=[case[0] for case in CASES_2018_2019_NO_ISO],
 )
+@pytest.mark.requires_ots
 def test_ots_2018_and_2019_without_iso(case, year, amt, expected_amt, total):
     """The A16-only (eq), partial and A6-only (zero) carriers in the earliest years."""
     result = evaluate_return(

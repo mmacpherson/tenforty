@@ -158,6 +158,7 @@ def test_batch_matches_the_derivation(year):
         ), name
 
 
+@pytest.mark.requires_ots
 def test_ots_does_not_report_the_credit():
     """OTS reports None, not NaN or 0, on a scalar return and in a batch frame."""
     scalar = evaluate_return(year=2025, backend="ots", w2_income=10_000.0)

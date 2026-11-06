@@ -41,6 +41,7 @@ SUPPORTED_STATES = [e.value for e in OTSState]
     year=st.sampled_from(SUPPORTED_YEARS),
     filing_status=st.sampled_from([e.value for e in OTSFilingStatus]),
 )
+@pytest.mark.requires_ots
 def test_w2_monotonicity(
     w2_income,
     w2_increment,
@@ -135,6 +136,7 @@ def test_w2_monotonicity(
         min_value=0.0, max_value=500_000.0, allow_nan=False, allow_infinity=False
     ),
 )
+@pytest.mark.requires_ots
 def test_federal_tax_monotonicity(
     year,
     filing_status,
@@ -255,6 +257,7 @@ def test_federal_tax_monotonicity(
         min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False
     ),
 )
+@pytest.mark.requires_ots
 def test_evaluate_return_properties(
     year,
     state,
@@ -347,6 +350,7 @@ def test_evaluate_return_properties(
     #     ), "Federal total tax should not exceed taxable income"
 
 
+@pytest.mark.requires_ots
 def test_az_widow_standard_deduction():
     """Regression: AZ Widow(er) used out-of-bounds array for standard deduction.
 
@@ -386,6 +390,7 @@ def test_az_widow_standard_deduction():
         min_value=10000, max_value=500000, allow_nan=False, allow_infinity=False
     ),
 )
+@pytest.mark.requires_ots
 def test_qualified_dividends_properly_taxed(
     year,
     state,
@@ -437,6 +442,7 @@ def test_qualified_dividends_properly_taxed(
         min_value=50000, max_value=500000, allow_nan=False, allow_infinity=False
     ),
 )
+@pytest.mark.requires_ots
 def test_qualified_dividends_preferential_rates(year, filing_status, amount):
     """Verify qualified dividends are taxed at preferential rates vs ordinary income."""
     qualified_result = tenforty.evaluate_return(

@@ -18,17 +18,17 @@ from .fixtures.scenarios import (
     SILVER_STANDARD_STATE_SCENARIOS,
     TaxScenario,
     run_tax_scenario,
-    scenario_id,
+    scenario_params,
 )
 
 
-@pytest.mark.parametrize("scenario", SILVER_STANDARD_FEDERAL_SCENARIOS, ids=scenario_id)
+@pytest.mark.parametrize("scenario", scenario_params(SILVER_STANDARD_FEDERAL_SCENARIOS))
 def test_silver_federal(scenario: TaxScenario):
     """Test federal tax against formula-derived values from IRS tax brackets."""
     run_tax_scenario(scenario)
 
 
-@pytest.mark.parametrize("scenario", SILVER_STANDARD_STATE_SCENARIOS, ids=scenario_id)
+@pytest.mark.parametrize("scenario", scenario_params(SILVER_STANDARD_STATE_SCENARIOS))
 def test_silver_state(scenario: TaxScenario):
     """Test state tax against formula-derived values from state tax brackets."""
     run_tax_scenario(scenario)

@@ -337,6 +337,7 @@ def test_status_guard_fails_when_the_mapping_is_removed(monkeypatch, year, form_
     ("state", "status"),
     [("MA", "Widow(er)"), ("VA", "Head_of_House"), ("VA", "Widow(er)")],
 )
+@pytest.mark.requires_ots
 def test_ots_refuses_a_filing_status_the_state_program_cannot_compute(state, status):
     """MA_1 has no Widow(er) case and VA_760 neither Head_of_House nor Widow(er)."""
     with pytest.raises(ValueError, match="cannot compute filing status"):
@@ -356,6 +357,7 @@ MA_1_YEARS = sorted(year for year, form_id in NATURAL_FORM_CONFIG if form_id == 
 @pytest.mark.parametrize(
     "filing_status", ["Single", "Married/Joint", "Married/Sep", "Head_of_House"]
 )
+@pytest.mark.requires_ots
 def test_ots_ma_reports_state_agi_for_every_status(year, filing_status):
     """MA state AGI must come from a line OTS fills for every status (tenforty-r91.8).
 
@@ -380,6 +382,7 @@ MA_WORKSHEET_STATUSES = {"Single", "Married/Joint", "Head_of_House"}
     "filing_status", ["Single", "Married/Joint", "Married/Sep", "Head_of_House"]
 )
 @pytest.mark.parametrize("w2_income", [-1_000.0, -1.0, 0.0, 1.0, 4_401.0, 60_000.0])
+@pytest.mark.requires_ots
 def test_ots_ma_state_agi_is_the_worksheet_agi(
     monkeypatch, year, filing_status, w2_income
 ):

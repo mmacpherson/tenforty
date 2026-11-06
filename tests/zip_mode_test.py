@@ -9,6 +9,7 @@ from tenforty import evaluate_return, evaluate_returns
 class TestZipSemantics:
     """Zip semantics: N list inputs -> exactly N rows (not N^k)."""
 
+    @pytest.mark.requires_ots
     def test_two_incomes_produce_two_rows(self):
         """Two W2 incomes should produce exactly two rows."""
         result = evaluate_returns(
@@ -24,6 +25,7 @@ class TestZipSemantics:
         assert len(result) == 2
         assert result["w2_income"].to_list() == [50000.0, 100000.0]
 
+    @pytest.mark.requires_ots
     def test_multiple_inputs_zipped_not_crossed(self):
         """Multiple list inputs should be zipped, not crossed."""
         result = evaluate_returns(
@@ -38,6 +40,7 @@ class TestZipSemantics:
 
         assert len(result) == 3
 
+    @pytest.mark.requires_ots
     def test_all_scalar_returns_one_row(self):
         """All scalar inputs should return a single row."""
         result = evaluate_returns(
@@ -56,6 +59,7 @@ class TestZipSemantics:
 class TestBroadcasting:
     """Scalar inputs broadcast to match list length."""
 
+    @pytest.mark.requires_ots
     def test_scalar_status_broadcast(self):
         """Scalar filing status should broadcast to match list inputs."""
         result = evaluate_returns(
@@ -70,6 +74,7 @@ class TestBroadcasting:
         assert len(result) == 3
         assert all(s == "Single" for s in result["filing_status"].to_list())
 
+    @pytest.mark.requires_ots
     def test_mixed_scalar_and_list(self):
         """Mix of scalar and list inputs should broadcast scalars."""
         result = evaluate_returns(
@@ -136,6 +141,7 @@ class TestConsistencyWithSingleEval:
         ],
         ids=["NY-75k", "Federal-only-50k", "MA-120k-MFJ"],
     )
+    @pytest.mark.requires_ots
     def test_zip_matches_single(self, params):
         """Zip result should match single evaluate_return() call."""
         single_result = evaluate_return(**params, backend="ots")
@@ -152,6 +158,7 @@ class TestConsistencyWithSingleEval:
         )
         assert row["total_tax"] == single_result.total_tax
 
+    @pytest.mark.requires_ots
     def test_multi_row_consistency(self):
         """Each row in multi-row zip should match individual calls."""
         incomes = [50000.0, 100000.0, 150000.0]
@@ -181,6 +188,7 @@ class TestConsistencyWithSingleEval:
 class TestMultipleFilingStatuses:
     """Per-row filing statuses in zip mode."""
 
+    @pytest.mark.requires_ots
     def test_different_statuses_per_row(self):
         """Different filing statuses per row should be evaluated correctly."""
         result = evaluate_returns(
@@ -206,6 +214,7 @@ class TestMultipleFilingStatuses:
 class TestEdgeCases:
     """Edge cases."""
 
+    @pytest.mark.requires_ots
     def test_zero_income(self):
         """Zero income should produce zero federal tax."""
         result = evaluate_returns(
@@ -220,6 +229,7 @@ class TestEdgeCases:
         assert len(result) == 1
         assert result["federal_total_tax"].item() == 0
 
+    @pytest.mark.requires_ots
     def test_federal_only(self):
         """Federal-only (state=None) should have zero state tax."""
         result = evaluate_returns(
@@ -235,6 +245,7 @@ class TestEdgeCases:
         assert all(t > 0 for t in result["federal_total_tax"].to_list())
         assert all(t == 0 for t in result["state_total_tax"].to_list())
 
+    @pytest.mark.requires_ots
     def test_output_columns_present(self):
         """All expected output columns should be present."""
         result = evaluate_returns(
@@ -262,6 +273,7 @@ class TestEdgeCases:
 class TestVectorYearAndState:
     """mode='zip' supports vector year and state via grouping."""
 
+    @pytest.mark.requires_ots
     def test_vector_year(self):
         """mode='zip' should support vector year."""
         result = evaluate_returns(
@@ -276,6 +288,7 @@ class TestVectorYearAndState:
         assert len(result) == 2
         assert result["year"].to_list() == [2023, 2024]
 
+    @pytest.mark.requires_ots
     def test_vector_state(self):
         """mode='zip' should support vector state."""
         result = evaluate_returns(

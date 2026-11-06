@@ -67,6 +67,7 @@ def test_graph_qbi_applies_above_threshold_limitation():
     assert r.federal_taxable_income == pytest.approx(202_371.67, abs=1.0)
 
 
+@pytest.mark.requires_ots
 def test_ots_niit_includes_short_term_gains():
     """$300k wages + $50k STCG: NIIT is 3.8% of $50k = $1,900."""
     r = evaluate_return(
@@ -92,6 +93,7 @@ def test_graph_niit_includes_short_term_gains():
     assert r.federal_niit == pytest.approx(1_900.0, abs=1.0)
 
 
+@pytest.mark.requires_ots
 def test_ots_niit_honors_the_capital_loss_limitation():
     """A net capital loss offsets net investment income by at most $3,000.
 
@@ -133,6 +135,7 @@ def test_graph_niit_honors_the_capital_loss_limitation():
 
 
 @skip_if_graph_unavailable
+@pytest.mark.requires_ots
 def test_graph_capital_loss_cap_does_not_leak_into_the_qcgws():
     """The capped Schedule D line 21 is a safe proxy for line 16 in the QCGWS.
 
@@ -161,6 +164,7 @@ def test_graph_capital_loss_cap_does_not_leak_into_the_qcgws():
     assert graph.federal_total_tax == pytest.approx(ots.federal_total_tax, abs=1.0)
 
 
+@pytest.mark.requires_ots
 def test_ots_niit_fires_when_gains_are_the_only_investment_income():
     """Form 8960 must run when capital gains are the sole investment income.
 
@@ -212,6 +216,7 @@ def test_graph_additional_medicare_includes_se_earnings():
     assert r.federal_additional_medicare_tax == pytest.approx(865.57, abs=1.0)
 
 
+@pytest.mark.requires_ots
 def test_ots_additional_medicare_fires_without_wages():
     """$300k SE profit, no wages: additional Medicare tax is $693.45, not $0."""
     r = evaluate_return(
@@ -303,6 +308,7 @@ def test_graph_2025_mfs_ltcg_matches_consensus():
 
 
 @skip_if_graph_unavailable
+@pytest.mark.requires_ots
 def test_amt_std_addback_agrees_across_backends():
     """Single, $150k wages + $200k ISO spread: backends agree on AMT.
 
@@ -334,6 +340,7 @@ def test_amt_std_addback_agrees_across_backends():
         (2025, 29_094.00),
     ],
 )
+@pytest.mark.requires_ots
 def test_amt_line_1_goes_negative_below_the_taxable_income_floor(year, official_amt):
     """Head of household, $200k ISO spread and no income: AMT is $29,718.
 
@@ -433,6 +440,7 @@ def test_ots_initializes_amt_preferential_inputs_at_zero_taxable_income(
         (2025, 23_626.0, 29_094.00),
     ],
 )
+@pytest.mark.requires_ots
 def test_ots_amt_preferential_cliff_ends_above_zero_taxable_income(
     year,
     qualified_dividends,
@@ -455,6 +463,7 @@ def test_ots_amt_preferential_cliff_ends_above_zero_taxable_income(
 
 
 @skip_if_graph_unavailable
+@pytest.mark.requires_ots
 def test_graph_applies_the_high_income_mfs_amt_increase():
     """2025 MFS line 4 adds 25% of AMTI above $900,350."""
     kwargs = dict(
@@ -488,6 +497,7 @@ def test_ots_2024_mfs_amt_uses_current_year_line4_constants():
 
 
 @skip_if_graph_unavailable
+@pytest.mark.requires_ots
 def test_itemized_semantics_agree_across_backends():
     """Both backends force a below-standard amount when Itemized is selected."""
     kwargs = dict(

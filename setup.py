@@ -1,4 +1,4 @@
-"""Build configuration for tenforty with platform-specific compiler flags.
+"""Build configuration for tenforty's native extensions (OTS and the graph backend).
 
 Build modes:
 - Default: build the OTS Cython extension and the Rust graph extension. The
@@ -6,7 +6,10 @@ Build modes:
   toolchain fails with an explanation instead of installing without it.
 - TENFORTY_WITHOUT_GRAPH=1: legacy OTS-only build. No graph backend; routing a
   return to the graph backend raises.
-- TENFORTY_GRAPH_ONLY=1: skip OTS, graph backend only (Windows compatible).
+- TENFORTY_GRAPH_ONLY=1: skip OTS, graph backend only. A graph-only wheel also
+  leaves out the OTS sources, so the installed package has no ``otslib`` at all.
+- Windows always builds graph-only: OpenTaxSolver does not run reliably there
+  (docs/windows-build-research.md), so no Windows build compiles it.
 
 Requiring Rust for a source build is an intermediate measure. The long-term
 answer is a prebuilt wheel for every platform, so a source build is only the
@@ -20,9 +23,12 @@ import sys
 
 from Cython.Build import cythonize
 from setuptools import Extension, setup
+from setuptools.command.build_py import build_py as _build_py
 
 WITHOUT_GRAPH_ENV = "TENFORTY_WITHOUT_GRAPH"
 GRAPH_ONLY_ENV = "TENFORTY_GRAPH_ONLY"
+OTS_PACKAGE = "tenforty.otslib"
+IS_WINDOWS = platform.system() == "Windows"
 
 MISSING_RUST_MESSAGE = f"""
 tenforty requires a Rust toolchain to build from source: {{reason}}.
@@ -73,24 +79,29 @@ def _require_rust_toolchain() -> None:
         raise _missing_rust_error(f"{' and '.join(missing)} not found on PATH")
 
 
-skip_ots = _env_flag(GRAPH_ONLY_ENV)
+skip_ots = _env_flag(GRAPH_ONLY_ENV) or IS_WINDOWS
 skip_graph = _env_flag(WITHOUT_GRAPH_ENV)
 
 if skip_ots and skip_graph:
+    if IS_WINDOWS:
+        raise SystemExit(
+            f"{WITHOUT_GRAPH_ENV}=1 leaves nothing to build on Windows, which "
+            "builds the graph backend only"
+        )
     raise SystemExit(
         f"{GRAPH_ONLY_ENV}=1 and {WITHOUT_GRAPH_ENV}=1 together leave nothing to build"
     )
 
 if skip_ots:
+    reason = "on Windows" if IS_WINDOWS else f"with {GRAPH_ONLY_ENV}=1"
+    print(
+        f"tenforty: building {reason} without the OTS extension; "
+        "the graph backend only",
+        file=sys.stderr,
+    )
     cython_extensions = []
 else:
-    extra_compile_args: list[str] = ["-O2"]
-    if platform.system() == "Windows":
-        extra_compile_args = ["/bigobj", "/O2", "/EHsc"]
-    elif platform.system() == "Darwin":
-        extra_compile_args = ["-O2", "-std=c++17"]
-    else:
-        extra_compile_args = ["-O2", "-std=c++17"]
+    extra_compile_args = ["-O2", "-std=c++17"]
 
     cython_extensions = [
         Extension(
@@ -102,8 +113,29 @@ else:
         ),
     ]
 
+
+class build_py(_build_py):
+    """Leave the OTS sources out of a graph-only build.
+
+    Without the compiled extension, a shipped ``otslib`` source directory would
+    import as an empty namespace package. Only ``run`` filters, so an sdist
+    still carries the OTS sources.
+    """
+
+    def run(self) -> None:  # noqa: D102
+        if skip_ots:
+            self.packages = [name for name in self.packages if name != OTS_PACKAGE]
+            self.package_data = {
+                name: patterns
+                for name, patterns in self.package_data.items()
+                if name != OTS_PACKAGE
+            }
+            self.__dict__.pop("data_files", None)
+        super().run()
+
+
 rust_extensions = []
-cmdclass = {}
+cmdclass = {"build_py": build_py}
 
 if not skip_graph:
     try:

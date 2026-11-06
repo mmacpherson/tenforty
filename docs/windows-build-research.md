@@ -1,6 +1,6 @@
 # Windows Build Research
 
-This document captures the research and attempts to get Windows builds working for tenforty. As of January 2026, Windows builds are not supported due to runtime crashes that occur when the library is loaded or used.
+This document captures the research and attempts to get Windows builds working for tenforty. As of January 2026, Windows builds were not supported because of runtime crashes in OpenTaxSolver. Windows builds now leave OTS out; see [Current Status](#current-status).
 
 ## Background
 
@@ -80,10 +80,23 @@ These are theories that have not been definitively confirmed:
 
 ## Current Status
 
-Windows support is deferred until the root cause can be identified and resolved. The library builds and runs correctly on:
+Every crash recorded above happened inside OpenTaxSolver: in `evaluate_form`
+running an OTS `main()`, or in MSVC compiling the OTS amalgamation. None was in
+the Rust graph backend.
 
-- Linux (x86_64)
-- macOS (x86_64 and arm64)
+A November 2026 probe on GitHub's `windows-latest` runner confirmed that the
+graph backend is clean on Windows:
+
+- With OTS left out, the graph extension built with MSVC on CPython 3.10, 3.13
+  and 3.15, both with `uv build` and with cibuildwheel.
+- The graph crate's `cargo test` passed.
+- The installed wheel evaluated federal, California and New York returns with
+  output byte-identical to Linux.
+
+So Windows builds are graph-only: `setup.py` never compiles OTS on Windows. A
+graph-only install computes the 2024 and 2025 graph returns, and every route
+into OTS raises `BackendUnavailableError`, naming the reason. Running OTS
+itself on Windows stays deferred until the crash root cause is found.
 
 ## Related Issues
 

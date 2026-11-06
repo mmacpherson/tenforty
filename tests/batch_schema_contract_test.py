@@ -66,7 +66,8 @@ GRID = {
     "qbi_is_sstb": [False, True],
     "self_employment_income": 10_000.0,
 }
-BACKENDS = ["ots", "graph", "auto"]
+# backend="auto" routes the CA and NY rows to OTS.
+BACKENDS = ["ots", "graph", pytest.param("auto", marks=pytest.mark.requires_ots)]
 
 
 def _request_rows(call: dict, mode: str) -> list[dict]:
@@ -142,6 +143,7 @@ def test_frame_schema_order_and_echo(backend, mode):
 
 
 @pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.requires_ots
 def test_backends_agree_on_everything_but_values(mode):
     """OTS and graph frames differ only in output values."""
     call = GRID if mode == "cross" else {"w2_income": [1.0, 2.0], "year": 2025}
@@ -151,6 +153,7 @@ def test_backends_agree_on_everything_but_values(mode):
     assert ots.select(INPUT_COLUMNS).equals(graph.select(INPUT_COLUMNS))
 
 
+@pytest.mark.requires_ots
 def test_mixed_year_auto_frame_has_one_schema():
     """A frame mixing engines needs no dtype inference."""
     call = {"year": [2022, 2024], "w2_income": [40_000, 90_000], "qbi_is_sstb": True}
@@ -208,6 +211,7 @@ def test_failed_rows_keep_the_schema(monkeypatch, mode):
     assert frame["assumptions"][0] is None
 
 
+@pytest.mark.requires_ots
 def test_scalar_and_batch_agree_on_output_fields():
     """A one-row batch carries the same outputs as evaluate_return."""
     for backend in ("ots", "graph"):
@@ -219,7 +223,13 @@ def test_scalar_and_batch_agree_on_output_fields():
             assert row[field] == pytest.approx(getattr(scalar, field)), field
 
 
-KINDS = ["empty", "success", "failed", "mixed"]
+# A "mixed" batch carries a 2022 row, which only OTS computes.
+KINDS = [
+    "empty",
+    "success",
+    "failed",
+    pytest.param("mixed", marks=pytest.mark.requires_ots),
+]
 
 
 def _call_for(kind: str, mode: str, backend: str) -> dict:

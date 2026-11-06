@@ -956,6 +956,7 @@ def test_f36_withholds_auto_when_ots_takes_the_standard_deduction(year):
     assert _f36_ots_schedule_a_with_negative_agi("ots", auto, {"agi": -2_916.0}) == {}
 
 
+@pytest.mark.requires_ots
 def test_ots_auto_itemizing_matches_forced_itemizing_live():
     """Astra's probe: OTS itemizes under Auto exactly as when forced (AST-59)."""
     from tenforty import evaluate_return
@@ -986,6 +987,7 @@ ZERO_TI_CASES = [
 
 
 @pytest.mark.parametrize(("update", "zero"), ZERO_TI_CASES)
+@pytest.mark.requires_ots
 def test_ots_zero_taxable_income_classifier_matches_ots(update, zero):
     """2025 Single, wages 25,000 (tips inside them), dividends 5,000, ISO 200,000."""
     from tenforty import evaluate_return
@@ -1052,6 +1054,7 @@ MFS_SALT_WITNESSES = [
 
 
 @pytest.mark.parametrize("update", MFS_SALT_WITNESSES)
+@pytest.mark.requires_ots
 def test_ots_mfs_salt_worksheet_keeps_line_15_positive(update):
     """The classifier and F27 follow OTS's MFS worksheet, not a $500,000 base."""
     from tenforty import evaluate_return

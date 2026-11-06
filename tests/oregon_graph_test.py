@@ -305,6 +305,7 @@ def test_regular_dependent_count_adds_to_status_base(year, credit, status, depen
 
 
 @pytest.mark.parametrize("year,taxable", [(2024, 7505), (2025, 7330)])
+@pytest.mark.requires_ots
 def test_ots_joint_regular_exemptions_zero_the_published_row_tax(year, taxable):
     """Archived J rows 359/349 are below the two regular credits 498/512."""
     kwargs = dict(

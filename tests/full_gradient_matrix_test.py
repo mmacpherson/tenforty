@@ -253,6 +253,7 @@ def _known_ots_qbi_gap(
 
 
 @skip_if_graph_unavailable
+@pytest.mark.requires_ots
 def test_full_gradient_matrix_agrees_with_bounded_ots_oracle():
     """Graph derivatives agree with OTS finite differences outside known gaps.
 

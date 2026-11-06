@@ -220,6 +220,7 @@ OTS_STATES_READING_FEDERAL_SCHEDULE_A = [
 @pytest.mark.parametrize(
     "schedule_a", [{"itemized_deductions": 20_000}, {"state_and_local_taxes": 5_000}]
 )
+@pytest.mark.requires_ots
 def test_ots_refuses_forced_standard_where_the_state_reads_schedule_a(
     year, state, schedule_a
 ):
@@ -241,6 +242,7 @@ def test_ots_refuses_forced_standard_where_the_state_reads_schedule_a(
 
 
 @pytest.mark.parametrize(("year", "state"), OTS_STATES_READING_FEDERAL_SCHEDULE_A)
+@pytest.mark.requires_ots
 def test_ots_accepts_those_states_without_schedule_a_or_with_auto(year, state):
     """The refusal is limited to the case the state program cannot represent."""
     common = dict(
@@ -251,6 +253,7 @@ def test_ots_accepts_those_states_without_schedule_a_or_with_auto(year, state):
     evaluate_return(standard_or_itemized="Auto", itemized_deductions=20_000, **common)
 
 
+@pytest.mark.requires_ots
 def test_ots_batch_refuses_forced_standard_before_computing():
     """A batch is refused whole, like the graph backend's unsupported inputs."""
     with pytest.raises(UnsupportedInputError, match="standard_or_itemized"):

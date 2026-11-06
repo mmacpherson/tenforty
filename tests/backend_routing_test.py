@@ -32,7 +32,14 @@ def _expected_engine(backend: str, year: int) -> str | None:
 
 
 YEAR_BACKEND_CASES = [
-    pytest.param(year, backend, id=f"{year}-{backend}")
+    pytest.param(
+        year,
+        backend,
+        id=f"{year}-{backend}",
+        marks=pytest.mark.requires_ots
+        if _expected_engine(backend, year) == "ots"
+        else (),
+    )
     for year in ALL_YEARS
     for backend in ("auto", "ots", "graph")
 ]
@@ -152,6 +159,7 @@ def test_omitted_backend_routes_as_auto(engine_calls, year, state, engine):
     assert isinstance(instance, OTSBackend if engine == "ots" else GraphBackend)
 
 
+@pytest.mark.requires_ots
 def test_omitted_backend_equals_explicit_auto():
     """The default is "auto" itself, not a look-alike."""
     for year, state in ((2025, None), (2024, "MS"), (2024, "CA"), (2022, None)):
@@ -170,6 +178,7 @@ def test_omitted_backend_refuses_what_auto_refuses(engine_calls, year):
 
 
 @pytest.mark.parametrize("year", GRAPH_DEFAULT_YEARS)
+@pytest.mark.requires_ots
 def test_explicit_backends_are_unchanged_by_the_default(engine_calls, year):
     """backend="ots" stays OTS and backend="graph" stays graph in graph years."""
     tenforty.evaluate_return(year=year, w2_income=80_000, backend="ots")
@@ -270,6 +279,7 @@ def _assert_outputs_match(frame: pl.DataFrame, expected: list[dict]) -> None:
             assert got[field] == pytest.approx(value), field
 
 
+@pytest.mark.requires_ots
 def test_mixed_year_auto_zip_batch_keeps_row_identity(engine_calls):
     """Each zip row is evaluated by its year's engine and stays in place."""
     rows = [
@@ -299,6 +309,7 @@ def test_mixed_year_auto_zip_batch_keeps_row_identity(engine_calls):
     _assert_outputs_match(frame, _scalar_rows(rows))
 
 
+@pytest.mark.requires_ots
 def test_mixed_year_auto_cross_batch_groups_years_in_request_order(engine_calls):
     """Cross rows run year-major in the requested year order, each on its engine."""
     years = [2025, 2021, 2024]
@@ -325,6 +336,7 @@ def test_mixed_year_auto_cross_batch_groups_years_in_request_order(engine_calls)
     )
 
 
+@pytest.mark.requires_ots
 def test_single_backend_auto_batch_matches_explicit_backend():
     """Auto over one engine yields the same frame as naming that engine."""
     for year, state, explicit in ((2022, "CA", "ots"), (2024, "MS", "graph")):
@@ -337,6 +349,7 @@ def test_single_backend_auto_batch_matches_explicit_backend():
         )
 
 
+@pytest.mark.requires_ots
 def test_out_of_scope_graph_state_routes_to_ots(monkeypatch, engine_calls):
     """The per-state hook sends an out-of-scope state to OTS under auto."""
     monkeypatch.setattr(
@@ -466,6 +479,7 @@ def test_graph_batches_pass_every_return_input():
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
 @pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.requires_ots
 def test_later_group_unsupported_input_refuses_before_any_group_runs(
     engine_calls, mode, on_error
 ):
@@ -486,6 +500,7 @@ def test_later_group_unsupported_input_refuses_before_any_group_runs(
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.requires_ots
 def test_earlier_engine_failure_cannot_mask_a_later_refusal(monkeypatch, mode):
     """The contract error wins even when an earlier group's engine would fail."""
     from tenforty import UnsupportedInputError
@@ -519,6 +534,7 @@ def test_later_row_validation_error_refuses_before_any_row_runs(engine_calls, on
     assert engine_calls == []
 
 
+@pytest.mark.requires_ots
 def test_batch_preflight_uses_the_graph_support_rule(monkeypatch, engine_calls):
     """The preflight asks graph's own rule, not a second copy of it."""
     from tenforty.backends import graph
@@ -570,6 +586,7 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
     assert len(results["total_tax"]) == 1
 
 
+@pytest.mark.requires_ots
 def test_default_backend_applies_the_state_facts_contract(engine_calls):
     """Under the "auto" default, facts follow routing and are never a reroute.
 

@@ -8,6 +8,7 @@ state is in graph scope (``graph_scope``), and OTS otherwise.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Literal
 
 from .graph_scope import exclusion_reasons, graph_state_in_scope
@@ -131,3 +132,57 @@ def select_backend(backend: str, year: object, state: object) -> Engine:
         if ots_covers(tax_year, tax_state):
             return "ots"
     raise _refuse(backend, tax_year, tax_state)
+
+
+def _where(year: int, state: OTSState | None) -> str:
+    return f"{year} federal" if state is None else f"{year}/{state.value}"
+
+
+def _the_returns(wheres: list[str]) -> str:
+    if len(wheres) == 1:
+        return f"the {wheres[0]} return"
+    return f"the {', '.join(wheres[:-1])} and {wheres[-1]} returns"
+
+
+def explain_ots_route(backend: str, groups: Iterable[tuple[object, object]]) -> str:
+    """Say why these returns need OTS, and what the graph backend can do instead.
+
+    Used when the OTS backend is not installed, so that the error names the
+    returns that need it and the remedy, if there is one.
+    """
+    off_graph: list[str] = []
+    not_validated: list[str] = []
+    graph_capable: list[str] = []
+    for year, state in groups:
+        tax_year = _year_value(year)
+        tax_state = _state_value(state)
+        where = _where(tax_year, tax_state)
+        if not graph_covers(tax_year, tax_state):
+            off_graph.append(where)
+        elif backend == "auto":
+            reasons = exclusion_reasons(tax_state, tax_year)
+            not_validated.append(f"{where} ({', '.join(reasons)})")
+        else:
+            graph_capable.append(where)
+
+    sentences = []
+    if off_graph:
+        verb = "needs" if len(off_graph) == 1 else "need"
+        sentences.append(
+            f"The graph backend covers tax years {_years_text(GRAPH_YEARS)} and "
+            f"its states only, so {_the_returns(off_graph)} {verb} OTS."
+        )
+    if not_validated:
+        it = "it" if len(not_validated) == 1 else "them"
+        sentences.append(
+            f"backend='auto' keeps {_the_returns(not_validated)} off the graph "
+            f"backend, which is not yet validated for {it}; backend='graph' "
+            f"computes {it} on the graph backend anyway."
+        )
+    if graph_capable:
+        it = "it" if len(graph_capable) == 1 else "them"
+        sentences.append(
+            f"backend='ots' was requested for {_the_returns(graph_capable)}; "
+            f"backend='graph' or backend='auto' computes {it} on the graph backend."
+        )
+    return " ".join(sentences)

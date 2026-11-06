@@ -17,8 +17,8 @@ import dotenv
 import polars as pl
 from pydantic import TypeAdapter
 
-from . import otslib
 from . import state_facts as _facts
+from ._ots_extension import load_otslib
 from .models import (
     FINITE_FLOAT_COLUMNS,
     LEGACY_ITEMIZED_MESSAGE,
@@ -31,6 +31,7 @@ from .models import (
     SUBORDINATE_FORM_CONFIG,
     TAX_RETURN_FLOAT_FIELDS,
     Assumption,
+    BackendUnavailableError,
     FederalItemized,
     InterpretedTaxReturn,
     LegacyItemizedDeductionsWarning,
@@ -50,7 +51,13 @@ from .models import (
     UnsupportedReturnError,
     validate_on_error,
 )
-from .routing import BackendChoice, Engine, graph_covers, select_backend
+from .routing import (
+    BackendChoice,
+    Engine,
+    explain_ots_route,
+    graph_covers,
+    select_backend,
+)
 from .state_facts import StateFacts
 
 dotenv.load_dotenv()
@@ -97,6 +104,14 @@ def get_logger(name: str = "tenforty") -> logging.Logger:
 
 
 logger = get_logger(__name__)
+
+
+def __getattr__(name: str) -> Any:
+    """Import the OTS extension only when ``core.otslib`` is read."""
+    if name == "otslib":
+        return load_otslib()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 _AMT_PREFIX = "Your Alternative Minimum Tax"
 _AMT_RE = re.compile(r"Your Alternative Minimum Tax =\s*(\d+(\.\d+)?)")
@@ -338,6 +353,7 @@ def evaluate_form(
         dict of parsed return values.
 
     """
+    load_otslib()
     if federal_form_values is None:
         federal_form_values = {}
 
@@ -351,7 +367,7 @@ def evaluate_form(
 
     form_text = generate_ots_return(federal_form_values, federal_form_config)
     logger.debug(f"Raw Federal OTS Input:\n{form_text}")
-    ots_output = otslib._evaluate_form(
+    ots_output = load_otslib()._evaluate_form(
         year, federal_form_id, form_text, on_error=on_error
     )
     logger.debug(f"Raw Federal OTS Output:\n{ots_output}")
@@ -377,7 +393,7 @@ def evaluate_form(
         state_form_config,
     )
     logger.debug(f"Raw State OTS Input:\n{state_form_text}")
-    state_output = otslib._evaluate_form(
+    state_output = load_otslib()._evaluate_form(
         year,
         state_form_id,
         state_form_text,
@@ -479,7 +495,7 @@ def _evaluate_subordinate(
     form_text = generate_ots_return(form_values, form_config)
     logger.debug(f"Raw {form_id} OTS Input:\n{form_text}")
     dispatch_id = _FORM_DISPATCH_ALIASES.get(form_id, form_id)
-    ots_output = otslib._evaluate_form(
+    ots_output = load_otslib()._evaluate_form(
         year,
         dispatch_id,
         form_text,
@@ -724,6 +740,7 @@ def evaluate_natural_input_form(
     on_error: str = "raise",
 ) -> dict[str, Any]:
     """Evaluate OTS return, starting from natural input."""
+    load_otslib()
     require_ots_supports(year.value, state, natural_form_values)
     federal_form_id = "US_1040"
     federal_natural_config = NATURAL_FORM_CONFIG.get((year.value, federal_form_id))
@@ -786,7 +803,7 @@ def evaluate_natural_input_form(
         preliminary_form_text = generate_ots_return(
             federal_form_values, federal_form_config
         )
-        preliminary_output = otslib._evaluate_form(
+        preliminary_output = load_otslib()._evaluate_form(
             year.value,
             federal_form_id,
             preliminary_form_text,
@@ -909,10 +926,24 @@ def evaluate_natural_input_form(
     )
 
 
-def _require_available(engine: Engine) -> None:
+def _require_available(
+    engine: Engine, backend: str, groups: Iterable[tuple[object, object]]
+) -> None:
+    """Raise before evaluation if the engine is not installed.
+
+    An OTS refusal names the returns that need OTS and what the graph backend
+    could do instead.
+    """
     from .backends import require_available
 
-    require_available(engine)
+    try:
+        require_available(engine)
+    except BackendUnavailableError as error:
+        if engine != "ots":
+            raise
+        raise BackendUnavailableError(
+            f"{error} {explain_ots_route(backend, groups)}"
+        ) from None
 
 
 def _warn_failed(engine: Engine, tax_input: TaxReturnInput, error: Exception) -> None:
@@ -1009,7 +1040,7 @@ def _evaluate_with_engine(
                 )
             }
         )
-    except UnsupportedReturnError:
+    except (UnsupportedReturnError, BackendUnavailableError):
         raise
     except Exception as error:
         if policy == OTSErrorPolicy.RAISE:
@@ -1160,13 +1191,13 @@ def evaluate_return(
     engine = select_backend(backend, input_data.year, input_data.state)
     row = replace(row, engine=engine)
     _check_routed_facts(models, [row])
+    _require_available(engine, backend, [(input_data.year, input_data.state)])
     if engine == "ots":
         require_ots_supports(
             input_data.year.value,
             input_data.state,
             input_data.model_dump(exclude={"year", "state"}),
         )
-    _require_available(engine)
     _attach_facts(input_data, models, row)
     return _evaluate_with_engine(input_data, engine, policy, row)
 
@@ -1482,7 +1513,11 @@ def evaluate_returns(
         ],
     )
     for engine in dict.fromkeys(engines.values()):
-        _require_available(engine)
+        _require_available(
+            engine,
+            backend,
+            [group for group, routed in engines.items() if routed == engine],
+        )
 
     if mode == "cross":
         group_params = {
@@ -1764,7 +1799,7 @@ def _graph_batch_outputs(
             {field: batch[field][i] for field in (*_OUTPUT_COLUMNS, FEDERAL_ITEMIZES)}
             for i in range(len(rows))
         ]
-    except UnsupportedReturnError:
+    except (UnsupportedReturnError, BackendUnavailableError):
         raise
     except Exception as error:
         _graph_batch_failed(error, policy, year, state)

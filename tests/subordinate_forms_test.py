@@ -169,6 +169,7 @@ def test_se_tax_single_w2_and_se():
 SE_60K_NET = 60_000 * 0.9235  # Schedule SE line 6: net earnings = 55,410
 
 
+@pytest.mark.requires_ots
 def test_se_tax_single_no_w2_taxes_all_se_earnings():
     """With no wages the whole wage base is free, so all net SE earnings bear the 12.4%."""
     r = evaluate_return(
@@ -180,6 +181,7 @@ def test_se_tax_single_no_w2_taxes_all_se_earnings():
     assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
 
 
+@pytest.mark.requires_ots
 def test_se_tax_single_w2_partially_consumes_ss_wage_base():
     """Wages below the base leave a remainder; only that remainder bears the 12.4%."""
     r = evaluate_return(
@@ -195,6 +197,7 @@ def test_se_tax_single_w2_partially_consumes_ss_wage_base():
     assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
 
 
+@pytest.mark.requires_ots
 def test_se_tax_single_w2_fully_consumes_ss_wage_base():
     """Wages at the base leave nothing; only the 2.9% Medicare portion remains."""
     r = evaluate_return(
@@ -209,6 +212,7 @@ def test_se_tax_single_w2_fully_consumes_ss_wage_base():
     assert r.federal_se_tax == pytest.approx(expected, abs=0.01)
 
 
+@pytest.mark.requires_ots
 def test_se_tax_single_is_monotone_nonincreasing_in_w2():
     """More of the filer's own wages can only shrink the OASDI slice, never grow it."""
     taxes = [
@@ -225,6 +229,7 @@ def test_se_tax_single_is_monotone_nonincreasing_in_w2():
     assert taxes[0] > taxes[-1], "SE tax must fall once wages start filling the base"
 
 
+@pytest.mark.requires_ots
 def test_se_tax_mfj_w2_aggregate_does_not_fill_one_spouses_wage_base():
     """MFJ w2_income is a HOUSEHOLD aggregate and must not fill one spouse's line 8a.
 
@@ -268,6 +273,7 @@ def test_se_tax_graph_batch_matches_single():
     assert batch["federal_se_tax"][0] == pytest.approx(single, abs=0.01)
 
 
+@pytest.mark.requires_ots
 def test_se_tax_single_w2_consumes_wage_base_in_2025_too():
     """The 2025 config carries the same line 8a mapping."""
     high = evaluate_return(
@@ -484,6 +490,7 @@ def test_new_fields_default_zero():
 # === OTS Backend Tests ===
 
 
+@pytest.mark.requires_ots
 def test_ots_se_tax_fires():
     """OTS: Self-employment income should produce SE tax."""
     r = evaluate_return(
@@ -498,6 +505,7 @@ def test_ots_se_tax_fires():
     )
 
 
+@pytest.mark.requires_ots
 def test_ots_additional_medicare_fires():
     """OTS: Additional Medicare Tax should fire for high-wage earner."""
     r = evaluate_return(
@@ -515,6 +523,7 @@ def test_ots_additional_medicare_fires():
     )
 
 
+@pytest.mark.requires_ots
 def test_ots_niit_fires_high_income():
     """OTS: NIIT should fire for high-income filer with investment income."""
     r = evaluate_return(
@@ -531,6 +540,7 @@ def test_ots_niit_fires_high_income():
     )
 
 
+@pytest.mark.requires_ots
 def test_ots_all_subordinate_taxes_fire():
     """OTS: A high-income return should show all three subordinate taxes."""
     r = evaluate_return(
@@ -550,6 +560,7 @@ def test_ots_all_subordinate_taxes_fire():
     ), "Total tax should exceed sum of subordinate taxes (includes income tax too)"
 
 
+@pytest.mark.requires_ots
 def test_ots_subordinate_both_years():
     """OTS: Subordinate taxes should work for both 2024 and 2025."""
     for year in (2024, 2025):
@@ -597,6 +608,7 @@ def test_decomposition_invariant_graph():
     )
 
 
+@pytest.mark.requires_ots
 def test_decomposition_invariant_ots():
     """OTS: federal_income_tax + subordinate taxes == federal_total_tax."""
     r = evaluate_return(
@@ -625,6 +637,7 @@ def test_decomposition_invariant_ots():
 # === Form 8959 SE Income Tests ===
 
 
+@pytest.mark.requires_ots
 def test_form_8959_se_income_ots():
     """OTS: Form 8959 should account for SE income exceeding threshold."""
     r = evaluate_return(

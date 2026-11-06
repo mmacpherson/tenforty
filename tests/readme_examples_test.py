@@ -126,6 +126,7 @@ def test_readme_has_examples_and_shown_outputs():
 
 
 @pytest.mark.requires_graph
+@pytest.mark.requires_ots
 def test_every_readme_block_runs_and_shows_its_output():
     """Run the README top to bottom; check each shown output and plot."""
     matplotlib.use("Agg")
@@ -150,3 +151,44 @@ def test_every_readme_block_runs_and_shows_its_output():
             elif kind == "image" and not text.startswith("http"):
                 assert (README.parent / text).is_file(), text
     assert checked >= 2
+
+
+# The README blocks that need OTS. On a graph-only install (every Windows
+# wheel) they raise BackendUnavailableError: blocks 1, 2 and 5 are CA returns,
+# which backend="auto" keeps on OTS, block 4 spans 2018-2023, and block 7 asks
+# for backend="ots".
+README_OTS_BLOCKS = frozenset({1, 2, 4, 5, 7})
+
+
+@pytest.mark.requires_graph
+def test_readme_on_a_graph_only_install(graph_only_install):
+    """Graph-only: the OTS blocks refuse, typed; every other block still matches."""
+    from tenforty import BackendUnavailableError
+
+    matplotlib.use("Agg")
+    namespace: dict = {"__name__": "readme"}
+    last_value: object = None
+    block = 0
+    refused: set[int] = set()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FutureWarning)
+        for kind, text in _segments():
+            if kind == "python":
+                block += 1
+                try:
+                    last_value = _run(text, namespace)
+                except BackendUnavailableError:
+                    refused.add(block)
+                    continue
+                if isinstance(last_value, so.Plot):
+                    last_value.plot()
+            elif block in refused:
+                continue
+            elif kind == "value":
+                _assert_value_matches(text, last_value, block)
+            elif kind == "table":
+                _assert_table_matches(text, last_value, block)
+    assert refused == README_OTS_BLOCKS, (
+        "update README_OTS_BLOCKS to the README blocks that need OTS"
+    )
+    assert block > len(README_OTS_BLOCKS)

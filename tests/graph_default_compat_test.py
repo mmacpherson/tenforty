@@ -24,7 +24,6 @@ import polars as pl
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
-from tenforty.backends import available_backends
 from tenforty.graph_scope import IN_SCOPE, exclusion_reasons
 from tenforty.models import (
     METADATA_OUTPUT_FIELDS,
@@ -42,10 +41,7 @@ from tests.parity.state_parity_policy import (
     OR_TAX_TABLE_TOLERANCE,
 )
 
-pytestmark = pytest.mark.skipif(
-    not {"ots", "graph"} <= set(available_backends()),
-    reason="both backends required",
-)
+pytestmark = pytest.mark.requires_ots
 
 YEARS = (2024, 2025)
 STATUSES = ("Single", "Married/Joint", "Married/Sep", "Head_of_House", "Widow(er)")

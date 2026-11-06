@@ -13,22 +13,7 @@ import pytest
 from tenforty.core import evaluate_form
 
 
-def _ots_available():
-    try:
-        from tenforty.backends import OTSBackend
-
-        return OTSBackend().is_available()
-    except ImportError:
-        return False
-
-
-skip_if_ots_unavailable = pytest.mark.skipif(
-    not _ots_available(),
-    reason="OTS backend required",
-)
-
-
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 class TestMI1040LineShift:
     """MI_1040 owe/refund amounts should appear on the correct output lines.
 
@@ -94,7 +79,7 @@ class TestMI1040LineShift:
         )
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 class TestForm6781:
     """Form 6781 (Section 1256 Contracts and Straddles) availability test.
 
