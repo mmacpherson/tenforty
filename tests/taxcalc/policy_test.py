@@ -1100,3 +1100,55 @@ def test_drift_guard_names_the_classifier_on_a_positive_line_15():
         zero_taxable_income_drift("graph", case, reference, {"taxable_income": 5.0})
         == []
     )
+
+
+def test_stored_goldens_path_reports_zero_taxable_income_drift(monkeypatch):
+    """tenforty-eero: unexcused_violations runs the drift guard, as the live path does.
+
+    The case makes F27 fire (AGI 17,322 is below the $21,900 standard
+    deduction); a faked OTS row with positive taxable income must be reported
+    as mirror drift, and a zero-income row must not.
+    """
+    from . import taxcalc_policy
+
+    case = _case(
+        year=2024,
+        status="Head_of_House",
+        ord_div=17_322.0,
+        qual_div=17_322.0,
+        iso=200_000.0,
+        itemized=0.0,
+        std_or_item="Auto",
+    )
+    expected = {
+        "agi": 17_322.0,
+        "taxable_income": 0.0,
+        "se_tax": 0.0,
+        "niit": 0.0,
+        "addl_medicare": 0.0,
+        "amt": 29_718.0,
+        "income_tax": 29_718.0,
+        "total_tax": 29_718.0,
+    }
+
+    def components(taxable_income):
+        return lambda case, backend: dict(
+            expected,
+            taxable_income=taxable_income,
+            deduction_taken=21_900.0,
+        )
+
+    monkeypatch.setattr(taxcalc_policy, "evaluate_components", components(5.0))
+    drift = [
+        v
+        for v in taxcalc_policy.unexcused_violations(case, "ots", expected, None)
+        if "drift" in v
+    ]
+    assert len(drift) == 1 and "F27" in drift[0]
+
+    monkeypatch.setattr(taxcalc_policy, "evaluate_components", components(0.0))
+    assert not [
+        v
+        for v in taxcalc_policy.unexcused_violations(case, "ots", expected, None)
+        if "drift" in v
+    ]
