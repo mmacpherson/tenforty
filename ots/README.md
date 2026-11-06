@@ -43,12 +43,13 @@ namespace OpenTaxSolver2018 {
   namespace taxsolve_MA_1_2018 { // I.e. Massachusetts solver ...
 ```
 
-At this writing, the only modifications to the original sources are:
+Due to the amalgamation into a single file, we `#undef` each of the `#defines`
+before exiting the namespace, to avoid collisions.
 
-1. Due the amalgamation into a single file, we `#undef` each of the `#defines`
-   before exiting the namespace, to avoid collisions.
-2. One function in `taxsolve_routines.c` uses `new` as a variable name, which is
-   a reserved word in C++. We rename that variable `_new` in the amalgamation.
+Beyond that restructuring, every change to OTS source is a registered
+portability or memory-safety patch: see `ots_patches.py` and
+[docs/ots-patches.md](../docs/ots-patches.md). `amalgamate.py` applies only
+registered patches, and stops if one matches other than its entry expects.
 
 ### Source File Guide
 

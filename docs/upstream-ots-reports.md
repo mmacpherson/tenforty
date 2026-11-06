@@ -130,7 +130,8 @@ The same shape applies to 2023 (`20800.0`) and 2025 (`23625.0`).
 
 **Note on our copy:** because this one is a memory-safety defect rather than a
 tax-logic disagreement, we do apply it locally, as a narrow and documented
-exception, via `patch_az_widow_std_deduction` in `ots/amalgamate.py`. We would
+exception, via `patch_az_widow_std_deduction` in `ots/amalgamate.py` (registry entry
+OTS-P5, `docs/ots-patches.md`). We would
 much rather drop that patch and track the release.
 
 ---
@@ -528,8 +529,9 @@ Two things here look different from the 2025 Schedule 1-A Part IV as we read it:
 ```
 
 The last line is a separate cosmetic slip: the line-29 amount is printed under
-the `S1A_20` label. tenforty relabels that output line locally
-(`patch_sched1a_line29_label`), which changes no computed figure.
+the `S1A_20` label. tenforty used to relabel that output line locally; it no
+longer does (2026-11-06), because a relabel is neither portability nor memory
+safety (see `docs/ots-patches.md`). No figure tenforty returns reads it.
 
 Not patched locally. Recorded as strict-xfails (`tests/obbba_2025_test.py`,
 cases C-1 and C-2).

@@ -29,12 +29,31 @@ Patching the vendored source instead would fork it invisibly: our tree would
 silently diverge from the upstream we claim to wrap, with nothing in the OTS
 release to show for it.
 
-**The narrow exception is portability and memory safety** — making the source
-compile and not read out of bounds, without changing any computed figure. The
-existing patch functions are of this kind: C99→C++ shims, and
-`patch_az_widow_std_deduction` for an out-of-bounds array read. Anything in this
-category still gets reported upstream, and the patch function carries a docstring
-saying why it qualifies.
+**The narrow exception is portability and memory safety**, without changing any
+computed figure:
+
+- **Portability** covers exactly two things: (i) making the source compile, and
+  (ii) the narrow executable-to-library control-flow adaptation, where an entry
+  point returns an error instead of terminating the host process. Nothing else
+  counts. State resets are explicitly **not** portability.
+- **Memory safety** means not reading or writing out of bounds or uninitialised
+  memory.
+
+**Any vendored patch needs a registry entry, a witness and an upstream report.**
+- The registry entry goes in `ots/ots_patches.py` and names the class
+  (`portability` or `memory-safety`, nothing else), scope, exact match counts,
+  effect on figures, status and witnesses.
+- The witness is a source witness in `tests/ots_patch_registry_test.py` that
+  finds the defect in the unpatched tarball source, plus a behavioral witness
+  where feasible.
+- The upstream report is drafted in `docs/upstream-ots-reports.md`, or the
+  entry says why a portability change needs none.
+- A test rejects an unregistered patch function, and regeneration stops if a
+  patch matches other than its entry says.
+
+When a release fixes the defect, the witness fails and says to retire the
+entry. [docs/ots-patches.md](docs/ots-patches.md) has the registry and the
+lifecycle.
 
 Before deciding a finding is upstream's, check whether it is actually **ours**:
 the mapping layer (`models.py` input maps, `core.py` activation and

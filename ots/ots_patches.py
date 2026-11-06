@@ -1,0 +1,423 @@
+"""Registry of every change ``amalgamate.py`` makes to vendored OpenTaxSolver.
+
+We vendor OpenTaxSolver; we do not fork it. The only changes allowed to its
+source are portability (making it compile and run as an in-process C++
+library) and memory safety (not reading or writing out of bounds or
+uninitialised memory), and only when the change alters no figure that OTS
+computes on a platform where the original is well defined. See ``AGENTS.md``
+and ``docs/ots-patches.md``.
+
+Each patch has one entry here. The entry says what the patch is for, where it
+applies, how many times it must match in each program and year, and which
+tests witness the defect in the unpatched upstream source. ``amalgamate.py``
+applies only active entries, in registry order, and fails if a patch matches
+other than the registry expects. ``tests/ots_patch_registry_test.py`` keeps
+the registry, the patch functions and the tracked tarballs in agreement, and
+renders ``docs/ots-patches.md``.
+
+This module is data. It imports nothing from ``amalgamate.py``.
+"""
+
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from typing import Literal
+
+PENDING_REMOVAL_CLASS = "none: state restoration, slated for removal"
+PatchClass = Literal[
+    "portability",
+    "memory-safety",
+    "none: state restoration, slated for removal",
+]
+PatchStatus = Literal[
+    "active",
+    "reported-upstream",
+    "fixed-upstream",
+    "pending-replacement",
+    "retired",
+]
+
+PATCH_CLASSES: tuple[str, ...] = ("portability", "memory-safety")
+PATCH_STATUSES: tuple[str, ...] = (
+    "active",
+    "reported-upstream",
+    "fixed-upstream",
+    "pending-replacement",
+    "retired",
+)
+APPLIED_STATUSES: tuple[str, ...] = (
+    "active",
+    "reported-upstream",
+    "fixed-upstream",
+    "pending-replacement",
+)
+EVERY_FORM_PROGRAM = "*"
+TRACKED_YEARS: tuple[int, ...] = tuple(range(2018, 2026))
+
+
+@dataclass(frozen=True)
+class OtsPatch:
+    """One change to vendored OpenTaxSolver source, and the evidence for it.
+
+    ``matches`` maps a tax year to the programs the patch changes that year
+    and how many matches it makes in each (the unit is the patch function's
+    own count, named in ``match_unit``). A program name is the OTS program
+    without its year (``AZ_140``, ``routines`` for taxsolve_routines.c), or
+    ``"*"`` for every form program, which is every program but the routines.
+    Any program and year not listed must match zero times.
+
+    ``witnesses`` are source witnesses: tests that find the defect pattern in
+    the unpatched release source. ``behavioral_witnesses`` are tests that
+    show the defect change a result when the unpatched program runs (for an
+    uninitialised read, compiling it with clang's
+    ``-ftrivial-auto-var-init=pattern`` against ``=zero`` makes the read
+    deterministic). A behavioral witness skips, never fails, when its
+    toolchain is missing. ``witness_depends_on`` names entries whose patches
+    a witness must apply first, because the unpatched program fails earlier
+    on their defect.
+
+    ``function`` is ``None`` only for a retired entry: the patch function has
+    been removed, and the entry stays as the history record. A retired
+    entry's witnesses assert the defect stays absent, so they fail if a
+    tarball regresses and the patch has to be restored.
+    """
+
+    id: str
+    function: str | None
+    patch_class: PatchClass
+    summary: str
+    scope: str
+    matches: Mapping[int, Mapping[str, int]]
+    match_unit: str
+    effect: str
+    status: PatchStatus
+    upstream: str
+    witnesses: tuple[str, ...]
+    behavioral_witnesses: tuple[str, ...] = ()
+    witness_depends_on: tuple[str, ...] = ()
+    retired: str | None = None
+    replacement: str | None = None
+    note: str | None = None
+    history: tuple[str, ...] = field(default=())
+
+    def expected_matches(self, year: int, program: str) -> int:
+        """How many matches the patch must make in ``program`` for ``year``."""
+        by_program = self.matches.get(year, {})
+        if program in by_program:
+            return by_program[program]
+        if program != "routines":
+            return by_program.get(EVERY_FORM_PROGRAM, 0)
+        return 0
+
+
+def _every_year(by_program: Mapping[str, int]) -> dict[int, Mapping[str, int]]:
+    return {year: by_program for year in TRACKED_YEARS}
+
+
+OTS_PATCHES: tuple[OtsPatch, ...] = (
+    OtsPatch(
+        id="OTS-P1",
+        function="patch_add_pdf_markup",
+        patch_class="portability",
+        summary="Rename the C++ reserved word `new` in `add_pdf_markup`.",
+        scope="taxsolve_routines.c, 2018-2025",
+        matches={
+            **{year: {"routines": 9} for year in (2018, 2019, 2020)},
+            **{year: {"routines": 14} for year in (2021, 2022, 2023, 2024, 2025)},
+        },
+        match_unit="whole-word `new` tokens renamed `_new` in the function body",
+        effect=(
+            "None on any platform: a local identifier is renamed consistently "
+            "within one function, so the compiled code is the same."
+        ),
+        status="active",
+        upstream=(
+            "Not applicable: OTS ships C, where `new` is an ordinary identifier. "
+            "Compiling it as C++ is our choice, not an upstream defect."
+        ),
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P1]",),
+    ),
+    OtsPatch(
+        id="OTS-P2",
+        function="patch_mystrndup_cpp_compat",
+        patch_class="portability",
+        summary="Cast `memset(malloc(...))` to `char*` in `mystrndup`.",
+        scope="taxsolve_routines.c, 2025",
+        matches={2025: {"routines": 1}},
+        match_unit="casts added",
+        effect=(
+            "None on any platform: C converts the `void*` to `char*` implicitly; "
+            "the cast states the same conversion for C++."
+        ),
+        status="active",
+        upstream=(
+            "Not applicable: the implicit `void*` conversion is valid C. "
+            "Compiling it as C++ is our choice."
+        ),
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P2]",),
+    ),
+    OtsPatch(
+        id="OTS-P3",
+        function="patch_exit_to_return",
+        patch_class="portability",
+        summary="Turn `exit(N)` in each program's `main` into a flushed `return N`.",
+        scope="every form program, 2018-2025",
+        matches=_every_year({EVERY_FORM_PROGRAM: 1}),
+        match_unit="`main` bodies rewritten (with no `exit(` left in them)",
+        effect=(
+            "Same error status; no intended change to any successful "
+            "computation. The rewrite touches only the paths where `main` ends "
+            "the program: OTS's `exit` would end the Python process, and the "
+            "`return` hands the Cython wrapper the same status after flushing "
+            "the output file, as `exit` would have."
+        ),
+        status="active",
+        upstream=(
+            "Not applicable: OTS is a set of command-line programs, for which "
+            "`exit` is correct. Running them in-process is our choice."
+        ),
+        witnesses=(
+            "tests/ots_patch_registry_test.py::test_source_witness[OTS-P3]",
+            "tests/ots_patch_registry_test.py::test_exit_rewrite_follows_main_braces_only",
+        ),
+        note=(
+            "Approved as portability by Mike's ruling of 2026-11-06: an entry "
+            "point that returns an error instead of terminating the host process "
+            "is the one control-flow adaptation portability covers. Not "
+            "contained: the 302 `exit()` calls in helper functions outside `main` "
+            "(all years, routines included) still end the interpreter. For "
+            "example, `evaluate_form(year=2024, federal_form_id='US_1040', "
+            "federal_form_values={'L1a': 'not-a-number'})` exits the Python "
+            "process with status 1 and no traceback."
+        ),
+    ),
+    OtsPatch(
+        id="OTS-P4",
+        function="patch_reset_globals",
+        patch_class=PENDING_REMOVAL_CLASS,
+        summary="Reset `do_all_caps` to 0 at the top of each program's `main`.",
+        scope="every form program, 2018-2025",
+        matches=_every_year({EVERY_FORM_PROGRAM: 1}),
+        match_unit="resets inserted",
+        effect=(
+            "None on computed figures: `do_all_caps` only upper-cases imported "
+            "names and paths. A fresh OTS process starts with it 0; the reset "
+            "gives every in-process run that same start, so a later program "
+            "does not read file paths upper-cased by an earlier NC, OH or PA run."
+        ),
+        status="pending-replacement",
+        replacement="tenforty-0qmf",
+        upstream=(
+            "Not applicable: each OTS program runs in a fresh process, where the "
+            "flag starts at 0. Reusing one process is our choice."
+        ),
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P4]",),
+        note=(
+            "Not an allowed class. Mike ruled on 2026-11-06 that a state reset is "
+            "not portability, so the reset moves into the Cython binding in a "
+            "follow-up PR. That PR removes this patch, and its 140 insertions "
+            "change ots_amalgamation.cpp. Until then this is the one entry the "
+            "class test tolerates outside portability and memory-safety."
+        ),
+    ),
+    OtsPatch(
+        id="OTS-P5",
+        function="patch_az_widow_std_deduction",
+        patch_class="memory-safety",
+        summary="Give `getAZStdDedAmt`'s table a Widow(er) row so `status` 5 is in bounds.",
+        scope="AZ_140, 2023-2025",
+        matches={year: {"AZ_140": 2} for year in (2023, 2024, 2025)},
+        match_unit="edits: the resized declaration and the added row",
+        effect=(
+            "None on any well-defined input. Every other filing status reads the "
+            "same row as before. Widow(er) read one element past the end of the "
+            "array, which is undefined (0.0 on Linux, 1.58e85 on macOS), so it "
+            "had no conforming figure to change; the added row carries the "
+            "Head-of-Household amount, which AZ DOR instructions prescribe."
+        ),
+        status="reported-upstream",
+        upstream="docs/upstream-ots-reports.md report 2; draft, not sent.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P5]",),
+        history=(
+            "Applied by hand in PR #268; made a patch function so regeneration keeps it.",
+        ),
+    ),
+    OtsPatch(
+        id="OTS-P6",
+        function="patch_show_fname_init_or_40",
+        patch_class="memory-safety",
+        summary="Guard `combined_name[comb_len - 2]` in `show_fname_init_or_40` with `comb_len >= 2`.",
+        scope="OR_40, 2024",
+        matches={2024: {"OR_40": 1}},
+        match_unit="length guards added",
+        effect=(
+            "None on computed figures: the function only splits a name for the "
+            "printed form. For names of two or more characters the guard is true "
+            "and nothing changes; shorter names read before the string, which is "
+            "undefined."
+        ),
+        status="fixed-upstream",
+        upstream=(
+            "Not reported: OpenTaxSolver2025_23.06 rewrote the function with "
+            "length checks, so only the closed 2024 release has it."
+        ),
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P6]",),
+        note="2024 only. The 2025 program has the rewritten function, so the patch does not match there.",
+        history=("Added in PR #221 with the OR_40 mapping.",),
+    ),
+    OtsPatch(
+        id="OTS-P7",
+        function="patch_f6781_cpp_compat",
+        patch_class="portability",
+        summary='Cast `malloc` and the `BoxN ? "X" : ""` ternaries to `char*` in Form 6781.',
+        scope="f6781, 2025",
+        matches={2025: {"f6781": 5}},
+        match_unit="casts added",
+        effect=(
+            "None on any platform: C converts both implicitly; the casts state the "
+            "same conversions for C++."
+        ),
+        status="active",
+        upstream="Not applicable: both conversions are valid C. Compiling it as C++ is our choice.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P7]",),
+    ),
+    OtsPatch(
+        id="OTS-P8",
+        function=None,
+        patch_class="portability",
+        summary="Translate C99 `restrict` to `__restrict__` (`patch_restrict_keyword`).",
+        scope="taxsolve_routines.c, OpenTaxSolver2025_23.05",
+        matches={},
+        match_unit="none: retired",
+        effect="None: it matched nothing in any tracked tarball once 23.06 replaced 23.05.",
+        status="retired",
+        upstream="Not applicable: `restrict` is valid C99.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P8]",),
+        retired=(
+            "2026-11-06. No tracked release uses `restrict`: OpenTaxSolver2025_23.06 "
+            "dropped it, and removing the patch left ots_amalgamation.cpp unchanged."
+        ),
+        history=("Added in PR #237 for v23.05's `date_rec_to_str`.",),
+    ),
+    OtsPatch(
+        id="OTS-P9",
+        function=None,
+        patch_class="memory-safety",
+        summary="Initialise `ret_stat.err` in `ImportReturnData` (`patch_import_status_init`).",
+        scope="taxsolve_routines.c, 2025",
+        matches={},
+        match_unit="none: retired",
+        effect=(
+            "None: OpenTaxSolver2025_23.06 initialises `ret_stat.err` itself on "
+            "the line after the declaration, so the patch only added a second, "
+            "identical assignment."
+        ),
+        status="retired",
+        upstream="Fixed upstream in OpenTaxSolver2025_23.06; no report needed.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P9]",),
+        retired=(
+            "2026-11-06. Fixed upstream in OpenTaxSolver2025_23.06. Removing the "
+            "patch deletes only the duplicate assignment from ots_amalgamation.cpp."
+        ),
+        history=("Added in PR #221.",),
+    ),
+)
+
+
+def active_patches() -> tuple[OtsPatch, ...]:
+    """Return the entries ``amalgamate.py`` applies, in application order."""
+    return tuple(entry for entry in OTS_PATCHES if entry.status in APPLIED_STATUSES)
+
+
+DOC_START = "<!-- ots-patches:start (generated by ots/ots_patches.py; do not edit) -->"
+DOC_END = "<!-- ots-patches:end -->"
+
+
+def _cell(text: str) -> str:
+    return text.replace("|", "\\|").replace("\n", " ")
+
+
+def _matches_text(entry: OtsPatch) -> str:
+    if not entry.matches:
+        return "none (retired)"
+    by_count: dict[tuple[tuple[str, int], ...], list[int]] = {}
+    for year, programs in sorted(entry.matches.items()):
+        by_count.setdefault(tuple(sorted(programs.items())), []).append(year)
+    parts = []
+    for programs, years in by_count.items():
+        span = f"{years[0]}-{years[-1]}" if len(years) > 1 else str(years[0])
+        named = ", ".join(
+            f"{'every form program' if name == EVERY_FORM_PROGRAM else name} {count}"
+            for name, count in programs
+        )
+        parts.append(f"{span}: {named}")
+    return "; ".join(parts)
+
+
+def _status_text(entry: OtsPatch) -> str:
+    if entry.status == "pending-replacement":
+        return f"active, pending replacement ({entry.replacement})"
+    return entry.status
+
+
+def render_registry() -> str:
+    """Render the registry as Markdown: a summary table, then one section per entry."""
+    lines = [
+        DOC_START,
+        "",
+        "| ID | Patch function | Class | Scope | Status |",
+        "|---|---|---|---|---|",
+    ]
+    for entry in OTS_PATCHES:
+        function = f"`{entry.function}`" if entry.function else "removed"
+        lines.append(
+            f"| {entry.id} | {function} | {entry.patch_class} | "
+            f"{_cell(entry.scope)} | {_status_text(entry)} |"
+        )
+    for entry in OTS_PATCHES:
+        lines += ["", f"### {entry.id}: {entry.summary}", ""]
+        fields = [
+            ("Patch function", f"`{entry.function}`" if entry.function else "removed"),
+            ("Class", entry.patch_class),
+            ("Scope", entry.scope),
+            ("Required matches", f"{_matches_text(entry)} ({entry.match_unit})"),
+            ("Effect on computed figures", entry.effect),
+            ("Status", _status_text(entry)),
+            ("Upstream", entry.upstream),
+            ("Source witnesses", ", ".join(f"`{w}`" for w in entry.witnesses)),
+        ]
+        if entry.behavioral_witnesses:
+            fields.append(
+                (
+                    "Behavioral witnesses",
+                    ", ".join(f"`{w}`" for w in entry.behavioral_witnesses),
+                )
+            )
+        if entry.witness_depends_on:
+            fields.append(
+                ("Witness applies first", ", ".join(entry.witness_depends_on))
+            )
+        if entry.retired:
+            fields.append(("Retired", entry.retired))
+        if entry.note:
+            fields.append(("Note", entry.note))
+        for event in entry.history:
+            fields.append(("History", event))
+        lines += [f"- **{name}:** {value}" for name, value in fields]
+    lines += ["", DOC_END]
+    return "\n".join(lines)
+
+
+def render_into(document: str) -> str:
+    """Replace the generated registry section of ``document`` with the current one."""
+    head, start, rest = document.partition(DOC_START)
+    _, end, tail = rest.partition(DOC_END)
+    if not start or not end:
+        raise ValueError("document has no generated registry section")
+    return head + render_registry() + tail
+
+
+if __name__ == "__main__":
+    from pathlib import Path
+
+    doc = Path(__file__).resolve().parent.parent / "docs" / "ots-patches.md"
+    doc.write_text(render_into(doc.read_text()))

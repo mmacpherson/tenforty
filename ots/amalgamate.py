@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import click
+from ots_patches import active_patches
 
 FED_FILENAME = "__FED_FILENAME__"
 PXD_TEMPLATE = """\
@@ -410,12 +411,78 @@ def generate_lookup_switch(import_map: dict[int, dict[str, str]]) -> str:
     return "\n".join(out)
 
 
-def patch_exit_to_return(lines: list[str]) -> list[str]:
-    """Replace exit(N) with return N inside main() so errors don't kill the Python process.
+class PatchMatchError(RuntimeError):
+    """A patch matched the vendored source other than its registry entry expects."""
 
-    Each OTS form has an ``int main(...)`` entry point.  The original C code
+
+def program_of(inner_key: str) -> str:
+    """Name an OTS program without its year: ``taxsolve_AZ_140_2024`` → ``AZ_140``."""
+    name = inner_key.removeprefix("taxsolve_")
+    return re.sub(r"_\d{4}$", "", name)
+
+
+def year_of(outer_key: str) -> int:
+    """Read the tax year from an outer namespace such as ``OpenTaxSolver2024``."""
+    return int(outer_key.removeprefix("OpenTaxSolver"))
+
+
+def patch_add_pdf_markup(lines: list[str]) -> tuple[list[str], int]:
+    """Rename the C++ reserved word ``new`` inside ``add_pdf_markup`` (OTS-P1).
+
+    ``add_pdf_markup`` in taxsolve_routines uses ``new`` as a variable name,
+    which C++ reserves. Each whole-word ``new`` in the function body becomes
+    ``_new``. Returns the patched lines and the number of renamed tokens.
+    """
+    start_ix = next(
+        (
+            ix
+            for ix, line in enumerate(lines)
+            if line.startswith("void add_pdf_markup(")
+        ),
+        None,
+    )
+    if start_ix is None:
+        return lines, 0
+
+    renamed = 0
+    ix = start_ix + 1
+    while lines[ix].strip() != "}":
+        lines[ix], count = re.subn(r"\bnew\b", "_new", lines[ix])
+        renamed += count
+        ix += 1
+    return lines, renamed
+
+
+def patch_mystrndup_cpp_compat(lines: list[str]) -> tuple[list[str], int]:
+    """Cast ``memset(malloc(...), ...)`` to ``char*`` in ``mystrndup`` (OTS-P2).
+
+    The 2025 taxsolve_routines ``mystrndup`` assigns the ``void*`` return of
+    ``memset(malloc(...), ...)`` directly to a ``char*``. This is valid C but
+    not C++. Add an explicit cast. Returns the lines and the number of casts.
+    """
+    out = []
+    casts = 0
+    for line in lines:
+        if "= memset( malloc(" in line:
+            line = line.replace("= memset( malloc(", "= (char*)memset( malloc(")
+            casts += 1
+        out.append(line)
+    return out, casts
+
+
+def _find_main(lines: list[str]) -> int | None:
+    return next(
+        (ix for ix, line in enumerate(lines) if re.match(r"\s*int\s+main\s*\(", line)),
+        None,
+    )
+
+
+def patch_exit_to_return(lines: list[str]) -> tuple[list[str], int]:
+    """Replace exit(N) with return N inside main() (OTS-P3).
+
+    Each OTS form has an ``int main(...)`` entry point. The original C code
     calls ``exit(1)`` on various error paths, which terminates the *entire*
-    host process — including the calling Python interpreter.  By converting
+    host process — including the calling Python interpreter. By converting
     these to ``return 1`` the form simply returns a non-zero exit code that
     the Cython wrapper can handle gracefully.
 
@@ -425,18 +492,17 @@ def patch_exit_to_return(lines: list[str]) -> list[str]:
     We also flush ``outfile`` before returning, because the original
     ``exit()`` would flush all stdio streams automatically, but a plain
     ``return`` from what is now just a regular C++ function does not.
-    """
-    start_ix = None
-    for i, line in enumerate(lines):
-        if re.match(r"\s*int\s+main\s*\(", line):
-            start_ix = i
-            break
 
+    Returns the lines and the number of ``main`` bodies rewritten. Raises if
+    an ``exit`` call is left in ``main`` that the rewrite does not cover.
+    """
+    start_ix = _find_main(lines)
     if start_ix is None:
-        return lines
+        return lines, 0
 
     depth = 0
     in_main = False
+    end_ix = None
     for i in range(start_ix, len(lines)):
         for ch in lines[i]:
             if ch == "{":
@@ -445,8 +511,10 @@ def patch_exit_to_return(lines: list[str]) -> list[str]:
             elif ch == "}":
                 depth -= 1
                 if in_main and depth == 0:
-                    return lines
-
+                    end_ix = i
+                    break
+        if end_ix is not None:
+            break
         if in_main and depth > 0:
             lines[i] = re.sub(
                 r"\bexit\s*\(\s*(\d+)\s*\)",
@@ -454,87 +522,41 @@ def patch_exit_to_return(lines: list[str]) -> list[str]:
                 lines[i],
             )
 
-    return lines
+    if end_ix is None:
+        raise PatchMatchError("int main(...) has no closing brace")
+    left = [
+        line for line in lines[start_ix : end_ix + 1] if re.search(r"\bexit\s*\(", line)
+    ]
+    if left:
+        raise PatchMatchError(f"exit() left in main after OTS-P3: {left}")
+    return lines, 1
 
 
-def patch_reset_globals(lines: list[str]) -> list[str]:
-    """Reset shared globals at the start of each form's main().
+def patch_reset_globals(lines: list[str]) -> tuple[list[str], int]:
+    """Reset shared globals at the start of each form's main() (OTS-P4, pending removal).
 
-    Some state forms (NC, OH) set ``do_all_caps = 1`` to uppercase imported
-    names.  The flag is never cleared, so subsequent forms in the same process
-    read file paths as uppercased strings, which fails on case-sensitive
-    filesystems.  Inserting a reset at the top of every form's main() ensures
-    a clean slate.
+    Some state forms (NC, OH, PA) set ``do_all_caps = 1`` to uppercase
+    imported names. The flag is never cleared, so subsequent forms in the
+    same process read file paths as uppercased strings, which fails on
+    case-sensitive filesystems. Inserting a reset at the top of every form's
+    main() ensures a clean slate. Returns the lines and the number of resets
+    inserted.
+
+    A state reset is not portability, so this is not an allowed patch class.
+    It stays only until tenforty-0qmf moves the reset into the Cython binding.
     """
-    start_ix = None
-    for i, line in enumerate(lines):
-        if re.match(r"\s*int\s+main\s*\(", line):
-            start_ix = i
-            break
+    start_ix = _find_main(lines)
     if start_ix is None:
-        return lines
-    # Find the opening brace of main()
-    for i in range(start_ix, min(start_ix + 5, len(lines))):
-        if "{" in lines[i]:
-            lines.insert(i + 1, " do_all_caps = 0;")
-            break
-    return lines
+        return lines, 0
+    for ix in range(start_ix, min(start_ix + 5, len(lines))):
+        if "{" in lines[ix]:
+            lines.insert(ix + 1, " do_all_caps = 0;")
+            return lines, 1
+    raise PatchMatchError("int main(...) has no opening brace within 5 lines")
 
 
-def patch_import_status_init(lines: list[str]) -> list[str]:
-    """Fix uninitialized IMPORT_STATUS.err in ImportReturnData.
-
-    The OTS 2025 taxsolve_routines ``ImportReturnData`` allocates a local
-    ``IMPORT_STATUS ret_stat`` but never initialises ``ret_stat.err``.  When
-    the import loop completes without error the field contains garbage,
-    causing callers that check ``imp_stat.err != IMPORT_ERR_SUCCESS`` to
-    wrongly take the error path.
-    """
-    for i, line in enumerate(lines):
-        if 'ret_stat.desc = ""' in line and "IMPORT" not in lines[i - 1]:
-            lines.insert(i + 1, "    ret_stat.err = IMPORT_ERR_SUCCESS;")
-            break
-    return lines
-
-
-def patch_show_fname_init_or_40(lines: list[str]) -> list[str]:
-    """Guard the comb_len-2 access in show_fname_init_or_40 against short names.
-
-    The original code accesses ``combined_name[comb_len - 2]`` without
-    checking that the string is long enough, causing undefined behaviour
-    when names are empty or single-character strings.
-    """
-    for i, line in enumerate(lines):
-        if "comb_len - 2" in line and "combined_name" in line and "if" in line:
-            lines[i] = line.replace(
-                "if ((*(combined_name + comb_len - 2)",
-                "if (comb_len >= 2 && (*(combined_name + comb_len - 2)",
-            )
-    return lines
-
-
-def patch_sched1a_line29_label(lines: list[str]) -> list[str]:
-    """Fix mis-labeled showline in Schedule 1-A Part IV.
-
-    After computing ``sched1A_L[29] = 300.0 * sched1A_L[28]``, the upstream
-    code writes ``showline_wlabelnz( "S1A_20", sched1A_L[20] )`` — but it
-    should be ``"S1A_29", sched1A_L[29]``.
-    """
-    for i, line in enumerate(lines):
-        if (
-            'showline_wlabelnz( "S1A_20", sched1A_L[20] )' in line
-            and i > 0
-            and "sched1A_L[29]" in lines[i - 1]
-        ):
-            lines[i] = line.replace(
-                'showline_wlabelnz( "S1A_20", sched1A_L[20] )',
-                'showline_wlabelnz( "S1A_29", sched1A_L[29] )',
-            )
-    return lines
-
-
-def patch_az_widow_std_deduction(lines: list[str]) -> list[str]:
-    """Extend ``getAZStdDedAmt``'s table so Widow(er) is in bounds.
+def patch_az_widow_std_deduction(lines: list[str]) -> tuple[list[str], int]:
+    """Extend ``getAZStdDedAmt``'s table so Widow(er) is in bounds (OTS-P5).
 
     ``azStdDedAmt`` is declared ``[5][1]`` and indexed by filing status, but
     ``WIDOW`` is 5 — one past the end — so an AZ Widow(er) return reads
@@ -545,23 +567,22 @@ def patch_az_widow_std_deduction(lines: list[str]) -> list[str]:
     box, and AZ DOR instructions have a qualifying widow(er) file as Head of
     Household.
 
-    This is a memory-safety fix, not a tax-logic change — the same category
-    as the C99/C++ compatibility shims above, which also exist to make the
-    vendored source usable rather than to alter what it computes. It is a
-    deliberate, narrow exception to the rule that vendored OpenTaxSolver
-    source is never modified, and it is reported upstream (see
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P5 in ``ots/ots_patches.py`` and reported upstream (report 2 in
     docs/upstream-ots-reports.md).
 
-    Applied by hand to the generated amalgamation in PR #268; reproduced here
-    so that regenerating the bindings does not silently revert it.
+    Returns the lines and the number of edits: the resized declaration and
+    the added row, so 2 per program.
     """
     hoh_row = re.compile(r"^(\s*)\{ ([\d.]+) \}\s*(/\* Head of Household\. \*/)$")
     out = []
+    edits = 0
     in_short_table = False
     for line in lines:
         if "azStdDedAmt[5][1]" in line:
             in_short_table = True
             out.append(line.replace("azStdDedAmt[5][1]", "azStdDedAmt[6][1]"))
+            edits += 1
             continue
         match = hoh_row.match(line) if in_short_table else None
         if match is None:
@@ -570,111 +591,83 @@ def patch_az_widow_std_deduction(lines: list[str]) -> list[str]:
         indent, amount, comment = match.groups()
         out.append(f"{indent}{{ {amount} }},  {comment}")
         out.append(f"{indent}{{ {amount} }}   /* Widow(er) - AZ maps QW to HoH. */")
+        edits += 1
         in_short_table = False
-    return out
+    return out, edits
 
 
-def patch_restrict_keyword(lines: list[str]) -> list[str]:
-    """Translate C99 ``restrict`` to the GCC/Clang ``__restrict__`` extension.
+def patch_show_fname_init_or_40(lines: list[str]) -> tuple[list[str], int]:
+    """Guard the comb_len-2 access in show_fname_init_or_40 (OTS-P6).
 
-    The v23.05 taxsolve_routines adds ``date_rec_to_str`` whose signature
-    uses ``char *restrict str`` and ``const struct date_rec *restrict drec``.
-    C++ does not recognise ``restrict`` (it is a C99/C11 keyword), causing
-    compilation failures.  ``__restrict__`` is the equivalent compiler
-    extension supported by GCC and Clang.
+    The 2024 code reads ``combined_name[comb_len - 2]`` without checking that
+    the string is long enough, an out-of-bounds read when a name is empty or a
+    single character. Returns the lines and the number of guards added.
     """
-    return [line.replace("*restrict ", "*__restrict__ ") for line in lines]
+    unguarded = "if ((*(combined_name + comb_len - 2)"
+    guards = 0
+    for ix, line in enumerate(lines):
+        if unguarded in line:
+            lines[ix] = line.replace(
+                unguarded, "if (comb_len >= 2 && (*(combined_name + comb_len - 2)"
+            )
+            guards += 1
+    return lines, guards
 
 
-def patch_mystrndup_cpp_compat(lines: list[str]) -> list[str]:
-    """Cast ``memset(malloc(...), ...)`` to ``char*`` in ``mystrndup``.
-
-    The v23.06 taxsolve_routines adds ``mystrndup`` which assigns the
-    ``void*`` return of ``memset(malloc(...), ...)`` directly to a
-    ``char*``.  This is valid C but not C++.  Add an explicit cast.
-    """
-    return [
-        line.replace("= memset( malloc(", "= (char*)memset( malloc(")
-        if "= memset( malloc(" in line
-        else line
-        for line in lines
-    ]
-
-
-def patch_f6781_cpp_compat(lines: list[str]) -> list[str]:
-    """Fix C-isms in the user-contributed Form 6781 that break under C++.
+def patch_f6781_cpp_compat(lines: list[str]) -> tuple[list[str], int]:
+    """Fix C-isms in the user-contributed Form 6781 that break under C++ (OTS-P7).
 
     1. ``malloc`` returns ``void*`` which does not implicitly convert to
        ``char*`` in C++.  Add an explicit cast.
     2. ``Show_String_wLabel("BoxA:", BoxA ? "X" : "")`` — the ternary
        expression evaluates to ``const char*`` which cannot convert to
        the ``char*`` parameter.  Cast the result.
+
+    Returns the lines and the number of casts.
     """
     out = []
+    casts = 0
     for line in lines:
         if "= malloc(" in line and "outfname" in line:
             line = line.replace("= malloc(", "= (char*)malloc(")
+            casts += 1
         if "Show_String_wLabel(" in line and '? "X"' in line:
-            line = re.sub(
+            line, count = re.subn(
                 r"(Box\w+) \? \"X\" : \"\"",
                 r'(char*)(\1 ? "X" : "")',
                 line,
             )
+            casts += count
         out.append(line)
-    return out
+    return out, casts
 
 
-def patch_add_pdf_markup(lines: list[str]) -> list[str]:
-    """Patch the 'add_pdf_markup' function in the source code to avoid compilation errors.
+def apply_registered_patches(year: int, program: str, lines: list[str]) -> list[str]:
+    """Apply every active registry patch, requiring each to match as registered.
 
-    We see compilation errors because it uses the C++ reserved word `new`. Our
-    fix is to replace each instance of "new" with "_new".
-
-    Args:
-    ----
-        lines: A list of strings representing the lines of source code.
-
-    Returns:
-    -------
-        A list of strings representing the patched source code.
-
+    A patch whose registry entry expects no match for this program and year
+    is still run on a copy, so a match outside its registered scope is
+    reported rather than silently skipped or silently applied.
     """
-    # Find function declaration.
-    found_fn = False
-    start_ix = 0
-    while True:
-        try:
-            line = lines[start_ix]
-        except IndexError:
-            break
-        if line.startswith("void add_pdf_markup("):
-            found_fn = True
-            break
-        start_ix += 1
-
-    # Quit if the function wasn't found. I.e., prior to 2018
-    if not found_fn:
-        return lines
-
-    # Walk through lines until we hit the end of the function, replacing
-    # "new" using word boundary matching to avoid false positives.
-    ix = start_ix + 1
-    while True:
-        line = lines[ix]
-        if line.strip() == "}":
-            break
-
-        # Use word boundary matching instead of naive replace
-        lines[ix] = re.sub(r"\bnew\b", "_new", line)
-        ix += 1
-
+    for entry in active_patches():
+        patch = globals()[entry.function]
+        expected = entry.expected_matches(year, program)
+        patched, matched = patch(list(lines))
+        if matched != expected:
+            raise PatchMatchError(
+                f"{entry.id} ({entry.function}) matched {matched} time(s) in "
+                f"{program} {year}; ots/ots_patches.py expects {expected}. "
+                "Upstream changed: update the registry entry and its witness."
+            )
+        if expected:
+            lines = patched
     return lines
 
 
 def postprocess_source_groups(
     outer_key: str, source_group: dict[str, dict[str, list[str]]]
 ) -> tuple[str, dict[str, dict[str, list[str]]]]:
-    """Postprocess the source groups by applying specific patches or transformations.
+    """Apply the registered patches (``ots/ots_patches.py``) to each program.
 
     Args:
     ----
@@ -687,25 +680,11 @@ def postprocess_source_groups(
         A tuple containing the outer key and the postprocessed source group.
 
     """
+    year = year_of(outer_key)
     for inner_key, group in source_group.items():
-        match (outer_key, inner_key):
-            case (_, "taxsolve_routines"):
-                group["source"] = patch_add_pdf_markup(group["source"])
-                group["source"] = patch_import_status_init(group["source"])
-                group["source"] = patch_mystrndup_cpp_compat(group["source"])
-                group["source"] = patch_restrict_keyword(group["source"])
-            case _:
-                group["source"] = patch_exit_to_return(group["source"])
-                group["source"] = patch_reset_globals(group["source"])
-                if "AZ_140" in inner_key:
-                    group["source"] = patch_az_widow_std_deduction(group["source"])
-                if "OR_40" in inner_key:
-                    group["source"] = patch_show_fname_init_or_40(group["source"])
-                if "US_1040" in inner_key:
-                    group["source"] = patch_sched1a_line29_label(group["source"])
-                if "f6781" in inner_key:
-                    group["source"] = patch_f6781_cpp_compat(group["source"])
-
+        group["source"] = apply_registered_patches(
+            year, program_of(inner_key), group["source"]
+        )
     return (outer_key, source_group)
 
 
