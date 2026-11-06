@@ -59,6 +59,8 @@ module TenForty.DSL
     tableLookup,
     byStatusE,
     taxTableBandTax,
+    tableBandMidpoint,
+    tableRoundToDollar,
     TaxTable,
     mkTaxTable,
 

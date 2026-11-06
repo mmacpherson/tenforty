@@ -158,11 +158,32 @@ usScheduleSeL4cTaxable = lineRef "us_schedule_se" "L4c_taxable"
 us1040L1z :: LineRef Dollars
 us1040L1z = lineRef "us_1040" "L1z"
 
+us1040L2a :: LineRef Dollars
+us1040L2a = lineRef "us_1040" "L2a"
+
 us1040L2b :: LineRef Dollars
 us1040L2b = lineRef "us_1040" "L2b"
 
 us1040L3b :: LineRef Dollars
 us1040L3b = lineRef "us_1040" "L3b"
+
+us1040L7 :: LineRef Dollars
+us1040L7 = lineRef "us_1040" "L7"
+
+usSchedule1L5 :: LineRef Dollars
+usSchedule1L5 = lineRef "us_schedule_1" "L5"
+
+usScheduleSeL3 :: LineRef Dollars
+usScheduleSeL3 = lineRef "us_schedule_se" "L3"
+
+us1040L1i :: LineRef Dollars
+us1040L1i = lineRef "us_1040" "L1i"
+
+usScheduleEicEarnedIncome :: LineRef Dollars
+usScheduleEicEarnedIncome = lineRef "us_schedule_eic" "EARNED_INCOME"
+
+usScheduleEicEitc :: LineRef Dollars
+usScheduleEicEitc = lineRef "us_schedule_eic" "EITC"
 
 us1040L4b :: LineRef Dollars
 us1040L4b = lineRef "us_1040" "L4b"

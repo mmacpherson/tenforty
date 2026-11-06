@@ -42,6 +42,7 @@ def test_gradient_vector_matches_scalar_api(graph_backend):
     assert list(gradients) == [
         "w2_income",
         "taxable_interest",
+        "tax_exempt_interest",
         "qualified_dividends",
         "ordinary_dividends",
         "short_term_capital_gains",

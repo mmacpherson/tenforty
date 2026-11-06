@@ -15,6 +15,7 @@ def _total_tax_at_wages(state: str, wages: float) -> float:
         filing_status="Single",
         w2_income=wages,
         backend="graph",
+        eitc_eligible=False,
     ).total_tax
 
 
@@ -147,6 +148,7 @@ def test_total_marginal_decomposes_into_federal_plus_state(state):
         "state": state,
         "filing_status": "Single",
         "w2_income": 100_000.0,
+        "eitc_eligible": False,
     }
 
     total = marginal_rate(**kwargs)
@@ -174,7 +176,11 @@ def test_solver_targets_the_public_total_in_every_state(state):
     target = _total_tax_at_wages(state, 200_000.0)
 
     wages = solve_for_income(
-        target_tax=target, year=2024, state=state, filing_status="Single"
+        target_tax=target,
+        year=2024,
+        state=state,
+        filing_status="Single",
+        eitc_eligible=False,
     )
 
     assert _total_tax_at_wages(state, wages) == pytest.approx(target, abs=0.01)

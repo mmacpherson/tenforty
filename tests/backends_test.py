@@ -150,7 +150,8 @@ class TestGraphBackend:
         Accepting the count because a state reads it would silently omit the
         child tax credit if the federal graph did not read it too
         (tenforty-aqx.4.1.6). The federal return reads it through the two
-        Schedule 8812 counts derived from it.
+        Schedule 8812 counts derived from it. The Schedule EIC count is never
+        derived from it.
         """
         from tenforty.backends import graph
 
@@ -166,12 +167,15 @@ class TestGraphBackend:
 
     @pytest.mark.parametrize(
         "carrier",
-        ["schedule_8812_qualifying_children", "schedule_8812_other_dependents"],
+        [
+            "schedule_8812_qualifying_children",
+            "schedule_8812_other_dependents",
+        ],
     )
     def test_federal_law_natural_reaching_only_a_state_is_refused(
         self, monkeypatch, carrier
     ):
-        """The guard refuses num_dependents if either federal count is unmapped."""
+        """The guard refuses num_dependents if any federal count is unmapped."""
         from tenforty.backends import graph
 
         monkeypatch.delitem(graph.NATURAL_TO_NODES, carrier)

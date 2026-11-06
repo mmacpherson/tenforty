@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import json
 import logging
 import pathlib
 from collections.abc import Callable, Iterable
@@ -42,8 +43,13 @@ logger = logging.getLogger(__name__)
 
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
 # Inputs that reach the graph only through naturals derived from them:
-# num_ctc_dependents is carried by the two Schedule 8812 counts.
-_CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
+# num_ctc_dependents is carried by the two Schedule 8812 counts, and
+# num_eitc_children and eitc_eligible by the Schedule EIC count and eligibility.
+_CARRIED_BY_DERIVED_FIELDS = {
+    "num_ctc_dependents",
+    "num_eitc_children",
+    "eitc_eligible",
+}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
@@ -139,6 +145,8 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_form_8960_L17_niit": "federal_niit",
     "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
     "us_form_8812_L14_ctc_odc": "federal_child_tax_credit",
+    # Form 1040 line 27 imports it; the resolver inlines that alias away.
+    "us_schedule_eic_EITC": "federal_earned_income_credit",
 }
 FEDERAL_BRACKET_RATE_NODE = "us_1040_L15BracketRate_ordinary_bracket_rate"
 USES_ITEMIZED_NODE = "us_1040_UsesItemized"
@@ -354,10 +362,28 @@ def _fact_node_values(tax_input: TaxReturnInput) -> dict[str, float]:
     return values
 
 
+STATES_READING_FEDERAL_EIC = frozenset({OTSState.MO})
+"""States whose graph return reads the federal earned income credit (Form 1040
+line 27). Their tax depends on it, so they need the facts that determine it."""
+
+
+def _require_eic_facts(tax_input: TaxReturnInput) -> None:
+    if tax_input.state not in STATES_READING_FEDERAL_EIC or tax_input.eitc_determined:
+        return
+    missing = "num_eitc_children" if tax_input.eitc_eligible else "eitc_eligible"
+    raise UnsupportedInputError(
+        f"{tax_input.state.value} graph returns subtract the federal earned "
+        f"income credit, which needs {missing}: pass eitc_eligible=False if the "
+        "filer cannot claim it, or eitc_eligible=True with num_eitc_children "
+        "(EIC qualifying children, not dependents). Neither has a default."
+    )
+
+
 def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
     """Refuse unsupported natural returns and nonzero inputs the graph cannot read."""
     returns = tuple(tax_inputs)
     for tax_input in returns:
+        _require_eic_facts(tax_input)
         if (
             tax_input.state == OTSState.NY
             and tax_input.filing_status == OTSFilingStatus.MARRIED_SEPARATE
@@ -568,6 +594,58 @@ def _input_runtime(tax_input: TaxReturnInput, *, include_facts: bool = True):
     return evaluator, graph
 
 
+_OPERAND_KEYS = ("left", "right", "arg", "cond", "then", "otherwise", "income")
+
+
+@lru_cache(maxsize=8)
+def nodes_depending_on(year: int, target: str) -> frozenset[str]:
+    """Names of the resolved graph's nodes whose value depends on ``target``."""
+    nodes = json.loads((_forms_dir() / f"us_tax_graph_{year}.json").read_text())[
+        "nodes"
+    ]
+
+    def operands(node_id: int) -> list[int]:
+        op = nodes[str(node_id)]["op"]
+        found = [op[key] for key in _OPERAND_KEYS if isinstance(op.get(key), int)]
+        return found + list(op.get("values", {}).values())
+
+    target_id = next(int(i) for i, node in nodes.items() if node.get("name") == target)
+    depends: dict[int, bool] = {target_id: True}
+    for start in map(int, nodes):
+        stack = [(start, False)]
+        while stack:
+            current, expanded = stack.pop()
+            if current in depends:
+                continue
+            if expanded:
+                depends[current] = any(depends[o] for o in operands(current))
+                continue
+            stack.append((current, True))
+            stack.extend((o, False) for o in operands(current) if o not in depends)
+    return frozenset(
+        nodes[str(i)].get("name", "") for i, flag in depends.items() if flag
+    )
+
+
+EIC_OUTPUT_NODE = _FEDERAL_FIELD_TO_NODE["federal_earned_income_credit"]
+
+
+def _require_eic_determined_for(tax_input: TaxReturnInput, nodes: list[str]) -> None:
+    """Refuse a derivative or solve whose output reads an undetermined EIC."""
+    if tax_input.eitc_determined:
+        return
+    reading = nodes_depending_on(tax_input.year.value, EIC_OUTPUT_NODE)
+    if any(node in reading for node in nodes):
+        missing = "num_eitc_children" if tax_input.eitc_eligible else "eitc_eligible"
+        raise UnsupportedInputError(
+            f"{', '.join(nodes)} depends on the federal earned income credit, "
+            f"which is not determined without {missing}: pass "
+            "eitc_eligible=False if the filer cannot claim it, or "
+            "eitc_eligible=True with num_eitc_children. A derivative or solve "
+            "never treats an undetermined credit as 0."
+        )
+
+
 class GraphBackend:
     """Backend using tax computation graph with autodiff and solver support."""
 
@@ -617,6 +695,8 @@ class GraphBackend:
         }
         itemizes = evaluator.eval(USES_ITEMIZED_NODE) > 0
 
+        if not tax_input.eitc_determined:
+            result["federal_earned_income_credit"] = None
         total_tax = result["federal_total_tax"]
         result["total_tax"] = total_tax
         result["federal_effective_tax_rate"] = _effective_tax_rate(
@@ -800,6 +880,12 @@ class GraphBackend:
             final_results[field] = output_cols[node_name]
 
         count = len(status_col)
+        final_results["federal_earned_income_credit"] = [
+            credit if tax_input.eitc_determined else None
+            for credit, tax_input in zip(
+                final_results["federal_earned_income_credit"], tax_inputs, strict=True
+            )
+        ]
         final_results[FEDERAL_ITEMIZES] = [
             value > 0 for value in final_results[FEDERAL_ITEMIZES]
         ]
@@ -962,6 +1048,14 @@ class GraphBackend:
         return [self._resolve_input_node(tax_input, var, output_node)]
 
     def _output_nodes(self, tax_input: TaxReturnInput, output: str) -> list[str]:
+        """Resolve an output for a derivative or solve, refusing an unknown EIC."""
+        nodes = self._resolve_output_nodes(tax_input, output)
+        _require_eic_determined_for(tax_input, nodes)
+        return nodes
+
+    def _resolve_output_nodes(
+        self, tax_input: TaxReturnInput, output: str
+    ) -> list[str]:
         """Resolve a public output to the graph nodes whose sum it denotes."""
         if output.startswith(_ALL_KNOWN_PREFIXES):
             return [output]

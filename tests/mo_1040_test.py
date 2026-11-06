@@ -35,12 +35,6 @@ CHART_TOLERANCE = 1.0
 
 MO_STANDARD_DEDUCTION_SINGLE = {2024: 14_600.0, 2025: 15_750.0}
 
-FEDERAL_EIC_NOT_COMPUTED = (
-    "MO-1040 line 9 subtracts the federal earned income credit, but the federal "
-    "graph does not compute it: 1040 line 27 is an input that stays 0 "
-    "(tenforty-tj2.14), so MO line 13 is taken on federal tax before EIC"
-)
-
 MO_HOH_EXEMPTION_NOT_COMPUTED = (
     "MO-1040 line 15 ($1,400 head of household / qualifying widow(er) "
     "exemption) is not computed: the graph's mo_1040_L21_exemptions is an "
@@ -94,15 +88,10 @@ def test_mo_tax_chart_worked_examples(year, taxable_income, expected_tax):
     )
 
 
-def _needs_federal_eic(*values):
-    return pytest.param(
-        *values,
-        marks=pytest.mark.xfail(strict=True, reason=FEDERAL_EIC_NOT_COMPUTED),
-    )
-
-
 # Whole-return fixtures: W-2 wages only, standard deduction, under 65, no
-# dependents, full-year resident. Kind: derived-arithmetic from the official
+# dependents, full-year resident, eligible for the childless EIC (at least 25,
+# nobody's dependent or qualifying child, valid SSN: eitc_eligible=True with
+# num_eitc_children=0), which the derivation subtracts on line 9. Kind: derived-arithmetic from the official
 # MO chart and line structure, with line 9 (federal tax net of EIC) read from
 # the IRS Tax Table and EIC Table. Sources as in the module docstring,
 # retrieved 2026-09-30, derived blind, session 1b251ce6.
@@ -115,11 +104,11 @@ def _needs_federal_eic(*values):
 # Columns: year, filing status, wages, expected MO taxable income, expected MO tax.
 MO_WHOLE_RETURN_SCENARIOS = [
     # Fed tax 101 - EIC 227 floors to 0, so line 13 is 0; TI 1,000 is in the 0% band.
-    _needs_federal_eic(2024, "Single", 15_600.0, 1_000.0, 0.0),
+    (2024, "Single", 15_600.0, 1_000.0, 0.0),
     # Line 9 = 216 - EIC 139 = 77; line 13 = 35% x 77 = 27; TI 2,123;
     # 2% x (2,123 - 1,273) = $17. Without the federal EIC line 13 is 76 and the
     # tax $16.
-    _needs_federal_eic(2024, "Single", 16_750.0, 2_123.0, 17.0),
+    (2024, "Single", 16_750.0, 2_123.0, 17.0),
     # Line 13 = 25% x 1,619 = 405; TI 14,995; 248 + 4.8% x 6,084 = $540.
     (2024, "Single", 30_000.0, 14_995.0, 540.0),
     # Line 13 = 15% x 5,219 = 783; TI 44,617; 248 + 4.8% x 35,706 = $1,962.
@@ -139,7 +128,7 @@ MO_WHOLE_RETURN_SCENARIOS = [
     (2025, "Single", 15_600.0, 0.0, 0.0),
     # Fed tax 101 - EIC 178 floors to 0, so line 13 is 0; TI 1,000 is in the
     # 0% band (tenforty-b72.10 repro: the graph charged $20).
-    _needs_federal_eic(2025, "Single", 16_750.0, 1_000.0, 0.0),
+    (2025, "Single", 16_750.0, 1_000.0, 0.0),
     # Line 13 = 25% x 1,475 = 369; TI 13,881; 256 + 4.7% x 4,690 = $476.
     (2025, "Single", 30_000.0, 13_881.0, 476.0),
     # Line 13 = 15% x 5,075 = 761; TI 43,489; 256 + 4.7% x 34,298 = $1,868.
@@ -172,12 +161,73 @@ def test_mo_whole_return_independent_derivation(
         filing_status=filing_status,
         w2_income=wages,
         backend="graph",
+        eitc_eligible=True,
+        num_eitc_children=0,
     )
 
     assert result.state_taxable_income == pytest.approx(
         expected_taxable_income, abs=CHART_TOLERANCE
     )
     assert result.state_total_tax == pytest.approx(expected_tax, abs=CHART_TOLERANCE)
+
+
+# The same derivation's "No EIC" alternative (MO-2024-2025.md, "Alternatives":
+# a filer not eligible, for example under 25), against the eligible rows of
+# MO_WHOLE_RETURN_SCENARIOS. Columns: year, wages, EIC when eligible (IRS EIC
+# Table, no children), MO TI and tax eligible, MO TI and tax not eligible.
+MO_EIC_FACT_SCENARIOS = [
+    (2024, 15_600.0, 227.0, 1_000.0, 0.0, 965.0, 0.0),
+    (2024, 16_750.0, 139.0, 2_123.0, 17.0, 2_074.0, 16.0),
+    (2025, 16_750.0, 178.0, 1_000.0, 0.0, 965.0, 0.0),
+]
+
+
+@pytest.mark.parametrize(
+    ("year", "wages", "eic", "eligible_ti", "eligible_tax", "ineligible_ti", "ineligible_tax"),
+    MO_EIC_FACT_SCENARIOS,
+    ids=lambda v: str(v),
+)  # fmt: skip
+def test_mo_line_9_follows_the_stated_eic_facts(
+    year, wages, eic, eligible_ti, eligible_tax, ineligible_ti, ineligible_tax
+):
+    """Single, no children: the EIC facts decide what MO line 9 subtracts."""
+    common = {
+        "year": year,
+        "state": "MO",
+        "filing_status": "Single",
+        "w2_income": wages,
+        "backend": "graph",
+    }
+    eligible = evaluate_return(**common, eitc_eligible=True, num_eitc_children=0)
+    ineligible = evaluate_return(**common, eitc_eligible=False)
+
+    assert eligible.federal_earned_income_credit == eic
+    assert ineligible.federal_earned_income_credit == 0
+    for result, taxable_income, tax in (
+        (eligible, eligible_ti, eligible_tax),
+        (ineligible, ineligible_ti, ineligible_tax),
+    ):
+        assert result.state_taxable_income == pytest.approx(
+            taxable_income, abs=CHART_TOLERANCE
+        )
+        assert result.state_total_tax == pytest.approx(tax, abs=CHART_TOLERANCE)
+
+
+@pytest.mark.parametrize(("year", "eic"), [(2024, 649.0), (2025, 864.0)])
+def test_mo_hoh_public_return_reports_the_stated_eic(year, eic):
+    """The HoH line-9 scenario through the public API with explicit facts."""
+    result = evaluate_return(
+        year=year,
+        state="MO",
+        filing_status="Head_of_House",
+        w2_income=45_000.0,
+        num_dependents=1,
+        num_eitc_children=1,
+        eitc_eligible=True,
+        backend="graph",
+    )
+
+    assert result.federal_earned_income_credit == eic
 
 
 # MO-1040 line 13 (federal income tax deduction) across every percentage band.
@@ -253,7 +303,12 @@ def test_mo_federal_tax_deduction_bands(
     )
 
     result = evaluate_return(
-        year=year, state="MO", filing_status="Single", w2_income=wages, backend="graph"
+        year=year,
+        state="MO",
+        filing_status="Single",
+        w2_income=wages,
+        backend="graph",
+        eitc_eligible=False,
     )
     assert result.state_taxable_income == pytest.approx(
         expected_taxable_income, abs=CHART_TOLERANCE
@@ -269,6 +324,8 @@ def _graph_with_children(year, filing_status, wages, children):
     )
     evaluator.set("us_1040_L1a_wages", wages)
     evaluator.set("us_form_8812_L1_num_qualifying_children", float(children))
+    evaluator.set("us_schedule_eic_NUM_QC", float(children))
+    evaluator.set("us_schedule_eic_ELIGIBLE", 1.0)
     return evaluator
 
 
@@ -342,9 +399,7 @@ def _hoh_graph(year):
     return _graph_with_children(year, "head_of_household", 45_000.0, 1)
 
 
-@pytest.mark.xfail(
-    strict=True, reason=f"{FEDERAL_EIC_NOT_COMPUTED}; {MO_HOH_EXEMPTION_NOT_COMPUTED}"
-)
+@pytest.mark.xfail(strict=True, reason=MO_HOH_EXEMPTION_NOT_COMPUTED)
 @pytest.mark.parametrize(
     ("year", "eic", "expected_taxable_income", "expected_tax"),
     MO_HOH_EIC_SCENARIOS,
@@ -373,33 +428,12 @@ def test_mo_hoh_return_with_computed_eic(
 def test_mo_line_9_subtracts_eic_and_floors_at_zero(
     year, eic, expected_taxable_income, expected_tax
 ):
-    """Federal EIC supplied at 1040 line 27 reaches MO line 9, floored at 0."""
+    """The federal EIC on 1040 line 27 reaches MO line 9, floored at 0."""
     evaluator = _hoh_graph(year)
-    evaluator.set("us_1040_L27_eic", eic)
 
+    assert evaluator.eval("us_schedule_eic_EITC") == eic
     assert evaluator.eval("mo_1040_L17_federal_tax") == 0.0
     assert evaluator.eval("mo_1040_L17_federal_tax_deduction") == 0.0
-
-
-@pytest.mark.xfail(strict=True, reason=MO_HOH_EXEMPTION_NOT_COMPUTED)
-@pytest.mark.parametrize(
-    ("year", "eic", "expected_taxable_income", "expected_tax"),
-    MO_HOH_EIC_SCENARIOS,
-    ids=lambda v: str(v),
-)
-def test_mo_hoh_return_with_supplied_eic(
-    year, eic, expected_taxable_income, expected_tax
-):
-    """The whole HoH return once the federal EIC is supplied at 1040 line 27."""
-    evaluator = _hoh_graph(year)
-    evaluator.set("us_1040_L27_eic", eic)
-
-    assert evaluator.eval("mo_1040_L22_mo_taxable_income") == pytest.approx(
-        expected_taxable_income, abs=CHART_TOLERANCE
-    )
-    assert evaluator.eval("mo_1040_L32_mo_total_tax") == pytest.approx(
-        expected_tax, abs=CHART_TOLERANCE
-    )
 
 
 # The caps cannot bind on a wage-only return (35% of federal tax reaches $5,000

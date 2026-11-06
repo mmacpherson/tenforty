@@ -42,11 +42,11 @@ def _input_dtype(name: str) -> pl.DataType:
         return pl.String
     if name in FEDERAL_ITEMIZED_COLUMNS:
         return pl.Float64
-    if name in {"year", "num_dependents", "num_ctc_dependents"}:
+    if name in {"year", "num_dependents", "num_ctc_dependents", "num_eitc_children"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String
-    if TaxReturnInput.model_fields[name].annotation is bool:
+    if TaxReturnInput.model_fields[name].annotation in (bool, bool | None):
         return pl.Boolean
     return pl.Float64
 

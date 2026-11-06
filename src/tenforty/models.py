@@ -439,8 +439,10 @@ class TaxReturnInput(BaseModel):
             "1040 line 19). Applied for 2023-2025 on the OTS backend and 2024-2025 "
             "on the graph backend; for 2018-2022 OTS reads the count but applies "
             "neither credit. Not modeled: the refundable additional child tax "
-            "credit (a payment, not part of total tax), the earned income credit "
-            "and the dependent care credit. Some state returns also read this "
+            "credit (a payment, not part of total tax) and the dependent care "
+            "credit. The earned income credit is reported separately "
+            "(federal_earned_income_credit; see num_eitc_children and "
+            "eitc_eligible). Some state returns also read this "
             "count as their dependent count (graph: CA, IL, MS, NY, OH, OR and WI; OTS: the state "
             "forms that map it); graph returns for other states take dependents "
             "through dependent_exemptions. The OR graph uses it for its regular "
@@ -481,6 +483,55 @@ class TaxReturnInput(BaseModel):
             "return) to claim the child tax credit; that is not checked."
         ),
     )
+    num_eitc_children: int | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Qualifying children for the federal earned income credit (Schedule "
+            "EIC; the credit counts at most 3): each meets the relationship test, "
+            "is under 19 at the end of the year, or under 24 and a full-time "
+            "student, or any age and permanently and totally disabled, has an SSN "
+            "valid for employment, lived with the filer in the U.S. for more than "
+            "half the year, and is not used by another person to claim the EIC "
+            "(Pub 596 Rules 8 and 9). This is not the dependent or child tax "
+            "credit count and is never inferred from them: a noncustodial parent "
+            "claiming a child's child tax credit under Form 8332 cannot claim "
+            "that child for the EIC, and a child aged 17-18, or a student under "
+            "24, can qualify for the EIC but not the child tax credit. With "
+            "eitc_eligible=True it determines federal_earned_income_credit; "
+            "unset, the credit is not determined (None) unless eitc_eligible is "
+            "False. Graph backend only."
+        ),
+    )
+    eitc_eligible: bool | None = Field(
+        default=None,
+        description=(
+            "Whether the filer meets the federal earned income credit conditions "
+            "the other inputs do not establish (Pub 596): a valid SSN for the "
+            "filer (both spouses on a joint return) (Rule 2), U.S. citizen or "
+            "resident alien all year (Rule 4), no Form 2555 (Rule 5), not "
+            "another taxpayer's qualifying child (Rule 10), and not barred from "
+            "the credit after a disallowance; and, with no qualifying child, the "
+            "whole of Rule 11 (one person, the filer or on a joint return either "
+            "spouse, is at least 25 and under 65 at the end of the year, by Rule "
+            "11's own birth-date bounds and death rule), nobody's dependent "
+            "(Rule 12) or qualifying child (Rule 13), and a main home in the U.S. "
+            "for more than half the year (Rule 14). filer_65_or_older and "
+            "spouse_65_or_older never affect the credit: they follow the "
+            "standard deduction's birthday convention and cannot express Rule "
+            "11. It never overrides what is computed: the earned income, AGI and "
+            "investment income limits (Rules 1, 6, 7 and 15) and the filing "
+            "status. False means "
+            "the credit is 0. True with num_eitc_children computes it. Unset "
+            "(or True without num_eitc_children), federal_earned_income_credit "
+            "is None: not determined. Missouri graph returns, whose line 9 "
+            "subtracts the credit, need the facts and raise "
+            "UnsupportedInputError without them, as do derivatives and solves "
+            "whose output reads the credit. Married filing separately is "
+            "always 0 on the graph: the separated-spouse exception (Rule 3) is "
+            "not modeled. Graph backend only."
+        ),
+    )
     standard_or_itemized: OTSDeductionType = Field(
         default=OTSDeductionType.AUTO,
         description=(
@@ -499,6 +550,16 @@ class TaxReturnInput(BaseModel):
     )
     w2_income: float = 0.0
     taxable_interest: float = 0.0
+    tax_exempt_interest: float = Field(
+        default=0.0,
+        ge=0.0,
+        description=(
+            "Tax-exempt interest (Form 1040 line 2a). Not taxed and not in AGI; "
+            "it counts as investment income for the earned income credit's "
+            "limit (Pub 596 Worksheet 1). Graph backend only; no state return "
+            "reads it."
+        ),
+    )
     qualified_dividends: float = 0.0
     ordinary_dividends: float = 0.0
     short_term_capital_gains: float = 0.0
@@ -721,6 +782,27 @@ class TaxReturnInput(BaseModel):
             return self.num_dependents
         return self.num_ctc_dependents
 
+    @property
+    def eitc_determined(self) -> bool:
+        """Whether the inputs establish the earned income credit (see eitc_eligible)."""
+        return self.eitc_eligible is False or (
+            self.eitc_eligible is True and self.num_eitc_children is not None
+        )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_eic_qualifying_children(self) -> int:
+        """EIC qualifying children (Schedule EIC line 1), 0 when not determined."""
+        if not self.eitc_determined or self.num_eitc_children is None:
+            return 0
+        return self.num_eitc_children
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def schedule_eic_eligible(self) -> float:
+        """1 when the EIC is determined and the filer is eligible; else 0."""
+        return 1.0 if self.eitc_determined and self.eitc_eligible else 0.0
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def schedule_8812_other_dependents(self) -> int:
@@ -913,6 +995,17 @@ class InterpretedTaxReturn(BaseModel):
             "Schedule 8812 line 14, entered on Form 1040 line 19. Already "
             "subtracted in federal_total_tax. Excludes the refundable additional "
             "child tax credit (line 28), which is a payment."
+        ),
+    )
+    federal_earned_income_credit: float | None = Field(
+        default=None,
+        description=(
+            "Earned income credit: Form 1040 line 27 (2025: line 27a), read from "
+            "the EIC Table as the EIC worksheets direct. Refundable, so it is a "
+            "payment, not part of federal_total_tax. None means not determined: "
+            "on the graph backend, eitc_eligible is unset, or True without "
+            "num_eitc_children; the OTS backend never reports it. 0 is a "
+            "determined zero; NaN is a failed computation."
         ),
     )
     federal_total_tax: float = 0.0
@@ -2141,6 +2234,7 @@ NUMERIC_OUTPUT_FIELDS: tuple[str, ...] = (
     "federal_niit",
     "federal_additional_medicare_tax",
     "federal_child_tax_credit",
+    "federal_earned_income_credit",
     "federal_total_tax",
     "state_adjusted_gross_income",
     "state_taxable_income",
