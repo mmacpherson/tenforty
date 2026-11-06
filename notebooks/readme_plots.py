@@ -175,13 +175,14 @@ def _(images, make_currency_formatter, pl, save_seaborn_objects_plot, so, tenfor
         tenforty.evaluate_returns(
             w2_income=100000, incentive_stock_option_gains=list(range(0, 100001, 2500))
         )
-        .select(["incentive_stock_option_gains", "federal_total_tax", "federal_amt"])
+        .with_columns(excluding_amt=pl.col("federal_total_tax") - pl.col("federal_amt"))
+        .select(["incentive_stock_option_gains", "excluding_amt", "federal_amt"])
         .unpivot(
             index="incentive_stock_option_gains", variable_name="Type", value_name="tax"
         )
         .with_columns(
             pl.col("Type").replace(
-                {"federal_amt": "AMT", "federal_total_tax": '"Regular" Tax'}
+                {"federal_amt": "AMT", "excluding_amt": "Tax excluding AMT"}
             )
         )
     )

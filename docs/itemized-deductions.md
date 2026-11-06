@@ -43,6 +43,9 @@ deduction, which each state defines by its own rules.
   `regular_tax` amount still reaches the state's line the way the old aggregate
   did. Those states are outside `backend="auto"` scope for this reason
   (tenforty-nuc6), and this is not an exact state computation.
+- **Mississippi:** a nonzero `regular_tax` raises `UnsupportedInputError`, as
+  the deprecated `itemized_deductions` does; MS itemizing is not supported
+  through either input ([State facts](state-facts.md)).
 
 ## Batches, derivatives and the solver
 

@@ -2,24 +2,26 @@
 
 ## Decisions
 
-- **The default becomes `backend="auto"`.** Auto computes a 2024 or 2025 return
-  on the graph backend when it is in graph scope, and on OTS otherwise. Today
-  the default is still `"ots"`; this note describes the flip and everything
-  already in place for it.
+- **The default is now `backend="auto"`.** Auto computes a 2024 or 2025 return
+  on the graph backend when it is in graph scope, and on OTS otherwise. Earlier
+  releases defaulted to `"ots"`; this note describes the flip and everything
+  that came with it.
 - **Graph scope (2024–2025):** federal-only returns; the eight states without
   an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and IL, MS and OR. Other
   states use OTS where covered, or raise `UnsupportedReturnError`. Years
   2018–2023 stay on OTS. `src/tenforty/graph_scope.py`
-  is the list, and each excluded state names the open defect or missing
-  evidence that keeps it out.
-- **An explicit backend is never reinterpreted.** `backend="ots"` is the
-  rollback: it gives you the OTS results of today, except that OTS now
-  refuses a nonzero `dependent_exemptions` it used to ignore, and a nonzero
+  is the list, and each excluded state names the open defect, missing evidence
+  or policy decision that keeps it out.
+- **An explicit backend is never reinterpreted.** `backend="ots"` computes on
+  OTS, as the earlier default did, and `backend="graph"` ignores scope.
+  `backend="ots"` is a rollback of the computation engine, not of every earlier
+  contract: the deduction election (`standard_or_itemized="Auto"`), the frame
+  schema and the error behavior changed for both backends, and OTS now refuses
+  a nonzero `dependent_exemptions` it used to ignore, and a nonzero
   `incentive_stock_option_gains` on 2018 and 2019 returns (see
   [Inputs refused](#inputs-refused-where-they-do-not-apply)).
-  `backend="graph"` ignores scope.
 - **What you should do:**
-  1. Run your workload with `backend="auto"` before the flip and compare it with
+  1. Run your workload on the default (`"auto"`) and compare it with
      `backend="ots"`. The differences you can expect are listed under
      [Known differences](#known-differences-between-ots-and-auto); anything else
      is a bug we want to hear about.
@@ -47,10 +49,14 @@ The CHANGELOG has the full wording.
   by engine and keeps its row order.
 - Auto computes IL and MS, which OTS cannot: under `backend="ots"` they raise
   `UnsupportedReturnError`.
-- MD and NC leave auto graph scope until their itemized-deduction contract is
-  implemented (`tenforty-nuc6`). Their graph mappings currently treat the
+- OH stays out of auto graph scope by decision: its graph Married/Joint return
+  requires the explicit `state_facts` joint-credit fact, which has no default,
+  so admitting it would make auto raise for those callers. It uses OTS.
+- MD, ME and NC leave auto graph scope until their itemized-deduction contract
+  is implemented (`tenforty-nuc6`). Their graph mappings currently treat the
   generic federal aggregate as a state itemized amount. NC therefore uses OTS;
-  MD has no OTS program and auto raises `UnsupportedReturnError`. Explicit
+  MD and ME have no OTS program, and auto raises `UnsupportedReturnError` for
+  them. Explicit
   `backend="graph"` remains available.
 - A request no backend can serve raises `UnsupportedReturnError` before
   evaluation, under every `on_error` policy. `backend="graph"` for 2018–2023
@@ -61,14 +67,17 @@ The CHANGELOG has the full wording.
 
 The graph backend refuses a nonzero input it cannot apply, with
 `UnsupportedInputError` (a `NotImplementedError` and a `ValueError`), instead of
-dropping it. On the returns auto sends to graph that matters for two inputs:
+dropping it. On the returns auto sends to graph that matters for these inputs:
 
 | Input | OTS today | Auto (graph-routed) |
 |---|---|---|
 | `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused: no state in auto's graph scope maps it. Only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV, none of which is in auto scope |
-| `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused, except AL and CA |
+| `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused: no state in auto's graph scope maps it (graph maps it only for AL and CA, both outside auto scope) |
+| `incentive_stock_option_gains` | 2018 and 2019: refused (those programs never use it); 2020–2025: used | Used |
+| `schedule_1_income`, `itemized_deductions`, `state_and_local_taxes`, and a nonzero `federal_itemized` regular-tax amount | Used | Used, except refused for MS, where the aggregates cannot identify a Mississippi amount ([State facts](state-facts.md)) |
 
-No OTS-covered return that auto sends to graph uses either input on OTS, so
+No OTS-covered return that auto sends to graph uses `dependent_exemptions` or
+`state_adjustment` on OTS, so
 refusing them loses nothing that was computed before. Checked empirically for
 every OTS-covered state and year (tenforty-aqx.4.1.2).
 
@@ -105,8 +114,8 @@ state itemizing from the federal Schedule A. See
 ### Results
 
 - **Failures are NaN, never zero.** Under `on_error="warn"` or `"ignore"`, a
-  failed return has NaN in every output field. The graph backend used to return
-  all zeros. A failed batch row keeps its place and input columns.
+  failed return has NaN in every numeric output field and `assumptions` is
+  `None`. The graph backend used to return all zeros. A failed batch row keeps its place and input columns.
 - **Rates can be `None`.** `federal_tax_bracket`, `federal_effective_tax_rate`,
   `state_tax_bracket` and `state_effective_tax_rate` are `float | None`. `None`
   means the rate is not defined: no state, a state whose bracket is not reported
@@ -137,7 +146,12 @@ state itemizing from the federal Schedule A. See
   resident-dependent baseline True and an optional False override. Missing or inconsistent
   facts refuse the whole request. State/total-tax MS MFJ household-income
   derivatives and solves are unsupported; explicit federal-only outputs remain
-  available. See [State facts](state-facts.md) for the validity bound and limits.
+  available. A nonzero `schedule_1_income`, `state_adjustment`,
+  `dependent_exemptions`, `itemized_deductions`, `state_and_local_taxes` or
+  `federal_itemized` regular-tax amount is refused for MS; switching from
+  `itemized_deductions` to `federal_itemized` does not make MS itemizing
+  supported. See [State facts](state-facts.md) for the validity bound and
+  limits.
 - Results gain `assumptions`: recorded conventions used because no input
   supplied them (`()` if none, `None` on failure). Massachusetts joint returns
   now report the one-earner line 11 convention on both backends; no value
@@ -179,13 +193,15 @@ state itemizing from the federal Schedule A. See
   of `federal_total_tax`. OTS reports `None`, so a return that moves from OTS to
   `backend="auto"` gains the value once its facts are given. Its inputs are
   the keyword-only `eitc_eligible`, `num_eitc_children` and
-  `tax_exempt_interest`. Neither fact has a default: without them the credit
-  is `None` (not determined), and `federal_total_tax` is unaffected. All three
-  are ignored on OTS, where nothing they feed is reported.
+  `tax_exempt_interest`. Neither fact has a default. `eitc_eligible=False`
+  gives a determined 0 with no child count; `eitc_eligible=True` with
+  `num_eitc_children` computes the credit; otherwise it is `None` (not
+  determined). `federal_total_tax` is unaffected either way. All three are
+  ignored on OTS, which always reports `None`.
 - Missouri: MO-1040 line 9 subtracts the federal EIC before the federal tax
-  deduction, so graph Missouri returns need the EIC facts and raise
-  `UnsupportedInputError` without them. Pass `eitc_eligible=False` for a filer
-  who cannot claim the credit.
+  deduction, so a graph Missouri return whose EIC is not determined raises
+  `UnsupportedInputError`. `eitc_eligible=False` (a determined 0, no child
+  count) is accepted, for a filer who cannot claim the credit.
 
 ### Installation
 
@@ -224,7 +240,7 @@ difference in the corpus unexplained.
 | Entry | Kind | Where | What you see on auto |
 |---|---|---|---|
 | F11 (OTS upstream report 1) | OTS defect | 2024 head of household, taxable income above $191,150 | Up to $64 less federal tax: OTS starts the 32% bracket $800 early |
-| F12 | Contract | The deprecated `itemized_deductions` with itemizing | Less or no AMT. OTS treats the aggregate as Schedule A "other taxes", added back for the AMT; graph treats it as "other deductions". Neither is wrong: the input does not say which kind of deduction it is. Resolved for `federal_itemized`, which states the AMT amount; see [Itemized deductions](itemized-deductions.md) |
+| F12 | Contract | The deprecated `itemized_deductions` with itemizing | Less or no AMT. The aggregate does not say how much of it the AMT allows, so each backend applies its shipped convention: OTS treats it as Schedule A "other taxes", added back in full; graph treats it as "other itemized deductions", allowed in full. Either can be wrong for a given return, in opposite directions, so auto can be less accurate than OTS here (and the reverse). The exact input is `federal_itemized=FederalItemized(regular_tax=..., amt=...)`, which states the AMT amount and which both backends honour (OTS refuses an `amt` above `regular_tax`, and any nonzero amount for AZ, CA and NY); see [Itemized deductions](itemized-deductions.md). Keeping each backend's shipped number for the legacy scalar is a bounded transition exception Mike approved, not an AMT default: a nonzero value raises `LegacyItemizedDeductionsWarning`, every itemizing return reports `federal.itemized_deductions.legacy_amt` in `assumptions`, and the scalar is removed in the first release after the North Carolina, Maryland and Maine itemized slices and the OTS Arizona/California/New York follow-ups (tenforty-nuc6) |
 | F31 (OTS upstream report 11) | OTS defect | 2025 MFS, SALT, MAGI between $250,000 and $500,000 | Smaller SALT deduction: graph applies the MFS phase-down OTS skips |
 | OTS-6251-8Z (OTS upstream report 17) | OTS defect | Negative `schedule_1_income` | Less or no AMT. OTS reads Schedule 1 line 8z into Form 6251 lines 2b and 2e, so a negative 8z adds twice its size to AMTI. Example: 2024 MFS, wages $80,000, `schedule_1_income=-15000`: OTS AMT $1,224, auto $0 |
 | MAP-OR-DEPENDENTS (tenforty-3nvf) | Our OTS mapping | OR with `num_dependents` | Lower OR tax by the $249 (2024) / $256 (2025) exemption credit per dependent, which our OTS map never passed |

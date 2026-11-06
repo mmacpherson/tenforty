@@ -916,8 +916,7 @@ def _run_range_scenario(scenario):
         kwargs["taxable_interest"] = scenario["taxable_interest"]
     if scenario.get("ordinary_dividends"):
         kwargs["ordinary_dividends"] = scenario["ordinary_dividends"]
-    if scenario.get("backend"):
-        kwargs["backend"] = scenario["backend"]
+    kwargs["backend"] = scenario.get("backend") or "ots"
     if scenario.get("state_facts"):
         kwargs["state_facts"] = scenario["state_facts"]
     result = evaluate_return(**kwargs)
@@ -2174,10 +2173,12 @@ def test_state_tax_increases_with_income(state, backend):
     """Verify that state tax increases monotonically with income."""
     incomes = [50000, 100000, 150000, 200000]
     kwargs_base = dict(
-        year=2024, state=state, filing_status="Single", eitc_eligible=False
+        year=2024,
+        state=state,
+        filing_status="Single",
+        eitc_eligible=False,
+        backend=backend or "ots",
     )
-    if backend:
-        kwargs_base["backend"] = backend
 
     results = [evaluate_return(w2_income=income, **kwargs_base) for income in incomes]
 

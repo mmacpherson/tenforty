@@ -11,6 +11,7 @@ def test_on_error_raise_is_default():
         year=2024,
         filing_status="Single",
         w2_income=50000,
+        backend="ots",
     )
     assert result.federal_total_tax > 0
 
@@ -24,6 +25,7 @@ def test_on_error_warn_emits_runtime_warning():
             filing_status="Single",
             w2_income=50000,
             on_error="warn",
+            backend="ots",
         )
         assert result.federal_total_tax > 0
 
@@ -37,6 +39,7 @@ def test_on_error_ignore_silently_continues():
             filing_status="Single",
             w2_income=50000,
             on_error="ignore",
+            backend="ots",
         )
         assert result.federal_total_tax > 0
         ots_warnings = [x for x in w if "OTS returned" in str(x.message)]

@@ -61,8 +61,7 @@ def run_tax_scenario(scenario: TaxScenario):
         dependent_exemptions=scenario.dependent_exemptions,
         state_adjustment=scenario.state_adjustment,
     )
-    if scenario.backend:
-        kwargs["backend"] = scenario.backend
+    kwargs["backend"] = scenario.backend or "ots"
     if scenario.state_facts is not None:
         kwargs["state_facts"] = MODELS[scenario.state](**scenario.state_facts)
     result = evaluate_return(**kwargs)

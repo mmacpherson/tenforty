@@ -16,6 +16,7 @@ class TestBatchBasics:
             state="NY",
             filing_status="Single",
             w2_income=75000.0,
+            backend="ots",
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -31,6 +32,7 @@ class TestBatchBasics:
             state="NY",
             filing_status="Single",
             w2_income=incomes,
+            backend="ots",
         )
 
         assert len(result) == len(incomes)
@@ -44,6 +46,7 @@ class TestBatchBasics:
             state=states,
             filing_status="Single",
             w2_income=100000.0,
+            backend="ots",
         )
 
         assert len(result) == len(states)
@@ -59,6 +62,7 @@ class TestBatchBasics:
             state="NY",
             filing_status="Single",
             w2_income=100000.0,
+            backend="ots",
         )
 
         assert len(result) == len(years)
@@ -74,6 +78,7 @@ class TestBatchBasics:
             year=years,
             state=states,
             w2_income=incomes,
+            backend="ots",
         )
 
         expected_rows = len(years) * len(states) * len(incomes)
@@ -89,6 +94,7 @@ class TestDataFrameStructure:
             year=2024,
             state="NY",
             w2_income=100000.0,
+            backend="ots",
         )
 
         expected_input_cols = [
@@ -115,6 +121,7 @@ class TestDataFrameStructure:
             year=2024,
             state="NY",
             w2_income=100000.0,
+            backend="ots",
         )
 
         numeric_cols = [
@@ -136,6 +143,7 @@ class TestDataFrameStructure:
             year=2024,
             state="NY",
             w2_income=100000.0,
+            backend="ots",
         )
 
         assert result["state"].dtype in (pl.Utf8, pl.String)
@@ -146,6 +154,7 @@ class TestDataFrameStructure:
             year=2024,
             state="NY",
             w2_income=[50000.0, 100000.0],
+            backend="ots",
         )
 
         assert result["federal_total_tax"].null_count() == 0
@@ -187,8 +196,8 @@ class TestConsistency:
     )
     def test_batch_matches_single(self, params):
         """Batch result should match single evaluate_return() call."""
-        single_result = evaluate_return(**params)
-        batch_result = evaluate_returns(**params)
+        single_result = evaluate_return(**params, backend="ots")
+        batch_result = evaluate_returns(**params, backend="ots")
 
         assert len(batch_result) == 1
         row = batch_result.row(0, named=True)
@@ -211,6 +220,7 @@ class TestConsistency:
             year=2024,
             state="NY",
             w2_income=incomes,
+            backend="ots",
         )
 
         assert result["w2_income"].to_list() == incomes
@@ -225,6 +235,7 @@ class TestEdgeCases:
             year=2024,
             state="NY",
             w2_income=0.0,
+            backend="ots",
         )
 
         assert len(result) == 1
@@ -236,6 +247,7 @@ class TestEdgeCases:
             year=2024,
             state=None,
             w2_income=100000.0,
+            backend="ots",
         )
 
         assert len(result) == 1
@@ -248,6 +260,7 @@ class TestEdgeCases:
             year=2024,
             state=["NY", None, "MA"],
             w2_income=100000.0,
+            backend="ots",
         )
 
         assert len(result) == 3
@@ -270,6 +283,7 @@ class TestEdgeCases:
             state="NY",
             filing_status=statuses,
             w2_income=100000.0,
+            backend="ots",
         )
 
         assert len(result) == len(statuses)
@@ -286,12 +300,14 @@ class TestExplicitCrossMode:
             year=2024,
             state="NY",
             w2_income=[50000.0, 100000.0],
+            backend="ots",
         )
         explicit_result = evaluate_returns(
             year=2024,
             state="NY",
             w2_income=[50000.0, 100000.0],
             mode="cross",
+            backend="ots",
         )
 
         assert default_result.shape == explicit_result.shape
@@ -307,6 +323,7 @@ class TestExplicitCrossMode:
             state="NY",
             w2_income=[50000.0, 100000.0],
             mode="cross",
+            backend="ots",
         )
 
         assert len(result) == 4

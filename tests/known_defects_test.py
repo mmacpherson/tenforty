@@ -74,6 +74,7 @@ def test_ots_niit_includes_short_term_gains():
         filing_status="Single",
         w2_income=300_000,
         short_term_capital_gains=50_000,
+        backend="ots",
     )
     assert r.federal_niit == pytest.approx(1_900.0, abs=1.0)
 
@@ -105,6 +106,7 @@ def test_ots_niit_honors_the_capital_loss_limitation():
             w2_income=300_000,
             taxable_interest=100_000,
             **{kind: -50_000},
+            backend="ots",
         )
         assert r.federal_niit == pytest.approx(3_686.0, abs=1.0), kind
 
@@ -171,6 +173,7 @@ def test_ots_niit_fires_when_gains_are_the_only_investment_income():
         filing_status="Single",
         w2_income=300_000,
         long_term_capital_gains=50_000,
+        backend="ots",
     )
     assert r.federal_niit == pytest.approx(1_900.0, abs=1.0)
 
@@ -212,7 +215,7 @@ def test_graph_additional_medicare_includes_se_earnings():
 def test_ots_additional_medicare_fires_without_wages():
     """$300k SE profit, no wages: additional Medicare tax is $693.45, not $0."""
     r = evaluate_return(
-        year=2024, filing_status="Single", self_employment_income=300_000
+        year=2024, filing_status="Single", self_employment_income=300_000, backend="ots"
     )
     assert r.federal_additional_medicare_tax == pytest.approx(693.45, abs=1.0)
 
@@ -254,7 +257,9 @@ def test_graph_taxes_short_term_gains_as_ordinary():
 )
 def test_ots_hoh_high_income_matches_consensus():
     """Head of House, $260k wages: income tax $52,185 per the IRS bracket table."""
-    r = evaluate_return(year=2024, filing_status="Head_of_House", w2_income=260_000)
+    r = evaluate_return(
+        year=2024, filing_status="Head_of_House", w2_income=260_000, backend="ots"
+    )
     assert r.federal_income_tax == pytest.approx(52_185.00, abs=2.0)
 
 
