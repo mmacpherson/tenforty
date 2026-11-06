@@ -2865,7 +2865,7 @@ wheels = [
 
 [[package]]
 name = "tenforty"
-version = "2025.12"
+version = "2025.13"
 source = { editable = "." }
 dependencies = [
     { name = "polars" },
