@@ -30,6 +30,64 @@
     Validation page as the account of what is independently checked.
 
 ### Added
+- **The federal earned income credit** (graph backend, 2024-2025):
+  `federal_earned_income_credit`, Form 1040 line 27 (2025: line 27a). It is
+  read from the EIC Table, as the worksheets direct, and every row of the
+  published 2024 and 2025 tables is checked at $0. Refundable, so it is a
+  payment and not part of `federal_total_tax`; `None` on OTS.
+  - New keyword-only inputs: `num_eitc_children` (EIC qualifying children),
+    `eitc_eligible` (the filer meets the EIC conditions the inputs cannot
+    show: valid SSNs, not another taxpayer's qualifying child, and the rest
+    of Pub 596 Rules 2, 4, 5 and 10; with no qualifying child, also all of
+    Rule 11, where one person, the filer or a joint spouse, is at least 25
+    and under 65 by Rule 11's own birth-date bounds, and Rules 12-14) and
+    `tax_exempt_interest` (Form 1040 line 2a, investment
+    income for the EIC limit). Nullable batch columns, except
+    `tax_exempt_interest`, which is a float.
+  - **No default guesses the credit.** `eitc_eligible=False` gives 0;
+    `eitc_eligible=True` with `num_eitc_children` computes it; otherwise
+    `federal_earned_income_credit` is `None`, "not determined", while
+    `federal_total_tax`, which the credit never enters, is computed as usual.
+    The EIC child count is never inferred from `num_dependents` or the child
+    tax credit count: a noncustodial parent claiming the child tax credit
+    under Form 8332 cannot claim that child for the EIC.
+  - `filer_65_or_older` and `spouse_65_or_older` never affect the EIC. They
+    follow the standard deduction's birthday convention (a January 1 birthday
+    counts as 65), and they cannot say whether one spouse meets both of Rule
+    11's age bounds.
+  - `marginal_rate(s)` and `solve_for_income` raise `UnsupportedInputError`
+    for an output that reads an undetermined credit (found from the resolved
+    graph, so raw node names are covered too), rather than treating it as 0.
+    `federal_total_tax` is unaffected.
+  - Earned income is computed (wages, the line 1i combat pay election, and net
+    self-employment earnings less the deductible half of SE tax) and now also
+    feeds Schedule 8812 line 18a, which was an unset input.
+  - Married filing separately gets 0: the separated-spouse exception (Pub 596
+    Rule 3) is not modeled.
+  - **Missouri graph returns now need the EIC facts.** MO-1040 line 9
+    subtracts the computed EIC, so a graph MO return without `eitc_eligible`
+    (or with `eitc_eligible=True` but no `num_eitc_children`) raises
+    `UnsupportedInputError` before evaluation, under every `on_error` and for
+    the whole batch. Pass `eitc_eligible=False` for a filer who cannot claim
+    the credit.
+- **`federal_itemized`: itemized deductions with an explicit AMT amount
+  (tenforty-nuc6).** `evaluate_return`, `evaluate_returns`, `marginal_rate(s)`
+  and `solve_for_income` take
+  `federal_itemized=tenforty.FederalItemized(regular_tax=..., amt=...)`. Both
+  amounts are prepared, net of every federal limit, and exclude the taxes
+  `state_and_local_taxes` carries. `regular_tax - amt` enters AMTI only when
+  the return itemizes. Both are required: there is no assumed AMT treatment.
+  Both backends honour it, which resolves ledger entry F12 for this input; the
+  two engines' other known differences remain. Blind derivations from IRS
+  sources witness every OTS year (2018–2025) and both graph years. See
+  [Itemized deductions](docs/itemized-deductions.md).
+  - **Batch frames** gain `federal_itemized_regular_tax` and
+    `federal_itemized_amt` input echo columns at the parameter's signature
+    position. They are null when the model is not supplied.
+  - **OTS limits.** OTS refuses, before evaluation:
+    - `amt` above `regular_tax`;
+    - any nonzero model for Arizona, California and New York, whose OTS
+      programs read the federal Schedule A by line.
 - **`state_facts`: explicit state-specific facts, and reported assumptions.**
   `evaluate_return`, `evaluate_returns`, `marginal_rate(s)` and
   `solve_for_income` take `state_facts=`, typed per-state models from
@@ -77,6 +135,21 @@
   `evaluate_returns` and `get_backend` share one selector; a mixed-year batch
   is split by year and keeps its row order.
 
+### Deprecated
+- **`itemized_deductions`.** A nonzero value emits
+  `LegacyItemizedDeductionsWarning` (a `DeprecationWarning`), once per call.
+  - **Numbers.** Each backend keeps its shipped numbers (OTS adds the amount
+    back for the AMT; graph allows it). Mike approved this as a compatibility
+    exception, not an AMT default.
+  - **Reporting.** Every return whose Form 1040 itemizes reports the
+    convention in `assumptions` as `federal.itemized_deductions.legacy_amt`.
+  - **Conflicts.** Combining it with `federal_itemized` raises `ValueError`.
+  - **Derivatives.** It cannot be a derivative or solve axis of a call that
+    passes `federal_itemized`.
+  - **Removal.** It goes in the first release after the North Carolina,
+    Maryland and Maine itemized slices and the OTS Arizona/California/New York
+    follow-ups. Each backend's old number can be reproduced with the labelled
+    recipes in the docs.
 ### Changed (both backends)
 - **`standard_or_itemized` gains `"Auto"`, now the default, and `"Standard"`
   forces the standard deduction.** `"Auto"` takes the larger of the standard
@@ -156,6 +229,11 @@
   percentage of AGI, which was wrong.
 
 ### Fixed (graph backend)
+- The graph resolver follows an import of a line that itself imports another
+  form's line. It used to stop at the first hop and leave a dangling operand.
+  Each year's graph has two such chains: Missouri line 9 reads Form 1040 line
+  27 (the EIC), and the EIC's investment income reads Form 1040 line 7
+  (Schedule D line 21). A cycle of imports is a compile error.
 - `federal_tax_bracket` is the rate-schedule bracket that holds taxable income.
   It used to be hard-coded to 0. Income exactly at a threshold stays in the
   lower bracket, as the schedules' "over X but not over Y" wording requires.
@@ -229,6 +307,14 @@
   converted to a count), or use an explicit `backend="graph"` for a 2024-2025
   state whose graph maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV).
   Zero is unchanged.
+- **OTS 2018 and 2019 now refuse a nonzero `incentive_stock_option_gains`.**
+  It is mapped to Form 6251 line AMTws3 every year, but the 2018 and 2019 OTS
+  federal programs parse that line and never store it, so the ISO adjustment
+  was dropped: a 2018 return with $150,000 wages and a $200,000 ISO spread
+  reported no AMT. Those years now raise `UnsupportedInputError` under every
+  `on_error` policy, from the same whole-batch preflight, on `backend="ots"`
+  and `backend="auto"` alike. No backend computes 2018 or 2019 with the
+  adjustment. 2020-2025 and a zero value are unchanged (tenforty-bmem).
 - **Massachusetts OTS returns now take the Form 1 line 11 deduction.** The
   MA_1 input map set only wages, so OTS never received line 11 (Social
   Security and Medicare paid, up to $2,000 per person) and over-taxed every

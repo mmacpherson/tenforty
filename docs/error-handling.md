@@ -122,8 +122,11 @@ state the backend has no return for. The message names what is supported and
 which backend to use instead.
 
 `UnsupportedInputError` is the subclass raised when a backend does not compute
-a nonzero input it was given (for example `dependent_exemptions`, which OTS
-maps for no return and the graph maps only for some states). It is also a `NotImplementedError`, which is what that
+a nonzero input it was given: for example `dependent_exemptions`, which OTS
+maps for no return and the graph maps only for some states, or
+`incentive_stock_option_gains` on 2018 and 2019 OTS returns, whose programs
+never use it. It is raised under every `on_error` policy, before any return in
+a batch is computed. It is also a `NotImplementedError`, which is what that
 refusal raised before.
 
 ### `BackendUnavailableError`

@@ -2281,3 +2281,42 @@ def test_ca_2025_sanity():
     """Sanity check CA 2025 (graph only, no OTS)."""
     result = _evaluate_2025_graph(100_000, state="CA")
     assert result["state_total_tax"] >= 0
+
+
+@skip_if_backends_unavailable
+@given(
+    year=st.sampled_from([2024, 2025]),
+    filing_status=st.sampled_from(["Single", "Married/Joint"]),
+    w2_income=st.integers(60_000, 400_000),
+    iso=st.sampled_from([0, 150_000, 400_000]),
+    salt=st.integers(0, 30_000),
+    regular_tax=st.integers(0, 80_000),
+    amt_share=st.sampled_from([0.0, 0.4, 1.0]),
+)
+@settings(max_examples=200, deadline=None)
+def test_federal_itemized_parity(
+    year, filing_status, w2_income, iso, salt, regular_tax, amt_share
+):
+    """Both engines honour federal_itemized's AMT amount (F12 resolved).
+
+    Bounded at 200 examples: a cross-backend value comparison, not an invariant.
+    OTS cannot carry amt above regular_tax, so the draw keeps amt within it.
+    """
+    from tenforty import FederalItemized
+
+    amounts = FederalItemized(
+        regular_tax=regular_tax, amt=round(regular_tax * amt_share)
+    )
+    call = {
+        "year": year,
+        "filing_status": filing_status,
+        "w2_income": w2_income,
+        "incentive_stock_option_gains": iso,
+        "state_and_local_taxes": salt,
+        "federal_itemized": amounts,
+    }
+    ots = evaluate_return(**call, backend="ots")
+    graph = evaluate_return(**call, backend="graph")
+    for field in ("federal_taxable_income", "federal_amt", "federal_total_tax"):
+        diff = abs(getattr(ots, field) - getattr(graph, field))
+        assert diff <= EXACT_TOLERANCE, f"{field} differs by ${diff:.2f} for {call}"

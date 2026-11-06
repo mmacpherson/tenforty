@@ -12,6 +12,7 @@ NATURAL_TO_NODE = {
     "standard_or_itemized": "us_1040_DeductionChoice",
     "w2_income": "us_1040_L1a_wages",
     "taxable_interest": "us_1040_L2b_taxable_interest",
+    "tax_exempt_interest": "us_1040_L2a_tax_exempt_interest",
     "qualified_dividends": "us_1040_L3a_qualified_dividends",
     "ordinary_dividends": "us_1040_L3b_ordinary_dividends",
     # Schedule 8812, derived from num_dependents and num_ctc_dependents: CTC
@@ -19,6 +20,10 @@ NATURAL_TO_NODE = {
     # dependents (form line 6; the spec's L3).
     "schedule_8812_qualifying_children": "us_form_8812_L1_num_qualifying_children",
     "schedule_8812_other_dependents": "us_form_8812_L3_num_other_dependents",
+    # Schedule EIC, derived from num_eitc_children and eitc_eligible; both are
+    # 0 when the credit is not determined.
+    "schedule_eic_qualifying_children": "us_schedule_eic_NUM_QC",
+    "schedule_eic_eligible": "us_schedule_eic_ELIGIBLE",
     # Schedule D (capital gains/losses)
     "short_term_capital_gains": "us_schedule_d_L1a_short_term_totals",
     "long_term_capital_gains": "us_schedule_d_L8a_long_term_totals",
@@ -29,7 +34,7 @@ NATURAL_TO_NODE = {
     "qbi_ubia": "us_form_8995_A_UBIA",
     "qbi_is_sstb": "us_form_8995_A_SSTB",
     "rental_income": "us_schedule_1_L5_rental_income",
-    # Schedule A (approximation): map aggregate value into "other deductions".
+    # Schedule A line 16: the deprecated aggregate, or federal_itemized.regular_tax.
     "itemized_deductions": "us_schedule_a_L16_other_deductions",
     # Schedule A line 5d, entered on line 5a; line 5e applies the cap.
     "state_and_local_taxes": "us_schedule_a_L5a_state_local_income_or_sales",
@@ -43,6 +48,8 @@ NATURAL_TO_NODE = {
     "vehicle_loan_interest": "us_schedule_1a_L23_qualified_car_loan_interest",
     # AMT (Form 6251)
     "incentive_stock_option_gains": "us_form_6251_L2k_iso_adjustment",
+    # federal_itemized.regular_tax - amt, applied to AMTI only when itemizing.
+    "itemized_amt_difference": "us_form_6251_ItemizedAmtDifference",
 }
 
 _SUBORDINATE_NODES: dict[str, list[str]] = {
@@ -581,13 +588,20 @@ STATE_GRAPH_CONFIGS: dict[OTSState, StateGraphConfig] = {
         },
     ),
     OTSState.MS: StateGraphConfig(
-        # MS Form 80-105 imports federal AGI. Mississippi uses a two-bracket system:
-        # 0% on first $10,000 of taxable income, then a flat rate above that
-        # (4.7% for 2024, 4.4% for 2025). Personal exemptions and additional
-        # exemptions (dependents, age 65+, blind) are accepted as total inputs
-        # (num_dependents cannot map to dollar amounts due to natural_to_node
-        # limitation). Standard or itemized deductions are also accepted as total input.
-        natural_to_node={},
+        # Total dependents and each age-65 box feed the $1,500 additional
+        # exemptions; MFS takes half of the joint exemption amount. CTC
+        # eligibility does not limit MS dependents. MFJ spouse MS AGI is a
+        # required state fact; the spec minimizes over lawful allocations.
+        natural_to_node={
+            "w2_income": "ms_80105_L38_wages",
+            "self_employment_income": "ms_80105_L39_business_income",
+            "rental_income": "ms_80105_L41_rental_income",
+            "taxable_interest": "ms_80105_L43_interest_income",
+            "ordinary_dividends": "ms_80105_L44_dividend_income",
+            "num_dependents": "ms_80105_Dependents",
+            "filer_65_or_older": "ms_80105_Filer65",
+            "spouse_65_or_older": "ms_80105_Spouse65",
+        },
         outputs={
             "state_adjusted_gross_income": "L13_ms_agi",
             "state_taxable_income": "L16_ms_taxable_income",

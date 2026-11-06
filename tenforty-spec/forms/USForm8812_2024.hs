@@ -113,7 +113,9 @@ usForm8812_2024 = form "us_form_8812" 2024 $ do
       smallerOf l15 l16b
 
   -- Line 18a: Earned income (wages, salaries, tips, etc.)
-  l18a <- keyInput "L18a" "earned_income" "Earned income (see instructions)"
+  -- Line 18a: the Earned Income Worksheet in the Schedule 8812 instructions is
+  -- the same wages-plus-net-self-employment amount as the EIC worksheets.
+  l18a <- interior "L18a" "earned_income" $ importForm usScheduleEicEarnedIncome
 
   -- Line 18b: Subtract $2,500 from line 18a. If zero or less, enter -0-.
   l18b <-

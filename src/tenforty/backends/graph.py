@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import json
 import logging
 import pathlib
 from collections.abc import Callable, Iterable
@@ -42,8 +43,13 @@ logger = logging.getLogger(__name__)
 
 _MODEL_CONTEXT_FIELDS = {"year", "state", "filing_status"}
 # Inputs that reach the graph only through naturals derived from them:
-# num_ctc_dependents is carried by the two Schedule 8812 counts.
-_CARRIED_BY_DERIVED_FIELDS = {"num_ctc_dependents"}
+# num_ctc_dependents is carried by the two Schedule 8812 counts, and
+# num_eitc_children and eitc_eligible by the Schedule EIC count and eligibility.
+_CARRIED_BY_DERIVED_FIELDS = {
+    "num_ctc_dependents",
+    "num_eitc_children",
+    "eitc_eligible",
+}
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
 # w2_income on both backends.
@@ -67,16 +73,54 @@ def _ohio_natural_joint_credit_values(
 
 
 def _natural_values(tax_input: TaxReturnInput) -> dict[str, object]:
-    """Lower a validated public input model to graph-compatible natural values."""
+    """Lower a validated public input model to graph-compatible natural values.
+
+    federal_itemized lowers as two naturals: its regular-tax amount through the
+    same nodes as the legacy itemized_deductions (Schedule A line 16, and for
+    now each state line the legacy scalar reaches), and the AMT difference,
+    regular_tax - amt, which Form 6251 adds to AMTI only when the return
+    itemizes. The legacy scalar has no difference: graph allows it all for the
+    AMT, its shipped convention.
+    """
     values = tax_input.model_dump(
         exclude=_MODEL_CONTEXT_FIELDS
         | _CARRIED_BY_DERIVED_FIELDS
         | _OTS_ONLY_DERIVED_FIELDS
+        | {"federal_itemized"}
     )
     values["standard_or_itemized"] = DEDUCTION_CHOICE_ENCODING[
         tax_input.standard_or_itemized
     ]
+    model = tax_input.federal_itemized
+    values["itemized_amt_difference"] = 0.0
+    if model is not None:
+        values["itemized_deductions"] = model.regular_tax
+        values["itemized_amt_difference"] = model.regular_tax - model.amt
     return values
+
+
+def _mississippi_taxpayer_agi_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Use the actual taxpayer column without inferring it from household sums."""
+    return {"ms_80105_TaxpayerAGI": float(value), "ms_80105_UseAGIFacts": 1.0}
+
+
+def _mississippi_head_of_family_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Encode the explicitly asserted state qualification for federal QSS."""
+    return {
+        "ms_80105_HeadOfFamilyEligible": float(value),
+        "ms_80105_UseHeadOfFamilyFact": 1.0,
+    }
+
+
+def _mississippi_spouse_agi_values(
+    tax_input: TaxReturnInput, value: object
+) -> dict[str, float]:
+    """Preserve the supplied Column B MS AGI; the spec rounds each column."""
+    return {"ms_80105_SpouseAGI": float(value)}
 
 
 _INCOME_TAX_STATES_WITHOUT_GRAPH_CONFIG = {
@@ -101,8 +145,13 @@ FEDERAL_OUTPUT_NODES: dict[str, str] = {
     "us_form_8960_L17_niit": "federal_niit",
     "us_form_8959_L18_total_additional_medicare": "federal_additional_medicare_tax",
     "us_form_8812_L14_ctc_odc": "federal_child_tax_credit",
+    # Form 1040 line 27 imports it; the resolver inlines that alias away.
+    "us_schedule_eic_EITC": "federal_earned_income_credit",
 }
 FEDERAL_BRACKET_RATE_NODE = "us_1040_L15BracketRate_ordinary_bracket_rate"
+USES_ITEMIZED_NODE = "us_1040_UsesItemized"
+FEDERAL_ITEMIZES = "federal_itemizes"
+"""Internal batch column: whether each row's Form 1040 used Schedule A."""
 _FEDERAL_FIELD_TO_NODE = {field: node for node, field in FEDERAL_OUTPUT_NODES.items()}
 
 _STATE_ZERO_FIELDS = (
@@ -111,6 +160,15 @@ _STATE_ZERO_FIELDS = (
     "state_total_tax",
 )
 _STATE_RATE_FIELDS = ("state_tax_bracket", "state_effective_tax_rate")
+_MS_AMBIGUOUS_NATURALS = frozenset(
+    {
+        "schedule_1_income",
+        "state_adjustment",
+        "dependent_exemptions",
+        "itemized_deductions",
+        "state_and_local_taxes",
+    }
+)
 
 
 def _state_output_node(form_name: str, line_name: str) -> str:
@@ -219,6 +277,14 @@ def _raise_unsupported(
     if not unsupported:
         return
     details = "\n".join(f"- {k}={v!r}" for k, v in unsupported)
+    if state == OTSState.MS and any(
+        name in _MS_AMBIGUOUS_NATURALS for name, _ in unsupported
+    ):
+        raise UnsupportedInputError(
+            "MS cannot lower these natural aggregates to clean Mississippi "
+            "form lines. Use prepared raw MS form inputs for those amounts.\n"
+            f"Unsupported inputs:\n{details}"
+        )
     if _ots_maps_inputs([name for name, _ in unsupported], state, year):
         remedy = "Provide these as 0 for now, or use backend='ots'."
     else:
@@ -251,7 +317,9 @@ def unsupported_inputs(
             if key in found or value == 0 or value is None:
                 continue
             if key not in reads:
-                reads[key] = _reads_nonzero(
+                reads[key] = not (
+                    state == OTSState.MS and natural_name in _MS_AMBIGUOUS_NATURALS
+                ) and _reads_nonzero(
                     natural_name, _lowered_input_nodes(natural_name, state, year)
                 )
             if not reads[key]:
@@ -263,6 +331,9 @@ FactLowering = Callable[[TaxReturnInput, object], dict[str, float]]
 
 
 FACT_LOWERINGS: dict[tuple[str, str], FactLowering] = {
+    ("MS", "taxpayer_adjusted_gross_income"): _mississippi_taxpayer_agi_values,
+    ("MS", "head_of_family_eligible"): _mississippi_head_of_family_values,
+    ("MS", "spouse_adjusted_gross_income"): _mississippi_spouse_agi_values,
     ("OH", "spouses_both_have_qualifying_income"): _ohio_natural_joint_credit_values,
 }
 """How each state fact reaches the graph, keyed by (state, field name).
@@ -291,10 +362,28 @@ def _fact_node_values(tax_input: TaxReturnInput) -> dict[str, float]:
     return values
 
 
+STATES_READING_FEDERAL_EIC = frozenset({OTSState.MO})
+"""States whose graph return reads the federal earned income credit (Form 1040
+line 27). Their tax depends on it, so they need the facts that determine it."""
+
+
+def _require_eic_facts(tax_input: TaxReturnInput) -> None:
+    if tax_input.state not in STATES_READING_FEDERAL_EIC or tax_input.eitc_determined:
+        return
+    missing = "num_eitc_children" if tax_input.eitc_eligible else "eitc_eligible"
+    raise UnsupportedInputError(
+        f"{tax_input.state.value} graph returns subtract the federal earned "
+        f"income credit, which needs {missing}: pass eitc_eligible=False if the "
+        "filer cannot claim it, or eitc_eligible=True with num_eitc_children "
+        "(EIC qualifying children, not dependents). Neither has a default."
+    )
+
+
 def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
     """Refuse unsupported natural returns and nonzero inputs the graph cannot read."""
     returns = tuple(tax_inputs)
     for tax_input in returns:
+        _require_eic_facts(tax_input)
         if (
             tax_input.state == OTSState.NY
             and tax_input.filing_status == OTSFilingStatus.MARRIED_SEPARATE
@@ -308,6 +397,121 @@ def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
         by_return.setdefault((state, year), []).append((name, value))
     for (state, year), unsupported in by_return.items():
         _raise_unsupported(unsupported, state, year)
+    for tax_input in returns:
+        _require_ms_fact_consistency(tax_input)
+
+
+def _require_ms_fact_consistency(tax_input: TaxReturnInput) -> None:
+    """Validate actual MS facts before any tax output or batch result is produced."""
+    if tax_input.state != OTSState.MS:
+        return
+    facts = tax_input._state_facts
+    if tax_input.filing_status in (
+        OTSFilingStatus.HEAD_OF_HOUSEHOLD,
+        OTSFilingStatus.WIDOW_WIDOWER,
+    ):
+        baseline = (
+            True
+            if tax_input.filing_status == OTSFilingStatus.HEAD_OF_HOUSEHOLD
+            else None
+        )
+        eligible = facts.get("head_of_family_eligible", baseline)
+        if eligible is None:
+            raise UnsupportedInputError(
+                "MS QSS needs state_facts.MS.head_of_family_eligible"
+            )
+        if eligible and tax_input.num_dependents < 1:
+            raise UnsupportedInputError(
+                "MS Head of Family requires num_dependents >= 1"
+            )
+    if tax_input.filing_status != OTSFilingStatus.MARRIED_JOINT:
+        return
+    names = ("taxpayer_adjusted_gross_income", "spouse_adjusted_gross_income")
+    for name in names:
+        if facts.get(name) is None:
+            raise UnsupportedInputError(f"MS MFJ needs state_facts.MS.{name}")
+    evaluator, _ = _input_runtime(tax_input, include_facts=False)
+    reference = int(evaluator.eval("ms_80105_L66_page2_ms_agi"))
+    bound = int(evaluator.eval("ms_80105_AGIConsistencyBound"))
+    supplied = sum(int(facts[name]) for name in names)
+    if abs(supplied - reference) > bound:
+        raise UnsupportedInputError(
+            "MS line-13 AGI facts are inconsistent with the household entries' "
+            f"rounding bound: column sum {supplied}, household reference {reference}, "
+            f"maximum difference {bound}. Supply both actual whole-dollar columns."
+        )
+
+
+_MS_HOUSEHOLD_INCOMES = frozenset(
+    {
+        "w2_income",
+        "taxable_interest",
+        "ordinary_dividends",
+        "qualified_dividends",
+        "short_term_capital_gains",
+        "long_term_capital_gains",
+        "self_employment_income",
+        "rental_income",
+        "schedule_1_income",
+    }
+)
+
+
+def _require_ms_perturbation_ownership(
+    tax_input: TaxReturnInput, outputs: list[str], inputs: list[str] | None
+) -> None:
+    """Check resolved input nodes so every alias has the same ownership rule."""
+    if (
+        tax_input.state != OTSState.MS
+        or tax_input.filing_status != OTSFilingStatus.MARRIED_JOINT
+        or not any(node.startswith("ms_80105_") for node in outputs)
+    ):
+        return
+    income_nodes = {
+        node
+        for name in _MS_HOUSEHOLD_INCOMES
+        | {
+            derived
+            for derived, source in DERIVED_NATURAL_SOURCES.items()
+            if source in _MS_HOUSEHOLD_INCOMES
+        }
+        for node in _lowered_input_nodes(name, tax_input.state, tax_input.year.value)
+    }
+    if inputs is None or income_nodes.intersection(inputs):
+        raise UnsupportedInputError(
+            "MS MFJ state/total-tax income derivatives and solves need to know "
+            "which spouse owns the hypothetical change; the two fixed AGI facts "
+            "do not identify that owner. Explicit federal-only outputs are supported."
+        )
+
+
+def _require_prepared_amounts_fixed(
+    tax_input: TaxReturnInput, inputs: list[str]
+) -> None:
+    """Refuse a derivative or solve axis that carries a prepared itemized amount.
+
+    Checked on resolved input nodes, so a natural name, a bare node and a
+    prefixed node are refused alike. The AMT-difference carrier is internal to
+    federal_itemized and is never an axis. When federal_itemized is supplied,
+    its regular-tax carriers (Schedule A line 16 and any state line it is
+    forwarded to) are held fixed too; the legacy itemized_deductions axis
+    stays available when it is the input in use.
+    """
+    year = tax_input.year.value
+    carriers = set(
+        _lowered_input_nodes("itemized_amt_difference", tax_input.state, year)
+    )
+    if tax_input.federal_itemized is not None:
+        carriers |= set(
+            _lowered_input_nodes("itemized_deductions", tax_input.state, year)
+        )
+    named = sorted(carriers.intersection(inputs))
+    if named:
+        raise ValueError(
+            f"{', '.join(named)} carries a federal_itemized amount, which is "
+            "unsupported as a derivative or solve axis: federal_itemized amounts "
+            "are prepared amounts, held fixed."
+        )
 
 
 def _state_output_node_for_field(state: OTSState, field: str, year: int) -> str:
@@ -360,6 +564,88 @@ def _load_resolved_graph(year: int):
     return Graph.from_json((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
 
 
+def _input_runtime(tax_input: TaxReturnInput, *, include_facts: bool = True):
+    """Populate a runtime for tax evaluation or the independent validity reference."""
+    from ..graphlib import FilingStatus, Runtime
+
+    inputs_dict = _natural_values(tax_input)
+    graph = _load_resolved_graph(tax_input.year.value)
+    filing_status = FilingStatus.from_str(
+        FILING_STATUS_MAP.get(tax_input.filing_status, "single")
+    )
+    evaluator = Runtime(graph, filing_status)
+
+    # Unset inputs default to 0 in eval; only the provided values are set
+    # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
+    natural_values = inputs_dict
+
+    year = tax_input.year.value
+    for natural_name, value in natural_values.items():
+        node_names = _lowered_input_nodes(natural_name, tax_input.state, year)
+        _require_input_nodes(natural_name, node_names, tax_input.state, year)
+        if value == 0 or value is None:
+            continue
+        for node_name in node_names:
+            evaluator.set(node_name, float(value))
+    if include_facts:
+        for node_name, value in _fact_node_values(tax_input).items():
+            evaluator.set(node_name, value)
+
+    return evaluator, graph
+
+
+_OPERAND_KEYS = ("left", "right", "arg", "cond", "then", "otherwise", "income")
+
+
+@lru_cache(maxsize=8)
+def nodes_depending_on(year: int, target: str) -> frozenset[str]:
+    """Names of the resolved graph's nodes whose value depends on ``target``."""
+    nodes = json.loads((_forms_dir() / f"us_tax_graph_{year}.json").read_text())[
+        "nodes"
+    ]
+
+    def operands(node_id: int) -> list[int]:
+        op = nodes[str(node_id)]["op"]
+        found = [op[key] for key in _OPERAND_KEYS if isinstance(op.get(key), int)]
+        return found + list(op.get("values", {}).values())
+
+    target_id = next(int(i) for i, node in nodes.items() if node.get("name") == target)
+    depends: dict[int, bool] = {target_id: True}
+    for start in map(int, nodes):
+        stack = [(start, False)]
+        while stack:
+            current, expanded = stack.pop()
+            if current in depends:
+                continue
+            if expanded:
+                depends[current] = any(depends[o] for o in operands(current))
+                continue
+            stack.append((current, True))
+            stack.extend((o, False) for o in operands(current) if o not in depends)
+    return frozenset(
+        nodes[str(i)].get("name", "") for i, flag in depends.items() if flag
+    )
+
+
+EIC_OUTPUT_NODE = _FEDERAL_FIELD_TO_NODE["federal_earned_income_credit"]
+
+
+def _require_eic_determined_for(tax_input: TaxReturnInput, nodes: list[str]) -> None:
+    """Refuse a derivative or solve whose output reads an undetermined EIC."""
+    if tax_input.eitc_determined:
+        return
+    reading = nodes_depending_on(tax_input.year.value, EIC_OUTPUT_NODE)
+    if any(node in reading for node in nodes):
+        missing = "num_eitc_children" if tax_input.eitc_eligible else "eitc_eligible"
+        raise UnsupportedInputError(
+            f"{', '.join(nodes)} depends on the federal earned income credit, "
+            f"which is not determined without {missing}: pass "
+            "eitc_eligible=False if the filer cannot claim it, or "
+            "eitc_eligible=True with num_eitc_children. A derivative or solve "
+            "never treats an undetermined credit as 0."
+        )
+
+
 class GraphBackend:
     """Backend using tax computation graph with autodiff and solver support."""
 
@@ -384,32 +670,8 @@ class GraphBackend:
 
     def _create_evaluator(self, tax_input: TaxReturnInput):
         """Create an evaluator for the given input."""
-        from ..graphlib import FilingStatus, Runtime
-
         require_supported_inputs([tax_input])
-        inputs_dict = _natural_values(tax_input)
-        graph = _load_resolved_graph(tax_input.year.value)
-        filing_status = FilingStatus.from_str(
-            FILING_STATUS_MAP.get(tax_input.filing_status, "single")
-        )
-        evaluator = Runtime(graph, filing_status)
-
-        # Unset inputs default to 0 in eval; only the provided values are set
-        # below. Zeroing all ~800 country-wide inputs here cost ~1.9 ms/return.
-        natural_values = inputs_dict
-
-        year = tax_input.year.value
-        for natural_name, value in natural_values.items():
-            node_names = _lowered_input_nodes(natural_name, tax_input.state, year)
-            _require_input_nodes(natural_name, node_names, tax_input.state, year)
-            if value == 0 or value is None:
-                continue
-            for node_name in node_names:
-                evaluator.set(node_name, float(value))
-        for node_name, value in _fact_node_values(tax_input).items():
-            evaluator.set(node_name, value)
-
-        return evaluator, graph
+        return _input_runtime(tax_input)
 
     def evaluate(self, tax_input: TaxReturnInput) -> InterpretedTaxReturn:
         """Evaluate tax return using graph evaluator."""
@@ -431,7 +693,10 @@ class GraphBackend:
         result: dict[str, float | None] = {
             field: evaluator.eval(node) for node, field in FEDERAL_OUTPUT_NODES.items()
         }
+        itemizes = evaluator.eval(USES_ITEMIZED_NODE) > 0
 
+        if not tax_input.eitc_determined:
+            result["federal_earned_income_credit"] = None
         total_tax = result["federal_total_tax"]
         result["total_tax"] = total_tax
         result["federal_effective_tax_rate"] = _effective_tax_rate(
@@ -461,7 +726,9 @@ class GraphBackend:
                 "state_total_tax", 0.0
             )
 
-        return InterpretedTaxReturn(**result)
+        interpreted = InterpretedTaxReturn(**result)
+        interpreted._federal_itemizes = itemizes
+        return interpreted
 
     def evaluate_batch(
         self,
@@ -532,10 +799,10 @@ class GraphBackend:
         # Checked on the normalized rows, so a value the input model refuses
         # (a Schedule 1-A amount before 2025) raises its ValueError first, as
         # the single-return path does.
-        require_supported_inputs(tax_inputs)
         if facts is not None:
             for tax_input, row_facts in zip(tax_inputs, facts, strict=True):
                 tax_input._state_facts = dict(row_facts)
+        require_supported_inputs(tax_inputs)
         fact_rows = [_fact_node_values(tax_input) for tax_input in tax_inputs]
         normalized: dict[str, list[float]] = {}
         for tax_input in tax_inputs:
@@ -564,6 +831,7 @@ class GraphBackend:
         # which the single path handles by evaluating that node into each.
         output_pairs: list[tuple[str, str]] = list(FEDERAL_OUTPUT_NODES.items())
         output_pairs.append((FEDERAL_BRACKET_RATE_NODE, "federal_tax_bracket"))
+        output_pairs.append((USES_ITEMIZED_NODE, FEDERAL_ITEMIZES))
         if state and state != OTSState.NONE:
             state_form = STATE_FORM_NAMES.get(state)
             if state_form:
@@ -612,6 +880,15 @@ class GraphBackend:
             final_results[field] = output_cols[node_name]
 
         count = len(status_col)
+        final_results["federal_earned_income_credit"] = [
+            credit if tax_input.eitc_determined else None
+            for credit, tax_input in zip(
+                final_results["federal_earned_income_credit"], tax_inputs, strict=True
+            )
+        ]
+        final_results[FEDERAL_ITEMIZES] = [
+            value > 0 for value in final_results[FEDERAL_ITEMIZES]
+        ]
 
         # Derived fields: the same definitions as the single path.
         final_results["federal_tax_bracket"] = [
@@ -771,6 +1048,14 @@ class GraphBackend:
         return [self._resolve_input_node(tax_input, var, output_node)]
 
     def _output_nodes(self, tax_input: TaxReturnInput, output: str) -> list[str]:
+        """Resolve an output for a derivative or solve, refusing an unknown EIC."""
+        nodes = self._resolve_output_nodes(tax_input, output)
+        _require_eic_determined_for(tax_input, nodes)
+        return nodes
+
+    def _resolve_output_nodes(
+        self, tax_input: TaxReturnInput, output: str
+    ) -> list[str]:
         """Resolve a public output to the graph nodes whose sum it denotes."""
         if output.startswith(_ALL_KNOWN_PREFIXES):
             return [output]
@@ -815,6 +1100,8 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
+        _require_prepared_amounts_fixed(tax_input, input_nodes)
+        _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
@@ -833,6 +1120,7 @@ class GraphBackend:
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
+        _require_ms_perturbation_ownership(tax_input, output_nodes, None)
         state_mapping = state_natural_to_node(tax_input.state, tax_input.year.value)
         year = tax_input.year.value
         natural_names = [
@@ -840,6 +1128,9 @@ class GraphBackend:
             for name, field in TaxReturnInput.model_fields.items()
             if field.annotation is float
             and (federal_nodes_for(name, year) or name in state_mapping)
+            and not (
+                name == "itemized_deductions" and tax_input.federal_itemized is not None
+            )
         ]
         input_groups = [
             self._input_nodes(tax_input, name, output_nodes[0])
@@ -870,6 +1161,8 @@ class GraphBackend:
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
+        _require_prepared_amounts_fixed(tax_input, input_nodes)
+        _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
 
         natural_values = _natural_values(tax_input)
         current_val = natural_values.get(var, 0)

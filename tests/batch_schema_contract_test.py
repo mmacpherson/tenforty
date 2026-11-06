@@ -20,10 +20,17 @@ from tenforty.models import NUMERIC_OUTPUT_FIELDS, TaxReturnInput
 pytestmark = pytest.mark.requires_graph
 
 _OPTIONS = {"on_error", "backend", "mode"}
-INPUT_COLUMNS = [
+PARAMETERS = [
     name
     for name in inspect.signature(tenforty.evaluate_returns).parameters
     if name not in _OPTIONS
+]
+# federal_itemized is echoed as its two amounts, at its own signature position.
+FEDERAL_ITEMIZED_COLUMNS = ["federal_itemized_regular_tax", "federal_itemized_amt"]
+INPUT_COLUMNS = [
+    column
+    for name in PARAMETERS
+    for column in (FEDERAL_ITEMIZED_COLUMNS if name == "federal_itemized" else [name])
 ]
 OUTPUT_COLUMNS = list(NUMERIC_OUTPUT_FIELDS)
 METADATA_COLUMNS = ["assumptions"]
@@ -33,11 +40,13 @@ COLUMNS = INPUT_COLUMNS + OUTPUT_COLUMNS + METADATA_COLUMNS
 def _input_dtype(name: str) -> pl.DataType:
     if name == "state_facts":
         return pl.String
-    if name in {"year", "num_dependents", "num_ctc_dependents"}:
+    if name in FEDERAL_ITEMIZED_COLUMNS:
+        return pl.Float64
+    if name in {"year", "num_dependents", "num_ctc_dependents", "num_eitc_children"}:
         return pl.Int64
     if name in {"state", "filing_status", "standard_or_itemized"}:
         return pl.String
-    if TaxReturnInput.model_fields[name].annotation is bool:
+    if TaxReturnInput.model_fields[name].annotation in (bool, bool | None):
         return pl.Boolean
     return pl.Float64
 
@@ -67,27 +76,36 @@ def _request_rows(call: dict, mode: str) -> list[dict]:
         for name, parameter in inspect.signature(
             tenforty.evaluate_returns
         ).parameters.items()
-        if name in INPUT_COLUMNS
+        if name in PARAMETERS
     }
     axes = {
         name: value if isinstance(value, list) else [value]
         for name, value in (defaults | call).items()
-        if name in INPUT_COLUMNS
+        if name in PARAMETERS
     }
     if mode == "cross":
-        return [
-            dict(zip(INPUT_COLUMNS, combo, strict=True))
-            for combo in itertools.product(*(axes[name] for name in INPUT_COLUMNS))
+        rows = [
+            dict(zip(PARAMETERS, combo, strict=True))
+            for combo in itertools.product(*(axes[name] for name in PARAMETERS))
         ]
-    lengths = {len(values) for values in axes.values() if len(values) != 1}
-    n = lengths.pop() if lengths else 1
-    return [
-        {
-            name: values[i] if len(values) > 1 else values[0]
-            for name, values in axes.items()
-        }
-        for i in range(n)
-    ]
+    else:
+        lengths = {len(values) for values in axes.values() if len(values) != 1}
+        n = lengths.pop() if lengths else 1
+        rows = [
+            {
+                name: values[i] if len(values) > 1 else values[0]
+                for name, values in axes.items()
+            }
+            for i in range(n)
+        ]
+    return [_echo_columns(row) for row in rows]
+
+
+def _echo_columns(row: dict) -> dict:
+    """Expand a request row's federal_itemized into its two echo columns."""
+    model = row.pop("federal_itemized")
+    amounts = (None, None) if model is None else (model.regular_tax, model.amt)
+    return row | dict(zip(FEDERAL_ITEMIZED_COLUMNS, amounts, strict=True))
 
 
 def _assert_contract(frame: pl.DataFrame, call: dict, mode: str) -> None:
@@ -99,7 +117,7 @@ def _assert_contract(frame: pl.DataFrame, call: dict, mode: str) -> None:
     for got, want in zip(echoed, expected, strict=True):
         for name in INPUT_COLUMNS:
             want_value = want[name]
-            if SCHEMA[name] == pl.Float64:
+            if SCHEMA[name] == pl.Float64 and want_value is not None:
                 want_value = float(want_value)
             assert got[name] == want_value, name
 

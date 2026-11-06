@@ -10,7 +10,7 @@ Also includes range-based sanity checks and monotonicity tests.
 import pytest
 
 from tenforty import evaluate_return
-from tenforty.state_facts import OH
+from tenforty.state_facts import MS, OH
 
 from .fixtures.scenarios import (
     REGRESSION_SCENARIOS,
@@ -905,6 +905,8 @@ def _run_range_scenario(scenario):
         state=scenario["state"],
         filing_status=scenario["filing_status"],
         w2_income=scenario["w2_income"],
+        # Missouri graph returns need the EIC facts; the ranges assume none.
+        eitc_eligible=False,
     )
     if scenario.get("state_adjustment"):
         kwargs["state_adjustment"] = scenario["state_adjustment"]
@@ -1746,6 +1748,9 @@ MS_SCENARIOS = [
         "year": 2024,
         "state": "MS",
         "filing_status": "Married/Joint",
+        "state_facts": MS(
+            taxpayer_adjusted_gross_income=100000, spouse_adjusted_gross_income=0
+        ),
         "w2_income": 100000,
         "expected_federal_min": 7900,
         "expected_federal_max": 8200,
@@ -2168,7 +2173,11 @@ def test_state_tax_increases_with_income(state, backend):
     """Verify that state tax increases monotonically with income."""
     incomes = [50000, 100000, 150000, 200000]
     kwargs_base = dict(
-        year=2024, state=state, filing_status="Single", backend=backend or "ots"
+        year=2024,
+        state=state,
+        filing_status="Single",
+        eitc_eligible=False,
+        backend=backend or "ots",
     )
 
     results = [evaluate_return(w2_income=income, **kwargs_base) for income in incomes]

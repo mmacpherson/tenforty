@@ -1,12 +1,20 @@
-"""OTS refuses a nonzero dependent_exemptions it has no mapping for.
+"""OTS refuses a nonzero input that its programs for the return do not use.
 
-OTS maps ``dependent_exemptions`` in no program of any year, so before this
-contract a nonzero value was dropped and the return computed without it. A
-nonzero value on any OTS return is now an ``UnsupportedInputError`` under
-every ``on_error`` policy, raised by the whole-batch preflight before any
-engine runs, and ``backend="auto"`` routing a return to OTS behaves exactly as
+- ``dependent_exemptions``: OTS maps it in no program of any year.
+- ``incentive_stock_option_gains``: mapped to AMTws3 every year, but the 2018
+  and 2019 US_1040 programs parse that line and never store it
+  (``OTS_UNREAD_INPUT_KEYS``, checked against the vendored release source).
+
+Before this contract such a value was dropped and the return computed without
+it. It is now an ``UnsupportedInputError`` under every ``on_error`` policy,
+raised by the whole-batch preflight before any engine runs, and
+``backend="auto"`` routing a return to OTS behaves exactly as
 ``backend="ots"`` does. Zero, explicit or omitted, is unchanged.
 """
+
+import re
+import tarfile
+from pathlib import Path
 
 import pytest
 
@@ -15,6 +23,7 @@ from tenforty import UnsupportedInputError, core
 from tenforty.core import ots_reads_input
 from tenforty.models import (
     NATURAL_FORM_CONFIG,
+    OTS_UNREAD_INPUT_KEYS,
     STATE_TO_FORM,
     SUBORDINATE_FORM_CONFIG,
     OTSState,
@@ -172,3 +181,112 @@ def test_graph_still_accepts_dependent_exemptions_where_it_maps_them():
         backend="graph",
     )
     assert result.state_total_tax > 0
+
+
+# --- incentive_stock_option_gains on OTS 2018/2019 (tenforty-bmem) -------------
+
+_OTS_RELEASES = Path(__file__).parents[1] / "ots" / "ots-releases"
+_READS_AMTWS3 = re.compile(r'GetLine\(\s*"AMTws3"')
+_NO_AMTWS_LINE_KEPT = "(j >= 3) && (j < 3)"
+ISO_UNREAD_YEARS = (2018, 2019)
+
+
+def _release_1040_source(year: int) -> str:
+    tarballs = sorted(_OTS_RELEASES.glob(f"OpenTaxSolver{year}_*.tgz"))
+    assert tarballs, year
+    wanted = f"taxsolve_US_1040_{year}.c"
+    with tarfile.open(tarballs[-1]) as tar:
+        for member in tar.getmembers():
+            if Path(member.name).name == wanted and "/src/" in f"/{member.name}":
+                return tar.extractfile(member).read().decode("latin-1")
+    raise AssertionError(f"{wanted} not in {tarballs[-1].name}")
+
+
+@pytest.mark.parametrize("year", OTS_YEARS)
+def test_unread_amtws3_matches_the_vendored_release_source(year):
+    """AMTws3 is listed unread exactly where the year's program never stores it.
+
+    2020 onward read it with GetLine. 2018 and 2019 accept AMTwsN labels in a
+    loop that keeps a value only for 3 <= N < 3, so AMTws3 is parsed and lost.
+    """
+    source = _release_1040_source(year)
+    listed_unread = "AMTws3" in OTS_UNREAD_INPUT_KEYS.get((year, "US_1040"), ())
+    assert listed_unread == (year in ISO_UNREAD_YEARS)
+    assert bool(_READS_AMTWS3.search(source)) == (not listed_unread)
+    if listed_unread:
+        assert _NO_AMTWS_LINE_KEPT in source
+
+
+def test_every_unread_key_is_one_we_map():
+    """An unread key names a key our map sends, so the list cannot go stale."""
+    for (year, form_id), keys in OTS_UNREAD_INPUT_KEYS.items():
+        mapped = set(NATURAL_FORM_CONFIG[(year, form_id)].input_map.values())
+        assert keys <= mapped, (year, form_id, keys - mapped)
+
+
+ISO_RETURN = {"w2_income": 150_000, "incentive_stock_option_gains": 200_000}
+
+
+@pytest.mark.parametrize("year", ISO_UNREAD_YEARS)
+def test_ots_drops_iso_in_years_that_never_read_it(year, monkeypatch):
+    """Without the refusal, the ISO adjustment changes nothing on these years."""
+    monkeypatch.setattr(core, "_OTS_REFUSED_WHEN_UNREAD", {})
+    with_iso = tenforty.evaluate_return(year=year, **ISO_RETURN, backend="ots")
+    without = tenforty.evaluate_return(
+        year=year, w2_income=ISO_RETURN["w2_income"], backend="ots"
+    )
+    assert with_iso == without
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+@pytest.mark.parametrize("backend", ("ots", "auto"))
+@pytest.mark.parametrize("state", (None, "CA", "TX"))
+@pytest.mark.parametrize("year", ISO_UNREAD_YEARS)
+def test_nonzero_iso_is_refused_where_ots_never_reads_it(
+    year, state, backend, on_error, ots_calls
+):
+    """2018/2019 refuse it under every policy, on ots and auto alike."""
+    with pytest.raises(UnsupportedInputError) as raised:
+        tenforty.evaluate_return(
+            year=year, state=state, **ISO_RETURN, backend=backend, on_error=on_error
+        )
+    message = str(raised.value)
+    assert "incentive_stock_option_gains=200000.0" in message
+    assert str(year) in message
+    assert ots_calls == []
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+def test_batch_preflight_refuses_a_later_iso_year(on_error, ots_calls):
+    """A 2019 ISO row stops the batch before the 2020 row computes."""
+    with pytest.raises(UnsupportedInputError, match="2019"):
+        tenforty.evaluate_returns(
+            year=[2020, 2019],
+            w2_income=[150_000.0, 150_000.0],
+            incentive_stock_option_gains=[200_000.0, 200_000.0],
+            mode="zip",
+            backend="ots",
+            on_error=on_error,
+        )
+    assert ots_calls == []
+
+
+@pytest.mark.parametrize("year", [y for y in OTS_YEARS if y not in ISO_UNREAD_YEARS])
+def test_iso_is_accepted_and_used_from_2020(year):
+    """From 2020 OTS reads the adjustment: it computes and raises the AMT."""
+    with_iso = tenforty.evaluate_return(year=year, **ISO_RETURN, backend="ots")
+    without = tenforty.evaluate_return(
+        year=year, w2_income=ISO_RETURN["w2_income"], backend="ots"
+    )
+    assert with_iso.federal_amt > without.federal_amt
+
+
+@pytest.mark.parametrize("year", ISO_UNREAD_YEARS)
+def test_zero_iso_is_accepted_in_unread_years(year):
+    """Zero, explicit or omitted, is unchanged."""
+    explicit = tenforty.evaluate_return(
+        year=year, w2_income=150_000, incentive_stock_option_gains=0, backend="ots"
+    )
+    assert explicit == tenforty.evaluate_return(
+        year=year, w2_income=150_000, backend="ots"
+    )

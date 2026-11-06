@@ -459,15 +459,30 @@ resolveForms cgs@(cg0 : _) =
                 keep = Map.insertWith (\_ old -> old)
              in keep (f, base) g (keep (f, nm) g m)
 
-    -- global id of each import node -> resolved target global id
-    importRedirect :: Map Int Int
-    importRedirect =
+    -- global id of each import node -> resolved target global id. A target can
+    -- itself be an import: a form's output line that only imports another
+    -- form's line (Form 1040 line 27 is Schedule EIC's credit). Import nodes are
+    -- dropped from the merged graph, so the redirect follows such chains to the
+    -- node that computes the value; stopping at the first hop left a dangling
+    -- operand.
+    directRedirect :: Map Int Int
+    directRedirect =
       Map.fromList
         [ (global f (nodeId n), tgt)
         | (f, n) <- flat,
           OpImport tf tl _ <- [nodeOp n],
           Just tgt <- [Map.lookup (tf, tl) resMap]
         ]
+
+    importRedirect :: Map Int Int
+    importRedirect = Map.map (chase (Map.size directRedirect)) directRedirect
+      where
+        chase :: Int -> Int -> Int
+        chase hops g = case Map.lookup g directRedirect of
+          Just next
+            | hops > 0 -> chase (hops - 1) next
+            | otherwise -> error "resolveForms: cyclic cross-form imports"
+          Nothing -> g
 
     -- a form-local operand -> its global id, following import redirects
     ref :: Text -> Int -> Int

@@ -107,6 +107,20 @@ it:
   (`tenforty-nuc6`). Ohio is out by decision: its graph Married/Joint return
   requires an explicit [state fact](./docs/state-facts.md) with no default, so
   admitting it would make the default raise for those callers.
+- **Mississippi needs facts.** MS is in graph scope, conditional on
+  [state facts](./docs/state-facts.md) with no default. A Married/Joint return
+  needs both spouses' actual Mississippi AGIs,
+  `state_facts.MS(taxpayer_adjusted_gross_income=..., spouse_adjusted_gross_income=...)`;
+  a Widow(er) return needs `MS(head_of_family_eligible=...)` (Head_of_House
+  defaults to the documented resident-dependent baseline). Without them the
+  call raises `UnsupportedInputError` before computing. MS Married/Joint
+  state and total-tax derivatives and solves over household income are
+  unsupported, and a nonzero `schedule_1_income`, `state_adjustment`,
+  `dependent_exemptions`, `itemized_deductions` or `state_and_local_taxes` is
+  refused for MS.
+- **The earned income credit needs facts.** `federal_earned_income_credit` is
+  `None` (not determined) unless `eitc_eligible` and `num_eitc_children` are
+  given, and graph Missouri returns raise without them.
 - **OTS is chosen by coverage, not as a retry.** A state goes to OTS because it
   is outside graph scope and OTS computes it. A return that fails on the graph
   backend is not rerun on OTS.
@@ -149,6 +163,7 @@ This results in the following:
  'federal_niit': 0.0,
  'federal_additional_medicare_tax': 0.0,
  'federal_child_tax_credit': 4400.0,
+ 'federal_earned_income_credit': None,
  'federal_total_tax': 3346.0,
  'state_adjusted_gross_income': 100000.0,
  'state_taxable_income': 88588.0,
@@ -442,12 +457,15 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
 | `state`                      | str \| None               | None                | Two-letter state code, or None for a federal-only return. The graph backend computes every state and DC for 2024-2025; OTS computes AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA and the no-income-tax states, for the years it has them. Which one the default uses: [Which backend computes your return](#which-backend-computes-your-return) |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
-| `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC, EITC and dependent care are not modeled. |
+| `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC and dependent care are not modeled; the EITC is `federal_earned_income_credit` (see `num_eitc_children`). |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
 | `dependent_exemptions`       | float                    | 0.0                 | State exemption dollars (not a count). A nonzero value is refused on OTS and under `backend="auto"` for every state and year; only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV. See its docstring in `TaxReturnInput` for the per-state rules |
+| `num_eitc_children`          | int \| None              | None                | Keyword-only. Earned income credit qualifying children (Schedule EIC; at most 3 count): under 19, a student under 24, or disabled, with a valid SSN, living with you over half the year, and not claimed for the EIC by anyone else. Never inferred from `num_dependents` or the child tax credit count (a noncustodial parent with a Form 8332 release gets the CTC, not the EIC). Graph only |
+| `eitc_eligible`              | bool \| None             | None                | Keyword-only. You meet the EIC conditions the inputs cannot show: valid SSNs, citizen or resident alien all year, no Form 2555, not another taxpayer's qualifying child, not barred after a disallowance; with no qualifying child also all of Pub 596 Rule 11 (one person, you or a joint spouse, at least 25 and under 65 at year end, by Rule 11's birth-date bounds), nobody's dependent or qualifying child, U.S. home over half the year. `filer_65_or_older`/`spouse_65_or_older` never affect the EIC. `False`: the credit is 0. `True` with `num_eitc_children`: computed. Otherwise `federal_earned_income_credit` is `None` (not determined). Graph Missouri returns, and derivatives or solves of an output that reads the EIC, require these facts. Graph only |
 | `standard_or_itemized`       | str                      | Auto                | Federal deduction election: "Auto" takes the larger; "Standard" or "Itemized" forces that choice ([contract](docs/deduction-choice-contract.md)) |
 | `w2_income`                  | float                    | 0.0                 |                                    |
 | `taxable_interest`           | float                    | 0.0                 |                                    |
+| `tax_exempt_interest`        | float                    | 0.0                 | Keyword-only. Form 1040 line 2a. Not taxed; counts toward the EIC investment income limit. Graph only |
 | `qualified_dividends`        | float                    | 0.0                 |                                    |
 | `ordinary_dividends`         | float                    | 0.0                 | Total ordinary dividends, including qualified |
 | `short_term_capital_gains`   | float                    | 0.0                 |                                    |
@@ -458,7 +476,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `qbi_is_sstb`                | bool                     | False               | Whether that business or aggregation is an SSTB |
 | `rental_income`              | float                    | 0.0                 |                                    |
 | `schedule_1_income`          | float                    | 0.0                 |                                    |
-| `itemized_deductions`        | float                    | 0.0                 | Aggregate approximation of other itemized deductions, outside the SALT cap. OTS enters it as Schedule A line 6 (other taxes) and the graph as line 16 (other deductions), so their AMT add-back differs |
+| `itemized_deductions`        | float                    | 0.0                 | **Deprecated; use `federal_itemized`.** An aggregate whose AMT treatment it does not state, so each backend applies its shipped convention (reported in `assumptions`); see [Itemized deductions](docs/itemized-deductions.md) |
 | `state_adjustment`           | float                    | 0.0                 | **Deprecated; avoid.** Meaning depends on state and backend; see [`state_adjustment`](#state_adjustment-deprecated) |
 | `incentive_stock_option_gains` | float                  | 0.0                 |                                    |
 | `state_and_local_taxes`      | float                    | 0.0                 | Schedule A line 5d (entered on 5a), capped on line 5e: $10,000 ($5,000 MFS) through 2024. For 2025, $40,000 less 30% of AGI over $500,000 ($250,000 MFS), not below $10,000; MFS then halves that result (equivalently $20,000 less 15% of AGI over $250,000, not below $5,000) |
@@ -467,7 +485,8 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `vehicle_loan_interest`      | float                    | 0.0                 | 2025 only. Qualified passenger vehicle loan interest; Schedule 1-A Part IV |
 | `filer_65_or_older`          | bool                     | False               | Additional standard deduction; for 2025 also the Schedule 1-A senior deduction |
 | `spouse_65_or_older`         | bool                     | False               | As above for the spouse; Married/Joint or Married/Sep only (MFS: standard deduction box only) |
-| `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio Married/Joint returns raise until the fact is given. See [State facts](./docs/state-facts.md) |
+| `federal_itemized`           | `FederalItemized` \| None | None                | Keyword-only. Itemized deductions other than taxes, net of federal limits, as allowed for the regular tax and for the AMT: `FederalItemized(regular_tax=..., amt=...)`; see [Itemized deductions](docs/itemized-deductions.md) |
+| `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio and Mississippi Married/Joint returns, and Mississippi Widow(er) returns, raise until the facts are given. See [State facts](./docs/state-facts.md) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return has NaN in every numeric output and `assumptions` of None, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
 | `backend`                    | str                      | auto                | "auto", "ots", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; pass "ots" for OTS results; see [Which backend computes your return](#which-backend-computes-your-return) and [Choosing a backend](./docs/error-handling.md#choosing-a-backend) |
 
@@ -540,6 +559,7 @@ orchestration layer before rerunning Form 1040.
 | federal_niit                    | Net Investment Income Tax (Form 8960)                 |
 | federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
 | federal_child_tax_credit        | Nonrefundable child tax credit + credit for other dependents (Schedule 8812 line 14, Form 1040 line 19); already subtracted in federal_total_tax. Excludes the refundable ACTC |
+| federal_earned_income_credit    | Earned income credit (Form 1040 line 27; 2025 line 27a), read from the EIC Table. Refundable: a payment, not subtracted in federal_total_tax. Graph (2024-2025), with `eitc_eligible` and `num_eitc_children`; `None` when those facts are missing (not determined) and always on OTS; 0 is a determined zero |
 | federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |

@@ -80,7 +80,7 @@ Source: `facts/scenarios/ats-1.json` (Tax Year 2023)
 
 Source: `facts/scenarios/ats-2.json` (Tax Year 2023)
 
-**Note**: the dependent (born 2005, 18 at the end of 2023) is not a child tax credit qualifying child but gets the $500 credit for other dependents (`ctcEligibleDependents` 0, `odcEligibleDependents` 1), so the fixture passes `num_dependents=1, num_ctc_dependents=0`. Total tax is $998 less $500 = $498. The $2,468 EITC is a refundable payment: tenforty does not compute it, and it does not change total tax.
+**Note**: the dependent (born 2005, 18 at the end of 2023) is not a child tax credit qualifying child but gets the $500 credit for other dependents (`ctcEligibleDependents` 0, `odcEligibleDependents` 1), so the fixture passes `num_dependents=1, num_ctc_dependents=0`. Total tax is $998 less $500 = $498. The $2,468 EITC is a refundable payment and does not change total tax. tenforty computes the EITC (`federal_earned_income_credit`) on the graph backend for 2024-2025 only, so this 2023 scenario cannot check it.
 
 ### Single Filer, $110,000 W2 Income
 
