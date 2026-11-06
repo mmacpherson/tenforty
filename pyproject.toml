@@ -126,9 +126,6 @@ unfixable = []
 "scripts/*.py" = ["D103"]
 
 [tool.setuptools]
-ext-modules = [
-  { name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"] }
-]
 include-package-data = false
 package-dir = { "" = "src" }
 packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.forms", "tenforty.graphlib"]

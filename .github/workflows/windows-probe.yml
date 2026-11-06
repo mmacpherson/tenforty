@@ -1,0 +1,79 @@
+name: windows-probe
+
+# Scratch probe (not for merge): does the Rust graph backend build, load and
+# evaluate on Windows, with the OTS extension left out?
+on:
+  push:
+    branches: [probe/windows-graph]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cargo-test:
+    name: cargo test (windows-latest)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+    - run: rustc -vV && cargo -V
+    - run: cargo test -p tenforty-graph
+
+  wheel:
+    name: graph-only wheel (windows-latest, ${{ matrix.python-version }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.15']
+    defaults:
+      run:
+        shell: bash
+    env:
+      TENFORTY_GRAPH_ONLY: '1'
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+    - name: Build the wheel
+      run: uv build --wheel --out-dir wheel
+    - name: Wheel contents (without the form JSON)
+      run: uv run --no-project python -c "import zipfile,glob; [print(n) for n in zipfile.ZipFile(glob.glob('wheel/*.whl')[0]).namelist() if not n.endswith(('.json','.md'))]"
+    - name: Install outside the source tree
+      run: |
+        uv venv "$RUNNER_TEMP/venv" --python ${{ matrix.python-version }}
+        uv pip install --python "$RUNNER_TEMP/venv/Scripts/python.exe" wheel/*.whl
+    - name: Probe the installed wheel
+      working-directory: ${{ runner.temp }}
+      run: '"$RUNNER_TEMP/venv/Scripts/python.exe" "$GITHUB_WORKSPACE/scripts/windows_graph_probe.py"'
+    - name: Graph-marked tests against the installed wheel (informational)
+      continue-on-error: true
+      env:
+        UV_LOCKED: '1'
+      run: |
+        set -o pipefail
+        uv sync --no-install-project --python ${{ matrix.python-version }}
+        uv pip install --python .venv/Scripts/python.exe --no-deps wheel/*.whl
+        mv src src.hidden
+        uv run --no-sync pytest -m requires_graph -q -p no:cacheprovider --tb=line -n 4 2>&1 | tail -n 120
+
+  cibuildwheel:
+    name: cibuildwheel (windows-latest, cp313)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
+    - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e  # v4.3.5
+      env:
+        CIBW_BUILD: cp313-win_amd64
+        CIBW_ENVIRONMENT_WINDOWS: TENFORTY_GRAPH_ONLY=1
+        CIBW_TEST_COMMAND: python {project}/scripts/windows_graph_probe.py
