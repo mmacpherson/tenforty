@@ -1,12 +1,12 @@
 {
  "meta": {
   "taxcalc_version": "6.9.0",
-  "generated": "2026-11-03",
+  "generated": "2026-11-05",
   "years": [
    2024,
    2025
   ],
-  "n_cases": 1191
+  "n_cases": 1193
  },
  "cases": [
   {
@@ -39284,6 +39284,66 @@
     "qbi_deduction": 0.0,
     "standard_deduction": 0.0,
     "itemized_deduction": 30000.0
+   },
+   "expected_spouse_attr": null
+  },
+  {
+   "year": 2024,
+   "tag": "S_negative_agi",
+   "status": "Head_of_House",
+   "w2": 0.0,
+   "se": 84.0,
+   "stcg": 0.0,
+   "ltcg": -8289.0,
+   "interest": 0.0,
+   "ord_div": 0.0,
+   "qual_div": 0.0,
+   "itemized": 0.0,
+   "iso": 200000.0,
+   "std_or_item": "Itemized",
+   "expected": {
+    "agi": -2916.0,
+    "taxable_income": 0.0,
+    "se_tax": 0.0,
+    "niit": 0.0,
+    "addl_medicare": 0.0,
+    "amt": 28959.84,
+    "income_tax": 28959.84,
+    "total_tax": 28959.84,
+    "amti": 197084.0,
+    "qbi_deduction": 0.0,
+    "standard_deduction": 21900.0,
+    "itemized_deduction": 0.0
+   },
+   "expected_spouse_attr": null
+  },
+  {
+   "year": 2025,
+   "tag": "S_negative_agi",
+   "status": "Head_of_House",
+   "w2": 0.0,
+   "se": 84.0,
+   "stcg": 0.0,
+   "ltcg": -8289.0,
+   "interest": 0.0,
+   "ord_div": 0.0,
+   "qual_div": 0.0,
+   "itemized": 0.0,
+   "iso": 200000.0,
+   "std_or_item": "Itemized",
+   "expected": {
+    "agi": -2916.0,
+    "taxable_income": 0.0,
+    "se_tax": 0.0,
+    "niit": 0.0,
+    "addl_medicare": 0.0,
+    "amt": 28335.84,
+    "income_tax": 28335.84,
+    "total_tax": 28335.84,
+    "amti": 197084.0,
+    "qbi_deduction": 0.0,
+    "standard_deduction": 23625.0,
+    "itemized_deduction": 0.0
    },
    "expected_spouse_attr": null
   }

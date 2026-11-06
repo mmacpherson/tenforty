@@ -11,6 +11,9 @@ Ded = "Ded"
 # Health savings account; typos would rewrite it to "HAS".
 HSA = "HSA"
 ND = "ND"
+# "OT" ends the upstream OpenTaxSolver identifier charityOT ("other than cash"),
+# quoted verbatim in docs/upstream-ots-reports.md.
+OT = "OT"
 # Colorado form DR 0104PN (part-year resident / nonresident); typos rewrites
 # "PN" to "ON", corrupting verbatim derivation records.
 PN = "PN"
