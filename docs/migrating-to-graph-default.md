@@ -74,7 +74,7 @@ dropping it. On the returns auto sends to graph that matters for these inputs:
 | `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused: no state in auto's graph scope maps it. Only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV, none of which is in auto scope |
 | `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused: no state in auto's graph scope maps it (graph maps it only for AL and CA, both outside auto scope) |
 | `incentive_stock_option_gains` | 2018 and 2019: refused (those programs never use it); 2020–2025: used | Used |
-| `schedule_1_income`, `itemized_deductions`, `state_and_local_taxes` | Used | Used, except refused for MS, where the aggregates cannot identify a Mississippi amount ([State facts](state-facts.md)) |
+| `schedule_1_income`, `itemized_deductions`, `state_and_local_taxes`, and a nonzero `federal_itemized` regular-tax amount | Used | Used, except refused for MS, where the aggregates cannot identify a Mississippi amount ([State facts](state-facts.md)) |
 
 No OTS-covered return that auto sends to graph uses `dependent_exemptions` or
 `state_adjustment` on OTS, so
@@ -147,8 +147,10 @@ state itemizing from the federal Schedule A. See
   facts refuse the whole request. State/total-tax MS MFJ household-income
   derivatives and solves are unsupported; explicit federal-only outputs remain
   available. A nonzero `schedule_1_income`, `state_adjustment`,
-  `dependent_exemptions`, `itemized_deductions` or `state_and_local_taxes` is
-  refused for MS. See [State facts](state-facts.md) for the validity bound and
+  `dependent_exemptions`, `itemized_deductions`, `state_and_local_taxes` or
+  `federal_itemized` regular-tax amount is refused for MS; switching from
+  `itemized_deductions` to `federal_itemized` does not make MS itemizing
+  supported. See [State facts](state-facts.md) for the validity bound and
   limits.
 - Results gain `assumptions`: recorded conventions used because no input
   supplied them (`()` if none, `None` on failure). Massachusetts joint returns
@@ -191,13 +193,15 @@ state itemizing from the federal Schedule A. See
   of `federal_total_tax`. OTS reports `None`, so a return that moves from OTS to
   `backend="auto"` gains the value once its facts are given. Its inputs are
   the keyword-only `eitc_eligible`, `num_eitc_children` and
-  `tax_exempt_interest`. Neither fact has a default: without them the credit
-  is `None` (not determined), and `federal_total_tax` is unaffected. All three
-  are ignored on OTS, where nothing they feed is reported.
+  `tax_exempt_interest`. Neither fact has a default. `eitc_eligible=False`
+  gives a determined 0 with no child count; `eitc_eligible=True` with
+  `num_eitc_children` computes the credit; otherwise it is `None` (not
+  determined). `federal_total_tax` is unaffected either way. All three are
+  ignored on OTS, which always reports `None`.
 - Missouri: MO-1040 line 9 subtracts the federal EIC before the federal tax
-  deduction, so graph Missouri returns need the EIC facts and raise
-  `UnsupportedInputError` without them. Pass `eitc_eligible=False` for a filer
-  who cannot claim the credit.
+  deduction, so a graph Missouri return whose EIC is not determined raises
+  `UnsupportedInputError`. `eitc_eligible=False` (a determined 0, no child
+  count) is accepted, for a filer who cannot claim the credit.
 
 ### Installation
 

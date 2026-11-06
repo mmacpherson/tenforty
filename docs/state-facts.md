@@ -144,8 +144,9 @@ income is assumed; special MS/federal basis differences and excluded income
 need prepared state data.
 
 For MS, a nonzero `schedule_1_income`, `state_adjustment`,
-`dependent_exemptions`, `itemized_deductions`, or `state_and_local_taxes`
-raises `UnsupportedInputError`. Those aggregates cannot identify a clean MS
+`dependent_exemptions`, `itemized_deductions`, or `state_and_local_taxes`,
+or a nonzero `federal_itemized` regular-tax amount (which lowers through the
+same itemized aggregate), raises `UnsupportedInputError`. Those aggregates cannot identify a clean MS
 amount/category: the generic federal other-income bucket may include MS-exempt
 income, and the itemized/tax aggregates cannot reconstruct MS Schedule A.
 Prepared raw MS form inputs can represent those categories. Other states'

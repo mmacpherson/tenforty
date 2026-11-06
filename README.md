@@ -118,11 +118,14 @@ it:
   call raises `UnsupportedInputError` before computing. MS Married/Joint
   state and total-tax derivatives and solves over household income are
   unsupported, and a nonzero `schedule_1_income`, `state_adjustment`,
-  `dependent_exemptions`, `itemized_deductions` or `state_and_local_taxes` is
-  refused for MS.
-- **The earned income credit needs facts.** `federal_earned_income_credit` is
-  `None` (not determined) unless `eitc_eligible` and `num_eitc_children` are
-  given, and graph Missouri returns raise without them.
+  `dependent_exemptions`, `itemized_deductions`, `state_and_local_taxes` or
+  `federal_itemized` regular-tax amount is refused for MS: itemizing on MS is
+  not supported through either itemized input.
+- **The earned income credit needs facts.** `eitc_eligible=False` gives a
+  determined 0, with no child count needed. `eitc_eligible=True` with
+  `num_eitc_children` computes the credit. Otherwise it is `None` (not
+  determined), and graph Missouri returns raise; `eitc_eligible=False` is
+  accepted there. OTS always reports `None`.
 - **OTS is chosen by coverage, not as a retry.** A state goes to OTS because it
   is outside graph scope and OTS computes it. A return that fails on the graph
   backend is not rerun on OTS.
@@ -514,9 +517,13 @@ whichever backend computed it and whether the batch is empty, succeeded,
 partly failed, or mixed engines under `backend="auto"`:
 
 - the inputs, in the order of the `evaluate_returns` signature (`year`
-  through `spouse_65_or_older`, then the keyword-only `num_ctc_dependents` and
-  `state_facts`), then the return fields of `InterpretedTaxReturn`;
-- `year`, `num_dependents` and `num_ctc_dependents` are Int64; `state`,
+  through `spouse_65_or_older`, then the keyword-only `num_ctc_dependents`,
+  `tax_exempt_interest`, `num_eitc_children`, `eitc_eligible`,
+  `federal_itemized_regular_tax`, `federal_itemized_amt` and `state_facts`),
+  then the return fields of `InterpretedTaxReturn`;
+- `year`, `num_dependents` and `num_ctc_dependents` are Int64; `num_eitc_children`
+  is a nullable Int64, `eitc_eligible` a nullable Boolean, and the two
+  `federal_itemized_*` echoes nullable Float64 (null when not supplied); `state`,
   `filing_status`, `standard_or_itemized` and `state_facts` are String (`state`
   is null for a federal-only return, `state_facts` the canonical JSON of the
   model for the row's state, or null); boolean inputs are Boolean; float inputs
@@ -561,14 +568,14 @@ orchestration layer before rerunning Form 1040.
 | federal_niit                    | Net Investment Income Tax (Form 8960)                 |
 | federal_additional_medicare_tax | Additional Medicare Tax (Form 8959)                   |
 | federal_child_tax_credit        | Nonrefundable child tax credit + credit for other dependents (Schedule 8812 line 14, Form 1040 line 19); already subtracted in federal_total_tax. Excludes the refundable ACTC |
-| federal_earned_income_credit    | Earned income credit (Form 1040 line 27; 2025 line 27a), read from the EIC Table. Refundable: a payment, not subtracted in federal_total_tax. Graph (2024-2025), with `eitc_eligible` and `num_eitc_children`; `None` when those facts are missing (not determined) and always on OTS; 0 is a determined zero |
+| federal_earned_income_credit    | Earned income credit (Form 1040 line 27; 2025 line 27a), read from the EIC Table. Refundable: a payment, not subtracted in federal_total_tax. Graph (2024-2025): 0 with `eitc_eligible=False`; computed with `eitc_eligible=True` and `num_eitc_children`; otherwise `None` (not determined). Always `None` on OTS. 0 is a determined zero |
 | federal_total_tax               | Total federal tax (income tax + SE + NIIT + Additional Medicare) |
 | state_adjusted_gross_income     | State-level Adjusted Gross Income                     |
 | state_taxable_income            | Income subject to state tax after deductions          |
 | state_total_tax                 | Total state tax liability                             |
 | state_tax_bracket               | Rate-schedule bracket (percent) holding state taxable income; None when not defined (no state, or not reported for that state) |
 | state_effective_tax_rate        | State tax as a percent of state taxable income; None when not defined |
-| assumptions                     | Recorded state conventions this computation used because no input supplied them, as `Assumption` records (`()` if none were recorded; `None` on a failed return). In `evaluate_returns`, a list of each record's JSON. See [State facts](./docs/state-facts.md) |
+| assumptions                     | Recorded conventions this computation used because no input supplied them, as `Assumption` records (`()` if none were recorded; `None` on a failed return). Most are state conventions; `federal.itemized_deductions.legacy_amt` is a federal record (`state` null) for the deprecated `itemized_deductions`. In `evaluate_returns`, a list of each record's JSON. See [State facts](./docs/state-facts.md) and [Itemized deductions](./docs/itemized-deductions.md) |
 
 The bracket fields are the rate schedule's own bracket, not `marginal_rate()`,
 which is the graph's planning sensitivity (see
