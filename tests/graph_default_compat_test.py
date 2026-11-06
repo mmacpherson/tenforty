@@ -157,11 +157,26 @@ IDENTITY_FIELDS = (
 """Fields checked by their defining identity on each backend (federal_income_tax
 is also compared directly). The two effective rates are also compared for
 availability: both backends must agree on whether each is defined."""
+GRAPH_ONLY_FIELDS = ("federal_earned_income_credit",)
+"""Fields only the graph reports: None on OTS, a number on graph-routed auto
+when its facts are given (docs/migrating-to-graph-default.md). Checked
+structurally, not by the ledger."""
 RATE_FIELDS = ("federal_effective_tax_rate", "state_effective_tax_rate")
 
 
 def _case_args(year, state, status, profile):
-    return {"year": year, "state": state, "filing_status": status, **profile}
+    """One return. eitc_eligible=False determines the EIC (0) on every case.
+
+    Missouri graph returns need the EIC facts; OTS does not read them. The
+    undetermined path is tested on its own below.
+    """
+    return {
+        "year": year,
+        "state": state,
+        "filing_status": status,
+        "eitc_eligible": False,
+        **profile,
+    }
 
 
 def _graph_routed_cases():
@@ -551,6 +566,9 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
     _assert_identities(auto, "auto", state)
     problems = _unexplained({**args}, ots, auto)
     assert not problems, "\n".join(problems)
+    for field in GRAPH_ONLY_FIELDS:
+        assert ots[field] is None, field
+        assert isinstance(auto[field], float), field
     _assert_metadata(args, ots["assumptions"], "ots")
     _assert_metadata(args, auto["assumptions"], "graph")
 
@@ -774,7 +792,7 @@ def test_every_output_field_is_compared_or_checked_by_identity():
     graph-routed corpus has no recorded conventions on either engine), never
     folded into the numeric interval ledger.
     """
-    covered = set(COMPARED_FIELDS) | set(IDENTITY_FIELDS)
+    covered = set(COMPARED_FIELDS) | set(IDENTITY_FIELDS) | set(GRAPH_ONLY_FIELDS)
     assert covered == set(NUMERIC_OUTPUT_FIELDS)
     assert set(METADATA_OUTPUT_FIELDS) == {"assumptions"}
 

@@ -1189,6 +1189,50 @@ spec n = do
             cgImports graph `shouldContain` [("us_form_8863", "L9", tyYear ty)]
           Left err -> expectationFailure $ show err
 
+  describe "Resolver import chains" $ do
+    -- chain_c imports chain_b's ALIAS, which only imports chain_a's OUT: the
+    -- shape of MO line 9 -> 1040 line 27 -> Schedule EIC. Import nodes are
+    -- dropped when forms are resolved, so a reference must land on OUT.
+    let formA = form "chain_a" 2025 $ do
+          _ <- keyOutput "OUT" "out" "The computed line" (dollars 7)
+          outputs ["OUT"]
+        formB = form "chain_b" 2025 $ do
+          _ <- interior "ALIAS" "alias" (importForm (lineRef "chain_a" "OUT"))
+          outputs ["ALIAS"]
+        formC = form "chain_c" 2025 $ do
+          _ <- keyOutput "USE" "use" "Uses the alias" (importForm (lineRef "chain_b" "ALIAS") .+. dollars 2)
+          outputs ["USE"]
+        formP = form "cycle_p" 2025 $ do
+          _ <- interior "ALIAS" "alias" (importForm (lineRef "cycle_q" "ALIAS"))
+          outputs ["ALIAS"]
+        formQ = form "cycle_q" 2025 $ do
+          _ <- interior "ALIAS" "alias" (importForm (lineRef "cycle_p" "ALIAS"))
+          outputs ["ALIAS"]
+        formR = form "cycle_r" 2025 $ do
+          _ <- keyOutput "USE" "use" "Uses the cycle" (importForm (lineRef "cycle_p" "ALIAS") .+. dollars 1)
+          outputs ["USE"]
+        compiled = map (either (error . show) compileForm)
+
+    it "follows an import of an import to the computing node" $ do
+      let resolved = JSON.resolveForms (compiled [formA, formB, formC])
+          nodes = cgNodes resolved
+          named prefix = [nodeId n | n <- Map.elems nodes, Just nm <- [nodeName n], prefix `T.isPrefixOf` nm]
+          operands n = case nodeOp n of
+            JSON.OpAdd a b -> [a, b]
+            _ -> []
+      forM_ (Map.elems nodes) $ \n ->
+        forM_ (operands n) $ \operand -> Map.member operand nodes `shouldBe` True
+      case named "chain_c_USE" of
+        [useId] -> do
+          let use = nodes Map.! useId
+          operands use `shouldSatisfy` any (`elem` named "chain_a_OUT")
+          evalGraphNode resolved Single 0 "chain_c_USE" `shouldBe` 9
+        other -> expectationFailure ("expected one chain_c_USE node, got " <> show other)
+
+    it "rejects cyclic cross-form imports" $
+      evaluate (length (show (cgNodes (JSON.resolveForms (compiled [formP, formQ, formR])))))
+        `shouldThrow` errorCall "resolveForms: cyclic cross-form imports"
+
   describe "Standard deduction" $ do
     it "2024 Single is $14,600" $
       forStatus standardDeduction2024 Single `shouldBe` 14600

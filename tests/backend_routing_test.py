@@ -341,7 +341,9 @@ def _engine_accepts(engine: str, year: int, state: OTSState) -> bool:
     """Ask the engine directly, bypassing the selector."""
     from tenforty.models import TaxReturnInput
 
-    tax_input = TaxReturnInput(year=year, state=state, w2_income=50_000)
+    tax_input = TaxReturnInput(
+        year=year, state=state, w2_income=50_000, eitc_eligible=False
+    )
     try:
         if engine == "ots":
             core.evaluate_natural_input_form(

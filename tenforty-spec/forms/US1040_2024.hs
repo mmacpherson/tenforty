@@ -32,7 +32,7 @@ us1040_2024 = form "us_1040" 2024 $ do
     interior "L1z" "total_wages" $
       sumOf [l1a, l1b, l1c, l1d, l1e, l1f, l1g, l1h]
 
-  _l2a <- keyInput "L2a" "tax_exempt_interest" "Tax-exempt interest (informational only)"
+  _l2a <- keyInput "L2a" "tax_exempt_interest" "Tax-exempt interest (EIC investment income; not taxed)"
   l2b <- keyInput "L2b" "taxable_interest" "Taxable interest from 1099-INT"
 
   l3a <- keyInput "L3a" "qualified_dividends" "Qualified dividends (for preferential rates)"
@@ -251,7 +251,7 @@ us1040_2024 = form "us_1040" 2024 $ do
       l25a .+. l25b .+. l25c
 
   l26 <- keyInput "L26" "estimated_payments" "Estimated tax payments for the year"
-  l27 <- keyInput "L27" "eic" "Earned income credit"
+  l27 <- interior "L27" "eic" $ importForm usScheduleEicEitc
   l28 <- interior "L28" "additional_ctc" $ importForm usForm8812L27
   l29 <- interior "L29" "aotc" $ importForm usForm8863L9
   l30 <- keyInput "L30" "recovery_rebate" "Recovery rebate credit"
@@ -296,6 +296,9 @@ us1040_2024 = form "us_1040" 2024 $ do
 
   outputs
     [ "L1z",
+      "L1i",
+      "L2a",
+      "L7",
       "NonWageIncomeMagnitude",
       "L2b",
       "L3b",

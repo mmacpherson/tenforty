@@ -641,6 +641,9 @@ def test_every_default_has_an_explicit_category():
         "full_year_resident",
         "not_claimable_dependent",
     } <= baselines
+    assert "tax_exempt_interest" in baselines
+    assert decisions["num_eitc_children"].category == "required"
+    assert decisions["eitc_eligible"].category == "required"
     for decision in decisions.values():
         assert decision.category in {"baseline", "required", "transition"}
         assert decision.note

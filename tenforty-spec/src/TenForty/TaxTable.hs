@@ -1,4 +1,12 @@
-module TenForty.TaxTable (TaxTable, mkTaxTable, taxTableBandTax, taxTableBandIncome) where
+module TenForty.TaxTable
+  ( TaxTable,
+    mkTaxTable,
+    taxTableBandTax,
+    taxTableBandIncome,
+    tableBandMidpoint,
+    tableRoundToDollar,
+  )
+where
 
 import TenForty.Expr
 import TenForty.Types
@@ -19,3 +27,14 @@ taxTableBandTax table@(TaxTable _ _ rateTable) income =
 taxTableBandIncome :: TaxTable -> Expr Dollars -> Expr Dollars
 taxTableBandIncome (TaxTable step (Amount midpointOffset) _) =
   TaxTableQuantize TableFloor (fromIntegral step) midpointOffset
+
+-- | The midpoint of the published table row holding an amount: rows are @step@
+-- dollars wide and start at multiples of @step@. Table quantization, so
+-- autodiff takes the planning tangent of the row formula, not a zero slope.
+tableBandMidpoint :: Int -> Expr Dollars -> Expr Dollars
+tableBandMidpoint step =
+  TaxTableQuantize TableFloor (fromIntegral step) (fromIntegral step / 2)
+
+-- | A table entry rounded to whole dollars (half up), as table quantization.
+tableRoundToDollar :: Expr Dollars -> Expr Dollars
+tableRoundToDollar = TaxTableQuantize TableRound 1 0

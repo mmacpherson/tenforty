@@ -174,6 +174,18 @@ state itemizing from the federal Schedule A. See
 - `federal_child_tax_credit` is the new output: the two credits together after
   the phase-out and the tax-liability limit (Form 1040 line 19), on both
   backends. Not modeled: the refundable additional child tax credit.
+- `federal_earned_income_credit` is a new graph-only output: the earned income
+  credit (Form 1040 line 27), read from the EIC Table. It is a payment, not part
+  of `federal_total_tax`. OTS reports `None`, so a return that moves from OTS to
+  `backend="auto"` gains the value once its facts are given. Its inputs are
+  the keyword-only `eitc_eligible`, `num_eitc_children` and
+  `tax_exempt_interest`. Neither fact has a default: without them the credit
+  is `None` (not determined), and `federal_total_tax` is unaffected. All three
+  are ignored on OTS, where nothing they feed is reported.
+- Missouri: MO-1040 line 9 subtracts the federal EIC before the federal tax
+  deduction, so graph Missouri returns need the EIC facts and raise
+  `UnsupportedInputError` without them. Pass `eitc_eligible=False` for a filer
+  who cannot claim the credit.
 
 ### Installation
 

@@ -9,12 +9,16 @@
             "form": "us_1040",
             "line": "L18",
             "year": 2025
+        },
+        {
+            "form": "us_schedule_eic",
+            "line": "EARNED_INCOME",
+            "year": 2025
         }
     ],
     "inputs": [
         0,
-        1,
-        2
+        1
     ],
     "meta": {
         "form_id": "us_form_8812",
@@ -40,7 +44,7 @@
             "id": 10,
             "op": {
                 "type": "literal",
-                "value": 400000
+                "value": 200000
             }
         },
         "11": {
@@ -59,68 +63,69 @@
         },
         "13": {
             "id": 13,
-            "op": {
-                "type": "literal",
-                "value": 200000
-            }
-        },
-        "14": {
-            "id": 14,
             "name": "L7_phaseout_threshold",
             "op": {
                 "type": "by_status",
                 "values": {
-                    "head_of_household": 12,
-                    "married_joint": 10,
-                    "married_separate": 11,
-                    "qualifying_widow": 13,
-                    "single": 9
+                    "head_of_household": 11,
+                    "married_joint": 9,
+                    "married_separate": 10,
+                    "qualifying_widow": 12,
+                    "single": 8
                 }
             }
         },
-        "15": {
-            "id": 15,
+        "14": {
+            "id": 14,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "15": {
+            "id": 15,
+            "op": {
+                "left": 7,
+                "right": 13,
+                "type": "sub"
+            }
+        },
         "16": {
             "id": 16,
+            "name": "L8_excess_agi",
             "op": {
-                "left": 8,
-                "right": 14,
-                "type": "sub"
+                "left": 14,
+                "right": 15,
+                "type": "max"
             }
         },
         "17": {
             "id": 17,
-            "name": "L8_excess_agi",
             "op": {
-                "left": 15,
-                "right": 16,
-                "type": "max"
+                "type": "literal",
+                "value": 1
             }
         },
         "18": {
             "id": 18,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 1000
             }
         },
         "19": {
             "id": 19,
             "op": {
-                "type": "literal",
-                "value": 1000
+                "left": 16,
+                "right": 18,
+                "type": "div"
             }
         },
         "2": {
             "id": 2,
-            "name": "L18a_earned_income",
             "op": {
-                "type": "input"
+                "type": "literal",
+                "value": 2200
             }
         },
         "20": {
@@ -128,129 +133,123 @@
             "op": {
                 "left": 17,
                 "right": 19,
-                "type": "div"
+                "type": "mul"
             }
         },
         "21": {
             "id": 21,
+            "name": "L9_floor",
             "op": {
-                "left": 18,
-                "right": 20,
-                "type": "mul"
+                "arg": 20,
+                "type": "floor"
             }
         },
         "22": {
             "id": 22,
-            "name": "L9_floor",
-            "op": {
-                "arg": 21,
-                "type": "floor"
-            }
-        },
-        "23": {
-            "id": 23,
             "op": {
                 "type": "literal",
                 "value": 1000
             }
         },
+        "23": {
+            "id": 23,
+            "op": {
+                "left": 21,
+                "right": 22,
+                "type": "mul"
+            }
+        },
         "24": {
             "id": 24,
             "op": {
-                "left": 22,
+                "left": 16,
                 "right": 23,
-                "type": "mul"
+                "type": "sub"
             }
         },
         "25": {
             "id": 25,
             "op": {
-                "left": 17,
-                "right": 24,
-                "type": "sub"
+                "type": "literal",
+                "value": 1
             }
         },
         "26": {
             "id": 26,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 0
             }
         },
         "27": {
             "id": 27,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 24,
+                "otherwise": 26,
+                "then": 25,
+                "type": "if_positive"
             }
         },
         "28": {
             "id": 28,
+            "name": "L9_phaseout_increments",
             "op": {
-                "cond": 25,
-                "otherwise": 27,
-                "then": 26,
-                "type": "if_positive"
+                "left": 21,
+                "right": 27,
+                "type": "add"
             }
         },
         "29": {
             "id": 29,
-            "name": "L9_phaseout_increments",
-            "op": {
-                "left": 22,
-                "right": 28,
-                "type": "add"
-            }
-        },
-        "3": {
-            "id": 3,
-            "op": {
-                "type": "literal",
-                "value": 2200
-            }
-        },
-        "30": {
-            "id": 30,
             "op": {
                 "type": "literal",
                 "value": 50
             }
         },
-        "31": {
-            "id": 31,
-            "name": "L10_credit_reduction",
+        "3": {
+            "id": 3,
+            "name": "L2_ctc_amount",
             "op": {
-                "left": 29,
-                "right": 30,
+                "left": 0,
+                "right": 2,
                 "type": "mul"
             }
         },
-        "32": {
-            "id": 32,
+        "30": {
+            "id": 30,
+            "name": "L10_credit_reduction",
+            "op": {
+                "left": 28,
+                "right": 29,
+                "type": "mul"
+            }
+        },
+        "31": {
+            "id": 31,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "32": {
+            "id": 32,
+            "op": {
+                "left": 6,
+                "right": 30,
+                "type": "sub"
+            }
+        },
         "33": {
             "id": 33,
+            "name": "L11_credit_after_phaseout",
             "op": {
-                "left": 7,
-                "right": 31,
-                "type": "sub"
+                "left": 31,
+                "right": 32,
+                "type": "max"
             }
         },
         "34": {
             "id": 34,
-            "name": "L11_credit_after_phaseout",
-            "op": {
-                "left": 32,
-                "right": 33,
-                "type": "max"
-            }
-        },
-        "35": {
-            "id": 35,
             "name": "L12_tax_liability",
             "op": {
                 "form": "us_1040",
@@ -259,80 +258,88 @@
                 "year": 2025
             }
         },
-        "36": {
-            "id": 36,
+        "35": {
+            "id": 35,
             "name": "L13_odc_limited",
             "op": {
-                "left": 6,
-                "right": 35,
+                "left": 5,
+                "right": 34,
+                "type": "min"
+            }
+        },
+        "36": {
+            "id": 36,
+            "name": "L14_ctc_odc",
+            "op": {
+                "left": 33,
+                "right": 34,
                 "type": "min"
             }
         },
         "37": {
             "id": 37,
-            "name": "L14_ctc_odc",
-            "op": {
-                "left": 34,
-                "right": 35,
-                "type": "min"
-            }
-        },
-        "38": {
-            "id": 38,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
+        "38": {
+            "id": 38,
+            "op": {
+                "left": 33,
+                "right": 34,
+                "type": "sub"
+            }
+        },
         "39": {
             "id": 39,
+            "name": "L15_excess_ctc",
             "op": {
-                "left": 34,
-                "right": 35,
-                "type": "sub"
+                "left": 37,
+                "right": 38,
+                "type": "max"
             }
         },
         "4": {
             "id": 4,
-            "name": "L2_ctc_amount",
             "op": {
-                "left": 0,
-                "right": 3,
-                "type": "mul"
+                "type": "literal",
+                "value": 500
             }
         },
         "40": {
             "id": 40,
-            "name": "L15_excess_ctc",
-            "op": {
-                "left": 38,
-                "right": 39,
-                "type": "max"
-            }
-        },
-        "41": {
-            "id": 41,
             "op": {
                 "type": "literal",
                 "value": 1700
             }
         },
-        "42": {
-            "id": 42,
+        "41": {
+            "id": 41,
             "name": "L16b_max_actc",
             "op": {
                 "left": 0,
-                "right": 41,
+                "right": 40,
                 "type": "mul"
+            }
+        },
+        "42": {
+            "id": 42,
+            "name": "L17_actc_limit",
+            "op": {
+                "left": 39,
+                "right": 41,
+                "type": "min"
             }
         },
         "43": {
             "id": 43,
-            "name": "L17_actc_limit",
+            "name": "L18a_earned_income",
             "op": {
-                "left": 40,
-                "right": 42,
-                "type": "min"
+                "form": "us_schedule_eic",
+                "line": "EARNED_INCOME",
+                "type": "import",
+                "year": 2025
             }
         },
         "44": {
@@ -352,7 +359,7 @@
         "46": {
             "id": 46,
             "op": {
-                "left": 2,
+                "left": 43,
                 "right": 45,
                 "type": "sub"
             }
@@ -384,40 +391,33 @@
         },
         "5": {
             "id": 5,
+            "name": "L4_odc_amount",
             "op": {
-                "type": "literal",
-                "value": 500
+                "left": 1,
+                "right": 4,
+                "type": "mul"
             }
         },
         "50": {
             "id": 50,
             "name": "L27_additional_ctc",
             "op": {
-                "left": 43,
+                "left": 42,
                 "right": 49,
                 "type": "min"
             }
         },
         "6": {
             "id": 6,
-            "name": "L4_odc_amount",
+            "name": "L5_total_credit_before_limit",
             "op": {
-                "left": 1,
+                "left": 3,
                 "right": 5,
-                "type": "mul"
+                "type": "add"
             }
         },
         "7": {
             "id": 7,
-            "name": "L5_total_credit_before_limit",
-            "op": {
-                "left": 4,
-                "right": 6,
-                "type": "add"
-            }
-        },
-        "8": {
-            "id": 8,
             "name": "L6_agi",
             "op": {
                 "form": "us_1040",
@@ -426,27 +426,34 @@
                 "year": 2025
             }
         },
-        "9": {
-            "id": 9,
+        "8": {
+            "id": 8,
             "op": {
                 "type": "literal",
                 "value": 200000
             }
+        },
+        "9": {
+            "id": 9,
+            "op": {
+                "type": "literal",
+                "value": 400000
+            }
         }
     },
     "outputs": [
-        31,
-        34,
-        37,
-        40,
+        30,
+        33,
+        36,
+        39,
+        41,
         42,
-        43,
         49,
-        4,
+        3,
         50,
+        5,
         6,
-        7,
-        17
+        16
     ],
     "tables": {}
 }

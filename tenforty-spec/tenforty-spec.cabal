@@ -154,6 +154,7 @@ executable tenforty-compile
     RIForm1040_2025
     SCForm1040_2024
     SCForm1040_2025
+    ScheduleEICCommon
     SDNoTax_2024
     SDNoTax_2025
     StateTaxTable
@@ -447,6 +448,7 @@ test-suite tenforty-spec-test
     RIForm1040_2025
     SCForm1040_2024
     SCForm1040_2025
+    ScheduleEICCommon
     SDNoTax_2024
     SDNoTax_2025
     StateTaxTable

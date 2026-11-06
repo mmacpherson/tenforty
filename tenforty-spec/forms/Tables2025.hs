@@ -98,6 +98,10 @@ module Tables2025
     eitcMaxCredit1QC2025,
     eitcMaxCredit2QC2025,
     eitcMaxCredit3PlusQC2025,
+    eitcCompletedPhaseOut0QC2025,
+    eitcCompletedPhaseOut1QC2025,
+    eitcCompletedPhaseOut2QC2025,
+    eitcCompletedPhaseOut3PlusQC2025,
   )
 where
 
@@ -413,3 +417,19 @@ eitcMaxCredit2QC2025 = 7152
 
 eitcMaxCredit3PlusQC2025 :: Amount Dollars
 eitcMaxCredit3PlusQC2025 = 8046
+
+-- | 2025 EITC completed phase-out amounts: AGI and earned income must each be
+-- less than these (Pub 596 (2025) Rule 1, p. 4; 2025 Form 1040 instructions, line 27a Step 1, p. 40). The
+-- married-filing-separately and qualifying-surviving-spouse entries use the
+-- single column, as the EIC Table does (MFS is otherwise ineligible).
+eitcCompletedPhaseOut0QC2025 :: ByStatus (Amount Dollars)
+eitcCompletedPhaseOut0QC2025 = byStatus 19104 26214 19104 19104 19104
+
+eitcCompletedPhaseOut1QC2025 :: ByStatus (Amount Dollars)
+eitcCompletedPhaseOut1QC2025 = byStatus 50434 57554 50434 50434 50434
+
+eitcCompletedPhaseOut2QC2025 :: ByStatus (Amount Dollars)
+eitcCompletedPhaseOut2QC2025 = byStatus 57310 64430 57310 57310 57310
+
+eitcCompletedPhaseOut3PlusQC2025 :: ByStatus (Amount Dollars)
+eitcCompletedPhaseOut3PlusQC2025 = byStatus 61555 68675 61555 61555 61555
