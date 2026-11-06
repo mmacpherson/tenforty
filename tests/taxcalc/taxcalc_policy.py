@@ -1236,11 +1236,14 @@ def unexcused_violations(
 
     Returns human-readable violation strings for disagreements that exceed
     tolerance and are not attributable to a known defect signature. MFJ cases
-    pass expected_alt (the spouse-attribution run) to form bounds.
+    pass expected_alt (the spouse-attribution run) to form bounds. Like the
+    live differential, it reports a zero-taxable-income signature firing on a
+    positive OTS line 15 as mirror drift (tenforty-eero).
     """
     ours = evaluate_components(case, backend)
     deltas = modeled_deltas(backend, case, expected)
     violations = election_violations(case, backend, ours)
+    violations.extend(zero_taxable_income_drift(backend, case, expected, ours))
     for quantity in QUANTITIES:
         exp_alt = expected_alt or expected
         lo = min(expected[quantity], exp_alt[quantity])
