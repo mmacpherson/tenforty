@@ -184,6 +184,7 @@ def test_negative_ctc_dependents_is_refused():
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
+@pytest.mark.without_ots
 def test_evaluate_return_refuses_more_ctc_dependents_than_dependents(backend):
     """The public API raises ValueError on either backend."""
     with pytest.raises(ValueError, match="num_ctc_dependents"):

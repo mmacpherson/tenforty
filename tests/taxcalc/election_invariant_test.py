@@ -54,12 +54,14 @@ WRONGLY_ITEMIZED = {
 
 
 @pytest.mark.parametrize("backend", ["graph", "ots"])
+@pytest.mark.without_ots
 def test_the_correct_forced_standard_return_passes(backend):
     """Line 12 of the derived return is the 2025 HoH standard deduction."""
     assert election_violations(WITNESS, backend, FORCED_STANDARD) == []
 
 
 @pytest.mark.parametrize("backend", ["graph", "ots"])
+@pytest.mark.without_ots
 def test_auto_results_under_a_forced_standard_case_fail(backend):
     """The mutant itemizes 24,000 where the election requires 23,625."""
     violations = election_violations(WITNESS, backend, WRONGLY_ITEMIZED)

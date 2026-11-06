@@ -37,6 +37,11 @@ def pytest_configure(config):
         "requires_ots: mark test as needing the OTS extension; --graph-only "
         "deselects it",
     )
+    config.addinivalue_line(
+        "markers",
+        "without_ots: the test runs without the OTS extension; overrides "
+        "requires_ots from a module, a parameter or the backend='ots' convention",
+    )
 
 
 def pytest_addoption(parser):
@@ -70,12 +75,21 @@ def _runs_on_ots(item) -> bool:
     )
 
 
+def needs_ots(item) -> bool:
+    """Whether this collected test needs the OTS extension to run."""
+    return bool(
+        item.get_closest_marker("requires_ots")
+        and not item.get_closest_marker("without_ots")
+    )
+
+
 def pytest_collection_modifyitems(config, items):
     """Mark OTS-parametrized cases; deselect, not skip, OTS tests when graph-only.
 
     A case parametrized with ``backend="ots"`` or ``engine="ots"`` is
     ``requires_ots`` by convention; anything else that needs OTS carries the
-    marker explicitly.
+    marker explicitly. ``without_ots`` overrides both, for a test that takes
+    ``backend="ots"`` but is refused or routed before any evaluation.
 
     A deselected test is not a skip, so --require-graph's skip accounting is
     unchanged. The option is refused on an install that has OTS, so the marker
@@ -92,12 +106,10 @@ def pytest_collection_modifyitems(config, items):
         raise pytest.UsageError(
             "--graph-only: the OTS extension is installed; run without --graph-only"
         )
-    deselected = [item for item in items if item.get_closest_marker("requires_ots")]
+    deselected = [item for item in items if needs_ots(item)]
     if deselected:
         config.hook.pytest_deselected(items=deselected)
-        items[:] = [
-            item for item in items if not item.get_closest_marker("requires_ots")
-        ]
+        items[:] = [item for item in items if not needs_ots(item)]
 
 
 def pytest_sessionstart(session):

@@ -228,6 +228,31 @@ jobs:
         TENFORTY_GRAPH_ONLY: '1'
       run: uv build --wheel --out-dir wheel sdist/*.tar.gz
 
+    # A fresh sdist has no build state, so seed what a full build leaves in
+    # build_lib (the otslib sources and a compiled extension): a graph-only
+    # rebuild in that tree must still ship no OTS file.
+    - name: Rebuild graph-only over a full build's leftovers, which must not ship
+      if: matrix.mode == 'graph-only'
+      env:
+        TENFORTY_GRAPH_ONLY: '1'
+      run: |
+        set -euo pipefail
+        mkdir unpacked
+        tar -xzf sdist/*.tar.gz -C unpacked
+        src=$(echo unpacked/tenforty-*)
+        read -r lib suffix < <(uv run --no-project --python 3.14 python -c '
+        import importlib.machinery, sys, sysconfig
+        print(f"lib.{sysconfig.get_platform()}-{sys.implementation.cache_tag}",
+              importlib.machinery.EXTENSION_SUFFIXES[0])')
+        mkdir -p "$src/build/$lib/tenforty/otslib"
+        echo leftover > "$src/build/$lib/tenforty/otslib/ots_amalgamation.cpp"
+        echo leftover > "$src/build/$lib/tenforty/otslib$suffix"
+        uv build --python 3.14 --wheel --out-dir seeded-wheel "$src"
+        if unzip -l seeded-wheel/*.whl | grep otslib; then
+          echo "::error::a graph-only rebuild shipped a full build's OTS files"
+          exit 1
+        fi
+
     - name: Install the wheel outside the source tree
       if: matrix.mode != 'without-rust'
       run: |

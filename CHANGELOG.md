@@ -41,7 +41,8 @@
 - `TENFORTY_GRAPH_ONLY=1` builds really leave OTS out. A static
   `ext-modules` entry in `pyproject.toml` added the OTS extension back; it is
   gone, and `setup.py` alone declares the extensions. Graph-only wheels also
-  ship none of the OTS sources.
+  ship no OTS file at all, neither the sources nor a compiled extension, even
+  when the tree still holds an earlier full build's output.
 - Windows builds are always graph-only, since OpenTaxSolver does not run
   reliably there ([docs/windows-build-research.md](docs/windows-build-research.md)).
 - The graph JSON is read as UTF-8 on every platform.
@@ -49,7 +50,8 @@
 ### Added (testing)
 - A `requires_ots` test marker, and `pytest --graph-only`, which deselects
   those tests on a graph-only install. A case parametrized with
-  `backend="ots"` or `engine="ots"` is marked automatically. CI runs the suite
+  `backend="ots"` or `engine="ots"` is marked automatically; `without_ots`
+  overrides that for a test that is refused or routed before evaluating. CI runs the suite
   on a graph-only install, and builds and smoke-checks a graph-only wheel from
   the sdist (`scripts/smoke_installed.py --expect-backends graph`).
 

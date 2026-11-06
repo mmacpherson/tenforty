@@ -23,11 +23,12 @@ import sys
 
 from Cython.Build import cythonize
 from setuptools import Extension, setup
-from setuptools.command.build_py import build_py as _build_py
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_commands import graph_only_commands
 
 WITHOUT_GRAPH_ENV = "TENFORTY_WITHOUT_GRAPH"
 GRAPH_ONLY_ENV = "TENFORTY_GRAPH_ONLY"
-OTS_PACKAGE = "tenforty.otslib"
 IS_WINDOWS = platform.system() == "Windows"
 
 MISSING_RUST_MESSAGE = f"""
@@ -114,28 +115,8 @@ else:
     ]
 
 
-class build_py(_build_py):
-    """Leave the OTS sources out of a graph-only build.
-
-    Without the compiled extension, a shipped ``otslib`` source directory would
-    import as an empty namespace package. Only ``run`` filters, so an sdist
-    still carries the OTS sources.
-    """
-
-    def run(self) -> None:  # noqa: D102
-        if skip_ots:
-            self.packages = [name for name in self.packages if name != OTS_PACKAGE]
-            self.package_data = {
-                name: patterns
-                for name, patterns in self.package_data.items()
-                if name != OTS_PACKAGE
-            }
-            self.__dict__.pop("data_files", None)
-        super().run()
-
-
 rust_extensions = []
-cmdclass = {"build_py": build_py}
+cmdclass = graph_only_commands(skip_ots)
 
 if not skip_graph:
     try:

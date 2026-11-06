@@ -142,10 +142,17 @@ def _check_ots_refused(allow_source_tree: bool) -> list[str]:
     """
     from tenforty import BackendUnavailableError
 
-    _require(
-        allow_source_tree or importlib.util.find_spec("tenforty.otslib") is None,
-        "a graph-only install still ships tenforty.otslib",
-    )
+    if not allow_source_tree:
+        import tenforty
+
+        shipped = sorted(
+            path.name for path in Path(tenforty.__file__).parent.glob("otslib*")
+        )
+        _require(not shipped, f"a graph-only install ships OTS files: {shipped}")
+        _require(
+            importlib.util.find_spec("tenforty.otslib") is None,
+            "a graph-only install still finds tenforty.otslib",
+        )
     refused = []
     for name, route in _refusals().items():
         for on_error in ("raise", "warn", "ignore"):

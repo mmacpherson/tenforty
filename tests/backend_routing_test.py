@@ -80,6 +80,7 @@ def _engines(calls: list[tuple[str, int]]) -> dict[int, set[str]]:
 
 
 @pytest.mark.parametrize(("year", "backend"), YEAR_BACKEND_CASES)
+@pytest.mark.without_ots
 def test_selector_resolves_every_year_and_backend(year, backend):
     """Auto picks by year; an explicit backend is never reinterpreted."""
     expected = _expected_engine(backend, year)
@@ -92,6 +93,7 @@ def test_selector_resolves_every_year_and_backend(year, backend):
 
 @pytest.mark.parametrize("backend", ["auto", "ots", "graph"])
 @pytest.mark.parametrize("year", [2017, 2026])
+@pytest.mark.without_ots
 def test_selector_rejects_years_no_backend_covers(year, backend):
     """A year outside every backend raises the routing error, not a file error."""
     with pytest.raises(UnsupportedReturnError, match=str(year)):

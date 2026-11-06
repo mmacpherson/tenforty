@@ -266,6 +266,7 @@ def test_ots_routed_oh_mfj_needs_no_fact(backend):
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
 @pytest.mark.parametrize("value", [True, False])
+@pytest.mark.without_ots
 def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
     engine_calls, backend, value
 ):
@@ -280,6 +281,7 @@ def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
 @pytest.mark.parametrize("value", [False, True])
+@pytest.mark.without_ots
 def test_ots_error_names_graph_for_both_computed_values(backend, value):
     """Graph computes both supplied values; OTS computes neither."""
     with pytest.raises(UnsupportedInputError) as refusal:

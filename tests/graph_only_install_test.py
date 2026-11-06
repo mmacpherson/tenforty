@@ -87,6 +87,19 @@ def test_explicit_ots_names_the_graph_remedy(
 
 
 @pytest.mark.requires_graph
+def test_explicit_ots_for_a_state_auto_keeps_off_graph_offers_graph_alone(
+    graph_only_install, no_evaluation
+):
+    """backend='ots' for 2025/CA: auto would refuse too, so only graph is offered."""
+    with pytest.raises(BackendUnavailableError) as raised:
+        tenforty.evaluate_return(year=2025, state="CA", backend="ots", **RETURN)
+    message = str(raised.value)
+    assert "only backend='graph' computes it" in message
+    assert "backend='auto' computes" not in message
+    assert "or backend='auto'" not in message
+
+
+@pytest.mark.requires_graph
 def test_auto_state_off_graph_names_why_and_the_remedy(
     graph_only_install, no_evaluation
 ):
@@ -190,3 +203,15 @@ def test_import_tenforty_needs_no_otslib():
 def test_pyproject_declares_no_extension_modules():
     """setup.py alone declares the extensions; a static one ignores graph-only."""
     assert "ext-modules" not in (REPO / "pyproject.toml").read_text()
+
+
+def test_no_graph_only_test_needs_ots(request):
+    """A test that simulates a graph-only install must not be deselected by one."""
+    from tests.conftest import needs_ots
+
+    misplaced = [
+        item.nodeid
+        for item in request.session.items
+        if "graph_only_install" in getattr(item, "fixturenames", ()) and needs_ots(item)
+    ]
+    assert not misplaced, misplaced

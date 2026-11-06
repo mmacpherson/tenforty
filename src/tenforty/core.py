@@ -926,9 +926,7 @@ def evaluate_natural_input_form(
     )
 
 
-def _require_available(
-    engine: Engine, backend: str, groups: Iterable[tuple[object, object]]
-) -> None:
+def _require_available(engine: Engine, groups: Iterable[tuple[object, object]]) -> None:
     """Raise before evaluation if the engine is not installed.
 
     An OTS refusal names the returns that need OTS and what the graph backend
@@ -941,9 +939,7 @@ def _require_available(
     except BackendUnavailableError as error:
         if engine != "ots":
             raise
-        raise BackendUnavailableError(
-            f"{error} {explain_ots_route(backend, groups)}"
-        ) from None
+        raise BackendUnavailableError(f"{error} {explain_ots_route(groups)}") from None
 
 
 def _warn_failed(engine: Engine, tax_input: TaxReturnInput, error: Exception) -> None:
@@ -1191,7 +1187,7 @@ def evaluate_return(
     engine = select_backend(backend, input_data.year, input_data.state)
     row = replace(row, engine=engine)
     _check_routed_facts(models, [row])
-    _require_available(engine, backend, [(input_data.year, input_data.state)])
+    _require_available(engine, [(input_data.year, input_data.state)])
     if engine == "ots":
         require_ots_supports(
             input_data.year.value,
@@ -1514,9 +1510,7 @@ def evaluate_returns(
     )
     for engine in dict.fromkeys(engines.values()):
         _require_available(
-            engine,
-            backend,
-            [group for group, routed in engines.items() if routed == engine],
+            engine, [group for group, routed in engines.items() if routed == engine]
         )
 
     if mode == "cross":

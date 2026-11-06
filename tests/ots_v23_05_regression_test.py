@@ -79,7 +79,6 @@ class TestMI1040LineShift:
         )
 
 
-@pytest.mark.requires_ots
 class TestForm6781:
     """Form 6781 (Section 1256 Contracts and Straddles) availability test.
 

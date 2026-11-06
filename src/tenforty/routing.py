@@ -144,7 +144,7 @@ def _the_returns(wheres: list[str]) -> str:
     return f"the {', '.join(wheres[:-1])} and {wheres[-1]} returns"
 
 
-def explain_ots_route(backend: str, groups: Iterable[tuple[object, object]]) -> str:
+def explain_ots_route(groups: Iterable[tuple[object, object]]) -> str:
     """Say why these returns need OTS, and what the graph backend can do instead.
 
     Used when the OTS backend is not installed, so that the error names the
@@ -159,11 +159,11 @@ def explain_ots_route(backend: str, groups: Iterable[tuple[object, object]]) -> 
         where = _where(tax_year, tax_state)
         if not graph_covers(tax_year, tax_state):
             off_graph.append(where)
-        elif backend == "auto":
+        elif graph_state_in_scope(tax_state, tax_year):
+            graph_capable.append(where)
+        else:
             reasons = exclusion_reasons(tax_state, tax_year)
             not_validated.append(f"{where} ({', '.join(reasons)})")
-        else:
-            graph_capable.append(where)
 
     sentences = []
     if off_graph:
@@ -176,8 +176,8 @@ def explain_ots_route(backend: str, groups: Iterable[tuple[object, object]]) -> 
         it = "it" if len(not_validated) == 1 else "them"
         sentences.append(
             f"backend='auto' keeps {_the_returns(not_validated)} off the graph "
-            f"backend, which is not yet validated for {it}; backend='graph' "
-            f"computes {it} on the graph backend anyway."
+            f"backend, which is not yet validated for {it}; only "
+            f"backend='graph' computes {it} on the graph backend."
         )
     if graph_capable:
         it = "it" if len(graph_capable) == 1 else "them"
