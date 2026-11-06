@@ -41,7 +41,8 @@ from tests.parity.state_parity_policy import (
     OR_TAX_TABLE_TOLERANCE,
 )
 
-pytestmark = pytest.mark.requires_ots
+# Compares the two backends, so it needs both.
+pytestmark = [pytest.mark.requires_ots, pytest.mark.requires_graph]
 
 YEARS = (2024, 2025)
 STATUSES = ("Single", "Married/Joint", "Married/Sep", "Head_of_House", "Widow(er)")

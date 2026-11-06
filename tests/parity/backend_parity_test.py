@@ -72,6 +72,7 @@ def assert_state_parity(state, year, filing_status, w2_income):
     ),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_basic_w2_parity(w2_income, filing_status):
     """Compare basic W2 income scenarios across all filing statuses.
 
@@ -103,6 +104,7 @@ def test_basic_w2_parity(w2_income, filing_status):
     gains_type=st.sampled_from(["short_term", "long_term"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_capital_gains_parity(w2_income, cap_gains, gains_type):
     """Compare capital gains scenarios - AGI should match after fix."""
     kwargs = {
@@ -130,6 +132,7 @@ def test_capital_gains_parity(w2_income, cap_gains, gains_type):
     ordinary_dividends=st.integers(0, 20_000),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_multi_income_parity(w2_income, taxable_interest, ordinary_dividends):
     """Compare scenarios with multiple income types."""
     ots = evaluate_return(
@@ -163,6 +166,7 @@ def test_multi_income_parity(w2_income, taxable_interest, ordinary_dividends):
     long_term=st.integers(0, 50_000),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_combined_capital_gains_parity(w2_income, short_term, long_term):
     """Compare scenarios with both short and long term capital gains."""
     ots = evaluate_return(
@@ -208,6 +212,7 @@ def test_combined_capital_gains_parity(w2_income, short_term, long_term):
     ),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_amt_preferential_rates_parity(
     w2_income, qualified_dividends, long_term_cap_gains, filing_status
 ):
@@ -251,6 +256,7 @@ def test_amt_preferential_rates_parity(
 
 
 @pytest.mark.requires_ots
+@pytest.mark.requires_graph
 def test_amt_regression_mfj_466k():
     """Pinned regression: MFJ ~$466K AGI should have $0 AMT (not $10,095)."""
     ots = evaluate_return(
@@ -290,6 +296,7 @@ def test_amt_regression_mfj_466k():
     ),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_subordinate_tax_parity(
     w2_income, self_employment_income, ordinary_dividends, filing_status
 ):
@@ -353,6 +360,7 @@ def test_subordinate_tax_parity(
 )
 # Two-backend oracle: bounded, it does not scale with the deep profile.
 @settings(max_examples=200, deadline=None)
+@pytest.mark.requires_graph
 def test_child_tax_credit_parity(year, w2_income, num_dependents, filing_status):
     """Schedule 8812 on both backends: the credit limit, phase-out and amount.
 
@@ -537,6 +545,7 @@ def _ots_deduction_shortfall_2025(common, std):
 )
 # Two-backend oracle: bounded, it does not scale with the deep profile.
 @settings(max_examples=200, deadline=None)
+@pytest.mark.requires_graph
 def test_obbba_inputs_parity(
     year,
     w2_income,
@@ -612,6 +621,7 @@ def test_obbba_inputs_parity(
 
 
 @pytest.mark.requires_ots
+@pytest.mark.requires_graph
 def test_federal_only_can_use_graph():
     """Verify federal-only returns can use graph backend."""
     from tenforty.backends import GraphBackend, get_backend
@@ -630,6 +640,7 @@ def test_federal_only_can_use_graph():
     ordinary_dividends=st.integers(0, 30_000),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_qualified_dividends_parity(w2_income, qualified_dividends, ordinary_dividends):
     """Test qualified dividends handling (preferential rates)."""
     ordinary_dividends = max(ordinary_dividends, qualified_dividends)
@@ -664,6 +675,7 @@ def test_qualified_dividends_parity(w2_income, qualified_dividends, ordinary_div
     schedule_1_income=st.integers(0, 50_000),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_schedule_1_income_parity(w2_income, schedule_1_income):
     """Test Schedule 1 additional income."""
     ots = evaluate_return(
@@ -697,6 +709,7 @@ def test_schedule_1_income_parity(w2_income, schedule_1_income):
     itemized_deductions=st.integers(15_000, 50_000),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_itemized_deductions_parity(w2_income, itemized_deductions):
     """Test itemized vs standard deduction choice."""
     ots = evaluate_return(
@@ -728,6 +741,7 @@ def test_itemized_deductions_parity(w2_income, itemized_deductions):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_mfj_deduction_selection_parity(w2_income, itemized_deductions, filing_status):
     """Test deduction selection when itemized is below standard deduction.
 
@@ -801,6 +815,7 @@ def test_graph_se_income_produces_qbi_deduction(self_employment_income):
     qbi_is_sstb=st.booleans(),
 )
 @settings(max_examples=100, deadline=None)
+@pytest.mark.requires_graph
 def test_qbi_form_8995a_parity(
     year,
     filing_status,
@@ -834,6 +849,7 @@ def test_qbi_form_8995a_parity(
 @pytest.mark.requires_ots
 @given(w2_income=st.integers(50_000, 200_000))
 @settings(max_examples=50)
+@pytest.mark.requires_graph
 def test_all_federal_outputs_parity(w2_income):
     """Compare all federal output fields between backends."""
     ots = evaluate_return(year=2024, w2_income=w2_income, backend="ots")
@@ -871,6 +887,7 @@ def test_all_federal_outputs_parity(w2_income):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_ca_state_agi_parity(w2_income, filing_status):
     """CA AGI matches exactly — rounding differences don't affect AGI."""
     ots = evaluate_return(
@@ -900,6 +917,7 @@ def test_ca_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_ca_state_tax_parity(w2_income, filing_status):
     """CA 2024 tax agrees up to the Tax Table tolerance and the stepped exemption phase-out."""
     assert_state_parity("CA", 2024, filing_status, w2_income)
@@ -925,6 +943,7 @@ def ca_2024_rate_schedule_return(draw):
 @pytest.mark.requires_ots
 @given(case=ca_2024_rate_schedule_return())
 @settings(max_examples=200)  # two-backend oracle; bounded like the other parity tests
+@pytest.mark.requires_graph
 def test_ca_state_tax_parity_rate_schedule_region(case):
     """CA 2024 tax agrees to OTS's whole-dollar rounding above the Tax Table and below the exemption phase-out."""
     filing_status, w2_income = case
@@ -955,6 +974,7 @@ def test_ca_state_tax_parity_rate_schedule_region(case):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_ny_state_agi_parity(w2_income, filing_status):
     """NY AGI matches exactly — household credit and supplemental tax don't affect AGI."""
     ots = evaluate_return(
@@ -984,6 +1004,7 @@ def test_ny_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_ny_state_tax_parity(w2_income, filing_status):
     """NY 2024 tax agrees within the existing table/recapture policy."""
     # tenforty-r91.5: OTS does not receive the joint household exemption count.
@@ -998,6 +1019,7 @@ def test_ny_state_tax_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_ma_state_agi_parity(w2_income, filing_status):
     """MA AGI matches exactly — personal exemption doesn't affect AGI."""
     ots = evaluate_return(
@@ -1027,6 +1049,7 @@ def test_ma_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=200)
+@pytest.mark.requires_graph
 def test_ma_state_tax_parity(w2_income, filing_status):
     """MA 2024 tax agrees up to the Tax Table tolerance and No Tax Status."""
     assert_state_parity("MA", 2024, filing_status, w2_income)
@@ -1041,6 +1064,7 @@ def test_ma_state_tax_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nc_state_agi_parity_2024(w2_income, filing_status):
     """NC 2024 AGI matches exactly — child deduction doesn't affect AGI."""
     ots = evaluate_return(
@@ -1070,6 +1094,7 @@ def test_nc_state_agi_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nc_state_tax_parity_2024(w2_income, filing_status):
     """NC 2024 tax agrees except where OTS lets taxable income go negative."""
     assert_state_parity("NC", 2024, filing_status, w2_income)
@@ -1081,6 +1106,7 @@ def test_nc_state_tax_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nj_state_agi_parity_2024(w2_income, filing_status):
     """NJ 2024 AGI matches exactly — personal exemption doesn't affect AGI."""
     ots = evaluate_return(
@@ -1110,6 +1136,7 @@ def test_nj_state_agi_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nj_state_tax_parity_2024(w2_income, filing_status):
     """NJ 2024 tax agrees up to the Tax Table, the regular exemption and the no-tax threshold."""
     assert_state_parity("NJ", 2024, filing_status, w2_income)
@@ -1121,6 +1148,7 @@ def test_nj_state_tax_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_pa_state_parity_2024(w2_income, filing_status):
     """PA 2024 uses a flat 3.07% tax with no deductions — exact parity expected."""
     ots = evaluate_return(
@@ -1155,6 +1183,7 @@ def test_pa_state_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_va_state_agi_parity_2024(w2_income, filing_status):
     """VA 2024 AGI matches exactly — exemptions don't affect AGI."""
     ots = evaluate_return(
@@ -1184,6 +1213,7 @@ def test_va_state_agi_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_va_state_tax_parity_2024(w2_income, filing_status):
     """VA 2024 tax agrees up to personal exemptions and OTS's unfloored taxable income."""
     assert_state_parity("VA", 2024, filing_status, w2_income)
@@ -1192,6 +1222,7 @@ def test_va_state_tax_parity_2024(w2_income, filing_status):
 @pytest.mark.requires_ots
 @given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_oh_state_parity_2024(w2_income):
     """OH 2024: compare AGI everywhere and tax outside the OTS count defect."""
     ots = evaluate_return(year=2024, state="OH", w2_income=w2_income, backend="ots")
@@ -1219,6 +1250,7 @@ def test_oh_state_parity_2024(w2_income):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_mi_state_parity_2024(w2_income, filing_status):
     """MI 2024 uses a flat 4.25% tax — exact parity expected with no exemptions."""
     ots = evaluate_return(
@@ -1261,6 +1293,7 @@ _skip_no_2023_graphs = pytest.mark.skip(
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nc_state_agi_parity_2023(w2_income, filing_status):
     """NC 2023 AGI matches exactly — child deduction doesn't affect AGI."""
     ots = evaluate_return(
@@ -1295,6 +1328,7 @@ def test_nc_state_agi_parity_2023(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nc_state_tax_parity_2023(w2_income, filing_status):
     """NC 2023 total tax differs because OTS auto-applies child deduction for MFJ."""
     ots = evaluate_return(
@@ -1325,6 +1359,7 @@ def test_nc_state_tax_parity_2023(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nj_state_agi_parity_2023(w2_income, filing_status):
     """NJ 2023 AGI matches exactly — personal exemption doesn't affect AGI."""
     ots = evaluate_return(
@@ -1359,6 +1394,7 @@ def test_nj_state_agi_parity_2023(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nj_state_tax_parity_2023(w2_income, filing_status):
     """NJ 2023 total tax differs because OTS auto-applies personal exemption."""
     ots = evaluate_return(
@@ -1389,6 +1425,7 @@ def test_nj_state_tax_parity_2023(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_pa_state_parity_2023(w2_income, filing_status):
     """PA 2023 uses a flat 3.07% tax with no deductions — exact parity expected."""
     ots = evaluate_return(
@@ -1424,6 +1461,7 @@ def test_pa_state_parity_2023(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_va_state_agi_parity_2023(w2_income, filing_status):
     """VA 2023 AGI matches exactly — exemptions don't affect AGI."""
     ots = evaluate_return(
@@ -1458,6 +1496,7 @@ def test_va_state_agi_parity_2023(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_va_state_tax_parity_2023(w2_income, filing_status):
     """VA 2023 total tax differs because OTS auto-applies personal exemption + standard deduction."""
     ots = evaluate_return(
@@ -1485,6 +1524,7 @@ def test_va_state_tax_parity_2023(w2_income, filing_status):
 @pytest.mark.requires_ots
 @given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_oh_state_parity_2023(w2_income):
     """OH 2023 income tax is filing-status-independent; parity within $20 rounding."""
     ots = evaluate_return(year=2023, state="OH", w2_income=w2_income, backend="ots")
@@ -1510,6 +1550,7 @@ def test_oh_state_parity_2023(w2_income):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_pa_state_parity(w2_income, filing_status):
     """Compare PA state tax between OTS and Graph for 2025.
 
@@ -1548,6 +1589,7 @@ def test_pa_state_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_mi_state_parity(w2_income, filing_status):
     """Compare MI state tax between OTS and Graph for 2025.
 
@@ -1584,6 +1626,7 @@ def test_mi_state_parity(w2_income, filing_status):
 @pytest.mark.requires_ots
 @given(w2_income=st.integers(0, 500_000))
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_oh_state_parity(w2_income):
     """OH 2025: compare AGI everywhere and tax outside the OTS count defect."""
     ots = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="ots")
@@ -1610,6 +1653,7 @@ def test_oh_state_parity(w2_income):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nc_state_agi_parity(w2_income, filing_status):
     """NC AGI matches exactly — child deduction doesn't affect AGI."""
     ots = evaluate_return(
@@ -1639,6 +1683,7 @@ def test_nc_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nc_state_tax_parity(w2_income, filing_status):
     """NC 2025 tax agrees except where OTS lets taxable income go negative."""
     assert_state_parity("NC", 2025, filing_status, w2_income)
@@ -1650,6 +1695,7 @@ def test_nc_state_tax_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nj_state_agi_parity(w2_income, filing_status):
     """NJ AGI matches exactly — personal exemption doesn't affect AGI."""
     ots = evaluate_return(
@@ -1679,6 +1725,7 @@ def test_nj_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_nj_state_tax_parity(w2_income, filing_status):
     """NJ 2025 tax agrees up to the Tax Table, the regular exemption and the no-tax threshold."""
     assert_state_parity("NJ", 2025, filing_status, w2_income)
@@ -1690,6 +1737,7 @@ def test_nj_state_tax_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_va_state_agi_parity(w2_income, filing_status):
     """VA AGI matches exactly — exemptions don't affect AGI."""
     ots = evaluate_return(
@@ -1719,6 +1767,7 @@ def test_va_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_va_state_tax_parity(w2_income, filing_status):
     """VA 2025 tax agrees up to personal exemptions and OTS's unfloored taxable income."""
     assert_state_parity("VA", 2025, filing_status, w2_income)
@@ -1733,6 +1782,7 @@ def test_va_state_tax_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_or_state_agi_parity_2024(w2_income, filing_status):
     """OR 2024 AGI matches exactly — exemption credits don't affect AGI."""
     ots = evaluate_return(
@@ -1762,6 +1812,7 @@ def test_or_state_agi_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_or_state_tax_parity_2024(w2_income, filing_status):
     """OR 2024 tax agrees within the existing table and rounding tolerance."""
     assert_state_parity("OR", 2024, filing_status, w2_income)
@@ -1776,6 +1827,7 @@ def test_or_state_tax_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_or_state_agi_parity(w2_income, filing_status):
     """OR 2025 AGI matches exactly — exemption credits don't affect AGI."""
     ots = evaluate_return(
@@ -1805,6 +1857,7 @@ def test_or_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_or_state_tax_parity(w2_income, filing_status):
     """OR 2025 tax agrees within the existing table and rounding tolerance."""
     assert_state_parity("OR", 2025, filing_status, w2_income)
@@ -1831,6 +1884,7 @@ def test_or_state_tax_parity(w2_income, filing_status):
         for defect in SIGNATURES
     ],
 )
+@pytest.mark.requires_graph
 def test_known_parity_defect_still_present(defect):
     """Burn-in: the witness agrees with its signature withdrawn only once the defect is fixed."""
     assert not unexcused_parity_violations(defect.witness, exclude=defect.finding_id)
@@ -1838,6 +1892,7 @@ def test_known_parity_defect_still_present(defect):
 
 @pytest.mark.requires_ots
 @pytest.mark.parametrize("defect", SIGNATURES, ids=lambda defect: defect.finding_id)
+@pytest.mark.requires_graph
 def test_parity_witness_is_explained_by_its_signatures(defect):
     """Each witness activates its own signature and is fully explained with it."""
     assert defect.signature(defect.witness)
@@ -2092,6 +2147,7 @@ def test_ots_or_married_joint_gets_two_exemption_credits():
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_az_state_agi_parity_2024(w2_income, filing_status):
     """AZ 2024 AGI matches exactly — exemptions don't affect AGI."""
     ots = evaluate_return(
@@ -2121,6 +2177,7 @@ def test_az_state_agi_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_az_state_tax_parity_2024(w2_income, filing_status):
     """AZ 2024 total tax matches — flat 2.5% rate, no exemption divergence."""
     ots = evaluate_return(
@@ -2153,6 +2210,7 @@ def test_az_state_tax_parity_2024(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_az_state_agi_parity(w2_income, filing_status):
     """AZ 2025 AGI matches exactly — exemptions don't affect AGI."""
     ots = evaluate_return(
@@ -2182,6 +2240,7 @@ def test_az_state_agi_parity(w2_income, filing_status):
     filing_status=st.sampled_from(["Single", "Married/Joint"]),
 )
 @settings(max_examples=100)
+@pytest.mark.requires_graph
 def test_az_state_tax_parity(w2_income, filing_status):
     """AZ 2025 total tax matches — flat 2.5% rate, no exemption divergence."""
     ots = evaluate_return(
@@ -2283,6 +2342,7 @@ def test_ca_2025_sanity():
     amt_share=st.sampled_from([0.0, 0.4, 1.0]),
 )
 @settings(max_examples=200, deadline=None)
+@pytest.mark.requires_graph
 def test_federal_itemized_parity(
     year, filing_status, w2_income, iso, salt, regular_tax, amt_share
 ):
