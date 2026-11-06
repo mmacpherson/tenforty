@@ -959,6 +959,65 @@ same return under both builds.
 
 ---
 
+## 21. 2018-2020 CA-540 truncates the name fields past their `strdup` buffer
+
+**Releases:** OpenTaxSolver2018_16.06, OpenTaxSolver2019_17.03,
+OpenTaxSolver2020_18.05
+**Files:**
+- `src/taxsolve_CA_540_2018.c:1101`, `:1105`, `:1114`, `:1118`
+- `src/taxsolve_CA_540_2019.c:1286`, `:1290`, `:1299`, `:1303`
+- `src/taxsolve_CA_540_2020.c:1326`, `:1330`, `:1339`, `:1343`
+
+The CA-540 program shortens the names for its printed output in place:
+
+```c
+ Your1stName = GetTextLineF( "Your1stName:" );
+ YourMidInitial = pull_initial( Your1stName );
+ Your1stName[11] = '\0';
+ ...
+ YourLastName   = GetTextLineF( "YourLastName:" );
+ YourLastName[15] = '\0';
+```
+
+and the same for `Spouse1stName[11]` and `SpouseLastName[15]`.
+`GetTextLineF` in `taxsolve_routines.c` returns `strdup( line )`, a buffer
+exactly as long as the text, so a name shorter than the cut writes the
+terminator past the end of its allocation. An empty name, which a return
+without names has, gives a 1-byte buffer.
+
+**What we see:** valgrind memcheck on a CA 2018, 2019 or 2020 return with
+no names reports four errors each:
+
+```
+Invalid write of size 1
+   at taxsolve_CA_540_2018::main
+ Address ... is 10 bytes after a block of size 1 alloc'd
+   at malloc
+   by strdup
+```
+
+(14 bytes after, for the last names.) On glibc this has not crashed for us.
+With musl's allocator, the overrun damaged its metadata, and the process
+later crashed in `free()`. As far as we can tell the names are only printed,
+so no computed figure is affected. From 2021 the program no longer reads
+these names.
+
+**Possible fix, if you agree:** cut only a longer name, e.g.
+
+```c
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
+```
+
+or copy into a fixed buffer, as the 2021 program does with `YourName`.
+
+**Locally:** patched as a memory-safety fix, OTS-P12
+(`patch_ca540_name_truncation_bound`), with exactly that guard on the 12
+lines. See `docs/ots-patches.md`. A source witness
+(`test_source_witness[OTS-P12]`) fails once a release carries the
+correction, which prompts retiring the patch.
+
+---
+
 ## Pending adjudication — do not send
 
 These are disagreements between OTS and PSL Tax-Calculator found by the

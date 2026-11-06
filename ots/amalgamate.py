@@ -725,6 +725,52 @@ def patch_grablinealloc_trim_bound(lines: list[str]) -> tuple[list[str], int]:
     return lines, bounded
 
 
+_NAME_TRUNCATION = re.compile(
+    r"\b(Your1stName|YourLastName|Spouse1stName|SpouseLastName)"
+    r"\[([1-9][0-9]*)\] = '\\0';"
+)
+
+
+def patch_ca540_name_truncation_bound(lines: list[str]) -> tuple[list[str], int]:
+    r"""Truncate CA-540's name fields only when they are longer than the cut (OTS-P12).
+
+    The 2018-2020 CA-540 programs shorten the filer's and spouse's names for
+    the printed output with a fixed-index write::
+
+        Your1stName = GetTextLineF( "Your1stName:" );
+        Your1stName[11] = '\0';
+
+    ``GetTextLineF`` returns ``strdup(line)``, a buffer exactly as long as the
+    text. A name shorter than the cut, including the empty name every tenforty
+    return passes, makes the write land past the allocation: valgrind reports
+    "Invalid write of size 1 ... 10 bytes after a block of size 1" for each of
+    ``Your1stName[11]``, ``YourLastName[15]``, ``Spouse1stName[11]`` and
+    ``SpouseLastName[15]``, on every 2018-2020 CA return. On musl the
+    corrupted allocator metadata later crashed the interpreter at exit.
+
+    The guard ``if (strlen(X) > N)`` performs the same truncation whenever the
+    write was inside the buffer and skips it only when the name already ends
+    before index ``N``, where the write was out of bounds. The truncated names
+    are only printed; no figure reads them.
+
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P12 in ``ots/ots_patches.py`` and reported upstream (report 21 in
+    docs/upstream-ots-reports.md). From 2021 the CA-540 program no longer
+    reads these names.
+
+    Returns the lines and the number of truncations guarded.
+    """
+    guarded = 0
+    for ix, line in enumerate(lines):
+        replaced, count = _NAME_TRUNCATION.subn(
+            r"if (strlen( \1 ) > \2) \1[\2] = '\\0';", line
+        )
+        if count:
+            lines[ix] = replaced
+            guarded += count
+    return lines, guarded
+
+
 def apply_registered_patches(year: int, program: str, lines: list[str]) -> list[str]:
     """Apply every active registry patch, requiring each to match as registered.
 
