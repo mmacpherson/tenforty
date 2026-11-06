@@ -92247,7 +92247,6 @@ IMPORT_STATUS ImportReturnData(char *return_filename, P_FORM_IMPORT_DEF p_form_i
     ret_stat.value = 0.0;
     ret_stat.string = "";
     ret_stat.desc = "";
-    ret_stat.err = IMPORT_ERR_SUCCESS;
 
     // Zero all values, and set all strings to "". This ensures reasonable
     // values, whether or not the file exists, and whether or not the fields exist.
@@ -99763,7 +99762,7 @@ void sched_1A( double s1A_L2a )		/* Do the Schedule 1-A Form. */
     sched1A_L[28] = j;
     fprintf(outfile, "S1A_28 = %d\n", j );
     sched1A_L[29] = 300.0 * sched1A_L[28];
-    showline_wlabelnz( "S1A_29", sched1A_L[29] );
+    showline_wlabelnz( "S1A_20", sched1A_L[20] );
     sched1A_L[30] = NotLessThanZero( sched1A_L[24] - sched1A_L[29] );
     showline_wlabelnz( "S1A_30", sched1A_L[30] );
 
