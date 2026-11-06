@@ -1,4 +1,34 @@
 ## [Unreleased]
+### Changed (default backend)
+- **The default backend is now `"auto"`**, in `evaluate_return`,
+  `evaluate_returns` and `tenforty.backends.get_backend`. A call that does not
+  pass `backend` computes 2024 and 2025 returns on the graph backend when the
+  return is federal-only or its state is in graph scope, and on OTS otherwise
+  (OTS for every 2018-2023 return). An out-of-scope state OTS does not compute
+  raises `UnsupportedReturnError` naming the reason, where the old default
+  raised for any state OTS does not compute. See
+  [Choosing a backend](docs/error-handling.md#choosing-a-backend), and
+  [Migrating to the graph default](docs/migrating-to-graph-default.md) for
+  every difference you can expect between `"ots"` and `"auto"` and how to
+  check your own workload.
+  - **Rollback:** pass `backend="ots"` to compute on OTS, as the old default
+    did. It rolls back the engine, not every earlier contract: the deduction
+    election, the frame schema and the error behavior changed for both
+    backends. An explicit `"ots"` or `"graph"` is never reinterpreted.
+  - Results for 2024-2025 calls that relied on the default can change, because
+    graph and OTS do not compute every return identically.
+  - The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
+    under the new default a 2024-2025 return that `"auto"` routes to graph
+    raises `BackendUnavailableError` there instead of falling back to OTS.
+    Pass `backend="ots"` with that package.
+  - `marginal_rate`, `marginal_rates` and `solve_for_income` take no `backend`
+    argument; they run on the graph backend, as before.
+  - The README opens with a routing table of which backend computes each
+    return, and its examples are run by `tests/readme_examples_test.py`, so
+    the outputs it shows cannot drift. The AMT example no longer counts the
+    AMT twice. [Evidence summary](docs/evidence-summary.md) replaces the IRS
+    Validation page as the account of what is independently checked.
+
 ### Added
 - **The federal earned income credit** (graph backend, 2024-2025):
   `federal_earned_income_credit`, Form 1040 line 27 (2025: line 27a). It is
@@ -68,9 +98,10 @@
     situations with a material effect, there is none: graph Ohio
     Married/Joint returns now raise `UnsupportedInputError` naming the fact
     and how to pass it, where they used to compute with no joint filing
-    credit. `False` reproduces that computation; `True` is refused until the
-    credit is wired (tenforty-b72.53). OH stays outside `backend="auto"`
-    scope, so default callers are unaffected.
+    credit. Both values compute: `False` gives no joint filing credit, and
+    `True` applies the credit's percentage, cap and 2025 MAGI limit. OH is
+    kept outside `backend="auto"` scope by design, so default callers never
+    meet the requirement.
   - **`assumptions` output.** `InterpretedTaxReturn.assumptions` lists the
     recorded conventions a computation used because no input supplied them;
     `None` on a failed return. `evaluate_returns` frames gain a `state_facts`
@@ -88,14 +119,19 @@
   public calls both ways and requires every difference to be one of them.
 - **Graph state scope for `backend="auto"`.** A state return goes to graph only
   when its known graph-side defects are closed and official-value fixtures
-  support it: for 2024-2025, Mississippi and the eight states without an
-  income tax. Other states route to OTS where OTS computes them, and otherwise
+  support it: for 2024-2025, Illinois, Mississippi, Oregon and the eight states
+  without an income tax. Maryland, Maine and North Carolina stay outside it
+  pending the itemized-deduction contract (tenforty-nuc6). Ohio stays outside
+  by design: its graph Married/Joint return requires the explicit
+  `state_facts` joint-credit fact, so admitting it would make `"auto"` raise
+  for those callers, and admitting it is a separate decision. Other states
+  route to OTS where OTS computes them, and otherwise
   raise `UnsupportedReturnError` naming the open defect or the missing
   evidence. `backend="graph"` ignores scope. See
   [graph state scope](docs/error-handling.md#graph-state-scope-under-auto).
 - `backend="auto"` selects the backend by tax year: graph for 2024-2025 (within
-  graph state scope), OTS for 2018-2023. The default is still `"ots"`, and an
-  explicit `"ots"` or `"graph"` is never reinterpreted. `evaluate_return`,
+  graph state scope), OTS for 2018-2023. An explicit `"ots"` or `"graph"` is
+  never reinterpreted. `evaluate_return`,
   `evaluate_returns` and `get_backend` share one selector; a mixed-year batch
   is split by year and keeps its row order.
 
@@ -137,8 +173,9 @@
   backend (OTS CA: a Schedule CA Part II itemized addition; graph CA: a Part I
   income addition; graph AL: the standard deduction amount; ignored or refused
   elsewhere), so a nonzero value now emits a `DeprecationWarning`. No mapping
-  changed. CA and AL stay out of `backend="auto"` graph scope until it is
-  resolved (tenforty-yu51).
+  changed. AL stays out of `backend="auto"` graph scope until it is resolved
+  (tenforty-yu51); CA stays out until it and CA's other open graph defects
+  (tenforty-b72.54, tenforty-tj2.20) are resolved.
 - **`evaluate_returns` frames now have one declared schema.** Columns are the
   inputs in signature order, then the `InterpretedTaxReturn` fields, with
   declared dtypes, for both backends, both modes, and empty, failed and
@@ -191,7 +228,7 @@
   every OTS state with a taxable income now has one. The README called it a
   percentage of AGI, which was wrong.
 
-### Fixed (graph backend: opt-in, experimental)
+### Fixed (graph backend)
 - The graph resolver follows an import of a line that itself imports another
   form's line. It used to stop at the first hop and leave a dangling operand.
   Each year's graph has two such chains: Missouri line 9 reads Form 1040 line
@@ -214,6 +251,28 @@
   line 23 a few ulps above line 24. The spec now computes those lines in an
   algebraically equal form whose tie is exact. Tax values are unchanged beyond
   floating-point rounding (at most 6e-11 dollars across 20,000 sampled returns).
+- Massachusetts Form 1 line 10 is built from the federal income lines instead
+  of federal AGI, so interest, dividends and capital gains go through Schedules
+  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
+  exemptions) and federal-only adjustments no longer reduce Massachusetts
+  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
+  MA is now line 10, as on OTS.
+- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
+  $100,000 of taxable income (Instruction 17), as published, instead of the
+  unrounded rate schedule; Worksheet 17A still applies to the cent at
+  $100,000 and above. Every one of the table's 2,001 rows is checked
+  (tenforty-tj2.20). Maryland stays outside `backend="auto"` scope pending the
+  itemized-deduction contract (tenforty-nuc6).
+- Maine Form 1040ME line 20 uses the published Maine Income Tax Table below
+  $100,000 of taxable income and the printed rate schedule (whole-dollar
+  bracket bases), in whole dollars, at and above it, instead of the unrounded
+  bracket integral. The line 17 and line 18 phase-out worksheets enter line 5
+  to four places, rounded half up, with whole-dollar lines 7 and 8, and every
+  Form 1040ME money entry (including federal AGI on line 14) is rounded to
+  whole dollars before the worksheets and the table lookup. Every
+  table row is checked. Maine stays outside the graph scope for
+  `backend="auto"` until the itemized-deductions contract lands, because its
+  graph takes `itemized_deductions` directly as its own itemized line.
 
 ### Changed (installation)
 - **Building from source requires Rust.** The graph backend is no longer an
@@ -233,7 +292,7 @@
 - CI tests every shipped wheel, and installs from the sdist with Rust, without
   Rust, and in OTS-only mode.
 
-### Fixed (OTS backend, the default)
+### Fixed (OTS backend)
 - **OTS now refuses a nonzero `dependent_exemptions` instead of ignoring it.**
   No OTS program in any year maps the input, federal or state, so a nonzero
   value was dropped and the return computed without it. Every OTS return
@@ -241,12 +300,13 @@
   `UnsupportedInputError` naming the input, state and year, under every
   `on_error` policy and before any return in an `evaluate_returns` batch is
   computed. `backend="auto"` returns routed to OTS refuse identically.
-  **This breaks callers that pass a nonzero `dependent_exemptions` to the
-  default backend**, which previously got a number that ignored it. Pass `0` (or
-  omit it) where no state exemption amount is intended, pass a dependent count
-  as `num_dependents` (dollars are not converted to a count), or use
-  `backend="graph"` for a 2024-2025 state whose graph maps it (GA, HI, IN, KS,
-  LA 2024, MD, ME, NJ, VA, VT, WV). Zero is unchanged.
+  **This breaks callers that pass a nonzero `dependent_exemptions` on OTS**
+  (`backend="ots"`, the previous default), which previously got a number that
+  ignored it. Pass `0` (or omit it) where no state exemption amount is
+  intended, pass a dependent count as `num_dependents` (dollars are not
+  converted to a count), or use an explicit `backend="graph"` for a 2024-2025
+  state whose graph maps it (GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT, WV).
+  Zero is unchanged.
 - **OTS 2018 and 2019 now refuse a nonzero `incentive_stock_option_gains`.**
   It is mapped to Form 6251 line AMTws3 every year, but the 2018 and 2019 OTS
   federal programs parse that line and never store it, so the ISO adjustment
@@ -262,33 +322,9 @@
   2018-2025. Line 11a is now 7.65% of `w2_income`, capped at $2,000; a joint
   return takes the one-earner reading because `w2_income` is a household
   total, so a two-earner couple can still be up to $100 high ($180 with the
-  surtax). **This changes default-backend MA
-  results.** OTS MA still maps only wages: interest, dividends, capital gains
-  and self-employment income are not reflected there.
-
-### Fixed (graph backend)
-- Massachusetts Form 1 line 10 is built from the federal income lines instead
-  of federal AGI, so interest, dividends and capital gains go through Schedules
-  B and D (short-term gains at 8.5%, Massachusetts loss netting, excess
-  exemptions) and federal-only adjustments no longer reduce Massachusetts
-  income. Line 11 (up to $2,000) is derived. `state_adjusted_gross_income` for
-  MA is now line 10, as on OTS.
-- Maryland Form 502 line 21 now uses the mandatory Maryland Tax Table below
-  $100,000 of taxable income (Instruction 17), as published, instead of the
-  unrounded rate schedule; Worksheet 17A still applies to the cent at
-  $100,000 and above. Every one of the table's 2,001 rows is checked.
-  Maryland 2024 and 2025 have no open graph defects left and join the graph
-  scope for `backend="auto"`.
-- Maine Form 1040ME line 20 uses the published Maine Income Tax Table below
-  $100,000 of taxable income and the printed rate schedule (whole-dollar
-  bracket bases), in whole dollars, at and above it, instead of the unrounded
-  bracket integral. The line 17 and line 18 phase-out worksheets enter line 5
-  to four places, rounded half up, with whole-dollar lines 7 and 8, and every
-  Form 1040ME money entry (including federal AGI on line 14) is rounded to
-  whole dollars before the worksheets and the table lookup. Every
-  table row is checked. Maine stays outside the graph scope for
-  `backend="auto"` until the itemized-deductions contract lands, because its
-  graph takes `itemized_deductions` directly as its own itemized line.
+  surtax). **This changes OTS MA results,** which `"auto"` also uses for
+  Massachusetts. OTS MA still maps only wages: interest, dividends, capital
+  gains and self-employment income are not reflected there.
 
 ## [2025.12] - 2026-10-22
 ### Fixed (OTS backend, the default)

@@ -10,7 +10,9 @@ dev = [
   "pytest-cov",
   "pytest-xdist>=3.2",  # --dist worksteal
   "ruff>=0.2.0",
-  "pre-commit"
+  "pre-commit",
+  "seaborn",  # README plot examples (tests/readme_examples_test.py)
+  "pyarrow"  # polars .to_pandas() in the README plot examples
 ]
 # Independent federal reference implementation for differential testing (scripts/taxcalc_audit.py,
 # tests/taxcalc/). Not synced by default: uv sync --group taxcalc
@@ -61,7 +63,9 @@ dev = [
   "pytest-cov",
   "pytest-xdist>=3.2",  # --dist worksteal
   "ruff>=0.2.0",
-  "pre-commit"
+  "pre-commit",
+  "seaborn",  # README plot examples (tests/readme_examples_test.py)
+  "pyarrow"  # polars .to_pandas() in the README plot examples
 ]
 
 [tool.cython]

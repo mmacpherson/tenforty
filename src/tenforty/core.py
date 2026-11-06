@@ -1077,7 +1077,7 @@ def evaluate_return(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "ots",
+    backend: BackendChoice = "auto",
     *,
     state_and_local_taxes: float = 0.0,
     qualified_tips: float = 0.0,
@@ -1094,8 +1094,10 @@ def evaluate_return(
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
 
-    ``backend`` is "ots" (default), "graph", or "auto" (graph for 2024-2025
-    within graph scope, OTS otherwise); an explicit backend is never
+    ``backend`` is "auto" (default), "ots", or "graph". "auto" computes a
+    2024-2025 return on graph when it is federal-only or its state is in graph
+    scope (``tenforty.graph_scope``), and on OTS otherwise; pass "ots" for the
+    behavior of releases whose default was OTS. An explicit backend is never
     reinterpreted. A request no backend can serve raises
     ``UnsupportedReturnError`` before evaluation, whatever ``on_error`` says. A
     computation that fails raises under ``on_error="raise"``; under "warn" or
@@ -1192,7 +1194,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "ots",
+    backend: BackendChoice = "auto",
     mode: Literal["cross", "zip"] = "cross",
     *,
     state_and_local_taxes: list[float] | float = 0.0,
@@ -1211,7 +1213,9 @@ def evaluate_returns(
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
 
     Pass ``mode="cross"`` (default) for Cartesian product or ``mode="zip"``
-    for element-wise evaluation with scalar broadcasting.
+    for element-wise evaluation with scalar broadcasting. ``backend`` is chosen
+    as in ``evaluate_return``: "auto" (default) splits the batch by year and
+    picks the engine per year and state; "ots" or "graph" forces one.
 
     Example:
     -------

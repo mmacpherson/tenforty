@@ -17,6 +17,7 @@ class TestZipSemantics:
             filing_status="Single",
             w2_income=[50000.0, 100000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -32,6 +33,7 @@ class TestZipSemantics:
             w2_income=[50000.0, 100000.0, 150000.0],
             taxable_interest=[1000.0, 2000.0, 3000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 3
@@ -44,6 +46,7 @@ class TestZipSemantics:
             filing_status="Single",
             w2_income=75000.0,
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 1
@@ -61,6 +64,7 @@ class TestBroadcasting:
             filing_status="Single",
             w2_income=[50000.0, 100000.0, 150000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 3
@@ -75,6 +79,7 @@ class TestBroadcasting:
             w2_income=[50000.0, 100000.0],
             taxable_interest=500.0,
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 2
@@ -133,8 +138,8 @@ class TestConsistencyWithSingleEval:
     )
     def test_zip_matches_single(self, params):
         """Zip result should match single evaluate_return() call."""
-        single_result = evaluate_return(**params)
-        zip_result = evaluate_returns(**params, mode="zip")
+        single_result = evaluate_return(**params, backend="ots")
+        zip_result = evaluate_returns(**params, mode="zip", backend="ots")
 
         assert len(zip_result) == 1
         row = zip_result.row(0, named=True)
@@ -157,11 +162,16 @@ class TestConsistencyWithSingleEval:
             filing_status="Single",
             w2_income=incomes,
             mode="zip",
+            backend="ots",
         )
 
         for i, income in enumerate(incomes):
             single = evaluate_return(
-                year=2024, state="NY", filing_status="Single", w2_income=income
+                year=2024,
+                state="NY",
+                filing_status="Single",
+                w2_income=income,
+                backend="ots",
             )
             row = zip_result.row(i, named=True)
             assert row["federal_total_tax"] == single.federal_total_tax
@@ -179,6 +189,7 @@ class TestMultipleFilingStatuses:
             filing_status=["Single", "Married/Joint", "Single"],
             w2_income=[75000.0, 150000.0, 100000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 3
@@ -203,6 +214,7 @@ class TestEdgeCases:
             filing_status="Single",
             w2_income=0.0,
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 1
@@ -216,6 +228,7 @@ class TestEdgeCases:
             filing_status="Single",
             w2_income=[50000.0, 100000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 2
@@ -229,6 +242,7 @@ class TestEdgeCases:
             state="NY",
             w2_income=100000.0,
             mode="zip",
+            backend="ots",
         )
 
         expected_cols = [
@@ -256,6 +270,7 @@ class TestVectorYearAndState:
             filing_status="Single",
             w2_income=[50000.0, 50000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 2
@@ -269,6 +284,7 @@ class TestVectorYearAndState:
             filing_status="Single",
             w2_income=[100000.0, 100000.0],
             mode="zip",
+            backend="ots",
         )
 
         assert len(result) == 2

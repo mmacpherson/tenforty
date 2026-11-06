@@ -172,7 +172,7 @@ SE_60K_NET = 60_000 * 0.9235  # Schedule SE line 6: net earnings = 55,410
 def test_se_tax_single_no_w2_taxes_all_se_earnings():
     """With no wages the whole wage base is free, so all net SE earnings bear the 12.4%."""
     r = evaluate_return(
-        year=2024, filing_status="Single", self_employment_income=60_000
+        year=2024, filing_status="Single", self_employment_income=60_000, backend="ots"
     )
     # line 9 = 168,600 - 0 = 168,600 > 55,410, so line 10 = 55,410 * 0.124 = 6,870.84
     # line 11 = 55,410 * 0.029 = 1,606.89
@@ -187,6 +187,7 @@ def test_se_tax_single_w2_partially_consumes_ss_wage_base():
         filing_status="Single",
         w2_income=150_000,
         self_employment_income=60_000,
+        backend="ots",
     )
     # line 9 = 168,600 - 150,000 = 18,600, which is less than net earnings of 55,410,
     # so line 10 = 18,600 * 0.124 = 2,306.40 (not 55,410 * 0.124 = 6,870.84)
@@ -201,6 +202,7 @@ def test_se_tax_single_w2_fully_consumes_ss_wage_base():
         filing_status="Single",
         w2_income=168_600,
         self_employment_income=60_000,
+        backend="ots",
     )
     # line 9 = 168,600 - 168,600 = 0, so line 10 = 0.00 and only line 11 survives.
     expected = SE_60K_NET * 0.029
@@ -215,6 +217,7 @@ def test_se_tax_single_is_monotone_nonincreasing_in_w2():
             filing_status="Single",
             w2_income=w2,
             self_employment_income=60_000,
+            backend="ots",
         ).federal_se_tax
         for w2 in (0, 50_000, 120_000, 150_000, 168_600, 200_000)
     ]
@@ -235,6 +238,7 @@ def test_se_tax_mfj_w2_aggregate_does_not_fill_one_spouses_wage_base():
         filing_status="Married/Joint",
         w2_income=181_408,
         self_employment_income=53_272,
+        backend="ots",
     )
     net = 53_272 * 0.9235
     expected = net * 0.124 + net * 0.029  # full OASDI: the base is untouched
@@ -271,9 +275,10 @@ def test_se_tax_single_w2_consumes_wage_base_in_2025_too():
         filing_status="Single",
         w2_income=200_000,
         self_employment_income=60_000,
+        backend="ots",
     ).federal_se_tax
     none = evaluate_return(
-        year=2025, filing_status="Single", self_employment_income=60_000
+        year=2025, filing_status="Single", self_employment_income=60_000, backend="ots"
     ).federal_se_tax
     assert high < none, "2025 wages above the base must still zero the OASDI portion"
     assert high == pytest.approx(SE_60K_NET * 0.029, abs=0.01)

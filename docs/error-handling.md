@@ -20,7 +20,8 @@ second:
 | `"warn"` | Logs the failure with its year, state and filing status, emits a `RuntimeWarning`, and returns a **failed return** |
 | `"ignore"` | Returns a **failed return** silently |
 
-A **failed return** has every field set to NaN: `InterpretedTaxReturn.failed()`.
+A **failed return** has NaN in every numeric field and `assumptions` of `None`
+(null in a frame): `InterpretedTaxReturn.failed()`.
 NaN means "this return failed". (A rate field that is `None`, null in a frame,
 is a different thing: the rate is not defined for a successful return.) It is
 never a $0 that could pass for a real
@@ -42,7 +43,8 @@ succeeded = df.filter(~pl.col("total_tax").is_nan())
 ```
 
 `evaluate_returns` keeps one row per requested return, in the requested order,
-with its inputs echoed; only a failed row's output columns are NaN. When a
+with its inputs echoed; only a failed row's numeric output columns are NaN, and
+its `assumptions` is null. When a
 graph batch fails under `"warn"` or `"ignore"`, its rows are re-evaluated one by
 one, so one failing return does not fail its neighbours.
 
@@ -55,13 +57,21 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 
 ## Choosing a backend
 
-`backend` is `"ots"` (the default), `"graph"`, or `"auto"`:
+`backend` is `"auto"` (the default), `"ots"`, or `"graph"`:
 
 | `backend` | 2018-2023 | 2024-2025 |
 |-----------|-----------|-----------|
 | `"ots"` | OTS | OTS |
 | `"graph"` | raises `UnsupportedReturnError` | graph |
 | `"auto"` | OTS | graph for federal-only returns and states in graph scope; otherwise OTS, or `UnsupportedReturnError` |
+
+`"auto"` picks the backend per return: graph for a 2024 or 2025 return that
+is federal-only or whose state is in graph scope (below), OTS otherwise. To compute on
+OTS, as earlier releases did by default, pass `backend="ots"`; that is the
+rollback if a default result surprises you. It rolls back the engine, not
+every earlier contract: the deduction election, the frame schema and the error
+behavior changed for both backends (see
+[Migrating to the graph default](./migrating-to-graph-default.md)).
 
 An explicit `"ots"` or `"graph"` is never reinterpreted: it is honoured or
 refused before evaluation. `"auto"` splits a mixed-year batch by year and
@@ -91,10 +101,10 @@ Ohio is excluded by decision: its graph Married/Joint return requires the
 explicit `state_facts` joint-credit fact, which has no default, so admitting
 it would make auto raise for those callers. Ohio routes to OTS.
 
-Maryland and North Carolina are excluded while the itemized-deduction contract
-is implemented (`tenforty-nuc6`): the generic federal aggregate cannot supply
-their state deduction. North Carolina routes to OTS. Maryland has no OTS
-program, so auto raises `UnsupportedReturnError` naming that bead.
+Maryland, Maine and North Carolina are excluded while the itemized-deduction
+contract is implemented (`tenforty-nuc6`): the generic federal aggregate cannot
+supply their state deduction. North Carolina routes to OTS. Maryland and Maine
+have no OTS program, so auto raises `UnsupportedReturnError` naming that bead.
 
 `backend="graph"` ignores scope and computes any state the graph covers. Use
 it when you accept the graph's current state of validation for that state.
@@ -125,6 +135,11 @@ Raised when the selected backend's compiled extension is not installed. It is
 an `ImportError`, and also a `RuntimeError` for callers that caught the earlier
 `RuntimeError("Graph backend is not available")`.
 
+The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
+under the default `"auto"` it raises this for any 2024 or 2025 return that
+`"auto"` routes to graph; it never falls back to OTS. Pass `backend="ots"` with
+that package.
+
 
 ### `OTSError`
 
@@ -135,7 +150,7 @@ indicates a problem with the input data that OTS couldn't process.
 from tenforty import OTSError
 
 try:
-    result = evaluate_return(w2_income=50000)
+    result = evaluate_return(w2_income=50000, backend="ots")
 except OTSError as e:
     print(f"Exit code: {e.exit_code}")
     print(f"Year: {e.year}")
@@ -156,7 +171,7 @@ output format from OTS.
 from tenforty import OTSParseError
 
 try:
-    result = evaluate_return(w2_income=50000)
+    result = evaluate_return(w2_income=50000, backend="ots")
 except OTSParseError as e:
     print(f"Message: {e}")
     if e.raw_output:

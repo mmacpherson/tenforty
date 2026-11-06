@@ -151,7 +151,7 @@ def ots_nonzero_exit(monkeypatch):
 def test_ots_nonzero_exit_raises_under_raise(ots_nonzero_exit):
     """A non-zero OTS exit is an error under raise."""
     with pytest.raises(OTSError):
-        tenforty.evaluate_return(year=2024, w2_income=50_000)
+        tenforty.evaluate_return(year=2024, w2_income=50_000, backend="ots")
 
 
 @pytest.mark.parametrize("on_error", ["warn", "ignore"])
@@ -160,7 +160,7 @@ def test_ots_nonzero_exit_invalidates_the_return(ots_nonzero_exit, on_error):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         result = tenforty.evaluate_return(
-            year=2024, w2_income=50_000, on_error=on_error
+            year=2024, w2_income=50_000, on_error=on_error, backend="ots"
         )
     assert _all_nan(result)
 
@@ -252,7 +252,7 @@ def test_unknown_on_error_is_rejected(policy):
 def test_on_error_accepts_the_policy_enum():
     """The documented enum values remain valid policies."""
     result = tenforty.evaluate_return(
-        year=2024, w2_income=1.0, on_error=tenforty.OTSErrorPolicy.IGNORE
+        year=2024, w2_income=1.0, on_error=tenforty.OTSErrorPolicy.IGNORE, backend="ots"
     )
     assert _none_nan(result.model_dump())
 

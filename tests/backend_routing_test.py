@@ -5,7 +5,13 @@ import polars as pl
 import pytest
 
 import tenforty
-from tenforty import BackendUnavailableError, UnsupportedReturnError, core, routing
+from tenforty import (
+    BackendUnavailableError,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+    core,
+    routing,
+)
 from tenforty.backends import GraphBackend, OTSBackend, get_backend
 from tenforty.models import OTSState
 
@@ -108,11 +114,69 @@ def test_unsupported_return_error_is_a_value_error():
     assert issubclass(UnsupportedReturnError, ValueError)
 
 
-def test_public_default_backend_is_still_ots():
-    """The default flip is a separate, later change."""
-    for function in (tenforty.evaluate_return, tenforty.evaluate_returns):
-        assert inspect.signature(function).parameters["backend"].default == "ots"
-    assert inspect.signature(get_backend).parameters["backend"].default == "ots"
+def test_public_default_backend_is_auto():
+    """Every public entry point that takes a backend defaults to "auto"."""
+    for function in (tenforty.evaluate_return, tenforty.evaluate_returns, get_backend):
+        assert inspect.signature(function).parameters["backend"].default == "auto"
+
+
+def test_graph_only_entry_points_take_no_backend():
+    """marginal_rate(s) and solve_for_income run on graph; there is no default."""
+    for function in (
+        tenforty.marginal_rate,
+        tenforty.marginal_rates,
+        tenforty.solve_for_income,
+    ):
+        assert "backend" not in inspect.signature(function).parameters
+
+
+DEFAULT_ROUTING_CASES = [
+    pytest.param(year, None, "ots" if year in OTS_ONLY_YEARS else "graph", id=str(year))
+    for year in ALL_YEARS
+] + [
+    pytest.param(2024, "MS", "graph", id="2024-MS-in-scope"),
+    pytest.param(2025, "TX", "graph", id="2025-TX-no-income-tax"),
+    pytest.param(2024, "CA", "ots", id="2024-CA-out-of-scope"),
+    pytest.param(2023, "CA", "ots", id="2023-CA"),
+]
+
+
+@pytest.mark.parametrize(("year", "state", "engine"), DEFAULT_ROUTING_CASES)
+def test_omitted_backend_routes_as_auto(engine_calls, year, state, engine):
+    """A call without backend reaches the engine "auto" selects, everywhere."""
+    assert routing.select_backend("auto", year, state) == engine
+    tenforty.evaluate_return(year=year, state=state, w2_income=80_000)
+    tenforty.evaluate_returns(year=year, state=state, w2_income=[40_000, 80_000])
+    assert _engines(engine_calls) == {year: {engine}}
+    instance = get_backend(year=year, state=state)
+    assert isinstance(instance, OTSBackend if engine == "ots" else GraphBackend)
+
+
+def test_omitted_backend_equals_explicit_auto():
+    """The default is "auto" itself, not a look-alike."""
+    for year, state in ((2025, None), (2024, "MS"), (2024, "CA"), (2022, None)):
+        call = {"year": year, "state": state, "w2_income": 90_000}
+        assert tenforty.evaluate_return(**call) == tenforty.evaluate_return(
+            **call, backend="auto"
+        )
+
+
+@pytest.mark.parametrize("year", GRAPH_DEFAULT_YEARS)
+def test_omitted_backend_refuses_what_auto_refuses(engine_calls, year):
+    """An out-of-scope state OTS lacks raises under the default, before loading."""
+    with pytest.raises(UnsupportedReturnError, match="backend='graph'"):
+        tenforty.evaluate_return(year=year, state="CO", w2_income=80_000)
+    assert engine_calls == []
+
+
+@pytest.mark.parametrize("year", GRAPH_DEFAULT_YEARS)
+def test_explicit_backends_are_unchanged_by_the_default(engine_calls, year):
+    """backend="ots" stays OTS and backend="graph" stays graph in graph years."""
+    tenforty.evaluate_return(year=year, w2_income=80_000, backend="ots")
+    assert _engines(engine_calls) == {year: {"ots"}}
+    engine_calls.clear()
+    tenforty.evaluate_return(year=year, state="CO", w2_income=80_000, backend="graph")
+    assert _engines(engine_calls) == {year: {"graph"}}
 
 
 @pytest.mark.parametrize(("year", "backend"), YEAR_BACKEND_CASES)
@@ -504,3 +568,59 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
         OTSYear.YEAR_2024, OTSState.NONE, {"w2_income": [50_000.0]}, ["Single"]
     )
     assert len(results["total_tax"]) == 1
+
+
+def test_default_backend_applies_the_state_facts_contract(engine_calls):
+    """Under the "auto" default, facts follow routing and are never a reroute.
+
+    OH is outside auto scope, so a default OH MFJ call goes to OTS: without
+    facts it computes; with the OH fact OTS refuses it, naming graph (which
+    computes False). The graph-only entry points honour the fact.
+    """
+    from tenforty.state_facts import OH
+
+    no_fact = tenforty.evaluate_return(
+        year=2024, state="OH", filing_status="Married/Joint", w2_income=90_000
+    )
+    assert no_fact.assumptions == ()
+    assert _engines(engine_calls) == {2024: {"ots"}}
+    engine_calls.clear()
+
+    fact = OH(spouses_both_have_qualifying_income=False)
+    with pytest.raises(UnsupportedInputError, match="backend='graph' does"):
+        tenforty.evaluate_return(
+            year=2024,
+            state="OH",
+            filing_status="Married/Joint",
+            w2_income=90_000,
+            state_facts=fact,
+        )
+    with pytest.raises(UnsupportedInputError, match="backend='graph' does"):
+        tenforty.evaluate_returns(
+            year=2024,
+            state=["TX", "OH"],
+            filing_status="Married/Joint",
+            w2_income=[50_000.0, 90_000.0],
+            mode="zip",
+            state_facts=fact,
+        )
+    assert engine_calls == []
+
+    oh_mfj = {
+        "year": 2024,
+        "state": "OH",
+        "filing_status": "Married/Joint",
+        "w2_income": 90_000,
+        "state_facts": fact,
+    }
+    assert tenforty.marginal_rate(**oh_mfj) > 0
+    assert tenforty.marginal_rates(**oh_mfj)["w2_income"] > 0
+    target = tenforty.evaluate_return(**(oh_mfj | {"backend": "graph"})).total_tax
+    assert tenforty.solve_for_income(target, **oh_mfj) == pytest.approx(90_000, abs=1.0)
+
+    joint_ma = tenforty.evaluate_return(
+        year=2024, state="MA", filing_status="Married/Joint", w2_income=90_000
+    )
+    assert [record.id for record in joint_ma.assumptions] == [
+        "ma.form_1.line_11.one_earner"
+    ]
