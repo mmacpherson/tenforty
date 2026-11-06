@@ -1008,3 +1008,28 @@ def test_ots_zero_taxable_income_classifier_matches_ots(update, zero):
     assert (ots.federal_taxable_income == 0.0) is zero
     reference = {"agi": ots.federal_adjusted_gross_income}
     assert _ots_taxable_income_is_zero(case, reference) is zero
+
+
+def test_f27_band_counts_long_term_gains():
+    """Part III line 13 is QDCG line 4: qualified dividends plus net capital gain.
+
+    #446 witness: 2025 MFJ, forced Standard, SE 583, LTCG 24,983, ISO 174,540;
+    AGI 25,524.81 is below the $31,500 standard deduction, so OTS's line 15 is
+    zero and the whole gain loses its preferential rate.
+    """
+    case = _case(
+        year=2025,
+        status="Married/Joint",
+        se=583.0,
+        ltcg=24_983.0,
+        iso=174_540.0,
+        std_or_item="Standard",
+        itemized=0.0,
+    )
+    reference = {"agi": 25_524.81, "taxable_income": 0.0}
+
+    model = _f27_ots_skips_amt_preferential_worksheet("ots", case, reference)
+
+    assert model["amt"] == DeltaRange(0.0, 0.28 * 24_983.0)
+    above = {"agi": 31_501.0, "taxable_income": 1.0}
+    assert _f27_ots_skips_amt_preferential_worksheet("ots", case, above) == {}

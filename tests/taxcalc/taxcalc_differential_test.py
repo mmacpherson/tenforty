@@ -240,6 +240,17 @@ ANCHOR_K3NS_DIVIDENDS_AND_LOSSES = _anchor(
     std_or_item="Standard",
     qbi_w2_wages=2.0,
 )
+# F27 with long-term gains rather than dividends (#446 gate witness): AGI below
+# the MFJ standard deduction, so OTS's line 15 is zero and Part III loses the
+# gain's preferential rate (OTS excess = 26% of 24,983).
+ANCHOR_K3NS_LONG_TERM_GAIN = _anchor(
+    year=2025,
+    status="Married/Joint",
+    se=583.0,
+    ltcg=24_983.0,
+    iso=174_540.0,
+    std_or_item="Standard",
+)
 ANCHOR_CAPITAL_LOSS = _anchor(
     w2=300_000.0,
     interest=100_000.0,
@@ -399,6 +410,7 @@ def _assert_components_match_taxcalc(backend, cases):
 @example(cases=[ANCHOR_CAPITAL_LOSS])
 @example(cases=[{**ANCHOR_FORCED_STANDARD_LTCG, "std_or_item": "Standard"}])
 @example(cases=[{**ANCHOR_FORCED_STANDARD_DIVIDENDS, "std_or_item": "Standard"}])
+@example(cases=[ANCHOR_K3NS_LONG_TERM_GAIN])
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 def test_components_match_taxcalc(backend, cases):
     """Every quantity falls within its modeled TaxCalc range and tolerance."""
