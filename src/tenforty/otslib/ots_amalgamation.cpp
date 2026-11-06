@@ -73305,7 +73305,7 @@ void GrabLineAlloc( char *fline, char **strng )
  if (twrd[0] != '\0') {
   // Trim trailing spaces from output string
   int cpos = strlen(twrd) - 1;
-  while (twrd[cpos] == ' ') {
+  while (cpos >= 0 && twrd[cpos] == ' ') {
    --cpos;
   }
   twrd[cpos + 1] = '\0';
@@ -90098,7 +90098,7 @@ int main( int argc, char *argv[] )
     //====== OR-A Page 1 ======
 
     #define SCH_A_LINES 23
-    double SchA_L[SCH_A_LINES + 1]; // Allow 1 extra for 1-based counting
+    double SchA_L[SCH_A_LINES + 1] = {0}; // Allow 1 extra for 1-based counting
     char *SchA_L10_Type;
     char *SchA_L22_Type;
 
@@ -93442,7 +93442,7 @@ if (infile==0) {
     //====== OR-A Page 1 ======
 
     #define SCH_A_LINES 23
-    double SchA_L[SCH_A_LINES + 1]; // Allow 1 extra for 1-based counting
+    double SchA_L[SCH_A_LINES + 1] = {0}; // Allow 1 extra for 1-based counting
     char *SchA_L10_Type;
     char *SchA_L22_Type;
 
