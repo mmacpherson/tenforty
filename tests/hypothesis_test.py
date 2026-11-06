@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 import tenforty
 from tenforty.backends import OTSBackend
 from tenforty.backends.graph import GraphBackend
-from tenforty.core import ots_reads_input
+from tenforty.core import ots_drops_input, ots_reads_input
 from tenforty.models import (
     OTSFilingStatus,
     OTSState,
@@ -274,6 +274,8 @@ def test_evaluate_return_properties(
     assume(is_state_supported(year, state, filing_status))
     if not ots_reads_input("incentive_stock_option_gains", year, OTSState.NONE):
         incentive_stock_option_gains = 0.0
+    if ots_drops_input("state_adjustment", year, OTSState(state)):
+        state_adjustment = 0.0
     result = tenforty.evaluate_return(
         year=year,
         state=state,

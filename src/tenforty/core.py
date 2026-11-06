@@ -712,6 +712,13 @@ _OTS_REFUSED_WHEN_UNREAD = {
         "covers 2024 and later. Pass incentive_stock_option_gains=0 only if the "
         "return has no such adjustment."
     ),
+}
+
+
+# Inputs tenforty maps, for some years, onto a line that year's OTS template
+# lacks, so the value never reached OTS. They are refused only where a map in
+# the return does that (``ots_drops_input``); elsewhere they behave as before.
+_OTS_REFUSED_WHEN_DROPPED = {
     "self_employment_income": (
         "tenforty maps it to a 2018 Schedule 1 line the 2018 OTS template does "
         "not have (tenforty-s2gx), and no other backend computes 2018: the "
@@ -731,6 +738,38 @@ _OTS_REFUSED_WHEN_UNREAD = {
         "if the return has no California adjustment."
     ),
 }
+
+
+def _ots_return_input_maps(
+    year: int, state: OTSState
+) -> list[tuple[str, dict[str, Any]]]:
+    form_ids = ["US_1040"]
+    if (state_form_id := STATE_TO_FORM.get(state)) is not None:
+        form_ids.append(state_form_id)
+    maps = [
+        (form_id, config.input_map)
+        for form_id in form_ids
+        if (config := NATURAL_FORM_CONFIG.get((year, form_id))) is not None
+    ]
+    maps += [
+        (sub_cfg.form_id, sub_cfg.input_map)
+        for sub_cfg in SUBORDINATE_FORM_CONFIG.get(year, [])
+    ]
+    return maps
+
+
+def ots_drops_input(name: str, year: int, state: OTSState) -> bool:
+    """Whether a map in this year's OTS return sends the input to a missing line.
+
+    The key is not a line of the program's template, so the value is dropped
+    before it reaches OTS, whatever any other program in the return does.
+    """
+    return any(
+        isinstance(ots_key := input_map.get(name), str)
+        and (year, form_id) in OTS_FORM_CONFIG
+        and ots_key not in _ots_template_keys(year, form_id)
+        for form_id, input_map in _ots_return_input_maps(year, state)
+    )
 
 
 def ots_reads_input(name: str, year: int, state: OTSState) -> bool:
@@ -781,17 +820,27 @@ def _require_ots_reads_inputs(
         value = natural_form_values.get(name, 0.0)
         if not value or ots_reads_input(name, year, state):
             continue
-        state_form_id = STATE_TO_FORM.get(state)
-        if state_form_id is not None:
-            where = f"{state.value} {year} ({state_form_id})"
-        elif state == OTSState.NONE:
-            where = f"the {year} federal return with no state"
-        else:
-            where = f"{state.value} {year}, which has no state income tax return"
+        where = _ots_return_where(year, state)
         raise UnsupportedInputError(
             f"OTS does not use {name}={value!r} on {where}, so it would "
             f"compute the return without it. {remedy}"
         )
+    for name, remedy in _OTS_REFUSED_WHEN_DROPPED.items():
+        value = natural_form_values.get(name, 0.0)
+        if value and ots_drops_input(name, year, state):
+            raise UnsupportedInputError(
+                f"OTS does not use {name}={value!r} on {_ots_return_where(year, state)}"
+                f", so it would compute the return without it. {remedy}"
+            )
+
+
+def _ots_return_where(year: int, state: OTSState) -> str:
+    state_form_id = STATE_TO_FORM.get(state)
+    if state_form_id is not None:
+        return f"{state.value} {year} ({state_form_id})"
+    if state == OTSState.NONE:
+        return f"the {year} federal return with no state"
+    return f"{state.value} {year}, which has no state income tax return"
 
 
 def _schedule_a_inputs(natural_form_values: dict[str, Any]) -> dict[str, object]:

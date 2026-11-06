@@ -318,7 +318,8 @@ def test_every_mapping_onto_a_missing_template_line_is_refused():
         template_keys = _template_keys(year, form_id)
         for name, ots_key in config.input_map.items():
             if isinstance(ots_key, str) and ots_key not in template_keys:
-                assert name in core._OTS_REFUSED_WHEN_UNREAD, (year, form_id, name)
+                refused = core._OTS_REFUSED_WHEN_UNREAD | core._OTS_REFUSED_WHEN_DROPPED
+                assert name in refused, (year, form_id, name)
 
 
 @pytest.mark.parametrize(
@@ -329,7 +330,18 @@ def test_template_lacks_the_mapped_line(year, state, name, ots_key, bead):
     form_id = STATE_TO_FORM[OTSState(state)] if state else "US_1040"
     assert NATURAL_FORM_CONFIG[(year, form_id)].input_map[name] == ots_key
     assert ots_key not in _template_keys(year, form_id)
-    assert not ots_reads_input(name, year, OTSState(state) if state else OTSState.NONE)
+    ots_state = OTSState(state) if state else OTSState.NONE
+    assert not ots_reads_input(name, year, ots_state)
+    assert core.ots_drops_input(name, year, ots_state)
+
+
+@pytest.mark.parametrize(
+    ("year", "state"), [(2025, "OR"), (2025, "TX"), (2018, None), (2020, "CA")]
+)
+def test_state_adjustment_is_refused_only_where_a_map_drops_it(year, state):
+    """Elsewhere it keeps its earlier behavior; only CA 2018/2019 drop it."""
+    ots_state = OTSState(state) if state else OTSState.NONE
+    assert not core.ots_drops_input("state_adjustment", year, ots_state)
 
 
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
