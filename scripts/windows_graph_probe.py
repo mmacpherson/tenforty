@@ -47,7 +47,13 @@ for kwargs in (
 
 for name, call in {
     "marginal_rate": lambda: tenforty.marginal_rate(year=2025, w2_income=75_000),
-    "solve_for_income": lambda: tenforty.solve_for_income(8_000, year=2025),
+    "solve_for_income": lambda: tenforty.solve_for_income(
+        tenforty.evaluate_return(
+            year=2025, w2_income=75_000, backend="graph"
+        ).total_tax,
+        year=2025,
+        w2_income=75_000,
+    ),
 }.items():
     try:
         print(name, "->", call())
