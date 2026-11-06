@@ -740,3 +740,117 @@ def test_ots_negative_other_income_adds_nothing_to_amti(year, regular_tax):
 
     assert result.federal_amt == 0.0
     assert result.federal_income_tax == pytest.approx(regular_tax, abs=0.01)
+
+
+# --- tenforty-k3ns: Form 6251 at zero taxable income ---------------------------
+# Independent derivation (blind, official IRS sources only, no tax software):
+# docs/validation/derivations/ots-amt-zero-taxable-income-2025.md, cases K1-K3
+# (2025) and K1-2024.
+# Every case has Form 1040 line 15 = 0, so the AMT is the whole income tax.
+
+K1_2025 = dict(
+    year=2025,
+    filing_status="Head_of_House",
+    self_employment_income=84.0,
+    long_term_capital_gains=-8_289.0,
+    incentive_stock_option_gains=200_000.0,
+    qbi_ubia=1_292.0,
+    standard_or_itemized="Itemized",
+)
+K2_2025 = dict(
+    year=2025,
+    filing_status="Married/Joint",
+    w2_income=2_731.0,
+    self_employment_income=1_606.0,
+    taxable_interest=2_146.0,
+    ordinary_dividends=24_007.0,
+    qualified_dividends=24_007.0,
+    incentive_stock_option_gains=200_000.0,
+    qbi_ubia=48_835.0,
+)
+K3_2025 = dict(
+    year=2025,
+    filing_status="Widow(er)",
+    self_employment_income=14_104.0,
+    taxable_interest=204.0,
+    ordinary_dividends=7_919.0,
+    qualified_dividends=7_919.0,
+    short_term_capital_gains=-23_224.0,
+    long_term_capital_gains=-8_939.0,
+    incentive_stock_option_gains=200_000.0,
+    qbi_w2_wages=2.0,
+    standard_or_itemized="Standard",
+)
+# (case, inputs, derived AMT = income tax, derived total tax)
+K_CASES = [
+    ("K1", K1_2025, 28_335.84, 28_335.84),
+    ("K2", K2_2025, 18_036.08, 18_263.00),
+    ("K3", K3_2025, 19_061.01, 21_053.84),
+]
+
+
+@skip_if_graph_unavailable
+@pytest.mark.parametrize(
+    ("inputs", "amt", "total"),
+    [case[1:] for case in K_CASES],
+    ids=[case[0] for case in K_CASES],
+)
+def test_graph_amt_at_zero_taxable_income(inputs, amt, total):
+    """Graph: line 1b may be negative and Part III keeps qualified dividends at 0%."""
+    result = evaluate_return(backend="graph", **inputs)
+
+    assert result.federal_taxable_income == 0.0
+    assert result.federal_amt == pytest.approx(amt, abs=0.01)
+    assert result.federal_income_tax == pytest.approx(amt, abs=0.01)
+    assert result.federal_total_tax == pytest.approx(total, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F36: OTS 2025 caps charity at 60%/30% of a negative AGI and floors "
+    "medical at 7.5% of it, so an elected-itemizing Schedule A goes negative",
+    strict=True,
+)
+def test_ots_schedule_a_with_negative_agi_2025():
+    """K1: Schedule A with no expenses is 0, so line 1b is AGI and AMTI is AGI + ISO.
+
+    OTS is wrong here under either reading of Schedule A line 4: with the
+    literal form arithmetic (line 4 = 218.70) the AMT would be 28,278.98.
+    """
+    result = evaluate_return(backend="ots", **K1_2025)
+
+    assert result.federal_amt == pytest.approx(28_335.84, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F36: statute reading of Schedule A line 4 (IRC 213(a): no medical "
+    "deduction without medical expenses); the literal form arithmetic differs",
+    strict=True,
+)
+def test_ots_schedule_a_with_negative_agi_2024():
+    """K1-2024: medical line 4 is 0, so AMTI is AGI + ISO = 197,084.
+
+    The derivation (case K1-2024) takes line 4 = 0 under IRC 213(a), which
+    allows only medical expenses paid in excess of 7.5% of AGI; the literal
+    form arithmetic with a negative AGI gives line 4 = 218.70 and AMT
+    28,902.98, which is what OTS reports.
+    """
+    result = evaluate_return(backend="ots", **(K1_2025 | {"year": 2024}))
+
+    assert result.federal_amt == pytest.approx(28_959.84, abs=0.01)
+
+
+@pytest.mark.xfail(
+    reason="F27: OTS skips the AMT preferential-rate worksheet when regular "
+    "taxable income is zero",
+    strict=True,
+)
+@pytest.mark.parametrize(
+    ("inputs", "amt"),
+    [(K2_2025, 18_036.08), (K3_2025, 19_061.01)],
+    ids=["K2", "K3"],
+)
+def test_ots_part_iii_keeps_dividends_at_zero_taxable_income(inputs, amt):
+    """K2, K3: the k3ns witnesses of F27, with dividends beside SE income and losses."""
+    result = evaluate_return(backend="ots", **inputs)
+
+    assert result.federal_amt == pytest.approx(amt, abs=0.01)

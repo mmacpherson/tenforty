@@ -41,7 +41,7 @@ signature, and update this table in the same PR.
 | F24 | OTS 2024 MFS AMTI increase uses stale 2023 constants | upstream OpenTaxSolver | open (tenforty-2jv; upstream report pending) | F23 adjudication |
 | F25 | Graph Form 6251 uses stale 2025 MFS 15%-gain ceiling | graph spec | fixed (tenforty-c9a) | randomized MFS ISO/gain differential |
 | F26 | ~~TaxCalc lets unused itemization reduce AMTI below the taxable-income floor~~ | withdrawn: graph spec | withdrawn — TaxCalc follows Form 6251 line 1; graph floored it (tenforty-nng) | randomized itemized ISO/loss differential |
-| F27 | OTS skips the AMT preferential-rate worksheet when regular taxable income is zero | upstream OpenTaxSolver | open (tenforty-909.1; upstream report pending) | randomized zero-taxable-income ISO/dividend differential |
+| F27 | OTS skips the AMT preferential-rate worksheet when regular taxable income is zero | upstream OpenTaxSolver | open (tenforty-909.1; upstream report pending; signature keyed on OTS's own line 15 since tenforty-k3ns) | randomized zero-taxable-income ISO/dividend differential |
 | F28 | TaxCalc elects to itemize below the standard deduction when that lowers AMT; tenforty takes the larger deduction | API contract, both backends | open (deduction-choice contract; tenforty-z31) | taxcalc 6.9.0 upgrade differential |
 | F29 | Form 8959 line 8 ignores the Schedule SE $400 stop rule | OTS mapping + graph spec | fixed (tenforty-j0f) | taxcalc 6.9.0 upgrade differential |
 | F30 | Graph Schedule A line 3 goes negative with negative AGI, creating a medical deduction | graph spec | fixed (tenforty-kzm) | taxcalc 6.9.0 upgrade differential |
@@ -49,6 +49,7 @@ signature, and update this table in the same PR.
 | F32 | OTS 2025 Schedule 1-A line 28 truncates; line 29 uses \$300 | upstream OpenTaxSolver | open (upstream report 12 pending) — not patched locally | OBBBA implementation, source reading |
 | F33 | OTS 2025 skips Schedule 1-A Parts II-V for MFS, denying MFS car loan interest | upstream OpenTaxSolver | open (upstream report 13 pending) — not patched locally | OBBBA implementation, source reading |
 | F34 | OTS 2025 Form 6251 line 1a omits the senior-deduction add-back | upstream OpenTaxSolver | open (upstream report 14 pending) — not patched locally | OBBBA implementation, source reading |
+| F36 | OTS Schedule A priced off a negative AGI: medical floor (every year) and, in 2025, the charity limits | upstream OpenTaxSolver | open (upstream report 19 pending; tenforty-k3ns) — not patched locally | randomized zero-taxable-income ISO differential |
 | F35 | TaxCalc 6.9.0 phases tips, overtime and car loan interest continuously, not per \$1,000 | taxcalc harness (adapter omits `exact_calculations=True`) | explained, not upstream; adapter change tracked as tenforty-253f | OBBBA golden witnesses |
 
 ## Method
@@ -775,6 +776,47 @@ boundary where line 1 is zero, while a passing companion pins the correct result
 one dollar above it. Tracked by `tenforty-909.1`; the vendored source is
 unchanged.
 
+**Signature rekeyed (tenforty-k3ns).** The signature first applied only when
+TaxCalc's taxable income was zero. TaxCalc can elect to itemize to cut AMT
+(F28), and then its taxable income is positive while OTS's stays zero, so F27
+never fired and the gate flaked on two 2025 witnesses:
+
+- MFJ: wages $2,731, SE $1,606, interest $2,146, qualified dividends $24,007,
+  ISO $200,000. Derived AMT $18,036.08; OTS $24,277.90.
+- QSS: SE $14,104, interest $204, qualified dividends $7,919, capital losses,
+  ISO $200,000. Derived AMT $19,061.01; OTS $21,119.95.
+
+In both, the OTS excess is exactly 26% of the qualified dividends. The
+signature now keys on OTS's own line 15: AGI less OTS's line 12 and less
+Schedule 1-A. Line 12 is taken under OTS's own itemizing decision and SALT cap.
+A positive amount before the QBI deduction stays positive after it. Live checks
+pin the classifier against OTS's output (AST-59): a SALT case and a Schedule 1-A
+case, each with a control one dollar above zero.
+
+**The mirror follows OTS's own code.** It reproduces:
+
+- **SALT.** OTS's 2025 SALT worksheet:
+  - The trigger is AGI above $500,000 with taxes above $10,000, or above $5,000
+    for MFS.
+  - Line 6 subtracts $500,000, or $250,000 for MFS.
+  - MFS then halves line 9.
+  - Outside the worksheet the flat limit applies: $40,000 ($20,000 MFS) in
+    2025, and $10,000 ($5,000 MFS) in 2024.
+- **Schedule 1-A**, as OTS 2025 computes it.
+- **The 2024/2025 standard deduction**, with its age boxes.
+- **The itemizing test**, which is strict.
+- **Line 14:** lines 12, 13a and 13b.
+
+Live 2025 MFS witnesses above $500,000 of AGI (AST-60) pin the SALT worksheet.
+
+**Drift guard.** The differential also checks every firing of F27 or F36
+against OTS's own taxable income and fails, naming the finding, if OTS's line
+15 is positive. OTS output checks only the classifier's domain there; it never
+sizes a band.
+The values come from a blind derivation
+(`docs/validation/derivations/ots-amt-zero-taxable-income-2025.md`, cases K2
+and K3). The graph agrees with it, and strict-xfails pin the OTS results.
+
 ### F28. NEW — TaxCalc elects to itemize below the standard deduction to cut AMT
 
 Surfaced by the TaxCalc 6.9.0 upgrade. Since 6.7.3 (F14) TaxCalc adds the
@@ -831,6 +873,69 @@ only to the extent they exceed 7.5% of AGI, so the deduction cannot exceed
 line 1; TaxCalc applies the percentage to AGI floored at zero. The graph now
 does the same. A passing test pins the 2025 qualifying-surviving-spouse witness
 at the derived $15,618.46 AMT.
+
+### F36. NEW, ADJUDICATED — OTS prices Schedule A off a negative AGI
+
+**The witness (tenforty-k3ns):** 2025 head of household, SE $84, long-term
+capital loss $8,289 (AGI −$2,916), ISO $200,000, itemizing elected with no
+itemized deductions. OTS AMT is $28,961.32. The blind derivation
+(`docs/validation/derivations/ots-amt-zero-taxable-income-2025.md`, case K1)
+gives $28,335.84; TaxCalc and the graph agree with it.
+
+**What OTS does.** With a negative AGI, OTS's Schedule A computes:
+
+- **Medical floor (every year):** 7.5% of the negative AGI, so line 4 becomes
+  +$218.70 with no medical expenses.
+- **Charity limits (2025 only):** 60% and 30% of the negative AGI, so no
+  contributions become −$1,749.60 and −$874.80.
+
+The total, −$2,405.70, becomes Form 1040 line 14. Line 15 stays zero, but Form
+6251 line 1b, line 11 less line 14, rises by $2,405.70, which is $625.48 of AMT
+at 26%.
+
+**How each half is decided.**
+
+- **The charity half** is unambiguous: a percentage-of-AGI limit cannot turn
+  zero contributions into a negative deduction.
+- **The medical half** rests on the statute reading F30 already adopted for the
+  graph. IRC 213(a) allows only medical expenses paid in excess of 7.5% of AGI,
+  so there is no deduction without expenses. The literal form arithmetic gives
+  line 4 = $218.70.
+- **Under each reading:**
+  - 2025: OTS is wrong under either reading. The literal reading gives
+    $28,278.98.
+  - 2024 (case K1-2024, derived $28,959.84): OTS reports $28,902.98, the
+    literal-arithmetic figure. It is wrong by $56.86 under the statute reading
+    we adopt.
+
+**Scope.** It reaches every return on which OTS itemizes:
+
+- forced Itemized; or
+- Auto, where OTS's own Schedule A (its SALT cap and these artifacts included)
+  exceeds the standard deduction.
+
+Whichever way OTS decides, AMTI moves only by the artifacts. That is because
+the legacy aggregate and the taxes are added back on line 2a. Our mapping sends
+nothing to Schedule A here beyond the aggregate, the taxes and the A18
+election.
+
+**Signature.** OTS only, OTS itemizing, AGI below zero:
+
+- 2025: [0, 35% × 82.5% × |AGI|].
+- Other years: [−35% × 7.5% × |AGI|, 0].
+
+The 35% is the 28% rate plus 7% through the exemption phase-out.
+
+**Records.**
+
+- Strict-xfails for 2025 and 2024.
+- Negative controls on graph, on a non-negative AGI, on Standard, and on Auto
+  where OTS takes the standard deduction.
+- A regression for Auto itemizing (AST-59).
+- Golden cases tagged `S_negative_agi`.
+`tenforty-w4m7` (2024 HoH, ISO, itemized, OTS $31 below TaxCalc) looks like
+the medical half, but it is not folded in. Upstream report 19 is drafted, not
+sent.
 
 ### F31-F34. NEW — OTS 2025 OBBBA defects, read from the source
 

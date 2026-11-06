@@ -348,6 +348,20 @@ def build_cases() -> list[dict]:
     ):
         add(2025, "R_obbba", **kw)
 
+    # tenforty-k3ns / F36: a negative AGI with itemizing elected. OTS prices the
+    # Schedule A medical floor (every year) and, in 2025, the charity limits off
+    # the negative AGI; Form 1040 line 15 stays zero and the AMT moves.
+    for year in YEARS:
+        add(
+            year,
+            "S_negative_agi",
+            status="Head_of_House",
+            se=84,
+            ltcg=-8_289,
+            iso=200_000,
+            std_or_item="Itemized",
+        )
+
     for i, c in enumerate(cases):
         c["case_id"] = i
     return cases

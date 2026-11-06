@@ -797,6 +797,62 @@ refusal's removal.
 
 ---
 
+## 19. Schedule A limits computed from a negative AGI (2025 charity; medical floor)
+
+**Releases:** OpenTaxSolver2025_23.06 (charity and medical), OpenTaxSolver2024_22.06 (medical)
+**Files:**
+- `src/taxsolve_US_1040_2025.c:2424`, `:2434` (charity limits), `:2456-2457` (medical floor)
+- `src/taxsolve_US_1040_2024.c:2271-2272` (medical floor)
+
+When AGI (`L[11]`) is negative and the user elects to itemize (`A18 Y`), Schedule A
+is computed from that negative AGI:
+
+```c
+ if (charityCC > 0.60 * L[11])
+  { ... charityCC = 0.60 * L[11]; }
+ ...
+ if (charityOT > 0.30 * L[11])
+  { ... charityOT = 0.30 * L[11]; }
+ ...
+ SchedA[2] = L[11];
+ SchedA[3] = Conditional_Round( 0.075 * SchedA[2] );
+ SchedA[4] = NotLessThanZero( SchedA[1] - SchedA[3] );
+```
+
+With no contributions, `0 > 0.60 * L[11]` holds, so cash contributions become
+60% of the negative AGI, and other contributions 30% of it. With no medical
+expenses, line 3 is negative and line 4 becomes 7.5% of |AGI|.
+
+**Minimal reproducer:** 2025 head of household, Schedule C profit $84,
+long-term capital loss $8,289 (AGI −$2,916), ISO bargain element $200,000
+(`AMTws3`), `A18 Y`, nothing else on Schedule A.
+
+- OTS prints `A4 = 218.70`, and line 12 = line 14 = −2,405.70.
+- Form 6251 line 1b is then −510.30 instead of −2,916.
+- AMT is **$28,961.32**.
+- With Schedule A at 0, line 1b is −2,916, AMTI 197,084, and AMT **$28,335.84**.
+
+**The charity half** seems clear to us: a limit of a percentage of AGI should
+not make a zero contribution negative.
+
+**The medical half** we raise as a question. Read literally, the form gives
+line 4 = $218.70 when AGI is negative, since line 3 is then negative and so is
+"not more than" line 1. IRC 213(a), though, allows only expenses paid in excess
+of 7.5% of AGI, so we read line 4 as 0. Tax-Calculator applies the percentage
+to AGI floored at zero. In 2024, where only this half is present, the same
+return gives OTS $28,902.98 against $28,959.84 under that reading.
+
+**Possible fix, if you agree:**
+- Floor the AGI used by these limits at zero, e.g. `0.60 * NotLessThanZero(L[11])`.
+- Compute `SchedA[3]` from `NotLessThanZero(SchedA[2])`.
+
+Not patched locally. Recorded as strict-xfails
+(`test_ots_schedule_a_with_negative_agi_2025`, `_2024`) and signature F36. The
+expected values are a blind derivation from IRS sources
+(`docs/validation/derivations/ots-amt-zero-taxable-income-2025.md`).
+
+---
+
 ## Pending adjudication — do not send
 
 These are disagreements between OTS and PSL Tax-Calculator found by the
@@ -807,9 +863,8 @@ claim about OTS yet.
 
 | Bead | Case | Observed |
 |---|---|---|
-| `tenforty-k3ns` | 2025 HoH; ISO $200,000, long-term capital loss −$8,289, SE $84, itemized | OTS AMT $28,961.32 vs Tax-Calculator $28,335.84: $625.48 higher, $617.48 past the $8 tolerance. Form 6251 capital-loss / Part III interaction to check. |
 | `tenforty-ifa0` (OTS half) | 2025 Single; SE $212, short-term capital loss −$231,428, ISO $200,000, itemized $1,039 | OTS total tax $28,967.15 vs $28,098.98 from both Tax-Calculator and the graph backend: $868.17 higher, $489.52 beyond the known-defect signature allowances. |
-| `tenforty-w4m7` | 2024 HoH; ISO $200,000, itemized, SSTB QBI | OTS AMT $31 beyond tolerance. Form 6251 / 8995-A to check. |
+| `tenforty-w4m7` | 2024 HoH; ISO $200,000, itemized, SSTB QBI | OTS AMT $31 beyond tolerance. Form 6251 / 8995-A to check. Possibly the medical half of report 19 (OTS lower by 26% of 7.5% of a negative AGI); not yet checked. |
 | `tenforty-kji5` | 2025 MFS; wages $111,988, ordinary dividends $4,943 (qualified $2,471.50), SE $1,119 | OTS income tax $17,180.72 vs Tax-Calculator $17,183.85: $3.13 lower, past the $2 tolerance; the graph backend passes. QDCG worksheet / Tax Table rounding to check. |
 | `tenforty-04c` | 2024 HoH; wages $98,094, ordinary = qualified dividends $29,711 | OTS income tax $14,574.65 vs Tax-Calculator $14,578.33: $3.68 lower, $1.68 past the $2 tolerance. Same family as kji5. |
 
