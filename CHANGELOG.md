@@ -29,6 +29,21 @@
   `on_error` policy and from the whole-batch preflight, on `backend="ots"` and
   `backend="auto"` alike. Zero, explicit or omitted, is unchanged. The
   mappings themselves are tracked as tenforty-s2gx and tenforty-8tlh.
+- **OTS 2024 and 2025 Oregon no longer read uninitialised memory into
+  Schedule OR-A line 9.** OTS sums line 8 into line 9, but nothing ever sets
+  line 8, so the Oregon itemized deduction depended on the stack. On Linux
+  the stray value was 0. On an Intel macOS wheel, a 2024 Single $420,000
+  return deducted $10,000 instead of the $2,745 standard deduction.
+  - OTS-P10 zero-initialises the array. Line 8 is "Reserved" on both years'
+    Schedule OR-A, so 0 is the form's own value. Figures on Linux do not change.
+  - OTS-P11 bounds a 2024 import routine's trailing-space trim, which read
+    before its buffer on an empty text field. It handles text only, so no
+    figure changes.
+  - Both are memory-safety entries in the registry, staged upstream as
+    report 20.
+  - A clang `-ftrivial-auto-var-init=pattern` against `=zero` build test
+    witnesses the Oregon defect and the fix. It skips without clang.
+
 ### Changed (OTS build)
 - Every change `ots/amalgamate.py` makes to vendored OpenTaxSolver is now
   registered in `ots/ots_patches.py`, rendered in

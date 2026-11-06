@@ -327,6 +327,63 @@ OTS_PATCHES: tuple[OtsPatch, ...] = (
         ),
         history=("Added in PR #221.",),
     ),
+    OtsPatch(
+        id="OTS-P10",
+        function="patch_or_40_sch_a_zero_init",
+        patch_class="memory-safety",
+        summary="Zero-initialise OR-40's `SchA_L`, whose line 8 is summed but never set.",
+        scope="OR_40, 2024-2025",
+        matches={year: {"OR_40": 1} for year in (2024, 2025)},
+        match_unit="declarations given `= {0}`",
+        effect=(
+            "None where the read was already 0, as on our Linux builds. Schedule "
+            "OR-A line 9 adds `SchA_L[8]`, which nothing assigns, so line 9 and "
+            "the Oregon itemized deduction took whatever was on the stack: a "
+            "2024 Single $420,000 return deducted $10,000 instead of the $2,745 "
+            'standard deduction on an Intel macOS build. Line 8 is "Reserved" '
+            "on the 2024 and 2025 forms, so 0 is the form's own value and every "
+            "formula is unchanged."
+        ),
+        status="reported-upstream",
+        upstream="docs/upstream-ots-reports.md report 20; draft, not sent.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P10]",),
+        behavioral_witnesses=(
+            "tests/ots_patch_behavior_test.py::test_or_40_sch_a_line_8_is_platform_independent",
+        ),
+        witness_depends_on=("OTS-P6",),
+        note=(
+            "Built with clang's `-ftrivial-auto-var-init=pattern`, the unpatched "
+            "program makes the read a NaN and deducts the full line 9 limit; "
+            "with the patch, pattern and `=zero` builds print the same return. "
+            "The witness applies OTS-P6 first, because at -O0 the 2024 program "
+            "otherwise crashes on the empty dependent names before Schedule OR-A."
+        ),
+    ),
+    OtsPatch(
+        id="OTS-P11",
+        function="patch_grablinealloc_trim_bound",
+        patch_class="memory-safety",
+        summary="Bound `GrabLineAlloc`'s trailing-space trim at the start of its buffer.",
+        scope="taxsolve_routines.c, 2024",
+        matches={2024: {"routines": 1}},
+        match_unit="trim loops given `cpos >= 0`",
+        effect=(
+            "None on computed figures: the function copies imported text fields "
+            "only, and amounts are imported by `GrabLineValue`. Wherever the "
+            "original loop stayed in the buffer the bounded one stops at the same "
+            'index; an empty field (`" "`) made it read, and possibly write, '
+            "before the buffer, which is undefined."
+        ),
+        status="reported-upstream",
+        upstream="docs/upstream-ots-reports.md report 20; draft, not sent.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P11]",),
+        note=(
+            "2024 only: the 2025 import routines were rewritten without the "
+            "loop. No behavioral witness: the stray byte is a stack neighbour, "
+            "which `-ftrivial-auto-var-init` does not make a space, so only "
+            "MemorySanitizer shows the read."
+        ),
+    ),
 )
 
 
