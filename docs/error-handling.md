@@ -172,7 +172,8 @@ parser calls `exit(1)` on such a value, which would end the Python process
 whatever `on_error` says, so the value is checked first: the key must be a line
 of the form's OTS template, an amount line takes finite ASCII numbers (grouped
 thousands such as `1,000` are fine), a yes/no line Y/N (yes/no, true/false,
-1/0), and a text line one line of text of at most 500 UTF-8 bytes, with no
+1/0, any case; written to OTS as `Y` or `N`, which every year's reader
+accepts), and a text line one line of text of at most 500 UTF-8 bytes, with no
 control characters. A line whose OTS reader tenforty does not identify, such as
 Schedule D's `D6` or its capital-gain entries, accepts only its template
 default; `Status` takes the filing-status names `Single`, `Married/Joint`,

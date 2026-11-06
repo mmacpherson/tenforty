@@ -8,7 +8,8 @@
   `evaluate_form` now checks every federal and state value before any native
   call and raises `OTSInputError` (a `ValueError`) naming the year, form and
   field: a key must be a line of the form's OTS template, an amount line takes
-  finite ASCII numbers, a yes/no line takes Y/N (yes/no, true/false, 1/0), and
+  finite ASCII numbers, a yes/no line takes Y/N (yes/no, true/false, 1/0, any
+  case, written to OTS as `Y` or `N`), and
   a text line one line of text of at most 500 UTF-8 bytes. Each template line
   now records the kind its OTS program reads, extracted from the vendored C
   source by `ots/amalgamate.py`. A line whose reader is not identified (such as

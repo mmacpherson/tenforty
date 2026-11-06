@@ -196,9 +196,11 @@ _OTS_NUMBER_RE = re.compile(
     re.ASCII,
 )
 _OTS_INTEGER_RE = re.compile(r"[+-]?[0-9]+\.?", re.ASCII)
-_OTS_BOOLEAN_WORDS = frozenset(
-    {"y", "n", "yes", "no", "true", "false", "1", "0", "n/a"}
-)
+# Accepted yes/no spellings, any case. They are written as "Y" or "N": the
+# 2018-2020 ';' readers (get_parameters, kind 'b') match "Y"/"N" with a
+# case-sensitive strcmp, and every reader in every year accepts uppercase.
+_OTS_TRUE_WORDS = frozenset({"y", "yes", "true", "1"})
+_OTS_FALSE_WORDS = frozenset({"n", "no", "false", "0"})
 
 
 # Lines whose reader ots/amalgamate.py cannot identify from a literal label, but
@@ -317,9 +319,11 @@ def _prepare_ots_value(
     if kind == OTSFieldKind.BOOLEAN:
         if isinstance(value, numbers.Real) and value not in (0, 1):
             return f"expected Y or N, got {text!r}", value
-        if words[0].lower() not in _OTS_BOOLEAN_WORDS:
-            return f"expected Y or N, got {text!r}", value
-        return None, value
+        if words[0].lower() in _OTS_TRUE_WORDS:
+            return None, "Y"
+        if words[0].lower() in _OTS_FALSE_WORDS:
+            return None, "N"
+        return f"expected Y or N, got {text!r}", value
     return None, value
 
 
@@ -335,10 +339,11 @@ def prepare_ots_form_values(
     parse, which ends the Python process whatever ``on_error`` says. Each key must
     be a line of the form's template, and each value must be what the OTS program
     reads on that line: a finite ASCII number on an amount line, Y/N (or yes/no,
-    true/false, 1/0) on a yes/no line, and a single line of text on a text line.
-    The template default is always accepted. Every number on an amount line is
-    rewritten in ``ots_canonical_number``'s spelling, which every OTS number
-    reader accepts, so the accepted grammar never has to match OTS's own.
+    true/false, 1/0, any case) on a yes/no line, and a single line of text on a
+    text line. The template default is always accepted. Every number on an
+    amount line is rewritten in ``ots_canonical_number``'s spelling and every
+    yes/no answer as ``Y`` or ``N``, spellings every OTS reader accepts, so the
+    accepted grammar never has to match OTS's own.
 
     A line whose reader ``ots/amalgamate.py`` could not identify (a label the
     program builds at run time, or a special reader such as Schedule D's

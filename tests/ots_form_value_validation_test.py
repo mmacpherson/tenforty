@@ -8,6 +8,7 @@ each caller-supplied value against the kind of field the OTS template declares
 and raises ``OTSInputError`` naming the field.
 """
 
+import json
 import math
 import re
 import subprocess
@@ -589,3 +590,89 @@ def test_public_evaluate_form_has_no_typed_bypass():
 
     parameters = inspect.signature(evaluate_form).parameters
     assert not any(name.startswith("_") for name in parameters)
+
+
+# --- AST-70: yes/no answers are written as Y or N -------------------------------
+
+TRUE_ALIASES = ["y", "Y", "yes", "YES", "Yes", "true", "TRUE", "True", "1", True, 1]
+FALSE_ALIASES = ["n", "N", "no", "NO", "No", "false", "FALSE", "False", "0", False, 0]
+
+
+def _boolean_lines(year):
+    from tenforty.core import _OTS_DECLARED_KINDS
+
+    return sorted(
+        {
+            field.key
+            for field in OTS_FORM_CONFIG[(year, "US_1040")].fields
+            if (field.kind or _OTS_DECLARED_KINDS.get(("US_1040", field.key)))
+            == OTSFieldKind.BOOLEAN
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "written"),
+    [(alias, "Y") for alias in TRUE_ALIASES]
+    + [(alias, "N") for alias in FALSE_ALIASES],
+)
+def test_yes_no_aliases_are_written_as_uppercase_y_or_n(value, written):
+    """The 2018-2020 ';' readers match only uppercase Y/N; every reader takes them."""
+    from tenforty.core import prepare_ots_form_values
+
+    for year, key in [(2020, "B7a"), (2020, "A18"), (2024, "You_Blind?")]:
+        config = OTS_FORM_CONFIG[(year, "US_1040")]
+        assert prepare_ots_form_values({key: value}, config) == {key: written}
+
+
+@skip_if_ots_unavailable
+@pytest.mark.parametrize("key", ["B7a", "A18", "You_Blind?"])
+def test_not_applicable_is_not_a_general_yes_no_answer(key):
+    """'n/a' means not applicable, not yes or no; it passes only as a default."""
+    with pytest.raises(OTSInputError, match=re.escape(key)):
+        evaluate_form(2024, federal_form_values={key: "n/a"})
+
+
+@skip_if_ots_unavailable
+def test_every_yes_no_alias_round_trips_every_reader_in_a_child():
+    """Every alias on every resolved yes/no line, every year, as Y/N computes.
+
+    Covers the newline readers (get_parameter, kind 'b'), the ';' readers
+    (GetYesNo and get_parameters), and the declared A18 schema, 2018-2025.
+    """
+    years = list(range(2018, 2026))
+    lines = {year: _boolean_lines(year) for year in years}
+    aliases = TRUE_ALIASES + FALSE_ALIASES
+    script = textwrap.dedent(
+        f"""
+        import json
+        from tenforty.core import evaluate_form
+        from tenforty.models import OTSError
+
+        def run(year, keys, value):
+            try:
+                return evaluate_form(year, federal_form_values={{k: value for k in keys}})
+            except OTSError as error:
+                return {{"ots_error": error.exit_code}}
+
+        lines = {lines!r}
+        out = {{}}
+        for year in {years!r}:
+            canonical = {{"Y": run(year, lines[year], "Y"), "N": run(year, lines[year], "N")}}
+            for value in {aliases!r}:
+                answer = "Y" if value in {TRUE_ALIASES!r} else "N"
+                out[f"{{year}} {{value!r}}"] = run(year, lines[year], value) == canonical[answer]
+        print(json.dumps(out))
+        print("survived")
+        """
+    )
+    child = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, timeout=600
+    )
+    assert child.returncode == 0, child.stdout[-2000:] + child.stderr[-2000:]
+    *body, last = child.stdout.strip().splitlines()
+    assert last == "survived"
+    results = json.loads(body[-1])
+    assert len(results) == len(years) * len(aliases)
+    assert all(results.values()), [case for case, same in results.items() if not same]
+    assert all(len(lines[year]) >= 5 for year in years)
