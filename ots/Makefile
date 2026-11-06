@@ -2,7 +2,7 @@ DEFAULT_GOAL: help
 .PHONY: install clean
 
 
-generated: amalgamate.py ots-releases/OpenTaxSolver*.tgz ## >> generate wrapper files from OTS source
+generated: amalgamate.py ots_patches.py ots-releases/OpenTaxSolver*.tgz ## >> generate wrapper files from OTS source
 	python amalgamate.py ots-releases/OpenTaxSolver*.tgz
 
 install: ## >> copy files over to main source directory

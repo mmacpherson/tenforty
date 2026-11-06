@@ -1,4 +1,26 @@
 ## [Unreleased]
+### Changed (OTS build)
+- Every change `ots/amalgamate.py` makes to vendored OpenTaxSolver is now
+  registered in `ots/ots_patches.py`, rendered in
+  [docs/ots-patches.md](docs/ots-patches.md).
+  - Each entry is portability or memory-safety, with its scope, exact match
+    counts, effect on figures, status, upstream report and a source witness.
+    The one temporary exception is OTS-P4, the `do_all_caps` state reset,
+    which stays until tenforty-0qmf moves it into the Cython binding.
+  - The source witness finds the defect in the unpatched tarball source, and
+    fails with "retire OTS-Pn" once a release fixes it.
+  - Regeneration stops if a patch matches other than its entry says.
+- The registry's first pass retired three patches. The regenerated
+  `ots_amalgamation.cpp` differs by two lines. No computed tax amount or
+  mapped tax result changes:
+  - `patch_restrict_keyword` matched nothing in any tracked release.
+  - `patch_import_status_init` duplicated an initialisation that
+    OpenTaxSolver2025_23.06 already makes.
+  - `patch_sched1a_line29_label` relabelled a printed output line, which is
+    neither portability nor memory safety. Removing it changes one raw OTS
+    diagnostic key: 2025 federal raw output, and `evaluate_form`'s raw key
+    dictionary, no longer have `S1A_29`. Upstream prints line 20 again
+    under `S1A_20` there instead. No mapped tax result reads either key.
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)
