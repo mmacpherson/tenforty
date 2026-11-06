@@ -12,6 +12,7 @@ import warnings
 from collections.abc import Callable
 from enum import Enum
 from functools import partial
+from typing import Any
 
 from pydantic import (
     BaseModel,
@@ -57,6 +58,21 @@ class OTSError(Exception):
         super().__init__(
             message or f"OTS returned exit code {exit_code} for {year}/{form}"
         )
+
+
+class OTSInputError(ValueError):
+    """Raised before any native call when a raw OTS form value cannot be read.
+
+    OTS parses its input file with helpers that call ``exit(1)`` on a value they
+    cannot parse, which would end the Python process, so ``evaluate_form``
+    checks each caller-supplied value against the field the template declares.
+    """
+
+    def __init__(self, year: int, form_id: str, key: str, problem: str):  # noqa: D107
+        self.year = year
+        self.form_id = form_id
+        self.key = key
+        super().__init__(f"{year}/{form_id} field {key!r}: {problem}")
 
 
 class OTSParseError(Exception):
@@ -361,12 +377,23 @@ class OTSFieldTerminator(Enum):
     NEWLINE = "newline"
 
 
+class OTSFieldKind(Enum):
+    """The kind of value the OTS program parses for a template line."""
+
+    NUMBER = "number"
+    INTEGER = "integer"
+    BOOLEAN = "boolean"
+    TEXT = "text"
+    WORD = "word"
+
+
 class OTSField(BaseModel):
     """Typically, represents one line of input in a tax form."""
 
     key: str
     default: int | float | str | None = None
     terminator: OTSFieldTerminator = OTSFieldTerminator.SEMICOLON
+    kind: OTSFieldKind | None = None
 
 
 class OTSForm(BaseModel):
@@ -404,9 +431,20 @@ class SubordinateFormConfig(BaseModel):
     activation_naturals: list[str] = []
 
 
+def _ots_form(entry: dict[str, Any]) -> OTSForm:
+    return OTSForm(
+        year=entry["year"],
+        form_id=entry["form_id"],
+        fields=[
+            OTSField(key=key, default=default, terminator=terminator, kind=kind)
+            for key, default, terminator, kind in entry["fields"]
+        ],
+    )
+
+
 OTS_FORM_CONFIG = dict(
     ((form.year, form.form_id), form)
-    for form in (OTSForm(**e) for e in _ots_form_models.OTS_FORM_CONFIG)
+    for form in map(_ots_form, _ots_form_models.OTS_FORM_CONFIG)
 )
 
 

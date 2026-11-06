@@ -146,6 +146,7 @@ def process_ots_tarball(
 
     """
     source_group = dict()
+    program_sources: dict[str, str] = {}
     configs = []
     outer_namespace = ""
     outer_namespaces = set()
@@ -160,6 +161,7 @@ def process_ots_tarball(
                         with open(f"{tmpdirname}/{item.name}") as fp:
                             source = fp.read()
                         source_group[inner_namespace] = group_lines(source)
+                        program_sources[shorten_inner_ns(inner_namespace)] = source
                         outer_namespaces.add(outer_namespace)
                     case (
                         r"/examples_and_templates/.*_template\.txt"
@@ -187,6 +189,7 @@ def process_ots_tarball(
 
     assert len(outer_namespace) > 0
     assert len(outer_namespaces) == 1
+    attach_field_kinds(configs, program_sources)
 
     # Inline taxsolve_get_fed_return_data into each AZ form's namespace.
     # AZ is the only state that uses this intermediate include file.  Rather
@@ -936,6 +939,90 @@ def build_fields(source: str) -> list[dict[str, Any]]:
     return fields
 
 
+FIELD_KIND_BY_READER = {
+    "GetLine": "number",
+    "GetLine1": "number",
+    "GetLineF": "number",
+    "GetLineFnz": "number",
+    "GetOptionalLine": "number",
+    "GetInteger": "integer",
+    "GetYesNo": "boolean",
+    "GetYesNo1": "boolean",
+    "GetYesNoSL": "boolean",
+    "GetString": "text",
+    "GetLineString": "text",
+    "GetTextLine": "text",
+    "GetTextLineF": "text",
+}
+FIELD_KIND_BY_PARAMETER_TYPE = {
+    "f": "number",
+    "i": "integer",
+    "b": "boolean",
+    "w": "text",
+    "l": "word",
+}
+_C_COMMENT_RE = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
+_READER_CALL_RE = re.compile(r"\b(Get\w+)\s*\(\s*\"([^\"]+)\"")
+_PARAMETER_CALL_RE = re.compile(
+    r"\bget_param(?:eter|eters|_single_line)\s*\(\s*infile\s*,\s*'(\w)'\s*,"
+    r"[^,;]*,\s*\"([^\"]+)\"\s*\)"
+)
+
+
+def extract_field_kinds(c_source: str) -> dict[str, str]:
+    """Map each input label a form's C source reads to the kind of value it parses.
+
+    OTS reads its input file with helpers that ``exit(1)`` on a value they cannot
+    parse, so tenforty validates raw values before any native call and needs to
+    know what each line expects. The kind comes from the reader the source calls
+    with that label as a string literal: ``GetLine("L1a", ...)`` reads a number,
+    ``GetYesNo("B7aa", ...)`` a boolean, ``GetTextLine("Your1stName:")`` a line
+    of text, and ``get_parameter(infile, 'b', ..., "You_Blind?")`` the kind its
+    type character names. A label read as a bare ``'l'`` word takes one
+    whitespace-free token.
+
+    Labels the source builds at run time, or reads with two different kinds, are
+    left out; the caller falls back to a conservative check for those.
+    """
+    source = _C_COMMENT_RE.sub("", c_source)
+    seen: dict[str, set[str]] = {}
+    for reader, label in _READER_CALL_RE.findall(source):
+        if reader in FIELD_KIND_BY_READER:
+            seen.setdefault(label, set()).add(FIELD_KIND_BY_READER[reader])
+    for type_char, label in _PARAMETER_CALL_RE.findall(source):
+        if type_char in FIELD_KIND_BY_PARAMETER_TYPE:
+            seen.setdefault(label, set()).add(FIELD_KIND_BY_PARAMETER_TYPE[type_char])
+    return {
+        label: next(iter(kinds)) for label, kinds in seen.items() if len(kinds) == 1
+    }
+
+
+def template_program_name(form_id: str) -> str:
+    """Name the OTS program that reads a template, from the template's directory.
+
+    Most templates sit in a directory named after their program; the
+    supplementary forms use ``Form_NNNN`` for program ``fNNNN`` (and
+    ``Form_CA_5805`` for ``CA_5805``).
+    """
+    return form_id.replace("Form_CA_", "CA_").replace("Form_", "f")
+
+
+def attach_field_kinds(
+    configs: list[dict[str, Any]], program_sources: dict[str, str]
+) -> None:
+    """Record on each template field the kind its OTS program reads, or None."""
+    for config in configs:
+        program = template_program_name(config["form_id"])
+        if program not in program_sources:
+            raise ValueError(
+                f"No OTS program source for template {config['year']}/"
+                f"{config['form_id']} (looked for {program})"
+            )
+        kinds = extract_field_kinds(program_sources[program])
+        for field in config["fields"]:
+            field["kind"] = kinds.get(field["key"])
+
+
 def build_config_file(configs: list[dict[str, Any]]) -> str:
     """Create a configuration file for OTS form templates.
 
@@ -947,15 +1034,31 @@ def build_config_file(configs: list[dict[str, Any]]) -> str:
     -------
         A string representing the contents of the configuration file.
 
-    NOTE: We just use !r/repr() here to generate a valid python dict literal,
-    and rely on the `black` hook downstream to prettify it.
+    Each field is written as a ``(key, default, terminator, kind)`` tuple, one
+    line per field once formatted, which ``tenforty.models`` reads back into
+    ``OTSField``.
+
+    NOTE: We just use !r/repr() here to generate a valid python literal, and
+    rely on the `ruff format` hook downstream to prettify it.
 
     """
+    compact = [
+        dict(
+            year=config["year"],
+            form_id=config["form_id"],
+            fields=[
+                (f["key"], f["default"], f["terminator"], f["kind"])
+                for f in config["fields"]
+            ],
+        )
+        for config in configs
+    ]
     return f"""\
 # THIS FILE IS PROGRAMMATICALLY GENERATED.
 # DO NOT EDIT BY HAND.
 # See `ots/amalgamate.py` to regenerate.
-OTS_FORM_CONFIG = {configs!r}
+# Each field is (key, default, terminator, kind).
+OTS_FORM_CONFIG = {compact!r}
     """
 
 

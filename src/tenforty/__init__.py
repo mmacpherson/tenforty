@@ -15,6 +15,7 @@ from .models import (  # noqa: F401
     LegacyItemizedDeductionsWarning,
     OTSError,
     OTSErrorPolicy,
+    OTSInputError,
     OTSParseError,
     UnsupportedInputError,
     UnsupportedReturnError,
