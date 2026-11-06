@@ -443,7 +443,7 @@ def test_every_typed_mapping_value_passes_the_validator():
     from tenforty.core import (
         _ots_template_lines_only,
         map_natural_to_ots_input,
-        validate_ots_form_values,
+        prepare_ots_form_values,
     )
     from tenforty.models import (
         NATURAL_FORM_CONFIG,
@@ -485,10 +485,107 @@ def test_every_typed_mapping_value_passes_the_validator():
                         mapped = defaults | map_natural_to_ots_input(natural, input_map)
                     except ValueError:
                         continue
-                    validate_ots_form_values(
+                    prepare_ots_form_values(
                         _ots_template_lines_only(year, form_id, mapped),
                         OTS_FORM_CONFIG[(year, form_id)],
                         from_typed_mapping=True,
                     )
                     checked += 1
     assert checked > 10_000
+
+
+# --- AST-68: numbers are rewritten in one canonical spelling -------------------
+
+SPELLINGS = ["-.5", "+.5", "-.5e2", ".5", "5.", "1e3", "-0", "1,000", "+7"]
+BOUNDARY_NUMBERS = [
+    -0.5,
+    0.1 + 0.2,
+    -123456789.98765432,
+    1e-300,
+    5e-324,
+    -2.5e-8,
+    1.7976931348623157e308,
+    -1e300,
+    123456789012345678,
+]
+
+
+@pytest.mark.parametrize("value", SPELLINGS + BOUNDARY_NUMBERS)
+def test_canonical_spelling_is_fixed_point_with_a_leading_digit(value):
+    """No exponent, no leading dot after a sign, and the same double back."""
+    from tenforty.core import ots_canonical_number
+
+    text = ots_canonical_number(value)
+    assert re.fullmatch(r"-?[0-9]+\.[0-9]+", text), text
+    assert len(text) <= 400
+    assert float(text) == float(str(value).replace(",", ""))
+
+
+@skip_if_ots_unavailable
+@pytest.mark.parametrize("value", SPELLINGS)
+def test_spellings_python_reads_are_written_canonically(value, monkeypatch):
+    """'-.5' and its kin reach OTS as '-0.5', which valid_float accepts."""
+    from tenforty import otslib
+
+    written = []
+    real = otslib._evaluate_form
+
+    def capture(year, form, form_text, *args, **kwargs):
+        written.append(form_text)
+        return real(year, form, form_text, *args, **kwargs)
+
+    monkeypatch.setattr(otslib, "_evaluate_form", capture)
+    result = evaluate_form(2024, federal_form_values={"L1a": value})
+    line = next(row for row in written[0].splitlines() if row.startswith("L1a "))
+    assert re.fullmatch(r"L1a -?[0-9]+\.[0-9]+;", line), line
+    assert result["federal"].get("L1z", 0.0) == pytest.approx(
+        float(value.replace(",", ""))
+    )
+
+
+@skip_if_ots_unavailable
+def test_canonical_spellings_round_trip_the_native_parser_in_a_child():
+    """Boundary values written canonically are read back by OTS, not exited on."""
+    values = SPELLINGS + [repr(v) for v in BOUNDARY_NUMBERS]
+    script = textwrap.dedent(
+        f"""
+        from tenforty.core import evaluate_form
+        for value in {values!r}:
+            result = evaluate_form(2024, federal_form_values={{"L1a": value}})
+            print(repr(result["federal"].get("L1z", 0.0)))
+        print("survived")
+        """
+    )
+    child = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, timeout=300
+    )
+    assert child.returncode == 0, child.stdout[-2000:] + child.stderr[-2000:]
+    *totals, last = child.stdout.split()
+    assert last == "survived"
+    for value, total in zip(values, totals, strict=True):
+        expected = float(value.replace(",", ""))
+        assert float(total) == pytest.approx(expected, rel=1e-12, abs=0.005), value
+
+
+@skip_if_ots_unavailable
+@pytest.mark.parametrize(
+    ("year", "key", "value"),
+    [
+        (2022, "Dep1_FirstName:", ""),
+        (2024, "Title:", "US Federal 1040 Tax Form - 2024"),
+        (2024, "Status", "Single"),
+        (2024, "D6", ""),
+        (2024, "Dependents", "0"),
+    ],
+)
+def test_an_exact_template_default_is_accepted_on_any_line(year, key, value):
+    """Passing a newline or ';' line's default is the same as omitting it."""
+    assert evaluate_form(year, federal_form_values={key: value}) == evaluate_form(year)
+
+
+def test_public_evaluate_form_has_no_typed_bypass():
+    """The raw contract is the only one evaluate_form offers."""
+    import inspect
+
+    parameters = inspect.signature(evaluate_form).parameters
+    assert not any(name.startswith("_") for name in parameters)

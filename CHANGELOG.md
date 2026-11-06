@@ -14,7 +14,10 @@
   source by `ots/amalgamate.py`. A line whose reader is not identified (such as
   Schedule D's `D6` and capital-gain entries) fails closed: `evaluate_form`
   accepts only its template default there, except `Status`, which takes
-  tenforty's filing-status names (tenforty-48hh).
+  tenforty's filing-status names. A line's exact template default is always
+  accepted. Numbers on amount lines are written to OTS in one canonical
+  fixed-point spelling (`-.5` is sent as `-0.5`, `1e3` as `1000.0`), which
+  parses back to the same value (tenforty-48hh).
 - **OTS now refuses three inputs it was silently dropping.** tenforty mapped
   `self_employment_income` and `rental_income` on 2018 returns, and
   `state_adjustment` on CA 2018 and 2019 returns, to lines those years' OTS

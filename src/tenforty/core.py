@@ -12,6 +12,7 @@ import warnings
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import replace
+from decimal import Decimal
 from typing import Any, Literal
 
 import dotenv
@@ -224,6 +225,23 @@ def _ots_number_problem(word: str) -> str | None:
     return None
 
 
+def ots_canonical_number(value: numbers.Real | str) -> str:
+    """Spell a finite number the way every OTS number reader accepts it.
+
+    OTS's ``valid_float`` wants an ASCII digit right after any sign, so it
+    rejects ``-.5`` that Python reads. The canonical spelling is fixed-point
+    with a leading digit and no exponent (``-0.5``, ``50000.0``,
+    ``10000000000000000.0``), from the shortest repr, so it parses back to the
+    same double. Any finite double spells in at most ~330 characters, inside
+    the 1,024-byte word buffers.
+    """
+    number = float(str(value).replace(",", ""))
+    text = format(Decimal(repr(number)), "f")
+    if "." not in text:
+        text += ".0"
+    return text
+
+
 def _ots_entry_words(field: OTSField, text: str) -> list[str]:
     separators = (
         _OTS_ENTRY_SEPARATORS
@@ -233,83 +251,94 @@ def _ots_entry_words(field: OTSField, text: str) -> list[str]:
     return [word for word in separators.split(text) if word]
 
 
-def _ots_value_problem(
+def _prepare_ots_value(
     form_id: str, field: OTSField, value: Any, *, from_typed_mapping: bool
-) -> str | None:
-    """Say why OTS cannot read ``value`` on ``field``, or None when it can."""
+) -> tuple[str | None, Any]:
+    """Return ``(problem, value to write)``; ``problem`` is None when OTS can read it."""
     if value is None:
-        return "expected a value, got None"
+        return "expected a value, got None", value
     if not isinstance(value, (str, numbers.Real)):
-        return f"expected a number or string, got {type(value).__name__}"
+        return f"expected a number or string, got {type(value).__name__}", value
     if isinstance(value, numbers.Real) and not _is_finite(value):
-        return f"expected a finite number, got {value!r}"
+        return f"expected a finite number, got {value!r}", value
     text = str(value)
     if len(text.encode("utf-8")) > _OTS_VALUE_MAX_BYTES:
-        return f"value is longer than {_OTS_VALUE_MAX_BYTES} bytes in UTF-8"
+        return f"value is longer than {_OTS_VALUE_MAX_BYTES} bytes in UTF-8", value
     if _OTS_CONTROL_RE.search(text):
-        return f"value contains a control character: {text!r}"
+        return f"value contains a control character: {text!r}", value
     if _OTS_PRAGMA_WORD in text:
-        return f"value contains the OTS pragma {_OTS_PRAGMA_WORD!r}"
+        return f"value contains the OTS pragma {_OTS_PRAGMA_WORD!r}", value
     if field.terminator == OTSFieldTerminator.SEMICOLON:
         if _OTS_ENTRY_BREAKERS & set(text):
-            return f"value may not contain ';', '\"', '{{' or '}}': {text!r}"
+            return f"value may not contain ';', '\"', '{{' or '}}': {text!r}", value
     elif _OTS_LINE_BREAKERS & set(text):
-        return f"value may not contain a line break, '\"', '{{' or '}}': {text!r}"
+        return (
+            f"value may not contain a line break, '\"', '{{' or '}}': {text!r}",
+            value,
+        )
+    if text == str(field.default):
+        return None, value
     kind = field.kind or _OTS_DECLARED_KINDS.get((form_id, field.key))
     if kind == OTSFieldKind.TEXT:
-        return None
+        return None, value
     if kind is None and field.key == "Status":
-        if text in _OTS_STATUS_WORDS or text == str(field.default):
-            return None
-        return f"expected one of {sorted(_OTS_STATUS_WORDS)}, got {text!r}"
-    if kind is None and not from_typed_mapping and text != str(field.default):
-        return (
+        if text in _OTS_STATUS_WORDS:
+            return None, value
+        return f"expected one of {sorted(_OTS_STATUS_WORDS)}, got {text!r}", value
+    if kind is None and not from_typed_mapping:
+        problem = (
             "OTS reads this line with a reader tenforty does not check, so "
             f"evaluate_form accepts only its template default {field.default!r}"
         )
+        return problem, value
     words = _ots_entry_words(field, text)
     if not words:
         if field.terminator == OTSFieldTerminator.SEMICOLON:
-            return None
-        return "expected a value, got an empty entry"
+            return None, value
+        return "expected a value, got an empty entry", value
     if not all(_OTS_ASCII_WORD_RE.fullmatch(word) for word in words):
-        return f"expected printable ASCII separated by spaces, got {text!r}"
+        return f"expected printable ASCII separated by spaces, got {text!r}", value
     several_allowed = field.terminator == OTSFieldTerminator.SEMICOLON and kind in (
         OTSFieldKind.NUMBER,
         None,
     )
     if len(words) != 1 and not several_allowed:
-        return f"expected a single value, got {text!r}"
+        return f"expected a single value, got {text!r}", value
     if kind == OTSFieldKind.NUMBER:
         if isinstance(value, bool):
-            return f"expected a number, got {value!r}"
-        return next(filter(None, map(_ots_number_problem, words)), None)
+            return f"expected a number, got {value!r}", value
+        if problem := next(filter(None, map(_ots_number_problem, words)), None):
+            return problem, value
+        return None, " ".join(map(ots_canonical_number, words))
     if kind == OTSFieldKind.INTEGER:
         if isinstance(value, bool) or not _OTS_INTEGER_RE.fullmatch(words[0]):
-            return f"expected a whole number, got {text!r}"
-        return None
+            return f"expected a whole number, got {text!r}", value
+        return None, value
     if kind == OTSFieldKind.BOOLEAN:
         if isinstance(value, numbers.Real) and value not in (0, 1):
-            return f"expected Y or N, got {text!r}"
+            return f"expected Y or N, got {text!r}", value
         if words[0].lower() not in _OTS_BOOLEAN_WORDS:
-            return f"expected Y or N, got {text!r}"
-        return None
-    return None
+            return f"expected Y or N, got {text!r}", value
+        return None, value
+    return None, value
 
 
-def validate_ots_form_values(
+def prepare_ots_form_values(
     form_values: dict[str, Any],
     form_config: OTSForm,
     *,
     from_typed_mapping: bool = False,
-) -> None:
-    """Check raw OTS form values before they reach the native parser.
+) -> dict[str, Any]:
+    """Check raw OTS form values and return them as they are written for OTS.
 
     OTS reads its input with helpers that call ``exit(1)`` on a value they cannot
     parse, which ends the Python process whatever ``on_error`` says. Each key must
     be a line of the form's template, and each value must be what the OTS program
     reads on that line: a finite ASCII number on an amount line, Y/N (or yes/no,
     true/false, 1/0) on a yes/no line, and a single line of text on a text line.
+    The template default is always accepted. Every number on an amount line is
+    rewritten in ``ots_canonical_number``'s spelling, which every OTS number
+    reader accepts, so the accepted grammar never has to match OTS's own.
 
     A line whose reader ``ots/amalgamate.py`` could not identify (a label the
     program builds at run time, or a special reader such as Schedule D's
@@ -324,6 +353,7 @@ def validate_ots_form_values(
 
     """
     fields = {field.key: field for field in form_config.fields}
+    prepared: dict[str, Any] = {}
     for key, value in form_values.items():
         field = fields.get(key)
         if field is None:
@@ -333,11 +363,12 @@ def validate_ots_form_values(
                 str(key),
                 "not a line of this form's OTS template",
             )
-        problem = _ots_value_problem(
+        problem, prepared[key] = _prepare_ots_value(
             form_config.form_id, field, value, from_typed_mapping=from_typed_mapping
         )
         if problem is not None:
             raise OTSInputError(form_config.year, form_config.form_id, key, problem)
+    return prepared
 
 
 def parse_ots_return(
@@ -488,8 +519,6 @@ def evaluate_form(
     state_form_values: dict[str, Any] | None = None,
     on_error: str = "raise",
     fed_import_map: dict[str, str] | None = None,
-    *,
-    _from_typed_mapping: bool = False,
 ) -> dict[str, dict[str, Any] | None]:
     """Evaluate an OTS form and return parsed values.
 
@@ -505,9 +534,6 @@ def evaluate_form(
         on_error: Error handling policy ("raise", "warn", or "ignore").
         fed_import_map: Maps federal output keys to state input keys,
             e.g. ``{"L11b": "L1"}`` to inject federal AGI into VA L1.
-        _from_typed_mapping: Internal. Set by tenforty's own typed path, whose
-            values for lines with no checked reader come from validated
-            inputs; a raw caller leaves it False.
 
     Returns:
     -------
@@ -517,9 +543,54 @@ def evaluate_form(
     ------
         OTSInputError: Before any native call, when a key is not a line of the
             form's template or OTS cannot read its value (see
-            ``validate_ots_form_values``), whatever ``on_error`` says.
+            ``prepare_ots_form_values``), whatever ``on_error`` says.
 
     """
+    return _evaluate_forms(
+        year,
+        federal_form_id,
+        state_form_id,
+        federal_form_values,
+        state_form_values,
+        on_error,
+        fed_import_map,
+        from_typed_mapping=False,
+    )
+
+
+def _evaluate_form_typed(
+    year: int,
+    federal_form_id: str,
+    state_form_id: str | None,
+    federal_form_values: dict[str, Any],
+    state_form_values: dict[str, Any] | None,
+    on_error: str,
+    fed_import_map: dict[str, str] | None,
+) -> dict[str, dict[str, Any] | None]:
+    """Evaluate the forms tenforty's typed mapping built (see evaluate_form)."""
+    return _evaluate_forms(
+        year,
+        federal_form_id,
+        state_form_id,
+        federal_form_values,
+        state_form_values,
+        on_error,
+        fed_import_map,
+        from_typed_mapping=True,
+    )
+
+
+def _evaluate_forms(
+    year: int,
+    federal_form_id: str,
+    state_form_id: str | None,
+    federal_form_values: dict[str, Any] | None,
+    state_form_values: dict[str, Any] | None,
+    on_error: str,
+    fed_import_map: dict[str, str] | None,
+    *,
+    from_typed_mapping: bool,
+) -> dict[str, dict[str, Any] | None]:
     if federal_form_values is None:
         federal_form_values = {}
 
@@ -530,10 +601,10 @@ def evaluate_form(
     federal_form_config = OTS_FORM_CONFIG.get(key)
     if federal_form_config is None:
         raise ValueError(f"No form available under key: [{key}]")
-    validate_ots_form_values(
+    federal_form_values = prepare_ots_form_values(
         federal_form_values,
         federal_form_config,
-        from_typed_mapping=_from_typed_mapping,
+        from_typed_mapping=from_typed_mapping,
     )
 
     state_form_config = None
@@ -542,10 +613,10 @@ def evaluate_form(
         state_form_config = OTS_FORM_CONFIG.get(key)
         if state_form_config is None:
             raise ValueError(f"No form available under key: [{key}]")
-        validate_ots_form_values(
+        state_form_values = prepare_ots_form_values(
             state_form_values,
             state_form_config,
-            from_typed_mapping=_from_typed_mapping,
+            from_typed_mapping=from_typed_mapping,
         )
 
     form_text = generate_ots_return(federal_form_values, federal_form_config)
@@ -1126,15 +1197,14 @@ def evaluate_natural_input_form(
     fed_import_map = (
         state_natural_config.fed_import_map if state_natural_config else None
     )
-    ots_output = evaluate_form(
+    ots_output = _evaluate_form_typed(
         year.value,
         federal_form_id,
         state_form_id,
         federal_form_values,
         state_form_values,
-        on_error=on_error,
-        fed_import_map=fed_import_map or None,
-        _from_typed_mapping=True,
+        on_error,
+        fed_import_map or None,
     )
 
     # Phase 3: Evaluate subordinate forms that need federal results.

@@ -78,13 +78,13 @@ def test_ots_reads_input_matches_the_maps(case):
 def ots_calls(monkeypatch):
     """Record each OTS engine call, so a refusal can prove none happened."""
     calls = []
-    real = core.evaluate_form
+    real = core.otslib._evaluate_form
 
     def recording(*args, **kwargs):
-        calls.append(args[:3])
+        calls.append(args[:2])
         return real(*args, **kwargs)
 
-    monkeypatch.setattr(core, "evaluate_form", recording)
+    monkeypatch.setattr(core.otslib, "_evaluate_form", recording)
     return calls
 
 

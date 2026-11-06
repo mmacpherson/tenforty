@@ -176,7 +176,10 @@ thousands such as `1,000` are fine), a yes/no line Y/N (yes/no, true/false,
 control characters. A line whose OTS reader tenforty does not identify, such as
 Schedule D's `D6` or its capital-gain entries, accepts only its template
 default; `Status` takes the filing-status names `Single`, `Married/Joint`,
-`Married/Sep`, `Head_of_House` and `Widow(er)`.
+`Married/Sep`, `Head_of_House` and `Widow(er)`. Any line accepts its exact
+template default. An accepted number is written to OTS in a canonical
+fixed-point spelling with a leading digit and no exponent (`-.5` becomes
+`-0.5`), the same value in a form every OTS number reader accepts.
 
 ```python
 from tenforty import OTSInputError
