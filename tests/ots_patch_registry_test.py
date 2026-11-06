@@ -182,6 +182,28 @@ def _p9_import_status_err_uninitialised(year: int, program: str) -> bool:
     return not re.match(r"\s*ret_stat\.err\s*=", source[declared.end() :])
 
 
+_SCH_A_UNINITIALISED = re.compile(
+    r"double\s+SchA_L\s*\[\s*SCH_A_LINES\s*\+\s*1\s*\]\s*;"
+)
+
+
+def _p10_or_sch_a_line_8_never_set(year: int, program: str) -> bool:
+    """Report whether OR-40 sums ``SchA_L[8]`` from an uninitialised array that never sets it."""
+    if program != "OR_40":
+        return False
+    source = _program_source(year, program)
+    reads = re.findall(r"SchA_L\s*\[\s*8\s*\]", source)
+    sets = re.findall(r"&\s*SchA_L\s*\[\s*8\s*\]|SchA_L\s*\[\s*8\s*\]\s*=(?!=)", source)
+    return bool(_SCH_A_UNINITIALISED.search(source) and reads and not sets)
+
+
+def _p11_grablinealloc_unbounded_trim(year: int, program: str) -> bool:
+    if program != "routines":
+        return False
+    body = _function_body(_program_source(year, program), "void GrabLineAlloc(")
+    return bool(re.search(r"while\s*\(\s*twrd\s*\[\s*cpos\s*\]\s*==\s*' '\s*\)", body))
+
+
 SOURCE_WITNESSES: dict[str, Callable[[int, str], bool]] = {
     "OTS-P1": _p1_new_as_identifier,
     "OTS-P2": _p2_void_pointer_to_char,
@@ -192,6 +214,8 @@ SOURCE_WITNESSES: dict[str, Callable[[int, str], bool]] = {
     "OTS-P7": _p7_f6781_c_conversions,
     "OTS-P8": _p8_restrict_keyword,
     "OTS-P9": _p9_import_status_err_uninitialised,
+    "OTS-P10": _p10_or_sch_a_line_8_never_set,
+    "OTS-P11": _p11_grablinealloc_unbounded_trim,
 }
 
 

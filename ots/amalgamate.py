@@ -642,6 +642,89 @@ def patch_f6781_cpp_compat(lines: list[str]) -> tuple[list[str], int]:
     return out, casts
 
 
+def patch_or_40_sch_a_zero_init(lines: list[str]) -> tuple[list[str], int]:
+    """Zero-initialise OR-40's Schedule OR-A array (OTS-P10).
+
+    ``SchA_L`` is a local ``double[SCH_A_LINES + 1]`` with no initialiser.
+    Lines 1, 5-7, 10, 12-14, 16, 18-20 and 22 are read with ``GetLine`` and
+    lines 2-4, 9, 11, 17, 21 and 23 are assigned. Nothing writes
+    ``SchA_L[8]``, yet line 9 is ``SchA_L[5] + SchA_L[6] + SchA_L[7] +
+    SchA_L[8]``, capped at the income and property tax limit. That read is
+    of uninitialised memory, so line 9, and through it the Oregon itemized
+    deduction on OR-40 line 16, is whatever was left on the stack:
+    - 0 on our Linux builds;
+    - a NaN under clang's ``-ftrivial-auto-var-init=pattern``, for which
+      ``SmallerOf(NaN, limit)`` returns the full $10,000 (2024) or $40,000
+      (2025) limit;
+    - on an Intel macOS build, a 2024 Single $420,000 return deducted $10,000
+      instead of the $2,745 standard deduction.
+
+    Zero is the value the form itself gives line 8: Schedule OR-A line 8 is
+    "Reserved" in both releases that have this code (150-101-007, 2024
+    Rev. 06-17-24 and 2025 Rev. 07-29-25, page 1). So on every platform where
+    the slot already read 0, Linux among them, every figure OTS prints is
+    unchanged, and elsewhere the patch replaces an undefined result with
+    that one. Every formula stays as upstream wrote it.
+
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P10 in ``ots/ots_patches.py`` and reported upstream (report 20 in
+    docs/upstream-ots-reports.md).
+
+    Returns the lines and the number of declarations initialised.
+    """
+    declaration = "double SchA_L[SCH_A_LINES + 1];"
+    initialised = 0
+    for ix, line in enumerate(lines):
+        if declaration in line:
+            lines[ix] = line.replace(
+                declaration, "double SchA_L[SCH_A_LINES + 1] = {0};"
+            )
+            initialised += 1
+    return lines, initialised
+
+
+def patch_grablinealloc_trim_bound(lines: list[str]) -> tuple[list[str], int]:
+    r"""Stop ``GrabLineAlloc``'s trailing-space trim at its buffer's start (OTS-P11).
+
+    The 2024 taxsolve_routines trims an imported string with::
+
+        int cpos = strlen(twrd) - 1;
+        while (twrd[cpos] == ' ') { --cpos; }
+        twrd[cpos + 1] = '\0';
+
+    with no lower bound. ``GrabLineString`` appends a space after every word,
+    so an empty field in an imported return (a blank name, say) arrives as
+    ``" "``. The loop then reads ``twrd[-1]``, out of bounds, and if that
+    byte is a space it keeps walking backwards and writes the terminator
+    before the buffer. MemorySanitizer reports it on OTS's own OR-40 2024
+    example.
+
+    The bound changes no output that was ever well defined. Wherever the
+    original stopped inside the buffer, the bounded loop stops at the same
+    index. For an all-space string both stop at ``cpos == -1`` and store the
+    empty string, which is what the original did whenever the byte before
+    ``twrd`` was not a space. The function handles only imported text fields
+    (``p_field_string``); imported amounts go through ``GrabLineValue``, so
+    no figure passes through it.
+
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P11 in ``ots/ots_patches.py`` and reported upstream (report 20 in
+    docs/upstream-ots-reports.md). Only the 2024 release has the loop; the
+    2025 import routines were rewritten without it.
+
+    Returns the lines and the number of loops bounded.
+    """
+    unbounded = "while (twrd[cpos] == ' ') {"
+    bounded = 0
+    for ix, line in enumerate(lines):
+        if unbounded in line:
+            lines[ix] = line.replace(
+                unbounded, "while (cpos >= 0 && twrd[cpos] == ' ') {"
+            )
+            bounded += 1
+    return lines, bounded
+
+
 def apply_registered_patches(year: int, program: str, lines: list[str]) -> list[str]:
     """Apply every active registry patch, requiring each to match as registered.
 

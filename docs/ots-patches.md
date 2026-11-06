@@ -103,6 +103,8 @@ changing the registry; the section below is generated.
 | OTS-P7 | `patch_f6781_cpp_compat` | portability | f6781, 2025 | active |
 | OTS-P8 | removed | portability | taxsolve_routines.c, OpenTaxSolver2025_23.05 | retired |
 | OTS-P9 | removed | memory-safety | taxsolve_routines.c, 2025 | retired |
+| OTS-P10 | `patch_or_40_sch_a_zero_init` | memory-safety | OR_40, 2024-2025 | reported-upstream |
+| OTS-P11 | `patch_grablinealloc_trim_bound` | memory-safety | taxsolve_routines.c, 2024 | reported-upstream |
 
 ### OTS-P1: Rename the C++ reserved word `new` in `add_pdf_markup`.
 
@@ -211,6 +213,32 @@ changing the registry; the section below is generated.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P9]`
 - **Retired:** 2026-11-06. Fixed upstream in OpenTaxSolver2025_23.06. Removing the patch deletes only the duplicate assignment from ots_amalgamation.cpp.
 - **History:** Added in PR #221.
+
+### OTS-P10: Zero-initialise OR-40's `SchA_L`, whose line 8 is summed but never set.
+
+- **Patch function:** `patch_or_40_sch_a_zero_init`
+- **Class:** memory-safety
+- **Scope:** OR_40, 2024-2025
+- **Required matches:** 2024-2025: OR_40 1 (declarations given `= {0}`)
+- **Effect on computed figures:** None where the read was already 0, as on our Linux builds. Schedule OR-A line 9 adds `SchA_L[8]`, which nothing assigns, so line 9 and the Oregon itemized deduction took whatever was on the stack: a 2024 Single $420,000 return deducted $10,000 instead of the $2,745 standard deduction on an Intel macOS build. Line 8 is "Reserved" on the 2024 and 2025 forms, so 0 is the form's own value and every formula is unchanged.
+- **Status:** reported-upstream
+- **Upstream:** docs/upstream-ots-reports.md report 20; draft, not sent.
+- **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P10]`
+- **Behavioral witnesses:** `tests/ots_patch_behavior_test.py::test_or_40_sch_a_line_8_is_platform_independent`
+- **Witness applies first:** OTS-P6
+- **Note:** Built with clang's `-ftrivial-auto-var-init=pattern`, the unpatched program makes the read a NaN and deducts the full line 9 limit; with the patch, pattern and `=zero` builds print the same return. The witness applies OTS-P6 first, because at -O0 the 2024 program otherwise crashes on the empty dependent names before Schedule OR-A.
+
+### OTS-P11: Bound `GrabLineAlloc`'s trailing-space trim at the start of its buffer.
+
+- **Patch function:** `patch_grablinealloc_trim_bound`
+- **Class:** memory-safety
+- **Scope:** taxsolve_routines.c, 2024
+- **Required matches:** 2024: routines 1 (trim loops given `cpos >= 0`)
+- **Effect on computed figures:** None on computed figures: the function copies imported text fields only, and amounts are imported by `GrabLineValue`. Wherever the original loop stayed in the buffer the bounded one stops at the same index; an empty field (`" "`) made it read, and possibly write, before the buffer, which is undefined.
+- **Status:** reported-upstream
+- **Upstream:** docs/upstream-ots-reports.md report 20; draft, not sent.
+- **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P11]`
+- **Note:** 2024 only: the 2025 import routines were rewritten without the loop. No behavioral witness: the stray byte is a stack neighbour, which `-ftrivial-auto-var-init` does not make a space, so only MemorySanitizer shows the read.
 
 <!-- ots-patches:end -->
 
