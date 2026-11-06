@@ -787,8 +787,11 @@ never fired and the gate flaked on two 2025 witnesses:
   ISO $200,000. Derived AMT $19,061.01; OTS $21,119.95.
 
 In both, the OTS excess is exactly 26% of the qualified dividends. The
-signature now keys on OTS's own line 15, computed as AGI less tenforty's
-deduction: a positive amount before the QBI deduction stays positive after it.
+signature now keys on OTS's own line 15: AGI less OTS's line 12 and less
+Schedule 1-A. Line 12 is taken under OTS's own itemizing decision and SALT cap.
+A positive amount before the QBI deduction stays positive after it. Live checks
+pin the classifier against OTS's output (AST-59): a SALT case and a Schedule 1-A
+case, each with a control one dollar above zero.
 The values come from a blind derivation
 (`docs/validation/derivations/ots-amt-zero-taxable-income-2025.md`, cases K2
 and K3). The graph agrees with it, and strict-xfails pin the OTS results.
@@ -884,19 +887,31 @@ at 26%.
     literal-arithmetic figure. It is wrong by $56.86 under the statute reading
     we adopt.
 
-**Scope.** Only an elected itemization reaches this; under Auto, OTS takes the
-larger standard deduction. Our mapping sends nothing to Schedule A here but the
-A18 election.
+**Scope.** It reaches every return on which OTS itemizes:
 
-**Signature.** OTS only, forced Itemized, AGI below zero:
+- forced Itemized; or
+- Auto, where OTS's own Schedule A (its SALT cap and these artifacts included)
+  exceeds the standard deduction.
+
+Whichever way OTS decides, AMTI moves only by the artifacts. That is because
+the legacy aggregate and the taxes are added back on line 2a. Our mapping sends
+nothing to Schedule A here beyond the aggregate, the taxes and the A18
+election.
+
+**Signature.** OTS only, OTS itemizing, AGI below zero:
 
 - 2025: [0, 35% × 82.5% × |AGI|].
 - Other years: [−35% × 7.5% × |AGI|, 0].
 
 The 35% is the 28% rate plus 7% through the exemption phase-out.
 
-**Records.** Strict-xfails for 2025 and 2024; negative controls on graph, on a
-non-negative AGI and on Auto/Standard; golden cases tagged `S_negative_agi`.
+**Records.**
+
+- Strict-xfails for 2025 and 2024.
+- Negative controls on graph, on a non-negative AGI, on Standard, and on Auto
+  where OTS takes the standard deduction.
+- A regression for Auto itemizing (AST-59).
+- Golden cases tagged `S_negative_agi`.
 `tenforty-w4m7` (2024 HoH, ISO, itemized, OTS $31 below TaxCalc) looks like
 the medical half, but it is not folded in. Upstream report 19 is drafted, not
 sent.

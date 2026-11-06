@@ -923,3 +923,88 @@ def test_f19_keeps_the_tie_when_taxcalc_kept_standard_despite_an_iso_spread(back
     assert _f19_deduction_choice_rule(backend, case, reference) == {
         "taxable_income": DeltaRange.exact(-239.0)
     }
+
+
+K1 = dict(
+    year=2025,
+    status="Head_of_House",
+    se=84.0,
+    ltcg=-8_289.0,
+    iso=200_000.0,
+    std_or_item="Itemized",
+)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_f36_covers_auto_when_ots_itemizes(year):
+    """AST-59: Auto itemizes when Schedule A beats the standard deduction."""
+    forced = _case(**(K1 | {"year": year, "itemized": 60_000.0}))
+    auto = forced | {"std_or_item": "Auto"}
+    reference = {"agi": -2_916.0}
+
+    assert _f36_ots_schedule_a_with_negative_agi("ots", auto, reference)
+    assert _f36_ots_schedule_a_with_negative_agi(
+        "ots", auto, reference
+    ) == _f36_ots_schedule_a_with_negative_agi("ots", forced, reference)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_f36_withholds_auto_when_ots_takes_the_standard_deduction(year):
+    """Auto with nothing beating the standard deduction gets no allowance."""
+    auto = _case(**(K1 | {"year": year})) | {"std_or_item": "Auto"}
+
+    assert _f36_ots_schedule_a_with_negative_agi("ots", auto, {"agi": -2_916.0}) == {}
+
+
+def test_ots_auto_itemizing_matches_forced_itemizing_live():
+    """Astra's probe: OTS itemizes under Auto exactly as when forced (AST-59)."""
+    from tenforty import evaluate_return
+
+    from .taxcalc_policy import tenforty_inputs
+
+    forced = _case(
+        **K1, interest=0.0, ord_div=0.0, qual_div=0.0, itemized=60_000.0, w2=0.0
+    )
+    auto = forced | {"std_or_item": "Auto"}
+    a = evaluate_return(backend="ots", **tenforty_inputs(auto))
+    f = evaluate_return(backend="ots", **tenforty_inputs(forced))
+
+    assert a.model_dump(exclude={"assumptions"}) == f.model_dump(
+        exclude={"assumptions"}
+    )
+
+
+# OTS's own line 15 for the zero-taxable-income classifier (F27), checked
+# against OTS's output: Astra's SALT case and a Schedule 1-A case, each with a
+# control one dollar above zero.
+ZERO_TI_CASES = [
+    pytest.param(dict(salt=40_000.0), True, id="salt-zero"),
+    pytest.param(dict(salt=29_999.0), False, id="salt-one-above"),
+    pytest.param(dict(tips=14_250.0), True, id="tips-zero"),
+    pytest.param(dict(tips=14_249.0), False, id="tips-one-above"),
+]
+
+
+@pytest.mark.parametrize(("update", "zero"), ZERO_TI_CASES)
+def test_ots_zero_taxable_income_classifier_matches_ots(update, zero):
+    """2025 Single, wages 25,000 (tips inside them), dividends 5,000, ISO 200,000."""
+    from tenforty import evaluate_return
+
+    from .taxcalc_policy import _ots_taxable_income_is_zero, tenforty_inputs
+
+    case = _case(
+        year=2025,
+        status="Single",
+        w2=25_000.0,
+        ord_div=5_000.0,
+        qual_div=5_000.0,
+        iso=200_000.0,
+        itemized=0.0,
+        std_or_item="Auto",
+        **update,
+    )
+    ots = evaluate_return(backend="ots", **tenforty_inputs(case))
+
+    assert (ots.federal_taxable_income == 0.0) is zero
+    reference = {"agi": ots.federal_adjusted_gross_income}
+    assert _ots_taxable_income_is_zero(case, reference) is zero

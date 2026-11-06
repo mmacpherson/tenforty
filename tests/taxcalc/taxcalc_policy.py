@@ -416,32 +416,107 @@ def _f24_ots_2024_mfs_amt_constants(
     return _same_delta({"amt", "income_tax", "total_tax"}, delta)
 
 
-def _tenforty_deduction(case: dict) -> float | None:
-    """Form 1040 line 12 as tenforty chooses it: the election, else the larger."""
+def _ots_salt_cap(case: dict, agi: float) -> float:
+    """Schedule A line 5e's cap as OTS applies it (2024 and 2025 sources).
+
+    2025 enters the SALT worksheet only when AGI exceeds $500,000 and the taxes
+    exceed $10,000, for every status (F31); otherwise the flat $40,000
+    ($20,000 MFS). 2024 is the flat $10,000 ($5,000 MFS).
+    """
+    status = case.get("status")
+    salt = max(0.0, case.get("salt", 0.0))
+    if case.get("year") != 2025:
+        return 5_000.0 if status == "Married/Sep" else 10_000.0
+    if agi > 500_000.0 and salt > 10_000.0:
+        limit = max(10_000.0, 40_000.0 - 0.30 * (agi - 500_000.0))
+        return limit / 2.0 if status == "Married/Sep" else limit
+    return 20_000.0 if status == "Married/Sep" else 40_000.0
+
+
+def _ots_schedule_a(case: dict, agi: float) -> float:
+    """Schedule A line 17 as OTS computes it for a case's inputs.
+
+    The legacy aggregate rides on line 6 and the taxes on line 5a under OTS's
+    cap. With a negative AGI OTS also prices the medical floor (line 4 becomes
+    7.5% of |AGI|) and, in 2025, the 60%/30% charity limits (-90% of |AGI|)
+    off it: F36.
+    """
+    salt = max(0.0, case.get("salt", 0.0))
+    total = max(0.0, case.get("itemized", 0.0)) + min(salt, _ots_salt_cap(case, agi))
+    if agi < 0.0:
+        total += 0.075 * -agi
+        if case.get("year") == 2025:
+            total -= 0.90 * -agi
+    return total
+
+
+def _ots_itemizes(case: dict, agi: float) -> bool:
+    """Whether OTS's Form 1040 uses Schedule A: forced, or larger than standard.
+
+    OTS itemizes when the standard deduction is strictly less than its line 17;
+    forced Standard sends it no Schedule A.
+    """
+    election = case.get("std_or_item", "Auto")
+    if election == "Itemized":
+        return True
+    if election == "Standard":
+        return False
+    std = standard_deduction(case)
+    return std is not None and std < _ots_schedule_a(case, agi)
+
+
+def _ots_schedule_1a_2025(case: dict, agi: float) -> float:
+    """Schedule 1-A line 38 as OTS 2025 computes it (modified AGI = AGI).
+
+    Tips (up to $25,000) and overtime (up to $12,500, $25,000 MFJ) lose $100
+    per whole $1,000 over $150,000 ($300,000 MFJ); car loan interest (up to
+    $10,000) loses $300 per whole $1,000 over $100,000 ($200,000 MFJ), OTS's
+    rule (F32); the senior deduction is $6,000 each less 6% over $75,000
+    ($150,000 MFJ). OTS skips Parts II-V for MFS (F33).
+    """
+    status = case.get("status")
+    if case.get("year") != 2025 or status == "Married/Sep":
+        return 0.0
+    joint = status == "Married/Joint"
+    steps = int(max(0.0, agi - (300_000.0 if joint else 150_000.0)) / 1_000.0)
+    tips = max(0.0, min(case.get("tips", 0.0), 25_000.0) - 100.0 * steps)
+    overtime = max(
+        0.0,
+        min(case.get("overtime", 0.0), 25_000.0 if joint else 12_500.0) - 100.0 * steps,
+    )
+    car_loan = _car_loan_deduction_2025(
+        status, agi, case.get("car_loan", 0.0), step=300.0, rounding=math.floor
+    )
+    per_person = max(
+        0.0, 6_000.0 - 0.06 * max(0.0, agi - (150_000.0 if joint else 75_000.0))
+    )
+    seniors = bool(case.get("age65")) + (bool(case.get("spouse65")) and joint)
+    return tips + overtime + car_loan + per_person * seniors
+
+
+def _ots_line_12(case: dict, agi: float) -> float | None:
+    """Form 1040 line 12 as OTS takes it, under OTS's own itemizing decision."""
     std = standard_deduction(case)
     if std is None:
         return None
-    itemized = max(0.0, case.get("itemized", 0.0))
-    election = case.get("std_or_item", "Auto")
-    if election == "Standard":
-        return std
-    if election == "Itemized":
-        return itemized
-    return max(std, itemized)
+    return _ots_schedule_a(case, agi) if _ots_itemizes(case, agi) else std
 
 
 def _ots_taxable_income_is_zero(case: dict, reference: dict[str, float]) -> bool:
     """Whether OTS's own Form 1040 line 15 is zero (tenforty-k3ns).
 
-    AGI agrees across engines; tenforty's deduction is its election. A positive
-    amount before the QBI deduction stays positive after it (the deduction is
-    at most 20% of it), so line 15 is zero exactly when AGI less the deduction
-    is not positive. This is OTS's condition, not TaxCalc's: when TaxCalc
-    elects to itemize (F28) its taxable income can be positive while OTS's is
-    zero.
+    AGI agrees across engines. Line 15 is AGI less line 12 (OTS's deduction,
+    with its SALT cap and its itemizing decision), the QBI deduction and
+    Schedule 1-A. The QBI deduction is at most 20% of taxable income before
+    it, so line 15 is zero exactly when AGI less line 12 and Schedule 1-A is
+    not positive. This is OTS's condition, not TaxCalc's: when TaxCalc elects
+    to itemize (F28) its taxable income can be positive while OTS's is zero.
     """
-    deduction = _tenforty_deduction(case)
-    return deduction is not None and reference["agi"] - deduction <= 0.0
+    agi = reference["agi"]
+    line_12 = _ots_line_12(case, agi)
+    return (
+        line_12 is not None and agi - line_12 - _ots_schedule_1a_2025(case, agi) <= 0.0
+    )
 
 
 def _f27_ots_skips_amt_preferential_worksheet(
@@ -480,8 +555,11 @@ def _f36_ots_schedule_a_with_negative_agi(
     with no contributions. Line 15 stays zero, so only Form 6251 line 1b moves:
     by -7.5% of |AGI| in 2024 and by +82.5% of |AGI| in 2025, at most 35% of
     which (28%, plus 7% through the exemption phase-out) reaches the AMT.
-    Only an elected (forced) itemization reaches it: under Auto OTS takes the
-    larger standard deduction. Upstream report 19 (docs/upstream-ots-reports.md).
+    It reaches every return on which OTS itemizes: forced Itemized, or Auto
+    where OTS's own Schedule A (its SALT cap and these artifacts included)
+    exceeds the standard deduction. Whichever way OTS decides, AMTI moves only
+    by the artifacts, because the legacy aggregate and the taxes are added back
+    on line 2a. Upstream report 19 (docs/upstream-ots-reports.md).
 
     The medical half rests on the statute reading of Schedule A line 4 (IRC
     213(a) allows only expenses paid in excess of the floor, so no expenses,
@@ -491,9 +569,9 @@ def _f36_ots_schedule_a_with_negative_agi(
     """
     if (
         backend != "ots"
-        or case.get("std_or_item") != "Itemized"
         or reference is None
         or reference["agi"] >= 0.0
+        or not _ots_itemizes(case, reference["agi"])
     ):
         return {}
     magnitude = -reference["agi"]
