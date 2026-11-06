@@ -51,6 +51,7 @@ from .taxcalc_policy import (  # noqa: E402
     taxcalc_obbba_fields,
     taxcalc_schedule_a_fields,
     tolerance,
+    zero_taxable_income_drift,
 )
 
 MARS = {
@@ -365,6 +366,7 @@ def _assert_components_match_taxcalc(backend, cases):
     for case, exp, exp_alt in zip(cases, expected, expected_alt, strict=True):
         ours = tenforty_components(case, backend)
         failures.extend(election_violations(case, backend, ours))
+        failures.extend(zero_taxable_income_drift(backend, case, exp, ours))
         deltas = modeled_deltas(backend, case, exp)
         for quantity in QUANTITIES:
             lo = min(exp[quantity], exp_alt[quantity])

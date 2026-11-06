@@ -792,6 +792,27 @@ Schedule 1-A. Line 12 is taken under OTS's own itemizing decision and SALT cap.
 A positive amount before the QBI deduction stays positive after it. Live checks
 pin the classifier against OTS's output (AST-59): a SALT case and a Schedule 1-A
 case, each with a control one dollar above zero.
+
+**The mirror follows OTS's own code.** It reproduces:
+
+- **SALT.** OTS's 2025 SALT worksheet:
+  - The trigger is AGI above $500,000 with taxes above $10,000, or above $5,000
+    for MFS.
+  - Line 6 subtracts $500,000, or $250,000 for MFS.
+  - MFS then halves line 9.
+  - Outside the worksheet the flat limit applies: $40,000 ($20,000 MFS) in
+    2025, and $10,000 ($5,000 MFS) in 2024.
+- **Schedule 1-A**, as OTS 2025 computes it.
+- **The 2024/2025 standard deduction**, with its age boxes.
+- **The itemizing test**, which is strict.
+- **Line 14:** lines 12, 13a and 13b.
+
+Live 2025 MFS witnesses above $500,000 of AGI (AST-60) pin the SALT worksheet.
+
+**Drift guard.** The differential also checks every firing of F27 or F36
+against OTS's own taxable income and fails, naming the finding, if OTS's line
+15 is positive. OTS output checks only the classifier's domain there; it never
+sizes a band.
 The values come from a blind derivation
 (`docs/validation/derivations/ots-amt-zero-taxable-income-2025.md`, cases K2
 and K3). The graph agrees with it, and strict-xfails pin the OTS results.

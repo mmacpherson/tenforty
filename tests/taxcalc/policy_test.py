@@ -1033,3 +1033,70 @@ def test_f27_band_counts_long_term_gains():
     assert model["amt"] == DeltaRange(0.0, 0.28 * 24_983.0)
     above = {"agi": 31_501.0, "taxable_income": 1.0}
     assert _f27_ots_skips_amt_preferential_worksheet("ots", case, above) == {}
+
+
+# AST-60 live witnesses: 2025 MFS above $500,000 of AGI, where OTS's SALT
+# worksheet subtracts $250,000 and halves, so its cap is $5,000. Both have a
+# positive OTS line 15, so neither may be classified as zero.
+MFS_SALT_WITNESSES = [
+    pytest.param(
+        dict(itemized=485_000.0, salt=40_000.0, std_or_item="Itemized"),
+        id="forced-itemized",
+    ),
+    pytest.param(dict(itemized=494_000.0, salt=7_500.0, std_or_item="Auto"), id="auto"),
+    pytest.param(
+        dict(itemized=494_000.0, salt=7_500.0, std_or_item="Itemized"),
+        id="itemized",
+    ),
+]
+
+
+@pytest.mark.parametrize("update", MFS_SALT_WITNESSES)
+def test_ots_mfs_salt_worksheet_keeps_line_15_positive(update):
+    """The classifier and F27 follow OTS's MFS worksheet, not a $500,000 base."""
+    from tenforty import evaluate_return
+
+    from .taxcalc_policy import _ots_taxable_income_is_zero, tenforty_inputs
+
+    case = _case(
+        year=2025,
+        status="Married/Sep",
+        w2=500_000.0,
+        ord_div=1_000.0,
+        qual_div=1_000.0,
+        iso=200_000.0,
+        **update,
+    )
+    ots = evaluate_return(backend="ots", **tenforty_inputs(case))
+    reference = {"agi": ots.federal_adjusted_gross_income, "taxable_income": 0.0}
+
+    assert ots.federal_taxable_income > 0.0
+    assert not _ots_taxable_income_is_zero(case, reference)
+    assert _f27_ots_skips_amt_preferential_worksheet("ots", case, reference) == {}
+
+
+def test_drift_guard_names_the_classifier_on_a_positive_line_15():
+    """A zero-TI signature firing on a positive OTS line 15 fails loudly."""
+    from .taxcalc_policy import zero_taxable_income_drift
+
+    case = _case(
+        year=2024,
+        status="Head_of_House",
+        ord_div=17_322.0,
+        qual_div=17_322.0,
+        iso=200_000.0,
+        itemized=0.0,
+    )
+    reference = {"agi": 17_322.0, "taxable_income": 0.0}
+
+    assert (
+        zero_taxable_income_drift("ots", case, reference, {"taxable_income": 0.0}) == []
+    )
+    messages = zero_taxable_income_drift(
+        "ots", case, reference, {"taxable_income": 5.0}
+    )
+    assert len(messages) == 1 and "F27" in messages[0] and "drift" in messages[0]
+    assert (
+        zero_taxable_income_drift("graph", case, reference, {"taxable_income": 5.0})
+        == []
+    )

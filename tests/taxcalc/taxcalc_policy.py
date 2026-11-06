@@ -416,21 +416,29 @@ def _f24_ots_2024_mfs_amt_constants(
     return _same_delta({"amt", "income_tax", "total_tax"}, delta)
 
 
-def _ots_salt_cap(case: dict, agi: float) -> float:
-    """Schedule A line 5e's cap as OTS applies it (2024 and 2025 sources).
+def _ots_salt_deduction(case: dict, agi: float) -> float:
+    """Schedule A line 5e as OTS computes it (localtax[5]; 2024 and 2025 sources).
 
-    2025 enters the SALT worksheet only when AGI exceeds $500,000 and the taxes
-    exceed $10,000, for every status (F31); otherwise the flat $40,000
-    ($20,000 MFS). 2024 is the flat $10,000 ($5,000 MFS).
+    2024: the flat $10,000 ($5,000 MFS) limit. 2025: the flat $40,000 ($20,000
+    MFS) limit, unless AGI exceeds $500,000 and the taxes exceed $10,000 (or,
+    for MFS, $5,000). Then OTS's State and Local Tax Deduction Worksheet
+    applies: line 9 is $40,000 less 30% of AGI over $500,000 ($250,000 MFS),
+    not below $10,000, and line 10 is the smaller of the taxes and line 9 (half
+    of line 9 for MFS). OTS uses the $500,000 trigger for MFS as well (F31).
     """
     status = case.get("status")
+    mfs = status == "Married/Sep"
     salt = max(0.0, case.get("salt", 0.0))
     if case.get("year") != 2025:
-        return 5_000.0 if status == "Married/Sep" else 10_000.0
-    if agi > 500_000.0 and salt > 10_000.0:
-        limit = max(10_000.0, 40_000.0 - 0.30 * (agi - 500_000.0))
-        return limit / 2.0 if status == "Married/Sep" else limit
-    return 20_000.0 if status == "Married/Sep" else 40_000.0
+        return min(salt, 5_000.0 if mfs else 10_000.0)
+    taxes = min(salt, 20_000.0 if mfs else 40_000.0)
+    if agi > 500_000.0 and (salt > 10_000.0 or (mfs and salt > 5_000.0)):
+        base = 250_000.0 if mfs else 500_000.0
+        line_9 = (
+            max(40_000.0 - 0.30 * (agi - base), 10_000.0) if agi > base else 40_000.0
+        )
+        taxes = min(line_9 / 2.0 if mfs else line_9, salt)
+    return taxes
 
 
 def _ots_schedule_a(case: dict, agi: float) -> float:
@@ -441,8 +449,7 @@ def _ots_schedule_a(case: dict, agi: float) -> float:
     7.5% of |AGI|) and, in 2025, the 60%/30% charity limits (-90% of |AGI|)
     off it: F36.
     """
-    salt = max(0.0, case.get("salt", 0.0))
-    total = max(0.0, case.get("itemized", 0.0)) + min(salt, _ots_salt_cap(case, agi))
+    total = max(0.0, case.get("itemized", 0.0)) + _ots_salt_deduction(case, agi)
     if agi < 0.0:
         total += 0.075 * -agi
         if case.get("year") == 2025:
@@ -924,6 +931,33 @@ def _f34_ots_amt_omits_senior_add_back(
         return {}
     drop = min(_TOP_AMT_MARGINAL_RATE * senior, reference["amt"])
     return _same_delta({"amt", "income_tax", "total_tax"}, DeltaRange(-drop, 0.0))
+
+
+# Signatures whose scope is a zero Form 1040 line 15 on OTS, computed by the
+# OTS mirror above. A mirror error would silently widen their allowance, so the
+# differential checks each firing against OTS's own taxable income.
+_ZERO_TAXABLE_INCOME_SIGNATURES = {
+    "F27": _f27_ots_skips_amt_preferential_worksheet,
+    "F36": _f36_ots_schedule_a_with_negative_agi,
+}
+
+
+def zero_taxable_income_drift(
+    backend: str, case: dict, reference: dict[str, float], ours: dict[str, float]
+) -> list[str]:
+    """Report a zero-taxable-income signature that fired on a positive OTS line 15.
+
+    OTS's output only checks the classifier's domain here; it never sizes a
+    band. Any message is a mirror defect to fix, not a tolerance to widen.
+    """
+    if backend != "ots" or ours["taxable_income"] == 0.0:
+        return []
+    return [
+        f"{case}: {finding_id} classified OTS line 15 as zero, but OTS reports "
+        f"taxable income {ours['taxable_income']:,.2f} (OTS mirror drift)"
+        for finding_id, signature in _ZERO_TAXABLE_INCOME_SIGNATURES.items()
+        if signature(backend, case, reference)
+    ]
 
 
 SIGNATURES = [
