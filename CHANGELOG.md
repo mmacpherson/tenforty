@@ -8,10 +8,13 @@
   `evaluate_form` now checks every federal and state value before any native
   call and raises `OTSInputError` (a `ValueError`) naming the year, form and
   field: a key must be a line of the form's OTS template, an amount line takes
-  finite numbers, a yes/no line takes Y/N (yes/no, true/false, 1/0), and a text
-  line one line of text. Each template line now records the kind its OTS
-  program reads, extracted from the vendored C source by `ots/amalgamate.py`
-  (tenforty-48hh).
+  finite ASCII numbers, a yes/no line takes Y/N (yes/no, true/false, 1/0), and
+  a text line one line of text of at most 500 UTF-8 bytes. Each template line
+  now records the kind its OTS program reads, extracted from the vendored C
+  source by `ots/amalgamate.py`. A line whose reader is not identified (such as
+  Schedule D's `D6` and capital-gain entries) fails closed: `evaluate_form`
+  accepts only its template default there, except `Status`, which takes
+  tenforty's filing-status names (tenforty-48hh).
 - **OTS now refuses three inputs it was silently dropping.** tenforty mapped
   `self_employment_income` and `rental_income` on 2018 returns, and
   `state_adjustment` on CA 2018 and 2019 returns, to lines those years' OTS

@@ -170,8 +170,13 @@ A `ValueError` raised by the raw `tenforty.core.evaluate_form` before any native
 call, when a federal or state form value is one OTS cannot read. OTS's input
 parser calls `exit(1)` on such a value, which would end the Python process
 whatever `on_error` says, so the value is checked first: the key must be a line
-of the form's OTS template, an amount line takes finite numbers, a yes/no line
-Y/N (yes/no, true/false, 1/0), and a text line one line of text.
+of the form's OTS template, an amount line takes finite ASCII numbers (grouped
+thousands such as `1,000` are fine), a yes/no line Y/N (yes/no, true/false,
+1/0), and a text line one line of text of at most 500 UTF-8 bytes, with no
+control characters. A line whose OTS reader tenforty does not identify, such as
+Schedule D's `D6` or its capital-gain entries, accepts only its template
+default; `Status` takes the filing-status names `Single`, `Married/Joint`,
+`Married/Sep`, `Head_of_House` and `Widow(er)`.
 
 ```python
 from tenforty import OTSInputError
