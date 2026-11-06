@@ -331,8 +331,10 @@ jobs:
         - {os: ubuntu-24.04-arm, build: cp313-*}
         - {os: ubuntu-24.04-arm, build: cp314-*}
         - {os: ubuntu-24.04-arm, build: cp315-*}
-        - {os: macos-latest, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*}
-        - {os: macos-15-intel, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*}
+        # rustc's minimum macOS target is 10.12 on x86_64 and 11.0 on arm64;
+        # cibuildwheel defaults x86_64 to 10.9, which delocate then rejects.
+        - {os: macos-latest, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*, macos_target: '11.0'}
+        - {os: macos-15-intel, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*, macos_target: '10.12'}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -348,6 +350,7 @@ jobs:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_BEFORE_BUILD: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && pip install setuptools-rust>=1.7
         CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
+        CIBW_ENVIRONMENT_MACOS: PATH="$HOME/.cargo/bin:$PATH" MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_target }}
         # Every shipped wheel must load and evaluate both backends.
         CIBW_TEST_COMMAND: python {project}/scripts/smoke_installed.py
 
