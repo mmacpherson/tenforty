@@ -233,6 +233,12 @@ federal program, from `"S1A_20", sched1A_L[20]` to `"S1A_29", sched1A_L[29]`.
 
 - It was neither portability nor memory safety, so it could not be
   registered, and it was removed on 2026-11-06.
-- It changed no figure tenforty returns: nothing in `src/` reads the `S1A_20`
-  or `S1A_29` output lines.
+- Removing it changes one raw OTS diagnostic output key. The 2025 federal
+  program's raw printed output, and so the raw key dictionary `evaluate_form`
+  returns, no longer has an `S1A_29` key. Where it was, upstream prints
+  `sched1A_L[20]` a second time under `S1A_20`. So the change is not neutral
+  for raw OTS output.
+- No computed tax amount or mapped tax result changes. `sched1A_L[29]` and
+  its use on line 30 are untouched, and no mapped tax input or output in
+  `src/` reads the `S1A_20` or `S1A_29` key.
 - The upstream slip is still in report 12 of `docs/upstream-ots-reports.md`.

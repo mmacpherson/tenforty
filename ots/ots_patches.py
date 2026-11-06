@@ -1,11 +1,18 @@
 """Registry of every change ``amalgamate.py`` makes to vendored OpenTaxSolver.
 
 We vendor OpenTaxSolver; we do not fork it. The only changes allowed to its
-source are portability (making it compile and run as an in-process C++
-library) and memory safety (not reading or writing out of bounds or
-uninitialised memory), and only when the change alters no figure that OTS
-computes on a platform where the original is well defined. See ``AGENTS.md``
-and ``docs/ots-patches.md``.
+source are portability and memory safety, and only when the change alters no
+figure that OTS computes on a platform where the original is well defined:
+
+- Portability covers exactly two things: (i) making the source compile, and
+  (ii) the narrow executable-to-library control-flow adaptation, where an
+  entry point returns an error instead of terminating the host process.
+  Nothing else counts; state resets are not portability.
+- Memory safety means not reading or writing out of bounds or uninitialised
+  memory.
+
+OTS-P4 is the one entry outside both classes, tolerated only until
+tenforty-0qmf removes it. See ``AGENTS.md`` and ``docs/ots-patches.md``.
 
 Each patch has one entry here. The entry says what the patch is for, where it
 applies, how many times it must match in each program and year, and which
@@ -13,7 +20,7 @@ tests witness the defect in the unpatched upstream source. ``amalgamate.py``
 applies only active entries, in registry order, and fails if a patch matches
 other than the registry expects. ``tests/ots_patch_registry_test.py`` keeps
 the registry, the patch functions and the tracked tarballs in agreement, and
-renders ``docs/ots-patches.md``.
+checks that ``docs/ots-patches.md`` shows the registry this module renders.
 
 This module is data. It imports nothing from ``amalgamate.py``.
 """

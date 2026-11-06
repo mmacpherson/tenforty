@@ -531,7 +531,8 @@ Two things here look different from the 2025 Schedule 1-A Part IV as we read it:
 The last line is a separate cosmetic slip: the line-29 amount is printed under
 the `S1A_20` label. tenforty used to relabel that output line locally; it no
 longer does (2026-11-06), because a relabel is neither portability nor memory
-safety (see `docs/ots-patches.md`). No figure tenforty returns reads it.
+safety (see `docs/ots-patches.md`). That changes the raw OTS output key back to
+`S1A_20`; no computed tax amount or mapped tax result reads it.
 
 Not patched locally. Recorded as strict-xfails (`tests/obbba_2025_test.py`,
 cases C-1 and C-2).
