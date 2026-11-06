@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## [2025.13] - 2026-11-06
 ### Changed (default backend)
 - **The default backend is now `"auto"`**, in `evaluate_return`,
   `evaluate_returns` and `tenforty.backends.get_backend`. A call that does not
