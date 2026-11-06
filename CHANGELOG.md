@@ -1,5 +1,34 @@
 ## [Unreleased]
 ### Fixed (OTS backend)
+- **A bad raw value passed to `tenforty.core.evaluate_form` no longer kills the
+  Python interpreter.** OTS parses its input file with helpers that call
+  `exit(1)` on a value they cannot read, outside the `main()` that tenforty
+  patches to return, so `evaluate_form(2024, federal_form_values={"L1a":
+  "not-a-number"})` ended the process under every `on_error` policy.
+  `evaluate_form` now checks every federal and state value before any native
+  call and raises `OTSInputError` (a `ValueError`) naming the year, form and
+  field: a key must be a line of the form's OTS template, an amount line takes
+  finite ASCII numbers, a yes/no line takes Y/N (yes/no, true/false, 1/0, any
+  case, written to OTS as `Y` or `N`), and
+  a text line one line of text of at most 500 UTF-8 bytes. Each template line
+  now records the kind its OTS program reads, extracted from the vendored C
+  source by `ots/amalgamate.py`. A line whose reader is not identified (such as
+  Schedule D's `D6` and capital-gain entries) fails closed: `evaluate_form`
+  accepts only its template default there, except `Status`, which takes
+  tenforty's filing-status names. A line's exact template default is always
+  accepted. Numbers on amount lines are written to OTS in one canonical
+  fixed-point spelling (`-.5` is sent as `-0.5`, `1e3` as `1000.0`), which
+  parses back to the same value (tenforty-48hh).
+- **OTS now refuses three inputs it was silently dropping.** tenforty mapped
+  `self_employment_income` and `rental_income` on 2018 returns, and
+  `state_adjustment` on CA 2018 and 2019 returns, to lines those years' OTS
+  templates do not have, so the values never reached OTS: a 2018 return with
+  $60,000 wages reported the same AGI with or without $50,000 of
+  self-employment or rental income. A nonzero value there now raises
+  `UnsupportedInputError` naming the input, state and year, under every
+  `on_error` policy and from the whole-batch preflight, on `backend="ots"` and
+  `backend="auto"` alike. Zero, explicit or omitted, is unchanged. The
+  mappings themselves are tracked as tenforty-s2gx and tenforty-8tlh.
 - **OTS 2024 and 2025 Oregon no longer read uninitialised memory into
   Schedule OR-A line 9.** OTS sums line 8 into line 9, but nothing ever sets
   line 8, so the Oregon itemized deduction depended on the stack. On Linux

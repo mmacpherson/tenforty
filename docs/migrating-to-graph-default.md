@@ -17,8 +17,10 @@
   `backend="ots"` is a rollback of the computation engine, not of every earlier
   contract: the deduction election (`standard_or_itemized="Auto"`), the frame
   schema and the error behavior changed for both backends, and OTS now refuses
-  a nonzero `dependent_exemptions` it used to ignore, and a nonzero
-  `incentive_stock_option_gains` on 2018 and 2019 returns (see
+  a nonzero `dependent_exemptions` it used to ignore, a nonzero
+  `incentive_stock_option_gains` on 2018 and 2019 returns, a nonzero
+  `self_employment_income` or `rental_income` on 2018 returns, and a nonzero
+  `state_adjustment` on CA 2018 and 2019 returns (see
   [Inputs refused](#inputs-refused-where-they-do-not-apply)).
 - **What you should do:**
   1. Run your workload on the default (`"auto"`) and compare it with
@@ -72,8 +74,9 @@ dropping it. On the returns auto sends to graph that matters for these inputs:
 | Input | OTS today | Auto (graph-routed) |
 |---|---|---|
 | `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused: no state in auto's graph scope maps it. Only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV, none of which is in auto scope |
-| `state_adjustment` | Mapped only for CA (see below); silently ignored elsewhere | Refused: no state in auto's graph scope maps it (graph maps it only for AL and CA, both outside auto scope) |
+| `state_adjustment` | Mapped only for CA, and refused on CA 2018 and 2019 (see below); silently ignored elsewhere | Refused: no state in auto's graph scope maps it (graph maps it only for AL and CA, both outside auto scope) |
 | `incentive_stock_option_gains` | 2018 and 2019: refused (those programs never use it); 2020–2025: used | Used |
+| `self_employment_income`, `rental_income` | 2018: refused (mapped to lines the 2018 template lacks); 2019–2025: used | Used |
 | `schedule_1_income`, `itemized_deductions`, `state_and_local_taxes`, and a nonzero `federal_itemized` regular-tax amount | Used | Used, except refused for MS, where the aggregates cannot identify a Mississippi amount ([State facts](state-facts.md)) |
 
 No OTS-covered return that auto sends to graph uses `dependent_exemptions` or
@@ -98,6 +101,14 @@ years' federal programs parse that line and never store it, so the ISO
 adjustment was dropped and the AMT computed without it. A nonzero value there
 now raises `UnsupportedInputError`; no backend computes those years with the
 adjustment. 2020 onward read the line and are unchanged.
+
+It also covers three inputs tenforty mapped to lines a year's OTS template does
+not have, so they never reached OTS: `self_employment_income` and
+`rental_income` on 2018 returns (a 2018 return reported the same AGI with or
+without them), and `state_adjustment` on CA 2018 and 2019 returns. A nonzero
+value there now raises `UnsupportedInputError`; no other backend computes those
+years. The mappings are being corrected (tenforty-s2gx, tenforty-8tlh). Zero is
+unchanged.
 
 ### Deduction choice
 
