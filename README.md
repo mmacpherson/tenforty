@@ -104,9 +104,11 @@ it:
   states stay out for a named reason: an open defect, missing evidence, or a
   decision. [Graph state scope](./docs/error-handling.md#graph-state-scope-under-auto)
   has the reasons. MD, ME and NC wait on the itemized-deduction contract
-  (`tenforty-nuc6`). Ohio is out by decision: its graph Married/Joint return
-  requires an explicit [state fact](./docs/state-facts.md) with no default, so
-  admitting it would make the default raise for those callers.
+  (`tenforty-nuc6`). Ohio stays on OTS by decision: graph Ohio Married/Joint
+  requires the joint-credit [state fact](./docs/state-facts.md), which has no
+  default, and since OTS already computes Ohio, routing it to graph would make
+  calls that work today raise. Mississippi, which OTS doesn't cover, requires
+  its facts instead of being unavailable.
 - **Mississippi needs facts.** MS is in graph scope, conditional on
   [state facts](./docs/state-facts.md) with no default. A Married/Joint return
   needs both spouses' actual Mississippi AGIs,
