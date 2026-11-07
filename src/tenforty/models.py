@@ -607,7 +607,9 @@ class TaxReturnInput(BaseModel):
             "enters it with long_term_capital_gains on PA-40 line 5, taking "
             "the household federal amount as the PA amount: PA basis "
             "differences are not modeled, and on a joint return PA's rule that "
-            "one spouse's loss cannot offset the other's gain is not applied."
+            "one spouse's loss cannot offset the other's gain is not applied; "
+            "such a return reports the assumption "
+            "pa.pa_40.joint_class_household_totals."
         ),
     )
     long_term_capital_gains: float = Field(
@@ -625,7 +627,8 @@ class TaxReturnInput(BaseModel):
             "line 31), which also drives Schedule SE. OTS PA enters it on PA-40 "
             "line 4 unchanged: PA Schedule C adjustments to the federal figure "
             "are not modeled, and on a joint return one spouse's business loss "
-            "is netted against the other's profit, which PA does not allow."
+            "is netted against the other's profit, which PA does not allow "
+            "(reported as pa.pa_40.joint_class_household_totals)."
         ),
     )
     qbi_w2_wages: float = Field(default=0.0, ge=0.0)

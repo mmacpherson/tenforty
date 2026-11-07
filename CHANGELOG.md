@@ -16,6 +16,12 @@
     return where one spouse has a business or gain loss and the other a profit,
     OTS nets them, which PA does not allow (each spouse's loss is ignored
     against the other's income).
+  - Such a joint return now reports that reading in `result.assumptions` as
+    `pa.pa_40.joint_class_household_totals`: on OTS, for PA Married/Joint
+    2023-2025 returns with a nonzero `self_employment_income`,
+    `short_term_capital_gains` or `long_term_capital_gains`. It is not refused,
+    because household totals cannot show the spouses' split. Per-spouse PA
+    class inputs are tenforty-s48h.75.
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)

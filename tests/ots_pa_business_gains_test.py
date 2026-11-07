@@ -19,11 +19,15 @@ joint return every business and gain item belonging to one spouse. The map
 covers exactly that; the joint-return rule that one spouse's class loss
 cannot offset the other's income needs per-spouse inputs it does not have.
 
-Line 12 is 3.07% of line 11, rounded to whole dollars (50 cents and up round
-up). Where the product has cents, either it or its rounding is the form's
-figure.
+Line 12 is 3.07% of line 11, and the form takes whole dollars (50 cents and
+up round up), so the form's figure is the rounded amount. OTS reports the
+unrounded product instead. That is accepted as an OTS precision tolerance,
+not as a second form figure: the observed tax must be either the form's
+whole-dollar figure or the derivation's unrounded product, which lies within
+the 50-cent rounding of it.
 """
 
+import json
 import math
 from dataclasses import dataclass
 
@@ -46,7 +50,10 @@ class Case:
     inputs: dict[str, float]
     total_taxable_income: float
     adjusted_taxable_income: float
-    tax: float
+    tax: int
+    """Line 12 as the form takes it, whole dollars (RECORD summary table)."""
+    unrounded_tax: float | None = None
+    """3.07% of line 11 before rounding, where it has cents (RECORD)."""
 
 
 CASES = (
@@ -73,6 +80,7 @@ CASES = (
         },
         131_000,
         131_000,
+        4_022,
         4_021.70,
     ),
     # Gains and losses net within the class, with no short/long-term split.
@@ -87,6 +95,7 @@ CASES = (
         },
         54_000,
         54_000,
+        1_658,
         1_657.80,
     ),
     # A class loss reduces no other class and is not carried over.
@@ -125,15 +134,22 @@ CASES = (
         },
         69_500,
         69_500,
+        2_134,
         2_133.65,
     ),
 )
 
 
-def _form_amounts(amount: float) -> tuple[float, ...]:
-    """Return the exact amount and, where it has cents, its whole-dollar rounding."""
-    rounded = math.floor(amount + 0.5)
-    return (amount,) if rounded == amount else (amount, rounded)
+def _accepted_tax(case: Case) -> tuple[float, ...]:
+    """Return the form's figure, plus OTS's unrounded product as a tolerance.
+
+    The tolerance is the form's own rounding rule: the product rounds half up
+    to the figure, so it is never more than 50 cents away.
+    """
+    if case.unrounded_tax is None:
+        return (case.tax,)
+    assert math.floor(case.unrounded_tax + 0.5) == case.tax
+    return (case.tax, case.unrounded_tax)
 
 
 @pytest.mark.parametrize("year", YEARS)
@@ -155,9 +171,8 @@ def test_ots_pa_matches_the_independent_derivation(case, year):
         case.adjusted_taxable_income, abs=CENT
     )
     assert any(
-        abs(result.state_total_tax - amount) <= CENT
-        for amount in _form_amounts(case.tax)
-    ), (result.state_total_tax, _form_amounts(case.tax))
+        abs(result.state_total_tax - amount) <= CENT for amount in _accepted_tax(case)
+    ), (result.state_total_tax, _accepted_tax(case))
 
 
 @pytest.mark.parametrize("year", YEARS)
@@ -168,3 +183,91 @@ def test_pa_map_sends_business_income_and_both_gains(year):
     for name in ("short_term_capital_gains", "long_term_capital_gains"):
         line, _ = input_map[name](1.0)
         assert line == "L5"
+
+
+# --- Joint-return class totals are household totals (tenforty-s48h.75) --------
+
+PA_JOINT_CLASSES = "pa.pa_40.joint_class_household_totals"
+CLASS_INPUTS = (
+    "self_employment_income",
+    "short_term_capital_gains",
+    "long_term_capital_gains",
+)
+
+
+def _pa_return(filing_status, state="PA", **amounts):
+    return tenforty.evaluate_return(
+        year=2025,
+        state=state,
+        filing_status=filing_status,
+        w2_income=60_000,
+        backend="ots",
+        **amounts,
+    )
+
+
+def _ids(result):
+    return [record.id for record in result.assumptions]
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize("name", CLASS_INPUTS)
+@pytest.mark.parametrize("amount", [2_500.0, -2_500.0])
+def test_joint_return_with_a_class_amount_reports_household_totals(name, amount):
+    """A nonzero line-4 or line-5 amount on a joint return is a household total."""
+    (record,) = [
+        r
+        for r in _pa_return("Married/Joint", **{name: amount}).assumptions
+        if r.id == PA_JOINT_CLASSES
+    ]
+    assert record.state == "PA"
+    assert record.input_path is None
+    assert record.value == "household_totals"
+    assert "spouse" in record.text
+    assert "netted" in record.text
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize(
+    ("filing_status", "amounts"),
+    [
+        ("Married/Joint", {}),
+        ("Married/Joint", {"taxable_interest": 5_000.0, "ordinary_dividends": 500.0}),
+        ("Single", {"self_employment_income": 2_500.0}),
+        ("Married/Sep", {"long_term_capital_gains": -2_500.0}),
+    ],
+)
+def test_no_class_amount_or_no_joint_return_reports_nothing(filing_status, amounts):
+    """Only a joint return with a business or gain amount carries the record."""
+    assert PA_JOINT_CLASSES not in _ids(_pa_return(filing_status, **amounts))
+
+
+@pytest.mark.requires_ots
+def test_other_states_never_report_the_pa_record():
+    """NJ nets the same household totals but has no such spouse rule."""
+    result = _pa_return("Married/Joint", state="NJ", self_employment_income=2_500.0)
+    assert PA_JOINT_CLASSES not in _ids(result)
+
+
+@pytest.mark.requires_ots
+def test_batch_rows_carry_the_record_exactly_where_the_scalar_does():
+    """The frame's assumptions column agrees with evaluate_return row by row."""
+    frame = tenforty.evaluate_returns(
+        year=2025,
+        state="PA",
+        filing_status=["Single", "Married/Joint"],
+        w2_income=60_000.0,
+        self_employment_income=[0.0, 2_500.0],
+        backend="ots",
+    )
+    for row in frame.iter_rows(named=True):
+        scalar = _pa_return(
+            row["filing_status"], self_employment_income=row["self_employment_income"]
+        )
+        encoded = [json.loads(item)["id"] for item in row["assumptions"]]
+        assert encoded == _ids(scalar)
+        expected = (
+            row["filing_status"] == "Married/Joint"
+            and row["self_employment_income"] != 0
+        )
+        assert (PA_JOINT_CLASSES in encoded) is expected
