@@ -600,9 +600,34 @@ class TaxReturnInput(BaseModel):
     )
     qualified_dividends: float = 0.0
     ordinary_dividends: float = 0.0
-    short_term_capital_gains: float = 0.0
-    long_term_capital_gains: float = 0.0
-    self_employment_income: float = 0.0
+    short_term_capital_gains: float = Field(
+        default=0.0,
+        description=(
+            "Net short-term capital gain or loss (federal Schedule D). OTS PA "
+            "enters it with long_term_capital_gains on PA-40 line 5, taking "
+            "the household federal amount as the PA amount: PA basis "
+            "differences are not modeled, and on a joint return PA's rule that "
+            "one spouse's loss cannot offset the other's gain is not applied."
+        ),
+    )
+    long_term_capital_gains: float = Field(
+        default=0.0,
+        description=(
+            "Net long-term capital gain or loss (federal Schedule D). OTS PA "
+            "nets it with short_term_capital_gains on PA-40 line 5 (see "
+            "short_term_capital_gains)."
+        ),
+    )
+    self_employment_income: float = Field(
+        default=0.0,
+        description=(
+            "Net profit or loss from a sole proprietorship (federal Schedule C "
+            "line 31), which also drives Schedule SE. OTS PA enters it on PA-40 "
+            "line 4 unchanged: PA Schedule C adjustments to the federal figure "
+            "are not modeled, and on a joint return one spouse's business loss "
+            "is netted against the other's profit, which PA does not allow."
+        ),
+    )
     qbi_w2_wages: float = Field(default=0.0, ge=0.0)
     qbi_ubia: float = Field(default=0.0, ge=0.0)
     qbi_is_sstb: bool = False
@@ -1129,7 +1154,11 @@ def _summed_line(line: str) -> Callable[[float], tuple[str, str]]:
 
 # PA-40 line 5 is net gain or loss from the sale of property: PA Schedule D
 # nets every sale with no short/long-term split, and a net loss reduces no
-# other class (PA-40 instructions, line 5).
+# other class (PA-40 instructions, line 5). The household federal gains are
+# taken as the PA gains, and line 4 takes self_employment_income (Schedule C
+# net profit) unchanged. Not modeled: PA basis and Schedule C differences, and
+# the joint-return rule that one spouse's class loss cannot offset the other's
+# income, since the inputs are household totals.
 _PA_PROPERTY_GAINS = _summed_line("L5")
 
 

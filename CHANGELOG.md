@@ -10,6 +10,12 @@
   dividends only, so these returns were under-taxed. The expected figures in
   `tests/ots_pa_business_gains_test.py` are an independent derivation from the
   PA-40 instructions (`docs/validation/derivations/pa-business-gains-2023-2025.md`).
+  - Limits: `self_employment_income` is taken as federal Schedule C net profit
+    and the gains as federal gains, unchanged; PA Schedule C and basis
+    differences are not modeled. The inputs are household totals, so on a joint
+    return where one spouse has a business or gain loss and the other a profit,
+    OTS nets them, which PA does not allow (each spouse's loss is ignored
+    against the other's income).
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)

@@ -13,6 +13,12 @@ OTS or graph output: docs/validation/derivations/pa-business-gains-2023-2025.md
 each case has one expected result for every year. No case qualifies for
 Schedule SP tax forgiveness.
 
+Scope: the cases assume a business profit with no PA adjustment to federal
+Schedule C, personal stock sales with matching PA and federal basis, and on a
+joint return every business and gain item belonging to one spouse. The map
+covers exactly that; the joint-return rule that one spouse's class loss
+cannot offset the other's income needs per-spouse inputs it does not have.
+
 Line 12 is 3.07% of line 11, rounded to whole dollars (50 cents and up round
 up). Where the product has cents, either it or its rounding is the form's
 figure.
