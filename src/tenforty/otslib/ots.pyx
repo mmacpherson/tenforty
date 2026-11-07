@@ -601,8 +601,35 @@ cdef extern from "ots_amalgamation.cpp" namespace "OpenTaxSolver2025::taxsolve_U
     int over65spouse
 
 
+# NC, OH and PA programs set their year's file-scope `do_all_caps` to 1 so the
+# text lines they read come out upper-cased, and nothing sets it back. OTS
+# starts each program in a fresh process, where it is 0; tenforty runs every
+# program in one process, so a later call that year would upper-case its names
+# and the federal-return path OR-40 and Form 8995 read. amalgamate.py lists the
+# years whose routines declare the flag; every call clears all of them.
+# tests/ots_caps_reset_test.py compares interleaved calls with a fresh process.
+cdef extern from "ots_amalgamation.cpp":
+    int do_all_caps_2018 "OpenTaxSolver2018::do_all_caps"
+    int do_all_caps_2019 "OpenTaxSolver2019::do_all_caps"
+    int do_all_caps_2020 "OpenTaxSolver2020::do_all_caps"
+    int do_all_caps_2021 "OpenTaxSolver2021::do_all_caps"
+    int do_all_caps_2022 "OpenTaxSolver2022::do_all_caps"
+    int do_all_caps_2023 "OpenTaxSolver2023::do_all_caps"
+    int do_all_caps_2024 "OpenTaxSolver2024::do_all_caps"
+    int do_all_caps_2025 "OpenTaxSolver2025::do_all_caps"
+
+
 cdef void _restore_fresh_process_state(int year, str form):
     """Reset file-scope OTS state that a fresh process would start at zero."""
+    global do_all_caps_2018, do_all_caps_2019, do_all_caps_2020, do_all_caps_2021, do_all_caps_2022, do_all_caps_2023, do_all_caps_2024, do_all_caps_2025
+    do_all_caps_2018 = 0
+    do_all_caps_2019 = 0
+    do_all_caps_2020 = 0
+    do_all_caps_2021 = 0
+    do_all_caps_2022 = 0
+    do_all_caps_2023 = 0
+    do_all_caps_2024 = 0
+    do_all_caps_2025 = 0
     global over65you, over65spouse
     if year == 2025 and form == "US_1040":
         over65you = 0
