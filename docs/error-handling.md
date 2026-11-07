@@ -125,7 +125,9 @@ which backend to use instead.
 a nonzero input it was given: for example `dependent_exemptions`, which OTS
 maps for no return and the graph maps only for some states, or
 `incentive_stock_option_gains` on 2018 and 2019 OTS returns, whose programs
-never use it. It is raised under every `on_error` policy, before any return in
+never use it. OTS also refuses `self_employment_income` and `rental_income` on
+2018 returns and `state_adjustment` on CA 2018 and 2019 returns, which tenforty
+maps to lines those years' OTS templates do not have. It is raised under every `on_error` policy, before any return in
 a batch is computed. It is also a `NotImplementedError`, which is what that
 refusal raised before.
 
@@ -161,6 +163,34 @@ Attributes:
 - `exit_code`: The non-zero exit code returned by OTS
 - `year`: The tax year being processed
 - `form`: The OTS form ID (e.g., `"US_1040"`)
+
+### `OTSInputError`
+
+A `ValueError` raised by the raw `tenforty.core.evaluate_form` before any native
+call, when a federal or state form value is one OTS cannot read. OTS's input
+parser calls `exit(1)` on such a value, which would end the Python process
+whatever `on_error` says, so the value is checked first: the key must be a line
+of the form's OTS template, an amount line takes finite ASCII numbers (grouped
+thousands such as `1,000` are fine), a yes/no line Y/N (yes/no, true/false,
+1/0, any case; written to OTS as `Y` or `N`, which every year's reader
+accepts), and a text line one line of text of at most 500 UTF-8 bytes, with no
+control characters. A line whose OTS reader tenforty does not identify, such as
+Schedule D's `D6` or its capital-gain entries, accepts only its template
+default; `Status` takes the filing-status names `Single`, `Married/Joint`,
+`Married/Sep`, `Head_of_House` and `Widow(er)`. Any line accepts its exact
+template default. An accepted number is written to OTS in a canonical
+fixed-point spelling with a leading digit and no exponent (`-.5` becomes
+`-0.5`), the same value in a form every OTS number reader accepts.
+
+```python
+from tenforty import OTSInputError
+from tenforty.core import evaluate_form
+
+try:
+    evaluate_form(2024, federal_form_values={"L1a": "not-a-number"})
+except OTSInputError as e:
+    print(e.year, e.form_id, e.key)  # 2024 US_1040 L1a
+```
 
 ### `OTSParseError`
 
