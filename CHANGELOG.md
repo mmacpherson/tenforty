@@ -16,8 +16,9 @@
     Windows wheel it builds.
 
 ### Fixed (testing)
-- The tests open every text file as UTF-8, so they read the same on Windows,
-  where Python before 3.15 defaults to the locale's code page.
+- The tests and the OTS binding generator (`ots/amalgamate.py`) open every
+  text file as UTF-8, so they read the same on Windows, where Python before
+  3.15 defaults to the locale's code page. The generated binding is unchanged.
 
 ### Fixed (installs without OTS)
 - A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every future Windows
