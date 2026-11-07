@@ -106,7 +106,9 @@ def run_comparison():
 
         try:
             ots_res = evaluate_return(**inputs, backend="ots")
-            graph_res = evaluate_return(**inputs, backend="graph")
+            graph_res = evaluate_return(
+                **inputs, backend="graph", allow_unvalidated=True
+            )
 
             diffs = []
 

@@ -1,11 +1,40 @@
-# Migrating to the graph default
+# Migrating between backends
 
-## Decisions
+## 2025.14: the OTS default is back
 
-- **The default is now `backend="auto"`.** Auto computes a 2024 or 2025 return
-  on the graph backend when it is in graph scope, and on OTS otherwise. Earlier
-  releases defaulted to `"ots"`; this note describes the flip and everything
-  that came with it.
+- **The default is `backend="ots"` again.** 2025.13 made `"auto"` the default;
+  2025.14 restores `"ots"` for `evaluate_return`, `evaluate_returns` and
+  `get_backend`. A call that names no backend computes on OTS, in every year.
+  The graph backend is opt-in until it is ready for every 2024–2025 state
+  (tenforty-s48h).
+- **To opt into auto, pass `backend="auto"`.** It routes exactly as the 2025.13
+  default did: graph for 2024–2025 federal-only returns and the states in graph
+  scope, OTS otherwise. Everything below about `"auto"` still holds when you ask
+  for it.
+- **Explicit `backend="graph"` now refuses a state outside graph scope.** It
+  raises `UnsupportedReturnError` before computing, naming the reasons, unless
+  you pass `allow_unvalidated=True`. In 2025.13 it computed any state silently:
+  for a 2025 California Married/Joint return with $100,000 of wages and two
+  dependents, graph gives $2,079.06 of state tax and OTS $1,130, because graph
+  California does not yet apply the dependent exemption credit
+  (tenforty-b72.54). The same rule covers `evaluate_returns` (one such row
+  refuses the whole batch), `marginal_rate`, `marginal_rates`,
+  `solve_for_income` and `get_backend`. A federal-only return, or a state in
+  graph scope, needs no opt-in.
+- **What you should do:**
+  1. If you relied on the 2025.13 default, pass `backend="auto"` to keep its
+     results, or do nothing to get OTS's.
+  2. If you call `backend="graph"`, `marginal_rate(s)` or `solve_for_income`
+     for a state outside graph scope, decide whether you accept an unvalidated
+     figure. If you do, pass `allow_unvalidated=True`.
+
+## 2025.13: what `"auto"` changes
+
+The rest of this note describes `backend="auto"` as it shipped as the 2025.13
+default; read "the default" there as `backend="auto"`.
+
+- **`backend="auto"`** computes a 2024 or 2025 return on the graph backend when
+  it is in graph scope, and on OTS otherwise.
 - **Graph scope (2024–2025):** federal-only returns; the eight states without
   an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and IL, MS and OR. Other
   states use OTS where covered, or raise `UnsupportedReturnError`. Years
@@ -13,7 +42,9 @@
   is the list, and each excluded state names the open defect, missing evidence
   or policy decision that keeps it out.
 - **An explicit backend is never reinterpreted.** `backend="ots"` computes on
-  OTS, as the earlier default did, and `backend="graph"` ignores scope.
+  OTS, as the default does, and `backend="graph"` computes on graph (since
+  2025.14, refusing a state outside graph scope unless
+  `allow_unvalidated=True`).
   `backend="ots"` is a rollback of the computation engine, not of every earlier
   contract: the deduction election (`standard_or_itemized="Auto"`), the frame
   schema and the error behavior changed for both backends, and OTS now refuses
@@ -23,7 +54,7 @@
   `state_adjustment` on CA 2018 and 2019 returns (see
   [Inputs refused](#inputs-refused-where-they-do-not-apply)).
 - **What you should do:**
-  1. Run your workload on the default (`"auto"`) and compare it with
+  1. Run your workload on `backend="auto"` and compare it with
      `backend="ots"`. The differences you can expect are listed under
      [Known differences](#known-differences-between-ots-and-auto); anything else
      is a bug we want to hear about.
@@ -58,8 +89,7 @@ The CHANGELOG has the full wording.
   is implemented (`tenforty-nuc6`). Their graph mappings currently treat the
   generic federal aggregate as a state itemized amount. NC therefore uses OTS;
   MD and ME have no OTS program, and auto raises `UnsupportedReturnError` for
-  them. Explicit
-  `backend="graph"` remains available.
+  them. Explicit `backend="graph"` computes them with `allow_unvalidated=True`.
 - A request no backend can serve raises `UnsupportedReturnError` before
   evaluation, under every `on_error` policy. `backend="graph"` for 2018–2023
   used to raise `FileNotFoundError`. A batch is checked whole before any row
@@ -73,7 +103,7 @@ dropping it. On the returns auto sends to graph that matters for these inputs:
 
 | Input | OTS today | Auto (graph-routed) |
 |---|---|---|
-| `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused: no state in auto's graph scope maps it. Only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV, none of which is in auto scope |
+| `dependent_exemptions` | No OTS form maps it; refused everywhere (it used to be silently ignored) | Refused: no state in auto's graph scope maps it. Only an explicit `backend="graph"` with `allow_unvalidated=True` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV, none of which is in graph scope |
 | `state_adjustment` | Mapped only for CA, and refused on CA 2018 and 2019 (see below); silently ignored elsewhere | Refused: no state in auto's graph scope maps it (graph maps it only for AL and CA, both outside auto scope) |
 | `incentive_stock_option_gains` | 2018 and 2019: refused (those programs never use it); 2020–2025: used | Used |
 | `self_employment_income`, `rental_income` | 2018: refused (mapped to lines the 2018 template lacks); 2019–2025: used | Used |
@@ -149,8 +179,8 @@ state itemizing from the federal Schedule A. See
   A graph Ohio Married/Joint return now **requires**
   `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=...)`
   and raises `UnsupportedInputError` without it, where it used to compute with
-  no joint filing credit. OH is outside auto scope, so only `backend="graph"`
-  callers see this.
+  no joint filing credit. OH is outside graph scope, so only `backend="graph"`
+  callers with `allow_unvalidated=True` see this.
 - MS remains in auto scope. MS MFJ requires both actual rounded line-13 AGIs
   through `state_facts.MS(taxpayer_adjusted_gross_income=..., spouse_adjusted_gross_income=...)`.
   Federal QSS requires `MS(head_of_family_eligible=...)`; HoH has the documented

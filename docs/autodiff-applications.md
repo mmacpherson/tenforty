@@ -12,7 +12,10 @@ uv run python examples/autodiff_planning.py --benchmark
 ```
 
 The examples use 2024 law and the graph backend. They are analysis examples,
-not tax advice or a general optimizer.
+not tax advice or a general optimizer. The first uses a California return,
+which is outside graph scope: the graph backend is not yet validated for
+California, so the example passes `allow_unvalidated=True`, and its figures
+illustrate the method rather than validated California tax.
 
 ## 1. Which next dollar costs the most?
 

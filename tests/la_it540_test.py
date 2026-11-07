@@ -56,9 +56,12 @@ STATE_FIELDS = (
 
 
 def _scalar_and_batch(**kw):
-    single = evaluate_return(backend="graph", **kw)
+    single = evaluate_return(backend="graph", **kw, allow_unvalidated=True)
     batch = evaluate_returns(
-        backend="graph", mode="zip", **{k: [v] for k, v in kw.items()}
+        backend="graph",
+        mode="zip",
+        **{k: [v] for k, v in kw.items()},
+        allow_unvalidated=True,
     )
     for field in (*STATE_FIELDS, "federal_total_tax"):
         assert batch[field][0] == pytest.approx(getattr(single, field), abs=0.01)
@@ -74,9 +77,15 @@ def test_zero_input_batch_evaluates(year):
         filing_status=["Single"],
         w2_income=[50_000],
         backend="graph",
+        allow_unvalidated=True,
     )
     single = evaluate_return(
-        year=year, state="LA", filing_status="Single", w2_income=50_000, backend="graph"
+        year=year,
+        state="LA",
+        filing_status="Single",
+        w2_income=50_000,
+        backend="graph",
+        allow_unvalidated=True,
     )
     assert list(batch["state_total_tax"]) == [
         pytest.approx(single.state_total_tax, abs=0.01)
@@ -86,7 +95,12 @@ def test_zero_input_batch_evaluates(year):
 def test_2025_zero_input_matches_the_instructions():
     """2025 line 10 = $50,000 - $12,500 = $37,500; line 11 = $37,500 x .03 = $1,125."""
     result = evaluate_return(
-        year=2025, state="LA", filing_status="Single", w2_income=50_000, backend="graph"
+        year=2025,
+        state="LA",
+        filing_status="Single",
+        w2_income=50_000,
+        backend="graph",
+        allow_unvalidated=True,
     )
     assert result.state_taxable_income == pytest.approx(37_500)
     assert result.state_total_tax == pytest.approx(1_125)
@@ -288,8 +302,10 @@ def test_2025_exemption_amount_is_refused_on_both_paths():
         dependent_exemptions=1_000,
     )
     for call in (
-        lambda: evaluate_return(backend="graph", **kw),
-        lambda: evaluate_returns(backend="graph", **{k: [v] for k, v in kw.items()}),
+        lambda: evaluate_return(backend="graph", **kw, allow_unvalidated=True),
+        lambda: evaluate_returns(
+            backend="graph", **{k: [v] for k, v in kw.items()}, allow_unvalidated=True
+        ),
     ):
         with pytest.raises(NotImplementedError, match="dependent_exemptions") as exc:
             call()
@@ -313,6 +329,8 @@ def test_missing_later_fan_out_node_is_rejected_on_both_paths(monkeypatch, w2_in
     )
     kw = dict(year=2024, state="LA", filing_status="Single", w2_income=w2_income)
     with pytest.raises(RuntimeError, match="us_form_absent_L1_wages"):
-        evaluate_return(backend="graph", **kw)
+        evaluate_return(backend="graph", **kw, allow_unvalidated=True)
     with pytest.raises(RuntimeError, match="us_form_absent_L1_wages"):
-        evaluate_returns(backend="graph", **{k: [v] for k, v in kw.items()})
+        evaluate_returns(
+            backend="graph", **{k: [v] for k, v in kw.items()}, allow_unvalidated=True
+        )

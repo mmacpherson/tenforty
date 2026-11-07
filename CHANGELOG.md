@@ -1,5 +1,51 @@
 ## [Unreleased]
 
+## [2025.14] - 2026-11-07
+### Changed (default backend)
+- **The default backend is `"ots"` again**, in `evaluate_return`,
+  `evaluate_returns` and `tenforty.backends.get_backend`, reverting 2025.13's
+  `"auto"` default. A call that names no backend computes on OTS in every year.
+  The graph backend is opt-in until it is ready for every 2024–2025 state
+  (tenforty-s48h).
+  - **To keep 2025.13's results, pass `backend="auto"`.** It routes exactly as
+    the 2025.13 default did; `"auto"`, its graph scope and its refusals are
+    unchanged.
+  - A 2024–2025 return in a state OTS lacks (IL, MS, CO and others) now raises
+    `UnsupportedReturnError` under the default, naming the graph remedy:
+    `backend="graph"` for a state in graph scope (IL, MS), and
+    `backend="graph"` with `allow_unvalidated=True` for one outside it (CO).
+  - On a graph-only install (`TENFORTY_GRAPH_ONLY=1`), every call on the
+    default raises `BackendUnavailableError`; pass `backend="auto"` or
+    `backend="graph"` there.
+  - See [Migrating between backends](docs/migrating-to-graph-default.md).
+
+### Changed (explicit graph refuses unvalidated states)
+- **`backend="graph"` refuses a state return outside graph scope** with
+  `UnsupportedReturnError`, before computing and under every `on_error`, naming
+  the exclusion reasons, unless the caller passes the new keyword-only
+  `allow_unvalidated=True`. It used to compute any state silently: a 2025
+  California Married/Joint return with $100,000 of wages and two dependents
+  gave $2,079.06 of state tax on graph against OTS's $1,130, because graph
+  California does not yet apply the dependent exemption credit
+  (tenforty-b72.54).
+  - The rule covers `evaluate_return`, `evaluate_returns` (one such row refuses
+    the whole batch before any row runs), `marginal_rate`, `marginal_rates`,
+    `solve_for_income` and `get_backend`. Federal-only returns and states in
+    graph scope (IL, MS, OR and the states without an income tax) need no
+    opt-in. `allow_unvalidated` has no effect on `"ots"` or `"auto"`.
+  - Refusal messages that point to graph for a state outside graph scope now
+    name the opt-in (`backend='graph' with allow_unvalidated=True`).
+
+### Changed (documentation)
+- The README, the Colab demo, the evidence summary, error handling, state facts
+  and the migration guide (now "Migrating between backends") describe the OTS
+  default and the graph opt-in. The README's `marginal_rates` example and the
+  autodiff planning example keep their California return and pass
+  `allow_unvalidated=True`, saying its figures illustrate the method rather than
+  validated California tax.
+- `scripts/smoke_installed.py` smoke-checks graph on Illinois, which is in graph
+  scope, and OTS on California.
+
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)
 - **The default backend is now `"auto"`**, in `evaluate_return`,

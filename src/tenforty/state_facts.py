@@ -33,6 +33,7 @@ from pydantic import (
     field_validator,
 )
 
+from .graph_scope import graph_state_in_scope
 from .models import (
     Assumption,
     OTSFilingStatus,
@@ -667,7 +668,7 @@ def check_capability(
                 )
             others = [e for e in descriptor.engines_computing(value) if e != row.engine]
             if others:
-                remedy = " or ".join(f"backend={e!r}" for e in others) + " does"
+                remedy = " or ".join(_backend_remedy(e, row) for e in others) + " does"
             else:
                 remedy = "no backend computes it yet" + (
                     f" ({descriptor.pending})" if descriptor.pending else ""
@@ -676,6 +677,14 @@ def check_capability(
                 f"{problem}; {remedy}. Facts never change which backend computes "
                 "a return."
             )
+
+
+def _backend_remedy(engine: Engine, row: FactRow) -> str:
+    if engine == "graph" and not graph_state_in_scope(
+        OTSState(row.state) if row.state else None, row.year
+    ):
+        return "backend='graph' with allow_unvalidated=True"
+    return f"backend={engine!r}"
 
 
 def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> None:

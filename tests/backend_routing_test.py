@@ -16,8 +16,8 @@ from tenforty.backends import GraphBackend, OTSBackend, get_backend
 from tenforty.models import OTSState
 
 OTS_ONLY_YEARS = (2018, 2019, 2020, 2021, 2022, 2023)
-GRAPH_DEFAULT_YEARS = (2024, 2025)
-ALL_YEARS = OTS_ONLY_YEARS + GRAPH_DEFAULT_YEARS
+AUTO_GRAPH_YEARS = (2024, 2025)
+ALL_YEARS = OTS_ONLY_YEARS + AUTO_GRAPH_YEARS
 ON_ERROR_POLICIES = ("raise", "warn", "ignore")
 
 pytestmark = pytest.mark.requires_graph
@@ -26,7 +26,7 @@ pytestmark = pytest.mark.requires_graph
 def _expected_engine(backend: str, year: int) -> str | None:
     if backend == "ots":
         return "ots"
-    if year in GRAPH_DEFAULT_YEARS:
+    if year in AUTO_GRAPH_YEARS:
         return "graph"
     return "ots" if backend == "auto" else None
 
@@ -123,10 +123,28 @@ def test_unsupported_return_error_is_a_value_error():
     assert issubclass(UnsupportedReturnError, ValueError)
 
 
-def test_public_default_backend_is_auto():
-    """Every public entry point that takes a backend defaults to "auto"."""
+def test_public_default_backend_is_ots():
+    """Every public entry point that takes a backend defaults to "ots".
+
+    Graph is opt-in: "auto" and "graph" are chosen explicitly (2025.14).
+    """
     for function in (tenforty.evaluate_return, tenforty.evaluate_returns, get_backend):
-        assert inspect.signature(function).parameters["backend"].default == "auto"
+        assert inspect.signature(function).parameters["backend"].default == "ots"
+
+
+def test_every_entry_point_defaults_to_refusing_unvalidated_graph_returns():
+    """allow_unvalidated is a keyword-only opt-in, off unless passed."""
+    for function in (
+        tenforty.evaluate_return,
+        tenforty.evaluate_returns,
+        tenforty.marginal_rate,
+        tenforty.marginal_rates,
+        tenforty.solve_for_income,
+        get_backend,
+    ):
+        parameter = inspect.signature(function).parameters["allow_unvalidated"]
+        assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
+        assert parameter.default is False
 
 
 def test_graph_only_entry_points_take_no_backend():
@@ -139,7 +157,7 @@ def test_graph_only_entry_points_take_no_backend():
         assert "backend" not in inspect.signature(function).parameters
 
 
-DEFAULT_ROUTING_CASES = [
+AUTO_ROUTING_CASES = [
     pytest.param(year, None, "ots" if year in OTS_ONLY_YEARS else "graph", id=str(year))
     for year in ALL_YEARS
 ] + [
@@ -150,43 +168,121 @@ DEFAULT_ROUTING_CASES = [
 ]
 
 
-@pytest.mark.parametrize(("year", "state", "engine"), DEFAULT_ROUTING_CASES)
-def test_omitted_backend_routes_as_auto(engine_calls, year, state, engine):
-    """A call without backend reaches the engine "auto" selects, everywhere."""
+@pytest.mark.parametrize(("year", "state", "engine"), AUTO_ROUTING_CASES)
+def test_explicit_auto_routes_by_year_and_scope(engine_calls, year, state, engine):
+    """backend="auto" reaches the engine it selects, in every entry point."""
     assert routing.select_backend("auto", year, state) == engine
-    tenforty.evaluate_return(year=year, state=state, w2_income=80_000)
-    tenforty.evaluate_returns(year=year, state=state, w2_income=[40_000, 80_000])
+    tenforty.evaluate_return(year=year, state=state, w2_income=80_000, backend="auto")
+    tenforty.evaluate_returns(
+        year=year, state=state, w2_income=[40_000, 80_000], backend="auto"
+    )
     assert _engines(engine_calls) == {year: {engine}}
-    instance = get_backend(year=year, state=state)
+    instance = get_backend("auto", year=year, state=state)
     assert isinstance(instance, OTSBackend if engine == "ots" else GraphBackend)
 
 
+DEFAULT_ROUTING_CASES = [
+    pytest.param(year, state, id=f"{year}-{state or 'federal'}")
+    for year in ALL_YEARS
+    for state in (None, "CA")
+] + [
+    pytest.param(2024, "NY", id="2024-NY"),
+    pytest.param(2025, "TX", id="2025-TX-no-income-tax"),
+]
+
+
+@pytest.mark.parametrize(("year", "state"), DEFAULT_ROUTING_CASES)
 @pytest.mark.requires_ots
-def test_omitted_backend_equals_explicit_auto():
-    """The default is "auto" itself, not a look-alike."""
-    for year, state in ((2025, None), (2024, "MS"), (2024, "CA"), (2022, None)):
+def test_omitted_backend_routes_to_ots(engine_calls, year, state):
+    """A call without backend reaches OTS in every year, graph years included."""
+    tenforty.evaluate_return(year=year, state=state, w2_income=80_000)
+    tenforty.evaluate_returns(year=year, state=state, w2_income=[40_000, 80_000])
+    assert _engines(engine_calls) == {year: {"ots"}}
+    assert isinstance(get_backend(year=year, state=state), OTSBackend)
+
+
+@pytest.mark.requires_ots
+def test_omitted_backend_equals_explicit_ots():
+    """The default is "ots" itself, not a look-alike."""
+    for year, state in ((2025, None), (2024, "CA"), (2025, "CA"), (2022, None)):
         call = {"year": year, "state": state, "w2_income": 90_000}
         assert tenforty.evaluate_return(**call) == tenforty.evaluate_return(
-            **call, backend="auto"
+            **call, backend="ots"
         )
 
 
-@pytest.mark.parametrize("year", GRAPH_DEFAULT_YEARS)
-def test_omitted_backend_refuses_what_auto_refuses(engine_calls, year):
-    """An out-of-scope state OTS lacks raises under the default, before loading."""
-    with pytest.raises(UnsupportedReturnError, match="backend='graph'"):
+@pytest.mark.requires_ots
+def test_default_ca_joint_return_with_dependents_is_the_ots_return():
+    """The 2025.13 regression: graph CA ignored dependent exemption credits.
+
+    tenforty-b72.54 keeps CA out of graph scope; with "auto" as the default this
+    return still went to OTS, but an explicit backend="graph" computed it
+    silently. Under the "ots" default the call is OTS's return, and explicit
+    graph refuses it unless the caller opts in.
+    """
+    call = {
+        "year": 2025,
+        "state": "CA",
+        "filing_status": "Married/Joint",
+        "w2_income": 100_000,
+        "num_dependents": 2,
+    }
+    assert tenforty.evaluate_return(**call) == tenforty.evaluate_return(
+        **call, backend="ots"
+    )
+    with pytest.raises(UnsupportedReturnError, match=r"tenforty-b72\.54"):
+        tenforty.evaluate_return(**call, backend="graph")
+
+
+@pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
+def test_omitted_backend_refuses_what_ots_refuses(engine_calls, year):
+    """A state OTS lacks raises under the default, before loading anything.
+
+    CO is outside graph scope too, so the remedy names the opt-in.
+    """
+    with pytest.raises(
+        UnsupportedReturnError, match="backend='graph' with allow_unvalidated=True"
+    ):
         tenforty.evaluate_return(year=year, state="CO", w2_income=80_000)
     assert engine_calls == []
 
 
-@pytest.mark.parametrize("year", GRAPH_DEFAULT_YEARS)
+@pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
+def test_omitted_backend_for_an_in_scope_state_ots_lacks_names_graph(year):
+    """IL is in graph scope and OTS has no IL return: the default offers graph."""
+    with pytest.raises(UnsupportedReturnError, match="Use backend='graph'"):
+        tenforty.evaluate_return(year=year, state="IL", w2_income=80_000)
+
+
+@pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
+def test_explicit_auto_refuses_what_it_cannot_route(engine_calls, year):
+    """An out-of-scope state OTS lacks raises under "auto", before loading."""
+    with pytest.raises(
+        UnsupportedReturnError, match="backend='graph' with allow_unvalidated=True"
+    ):
+        tenforty.evaluate_return(
+            year=year, state="CO", w2_income=80_000, backend="auto"
+        )
+    assert engine_calls == []
+
+
+@pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
 @pytest.mark.requires_ots
 def test_explicit_backends_are_unchanged_by_the_default(engine_calls, year):
     """backend="ots" stays OTS and backend="graph" stays graph in graph years."""
     tenforty.evaluate_return(year=year, w2_income=80_000, backend="ots")
     assert _engines(engine_calls) == {year: {"ots"}}
     engine_calls.clear()
-    tenforty.evaluate_return(year=year, state="CO", w2_income=80_000, backend="graph")
+    tenforty.evaluate_return(year=year, state="IL", w2_income=80_000, backend="graph")
+    assert _engines(engine_calls) == {year: {"graph"}}
+    engine_calls.clear()
+    tenforty.evaluate_return(
+        year=year,
+        state="CO",
+        w2_income=80_000,
+        backend="graph",
+        allow_unvalidated=True,
+    )
     assert _engines(engine_calls) == {year: {"graph"}}
 
 
@@ -360,7 +456,12 @@ def test_out_of_scope_graph_state_routes_to_ots(monkeypatch, engine_calls):
     assert routing.select_backend("auto", 2024, "CA") == "ots"
     assert routing.select_backend("auto", 2024, "NY") == "graph"
     assert routing.select_backend("auto", 2024, None) == "graph"
-    assert routing.select_backend("graph", 2024, "CA") == "graph"
+    assert routing.select_backend("graph", 2024, "NY") == "graph"
+    with pytest.raises(UnsupportedReturnError, match="allow_unvalidated=True"):
+        routing.select_backend("graph", 2024, "CA")
+    assert (
+        routing.select_backend("graph", 2024, "CA", allow_unvalidated=True) == "graph"
+    )
 
     tenforty.evaluate_return(year=2024, state="CA", w2_income=50_000, backend="auto")
     assert _engines(engine_calls) == {2024: {"ots"}}
@@ -441,13 +542,148 @@ def _engine_accepts(engine: str, year: int, state: OTSState) -> bool:
 @pytest.mark.parametrize("year", ALL_YEARS)
 @pytest.mark.parametrize("engine", ["ots", "graph"])
 def test_selector_agrees_with_what_each_engine_computes(engine, year, state):
-    """The selector honours exactly the year/state pairs the engine can serve."""
+    """With the opt-in, the selector honours exactly what the engine can serve."""
     try:
-        routing.select_backend(engine, year, state)
+        routing.select_backend(engine, year, state, allow_unvalidated=True)
         selected = True
     except UnsupportedReturnError:
         selected = False
     assert selected == _engine_accepts(engine, year, state)
+
+
+@pytest.mark.parametrize("state", ALL_STATES, ids=lambda state: state.value)
+@pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
+@pytest.mark.without_ots
+def test_explicit_graph_selects_only_in_scope_returns(year, state):
+    """Without the opt-in, backend="graph" takes a state return only in scope.
+
+    Out of scope, it refuses naming every exclusion reason and the opt-in.
+    """
+    from tenforty.graph_scope import exclusion_reasons, graph_state_in_scope
+
+    if graph_state_in_scope(state, year):
+        assert routing.select_backend("graph", year, state) == "graph"
+        return
+    with pytest.raises(UnsupportedReturnError) as refusal:
+        routing.select_backend("graph", year, state)
+    message = str(refusal.value)
+    assert "allow_unvalidated=True" in message
+    for reason in exclusion_reasons(state, year):
+        assert reason in message
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+def test_explicit_graph_out_of_scope_refuses_before_computing(engine_calls, on_error):
+    """No on_error policy turns an unvalidated graph return into a result."""
+    with pytest.raises(UnsupportedReturnError, match="not yet validated"):
+        tenforty.evaluate_return(
+            year=2025, state="CA", w2_income=50_000, backend="graph", on_error=on_error
+        )
+    assert engine_calls == []
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_graph_batch_with_one_unvalidated_state_refuses_whole(
+    engine_calls, mode, on_error
+):
+    """One out-of-scope row refuses the whole explicit-graph batch up front."""
+    with pytest.raises(UnsupportedReturnError, match="CA 2025"):
+        tenforty.evaluate_returns(
+            year=2025,
+            state=["IL", "CA"],
+            w2_income=[50_000.0, 60_000.0],
+            backend="graph",
+            mode=mode,
+            on_error=on_error,
+        )
+    assert engine_calls == []
+
+
+@pytest.mark.parametrize("mode", ["cross", "zip"])
+def test_graph_batch_opt_in_computes_every_row(engine_calls, mode):
+    """With the opt-in, the mixed batch computes on graph, row for row."""
+    frame = tenforty.evaluate_returns(
+        year=2025,
+        state=["IL", "CA"],
+        w2_income=[50_000.0, 60_000.0],
+        backend="graph",
+        mode=mode,
+        allow_unvalidated=True,
+    )
+    assert frame.height == (4 if mode == "cross" else 2)
+    assert _engines(engine_calls) == {2025: {"graph"}}
+    single = tenforty.evaluate_return(
+        year=2025,
+        state="CA",
+        w2_income=60_000.0,
+        backend="graph",
+        allow_unvalidated=True,
+    )
+    ca_row = frame.filter((pl.col("state") == "CA") & (pl.col("w2_income") == 60_000.0))
+    assert ca_row["total_tax"].item() == single.total_tax
+
+
+GRAPH_ONLY_FUNCTIONS = [
+    pytest.param(lambda **kw: tenforty.marginal_rate(**kw), id="marginal_rate"),
+    pytest.param(lambda **kw: tenforty.marginal_rates(**kw), id="marginal_rates"),
+    pytest.param(
+        lambda **kw: tenforty.solve_for_income(target_tax=5_000.0, **kw),
+        id="solve_for_income",
+    ),
+]
+
+
+@pytest.mark.parametrize("function", GRAPH_ONLY_FUNCTIONS)
+def test_graph_only_apis_refuse_unvalidated_states(function):
+    """Autodiff and the solver apply the explicit-graph scope rule."""
+    with pytest.raises(UnsupportedReturnError, match=r"tenforty-b72\.54"):
+        function(year=2025, state="CA", w2_income=50_000.0)
+
+
+def _solve_at_own_tax(**kw):
+    """Solve for the wages that give this return's own graph tax."""
+    target = tenforty.evaluate_return(backend="graph", **kw).total_tax
+    return tenforty.solve_for_income(target_tax=target, **kw)
+
+
+COMPUTING_GRAPH_ONLY_FUNCTIONS = [
+    *GRAPH_ONLY_FUNCTIONS[:2],
+    pytest.param(_solve_at_own_tax, id="solve_for_income"),
+]
+
+
+@pytest.mark.parametrize("function", COMPUTING_GRAPH_ONLY_FUNCTIONS)
+def test_graph_only_apis_compute_unvalidated_states_on_request(function):
+    """The opt-in lets autodiff and the solver run on an out-of-scope state."""
+    assert function(year=2025, state="CA", w2_income=50_000.0, allow_unvalidated=True)
+
+
+@pytest.mark.parametrize("function", COMPUTING_GRAPH_ONLY_FUNCTIONS)
+def test_graph_only_apis_compute_in_scope_states_as_before(function):
+    """In scope, the graph-only APIs need no opt-in."""
+    assert function(year=2025, state="IL", w2_income=50_000.0)
+
+
+def test_get_backend_applies_the_scope_rule():
+    """get_backend("graph") refuses an out-of-scope state unless opted in."""
+    with pytest.raises(UnsupportedReturnError, match="allow_unvalidated=True"):
+        get_backend("graph", year=2025, state="CA")
+    assert isinstance(
+        get_backend("graph", year=2025, state="CA", allow_unvalidated=True),
+        GraphBackend,
+    )
+    assert isinstance(get_backend("graph", year=2025, state="IL"), GraphBackend)
+
+
+@pytest.mark.parametrize("backend", ["ots", "auto"])
+@pytest.mark.requires_ots
+def test_opt_in_changes_nothing_off_explicit_graph(backend):
+    """allow_unvalidated only affects backend="graph"."""
+    for state in ("CA", None):
+        assert routing.select_backend(
+            backend, 2025, state, allow_unvalidated=True
+        ) == routing.select_backend(backend, 2025, state)
 
 
 @pytest.mark.parametrize(
@@ -590,11 +826,12 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
 
 @pytest.mark.requires_ots
 def test_default_backend_applies_the_state_facts_contract(engine_calls):
-    """Under the "auto" default, facts follow routing and are never a reroute.
+    """Under the "ots" default, facts follow routing and are never a reroute.
 
-    OH is outside auto scope, so a default OH MFJ call goes to OTS: without
-    facts it computes; with the OH fact OTS refuses it, naming graph (which
-    computes False). The graph-only entry points honour the fact.
+    A default OH MFJ call goes to OTS: without facts it computes; with the OH
+    fact OTS refuses it, naming graph with the opt-in (OH is outside graph
+    scope; graph computes False). The graph-only entry points, opted in,
+    honour the fact.
     """
     from tenforty.state_facts import OH
 
@@ -606,7 +843,8 @@ def test_default_backend_applies_the_state_facts_contract(engine_calls):
     engine_calls.clear()
 
     fact = OH(spouses_both_have_qualifying_income=False)
-    with pytest.raises(UnsupportedInputError, match="backend='graph' does"):
+    opt_in_remedy = "backend='graph' with allow_unvalidated=True does"
+    with pytest.raises(UnsupportedInputError, match=opt_in_remedy):
         tenforty.evaluate_return(
             year=2024,
             state="OH",
@@ -614,7 +852,7 @@ def test_default_backend_applies_the_state_facts_contract(engine_calls):
             w2_income=90_000,
             state_facts=fact,
         )
-    with pytest.raises(UnsupportedInputError, match="backend='graph' does"):
+    with pytest.raises(UnsupportedInputError, match=opt_in_remedy):
         tenforty.evaluate_returns(
             year=2024,
             state=["TX", "OH"],
@@ -631,6 +869,7 @@ def test_default_backend_applies_the_state_facts_contract(engine_calls):
         "filing_status": "Married/Joint",
         "w2_income": 90_000,
         "state_facts": fact,
+        "allow_unvalidated": True,
     }
     assert tenforty.marginal_rate(**oh_mfj) > 0
     assert tenforty.marginal_rates(**oh_mfj)["w2_income"] > 0

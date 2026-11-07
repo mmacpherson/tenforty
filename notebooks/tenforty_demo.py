@@ -68,8 +68,11 @@ def _(mo):
     | 2018 to 2022 | CA, MA, NY |
 
     The states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) work in
-    every year. Pass `backend="graph"` for many more states, for the 2024 and
-    2025 tax years; the README lists them.
+    every year. The graph backend, which you opt into with `backend="auto"` or
+    `backend="graph"`, has forms for many more states for 2024 and 2025, but
+    only IL, MS, OR and the states without an income tax are in graph scope.
+    For the others the graph is not yet validated, so `backend="graph"` refuses
+    them unless you pass `allow_unvalidated=True`; the README lists them.
 
     The available tax years and filing statuses:
     """)

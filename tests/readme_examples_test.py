@@ -154,10 +154,9 @@ def test_every_readme_block_runs_and_shows_its_output():
 
 
 # The README blocks that need OTS. On a graph-only install (every Windows
-# wheel) they raise BackendUnavailableError: blocks 1, 2 and 5 are CA returns,
-# which backend="auto" keeps on OTS, block 4 spans 2018-2023, and block 7 asks
-# for backend="ots".
-README_OTS_BLOCKS = frozenset({1, 2, 4, 5, 7})
+# wheel) they raise BackendUnavailableError: blocks 1 to 6 name no backend, so
+# they use the OTS default, and block 7 asks for backend="ots".
+README_OTS_BLOCKS = frozenset({1, 2, 3, 4, 5, 6, 7})
 
 
 @pytest.mark.requires_graph

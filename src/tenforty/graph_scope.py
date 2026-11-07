@@ -4,7 +4,8 @@ A state's return enters graph scope only once its known graph-side defects are
 closed, official-value fixtures support it (tenforty-du9, approved 2026-11-03),
 and no policy decision holds it out. Scope is inferred down, never up: a (state, year) is in scope only
 by an explicit entry in ``IN_SCOPE``, and every other graph return is excluded
-for the reasons ``exclusion_reasons`` gives. ``backend="graph"`` ignores scope.
+for the reasons ``exclusion_reasons`` gives. ``backend="graph"`` refuses an
+excluded return too, unless the caller passes ``allow_unvalidated=True``.
 
 The tables below are hand-kept data. tests/graph_scope_test.py checks them
 against the known-defect signatures in tests/ and the fixture documents in

@@ -45,6 +45,7 @@ def test_archived_returns_without_graph_defect_allowances(case):
         filing_status=case.filing_status,
         backend="graph",
         **case.inputs,
+        allow_unvalidated=True,
     )
     taxable, tax = case.outcomes[0]
     if case.check_taxable_income:
@@ -95,6 +96,7 @@ def test_other_dependents_do_not_receive_the_ctc_child_deduction(year, tax):
         num_dependents=2,
         num_ctc_dependents=0,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (34_500, tax)
 
@@ -110,6 +112,7 @@ def test_ctc_subset_counts_only_the_one_qualifying_child(year, tax):
         num_dependents=3,
         num_ctc_dependents=1,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (54_375, tax)
 
@@ -128,6 +131,7 @@ def test_natural_zip_preserves_each_rows_ctc_subset(year, tax_without, tax_with)
         num_ctc_dependents=[0, 2],
         mode="zip",
         backend="graph",
+        allow_unvalidated=True,
     )
     assert result["state_taxable_income"].to_list() == [34_500, 29_500]
     assert result["state_total_tax"].to_list() == [tax_without, tax_with]
@@ -144,6 +148,7 @@ def test_fractional_agi_below_half_stays_in_the_published_band(year, tax, fracti
         w2_income=40_000 + fraction,
         num_dependents=2,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (8500, tax)
 
@@ -158,6 +163,7 @@ def test_half_dollar_entry_crosses_into_the_next_child_band(year, tax):
         w2_income=40_000.50,
         num_dependents=2,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (9501, tax)
 
@@ -190,6 +196,7 @@ def test_natural_cross_expands_the_explicit_ctc_subset(year, tax_without, tax_wi
         num_ctc_dependents=[0, 2],
         mode="cross",
         backend="graph",
+        allow_unvalidated=True,
     )
     assert result["state_taxable_income"].to_list() == [34_500, 29_500]
     assert result["state_total_tax"].to_list() == [tax_without, tax_with]

@@ -155,6 +155,7 @@ def test_public_marginal_rates_matches_scalar_entry(graph_backend):
         state="CA",
         filing_status="Single",
         w2_income=100_000.0,
+        allow_unvalidated=True,
     )
 
     assert rates["w2_income"] == pytest.approx(
@@ -163,6 +164,7 @@ def test_public_marginal_rates_matches_scalar_entry(graph_backend):
             state="CA",
             filing_status="Single",
             w2_income=100_000.0,
+            allow_unvalidated=True,
         ),
         abs=1e-12,
     )

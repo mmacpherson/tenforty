@@ -87,6 +87,7 @@ def test_business_wages_ubia_and_sstb_match_form_8995a(extra, expected_taxable_i
         taxable_interest=160_514.775,
         backend="graph",
         **extra,
+        allow_unvalidated=True,
     )
 
     assert result.federal_taxable_income == pytest.approx(
@@ -117,6 +118,7 @@ def test_above_range_uses_the_full_wage_limit_and_excludes_sstb(
         long_term_capital_gains=60_000.0,
         backend="graph",
         **extra,
+        allow_unvalidated=True,
     )
 
     assert result.federal_taxable_income == pytest.approx(
@@ -168,8 +170,12 @@ def test_qbi_business_input_gradients(wrt, field_value, expected):
         wrt: field_value,
     }
 
-    scalar = marginal_rate(**kwargs, wrt=wrt, output="federal_taxable_income")
-    vector = marginal_rates(**kwargs, output="federal_taxable_income")
+    scalar = marginal_rate(
+        **kwargs, wrt=wrt, output="federal_taxable_income", allow_unvalidated=True
+    )
+    vector = marginal_rates(
+        **kwargs, output="federal_taxable_income", allow_unvalidated=True
+    )
 
     assert scalar == pytest.approx(expected, abs=1e-12)
     assert vector[wrt] == pytest.approx(scalar, abs=1e-12)

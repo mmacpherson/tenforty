@@ -552,12 +552,14 @@ def test_federal_tax_continuity(
         filing_status=filing_status,
         backend=backend,
         **{income_field: base_income},
+        allow_unvalidated=True,
     )
     r2 = tenforty.evaluate_return(
         year=year,
         filing_status=filing_status,
         backend=backend,
         **{income_field: base_income + 1.0},
+        allow_unvalidated=True,
     )
     delta = r2.total_tax - r1.total_tax
     assert abs(delta) <= 0.417 + 2.0, (
@@ -595,13 +597,18 @@ def test_federal_tax_monotone_in_each_income(
     backend, year, filing_status, income_field, base, increment
 ):
     r1 = tenforty.evaluate_return(
-        year=year, filing_status=filing_status, backend=backend, **{income_field: base}
+        year=year,
+        filing_status=filing_status,
+        backend=backend,
+        **{income_field: base},
+        allow_unvalidated=True,
     )
     r2 = tenforty.evaluate_return(
         year=year,
         filing_status=filing_status,
         backend=backend,
         **{income_field: base + increment},
+        allow_unvalidated=True,
     )
     assert r1.total_tax <= r2.total_tax + 1e-6, (
         f"Non-monotone in {income_field} [{backend}]: total_tax fell from "
@@ -683,6 +690,7 @@ def test_cross_status_tax_ordering(backend, year, income_field, income):
             filing_status=filing_status,
             backend=backend,
             **{income_field: income},
+            allow_unvalidated=True,
         ).total_tax
 
     single = tax("Single")

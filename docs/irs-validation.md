@@ -3,7 +3,7 @@
 > **Historical record.** This page documents the 2022–2023 IRS Direct File and
 > MeF ATS work against the OTS backend, and some of its statements are out of
 > date: tenforty now computes self-employment tax, QBI and the credit for other
-> dependents, and the default computes 2024–2025 on the graph backend. For what
+> dependents, and `backend="auto"` computes 2024–2025 on the graph backend. For what
 > is evidenced today, per kind of return, see the
 > [evidence summary](evidence-summary.md).
 

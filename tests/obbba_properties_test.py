@@ -24,7 +24,7 @@ _BUMP = st.integers(1, 30_000).map(float)
 
 
 def _graph(**kwargs):
-    return evaluate_return(backend="graph", **kwargs)
+    return evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
 
 
 @settings(deadline=None)  # inherit profile example count (ci=500, deep=10k)

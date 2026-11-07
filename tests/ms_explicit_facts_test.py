@@ -177,11 +177,13 @@ def test_household_income_state_sensitivities_need_perturbation_ownership(
     )
     with pytest.raises(UnsupportedInputError, match="which spouse"):
         if operation == "gradient":
-            marginal_rate(**args, wrt="w2_income")
+            marginal_rate(**args, wrt="w2_income", allow_unvalidated=True)
         elif operation == "gradients":
-            marginal_rates(**args)
+            marginal_rates(**args, allow_unvalidated=True)
         else:
-            solve_for_income(**args, target_tax=10000, for_input="w2_income")
+            solve_for_income(
+                **args, target_tax=10000, for_input="w2_income", allow_unvalidated=True
+            )
 
 
 def test_explicit_federal_only_sensitivity_remains_available():
@@ -192,9 +194,9 @@ def test_explicit_federal_only_sensitivity_remains_available():
         w2_income=61611.8,
         output="federal_total_tax",
     )
-    assert marginal_rate(**args, state="MS", state_facts=_joint()) == marginal_rate(
-        **args
-    )
+    assert marginal_rate(
+        **args, state="MS", state_facts=_joint(), allow_unvalidated=True
+    ) == marginal_rate(**args, allow_unvalidated=True)
 
 
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
@@ -223,19 +225,29 @@ def test_each_federal_only_operation_remains_available(operation):
     )
     ms_args = args | dict(state="MS", state_facts=_joint())
     if operation == "gradient":
-        assert marginal_rate(**ms_args) == marginal_rate(**args)
+        assert marginal_rate(**ms_args, allow_unvalidated=True) == marginal_rate(
+            **args, allow_unvalidated=True
+        )
     elif operation == "gradients":
         assert (
-            marginal_rates(**ms_args)["w2_income"]
-            == marginal_rates(**args)["w2_income"]
+            marginal_rates(**ms_args, allow_unvalidated=True)["w2_income"]
+            == marginal_rates(**args, allow_unvalidated=True)["w2_income"]
         )
     else:
         target = evaluate_return(
-            year=2025, filing_status="Married/Joint", w2_income=61611.8, backend="graph"
+            year=2025,
+            filing_status="Married/Joint",
+            w2_income=61611.8,
+            backend="graph",
         ).federal_total_tax
-        solved = solve_for_income(**ms_args, target_tax=target, for_input="w2_income")
+        solved = solve_for_income(
+            **ms_args, target_tax=target, for_input="w2_income", allow_unvalidated=True
+        )
         assert evaluate_return(
-            year=2025, filing_status="Married/Joint", w2_income=solved, backend="graph"
+            year=2025,
+            filing_status="Married/Joint",
+            w2_income=solved,
+            backend="graph",
         ).federal_total_tax == pytest.approx(target, abs=0.01)
 
 
@@ -374,6 +386,7 @@ def test_income_aliases_cannot_bypass_joint_ownership(
             mode="zip",
             state_facts=_joint(),
             backend="graph",
+            allow_unvalidated=True,
         )
         rows = frame.select(list(args)).to_dicts()
     else:
@@ -381,7 +394,13 @@ def test_income_aliases_cannot_bypass_joint_ownership(
     for row in rows:
         with pytest.raises(UnsupportedInputError, match="which spouse"):
             if operation == "gradient":
-                marginal_rate(**row, state_facts=_joint(), output=output, wrt=alias)
+                marginal_rate(
+                    **row,
+                    state_facts=_joint(),
+                    output=output,
+                    wrt=alias,
+                    allow_unvalidated=True,
+                )
             else:
                 solve_for_income(
                     **row,
@@ -389,6 +408,7 @@ def test_income_aliases_cannot_bypass_joint_ownership(
                     output=output,
                     target_tax=5000,
                     for_input=alias,
+                    allow_unvalidated=True,
                 )
 
 
@@ -404,11 +424,20 @@ def test_federal_only_wage_aliases_remain_supported(alias, operation):
     )
     ms_args = args | dict(state="MS", state_facts=_joint())
     if operation == "gradient":
-        assert marginal_rate(**ms_args, wrt=alias) == marginal_rate(**args, wrt=alias)
+        assert marginal_rate(
+            **ms_args, wrt=alias, allow_unvalidated=True
+        ) == marginal_rate(**args, wrt=alias, allow_unvalidated=True)
     else:
         target = evaluate_return(
-            year=2025, filing_status="Married/Joint", w2_income=61611.8, backend="graph"
+            year=2025,
+            filing_status="Married/Joint",
+            w2_income=61611.8,
+            backend="graph",
         ).federal_total_tax
-        assert solve_for_income(**ms_args, target_tax=target, for_input=alias) == (
-            solve_for_income(**args, target_tax=target, for_input=alias)
+        assert solve_for_income(
+            **ms_args, target_tax=target, for_input=alias, allow_unvalidated=True
+        ) == (
+            solve_for_income(
+                **args, target_tax=target, for_input=alias, allow_unvalidated=True
+            )
         )

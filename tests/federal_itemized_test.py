@@ -230,7 +230,10 @@ def test_legacy_convention_is_reported_where_applied(backend, value):
     """Legacy convention is reported where applied."""
     with pytest.warns(LegacyItemizedDeductionsWarning):
         result = evaluate_return(
-            **ITEMIZING, itemized_deductions=30_000, backend=backend
+            **ITEMIZING,
+            itemized_deductions=30_000,
+            backend=backend,
+            allow_unvalidated=True,
         )
     (record,) = _legacy_records(result)
     assert record.state is None
@@ -257,6 +260,7 @@ def test_legacy_convention_is_not_reported_when_the_return_does_not_itemize(
             itemized_deductions=amount,
             standard_or_itemized=choice,
             backend=backend,
+            allow_unvalidated=True,
         )
     assert _legacy_records(result) == []
 
@@ -270,6 +274,7 @@ def test_new_model_reports_no_legacy_convention(backend):
         **ITEMIZING,
         federal_itemized=FederalItemized(regular_tax=30_000, amt=30_000),
         backend=backend,
+        allow_unvalidated=True,
     )
     assert _legacy_records(result) == []
 
@@ -324,6 +329,7 @@ def test_legacy_numbers_equal_the_backends_reproduction_recipe(
         "incentive_stock_option_gains": iso,
         "state_and_local_taxes": 4_000,
         "backend": backend,
+        "allow_unvalidated": True,
     }
     with pytest.warns(LegacyItemizedDeductionsWarning):
         legacy = evaluate_return(**call, itemized_deductions=30_000)
@@ -566,6 +572,7 @@ def test_nested_fields_are_not_derivative_axes(wrt):
             **ITEMIZING,
             federal_itemized=FederalItemized(regular_tax=30_000, amt=30_000),
             wrt=wrt,
+            allow_unvalidated=True,
         )
 
 
@@ -577,6 +584,7 @@ def test_legacy_axis_is_refused_with_the_new_model():
             **ITEMIZING,
             federal_itemized=FederalItemized(regular_tax=30_000, amt=30_000),
             wrt="itemized_deductions",
+            allow_unvalidated=True,
         )
     with pytest.raises(ValueError, match="itemized_deductions"):
         tenforty.solve_for_income(
@@ -584,6 +592,7 @@ def test_legacy_axis_is_refused_with_the_new_model():
             **ITEMIZING,
             federal_itemized=FederalItemized(regular_tax=30_000, amt=30_000),
             for_input="itemized_deductions",
+            allow_unvalidated=True,
         )
 
 
@@ -593,6 +602,7 @@ def test_marginal_rates_hold_the_model_fixed():
     rates = tenforty.marginal_rates(
         **ITEMIZING,
         federal_itemized=FederalItemized(regular_tax=30_000, amt=30_000),
+        allow_unvalidated=True,
     )
     assert "itemized_deductions" not in rates
     assert "w2_income" in rates
@@ -606,7 +616,9 @@ def test_marginal_rate_sees_the_amt_difference():
         FederalItemized(regular_tax=30_000, amt=30_000),
         FederalItemized(regular_tax=30_000, amt=0),
     ):
-        rate = tenforty.marginal_rate(**common, federal_itemized=model)
+        rate = tenforty.marginal_rate(
+            **common, federal_itemized=model, allow_unvalidated=True
+        )
         assert rate > 0
 
 
@@ -632,7 +644,10 @@ def test_batch_accepts_a_dictionary_and_echoes_it_as_the_model(backend, mode, on
     )
     assert frame.select(ECHO).rows() == [(30_000.0, 12_000.0)] * 2
     scalar = evaluate_return(
-        year=2025, w2_income=150_000, federal_itemized=DICT_MODEL, backend=backend
+        year=2025,
+        w2_income=150_000,
+        federal_itemized=DICT_MODEL,
+        backend=backend,
     )
     assert frame["federal_total_tax"][1] == scalar.federal_total_tax
 
@@ -702,7 +717,12 @@ AMT_BINDING = {
 def test_carrier_aliases_are_not_derivative_axes(alias):
     """Natural and node names of a prepared amount are refused as wrt."""
     with pytest.raises(ValueError, match="unsupported"):
-        tenforty.marginal_rate(**AMT_BINDING, federal_itemized=DICT_MODEL, wrt=alias)
+        tenforty.marginal_rate(
+            **AMT_BINDING,
+            federal_itemized=DICT_MODEL,
+            wrt=alias,
+            allow_unvalidated=True,
+        )
 
 
 @requires_graph
@@ -711,7 +731,11 @@ def test_carrier_aliases_are_not_solve_axes(alias):
     """The same aliases are refused as for_input."""
     with pytest.raises(ValueError, match="unsupported"):
         tenforty.solve_for_income(
-            65_000, **AMT_BINDING, federal_itemized=DICT_MODEL, for_input=alias
+            65_000,
+            **AMT_BINDING,
+            federal_itemized=DICT_MODEL,
+            for_input=alias,
+            allow_unvalidated=True,
         )
 
 
@@ -727,6 +751,7 @@ def test_forwarded_state_carrier_is_held_fixed(alias):
             federal_itemized=DICT_MODEL,
             wrt=alias,
             output="state_total_tax",
+            allow_unvalidated=True,
         )
 
 
@@ -738,7 +763,12 @@ def test_the_amt_difference_carrier_is_never_an_axis(alias):
     """It is internal to federal_itemized, so a legacy call cannot name it either."""
     with pytest.raises(ValueError, match="unsupported"):
         with pytest.warns(LegacyItemizedDeductionsWarning):
-            tenforty.marginal_rate(**AMT_BINDING, itemized_deductions=30_000, wrt=alias)
+            tenforty.marginal_rate(
+                **AMT_BINDING,
+                itemized_deductions=30_000,
+                wrt=alias,
+                allow_unvalidated=True,
+            )
 
 
 @requires_graph
@@ -749,7 +779,7 @@ def test_legacy_axis_is_preserved_without_the_model(wrt):
     """With the legacy scalar in use, its axis and node alias still differentiate."""
     with pytest.warns(LegacyItemizedDeductionsWarning):
         rate = tenforty.marginal_rate(
-            **AMT_BINDING, itemized_deductions=30_000, wrt=wrt
+            **AMT_BINDING, itemized_deductions=30_000, wrt=wrt, allow_unvalidated=True
         )
     assert isinstance(rate, float)
 
@@ -757,8 +787,15 @@ def test_legacy_axis_is_preserved_without_the_model(wrt):
 @requires_graph
 def test_income_derivatives_still_work_with_the_model():
     """Ordinary axes are unaffected by the carrier guard."""
-    assert tenforty.marginal_rate(**AMT_BINDING, federal_itemized=DICT_MODEL) > 0
     assert (
-        tenforty.solve_for_income(60_000, **AMT_BINDING, federal_itemized=DICT_MODEL)
+        tenforty.marginal_rate(
+            **AMT_BINDING, federal_itemized=DICT_MODEL, allow_unvalidated=True
+        )
+        > 0
+    )
+    assert (
+        tenforty.solve_for_income(
+            60_000, **AMT_BINDING, federal_itemized=DICT_MODEL, allow_unvalidated=True
+        )
         > 0
     )

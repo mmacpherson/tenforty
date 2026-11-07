@@ -93,7 +93,12 @@ def test_eic_without_the_child_tax_credit(
 ):
     """Line 24 (A): the children are EIC children only, so no line 19 credit."""
     result = evaluate_return(
-        year=year, backend="graph", num_eitc_children=children, **FACTS, **inputs
+        year=year,
+        backend="graph",
+        num_eitc_children=children,
+        **FACTS,
+        **inputs,
+        allow_unvalidated=True,
     )
 
     assert result.federal_earned_income_credit == eic
@@ -117,6 +122,7 @@ def test_eic_children_who_are_also_child_tax_credit_children(
         num_eitc_children=children,
         **FACTS,
         **inputs,
+        allow_unvalidated=True,
     )
 
     assert result.federal_earned_income_credit == eic
@@ -146,6 +152,7 @@ def test_batch_matches_the_derivation(year):
             else [inputs[column] for _, inputs, _, _ in rows]
             for column in columns
         },
+        allow_unvalidated=True,
     )
 
     assert frame["num_eitc_children"].to_list() == [row[2] for row in rows]
@@ -191,6 +198,7 @@ def test_tax_exempt_interest_counts_toward_the_investment_limit(year):
         taxable_interest=at_limit - 1.0,
         tax_exempt_interest=1.0,
         **base,
+        allow_unvalidated=True,
     )
     over = evaluate_return(
         year=year,
@@ -200,6 +208,7 @@ def test_tax_exempt_interest_counts_toward_the_investment_limit(year):
         taxable_interest=at_limit - 1.0,
         tax_exempt_interest=2.0,
         **base,
+        allow_unvalidated=True,
     )
 
     assert within.federal_earned_income_credit > 0
@@ -220,7 +229,12 @@ def test_the_age_65_boxes_never_change_the_credit(year):
     """eitc_eligible decides Rule 11; the age-65 boxes cannot veto or grant it."""
     plateau = {2024: 632, 2025: 649}[year]
     at_10_600 = {2024: 609, 2025: 649}[year]
-    single = {"year": year, "backend": "graph", "num_eitc_children": 0}
+    single = {
+        "year": year,
+        "backend": "graph",
+        "num_eitc_children": 0,
+        "allow_unvalidated": True,
+    }
     joint = {**single, "filing_status": "Married/Joint", "w2_income": 10_000.0}
 
     # Spouses 24 and 65: neither meets both bounds, so not eligible.
@@ -274,6 +288,7 @@ def test_married_filing_separately_gets_no_credit(year):
         w2_income=15_000.0,
         num_eitc_children=2,
         **FACTS,
+        allow_unvalidated=True,
     )
 
     assert result.federal_earned_income_credit == 0
@@ -292,6 +307,7 @@ WITNESS = {
     "filing_status": "Single",
     "w2_income": 20_000.0,
     "num_dependents": 1,
+    "allow_unvalidated": True,
 }
 
 
@@ -424,7 +440,12 @@ def test_missouri_refuses_a_return_without_the_facts(year, on_error, facts, miss
 
     with pytest.raises(UnsupportedInputError, match=missing):
         evaluate_return(
-            year=year, backend="graph", on_error=on_error, **MO_LOW_INCOME, **facts
+            year=year,
+            backend="graph",
+            on_error=on_error,
+            **MO_LOW_INCOME,
+            **facts,
+            allow_unvalidated=True,
         )
 
 
@@ -449,6 +470,7 @@ def test_missouri_refusal_covers_the_whole_batch_before_evaluation(monkeypatch, 
             state=[None, "MO"],
             w2_income=16_750.0,
             eitc_eligible=[False, None] if mode == "zip" else None,
+            allow_unvalidated=True,
         )
 
 
@@ -458,8 +480,13 @@ def test_missouri_refuses_a_marginal_rate_without_the_facts():
     from tenforty import UnsupportedInputError, marginal_rate
 
     with pytest.raises(UnsupportedInputError, match="eitc_eligible"):
-        marginal_rate(year=2025, **MO_LOW_INCOME)
-    assert marginal_rate(year=2025, **MO_LOW_INCOME, eitc_eligible=False) >= 0
+        marginal_rate(year=2025, **MO_LOW_INCOME, allow_unvalidated=True)
+    assert (
+        marginal_rate(
+            year=2025, **MO_LOW_INCOME, eitc_eligible=False, allow_unvalidated=True
+        )
+        >= 0
+    )
 
 
 # --- Derivatives and solves --------------------------------------------------
@@ -481,9 +508,15 @@ def test_planning_calls_refuse_an_undetermined_credit(output, facts, missing):
     )
 
     calls = [
-        lambda: marginal_rate(**PLANNING, **facts, output=output),
-        lambda: marginal_rates(**PLANNING, **facts, output=output),
-        lambda: solve_for_income(target_tax=0.0, **PLANNING, **facts, output=output),
+        lambda: marginal_rate(
+            **PLANNING, **facts, output=output, allow_unvalidated=True
+        ),
+        lambda: marginal_rates(
+            **PLANNING, **facts, output=output, allow_unvalidated=True
+        ),
+        lambda: solve_for_income(
+            target_tax=0.0, **PLANNING, **facts, output=output, allow_unvalidated=True
+        ),
     ]
     for call in calls:
         with pytest.raises(UnsupportedInputError, match=missing):
@@ -497,8 +530,8 @@ def test_planning_calls_on_the_credit_with_the_facts(output):
     from tenforty import marginal_rate, marginal_rates
 
     facts = {"eitc_eligible": True, "num_eitc_children": 0}
-    rate = marginal_rate(**PLANNING, **facts, output=output)
-    rates = marginal_rates(**PLANNING, **facts, output=output)
+    rate = marginal_rate(**PLANNING, **facts, output=output, allow_unvalidated=True)
+    rates = marginal_rates(**PLANNING, **facts, output=output, allow_unvalidated=True)
 
     assert math.isfinite(rate)
     assert rates["w2_income"] == rate
@@ -509,12 +542,16 @@ def test_total_tax_planning_needs_no_eic_facts():
     """The credit is outside total tax, so total-tax planning never refuses."""
     from tenforty import marginal_rate, solve_for_income
 
-    without = marginal_rate(**PLANNING)
-    with_facts = marginal_rate(**PLANNING, eitc_eligible=True, num_eitc_children=0)
+    without = marginal_rate(**PLANNING, allow_unvalidated=True)
+    with_facts = marginal_rate(
+        **PLANNING, eitc_eligible=True, num_eitc_children=0, allow_unvalidated=True
+    )
     # A target observed above the $100,000 Tax Table ceiling is attainable.
     target = evaluate_return(year=2025, backend="graph", w2_income=130_000.0)
     wages = solve_for_income(
-        target_tax=target.total_tax, year=2025, filing_status="Single"
+        target_tax=target.total_tax,
+        year=2025,
+        filing_status="Single",
     )
 
     assert without == with_facts

@@ -56,10 +56,17 @@ FANOUT_NATURALS = sorted(
 
 
 def _finite_difference(natural: str, step: float = 1.0, **case) -> float:
-    base = evaluate_return(backend="graph", **case).federal_total_tax
+    base = evaluate_return(
+        backend="graph", **case, allow_unvalidated=True
+    ).federal_total_tax
     bumped = dict(case)
     bumped[natural] = case.get(natural, 0.0) + step
-    return (evaluate_return(backend="graph", **bumped).federal_total_tax - base) / step
+    return (
+        evaluate_return(
+            backend="graph", **bumped, allow_unvalidated=True
+        ).federal_total_tax
+        - base
+    ) / step
 
 
 def _gradient(natural: str, **case) -> float:
@@ -158,7 +165,9 @@ def test_duplicate_fanout_entry_does_not_double_count(monkeypatch):
 def _solve_for(natural: str, **known) -> float:
     from tenforty.backends import GraphBackend
 
-    target = evaluate_return(backend="graph", **known).federal_total_tax
+    target = evaluate_return(
+        backend="graph", **known, allow_unvalidated=True
+    ).federal_total_tax
     hidden = dict(known)
     hidden[natural] = 0.0
     return GraphBackend().solve(
@@ -217,7 +226,9 @@ def test_solve_recovers_wages_through_the_derived_schedule_se_node():
         w2_income=140_000.0,
         self_employment_income=60_000.0,
     )
-    target = evaluate_return(backend="graph", **known).federal_total_tax
+    target = evaluate_return(
+        backend="graph", **known, allow_unvalidated=True
+    ).federal_total_tax
 
     solved = _solve_for("w2_income", **known)
 
@@ -229,7 +240,7 @@ def test_solve_recovers_wages_through_the_derived_schedule_se_node():
 
     residual = (
         evaluate_return(
-            backend="graph", **{**known, "w2_income": solved}
+            backend="graph", **{**known, "w2_income": solved}, allow_unvalidated=True
         ).federal_total_tax
         - target
     )

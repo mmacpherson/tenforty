@@ -133,7 +133,9 @@ def _output_at(
     delta: float,
 ) -> float:
     value = float(case.get(wrt, 0.0)) + delta
-    result = evaluate_return(backend=backend, **{**case, wrt: value})
+    result = evaluate_return(
+        backend=backend, **{**case, wrt: value}, allow_unvalidated=True
+    )
     return float(getattr(result, output))
 
 
@@ -163,7 +165,12 @@ def _graph_linear_slope(
     """
 
     def evaluate(probe: dict[str, float | int | str]) -> float:
-        return float(getattr(evaluate_return(backend="graph", **probe), output))
+        return float(
+            getattr(
+                evaluate_return(backend="graph", **probe, allow_unvalidated=True),
+                output,
+            )
+        )
 
     return linear_path_slope(case, wrt, output, step, evaluate)
 

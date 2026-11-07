@@ -221,6 +221,7 @@ def test_default_equals_explicit_all_ctc(backend, year):
         w2_income=100_000,
         num_dependents=2,
         backend=backend,
+        allow_unvalidated=True,
     )
     default = evaluate_return(**common)
     explicit = evaluate_return(**common, num_ctc_dependents=2)

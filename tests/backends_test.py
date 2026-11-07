@@ -66,12 +66,19 @@ class TestBackendSelection:
         backend = get_backend("ots")
         assert backend.name == "ots"
 
+    @pytest.mark.requires_ots
+    def test_get_backend_default_is_ots(self):
+        """The default backend is "ots", in graph years too."""
+        assert get_backend().name == "ots"
+        assert get_backend(year=2025).name == "ots"
+        assert get_backend(year=2023).name == "ots"
+
     @pytest.mark.requires_graph
     @pytest.mark.requires_ots
-    def test_get_backend_default_is_auto(self):
-        """The default backend is "auto": graph for 2024, OTS for 2023."""
-        assert get_backend().name == "graph"
-        assert get_backend(year=2023).name == "ots"
+    def test_get_backend_auto_picks_by_year(self):
+        """Explicit "auto": graph for 2024, OTS for 2023."""
+        assert get_backend("auto").name == "graph"
+        assert get_backend("auto", year=2023).name == "ots"
 
 
 @pytest.mark.requires_graph
@@ -99,7 +106,11 @@ class TestGraphBackend:
         from tenforty import evaluate_return
 
         result = evaluate_return(
-            year=2024, state="CA", w2_income=100_000, backend="graph"
+            year=2024,
+            state="CA",
+            w2_income=100_000,
+            backend="graph",
+            allow_unvalidated=True,
         )
         assert result.state_total_tax > 0
 
@@ -195,7 +206,10 @@ class TestGraphBackend:
 
         with pytest.raises(NotImplementedError) as refusal:
             evaluate_return(
-                year=2024, w2_income=50_000, dependent_exemptions=1.0, backend="graph"
+                year=2024,
+                w2_income=50_000,
+                dependent_exemptions=1.0,
+                backend="graph",
             )
         assert "backend='ots'" not in str(refusal.value)
 

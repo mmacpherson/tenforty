@@ -130,6 +130,7 @@ def test_graph_niit_honors_the_capital_loss_limitation():
             taxable_interest=100_000,
             backend="graph",
             **{kind: -50_000},
+            allow_unvalidated=True,
         )
         assert r.federal_niit == pytest.approx(3_686.0, abs=1.0), kind
 
@@ -157,7 +158,7 @@ def test_graph_capital_loss_cap_does_not_leak_into_the_qcgws():
         long_term_capital_gains=10_000,
         short_term_capital_gains=-50_000,
     )
-    graph = evaluate_return(backend="graph", **inputs)
+    graph = evaluate_return(backend="graph", **inputs, allow_unvalidated=True)
     ots = evaluate_return(backend="ots", **inputs)
     assert graph.federal_adjusted_gross_income == pytest.approx(397_000.0, abs=1.0)
     assert graph.federal_income_tax == pytest.approx(ots.federal_income_tax, abs=1.0)
@@ -290,7 +291,7 @@ def test_itemized_category_amt_agrees_across_backends():
         itemized_deductions=33_410,
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
     assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=1.0)
 
 
@@ -327,7 +328,7 @@ def test_amt_std_addback_agrees_across_backends():
         incentive_stock_option_gains=200_000,
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
     assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=2.0)
     assert graph.federal_amt == pytest.approx(43_813.50, abs=1.0)
 
@@ -363,7 +364,7 @@ def test_amt_line_1_goes_negative_below_the_taxable_income_floor(year, official_
         incentive_stock_option_gains=200_000,
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
 
     assert ots.federal_amt == pytest.approx(official_amt, abs=1.0)
     assert graph.federal_amt == pytest.approx(official_amt, abs=1.0)
@@ -426,7 +427,7 @@ def test_ots_initializes_amt_preferential_inputs_at_zero_taxable_income(
         incentive_stock_option_gains=200_000.0,
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
 
     assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=0.01)
     assert graph.federal_amt == pytest.approx(official_amt, abs=0.01)
@@ -455,7 +456,7 @@ def test_ots_amt_preferential_cliff_ends_above_zero_taxable_income(
         incentive_stock_option_gains=200_000.0,
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
 
     assert ots.federal_taxable_income == pytest.approx(1.0, abs=0.01)
     assert ots.federal_amt == pytest.approx(graph.federal_amt, abs=0.01)
@@ -473,7 +474,7 @@ def test_graph_applies_the_high_income_mfs_amt_increase():
         incentive_stock_option_gains=300_000,
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
 
     assert graph.federal_amt == pytest.approx(ots.federal_amt, abs=2.0)
     assert ots.federal_amt == pytest.approx(68_380.75, abs=1.0)
@@ -508,7 +509,7 @@ def test_itemized_semantics_agree_across_backends():
         standard_or_itemized="Itemized",
     )
     ots = evaluate_return(backend="ots", **kwargs)
-    graph = evaluate_return(backend="graph", **kwargs)
+    graph = evaluate_return(backend="graph", **kwargs, allow_unvalidated=True)
     assert ots.federal_taxable_income == pytest.approx(
         graph.federal_taxable_income, abs=1.0
     )
@@ -807,7 +808,7 @@ K_CASES = [
 )
 def test_graph_amt_at_zero_taxable_income(inputs, amt, total):
     """Graph: line 1b may be negative and Part III keeps qualified dividends at 0%."""
-    result = evaluate_return(backend="graph", **inputs)
+    result = evaluate_return(backend="graph", **inputs, allow_unvalidated=True)
 
     assert result.federal_taxable_income == 0.0
     assert result.federal_amt == pytest.approx(amt, abs=0.01)
