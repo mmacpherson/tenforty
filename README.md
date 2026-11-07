@@ -18,16 +18,13 @@
 `tenforty` is an open-source Python package designed to help demystify US
 federal and state tax computations. It offers an accessible way to explore tax
 scenarios, compare different tax situations, and understand how the inputs to a
-return affect what you owe. It's built for an individual interrogating *their
-own return*: sensitivity analysis, what-if sweeps, and optimization.
+return affect what you owe. It's particularly useful for sensitivity analysis,
+what-if sweeps, and optimizing your taxes.
 
-It computes returns with two engines. One is
-[Open Tax Solver](https://opentaxsolver.sourceforge.net/) (OTS), wrapped in a
-Python library. The other is tenforty's own graph backend: tax forms written in
-a Haskell DSL, compiled to graphs and evaluated by a Rust runtime. By default
-each return goes to one of them by tax year and state; see
-[Which backend computes your return](#which-backend-computes-your-return). The
-ideas behind the package are discussed in a blog post
+The package is built on top of
+[Open Tax Solver](https://opentaxsolver.sourceforge.net/) (OTS) and tenforty's own
+backend, wrapping them into a Python library. The ideas behind it are
+discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
 
 You can try `tenforty` out immediately in your browser via the included Colab
