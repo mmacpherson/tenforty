@@ -31,7 +31,7 @@ def _graph_available() -> bool:
 
 
 def _sample_cases(n=24) -> list[dict]:
-    cases = json.loads(FIXTURE.read_text())["cases"]
+    cases = json.loads(FIXTURE.read_text(encoding="utf-8"))["cases"]
     step = max(1, len(cases) // n)
     return cases[::step][:n]
 

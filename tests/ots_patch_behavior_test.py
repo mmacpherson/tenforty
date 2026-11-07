@@ -159,7 +159,7 @@ def test_or_40_sch_a_line_8_is_platform_independent(year, tmp_path):
     federal, wages_set = re.subn(r"(?m)^L1a\s*$", f"L1a {WAGES}", federal, count=1)
     assert wages_set == 1
     federal_input = forms / "US_1040" / "witness.txt"
-    federal_input.write_text(federal)
+    federal_input.write_text(federal, encoding="utf-8")
     _run(clang, src / f"taxsolve_US_1040_{year}.c", src, [], federal_input)
     federal_output = federal_input.with_name("witness_out.txt")
 
@@ -183,10 +183,10 @@ def test_or_40_sch_a_line_8_is_platform_independent(year, tmp_path):
     outputs = {}
     for label, source in (("unpatched", before), ("patched", after)):
         program = src / f"or_{label}.c"
-        program.write_text(source)
+        program.write_text(source, encoding="utf-8")
         for mode in INIT_MODES:
             inp = forms / "OR_40" / f"{label}_{mode}.txt"
-            inp.write_text(or_input)
+            inp.write_text(or_input, encoding="utf-8")
             outputs[label, mode] = _run(
                 clang, program, src, [f"-ftrivial-auto-var-init={mode}"], inp
             )

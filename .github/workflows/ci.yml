@@ -21,9 +21,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Windows excluded due to runtime crashes. See docs/windows-build-research.md
         os: [ubuntu-latest, macos-latest]
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
+        # Windows builds graph only (OTS crashes there; see
+        # docs/windows-build-research.md), so it runs with --graph-only, at
+        # the oldest and newest supported Python.
+        include:
+        - {os: windows-latest, python-version: '3.10', pytest-args: --graph-only}
+        - {os: windows-latest, python-version: '3.15', pytest-args: --graph-only}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -41,7 +46,7 @@ jobs:
       run: uv sync
 
     - name: Run tests
-      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
+      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200 ${{ matrix.pytest-args }}
 
   # A graph-only install, as every Windows wheel is: the OTS extension is not
   # built. Tests that need OTS are marked requires_ots and --graph-only
@@ -105,10 +110,18 @@ jobs:
   wheel-install:
     name: installed wheel, Python 3.15 (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+        venv-python: [.venv/bin/python]
+        backends: [ots graph]
+        # A Windows wheel ships the graph backend only.
+        include:
+        - {os: windows-latest, venv-python: .venv/Scripts/python.exe, backends: graph, pytest-args: --graph-only}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -132,38 +145,50 @@ jobs:
 
     - name: Build and install wheel
       run: |
-        uv build --wheel --python .venv/bin/python
+        uv build --wheel --python ${{ matrix.venv-python }}
         uv pip install --no-deps dist/*.whl
 
-    - name: Require both native backends from the installed wheel
+    - name: Require the platform's native backends from the installed wheel
+      env:
+        EXPECTED_BACKENDS: ${{ matrix.backends }}
       run: |
         uv run --no-sync python - <<'PY'
+        import os
         import sys
         from pathlib import Path
 
         import tenforty
         from tenforty.backends import available_backends
 
+        expected = set(os.environ["EXPECTED_BACKENDS"].split())
         assert sys.version_info[:2] == (3, 15), sys.version
         assert Path(tenforty.__file__).is_relative_to(Path(sys.prefix)), tenforty.__file__
-        assert {"ots", "graph"} <= set(available_backends()), available_backends()
+        assert set(available_backends()) == expected, available_backends()
         PY
 
     - name: Run tests against the installed wheel
-      run: uv run --no-sync pytest --hypothesis-profile=ci
+      run: uv run --no-sync pytest --hypothesis-profile=ci ${{ matrix.pytest-args }}
 
   # Builds a wheel from the sdist, as any platform without a prebuilt wheel
   # does, in each supported source-build mode: with Rust it must ship the graph
   # backend; without Rust it must fail and say why; with the legacy
   # TENFORTY_WITHOUT_GRAPH=1 opt-out it must build OTS only; with
-  # TENFORTY_GRAPH_ONLY=1, as on Windows, it must ship graph and no OTS.
+  # TENFORTY_GRAPH_ONLY=1 it must ship graph and no OTS. On Windows a plain
+  # build with Rust must come out graph-only, with no variable set.
   sdist-install:
-    name: install from sdist (${{ matrix.mode }})
-    runs-on: ubuntu-latest
+    name: install from sdist (${{ matrix.mode }}${{ matrix.os != 'ubuntu-latest' && format(', {0}', matrix.os) || '' }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         mode: [with-rust, without-rust, without-graph, graph-only]
+        venv-bin: [bin]
+        include:
+        - {os: windows-latest, mode: with-rust, venv-bin: Scripts}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -257,12 +282,19 @@ jobs:
       if: matrix.mode != 'without-rust'
       run: |
         uv venv "$RUNNER_TEMP/venv"
-        uv pip install --python "$RUNNER_TEMP/venv/bin/python" wheel/*.whl
+        uv pip install --python "$RUNNER_TEMP/venv/${{ matrix.venv-bin }}/python" wheel/*.whl
 
     - name: Smoke-check the installed graph and OTS backends
-      if: matrix.mode == 'with-rust'
+      if: matrix.mode == 'with-rust' && runner.os != 'Windows'
       working-directory: ${{ runner.temp }}
       run: '"$RUNNER_TEMP/venv/bin/python" "$GITHUB_WORKSPACE/scripts/smoke_installed.py"'
+
+    - name: Smoke-check the Windows build came out graph-only, with no variable set
+      if: matrix.mode == 'with-rust' && runner.os == 'Windows'
+      working-directory: ${{ runner.temp }}
+      run: |
+        test -z "${TENFORTY_GRAPH_ONLY:-}"
+        "$RUNNER_TEMP/venv/Scripts/python" "$GITHUB_WORKSPACE/scripts/smoke_installed.py" --expect-backends graph
 
     - name: Smoke-check the graph-only install computes graph and refuses OTS
       if: matrix.mode == 'graph-only'
@@ -379,13 +411,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Windows excluded due to runtime crashes (tenforty-aqx.6.1). See
-        # docs/windows-build-research.md.
         # Each runner builds its native architecture: ubuntu-latest x86_64,
-        # ubuntu-24.04-arm aarch64, macos-latest arm64, macos-15-intel x86_64.
-        # Linux builds one Python at a time in containers, so each version gets
-        # its own job; each macOS runner stays one job, since few macOS runners
-        # run at once.
+        # ubuntu-24.04-arm aarch64, macos-latest arm64, macos-15-intel x86_64,
+        # windows-latest AMD64. Linux builds one Python at a time in
+        # containers, and Windows builds the Rust extension once per Python,
+        # so each of their versions gets its own job; each macOS runner stays
+        # one job, since few macOS runners run at once. Windows wheels are
+        # graph-only (setup.py never builds OTS there; see
+        # docs/windows-build-research.md).
         include:
         - {os: ubuntu-latest, build: cp310-*}
         - {os: ubuntu-latest, build: cp311-*}
@@ -403,6 +436,12 @@ jobs:
         # cibuildwheel defaults x86_64 to 10.9, which delocate then rejects.
         - {os: macos-latest, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*, macos_target: '11.0'}
         - {os: macos-15-intel, build: cp310-* cp311-* cp312-* cp313-* cp314-* cp315-*, macos_target: '10.12'}
+        - {os: windows-latest, build: cp310-*}
+        - {os: windows-latest, build: cp311-*}
+        - {os: windows-latest, build: cp312-*}
+        - {os: windows-latest, build: cp313-*}
+        - {os: windows-latest, build: cp314-*}
+        - {os: windows-latest, build: cp315-*}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -419,8 +458,15 @@ jobs:
         CIBW_BEFORE_BUILD: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && pip install setuptools-rust>=1.7
         CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
         CIBW_ENVIRONMENT_MACOS: PATH="$HOME/.cargo/bin:$PATH" MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_target }}
-        # Every shipped wheel must load and evaluate both backends.
+        # The runner's Rust toolchain builds the Windows wheels, so the
+        # rustup install and its PATH entry are left out (empty overrides).
+        CIBW_ARCHS_WINDOWS: AMD64
+        CIBW_BEFORE_BUILD_WINDOWS: ''
+        CIBW_ENVIRONMENT_WINDOWS: ''
+        # Every shipped wheel must load and evaluate both backends, except a
+        # Windows wheel, which must evaluate graph and refuse OTS, typed.
         CIBW_TEST_COMMAND: python {project}/scripts/smoke_installed.py
+        CIBW_TEST_COMMAND_WINDOWS: python {project}/scripts/smoke_installed.py --expect-backends graph
 
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:

@@ -196,7 +196,9 @@ INCOME_TAX_GRAPH_STATES = sorted(
 
 @cache
 def _graph_output_names(year: int) -> frozenset[str]:
-    graph = json.loads((_forms_dir() / f"us_tax_graph_{year}.json").read_text())
+    graph = json.loads(
+        (_forms_dir() / f"us_tax_graph_{year}.json").read_text(encoding="utf-8")
+    )
     nodes = graph["nodes"]
     return frozenset(nodes[str(node_id)]["name"] for node_id in graph["outputs"])
 

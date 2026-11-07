@@ -202,7 +202,7 @@ def test_import_tenforty_needs_no_otslib():
 
 def test_pyproject_declares_no_extension_modules():
     """setup.py alone declares the extensions; a static one ignores graph-only."""
-    assert "ext-modules" not in (REPO / "pyproject.toml").read_text()
+    assert "ext-modules" not in (REPO / "pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_no_graph_only_test_needs_ots(request):

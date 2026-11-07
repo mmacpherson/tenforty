@@ -1,5 +1,24 @@
 ## [Unreleased]
 
+### Added (Windows)
+- **Windows wheels, graph backend only.** `pip install tenforty` on Windows
+  x86_64 (CPython 3.10–3.15) now installs a prebuilt wheel with the graph
+  backend and without OTS, which still crashes when built for Windows
+  ([Windows build research](docs/windows-build-research.md)).
+  - 2024 and 2025 returns compute on graph as on any other platform.
+  - Anything that needs OTS (2018–2023, the 2024–2025 states `auto` keeps on
+    OTS, `backend="ots"`, `evaluate_form`) raises `BackendUnavailableError`
+    before computing, whatever `on_error` says, naming what graph can do
+    instead.
+  - The README's Installation section says which of its examples need OTS.
+  - CI runs the graph-only suite on Windows (Python 3.10 and 3.15), tests an
+    installed wheel and a wheel built from the sdist, and smoke-checks every
+    Windows wheel it builds.
+
+### Fixed (testing)
+- The tests open every text file as UTF-8, so they read the same on Windows,
+  where Python before 3.15 defaults to the locale's code page.
+
 ### Fixed (installs without OTS)
 - A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every future Windows
   wheel) now has a clear contract:

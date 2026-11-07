@@ -1900,8 +1900,8 @@ def test_parity_findings_are_unique_tracked_and_ots_ones_staged_and_witnessed():
     assert len(finding_ids) == len(set(finding_ids))
     reports = (
         Path(__file__).parents[2] / "docs" / "upstream-ots-reports.md"
-    ).read_text()
-    this_file = Path(__file__).read_text()
+    ).read_text(encoding="utf-8")
+    this_file = Path(__file__).read_text(encoding="utf-8")
     for defect in SIGNATURES:
         if defect.side == "ots":
             number = defect.tracking.removeprefix("upstream report ")
