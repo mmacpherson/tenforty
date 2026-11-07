@@ -311,6 +311,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": true,
         "2025": true
@@ -338,6 +342,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,
@@ -375,6 +383,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -410,6 +422,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -447,6 +463,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -482,6 +502,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -526,6 +550,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -558,6 +586,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -589,6 +621,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -626,6 +662,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -653,6 +693,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,
@@ -690,6 +734,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -726,6 +774,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -757,6 +809,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -790,6 +846,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -822,6 +882,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": true,
         "2025": true
@@ -853,6 +917,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -890,6 +958,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -921,6 +993,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -954,6 +1030,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -985,6 +1065,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1022,6 +1106,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1058,6 +1146,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1089,6 +1181,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1126,6 +1222,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1161,6 +1261,22 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {
+          "single": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "married_joint": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "married_separate": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "head_of_household": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "qualifying_widow": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default."
+        },
+        "2025": {
+          "single": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "married_joint": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "married_separate": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "head_of_household": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default.",
+          "qualifying_widow": "MO graph returns subtract the federal earned income credit, which needs eitc_eligible: pass eitc_eligible=False if the filer cannot claim it, or eitc_eligible=True with num_eitc_children (EIC qualifying children, not dependents). Neither has a default."
+        }
       },
       "validated": {
         "2024": false,
@@ -1203,8 +1319,20 @@
         }
       },
       "unsupported_inputs": {
-        "2024": [],
-        "2025": []
+        "2024": ["itemized_deductions", "schedule_1_income"],
+        "2025": ["itemized_deductions", "schedule_1_income"]
+      },
+      "refused_statuses": {
+        "2024": {
+          "married_joint": "MS Married/Joint returns on the graph backend need taxpayer_adjusted_gross_income, which has no default: pass state_facts=tenforty.state_facts.MS(taxpayer_adjusted_gross_income=<actual whole-dollar amount>). Taxpayer Column A. Actual Mississippi Form 80-105 line-13 AGI from the corresponding page-2 line-66 column, before deductions and exemptions, for a full-year joint or combined return. Finite signed whole dollars; explicit 0 is supplied, None is missing. Both taxpayer and spouse AGIs are required and used exactly. Neither column is inferred from household rounding. The sum is validated against the household entries within their source-derived per-entry rounding bound. The computation chooses the exact minimum lawful deduction/exemption allocation (2024/2025 instructions pp. 5/7). No default or assumption is used.",
+          "head_of_household": "MS Head of Family requires num_dependents >= 1",
+          "qualifying_widow": "MS Widow(er) returns on the graph backend need head_of_family_eligible, which has no default: pass state_facts=tenforty.state_facts.MS(head_of_family_eligible=True) or =False. For federal Head_of_House or qualifying surviving spouse (Widow(er)), True asserts all Mississippi Head of Family conditions: maintaining the household and an actual federally qualifying dependent residing there for the required year. True selects MS Head of Family and requires num_dependents >= 1. False computes MS Single amounts; it does not certify lawful Single status. Still-married federal HoH filers may need an MS married return and prepared state handling instead. MS married HoF requires living apart from the spouse all year, not only the federal last-six-month test. Head_of_House has the documented resident-dependent baseline True when this fact is absent; a parent living elsewhere is a special circumstance supplied as False. No assumption is recorded for that baseline. Federal QSS or a positive dependent count alone never establishes QSS qualification. None is missing and refused for QSS. No dependent is synthesized."
+        },
+        "2025": {
+          "married_joint": "MS Married/Joint returns on the graph backend need taxpayer_adjusted_gross_income, which has no default: pass state_facts=tenforty.state_facts.MS(taxpayer_adjusted_gross_income=<actual whole-dollar amount>). Taxpayer Column A. Actual Mississippi Form 80-105 line-13 AGI from the corresponding page-2 line-66 column, before deductions and exemptions, for a full-year joint or combined return. Finite signed whole dollars; explicit 0 is supplied, None is missing. Both taxpayer and spouse AGIs are required and used exactly. Neither column is inferred from household rounding. The sum is validated against the household entries within their source-derived per-entry rounding bound. The computation chooses the exact minimum lawful deduction/exemption allocation (2024/2025 instructions pp. 5/7). No default or assumption is used.",
+          "head_of_household": "MS Head of Family requires num_dependents >= 1",
+          "qualifying_widow": "MS Widow(er) returns on the graph backend need head_of_family_eligible, which has no default: pass state_facts=tenforty.state_facts.MS(head_of_family_eligible=True) or =False. For federal Head_of_House or qualifying surviving spouse (Widow(er)), True asserts all Mississippi Head of Family conditions: maintaining the household and an actual federally qualifying dependent residing there for the required year. True selects MS Head of Family and requires num_dependents >= 1. False computes MS Single amounts; it does not certify lawful Single status. Still-married federal HoH filers may need an MS married return and prepared state handling instead. MS married HoF requires living apart from the spouse all year, not only the federal last-six-month test. Head_of_House has the documented resident-dependent baseline True when this fact is absent; a parent living elsewhere is a special circumstance supplied as False. No assumption is recorded for that baseline. Federal QSS or a positive dependent count alone never establishes QSS qualification. None is missing and refused for QSS. No dependent is synthesized."
+        }
       },
       "validated": {
         "2024": true,
@@ -1237,6 +1365,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1274,6 +1406,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1306,6 +1442,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1337,6 +1477,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1376,6 +1520,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1407,6 +1555,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1440,6 +1592,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1467,6 +1623,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,
@@ -1503,6 +1663,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {
+          "married_separate": "NY married filing separately returns need spouse AGI/dependents, available only as raw graph inputs."
+        },
+        "2025": {
+          "married_separate": "NY married filing separately returns need spouse AGI/dependents, available only as raw graph inputs."
+        }
       },
       "validated": {
         "2024": false,
@@ -1546,6 +1714,14 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {
+          "married_joint": "OH Married/Joint returns on the graph backend need spouses_both_have_qualifying_income, which has no default: pass state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=True) or =False. True when, on an Ohio married-filing-jointly return, each spouse separately has at least $500 of qualifying income: income included in Ohio adjusted gross income other than interest, dividends and distributions, capital gains, and rents and royalties. Amounts deducted on the Ohio Schedule of Adjustments (for example business income under the business income deduction, Social Security, state and local tax refunds) are not in Ohio AGI and do not count; wages do. It states a fact about the spouses' income, not whether the credit is allowed: the credit's percentage, its $650 cap and the 2025 MAGI limit are computed."
+        },
+        "2025": {
+          "married_joint": "OH Married/Joint returns on the graph backend need spouses_both_have_qualifying_income, which has no default: pass state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=True) or =False. True when, on an Ohio married-filing-jointly return, each spouse separately has at least $500 of qualifying income: income included in Ohio adjusted gross income other than interest, dividends and distributions, capital gains, and rents and royalties. Amounts deducted on the Ohio Schedule of Adjustments (for example business income under the business income deduction, Social Security, state and local tax refunds) are not in Ohio AGI and do not count; wages do. It states a fact about the spouses' income, not whether the credit is allowed: the credit's percentage, its $650 cap and the 2025 MAGI limit are computed."
+        }
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1582,6 +1758,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1613,6 +1793,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,
@@ -1654,6 +1838,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1685,6 +1873,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1718,6 +1910,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1745,6 +1941,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,
@@ -1774,6 +1974,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": true,
         "2025": true
@@ -1801,6 +2005,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,
@@ -1833,6 +2041,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1870,6 +2082,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -1905,6 +2121,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": false,
@@ -1946,6 +2166,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": true,
         "2025": true
@@ -1982,6 +2206,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -2014,6 +2242,10 @@
         "2024": [],
         "2025": []
       },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
+      },
       "validated": {
         "2024": false,
         "2025": false
@@ -2041,6 +2273,10 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "refused_statuses": {
+        "2024": {},
+        "2025": {}
       },
       "validated": {
         "2024": true,

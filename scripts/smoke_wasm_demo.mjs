@@ -172,6 +172,39 @@ assert.ok(
 );
 assert.ok(illinoisAnalysis.results.state_total_tax > 0);
 
+const mississippi = { ...illinois, jurisdiction: "MS" };
+assert.ok(
+  calculateScenario(graphlib, graphs.get(2025), contract, mississippi)
+    .state_total_tax > 0,
+  "a Single MS return computes",
+);
+for (const filingStatus of [
+  "married_joint",
+  "qualifying_widow",
+  "head_of_household",
+]) {
+  assert.throws(
+    () =>
+      calculateScenario(graphlib, graphs.get(2025), contract, {
+        ...mississippi,
+        filingStatus,
+      }),
+    /browser calculator cannot compute a MS 2025/,
+    `MS ${filingStatus} needs facts the browser cannot supply`,
+  );
+}
+for (const name of ["schedule_1_income", "itemized_deductions"]) {
+  assert.throws(
+    () =>
+      calculateScenario(graphlib, graphs.get(2025), contract, {
+        ...mississippi,
+        inputs: { ...mississippi.inputs, [name]: 1000 },
+      }),
+    new RegExp(`${name} is not supported for MS/2025`),
+    `a nonzero ${name} is refused for MS, as in Python`,
+  );
+}
+
 for (const value of ["true", 1, null]) {
   assert.throws(
     () =>

@@ -63,8 +63,29 @@ def test_browser_contract_exposes_known_limitations():
         "validated-jurisdictions",
         "state-slopes",
     }
-    for jurisdiction in CONTRACT["jurisdictions"].values():
-        assert all(not names for names in jurisdiction["unsupported_inputs"].values())
+
+
+def test_browser_refuses_what_python_refuses_on_the_graph():
+    """The raw-graph browser path carries Python's refusals (contract probes).
+
+    Mississippi needs facts the browser cannot supply for Married/Joint and
+    Widow(er), and a dependent for Head_of_House; its ambiguous aggregates are
+    refused, as on Python's graph path.
+    """
+    for year in ("2024", "2025"):
+        ms = CONTRACT["jurisdictions"]["MS"]
+        assert set(ms["refused_statuses"][year]) == {
+            "married_joint",
+            "qualifying_widow",
+            "head_of_household",
+        }
+        assert {"schedule_1_income", "itemized_deductions"} <= set(
+            ms["unsupported_inputs"][year]
+        )
+        for code in ("US", "IL", "OR", "TX"):
+            spec = CONTRACT["jurisdictions"][code]
+            assert spec["refused_statuses"][year] == {}, code
+            assert spec["unsupported_inputs"][year] == [], code
 
 
 def test_browser_ui_uses_the_public_calculation_boundary():

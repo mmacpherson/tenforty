@@ -176,7 +176,9 @@ export function validateBrowserContract(contract, graph, year) {
   for (const [code, specification] of Object.entries(contract.jurisdictions)) {
     for (const supportedYear of contract.supported_years) {
       if (
-        typeof specification.validated?.[String(supportedYear)] !== "boolean"
+        typeof specification.validated?.[String(supportedYear)] !== "boolean" ||
+        typeof specification.refused_statuses?.[String(supportedYear)] !==
+          "object"
       ) {
         throw new BrowserContractError(
           `Browser contract must say whether ${code} ${supportedYear} is validated`,
@@ -279,6 +281,14 @@ export class BrowserTaxRuntime {
       "jurisdiction",
     );
     requireEntry(contract.filing_statuses, filingStatus, "filing status");
+    const refusal =
+      jurisdictionSpec.refused_statuses?.[yearKey]?.[filingStatus];
+    if (refusal) {
+      throw new BrowserContractError(
+        `The browser calculator cannot compute a ${jurisdiction} ${year} ` +
+          `${contract.filing_statuses[filingStatus]} return: ${refusal}`,
+      );
+    }
     if (!requireBooleanOption("allowUnvalidated", allowUnvalidated)) {
       requireValidatedJurisdiction(contract, jurisdiction, year);
     }

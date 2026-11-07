@@ -6,8 +6,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import warnings
 from pathlib import Path
 
+from tenforty import (
+    LegacyItemizedDeductionsWarning,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+    evaluate_return,
+)
 from tenforty.backends.graph import (
     FEDERAL_OUTPUT_NODES,
     STATE_PLANNING_DEFECT,
@@ -21,9 +28,18 @@ from tenforty.mappings import (
     state_natural_to_node,
     state_output_lines,
 )
-from tenforty.models import DEDUCTION_CHOICE_ENCODING, STATE_TO_FORM
+from tenforty.models import DEDUCTION_CHOICE_ENCODING, STATE_TO_FORM, OTSFilingStatus
 
 ROOT = Path(__file__).resolve().parents[1]
+
+BROWSER_STATUSES = {
+    "single": OTSFilingStatus.SINGLE,
+    "married_joint": OTSFilingStatus.MARRIED_JOINT,
+    "married_separate": OTSFilingStatus.MARRIED_SEPARATE,
+    "head_of_household": OTSFilingStatus.HEAD_OF_HOUSEHOLD,
+    "qualifying_widow": OTSFilingStatus.WIDOW_WIDOWER,
+}
+PROBE_AMOUNT = 1_000.0
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
 
 INPUTS = {
@@ -470,6 +486,55 @@ def _graph_inventory(year: int) -> tuple[set[str], set[str], dict[str, object]]:
     return input_names, output_names, metadata
 
 
+def _python_refusal(year: int, state: str | None, status: str, **inputs) -> str | None:
+    """Return Python's refusal message for this graph return, or None.
+
+    The browser runs the raw graph, which skips the Python-side rules: required
+    state facts, inputs the state graph cannot read, and return-level refusals.
+    Asking Python here carries every such rule into the contract, so the
+    browser refuses exactly what Python refuses. The scope rule is lifted:
+    the contract's ``validated`` flag carries it separately.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", LegacyItemizedDeductionsWarning)
+        try:
+            evaluate_return(
+                year=year,
+                state=state,
+                filing_status=BROWSER_STATUSES[status],
+                backend="graph",
+                allow_unvalidated=True,
+                **inputs,
+            )
+        except (UnsupportedInputError, UnsupportedReturnError) as refusal:
+            return str(refusal)
+    return None
+
+
+def _refusals(year: int, state: str | None) -> tuple[dict[str, str], list[str]]:
+    """Return the statuses and nonzero money inputs Python refuses here.
+
+    When every status is refused the return never computes, so no input is
+    probed.
+    """
+    statuses = {
+        status: message
+        for status in BROWSER_STATUSES
+        if (message := _python_refusal(year, state, status)) is not None
+    }
+    probe_status = next((s for s in BROWSER_STATUSES if s not in statuses), None)
+    if probe_status is None:
+        return statuses, []
+    inputs = sorted(
+        name
+        for name, metadata in INPUTS.items()
+        if metadata["type"] == "money"
+        and _python_refusal(year, state, probe_status, **{name: PROBE_AMOUNT})
+        is not None
+    )
+    return statuses, inputs
+
+
 def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
     inventories = {year: _graph_inventory(year) for year in years}
     jurisdictions: dict[str, object] = {
@@ -478,7 +543,10 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             "kind": "federal",
             "input_nodes": {str(year): {} for year in years},
             "output_nodes": {str(year): {} for year in years},
-            "unsupported_inputs": {str(year): [] for year in years},
+            "unsupported_inputs": {
+                str(year): _refusals(year, None)[1] for year in years
+            },
+            "refused_statuses": {str(year): _refusals(year, None)[0] for year in years},
             "validated": {str(year): True for year in years},
             "exclusion_reasons": {str(year): [] for year in years},
         }
@@ -502,6 +570,7 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             "input_nodes": {},
             "output_nodes": {},
             "unsupported_inputs": {},
+            "refused_statuses": {},
             "validated": {
                 str(year): graph_state_in_scope(state, year) for year in years
             },
@@ -536,7 +605,11 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
 
             jurisdiction["input_nodes"][str(year)] = mapped_inputs
             jurisdiction["output_nodes"][str(year)] = mapped_outputs
-            jurisdiction["unsupported_inputs"][str(year)] = unsupported_inputs
+            refused_statuses, refused_inputs = _refusals(year, state_code)
+            jurisdiction["unsupported_inputs"][str(year)] = sorted(
+                set(unsupported_inputs) | set(refused_inputs)
+            )
+            jurisdiction["refused_statuses"][str(year)] = refused_statuses
 
         jurisdictions[state_code] = jurisdiction
 
