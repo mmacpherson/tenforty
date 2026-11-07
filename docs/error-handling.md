@@ -142,6 +142,17 @@ under the default `"auto"` it raises this for any 2024 or 2025 return that
 `"auto"` routes to graph; it never falls back to OTS. Pass `backend="ots"` with
 that package.
 
+A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every Windows build) is the
+mirror case: it has no OTS extension. It raises this for every return that
+needs OTS: 2018-2023, a state `"auto"` keeps on OTS, `backend="ots"`, and
+`core.evaluate_form`. The message names the returns and, where the graph
+backend covers them, the `backend="graph"` remedy. Like the OTS-only package,
+it never falls back to the other backend. A batch with any such row is refused
+whole.
+
+Both are raised before any return is computed, under every `on_error` policy:
+a missing backend describes the install, not a failed computation.
+
 
 ### `OTSError`
 

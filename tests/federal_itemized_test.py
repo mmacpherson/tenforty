@@ -161,6 +161,7 @@ def test_batch_refuses_both_representations_whole(engine_calls, mode, on_error):
     assert engine_calls == []
 
 
+@pytest.mark.requires_ots
 def test_explicit_zero_legacy_amount_is_not_a_conflict():
     """Explicit zero legacy amount is not a conflict."""
     evaluate_return(
@@ -174,6 +175,7 @@ def test_explicit_zero_legacy_amount_is_not_a_conflict():
 # --- The legacy transition -------------------------------------------------------
 
 
+@pytest.mark.requires_ots
 def test_legacy_amount_warns_without_prescribing_amt():
     """Legacy amount warns without prescribing amt."""
     with pytest.warns(LegacyItemizedDeductionsWarning) as caught:
@@ -185,6 +187,7 @@ def test_legacy_amount_warns_without_prescribing_amt():
     assert issubclass(LegacyItemizedDeductionsWarning, DeprecationWarning)
 
 
+@pytest.mark.requires_ots
 def test_batch_warns_once_per_call():
     """Batch warns once per call."""
     with pytest.warns(LegacyItemizedDeductionsWarning) as caught:
@@ -198,6 +201,7 @@ def test_batch_warns_once_per_call():
     assert len(legacy) == 1
 
 
+@pytest.mark.requires_ots
 def test_no_warning_without_a_legacy_amount():
     """No warning without a legacy amount."""
     with warnings.catch_warnings():
@@ -332,6 +336,7 @@ def test_legacy_numbers_equal_the_backends_reproduction_recipe(
 # --- OTS capability ---------------------------------------------------------------
 
 
+@pytest.mark.requires_ots
 def test_ots_refuses_amt_above_regular_tax_before_evaluation(engine_calls):
     """Ots refuses amt above regular tax before evaluation."""
     with pytest.raises(UnsupportedInputError, match="amt"):
@@ -349,6 +354,7 @@ def test_ots_refuses_amt_above_regular_tax_before_evaluation(engine_calls):
     [(30_000, 30_000), (30_000, 0), (30_000, 12_000)],
     ids=["equal", "zero-amt", "partial"],
 )
+@pytest.mark.requires_ots
 def test_ots_refuses_new_model_for_states_reading_schedule_a(
     engine_calls, state, amounts
 ):
@@ -366,6 +372,7 @@ def test_ots_refuses_new_model_for_states_reading_schedule_a(
 
 
 @pytest.mark.parametrize("state", ["AZ", "CA", "NY"])
+@pytest.mark.requires_ots
 def test_ots_accepts_a_zero_model_for_states_reading_schedule_a(state):
     """Ots accepts a zero model for states reading schedule a."""
     evaluate_return(
@@ -377,6 +384,7 @@ def test_ots_accepts_a_zero_model_for_states_reading_schedule_a(state):
 
 
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+@pytest.mark.requires_ots
 def test_ots_refusal_in_a_late_batch_row_refuses_the_whole_batch(
     engine_calls, on_error
 ):
@@ -406,6 +414,7 @@ def test_ots_forced_standard_refusal_counts_the_new_carriers():
 
 
 @pytest.mark.parametrize("amounts", [(30_000, 30_000), (30_000, 0), (30_000, 12_000)])
+@pytest.mark.requires_ots
 def test_ots_federal_years_accept_the_new_model(amounts):
     """Ots federal years accept the new model."""
     regular, amt = amounts
@@ -424,6 +433,7 @@ def test_ots_federal_years_accept_the_new_model(amounts):
 ECHO = ["federal_itemized_regular_tax", "federal_itemized_amt"]
 
 
+@pytest.mark.requires_ots
 def test_echo_columns_sit_at_the_parameter_position():
     """Echo columns sit at the parameter position."""
     parameters = [
@@ -440,6 +450,7 @@ def test_echo_columns_sit_at_the_parameter_position():
     assert frame.schema["federal_itemized_amt"] == pl.Float64
 
 
+@pytest.mark.requires_ots
 def test_echo_is_null_when_not_supplied_and_keeps_explicit_zero():
     """Echo is null when not supplied and keeps explicit zero."""
     frame = evaluate_returns(
@@ -451,6 +462,7 @@ def test_echo_is_null_when_not_supplied_and_keeps_explicit_zero():
     assert frame.select(ECHO).rows() == [(None, None), (0.0, 0.0)]
 
 
+@pytest.mark.requires_ots
 def test_a_model_is_one_cross_axis_value():
     """A model is one cross axis value."""
     models = [
@@ -472,6 +484,7 @@ def test_a_model_is_one_cross_axis_value():
     ]
 
 
+@pytest.mark.requires_ots
 def test_a_model_broadcasts_in_zip_mode():
     """A model broadcasts in zip mode."""
     model = FederalItemized(regular_tax=30_000, amt=12_000)
@@ -485,6 +498,7 @@ def test_a_model_broadcasts_in_zip_mode():
     assert frame.select(ECHO).rows() == [(30_000.0, 12_000.0)] * 2
 
 
+@pytest.mark.requires_ots
 def test_empty_frame_has_the_echo_columns():
     """Empty frame has the echo columns."""
     frame = evaluate_returns(year=2024, w2_income=[], backend="ots")
@@ -492,6 +506,7 @@ def test_empty_frame_has_the_echo_columns():
     assert all(name in frame.columns for name in ECHO)
 
 
+@pytest.mark.requires_ots
 def test_failed_rows_keep_the_echo(monkeypatch):
     """Failed rows keep the echo."""
 

@@ -15,6 +15,7 @@ from tenforty.graph_scope import KNOWN_GRAPH_DEFECTS
 from tenforty.models import OTSState, TaxReturnInput
 
 
+@pytest.mark.requires_ots
 def test_nonzero_state_adjustment_warns_deprecated():
     """A nonzero state_adjustment emits a DeprecationWarning."""
     with pytest.warns(DeprecationWarning, match="state_adjustment"):
@@ -27,6 +28,7 @@ def test_nonzero_state_adjustment_warns_deprecated():
         )
 
 
+@pytest.mark.requires_ots
 def test_batch_with_nonzero_state_adjustment_warns_deprecated():
     """The batch API warns too."""
     with pytest.warns(DeprecationWarning, match="state_adjustment"):
@@ -39,6 +41,7 @@ def test_batch_with_nonzero_state_adjustment_warns_deprecated():
         )
 
 
+@pytest.mark.requires_ots
 def test_zero_state_adjustment_does_not_warn():
     """The default never warns."""
     with warnings.catch_warnings():

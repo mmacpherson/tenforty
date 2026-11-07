@@ -171,6 +171,7 @@ def test_gradient_wrt_children_is_the_per_child_credit(year):
 
 
 @pytest.mark.parametrize("year", range(2018, 2023))
+@pytest.mark.requires_ots
 def test_ots_applies_no_federal_credit_before_2023(year):
     """OTS ships no Schedule 8812 program before 2023; the count is ignored."""
     common = dict(year=year, filing_status="Married/Joint", w2_income=100_000)
@@ -179,6 +180,7 @@ def test_ots_applies_no_federal_credit_before_2023(year):
     assert with_children.federal_total_tax == without.federal_total_tax
 
 
+@pytest.mark.requires_ots
 def test_ots_2023_applies_the_credit():
     """2023 runs the OTS Schedule 8812 too; no independent 2023 values are held."""
     common = dict(year=2023, filing_status="Married/Joint", w2_income=100_000)

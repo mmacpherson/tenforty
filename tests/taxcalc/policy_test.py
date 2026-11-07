@@ -115,6 +115,7 @@ def test_f19_does_not_model_amt_sensitive_deduction_choice_without_selection():
 
 
 @pytest.mark.parametrize("backend", ["ots", "graph"])
+@pytest.mark.without_ots
 def test_f19_does_not_match_when_taxcalc_selected_itemization(backend):
     """The minimized QBI-suite failure is agreement, not a deduction-choice tie."""
     case = _case(
@@ -138,6 +139,7 @@ def test_f19_does_not_match_when_taxcalc_selected_itemization(backend):
 
 @pytest.mark.parametrize("backend", ["ots", "graph"])
 @pytest.mark.parametrize("mode", ["Auto", "Itemized"])
+@pytest.mark.without_ots
 def test_f19_keeps_the_exact_delta_for_the_real_standard_deduction_tie(backend, mode):
     """Auto and Itemized take Schedule A; only the reference keeps standard here."""
     case = _case(
@@ -308,6 +310,7 @@ def test_f36_bounds_the_negative_agi_schedule_a():
     ],
     ids=["graph", "zero-agi", "positive-agi", "auto", "standard"],
 )
+@pytest.mark.without_ots
 def test_f36_negative_controls(backend, update, agi):
     """F36 never fires on graph, at a non-negative AGI, or without forced itemizing."""
     case = (
@@ -575,6 +578,7 @@ def test_f31_counts_only_the_excess_over_the_standard_deduction():
         ("ots", {"salt": 0.0}, 300_000.0),
     ],
 )
+@pytest.mark.without_ots
 def test_f31_is_silent_where_the_cap_does_not_change_the_return(backend, updates, agi):
     """No shift outside MFS (250k, 500k] or where taxes fit both caps."""
     case = {
@@ -611,6 +615,7 @@ def test_f32_passes_the_rounding_and_rate_shift():
         ("ots", {"w2": 100_000.0}),
     ],
 )
+@pytest.mark.without_ots
 def test_f32_negative_controls(backend, updates):
     """No shift without interest, outside 2025, for MFS (F33), or with no excess."""
     case = {**_obbba_case(status="Single", w2=112_300.0, car_loan=4_500.0), **updates}
@@ -641,6 +646,7 @@ def test_f33_passes_the_whole_lawful_mfs_deduction():
         ("ots", {"car_loan": 0.0, "tips": 10_000.0}),
     ],
 )
+@pytest.mark.without_ots
 def test_f33_negative_controls(backend, updates):
     """No shift off MFS, without interest, or once the deduction is phased out."""
     case = {
@@ -678,6 +684,7 @@ def test_f34_bounds_the_missing_senior_add_back_where_amt_binds():
         ("ots", {"w2": 175_000.0}, 42_801.0),
     ],
 )
+@pytest.mark.without_ots
 def test_f34_negative_controls(backend, updates, amt):
     """Silent without AMT, a senior deduction, or outside 2025 OTS."""
     case = {
@@ -690,6 +697,7 @@ def test_f34_negative_controls(backend, updates, amt):
 
 
 @pytest.mark.parametrize("backend", ["ots", "graph"])
+@pytest.mark.without_ots
 def test_obbba_signatures_are_inactive_without_obbba_inputs(backend):
     """A pre-OBBBA 2025 case draws no F31-F34 delta whatever its size."""
     case = _obbba_case(status="Married/Sep", w2=300_000.0, iso=200_000.0)
@@ -899,6 +907,7 @@ def test_f28_covers_taxcalc_itemizing_zero_under_forced_standard():
 
 
 @pytest.mark.parametrize("backend", ["ots", "graph"])
+@pytest.mark.without_ots
 def test_f19_keeps_the_tie_when_taxcalc_kept_standard_despite_an_iso_spread(backend):
     """Differential witness: forced itemization onto 0%-bracket dividends, ISO 100,001."""
     case = _case(
@@ -956,6 +965,7 @@ def test_f36_withholds_auto_when_ots_takes_the_standard_deduction(year):
     assert _f36_ots_schedule_a_with_negative_agi("ots", auto, {"agi": -2_916.0}) == {}
 
 
+@pytest.mark.requires_ots
 def test_ots_auto_itemizing_matches_forced_itemizing_live():
     """Astra's probe: OTS itemizes under Auto exactly as when forced (AST-59)."""
     from tenforty import evaluate_return
@@ -986,6 +996,7 @@ ZERO_TI_CASES = [
 
 
 @pytest.mark.parametrize(("update", "zero"), ZERO_TI_CASES)
+@pytest.mark.requires_ots
 def test_ots_zero_taxable_income_classifier_matches_ots(update, zero):
     """2025 Single, wages 25,000 (tips inside them), dividends 5,000, ISO 200,000."""
     from tenforty import evaluate_return
@@ -1052,6 +1063,7 @@ MFS_SALT_WITNESSES = [
 
 
 @pytest.mark.parametrize("update", MFS_SALT_WITNESSES)
+@pytest.mark.requires_ots
 def test_ots_mfs_salt_worksheet_keeps_line_15_positive(update):
     """The classifier and F27 follow OTS's MFS worksheet, not a $500,000 base."""
     from tenforty import evaluate_return

@@ -32,6 +32,16 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "requires_graph: mark test as requiring graph backend extension"
     )
+    config.addinivalue_line(
+        "markers",
+        "requires_ots: mark test as needing the OTS extension; --graph-only "
+        "deselects it",
+    )
+    config.addinivalue_line(
+        "markers",
+        "without_ots: the test runs without the OTS extension; overrides "
+        "requires_ots from a module, a parameter or the backend='ots' convention",
+    )
 
 
 def pytest_addoption(parser):
@@ -47,6 +57,59 @@ def pytest_addoption(parser):
         default=1,
         help="minimum graph-marked passing tests when --require-graph is set",
     )
+    parser.addoption(
+        "--graph-only",
+        action="store_true",
+        help="test a graph-only install: deselect requires_ots tests; refused "
+        "when the OTS extension is installed",
+    )
+
+
+_OTS_PARAMETERS = ("backend", "engine")
+
+
+def _runs_on_ots(item) -> bool:
+    callspec = getattr(item, "callspec", None)
+    return callspec is not None and any(
+        callspec.params.get(name) == "ots" for name in _OTS_PARAMETERS
+    )
+
+
+def needs_ots(item) -> bool:
+    """Whether this collected test needs the OTS extension to run."""
+    return bool(
+        item.get_closest_marker("requires_ots")
+        and not item.get_closest_marker("without_ots")
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Mark OTS-parametrized cases; deselect, not skip, OTS tests when graph-only.
+
+    A case parametrized with ``backend="ots"`` or ``engine="ots"`` is
+    ``requires_ots`` by convention; anything else that needs OTS carries the
+    marker explicitly. ``without_ots`` overrides both, for a test that takes
+    ``backend="ots"`` but is refused or routed before any evaluation.
+
+    A deselected test is not a skip, so --require-graph's skip accounting is
+    unchanged. The option is refused on an install that has OTS, so the marker
+    can never hide a test that could run.
+    """
+    for item in items:
+        if _runs_on_ots(item):
+            item.add_marker(pytest.mark.requires_ots)
+    if not config.getoption("--graph-only"):
+        return
+    from tenforty._ots_extension import ots_extension_installed
+
+    if ots_extension_installed():
+        raise pytest.UsageError(
+            "--graph-only: the OTS extension is installed; run without --graph-only"
+        )
+    deselected = [item for item in items if needs_ots(item)]
+    if deselected:
+        config.hook.pytest_deselected(items=deselected)
+        items[:] = [item for item in items if not needs_ots(item)]
 
 
 def pytest_sessionstart(session):
@@ -127,6 +190,18 @@ def pytest_sessionfinish(session, exitstatus):
                 )
                 for skipped in _unexpected_skips:
                     reporter.write_line(f"--require-graph: unexpected skip: {skipped}")
+
+
+@pytest.fixture
+def graph_only_install(monkeypatch):
+    """Make this install behave as a graph-only one: no OTS extension.
+
+    Runs on any install, so the graph-only contract is tested in every lane,
+    not only where the extension is really absent.
+    """
+    from tenforty import _ots_extension
+
+    monkeypatch.setattr(_ots_extension, "ots_extension_installed", lambda: False)
 
 
 settings.register_profile(

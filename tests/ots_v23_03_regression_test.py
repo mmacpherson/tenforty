@@ -10,22 +10,7 @@ import pytest
 from tenforty.core import evaluate_form
 
 
-def _ots_available():
-    try:
-        from tenforty.backends import OTSBackend
-
-        return OTSBackend().is_available()
-    except ImportError:
-        return False
-
-
-skip_if_ots_unavailable = pytest.mark.skipif(
-    not _ots_available(),
-    reason="OTS backend required",
-)
-
-
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 class TestSchedule1AMFS:
     """MFS filers should not get Schedule 1-A Parts II-V deductions.
 
@@ -74,7 +59,7 @@ class TestSchedule1AMFS:
         assert with_s1a["federal"]["L24"] == without_s1a["federal"]["L24"]
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 class TestCASALTCap:
     """CA 540 SALT cap raised from $10K/$5K to $40K/$20K in v23.03.
 

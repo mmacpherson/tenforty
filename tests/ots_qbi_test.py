@@ -4,6 +4,8 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 
+pytestmark = pytest.mark.requires_ots
+
 
 @pytest.mark.parametrize(
     ("case", "expected_taxable_income"),

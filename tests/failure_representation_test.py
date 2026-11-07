@@ -148,6 +148,7 @@ def ots_nonzero_exit(monkeypatch):
     monkeypatch.setattr(core.otslib, "_evaluate_form", evaluate_form)
 
 
+@pytest.mark.requires_ots
 def test_ots_nonzero_exit_raises_under_raise(ots_nonzero_exit):
     """A non-zero OTS exit is an error under raise."""
     with pytest.raises(OTSError):
@@ -155,6 +156,7 @@ def test_ots_nonzero_exit_raises_under_raise(ots_nonzero_exit):
 
 
 @pytest.mark.parametrize("on_error", ["warn", "ignore"])
+@pytest.mark.requires_ots
 def test_ots_nonzero_exit_invalidates_the_return(ots_nonzero_exit, on_error):
     """OTS output after a non-zero exit is not passed off as a result."""
     with warnings.catch_warnings():
@@ -192,12 +194,14 @@ def subordinate_fails(monkeypatch):
     monkeypatch.setattr(core, "_evaluate_subordinate", evaluate_subordinate)
 
 
+@pytest.mark.requires_ots
 def test_self_employment_return_runs_a_subordinate_form(subordinate_calls):
     """Guard: the subordinate-failure tests below really exercise a form."""
     tenforty.evaluate_return(**SE_RETURN, backend="ots")
     assert subordinate_calls
 
 
+@pytest.mark.requires_ots
 def test_subordinate_failure_raises_under_raise(subordinate_fails):
     """A failed required subordinate form is never skipped under raise."""
     with pytest.raises(Boom):
@@ -205,6 +209,7 @@ def test_subordinate_failure_raises_under_raise(subordinate_fails):
 
 
 @pytest.mark.parametrize("on_error", ["warn", "ignore"])
+@pytest.mark.requires_ots
 def test_subordinate_failure_invalidates_the_whole_return(subordinate_fails, on_error):
     """A skipped form would yield a wrong nonzero return; it fails instead."""
     with warnings.catch_warnings():
@@ -249,6 +254,7 @@ def test_unknown_on_error_is_rejected(policy):
         tenforty.evaluate_returns(year=2024, w2_income=1.0, on_error=policy)
 
 
+@pytest.mark.requires_ots
 def test_on_error_accepts_the_policy_enum():
     """The documented enum values remain valid policies."""
     result = tenforty.evaluate_return(
@@ -288,6 +294,7 @@ def test_graph_batch_failure_isolates_the_failed_row(
 
 @pytest.mark.parametrize("on_error", ["warn", "ignore"])
 @pytest.mark.parametrize("mode", ["cross", "zip"])
+@pytest.mark.requires_ots
 def test_ots_batch_failure_isolates_the_failed_row(ots_federal_fails, mode, on_error):
     """An OTS row that fails is NaN in place; its neighbours are unaffected."""
     with warnings.catch_warnings():
@@ -307,6 +314,7 @@ def test_batch_failure_raises_under_raise(graph_batch_fails, mode):
         )
 
 
+@pytest.mark.requires_ots
 def test_mixed_engine_zip_batch_keeps_failed_row_in_place(
     graph_batch_fails, graph_scalar_fails
 ):

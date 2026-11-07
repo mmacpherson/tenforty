@@ -256,6 +256,7 @@ def test_late_row_missing_required_fact_refuses_the_whole_batch(engine_calls):
 
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
+@pytest.mark.requires_ots
 def test_ots_routed_oh_mfj_needs_no_fact(backend):
     """OH is outside auto scope: the existing OTS path, no graph requirement."""
     args = _oh(backend=backend)
@@ -265,6 +266,7 @@ def test_ots_routed_oh_mfj_needs_no_fact(backend):
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
 @pytest.mark.parametrize("value", [True, False])
+@pytest.mark.without_ots
 def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
     engine_calls, backend, value
 ):
@@ -279,6 +281,7 @@ def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
 
 @pytest.mark.parametrize("backend", ["auto", "ots"])
 @pytest.mark.parametrize("value", [False, True])
+@pytest.mark.without_ots
 def test_ots_error_names_graph_for_both_computed_values(backend, value):
     """Graph computes both supplied values; OTS computes neither."""
     with pytest.raises(UnsupportedInputError) as refusal:
@@ -310,6 +313,7 @@ def test_graph_error_for_uncomputed_value_names_no_other_backend(monkeypatch):
     assert "no backend computes it yet (tenforty-example-pending)" in message
 
 
+@pytest.mark.requires_ots
 def test_no_rows_and_no_facts_is_the_normal_empty_frame():
     """No required row exists in an empty batch."""
     frame = evaluate_returns(year=2024, w2_income=[], backend="ots")
@@ -469,6 +473,7 @@ def test_ma_batch_rows_carry_the_full_record_as_json(backend):
     assert json.loads(encoded) == scalar[0].model_dump()
 
 
+@pytest.mark.requires_ots
 def test_federal_and_other_states_report_nothing():
     """No records outside the inventory's scope; never an OH record."""
     for state in (None, "CA", "OH", "NY"):
@@ -530,6 +535,7 @@ def test_failed_return_has_nan_numbers_and_null_metadata():
     assert failed.assumptions is None
 
 
+@pytest.mark.requires_ots
 def test_failed_batch_row_has_null_assumptions_and_keeps_its_echo(monkeypatch):
     """A failed row: NaN outputs, null assumptions, input echo intact."""
 

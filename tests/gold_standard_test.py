@@ -15,11 +15,11 @@ from .fixtures.scenarios import (
     IRS_DIRECT_FILE_SCENARIOS,
     TaxScenario,
     run_tax_scenario,
-    scenario_id,
+    scenario_params,
 )
 
 
-@pytest.mark.parametrize("scenario", IRS_DIRECT_FILE_SCENARIOS, ids=scenario_id)
+@pytest.mark.parametrize("scenario", scenario_params(IRS_DIRECT_FILE_SCENARIOS))
 def test_gold_irs_direct_file(scenario: TaxScenario):
     """Test against IRS Direct File official test fixtures."""
     run_tax_scenario(scenario)

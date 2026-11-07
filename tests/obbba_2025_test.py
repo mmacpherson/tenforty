@@ -500,6 +500,7 @@ SCHEDULE_1A_INPUTS = ["qualified_tips", "qualified_overtime", "vehicle_loan_inte
 
 @pytest.mark.parametrize("backend", BACKENDS)
 @pytest.mark.parametrize("name", SCHEDULE_1A_INPUTS)
+@pytest.mark.without_ots
 def test_schedule_1a_inputs_are_refused_before_2025(backend, name):
     """Schedule 1-A first exists for 2025 (P.L. 119-21 §§70201-70203); 2024 refuses it."""
     with pytest.raises(ValueError, match=name):

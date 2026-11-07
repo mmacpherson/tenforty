@@ -1,10 +1,13 @@
 # ruff: noqa: D100
 import warnings
 
+import pytest
+
 import tenforty
 from tenforty import OTSError, OTSErrorPolicy
 
 
+@pytest.mark.requires_ots
 def test_on_error_raise_is_default():
     """Verify that on_error='raise' is the default behavior."""
     result = tenforty.evaluate_return(
@@ -16,6 +19,7 @@ def test_on_error_raise_is_default():
     assert result.federal_total_tax > 0
 
 
+@pytest.mark.requires_ots
 def test_on_error_warn_emits_runtime_warning():
     """Verify that on_error='warn' emits RuntimeWarning on OTS issues."""
     with warnings.catch_warnings(record=True):
@@ -30,6 +34,7 @@ def test_on_error_warn_emits_runtime_warning():
         assert result.federal_total_tax > 0
 
 
+@pytest.mark.requires_ots
 def test_on_error_ignore_silently_continues():
     """Verify that on_error='ignore' does not emit warnings."""
     with warnings.catch_warnings(record=True) as w:
@@ -72,10 +77,9 @@ def test_ots_error_custom_message():
     assert str(error) == "Custom error message"
 
 
+@pytest.mark.requires_ots
 def test_invalid_year_form_raises_value_error():
     """Verify that invalid year/form combinations raise ValueError."""
-    import pytest
-
     from tenforty import otslib
 
     with pytest.raises(

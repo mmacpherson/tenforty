@@ -11,6 +11,7 @@ from tenforty.models import OTSState, TaxReturnInput
 class TestOTSBackend:
     """Tests for OTS backend."""
 
+    @pytest.mark.requires_ots
     def test_ots_backend_is_available(self):
         """OTS backend should be available when otslib is installed."""
         backend = OTSBackend()
@@ -21,6 +22,7 @@ class TestOTSBackend:
         backend = OTSBackend()
         assert isinstance(backend, TaxBackend)
 
+    @pytest.mark.requires_ots
     def test_ots_backend_evaluate(self):
         """OTS backend should evaluate tax returns."""
         backend = OTSBackend()
@@ -52,17 +54,20 @@ class TestOTSBackend:
 class TestBackendSelection:
     """Tests for backend selection logic."""
 
+    @pytest.mark.requires_ots
     def test_available_backends_includes_ots(self):
         """OTS should always be in available backends."""
         backends = available_backends()
         assert "ots" in backends
 
+    @pytest.mark.requires_ots
     def test_get_backend_ots(self):
         """Should be able to get OTS backend explicitly."""
         backend = get_backend("ots")
         assert backend.name == "ots"
 
     @pytest.mark.requires_graph
+    @pytest.mark.requires_ots
     def test_get_backend_default_is_auto(self):
         """The default backend is "auto": graph for 2024, OTS for 2023."""
         assert get_backend().name == "graph"

@@ -43,6 +43,37 @@ jobs:
     - name: Run tests
       run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
 
+  # A graph-only install, as every Windows wheel is: the OTS extension is not
+  # built. Tests that need OTS are marked requires_ots and --graph-only
+  # deselects them (a deselection, not a skip), so the rest must pass with
+  # graph alone. Kept on Linux so the markers stay maintained where anyone can
+  # reproduce them: TENFORTY_GRAPH_ONLY=1 uv sync, then this pytest command.
+  validate-graph-only:
+    name: validate (ubuntu-latest, 3.14, graph-only install)
+    runs-on: ubuntu-latest
+    env:
+      TENFORTY_GRAPH_ONLY: '1'
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+      with:
+        python-version: '3.14'
+        enable-cache: true
+        cache-dependency-glob: pyproject.toml
+
+    - name: Install deps, graph backend only
+      run: uv sync
+
+    - name: Run tests on the graph-only install
+      run: >-
+        uv run pytest --graph-only --hypothesis-profile=ci --require-graph
+        --min-graph-passes=200
+
   # The jobs above test against uv.lock; this one tests what a new install
   # gets today, the newest versions pyproject.toml allows.
   latest-deps:
@@ -124,14 +155,15 @@ jobs:
   # Builds a wheel from the sdist, as any platform without a prebuilt wheel
   # does, in each supported source-build mode: with Rust it must ship the graph
   # backend; without Rust it must fail and say why; with the legacy
-  # TENFORTY_WITHOUT_GRAPH=1 opt-out it must build OTS only.
+  # TENFORTY_WITHOUT_GRAPH=1 opt-out it must build OTS only; with
+  # TENFORTY_GRAPH_ONLY=1, as on Windows, it must ship graph and no OTS.
   sdist-install:
     name: install from sdist (${{ matrix.mode }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        mode: [with-rust, without-rust, without-graph]
+        mode: [with-rust, without-rust, without-graph, graph-only]
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -145,14 +177,14 @@ jobs:
         cache-dependency-glob: pyproject.toml
 
     - name: Install Rust toolchain
-      if: matrix.mode == 'with-rust'
+      if: matrix.mode == 'with-rust' || matrix.mode == 'graph-only'
       uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec  # stable
 
     - name: Build the sdist
       run: uv build --sdist --out-dir sdist
 
     - name: Hide the runner's Rust toolchain
-      if: matrix.mode != 'with-rust'
+      if: matrix.mode == 'without-rust' || matrix.mode == 'without-graph'
       run: |
         set -euo pipefail
         path_without_rust=$(printf '%s' "$PATH" | tr ':' '\n' | grep -v -e '\.cargo' -e '\.rustup' | paste -sd:)
@@ -190,6 +222,37 @@ jobs:
         fi
         uv build --wheel --out-dir wheel sdist/*.tar.gz
 
+    - name: Build a graph-only wheel from the sdist
+      if: matrix.mode == 'graph-only'
+      env:
+        TENFORTY_GRAPH_ONLY: '1'
+      run: uv build --wheel --out-dir wheel sdist/*.tar.gz
+
+    # A fresh sdist has no build state, so seed what a full build leaves in
+    # build_lib (the otslib sources and a compiled extension): a graph-only
+    # rebuild in that tree must still ship no OTS file.
+    - name: Rebuild graph-only over a full build's leftovers, which must not ship
+      if: matrix.mode == 'graph-only'
+      env:
+        TENFORTY_GRAPH_ONLY: '1'
+      run: |
+        set -euo pipefail
+        mkdir unpacked
+        tar -xzf sdist/*.tar.gz -C unpacked
+        src=$(echo unpacked/tenforty-*)
+        read -r lib suffix < <(uv run --no-project --python 3.14 python -c '
+        import importlib.machinery, sys, sysconfig
+        print(f"lib.{sysconfig.get_platform()}-{sys.implementation.cache_tag}",
+              importlib.machinery.EXTENSION_SUFFIXES[0])')
+        mkdir -p "$src/build/$lib/tenforty/otslib"
+        echo leftover > "$src/build/$lib/tenforty/otslib/ots_amalgamation.cpp"
+        echo leftover > "$src/build/$lib/tenforty/otslib$suffix"
+        uv build --python 3.14 --wheel --out-dir seeded-wheel "$src"
+        if unzip -l seeded-wheel/*.whl | grep otslib; then
+          echo "::error::a graph-only rebuild shipped a full build's OTS files"
+          exit 1
+        fi
+
     - name: Install the wheel outside the source tree
       if: matrix.mode != 'without-rust'
       run: |
@@ -200,6 +263,11 @@ jobs:
       if: matrix.mode == 'with-rust'
       working-directory: ${{ runner.temp }}
       run: '"$RUNNER_TEMP/venv/bin/python" "$GITHUB_WORKSPACE/scripts/smoke_installed.py"'
+
+    - name: Smoke-check the graph-only install computes graph and refuses OTS
+      if: matrix.mode == 'graph-only'
+      working-directory: ${{ runner.temp }}
+      run: '"$RUNNER_TEMP/venv/bin/python" "$GITHUB_WORKSPACE/scripts/smoke_installed.py" --expect-backends graph'
 
     - name: Check the OTS-only install computes OTS and refuses graph
       if: matrix.mode == 'without-graph'

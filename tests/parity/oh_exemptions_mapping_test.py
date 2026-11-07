@@ -3,11 +3,8 @@
 import pytest
 
 from tenforty import evaluate_return
-from tenforty.backends import available_backends
 
-pytestmark = pytest.mark.skipif(
-    "ots" not in available_backends(), reason="OTS backend not installed"
-)
+pytestmark = pytest.mark.requires_ots
 
 
 @pytest.mark.parametrize("year", [2024, 2025])

@@ -78,6 +78,7 @@ def _fresh_taxable_income(inputs):
     return float(completed.stdout.strip())
 
 
+@pytest.mark.requires_ots
 def test_filer_flag_does_not_leak_old_young_old():
     """Old, young, old filer: each return gets only its own age answer."""
     first_old = _taxable_income(E1_OLD)
@@ -90,6 +91,7 @@ def test_filer_flag_does_not_leak_old_young_old():
     assert second_old == pytest.approx(72_450.0, abs=CENTS)
 
 
+@pytest.mark.requires_ots
 def test_spouse_flag_does_not_leak_into_a_young_joint_return():
     """Spouse-only 65+ MFJ, then a young MFJ return."""
     spouse_old = _taxable_income(MFJ_SPOUSE_OLD)

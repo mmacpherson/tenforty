@@ -24,7 +24,6 @@ import polars as pl
 import pytest
 
 from tenforty import evaluate_return, evaluate_returns
-from tenforty.backends import available_backends
 from tenforty.graph_scope import IN_SCOPE, exclusion_reasons
 from tenforty.models import (
     METADATA_OUTPUT_FIELDS,
@@ -42,10 +41,7 @@ from tests.parity.state_parity_policy import (
     OR_TAX_TABLE_TOLERANCE,
 )
 
-pytestmark = pytest.mark.skipif(
-    not {"ots", "graph"} <= set(available_backends()),
-    reason="both backends required",
-)
+pytestmark = pytest.mark.requires_graph
 
 YEARS = (2024, 2025)
 STATUSES = ("Single", "Married/Joint", "Married/Sep", "Head_of_House", "Widow(er)")
@@ -555,6 +551,7 @@ def _assert_metadata(args: dict, assumptions: tuple, engine: str) -> None:
     [case[1:] for case in GRAPH_ROUTED_CASES],
     ids=[case[0] for case in GRAPH_ROUTED_CASES],
 )
+@pytest.mark.requires_ots
 def test_auto_differs_from_ots_only_as_the_ledger_explains(
     year, state, status, profile
 ):
@@ -578,6 +575,7 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
 
 @pytest.mark.parametrize("year,state", OTS_ROUTED_CASES)
 @pytest.mark.parametrize("status", ("Single", "Married/Joint"))
+@pytest.mark.requires_ots
 def test_auto_equals_ots_outside_graph_scope(year, state, status):
     """A state outside graph scope computes on OTS under auto: identical results."""
     args = _case_args(year, state, status, {"w2_income": 85_000, "num_dependents": 1})
@@ -588,6 +586,7 @@ def test_auto_equals_ots_outside_graph_scope(year, state, status):
 
 @pytest.mark.parametrize("year", (2018, 2021, 2023))
 @pytest.mark.parametrize("state", (None, "CA", "NY"))
+@pytest.mark.requires_ots
 def test_auto_equals_ots_before_2024(year, state):
     """Years before 2024 stay on OTS under auto."""
     args = _case_args(year, state, "Single", {"w2_income": 85_000})
@@ -609,6 +608,7 @@ def test_auto_computes_states_ots_cannot(year, state):
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("state", ("OR", "TX", None))
+@pytest.mark.requires_ots
 def test_auto_refuses_inputs_ots_silently_ignored(state):
     """OTS drops state_adjustment on graph-routed returns; auto refuses it."""
     args = _case_args(2025, state, "Single", {"w2_income": 80_000})
@@ -638,6 +638,7 @@ def _frame_rows(frame: pl.DataFrame) -> list[dict]:
 
 
 @pytest.mark.parametrize("mode", ("cross", "zip"))
+@pytest.mark.requires_ots
 def test_batch_frames_share_schema_and_match_scalars(mode):
     """Ots and auto frames share one schema, and each row equals its scalar call."""
     if mode == "cross":
@@ -701,6 +702,7 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
                     )
 
 
+@pytest.mark.requires_ots
 def test_auto_batch_keeps_row_order_across_engines():
     """A zip batch mixing graph- and OTS-routed rows returns rows in request order."""
     states = ["CA", "OR", None, "NY", "TX", "AZ"]
@@ -761,12 +763,14 @@ def _unnecessary_entries(ledger) -> list[str]:
     return unnecessary
 
 
+@pytest.mark.requires_ots
 def test_every_ledger_entry_is_necessary():
     """Removing any one entry leaves some corpus difference unexplained."""
     assert all(not _unexplained(*case) for case in _corpus())
     assert _unnecessary_entries(LEDGER) == []
 
 
+@pytest.mark.requires_ots
 def test_necessity_rejects_a_zero_entry():
     """Negative control: an entry that allows nothing is caught as unnecessary."""
     zero = LedgerEntry(
@@ -778,6 +782,7 @@ def test_necessity_rejects_a_zero_entry():
     assert _unnecessary_entries((*LEDGER, zero)) == ["DORMANT-ZERO"]
 
 
+@pytest.mark.requires_ots
 def test_necessity_rejects_a_duplicate_entry():
     """Negative control: a duplicated entry doubles an allowance and is caught."""
     f11 = next(entry for entry in LEDGER if entry.entry_id == "F11")
@@ -804,6 +809,7 @@ def _real_case(year, state, status, profile_name):
     return args, ots, auto
 
 
+@pytest.mark.requires_ots
 def test_mutation_income_tax_shift_is_caught():
     """Regression: +10,000 on auto's federal_income_tax fails identity and ledger."""
     args, ots, auto = _real_case(2024, None, "Single", "wages_mid")
@@ -813,6 +819,7 @@ def test_mutation_income_tax_shift_is_caught():
     assert _unexplained(args, ots, mutated)
 
 
+@pytest.mark.requires_ots
 def test_mutation_missing_state_rate_is_caught():
     """Regression: a None state rate where one is defined fails both checks."""
     args, ots, auto = _real_case(2024, "OR", "Single", "wages_mid")
@@ -823,6 +830,7 @@ def test_mutation_missing_state_rate_is_caught():
     assert _unexplained(args, ots, mutated)
 
 
+@pytest.mark.requires_ots
 def test_mutation_spurious_state_rate_is_caught():
     """Regression: a state rate on a federal-only return fails the identity."""
     _, _, auto = _real_case(2024, None, "Single", "wages_mid")
@@ -831,6 +839,7 @@ def test_mutation_spurious_state_rate_is_caught():
         _assert_identities(mutated, "mutated", None)
 
 
+@pytest.mark.requires_ots
 def test_mutation_total_tax_shift_is_caught():
     """Regression: total_tax that is not federal plus state fails the identity."""
     _, _, auto = _real_case(2025, "OR", "Married/Joint", "wages_mid")
@@ -839,6 +848,7 @@ def test_mutation_total_tax_shift_is_caught():
         _assert_identities(mutated, "mutated", "OR")
 
 
+@pytest.mark.requires_ots
 def test_mutation_unledgered_amt_is_caught():
     """Regression: an AMT difference with no entry that covers it is unexplained."""
     args, ots, auto = _real_case(2024, None, "Single", "wages_high")

@@ -19,11 +19,13 @@ class TestEvaluateReturn:
         result = evaluate_return(year=2024, w2_income=100_000)
         assert result.federal_total_tax > 5000
 
+    @pytest.mark.requires_ots
     def test_evaluate_return_explicit_ots(self):
         """evaluate_return should work with explicit OTS backend."""
         result = evaluate_return(year=2024, w2_income=100_000, backend="ots")
         assert result.federal_total_tax > 5000
 
+    @pytest.mark.requires_ots
     def test_evaluate_return_all_parameters(self):
         """evaluate_return should accept all tax parameters."""
         result = evaluate_return(
@@ -47,6 +49,7 @@ class TestEvaluateReturn:
         assert result.federal_total_tax > 0
         assert result.state_total_tax > 0
 
+    @pytest.mark.requires_ots
     def test_evaluate_return_filing_statuses(self):
         """evaluate_return should work with different filing statuses."""
         statuses = ["Single", "Married/Joint", "Head_of_House"]
@@ -60,12 +63,14 @@ class TestEvaluateReturn:
 class TestEvaluateReturns:
     """Tests for evaluate_returns function."""
 
+    @pytest.mark.requires_ots
     def test_evaluate_returns_single_value(self):
         """evaluate_returns should work with single values."""
         df = evaluate_returns(year=2024, w2_income=100_000, backend="ots")
         assert len(df) == 1
         assert df["federal_total_tax"][0] > 5000
 
+    @pytest.mark.requires_ots
     def test_evaluate_returns_multiple_incomes(self):
         """evaluate_returns should generate grid for multiple incomes."""
         df = evaluate_returns(
@@ -75,6 +80,7 @@ class TestEvaluateReturns:
         federal_total_tax = df["federal_total_tax"].to_list()
         assert federal_total_tax == sorted(federal_total_tax)
 
+    @pytest.mark.requires_ots
     def test_evaluate_returns_multiple_years(self):
         """evaluate_returns should work with multiple years."""
         df = evaluate_returns(year=[2023, 2024], w2_income=100_000, backend="ots")

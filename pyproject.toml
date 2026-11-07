@@ -13,6 +13,7 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit",
   "seaborn",  # README plot examples (tests/readme_examples_test.py)
+  "setuptools",  # the graph-only build commands (tests/graph_only_build_test.py)
   "pyarrow"  # polars .to_pandas() in the README plot examples
 ]
 # Independent federal reference implementation for differential testing (scripts/taxcalc_audit.py,
@@ -38,6 +39,7 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3.15",
   "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
   "License :: OSI Approved :: MIT License",
   "Development Status :: 4 - Beta",
@@ -67,6 +69,7 @@ dev = [
   "ruff>=0.2.0",
   "pre-commit",
   "seaborn",  # README plot examples (tests/readme_examples_test.py)
+  "setuptools",  # the graph-only build commands (tests/graph_only_build_test.py)
   "pyarrow"  # polars .to_pandas() in the README plot examples
 ]
 
@@ -126,9 +129,6 @@ unfixable = []
 "scripts/*.py" = ["D103"]
 
 [tool.setuptools]
-ext-modules = [
-  { name = "tenforty.otslib", sources = ["src/tenforty/otslib/ots.pyx"], library-dirs = ["src/tenforty/otslib"] }
-]
 include-package-data = false
 package-dir = { "" = "src" }
 packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.forms", "tenforty.graphlib"]
@@ -136,3 +136,15 @@ packages = ["tenforty", "tenforty.otslib", "tenforty.backends", "tenforty.forms"
 [tool.setuptools.package-data]
 "tenforty.forms" = ["*.json", "*.md"]
 "tenforty.otslib" = ["*.pyx", "*.pxd", "*.cpp"]
+
+# uv reuses a built tenforty unless one of these changes. The build-mode
+# variables decide which extensions setup.py compiles, so switching mode
+# rebuilds instead of reusing, say, a full build for a graph-only sync.
+[tool.uv]
+cache-keys = [
+  { file = "pyproject.toml" },
+  { file = "setup.py" },
+  { file = "setup.cfg" },
+  { env = "TENFORTY_GRAPH_ONLY" },
+  { env = "TENFORTY_WITHOUT_GRAPH" }
+]

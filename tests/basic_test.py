@@ -1,4 +1,6 @@
 # ruff: noqa: D100, D103
+import pytest
+
 from tenforty import evaluate_return
 from tenforty.backends import OTSBackend
 from tenforty.core import prefix_keys
@@ -29,6 +31,7 @@ def test_prefix_keys():
         assert prefix_keys(test_input, prefix) == expected
 
 
+@pytest.mark.requires_ots
 def test_basic_evaluation():
     """Make sure the lights are on."""
     for year in OTSBackend.supported_years:

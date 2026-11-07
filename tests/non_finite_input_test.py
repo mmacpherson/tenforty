@@ -70,6 +70,7 @@ def test_tax_return_input_rejects_non_finite(field, value):
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
 @pytest.mark.parametrize("value", NON_FINITE, ids=NON_FINITE_IDS)
 @pytest.mark.parametrize("field", REPRESENTATIVE_FIELDS)
+@pytest.mark.requires_ots
 def test_evaluate_return_rejects_non_finite_before_backend(
     backends_unreachable, field, value, on_error, backend
 ):
@@ -89,6 +90,7 @@ def test_evaluate_return_rejects_non_finite_before_backend(
 @pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
 @pytest.mark.parametrize("value", NON_FINITE, ids=NON_FINITE_IDS)
 @pytest.mark.parametrize("field", REPRESENTATIVE_FIELDS)
+@pytest.mark.requires_ots
 def test_evaluate_returns_rejects_non_finite_before_backend(
     backends_unreachable, field, value, on_error, mode, backend
 ):
@@ -120,6 +122,7 @@ def test_every_float_field_is_an_evaluate_returns_argument():
 
 @pytest.mark.parametrize("mode", ["cross", "zip"])
 @pytest.mark.parametrize("field", FLOAT_FIELDS)
+@pytest.mark.requires_ots
 def test_evaluate_returns_validates_every_float_field(
     backends_unreachable, field, mode
 ):
@@ -134,6 +137,7 @@ def test_evaluate_returns_validates_every_float_field(
 
 
 @pytest.mark.parametrize("value", NON_FINITE, ids=NON_FINITE_IDS)
+@pytest.mark.requires_ots
 def test_evaluate_returns_rejects_non_finite_scalar(backends_unreachable, value):
     """A scalar non-finite value is rejected the same way as a list entry."""
     with pytest.raises(ValidationError) as error:

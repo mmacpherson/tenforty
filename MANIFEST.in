@@ -4,3 +4,5 @@ include Cargo.toml Cargo.lock
 include crates/tenforty-graph/Cargo.toml
 recursive-include crates/tenforty-graph/src *.rs
 recursive-include crates/tenforty-graph/benches *.rs
+# setup.py imports the build commands that keep OTS out of a graph-only wheel.
+include build_commands.py

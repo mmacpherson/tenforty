@@ -17,6 +17,8 @@ import pytest
 
 from tenforty import evaluate_return
 
+pytestmark = pytest.mark.requires_ots
+
 WHOLE_DOLLAR = 0.50
 LINE_11_TAX_ROUNDING = 0.05 * WHOLE_DOLLAR + WHOLE_DOLLAR
 

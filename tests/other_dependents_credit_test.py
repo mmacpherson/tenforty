@@ -184,6 +184,7 @@ def test_negative_ctc_dependents_is_refused():
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
+@pytest.mark.without_ots
 def test_evaluate_return_refuses_more_ctc_dependents_than_dependents(backend):
     """The public API raises ValueError on either backend."""
     with pytest.raises(ValueError, match="num_ctc_dependents"):
@@ -234,6 +235,7 @@ def test_no_dependents_no_credit(backend):
 
 
 @pytest.mark.parametrize("year", range(2018, 2023))
+@pytest.mark.requires_ots
 def test_ots_applies_no_other_dependent_credit_before_2023(year):
     """OTS ships no Schedule 8812 program before 2023; the counts are ignored."""
     common = dict(year=year, filing_status="Married/Joint", w2_income=100_000)

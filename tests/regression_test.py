@@ -16,7 +16,7 @@ from .fixtures.scenarios import (
     REGRESSION_SCENARIOS,
     TaxScenario,
     run_tax_scenario,
-    scenario_id,
+    scenario_params,
 )
 
 # Range-based sanity check scenarios (not exact values, just reasonable ranges)
@@ -888,7 +888,7 @@ VA_SCENARIOS = [
 ]
 
 
-@pytest.mark.parametrize("scenario", REGRESSION_SCENARIOS, ids=scenario_id)
+@pytest.mark.parametrize("scenario", scenario_params(REGRESSION_SCENARIOS))
 def test_ots_baseline(scenario: TaxScenario):
     """Test against captured OTS baseline values (regression detection only).
 
@@ -971,6 +971,7 @@ def test_az_tax_ranges(scenario):
     NY_SCENARIOS,
     ids=lambda s: f"NY-{s['year']}-{s['filing_status']}-{s['w2_income']}",
 )
+@pytest.mark.requires_ots
 def test_ny_tax_ranges(scenario):
     """Sanity check: NY tax falls within expected ranges."""
     _run_range_scenario(scenario)
@@ -2128,12 +2129,12 @@ def test_wv_tax_ranges(scenario):
         pytest.param("AL", "graph", marks=pytest.mark.requires_graph),
         pytest.param("AR", "graph", marks=pytest.mark.requires_graph),
         pytest.param("AZ", "graph", marks=pytest.mark.requires_graph),
-        ("CA", None),
+        pytest.param("CA", None, marks=pytest.mark.requires_ots),
         pytest.param("CO", "graph", marks=pytest.mark.requires_graph),
         pytest.param("CT", "graph", marks=pytest.mark.requires_graph),
         pytest.param("DC", "graph", marks=pytest.mark.requires_graph),
         pytest.param("DE", "graph", marks=pytest.mark.requires_graph),
-        ("NY", None),
+        pytest.param("NY", None, marks=pytest.mark.requires_ots),
         pytest.param("MA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("GA", "graph", marks=pytest.mark.requires_graph),
         pytest.param("HI", "graph", marks=pytest.mark.requires_graph),

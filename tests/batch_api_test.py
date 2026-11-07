@@ -5,6 +5,8 @@ import pytest
 
 from tenforty import evaluate_return, evaluate_returns
 
+pytestmark = pytest.mark.requires_ots
+
 
 class TestBatchBasics:
     """Basic batch processing tests."""

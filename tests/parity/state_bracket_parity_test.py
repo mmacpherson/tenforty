@@ -51,9 +51,12 @@ CASES = [
     if (state, status) not in OTS_UNSUPPORTED_STATUS | GRAPH_UNSUPPORTED_STATUS
 ]
 
-pytestmark = pytest.mark.skipif(
-    "graph" not in available_backends(), reason="graph backend not installed"
-)
+pytestmark = [
+    pytest.mark.requires_ots,
+    pytest.mark.skipif(
+        "graph" not in available_backends(), reason="graph backend not installed"
+    ),
+]
 
 
 @pytest.mark.parametrize(("state", "year", "status", "wages"), CASES)

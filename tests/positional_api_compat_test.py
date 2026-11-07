@@ -107,6 +107,7 @@ def _old_positional_values(function, **overrides):
     ]
 
 
+@pytest.mark.requires_ots
 def test_evaluate_return_accepts_the_old_positional_call():
     """A call positional through `backend` binds as it did before."""
     args = _old_positional_values(
@@ -118,6 +119,7 @@ def test_evaluate_return_accepts_the_old_positional_call():
     )
 
 
+@pytest.mark.requires_ots
 def test_evaluate_returns_accepts_the_old_positional_call():
     """A call positional through `mode` binds as it did before."""
     args = _old_positional_values(

@@ -26,6 +26,7 @@ def smoke():
 @pytest.mark.skipif(
     "graph" not in available_backends(), reason="graph backend not built"
 )
+@pytest.mark.requires_ots
 def test_smoke_passes_against_dev_install(smoke, capsys):
     """Both backends evaluate every advertised year on this install."""
     assert smoke.main(["--allow-source-tree"]) == 0
@@ -47,3 +48,19 @@ def test_smoke_rejects_missing_graph_backend(smoke, monkeypatch):
     monkeypatch.setattr("tenforty.backends.available_backends", lambda: ["ots"])
     with pytest.raises(smoke.SmokeFailure, match="graph"):
         smoke.main(["--allow-source-tree"])
+
+
+@pytest.mark.requires_graph
+def test_smoke_graph_only_mode_passes_on_a_graph_only_install(
+    smoke, graph_only_install, capsys
+):
+    """--expect-backends graph evaluates graph and checks every OTS refusal."""
+    assert smoke.main(["--allow-source-tree", "--expect-backends", "graph"]) == 0
+    assert "refused OTS, typed, under every on_error" in capsys.readouterr().out
+
+
+@pytest.mark.requires_ots
+def test_smoke_graph_only_mode_rejects_an_install_with_ots(smoke):
+    """A graph-only expectation fails on an install that also has OTS."""
+    with pytest.raises(smoke.SmokeFailure, match="expected"):
+        smoke.main(["--allow-source-tree", "--expect-backends", "graph"])

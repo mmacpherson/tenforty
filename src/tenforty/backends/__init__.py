@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import platform
 from functools import lru_cache
 
+from .._ots_extension import ots_unavailable_reason
 from ..models import BackendUnavailableError
 from ..routing import BackendChoice, Engine, select_backend
 from .ots import OTSBackend
@@ -54,10 +54,9 @@ def require_available(engine: Engine) -> TaxBackend:
     if engine == "ots":
         ots = _ots_backend()
         if not ots.is_available():
-            msg = "OTS backend is not available"
-            if platform.system() == "Windows":
-                msg += " (OTS requires C++ compilation which may not be configured on Windows)"
-            raise BackendUnavailableError(msg)
+            raise BackendUnavailableError(
+                f"The OTS backend is not available: {ots_unavailable_reason()}."
+            )
         return ots
     graph = _graph_backend()
     if graph is None or not graph.is_available():
