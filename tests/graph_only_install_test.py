@@ -65,9 +65,10 @@ def test_graph_only_install_lists_graph_alone(graph_only_install):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize("on_error", ON_ERROR)
 def test_historical_year_refuses_whatever_on_error_says(
-    graph_only_install, no_evaluation, on_error
+    graph_only_install, no_evaluation, on_error, monkeypatch
 ):
     """2023 needs OTS: a typed refusal, never a NaN row."""
+    monkeypatch.setattr(_ots_extension.platform, "system", lambda: "Linux")
     with pytest.raises(BackendUnavailableError) as raised:
         tenforty.evaluate_return(year=2023, on_error=on_error, **RETURN)
     message = str(raised.value)

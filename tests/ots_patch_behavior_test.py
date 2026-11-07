@@ -134,6 +134,11 @@ def _comparable(output: str) -> list[str]:
     return [line for line in output.splitlines() if not line.startswith("Title:")]
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="builds the vendored OTS programs with a POSIX toolchain; "
+    "tenforty never builds OTS on Windows",
+)
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_or_40_sch_a_line_8_is_platform_independent(year, tmp_path):
     """OTS-P10: unpatched OR-40 deducts the line 9 limit when the stack is not 0.

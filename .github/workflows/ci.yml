@@ -186,9 +186,9 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         mode: [with-rust, without-rust, without-graph, graph-only]
-        venv-bin: [bin]
+        venv-python: [bin/python]
         include:
-        - {os: windows-latest, mode: with-rust, venv-bin: Scripts}
+        - {os: windows-latest, mode: with-rust, venv-python: Scripts/python.exe}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -282,7 +282,7 @@ jobs:
       if: matrix.mode != 'without-rust'
       run: |
         uv venv "$RUNNER_TEMP/venv"
-        uv pip install --python "$RUNNER_TEMP/venv/${{ matrix.venv-bin }}/python" wheel/*.whl
+        uv pip install --python "$RUNNER_TEMP/venv/${{ matrix.venv-python }}" wheel/*.whl
 
     - name: Smoke-check the installed graph and OTS backends
       if: matrix.mode == 'with-rust' && runner.os != 'Windows'
@@ -294,7 +294,7 @@ jobs:
       working-directory: ${{ runner.temp }}
       run: |
         test -z "${TENFORTY_GRAPH_ONLY:-}"
-        "$RUNNER_TEMP/venv/Scripts/python" "$GITHUB_WORKSPACE/scripts/smoke_installed.py" --expect-backends graph
+        "$RUNNER_TEMP/venv/Scripts/python.exe" "$GITHUB_WORKSPACE/scripts/smoke_installed.py" --expect-backends graph
 
     - name: Smoke-check the graph-only install computes graph and refuses OTS
       if: matrix.mode == 'graph-only'
