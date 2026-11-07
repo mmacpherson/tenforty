@@ -189,7 +189,11 @@ for (const filingStatus of [
         ...mississippi,
         filingStatus,
       }),
-    /browser calculator cannot compute a MS 2025/,
+    (error) =>
+      error instanceof BrowserContractError &&
+      /calculator doesn't collect yet/.test(error.message) &&
+      typeof error.detail === "string" &&
+      error.detail.length > 0,
     `MS ${filingStatus} needs facts the browser cannot supply`,
   );
 }

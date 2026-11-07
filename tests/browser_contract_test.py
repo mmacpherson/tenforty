@@ -79,6 +79,10 @@ def test_browser_refuses_what_python_refuses_on_the_graph():
             "qualifying_widow",
             "head_of_household",
         }
+        for refusal in ms["refused_statuses"][year].values():
+            assert "Python library" in refusal["message"]
+            assert "state_facts" not in refusal["message"]
+            assert refusal["detail"]
         assert {"schedule_1_income", "itemized_deductions"} <= set(
             ms["unsupported_inputs"][year]
         )

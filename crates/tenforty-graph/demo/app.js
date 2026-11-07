@@ -1,6 +1,7 @@
 import init, * as graphlib from "./pkg/graphlib.js";
 import {
   BrowserContractError,
+  UnvalidatedJurisdictionError,
   isValidatedJurisdiction,
   loadBrowserContract,
 } from "./browser_contract.js";
@@ -451,8 +452,10 @@ function renderAnalysis(analysis, curvePoints, inputName) {
   setText("analysis-action", metadata.action);
   setText(
     "next-dollar-cents",
-    withheld ? "—" : (gradient.total * 100).toFixed(1),
+    withheld ? "withheld" : (gradient.total * 100).toFixed(1),
   );
+  byId("next-dollar-cents").classList.toggle("is-withheld", withheld);
+  byId("next-dollar-unit").hidden = withheld;
   setText("next-dollar-federal", formatCents(gradient.federal));
   setText(
     "next-dollar-state-label",
@@ -757,6 +760,20 @@ function scheduleCalculation() {
   });
 }
 
+function showShareLinkNotice(error) {
+  const unvalidated = error instanceof UnvalidatedJurisdictionError;
+  const name = unvalidated
+    ? (contract.jurisdictions[error.jurisdiction]?.name ?? error.jurisdiction)
+    : null;
+  byId("notice-title").textContent = unvalidated
+    ? `${name} isn’t available in this calculator yet.`
+    : "This share link couldn’t be opened.";
+  byId("notice-message").textContent = unvalidated
+    ? `We opened a federal-only return instead. The calculator so far covers federal returns and Illinois, Mississippi, Oregon and the eight states without an income tax; the tax model isn’t validated for ${name} yet.`
+    : `We opened a federal-only return instead. (${error.message})`;
+  byId("notice-banner").hidden = false;
+}
+
 function showToast(message) {
   const toast = byId("toast");
   window.clearTimeout(toastTimer);
@@ -811,6 +828,9 @@ function bindEvents() {
     scheduleCalculation();
     showToast("Scenario reset");
   });
+  byId("dismiss-notice").addEventListener("click", () => {
+    byId("notice-banner").hidden = true;
+  });
   byId("dismiss-error").addEventListener("click", () => {
     byId("error-banner").hidden = true;
   });
@@ -841,7 +861,7 @@ async function main() {
     bindEvents();
     await calculate();
     if (invalidShareLink) {
-      showToast(`Invalid share link ignored: ${invalidShareLink.message}`);
+      showShareLinkNotice(invalidShareLink);
     }
   } catch (error) {
     showError(

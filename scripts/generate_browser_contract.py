@@ -40,6 +40,34 @@ BROWSER_STATUSES = {
     "qualifying_widow": OTSFilingStatus.WIDOW_WIDOWER,
 }
 PROBE_AMOUNT = 1_000.0
+
+_MS_SPOUSE_INCOME = (
+    "Mississippi joint and widow(er) returns need each spouse's income, which "
+    "this calculator doesn't collect yet. Single works; the Python library "
+    "supports these returns with state facts."
+)
+BROWSER_REFUSAL_MESSAGES = {
+    ("MS", "married_joint"): _MS_SPOUSE_INCOME,
+    ("MS", "qualifying_widow"): _MS_SPOUSE_INCOME,
+    ("MS", "head_of_household"): (
+        "Mississippi head-of-household returns need a dependent, which this "
+        "calculator doesn't collect yet. Single works; the Python library "
+        "supports these returns with num_dependents."
+    ),
+}
+"""User-facing text for a refused browser return; Python's message is the detail."""
+
+
+def _browser_message(state: str | None, status: str) -> str:
+    if (state, status) in BROWSER_REFUSAL_MESSAGES:
+        return BROWSER_REFUSAL_MESSAGES[(state, status)]
+    where = STATE_NAMES.get(state, "These") if state else "Federal"
+    return (
+        f"{where} returns with this filing status need information this "
+        "calculator doesn't collect yet; the Python library supports them."
+    )
+
+
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
 
 INPUTS = {
@@ -511,16 +539,18 @@ def _python_refusal(year: int, state: str | None, status: str, **inputs) -> str 
     return None
 
 
-def _refusals(year: int, state: str | None) -> tuple[dict[str, str], list[str]]:
+def _refusals(
+    year: int, state: str | None
+) -> tuple[dict[str, dict[str, str]], list[str]]:
     """Return the statuses and nonzero money inputs Python refuses here.
 
     When every status is refused the return never computes, so no input is
     probed.
     """
     statuses = {
-        status: message
+        status: {"message": _browser_message(state, status), "detail": detail}
         for status in BROWSER_STATUSES
-        if (message := _python_refusal(year, state, status)) is not None
+        if (detail := _python_refusal(year, state, status)) is not None
     }
     probe_status = next((s for s in BROWSER_STATUSES if s not in statuses), None)
     if probe_status is None:

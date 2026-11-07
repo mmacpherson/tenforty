@@ -1,7 +1,17 @@
 export class BrowserContractError extends Error {
-  constructor(message) {
+  constructor(message, { detail = null } = {}) {
     super(message);
     this.name = "BrowserContractError";
+    this.detail = detail;
+  }
+}
+
+export class UnvalidatedJurisdictionError extends BrowserContractError {
+  constructor(message, { jurisdiction, year }) {
+    super(message);
+    this.name = "UnvalidatedJurisdictionError";
+    this.jurisdiction = jurisdiction;
+    this.year = year;
   }
 }
 
@@ -178,7 +188,14 @@ export function validateBrowserContract(contract, graph, year) {
       if (
         typeof specification.validated?.[String(supportedYear)] !== "boolean" ||
         typeof specification.refused_statuses?.[String(supportedYear)] !==
-          "object"
+          "object" ||
+        Object.values(
+          specification.refused_statuses[String(supportedYear)],
+        ).some(
+          (refusal) =>
+            typeof refusal?.message !== "string" ||
+            typeof refusal?.detail !== "string",
+        )
       ) {
         throw new BrowserContractError(
           `Browser contract must say whether ${code} ${supportedYear} is validated`,
@@ -254,10 +271,11 @@ export function requireValidatedJurisdiction(contract, jurisdiction, year) {
   const reasons =
     contract.jurisdictions[jurisdiction]?.exclusion_reasons?.[String(year)] ??
     [];
-  throw new BrowserContractError(
+  throw new UnvalidatedJurisdictionError(
     `The graph is not yet validated for ${jurisdiction} ${year}` +
       (reasons.length ? ` (${reasons.join(", ")})` : "") +
       `; ${contract.scope.summary}`,
+    { jurisdiction, year },
   );
 }
 
@@ -284,10 +302,9 @@ export class BrowserTaxRuntime {
     const refusal =
       jurisdictionSpec.refused_statuses?.[yearKey]?.[filingStatus];
     if (refusal) {
-      throw new BrowserContractError(
-        `The browser calculator cannot compute a ${jurisdiction} ${year} ` +
-          `${contract.filing_statuses[filingStatus]} return: ${refusal}`,
-      );
+      throw new BrowserContractError(refusal.message, {
+        detail: refusal.detail,
+      });
     }
     if (!requireBooleanOption("allowUnvalidated", allowUnvalidated)) {
       requireValidatedJurisdiction(contract, jurisdiction, year);
