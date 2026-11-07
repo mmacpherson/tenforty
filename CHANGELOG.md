@@ -10,10 +10,15 @@
   under-taxed. The expected figures in `tests/ots_nj_gains_business_test.py`
   are an independent derivation from the NJ-1040 forms and instructions
   (`docs/validation/derivations/nj-gains-business-2023-2025.md`).
-  - Found while deriving them: OTS prices NJ taxable income that falls exactly
-    on a tax-table row's lower edge (a whole multiple of $50 below $100,000) as
-    the row below, $1-$3 under the table. Upstream report 22, recorded as a
-    strict signature; not patched.
+  - Limits: `self_employment_income` is taken as federal Schedule C net profit
+    and entered unchanged. NJ-BUS-1 adjustments, the NJ-BUS-2 alternative
+    business calculation and loss carryforwards are not modeled, nor are NJ-DOP
+    basis or taxability differences from the federal gains.
+  - Found while deriving them: OTS appears to price NJ taxable income that falls
+    exactly on a tax-table row's lower edge as the row below. That was checked
+    at $29,000, $53,000, $68,500 and $69,000 in 2023-2025, where the result is
+    $1-$3 under the table. Upstream report 22, recorded as a strict signature;
+    not patched.
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)

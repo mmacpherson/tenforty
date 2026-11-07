@@ -13,6 +13,11 @@ docs/validation/derivations/nj-gains-business-2023-2025.md (retrieved
 tax-table rows used are identical in the three years, so each case has one
 expected result for every year.
 
+Scope: the cases assume a business profit with no NJ adjustment to federal
+Schedule C and personal stock sales whose NJ and federal treatment match. The
+map covers exactly that; NJ-BUS-1/NJ-BUS-2 adjustments, loss carryforwards
+and NJ-DOP basis or taxability differences are not modeled.
+
 Taxable income under $100,000 takes the printed tax-table row, which is whole
 dollars. At $100,000 and above the rate schedule gives cents, and the booklet
 lets the filer round to whole dollars (50 cents and up round up), so either

@@ -1034,9 +1034,14 @@ As we read the NJ-1040 instructions, the tax table's rows are "At least" /
 booklets read the same). Taxable income of exactly $69,000 therefore falls in
 the row "69,000 / 69,050", tax $2,321 for status 1 or 3. Subtracting the
 epsilon before dividing puts it in the row "68,950 / 69,000" instead, so the
-program prices that row's midpoint and reports $2,318. Every taxable income
-under $100,000 that is a whole multiple of $50 is priced one row low, by the
-row's marginal rate times $50 (about $1 to $3).
+program prices that row's midpoint and reports $2,318. We checked this at
+four lower edges, $29,000, $53,000, $68,500 and $69,000 (status 1 or 3), in
+2023, 2024 and 2025, where OTS is $1 to $3 under the table. We have not
+checked every edge. From the code it looks as though other positive multiples
+of $50 under $100,000 would also be priced one row low, but the visible effect
+can vary: it is nil where the two adjacent rows round to the same tax, it does
+not arise at zero, and it can reach about $4 in the top single-filer table
+band.
 
 **Minimal reproducer:** 2025 Single, $70,000 of wages, no other entries. Line
 39/42 is $69,000. OTS reports line 43 = $2,318; the table gives $2,321. At

@@ -600,9 +600,33 @@ class TaxReturnInput(BaseModel):
     )
     qualified_dividends: float = 0.0
     ordinary_dividends: float = 0.0
-    short_term_capital_gains: float = 0.0
-    long_term_capital_gains: float = 0.0
-    self_employment_income: float = 0.0
+    short_term_capital_gains: float = Field(
+        default=0.0,
+        description=(
+            "Net short-term capital gain or loss (federal Schedule D). OTS NJ "
+            "enters it with long_term_capital_gains on NJ-1040 line 19, taking "
+            "the federal amount as the NJ amount: no NJ basis, taxability or "
+            "business-property difference on Schedule NJ-DOP is modeled."
+        ),
+    )
+    long_term_capital_gains: float = Field(
+        default=0.0,
+        description=(
+            "Net long-term capital gain or loss (federal Schedule D). OTS NJ "
+            "nets it with short_term_capital_gains on NJ-1040 line 19 (see "
+            "short_term_capital_gains)."
+        ),
+    )
+    self_employment_income: float = Field(
+        default=0.0,
+        description=(
+            "Net profit or loss from a sole proprietorship (federal Schedule C "
+            "line 31), which also drives Schedule SE. OTS NJ enters it on "
+            "NJ-1040 line 18 unchanged: the NJ-BUS-1 Part I adjustments to the "
+            "federal figure and the NJ-BUS-2 alternative business calculation "
+            "(including loss carryforwards) are not modeled."
+        ),
+    )
     qbi_w2_wages: float = Field(default=0.0, ge=0.0)
     qbi_ubia: float = Field(default=0.0, ge=0.0)
     qbi_is_sstb: bool = False
@@ -1129,7 +1153,10 @@ def _summed_line(line: str) -> Callable[[float], tuple[str, str]]:
 
 # NJ-1040 line 19 is net gains from disposition of property: Schedule NJ-DOP
 # nets every sale with no short/long-term split, and the program enters a net
-# loss as nothing (instructions, line 19).
+# loss as nothing (instructions, line 19). The federal gains are taken as the
+# NJ gains; NJ-DOP basis, taxability and business-property differences are
+# not modeled. Line 18 likewise takes self_employment_income (Schedule C net
+# profit) without the NJ-BUS-1 adjustments or the NJ-BUS-2 calculation.
 _NJ_DISPOSITION_GAINS = _summed_line("L19")
 
 

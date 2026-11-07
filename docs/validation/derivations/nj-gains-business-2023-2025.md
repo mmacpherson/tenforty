@@ -281,3 +281,23 @@ are identical in all three years.
 
 No new ambiguities. Case 8's capital loss follows J4/J5. Case 8 has positive business
 income, so the NJ-BUS-2 question (J1) does not arise.
+
+## Addendum: review confirmations (2026-11-07)
+
+Added after the blind derivation, by the reviewer of PR #464 (Astra, with a fresh
+source-only sub-reviewer `nj464_sources`). The blind record above is unchanged,
+including its original uncertainty in J1.
+
+- **J1 resolved.** NJ-BUS-2's alternative business calculation adjustment is zero when
+  the only business category is a loss and there is no positive business-category
+  income or carryforward. Wages and personal disposition gains are outside that
+  calculation. So case 4's line 35 = 0 stands. Source: Schedule NJ-BUS-2, lines 1-12,
+  https://www.nj.gov/treasury/taxation/pdf/current/resbus2.pdf, and the corresponding
+  2023 and 2024 forms.
+- **Rule and row re-derived independently.** The reviewer obtained Single gross income
+  70,000, taxable income 69,000 and tax 2,321 for wages 60,000, business profit 10,000
+  and personal gains +5,000/-5,000. It transcribed the 68,950-69,000 row as 2,318 and
+  the 69,000-69,050 row as 2,321 in all three years. Source: NJ-1040 instructions,
+  printed pp. 11-12, 16-17 and 60, for 2023, 2024 and 2025 (URLs in section 1).
+- **Source bytes.** The reviewer fetched the 2025 instructions and matched SHA-256
+  fe7977419b70d0c3dcc392c328adc5f58f3b99937e0d2f79aecf6ac368872c31.
