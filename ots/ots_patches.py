@@ -394,6 +394,44 @@ OTS_PATCHES: tuple[OtsPatch, ...] = (
             "MemorySanitizer shows the read."
         ),
     ),
+    OtsPatch(
+        id="OTS-P12",
+        function="patch_ca540_name_truncation_bound",
+        patch_class="memory-safety",
+        summary=(
+            "Truncate CA-540's printed name fields only when the name is longer "
+            "than the cut."
+        ),
+        scope="CA_540, 2018-2020",
+        matches={year: {"CA_540": 4} for year in (2018, 2019, 2020)},
+        match_unit="fixed-index name truncations given `if (strlen(X) > N)`",
+        effect=(
+            "None on computed figures: the four names are only printed. "
+            "`Your1stName[11]`, `YourLastName[15]`, `Spouse1stName[11]` and "
+            "`SpouseLastName[15]` are cut in place in `GetTextLineF`'s "
+            "`strdup` of the input line (`strlen + 1` bytes), so a shorter "
+            "name, including the empty one every tenforty return passes, wrote "
+            "past the allocation. The guard prevents those writes and leaves "
+            "the resulting C string unchanged wherever the original write was "
+            "valid; the writes it skips in bounds (a name of exactly the cut's "
+            "length, or one `pull_initial` already terminated earlier) were "
+            "redundant or past the string's terminator."
+        ),
+        status="reported-upstream",
+        upstream="docs/upstream-ots-reports.md report 21; draft, not sent.",
+        witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P12]",),
+        note=(
+            "Found by valgrind memcheck on a musllinux cp314 wheel: 12 errors, "
+            '"Invalid write of size 1 ... 10 (or 14) bytes after a block of '
+            'size 1", four per year in taxsolve_CA_540_{2018,2019,2020} main, '
+            "on every CA return of those years; a sweep of every OTS year and "
+            "state found no other invalid write. musl's allocator later "
+            "faulted at interpreter exit when a heap layout put its metadata "
+            "next to the overrun. No behavioral witness runs in the suite: the "
+            "write is only observable under valgrind or AddressSanitizer. From "
+            "2021 the program no longer reads these names."
+        ),
+    ),
 )
 
 

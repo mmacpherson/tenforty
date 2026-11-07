@@ -111,6 +111,7 @@ changing the registry; the section below is generated.
 | OTS-P9 | removed | memory-safety | taxsolve_routines.c, 2025 | retired |
 | OTS-P10 | `patch_or_40_sch_a_zero_init` | memory-safety | OR_40, 2024-2025 | reported-upstream |
 | OTS-P11 | `patch_grablinealloc_trim_bound` | memory-safety | taxsolve_routines.c, 2024 | reported-upstream |
+| OTS-P12 | `patch_ca540_name_truncation_bound` | memory-safety | CA_540, 2018-2020 | reported-upstream |
 
 ### OTS-P1: Rename the C++ reserved word `new` in `add_pdf_markup`.
 
@@ -247,6 +248,18 @@ changing the registry; the section below is generated.
 - **Upstream:** docs/upstream-ots-reports.md report 20; draft, not sent.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P11]`
 - **Note:** 2024 only: the 2025 import routines were rewritten without the loop. No behavioral witness: the stray byte is a stack neighbour, which `-ftrivial-auto-var-init` does not make a space, so only MemorySanitizer shows the read.
+
+### OTS-P12: Truncate CA-540's printed name fields only when the name is longer than the cut.
+
+- **Patch function:** `patch_ca540_name_truncation_bound`
+- **Class:** memory-safety
+- **Scope:** CA_540, 2018-2020
+- **Required matches:** 2018-2020: CA_540 4 (fixed-index name truncations given `if (strlen(X) > N)`)
+- **Effect on computed figures:** None on computed figures: the four names are only printed. `Your1stName[11]`, `YourLastName[15]`, `Spouse1stName[11]` and `SpouseLastName[15]` are cut in place in `GetTextLineF`'s `strdup` of the input line (`strlen + 1` bytes), so a shorter name, including the empty one every tenforty return passes, wrote past the allocation. The guard prevents those writes and leaves the resulting C string unchanged wherever the original write was valid; the writes it skips in bounds (a name of exactly the cut's length, or one `pull_initial` already terminated earlier) were redundant or past the string's terminator.
+- **Status:** reported-upstream
+- **Upstream:** docs/upstream-ots-reports.md report 21; draft, not sent.
+- **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P12]`
+- **Note:** Found by valgrind memcheck on a musllinux cp314 wheel: 12 errors, "Invalid write of size 1 ... 10 (or 14) bytes after a block of size 1", four per year in taxsolve_CA_540_{2018,2019,2020} main, on every CA return of those years; a sweep of every OTS year and state found no other invalid write. musl's allocator later faulted at interpreter exit when a heap layout put its metadata next to the overrun. No behavioral witness runs in the suite: the write is only observable under valgrind or AddressSanitizer. From 2021 the program no longer reads these names.
 
 <!-- ots-patches:end -->
 

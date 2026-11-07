@@ -3832,11 +3832,11 @@ int main( int argc, char *argv[] )
  writeout_line = 0;
  Your1stName = GetTextLineF( "Your1stName:" );
  YourMidInitial = pull_initial( Your1stName );
- Your1stName[11] = '\0';
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
  fprintf(outfile,"Your1stName: %s\n", Your1stName );
  fprintf(outfile,"YourMidInit: %s\n", YourMidInitial );
  YourLastName   = GetTextLineF( "YourLastName:" );
- YourLastName[15] = '\0';
+ if (strlen( YourLastName ) > 15) YourLastName[15] = '\0';
  fprintf(outfile,"YourLastName: %s\n", YourLastName );
  socsec = GetTextLineF( "YourSocSec#:" );
  format_socsec( socsec, 1 );
@@ -3845,11 +3845,11 @@ int main( int argc, char *argv[] )
 
  Spouse1stName = GetTextLineF( "Spouse1stName:" );
  SpouseMidInitial = pull_initial( Spouse1stName );
- Spouse1stName[11] = '\0';
+ if (strlen( Spouse1stName ) > 11) Spouse1stName[11] = '\0';
  fprintf(outfile,"Spouse1stName: %s\n", Spouse1stName );
  fprintf(outfile,"SpouseMidInit: %s\n", SpouseMidInitial );
  SpouseLastName = GetTextLineF( "SpouseLastName:" );
- SpouseLastName[15] = '\0';
+ if (strlen( SpouseLastName ) > 15) SpouseLastName[15] = '\0';
  fprintf(outfile,"SpouseLastName: %s\n", SpouseLastName );
  socsec = GetTextLineF( "SpouseSocSec#:" );
  format_socsec( socsec, 1 );
@@ -17474,11 +17474,11 @@ int main( int argc, char *argv[] )
  writeout_line = 0;
  Your1stName = GetTextLineF( "Your1stName:" );
  YourMidInitial = pull_initial( Your1stName );
- Your1stName[11] = '\0';
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
  fprintf(outfile,"Your1stName: %s\n", Your1stName );
  fprintf(outfile,"YourMidInit: %s\n", YourMidInitial );
  YourLastName   = GetTextLineF( "YourLastName:" );
- YourLastName[15] = '\0';
+ if (strlen( YourLastName ) > 15) YourLastName[15] = '\0';
  fprintf(outfile,"YourLastName: %s\n", YourLastName );
  socsec = GetTextLineF( "YourSocSec#:" );
  format_socsec( socsec, 1 );
@@ -17487,11 +17487,11 @@ int main( int argc, char *argv[] )
 
  Spouse1stName = GetTextLineF( "Spouse1stName:" );
  SpouseMidInitial = pull_initial( Spouse1stName );
- Spouse1stName[11] = '\0';
+ if (strlen( Spouse1stName ) > 11) Spouse1stName[11] = '\0';
  fprintf(outfile,"Spouse1stName: %s\n", Spouse1stName );
  fprintf(outfile,"SpouseMidInit: %s\n", SpouseMidInitial );
  SpouseLastName = GetTextLineF( "SpouseLastName:" );
- SpouseLastName[15] = '\0';
+ if (strlen( SpouseLastName ) > 15) SpouseLastName[15] = '\0';
  fprintf(outfile,"SpouseLastName: %s\n", SpouseLastName );
  socsec = GetTextLineF( "SpouseSocSec#:" );
  format_socsec( socsec, 1 );
@@ -27302,11 +27302,11 @@ int main( int argc, char *argv[] )
  writeout_line = 0;
  Your1stName = GetTextLineF( "Your1stName:" );
  YourMidInitial = pull_initial( Your1stName );
- Your1stName[11] = '\0';
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
  fprintf(outfile,"Your1stName: %s\n", Your1stName );
  fprintf(outfile,"YourMidInit: %s\n", YourMidInitial );
  YourLastName   = GetTextLineF( "YourLastName:" );
- YourLastName[15] = '\0';
+ if (strlen( YourLastName ) > 15) YourLastName[15] = '\0';
  fprintf(outfile,"YourLastName: %s\n", YourLastName );
  socsec = GetTextLineF( "YourSocSec#:" );
  format_socsec( socsec, 1 );
@@ -27315,11 +27315,11 @@ int main( int argc, char *argv[] )
 
  Spouse1stName = GetTextLineF( "Spouse1stName:" );
  SpouseMidInitial = pull_initial( Spouse1stName );
- Spouse1stName[11] = '\0';
+ if (strlen( Spouse1stName ) > 11) Spouse1stName[11] = '\0';
  fprintf(outfile,"Spouse1stName: %s\n", Spouse1stName );
  fprintf(outfile,"SpouseMidInit: %s\n", SpouseMidInitial );
  SpouseLastName = GetTextLineF( "SpouseLastName:" );
- SpouseLastName[15] = '\0';
+ if (strlen( SpouseLastName ) > 15) SpouseLastName[15] = '\0';
  fprintf(outfile,"SpouseLastName: %s\n", SpouseLastName );
  socsec = GetTextLineF( "SpouseSocSec#:" );
  format_socsec( socsec, 1 );
