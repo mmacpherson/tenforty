@@ -190,3 +190,96 @@ def test_ots_entry_point_refuses_an_undelivered_state_input(name):
 def test_ots_entry_point_still_computes_a_served_return(name):
     """The refusals are narrow: an ordinary MA return computes everywhere."""
     assert OTS_ENTRY_POINTS[name](year=2025, state="MA", w2_income=60_000.0) is not None
+
+
+# --- Required facts: the opt-in lifts scope, never a required fact ----------
+
+REQUIRED_FACT_CASES = [
+    pytest.param(
+        "OH", "Married/Joint", "spouses_both_have_qualifying_income", id="OH-MFJ"
+    ),
+    pytest.param("MS", "Married/Joint", "taxpayer_adjusted_gross_income", id="MS-MFJ"),
+    pytest.param("MS", "Widow(er)", "head_of_family_eligible", id="MS-QSS"),
+    pytest.param("MO", "Single", "eitc_eligible", id="MO-EIC"),
+]
+
+
+def _fact_entry_points(state, status):
+    tax_return = {
+        "year": 2025,
+        "state": state,
+        "filing_status": status,
+        "w2_income": 60_000.0,
+    }
+    tax_input = TaxReturnInput(**tax_return)
+    batch_args = (
+        2025,
+        OTSState(state),
+        {"w2_income": [60_000.0]},
+        [status],
+    )
+    entries = {
+        "evaluate_return": lambda **kw: tenforty.evaluate_return(
+            **tax_return, backend="graph", **kw
+        ),
+        "evaluate_returns": lambda **kw: tenforty.evaluate_returns(
+            **tax_return, backend="graph", **kw
+        ),
+        "marginal_rate": lambda **kw: tenforty.marginal_rate(
+            **tax_return, output=FEDERAL, **kw
+        ),
+        "marginal_rates": lambda **kw: tenforty.marginal_rates(
+            **tax_return, output=FEDERAL, **kw
+        ),
+        "solve_for_income": lambda **kw: tenforty.solve_for_income(
+            target_tax=5_000.0, **tax_return, output=FEDERAL, **kw
+        ),
+    }
+    for where, backend in (
+        ("GraphBackend()", GraphBackend()),
+        ("get_backend('graph')", get_backend("graph", year=2025)),
+    ):
+        entries |= {
+            f"{where}.evaluate": lambda b=backend, **kw: b.evaluate(tax_input, **kw),
+            f"{where}.evaluate_batch": lambda b=backend, **kw: b.evaluate_batch(
+                *batch_args, mode="zip", **kw
+            ),
+            f"{where}.gradient": lambda b=backend, **kw: b.gradient(
+                tax_input, FEDERAL, "w2_income", **kw
+            ),
+            f"{where}.gradients": lambda b=backend, **kw: b.gradients(
+                tax_input, FEDERAL, **kw
+            ),
+            f"{where}.solve": lambda b=backend, **kw: b.solve(
+                tax_input, FEDERAL, 5_000.0, "w2_income", **kw
+            ),
+        }
+    return entries
+
+
+FACT_ENTRY_NAMES = sorted(_fact_entry_points("OH", "Married/Joint"))
+
+
+def test_required_fact_entry_points_cover_every_graph_entry_point():
+    """The required-fact matrix uses the same entry points as the scope matrix."""
+    assert set(FACT_ENTRY_NAMES) == set(GRAPH_ENTRY_POINTS) - {"get_backend"}
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize("name", FACT_ENTRY_NAMES)
+@pytest.mark.parametrize(("state", "status", "fact"), REQUIRED_FACT_CASES)
+def test_the_opt_in_never_supplies_a_required_fact(name, state, status, fact):
+    """With allow_unvalidated=True a missing required fact still refuses."""
+    entry = _fact_entry_points(state, status)[name]
+    with pytest.raises(UnsupportedInputError, match=fact):
+        entry(allow_unvalidated=True)
+
+
+@pytest.mark.requires_graph
+@pytest.mark.parametrize("name", FACT_ENTRY_NAMES)
+@pytest.mark.parametrize(("state", "status", "fact"), REQUIRED_FACT_CASES)
+def test_a_missing_required_fact_refuses_without_the_opt_in(name, state, status, fact):
+    """Without the opt-in the return is refused too: by scope, or by the fact."""
+    entry = _fact_entry_points(state, status)[name]
+    with pytest.raises(UnsupportedReturnError):
+        entry()

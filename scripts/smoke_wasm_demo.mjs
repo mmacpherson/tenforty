@@ -125,12 +125,21 @@ for (const testCase of contract.gradient_cases) {
         testCase.jurisdiction,
         testCase.year,
       ),
-      includeStateSlopes: true,
     },
   );
+  const slopesWithheld =
+    testCase.jurisdiction !== "US" && !contract.state_slopes.available;
   for (const [inputName, expectedParts] of Object.entries(testCase.expected)) {
     for (const [part, expected] of Object.entries(expectedParts)) {
       const actual = analysis.gradients[inputName][part];
+      if (slopesWithheld && part !== "federal") {
+        assert.equal(
+          actual,
+          null,
+          `${testCase.id}/${inputName}/${part}: a state slope must be withheld`,
+        );
+        continue;
+      }
       assert.ok(
         Math.abs(actual - expected) <= 1e-6,
         `${testCase.id}/${inputName}/${part}: expected ${expected}, received ${actual}`,
@@ -170,6 +179,19 @@ assert.ok(
   illinoisAnalysis.gradients.w2_income.federal > 0,
   "federal slopes stay available on a state return",
 );
+const illinoisAttempt = analyzeScenario(
+  graphlib,
+  graphs.get(2025),
+  contract,
+  illinois,
+  { includeStateSlopes: true, allowUnvalidated: false },
+);
+assert.equal(
+  illinoisAttempt.gradients.w2_income.state,
+  null,
+  "no caller option restores a withheld state slope",
+);
+assert.equal(illinoisAttempt.gradients.w2_income.total, null);
 assert.ok(illinoisAnalysis.results.state_total_tax > 0);
 
 const mississippi = { ...illinois, jurisdiction: "MS" };

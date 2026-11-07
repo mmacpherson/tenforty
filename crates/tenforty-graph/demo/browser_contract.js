@@ -284,13 +284,7 @@ export class BrowserTaxRuntime {
     graphlib,
     graph,
     contract,
-    {
-      year,
-      jurisdiction,
-      filingStatus,
-      allowUnvalidated = false,
-      includeStateSlopes = false,
-    },
+    { year, jurisdiction, filingStatus, allowUnvalidated = false },
   ) {
     const yearKey = requireYear(contract, year);
     const jurisdictionSpec = requireEntry(
@@ -309,10 +303,6 @@ export class BrowserTaxRuntime {
     if (!requireBooleanOption("allowUnvalidated", allowUnvalidated)) {
       requireValidatedJurisdiction(contract, jurisdiction, year);
     }
-    this.includeStateSlopes = requireBooleanOption(
-      "includeStateSlopes",
-      includeStateSlopes,
-    );
     validateBrowserContract(contract, graph, year);
 
     this.contract = contract;
@@ -408,10 +398,7 @@ export class BrowserTaxRuntime {
       "federal total tax",
     );
     const isStateReturn = this.jurisdiction !== "US";
-    const withheld =
-      isStateReturn &&
-      !this.contract.state_slopes.available &&
-      !this.includeStateSlopes;
+    const withheld = isStateReturn && !this.contract.state_slopes.available;
     if (withheld) {
       return Object.fromEntries(
         inputNames.map((name, index) => [

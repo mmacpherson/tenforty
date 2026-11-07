@@ -20,7 +20,7 @@ supplyable input are reported per return in
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from typing import ClassVar, Literal
 
@@ -691,30 +691,41 @@ def check_required(models: dict[str, StateFacts], rows: Sequence[FactRow]) -> No
     """Phase 4b: every row has each fact its engine, state, year and status need."""
     for row in rows:
         model = models.get(row.state or "")
-        for descriptor in _DESCRIPTORS:
-            if (
-                descriptor.state == row.state
-                and row.year in descriptor.years
-                and row.status in descriptor.statuses
-                and (
-                    descriptor.required_statuses is None
-                    or row.status in descriptor.required_statuses
+        supplied = {} if model is None else model.model_dump()
+        require_facts_for(row, supplied)
+
+
+def require_facts_for(row: FactRow, supplied: Mapping[str, object]) -> None:
+    """Raise if ``row`` lacks a fact its engine requires; ``supplied`` maps names.
+
+    The one rule behind ``check_required`` and the graph backend's own entry
+    points, so a direct backend call cannot compute a return without a fact the
+    public API requires.
+    """
+    for descriptor in _DESCRIPTORS:
+        if (
+            descriptor.state == row.state
+            and row.year in descriptor.years
+            and row.status in descriptor.statuses
+            and (
+                descriptor.required_statuses is None
+                or row.status in descriptor.required_statuses
+            )
+            and row.engine in descriptor.required_by
+            and supplied.get(descriptor.name) is None
+        ):
+            raise UnsupportedInputError(
+                f"{row.state} {row.status} returns on the {row.engine} backend "
+                f"need {descriptor.name}, which has no default: pass "
+                f"state_facts=tenforty.state_facts.{row.state}("
+                f"{descriptor.name}="
+                + (
+                    "True) or =False. "
+                    if descriptor.value_type == "boolean"
+                    else "<actual whole-dollar amount>). "
                 )
-                and row.engine in descriptor.required_by
-                and (model is None or getattr(model, descriptor.name) is None)
-            ):
-                raise UnsupportedInputError(
-                    f"{row.state} {row.status} returns on the {row.engine} backend "
-                    f"need {descriptor.name}, which has no default: pass "
-                    f"state_facts=tenforty.state_facts.{row.state}("
-                    f"{descriptor.name}="
-                    + (
-                        "True) or =False. "
-                        if descriptor.value_type == "boolean"
-                        else "<actual whole-dollar amount>). "
-                    )
-                    + descriptor.description
-                )
+                + descriptor.description
+            )
 
 
 def recorded_assumptions(row: FactRow) -> tuple[Assumption, ...]:

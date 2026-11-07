@@ -25,8 +25,8 @@ State and combined next-dollar slopes are withheld for every state return
 (`state_slopes.available` is false): graph state derivatives read zero for IL,
 MS and OR although their state tax moves with income (tenforty-s48h.76). The
 calculator shows federal slopes, and the tax curve, which is computed by
-evaluation; `BrowserTaxRuntime` returns `null` for the state and total parts
-unless constructed with `includeStateSlopes: true`.
+evaluation; `BrowserTaxRuntime` returns `null` for the state and total parts,
+and no option restores them while the contract withholds them.
 
 The public inputs cover wages, interest, dividends, capital gains and losses,
 self-employment income, rental income, other Schedule 1 income, aggregate

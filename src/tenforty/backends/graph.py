@@ -9,6 +9,7 @@ import pathlib
 from collections.abc import Callable, Iterable
 from functools import lru_cache
 
+from .. import state_facts as _facts
 from ..mappings import (
     DERIVED_NATURAL_SOURCES,
     FILING_STATUS_MAP,
@@ -384,6 +385,12 @@ def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
     returns = tuple(tax_inputs)
     for tax_input in returns:
         _require_eic_facts(tax_input)
+        _facts.require_facts_for(
+            _facts.fact_row(
+                tax_input.year, tax_input.state, tax_input.filing_status, "graph"
+            ),
+            tax_input._state_facts,
+        )
         if (
             tax_input.state == OTSState.NY
             and tax_input.filing_status == OTSFilingStatus.MARRIED_SEPARATE
