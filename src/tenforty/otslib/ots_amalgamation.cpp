@@ -989,7 +989,6 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -1504,7 +1503,6 @@ float thisversion=16.02;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -1915,7 +1913,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -2358,7 +2355,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -3189,7 +3185,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10;
  double min2file=0.0, sched540[MAX_LINES], sched540b[MAX_LINES], sched540c[MAX_LINES],
 	threshA=0, std_ded=0;
@@ -3837,11 +3832,11 @@ int main( int argc, char *argv[] )
  writeout_line = 0;
  Your1stName = GetTextLineF( "Your1stName:" );
  YourMidInitial = pull_initial( Your1stName );
- Your1stName[11] = '\0';
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
  fprintf(outfile,"Your1stName: %s\n", Your1stName );
  fprintf(outfile,"YourMidInit: %s\n", YourMidInitial );
  YourLastName   = GetTextLineF( "YourLastName:" );
- YourLastName[15] = '\0';
+ if (strlen( YourLastName ) > 15) YourLastName[15] = '\0';
  fprintf(outfile,"YourLastName: %s\n", YourLastName );
  socsec = GetTextLineF( "YourSocSec#:" );
  format_socsec( socsec, 1 );
@@ -3850,11 +3845,11 @@ int main( int argc, char *argv[] )
 
  Spouse1stName = GetTextLineF( "Spouse1stName:" );
  SpouseMidInitial = pull_initial( Spouse1stName );
- Spouse1stName[11] = '\0';
+ if (strlen( Spouse1stName ) > 11) Spouse1stName[11] = '\0';
  fprintf(outfile,"Spouse1stName: %s\n", Spouse1stName );
  fprintf(outfile,"SpouseMidInit: %s\n", SpouseMidInitial );
  SpouseLastName = GetTextLineF( "SpouseLastName:" );
- SpouseLastName[15] = '\0';
+ if (strlen( SpouseLastName ) > 15) SpouseLastName[15] = '\0';
  fprintf(outfile,"SpouseLastName: %s\n", SpouseLastName );
  socsec = GetTextLineF( "SpouseSocSec#:" );
  format_socsec( socsec, 1 );
@@ -4024,7 +4019,6 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], *infname=0, outfname[4000];
  int status=0;
@@ -4590,7 +4584,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2000], *infname=0, outfname[1500];
  time_t now;
@@ -6128,7 +6121,6 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* NOT Updated for 2018. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -7644,7 +7636,6 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -8380,7 +8371,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -9665,7 +9655,6 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -10921,7 +10910,6 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -11560,7 +11548,6 @@ float thisversion=17.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -11971,7 +11958,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -12406,7 +12392,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -12846,7 +12831,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2000], *infname=0, outfname[1500];
  time_t now;
@@ -14429,7 +14413,6 @@ void Grab_ScheduleB_Payer_Lines( char *infname, FILE *outfile )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2019. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -15262,7 +15245,6 @@ double TaxRateFunction( double income, int status )     /* Emulates table lookup
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], *infname=0, outfname[4000];
  int status=0;
@@ -15913,7 +15895,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -16694,7 +16675,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -17494,11 +17474,11 @@ int main( int argc, char *argv[] )
  writeout_line = 0;
  Your1stName = GetTextLineF( "Your1stName:" );
  YourMidInitial = pull_initial( Your1stName );
- Your1stName[11] = '\0';
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
  fprintf(outfile,"Your1stName: %s\n", Your1stName );
  fprintf(outfile,"YourMidInit: %s\n", YourMidInitial );
  YourLastName   = GetTextLineF( "YourLastName:" );
- YourLastName[15] = '\0';
+ if (strlen( YourLastName ) > 15) YourLastName[15] = '\0';
  fprintf(outfile,"YourLastName: %s\n", YourLastName );
  socsec = GetTextLineF( "YourSocSec#:" );
  format_socsec( socsec, 1 );
@@ -17507,11 +17487,11 @@ int main( int argc, char *argv[] )
 
  Spouse1stName = GetTextLineF( "Spouse1stName:" );
  SpouseMidInitial = pull_initial( Spouse1stName );
- Spouse1stName[11] = '\0';
+ if (strlen( Spouse1stName ) > 11) Spouse1stName[11] = '\0';
  fprintf(outfile,"Spouse1stName: %s\n", Spouse1stName );
  fprintf(outfile,"SpouseMidInit: %s\n", SpouseMidInitial );
  SpouseLastName = GetTextLineF( "SpouseLastName:" );
- SpouseLastName[15] = '\0';
+ if (strlen( SpouseLastName ) > 15) SpouseLastName[15] = '\0';
  fprintf(outfile,"SpouseLastName: %s\n", SpouseLastName );
  socsec = GetTextLineF( "SpouseSocSec#:" );
  format_socsec( socsec, 1 );
@@ -18731,7 +18711,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -19263,7 +19242,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -21007,7 +20985,6 @@ void Calculate_Schedule_A( )
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2020. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -22613,7 +22590,6 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -23252,7 +23228,6 @@ float thisversion=18.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -23448,7 +23423,6 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -23988,7 +23962,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -24353,7 +24326,6 @@ float thisversion = 1.00;
 
 int main(int argc, char *argv[])
 {
- do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -24748,7 +24720,6 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -25324,7 +25295,6 @@ float thisversion=18.01;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -25789,7 +25759,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2000], *infname=0, outfname[1500];
  time_t now;
@@ -26498,7 +26467,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -27334,11 +27302,11 @@ int main( int argc, char *argv[] )
  writeout_line = 0;
  Your1stName = GetTextLineF( "Your1stName:" );
  YourMidInitial = pull_initial( Your1stName );
- Your1stName[11] = '\0';
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
  fprintf(outfile,"Your1stName: %s\n", Your1stName );
  fprintf(outfile,"YourMidInit: %s\n", YourMidInitial );
  YourLastName   = GetTextLineF( "YourLastName:" );
- YourLastName[15] = '\0';
+ if (strlen( YourLastName ) > 15) YourLastName[15] = '\0';
  fprintf(outfile,"YourLastName: %s\n", YourLastName );
  socsec = GetTextLineF( "YourSocSec#:" );
  format_socsec( socsec, 1 );
@@ -27347,11 +27315,11 @@ int main( int argc, char *argv[] )
 
  Spouse1stName = GetTextLineF( "Spouse1stName:" );
  SpouseMidInitial = pull_initial( Spouse1stName );
- Spouse1stName[11] = '\0';
+ if (strlen( Spouse1stName ) > 11) Spouse1stName[11] = '\0';
  fprintf(outfile,"Spouse1stName: %s\n", Spouse1stName );
  fprintf(outfile,"SpouseMidInit: %s\n", SpouseMidInitial );
  SpouseLastName = GetTextLineF( "SpouseLastName:" );
- SpouseLastName[15] = '\0';
+ if (strlen( SpouseLastName ) > 15) SpouseLastName[15] = '\0';
  fprintf(outfile,"SpouseLastName: %s\n", SpouseLastName );
  socsec = GetTextLineF( "SpouseSocSec#:" );
  format_socsec( socsec, 1 );
@@ -28747,7 +28715,6 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -29346,7 +29313,6 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -29495,7 +29461,6 @@ float thisversion = 1.01;
 
 int main(int argc, char *argv[])
 {
- do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -30449,7 +30414,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -31492,7 +31456,6 @@ float thisversion=19.02;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -31704,7 +31667,6 @@ void check_if_yes( char *label )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, dep_deduct, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -32362,7 +32324,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -33869,7 +33830,6 @@ void tax_computation_worksheet( int status )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -34786,7 +34746,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -35252,7 +35211,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -37027,7 +36985,6 @@ void Calc_StudentLoan_Sched1L21()		/* Page 94 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2021. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -38139,7 +38096,6 @@ float thisversion=19.01;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -38638,7 +38594,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -39116,7 +39071,6 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -39937,7 +39891,6 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -40543,7 +40496,6 @@ float thisversion=2.01;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -40781,7 +40733,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -42395,7 +42346,6 @@ float thisversion=20.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -42607,7 +42557,6 @@ void check_if_yes( char *label )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -43239,7 +43188,6 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -43833,7 +43781,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -44062,7 +44009,6 @@ float thisversion=3.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -44310,7 +44256,6 @@ float thisversion = 2.00;
 
 int main(int argc, char *argv[])
 {
- do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -45302,7 +45247,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -46528,7 +46472,6 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -47406,7 +47349,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -48775,7 +48717,6 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -49692,7 +49633,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -50138,7 +50078,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -52098,7 +52037,6 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 93 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2022. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -53163,7 +53101,6 @@ float thisversion=20.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -53644,7 +53581,6 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -53842,7 +53778,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -54296,7 +54231,6 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -54933,7 +54867,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -55332,7 +55265,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -57107,7 +57039,6 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -57703,7 +57634,6 @@ float thisversion=21.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -58188,7 +58118,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -58547,7 +58476,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -58776,7 +58704,6 @@ float thisversion=3.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -59070,7 +58997,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -59356,7 +59282,6 @@ float thisversion = 2.00;
 
 int main(int argc, char *argv[])
 {
- do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -60348,7 +60273,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -61453,7 +61377,6 @@ float thisversion=21.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -61665,7 +61588,6 @@ void check_if_yes( char *label )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -62327,7 +62249,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -63696,7 +63617,6 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -64616,7 +64536,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -65041,7 +64960,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -67005,7 +66923,6 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 96 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2023. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -68091,7 +68008,6 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -68289,7 +68205,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -68751,7 +68666,6 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -69930,7 +69844,6 @@ double getAZTaxAmt( double azTaxableIncome )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
 	int i, j, k, deduction = 0, includePage4 = 0;
 	char word[4000], outfname[4000], prelim_1040_outfilename[5000], *infname = 0;
 	time_t now;
@@ -70689,7 +70602,6 @@ float thisversion=2.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -71082,7 +70994,6 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -71864,7 +71775,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -73305,7 +73215,7 @@ void GrabLineAlloc( char *fline, char **strng )
  if (twrd[0] != '\0') {
   // Trim trailing spaces from output string
   int cpos = strlen(twrd) - 1;
-  while (twrd[cpos] == ' ') {
+  while (cpos >= 0 && twrd[cpos] == ' ') {
    --cpos;
   }
   twrd[cpos + 1] = '\0';
@@ -73701,7 +73611,6 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -74280,7 +74189,6 @@ float thisversion=2.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -74556,7 +74464,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -74890,7 +74797,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -75249,7 +75155,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -75478,7 +75383,6 @@ float thisversion=3.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -75772,7 +75676,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -76069,7 +75972,6 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, stop=0;
  char word[8000], outfname[8000], *infname=0;
  time_t now;
@@ -76246,7 +76148,6 @@ float thisversion = 3.00;
 
 int main(int argc, char *argv[])
 {
- do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -77113,7 +77014,6 @@ double getAZTaxAmt( double azTaxableIncome )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
 	int i, j, k, deduction = 0, includePage4 = 0, numtaxpayers=1;
 	char word[4000], outfname[4000], prelim_1040_outfilename[5000], *infname = 0;
 	time_t now;
@@ -78595,7 +78495,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -79872,7 +79771,6 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -80661,7 +80559,6 @@ float thisversion=22.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -80861,7 +80758,6 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -81496,7 +81392,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -82877,7 +82772,6 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -83795,7 +83689,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -84228,7 +84121,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -86243,7 +86135,6 @@ void Calc_StudentLoan_Sched1L21()		/* Instructions page 96 */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2024. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[2000], outfname[2000], *infname="", labelx[1024]="";
  time_t now;
@@ -87365,7 +87256,6 @@ float thisversion=22.02;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;
@@ -87868,7 +87758,6 @@ struct date_record yourDOB, spouseDOB, DL;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  int status=0, exemptionsA=0, exemptionsB=0, youBlind=0, spouseBlind=0;
@@ -88332,7 +88221,6 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -88958,7 +88846,6 @@ double flat_tax_rate = 0.0425;		/* Updated for 2024. */
 /* ------------------- Main -------------------------------------- */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[500], labelx[1000];
  time_t now;
@@ -89718,7 +89605,6 @@ void show_ssn_or_40(char *label, char *ssn) {
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -90098,7 +89984,7 @@ int main( int argc, char *argv[] )
     //====== OR-A Page 1 ======
 
     #define SCH_A_LINES 23
-    double SchA_L[SCH_A_LINES + 1]; // Allow 1 extra for 1-based counting
+    double SchA_L[SCH_A_LINES + 1] = {0}; // Allow 1 extra for 1-based counting
     char *SchA_L10_Type;
     char *SchA_L22_Type;
 
@@ -93027,7 +92913,6 @@ void show_ssn_or_40(char *label, char *ssn) {
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -93442,7 +93327,7 @@ if (infile==0) {
     //====== OR-A Page 1 ======
 
     #define SCH_A_LINES 23
-    double SchA_L[SCH_A_LINES + 1]; // Allow 1 extra for 1-based counting
+    double SchA_L[SCH_A_LINES + 1] = {0}; // Allow 1 extra for 1-based counting
     char *SchA_L10_Type;
     char *SchA_L22_Type;
 
@@ -94213,7 +94098,6 @@ double ComputeTax(double taxableIncome)
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, i65, iblind, ndep, ndep12=0;
  int flag, notaxstatus=0;
  char word[4000], *infname=0, outfname[4000], *answ;
@@ -94831,7 +94715,6 @@ void Age65_and_Older_Deduction_Worksheet( double FAGI, double L5 )	   /* Updated
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[1000], outfname[4000], *lnameptr, lastname[1024], *socsec, *datestr, *twrd, *infname=0;
  time_t now;
@@ -95236,7 +95119,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -95567,7 +95449,6 @@ double L8a=0.0, L8b=0.0, L8c=0.0, L8d=0.0; 	/* Wages & Tips */
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, stop=0, CkMinister=0;
  char word[8000], outfname[8000], *infname=0;
  double L1a=0.0, L1b=0.0;
@@ -95783,7 +95664,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -96265,7 +96145,6 @@ double L6WS(int column, double IIIL4, double ScdA, double IIIL5, double FAIWSL3,
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity = INDIVIDUAL, Quest4 = Yes;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -97054,7 +96933,6 @@ int status;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -97280,7 +97158,6 @@ float thisversion=4.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[4000], *infname=0;
  time_t now;
@@ -97536,7 +97413,6 @@ double flat_tax_rate = 0.0425;		/* Updated for 2025. */
 /* ------------------- Main -------------------------------------- */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[500], labelx[1000];
  time_t now;
@@ -99811,7 +99687,6 @@ void sched_1A( double s1A_L2a )		/* Do the Schedule 1-A Form. */
 /*----------------------------------------------------------------------*/
 int main( int argc, char *argv[] )						/* Updated for 2025. */
 {
- do_all_caps = 0;
  int argk, j, k, itemize=0;
  char word[MAXSTRLEN], outfname[MAXSTRLEN], *infname="", labelx[1024]="";
  time_t now;
@@ -101092,7 +100967,6 @@ void ImportFederalReturnData( char *fedlogfile, struct FedReturnData *fed_data )
 /* ------------------------------------------------------------------------------------ */
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, jj, k, status;
  char word[1000], *infname=0, outfname[1000], *socsec, socsectmp[100];
  time_t now;
@@ -102006,7 +101880,6 @@ double getAZTaxAmt( double azTaxableIncome )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
 	int i, j, k, deduction = 0, includePage4 = 0, numtaxpayers=1;
 	char word[4000], outfname[4000], prelim_1040_outfilename[5000], *infname = 0;
 	time_t now;
@@ -103759,7 +103632,6 @@ void tax_computation_worksheet( int status )	/* Called for Line-39 when Line-33 
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, argk, day, month, yyyy, itemize=0, all_forms=0;
  char word[1000], *infname=0, outfname[1000], *answ;
  time_t now;
@@ -104656,7 +104528,6 @@ float thisversion = 3.01;
 
 int main(int argc, char *argv[])
 {
- do_all_caps = 0;
   int i, j, k;
   int complete_part_one, complete_part_two, complete_part_three, dist_or_conv;
   char word[4000], outfname[4000], *infname = 0;
@@ -104954,7 +104825,6 @@ float thisversion=22.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *answ, *infname=0;
  time_t now;
@@ -105185,7 +105055,6 @@ static char* outfname;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int jj;
   char word[4000];
   time_t now;
@@ -105771,7 +105640,6 @@ float thisversion=2.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -106089,7 +105957,6 @@ int f_sch_c_imp_defs_size = sizeof(f_sch_c_imp_defs)/sizeof(FORM_IMPORT_DEF);
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[6000], outfname[6000], *infname=0;
  time_t now;
@@ -107039,7 +106906,6 @@ void display_part2( int j )
 /*----------------------------------------------------------------------------*/
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int argk, j, k, iline7, iline8, iline9, iline10, CkFYHealthCoverage=0, L7a=0;
  double min2file=0.0, sched540A[MAX_LINES], sched540B[MAX_LINES], sched540C[MAX_LINES],
 	sched540Ab[MAX_LINES], sched540Ac[MAX_LINES],
@@ -108279,7 +108145,6 @@ void place_blocked_value( char *phrase, int numpre, int numpost, char *label )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0, answer=0, HomeOwner=0, Tenant=0, eligible_proptax_ded=1;
  char word[1000], *infname=0, outfname[4000];
  time_t now;
@@ -109091,7 +108956,6 @@ void show_ssn_f2441(char *label, char *ssn) {
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
     int i, j, k;
     char word[6000], outfname[6000], *infname=0;
     time_t now;
@@ -109877,7 +109741,6 @@ char *pull_initial( char *name )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int j, k, mm;
  char word[4000], *infname=0, outfname[4000], label[90], *socsec, *pname, *MidInit;
  int status=0, exemptions=0, qualify_jfc=0;
@@ -110377,7 +110240,6 @@ double Estate_Trust_TaxRateFunction( double income )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
   int i, j, k, status, entity=INDIVIDUAL;
  char word[4000], outfname[4000], *infname=0;
  time_t now;
@@ -111012,7 +110874,6 @@ double pos( double x )
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k, status=0;
  char word[2500], *infname=0, outfname[2500];
  time_t now;
@@ -111293,7 +111154,6 @@ float thisversion=23.00;
 
 int main( int argc, char *argv[] )
 {
- do_all_caps = 0;
  int i, j, k;
  char word[4000], outfname[4000], *EIN=0, *answ, *infname=0;
  time_t now;

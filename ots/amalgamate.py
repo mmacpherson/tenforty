@@ -147,6 +147,7 @@ def process_ots_tarball(
 
     """
     source_group = dict()
+    program_sources: dict[str, str] = {}
     configs = []
     outer_namespace = ""
     outer_namespaces = set()
@@ -161,6 +162,7 @@ def process_ots_tarball(
                         with open(f"{tmpdirname}/{item.name}") as fp:
                             source = fp.read()
                         source_group[inner_namespace] = group_lines(source)
+                        program_sources[shorten_inner_ns(inner_namespace)] = source
                         outer_namespaces.add(outer_namespace)
                     case (
                         r"/examples_and_templates/.*_template\.txt"
@@ -188,6 +190,7 @@ def process_ots_tarball(
 
     assert len(outer_namespace) > 0
     assert len(outer_namespaces) == 1
+    attach_field_kinds(configs, program_sources)
 
     # Inline taxsolve_get_fed_return_data into each AZ form's namespace.
     # AZ is the only state that uses this intermediate include file.  Rather
@@ -532,29 +535,6 @@ def patch_exit_to_return(lines: list[str]) -> tuple[list[str], int]:
     return lines, 1
 
 
-def patch_reset_globals(lines: list[str]) -> tuple[list[str], int]:
-    """Reset shared globals at the start of each form's main() (OTS-P4, pending removal).
-
-    Some state forms (NC, OH, PA) set ``do_all_caps = 1`` to uppercase
-    imported names. The flag is never cleared, so subsequent forms in the
-    same process read file paths as uppercased strings, which fails on
-    case-sensitive filesystems. Inserting a reset at the top of every form's
-    main() ensures a clean slate. Returns the lines and the number of resets
-    inserted.
-
-    A state reset is not portability, so this is not an allowed patch class.
-    It stays only until tenforty-0qmf moves the reset into the Cython binding.
-    """
-    start_ix = _find_main(lines)
-    if start_ix is None:
-        return lines, 0
-    for ix in range(start_ix, min(start_ix + 5, len(lines))):
-        if "{" in lines[ix]:
-            lines.insert(ix + 1, " do_all_caps = 0;")
-            return lines, 1
-    raise PatchMatchError("int main(...) has no opening brace within 5 lines")
-
-
 def patch_az_widow_std_deduction(lines: list[str]) -> tuple[list[str], int]:
     """Extend ``getAZStdDedAmt``'s table so Widow(er) is in bounds (OTS-P5).
 
@@ -640,6 +620,139 @@ def patch_f6781_cpp_compat(lines: list[str]) -> tuple[list[str], int]:
             casts += count
         out.append(line)
     return out, casts
+
+
+def patch_or_40_sch_a_zero_init(lines: list[str]) -> tuple[list[str], int]:
+    """Zero-initialise OR-40's Schedule OR-A array (OTS-P10).
+
+    ``SchA_L`` is a local ``double[SCH_A_LINES + 1]`` with no initialiser.
+    Lines 1, 5-7, 10, 12-14, 16, 18-20 and 22 are read with ``GetLine`` and
+    lines 2-4, 9, 11, 17, 21 and 23 are assigned. Nothing writes
+    ``SchA_L[8]``, yet line 9 is ``SchA_L[5] + SchA_L[6] + SchA_L[7] +
+    SchA_L[8]``, capped at the income and property tax limit. That read is
+    of uninitialised memory, so line 9, and through it the Oregon itemized
+    deduction on OR-40 line 16, is whatever was left on the stack:
+    - 0 on our Linux builds;
+    - a NaN under clang's ``-ftrivial-auto-var-init=pattern``, for which
+      ``SmallerOf(NaN, limit)`` returns the full $10,000 (2024) or $40,000
+      (2025) limit;
+    - on an Intel macOS build, a 2024 Single $420,000 return deducted $10,000
+      instead of the $2,745 standard deduction.
+
+    Zero is the value the form itself gives line 8: Schedule OR-A line 8 is
+    "Reserved" in both releases that have this code (150-101-007, 2024
+    Rev. 06-17-24 and 2025 Rev. 07-29-25, page 1). So on every platform where
+    the slot already read 0, Linux among them, every figure OTS prints is
+    unchanged, and elsewhere the patch replaces an undefined result with
+    that one. Every formula stays as upstream wrote it.
+
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P10 in ``ots/ots_patches.py`` and reported upstream (report 20 in
+    docs/upstream-ots-reports.md).
+
+    Returns the lines and the number of declarations initialised.
+    """
+    declaration = "double SchA_L[SCH_A_LINES + 1];"
+    initialised = 0
+    for ix, line in enumerate(lines):
+        if declaration in line:
+            lines[ix] = line.replace(
+                declaration, "double SchA_L[SCH_A_LINES + 1] = {0};"
+            )
+            initialised += 1
+    return lines, initialised
+
+
+def patch_grablinealloc_trim_bound(lines: list[str]) -> tuple[list[str], int]:
+    r"""Stop ``GrabLineAlloc``'s trailing-space trim at its buffer's start (OTS-P11).
+
+    The 2024 taxsolve_routines trims an imported string with::
+
+        int cpos = strlen(twrd) - 1;
+        while (twrd[cpos] == ' ') { --cpos; }
+        twrd[cpos + 1] = '\0';
+
+    with no lower bound. ``GrabLineString`` appends a space after every word,
+    so an empty field in an imported return (a blank name, say) arrives as
+    ``" "``. The loop then reads ``twrd[-1]``, out of bounds, and if that
+    byte is a space it keeps walking backwards and writes the terminator
+    before the buffer. MemorySanitizer reports it on OTS's own OR-40 2024
+    example.
+
+    The bound changes no output that was ever well defined. Wherever the
+    original stopped inside the buffer, the bounded loop stops at the same
+    index. For an all-space string both stop at ``cpos == -1`` and store the
+    empty string, which is what the original did whenever the byte before
+    ``twrd`` was not a space. The function handles only imported text fields
+    (``p_field_string``); imported amounts go through ``GrabLineValue``, so
+    no figure passes through it.
+
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P11 in ``ots/ots_patches.py`` and reported upstream (report 20 in
+    docs/upstream-ots-reports.md). Only the 2024 release has the loop; the
+    2025 import routines were rewritten without it.
+
+    Returns the lines and the number of loops bounded.
+    """
+    unbounded = "while (twrd[cpos] == ' ') {"
+    bounded = 0
+    for ix, line in enumerate(lines):
+        if unbounded in line:
+            lines[ix] = line.replace(
+                unbounded, "while (cpos >= 0 && twrd[cpos] == ' ') {"
+            )
+            bounded += 1
+    return lines, bounded
+
+
+_NAME_TRUNCATION = re.compile(
+    r"\b(Your1stName|YourLastName|Spouse1stName|SpouseLastName)"
+    r"\[([1-9][0-9]*)\] = '\\0';"
+)
+
+
+def patch_ca540_name_truncation_bound(lines: list[str]) -> tuple[list[str], int]:
+    r"""Truncate CA-540's name fields only when they are longer than the cut (OTS-P12).
+
+    The 2018-2020 CA-540 programs shorten the filer's and spouse's names for
+    the printed output with a fixed-index write::
+
+        Your1stName = GetTextLineF( "Your1stName:" );
+        Your1stName[11] = '\0';
+
+    ``GetTextLineF`` returns ``strdup(line)``, a buffer of ``strlen(text) + 1``
+    bytes including the terminator. A name shorter than the cut, including the empty name every tenforty
+    return passes, makes the write land past the allocation: valgrind reports
+    "Invalid write of size 1 ... 10 bytes after a block of size 1" for each of
+    ``Your1stName[11]``, ``YourLastName[15]``, ``Spouse1stName[11]`` and
+    ``SpouseLastName[15]``, on every 2018-2020 CA return. On musl the
+    corrupted allocator metadata later crashed the interpreter at exit.
+
+    The guard ``if (strlen(X) > N)`` prevents every out-of-bounds write and
+    leaves the resulting C string as the original left it whenever the
+    original write was valid. A name longer than ``N`` gets the same cut. A
+    name of exactly ``N`` characters already has its terminator at ``N``, so
+    the skipped write was redundant. ``pull_initial`` can put an earlier
+    terminator into a longer first name; the guard then skips an in-bounds
+    write past that terminator, which no C-string operation sees. The
+    truncated names are only printed; no figure reads them.
+
+    This is a memory-safety fix, not a tax-logic change. It is registered as
+    OTS-P12 in ``ots/ots_patches.py`` and reported upstream (report 21 in
+    docs/upstream-ots-reports.md). From 2021 the CA-540 program no longer
+    reads these names.
+
+    Returns the lines and the number of truncations guarded.
+    """
+    guarded = 0
+    for ix, line in enumerate(lines):
+        replaced, count = _NAME_TRUNCATION.subn(
+            r"if (strlen( \1 ) > \2) \1[\2] = '\\0';", line
+        )
+        if count:
+            lines[ix] = replaced
+            guarded += count
+    return lines, guarded
 
 
 def apply_registered_patches(year: int, program: str, lines: list[str]) -> list[str]:
@@ -759,6 +872,44 @@ def build_amalgamation(
     return amalgamation
 
 
+CAPS_FLAG_DECLARATION = re.compile(r"^int\s+do_all_caps\s*=\s*0\s*;", re.MULTILINE)
+
+
+def caps_flag_years(
+    source_groups: dict[str, dict[str, dict[str, list[str]]]],
+) -> list[int]:
+    """List the years whose shared routines declare the file-scope ``do_all_caps`` flag.
+
+    NC, OH and PA programs set it to 1 and nothing clears it, so the Cython
+    binding resets each listed year's flag before every native call, giving
+    every in-process call the 0 a fresh OTS process starts with.
+    """
+    years = []
+    for outer_ns, source_group in source_groups.items():
+        for inner_ns, group in source_group.items():
+            if program_of(inner_ns) == "routines" and CAPS_FLAG_DECLARATION.search(
+                "\n".join(group["source"])
+            ):
+                years.append(year_of(outer_ns))
+    return sorted(years)
+
+
+def generate_caps_flag_externs(years: list[int]) -> str:
+    """Declare each year's ``do_all_caps`` to Cython under a year-qualified name."""
+    return "\n".join(
+        f'    int do_all_caps_{year} "OpenTaxSolver{year}::do_all_caps"'
+        for year in years
+    )
+
+
+def generate_caps_flag_resets(years: list[int]) -> str:
+    """Zero every year's ``do_all_caps`` inside ``_restore_fresh_process_state``."""
+    names = [f"do_all_caps_{year}" for year in years]
+    return "\n".join(
+        [f"    global {', '.join(names)}"] + [f"    {name} = 0" for name in names]
+    )
+
+
 def build_cython_sources(
     source_groups: dict[str, dict[str, dict[str, list[str]]]],
     cython_template_file: str,
@@ -808,8 +959,11 @@ def build_cython_sources(
     with open(cython_template_file) as fp:
         template = fp.read()
 
+    caps_years = caps_flag_years(source_groups)
     out[cython_template_file.replace(".template", "")] = template.format(
         CIMPORTS="\n".join(cimports),
+        CAPS_FLAG_EXTERNS=generate_caps_flag_externs(caps_years),
+        CAPS_FLAG_RESETS=generate_caps_flag_resets(caps_years),
         LOOKUP_DICT_KEYS=generate_lookup_dict_entries(import_map),
         LOOKUP_SWITCH=generate_lookup_switch(import_map),
         FED_FILENAME=FED_FILENAME,
@@ -915,6 +1069,90 @@ def build_fields(source: str) -> list[dict[str, Any]]:
     return fields
 
 
+FIELD_KIND_BY_READER = {
+    "GetLine": "number",
+    "GetLine1": "number",
+    "GetLineF": "number",
+    "GetLineFnz": "number",
+    "GetOptionalLine": "number",
+    "GetInteger": "integer",
+    "GetYesNo": "boolean",
+    "GetYesNo1": "boolean",
+    "GetYesNoSL": "boolean",
+    "GetString": "text",
+    "GetLineString": "text",
+    "GetTextLine": "text",
+    "GetTextLineF": "text",
+}
+FIELD_KIND_BY_PARAMETER_TYPE = {
+    "f": "number",
+    "i": "integer",
+    "b": "boolean",
+    "w": "text",
+    "l": "word",
+}
+_C_COMMENT_RE = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
+_READER_CALL_RE = re.compile(r"\b(Get\w+)\s*\(\s*\"([^\"]+)\"")
+_PARAMETER_CALL_RE = re.compile(
+    r"\bget_param(?:eter|eters|_single_line)\s*\(\s*infile\s*,\s*'(\w)'\s*,"
+    r"[^,;]*,\s*\"([^\"]+)\"\s*\)"
+)
+
+
+def extract_field_kinds(c_source: str) -> dict[str, str]:
+    """Map each input label a form's C source reads to the kind of value it parses.
+
+    OTS reads its input file with helpers that ``exit(1)`` on a value they cannot
+    parse, so tenforty validates raw values before any native call and needs to
+    know what each line expects. The kind comes from the reader the source calls
+    with that label as a string literal: ``GetLine("L1a", ...)`` reads a number,
+    ``GetYesNo("B7aa", ...)`` a boolean, ``GetTextLine("Your1stName:")`` a line
+    of text, and ``get_parameter(infile, 'b', ..., "You_Blind?")`` the kind its
+    type character names. A label read as a bare ``'l'`` word takes one
+    whitespace-free token.
+
+    Labels the source builds at run time, or reads with two different kinds, are
+    left out; the caller falls back to a conservative check for those.
+    """
+    source = _C_COMMENT_RE.sub("", c_source)
+    seen: dict[str, set[str]] = {}
+    for reader, label in _READER_CALL_RE.findall(source):
+        if reader in FIELD_KIND_BY_READER:
+            seen.setdefault(label, set()).add(FIELD_KIND_BY_READER[reader])
+    for type_char, label in _PARAMETER_CALL_RE.findall(source):
+        if type_char in FIELD_KIND_BY_PARAMETER_TYPE:
+            seen.setdefault(label, set()).add(FIELD_KIND_BY_PARAMETER_TYPE[type_char])
+    return {
+        label: next(iter(kinds)) for label, kinds in seen.items() if len(kinds) == 1
+    }
+
+
+def template_program_name(form_id: str) -> str:
+    """Name the OTS program that reads a template, from the template's directory.
+
+    Most templates sit in a directory named after their program; the
+    supplementary forms use ``Form_NNNN`` for program ``fNNNN`` (and
+    ``Form_CA_5805`` for ``CA_5805``).
+    """
+    return form_id.replace("Form_CA_", "CA_").replace("Form_", "f")
+
+
+def attach_field_kinds(
+    configs: list[dict[str, Any]], program_sources: dict[str, str]
+) -> None:
+    """Record on each template field the kind its OTS program reads, or None."""
+    for config in configs:
+        program = template_program_name(config["form_id"])
+        if program not in program_sources:
+            raise ValueError(
+                f"No OTS program source for template {config['year']}/"
+                f"{config['form_id']} (looked for {program})"
+            )
+        kinds = extract_field_kinds(program_sources[program])
+        for field in config["fields"]:
+            field["kind"] = kinds.get(field["key"])
+
+
 def build_config_file(configs: list[dict[str, Any]]) -> str:
     """Create a configuration file for OTS form templates.
 
@@ -926,15 +1164,31 @@ def build_config_file(configs: list[dict[str, Any]]) -> str:
     -------
         A string representing the contents of the configuration file.
 
-    NOTE: We just use !r/repr() here to generate a valid python dict literal,
-    and rely on the `black` hook downstream to prettify it.
+    Each field is written as a ``(key, default, terminator, kind)`` tuple, one
+    line per field once formatted, which ``tenforty.models`` reads back into
+    ``OTSField``.
+
+    NOTE: We just use !r/repr() here to generate a valid python literal, and
+    rely on the `ruff format` hook downstream to prettify it.
 
     """
+    compact = [
+        dict(
+            year=config["year"],
+            form_id=config["form_id"],
+            fields=[
+                (f["key"], f["default"], f["terminator"], f["kind"])
+                for f in config["fields"]
+            ],
+        )
+        for config in configs
+    ]
     return f"""\
 # THIS FILE IS PROGRAMMATICALLY GENERATED.
 # DO NOT EDIT BY HAND.
 # See `ots/amalgamate.py` to regenerate.
-OTS_FORM_CONFIG = {configs!r}
+# Each field is (key, default, terminator, kind).
+OTS_FORM_CONFIG = {compact!r}
     """
 
 

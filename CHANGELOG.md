@@ -1,12 +1,88 @@
 ## [Unreleased]
+### Fixed (OTS backend)
+- **OTS 2018-2020 California no longer writes past the end of a heap
+  buffer.** CA-540 shortens the filer's and spouse's names for its printed
+  output by writing a terminator at a fixed position. The name is a copy
+  sized to the text and its terminator, and tenforty passes no names, so every
+  2018-2020 CA return wrote 10 to 14 bytes past a 1-byte allocation.
+  A valgrind sweep of every OTS year and state form (one Single and one
+  joint return each) found no other memory error. On a musllinux wheel the
+  overrun could later crash the interpreter at exit.
+  - OTS-P12 cuts a name only when it is longer than the cut, which prevents
+    every overrun and leaves each name as before. The names are only
+    printed, so no figure changes.
+  - It is a memory-safety entry in the registry, staged upstream as
+    report 21.
+- **A bad raw value passed to `tenforty.core.evaluate_form` no longer kills the
+  Python interpreter.** OTS parses its input file with helpers that call
+  `exit(1)` on a value they cannot read, outside the `main()` that tenforty
+  patches to return, so `evaluate_form(2024, federal_form_values={"L1a":
+  "not-a-number"})` ended the process under every `on_error` policy.
+  `evaluate_form` now checks every federal and state value before any native
+  call and raises `OTSInputError` (a `ValueError`) naming the year, form and
+  field: a key must be a line of the form's OTS template, an amount line takes
+  finite ASCII numbers, a yes/no line takes Y/N (yes/no, true/false, 1/0, any
+  case, written to OTS as `Y` or `N`), and
+  a text line one line of text of at most 500 UTF-8 bytes. Each template line
+  now records the kind its OTS program reads, extracted from the vendored C
+  source by `ots/amalgamate.py`. A line whose reader is not identified (such as
+  Schedule D's `D6` and capital-gain entries) fails closed: `evaluate_form`
+  accepts only its template default there, except `Status`, which takes
+  tenforty's filing-status names. A line's exact template default is always
+  accepted. Numbers on amount lines are written to OTS in one canonical
+  fixed-point spelling (`-.5` is sent as `-0.5`, `1e3` as `1000.0`), which
+  parses back to the same value (tenforty-48hh).
+- **OTS now refuses three inputs it was silently dropping.** tenforty mapped
+  `self_employment_income` and `rental_income` on 2018 returns, and
+  `state_adjustment` on CA 2018 and 2019 returns, to lines those years' OTS
+  templates do not have, so the values never reached OTS: a 2018 return with
+  $60,000 wages reported the same AGI with or without $50,000 of
+  self-employment or rental income. A nonzero value there now raises
+  `UnsupportedInputError` naming the input, state and year, under every
+  `on_error` policy and from the whole-batch preflight, on `backend="ots"` and
+  `backend="auto"` alike. Zero, explicit or omitted, is unchanged. The
+  mappings themselves are tracked as tenforty-s2gx and tenforty-8tlh.
+- **OTS 2024 and 2025 Oregon no longer read uninitialised memory into
+  Schedule OR-A line 9.** OTS sums line 8 into line 9, but nothing ever sets
+  line 8, so the Oregon itemized deduction depended on the stack. On Linux
+  the stray value was 0. On an Intel macOS wheel, a 2024 Single $420,000
+  return deducted $10,000 instead of the $2,745 standard deduction.
+  - OTS-P10 zero-initialises the array. Line 8 is "Reserved" on both years'
+    Schedule OR-A, so 0 is the form's own value. Figures on Linux do not change.
+  - OTS-P11 bounds a 2024 import routine's trailing-space trim, which read
+    before its buffer on an empty text field. It handles text only, so no
+    figure changes.
+  - Both are memory-safety entries in the registry, staged upstream as
+    report 20.
+  - A clang `-ftrivial-auto-var-init=pattern` against `=zero` build test
+    witnesses the Oregon defect and the fix. It skips without clang.
+
 ### Changed (OTS build)
+- **The `do_all_caps` reset moved out of the vendored OTS source into the
+  Cython binding.** NC, OH and PA programs set their year's `do_all_caps` so
+  the text lines they read come out upper-cased, and nothing clears it. A
+  fresh OTS process starts at 0, but tenforty runs every program in one
+  process. Without a reset, an NC, OH or PA call would upper-case later calls'
+  names. It would also break OR-40 and Form 8995, which read the federal
+  return's path as text: a later 2024 or 2025 Oregon return failed, and a
+  2024 QBI return lost its Form 8995 deduction.
+  - `amalgamate.py` used to insert `do_all_caps = 0;` at the top of every
+    program's `main` (OTS-P4, 140 insertions). That patch is removed, and
+    `ots_amalgamation.cpp` loses only those 140 lines.
+  - Instead, `_restore_fresh_process_state` clears every year's flag before
+    each native call. That covers federal, state, subordinate and raw-form
+    calls alike. No computed figure changes.
+  - New tests interleave NC, OH and PA with later 1040, OR-40 and Form 8995
+    calls in one process, under a mixed-case temp path, for every year
+    2018-2025. Each step is compared with the same step in a fresh process.
+    Without the reset, 12 of these tests fail.
 - Every change `ots/amalgamate.py` makes to vendored OpenTaxSolver is now
   registered in `ots/ots_patches.py`, rendered in
   [docs/ots-patches.md](docs/ots-patches.md).
   - Each entry is portability or memory-safety, with its scope, exact match
     counts, effect on figures, status, upstream report and a source witness.
-    The one temporary exception is OTS-P4, the `do_all_caps` state reset,
-    which stays until tenforty-0qmf moves it into the Cython binding.
+    OTS-P4, the `do_all_caps` state reset, was neither; it is retired, and
+    the Cython binding now does the reset (below).
   - The source witness finds the defect in the unpatched tarball source, and
     fails with "retire OTS-Pn" once a release fixes it.
   - Regeneration stops if a patch matches other than its entry says.

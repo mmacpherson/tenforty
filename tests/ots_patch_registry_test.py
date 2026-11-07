@@ -17,6 +17,7 @@ and to the upstream source:
 """
 
 import ast
+import copy
 import dataclasses
 import re
 import sys
@@ -182,6 +183,46 @@ def _p9_import_status_err_uninitialised(year: int, program: str) -> bool:
     return not re.match(r"\s*ret_stat\.err\s*=", source[declared.end() :])
 
 
+_SCH_A_UNINITIALISED = re.compile(
+    r"double\s+SchA_L\s*\[\s*SCH_A_LINES\s*\+\s*1\s*\]\s*;"
+)
+
+
+def _p10_or_sch_a_line_8_never_set(year: int, program: str) -> bool:
+    """Report whether OR-40 sums ``SchA_L[8]`` from an uninitialised array that never sets it."""
+    if program != "OR_40":
+        return False
+    source = _program_source(year, program)
+    reads = re.findall(r"SchA_L\s*\[\s*8\s*\]", source)
+    sets = re.findall(r"&\s*SchA_L\s*\[\s*8\s*\]|SchA_L\s*\[\s*8\s*\]\s*=(?!=)", source)
+    return bool(_SCH_A_UNINITIALISED.search(source) and reads and not sets)
+
+
+def _p11_grablinealloc_unbounded_trim(year: int, program: str) -> bool:
+    if program != "routines":
+        return False
+    body = _function_body(_program_source(year, program), "void GrabLineAlloc(")
+    return bool(re.search(r"while\s*\(\s*twrd\s*\[\s*cpos\s*\]\s*==\s*' '\s*\)", body))
+
+
+_CA540_NAME_CUT = re.compile(
+    r"\b(Your1stName|YourLastName|Spouse1stName|SpouseLastName)\s*=\s*"
+    r"GetTextLineF\(.*?\n\s*\1\s*\[\s*[1-9][0-9]*\s*\]\s*=\s*'\\0'\s*;",
+    re.DOTALL,
+)
+
+
+def _p12_ca540_name_cut_past_strdup(year: int, program: str) -> bool:
+    """Report whether CA-540 cuts a ``GetTextLineF`` name at a fixed index, unguarded.
+
+    The cut must start its own statement line, so a guarded cut
+    (``if (strlen(X) > N) X[N] = ...``) reads as fixed.
+    """
+    if program != "CA_540":
+        return False
+    return len(_CA540_NAME_CUT.findall(_program_source(year, program))) == 4
+
+
 SOURCE_WITNESSES: dict[str, Callable[[int, str], bool]] = {
     "OTS-P1": _p1_new_as_identifier,
     "OTS-P2": _p2_void_pointer_to_char,
@@ -192,6 +233,9 @@ SOURCE_WITNESSES: dict[str, Callable[[int, str], bool]] = {
     "OTS-P7": _p7_f6781_c_conversions,
     "OTS-P8": _p8_restrict_keyword,
     "OTS-P9": _p9_import_status_err_uninitialised,
+    "OTS-P10": _p10_or_sch_a_line_8_never_set,
+    "OTS-P11": _p11_grablinealloc_unbounded_trim,
+    "OTS-P12": _p12_ca540_name_cut_past_strdup,
 }
 
 
@@ -210,6 +254,14 @@ def test_source_witness(patch_id):
         for program in _amalgamated_programs(year)
         if witness(year, program)
     }
+    if entry.replacement:
+        years_present = {year for year, _ in present}
+        gone = set(_tracked_years()) - years_present
+        assert not gone, (
+            f"Upstream no longer has the defect {patch_id} addressed in {sorted(gone)}: "
+            f"drop those years from its replacement ({entry.replacement})."
+        )
+        return
     if entry.status == "retired":
         assert not present, (
             f"The defect {patch_id} fixed is back in {sorted(present)}: "
@@ -261,26 +313,41 @@ def test_only_retired_entries_lack_a_function():
             assert entry.matches, entry.id
 
 
-PENDING_REMOVAL = {"OTS-P4": "tenforty-0qmf"}
-
-
 def test_a_patch_is_portability_or_memory_safety_and_nothing_else():
     """A tax-logic change is never a registry class, so it can never be a patch.
 
-    The one tolerated exception is OTS-P4, a state reset that Mike ruled is
-    not portability. It stays applied only until tenforty-0qmf moves the
-    reset into the Cython binding and removes the patch.
+    Only a retired entry whose fix moved out of the vendored source may record
+    another class: OTS-P4, the state reset now in the Cython binding.
     """
     assert ots_patches.PATCH_CLASSES == ("portability", "memory-safety")
-    for entry in OTS_PATCHES:
-        if entry.id in PENDING_REMOVAL:
-            assert entry.patch_class == "none: state restoration, slated for removal"
-            assert entry.status == "pending-replacement", entry.id
-            assert entry.replacement == PENDING_REMOVAL[entry.id], entry.id
-            continue
-        assert entry.patch_class in ("portability", "memory-safety"), entry.id
-        assert entry.status != "pending-replacement", entry.id
+    for entry in ots_patches.active_patches():
+        assert entry.patch_class in ots_patches.PATCH_CLASSES, entry.id
         assert entry.replacement is None, entry.id
+    for entry in OTS_PATCHES:
+        if entry.patch_class not in ots_patches.PATCH_CLASSES:
+            assert entry.status == "retired", entry.id
+            assert entry.replacement, entry.id
+
+
+@cache
+def _source_groups() -> dict:
+    source_groups = {}
+    for tarball in TARBALLS:
+        groups, _ = amalgamate.process_ots_tarball(str(tarball))
+        source_groups |= groups
+    return source_groups
+
+
+def test_the_binding_clears_the_caps_flag_of_every_year_that_declares_it():
+    """OTS-P4's replacement: every year with the shared flag is reset before each call."""
+    years = amalgamate.caps_flag_years(_source_groups())
+    assert years == _tracked_years()
+    binding = (OTS_DIR.parent / "src" / "tenforty" / "otslib" / "ots.pyx").read_text()
+    reset_body = binding.partition("cdef void _restore_fresh_process_state(")[2]
+    reset_body = reset_body.partition("\ndef ")[0]
+    for year in years:
+        assert f'int do_all_caps_{year} "OpenTaxSolver{year}::do_all_caps"' in binding
+        assert f"    do_all_caps_{year} = 0\n" in reset_body, year
 
 
 _MAIN_WITH_HELPER = """\
@@ -388,10 +455,7 @@ def test_witness_dependencies_name_applied_entries():
 
 
 def _regenerate_amalgamation() -> str:
-    source_groups = {}
-    for tarball in TARBALLS:
-        groups, _ = amalgamate.process_ots_tarball(str(tarball))
-        source_groups |= groups
+    source_groups = copy.deepcopy(_source_groups())
     source_groups = dict(
         amalgamate.postprocess_source_groups(key, group)
         for key, group in source_groups.items()

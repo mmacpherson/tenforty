@@ -4,6 +4,10 @@
 - ``incentive_stock_option_gains``: mapped to AMTws3 every year, but the 2018
   and 2019 US_1040 programs parse that line and never store it
   (``OTS_UNREAD_INPUT_KEYS``, checked against the vendored release source).
+- ``self_employment_income`` and ``rental_income`` on 2018, and
+  ``state_adjustment`` on CA 2018/2019: our map sends them to lines those
+  years' templates lack, so they never reached OTS (tenforty-s2gx,
+  tenforty-8tlh).
 
 Before this contract such a value was dropped and the return computed without
 it. It is now an ``UnsupportedInputError`` under every ``on_error`` policy,
@@ -74,13 +78,13 @@ def test_ots_reads_input_matches_the_maps(case):
 def ots_calls(monkeypatch):
     """Record each OTS engine call, so a refusal can prove none happened."""
     calls = []
-    real = core.evaluate_form
+    real = core.otslib._evaluate_form
 
     def recording(*args, **kwargs):
-        calls.append(args[:3])
+        calls.append(args[:2])
         return real(*args, **kwargs)
 
-    monkeypatch.setattr(core, "evaluate_form", recording)
+    monkeypatch.setattr(core.otslib, "_evaluate_form", recording)
     return calls
 
 
@@ -298,4 +302,89 @@ def test_zero_iso_is_accepted_in_unread_years(year):
     )
     assert explicit == tenforty.evaluate_return(
         year=year, w2_income=150_000, backend="ots"
+    )
+
+
+# --- inputs mapped onto lines the year's template lacks (tenforty-48hh) --------
+
+TEMPLATE_ABSENT_CASES = [
+    (2018, None, "self_employment_income", "S1_3", "tenforty-s2gx"),
+    (2018, None, "rental_income", "S1_5", "tenforty-s2gx"),
+    (2018, "CA", "state_adjustment", "CA540_P2_Add_6", "tenforty-8tlh"),
+    (2019, "CA", "state_adjustment", "CA540_P2_Add_6", "tenforty-8tlh"),
+]
+
+
+def _template_keys(year, form_id):
+    from tenforty.models import OTS_FORM_CONFIG
+
+    return {field.key for field in OTS_FORM_CONFIG[(year, form_id)].fields}
+
+
+def test_every_mapping_onto_a_missing_template_line_is_refused():
+    """A key our map sends that the template lacks names a refused input."""
+    for (year, form_id), config in NATURAL_FORM_CONFIG.items():
+        template_keys = _template_keys(year, form_id)
+        for name, ots_key in config.input_map.items():
+            if isinstance(ots_key, str) and ots_key not in template_keys:
+                refused = core._OTS_REFUSED_WHEN_UNREAD | core._OTS_REFUSED_WHEN_DROPPED
+                assert name in refused, (year, form_id, name)
+
+
+@pytest.mark.parametrize(
+    ("year", "state", "name", "ots_key", "bead"), TEMPLATE_ABSENT_CASES
+)
+def test_template_lacks_the_mapped_line(year, state, name, ots_key, bead):
+    """Each refused input maps to a line its template lacks."""
+    form_id = STATE_TO_FORM[OTSState(state)] if state else "US_1040"
+    assert NATURAL_FORM_CONFIG[(year, form_id)].input_map[name] == ots_key
+    assert ots_key not in _template_keys(year, form_id)
+    ots_state = OTSState(state) if state else OTSState.NONE
+    assert not ots_reads_input(name, year, ots_state)
+    assert core.ots_drops_input(name, year, ots_state)
+
+
+@pytest.mark.parametrize(
+    ("year", "state"), [(2025, "OR"), (2025, "TX"), (2018, None), (2020, "CA")]
+)
+def test_state_adjustment_is_refused_only_where_a_map_drops_it(year, state):
+    """Elsewhere it keeps its earlier behavior; only CA 2018/2019 drop it."""
+    ots_state = OTSState(state) if state else OTSState.NONE
+    assert not core.ots_drops_input("state_adjustment", year, ots_state)
+
+
+@pytest.mark.parametrize("on_error", ON_ERROR_POLICIES)
+@pytest.mark.parametrize("backend", ("ots", "auto"))
+@pytest.mark.parametrize(
+    ("year", "state", "name", "ots_key", "bead"), TEMPLATE_ABSENT_CASES
+)
+def test_nonzero_input_on_a_missing_line_is_refused(
+    year, state, name, ots_key, bead, backend, on_error, ots_calls
+):
+    """A nonzero value is refused under every policy, before any engine runs."""
+    with pytest.raises(UnsupportedInputError) as raised:
+        tenforty.evaluate_return(
+            year=year,
+            state=state,
+            w2_income=60_000,
+            backend=backend,
+            on_error=on_error,
+            **{name: 5_000},
+        )
+    message = str(raised.value)
+    assert f"{name}=5000.0" in message
+    assert str(year) in message
+    assert bead in message
+    assert f"{name}=0" in message
+    assert ots_calls == []
+
+
+@pytest.mark.parametrize(
+    ("year", "state", "name", "ots_key", "bead"), TEMPLATE_ABSENT_CASES
+)
+def test_zero_input_on_a_missing_line_is_accepted(year, state, name, ots_key, bead):
+    """Zero computes the same return as omitting the input."""
+    kwargs = {"year": year, "state": state, "w2_income": 60_000, "backend": "ots"}
+    assert tenforty.evaluate_return(**kwargs, **{name: 0}) == tenforty.evaluate_return(
+        **kwargs
     )

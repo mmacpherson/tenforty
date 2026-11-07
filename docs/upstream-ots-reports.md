@@ -856,6 +856,168 @@ expected values are a blind derivation from IRS sources
 
 ---
 
+## 20. OR-40 Schedule OR-A line 9 adds `SchA_L[8]`, which is never set
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:**
+- `src/taxsolve_OR_40_2024.c:824` (declaration), `:998` (read)
+- `src/taxsolve_OR_40_2025.c:892` (declaration), `:1066` (read)
+
+Schedule OR-A's array is a local with no initializer:
+
+```c
+    #define SCH_A_LINES 23
+    double SchA_L[SCH_A_LINES + 1]; // Allow 1 extra for 1-based counting
+```
+
+Lines 5, 6 and 7 are read with `GetLine`. As far as we can see nothing assigns
+`SchA_L[8]`, but line 9 adds it:
+
+```c
+    SchA_L9_Sum = SchA_L[5] + SchA_L[6] + SchA_L[7] + SchA_L[8];
+    SchA_L[9] = SmallerOf(SchA_L9_Sum, p_cfg->income_and_property_tax_deduction_limit);
+```
+
+So line 9, and from it the Oregon itemized deduction on line 16, depends on
+whatever happens to be on the stack. On the form, line 8 is reserved:
+
+- 2024 Schedule OR-A (150-101-007, Rev. 06-17-24), page 1: "8. Reserved",
+  and line 9 "Total income and property taxes. Add lines 5 through 8. Don't
+  enter more than $10,000 ($5,000 if married filing separately)."
+  https://www.oregon.gov/dor/forms/FormsPubs/schedule-or-a_101-007_2024.pdf
+- 2025 Schedule OR-A (Rev. 07-29-25), page 1: the same, with $40,000
+  ($20,000 if married filing separately).
+  https://www.oregon.gov/dor/forms/FormsPubs/schedule-or-a_101-007_2025.pdf
+
+So unless we are missing an input meant to fill it, the intended value of
+`SchA_L[8]` is 0, and the sum is otherwise as the form describes.
+
+**What we see:**
+- On Linux with gcc or clang at default settings, the slot happens to hold 0,
+  and the results look right.
+- On an Intel Mac build, a 2024 Single return with $420,000 of wages and
+  nothing else gave Oregon taxable income of $410,000. That is a $10,000
+  deduction (the line 9 limit) instead of the $2,745 standard deduction, which
+  gives $417,255.
+
+**Deterministic reproducer.** Building with clang's
+`-ftrivial-auto-var-init=pattern` (which fills uninitialized locals with a
+fixed byte pattern) makes the difference reproducible on any platform. Same
+return: federal 1040 Single, `L1a 420000`, and the stock `OR_40_2024_template.txt`
+pointing at its output.
+
+| Build | 2024 L18 | 2024 L19 | 2025 L18 | 2025 L19 |
+|---|---|---|---|---|
+| `-ftrivial-auto-var-init=zero` | 2,745 | 417,255 | 2,835 | 417,165 |
+| `-ftrivial-auto-var-init=pattern` | 10,000 | 410,000 | 40,000 | 380,000 |
+
+With `pattern`, `SchA_L[8]` is a NaN. `SmallerOf(NaN, limit)` returns the limit,
+because `NaN < limit` is false, so line 9 becomes the full limit. With real
+stack contents, line 9 of any 2024 or 2025 return can carry anything up to
+the limit, whether or not the filer itemizes.
+
+The 2025 `OR_40_2025_example.txt` shows the same thing: line 19 is 50,203 with
+`zero` and 14,647 with `pattern`. MemorySanitizer
+(`clang -fsanitize=memory -fsanitize-memory-track-origins`) also reports the
+read, tracing the uninitialized value back to `SchA_L` at `:892`.
+
+**Possible fix, if you agree:** initialize the array
+(`double SchA_L[SCH_A_LINES + 1] = {0};`), which also guards any future
+unused slot. Or set `SchA_L[8] = 0.0;` before the sum.
+
+**A smaller one in the same 2024 code path, offered tentatively.**
+`GrabLineAlloc` in `src/taxsolve_routines.c:1155-1168` (2024 only) trims
+trailing spaces with no lower bound:
+
+```c
+  int cpos = strlen(twrd) - 1;
+  while (twrd[cpos] == ' ') {
+   --cpos;
+  }
+  twrd[cpos + 1] = '\0';
+```
+
+An empty imported string comes back from `GrabLineString` as `" "`. The loop
+then reads `twrd[-1]`, and if that byte is a space it keeps going and writes
+before the buffer. MemorySanitizer flags it on the OR-40 example. As far as we
+can see it only affects imported text fields, not amounts. A guard such as
+`while (cpos >= 0 && twrd[cpos] == ' ')` would do. The 2025 import routines
+no longer have this loop.
+
+**Locally:** both are patched as memory-safety fixes, and no formula changes.
+- OTS-P10, `patch_or_40_sch_a_zero_init`, zero-initializes `SchA_L`. That is
+  the form's own value for line 8, and what our Linux builds already read.
+- OTS-P11, `patch_grablinealloc_trim_bound`, bounds the trim loop.
+
+See `docs/ots-patches.md`. Each entry has a source witness
+(`test_source_witness[OTS-P10]`, `[OTS-P11]`) that fails once a release
+carries the correction, which prompts retiring the patch.
+`test_or_40_sch_a_line_8_is_platform_independent` builds the OR-40 program
+with clang's `pattern` and `zero` initialization. It shows the unpatched
+program deducting the line 9 limit, and the patched program printing the
+same return under both builds.
+
+---
+
+## 21. 2018-2020 CA-540 truncates the name fields past their `strdup` buffer
+
+**Releases:** OpenTaxSolver2018_16.06, OpenTaxSolver2019_17.03,
+OpenTaxSolver2020_18.05
+**Files:**
+- `src/taxsolve_CA_540_2018.c:1101`, `:1105`, `:1114`, `:1118`
+- `src/taxsolve_CA_540_2019.c:1286`, `:1290`, `:1299`, `:1303`
+- `src/taxsolve_CA_540_2020.c:1326`, `:1330`, `:1339`, `:1343`
+
+The CA-540 program shortens the names for its printed output in place:
+
+```c
+ Your1stName = GetTextLineF( "Your1stName:" );
+ YourMidInitial = pull_initial( Your1stName );
+ Your1stName[11] = '\0';
+ ...
+ YourLastName   = GetTextLineF( "YourLastName:" );
+ YourLastName[15] = '\0';
+```
+
+and the same for `Spouse1stName[11]` and `SpouseLastName[15]`.
+`GetTextLineF` in `taxsolve_routines.c` returns `strdup( line )`, a buffer
+of `strlen( line ) + 1` bytes, so a name shorter than the cut writes the
+terminator past the end of its allocation. An empty name, which a return
+without names has, gives a 1-byte buffer.
+
+**What we see:** valgrind memcheck on a CA 2018, 2019 or 2020 return with
+no names reports four errors each:
+
+```
+Invalid write of size 1
+   at taxsolve_CA_540_2018::main
+ Address ... is 10 bytes after a block of size 1 alloc'd
+   at malloc
+   by strdup
+```
+
+(14 bytes after, for the last names.) On glibc this has not crashed for us.
+With musl's allocator, the overrun damaged its metadata, and the process
+later crashed in `free()`. As far as we can tell the names are only printed,
+so no computed figure is affected. From 2021 the program no longer reads
+these names.
+
+**Possible fix, if you agree:** cut only a longer name, e.g.
+
+```c
+ if (strlen( Your1stName ) > 11) Your1stName[11] = '\0';
+```
+
+or copy into a fixed buffer, as the 2021 program does with `YourName`.
+
+**Locally:** patched as a memory-safety fix, OTS-P12
+(`patch_ca540_name_truncation_bound`), with exactly that guard on the 12
+lines. See `docs/ots-patches.md`. A source witness
+(`test_source_witness[OTS-P12]`) fails once a release carries the
+correction, which prompts retiring the patch.
+
+---
+
 ## Pending adjudication — do not send
 
 These are disagreements between OTS and PSL Tax-Calculator found by the

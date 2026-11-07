@@ -13,9 +13,10 @@ The only edits it may make to OTS source are:
 - **memory safety**: stopping reads or writes out of bounds or of
   uninitialised memory.
 
-One entry is outside both classes and is tolerated only until it is removed:
-OTS-P4, the `do_all_caps` reset. That reset moves into the Cython binding
-under tenforty-0qmf.
+No applied patch is outside both classes. OTS-P4, the `do_all_caps` state
+reset, was the one exception; it is retired, and the reset now lives in the
+Cython binding (`_restore_fresh_process_state` in `ots/ots.template.pyx`),
+which restores fresh-process state before every native call.
 
 Even these must not change a figure OTS computes on a platform where the
 original source is well defined. A tax-logic defect is never patched: it is
@@ -65,7 +66,6 @@ registry, and `tests/ots_patch_registry_test.py` fails if the two disagree.
 | `active` | Applied; no upstream report is needed or staged. |
 | `reported-upstream` | Applied; an upstream report is drafted or sent. |
 | `fixed-upstream` | Applied to the tracked releases that still have the defect; a later OTS release has fixed it. |
-| `pending-replacement` | Applied, but not an allowed class; the entry names the bead that replaces it outside the vendored source. Only OTS-P4. |
 | `retired` | The function is removed. The entry stays as the history record, with the date and the release that made it unnecessary. |
 
 **Retiring a patch.**
@@ -78,6 +78,12 @@ registry, and `tests/ots_patch_registry_test.py` fails if the two disagree.
 **Restoring a patch.** A retired entry's witness asserts the defect stays
 absent. If a new tarball reintroduces the defect, the witness fails and says
 to restore the patch.
+
+**Replacing a patch outside the vendored source.** A retired entry with a
+`replacement` had its fix moved elsewhere, as OTS-P4's reset moved into the
+Cython binding. The defect is still upstream, so its witness asserts the
+reverse: the defect stays present in every tracked year, and fails once a
+release fixes it, which is the signal to remove the replacement.
 
 **Regenerating.** Run `uv run make -C ots generated install` (it runs
 `amalgamate.py` over every tarball in `ots/ots-releases/`), then the
@@ -97,12 +103,15 @@ changing the registry; the section below is generated.
 | OTS-P1 | `patch_add_pdf_markup` | portability | taxsolve_routines.c, 2018-2025 | active |
 | OTS-P2 | `patch_mystrndup_cpp_compat` | portability | taxsolve_routines.c, 2025 | active |
 | OTS-P3 | `patch_exit_to_return` | portability | every form program, 2018-2025 | active |
-| OTS-P4 | `patch_reset_globals` | none: state restoration, slated for removal | every form program, 2018-2025 | active, pending replacement (tenforty-0qmf) |
+| OTS-P4 | removed | none: state restoration, moved to the Cython binding | every form program, 2018-2025 | retired, replaced outside the vendored source |
 | OTS-P5 | `patch_az_widow_std_deduction` | memory-safety | AZ_140, 2023-2025 | reported-upstream |
 | OTS-P6 | `patch_show_fname_init_or_40` | memory-safety | OR_40, 2024 | fixed-upstream |
 | OTS-P7 | `patch_f6781_cpp_compat` | portability | f6781, 2025 | active |
 | OTS-P8 | removed | portability | taxsolve_routines.c, OpenTaxSolver2025_23.05 | retired |
 | OTS-P9 | removed | memory-safety | taxsolve_routines.c, 2025 | retired |
+| OTS-P10 | `patch_or_40_sch_a_zero_init` | memory-safety | OR_40, 2024-2025 | reported-upstream |
+| OTS-P11 | `patch_grablinealloc_trim_bound` | memory-safety | taxsolve_routines.c, 2024 | reported-upstream |
+| OTS-P12 | `patch_ca540_name_truncation_bound` | memory-safety | CA_540, 2018-2020 | reported-upstream |
 
 ### OTS-P1: Rename the C++ reserved word `new` in `add_pdf_markup`.
 
@@ -138,17 +147,19 @@ changing the registry; the section below is generated.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P3]`, `tests/ots_patch_registry_test.py::test_exit_rewrite_follows_main_braces_only`
 - **Note:** Approved as portability by Mike's ruling of 2026-11-06: an entry point that returns an error instead of terminating the host process is the one control-flow adaptation portability covers. Not contained: the 302 `exit()` calls in helper functions outside `main` (all years, routines included) still end the interpreter. For example, `evaluate_form(year=2024, federal_form_id='US_1040', federal_form_values={'L1a': 'not-a-number'})` exits the Python process with status 1 and no traceback.
 
-### OTS-P4: Reset `do_all_caps` to 0 at the top of each program's `main`.
+### OTS-P4: Reset `do_all_caps` to 0 at the top of each program's `main` (`patch_reset_globals`).
 
-- **Patch function:** `patch_reset_globals`
-- **Class:** none: state restoration, slated for removal
+- **Patch function:** removed
+- **Class:** none: state restoration, moved to the Cython binding
 - **Scope:** every form program, 2018-2025
-- **Required matches:** 2018-2025: every form program 1 (resets inserted)
-- **Effect on computed figures:** None on computed figures: `do_all_caps` only upper-cases imported names and paths. A fresh OTS process starts with it 0; the reset gives every in-process run that same start, so a later program does not read file paths upper-cased by an earlier NC, OH or PA run.
-- **Status:** active, pending replacement (tenforty-0qmf)
+- **Required matches:** none (retired) (none: retired)
+- **Effect on computed figures:** None: removing the patch removes only its 140 inserted resets from ots_amalgamation.cpp. `do_all_caps` only upper-cases the text lines a program reads, and the binding now clears it before every call.
+- **Status:** retired, replaced outside the vendored source
 - **Upstream:** Not applicable: each OTS program runs in a fresh process, where the flag starts at 0. Reusing one process is our choice.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P4]`
-- **Note:** Not an allowed class. Mike ruled on 2026-11-06 that a state reset is not portability, so the reset moves into the Cython binding in a follow-up PR. That PR removes this patch, and its 140 insertions change ots_amalgamation.cpp. Until then this is the one entry the class test tolerates outside portability and memory-safety.
+- **Retired:** 2026-11-06. Mike ruled that a state reset is not portability, so tenforty-0qmf moved it out of the vendored source into the Cython binding. The leak is still upstream: the source witness now asserts it stays present in every tracked year, and fails once a release clears the flag itself, which is the signal to drop that year's binding reset.
+- **Replaced by:** `_restore_fresh_process_state` in ots/ots.template.pyx clears every year's `do_all_caps` before each native call (tenforty-0qmf); tests/ots_caps_reset_test.py compares interleaved calls with a fresh process.
+- **History:** Patched into every program's `main` until tenforty-0qmf.
 
 ### OTS-P5: Give `getAZStdDedAmt`'s table a Widow(er) row so `status` 5 is in bounds.
 
@@ -211,6 +222,44 @@ changing the registry; the section below is generated.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P9]`
 - **Retired:** 2026-11-06. Fixed upstream in OpenTaxSolver2025_23.06. Removing the patch deletes only the duplicate assignment from ots_amalgamation.cpp.
 - **History:** Added in PR #221.
+
+### OTS-P10: Zero-initialise OR-40's `SchA_L`, whose line 8 is summed but never set.
+
+- **Patch function:** `patch_or_40_sch_a_zero_init`
+- **Class:** memory-safety
+- **Scope:** OR_40, 2024-2025
+- **Required matches:** 2024-2025: OR_40 1 (declarations given `= {0}`)
+- **Effect on computed figures:** None where the read was already 0, as on our Linux builds. Schedule OR-A line 9 adds `SchA_L[8]`, which nothing assigns, so line 9 and the Oregon itemized deduction took whatever was on the stack: a 2024 Single $420,000 return deducted $10,000 instead of the $2,745 standard deduction on an Intel macOS build. Line 8 is "Reserved" on the 2024 and 2025 forms, so 0 is the form's own value and every formula is unchanged.
+- **Status:** reported-upstream
+- **Upstream:** docs/upstream-ots-reports.md report 20; draft, not sent.
+- **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P10]`
+- **Behavioral witnesses:** `tests/ots_patch_behavior_test.py::test_or_40_sch_a_line_8_is_platform_independent`
+- **Witness applies first:** OTS-P6
+- **Note:** Built with clang's `-ftrivial-auto-var-init=pattern`, the unpatched program makes the read a NaN and deducts the full line 9 limit; with the patch, pattern and `=zero` builds print the same return. The witness applies OTS-P6 first, because at -O0 the 2024 program otherwise crashes on the empty dependent names before Schedule OR-A.
+
+### OTS-P11: Bound `GrabLineAlloc`'s trailing-space trim at the start of its buffer.
+
+- **Patch function:** `patch_grablinealloc_trim_bound`
+- **Class:** memory-safety
+- **Scope:** taxsolve_routines.c, 2024
+- **Required matches:** 2024: routines 1 (trim loops given `cpos >= 0`)
+- **Effect on computed figures:** None on computed figures: the function copies imported text fields only, and amounts are imported by `GrabLineValue`. Wherever the original loop stayed in the buffer the bounded one stops at the same index; an empty field (`" "`) made it read, and possibly write, before the buffer, which is undefined.
+- **Status:** reported-upstream
+- **Upstream:** docs/upstream-ots-reports.md report 20; draft, not sent.
+- **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P11]`
+- **Note:** 2024 only: the 2025 import routines were rewritten without the loop. No behavioral witness: the stray byte is a stack neighbour, which `-ftrivial-auto-var-init` does not make a space, so only MemorySanitizer shows the read.
+
+### OTS-P12: Truncate CA-540's printed name fields only when the name is longer than the cut.
+
+- **Patch function:** `patch_ca540_name_truncation_bound`
+- **Class:** memory-safety
+- **Scope:** CA_540, 2018-2020
+- **Required matches:** 2018-2020: CA_540 4 (fixed-index name truncations given `if (strlen(X) > N)`)
+- **Effect on computed figures:** None on computed figures: the four names are only printed. `Your1stName[11]`, `YourLastName[15]`, `Spouse1stName[11]` and `SpouseLastName[15]` are cut in place in `GetTextLineF`'s `strdup` of the input line (`strlen + 1` bytes), so a shorter name, including the empty one every tenforty return passes, wrote past the allocation. The guard prevents those writes and leaves the resulting C string unchanged wherever the original write was valid; the writes it skips in bounds (a name of exactly the cut's length, or one `pull_initial` already terminated earlier) were redundant or past the string's terminator.
+- **Status:** reported-upstream
+- **Upstream:** docs/upstream-ots-reports.md report 21; draft, not sent.
+- **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P12]`
+- **Note:** Found by valgrind memcheck on a musllinux cp314 wheel: 12 errors, "Invalid write of size 1 ... 10 (or 14) bytes after a block of size 1", four per year in taxsolve_CA_540_{2018,2019,2020} main, on every CA return of those years; a sweep of every OTS year and state found no other invalid write. musl's allocator later faulted at interpreter exit when a heap layout put its metadata next to the overrun. No behavioral witness runs in the suite: the write is only observable under valgrind or AddressSanitizer. From 2021 the program no longer reads these names.
 
 <!-- ots-patches:end -->
 
