@@ -535,29 +535,6 @@ def patch_exit_to_return(lines: list[str]) -> tuple[list[str], int]:
     return lines, 1
 
 
-def patch_reset_globals(lines: list[str]) -> tuple[list[str], int]:
-    """Reset shared globals at the start of each form's main() (OTS-P4, pending removal).
-
-    Some state forms (NC, OH, PA) set ``do_all_caps = 1`` to uppercase
-    imported names. The flag is never cleared, so subsequent forms in the
-    same process read file paths as uppercased strings, which fails on
-    case-sensitive filesystems. Inserting a reset at the top of every form's
-    main() ensures a clean slate. Returns the lines and the number of resets
-    inserted.
-
-    A state reset is not portability, so this is not an allowed patch class.
-    It stays only until tenforty-0qmf moves the reset into the Cython binding.
-    """
-    start_ix = _find_main(lines)
-    if start_ix is None:
-        return lines, 0
-    for ix in range(start_ix, min(start_ix + 5, len(lines))):
-        if "{" in lines[ix]:
-            lines.insert(ix + 1, " do_all_caps = 0;")
-            return lines, 1
-    raise PatchMatchError("int main(...) has no opening brace within 5 lines")
-
-
 def patch_az_widow_std_deduction(lines: list[str]) -> tuple[list[str], int]:
     """Extend ``getAZStdDedAmt``'s table so Widow(er) is in bounds (OTS-P5).
 
@@ -895,6 +872,44 @@ def build_amalgamation(
     return amalgamation
 
 
+CAPS_FLAG_DECLARATION = re.compile(r"^int\s+do_all_caps\s*=\s*0\s*;", re.MULTILINE)
+
+
+def caps_flag_years(
+    source_groups: dict[str, dict[str, dict[str, list[str]]]],
+) -> list[int]:
+    """List the years whose shared routines declare the file-scope ``do_all_caps`` flag.
+
+    NC, OH and PA programs set it to 1 and nothing clears it, so the Cython
+    binding resets each listed year's flag before every native call, giving
+    every in-process call the 0 a fresh OTS process starts with.
+    """
+    years = []
+    for outer_ns, source_group in source_groups.items():
+        for inner_ns, group in source_group.items():
+            if program_of(inner_ns) == "routines" and CAPS_FLAG_DECLARATION.search(
+                "\n".join(group["source"])
+            ):
+                years.append(year_of(outer_ns))
+    return sorted(years)
+
+
+def generate_caps_flag_externs(years: list[int]) -> str:
+    """Declare each year's ``do_all_caps`` to Cython under a year-qualified name."""
+    return "\n".join(
+        f'    int do_all_caps_{year} "OpenTaxSolver{year}::do_all_caps"'
+        for year in years
+    )
+
+
+def generate_caps_flag_resets(years: list[int]) -> str:
+    """Zero every year's ``do_all_caps`` inside ``_restore_fresh_process_state``."""
+    names = [f"do_all_caps_{year}" for year in years]
+    return "\n".join(
+        [f"    global {', '.join(names)}"] + [f"    {name} = 0" for name in names]
+    )
+
+
 def build_cython_sources(
     source_groups: dict[str, dict[str, dict[str, list[str]]]],
     cython_template_file: str,
@@ -944,8 +959,11 @@ def build_cython_sources(
     with open(cython_template_file) as fp:
         template = fp.read()
 
+    caps_years = caps_flag_years(source_groups)
     out[cython_template_file.replace(".template", "")] = template.format(
         CIMPORTS="\n".join(cimports),
+        CAPS_FLAG_EXTERNS=generate_caps_flag_externs(caps_years),
+        CAPS_FLAG_RESETS=generate_caps_flag_resets(caps_years),
         LOOKUP_DICT_KEYS=generate_lookup_dict_entries(import_map),
         LOOKUP_SWITCH=generate_lookup_switch(import_map),
         FED_FILENAME=FED_FILENAME,

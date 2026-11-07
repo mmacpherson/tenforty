@@ -13,9 +13,10 @@ The only edits it may make to OTS source are:
 - **memory safety**: stopping reads or writes out of bounds or of
   uninitialised memory.
 
-One entry is outside both classes and is tolerated only until it is removed:
-OTS-P4, the `do_all_caps` reset. That reset moves into the Cython binding
-under tenforty-0qmf.
+No applied patch is outside both classes. OTS-P4, the `do_all_caps` state
+reset, was the one exception; it is retired, and the reset now lives in the
+Cython binding (`_restore_fresh_process_state` in `ots/ots.template.pyx`),
+which restores fresh-process state before every native call.
 
 Even these must not change a figure OTS computes on a platform where the
 original source is well defined. A tax-logic defect is never patched: it is
@@ -65,7 +66,6 @@ registry, and `tests/ots_patch_registry_test.py` fails if the two disagree.
 | `active` | Applied; no upstream report is needed or staged. |
 | `reported-upstream` | Applied; an upstream report is drafted or sent. |
 | `fixed-upstream` | Applied to the tracked releases that still have the defect; a later OTS release has fixed it. |
-| `pending-replacement` | Applied, but not an allowed class; the entry names the bead that replaces it outside the vendored source. Only OTS-P4. |
 | `retired` | The function is removed. The entry stays as the history record, with the date and the release that made it unnecessary. |
 
 **Retiring a patch.**
@@ -78,6 +78,12 @@ registry, and `tests/ots_patch_registry_test.py` fails if the two disagree.
 **Restoring a patch.** A retired entry's witness asserts the defect stays
 absent. If a new tarball reintroduces the defect, the witness fails and says
 to restore the patch.
+
+**Replacing a patch outside the vendored source.** A retired entry with a
+`replacement` had its fix moved elsewhere, as OTS-P4's reset moved into the
+Cython binding. The defect is still upstream, so its witness asserts the
+reverse: the defect stays present in every tracked year, and fails once a
+release fixes it, which is the signal to remove the replacement.
 
 **Regenerating.** Run `uv run make -C ots generated install` (it runs
 `amalgamate.py` over every tarball in `ots/ots-releases/`), then the
@@ -97,7 +103,7 @@ changing the registry; the section below is generated.
 | OTS-P1 | `patch_add_pdf_markup` | portability | taxsolve_routines.c, 2018-2025 | active |
 | OTS-P2 | `patch_mystrndup_cpp_compat` | portability | taxsolve_routines.c, 2025 | active |
 | OTS-P3 | `patch_exit_to_return` | portability | every form program, 2018-2025 | active |
-| OTS-P4 | `patch_reset_globals` | none: state restoration, slated for removal | every form program, 2018-2025 | active, pending replacement (tenforty-0qmf) |
+| OTS-P4 | removed | none: state restoration, moved to the Cython binding | every form program, 2018-2025 | retired, replaced outside the vendored source |
 | OTS-P5 | `patch_az_widow_std_deduction` | memory-safety | AZ_140, 2023-2025 | reported-upstream |
 | OTS-P6 | `patch_show_fname_init_or_40` | memory-safety | OR_40, 2024 | fixed-upstream |
 | OTS-P7 | `patch_f6781_cpp_compat` | portability | f6781, 2025 | active |
@@ -141,17 +147,19 @@ changing the registry; the section below is generated.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P3]`, `tests/ots_patch_registry_test.py::test_exit_rewrite_follows_main_braces_only`
 - **Note:** Approved as portability by Mike's ruling of 2026-11-06: an entry point that returns an error instead of terminating the host process is the one control-flow adaptation portability covers. Not contained: the 302 `exit()` calls in helper functions outside `main` (all years, routines included) still end the interpreter. For example, `evaluate_form(year=2024, federal_form_id='US_1040', federal_form_values={'L1a': 'not-a-number'})` exits the Python process with status 1 and no traceback.
 
-### OTS-P4: Reset `do_all_caps` to 0 at the top of each program's `main`.
+### OTS-P4: Reset `do_all_caps` to 0 at the top of each program's `main` (`patch_reset_globals`).
 
-- **Patch function:** `patch_reset_globals`
-- **Class:** none: state restoration, slated for removal
+- **Patch function:** removed
+- **Class:** none: state restoration, moved to the Cython binding
 - **Scope:** every form program, 2018-2025
-- **Required matches:** 2018-2025: every form program 1 (resets inserted)
-- **Effect on computed figures:** None on computed figures: `do_all_caps` only upper-cases imported names and paths. A fresh OTS process starts with it 0; the reset gives every in-process run that same start, so a later program does not read file paths upper-cased by an earlier NC, OH or PA run.
-- **Status:** active, pending replacement (tenforty-0qmf)
+- **Required matches:** none (retired) (none: retired)
+- **Effect on computed figures:** None: removing the patch removes only its 140 inserted resets from ots_amalgamation.cpp. `do_all_caps` only upper-cases the text lines a program reads, and the binding now clears it before every call.
+- **Status:** retired, replaced outside the vendored source
 - **Upstream:** Not applicable: each OTS program runs in a fresh process, where the flag starts at 0. Reusing one process is our choice.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P4]`
-- **Note:** Not an allowed class. Mike ruled on 2026-11-06 that a state reset is not portability, so the reset moves into the Cython binding in a follow-up PR. That PR removes this patch, and its 140 insertions change ots_amalgamation.cpp. Until then this is the one entry the class test tolerates outside portability and memory-safety.
+- **Retired:** 2026-11-06. Mike ruled that a state reset is not portability, so tenforty-0qmf moved it out of the vendored source into the Cython binding. The leak is still upstream: the source witness now asserts it stays present in every tracked year, and fails once a release clears the flag itself, which is the signal to drop that year's binding reset.
+- **Replaced by:** `_restore_fresh_process_state` in ots/ots.template.pyx clears every year's `do_all_caps` before each native call (tenforty-0qmf); tests/ots_caps_reset_test.py compares interleaved calls with a fresh process.
+- **History:** Patched into every program's `main` until tenforty-0qmf.
 
 ### OTS-P5: Give `getAZStdDedAmt`'s table a Widow(er) row so `status` 5 is in bounds.
 

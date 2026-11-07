@@ -58,13 +58,31 @@
     witnesses the Oregon defect and the fix. It skips without clang.
 
 ### Changed (OTS build)
+- **The `do_all_caps` reset moved out of the vendored OTS source into the
+  Cython binding.** NC, OH and PA programs set their year's `do_all_caps` so
+  the text lines they read come out upper-cased, and nothing clears it. A
+  fresh OTS process starts at 0, but tenforty runs every program in one
+  process. Without a reset, an NC, OH or PA call would upper-case later calls'
+  names. It would also break OR-40 and Form 8995, which read the federal
+  return's path as text: a later 2024 or 2025 Oregon return failed, and a
+  2024 QBI return lost its Form 8995 deduction.
+  - `amalgamate.py` used to insert `do_all_caps = 0;` at the top of every
+    program's `main` (OTS-P4, 140 insertions). That patch is removed, and
+    `ots_amalgamation.cpp` loses only those 140 lines.
+  - Instead, `_restore_fresh_process_state` clears every year's flag before
+    each native call. That covers federal, state, subordinate and raw-form
+    calls alike. No computed figure changes.
+  - New tests interleave NC, OH and PA with later 1040, OR-40 and Form 8995
+    calls in one process, under a mixed-case temp path, for every year
+    2018-2025. Each step is compared with the same step in a fresh process.
+    Without the reset, 12 of these tests fail.
 - Every change `ots/amalgamate.py` makes to vendored OpenTaxSolver is now
   registered in `ots/ots_patches.py`, rendered in
   [docs/ots-patches.md](docs/ots-patches.md).
   - Each entry is portability or memory-safety, with its scope, exact match
     counts, effect on figures, status, upstream report and a source witness.
-    The one temporary exception is OTS-P4, the `do_all_caps` state reset,
-    which stays until tenforty-0qmf moves it into the Cython binding.
+    OTS-P4, the `do_all_caps` state reset, was neither; it is retired, and
+    the Cython binding now does the reset (below).
   - The source witness finds the defect in the unpatched tarball source, and
     fails with "retire OTS-Pn" once a release fixes it.
   - Regeneration stops if a patch matches other than its entry says.

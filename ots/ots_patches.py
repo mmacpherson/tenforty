@@ -11,8 +11,9 @@ figure that OTS computes on a platform where the original is well defined:
 - Memory safety means not reading or writing out of bounds or uninitialised
   memory.
 
-OTS-P4 is the one entry outside both classes, tolerated only until
-tenforty-0qmf removes it. See ``AGENTS.md`` and ``docs/ots-patches.md``.
+No applied entry is outside both classes. OTS-P4, a state reset, was the one
+exception; it is retired, and the reset now lives in the Cython binding. See
+``AGENTS.md`` and ``docs/ots-patches.md``.
 
 Each patch has one entry here. The entry says what the patch is for, where it
 applies, how many times it must match in each program and year, and which
@@ -29,17 +30,16 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Literal
 
-PENDING_REMOVAL_CLASS = "none: state restoration, slated for removal"
+RELOCATED_CLASS = "none: state restoration, moved to the Cython binding"
 PatchClass = Literal[
     "portability",
     "memory-safety",
-    "none: state restoration, slated for removal",
+    "none: state restoration, moved to the Cython binding",
 ]
 PatchStatus = Literal[
     "active",
     "reported-upstream",
     "fixed-upstream",
-    "pending-replacement",
     "retired",
 ]
 
@@ -48,14 +48,12 @@ PATCH_STATUSES: tuple[str, ...] = (
     "active",
     "reported-upstream",
     "fixed-upstream",
-    "pending-replacement",
     "retired",
 )
 APPLIED_STATUSES: tuple[str, ...] = (
     "active",
     "reported-upstream",
     "fixed-upstream",
-    "pending-replacement",
 )
 EVERY_FORM_PROGRAM = "*"
 TRACKED_YEARS: tuple[int, ...] = tuple(range(2018, 2026))
@@ -86,6 +84,12 @@ class OtsPatch:
     been removed, and the entry stays as the history record. A retired
     entry's witnesses assert the defect stays absent, so they fail if a
     tarball regresses and the patch has to be restored.
+
+    ``replacement`` is set only on a retired entry whose fix moved out of the
+    vendored source rather than into an upstream release. The defect is still
+    upstream, so its witness asserts the reverse: the defect stays present in
+    every tracked year, and fails once a release fixes it, which is the signal
+    to remove the replacement.
     """
 
     id: str
@@ -199,32 +203,38 @@ OTS_PATCHES: tuple[OtsPatch, ...] = (
     ),
     OtsPatch(
         id="OTS-P4",
-        function="patch_reset_globals",
-        patch_class=PENDING_REMOVAL_CLASS,
-        summary="Reset `do_all_caps` to 0 at the top of each program's `main`.",
+        function=None,
+        patch_class=RELOCATED_CLASS,
+        summary="Reset `do_all_caps` to 0 at the top of each program's `main` (`patch_reset_globals`).",
         scope="every form program, 2018-2025",
-        matches=_every_year({EVERY_FORM_PROGRAM: 1}),
-        match_unit="resets inserted",
+        matches={},
+        match_unit="none: retired",
         effect=(
-            "None on computed figures: `do_all_caps` only upper-cases imported "
-            "names and paths. A fresh OTS process starts with it 0; the reset "
-            "gives every in-process run that same start, so a later program "
-            "does not read file paths upper-cased by an earlier NC, OH or PA run."
+            "None: removing the patch removes only its 140 inserted resets from "
+            "ots_amalgamation.cpp. `do_all_caps` only upper-cases the text lines "
+            "a program reads, and the binding now clears it before every call."
         ),
-        status="pending-replacement",
-        replacement="tenforty-0qmf",
+        status="retired",
+        replacement=(
+            "`_restore_fresh_process_state` in ots/ots.template.pyx clears every "
+            "year's `do_all_caps` before each native call (tenforty-0qmf); "
+            "tests/ots_caps_reset_test.py compares interleaved calls with a "
+            "fresh process."
+        ),
         upstream=(
             "Not applicable: each OTS program runs in a fresh process, where the "
             "flag starts at 0. Reusing one process is our choice."
         ),
         witnesses=("tests/ots_patch_registry_test.py::test_source_witness[OTS-P4]",),
-        note=(
-            "Not an allowed class. Mike ruled on 2026-11-06 that a state reset is "
-            "not portability, so the reset moves into the Cython binding in a "
-            "follow-up PR. That PR removes this patch, and its 140 insertions "
-            "change ots_amalgamation.cpp. Until then this is the one entry the "
-            "class test tolerates outside portability and memory-safety."
+        retired=(
+            "2026-11-06. Mike ruled that a state reset is not portability, so "
+            "tenforty-0qmf moved it out of the vendored source into the Cython "
+            "binding. The leak is still upstream: the source witness now asserts "
+            "it stays present in every tracked year, and fails once a release "
+            "clears the flag itself, which is the signal to drop that year's "
+            "binding reset."
         ),
+        history=("Patched into every program's `main` until tenforty-0qmf.",),
     ),
     OtsPatch(
         id="OTS-P5",
@@ -456,8 +466,8 @@ def _matches_text(entry: OtsPatch) -> str:
 
 
 def _status_text(entry: OtsPatch) -> str:
-    if entry.status == "pending-replacement":
-        return f"active, pending replacement ({entry.replacement})"
+    if entry.replacement:
+        return f"{entry.status}, replaced outside the vendored source"
     return entry.status
 
 
@@ -500,6 +510,8 @@ def render_registry() -> str:
             )
         if entry.retired:
             fields.append(("Retired", entry.retired))
+        if entry.replacement:
+            fields.append(("Replaced by", entry.replacement))
         if entry.note:
             fields.append(("Note", entry.note))
         for event in entry.history:

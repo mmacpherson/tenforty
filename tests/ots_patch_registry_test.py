@@ -17,6 +17,7 @@ and to the upstream source:
 """
 
 import ast
+import copy
 import dataclasses
 import re
 import sys
@@ -253,6 +254,14 @@ def test_source_witness(patch_id):
         for program in _amalgamated_programs(year)
         if witness(year, program)
     }
+    if entry.replacement:
+        years_present = {year for year, _ in present}
+        gone = set(_tracked_years()) - years_present
+        assert not gone, (
+            f"Upstream no longer has the defect {patch_id} addressed in {sorted(gone)}: "
+            f"drop those years from its replacement ({entry.replacement})."
+        )
+        return
     if entry.status == "retired":
         assert not present, (
             f"The defect {patch_id} fixed is back in {sorted(present)}: "
@@ -304,26 +313,41 @@ def test_only_retired_entries_lack_a_function():
             assert entry.matches, entry.id
 
 
-PENDING_REMOVAL = {"OTS-P4": "tenforty-0qmf"}
-
-
 def test_a_patch_is_portability_or_memory_safety_and_nothing_else():
     """A tax-logic change is never a registry class, so it can never be a patch.
 
-    The one tolerated exception is OTS-P4, a state reset that Mike ruled is
-    not portability. It stays applied only until tenforty-0qmf moves the
-    reset into the Cython binding and removes the patch.
+    Only a retired entry whose fix moved out of the vendored source may record
+    another class: OTS-P4, the state reset now in the Cython binding.
     """
     assert ots_patches.PATCH_CLASSES == ("portability", "memory-safety")
-    for entry in OTS_PATCHES:
-        if entry.id in PENDING_REMOVAL:
-            assert entry.patch_class == "none: state restoration, slated for removal"
-            assert entry.status == "pending-replacement", entry.id
-            assert entry.replacement == PENDING_REMOVAL[entry.id], entry.id
-            continue
-        assert entry.patch_class in ("portability", "memory-safety"), entry.id
-        assert entry.status != "pending-replacement", entry.id
+    for entry in ots_patches.active_patches():
+        assert entry.patch_class in ots_patches.PATCH_CLASSES, entry.id
         assert entry.replacement is None, entry.id
+    for entry in OTS_PATCHES:
+        if entry.patch_class not in ots_patches.PATCH_CLASSES:
+            assert entry.status == "retired", entry.id
+            assert entry.replacement, entry.id
+
+
+@cache
+def _source_groups() -> dict:
+    source_groups = {}
+    for tarball in TARBALLS:
+        groups, _ = amalgamate.process_ots_tarball(str(tarball))
+        source_groups |= groups
+    return source_groups
+
+
+def test_the_binding_clears_the_caps_flag_of_every_year_that_declares_it():
+    """OTS-P4's replacement: every year with the shared flag is reset before each call."""
+    years = amalgamate.caps_flag_years(_source_groups())
+    assert years == _tracked_years()
+    binding = (OTS_DIR.parent / "src" / "tenforty" / "otslib" / "ots.pyx").read_text()
+    reset_body = binding.partition("cdef void _restore_fresh_process_state(")[2]
+    reset_body = reset_body.partition("\ndef ")[0]
+    for year in years:
+        assert f'int do_all_caps_{year} "OpenTaxSolver{year}::do_all_caps"' in binding
+        assert f"    do_all_caps_{year} = 0\n" in reset_body, year
 
 
 _MAIN_WITH_HELPER = """\
@@ -431,10 +455,7 @@ def test_witness_dependencies_name_applied_entries():
 
 
 def _regenerate_amalgamation() -> str:
-    source_groups = {}
-    for tarball in TARBALLS:
-        groups, _ = amalgamate.process_ots_tarball(str(tarball))
-        source_groups |= groups
+    source_groups = copy.deepcopy(_source_groups())
     source_groups = dict(
         amalgamate.postprocess_source_groups(key, group)
         for key, group in source_groups.items()
