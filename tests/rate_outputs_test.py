@@ -57,7 +57,7 @@ def _derived_bracket_vectors() -> list[tuple[int, str, int, float]]:
     row = re.compile(r"^\| ([\d,]+) \| [^|]+ \| (\d+) \|$")
     vectors = []
     year = status = None
-    for text in DERIVATION.read_text().splitlines():
+    for text in DERIVATION.read_text(encoding="utf-8").splitlines():
         if match := heading.match(text):
             year, status = int(match.group(1)), STATUS_BY_HEADING[match.group(2)]
         elif year is not None and (match := row.match(text)):

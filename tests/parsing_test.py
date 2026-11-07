@@ -219,7 +219,7 @@ def test_regression_federal_1040_2024_single_75k():
     if not fixture_path.exists():
         pytest.skip("Fixture file not found")
 
-    text = fixture_path.read_text()
+    text = fixture_path.read_text(encoding="utf-8")
     result = parse_ots_return(text, year=2024, form_id="US_1040")
 
     assert result["L11"] == 75000.0

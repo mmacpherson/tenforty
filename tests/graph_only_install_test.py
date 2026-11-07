@@ -65,9 +65,10 @@ def test_graph_only_install_lists_graph_alone(graph_only_install):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize("on_error", ON_ERROR)
 def test_historical_year_refuses_whatever_on_error_says(
-    graph_only_install, no_evaluation, on_error
+    graph_only_install, no_evaluation, on_error, monkeypatch
 ):
     """2023 needs OTS: a typed refusal, never a NaN row."""
+    monkeypatch.setattr(_ots_extension.platform, "system", lambda: "Linux")
     with pytest.raises(BackendUnavailableError) as raised:
         tenforty.evaluate_return(year=2023, on_error=on_error, **RETURN)
     message = str(raised.value)
@@ -202,7 +203,7 @@ def test_import_tenforty_needs_no_otslib():
 
 def test_pyproject_declares_no_extension_modules():
     """setup.py alone declares the extensions; a static one ignores graph-only."""
-    assert "ext-modules" not in (REPO / "pyproject.toml").read_text()
+    assert "ext-modules" not in (REPO / "pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_no_graph_only_test_needs_ots(request):

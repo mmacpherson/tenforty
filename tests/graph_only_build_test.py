@@ -29,7 +29,7 @@ def _seed(build_lib: Path) -> None:
     for name in (*LEFT_BY_A_FULL_BUILD, *GRAPH_FILES):
         path = build_lib / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("seeded\n")
+        path.write_text("seeded\n", encoding="utf-8")
 
 
 def _files(root: Path) -> set[str]:

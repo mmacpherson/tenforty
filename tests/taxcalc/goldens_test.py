@@ -25,11 +25,13 @@ from .taxcalc_policy import unexcused_violations
 
 FIXTURE = Path(__file__).parent / "fixtures" / "taxcalc_goldens.json"
 PROJECT_ROOT = Path(__file__).parents[2]
-PAYLOAD = json.loads(FIXTURE.read_text())
+PAYLOAD = json.loads(FIXTURE.read_text(encoding="utf-8"))
 
 
 def _pinned_taxcalc_version() -> str:
-    pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
+    pyproject = tomllib.loads(
+        (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    )
     requirement = next(
         item
         for item in pyproject["dependency-groups"]["taxcalc"]

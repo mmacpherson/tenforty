@@ -1,0 +1,4 @@
+# Check every text file out with LF, on Windows too. Tests hash and compare
+# committed files byte for byte (the browser contract records each graph
+# JSON's SHA-256), so a CRLF checkout would read as stale.
+* text=auto eol=lf

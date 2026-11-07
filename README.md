@@ -55,14 +55,32 @@ in the [Limitations](#known-limitations) section below.
 pip install tenforty
 ```
 
-Python 3.10–3.15 is supported on Linux and macOS. Windows is not supported; see
-[Known Limitations](#known-limitations) for workarounds.
+Python 3.10–3.15 is supported on Linux, macOS and Windows.
+
+**On Windows, tenforty has the graph backend only.** OTS crashes when built
+for Windows, so Windows wheels leave it out; the
+[Windows build research](./docs/windows-build-research.md) has the details.
+
+- **What computes:** 2024 and 2025 returns. Those `backend="auto"` sends to
+  graph compute exactly as elsewhere (see
+  [Which Backend Computes Your Return](#which-backend-computes-your-return)),
+  and `backend="graph"` computes any 2024–2025 return.
+- **What refuses:** anything that needs OTS. That is tax years 2018–2023, the
+  2024–2025 states `auto` keeps on OTS (CA among them), `backend="ots"`, and
+  `tenforty.core.evaluate_form`. Each raises `BackendUnavailableError` before
+  computing, under every `on_error` policy, and the message says what graph
+  can do instead.
+- **The examples below:** five need OTS. The Quick Start, the tax table and
+  the capital-gains plot are CA returns, the federal-tax-over-time plot spans
+  2018–2025, and [The Graph Backend](#the-graph-backend) compares against
+  `backend="ots"`. On Windows, pass `backend="graph"` to a 2024–2025 example,
+  or use a state `auto` computes on graph, such as `state="IL"`.
 
 ### Building from source
 
 `pip install tenforty` uses a prebuilt wheel where one matches your platform:
-CPython 3.10–3.15 on Linux x86_64 and aarch64 (glibc 2.28+ and musl) and on
-macOS arm64 and x86_64.
+CPython 3.10–3.15 on Linux x86_64 and aarch64 (glibc 2.28+ and musl), on
+macOS arm64 and x86_64, and on Windows x86_64 (graph only).
 Elsewhere it builds from the source distribution, and that build needs a
 [Rust toolchain](https://rustup.rs) as well as a C++ compiler, because the graph
 backend is compiled from Rust. Without Rust the build stops and explains why;
@@ -670,10 +688,10 @@ true tax cliffs.
 
 ## Known Limitations
 
-- Currently does not support Windows. The Colab notebook linked above, or using
-  WSL are workarounds. Attempts have been made to get Windows builds working, but
-  runtime crashes persist due to compiler interoperability challenges; see
-  [Windows Build Research](./docs/windows-build-research.md) for details.
+- On Windows only the graph backend is available, so returns that need OTS
+  (2018–2023, and the 2024–2025 states `auto` keeps on OTS) raise
+  `BackendUnavailableError` there; see [Installation](#installation). The Colab
+  notebook linked above, or WSL, runs both backends.
 - Net Investment Income Tax (Form 8960) and Additional Medicare Tax (Form 8959)
   are computed for the 2024 and 2025 tax years only. For earlier years they are
   reported as zero, so if they apply to your situation the total tax will be
