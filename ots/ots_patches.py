@@ -399,10 +399,13 @@ OTS_PATCHES: tuple[OtsPatch, ...] = (
             "None on computed figures: the four names are only printed. "
             "`Your1stName[11]`, `YourLastName[15]`, `Spouse1stName[11]` and "
             "`SpouseLastName[15]` are cut in place in `GetTextLineF`'s "
-            "`strdup` of the input line, so a shorter name, including the "
-            "empty one every tenforty return passes, wrote past the "
-            "allocation. Wherever the write was inside the buffer, the guarded "
-            "one makes the same cut."
+            "`strdup` of the input line (`strlen + 1` bytes), so a shorter "
+            "name, including the empty one every tenforty return passes, wrote "
+            "past the allocation. The guard prevents those writes and leaves "
+            "the resulting C string unchanged wherever the original write was "
+            "valid; the writes it skips in bounds (a name of exactly the cut's "
+            "length, or one `pull_initial` already terminated earlier) were "
+            "redundant or past the string's terminator."
         ),
         status="reported-upstream",
         upstream="docs/upstream-ots-reports.md report 21; draft, not sent.",

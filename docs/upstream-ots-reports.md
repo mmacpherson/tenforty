@@ -981,7 +981,7 @@ The CA-540 program shortens the names for its printed output in place:
 
 and the same for `Spouse1stName[11]` and `SpouseLastName[15]`.
 `GetTextLineF` in `taxsolve_routines.c` returns `strdup( line )`, a buffer
-exactly as long as the text, so a name shorter than the cut writes the
+of `strlen( line ) + 1` bytes, so a name shorter than the cut writes the
 terminator past the end of its allocation. An empty name, which a return
 without names has, gives a 1-byte buffer.
 

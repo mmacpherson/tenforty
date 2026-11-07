@@ -3,13 +3,14 @@
 - **OTS 2018-2020 California no longer writes past the end of a heap
   buffer.** CA-540 shortens the filer's and spouse's names for its printed
   output by writing a terminator at a fixed position. The name is a copy
-  exactly as long as the text, and tenforty passes no names, so every
+  sized to the text and its terminator, and tenforty passes no names, so every
   2018-2020 CA return wrote 10 to 14 bytes past a 1-byte allocation.
   A valgrind sweep of every OTS year and state form (one Single and one
   joint return each) found no other memory error. On a musllinux wheel the
   overrun could later crash the interpreter at exit.
-  - OTS-P12 cuts a name only when it is longer than the cut. The names are
-    only printed, so no figure changes.
+  - OTS-P12 cuts a name only when it is longer than the cut, which prevents
+    every overrun and leaves each name as before. The names are only
+    printed, so no figure changes.
   - It is a memory-safety entry in the registry, staged upstream as
     report 21.
 - **OTS 2024 and 2025 Oregon no longer read uninitialised memory into

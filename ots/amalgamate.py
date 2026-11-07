@@ -740,18 +740,22 @@ def patch_ca540_name_truncation_bound(lines: list[str]) -> tuple[list[str], int]
         Your1stName = GetTextLineF( "Your1stName:" );
         Your1stName[11] = '\0';
 
-    ``GetTextLineF`` returns ``strdup(line)``, a buffer exactly as long as the
-    text. A name shorter than the cut, including the empty name every tenforty
+    ``GetTextLineF`` returns ``strdup(line)``, a buffer of ``strlen(text) + 1``
+    bytes including the terminator. A name shorter than the cut, including the empty name every tenforty
     return passes, makes the write land past the allocation: valgrind reports
     "Invalid write of size 1 ... 10 bytes after a block of size 1" for each of
     ``Your1stName[11]``, ``YourLastName[15]``, ``Spouse1stName[11]`` and
     ``SpouseLastName[15]``, on every 2018-2020 CA return. On musl the
     corrupted allocator metadata later crashed the interpreter at exit.
 
-    The guard ``if (strlen(X) > N)`` performs the same truncation whenever the
-    write was inside the buffer and skips it only when the name already ends
-    before index ``N``, where the write was out of bounds. The truncated names
-    are only printed; no figure reads them.
+    The guard ``if (strlen(X) > N)`` prevents every out-of-bounds write and
+    leaves the resulting C string as the original left it whenever the
+    original write was valid. A name longer than ``N`` gets the same cut. A
+    name of exactly ``N`` characters already has its terminator at ``N``, so
+    the skipped write was redundant. ``pull_initial`` can put an earlier
+    terminator into a longer first name; the guard then skips an in-bounds
+    write past that terminator, which no C-string operation sees. The
+    truncated names are only printed; no figure reads them.
 
     This is a memory-safety fix, not a tax-logic change. It is registered as
     OTS-P12 in ``ots/ots_patches.py`` and reported upstream (report 21 in

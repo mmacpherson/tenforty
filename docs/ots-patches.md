@@ -247,7 +247,7 @@ changing the registry; the section below is generated.
 - **Class:** memory-safety
 - **Scope:** CA_540, 2018-2020
 - **Required matches:** 2018-2020: CA_540 4 (fixed-index name truncations given `if (strlen(X) > N)`)
-- **Effect on computed figures:** None on computed figures: the four names are only printed. `Your1stName[11]`, `YourLastName[15]`, `Spouse1stName[11]` and `SpouseLastName[15]` are cut in place in `GetTextLineF`'s `strdup` of the input line, so a shorter name, including the empty one every tenforty return passes, wrote past the allocation. Wherever the write was inside the buffer, the guarded one makes the same cut.
+- **Effect on computed figures:** None on computed figures: the four names are only printed. `Your1stName[11]`, `YourLastName[15]`, `Spouse1stName[11]` and `SpouseLastName[15]` are cut in place in `GetTextLineF`'s `strdup` of the input line (`strlen + 1` bytes), so a shorter name, including the empty one every tenforty return passes, wrote past the allocation. The guard prevents those writes and leaves the resulting C string unchanged wherever the original write was valid; the writes it skips in bounds (a name of exactly the cut's length, or one `pull_initial` already terminated earlier) were redundant or past the string's terminator.
 - **Status:** reported-upstream
 - **Upstream:** docs/upstream-ots-reports.md report 21; draft, not sent.
 - **Source witnesses:** `tests/ots_patch_registry_test.py::test_source_witness[OTS-P12]`
