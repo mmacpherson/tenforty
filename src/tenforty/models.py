@@ -1114,6 +1114,25 @@ def _spouse_65_box(value):
     return ("Spouse_65+Over?", "Y" if value else "N")
 
 
+def _summed_line(line: str) -> Callable[[float], tuple[str, str]]:
+    """Send a natural to a line OTS reads with GetLine, which sums every value.
+
+    Several naturals mapped this way share the line; a plain string mapping
+    would keep only the last.
+    """
+
+    def to_line(value: float) -> tuple[str, str]:
+        return (line, str(value))
+
+    return to_line
+
+
+# NJ-1040 line 19 is net gains from disposition of property: Schedule NJ-DOP
+# nets every sale with no short/long-term split, and the program enters a net
+# loss as nothing (instructions, line 19).
+_NJ_DISPOSITION_GAINS = _summed_line("L19")
+
+
 def _restricted_filing_status(
     form_id: str, supported: frozenset[OTSFilingStatus]
 ) -> Callable[[str], tuple[str, str]]:
@@ -1289,6 +1308,9 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L15",
             "taxable_interest": "L16a",
             "ordinary_dividends": "L17",
+            "self_employment_income": "L18",
+            "short_term_capital_gains": _NJ_DISPOSITION_GAINS,
+            "long_term_capital_gains": _NJ_DISPOSITION_GAINS,
         },
         "output_map": {
             "L29": "adjusted_gross_income",
@@ -1465,6 +1487,9 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L15",
             "taxable_interest": "L16a",
             "ordinary_dividends": "L17",
+            "self_employment_income": "L18",
+            "short_term_capital_gains": _NJ_DISPOSITION_GAINS,
+            "long_term_capital_gains": _NJ_DISPOSITION_GAINS,
         },
         "output_map": {
             "L29": "adjusted_gross_income",
@@ -1630,6 +1655,9 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L15",
             "taxable_interest": "L16a",
             "ordinary_dividends": "L17",
+            "self_employment_income": "L18",
+            "short_term_capital_gains": _NJ_DISPOSITION_GAINS,
+            "long_term_capital_gains": _NJ_DISPOSITION_GAINS,
         },
         "output_map": {
             "L29": "adjusted_gross_income",

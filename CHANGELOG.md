@@ -1,4 +1,19 @@
 ## [Unreleased]
+### Fixed
+- **OTS NJ now taxes business profits and capital gains** (tenforty-r91.15).
+  `self_employment_income` goes to NJ-1040 line 18 (net profits from business),
+  and `short_term_capital_gains` with `long_term_capital_gains` go to line 19
+  (net gains from disposition of property), for 2023-2025. NJ nets every sale on
+  Schedule NJ-DOP with no short/long-term split, and a net loss in either line
+  is no entry and offsets nothing else; OTS does both. Before, OTS NJ computed
+  the return from wages, interest and dividends only, so these returns were
+  under-taxed. The expected figures in `tests/ots_nj_gains_business_test.py`
+  are an independent derivation from the NJ-1040 forms and instructions
+  (`docs/validation/derivations/nj-gains-business-2023-2025.md`).
+  - Found while deriving them: OTS prices NJ taxable income that falls exactly
+    on a tax-table row's lower edge (a whole multiple of $50 below $100,000) as
+    the row below, $1-$3 under the table. Upstream report 22, recorded as a
+    strict signature; not patched.
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)
