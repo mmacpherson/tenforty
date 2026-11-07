@@ -358,6 +358,7 @@ def test_state_adjustment_is_refused_only_where_a_map_drops_it(year, state):
 @pytest.mark.parametrize(
     ("year", "state", "name", "ots_key", "bead"), TEMPLATE_ABSENT_CASES
 )
+@pytest.mark.requires_ots
 def test_nonzero_input_on_a_missing_line_is_refused(
     year, state, name, ots_key, bead, backend, on_error, ots_calls
 ):
@@ -382,6 +383,7 @@ def test_nonzero_input_on_a_missing_line_is_refused(
 @pytest.mark.parametrize(
     ("year", "state", "name", "ots_key", "bead"), TEMPLATE_ABSENT_CASES
 )
+@pytest.mark.requires_ots
 def test_zero_input_on_a_missing_line_is_accepted(year, state, name, ots_key, bead):
     """Zero computes the same return as omitting the input."""
     kwargs = {"year": year, "state": state, "w2_income": 60_000, "backend": "ots"}

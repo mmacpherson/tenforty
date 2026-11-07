@@ -29,6 +29,8 @@ import pytest
 from tenforty.core import OTS_FORM_CONFIG
 from tenforty.models import SUBORDINATE_FORM_CONFIG
 
+pytestmark = pytest.mark.requires_ots
+
 YEARS = tuple(range(2018, 2026))
 CAPS_SETTERS = ("NC_D400", "OH_IT1040", "PA_40")
 MIXED_CASE_NAMES = {"Your1stName:": "Mixedcase", "YourLastName:": "Lower-name"}

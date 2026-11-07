@@ -26,21 +26,6 @@ from tenforty.models import (
     OTSInputError,
 )
 
-
-def _ots_available():
-    try:
-        from tenforty.backends import OTSBackend
-
-        return OTSBackend().is_available()
-    except ImportError:
-        return False
-
-
-skip_if_ots_unavailable = pytest.mark.skipif(
-    not _ots_available(),
-    reason="OTS backend required",
-)
-
 POLICIES = ("raise", "warn", "ignore")
 
 
@@ -66,7 +51,7 @@ def test_templates_carry_the_kind_ots_reads(year, form_id, key, kind):
     assert _field(year, form_id, key).kind == kind
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("on_error", POLICIES)
 def test_witness_raises_in_process_naming_the_field(on_error):
     """The AST-65 witness raises in-process under every policy."""
@@ -84,7 +69,7 @@ def test_input_error_is_a_value_error():
     assert issubclass(OTSInputError, ValueError)
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(
     "value",
     [
@@ -106,7 +91,7 @@ def test_amount_lines_require_one_finite_number(value):
         evaluate_form(2024, federal_form_values={"L1a": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", [50_000, 50_000.5, "50000", "50,000", "-12.5", "1e3"])
 def test_amount_lines_accept_finite_numbers(value):
     """Ints, floats and numeric strings (commas allowed) reach OTS."""
@@ -114,7 +99,7 @@ def test_amount_lines_accept_finite_numbers(value):
     assert result["federal"]["L1z"] == pytest.approx(float(str(value).replace(",", "")))
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(("value", "total"), [("", 0.0), ("100 250.5", 350.5)])
 def test_semicolon_amount_lines_take_an_empty_or_summed_entry(value, total):
     """A ';' line takes no entry (zero) or several summed."""
@@ -122,7 +107,7 @@ def test_semicolon_amount_lines_take_an_empty_or_summed_entry(value, total):
     assert result["federal"].get("L1z", 0.0) == pytest.approx(total)
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", ["", "two"])
 def test_single_value_amount_lines_reject_empty_and_words(value):
     """A newline line would read the next label as its value."""
@@ -130,7 +115,7 @@ def test_single_value_amount_lines_reject_empty_and_words(value):
         evaluate_form(2024, federal_form_values={"Dependents": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", ["maybe", 2, 0.5, "", None, "Y N"])
 def test_boolean_lines_reject_non_boolean_values(value):
     """OTS exits on a yes/no answer it does not recognize."""
@@ -138,21 +123,21 @@ def test_boolean_lines_reject_non_boolean_values(value):
         evaluate_form(2024, federal_form_values={"You_Blind?": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", ["Y", "n", "Yes", "no", "TRUE", "false", True, 0, 1])
 def test_boolean_lines_accept_what_ots_parses(value):
     """Every spelling OTS's boolean reader takes is accepted."""
     evaluate_form(2024, federal_form_values={"You_Blind?": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_unknown_label_raises_naming_it():
     """A key the template lacks would be dropped silently."""
     with pytest.raises(OTSInputError, match=r"L1aa"):
         evaluate_form(2024, federal_form_values={"L1aa": 100})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", ["Ada\nL1a 5 ;", "{unclosed", "x" * 600])
 def test_text_lines_reject_values_that_break_the_input_file(value):
     """A line break, brace or overlong text would derail the parser."""
@@ -160,13 +145,13 @@ def test_text_lines_reject_values_that_break_the_input_file(value):
         evaluate_form(2024, federal_form_values={"Your1stName:": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_text_lines_accept_an_ordinary_line():
     """Ordinary text with spaces is a valid text line."""
     evaluate_form(2024, federal_form_values={"Your1stName:": "Ada Lovelace"})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_state_values_are_checked_before_any_native_call(monkeypatch):
     """A bad state value is caught before the federal program runs."""
     from tenforty import otslib
@@ -184,7 +169,7 @@ def test_state_values_are_checked_before_any_native_call(monkeypatch):
         )
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_parent_interpreter_survives_the_witness():
     """The witness run in a child process returns instead of exiting."""
     script = textwrap.dedent(
@@ -221,7 +206,7 @@ def test_parent_interpreter_survives_the_witness():
     ]
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_numpy_scalars_are_numbers():
     """A numpy integer or float on an amount line is a number, as before."""
     np = pytest.importorskip("numpy")
@@ -243,7 +228,7 @@ WITNESSES = [
 ]
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(("key", "value"), WITNESSES)
 def test_witness_is_refused_in_a_child_before_any_engine_call(key, value):
     """Each witness raises under every policy and never reaches native OTS."""
@@ -279,7 +264,7 @@ def test_witness_is_refused_in_a_child_before_any_engine_call(key, value):
     ]  # fmt: skip
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(
     "value",
     [
@@ -302,14 +287,14 @@ def test_amount_lines_take_only_the_ascii_grammar_ots_reads(value, monkeypatch):
         evaluate_form(2024, federal_form_values={"L1a": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", ["1,000", "12,345.67", "1e3", "5.", ".5", "-0"])
 def test_amount_lines_accept_ascii_numbers(value):
     """Grouped thousands and the decimal forms OTS's valid_float takes."""
     evaluate_form(2024, federal_form_values={"L1a": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(
     ("key", "value"),
     [
@@ -332,7 +317,7 @@ def test_unresolved_lines_fail_closed_for_raw_callers(key, value, monkeypatch):
             evaluate_form(year, state_form_id=form_id, state_form_values=values)
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_unresolved_lines_accept_their_template_default():
     """Passing the default explicitly is the same as omitting the line."""
     assert evaluate_form(
@@ -340,7 +325,7 @@ def test_unresolved_lines_accept_their_template_default():
     ) == evaluate_form(2024)
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(
     ("year", "key", "value", "ok"),
     [
@@ -361,7 +346,7 @@ def test_declared_schemas_for_status_and_force_itemize(year, key, value, ok):
             evaluate_form(year, federal_form_values={key: value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(("value", "ok"), [("é" * 200, True), ("é" * 300, False)])
 def test_text_is_bounded_in_utf8_bytes(value, ok):
     """400 bytes fit OTS's buffers; 600 bytes (300 characters) do not."""
@@ -372,7 +357,7 @@ def test_text_is_bounded_in_utf8_bytes(value, ok):
             evaluate_form(2024, federal_form_values={"Your1stName:": value})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_whole_request_is_refused_before_the_first_engine_call(monkeypatch):
     """A bad state line stops the request before the federal program runs."""
     calls = _forbid_native_calls(monkeypatch)
@@ -522,7 +507,7 @@ def test_canonical_spelling_is_fixed_point_with_a_leading_digit(value):
     assert float(text) == float(str(value).replace(",", ""))
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("value", SPELLINGS)
 def test_spellings_python_reads_are_written_canonically(value, monkeypatch):
     """'-.5' and its kin reach OTS as '-0.5', which valid_float accepts."""
@@ -544,7 +529,7 @@ def test_spellings_python_reads_are_written_canonically(value, monkeypatch):
     )
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_canonical_spellings_round_trip_the_native_parser_in_a_child():
     """Boundary values written canonically are read back by OTS, not exited on."""
     values = SPELLINGS + [repr(v) for v in BOUNDARY_NUMBERS]
@@ -568,7 +553,7 @@ def test_canonical_spellings_round_trip_the_native_parser_in_a_child():
         assert float(total) == pytest.approx(expected, rel=1e-12, abs=0.005), value
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize(
     ("year", "key", "value"),
     [
@@ -625,7 +610,7 @@ def test_yes_no_aliases_are_written_as_uppercase_y_or_n(value, written):
         assert prepare_ots_form_values({key: value}, config) == {key: written}
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("key", ["B7a", "A18", "You_Blind?"])
 def test_not_applicable_is_not_a_general_yes_no_answer(key):
     """'n/a' means not applicable, not yes or no; it passes only as a default."""
@@ -633,7 +618,7 @@ def test_not_applicable_is_not_a_general_yes_no_answer(key):
         evaluate_form(2024, federal_form_values={key: "n/a"})
 
 
-@skip_if_ots_unavailable
+@pytest.mark.requires_ots
 def test_every_yes_no_alias_round_trips_every_reader_in_a_child():
     """Every alias on every resolved yes/no line, every year, as Y/N computes.
 
