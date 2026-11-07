@@ -204,6 +204,24 @@ def _p11_grablinealloc_unbounded_trim(year: int, program: str) -> bool:
     return bool(re.search(r"while\s*\(\s*twrd\s*\[\s*cpos\s*\]\s*==\s*' '\s*\)", body))
 
 
+_CA540_NAME_CUT = re.compile(
+    r"\b(Your1stName|YourLastName|Spouse1stName|SpouseLastName)\s*=\s*"
+    r"GetTextLineF\(.*?\n\s*\1\s*\[\s*[1-9][0-9]*\s*\]\s*=\s*'\\0'\s*;",
+    re.DOTALL,
+)
+
+
+def _p12_ca540_name_cut_past_strdup(year: int, program: str) -> bool:
+    """Report whether CA-540 cuts a ``GetTextLineF`` name at a fixed index, unguarded.
+
+    The cut must start its own statement line, so a guarded cut
+    (``if (strlen(X) > N) X[N] = ...``) reads as fixed.
+    """
+    if program != "CA_540":
+        return False
+    return len(_CA540_NAME_CUT.findall(_program_source(year, program))) == 4
+
+
 SOURCE_WITNESSES: dict[str, Callable[[int, str], bool]] = {
     "OTS-P1": _p1_new_as_identifier,
     "OTS-P2": _p2_void_pointer_to_char,
@@ -216,6 +234,7 @@ SOURCE_WITNESSES: dict[str, Callable[[int, str], bool]] = {
     "OTS-P9": _p9_import_status_err_uninitialised,
     "OTS-P10": _p10_or_sch_a_line_8_never_set,
     "OTS-P11": _p11_grablinealloc_unbounded_trim,
+    "OTS-P12": _p12_ca540_name_cut_past_strdup,
 }
 
 
