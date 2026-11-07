@@ -23,7 +23,7 @@ what-if sweeps, and optimizing your taxes.
 
 The package is built on top of
 [Open Tax Solver](https://opentaxsolver.sourceforge.net/) (OTS) and tenforty's own
-graph backend, wrapping them into a Python library. The ideas behind it are
+backend, wrapping them into a Python library. The ideas behind it are
 discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
 
