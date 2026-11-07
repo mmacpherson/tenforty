@@ -123,6 +123,14 @@ def _refuse_ots_return(year: int, state: OTSState) -> UnsupportedReturnError:
     )
 
 
+def require_ots_serves(year: object, state: object) -> None:
+    """Raise if OTS refuses this return outright (``OTS_REFUSED_RETURNS``)."""
+    tax_year = _year_value(year)
+    tax_state = _state_value(state)
+    if tax_state is not None and (tax_state, tax_year) in OTS_REFUSED_RETURNS:
+        raise _refuse_ots_return(tax_year, tax_state)
+
+
 def _ots_route(year: int, state: OTSState | None) -> Engine:
     if state is not None and (state, year) in OTS_REFUSED_RETURNS:
         raise _refuse_ots_return(year, state)
@@ -186,6 +194,12 @@ def select_backend(
             without ``allow_unvalidated=True``.
 
     """
+    if not isinstance(allow_unvalidated, bool):
+        raise TypeError(
+            f"allow_unvalidated must be True or False, not {allow_unvalidated!r}: "
+            "it is an explicit acknowledgment that the graph is not yet "
+            "validated for the return."
+        )
     if backend not in BACKEND_CHOICES:
         choices = ", ".join(repr(choice) for choice in BACKEND_CHOICES)
         raise ValueError(f"Unknown backend: {backend!r}; expected one of {choices}")

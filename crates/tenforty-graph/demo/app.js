@@ -1,6 +1,7 @@
 import init, * as graphlib from "./pkg/graphlib.js";
 import {
   BrowserContractError,
+  isValidatedJurisdiction,
   loadBrowserContract,
 } from "./browser_contract.js";
 import {
@@ -204,13 +205,17 @@ function populateInterface() {
   }
 
   const jurisdictionSelect = byId("jurisdiction");
-  const jurisdictions = Object.entries(contract.jurisdictions).sort(
-    ([leftCode, left], [rightCode, right]) => {
+  const jurisdictions = Object.entries(contract.jurisdictions)
+    .filter(([code]) =>
+      contract.supported_years.every((year) =>
+        isValidatedJurisdiction(contract, code, year),
+      ),
+    )
+    .sort(([leftCode, left], [rightCode, right]) => {
       if (leftCode === "US") return -1;
       if (rightCode === "US") return 1;
       return left.name.localeCompare(right.name);
-    },
-  );
+    });
   for (const [code, specification] of jurisdictions) {
     const option = document.createElement("option");
     option.value = code;
@@ -340,6 +345,16 @@ function renderCurve(points, results, gradient, inputName) {
   const tangentStart = Math.max(minimumInput, currentInput - tangentRadius);
   const tangentEnd = Math.min(maximumInput, currentInput + tangentRadius);
   const tangent = byId("curve-tangent");
+  tangent.hidden = gradient.total === null;
+  if (gradient.total === null) {
+    const shortLabel = SENSITIVITY_INPUTS[inputName].shortLabel.toLowerCase();
+    setText("curve-title", `as ${shortLabel} changes`);
+    setText(
+      "curve-summary",
+      `Modeled total tax as ${shortLabel} ranges from ${formatCurrency(minimumInput)} to ${formatCurrency(maximumInput)}. This return is at ${formatCurrency(currentInput)} with ${formatCurrency(currentTax)} of modeled total tax. ${contract.state_slopes.summary}`,
+    );
+    return;
+  }
   tangent.setAttribute("x1", xScale(tangentStart));
   tangent.setAttribute("x2", xScale(tangentEnd));
   tangent.setAttribute(
@@ -399,25 +414,29 @@ function renderSensitivities(gradients) {
       metadata.curveMaximum ? "button" : "div",
     );
     element.className = "sensitivity-item";
+    const withheld = gradients[name].total === null;
+    const shown = withheld ? gradients[name].federal : gradients[name].total;
     if (metadata.curveMaximum) {
       element.type = "button";
       element.dataset.curveInput = name;
       element.setAttribute(
         "aria-label",
-        `Plot ${metadata.shortLabel}: ${formatCents(gradients[name].total)} of tax per dollar`,
+        `Plot ${metadata.shortLabel}: ${formatCents(shown)} of ${withheld ? "federal " : ""}tax per dollar`,
       );
     }
     element.append(
       createTextElement("span", "sensitivity-action", metadata.action),
       createTextElement(
         "strong",
-        gradients[name].total < 0 ? "negative" : "",
-        formatCents(gradients[name].total),
+        shown < 0 ? "negative" : "",
+        formatCents(shown),
       ),
       createTextElement(
         "small",
         "",
-        `${formatCents(gradients[name].federal)} federal · ${formatCents(gradients[name].state)} state`,
+        withheld
+          ? "federal only · state slope withheld"
+          : `${formatCents(gradients[name].federal)} federal · ${formatCents(gradients[name].state)} state`,
       ),
     );
     list.appendChild(element);
@@ -428,20 +447,32 @@ function renderAnalysis(analysis, curvePoints, inputName) {
   const metadata = SENSITIVITY_INPUTS[inputName];
   const gradient = analysis.gradients[inputName];
   const jurisdiction = selectedJurisdiction();
+  const withheld = gradient.total === null;
   setText("analysis-action", metadata.action);
-  setText("next-dollar-cents", (gradient.total * 100).toFixed(1));
+  setText(
+    "next-dollar-cents",
+    withheld ? "—" : (gradient.total * 100).toFixed(1),
+  );
   setText("next-dollar-federal", formatCents(gradient.federal));
   setText(
     "next-dollar-state-label",
     scenario.jurisdiction === "US" ? "No state selected" : jurisdiction.name,
   );
-  setText("next-dollar-state", formatCents(gradient.state));
-  setText("next-dollar-total", formatPercent(gradient.total * 100));
+  setText(
+    "next-dollar-state",
+    withheld ? "withheld" : formatCents(gradient.state),
+  );
+  setText(
+    "next-dollar-total",
+    withheld ? "—" : formatPercent(gradient.total * 100),
+  );
   setText(
     "derivative-interpretation",
-    metadata.reclassification
-      ? "This reclassifies an existing ordinary-dividend dollar; it is not the cost of earning another dollar."
-      : "This is the composed right-hand effect at the current return—not your effective rate.",
+    withheld
+      ? contract.state_slopes.summary
+      : metadata.reclassification
+        ? "This reclassifies an existing ordinary-dividend dollar; it is not the cost of earning another dollar."
+        : "This is the composed right-hand effect at the current return—not your effective rate.",
   );
   renderCurve(curvePoints, analysis.results, gradient, inputName);
   renderSensitivities(analysis.gradients);

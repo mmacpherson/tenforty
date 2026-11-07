@@ -101,6 +101,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.MD: _both_years("tenforty-nuc6"),
     S.ME: _both_years("tenforty-nuc6"),
     S.MN: _both_years("tenforty-nuc6"),
+    S.MI: _both_years("tenforty-s48h.45"),
     S.MO: _both_years("tenforty-b72.46", "tenforty-nuc6"),
     S.MT: _both_years("tenforty-b72.7"),
     S.NC: _both_years("tenforty-nuc6"),
@@ -135,6 +136,7 @@ UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
         "tenforty-b72.47",
         "tenforty-b72.54",
         "tenforty-nuc6",
+        "tenforty-s48h.45",
         "tenforty-yu51",
     }
 )

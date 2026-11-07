@@ -10,9 +10,11 @@ from pathlib import Path
 
 from tenforty.backends.graph import (
     FEDERAL_OUTPUT_NODES,
+    STATE_PLANNING_DEFECT,
     GraphBackend,
     _state_output_node,
 )
+from tenforty.graph_scope import exclusion_reasons, graph_state_in_scope
 from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
@@ -477,6 +479,8 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             "input_nodes": {str(year): {} for year in years},
             "output_nodes": {str(year): {} for year in years},
             "unsupported_inputs": {str(year): [] for year in years},
+            "validated": {str(year): True for year in years},
+            "exclusion_reasons": {str(year): [] for year in years},
         }
     }
 
@@ -498,6 +502,12 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             "input_nodes": {},
             "output_nodes": {},
             "unsupported_inputs": {},
+            "validated": {
+                str(year): graph_state_in_scope(state, year) for year in years
+            },
+            "exclusion_reasons": {
+                str(year): list(exclusion_reasons(state, year)) for year in years
+            },
         }
 
         for year in years:
@@ -642,7 +652,26 @@ def build_contract() -> dict[str, object]:
             "input_nodes": "inputs[name].federal_nodes plus jurisdiction.input_nodes[year][name] plus active derived-input nodes",
         },
         "jurisdictions": _jurisdictions(years),
+        "scope": {
+            "summary": "The graph is so far validated for 2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other jurisdictions are not yet validated: the calculator does not offer them, a shared link to one is refused, and BrowserTaxRuntime computes one only with allowUnvalidated: true.",
+            "tracking": "tenforty-s48h",
+        },
+        "state_slopes": {
+            "available": STATE_PLANNING_DEFECT is None,
+            "summary": "State and combined next-dollar slopes are withheld for every state return: graph state derivatives read zero for IL, MS and OR although their state tax moves with income. Federal slopes are unaffected, and the tax curve is computed by evaluation.",
+            "tracking": STATE_PLANNING_DEFECT,
+        },
         "limitations": [
+            {
+                "id": "validated-jurisdictions",
+                "summary": "Only federal-only returns and the validated states (IL, MS, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
+                "tracking": "tenforty-s48h",
+            },
+            {
+                "id": "state-slopes",
+                "summary": "State and combined next-dollar slopes are withheld until state derivatives are fixed; federal slopes are shown.",
+                "tracking": STATE_PLANNING_DEFECT,
+            },
             {
                 "id": "tax-years",
                 "summary": "Only tax years 2024 and 2025 are supported by the browser contract.",

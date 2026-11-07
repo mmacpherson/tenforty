@@ -310,6 +310,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
+        "2024": [],
+        "2025": []
       }
     },
     "AK": {
@@ -328,6 +336,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -358,6 +374,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-yu51", "tenforty-nuc6", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-yu51", "tenforty-nuc6", "evidence: tenforty-b72.12"]
       }
     },
     "AR": {
@@ -386,6 +410,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
       }
     },
     "AZ": {
@@ -414,6 +446,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
       }
     },
     "CA": {
@@ -442,6 +482,25 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": [
+          "tenforty-b72.54",
+          "tenforty-tj2.20",
+          "tenforty-yu51",
+          "tenforty-nuc6"
+        ],
+        "2025": [
+          "tenforty-b72.54",
+          "tenforty-tj2.20",
+          "tenforty-yu51",
+          "tenforty-nuc6",
+          "evidence: tenforty-b72.12"
+        ]
       }
     },
     "CO": {
@@ -466,6 +525,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"]
       }
     },
     "CT": {
@@ -490,6 +557,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "DC": {
@@ -514,6 +589,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "DE": {
@@ -542,6 +625,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
       }
     },
     "FL": {
@@ -560,6 +651,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -590,6 +689,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.42", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.42", "tenforty-nuc6"]
       }
     },
     "HI": {
@@ -618,6 +725,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.41", "tenforty-tj2.20", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.41", "tenforty-tj2.20", "tenforty-nuc6"]
       }
     },
     "IA": {
@@ -642,6 +757,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "ID": {
@@ -666,6 +789,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "IL": {
@@ -688,6 +819,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -714,6 +853,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.42"],
+        "2025": ["tenforty-b72.42"]
       }
     },
     "KS": {
@@ -742,6 +889,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.42", "tenforty-tj2.20", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.42", "tenforty-tj2.20", "tenforty-nuc6"]
       }
     },
     "KY": {
@@ -766,6 +921,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "LA": {
@@ -790,6 +953,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-tj2.20"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "MA": {
@@ -814,6 +985,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.40"],
+        "2025": ["tenforty-b72.40"]
       }
     },
     "MD": {
@@ -842,6 +1021,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6"],
+        "2025": ["tenforty-nuc6"]
       }
     },
     "ME": {
@@ -870,6 +1057,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6"],
+        "2025": ["tenforty-nuc6"]
       }
     },
     "MI": {
@@ -894,6 +1089,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-s48h.45", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-s48h.45", "evidence: tenforty-b72.12"]
       }
     },
     "MN": {
@@ -922,6 +1125,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
       }
     },
     "MO": {
@@ -950,6 +1161,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.46", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.46", "tenforty-nuc6"]
       }
     },
     "MS": {
@@ -986,6 +1205,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
+        "2024": [],
+        "2025": []
       }
     },
     "MT": {
@@ -1010,6 +1237,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.7", "evidence: tenforty-b72.12"],
+        "2025": ["tenforty-b72.7", "evidence: tenforty-b72.12"]
       }
     },
     "NC": {
@@ -1038,6 +1273,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-nuc6"],
+        "2025": ["tenforty-nuc6"]
       }
     },
     "ND": {
@@ -1062,6 +1305,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "NE": {
@@ -1086,6 +1337,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "NH": {
@@ -1116,6 +1375,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "NJ": {
@@ -1140,6 +1407,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.38", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.38", "tenforty-tj2.20"]
       }
     },
     "NM": {
@@ -1164,6 +1439,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "NV": {
@@ -1182,6 +1465,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -1212,6 +1503,24 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": [
+          "tenforty-b72.4",
+          "tenforty-tj2.20",
+          "tenforty-nuc6",
+          "evidence: tenforty-b72.12"
+        ],
+        "2025": [
+          "tenforty-b72.4",
+          "tenforty-tj2.20",
+          "tenforty-nuc6",
+          "evidence: tenforty-b72.12"
+        ]
       }
     },
     "OH": {
@@ -1236,6 +1545,18 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": [
+          "policy: graph Ohio Married/Joint requires the explicit state_facts OH joint-credit fact, which has no default (decided 2026-11-04); admitting OH to auto scope is a separate decision"
+        ],
+        "2025": [
+          "policy: graph Ohio Married/Joint requires the explicit state_facts OH joint-credit fact, which has no default (decided 2026-11-04); admitting OH to auto scope is a separate decision"
+        ]
       }
     },
     "OK": {
@@ -1260,6 +1581,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "OR": {
@@ -1282,6 +1611,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -1316,6 +1653,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "RI": {
@@ -1340,6 +1685,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "SC": {
@@ -1364,6 +1717,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "SD": {
@@ -1382,6 +1743,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -1404,6 +1773,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
+        "2024": [],
+        "2025": []
       }
     },
     "TX": {
@@ -1422,6 +1799,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -1448,6 +1833,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "VA": {
@@ -1476,6 +1869,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.37", "tenforty-b72.42", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.37", "tenforty-b72.42", "tenforty-nuc6"]
       }
     },
     "VT": {
@@ -1504,6 +1905,26 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": [
+          "tenforty-b72.20",
+          "tenforty-b72.42",
+          "tenforty-b72.47",
+          "tenforty-tj2.20",
+          "tenforty-nuc6"
+        ],
+        "2025": [
+          "tenforty-b72.20",
+          "tenforty-b72.42",
+          "tenforty-b72.47",
+          "tenforty-tj2.20",
+          "tenforty-nuc6"
+        ]
       }
     },
     "WA": {
@@ -1522,6 +1943,14 @@
         }
       },
       "unsupported_inputs": {
+        "2024": [],
+        "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
         "2024": [],
         "2025": []
       }
@@ -1552,6 +1981,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["tenforty-b72.20", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.20", "tenforty-nuc6"]
       }
     },
     "WV": {
@@ -1576,6 +2013,14 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": false,
+        "2025": false
+      },
+      "exclusion_reasons": {
+        "2024": ["evidence: tenforty-b72.12"],
+        "2025": ["evidence: tenforty-b72.12"]
       }
     },
     "WY": {
@@ -1596,10 +2041,37 @@
       "unsupported_inputs": {
         "2024": [],
         "2025": []
+      },
+      "validated": {
+        "2024": true,
+        "2025": true
+      },
+      "exclusion_reasons": {
+        "2024": [],
+        "2025": []
       }
     }
   },
+  "scope": {
+    "summary": "The graph is so far validated for 2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other jurisdictions are not yet validated: the calculator does not offer them, a shared link to one is refused, and BrowserTaxRuntime computes one only with allowUnvalidated: true.",
+    "tracking": "tenforty-s48h"
+  },
+  "state_slopes": {
+    "available": false,
+    "summary": "State and combined next-dollar slopes are withheld for every state return: graph state derivatives read zero for IL, MS and OR although their state tax moves with income. Federal slopes are unaffected, and the tax curve is computed by evaluation.",
+    "tracking": "tenforty-s48h.76"
+  },
   "limitations": [
+    {
+      "id": "validated-jurisdictions",
+      "summary": "Only federal-only returns and the validated states (IL, MS, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
+      "tracking": "tenforty-s48h"
+    },
+    {
+      "id": "state-slopes",
+      "summary": "State and combined next-dollar slopes are withheld until state derivatives are fixed; federal slopes are shown.",
+      "tracking": "tenforty-s48h.76"
+    },
     {
       "id": "tax-years",
       "summary": "Only tax years 2024 and 2025 are supported by the browser contract."

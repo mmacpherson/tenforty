@@ -58,9 +58,9 @@ def engine_calls(monkeypatch):
         calls.append(("ots", year.value))
         return real_ots(year, *args, **kwargs)
 
-    def graph_evaluate(self, tax_input):
+    def graph_evaluate(self, tax_input, **kwargs):
         calls.append(("graph", tax_input.year.value))
-        return real_graph_evaluate(self, tax_input)
+        return real_graph_evaluate(self, tax_input, **kwargs)
 
     def graph_batch(self, year, *args, **kwargs):
         calls.append(("graph", int(year)))
@@ -532,7 +532,7 @@ def _engine_accepts(engine: str, year: int, state: OTSState) -> bool:
                 tax_input.model_dump(exclude={"year", "state"}),
             )
         else:
-            GraphBackend().evaluate(tax_input)
+            GraphBackend().evaluate(tax_input, allow_unvalidated=True)
     except (ValueError, FileNotFoundError):
         return False
     return True
@@ -544,19 +544,15 @@ def _engine_accepts(engine: str, year: int, state: OTSState) -> bool:
 def test_selector_agrees_with_what_each_engine_computes(engine, year, state):
     """With the opt-in, the selector honours exactly what the engine can serve.
 
-    The one exception is a return OTS covers but computes wrongly for every
-    caller (``routing.OTS_REFUSED_RETURNS``): the engine accepts it, and the
-    selector refuses it.
+    A return OTS refuses outright (``routing.OTS_REFUSED_RETURNS``) is refused
+    by the selector and by the engine alike.
     """
     try:
         routing.select_backend(engine, year, state, allow_unvalidated=True)
         selected = True
     except UnsupportedReturnError:
         selected = False
-    refused = engine == "ots" and (state, year) in routing.OTS_REFUSED_RETURNS
-    assert selected == (_engine_accepts(engine, year, state) and not refused)
-    if refused:
-        assert _engine_accepts(engine, year, state)
+    assert selected == _engine_accepts(engine, year, state)
 
 
 @pytest.mark.parametrize("state", ALL_STATES, ids=lambda state: state.value)
@@ -650,8 +646,9 @@ def test_graph_only_apis_refuse_unvalidated_states(function):
 
 
 def _solve_at_own_tax(**kw):
-    """Solve for the wages that give this return's own graph tax."""
-    target = tenforty.evaluate_return(backend="graph", **kw).total_tax
+    """Solve for the wages that give this return's own federal graph tax."""
+    call = {k: v for k, v in kw.items() if k != "output"}
+    target = tenforty.evaluate_return(backend="graph", **call).federal_total_tax
     return tenforty.solve_for_income(target_tax=target, **kw)
 
 
@@ -660,17 +657,24 @@ COMPUTING_GRAPH_ONLY_FUNCTIONS = [
     pytest.param(_solve_at_own_tax, id="solve_for_income"),
 ]
 
+# A federal output: state-dependent outputs are refused until tenforty-s48h.76
+# is fixed (tests/state_planning_refusal_test.py), but the scope rule still
+# applies to the return.
+FEDERAL = {"output": "federal_total_tax"}
+
 
 @pytest.mark.parametrize("function", COMPUTING_GRAPH_ONLY_FUNCTIONS)
 def test_graph_only_apis_compute_unvalidated_states_on_request(function):
     """The opt-in lets autodiff and the solver run on an out-of-scope state."""
-    assert function(year=2025, state="CA", w2_income=50_000.0, allow_unvalidated=True)
+    assert function(
+        year=2025, state="CA", w2_income=50_000.0, allow_unvalidated=True, **FEDERAL
+    )
 
 
 @pytest.mark.parametrize("function", COMPUTING_GRAPH_ONLY_FUNCTIONS)
 def test_graph_only_apis_compute_in_scope_states_as_before(function):
     """In scope, the graph-only APIs need no opt-in."""
-    assert function(year=2025, state="IL", w2_income=50_000.0)
+    assert function(year=2025, state="IL", w2_income=50_000.0, **FEDERAL)
 
 
 def test_get_backend_applies_the_scope_rule():
@@ -833,6 +837,7 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
 
 
 @pytest.mark.requires_ots
+@pytest.mark.usefixtures("lift_state_planning_refusal")
 def test_default_backend_applies_the_state_facts_contract(engine_calls):
     """Under the "ots" default, facts follow routing and are never a reroute.
 

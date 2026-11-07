@@ -87,6 +87,7 @@ older and mostly federal:
   width can hide a smaller error inside it.
 - Deep and soak property sweeps found real defects, but monotonicity, parity
   and internal consistency do not establish a dollar value.
-- The [browser demo](browser-calculator-contract.md) runs the graph for every
-  state. That shows it executes and matches the Python runtime, not that every
-  state is validated.
+- The [browser demo](browser-calculator-contract.md) offers federal-only returns
+  and the validated states only; its contract cases still run the graph for
+  other states, with an explicit acknowledgment. That shows the graph executes
+  and matches the Python runtime there, not that those states are validated.

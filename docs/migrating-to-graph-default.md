@@ -37,6 +37,24 @@
      for a state outside graph scope, decide whether you accept an unvalidated
      figure. If you do, pass `allow_unvalidated=True`.
 
+### Graph planning refuses state-dependent outputs
+
+Graph state derivatives read zero for IL, MS and OR although their state tax
+moves with income (tenforty-s48h.76). Until that is fixed, `marginal_rate`,
+`marginal_rates` and `solve_for_income` (and the `GraphBackend` gradient,
+gradients and solve methods) raise `UnsupportedReturnError` for any output that
+depends on the state return, for every state: the state outputs, `total_tax`
+on a state return, and raw state node names. `allow_unvalidated` does not lift
+this. Federal outputs keep working: pass `output="federal_total_tax"`.
+
+### Every public entry point applies the refusals
+
+`GraphBackend`, the objects `get_backend` returns, and
+`core.evaluate_natural_input_form` apply the same refusals as
+`evaluate_return`; their graph methods take `allow_unvalidated`, which must be
+`True` or `False` (the string `"False"` raises `TypeError`). The browser
+calculator offers only the validated jurisdictions and withholds state slopes.
+
 ### OTS refuses every Michigan return
 
 tenforty's MI_1040 map passes no exemption count, so OTS Michigan applies no

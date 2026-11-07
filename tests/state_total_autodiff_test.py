@@ -1,11 +1,26 @@
-"""State-aware total-tax autodiff and solver contract."""
+"""State-aware total-tax autodiff and solver contract.
+
+These are engine-level checks of state derivatives, which the public API
+refuses until tenforty-s48h.76 is fixed (graph state derivatives read zero for
+IL, MS and OR). The module lifts that refusal; IL, MS and OR are left out of
+the derivative identities, which would only compare two equally broken paths,
+and their defect is pinned by a strict xfail below.
+"""
 
 import pytest
 
-from tenforty import evaluate_return, marginal_rate, solve_for_income
+from tenforty import (
+    evaluate_return,
+    marginal_rate,
+    solve_for_income,
+)
 from tenforty.mappings import STATE_GRAPH_CONFIGS
 
+pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
+
 GRAPH_STATES = sorted(state.value for state in STATE_GRAPH_CONFIGS if state.value)
+ZERO_STATE_SLOPE_STATES = ("IL", "MS", "OR")
+DIFFERENTIABLE_STATES = [s for s in GRAPH_STATES if s not in ZERO_STATE_SLOPE_STATES]
 
 
 def _total_tax_at_wages(state: str, wages: float) -> float:
@@ -145,7 +160,7 @@ def test_state_total_solver_roundtrips_public_total():
     assert result.federal_total_tax < target
 
 
-@pytest.mark.parametrize("state", GRAPH_STATES)
+@pytest.mark.parametrize("state", DIFFERENTIABLE_STATES)
 def test_total_marginal_decomposes_into_federal_plus_state(state):
     """Every state's total-tax derivative is its two parts, and nothing else.
 
@@ -208,3 +223,32 @@ def test_solver_targets_the_public_total_in_every_state(state):
     )
 
     assert _total_tax_at_wages(state, wages) == pytest.approx(target, abs=0.01)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
+@pytest.mark.xfail(
+    strict=True,
+    reason="tenforty-s48h.76: the graph state derivative reads zero for IL, MS, OR",
+)
+def test_state_slope_matches_a_finite_difference_in_il_ms_or(state, year):
+    """Witness for s48h.76: the state slope should match the state tax's change.
+
+    At $85,000 of Single wages the state tax moves with income (a structural
+    finite difference on the graph's own evaluation, not a tax-value fixture),
+    but the derivative reads zero. When the derivative is fixed this passes,
+    the strict xfail fails, and the public refusal can be lifted.
+    """
+    kwargs = {"year": year, "state": state, "filing_status": "Single"}
+
+    def state_tax(wages: float) -> float:
+        return evaluate_return(
+            **kwargs, w2_income=wages, backend="graph", eitc_eligible=False
+        ).state_total_tax
+
+    finite_difference = (state_tax(85_500.0) - state_tax(84_500.0)) / 1_000.0
+    assert finite_difference > 0.01
+    slope = marginal_rate(
+        **kwargs, w2_income=85_000.0, output="state_total_tax", eitc_eligible=False
+    )
+    assert slope == pytest.approx(finite_difference, abs=0.005)

@@ -403,6 +403,7 @@ def test_contract_errors_ignore_on_error(on_error):
         )
 
 
+@pytest.mark.usefixtures("lift_state_planning_refusal")
 @requires_graph
 def test_derivatives_require_the_fact_and_hold_it_fixed(oh_lowering):
     """marginal_rate refuses OH MFJ without the fact and accepts it with one."""

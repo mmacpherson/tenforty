@@ -40,10 +40,10 @@ def graph_scalar_fails(monkeypatch):
     """Make graph scalar evaluation fail for the FAILING_W2 return only."""
     real = GraphBackend.evaluate
 
-    def evaluate(self, tax_input):
+    def evaluate(self, tax_input, **kwargs):
         if tax_input.w2_income == FAILING_W2:
             raise Boom("graph evaluation failed")
-        return real(self, tax_input)
+        return real(self, tax_input, **kwargs)
 
     monkeypatch.setattr(GraphBackend, "evaluate", evaluate)
 

@@ -1,4 +1,8 @@
-import { BrowserContractError, BrowserTaxRuntime } from "./browser_contract.js";
+import {
+  BrowserContractError,
+  BrowserTaxRuntime,
+  requireValidatedJurisdiction,
+} from "./browser_contract.js";
 
 export const INPUT_GROUPS = {
   "income-fields": [
@@ -159,6 +163,7 @@ export function parseScenario(contract, search, fallbackScenario = null) {
   if (!Object.hasOwn(contract.jurisdictions, jurisdiction)) {
     throw new BrowserContractError(`Unsupported jurisdiction: ${jurisdiction}`);
   }
+  requireValidatedJurisdiction(contract, jurisdiction, year);
   if (!Object.hasOwn(contract.filing_statuses, filingStatus)) {
     throw new BrowserContractError(
       `Unsupported filing status: ${filingStatus}`,
@@ -196,21 +201,35 @@ export function serializeScenario(contract, scenario) {
   return parameters.toString();
 }
 
-export function calculateScenario(graphlib, graph, contract, scenario) {
+export function calculateScenario(
+  graphlib,
+  graph,
+  contract,
+  scenario,
+  options = {},
+) {
   const calculator = new BrowserTaxRuntime(graphlib, graph, contract, {
     year: scenario.year,
     jurisdiction: scenario.jurisdiction,
     filingStatus: scenario.filingStatus,
+    ...options,
   });
   calculator.setInputs(scenario.inputs);
   return calculator.evaluate();
 }
 
-export function analyzeScenario(graphlib, graph, contract, scenario) {
+export function analyzeScenario(
+  graphlib,
+  graph,
+  contract,
+  scenario,
+  options = {},
+) {
   const calculator = new BrowserTaxRuntime(graphlib, graph, contract, {
     year: scenario.year,
     jurisdiction: scenario.jurisdiction,
     filingStatus: scenario.filingStatus,
+    ...options,
   });
   calculator.setInputs(scenario.inputs);
   return {

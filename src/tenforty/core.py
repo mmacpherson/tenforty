@@ -63,6 +63,7 @@ from .routing import (
     Engine,
     explain_ots_route,
     graph_covers,
+    require_ots_serves,
     select_backend,
 )
 from .state_facts import StateFacts
@@ -1076,8 +1077,10 @@ def require_ots_supports(
     """Refuse an OTS return OTS would compute wrongly, before it is evaluated.
 
     It would drop an input, misstate the deduction election, or misplace a
-    federal_itemized combination OTS cannot carry exactly.
+    federal_itemized combination OTS cannot carry exactly, or the return is one
+    OTS refuses outright (``routing.OTS_REFUSED_RETURNS``).
     """
+    require_ots_serves(year, state)
     _require_ots_reads_inputs(year, state, natural_form_values)
     require_ots_state_inputs(year, state, natural_form_values)
     _require_ots_federal_itemized(state, natural_form_values, year)
@@ -1399,7 +1402,7 @@ def _evaluate_with_engine(
         else:
             from .backends.graph import GraphBackend
 
-            result = GraphBackend().evaluate(tax_input)
+            result = GraphBackend().evaluate(tax_input, allow_unvalidated=True)
             itemizes = result._federal_itemizes
         return result.model_copy(
             update={
@@ -2172,6 +2175,7 @@ def _graph_batch_outputs(
             [row["filing_status"] for row in rows],
             mode="zip",
             facts=facts,
+            allow_unvalidated=True,
         )
         return [
             {field: batch[field][i] for field in (*_OUTPUT_COLUMNS, FEDERAL_ITEMIZES)}
@@ -2318,6 +2322,9 @@ def marginal_rate(
     This computes the derivative of `output` with respect to `wrt`. A state
     return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
+    Any output that depends on the state return (a state output, ``total_tax``
+    on a state return, a raw state node) is refused until tenforty-s48h.76 is
+    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
     """
     if wrt in _DISCRETE_INPUTS:
         raise ValueError(f"{wrt} is discrete and cannot be differentiated")
@@ -2363,7 +2370,7 @@ def marginal_rate(
     backend = require_available("graph")
 
     _require_differentiable(tax_input, wrt)
-    result = backend.gradient(tax_input, output, wrt)
+    result = backend.gradient(tax_input, output, wrt, allow_unvalidated=True)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
 
@@ -2415,6 +2422,9 @@ def marginal_rates(
     function's right-hand derivative, matching :func:`marginal_rate`. A state
     return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
+    Any output that depends on the state return (a state output, ``total_tax``
+    on a state return, a raw state node) is refused until tenforty-s48h.76 is
+    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
     """
     warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
@@ -2457,7 +2467,7 @@ def marginal_rates(
     _graph_facts(tax_input, state_facts, allow_unvalidated)
     backend = require_available("graph")
 
-    result = backend.gradients(tax_input, output)
+    result = backend.gradients(tax_input, output, allow_unvalidated=True)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
 
@@ -2507,6 +2517,9 @@ def solve_for_income(
 
     A state return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
+    Any output that depends on the state return (a state output, ``total_tax``
+    on a state return, a raw state node) is refused until tenforty-s48h.76 is
+    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
     """
     if for_input in _DISCRETE_INPUTS:
         raise ValueError(f"{for_input} is discrete and cannot be solved continuously")
@@ -2551,7 +2564,13 @@ def solve_for_income(
     backend = require_available("graph")
 
     _require_differentiable(tax_input, for_input)
-    result = backend.solve(tax_input, output=output, target=target_tax, var=for_input)
+    result = backend.solve(
+        tax_input,
+        output=output,
+        target=target_tax,
+        var=for_input,
+        allow_unvalidated=True,
+    )
     if result is None:
         raise RuntimeError("Graph backend solver did not converge")
 

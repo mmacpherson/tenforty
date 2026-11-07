@@ -69,6 +69,37 @@
     `itemized_deductions`, `state_and_local_taxes`) pass with
     `standard_or_itemized="Standard"`.
 
+### Changed (graph planning refuses state-dependent outputs)
+- **`marginal_rate`, `marginal_rates` and `solve_for_income` refuse any output
+  that depends on the state return**, with `UnsupportedReturnError`, for every
+  state: the state outputs, `total_tax` on a state return, and raw state node
+  names. Graph state derivatives read zero for IL, MS and OR although their
+  state tax moves with income (tenforty-s48h.76); for 2025 Single wages of
+  $85,000 the IL total-tax rate came out at the federal 0.22. Federal outputs
+  keep working, with or without a state. `allow_unvalidated` does not lift
+  this refusal. The `GraphBackend` gradient, gradients and solve methods apply
+  it too.
+
+### Changed (every public entry point applies the refusals)
+- `GraphBackend` and the object `get_backend("graph")` returns apply the scope
+  rule in `evaluate`, `evaluate_batch`, `gradient`, `gradients` and `solve`,
+  each taking `allow_unvalidated`. `OTSBackend.evaluate`,
+  `get_backend("ots").evaluate` and `core.evaluate_natural_input_form` apply
+  the Michigan refusal and the undelivered-input refusals. Before, these
+  objects computed what `evaluate_return` refused.
+- **`allow_unvalidated` must be `True` or `False`**: any other value, the
+  string `"False"` included, raises `TypeError` instead of opting in.
+- Graph Michigan's refusal names its known defect (tenforty-s48h.45).
+
+### Changed (browser calculator)
+- The calculator offers federal-only returns and the validated states only
+  (IL, MS, OR and the eight states without an income tax), 2024 and 2025; a
+  shared link to another jurisdiction is refused, and `BrowserTaxRuntime`
+  computes one only with `allowUnvalidated: true`. The tagline says "so far,
+  validated for" instead of "Federal + all 50 states + DC".
+- State and combined next-dollar slopes are withheld on state returns until
+  tenforty-s48h.76 is fixed; federal slopes and the tax curve remain.
+
 ### Changed (documentation)
 - The README, the Colab demo, the evidence summary, error handling, state facts
   and the migration guide (now "Migrating between backends") describe the OTS
