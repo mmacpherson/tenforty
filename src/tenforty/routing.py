@@ -33,6 +33,23 @@ OTS_YEARS: tuple[int, ...] = tuple(
 )
 
 
+OTS_REFUSED_RETURNS: dict[tuple[OTSState, int], str] = {
+    (OTSState.MI, year): (
+        "OTS Michigan applies no personal exemption: tenforty's MI_1040 map "
+        "passes no exemption count, so MI-1040 line 9a ($5,600 per exemption "
+        "in 2024, $5,800 in 2025, for the filer, the spouse and each dependent) "
+        "is zero for every return (tenforty-s48h.45, tenforty-r91.10)"
+    )
+    for year in (2024, 2025)
+}
+"""Returns OTS covers but computes wrongly for every caller, refused until fixed.
+
+They are refused under ``"ots"`` and under ``"auto"`` wherever auto would send
+them to OTS. ``ots_covers`` still reports them, so the refusal names its
+reason rather than claiming OTS has no such return.
+"""
+
+
 def _year_value(year: object) -> int:
     return int(getattr(year, "value", year))
 
@@ -77,7 +94,7 @@ def _refuse_unvalidated(year: int, state: OTSState) -> UnsupportedReturnError:
     reasons = ", ".join(exclusion_reasons(state, year))
     remedy = (
         f" Use backend='ots' for {year}/{state.value}, or pass"
-        if ots_covers(year, state)
+        if ots_serves(year, state)
         else " Pass"
     )
     return UnsupportedReturnError(
@@ -86,6 +103,30 @@ def _refuse_unvalidated(year: int, state: OTSState) -> UnsupportedReturnError:
         f"a figure that may be wrong.{remedy} allow_unvalidated=True to compute "
         "it on the graph backend anyway."
     )
+
+
+def ots_serves(year: int, state: OTSState | None) -> bool:
+    """Whether OTS covers the return and does not refuse it."""
+    return ots_covers(year, state) and (state, year) not in OTS_REFUSED_RETURNS
+
+
+def _refuse_ots_return(year: int, state: OTSState) -> UnsupportedReturnError:
+    graph = (
+        " The graph backend is not yet validated for it either; backend='graph' "
+        "with allow_unvalidated=True computes it there."
+        if graph_covers(year, state) and not graph_state_in_scope(state, year)
+        else ""
+    )
+    return UnsupportedReturnError(
+        f"OTS refuses the {state.value} {year} return: "
+        f"{OTS_REFUSED_RETURNS[(state, year)]}.{graph}"
+    )
+
+
+def _ots_route(year: int, state: OTSState | None) -> Engine:
+    if state is not None and (state, year) in OTS_REFUSED_RETURNS:
+        raise _refuse_ots_return(year, state)
+    return "ots"
 
 
 def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedReturnError:
@@ -98,7 +139,7 @@ def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedRetur
             )
         else:
             reason = f"The graph backend has no {state.value} return for {year}."
-        if ots_covers(year, state):
+        if ots_serves(year, state):
             reason += f" Use backend='ots' or backend='auto' for {where}."
         return UnsupportedReturnError(reason)
     if backend == "ots":
@@ -153,7 +194,7 @@ def select_backend(
 
     if backend == "ots":
         if ots_covers(tax_year, tax_state):
-            return "ots"
+            return _ots_route(tax_year, tax_state)
     elif backend == "graph":
         if graph_covers(tax_year, tax_state):
             if allow_unvalidated or graph_state_in_scope(tax_state, tax_year):
@@ -167,7 +208,7 @@ def select_backend(
         ):
             return "graph"
         if ots_covers(tax_year, tax_state):
-            return "ots"
+            return _ots_route(tax_year, tax_state)
     raise _refuse(backend, tax_year, tax_state)
 
 

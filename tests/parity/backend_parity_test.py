@@ -7,7 +7,7 @@ import pytest
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
-from tenforty import evaluate_return
+from tenforty import evaluate_return, routing
 from tests.parity.state_parity_policy import (
     SIGNATURES,
     unexcused_parity_violations,
@@ -1270,14 +1270,21 @@ def test_oh_state_parity_2024(w2_income):
 @settings(max_examples=100)
 @pytest.mark.requires_graph
 def test_mi_state_parity_2024(w2_income, filing_status):
-    """MI 2024 uses a flat 4.25% tax — exact parity expected with no exemptions."""
-    ots = evaluate_return(
-        year=2024,
-        state="MI",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
+    """MI 2024 uses a flat 4.25% tax — exact parity expected with no exemptions.
+
+    Both engines apply no MI-1040 exemption yet (tenforty-s48h.45), so 2025.14
+    refuses every OTS MI return; this parity check lifts that refusal to keep
+    comparing the two engines.
+    """
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(routing, "OTS_REFUSED_RETURNS", {})
+        ots = evaluate_return(
+            year=2024,
+            state="MI",
+            w2_income=w2_income,
+            filing_status=filing_status,
+            backend="ots",
+        )
     graph = evaluate_return(
         year=2024,
         state="MI",
@@ -1620,15 +1627,18 @@ def test_mi_state_parity(w2_income, filing_status):
 
     MI uses a flat 4.25% tax on taxable income. Personal exemptions must
     be passed explicitly to both backends; with no exemptions, parity
-    is exact.
+    is exact. 2025.14 refuses every OTS MI return (tenforty-s48h.45); this
+    parity check lifts that refusal to keep comparing the two engines.
     """
-    ots = evaluate_return(
-        year=2025,
-        state="MI",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(routing, "OTS_REFUSED_RETURNS", {})
+        ots = evaluate_return(
+            year=2025,
+            state="MI",
+            w2_income=w2_income,
+            filing_status=filing_status,
+            backend="ots",
+        )
     graph = evaluate_return(
         year=2025,
         state="MI",

@@ -32,7 +32,7 @@ from tenforty.models import (
     SUBORDINATE_FORM_CONFIG,
     OTSState,
 )
-from tenforty.routing import ots_covers
+from tenforty.routing import OTS_REFUSED_RETURNS, ots_covers
 
 ON_ERROR_POLICIES = ("raise", "warn", "ignore")
 OTS_YEARS = sorted(
@@ -42,7 +42,8 @@ OTS_RETURNS = [
     (year, state)
     for year in OTS_YEARS
     for state in OTSState
-    if STATE_TO_FORM.get(state) is None or ots_covers(year, state)
+    if (STATE_TO_FORM.get(state) is None or ots_covers(year, state))
+    and (state, year) not in OTS_REFUSED_RETURNS
 ]
 
 

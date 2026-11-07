@@ -64,7 +64,8 @@ other than the EIC, and retirement and benefit income. See the [API Reference](.
 ## Returns on OTS
 
 The default sends every return to OTS. `backend="auto"` sends 2018–2023, and
-2024–2025 in AZ, CA, MA, MI, NC, NJ, NY, OH, PA and VA, to OTS. Its evidence is
+2024–2025 in AZ, CA, MA, NC, NJ, NY, OH, PA and VA, to OTS (2025.14 refuses OTS
+Michigan, which applies no personal exemption). Its evidence is
 older and mostly federal:
 
 - IRS Direct File scenarios for 2022–2023 ([IRS Validation](irs-validation.md),

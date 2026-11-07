@@ -68,11 +68,15 @@ def _(mo):
     | 2018 to 2022 | CA, MA, NY |
 
     The states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) work in
-    every year. The graph backend, which you opt into with `backend="auto"` or
-    `backend="graph"`, has forms for many more states for 2024 and 2025, but
-    only IL, MS, OR and the states without an income tax are in graph scope.
-    For the others the graph is not yet validated, so `backend="graph"` refuses
-    them unless you pass `allow_unvalidated=True`; the README lists them.
+    every year. In 2025.14 OTS refuses every Michigan return, and some state
+    inputs its maps do not yet deliver (the migration guide lists them).
+
+    The graph backend is opt-in: pass `backend="graph"` or `backend="auto"`. It
+    has forms for every state for 2024 and 2025, and is so far validated for
+    2024 and 2025 federal-only returns and for IL, MS and OR plus the eight
+    states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other states
+    refuse unless you pass `allow_unvalidated=True`, because they aren't
+    validated yet.
 
     The available tax years and filing statuses:
     """)

@@ -4,9 +4,15 @@
 ### Changed (default backend)
 - **The default backend is `"ots"` again**, in `evaluate_return`,
   `evaluate_returns` and `tenforty.backends.get_backend`, reverting 2025.13's
-  `"auto"` default. A call that names no backend computes on OTS in every year.
-  The graph backend is opt-in until it is ready for every 2024–2025 state
-  (tenforty-s48h).
+  `"auto"` default. A call that names no backend computes on OTS in every
+  year: federal returns for 2018–2025, and for 2024–2025 AZ, CA, MA, MI, NC, NJ,
+  NY, OH, OR, PA, VA and the states without an income tax; any other state
+  raises.
+  - The graph backend is opt-in (`backend="graph"` or `backend="auto"`). It is
+    incomplete: so far validated for 2024 and 2025 federal-only returns and for
+    IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD,
+    TN, TX, WA, WY). Other states refuse unless `allow_unvalidated=True`,
+    because they aren't validated yet (tenforty-s48h).
   - **To keep 2025.13's results, pass `backend="auto"`.** It routes exactly as
     the 2025.13 default did; `"auto"`, its graph scope and its refusals are
     unchanged.
@@ -35,6 +41,33 @@
     opt-in. `allow_unvalidated` has no effect on `"ots"` or `"auto"`.
   - Refusal messages that point to graph for a state outside graph scope now
     name the opt-in (`backend='graph' with allow_unvalidated=True`).
+
+### Changed (OTS refuses what it would compute wrongly)
+- **Every Michigan return is refused on OTS**, 2024 and 2025, with
+  `UnsupportedReturnError`, under the default and `backend="auto"`, before
+  computing. tenforty's MI_1040 map passes no exemption count, so OTS Michigan
+  applied no MI-1040 line 9a exemption to anyone (tenforty-s48h.45,
+  tenforty-r91.10). Graph Michigan has the same defect and is not validated;
+  `backend="graph"` refuses it unless `allow_unvalidated=True`.
+- **OTS refuses state inputs its maps do not deliver** with
+  `UnsupportedInputError`, before computing and for the whole batch, where it
+  used to compute the state tax without them. Zero passes; an input the state
+  does not use is never refused. The full table, with each form line and bead,
+  is in [Migrating between backends](docs/migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver):
+  - MA_1: interest, dividends, short- and long-term gains, self-employment and
+    rental income, and filer/spouse 65 or older (tenforty-r91.14);
+  - NJ_1040: self-employment income and capital gains (tenforty-r91.15),
+    `num_dependents`, filer/spouse 65 or older and rental income
+    (tenforty-r91.20);
+  - PA_40: self-employment income and capital gains (tenforty-s48h.46), and
+    rental income (tenforty-r91.21);
+  - VA_760: filer/spouse 65 or older and itemizing (tenforty-r91.16), and
+    `num_dependents` (tenforty-r91.22);
+  - NC_D400: itemizing (tenforty-r91.17);
+  - AZ_140: `num_dependents` and filer/spouse 65 or older (tenforty-s48h.51).
+  - On VA and NC, the itemizing inputs (`federal_itemized`,
+    `itemized_deductions`, `state_and_local_taxes`) pass with
+    `standard_or_itemized="Standard"`.
 
 ### Changed (documentation)
 - The README, the Colab demo, the evidence summary, error handling, state facts

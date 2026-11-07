@@ -88,8 +88,9 @@ fixtures support it. For 2024 and 2025 that is currently:
 A federal-only return (`state=None`) is always in scope.
 
 For any other state, `"auto"` uses OTS if OTS computes that state's return
-(Arizona, California, Massachusetts, Michigan, North Carolina, New Jersey,
-New York, Ohio, Pennsylvania and Virginia). Otherwise it raises
+(Arizona, California, Massachusetts, North Carolina, New Jersey, New York,
+Ohio, Pennsylvania and Virginia; OTS Michigan is refused in 2025.14, because it
+applies no personal exemption). Otherwise it raises
 `UnsupportedReturnError`, and the message names the reason: the open defect
 (a `tenforty-...` issue), `evidence: tenforty-b72.12` (no official-value
 fixtures yet), or a `policy: ...` decision.
@@ -122,8 +123,9 @@ before any row runs), `marginal_rate`, `marginal_rates`, `solve_for_income` and
 
 A `ValueError` raised before evaluation when the selected backend cannot
 compute the requested return: for example `backend="graph"` for 2023, a
-state the backend has no return for, or `backend="graph"` for a state outside
-graph scope without `allow_unvalidated=True`. The message names what is
+state the backend has no return for, `backend="graph"` for a state outside
+graph scope without `allow_unvalidated=True`, or a Michigan return on OTS,
+which 2025.14 refuses because OTS Michigan applies no personal exemption. The message names what is
 supported and which backend to use instead.
 
 `UnsupportedInputError` is the subclass raised when a backend does not compute
@@ -132,7 +134,11 @@ maps for no return and the graph maps only for some states, or
 `incentive_stock_option_gains` on 2018 and 2019 OTS returns, whose programs
 never use it. OTS also refuses `self_employment_income` and `rental_income` on
 2018 returns and `state_adjustment` on CA 2018 and 2019 returns, which tenforty
-maps to lines those years' OTS templates do not have. It is raised under every `on_error` policy, before any return in
+maps to lines those years' OTS templates do not have. Since 2025.14 OTS also refuses a nonzero state input its map does not deliver to
+the state program (for example capital gains on MA_1, NJ_1040 and PA_40); the
+list is in
+[Migrating between backends](./migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver).
+It is raised under every `on_error` policy, before any return in
 a batch is computed. It is also a `NotImplementedError`, which is what that
 refusal raised before.
 

@@ -87,24 +87,34 @@ to the graph backend raises an error instead of falling back to OTS.
 
 ## Which Backend Computes Your Return
 
-The default is `backend="ots"`: every return is computed on OTS, for the tax
-years 2018–2025 and the states OTS has (AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA
-and VA, plus the states without an income tax, in the years OTS has each). A
-state OTS lacks raises `UnsupportedReturnError` before computing, naming the
-graph alternative where there is one.
+**The default is OTS** (`backend="ots"`): every return is computed on OTS,
+federal returns for 2018–2025, and for 2024–2025 the states AZ, CA, MA, MI, NC,
+NJ, NY, OH, OR, PA and VA, plus the states without an income tax (earlier years
+have fewer states; see the Colab demo's table). Any other state raises
+`UnsupportedReturnError` before computing, naming the graph alternative where
+there is one. In 2025.14 OTS also refuses what it would compute wrongly:
+every Michigan return, and the
+[state inputs its maps do not yet deliver](./docs/migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver).
 
-The graph backend is opt-in. Pass `backend="auto"` or `backend="graph"`:
+**The graph backend is opt-in** (`backend="graph"` or `backend="auto"`). It is
+incomplete, and so far validated for 2024 and 2025 federal-only returns and for
+IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN,
+TX, WA and WY). Other states refuse unless you pass `allow_unvalidated=True`,
+because they aren't validated yet; the work to validate them is
+[tenforty-s48h](#graph-coverage).
 
 | Return | `backend="auto"` | `backend="graph"` |
 |---|---|---|
 | Tax years 2018–2023 | OTS, for the states OTS has that year; any other state raises | Raises `UnsupportedReturnError` |
 | 2024–2025, federal only (`state=None`) | Graph | Graph |
 | 2024–2025 in IL, MS or OR, or a state without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) | Graph | Graph |
-| 2024–2025 in AZ, CA, MA, MI, NC, NJ, NY, OH, PA or VA | OTS | Raises, naming the reasons, unless `allow_unvalidated=True` |
+| 2024–2025 in AZ, CA, MA, NC, NJ, NY, OH, PA or VA | OTS | Raises, naming the reasons, unless `allow_unvalidated=True` |
+| 2024–2025 in MI | Raises: OTS Michigan applies no personal exemption, and graph MI is not validated | Raises, naming the reasons, unless `allow_unvalidated=True` |
 | 2024–2025 in AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IN, KS, KY, LA, MD, ME, MN, MO, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI or WV | Raises, naming the reasons | Raises, naming the reasons, unless `allow_unvalidated=True` |
 
-- **Graph scope.** A 2024–2025 state is in graph scope only when its known
-  graph-side defects are closed and official values support it. The other
+- <a id="graph-coverage"></a>**Graph coverage.** Graph has forms for every
+  state, but a 2024–2025 state is validated, and in graph scope, only when its
+  known graph-side defects are closed and official values support it. The other
   states stay out for a named reason: an open defect, missing evidence, or a
   decision. [Graph state scope](./docs/error-handling.md#graph-state-scope-under-auto)
   has the reasons. MD, ME and NC wait on the itemized-deduction contract
@@ -473,7 +483,7 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
-| `state`                      | str \| None               | None                | Two-letter state code, or None for a federal-only return. OTS, the default, computes AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA and the no-income-tax states, for the years it has them. The graph backend has every state and DC for 2024-2025, and computes those outside graph scope only with `allow_unvalidated=True`: [Which backend computes your return](#which-backend-computes-your-return) |
+| `state`                      | str \| None               | None                | Two-letter state code, or None for a federal-only return. OTS, the default, computes AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA and the no-income-tax states, for the years it has them (2025.14 refuses MI on OTS). The graph backend has every state and DC for 2024-2025, and computes those outside graph scope only with `allow_unvalidated=True`: [Which backend computes your return](#which-backend-computes-your-return) |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC and dependent care are not modeled; the EITC is `federal_earned_income_credit` (see `num_eitc_children`). |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
@@ -628,9 +638,11 @@ Compared with the OTS backend:
 - It covers the 2024 and 2025 tax years only.
 - It has forms for many more states: in addition to the OTS states, AL, AR,
   CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT,
-  ND, NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV. Only IL, MS, OR and the
-  states without an income tax are in graph scope today; the rest compute only
-  with `allow_unvalidated=True`.
+  ND, NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV. It is so far validated for
+  2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states
+  without an income tax (AK, FL, NV, SD, TN, TX, WA, WY); the other states
+  compute only with `allow_unvalidated=True` until they are validated
+  (tenforty-s48h).
 - Not every input is mapped for every state. It raises on an input it can't
   represent rather than dropping it.
 - It takes `dependent_exemptions`, state exemption dollars (not a count), for

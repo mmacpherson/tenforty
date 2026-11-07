@@ -308,8 +308,11 @@ def _graph_recipe(amount):
     return FederalItemized(regular_tax=amount, amt=amount)
 
 
+# OTS NC is not here: OTS refuses a nonzero itemized input on NC_D400 until its
+# map carries NC itemized deductions (tenforty-r91.17); tests/ots_state_gaps_test.py
+# covers that refusal.
 REPRODUCTION = [
-    pytest.param("ots", _ots_recipe, state, id=f"ots-{state}") for state in (None, "NC")
+    pytest.param("ots", _ots_recipe, state, id=f"ots-{state}") for state in (None,)
 ] + [
     pytest.param(
         "graph", _graph_recipe, state, id=f"graph-{state}", marks=requires_graph

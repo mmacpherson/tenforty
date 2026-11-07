@@ -542,13 +542,21 @@ def _engine_accepts(engine: str, year: int, state: OTSState) -> bool:
 @pytest.mark.parametrize("year", ALL_YEARS)
 @pytest.mark.parametrize("engine", ["ots", "graph"])
 def test_selector_agrees_with_what_each_engine_computes(engine, year, state):
-    """With the opt-in, the selector honours exactly what the engine can serve."""
+    """With the opt-in, the selector honours exactly what the engine can serve.
+
+    The one exception is a return OTS covers but computes wrongly for every
+    caller (``routing.OTS_REFUSED_RETURNS``): the engine accepts it, and the
+    selector refuses it.
+    """
     try:
         routing.select_backend(engine, year, state, allow_unvalidated=True)
         selected = True
     except UnsupportedReturnError:
         selected = False
-    assert selected == _engine_accepts(engine, year, state)
+    refused = engine == "ots" and (state, year) in routing.OTS_REFUSED_RETURNS
+    assert selected == (_engine_accepts(engine, year, state) and not refused)
+    if refused:
+        assert _engine_accepts(engine, year, state)
 
 
 @pytest.mark.parametrize("state", ALL_STATES, ids=lambda state: state.value)

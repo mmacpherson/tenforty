@@ -57,6 +57,7 @@ from .models import (
     UnsupportedReturnError,
     validate_on_error,
 )
+from .ots_state_gaps import require_ots_state_inputs
 from .routing import (
     BackendChoice,
     Engine,
@@ -1078,6 +1079,7 @@ def require_ots_supports(
     federal_itemized combination OTS cannot carry exactly.
     """
     _require_ots_reads_inputs(year, state, natural_form_values)
+    require_ots_state_inputs(year, state, natural_form_values)
     _require_ots_federal_itemized(state, natural_form_values, year)
     if state not in _OTS_STATES_READING_FEDERAL_SCHEDULE_A:
         return

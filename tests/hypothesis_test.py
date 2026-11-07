@@ -11,6 +11,7 @@ from tenforty.models import (
     OTSFilingStatus,
     OTSState,
 )
+from tenforty.ots_state_gaps import ots_state_input_gap
 
 from .fixtures.helpers import is_state_supported
 
@@ -279,6 +280,28 @@ def test_evaluate_return_properties(
         incentive_stock_option_gains = 0.0
     if ots_drops_input("state_adjustment", year, OTSState(state)):
         state_adjustment = 0.0
+    gaps = {
+        name
+        for name in (
+            "num_dependents",
+            "taxable_interest",
+            "qualified_dividends",
+            "ordinary_dividends",
+            "short_term_capital_gains",
+            "long_term_capital_gains",
+            "itemized_deductions",
+        )
+        if ots_state_input_gap(name, year, state)
+    }
+    num_dependents = 0 if "num_dependents" in gaps else num_dependents
+    taxable_interest = 0.0 if "taxable_interest" in gaps else taxable_interest
+    if gaps & {"qualified_dividends", "ordinary_dividends"}:
+        qualified_dividends = ordinary_dividends = 0.0
+    if "short_term_capital_gains" in gaps:
+        short_term_capital_gains = 0.0
+    if "long_term_capital_gains" in gaps:
+        long_term_capital_gains = 0.0
+    itemized_deductions = 0.0 if "itemized_deductions" in gaps else itemized_deductions
     result = tenforty.evaluate_return(
         year=year,
         state=state,
@@ -357,7 +380,9 @@ def test_az_widow_standard_deduction():
     """Regression: AZ Widow(er) used out-of-bounds array for standard deduction.
 
     AZ Form 140 has no Widow(er) box; qualifying widow(er) files as
-    Head of Household and gets the HoH standard deduction.
+    Head of Household and gets the HoH standard deduction. The HoH return
+    names no dependent: OTS AZ refuses num_dependents (tenforty-s48h.51), and
+    the comparison is of the standard deduction, which dependents do not move.
     """
     result = tenforty.evaluate_return(
         year=2024,
@@ -371,7 +396,6 @@ def test_az_widow_standard_deduction():
         state="AZ",
         filing_status="Head_of_House",
         w2_income=50000.0,
-        num_dependents=1,
         backend="ots",
     )
     assert result.state_taxable_income == hoh_result.state_taxable_income
@@ -401,6 +425,7 @@ def test_qualified_dividends_properly_taxed(
 ):
     """Test that qualified dividends are properly included in ordinary dividends."""
     assume(is_state_supported(year, state, filing_status))
+    assume(not ots_state_input_gap("ordinary_dividends", year, state))
     # Test with only qualified dividends
     result = tenforty.evaluate_return(
         year=year,
