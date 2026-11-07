@@ -1,4 +1,15 @@
 ## [Unreleased]
+### Fixed
+- **OTS PA now taxes business income and capital gains** (tenforty-s48h.46).
+  `self_employment_income` goes to PA-40 line 4 (net income from the operation
+  of a business), and `short_term_capital_gains` with
+  `long_term_capital_gains` go to line 5 (net gain from the sale of property),
+  for 2023-2025. PA nets gains and losses within the class with no
+  short/long-term split, and a class loss reduces no other class; OTS does
+  both. Before, OTS PA computed the return from compensation, interest and
+  dividends only, so these returns were under-taxed. The expected figures in
+  `tests/ots_pa_business_gains_test.py` are an independent derivation from the
+  PA-40 instructions (`docs/validation/derivations/pa-business-gains-2023-2025.md`).
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)
