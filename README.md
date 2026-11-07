@@ -660,19 +660,15 @@ outside graph scope:
 ### Marginal Rates for Every Input
 
 `marginal_rates` reports how a selected output responds to every continuous
-public input at once. California is outside graph scope, so this example opts
-in with `allow_unvalidated=True`; it shows the method, not validated California
-figures:
+public input at once:
 
 ``` python
 from tenforty import marginal_rates
 
 rates = marginal_rates(
     year=2024,
-    state="CA",
     filing_status="Single",
     w2_income=100_000,
-    allow_unvalidated=True,
 )
 
 rates["w2_income"]
@@ -697,7 +693,9 @@ literal slope is zero inside a row and a jump at its edge. There the graph
 reports the planning slope, the rate at the table row's midpoint: the bracket
 rate the rows step through, not the zero inside a row. Some comparisons of nearly equal amounts can
 also take the wrong side of a tie in floating point, which is tracked as
-`tenforty-msj2`.
+`tenforty-msj2`. For IL, MS and OR the state slope is currently reported as
+zero, although their state tax moves with income, so their marginal rates show
+only the federal slope (`tenforty-s48h.76`).
 
 The reproducible
 [autodiff planning examples](docs/autodiff-applications.md) show a full

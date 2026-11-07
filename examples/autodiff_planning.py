@@ -19,7 +19,6 @@ from tenforty import evaluate_return, marginal_rate, marginal_rates
 
 _SENSITIVITY_SCENARIO = {
     "year": 2024,
-    "state": "CA",
     "filing_status": "Single",
     "w2_income": 120_000.0,
     "taxable_interest": 3_000.0,
@@ -31,11 +30,7 @@ _SENSITIVITY_SCENARIO = {
     "rental_income": 2_000.0,
     "schedule_1_income": 1_000.0,
     "itemized_deductions": 20_000.0,
-    "state_adjustment": 1_000.0,
     "incentive_stock_option_gains": 3_000.0,
-    # California is outside graph scope (not yet validated), so the graph
-    # backend computes it only on request; the figures illustrate the method.
-    "allow_unvalidated": True,
 }
 
 _STACKING_WAGES = (30_000, 50_000, 60_000, 61_700, 65_000, 70_000)

@@ -11,18 +11,25 @@ uv run python examples/autodiff_planning.py
 uv run python examples/autodiff_planning.py --benchmark
 ```
 
-The examples use 2024 law and the graph backend. They are analysis examples,
-not tax advice or a general optimizer. The first uses a California return,
-which is outside graph scope: the graph backend is not yet validated for
-California, so the example passes `allow_unvalidated=True`, and its figures
-illustrate the method rather than validated California tax.
+The examples use 2024 law and the graph backend, on federal-only returns. They
+are analysis examples, not tax advice or a general optimizer.
+
+State returns are left out deliberately. The graph is so far validated only for
+federal-only returns and IL, MS, OR and the states without an income tax, and
+for IL, MS and OR its state derivative is currently zero although their state
+tax moves with income (tenforty-s48h.76), so `marginal_rates` on those returns
+reports only the federal slope.
 
 ## 1. Which next dollar costs the most?
 
 `marginal_rates(...)` returns the local tax effect of every continuous public
-input in one call. On the example California return, the largest positive
-effect is self-employment income at about 42.34 cents of tax per dollar. An
-itemized-deduction dollar reduces tax by about 33.3 cents.
+input in one call. On the example return (2024, Single, $120,000 of wages plus
+investment, self-employment and rental income), the largest positive effect is
+self-employment income at about 31.97 cents of tax per dollar: 14.13 cents of
+self-employment tax (15.3% of 92.35%), plus 24% of the 74.34 cents it adds to
+taxable income once half the self-employment tax and the 20% QBI deduction come
+off. An
+itemized-deduction dollar reduces tax by 24 cents.
 
 Qualified dividends are negative 9 cents in this scenario. That is not a claim
 that receiving a dividend reduces tax. Form 1040's ordinary-dividend amount
@@ -33,31 +40,35 @@ ordinary to preferential income.
 This table is the clearest current application:
 
 - it ranks all modeled levers without hand-reading several interacting forms;
-- it keeps natural-input fan-out and state tax in the derivative;
+- it keeps natural-input fan-out in the derivative;
 - negative rates and stacked preferential income make hidden interactions
   visible.
 
-The performance claim needs care. On a 14-lever 2024 California return, two
-local runs on 2026-07-31 measured:
+The performance claim needs care. Two local runs on 2026-11-07, on this
+15-lever federal return, measured:
 
 | Method | Milliseconds per table | Relative to vector |
 |---|---:|---:|
-| Vector autodiff | 41.2–41.8 | 1.00× |
-| Scalar-autodiff loop | 104.3–106.1 | 2.53–2.54× |
-| $1 forward-difference loop | 33.0–41.3 | 0.80–0.99× |
+| Vector autodiff | 23.6–24.3 | 1.00× |
+| Scalar-autodiff loop | 90.5–95.7 | 3.84–3.95× |
+| $1 forward-difference loop | 62.0–62.7 | 2.58–2.63× |
 
-These are illustrative timings, not a stable benchmark promise; run
-`--benchmark` on the target machine. The structural result is more important:
-the vector removes repeated reverse traversals and is materially faster than
-calling scalar autodiff for every input, but it is not currently faster than a
-forward-difference table end to end. The public scalar-loop timing also includes
-constructing a fresh evaluator for every call, so its 2.53–2.54× ratio measures
-both evaluator reuse and reverse-traversal reuse; it does not isolate the latter.
-Active tax kinks also require independent right-hand probes for affected inputs.
+An earlier measurement, on a 2024 California return computed on the graph
+(2026-07-31, a different machine), found the forward-difference loop
+competitive: 0.80–0.99× of the vector's time, against the vector's 41.2–41.8 ms
+per table. Which method wins end to end therefore depends on the return, so
+these are illustrative timings, not a stable benchmark promise; run
+`--benchmark` on the target machine. The structural result holds in both: the
+vector removes repeated reverse traversals and is materially faster than
+calling scalar autodiff for every input. The public scalar-loop timing also
+includes constructing a fresh evaluator for every call, so its ratio measures
+both evaluator reuse and reverse-traversal reuse; it does not isolate the
+latter. Active tax kinks also require independent right-hand probes for
+affected inputs.
 
-Forward simulation is therefore genuinely competitive for this workflow. The
-vector API wins on semantics, ergonomics, and exact smooth-region slopes—not
-on a universal runtime advantage.
+Forward simulation can therefore be competitive for this workflow. The vector
+API wins on semantics, ergonomics, and exact smooth-region slopes, not on a
+universal runtime advantage.
 
 ## 2. Why the bracket is not the marginal rate
 

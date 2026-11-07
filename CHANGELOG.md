@@ -73,9 +73,12 @@
 - The README, the Colab demo, the evidence summary, error handling, state facts
   and the migration guide (now "Migrating between backends") describe the OTS
   default and the graph opt-in. The README's `marginal_rates` example and the
-  autodiff planning example keep their California return and pass
-  `allow_unvalidated=True`, saying its figures illustrate the method rather than
-  validated California tax.
+  autodiff planning example (`examples/autodiff_planning.py`,
+  `docs/autodiff-applications.md`) use a federal-only return instead of an
+  unvalidated California one; their figures and benchmark timings were
+  regenerated, and the example's test now checks structure and signs only.
+- Known: graph `marginal_rate(s)` report a zero state slope for IL, MS and OR,
+  although their state tax moves with income (tenforty-s48h.76).
 - `scripts/smoke_installed.py` smoke-checks graph on Illinois, which is in graph
   scope, and OTS on California.
 
