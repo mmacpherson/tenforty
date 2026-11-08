@@ -1,7 +1,17 @@
 export class BrowserContractError extends Error {
-  constructor(message) {
+  constructor(message, { detail = null } = {}) {
     super(message);
     this.name = "BrowserContractError";
+    this.detail = detail;
+  }
+}
+
+export class UnvalidatedJurisdictionError extends BrowserContractError {
+  constructor(message, { jurisdiction, year }) {
+    super(message);
+    this.name = "UnvalidatedJurisdictionError";
+    this.jurisdiction = jurisdiction;
+    this.year = year;
   }
 }
 
@@ -165,6 +175,34 @@ export function validateBrowserContract(contract, graph, year) {
       `Unsupported browser contract schema: ${contract.schema_version}`,
     );
   }
+  if (
+    typeof contract.scope?.summary !== "string" ||
+    typeof contract.state_slopes?.available !== "boolean"
+  ) {
+    throw new BrowserContractError(
+      "Browser contract must state its validated scope and state-slope status",
+    );
+  }
+  for (const [code, specification] of Object.entries(contract.jurisdictions)) {
+    for (const supportedYear of contract.supported_years) {
+      if (
+        typeof specification.validated?.[String(supportedYear)] !== "boolean" ||
+        typeof specification.refused_statuses?.[String(supportedYear)] !==
+          "object" ||
+        Object.values(
+          specification.refused_statuses[String(supportedYear)],
+        ).some(
+          (refusal) =>
+            typeof refusal?.message !== "string" ||
+            typeof refusal?.detail !== "string",
+        )
+      ) {
+        throw new BrowserContractError(
+          `Browser contract must say whether ${code} ${supportedYear} is validated`,
+        );
+      }
+    }
+  }
   const yearKey = requireYear(contract, year);
   const graphMetadata = JSON.parse(graph.toJson()).meta;
   if (graphMetadata.year !== year) {
@@ -214,8 +252,40 @@ export function validateBrowserContract(contract, graph, year) {
   }
 }
 
+function requireBooleanOption(name, value) {
+  if (typeof value !== "boolean") {
+    throw new BrowserContractError(
+      `${name} must be true or false, not ${JSON.stringify(value)}`,
+    );
+  }
+  return value;
+}
+
+export function isValidatedJurisdiction(contract, jurisdiction, year) {
+  const specification = contract.jurisdictions[jurisdiction];
+  return Boolean(specification?.validated?.[String(year)]);
+}
+
+export function requireValidatedJurisdiction(contract, jurisdiction, year) {
+  if (isValidatedJurisdiction(contract, jurisdiction, year)) return;
+  const reasons =
+    contract.jurisdictions[jurisdiction]?.exclusion_reasons?.[String(year)] ??
+    [];
+  throw new UnvalidatedJurisdictionError(
+    `The graph is not yet validated for ${jurisdiction} ${year}` +
+      (reasons.length ? ` (${reasons.join(", ")})` : "") +
+      `; ${contract.scope.summary}`,
+    { jurisdiction, year },
+  );
+}
+
 export class BrowserTaxRuntime {
-  constructor(graphlib, graph, contract, { year, jurisdiction, filingStatus }) {
+  constructor(
+    graphlib,
+    graph,
+    contract,
+    { year, jurisdiction, filingStatus, allowUnvalidated = false },
+  ) {
     const yearKey = requireYear(contract, year);
     const jurisdictionSpec = requireEntry(
       contract.jurisdictions,
@@ -223,6 +293,16 @@ export class BrowserTaxRuntime {
       "jurisdiction",
     );
     requireEntry(contract.filing_statuses, filingStatus, "filing status");
+    const refusal =
+      jurisdictionSpec.refused_statuses?.[yearKey]?.[filingStatus];
+    if (refusal) {
+      throw new BrowserContractError(refusal.message, {
+        detail: refusal.detail,
+      });
+    }
+    if (!requireBooleanOption("allowUnvalidated", allowUnvalidated)) {
+      requireValidatedJurisdiction(contract, jurisdiction, year);
+    }
     validateBrowserContract(contract, graph, year);
 
     this.contract = contract;
@@ -317,6 +397,16 @@ export class BrowserTaxRuntime {
       inputGroups,
       "federal total tax",
     );
+    const isStateReturn = this.jurisdiction !== "US";
+    const withheld = isStateReturn && !this.contract.state_slopes.available;
+    if (withheld) {
+      return Object.fromEntries(
+        inputNames.map((name, index) => [
+          name,
+          { federal: federalValues[index], state: null, total: null },
+        ]),
+      );
+    }
     const stateValues = stateOutput
       ? evaluateGradientVector(
           this.runtime,

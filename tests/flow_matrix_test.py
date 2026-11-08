@@ -103,7 +103,7 @@ _FD_STEP = 100.0
 def _derivative(backend: str, wrt: str, output_field: str, case: dict) -> float:
     if backend == "graph":
         return tenforty.marginal_rate(
-            output=_FIELD_TO_NODE[output_field], wrt=wrt, **case
+            output=_FIELD_TO_NODE[output_field], wrt=wrt, **case, allow_unvalidated=True
         )
 
     def output_at(delta: float) -> float:

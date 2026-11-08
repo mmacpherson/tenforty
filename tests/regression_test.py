@@ -917,6 +917,7 @@ def _run_range_scenario(scenario):
     if scenario.get("ordinary_dividends"):
         kwargs["ordinary_dividends"] = scenario["ordinary_dividends"]
     kwargs["backend"] = scenario.get("backend") or "ots"
+    kwargs["allow_unvalidated"] = kwargs["backend"] == "graph"
     if scenario.get("state_facts"):
         kwargs["state_facts"] = scenario["state_facts"]
     result = evaluate_return(**kwargs)
@@ -950,7 +951,7 @@ def _run_range_scenario(scenario):
 )
 def test_al_tax_ranges(scenario):
     """Sanity check: AL tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -962,7 +963,7 @@ def test_al_tax_ranges(scenario):
 )
 def test_az_tax_ranges(scenario):
     """Sanity check: AZ tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -985,7 +986,7 @@ def test_ny_tax_ranges(scenario):
 )
 def test_ma_tax_ranges(scenario):
     """Sanity check: MA tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -997,7 +998,7 @@ def test_ma_tax_ranges(scenario):
 )
 def test_ga_tax_ranges(scenario):
     """Sanity check: GA tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1009,7 +1010,7 @@ def test_ga_tax_ranges(scenario):
 )
 def test_md_tax_ranges(scenario):
     """Sanity check: MD tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1021,7 +1022,7 @@ def test_md_tax_ranges(scenario):
 )
 def test_mo_tax_ranges(scenario):
     """Sanity check: MO tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1033,7 +1034,7 @@ def test_mo_tax_ranges(scenario):
 )
 def test_mt_tax_ranges(scenario):
     """Sanity check: MT tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1045,7 +1046,7 @@ def test_mt_tax_ranges(scenario):
 )
 def test_ri_tax_ranges(scenario):
     """Sanity check: RI tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1057,7 +1058,7 @@ def test_ri_tax_ranges(scenario):
 )
 def test_nd_tax_ranges(scenario):
     """Sanity check: ND tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1071,7 +1072,7 @@ def test_nd_tax_ranges(scenario):
 )
 def test_nh_tax_ranges(scenario):
     """Sanity check: NH tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1083,7 +1084,7 @@ def test_nh_tax_ranges(scenario):
 )
 def test_mn_tax_ranges(scenario):
     """Sanity check: MN tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1095,7 +1096,7 @@ def test_mn_tax_ranges(scenario):
 )
 def test_pa_tax_ranges(scenario):
     """Sanity check: PA tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1107,7 +1108,7 @@ def test_pa_tax_ranges(scenario):
 )
 def test_sc_tax_ranges(scenario):
     """Sanity check: SC tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1119,7 +1120,7 @@ def test_sc_tax_ranges(scenario):
 )
 def test_mi_tax_ranges(scenario):
     """Sanity check: MI tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1131,7 +1132,7 @@ def test_mi_tax_ranges(scenario):
 )
 def test_nj_tax_ranges(scenario):
     """Sanity check: NJ tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1143,7 +1144,7 @@ def test_nj_tax_ranges(scenario):
 )
 def test_nc_tax_ranges(scenario):
     """Sanity check: NC tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1155,7 +1156,7 @@ def test_nc_tax_ranges(scenario):
 )
 def test_oh_tax_ranges(scenario):
     """Sanity check: OH tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1167,7 +1168,7 @@ def test_oh_tax_ranges(scenario):
 )
 def test_va_tax_ranges(scenario):
     """Sanity check: VA tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1179,7 +1180,7 @@ def test_va_tax_ranges(scenario):
 )
 def test_wi_tax_ranges(scenario):
     """Sanity check: WI tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1191,7 +1192,7 @@ def test_wi_tax_ranges(scenario):
 )
 def test_vt_tax_ranges(scenario):
     """Sanity check: VT tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1203,7 +1204,7 @@ def test_vt_tax_ranges(scenario):
 )
 def test_il_tax_ranges(scenario):
     """Sanity check: IL tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1215,7 +1216,7 @@ def test_il_tax_ranges(scenario):
 )
 def test_in_tax_ranges(scenario):
     """Sanity check: IN tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1272,7 +1273,7 @@ CO_SCENARIOS = [
 )
 def test_co_tax_ranges(scenario):
     """Sanity check: CO tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1328,7 +1329,7 @@ CT_SCENARIOS = [
 )
 def test_ct_tax_ranges(scenario):
     """Sanity check: CT tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1340,7 +1341,7 @@ def test_ct_tax_ranges(scenario):
 )
 def test_dc_tax_ranges(scenario):
     """Sanity check: DC tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1396,7 +1397,7 @@ DE_SCENARIOS = [
 )
 def test_de_tax_ranges(scenario):
     """Sanity check: DE tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1456,7 +1457,7 @@ KS_SCENARIOS = [
 )
 def test_ks_tax_ranges(scenario):
     """Sanity check: KS tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1580,7 +1581,7 @@ LA_SCENARIOS = [
 )
 def test_ky_tax_ranges(scenario):
     """Sanity check: KY tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1592,7 +1593,7 @@ def test_ky_tax_ranges(scenario):
 )
 def test_la_tax_ranges(scenario):
     """Sanity check: LA tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1638,7 +1639,7 @@ IA_SCENARIOS = [
 )
 def test_ia_tax_ranges(scenario):
     """Sanity check: IA tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1684,7 +1685,7 @@ ID_SCENARIOS = [
 )
 def test_id_tax_ranges(scenario):
     """Sanity check: ID tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1730,7 +1731,7 @@ UT_SCENARIOS = [
 )
 def test_ut_tax_ranges(scenario):
     """Sanity check: UT tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1779,7 +1780,7 @@ MS_SCENARIOS = [
 )
 def test_ms_tax_ranges(scenario):
     """Sanity check: MS tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1825,7 +1826,7 @@ OK_SCENARIOS = [
 )
 def test_ok_tax_ranges(scenario):
     """Sanity check: OK tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1881,7 +1882,7 @@ OR_SCENARIOS = [
 )
 def test_or_tax_ranges(scenario):
     """Retained legacy cases use the archived conditional DOR state arithmetic."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1927,7 +1928,7 @@ AR_SCENARIOS = [
 )
 def test_ar_tax_ranges(scenario):
     """Sanity check: AR tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -1973,7 +1974,7 @@ NM_SCENARIOS = [
 )
 def test_nm_tax_ranges(scenario):
     """Sanity check: NM tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -2019,7 +2020,7 @@ NE_SCENARIOS = [
 )
 def test_ne_tax_ranges(scenario):
     """Sanity check: NE tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -2073,7 +2074,7 @@ HI_SCENARIOS = [
 )
 def test_hi_tax_ranges(scenario):
     """Sanity check: HI tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -2119,7 +2120,7 @@ WV_SCENARIOS = [
 )
 def test_wv_tax_ranges(scenario):
     """Sanity check: WV tax falls within expected ranges (graph backend)."""
-    scenario_with_backend = {**scenario, "backend": "graph"}
+    scenario_with_backend = {**scenario, "backend": "graph", "allow_unvalidated": True}
     _run_range_scenario(scenario_with_backend)
 
 
@@ -2179,6 +2180,7 @@ def test_state_tax_increases_with_income(state, backend):
         filing_status="Single",
         eitc_eligible=False,
         backend=backend or "ots",
+        allow_unvalidated=True,
     )
 
     results = [evaluate_return(w2_income=income, **kwargs_base) for income in incomes]
@@ -2195,7 +2197,12 @@ def test_nh_tax_increases_with_interest():
     """Verify that NH tax increases monotonically with interest income (2024 only)."""
     interest_amounts = [5000, 10000, 20000, 40000]
     kwargs_base = dict(
-        year=2024, state="NH", filing_status="Single", w2_income=50000, backend="graph"
+        year=2024,
+        state="NH",
+        filing_status="Single",
+        w2_income=50000,
+        backend="graph",
+        allow_unvalidated=True,
     )
 
     results = [

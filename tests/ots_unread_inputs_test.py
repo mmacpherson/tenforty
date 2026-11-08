@@ -32,7 +32,7 @@ from tenforty.models import (
     SUBORDINATE_FORM_CONFIG,
     OTSState,
 )
-from tenforty.routing import ots_covers
+from tenforty.routing import OTS_REFUSED_RETURNS, ots_covers
 
 ON_ERROR_POLICIES = ("raise", "warn", "ignore")
 OTS_YEARS = sorted(
@@ -42,7 +42,8 @@ OTS_RETURNS = [
     (year, state)
     for year in OTS_YEARS
     for state in OTSState
-    if STATE_TO_FORM.get(state) is None or ots_covers(year, state)
+    if (STATE_TO_FORM.get(state) is None or ots_covers(year, state))
+    and (state, year) not in OTS_REFUSED_RETURNS
 ]
 
 
@@ -150,6 +151,7 @@ def test_batch_preflight_refuses_before_any_ots_return_runs(
             mode="zip",
             backend=backend,
             on_error=on_error,
+            allow_unvalidated=True,
         )
     assert ots_calls == []
 
@@ -166,14 +168,17 @@ def test_zero_dependent_exemptions_is_accepted(case, backend):
     year, state = case
     kwargs = {"year": year, "state": state.value, "w2_income": 60_000}
     explicit = tenforty.evaluate_return(
-        **kwargs, dependent_exemptions=0, backend=backend
+        **kwargs, dependent_exemptions=0, backend=backend, allow_unvalidated=True
     )
-    omitted = tenforty.evaluate_return(**kwargs, backend=backend)
+    omitted = tenforty.evaluate_return(
+        **kwargs, backend=backend, allow_unvalidated=True
+    )
     assert explicit == omitted
     frame = tenforty.evaluate_returns(
         **{key: [value] for key, value in kwargs.items()},
         dependent_exemptions=[0.0],
         backend=backend,
+        allow_unvalidated=True,
     )
     assert frame.height == 1
 
@@ -187,6 +192,7 @@ def test_graph_still_accepts_dependent_exemptions_where_it_maps_them():
         w2_income=60_000,
         dependent_exemptions=4_000,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert result.state_total_tax > 0
 
@@ -258,7 +264,12 @@ def test_nonzero_iso_is_refused_where_ots_never_reads_it(
     """2018/2019 refuse it under every policy, on ots and auto alike."""
     with pytest.raises(UnsupportedInputError) as raised:
         tenforty.evaluate_return(
-            year=year, state=state, **ISO_RETURN, backend=backend, on_error=on_error
+            year=year,
+            state=state,
+            **ISO_RETURN,
+            backend=backend,
+            on_error=on_error,
+            allow_unvalidated=True,
         )
     message = str(raised.value)
     assert "incentive_stock_option_gains=200000.0" in message
@@ -371,6 +382,7 @@ def test_nonzero_input_on_a_missing_line_is_refused(
             backend=backend,
             on_error=on_error,
             **{name: 5_000},
+            allow_unvalidated=True,
         )
     message = str(raised.value)
     assert f"{name}=5000.0" in message

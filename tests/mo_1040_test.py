@@ -163,6 +163,7 @@ def test_mo_whole_return_independent_derivation(
         backend="graph",
         eitc_eligible=True,
         num_eitc_children=0,
+        allow_unvalidated=True,
     )
 
     assert result.state_taxable_income == pytest.approx(
@@ -197,6 +198,7 @@ def test_mo_line_9_follows_the_stated_eic_facts(
         "filing_status": "Single",
         "w2_income": wages,
         "backend": "graph",
+        "allow_unvalidated": True,
     }
     eligible = evaluate_return(**common, eitc_eligible=True, num_eitc_children=0)
     ineligible = evaluate_return(**common, eitc_eligible=False)
@@ -225,6 +227,7 @@ def test_mo_hoh_public_return_reports_the_stated_eic(year, eic):
         num_eitc_children=1,
         eitc_eligible=True,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     assert result.federal_earned_income_credit == eic
@@ -309,6 +312,7 @@ def test_mo_federal_tax_deduction_bands(
         w2_income=wages,
         backend="graph",
         eitc_eligible=False,
+        allow_unvalidated=True,
     )
     assert result.state_taxable_income == pytest.approx(
         expected_taxable_income, abs=CHART_TOLERANCE

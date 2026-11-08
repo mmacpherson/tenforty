@@ -58,9 +58,12 @@ BASELINES = [
 
 
 def _scalar_and_zip(**inputs):
-    scalar = evaluate_return(backend="graph", **inputs)
+    scalar = evaluate_return(backend="graph", **inputs, allow_unvalidated=True)
     batch = evaluate_returns(
-        backend="graph", mode="zip", **{name: [value] for name, value in inputs.items()}
+        backend="graph",
+        mode="zip",
+        **{name: [value] for name, value in inputs.items()},
+        allow_unvalidated=True,
     )
     for name in (
         "state_adjusted_gross_income",
@@ -130,6 +133,7 @@ def test_cross_batch_threshold_matches_scalar(year, state, threshold):
         state=[state],
         filing_status=statuses,
         w2_income=wages,
+        allow_unvalidated=True,
     )
     for index, (wage, status) in enumerate(
         (wage, status) for status in statuses for wage in wages
@@ -140,6 +144,7 @@ def test_cross_batch_threshold_matches_scalar(year, state, threshold):
             state=state,
             filing_status=status,
             w2_income=wage,
+            allow_unvalidated=True,
         )
         assert batch["state_total_tax"][index] == scalar.state_total_tax
 
@@ -187,7 +192,12 @@ def test_va_federal_hoh_and_qw_use_state_single_rules(year, status):
     The boundary tests also pin Single's $11,950 filing threshold for both.
     """
     single = evaluate_return(
-        year=year, state="VA", filing_status="Single", w2_income=50_000, backend="graph"
+        year=year,
+        state="VA",
+        filing_status="Single",
+        w2_income=50_000,
+        backend="graph",
+        allow_unvalidated=True,
     )
     mapped = _scalar_and_zip(
         year=year, state="VA", filing_status=status, w2_income=50_000

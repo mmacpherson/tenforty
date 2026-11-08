@@ -40,10 +40,10 @@ def graph_scalar_fails(monkeypatch):
     """Make graph scalar evaluation fail for the FAILING_W2 return only."""
     real = GraphBackend.evaluate
 
-    def evaluate(self, tax_input):
+    def evaluate(self, tax_input, **kwargs):
         if tax_input.w2_income == FAILING_W2:
             raise Boom("graph evaluation failed")
-        return real(self, tax_input)
+        return real(self, tax_input, **kwargs)
 
     monkeypatch.setattr(GraphBackend, "evaluate", evaluate)
 
@@ -81,7 +81,10 @@ def test_failed_return_is_nan_in_every_field():
 def test_genuine_zero_return_is_zero_not_nan(backend, on_error):
     """A return with no income is a real zero, distinct from a failure."""
     result = tenforty.evaluate_return(
-        year=2024, w2_income=0.0, backend=backend, on_error=on_error
+        year=2024,
+        w2_income=0.0,
+        backend=backend,
+        on_error=on_error,
     )
     assert result.total_tax == 0.0
     assert _none_nan(result.model_dump())
@@ -108,7 +111,10 @@ class TestScalarExecutionFailure:
             pytest.warns(RuntimeWarning, match=f"{backend} backend failed for 2024"),
         ):
             result = tenforty.evaluate_return(
-                year=2024, w2_income=FAILING_W2, backend=backend, on_error="warn"
+                year=2024,
+                w2_income=FAILING_W2,
+                backend=backend,
+                on_error="warn",
             )
         assert _all_nan(result)
         assert any("Boom" in record.getMessage() for record in caplog.records)
@@ -122,7 +128,10 @@ class TestScalarExecutionFailure:
         ):
             warnings.simplefilter("error")
             result = tenforty.evaluate_return(
-                year=2024, w2_income=FAILING_W2, backend=backend, on_error="ignore"
+                year=2024,
+                w2_income=FAILING_W2,
+                backend=backend,
+                on_error="ignore",
             )
         assert _all_nan(result)
         assert caplog.records == []
@@ -287,7 +296,11 @@ def test_graph_batch_failure_isolates_the_failed_row(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         frame = tenforty.evaluate_returns(
-            year=2024, w2_income=BATCH_W2, backend="graph", mode=mode, on_error=on_error
+            year=2024,
+            w2_income=BATCH_W2,
+            backend="graph",
+            mode=mode,
+            on_error=on_error,
         )
     _assert_one_failed_row(frame, BATCH_W2)
 
@@ -310,7 +323,10 @@ def test_batch_failure_raises_under_raise(graph_batch_fails, mode):
     """Raise does not fall back: the batch's own exception surfaces."""
     with pytest.raises(Boom):
         tenforty.evaluate_returns(
-            year=2024, w2_income=BATCH_W2, backend="graph", mode=mode
+            year=2024,
+            w2_income=BATCH_W2,
+            backend="graph",
+            mode=mode,
         )
 
 
@@ -339,6 +355,7 @@ def test_graph_cross_fallback_keeps_batch_row_order(monkeypatch):
         "taxable_interest": [0.0, 2_000.0],
         "backend": "graph",
         "on_error": "ignore",
+        "allow_unvalidated": True,
     }
     batched = tenforty.evaluate_returns(**call)
     monkeypatch.setattr(

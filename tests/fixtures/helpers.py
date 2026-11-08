@@ -6,6 +6,7 @@ from tenforty.models import (
     OTSFilingStatus,
     OTSState,
 )
+from tenforty.routing import OTS_REFUSED_RETURNS
 
 _OTS_CRASH_FORMS = {"PA_40"}
 
@@ -46,6 +47,8 @@ def is_state_supported(
     if form_id in _OTS_CRASH_FORMS:
         return False
     if (year, form_id) not in NATURAL_FORM_CONFIG:
+        return False
+    if (state_enum, year) in OTS_REFUSED_RETURNS:
         return False
     return filing_status is None or _ots_accepts_filing_status(
         year, form_id, filing_status

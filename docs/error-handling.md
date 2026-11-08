@@ -57,21 +57,18 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 
 ## Choosing a backend
 
-`backend` is `"auto"` (the default), `"ots"`, or `"graph"`:
+`backend` is `"ots"` (the default), `"auto"`, or `"graph"`:
 
 | `backend` | 2018-2023 | 2024-2025 |
 |-----------|-----------|-----------|
 | `"ots"` | OTS | OTS |
-| `"graph"` | raises `UnsupportedReturnError` | graph |
+| `"graph"` | raises `UnsupportedReturnError` | graph for federal-only returns and states in graph scope; another state raises `UnsupportedReturnError` unless `allow_unvalidated=True` |
 | `"auto"` | OTS | graph for federal-only returns and states in graph scope; otherwise OTS, or `UnsupportedReturnError` |
 
-`"auto"` picks the backend per return: graph for a 2024 or 2025 return that
-is federal-only or whose state is in graph scope (below), OTS otherwise. To compute on
-OTS, as earlier releases did by default, pass `backend="ots"`; that is the
-rollback if a default result surprises you. It rolls back the engine, not
-every earlier contract: the deduction election, the frame schema and the error
-behavior changed for both backends (see
-[Migrating to the graph default](./migrating-to-graph-default.md)).
+The graph backend is opt-in. `"auto"` picks the backend per return: graph for a
+2024 or 2025 return that is federal-only or whose state is in graph scope
+(below), OTS otherwise. 2025.13 made `"auto"` the default; 2025.14 restored
+`"ots"` (see [Migrating between backends](./migrating-to-graph-default.md)).
 
 An explicit `"ots"` or `"graph"` is never reinterpreted: it is honoured or
 refused before evaluation. `"auto"` splits a mixed-year batch by year and
@@ -91,8 +88,9 @@ fixtures support it. For 2024 and 2025 that is currently:
 A federal-only return (`state=None`) is always in scope.
 
 For any other state, `"auto"` uses OTS if OTS computes that state's return
-(Arizona, California, Massachusetts, Michigan, North Carolina, New Jersey,
-New York, Ohio, Pennsylvania and Virginia). Otherwise it raises
+(Arizona, California, Massachusetts, North Carolina, New Jersey, New York,
+Ohio, Pennsylvania and Virginia; OTS Michigan is refused in 2025.14, because it
+applies no personal exemption). Otherwise it raises
 `UnsupportedReturnError`, and the message names the reason: the open defect
 (a `tenforty-...` issue), `evidence: tenforty-b72.12` (no official-value
 fixtures yet), or a `policy: ...` decision.
@@ -106,8 +104,15 @@ contract is implemented (`tenforty-nuc6`): the generic federal aggregate cannot
 supply their state deduction. North Carolina routes to OTS. Maryland and Maine
 have no OTS program, so auto raises `UnsupportedReturnError` naming that bead.
 
-`backend="graph"` ignores scope and computes any state the graph covers. Use
-it when you accept the graph's current state of validation for that state.
+`backend="graph"` applies scope too. A state outside graph scope raises
+`UnsupportedReturnError` before computing, naming the same reasons, unless the
+caller passes `allow_unvalidated=True`; then the graph computes it. Pass it
+only when you accept that the graph is not yet validated for that state: its
+figure may be wrong (graph California, for one, does not yet apply the
+dependent exemption credit, `tenforty-b72.54`). The rule covers every way in:
+`evaluate_return`, `evaluate_returns` (one such row refuses the whole batch
+before any row runs), `marginal_rate`, `marginal_rates`, `solve_for_income` and
+`get_backend`. `allow_unvalidated` has no effect on `"ots"` or `"auto"`.
 
 `tenforty.graph_scope.graph_state_in_scope(state, year)` and
 `exclusion_reasons(state, year)` report the same decision.
@@ -117,9 +122,11 @@ it when you accept the graph's current state of validation for that state.
 ### `UnsupportedReturnError`
 
 A `ValueError` raised before evaluation when the selected backend cannot
-compute the requested return: for example `backend="graph"` for 2023, or a
-state the backend has no return for. The message names what is supported and
-which backend to use instead.
+compute the requested return: for example `backend="graph"` for 2023, a
+state the backend has no return for, `backend="graph"` for a state outside
+graph scope without `allow_unvalidated=True`, or a Michigan return on OTS,
+which 2025.14 refuses because OTS Michigan applies no personal exemption. The message names what is
+supported and which backend to use instead.
 
 `UnsupportedInputError` is the subclass raised when a backend does not compute
 a nonzero input it was given: for example `dependent_exemptions`, which OTS
@@ -127,7 +134,11 @@ maps for no return and the graph maps only for some states, or
 `incentive_stock_option_gains` on 2018 and 2019 OTS returns, whose programs
 never use it. OTS also refuses `self_employment_income` and `rental_income` on
 2018 returns and `state_adjustment` on CA 2018 and 2019 returns, which tenforty
-maps to lines those years' OTS templates do not have. It is raised under every `on_error` policy, before any return in
+maps to lines those years' OTS templates do not have. Since 2025.14 OTS also refuses a nonzero state input its map does not deliver to
+the state program (for example capital gains on MA_1, NJ_1040 and PA_40); the
+list is in
+[Migrating between backends](./migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver).
+It is raised under every `on_error` policy, before any return in
 a batch is computed. It is also a `NotImplementedError`, which is what that
 refusal raised before.
 
@@ -137,15 +148,16 @@ Raised when the selected backend's compiled extension is not installed. It is
 an `ImportError`, and also a `RuntimeError` for callers that caught the earlier
 `RuntimeError("Graph backend is not available")`.
 
-The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
-under the default `"auto"` it raises this for any 2024 or 2025 return that
-`"auto"` routes to graph; it never falls back to OTS. Pass `backend="ots"` with
-that package.
+The OTS-only package (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so it
+raises this for `backend="graph"` and for any 2024 or 2025 return that
+`"auto"` routes to graph; it never falls back to OTS. The OTS default works
+with that package.
 
 A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every Windows build) is the
 mirror case: it has no OTS extension. It raises this for every return that
-needs OTS: 2018-2023, a state `"auto"` keeps on OTS, `backend="ots"`, and
-`core.evaluate_form`. The message names the returns and, where the graph
+needs OTS: every call on the OTS default, `backend="ots"`, 2018-2023, a state
+`"auto"` keeps on OTS, and `core.evaluate_form`. Pass `backend="auto"` or
+`backend="graph"` on such an install. The message names the returns and, where the graph
 backend covers them, the `backend="graph"` remedy. Like the OTS-only package,
 it never falls back to the other backend. A batch with any such row is refused
 whole.

@@ -65,25 +65,33 @@ def require_available(engine: Engine) -> TaxBackend:
 
 
 def get_backend(
-    backend: BackendChoice = "auto",
+    backend: BackendChoice = "ots",
     year: int = 2024,
     state: str | None = None,
+    *,
+    allow_unvalidated: bool = False,
 ) -> TaxBackend:
     """Get the backend instance that computes this year's return.
 
     Args:
-        backend: "auto" (default; graph for 2024-2025 within graph scope,
-            OTS otherwise), "ots", or "graph".
+        backend: "ots" (default), "auto" (graph for 2024-2025 within graph
+            scope, OTS otherwise), or "graph".
         year: Tax year.
         state: State code (e.g., "CA") or None for federal only.
+        allow_unvalidated: Let "graph" serve a state return outside graph
+            scope, which graph is not yet validated for.
 
     Returns:
         TaxBackend instance
 
     Raises:
         ValueError: If ``backend`` is not a known backend name.
-        UnsupportedReturnError: If the backend cannot compute this year/state.
+        UnsupportedReturnError: If the backend cannot compute this year/state,
+            or "graph" was asked for a return outside graph scope without
+            ``allow_unvalidated=True``.
         BackendUnavailableError: If the selected backend is not installed.
 
     """
-    return require_available(select_backend(backend, year, state))
+    return require_available(
+        select_backend(backend, year, state, allow_unvalidated=allow_unvalidated)
+    )

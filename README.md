@@ -23,8 +23,10 @@ what-if sweeps, and optimizing your taxes.
 
 The package is built on top of
 [Open Tax Solver](https://opentaxsolver.sourceforge.net/) (OTS) and tenforty's own
-backend, wrapping them into a Python library. The ideas behind it are
-discussed in a blog post
+graph backend, wrapping them into a Python library. Returns are computed on
+OTS by default; the graph backend is opt-in (see
+[Which backend computes your return](#which-backend-computes-your-return)). The
+ideas behind it are discussed in a blog post
 [here](https://finedataproducts.com/posts/2024-03-10-tax-scenarios-with-ai/).
 
 You can try `tenforty` out immediately in your browser via the included Colab
@@ -85,27 +87,51 @@ to the graph backend raises an error instead of falling back to OTS.
 
 ## Which Backend Computes Your Return
 
-The default, `backend="auto"`, picks the engine for each return before computing
-it:
+**The default is OTS** (`backend="ots"`): every return is computed on OTS,
+federal returns for 2018–2025, and for 2024–2025 the states AZ, CA, MA, MI, NC,
+NJ, NY, OH, OR, PA and VA, plus the states without an income tax (earlier years
+have fewer states; see the Colab demo's table). Any other state raises
+`UnsupportedReturnError` before computing, naming the graph alternative where
+there is one. In 2025.14 OTS also refuses what it would compute wrongly:
+every Michigan return, and the
+[state inputs its maps do not yet deliver](./docs/migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver).
 
-| Return | Under `backend="auto"` |
-|---|---|
-| Tax years 2018–2023 | OTS, for the states OTS has that year; any other state raises `UnsupportedReturnError` |
-| 2024–2025, federal only (`state=None`) | Graph |
-| 2024–2025 in IL, MS or OR, or a state without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) | Graph |
-| 2024–2025 in AZ, CA, MA, MI, NC, NJ, NY, OH, PA or VA | OTS |
-| 2024–2025 in AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IN, KS, KY, LA, MD, ME, MN, MO, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI or WV | Raises `UnsupportedReturnError`, naming the reason; `backend="graph"` computes it anyway |
+**The graph backend is opt-in** (`backend="graph"` or `backend="auto"`). It is
+incomplete, and so far validated for 2024 and 2025 federal-only returns and for
+IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN,
+TX, WA and WY). Other states refuse unless you pass `allow_unvalidated=True`,
+because they aren't validated yet; the work to validate them is
+[tenforty-s48h](#graph-coverage).
 
-- **Graph scope.** A 2024–2025 state goes to graph only when its known
-  graph-side defects are closed and official values support it. The other
+| Return | `backend="auto"` | `backend="graph"` |
+|---|---|---|
+| Tax years 2018–2023 | OTS, for the states OTS has that year; any other state raises | Raises `UnsupportedReturnError` |
+| 2024–2025, federal only (`state=None`) | Graph | Graph |
+| 2024–2025 in IL, MS or OR, or a state without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) | Graph | Graph |
+| 2024–2025 in AZ, CA, MA, NC, NJ, NY, OH, PA or VA | OTS | Raises, naming the reasons, unless `allow_unvalidated=True` |
+| 2024–2025 in MI | Raises: OTS Michigan applies no personal exemption, and graph MI is not validated | Raises, naming the reasons, unless `allow_unvalidated=True` |
+| 2024–2025 in AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IN, KS, KY, LA, MD, ME, MN, MO, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI or WV | Raises, naming the reasons | Raises, naming the reasons, unless `allow_unvalidated=True` |
+
+- <a id="graph-coverage"></a>**Graph coverage.** Graph has forms for every
+  state, but a 2024–2025 state is validated, and in graph scope, only when its
+  known graph-side defects are closed and official values support it. The other
   states stay out for a named reason: an open defect, missing evidence, or a
   decision. [Graph state scope](./docs/error-handling.md#graph-state-scope-under-auto)
   has the reasons. MD, ME and NC wait on the itemized-deduction contract
-  (`tenforty-nuc6`). Ohio stays on OTS by decision: graph Ohio Married/Joint
+  (`tenforty-nuc6`). Ohio stays out by decision: graph Ohio Married/Joint
   requires the joint-credit [state fact](./docs/state-facts.md), which has no
   default, and since OTS already computes Ohio, routing it to graph would make
   calls that work today raise. Mississippi, which OTS doesn't cover, requires
   its facts instead of being unavailable.
+- **Outside graph scope, graph refuses unless asked.** `backend="graph"` on a
+  state outside graph scope raises `UnsupportedReturnError` before computing,
+  naming the reasons, because the graph is not yet validated there and its
+  figure may be wrong (graph California, for one, does not yet apply the
+  dependent exemption credit, `tenforty-b72.54`). Pass
+  `allow_unvalidated=True` to compute it on the graph backend anyway. The same
+  rule applies to `evaluate_returns` (one such row refuses the whole batch),
+  `marginal_rate`, `marginal_rates` and `solve_for_income`. It never affects
+  `"ots"` or `"auto"`.
 - **Mississippi needs facts.** MS is in graph scope, conditional on
   [state facts](./docs/state-facts.md) with no default. A Married/Joint return
   needs both spouses' actual Mississippi AGIs,
@@ -123,17 +149,17 @@ it:
   `num_eitc_children` computes the credit. Otherwise it is `None` (not
   determined), and graph Missouri returns raise; `eitc_eligible=False` is
   accepted there. OTS always reports `None`.
-- **OTS is chosen by coverage, not as a retry.** A state goes to OTS because it
-  is outside graph scope and OTS computes it. A return that fails on the graph
-  backend is not rerun on OTS.
+- **Under `"auto"`, OTS is chosen by coverage, not as a retry.** A state goes
+  to OTS because it is outside graph scope and OTS computes it. A return that
+  fails on the graph backend is not rerun on OTS.
 - **An explicit backend is never reinterpreted.** `backend="ots"` computes on
   OTS and `backend="graph"` on graph, or the call raises before computing.
-  `backend="ots"` gives the OTS results earlier releases defaulted to. It does
-  not restore every earlier contract: the deduction election, the frame schema
-  and the error behavior changed for both backends. See
-  [Migrating to the graph default](./docs/migrating-to-graph-default.md).
+  The OTS default gives the results of releases before 2025.13, but not every
+  earlier contract: the deduction election, the frame schema and the error
+  behavior changed for both backends. See
+  [Migrating between backends](./docs/migrating-to-graph-default.md).
 - **The OTS-only package** (`TENFORTY_WITHOUT_GRAPH=1`) has no graph backend, so
-  a return the default routes to graph raises `BackendUnavailableError` there.
+  a return routed to graph raises `BackendUnavailableError` there.
 
 
 ## Quick Start
@@ -175,8 +201,8 @@ This results in the following:
  'assumptions': ()}
 ```
 
-No `year=` argument was specified here, so the default year, 2025, was used.
-California is outside graph scope, so this return was computed on OTS. The
+No `year=` argument was specified here, so the default year, 2025, was used,
+and no `backend=`, so it was computed on OTS, the default. The
 output is a pydantic model, and we've called its `.model_dump()` method to
 show the result as a dictionary. Every argument and output field is listed in
 the [API Reference](#api-reference).
@@ -193,8 +219,8 @@ figures onto `tenforty`'s inputs, runs the return, and answers follow-up
 questions by changing inputs and re-running.
 
 How much to trust the result depends on what your return contains. The
-[evidence summary](./docs/evidence-summary.md) says, for each kind of return the
-default computes, what is checked against independent published values and
+[evidence summary](./docs/evidence-summary.md) says, for each kind of return,
+what is checked against independent published values and
 what is only checked for agreement between the backends, against snapshots, or
 by property tests. Tax-Calculator serves as an independent federal model
 ([differential audit](./docs/taxcalc-differential-audit.md)). It's still a
@@ -324,9 +350,9 @@ df = evaluate_returns(w2_income=list(range(0, 250_001, 1_000)))
 ### Plot: Federal Tax Over Time
 
 One can just as easily vary the year as any other parameter. `tenforty`
-supports back to the 2018 tax year; under the default, 2018–2023 are computed
-on OTS (whose authors have published an edition every year for over two
-decades) and 2024–2025 on the graph backend. Here we show the federal tax on
+supports back to the 2018 tax year, every year computed on OTS by default (its
+authors have published an edition every year for over two decades). Here we
+show the federal tax on
 $100K of W2 income for each supported year.
 
 ``` python
@@ -457,11 +483,11 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | Argument                     | Type                     | Default             | Notes                              |
 |------------------------------|--------------------------|---------------------|------------------------------------|
 | `year`                       | int                      | 2025                | 2018-2025 inclusive                |
-| `state`                      | str \| None               | None                | Two-letter state code, or None for a federal-only return. The graph backend computes every state and DC for 2024-2025; OTS computes AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA and the no-income-tax states, for the years it has them. Which one the default uses: [Which backend computes your return](#which-backend-computes-your-return) |
+| `state`                      | str \| None               | None                | Two-letter state code, or None for a federal-only return. OTS, the default, computes AZ, CA, MA, MI, NC, NJ, NY, OH, OR, PA, VA and the no-income-tax states, for the years it has them (2025.14 refuses MI on OTS). The graph backend has every state and DC for 2024-2025, and computes those outside graph scope only with `allow_unvalidated=True`: [Which backend computes your return](#which-backend-computes-your-return) |
 | `filing_status`              | str                      | Single              | "Single", "Married/Joint", "Head_of_House", "Married/Sep", "Widow(er)" |
 | `num_dependents`             | int                      | 0                   | Total dependents (qualifying children and qualifying relatives). Each gets the child tax credit or the $500 credit for other dependents; see `num_ctc_dependents`. Applied for 2023-2025 (OTS) and 2024-2025 (graph); OTS 2018-2022 applies neither. The refundable ACTC and dependent care are not modeled; the EITC is `federal_earned_income_credit` (see `num_eitc_children`). |
 | `num_ctc_dependents`         | int \| None              | None                | Keyword-only. How many of `num_dependents` are child tax credit qualifying children (under 17, valid SSN; Schedule 8812 line 4). Unset means all of them. Set it lower for dependents who only get the $500 other-dependent credit: children 17+, dependents without an SSN, qualifying relatives. Must not exceed `num_dependents` |
-| `dependent_exemptions`       | float                    | 0.0                 | State exemption dollars (not a count). A nonzero value is refused on OTS and under `backend="auto"` for every state and year; only an explicit `backend="graph"` accepts it, for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV. See its docstring in `TaxReturnInput` for the per-state rules |
+| `dependent_exemptions`       | float                    | 0.0                 | State exemption dollars (not a count). A nonzero value is refused on OTS and under `backend="auto"` for every state and year; only an explicit `backend="graph"` with `allow_unvalidated=True` accepts it (these states are outside graph scope), for GA, HI, IN, KS, LA 2024, MD, ME, NJ, VA, VT and WV. See its docstring in `TaxReturnInput` for the per-state rules |
 | `num_eitc_children`          | int \| None              | None                | Keyword-only. Earned income credit qualifying children (Schedule EIC; at most 3 count): under 19, a student under 24, or disabled, with a valid SSN, living with you over half the year, and not claimed for the EIC by anyone else. Never inferred from `num_dependents` or the child tax credit count (a noncustodial parent with a Form 8332 release gets the CTC, not the EIC). Graph only |
 | `eitc_eligible`              | bool \| None             | None                | Keyword-only. You meet the EIC conditions the inputs cannot show: valid SSNs, citizen or resident alien all year, no Form 2555, not another taxpayer's qualifying child, not barred after a disallowance; with no qualifying child also all of Pub 596 Rule 11 (one person, you or a joint spouse, at least 25 and under 65 at year end, by Rule 11's birth-date bounds), nobody's dependent or qualifying child, U.S. home over half the year. `filer_65_or_older`/`spouse_65_or_older` never affect the EIC. `False`: the credit is 0. `True` with `num_eitc_children`: computed. Otherwise `federal_earned_income_credit` is `None` (not determined). Graph Missouri returns, and derivatives or solves of an output that reads the EIC, require these facts. Graph only |
 | `standard_or_itemized`       | str                      | Auto                | Federal deduction election: "Auto" takes the larger; "Standard" or "Itemized" forces that choice ([contract](docs/deduction-choice-contract.md)) |
@@ -490,7 +516,8 @@ valid options. [Error Handling](./docs/error-handling.md) describes the
 | `federal_itemized`           | `FederalItemized` \| None | None                | Keyword-only. Itemized deductions other than taxes, net of federal limits, as allowed for the regular tax and for the AMT: `FederalItemized(regular_tax=..., amt=...)`; see [Itemized deductions](docs/itemized-deductions.md) |
 | `state_facts`                | model or tuple           | None                | Keyword-only. State-specific facts from `tenforty.state_facts`, e.g. `state_facts=tenforty.state_facts.OH(spouses_both_have_qualifying_income=False)`; one model, or a tuple for distinct states. `tenforty.state_facts.available(state, year)` lists them. Some are required where no default would be right: graph Ohio and Mississippi Married/Joint returns, and Mississippi Widow(er) returns, raise until the facts are given. See [State facts](./docs/state-facts.md) |
 | `on_error`                   | str                      | raise               | "raise", "warn" or "ignore". Under warn/ignore a failed return has NaN in every numeric output and `assumptions` of None, never $0; see [Failures and on_error](./docs/error-handling.md#failures-and-on_error) |
-| `backend`                    | str                      | auto                | "auto", "ots", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; pass "ots" for OTS results; see [Which backend computes your return](#which-backend-computes-your-return) and [Choosing a backend](./docs/error-handling.md#choosing-a-backend) |
+| `backend`                    | str                      | ots                 | "ots", "auto", or "graph". "auto" uses graph for 2024-2025 within graph scope and OTS otherwise; "graph" refuses a state outside graph scope unless `allow_unvalidated=True`; see [Which backend computes your return](#which-backend-computes-your-return) and [Choosing a backend](./docs/error-handling.md#choosing-a-backend) |
+| `allow_unvalidated`          | bool                     | False               | Keyword-only. Let `backend="graph"` (and `marginal_rate(s)`, `solve_for_income`) compute a state return outside graph scope, which the graph is not yet validated for. No effect on "ots" or "auto" |
 
 ### `state_adjustment` (deprecated)
 
@@ -583,8 +610,8 @@ the two can differ in the last digit (NY 6.85% is 6.9 on OTS).
 
 ## The Graph Backend
 
-The graph backend computes the default's 2024–2025 federal returns and its
-graph-scope states (see
+The graph backend is opt-in: `backend="auto"` uses it for 2024–2025 federal
+returns and graph-scope states, and `backend="graph"` asks for it outright (see
 [Which backend computes your return](#which-backend-computes-your-return)).
 Tax forms are written in a Haskell DSL ([`tenforty-spec/`](./tenforty-spec/)),
 compiled to JSON graphs, and evaluated by a Rust runtime exposed to Python.
@@ -592,29 +619,39 @@ Because the whole return is one differentiable graph, it can report planning
 sensitivities and solve for inputs, which OTS can't. It is included in the
 published wheels.
 
-To force one backend, pass it explicitly. `backend="graph"` computes any state
-the graph covers, in scope or not;
-[Migrating to the graph default](./docs/migrating-to-graph-default.md) lists
-every difference to expect between `"ots"` and `"auto"`:
+To force one backend, pass it explicitly. `backend="graph"` computes a
+federal-only return or a state in graph scope, and a state outside it only with
+`allow_unvalidated=True`, since the graph is not yet validated there;
+[Migrating between backends](./docs/migrating-to-graph-default.md) lists every
+difference to expect between `"ots"` and `"auto"`:
 
 ``` python
-evaluate_return(year=2025, state="CO", w2_income=100_000, backend="graph")
+evaluate_return(year=2025, state="IL", w2_income=100_000, backend="graph")
+evaluate_return(
+    year=2025, state="CO", w2_income=100_000, backend="graph", allow_unvalidated=True
+)
 evaluate_return(year=2025, w2_income=100_000, backend="ots")
 ```
 
 Compared with the OTS backend:
 
 - It covers the 2024 and 2025 tax years only.
-- It supports many more states: in addition to the OTS states, AL, AR, CO,
-  CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT, ND,
-  NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV.
+- It has forms for many more states: in addition to the OTS states, AL, AR,
+  CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT,
+  ND, NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV. It is so far validated for
+  2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states
+  without an income tax (AK, FL, NV, SD, TN, TX, WA, WY); the other states
+  compute only with `allow_unvalidated=True` until they are validated
+  (tenforty-s48h).
 - Not every input is mapped for every state. It raises on an input it can't
   represent rather than dropping it.
 - It takes `dependent_exemptions`, state exemption dollars (not a count), for
   the states that use them. OTS has no such input and refuses a nonzero value.
 
 Two function families exist only on this backend and take the same return
-arguments as `evaluate_return`:
+arguments as `evaluate_return`, including `allow_unvalidated` for a state
+outside graph scope. Until `tenforty-s48h.76` is fixed they answer federal
+outputs only (see below):
 
 - `marginal_rates(...)` gives the planning sensitivity of an output to every
   continuous input at once; `marginal_rate(..., wrt=...)` does one input.
@@ -631,7 +668,6 @@ from tenforty import marginal_rates
 
 rates = marginal_rates(
     year=2024,
-    state="CA",
     filing_status="Single",
     w2_income=100_000,
 )
@@ -660,6 +696,15 @@ rate the rows step through, not the zero inside a row. Some comparisons of nearl
 also take the wrong side of a tie in floating point, which is tracked as
 `tenforty-msj2`.
 
+**State-dependent planning is refused for now.** Graph state derivatives read
+zero for IL, MS and OR although their state tax moves with income
+(`tenforty-s48h.76`), so until that is fixed `marginal_rate`, `marginal_rates`
+and `solve_for_income` raise `UnsupportedReturnError` for any output that
+depends on the state return: the state outputs, `total_tax` on a state return,
+and raw state node names, for every state. `allow_unvalidated` does not lift
+this. Federal outputs keep working, with or without a state:
+`output="federal_total_tax"`.
+
 The reproducible
 [autodiff planning examples](docs/autodiff-applications.md) show a full
 next-dollar table, the interaction between wages and long-term-gain stacking,
@@ -680,7 +725,7 @@ true tax cliffs.
   underestimated.
 - Evidence is uneven across states and income types; the
   [evidence summary](./docs/evidence-summary.md) says what is independently
-  checked for each kind of return the default computes.
+  checked for each kind of return each engine computes.
 
 
 ## Related Projects

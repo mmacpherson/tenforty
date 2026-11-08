@@ -75,9 +75,12 @@ def _runtime(year, status, wages):
 
 
 def _scalar_and_zip(**inputs):
-    scalar = evaluate_return(backend="graph", **inputs)
+    scalar = evaluate_return(backend="graph", **inputs, allow_unvalidated=True)
     batch = evaluate_returns(
-        backend="graph", mode="zip", **{name: [value] for name, value in inputs.items()}
+        backend="graph",
+        mode="zip",
+        **{name: [value] for name, value in inputs.items()},
+        allow_unvalidated=True,
     )
     for name in ("state_taxable_income", "state_total_tax"):
         assert batch[name][0] == pytest.approx(getattr(scalar, name), abs=1e-8)

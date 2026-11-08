@@ -52,6 +52,7 @@ def test_archived_nonjoint_returns_without_defect_allowances(case):
         filing_status=case.filing_status,
         backend="graph",
         **case.inputs,
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == case.outcomes[0]
 
@@ -67,6 +68,7 @@ def test_archived_head_of_household_dependent_uses_total_dependents(year, tax):
         num_dependents=1,
         num_ctc_dependents=0,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (70_700, tax)
 
@@ -110,6 +112,7 @@ def test_archived_split_earner_returns_through_required_fact(
         num_dependents=dependents,
         state_facts=OH(spouses_both_have_qualifying_income=True),
         backend="graph",
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (taxable, tax)
     assert result.assumptions == ()
@@ -132,6 +135,7 @@ def test_fact_does_not_bypass_the_2025_magi_limit(year, agi):
             w2_income=agi,
             state_facts=OH(spouses_both_have_qualifying_income=value),
             backend="graph",
+            allow_unvalidated=True,
         )
         for value in [False, True]
     ]
@@ -159,6 +163,7 @@ def test_real_fact_lowering_in_mixed_status_batches(
         state_facts=OH(spouses_both_have_qualifying_income=value),
         backend="graph",
         mode=mode,
+        allow_unvalidated=True,
     )
     assert frame["state_total_tax"].to_list() == [
         single,
@@ -243,6 +248,7 @@ def test_natural_zip_preserves_total_dependent_exemptions(year, tax):
         num_ctc_dependents=[0, 0],
         backend="graph",
         mode="zip",
+        allow_unvalidated=True,
     )
     assert result["state_taxable_income"].to_list() == [26_050, 70_700]
     assert result["state_total_tax"].to_list() == [0, tax]

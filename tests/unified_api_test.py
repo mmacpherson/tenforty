@@ -14,6 +14,7 @@ from tenforty import (
 class TestEvaluateReturn:
     """Tests for evaluate_return function."""
 
+    @pytest.mark.requires_ots
     def test_evaluate_return_default_backend(self):
         """evaluate_return should work with default backend selection."""
         result = evaluate_return(year=2024, w2_income=100_000)
@@ -178,6 +179,7 @@ class TestBackwardsCompatibility:
 
         assert callable(er)
 
+    @pytest.mark.requires_ots
     def test_existing_api_unchanged(self):
         """Existing API calls should work without changes."""
         result = evaluate_return(

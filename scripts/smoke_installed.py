@@ -34,7 +34,8 @@ REQUIRED_YEARS = {
     "graph": frozenset({2024, 2025}),
     "ots": frozenset(range(2018, 2026)),
 }
-SMOKE_STATE = "CA"
+SMOKE_STATES = {"ots": "CA", "graph": "IL"}
+"""A state each backend computes; IL is in graph scope, so graph takes it as is."""
 SMOKE_RETURN = {"filing_status": "Single", "w2_income": 75_000.0}
 
 
@@ -89,7 +90,7 @@ def _check_backend(backend_name: str) -> list[str]:
 
     checked = []
     for year in sorted(advertised):
-        for state in (None, SMOKE_STATE):
+        for state in (None, SMOKE_STATES[backend_name]):
             result = evaluate_return(
                 year=year, state=state, backend=backend_name, **SMOKE_RETURN
             )
@@ -98,17 +99,17 @@ def _check_backend(backend_name: str) -> list[str]:
     return checked
 
 
-def _check_default_route(backends: frozenset[str]) -> str:
+def _check_auto_route(backends: frozenset[str]) -> str:
     from tenforty import evaluate_return
 
     backend_parameter = inspect.signature(evaluate_return).parameters["backend"]
     if "auto" not in str(backend_parameter.annotation):
-        return "default route: backend='auto' not offered by this version; skipped"
+        return "auto route: backend='auto' not offered by this version; skipped"
     years = frozenset().union(*(REQUIRED_YEARS[backend] for backend in backends))
     for year in sorted(years):
         result = evaluate_return(year=year, backend="auto", **SMOKE_RETURN)
         _check_return(result, backend="auto", year=year, state=None)
-    return "default route: backend='auto' evaluated every required year"
+    return "auto route: backend='auto' evaluated every required year"
 
 
 def _refusals() -> dict[str, Callable[[str], object]]:
@@ -203,7 +204,7 @@ def main(argv: list[str] | None = None) -> int:
         for name in _check_backend(backend)
     ]
     print(f"evaluated {len(checked)} returns: {', '.join(checked)}")
-    print(_check_default_route(expected))
+    print(_check_auto_route(expected))
     if "ots" not in expected:
         print(
             f"refused OTS, typed, under every on_error: {', '.join(_check_ots_refused(args.allow_source_tree))}"

@@ -1,6 +1,8 @@
 import init, * as graphlib from "./pkg/graphlib.js";
 import {
   BrowserContractError,
+  UnvalidatedJurisdictionError,
+  isValidatedJurisdiction,
   loadBrowserContract,
 } from "./browser_contract.js";
 import {
@@ -204,13 +206,17 @@ function populateInterface() {
   }
 
   const jurisdictionSelect = byId("jurisdiction");
-  const jurisdictions = Object.entries(contract.jurisdictions).sort(
-    ([leftCode, left], [rightCode, right]) => {
+  const jurisdictions = Object.entries(contract.jurisdictions)
+    .filter(([code]) =>
+      contract.supported_years.every((year) =>
+        isValidatedJurisdiction(contract, code, year),
+      ),
+    )
+    .sort(([leftCode, left], [rightCode, right]) => {
       if (leftCode === "US") return -1;
       if (rightCode === "US") return 1;
       return left.name.localeCompare(right.name);
-    },
-  );
+    });
   for (const [code, specification] of jurisdictions) {
     const option = document.createElement("option");
     option.value = code;
@@ -340,6 +346,16 @@ function renderCurve(points, results, gradient, inputName) {
   const tangentStart = Math.max(minimumInput, currentInput - tangentRadius);
   const tangentEnd = Math.min(maximumInput, currentInput + tangentRadius);
   const tangent = byId("curve-tangent");
+  tangent.hidden = gradient.total === null;
+  if (gradient.total === null) {
+    const shortLabel = SENSITIVITY_INPUTS[inputName].shortLabel.toLowerCase();
+    setText("curve-title", `as ${shortLabel} changes`);
+    setText(
+      "curve-summary",
+      `Modeled total tax as ${shortLabel} ranges from ${formatCurrency(minimumInput)} to ${formatCurrency(maximumInput)}. This return is at ${formatCurrency(currentInput)} with ${formatCurrency(currentTax)} of modeled total tax. ${contract.state_slopes.summary}`,
+    );
+    return;
+  }
   tangent.setAttribute("x1", xScale(tangentStart));
   tangent.setAttribute("x2", xScale(tangentEnd));
   tangent.setAttribute(
@@ -399,25 +415,29 @@ function renderSensitivities(gradients) {
       metadata.curveMaximum ? "button" : "div",
     );
     element.className = "sensitivity-item";
+    const withheld = gradients[name].total === null;
+    const shown = withheld ? gradients[name].federal : gradients[name].total;
     if (metadata.curveMaximum) {
       element.type = "button";
       element.dataset.curveInput = name;
       element.setAttribute(
         "aria-label",
-        `Plot ${metadata.shortLabel}: ${formatCents(gradients[name].total)} of tax per dollar`,
+        `Plot ${metadata.shortLabel}: ${formatCents(shown)} of ${withheld ? "federal " : ""}tax per dollar`,
       );
     }
     element.append(
       createTextElement("span", "sensitivity-action", metadata.action),
       createTextElement(
         "strong",
-        gradients[name].total < 0 ? "negative" : "",
-        formatCents(gradients[name].total),
+        shown < 0 ? "negative" : "",
+        formatCents(shown),
       ),
       createTextElement(
         "small",
         "",
-        `${formatCents(gradients[name].federal)} federal · ${formatCents(gradients[name].state)} state`,
+        withheld
+          ? "federal only · state slope withheld"
+          : `${formatCents(gradients[name].federal)} federal · ${formatCents(gradients[name].state)} state`,
       ),
     );
     list.appendChild(element);
@@ -428,20 +448,34 @@ function renderAnalysis(analysis, curvePoints, inputName) {
   const metadata = SENSITIVITY_INPUTS[inputName];
   const gradient = analysis.gradients[inputName];
   const jurisdiction = selectedJurisdiction();
+  const withheld = gradient.total === null;
   setText("analysis-action", metadata.action);
-  setText("next-dollar-cents", (gradient.total * 100).toFixed(1));
+  setText(
+    "next-dollar-cents",
+    withheld ? "withheld" : (gradient.total * 100).toFixed(1),
+  );
+  byId("next-dollar-cents").classList.toggle("is-withheld", withheld);
+  byId("next-dollar-unit").hidden = withheld;
   setText("next-dollar-federal", formatCents(gradient.federal));
   setText(
     "next-dollar-state-label",
     scenario.jurisdiction === "US" ? "No state selected" : jurisdiction.name,
   );
-  setText("next-dollar-state", formatCents(gradient.state));
-  setText("next-dollar-total", formatPercent(gradient.total * 100));
+  setText(
+    "next-dollar-state",
+    withheld ? "withheld" : formatCents(gradient.state),
+  );
+  setText(
+    "next-dollar-total",
+    withheld ? "—" : formatPercent(gradient.total * 100),
+  );
   setText(
     "derivative-interpretation",
-    metadata.reclassification
-      ? "This reclassifies an existing ordinary-dividend dollar; it is not the cost of earning another dollar."
-      : "This is the composed right-hand effect at the current return—not your effective rate.",
+    withheld
+      ? contract.state_slopes.summary
+      : metadata.reclassification
+        ? "This reclassifies an existing ordinary-dividend dollar; it is not the cost of earning another dollar."
+        : "This is the composed right-hand effect at the current return—not your effective rate.",
   );
   renderCurve(curvePoints, analysis.results, gradient, inputName);
   renderSensitivities(analysis.gradients);
@@ -726,6 +760,20 @@ function scheduleCalculation() {
   });
 }
 
+function showShareLinkNotice(error) {
+  const unvalidated = error instanceof UnvalidatedJurisdictionError;
+  const name = unvalidated
+    ? (contract.jurisdictions[error.jurisdiction]?.name ?? error.jurisdiction)
+    : null;
+  byId("notice-title").textContent = unvalidated
+    ? `${name} isn’t available in this calculator yet.`
+    : "This share link couldn’t be opened.";
+  byId("notice-message").textContent = unvalidated
+    ? `We opened a federal-only return instead. The calculator so far covers federal returns and Illinois, Mississippi, Oregon and the eight states without an income tax; the tax model isn’t validated for ${name} yet.`
+    : `We opened a federal-only return instead. (${error.message})`;
+  byId("notice-banner").hidden = false;
+}
+
 function showToast(message) {
   const toast = byId("toast");
   window.clearTimeout(toastTimer);
@@ -780,6 +828,9 @@ function bindEvents() {
     scheduleCalculation();
     showToast("Scenario reset");
   });
+  byId("dismiss-notice").addEventListener("click", () => {
+    byId("notice-banner").hidden = true;
+  });
   byId("dismiss-error").addEventListener("click", () => {
     byId("error-banner").hidden = true;
   });
@@ -810,7 +861,7 @@ async function main() {
     bindEvents();
     await calculate();
     if (invalidShareLink) {
-      showToast(`Invalid share link ignored: ${invalidShareLink.message}`);
+      showShareLinkNotice(invalidShareLink);
     }
   } catch (error) {
     showError(

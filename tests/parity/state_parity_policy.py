@@ -944,6 +944,7 @@ def evaluate_both(case: dict) -> tuple[dict[str, float], dict[str, float]]:
             filing_status=case["status"],
             w2_income=case["w2"],
             backend=backend,
+            allow_unvalidated=True,
         )
         results.append({quantity: getattr(result, quantity) for quantity in QUANTITIES})
     return results[0], results[1]

@@ -2,8 +2,10 @@
 
 ``backend="ots"`` and ``backend="graph"`` are never reinterpreted: each is
 validated against what that backend covers and either honoured or refused.
-``backend="auto"`` selects graph for the years in ``AUTO_GRAPH_YEARS`` when the
-state is in graph scope (``graph_scope``), and OTS otherwise.
+``backend="graph"`` also refuses a state return outside graph scope
+(``graph_scope``), which is not yet validated, unless the caller passes
+``allow_unvalidated=True``. ``backend="auto"`` selects graph for the years in
+``AUTO_GRAPH_YEARS`` when the state is in graph scope, and OTS otherwise.
 """
 
 from __future__ import annotations
@@ -29,6 +31,23 @@ AUTO_GRAPH_YEARS: frozenset[int] = frozenset({2024, 2025})
 OTS_YEARS: tuple[int, ...] = tuple(
     sorted({year for (year, form_id) in NATURAL_FORM_CONFIG if form_id == "US_1040"})
 )
+
+
+OTS_REFUSED_RETURNS: dict[tuple[OTSState, int], str] = {
+    (OTSState.MI, year): (
+        "OTS Michigan applies no personal exemption: tenforty's MI_1040 map "
+        "passes no exemption count, so MI-1040 line 9a ($5,600 per exemption "
+        "in 2024, $5,800 in 2025, for the filer, the spouse and each dependent) "
+        "is zero for every return (tenforty-s48h.45, tenforty-r91.10)"
+    )
+    for year in (2024, 2025)
+}
+"""Returns OTS covers but computes wrongly for every caller, refused until fixed.
+
+They are refused under ``"ots"`` and under ``"auto"`` wherever auto would send
+them to OTS. ``ots_covers`` still reports them, so the refusal names its
+reason rather than claiming OTS has no such return.
+"""
 
 
 def _year_value(year: object) -> int:
@@ -60,6 +79,64 @@ def ots_covers(year: int, state: OTSState | None) -> bool:
     return state_form is None or (year, state_form) in NATURAL_FORM_CONFIG
 
 
+def _graph_remedy(year: int, state: OTSState | None) -> str:
+    """How to compute this return on graph, for a refusal from another backend."""
+    where = f"{year}" if state is None else f"{year}/{state.value}"
+    if graph_state_in_scope(state, year):
+        return f" Use backend='graph' for {where}."
+    return (
+        f" backend='graph' with allow_unvalidated=True computes {where} on the "
+        "graph backend, which is not yet validated for it."
+    )
+
+
+def _refuse_unvalidated(year: int, state: OTSState) -> UnsupportedReturnError:
+    reasons = ", ".join(exclusion_reasons(state, year))
+    remedy = (
+        f" Use backend='ots' for {year}/{state.value}, or pass"
+        if ots_serves(year, state)
+        else " Pass"
+    )
+    return UnsupportedReturnError(
+        f"The graph backend is not yet validated for the {state.value} {year} "
+        f"return ({reasons}), so backend='graph' refuses it rather than compute "
+        f"a figure that may be wrong.{remedy} allow_unvalidated=True to compute "
+        "it on the graph backend anyway."
+    )
+
+
+def ots_serves(year: int, state: OTSState | None) -> bool:
+    """Whether OTS covers the return and does not refuse it."""
+    return ots_covers(year, state) and (state, year) not in OTS_REFUSED_RETURNS
+
+
+def _refuse_ots_return(year: int, state: OTSState) -> UnsupportedReturnError:
+    graph = (
+        " The graph backend is not yet validated for it either; backend='graph' "
+        "with allow_unvalidated=True computes it there."
+        if graph_covers(year, state) and not graph_state_in_scope(state, year)
+        else ""
+    )
+    return UnsupportedReturnError(
+        f"OTS refuses the {state.value} {year} return: "
+        f"{OTS_REFUSED_RETURNS[(state, year)]}.{graph}"
+    )
+
+
+def require_ots_serves(year: object, state: object) -> None:
+    """Raise if OTS refuses this return outright (``OTS_REFUSED_RETURNS``)."""
+    tax_year = _year_value(year)
+    tax_state = _state_value(state)
+    if tax_state is not None and (tax_state, tax_year) in OTS_REFUSED_RETURNS:
+        raise _refuse_ots_return(tax_year, tax_state)
+
+
+def _ots_route(year: int, state: OTSState | None) -> Engine:
+    if state is not None and (state, year) in OTS_REFUSED_RETURNS:
+        raise _refuse_ots_return(year, state)
+    return "ots"
+
+
 def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedReturnError:
     where = f"{year}" if state is None else f"{year}/{state.value}"
     if backend == "graph":
@@ -70,7 +147,7 @@ def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedRetur
             )
         else:
             reason = f"The graph backend has no {state.value} return for {year}."
-        if ots_covers(year, state):
+        if ots_serves(year, state):
             reason += f" Use backend='ots' or backend='auto' for {where}."
         return UnsupportedReturnError(reason)
     if backend == "ots":
@@ -85,7 +162,7 @@ def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedRetur
                 f"backend has no {state.value} return for {year}."
             )
         if graph_covers(year, state):
-            reason += f" Use backend='graph' for {where}."
+            reason += _graph_remedy(year, state)
         return UnsupportedReturnError(reason)
     reasons = (
         exclusion_reasons(state, year)
@@ -96,20 +173,33 @@ def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedRetur
         return UnsupportedReturnError(
             f"backend='auto' keeps the {state.value} {year} return off the graph "
             f"backend, which is not yet validated for it ({', '.join(reasons)}), and "
-            f"OTS has no {state.value} return for {year}. Use backend='graph' to "
-            "compute it on the graph backend anyway."
+            f"OTS has no {state.value} return for {year}. Use backend='graph' with "
+            "allow_unvalidated=True to compute it on the graph backend anyway."
         )
     return UnsupportedReturnError(f"No backend computes the return for {where}.")
 
 
-def select_backend(backend: str, year: object, state: object) -> Engine:
+def select_backend(
+    backend: str, year: object, state: object, *, allow_unvalidated: bool = False
+) -> Engine:
     """Return the engine that computes this return, or raise before evaluation.
+
+    ``allow_unvalidated`` lets ``backend="graph"`` compute a state return outside
+    graph scope; it changes nothing for "ots" or "auto".
 
     Raises:
         ValueError: ``backend`` is not one of ``BACKEND_CHOICES``.
-        UnsupportedReturnError: the selected backend cannot compute the return.
+        UnsupportedReturnError: the selected backend cannot compute the return,
+            or ``backend="graph"`` was asked for a return outside graph scope
+            without ``allow_unvalidated=True``.
 
     """
+    if not isinstance(allow_unvalidated, bool):
+        raise TypeError(
+            f"allow_unvalidated must be True or False, not {allow_unvalidated!r}: "
+            "it is an explicit acknowledgment that the graph is not yet "
+            "validated for the return."
+        )
     if backend not in BACKEND_CHOICES:
         choices = ", ".join(repr(choice) for choice in BACKEND_CHOICES)
         raise ValueError(f"Unknown backend: {backend!r}; expected one of {choices}")
@@ -118,10 +208,12 @@ def select_backend(backend: str, year: object, state: object) -> Engine:
 
     if backend == "ots":
         if ots_covers(tax_year, tax_state):
-            return "ots"
+            return _ots_route(tax_year, tax_state)
     elif backend == "graph":
         if graph_covers(tax_year, tax_state):
-            return "graph"
+            if allow_unvalidated or graph_state_in_scope(tax_state, tax_year):
+                return "graph"
+            raise _refuse_unvalidated(tax_year, tax_state)
     else:
         if (
             tax_year in AUTO_GRAPH_YEARS
@@ -130,7 +222,7 @@ def select_backend(backend: str, year: object, state: object) -> Engine:
         ):
             return "graph"
         if ots_covers(tax_year, tax_state):
-            return "ots"
+            return _ots_route(tax_year, tax_state)
     raise _refuse(backend, tax_year, tax_state)
 
 
@@ -176,13 +268,14 @@ def explain_ots_route(groups: Iterable[tuple[object, object]]) -> str:
         it = "it" if len(not_validated) == 1 else "them"
         sentences.append(
             f"backend='auto' keeps {_the_returns(not_validated)} off the graph "
-            f"backend, which is not yet validated for {it}; only "
-            f"backend='graph' computes {it} on the graph backend."
+            f"backend, which is not yet validated for {it}; only backend='graph' "
+            f"with allow_unvalidated=True computes {it} on the graph backend."
         )
     if graph_capable:
         it = "it" if len(graph_capable) == 1 else "them"
         sentences.append(
-            f"backend='ots' was requested for {_the_returns(graph_capable)}; "
+            f"backend='ots' (the default) sends {_the_returns(graph_capable)} "
+            "to OTS; "
             f"backend='graph' or backend='auto' computes {it} on the graph backend."
         )
     return " ".join(sentences)
