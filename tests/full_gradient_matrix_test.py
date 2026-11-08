@@ -27,6 +27,10 @@ from tenforty.models import TaxReturnInput
 
 from .fixtures.planning_twin import linear_path_slope
 
+# Engine-level derivative tests on CA, GA and NH, which the public API refuses
+# until tenforty-s48h.76 is fixed; none of them uses IL, MS or OR.
+pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
+
 
 def _graph_backend_available() -> bool:
     try:
@@ -133,7 +137,9 @@ def _output_at(
     delta: float,
 ) -> float:
     value = float(case.get(wrt, 0.0)) + delta
-    result = evaluate_return(backend=backend, **{**case, wrt: value})
+    result = evaluate_return(
+        backend=backend, **{**case, wrt: value}, allow_unvalidated=True
+    )
     return float(getattr(result, output))
 
 
@@ -163,13 +169,20 @@ def _graph_linear_slope(
     """
 
     def evaluate(probe: dict[str, float | int | str]) -> float:
-        return float(getattr(evaluate_return(backend="graph", **probe), output))
+        return float(
+            getattr(
+                evaluate_return(backend="graph", **probe, allow_unvalidated=True),
+                output,
+            )
+        )
 
     return linear_path_slope(case, wrt, output, step, evaluate)
 
 
 def _gradient(case: dict[str, float | int | str], wrt: str, output: str) -> float:
-    result = GraphBackend().gradient(TaxReturnInput(**case), output, wrt)
+    result = GraphBackend().gradient(
+        TaxReturnInput(**case), output, wrt, allow_unvalidated=True
+    )
     assert result is not None
     return result
 
@@ -232,7 +245,9 @@ def test_regional_gradient_matrix_around_boundaries(region, wrt, output, offset)
     assume(right is not None)
 
     analytical = _gradient(case, wrt, output)
-    vector = GraphBackend().gradients(TaxReturnInput(**case), output)
+    vector = GraphBackend().gradients(
+        TaxReturnInput(**case), output, allow_unvalidated=True
+    )
     assert vector is not None
     assert vector[wrt] == pytest.approx(analytical, abs=1e-12, rel=0.0), _failure(
         region, wrt, output, vector[wrt], analytical

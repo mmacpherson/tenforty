@@ -9,6 +9,7 @@ import pathlib
 from collections.abc import Callable, Iterable
 from functools import lru_cache
 
+from .. import state_facts as _facts
 from ..mappings import (
     DERIVED_NATURAL_SOURCES,
     FILING_STATUS_MAP,
@@ -34,7 +35,7 @@ from ..models import (
     UnsupportedInputError,
     UnsupportedReturnError,
 )
-from ..routing import GRAPH_YEARS
+from ..routing import GRAPH_YEARS, select_backend
 
 _STATE_PREFIXES = tuple(f"{name}_" for name in STATE_FORM_NAMES.values())
 _ALL_KNOWN_PREFIXES = ("us_", *_STATE_PREFIXES)
@@ -384,6 +385,12 @@ def require_supported_inputs(tax_inputs: Iterable[TaxReturnInput]) -> None:
     returns = tuple(tax_inputs)
     for tax_input in returns:
         _require_eic_facts(tax_input)
+        _facts.require_facts_for(
+            _facts.fact_row(
+                tax_input.year, tax_input.state, tax_input.filing_status, "graph"
+            ),
+            tax_input._state_facts,
+        )
         if (
             tax_input.state == OTSState.NY
             and tax_input.filing_status == OTSFilingStatus.MARRIED_SEPARATE
@@ -648,8 +655,48 @@ def _require_eic_determined_for(tax_input: TaxReturnInput, nodes: list[str]) -> 
         )
 
 
+STATE_PLANNING_DEFECT: str | None = "tenforty-s48h.76"
+"""While set, derivatives and solves of a state-dependent output are refused.
+
+The graph reports a zero state slope for IL, MS and OR although their state tax
+moves with income, so no state-dependent derivative or solve is trusted, for
+any state, until the bead is closed. Federal outputs are unaffected.
+"""
+
+
+def _require_federal_planning_output(
+    tax_input: TaxReturnInput, output: str, output_nodes: list[str]
+) -> None:
+    """Refuse a derivative or solve whose output reads a state node."""
+    if STATE_PLANNING_DEFECT is None:
+        return
+    state_nodes = [node for node in output_nodes if node.startswith(_STATE_PREFIXES)]
+    if not state_nodes:
+        return
+    state = tax_input.state.value if tax_input.state else "state"
+    raise UnsupportedReturnError(
+        f"Derivatives and solves of {output!r} on the {state} "
+        f"{tax_input.year.value} return are refused: it depends on the state "
+        f"return ({', '.join(state_nodes)}), and graph state derivatives are "
+        f"not yet reliable (they read zero for IL, MS and OR although their "
+        f"state tax moves with income; {STATE_PLANNING_DEFECT}). Ask for a "
+        "federal output, such as output='federal_total_tax', or compare "
+        "evaluate_return results. allow_unvalidated does not lift this."
+    )
+
+
+def _require_validated(year: object, state: object, allow_unvalidated: bool) -> None:
+    """Apply the public scope rule: refuse an unvalidated state unless opted in."""
+    select_backend("graph", year, state, allow_unvalidated=allow_unvalidated)
+
+
 class GraphBackend:
-    """Backend using tax computation graph with autodiff and solver support."""
+    """Backend using tax computation graph with autodiff and solver support.
+
+    Every evaluating method applies the same rule as ``backend="graph"``: a
+    state return outside graph scope raises ``UnsupportedReturnError`` before
+    computing unless ``allow_unvalidated=True``.
+    """
 
     name = "graph"
     supported_years = GRAPH_YEARS
@@ -675,10 +722,13 @@ class GraphBackend:
         require_supported_inputs([tax_input])
         return _input_runtime(tax_input)
 
-    def evaluate(self, tax_input: TaxReturnInput) -> InterpretedTaxReturn:
+    def evaluate(
+        self, tax_input: TaxReturnInput, *, allow_unvalidated: bool = False
+    ) -> InterpretedTaxReturn:
         """Evaluate tax return using graph evaluator."""
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
+        _require_validated(tax_input.year, tax_input.state, allow_unvalidated)
 
         if tax_input.state and tax_input.state != OTSState.NONE:
             if tax_input.state not in STATE_FORM_NAMES:
@@ -740,6 +790,8 @@ class GraphBackend:
         statuses: list[str],
         mode: str = "cross",
         facts: list[dict[str, object]] | None = None,
+        *,
+        allow_unvalidated: bool = False,
     ) -> dict[str, list[float | None]]:
         """Evaluate multiple scenarios efficiently using graph batch API.
 
@@ -752,6 +804,7 @@ class GraphBackend:
         year = getattr(year, "value", year)
         if not self.is_available():
             raise RuntimeError("Graph backend is not available")
+        _require_validated(year, state, allow_unvalidated)
 
         if state and state != OTSState.NONE:
             if state not in STATE_FORM_NAMES:
@@ -1093,14 +1146,21 @@ class GraphBackend:
         return [f"us_1040_{output}"]
 
     def gradient(
-        self, tax_input: TaxReturnInput, output: str, wrt: str
+        self,
+        tax_input: TaxReturnInput,
+        output: str,
+        wrt: str,
+        *,
+        allow_unvalidated: bool = False,
     ) -> float | None:
         """Compute sensitivity, using planning tangents for tax-table quantization."""
         if not self.is_available():
             return None
+        _require_validated(tax_input.year, tax_input.state, allow_unvalidated)
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
+        _require_federal_planning_output(tax_input, output, output_nodes)
         input_nodes = self._input_nodes(tax_input, wrt, output_nodes[0])
         _require_prepared_amounts_fixed(tax_input, input_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)
@@ -1108,7 +1168,7 @@ class GraphBackend:
         return evaluator.gradient_multi_output(output_nodes, input_nodes)
 
     def gradients(
-        self, tax_input: TaxReturnInput, output: str
+        self, tax_input: TaxReturnInput, output: str, *, allow_unvalidated: bool = False
     ) -> dict[str, float] | None:
         """Compute gradients for every continuous public input.
 
@@ -1119,9 +1179,11 @@ class GraphBackend:
         """
         if not self.is_available():
             return None
+        _require_validated(tax_input.year, tax_input.state, allow_unvalidated)
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
+        _require_federal_planning_output(tax_input, output, output_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, None)
         state_mapping = state_natural_to_node(tax_input.state, tax_input.year.value)
         year = tax_input.year.value
@@ -1143,7 +1205,13 @@ class GraphBackend:
         return dict(zip(natural_names, values, strict=True))
 
     def solve(
-        self, tax_input: TaxReturnInput, output: str, target: float, var: str
+        self,
+        tax_input: TaxReturnInput,
+        output: str,
+        target: float,
+        var: str,
+        *,
+        allow_unvalidated: bool = False,
     ) -> float | None:
         """Solve for input value that produces target output.
 
@@ -1159,9 +1227,11 @@ class GraphBackend:
         """
         if not self.is_available():
             return None
+        _require_validated(tax_input.year, tax_input.state, allow_unvalidated)
 
         evaluator, _ = self._create_evaluator(tax_input)
         output_nodes = self._output_nodes(tax_input, output)
+        _require_federal_planning_output(tax_input, output, output_nodes)
         input_nodes = self._input_nodes(tax_input, var, output_nodes[0])
         _require_prepared_amounts_fixed(tax_input, input_nodes)
         _require_ms_perturbation_ownership(tax_input, output_nodes, input_nodes)

@@ -30,12 +30,15 @@ SCHEDULE_3_LINE_1 = [
 
 
 def _scalar_and_zip(**inputs):
-    scalar = evaluate_return(backend="graph", state="IN", **inputs)
+    scalar = evaluate_return(
+        backend="graph", state="IN", **inputs, allow_unvalidated=True
+    )
     batch = evaluate_returns(
         backend="graph",
         mode="zip",
         state=["IN"],
         **{name: [value] for name, value in inputs.items()},
+        allow_unvalidated=True,
     )
     for name in (
         "state_adjusted_gross_income",
@@ -86,7 +89,9 @@ def test_line_8_is_state_tax_and_line_9_is_county_tax(year):
     runtime.set("in_it40_L9_county_tax", 250.0)
     assert runtime.eval("in_it40_L8_in_state_tax") == state_tax
     assert runtime.eval("in_it40_L10_in_total_tax") == pytest.approx(state_tax + 250)
-    result = evaluate_return(year=year, state="IN", w2_income=50_000, backend="graph")
+    result = evaluate_return(
+        year=year, state="IN", w2_income=50_000, backend="graph", allow_unvalidated=True
+    )
     assert result.state_total_tax == pytest.approx(state_tax)
 
 

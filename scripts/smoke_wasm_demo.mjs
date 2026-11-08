@@ -11,8 +11,12 @@ const contractModulePath = path.join(siteDirectory, "browser_contract.js");
 const calculatorModulePath = path.join(siteDirectory, "calculator.js");
 const contractPath = path.join(siteDirectory, "browser_contract.json");
 const graphlib = await import(pathToFileURL(modulePath));
-const { BrowserContractError, validateBrowserContract } =
-  await import(pathToFileURL(contractModulePath));
+const {
+  BrowserContractError,
+  BrowserTaxRuntime,
+  isValidatedJurisdiction,
+  validateBrowserContract,
+} = await import(pathToFileURL(contractModulePath));
 const {
   INPUT_GROUPS,
   SENSITIVITY_INPUTS,
@@ -66,20 +70,38 @@ for (const year of contract.supported_years) {
 
 for (const testCase of contract.parity_cases) {
   const scenario = scenarioFromParityCase(contract, testCase);
-  const sharedScenario = parseScenario(
+  const validated = isValidatedJurisdiction(
     contract,
-    `#${serializeScenario(contract, scenario)}`,
+    testCase.jurisdiction,
+    testCase.year,
   );
-  assert.deepEqual(
-    sharedScenario,
-    scenario,
-    `${testCase.id}: share URL changed the scenario`,
-  );
+  const shareUrl = `#${serializeScenario(contract, scenario)}`;
+  let computedScenario = scenario;
+  if (validated) {
+    computedScenario = parseScenario(contract, shareUrl);
+    assert.deepEqual(
+      computedScenario,
+      scenario,
+      `${testCase.id}: share URL changed the scenario`,
+    );
+  } else {
+    assert.throws(
+      () => parseScenario(contract, shareUrl),
+      /not yet validated/,
+      `${testCase.id}: a shared link to an unvalidated jurisdiction must be refused`,
+    );
+    assert.throws(
+      () => calculateScenario(graphlib, graphs.get(testCase.year), contract, scenario),
+      /not yet validated/,
+      `${testCase.id}: the runtime must refuse an unvalidated jurisdiction`,
+    );
+  }
   const actual = calculateScenario(
     graphlib,
     graphs.get(testCase.year),
     contract,
-    sharedScenario,
+    computedScenario,
+    { allowUnvalidated: !validated },
   );
 
   for (const [name, expected] of Object.entries(testCase.expected)) {
@@ -97,16 +119,130 @@ for (const testCase of contract.gradient_cases) {
     graphs.get(testCase.year),
     contract,
     scenario,
+    {
+      allowUnvalidated: !isValidatedJurisdiction(
+        contract,
+        testCase.jurisdiction,
+        testCase.year,
+      ),
+    },
   );
+  const slopesWithheld =
+    testCase.jurisdiction !== "US" && !contract.state_slopes.available;
   for (const [inputName, expectedParts] of Object.entries(testCase.expected)) {
     for (const [part, expected] of Object.entries(expectedParts)) {
       const actual = analysis.gradients[inputName][part];
+      if (slopesWithheld && part !== "federal") {
+        assert.equal(
+          actual,
+          null,
+          `${testCase.id}/${inputName}/${part}: a state slope must be withheld`,
+        );
+        continue;
+      }
       assert.ok(
         Math.abs(actual - expected) <= 1e-6,
         `${testCase.id}/${inputName}/${part}: expected ${expected}, received ${actual}`,
       );
     }
   }
+}
+
+const offered = Object.keys(contract.jurisdictions).filter((code) =>
+  contract.supported_years.every((year) =>
+    isValidatedJurisdiction(contract, code, year),
+  ),
+);
+assert.deepEqual(
+  new Set(offered),
+  new Set(["US", "IL", "MS", "OR", "AK", "FL", "NV", "SD", "TN", "TX", "WA", "WY"]),
+  "the calculator offers exactly the validated jurisdictions",
+);
+
+const illinois = {
+  year: 2025,
+  jurisdiction: "IL",
+  filingStatus: "single",
+  inputs: { ...scenarioFromParityCase(contract, contract.gradient_cases[0]).inputs },
+};
+illinois.inputs.w2_income = 85000;
+const illinoisAnalysis = analyzeScenario(
+  graphlib,
+  graphs.get(2025),
+  contract,
+  illinois,
+);
+assert.equal(contract.state_slopes.available, false);
+assert.equal(illinoisAnalysis.gradients.w2_income.state, null);
+assert.equal(illinoisAnalysis.gradients.w2_income.total, null);
+assert.ok(
+  illinoisAnalysis.gradients.w2_income.federal > 0,
+  "federal slopes stay available on a state return",
+);
+const illinoisAttempt = analyzeScenario(
+  graphlib,
+  graphs.get(2025),
+  contract,
+  illinois,
+  { includeStateSlopes: true, allowUnvalidated: false },
+);
+assert.equal(
+  illinoisAttempt.gradients.w2_income.state,
+  null,
+  "no caller option restores a withheld state slope",
+);
+assert.equal(illinoisAttempt.gradients.w2_income.total, null);
+assert.ok(illinoisAnalysis.results.state_total_tax > 0);
+
+const mississippi = { ...illinois, jurisdiction: "MS" };
+assert.ok(
+  calculateScenario(graphlib, graphs.get(2025), contract, mississippi)
+    .state_total_tax > 0,
+  "a Single MS return computes",
+);
+for (const filingStatus of [
+  "married_joint",
+  "qualifying_widow",
+  "head_of_household",
+]) {
+  assert.throws(
+    () =>
+      calculateScenario(graphlib, graphs.get(2025), contract, {
+        ...mississippi,
+        filingStatus,
+      }),
+    (error) =>
+      error instanceof BrowserContractError &&
+      /calculator doesn't collect yet/.test(error.message) &&
+      typeof error.detail === "string" &&
+      error.detail.length > 0,
+    `MS ${filingStatus} needs facts the browser cannot supply`,
+  );
+}
+for (const name of ["schedule_1_income", "itemized_deductions"]) {
+  assert.throws(
+    () =>
+      calculateScenario(graphlib, graphs.get(2025), contract, {
+        ...mississippi,
+        inputs: { ...mississippi.inputs, [name]: 1000 },
+      }),
+    new RegExp(`${name} is not supported for MS/2025`),
+    `a nonzero ${name} is refused for MS, as in Python`,
+  );
+}
+
+for (const value of ["true", 1, null]) {
+  assert.throws(
+    () =>
+      new BrowserTaxRuntime(graphlib, graphs.get(2025), contract, {
+        year: 2025,
+        jurisdiction: "CA",
+        filingStatus: "single",
+        allowUnvalidated: value,
+      }),
+    /allowUnvalidated must be true or false/,
+    `allowUnvalidated=${JSON.stringify(value)} must not acknowledge`,
+  );
 }
 
 const ordinaryScenario = scenarioFromParityCase(
@@ -142,5 +278,5 @@ assert.throws(
 );
 
 console.log(
-  `WASM browser contract passed: ${contract.parity_cases.length} value cases, ${contract.gradient_cases.length} gradient regions, ${contract.supported_years.length} tax years, and ${Object.keys(contract.jurisdictions).length} jurisdictions`,
+  `WASM browser contract passed: ${contract.parity_cases.length} value cases, ${contract.gradient_cases.length} gradient regions, ${contract.supported_years.length} tax years, and ${offered.length} of ${Object.keys(contract.jurisdictions).length} jurisdictions offered`,
 );

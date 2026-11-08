@@ -157,7 +157,12 @@ def test_lines_17_to_20_follow_one_reading(year, status, case, agi, primary, tru
 def test_public_result_follows_one_reading(year, status, case, agi, primary, truncated):
     """The public taxable income and tax come from the same reading."""
     result = evaluate_return(
-        backend="graph", year=year, state="ME", filing_status=status, w2_income=agi
+        backend="graph",
+        year=year,
+        state="ME",
+        filing_status=status,
+        w2_income=agi,
+        allow_unvalidated=True,
     )
     readings = [
         (line_19, line_20) for _, _, line_19, line_20 in _readings(primary, truncated)

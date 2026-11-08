@@ -59,7 +59,13 @@ def test_every_entry_point_defaults_to_auto(function):
 def test_each_choice_selects_its_deduction(backend, year):
     """Standard forces the standard deduction even when Schedule A is larger."""
     standard = STANDARD_DEDUCTION_SINGLE[year]
-    common = dict(year=year, filing_status="Single", w2_income=100_000, backend=backend)
+    common = dict(
+        year=year,
+        filing_status="Single",
+        w2_income=100_000,
+        backend=backend,
+        allow_unvalidated=True,
+    )
     larger = standard + 5_000
     smaller = 10_000
 
@@ -86,6 +92,7 @@ def test_forced_standard_ignores_state_and_local_taxes(backend):
         itemized_deductions=10_000,
         state_and_local_taxes=9_000,
         backend=backend,
+        allow_unvalidated=True,
     )
 
     auto = evaluate_return(standard_or_itemized="Auto", **common)
@@ -173,16 +180,21 @@ def test_forced_standard_reaches_gradients_and_solver():
 
     # At $60,000 of wages Auto itemizes $30,000, leaving taxable income of
     # 30,000 in the 12% bracket; forced Standard ignores the itemized amount.
-    auto_slope = marginal_rate(w2_income=60_000, wrt="itemized_deductions", **common)
+    auto_slope = marginal_rate(
+        w2_income=60_000, wrt="itemized_deductions", **common, allow_unvalidated=True
+    )
     forced_slope = marginal_rate(
         w2_income=60_000,
         wrt="itemized_deductions",
         standard_or_itemized="Standard",
         **common,
+        allow_unvalidated=True,
     )
     # $13,847 is the 2024 Tax Table row 85,400-85,450, Single; forced Standard
     # reaches it at wages of 100,000 plus up to $50.
-    forced_income = solve_for_income(13_847, standard_or_itemized="Standard", **common)
+    forced_income = solve_for_income(
+        13_847, standard_or_itemized="Standard", **common, allow_unvalidated=True
+    )
 
     assert auto_slope == pytest.approx(-0.12)
     assert forced_slope == pytest.approx(0.0)
@@ -198,6 +210,7 @@ def test_forced_standard_reaches_a_state_importing_federal_taxable_income():
         w2_income=100_000,
         itemized_deductions=20_000,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     auto = evaluate_return(**common)

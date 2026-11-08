@@ -89,6 +89,7 @@ def test_graph_matches_official_values(case: OfficialCase):
         filing_status=case.filing_status,
         backend="graph",
         **inputs,
+        allow_unvalidated=True,
     )
     observed = {quantity: getattr(result, quantity) for quantity in QUANTITIES}
     explained, detail = judge(case, observed)

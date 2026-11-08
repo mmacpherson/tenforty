@@ -71,12 +71,15 @@ DEPENDENT_EXEMPTION = 2_320
 
 
 def _scalar_and_zip(**inputs):
-    scalar = evaluate_return(backend="graph", state="KS", **inputs)
+    scalar = evaluate_return(
+        backend="graph", state="KS", **inputs, allow_unvalidated=True
+    )
     batch = evaluate_returns(
         backend="graph",
         mode="zip",
         state=["KS"],
         **{name: [value] for name, value in inputs.items()},
+        allow_unvalidated=True,
     )
     for name in ("state_taxable_income", "state_total_tax"):
         assert batch[name][0] == pytest.approx(getattr(scalar, name), abs=1e-8)

@@ -268,8 +268,12 @@ def test_se_tax_graph_batch_matches_single():
         w2_income=168_600,
         self_employment_income=60_000,
     )
-    single = evaluate_return(backend="graph", **kwargs).federal_se_tax
-    batch = evaluate_returns(backend="graph", **{k: [v] for k, v in kwargs.items()})
+    single = evaluate_return(
+        backend="graph", **kwargs, allow_unvalidated=True
+    ).federal_se_tax
+    batch = evaluate_returns(
+        backend="graph", **{k: [v] for k, v in kwargs.items()}, allow_unvalidated=True
+    )
     assert batch["federal_se_tax"][0] == pytest.approx(single, abs=0.01)
 
 

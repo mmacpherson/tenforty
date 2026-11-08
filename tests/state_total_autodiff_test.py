@@ -1,11 +1,26 @@
-"""State-aware total-tax autodiff and solver contract."""
+"""State-aware total-tax autodiff and solver contract.
+
+These are engine-level checks of state derivatives, which the public API
+refuses until tenforty-s48h.76 is fixed (graph state derivatives read zero for
+IL, MS and OR). The module lifts that refusal; IL, MS and OR are left out of
+the derivative identities, which would only compare two equally broken paths,
+and their defect is pinned by a strict xfail below.
+"""
 
 import pytest
 
-from tenforty import evaluate_return, marginal_rate, solve_for_income
+from tenforty import (
+    evaluate_return,
+    marginal_rate,
+    solve_for_income,
+)
 from tenforty.mappings import STATE_GRAPH_CONFIGS
 
+pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
+
 GRAPH_STATES = sorted(state.value for state in STATE_GRAPH_CONFIGS if state.value)
+ZERO_STATE_SLOPE_STATES = ("IL", "MS", "OR")
+DIFFERENTIABLE_STATES = [s for s in GRAPH_STATES if s not in ZERO_STATE_SLOPE_STATES]
 
 
 def _total_tax_at_wages(state: str, wages: float) -> float:
@@ -16,6 +31,7 @@ def _total_tax_at_wages(state: str, wages: float) -> float:
         w2_income=wages,
         backend="graph",
         eitc_eligible=False,
+        allow_unvalidated=True,
     ).total_tax
 
 
@@ -38,6 +54,7 @@ def test_state_total_marginal_matches_finite_difference():
         state="CA",
         filing_status="Single",
         w2_income=wages,
+        allow_unvalidated=True,
     )
 
     assert rate == pytest.approx(finite_difference, abs=1e-9)
@@ -53,8 +70,12 @@ def test_explicit_federal_output_excludes_state_tax():
         "w2_income": 100_000.0,
     }
 
-    federal_field = marginal_rate(**kwargs, output="federal_total_tax")
-    federal_node = marginal_rate(**kwargs, output="us_1040_L24_total_tax")
+    federal_field = marginal_rate(
+        **kwargs, output="federal_total_tax", allow_unvalidated=True
+    )
+    federal_node = marginal_rate(
+        **kwargs, output="us_1040_L24_total_tax", allow_unvalidated=True
+    )
 
     assert federal_field == pytest.approx(0.22, abs=1e-9)
     assert federal_node == pytest.approx(federal_field, abs=1e-9)
@@ -69,8 +90,10 @@ def test_no_tax_state_total_matches_federal():
         "w2_income": 100_000.0,
     }
 
-    total_rate = marginal_rate(**kwargs)
-    federal_rate = marginal_rate(**kwargs, output="federal_total_tax")
+    total_rate = marginal_rate(**kwargs, allow_unvalidated=True)
+    federal_rate = marginal_rate(
+        **kwargs, output="federal_total_tax", allow_unvalidated=True
+    )
 
     assert total_rate == pytest.approx(federal_rate, abs=1e-9)
 
@@ -86,17 +109,26 @@ def test_state_mapped_interest_survives_federal_kink_probe():
     }
     step = 0.01
 
-    total_rate = marginal_rate(**kwargs, wrt="taxable_interest")
+    total_rate = marginal_rate(**kwargs, wrt="taxable_interest", allow_unvalidated=True)
     federal_rate = marginal_rate(
-        **kwargs, output="federal_total_tax", wrt="taxable_interest"
+        **kwargs,
+        output="federal_total_tax",
+        wrt="taxable_interest",
+        allow_unvalidated=True,
     )
     state_rate = marginal_rate(
-        **kwargs, output="state_total_tax", wrt="taxable_interest"
+        **kwargs,
+        output="state_total_tax",
+        wrt="taxable_interest",
+        allow_unvalidated=True,
     )
-    base_tax = evaluate_return(**kwargs, backend="graph").total_tax
+    base_tax = evaluate_return(
+        **kwargs, backend="graph", allow_unvalidated=True
+    ).total_tax
     right_tax = evaluate_return(
         **(kwargs | {"taxable_interest": kwargs["taxable_interest"] + step}),
         backend="graph",
+        allow_unvalidated=True,
     ).total_tax
 
     assert total_rate == pytest.approx(federal_rate + state_rate, abs=1e-12)
@@ -112,6 +144,7 @@ def test_state_total_solver_roundtrips_public_total():
         year=2024,
         state="CA",
         filing_status="Single",
+        allow_unvalidated=True,
     )
 
     result = evaluate_return(
@@ -120,13 +153,14 @@ def test_state_total_solver_roundtrips_public_total():
         filing_status="Single",
         w2_income=solved_wages,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     assert result.total_tax == pytest.approx(target, abs=0.01)
     assert result.federal_total_tax < target
 
 
-@pytest.mark.parametrize("state", GRAPH_STATES)
+@pytest.mark.parametrize("state", DIFFERENTIABLE_STATES)
 def test_total_marginal_decomposes_into_federal_plus_state(state):
     """Every state's total-tax derivative is its two parts, and nothing else.
 
@@ -151,9 +185,13 @@ def test_total_marginal_decomposes_into_federal_plus_state(state):
         "eitc_eligible": False,
     }
 
-    total = marginal_rate(**kwargs)
-    federal = marginal_rate(**kwargs, output="federal_total_tax")
-    state_rate = marginal_rate(**kwargs, output="state_total_tax")
+    total = marginal_rate(**kwargs, allow_unvalidated=True)
+    federal = marginal_rate(
+        **kwargs, output="federal_total_tax", allow_unvalidated=True
+    )
+    state_rate = marginal_rate(
+        **kwargs, output="state_total_tax", allow_unvalidated=True
+    )
 
     assert total == pytest.approx(federal + state_rate, abs=1e-12)
 
@@ -181,6 +219,36 @@ def test_solver_targets_the_public_total_in_every_state(state):
         state=state,
         filing_status="Single",
         eitc_eligible=False,
+        allow_unvalidated=True,
     )
 
     assert _total_tax_at_wages(state, wages) == pytest.approx(target, abs=0.01)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
+@pytest.mark.xfail(
+    strict=True,
+    reason="tenforty-s48h.76: the graph state derivative reads zero for IL, MS, OR",
+)
+def test_state_slope_matches_a_finite_difference_in_il_ms_or(state, year):
+    """Witness for s48h.76: the state slope should match the state tax's change.
+
+    At $85,000 of Single wages the state tax moves with income (a structural
+    finite difference on the graph's own evaluation, not a tax-value fixture),
+    but the derivative reads zero. When the derivative is fixed this passes,
+    the strict xfail fails, and the public refusal can be lifted.
+    """
+    kwargs = {"year": year, "state": state, "filing_status": "Single"}
+
+    def state_tax(wages: float) -> float:
+        return evaluate_return(
+            **kwargs, w2_income=wages, backend="graph", eitc_eligible=False
+        ).state_total_tax
+
+    finite_difference = (state_tax(85_500.0) - state_tax(84_500.0)) / 1_000.0
+    assert finite_difference > 0.01
+    slope = marginal_rate(
+        **kwargs, w2_income=85_000.0, output="state_total_tax", eitc_eligible=False
+    )
+    assert slope == pytest.approx(finite_difference, abs=0.005)

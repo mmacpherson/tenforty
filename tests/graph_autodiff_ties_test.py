@@ -33,6 +33,10 @@ from tenforty.models import TaxReturnInput
 from .fixtures.planning_twin import SMALL_STEP, row_offsets, twin_output
 from .graph_autodiff_properties_test import skip_if_graph_unavailable
 
+# Engine-level derivative tests on CA, GA and NH, which the public API refuses
+# until tenforty-s48h.76 is fixed; none of them uses IL, MS or OR.
+pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
+
 STANDARD_DEDUCTION = {
     (2024, "Single"): 14_600.0,
     (2024, "Married/Joint"): 29_200.0,
@@ -104,7 +108,10 @@ def same_row_zero_band_returns(draw):
 def test_zero_band_dividends_add_no_tax_at_a_worksheet_tie(case):
     """Lines 23 and 24 tie; the right-hand derivative is the 0% band's zero."""
     gradient = GraphBackend().gradient(
-        TaxReturnInput(**case), "federal_total_tax", "qualified_dividends"
+        TaxReturnInput(**case),
+        "federal_total_tax",
+        "qualified_dividends",
+        allow_unvalidated=True,
     )
 
     assert gradient == pytest.approx(0.0, abs=1e-9), case
@@ -149,7 +156,10 @@ def test_zero_band_dividends_add_no_tax_at_a_worksheet_tie(case):
 def test_recorded_witnesses(case):
     """The deep-sweep witnesses: each is a line 23 / line 24 tie."""
     gradient = GraphBackend().gradient(
-        TaxReturnInput(**case), "federal_total_tax", "qualified_dividends"
+        TaxReturnInput(**case),
+        "federal_total_tax",
+        "qualified_dividends",
+        allow_unvalidated=True,
     )
 
     assert gradient == pytest.approx(0.0, abs=1e-9)
@@ -185,10 +195,16 @@ def test_combined_return_at_a_worksheet_tie_takes_the_right_hand_slope():
     right = twin_at(1.0) - center
     backend = GraphBackend()
     federal = backend.gradient(
-        TaxReturnInput(**case), "federal_total_tax", "qualified_dividends"
+        TaxReturnInput(**case),
+        "federal_total_tax",
+        "qualified_dividends",
+        allow_unvalidated=True,
     )
     combined = backend.gradient(
-        TaxReturnInput(**case), "total_tax", "qualified_dividends"
+        TaxReturnInput(**case),
+        "total_tax",
+        "qualified_dividends",
+        allow_unvalidated=True,
     )
 
     assert right == pytest.approx(right_short, abs=1e-4)
@@ -226,7 +242,7 @@ def test_opening_tax_table_row_edges_take_the_right_hand_slope(year, status, edg
     right_short = (twin_at(SMALL_STEP) - center) / ((wages + SMALL_STEP) - wages)
     right = twin_at(1.0) - center
     analytical = GraphBackend().gradient(
-        TaxReturnInput(**case), "federal_total_tax", "w2_income"
+        TaxReturnInput(**case), "federal_total_tax", "w2_income", allow_unvalidated=True
     )
 
     assert right == pytest.approx(right_short, abs=1e-4)

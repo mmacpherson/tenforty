@@ -90,7 +90,7 @@ backend applied its own shipped convention:
 | OTS | Schedule A line 6, "other taxes" | Added back in full | `added_back` |
 | Graph | Line 16, "other itemized deductions" | Allowed in full | `allowed` |
 
-That is ledger entry F12 in [Migrating to the graph default](migrating-to-graph-default.md).
+That is ledger entry F12 in [Migrating between backends](migrating-to-graph-default.md).
 Mike approved keeping each backend's shipped numbers for a stated transition.
 It is a compatibility exception for shipped behaviour, not an AMT default.
 

@@ -43,8 +43,10 @@ def test_no_tax_status_includes_the_agi_threshold(year, status, threshold, offse
     inputs = dict(
         year=year, state="MA", filing_status=status, w2_income=threshold + offset
     )
-    scalar = evaluate_return(**inputs, backend="graph")
-    batch = evaluate_returns(**inputs, backend="graph", mode="zip")
+    scalar = evaluate_return(**inputs, backend="graph", allow_unvalidated=True)
+    batch = evaluate_returns(
+        **inputs, backend="graph", mode="zip", allow_unvalidated=True
+    )
     assert batch["state_total_tax"][0] == scalar.state_total_tax
     if offset <= 0:
         assert scalar.state_total_tax == 0
@@ -186,6 +188,7 @@ def test_general_mixed_income_no_tax_status_remains_deferred(year):
         w2_income=7_500,
         ordinary_dividends=100,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert result.state_total_tax == 0
 

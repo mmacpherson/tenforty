@@ -15,6 +15,7 @@ tenforty.evaluate_return(
     filing_status="Married/Joint",
     w2_income=90_000,
     backend="graph",
+    allow_unvalidated=True,  # Ohio is outside graph scope
     state_facts=OH(spouses_both_have_qualifying_income=False),
 )
 ```
@@ -180,8 +181,9 @@ Those graph controls do not replace or default a missing natural MS fact.
 - **Required facts.** Some facts have no default (see below). Every row whose
   backend, state, year and status needs one must have it. Otherwise the call
   raises `UnsupportedInputError`, and the message names the fact and shows how
-  to pass it. Ohio is outside `backend="auto"` scope, so a call on the default
-  backend never meets the Ohio requirement.
+  to pass it. Ohio is outside graph scope, so a call on the OTS default or
+  `backend="auto"` never meets the Ohio requirement; graph Ohio needs
+  `backend="graph"` with `allow_unvalidated=True`.
 - **Checked before anything runs.** Every check runs before any return is
   computed, under every `on_error` policy. A batch is refused whole; it never
   yields partial results or NaN rows for these errors.

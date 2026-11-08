@@ -178,7 +178,11 @@ def test_published_full_year_chart_boundaries(
 def test_natural_witnesses_scalar_and_batch(wages, taxable, tax):
     """Archived witnesses reach both Python surfaces; E1 corrects the $110,000 case."""
     kwargs = dict(
-        year=2024, state="OR", filing_status="Single", w2_income=wages, backend="graph"
+        year=2024,
+        state="OR",
+        filing_status="Single",
+        w2_income=wages,
+        backend="graph",
     )
     scalar = evaluate_return(**kwargs)
     batch = evaluate_returns(**kwargs, mode="zip")

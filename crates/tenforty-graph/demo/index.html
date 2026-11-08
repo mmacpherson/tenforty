@@ -32,7 +32,8 @@
     <main id="calculator">
       <section class="intro" aria-labelledby="page-title">
         <p class="eyebrow">
-          Federal + all 50 states + DC · exact local effects
+          So far, validated for federal returns and IL, MS, OR + the eight
+          no-income-tax states · 2024–2025
         </p>
         <h1 id="page-title">See what the<br />next dollar does.</h1>
         <p class="intro-copy">
@@ -66,6 +67,16 @@
         </div>
       </section>
 
+      <div id="notice-banner" class="error-banner" role="status" hidden>
+        <div>
+          <strong id="notice-title"></strong>
+          <p id="notice-message"></p>
+        </div>
+        <button id="dismiss-notice" type="button" aria-label="Dismiss notice">
+          ×
+        </button>
+      </div>
+
       <div id="error-banner" class="error-banner" role="alert" hidden>
         <div>
           <strong>We couldn’t calculate this scenario.</strong>
@@ -97,7 +108,8 @@
 
           <div class="next-dollar-readout" aria-live="polite">
             <div class="next-dollar-number">
-              <strong id="next-dollar-cents">—</strong><span>¢</span>
+              <strong id="next-dollar-cents">—</strong
+              ><span id="next-dollar-unit">¢</span>
             </div>
             <p>of the next $1 goes to modeled income tax</p>
           </div>

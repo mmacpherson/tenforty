@@ -21,6 +21,7 @@ from pydantic import TypeAdapter
 
 from . import state_facts as _facts
 from ._ots_extension import load_otslib
+from .graph_scope import graph_state_in_scope
 from .models import (
     FINITE_FLOAT_COLUMNS,
     LEGACY_ITEMIZED_MESSAGE,
@@ -56,11 +57,13 @@ from .models import (
     UnsupportedReturnError,
     validate_on_error,
 )
+from .ots_state_gaps import require_ots_state_inputs
 from .routing import (
     BackendChoice,
     Engine,
     explain_ots_route,
     graph_covers,
+    require_ots_serves,
     select_backend,
 )
 from .state_facts import StateFacts
@@ -866,7 +869,8 @@ _OTS_REFUSED_WHEN_UNREAD = {
         "If you meant a number of dependents, pass it as num_dependents; "
         "exemption dollars are not converted to a count. Otherwise use "
         "backend='graph' for a 2024 or later state and year whose graph maps "
-        "dependent_exemptions."
+        "dependent_exemptions (with allow_unvalidated=True for a state outside "
+        "graph scope)."
     ),
     "incentive_stock_option_gains": (
         "No other input carries the Form 6251 incentive stock option "
@@ -1022,7 +1026,12 @@ def _graph_remedy(year: int | None, state: OTSState) -> str:
     """Suggest graph only where it computes the whole requested return."""
     tax_state = None if state in (None, OTSState.NONE) else state
     if year is not None and graph_covers(year, tax_state):
-        return " backend='graph' computes it."
+        if graph_state_in_scope(tax_state, year):
+            return " backend='graph' computes it."
+        return (
+            " backend='graph' with allow_unvalidated=True computes it on the graph "
+            "backend, which is not yet validated for this state."
+        )
     return " No other backend computes this return."
 
 
@@ -1068,9 +1077,12 @@ def require_ots_supports(
     """Refuse an OTS return OTS would compute wrongly, before it is evaluated.
 
     It would drop an input, misstate the deduction election, or misplace a
-    federal_itemized combination OTS cannot carry exactly.
+    federal_itemized combination OTS cannot carry exactly, or the return is one
+    OTS refuses outright (``routing.OTS_REFUSED_RETURNS``).
     """
+    require_ots_serves(year, state)
     _require_ots_reads_inputs(year, state, natural_form_values)
+    require_ots_state_inputs(year, state, natural_form_values)
     _require_ots_federal_itemized(state, natural_form_values, year)
     if state not in _OTS_STATES_READING_FEDERAL_SCHEDULE_A:
         return
@@ -1085,7 +1097,8 @@ def require_ots_supports(
         f"with Schedule A inputs ({details}): its {state.value} program builds the "
         "state itemized deduction from the federal Schedule A, which OTS must "
         "leave empty to force the standard deduction. Use backend='graph' where "
-        "it covers the year, or standard_or_itemized='Auto'."
+        "it covers the year (with allow_unvalidated=True for a state outside "
+        "graph scope), or standard_or_itemized='Auto'."
     )
 
 
@@ -1389,7 +1402,7 @@ def _evaluate_with_engine(
         else:
             from .backends.graph import GraphBackend
 
-            result = GraphBackend().evaluate(tax_input)
+            result = GraphBackend().evaluate(tax_input, allow_unvalidated=True)
             itemizes = result._federal_itemizes
         return result.model_copy(
             update={
@@ -1466,7 +1479,7 @@ def evaluate_return(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "auto",
+    backend: BackendChoice = "ots",
     *,
     state_and_local_taxes: float = 0.0,
     qualified_tips: float = 0.0,
@@ -1480,13 +1493,16 @@ def evaluate_return(
     eitc_eligible: bool | None = None,
     federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
+    allow_unvalidated: bool = False,
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
 
-    ``backend`` is "auto" (default), "ots", or "graph". "auto" computes a
+    ``backend`` is "ots" (default), "auto", or "graph". "auto" computes a
     2024-2025 return on graph when it is federal-only or its state is in graph
-    scope (``tenforty.graph_scope``), and on OTS otherwise; pass "ots" for the
-    behavior of releases whose default was OTS. An explicit backend is never
+    scope (``tenforty.graph_scope``), and on OTS otherwise. "graph" computes a
+    2024-2025 return on graph; a state return outside graph scope, which graph
+    is not yet validated for, raises ``UnsupportedReturnError`` naming the
+    reasons, unless ``allow_unvalidated=True``. An explicit backend is never
     reinterpreted. A request no backend can serve raises
     ``UnsupportedReturnError`` before evaluation, whatever ``on_error`` says. A
     computation that fails raises under ``on_error="raise"``; under "warn" or
@@ -1546,7 +1562,12 @@ def evaluate_return(
         input_data.year, input_data.state, input_data.filing_status, None
     )
     _facts.check_projection(models, [row])
-    engine = select_backend(backend, input_data.year, input_data.state)
+    engine = select_backend(
+        backend,
+        input_data.year,
+        input_data.state,
+        allow_unvalidated=allow_unvalidated,
+    )
     row = replace(row, engine=engine)
     _check_routed_facts(models, [row])
     _require_available(engine, [(input_data.year, input_data.state)])
@@ -1583,7 +1604,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "auto",
+    backend: BackendChoice = "ots",
     mode: Literal["cross", "zip"] = "cross",
     *,
     state_and_local_taxes: list[float] | float = 0.0,
@@ -1598,13 +1619,16 @@ def evaluate_returns(
     eitc_eligible: list[bool | None] | bool | None = None,
     federal_itemized: list[FederalItemized | None] | FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
+    allow_unvalidated: bool = False,
 ) -> pl.DataFrame:
     """Evaluate tax returns for a grid (cross) or aligned samples (zip) of inputs.
 
     Pass ``mode="cross"`` (default) for Cartesian product or ``mode="zip"``
     for element-wise evaluation with scalar broadcasting. ``backend`` is chosen
-    as in ``evaluate_return``: "auto" (default) splits the batch by year and
-    picks the engine per year and state; "ots" or "graph" forces one.
+    as in ``evaluate_return``: "ots" (default) or "graph" forces one engine;
+    "auto" splits the batch by year and picks the engine per year and state.
+    ``allow_unvalidated`` is as in ``evaluate_return``. Every row is routed
+    before any is evaluated, so one refused row refuses the whole batch.
 
     Example:
     -------
@@ -1858,7 +1882,8 @@ def evaluate_returns(
     else:
         groups = list(zip(years, states_of_residence, strict=True))
     engines = {
-        group: select_backend(backend, *group) for group in dict.fromkeys(groups)
+        group: select_backend(backend, *group, allow_unvalidated=allow_unvalidated)
+        for group in dict.fromkeys(groups)
     }
     _check_routed_facts(
         models,
@@ -1997,7 +2022,7 @@ _BATCH_AXIS_FIELDS = frozenset(
         "standard_or_itemized",
     }
 )
-_BATCH_OPTIONS = frozenset({"on_error", "backend", "mode"})
+_BATCH_OPTIONS = frozenset({"on_error", "backend", "mode", "allow_unvalidated"})
 _GRAPH_PASSTHROUGH_FIELDS = tuple(
     name
     for name in inspect.signature(evaluate_returns).parameters
@@ -2150,6 +2175,7 @@ def _graph_batch_outputs(
             [row["filing_status"] for row in rows],
             mode="zip",
             facts=facts,
+            allow_unvalidated=True,
         )
         return [
             {field: batch[field][i] for field in (*_OUTPUT_COLUMNS, FEDERAL_ITEMIZES)}
@@ -2180,7 +2206,12 @@ def _scalar_rows(
     models: dict[str, StateFacts],
     fact_rows: list[_facts.FactRow],
 ) -> list[dict]:
-    """Evaluate rows one by one, each with only the facts active on it."""
+    """Evaluate rows one by one, each with only the facts active on it.
+
+    The batch routed every row before evaluating any, under the caller's
+    ``allow_unvalidated``, so ``engine`` is already the decision; routing a row
+    again must not re-apply scope to it.
+    """
     results = []
     for params, row in zip(params_rows, fact_rows, strict=True):
         model = models.get(row.state or "")
@@ -2192,6 +2223,7 @@ def _scalar_rows(
                 on_error=policy,
                 backend=engine,
                 state_facts=type(model)(**active) if active else None,
+                allow_unvalidated=True,
             )
         output = result.model_dump(exclude={"assumptions"})
         output["assumptions"] = (
@@ -2224,14 +2256,23 @@ def _require_differentiable(tax_input: TaxReturnInput, name: str) -> None:
         )
 
 
-def _graph_facts(tax_input: TaxReturnInput, state_facts: StateFactsArgument) -> None:
-    """Route a graph-only call and apply its state facts, held fixed throughout."""
+def _graph_facts(
+    tax_input: TaxReturnInput,
+    state_facts: StateFactsArgument,
+    allow_unvalidated: bool,
+) -> None:
+    """Route a graph-only call and apply its state facts, held fixed throughout.
+
+    A state return outside graph scope is refused unless ``allow_unvalidated``.
+    """
     models = _facts.normalize(state_facts)
     row = _facts.fact_row(
         tax_input.year, tax_input.state, tax_input.filing_status, None
     )
     _facts.check_projection(models, [row])
-    select_backend("graph", tax_input.year, tax_input.state)
+    select_backend(
+        "graph", tax_input.year, tax_input.state, allow_unvalidated=allow_unvalidated
+    )
     row = replace(row, engine="graph")
     _check_routed_facts(models, [row])
     _attach_facts(tax_input, models, row)
@@ -2272,12 +2313,18 @@ def marginal_rate(
     eitc_eligible: bool | None = None,
     federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
+    allow_unvalidated: bool = False,
     wrt: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
     """Compute marginal tax rate via autodiff (graph backend only).
 
-    This computes the derivative of `output` with respect to `wrt`.
+    This computes the derivative of `output` with respect to `wrt`. A state
+    return outside graph scope, which graph is not yet validated for, raises
+    ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
+    Any output that depends on the state return (a state output, ``total_tax``
+    on a state return, a raw state node) is refused until tenforty-s48h.76 is
+    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
     """
     if wrt in _DISCRETE_INPUTS:
         raise ValueError(f"{wrt} is discrete and cannot be differentiated")
@@ -2319,11 +2366,11 @@ def marginal_rate(
 
     from .backends import require_available
 
-    _graph_facts(tax_input, state_facts)
+    _graph_facts(tax_input, state_facts, allow_unvalidated)
     backend = require_available("graph")
 
     _require_differentiable(tax_input, wrt)
-    result = backend.gradient(tax_input, output, wrt)
+    result = backend.gradient(tax_input, output, wrt, allow_unvalidated=True)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
 
@@ -2365,13 +2412,19 @@ def marginal_rates(
     eitc_eligible: bool | None = None,
     federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
+    allow_unvalidated: bool = False,
     output: str = "total_tax",
 ) -> dict[str, float]:
     """Compute marginal rates for every continuous public input.
 
     Smooth inputs are differentiated together in one reverse pass per resolved
     output. At a piecewise boundary, affected entries use the composed
-    function's right-hand derivative, matching :func:`marginal_rate`.
+    function's right-hand derivative, matching :func:`marginal_rate`. A state
+    return outside graph scope, which graph is not yet validated for, raises
+    ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
+    Any output that depends on the state return (a state output, ``total_tax``
+    on a state return, a raw state node) is refused until tenforty-s48h.76 is
+    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
     """
     warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
@@ -2411,10 +2464,10 @@ def marginal_rates(
 
     from .backends import require_available
 
-    _graph_facts(tax_input, state_facts)
+    _graph_facts(tax_input, state_facts, allow_unvalidated)
     backend = require_available("graph")
 
-    result = backend.gradients(tax_input, output)
+    result = backend.gradients(tax_input, output, allow_unvalidated=True)
     if result is None:
         raise RuntimeError("Graph backend does not support autodiff")
 
@@ -2456,10 +2509,18 @@ def solve_for_income(
     eitc_eligible: bool | None = None,
     federal_itemized: FederalItemized | None = None,
     state_facts: StateFactsArgument = None,
+    allow_unvalidated: bool = False,
     for_input: str = "w2_income",
     output: str = "total_tax",
 ) -> float:
-    """Solve for an input value that produces a target output (graph backend only)."""
+    """Solve for an input value that produces a target output (graph backend only).
+
+    A state return outside graph scope, which graph is not yet validated for, raises
+    ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
+    Any output that depends on the state return (a state output, ``total_tax``
+    on a state return, a raw state node) is refused until tenforty-s48h.76 is
+    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    """
     if for_input in _DISCRETE_INPUTS:
         raise ValueError(f"{for_input} is discrete and cannot be solved continuously")
     warn_legacy_itemized([itemized_deductions])
@@ -2499,11 +2560,17 @@ def solve_for_income(
 
     from .backends import require_available
 
-    _graph_facts(tax_input, state_facts)
+    _graph_facts(tax_input, state_facts, allow_unvalidated)
     backend = require_available("graph")
 
     _require_differentiable(tax_input, for_input)
-    result = backend.solve(tax_input, output=output, target=target_tax, var=for_input)
+    result = backend.solve(
+        tax_input,
+        output=output,
+        target=target_tax,
+        var=for_input,
+        allow_unvalidated=True,
+    )
     if result is None:
         raise RuntimeError("Graph backend solver did not converge")
 
