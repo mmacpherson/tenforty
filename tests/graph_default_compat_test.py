@@ -577,11 +577,20 @@ def test_auto_differs_from_ots_only_as_the_ledger_explains(
 @pytest.mark.parametrize("status", ("Single", "Married/Joint"))
 @pytest.mark.requires_ots
 def test_auto_equals_ots_outside_graph_scope(year, state, status):
-    """A state outside graph scope computes on OTS under auto: identical results."""
+    """A state outside graph scope computes on OTS under auto: identical results.
+
+    Where OTS refuses the return or an input (MI; num_dependents on AZ, NJ and
+    VA, tenforty.ots_state_gaps), auto refuses it identically.
+    """
     args = _case_args(year, state, status, {"w2_income": 85_000, "num_dependents": 1})
-    assert evaluate_return(**args, backend="auto") == evaluate_return(
-        **args, backend="ots"
-    )
+
+    def outcome(backend):
+        try:
+            return evaluate_return(**args, backend=backend)
+        except ValueError as refusal:
+            return (type(refusal), str(refusal))
+
+    assert outcome("auto") == outcome("ots")
 
 
 @pytest.mark.parametrize("year", (2018, 2021, 2023))

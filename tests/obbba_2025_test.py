@@ -78,7 +78,7 @@ def _expect_ots_defect(request, backend, ots_defect):
 
 
 def _evaluate(backend, **inputs):
-    return evaluate_return(year=2025, backend=backend, **inputs)
+    return evaluate_return(year=2025, backend=backend, **inputs, allow_unvalidated=True)
 
 
 # --- SALT cap with MAGI phase-down (Schedule A line 5e; i1040sca 2025 PDF p.7) ----
@@ -510,6 +510,7 @@ def test_schedule_1a_inputs_are_refused_before_2025(backend, name):
             w2_income=100_000.0,
             backend=backend,
             **{name: 1_000.0},
+            allow_unvalidated=True,
         )
 
 
@@ -551,6 +552,7 @@ def test_age_65_flags_raise_the_2024_standard_deduction(
         w2_income=wages,
         backend=backend,
         **flags,
+        allow_unvalidated=True,
     )
 
     assert result.federal_taxable_income == pytest.approx(taxable_income, abs=CENTS)

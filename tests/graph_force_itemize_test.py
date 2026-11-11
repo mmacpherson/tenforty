@@ -17,6 +17,7 @@ def test_graph_automatic_and_forced_itemization(year, standard_deduction):
         filing_status="Single",
         w2_income=100_000,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     automatic_below = evaluate_return(itemized_deductions=10_000, **common)
@@ -108,14 +109,19 @@ def test_forced_itemization_reaches_gradients_and_solver():
         itemized_deductions=10_000,
     )
 
-    automatic_rate = marginal_rate(w2_income=61_600, **common)
+    automatic_rate = marginal_rate(w2_income=61_600, **common, allow_unvalidated=True)
     forced_rate = marginal_rate(
-        w2_income=61_600, standard_or_itemized="Itemized", **common
+        w2_income=61_600,
+        standard_or_itemized="Itemized",
+        **common,
+        allow_unvalidated=True,
     )
     # $13,847 is the 2024 Tax Table row 85,400-85,450, Single; any income
     # whose taxable income lands in that row attains it.
-    automatic_income = solve_for_income(13_847, **common)
-    forced_income = solve_for_income(13_847, standard_or_itemized="Itemized", **common)
+    automatic_income = solve_for_income(13_847, **common, allow_unvalidated=True)
+    forced_income = solve_for_income(
+        13_847, standard_or_itemized="Itemized", **common, allow_unvalidated=True
+    )
 
     assert automatic_rate == pytest.approx(0.12)
     assert forced_rate == pytest.approx(0.22)
@@ -132,6 +138,7 @@ def test_forced_itemization_reaches_a_state_importing_federal_taxable_income():
         w2_income=100_000,
         itemized_deductions=10_000,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     automatic = evaluate_return(**common)

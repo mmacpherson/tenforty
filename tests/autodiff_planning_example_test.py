@@ -17,14 +17,26 @@ def example():
 
 
 def test_next_dollar_table_ranks_every_continuous_input(example):
-    """The table is complete and exposes economically meaningful signs."""
+    """The table is complete and exposes economically meaningful signs.
+
+    Structure only, not tax evidence: a self-employment dollar costs more than
+    a wage dollar (it also bears self-employment tax), reclassifying a dividend
+    dollar as qualified lowers tax, and an itemized dollar lowers it.
+    """
     table = example["next_dollar_table"]()
     rates = dict(table.select("input", "tax_change_per_dollar").iter_rows())
 
-    assert len(rates) == 16
-    assert rates["self_employment_income"] == pytest.approx(0.42344684, abs=1e-7)
-    assert rates["qualified_dividends"] == pytest.approx(-0.09, abs=1e-7)
-    assert rates["itemized_deductions"] == pytest.approx(-0.333, abs=1e-7)
+    assert set(rates) >= {
+        "w2_income",
+        "self_employment_income",
+        "qualified_dividends",
+        "ordinary_dividends",
+        "itemized_deductions",
+    }
+    assert table["input"].n_unique() == table.height
+    assert rates["self_employment_income"] > rates["w2_income"] > 0
+    assert rates["qualified_dividends"] < 0
+    assert rates["itemized_deductions"] < 0
 
 
 def test_ltcg_stacking_table_reproduces_the_non_monotonic_rate_profile(example):

@@ -79,6 +79,7 @@ def _oh(status="Married/Joint", **kwargs):
         "w2_income": 90_000,
         "backend": "graph",
         **kwargs,
+        "allow_unvalidated": True,
     }
 
 
@@ -215,6 +216,7 @@ def test_graph_batch_with_mfj_row_and_no_fact_is_refused_whole(engine_calls, mod
             w2_income=[60_000.0, 90_000.0] if mode == "zip" else 90_000.0,
             backend="graph",
             mode=mode,
+            allow_unvalidated=True,
         )
     assert engine_calls == []
 
@@ -231,6 +233,7 @@ def test_graph_batch_fact_applies_to_mfj_rows_only(oh_lowering, mode):
         backend="graph",
         mode=mode,
         state_facts=OH(spouses_both_have_qualifying_income=False),
+        allow_unvalidated=True,
     )
     assert sorted(oh_lowering) == [("Married/Joint", False)]
     assert (
@@ -251,6 +254,7 @@ def test_late_row_missing_required_fact_refuses_the_whole_batch(engine_calls):
             w2_income=[50_000.0, 60_000.0, 70_000.0, 80_000.0],
             backend="graph",
             mode="zip",
+            allow_unvalidated=True,
         )
     assert engine_calls == []
 
@@ -283,13 +287,16 @@ def test_ots_routed_oh_with_a_fact_is_refused_not_rerouted(
 @pytest.mark.parametrize("value", [False, True])
 @pytest.mark.without_ots
 def test_ots_error_names_graph_for_both_computed_values(backend, value):
-    """Graph computes both supplied values; OTS computes neither."""
+    """Graph computes both supplied values; OTS computes neither.
+
+    OH is outside graph scope, so the remedy names the opt-in.
+    """
     with pytest.raises(UnsupportedInputError) as refusal:
         evaluate_return(
             **_oh(backend=backend),
             state_facts=OH(spouses_both_have_qualifying_income=value),
         )
-    assert "backend='graph' does" in str(refusal.value)
+    assert "backend='graph' with allow_unvalidated=True does" in str(refusal.value)
 
 
 @requires_graph
@@ -331,6 +338,7 @@ def test_supplied_facts_with_no_rows_are_refused():
             w2_income=[],
             backend="graph",
             state_facts=OH(spouses_both_have_qualifying_income=True),
+            allow_unvalidated=True,
         )
 
 
@@ -391,15 +399,21 @@ def test_contract_errors_ignore_on_error(on_error):
             w2_income=[50_000.0],
             backend="graph",
             on_error=on_error,
+            allow_unvalidated=True,
         )
 
 
+@pytest.mark.usefixtures("lift_state_planning_refusal")
 @requires_graph
 def test_derivatives_require_the_fact_and_hold_it_fixed(oh_lowering):
     """marginal_rate refuses OH MFJ without the fact and accepts it with one."""
     with pytest.raises(UnsupportedInputError, match=OH_FIELD):
         tenforty.marginal_rate(
-            year=2024, state="OH", filing_status="Married/Joint", w2_income=90_000
+            year=2024,
+            state="OH",
+            filing_status="Married/Joint",
+            w2_income=90_000,
+            allow_unvalidated=True,
         )
     rate = tenforty.marginal_rate(
         year=2024,
@@ -407,6 +421,7 @@ def test_derivatives_require_the_fact_and_hold_it_fixed(oh_lowering):
         filing_status="Married/Joint",
         w2_income=90_000,
         state_facts=OH(spouses_both_have_qualifying_income=True),
+        allow_unvalidated=True,
     )
     assert math.isfinite(rate)
     assert oh_lowering == [("Married/Joint", True)]
@@ -426,6 +441,7 @@ def _ma_args(backend, status="Married/Joint"):
         "filing_status": status,
         "w2_income": 90_000,
         "backend": backend,
+        "allow_unvalidated": True,
     }
 
 
@@ -464,6 +480,7 @@ def test_ma_batch_rows_carry_the_full_record_as_json(backend):
         filing_status=["Single", "Married/Joint"],
         w2_income=90_000.0,
         backend=backend,
+        allow_unvalidated=True,
     )
     single, joint = frame["assumptions"].to_list()
     assert single == []

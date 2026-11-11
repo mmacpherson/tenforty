@@ -8,10 +8,25 @@ checked against the resolved graphs and independent pinned scenarios.
 
 ## Supported surface
 
-Contract version 1 supports tax years 2024 and 2025, federal-only calculations,
-all 50 states, and the District of Columbia. “Supported” means the resolved graph
+Contract version 1 covers tax years 2024 and 2025, federal-only calculations,
+all 50 states, and the District of Columbia. “Covered” means the resolved graph
 contains the declared nodes and can calculate the listed public concepts. It does
 not imply that every line of every return is modeled.
+
+The graph is so far validated for federal-only returns and for IL, MS and OR
+plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY);
+each jurisdiction's `validated` flag and `exclusion_reasons`, per year, come from
+`tenforty.graph_scope`. The calculator offers only validated jurisdictions, a
+shared link to another one is refused, and `BrowserTaxRuntime` computes one only
+when constructed with `allowUnvalidated: true` (a real boolean), the same
+acknowledgment as Python's `allow_unvalidated=True` (tenforty-s48h).
+
+State and combined next-dollar slopes are withheld for every state return
+(`state_slopes.available` is false): graph state derivatives read zero for IL,
+MS and OR although their state tax moves with income (tenforty-s48h.76). The
+calculator shows federal slopes, and the tax curve, which is computed by
+evaluation; `BrowserTaxRuntime` returns `null` for the state and total parts,
+and no option restores them while the contract withholds them.
 
 The public inputs cover wages, interest, dividends, capital gains and losses,
 self-employment income, rental income, other Schedule 1 income, aggregate
@@ -39,7 +54,7 @@ node-to-node partial is not a public marginal rate. The WASM boundary returns a
 grouped gradient vector: smooth public inputs share one reverse traversal per
 output, while active thresholds retain the graph runtime's right-hand convention.
 The calculator derives combined effects by adding the federal and selected-state
-vectors entry by entry.
+vectors entry by entry, while state slopes are available (see above).
 
 ## Failure and accuracy contract
 

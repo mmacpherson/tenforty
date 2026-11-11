@@ -151,6 +151,7 @@ def test_qualifying_widow_standard_deduction_matches_head_of_household(year, wag
             filing_status=filing_status,
             w2_income=wages,
             backend="graph",
+            allow_unvalidated=True,
         ).state_taxable_income
 
     assert wi_taxable_income("Widow(er)") == pytest.approx(

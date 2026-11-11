@@ -45,6 +45,7 @@ def test_archived_returns_without_exemption_defect_allowances(case):
         filing_status=case.filing_status,
         backend="graph",
         **case.inputs,
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == case.outcomes[0]
 

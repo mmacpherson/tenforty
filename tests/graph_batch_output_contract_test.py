@@ -36,7 +36,10 @@ REUSED_FED_AGI_STATES = ["CT", "NE", "NM", "OR"]
 
 def _batch_row(kw: dict):
     return evaluate_returns(
-        backend="graph", mode="zip", **{k: [v] for k, v in kw.items()}
+        backend="graph",
+        mode="zip",
+        **{k: [v] for k, v in kw.items()},
+        allow_unvalidated=True,
     )
 
 
@@ -55,7 +58,7 @@ def test_batch_matches_single_all_fields(state, filing_status, income):
         long_term_capital_gains=8_000,
         qualified_dividends=2_000,
     )
-    single = evaluate_return(backend="graph", **kw)
+    single = evaluate_return(backend="graph", **kw, allow_unvalidated=True)
     df = _batch_row(kw)
 
     for field in OUTPUT_FIELDS:
@@ -79,7 +82,7 @@ def test_54q_amt_and_derived_columns_present():
         w2_income=200_000,
         incentive_stock_option_gains=100_000,
     )
-    single = evaluate_return(backend="graph", **kw)
+    single = evaluate_return(backend="graph", **kw, allow_unvalidated=True)
     df = _batch_row(kw)
 
     assert single.federal_amt > 0, "fixture should trigger AMT"
@@ -92,7 +95,7 @@ def test_54q_amt_and_derived_columns_present():
 def test_reused_federal_agi_states_report_state_agi(state):
     """CT/NE/NM/OR state AGI (the reused us_1040_L11_agi node) is not zero-filled."""
     kw = dict(year=2024, state=state, filing_status="Single", w2_income=120_000)
-    single = evaluate_return(backend="graph", **kw)
+    single = evaluate_return(backend="graph", **kw, allow_unvalidated=True)
     df = _batch_row(kw)
 
     assert single.state_adjusted_gross_income > 0

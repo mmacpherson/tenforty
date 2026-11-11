@@ -1,8 +1,11 @@
 # Evidence Summary
 
-This page lists, for each kind of return the default `backend="auto"` computes,
-what the tests check against independent published values and what they only
-check structurally. The suite's headline test count does not certify a typical
+This page lists, for each kind of return and the engine that computes it, what
+the tests check against independent published values and what they only check
+structurally. The default, `backend="ots"`, computes every return on OTS. The
+graph sections apply to the opt-in backends: `backend="auto"` (graph for
+2024–2025 federal returns and the states in graph scope) and `backend="graph"`
+(which refuses a state outside graph scope unless `allow_unvalidated=True`). The suite's headline test count does not certify a typical
 return. Many tests repeat one regime at many points, and many check agreement
 or shape rather than dollar values.
 
@@ -31,6 +34,11 @@ both directions.
 
 ## Federal, 2024–2025 (graph)
 
+The value evidence below is established on the graph engine. Under the OTS
+default, federal 2024–2025 returns are checked against graph by parity
+(`tests/parity/`), and some value suites also run on OTS (for example
+`tests/deduction_choice_values_test.py` and `tests/obbba_2025_test.py`).
+
 | Regime | Independent value evidence | Beyond it, structural only |
 |---|---|---|
 | Wages, interest, dividends, capital gains; Form 1040 line 16 | Every published IRS Tax Table row, and hand-worked Tax Computation and Qualified Dividends and Capital Gain worksheets (`tests/federal_tax_table_test.py`, [federal brackets](validation/derivations/federal-brackets-2024-2025.md)); Tax-Calculator differential | Property sweeps over combinations |
@@ -53,10 +61,12 @@ other than the EIC, and retirement and benefit income. See the [API Reference](.
 | MS | A blind source archive ([MS record](validation/state-fixtures/MS-2024-2025.md)); fresh independent source derivations of exemptions, line-entry rounding, the two-column joint computation and its least-tax allocation proof ([exemptions and rounding](validation/derivations/ms-2024-2025-exemptions-rounding.md), [review](validation/derivations/ms-pr447-review-independent.md), [release check](validation/derivations/ms-release-independent-source-astra.md); `tests/ms_exemptions_rounding_test.py`, `tests/ms_explicit_facts_test.py`, `tests/ms_income_entries_test.py`) | Conditional on required facts: Married/Joint needs both spouses' actual line-13 AGIs and QSS needs `head_of_family_eligible` ([State facts](state-facts.md)); missing facts raise. MFJ state/total-tax income derivatives and solves are unsupported. Nonzero `schedule_1_income`, `state_adjustment`, `dependent_exemptions`, `itemized_deductions`, `state_and_local_taxes` and `federal_itemized` regular-tax amounts are refused; MS itemizing is not supported. Ordinary state-taxable income is assumed |
 | AK, FL, NV, SD, TN, TX, WA, WY | None needed for state tax: structural checks that state tax is $0 across statuses, years and incomes | The federal return is the federal engine above; these rows add no separate federal evidence |
 
-## Returns on OTS under the default
+## Returns on OTS
 
-The default sends 2018–2023, and 2024–2025 in AZ, CA, MA, MI, NC, NJ, NY, OH,
-PA and VA, to OTS. Its evidence is older and mostly federal:
+The default sends every return to OTS. `backend="auto"` sends 2018–2023, and
+2024–2025 in AZ, CA, MA, NC, NJ, NY, OH, PA and VA, to OTS (2025.14 refuses OTS
+Michigan, which applies no personal exemption). Its evidence is
+older and mostly federal:
 
 - IRS Direct File scenarios for 2022–2023 ([IRS Validation](irs-validation.md),
   a historical record) and formula-derived bracket checks.
@@ -67,8 +77,8 @@ PA and VA, to OTS. Its evidence is older and mostly federal:
 - OTS defects found against the official forms are reported upstream and
   recorded as strict xfails ([upstream reports](upstream-ots-reports.md)). OTS
   also has known mapping bugs in our layer, such as OH status and exemptions, NY
-  exemptions and the NC child deduction. OTS under the default is a fallback,
-  not a certification.
+  exemptions and the NC child deduction. Being the default is not a
+  certification.
 
 ## Not evidence of correct values
 
@@ -77,6 +87,7 @@ PA and VA, to OTS. Its evidence is older and mostly federal:
   width can hide a smaller error inside it.
 - Deep and soak property sweeps found real defects, but monotonicity, parity
   and internal consistency do not establish a dollar value.
-- The [browser demo](browser-calculator-contract.md) runs the graph for every
-  state. That shows it executes and matches the Python runtime, not that every
-  state is validated.
+- The [browser demo](browser-calculator-contract.md) offers federal-only returns
+  and the validated states only; its contract cases still run the graph for
+  other states, with an explicit acknowledgment. That shows the graph executes
+  and matches the Python runtime there, not that those states are validated.

@@ -7,9 +7,11 @@
   for 2023-2025. PA nets gains and losses within the class with no
   short/long-term split, and a class loss reduces no other class; OTS does
   both. Before, OTS PA computed the return from compensation, interest and
-  dividends only, so these returns were under-taxed. The expected figures in
-  `tests/ots_pa_business_gains_test.py` are an independent derivation from the
-  PA-40 instructions (`docs/validation/derivations/pa-business-gains-2023-2025.md`).
+  dividends only, so these returns were under-taxed; 2025.14 refused a nonzero
+  value of these inputs on OTS PA, and that refusal is removed. The expected
+  figures in `tests/ots_pa_business_gains_test.py` are an independent
+  derivation from the PA-40 instructions
+  (`docs/validation/derivations/pa-business-gains-2023-2025.md`).
   - Limits: `self_employment_income` is taken as federal Schedule C net profit
     and the gains as federal gains, unchanged; PA Schedule C and basis
     differences are not modeled. The inputs are household totals, so on a joint
@@ -22,6 +24,119 @@
     `short_term_capital_gains` or `long_term_capital_gains`. It is not refused,
     because household totals cannot show the spouses' split. Per-spouse PA
     class inputs are tenforty-s48h.75.
+
+## [2025.14] - 2026-11-07
+### Changed (default backend)
+- **The default backend is `"ots"` again**, in `evaluate_return`,
+  `evaluate_returns` and `tenforty.backends.get_backend`, reverting 2025.13's
+  `"auto"` default. A call that names no backend computes on OTS in every
+  year: federal returns for 2018–2025, and for 2024–2025 AZ, CA, MA, MI, NC, NJ,
+  NY, OH, OR, PA, VA and the states without an income tax; any other state
+  raises.
+  - The graph backend is opt-in (`backend="graph"` or `backend="auto"`). It is
+    incomplete: so far validated for 2024 and 2025 federal-only returns and for
+    IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD,
+    TN, TX, WA, WY). Other states refuse unless `allow_unvalidated=True`,
+    because they aren't validated yet (tenforty-s48h).
+  - **To keep 2025.13's results, pass `backend="auto"`.** It routes exactly as
+    the 2025.13 default did; `"auto"`, its graph scope and its refusals are
+    unchanged.
+  - A 2024–2025 return in a state OTS lacks (IL, MS, CO and others) now raises
+    `UnsupportedReturnError` under the default, naming the graph remedy:
+    `backend="graph"` for a state in graph scope (IL, MS), and
+    `backend="graph"` with `allow_unvalidated=True` for one outside it (CO).
+  - On a graph-only install (`TENFORTY_GRAPH_ONLY=1`), every call on the
+    default raises `BackendUnavailableError`; pass `backend="auto"` or
+    `backend="graph"` there.
+  - See [Migrating between backends](docs/migrating-to-graph-default.md).
+
+### Changed (explicit graph refuses unvalidated states)
+- **`backend="graph"` refuses a state return outside graph scope** with
+  `UnsupportedReturnError`, before computing and under every `on_error`, naming
+  the exclusion reasons, unless the caller passes the new keyword-only
+  `allow_unvalidated=True`. It used to compute any state silently: a 2025
+  California Married/Joint return with $100,000 of wages and two dependents
+  gave $2,079.06 of state tax on graph against OTS's $1,130, because graph
+  California does not yet apply the dependent exemption credit
+  (tenforty-b72.54).
+  - The rule covers `evaluate_return`, `evaluate_returns` (one such row refuses
+    the whole batch before any row runs), `marginal_rate`, `marginal_rates`,
+    `solve_for_income` and `get_backend`. Federal-only returns and states in
+    graph scope (IL, MS, OR and the states without an income tax) need no
+    opt-in. `allow_unvalidated` has no effect on `"ots"` or `"auto"`.
+  - Refusal messages that point to graph for a state outside graph scope now
+    name the opt-in (`backend='graph' with allow_unvalidated=True`).
+
+### Changed (OTS refuses what it would compute wrongly)
+- **Every Michigan return is refused on OTS**, 2024 and 2025, with
+  `UnsupportedReturnError`, under the default and `backend="auto"`, before
+  computing. tenforty's MI_1040 map passes no exemption count, so OTS Michigan
+  applied no MI-1040 line 9a exemption to anyone (tenforty-s48h.45,
+  tenforty-r91.10). Graph Michigan has the same defect and is not validated;
+  `backend="graph"` refuses it unless `allow_unvalidated=True`.
+- **OTS refuses state inputs its maps do not deliver** with
+  `UnsupportedInputError`, before computing and for the whole batch, where it
+  used to compute the state tax without them. Zero passes; an input the state
+  does not use is never refused. The full table, with each form line and bead,
+  is in [Migrating between backends](docs/migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver):
+  - MA_1: interest, dividends, short- and long-term gains, self-employment and
+    rental income, and filer/spouse 65 or older (tenforty-r91.14);
+  - NJ_1040: self-employment income and capital gains (tenforty-r91.15),
+    `num_dependents`, filer/spouse 65 or older and rental income
+    (tenforty-r91.20);
+  - PA_40: self-employment income and capital gains (tenforty-s48h.46), and
+    rental income (tenforty-r91.21);
+  - VA_760: filer/spouse 65 or older and itemizing (tenforty-r91.16), and
+    `num_dependents` (tenforty-r91.22);
+  - NC_D400: itemizing (tenforty-r91.17);
+  - AZ_140: `num_dependents` and filer/spouse 65 or older (tenforty-s48h.51).
+  - On VA and NC, the itemizing inputs (`federal_itemized`,
+    `itemized_deductions`, `state_and_local_taxes`) pass with
+    `standard_or_itemized="Standard"`.
+
+### Changed (graph planning refuses state-dependent outputs)
+- **`marginal_rate`, `marginal_rates` and `solve_for_income` refuse any output
+  that depends on the state return**, with `UnsupportedReturnError`, for every
+  state: the state outputs, `total_tax` on a state return, and raw state node
+  names. Graph state derivatives read zero for IL, MS and OR although their
+  state tax moves with income (tenforty-s48h.76); for 2025 Single wages of
+  $85,000 the IL total-tax rate came out at the federal 0.22. Federal outputs
+  keep working, with or without a state. `allow_unvalidated` does not lift
+  this refusal. The `GraphBackend` gradient, gradients and solve methods apply
+  it too.
+
+### Changed (every public entry point applies the refusals)
+- `GraphBackend` and the object `get_backend("graph")` returns apply the scope
+  rule in `evaluate`, `evaluate_batch`, `gradient`, `gradients` and `solve`,
+  each taking `allow_unvalidated`. `OTSBackend.evaluate`,
+  `get_backend("ots").evaluate` and `core.evaluate_natural_input_form` apply
+  the Michigan refusal and the undelivered-input refusals. Before, these
+  objects computed what `evaluate_return` refused.
+- **`allow_unvalidated` must be `True` or `False`**: any other value, the
+  string `"False"` included, raises `TypeError` instead of opting in.
+- Graph Michigan's refusal names its known defect (tenforty-s48h.45).
+
+### Changed (browser calculator)
+- The calculator offers federal-only returns and the validated states only
+  (IL, MS, OR and the eight states without an income tax), 2024 and 2025; a
+  shared link to another jurisdiction is refused, and `BrowserTaxRuntime`
+  computes one only with `allowUnvalidated: true`. The tagline says "so far,
+  validated for" instead of "Federal + all 50 states + DC".
+- State and combined next-dollar slopes are withheld on state returns until
+  tenforty-s48h.76 is fixed; federal slopes and the tax curve remain.
+
+### Changed (documentation)
+- The README, the Colab demo, the evidence summary, error handling, state facts
+  and the migration guide (now "Migrating between backends") describe the OTS
+  default and the graph opt-in. The README's `marginal_rates` example and the
+  autodiff planning example (`examples/autodiff_planning.py`,
+  `docs/autodiff-applications.md`) use a federal-only return instead of an
+  unvalidated California one; their figures and benchmark timings were
+  regenerated, and the example's test now checks structure and signs only.
+- Known: graph `marginal_rate(s)` report a zero state slope for IL, MS and OR,
+  although their state tax moves with income (tenforty-s48h.76).
+- `scripts/smoke_installed.py` smoke-checks graph on Illinois, which is in graph
+  scope, and OTS on California.
 
 ## [2025.13] - 2026-11-06
 ### Changed (default backend)

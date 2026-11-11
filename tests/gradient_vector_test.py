@@ -8,6 +8,10 @@ from tenforty import marginal_rate, marginal_rates
 from tenforty.backends import GraphBackend, OTSBackend
 from tenforty.models import TaxReturnInput
 
+# Engine-level derivative tests on CA, GA and NH, which the public API refuses
+# until tenforty-s48h.76 is fixed; none of them uses IL, MS or OR.
+pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
+
 
 @pytest.fixture(scope="module")
 def graph_backend() -> GraphBackend:
@@ -36,7 +40,9 @@ def test_gradient_vector_matches_scalar_api(graph_backend):
         incentive_stock_option_gains=3_000.0,
     )
 
-    gradients = graph_backend.gradients(tax_input, "federal_total_tax")
+    gradients = graph_backend.gradients(
+        tax_input, "federal_total_tax", allow_unvalidated=True
+    )
 
     assert gradients is not None
     assert list(gradients) == [
@@ -58,7 +64,7 @@ def test_gradient_vector_matches_scalar_api(graph_backend):
     ]
     for natural_name, vector_gradient in gradients.items():
         scalar_gradient = graph_backend.gradient(
-            tax_input, "federal_total_tax", natural_name
+            tax_input, "federal_total_tax", natural_name, allow_unvalidated=True
         )
         assert vector_gradient == pytest.approx(scalar_gradient, abs=1e-12)
 
@@ -86,10 +92,12 @@ def test_gradient_vector_matches_finite_difference_away_from_kinks(
     plus = tax_input.model_copy(update={natural_name: value + step})
     minus = tax_input.model_copy(update={natural_name: value - step})
 
-    gradients = graph_backend.gradients(tax_input, "federal_total_tax")
+    gradients = graph_backend.gradients(
+        tax_input, "federal_total_tax", allow_unvalidated=True
+    )
     finite_difference = (
-        graph_backend.evaluate(plus).federal_total_tax
-        - graph_backend.evaluate(minus).federal_total_tax
+        graph_backend.evaluate(plus, allow_unvalidated=True).federal_total_tax
+        - graph_backend.evaluate(minus, allow_unvalidated=True).federal_total_tax
     ) / (2 * step)
 
     assert gradients is not None
@@ -106,8 +114,10 @@ def test_gradient_vector_preserves_state_fanout_after_federal_kink(graph_backend
         taxable_interest=50_000.0,
     )
 
-    gradients = graph_backend.gradients(tax_input, "total_tax")
-    scalar = graph_backend.gradient(tax_input, "total_tax", "taxable_interest")
+    gradients = graph_backend.gradients(tax_input, "total_tax", allow_unvalidated=True)
+    scalar = graph_backend.gradient(
+        tax_input, "total_tax", "taxable_interest", allow_unvalidated=True
+    )
 
     assert gradients is not None
     assert gradients["taxable_interest"] == pytest.approx(scalar, abs=1e-12)
@@ -122,9 +132,14 @@ def test_gradient_vector_preserves_right_derivative_at_coincident_kinks(graph_ba
         w2_income=200_000.0,
     )
 
-    gradients = graph_backend.gradients(tax_input, "federal_additional_medicare_tax")
+    gradients = graph_backend.gradients(
+        tax_input, "federal_additional_medicare_tax", allow_unvalidated=True
+    )
     scalar = graph_backend.gradient(
-        tax_input, "federal_additional_medicare_tax", "w2_income"
+        tax_input,
+        "federal_additional_medicare_tax",
+        "w2_income",
+        allow_unvalidated=True,
     )
 
     assert gradients is not None
@@ -142,7 +157,7 @@ def test_gradient_vector_includes_selected_state_inputs(
     """Only continuous inputs mapped by the selected state join the vector."""
     tax_input = TaxReturnInput(year=2024, state=state, w2_income=100_000.0)
 
-    gradients = graph_backend.gradients(tax_input, "total_tax")
+    gradients = graph_backend.gradients(tax_input, "total_tax", allow_unvalidated=True)
 
     assert gradients is not None
     assert state_input in gradients
@@ -155,6 +170,7 @@ def test_public_marginal_rates_matches_scalar_entry(graph_backend):
         state="CA",
         filing_status="Single",
         w2_income=100_000.0,
+        allow_unvalidated=True,
     )
 
     assert rates["w2_income"] == pytest.approx(
@@ -163,6 +179,7 @@ def test_public_marginal_rates_matches_scalar_entry(graph_backend):
             state="CA",
             filing_status="Single",
             w2_income=100_000.0,
+            allow_unvalidated=True,
         ),
         abs=1e-12,
     )

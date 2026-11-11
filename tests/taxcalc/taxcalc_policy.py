@@ -1117,7 +1117,9 @@ def evaluate_components(case: dict, backend: str) -> dict[str, float]:
     """
     import tenforty
 
-    r = tenforty.evaluate_return(backend=backend, **tenforty_inputs(case))
+    r = tenforty.evaluate_return(
+        backend=backend, **tenforty_inputs(case), allow_unvalidated=True
+    )
     if backend == "graph":
         deduction_taken = graph_deduction_taken(case)
     else:

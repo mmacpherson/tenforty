@@ -156,4 +156,6 @@ def test_solve_for_income_accepts_the_old_positional_call():
     # $13,847 is a reportable 2024 Tax Table amount (row 85,400-85,450, Single).
     args = _old_positional_values(solve_for_income, target_tax=13_847.0, year=2024)
 
-    assert solve_for_income(*args) == solve_for_income(target_tax=13_847.0, year=2024)
+    assert solve_for_income(*args, allow_unvalidated=True) == solve_for_income(
+        target_tax=13_847.0, year=2024
+    )

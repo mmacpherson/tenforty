@@ -22,7 +22,7 @@ function element(id) {
       value: "",
       valueAsNumber: NaN,
       validity: { badInput: false },
-      classList: { add() {}, remove() {} },
+      classList: { add() {}, remove() {}, toggle() {} },
       setAttribute() {},
       closest() { return this; },
     });

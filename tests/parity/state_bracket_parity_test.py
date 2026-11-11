@@ -69,6 +69,7 @@ def test_state_bracket_agrees_within_ots_print_precision(state, year, status, wa
         w2_income=wages,
         backend="graph",
         state_facts=credit_neutral_facts(state, status),
+        allow_unvalidated=True,
     )
     ots = evaluate_return(
         year=year, state=state, filing_status=status, w2_income=wages, backend="ots"

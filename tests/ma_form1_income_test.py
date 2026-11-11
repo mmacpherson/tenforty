@@ -319,7 +319,12 @@ def test_total_tax_matches_the_derivation(
 ):
     """Line 28 through the natural API; table cases carry the table bound."""
     result = evaluate_return(
-        backend="graph", year=year, state="MA", filing_status=STATUS[status], **inputs
+        backend="graph",
+        year=year,
+        state="MA",
+        filing_status=STATUS[status],
+        **inputs,
+        allow_unvalidated=True,
     )
     tolerance = LINE_11_TAX_ROUNDING + (TABLE_ROW if table else 0.0)
     assert result.state_total_tax == pytest.approx(l28[year], abs=tolerance)
@@ -367,6 +372,7 @@ def test_two_earner_joint_return_stays_within_the_approximation_bound(year, spli
         state="MA",
         filing_status="Married/Joint",
         w2_income=wages,
+        allow_unvalidated=True,
     )
     excess = result.state_total_tax - legal_tax
     ceiling = marginal_rate * 2_000

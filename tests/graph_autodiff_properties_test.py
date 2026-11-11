@@ -142,7 +142,9 @@ _SS_WAGE_BASE_2024 = 168_600.0
 
 
 def _total_tax(case: dict) -> float:
-    return evaluate_return(backend="graph", **case).federal_total_tax
+    return evaluate_return(
+        backend="graph", **case, allow_unvalidated=True
+    ).federal_total_tax
 
 
 def _gradient(wrt: str, case: dict) -> float:
@@ -253,7 +255,9 @@ def test_gradient_survives_coincident_kinks_at_the_medicare_threshold():
 
     def additional_medicare(value):
         return evaluate_return(
-            backend="graph", **{**_KINK_CASE, "w2_income": value}
+            backend="graph",
+            **{**_KINK_CASE, "w2_income": value},
+            allow_unvalidated=True,
         ).federal_additional_medicare_tax
 
     w2 = _KINK_CASE["w2_income"]
@@ -373,7 +377,9 @@ def test_se_tax_gradient_carries_w2_wage_base_coupling():
 
     def se_tax(value):
         return evaluate_return(
-            backend="graph", **{**_COUPLING_CASE, "w2_income": value}
+            backend="graph",
+            **{**_COUPLING_CASE, "w2_income": value},
+            allow_unvalidated=True,
         ).federal_se_tax
 
     central = (se_tax(w2 + 1.0) - se_tax(w2 - 1.0)) / 2.0
@@ -435,7 +441,7 @@ def test_se_tax_gradient_tracks_wage_base_across_the_region(w2: float, coupled: 
 
     def se_tax(value):
         return evaluate_return(
-            backend="graph", **{**case, "w2_income": value}
+            backend="graph", **{**case, "w2_income": value}, allow_unvalidated=True
         ).federal_se_tax
 
     central = (se_tax(w2 + 1.0) - se_tax(w2 - 1.0)) / 2.0
