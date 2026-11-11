@@ -117,36 +117,47 @@ SOLVES = [
 
 
 NONCONVERGING_SOLVES = {("OR", "Married/Joint", "total_tax", 2024)}
-"""tenforty-s48h.79: Newton cycles across a whole-dollar step and never lands.
+"""Accepted limitation of tenforty-s48h.76, pending tenforty-s48h.79.
 
 Married/Joint at $120,000 has federal taxable income in the Tax Table, so
-total_tax is a step function; the old graphs fail other cases the same way.
+total_tax is a step function, and Newton can cycle across a step without
+landing. That weakness predates this change, but this case is newly lost: on
+the pre-s48h.76 graphs it converged (wages 120000.568...). Over this test's
+matrix from $50,000 the change gains 13 solves (every state-only and raw-node
+solve, which the old zero slopes made impossible, and 2025 OR MFJ total_tax,
+which failed before) and loses this one.
 """
+
+SOLVER_NONCONVERGENCE = r"^Graph backend solver did not converge$"
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("state,filing_status,output", SOLVES)
-def test_state_dependent_solves_round_trip(request, year, state, filing_status, output):
-    """solve_for_income reaches the output observed at $120,000.50, from $50,000."""
+def test_state_dependent_solves_round_trip(year, state, filing_status, output):
+    """solve_for_income reaches the output observed at $120,000.50, from $50,000.
+
+    A case in NONCONVERGING_SOLVES must fail with exactly the solver's
+    non-convergence error, then reports as xfail; if it converges, the test
+    fails, so the entry is retired once tenforty-s48h.79 is fixed.
+    """
     kw = {
         "year": year,
         "state": state,
         "filing_status": filing_status,
         "eitc_eligible": False,
     }
-    if (state, filing_status, output, year) in NONCONVERGING_SOLVES:
-        request.applymarker(
-            pytest.mark.xfail(
-                strict=True,
-                raises=RuntimeError,
-                reason="tenforty-s48h.79: solver does not converge on a stepped total",
-            )
-        )
     target = _output_value(output, **kw, w2_income=TARGET_WAGES)
-    wages = tenforty.solve_for_income(
-        target_tax=target, **kw, w2_income=START_WAGES, output=output
-    )
-    _assert_round_trip(output, wages, target, **kw)
+
+    def solve() -> float | None:
+        return tenforty.solve_for_income(
+            target_tax=target, **kw, w2_income=START_WAGES, output=output
+        )
+
+    if (state, filing_status, output, year) in NONCONVERGING_SOLVES:
+        with pytest.raises(RuntimeError, match=SOLVER_NONCONVERGENCE):
+            solve()
+        pytest.xfail("tenforty-s48h.79: Newton does not converge on this stepped total")
+    _assert_round_trip(output, solve(), target, **kw)
 
 
 @pytest.mark.parametrize("year", [2024, 2025])

@@ -13,6 +13,13 @@
 - Known limit: a planning slope through a stepwise phase-out (`floorE`:
   California's exemption credit and FTB 3506, federal Forms 2441 and 8812,
   Schedule 1-A) still reads zero (tenforty-s48h.78).
+- Known limit: `solve_for_income` uses Newton steps, and on a whole-dollar
+  stepped total it can cycle across a step without landing
+  (tenforty-s48h.79). That weakness predates this change, which shifts where
+  it bites. Solving from $50,000 for the value at $120,000.50 now works for
+  every state-only and raw state node output (impossible before, with a zero
+  slope) and for 2025 OR Married/Joint `total_tax`. It no longer converges for
+  2024 OR Married/Joint `total_tax`, which converged before.
 - The MS Married/Joint spouse-ownership refusal for income derivatives and
   solves is unchanged.
 - The browser calculator shows state and combined next-dollar slopes on state
