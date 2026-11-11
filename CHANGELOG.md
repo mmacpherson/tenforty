@@ -38,13 +38,15 @@
   x86_64 (CPython 3.10–3.15) now installs a prebuilt wheel with the graph
   backend and without OTS, which still crashes when built for Windows
   ([Windows build research](docs/windows-build-research.md)).
-  - Pass `backend="graph"` or `backend="auto"` for 2024 and 2025 returns,
-    subject to graph scope and input restrictions as on other platforms.
-    The default `backend="ots"` refuses on Windows.
-  - Anything that needs OTS (2018–2023, the 2024–2025 states `auto` keeps on
-    OTS, `backend="ots"`, `evaluate_form`) raises `BackendUnavailableError`
-    before computing, whatever `on_error` says, naming what graph can do
-    instead.
+  - With no backend argument, Windows calls follow `backend="auto"`:
+    supported 2024–2025 federal-only returns and in-scope state returns compute
+    on graph. Graph scope, input restrictions and required facts still apply.
+  - Valid routes needing OTS (2018–2023, CA returns that `auto` keeps on OTS,
+    explicit `backend="ots"` for supported OTS returns, `evaluate_form`)
+    raise `BackendUnavailableError` before computing, under every `on_error`.
+    Routing refusals precede availability: Michigan returns under `auto` and explicit
+    `backend="ots"` for Illinois raise `UnsupportedReturnError`. Required-fact
+    and unsupported-input checks can also raise `UnsupportedInputError`.
   - The README's Installation section says which of its examples need OTS.
   - CI runs the graph-only suite on Windows (Python 3.10 and 3.15), tests an
     installed wheel and a wheel built from the sdist, and smoke-checks every

@@ -64,23 +64,32 @@ Python 3.10–3.15 is supported on Linux, macOS and Windows.
 for Windows, so Windows wheels leave it out; the
 [Windows build research](./docs/windows-build-research.md) has the details.
 
-- **What computes:** 2024 and 2025 returns with `backend="graph"`, or with
-  `backend="auto"` when it selects graph (see
+A call that names no backend follows `backend="auto"` on Windows: supported
+2024–2025 federal-only returns and in-scope state returns compute on graph
+without a backend argument.
+
+- **What computes:** the returns that `backend="auto"` routes to graph on
+  other platforms (see
   [Which Backend Computes Your Return](#which-backend-computes-your-return)).
   Graph scope, supported inputs and required state facts apply on Windows too;
-  an explicit graph return outside validated state scope requires
+  an explicit `backend="graph"` outside validated state scope requires
   `allow_unvalidated=True`.
-- **What refuses:** the default `backend="ots"` and anything else that needs
-  OTS. That includes tax years 2018–2023, the 2024–2025 states `auto` keeps on
-  OTS (CA among them), and `tenforty.core.evaluate_form`. Each raises
-  `BackendUnavailableError` before computing, under every `on_error` policy,
-  and the message says what graph can do instead.
-- **The examples below:** five need OTS. The Quick Start, the tax table and
-  the capital-gains plot are CA returns, the federal-tax-over-time plot spans
-  2018–2025, and [The Graph Backend](#the-graph-backend) compares against
-  `backend="ots"`. To adapt a 2024–2025 example on Windows, pass
-  `backend="graph"` or `backend="auto"` and use a validated state such as
-  `state="IL"`, or a federal-only return.
+- **What refuses:** a valid route needing OTS raises `BackendUnavailableError`
+  before computing, under every `on_error` policy. Examples include 2018–2023
+  returns, CA returns that `auto` keeps on OTS, an explicit `backend="ots"`
+  for a supported OTS return, and `tenforty.core.evaluate_form`.
+  Routing refusals happen first: Michigan returns under `auto` and an explicit
+  `backend="ots"` for Illinois raise `UnsupportedReturnError`, as does an
+  explicit graph request outside validated state scope without opt-in.
+  Required-fact and unsupported-input checks can raise `UnsupportedInputError`
+  too.
+- **The examples below:** five need OTS, as checked by the graph-only README
+  test. The Quick Start, the tax table and the capital-gains plot are CA
+  returns, the federal-tax-over-time plot spans 2018–2025, and
+  [The Graph Backend](#the-graph-backend) compares against `backend="ots"`.
+  A 2024–2025 example using a federal-only return or a validated state such
+  as `state="IL"` needs no backend argument on Windows; the explicit OTS
+  comparison still requires an install with OTS.
 
 ### Graph-only installations
 
@@ -756,10 +765,11 @@ true tax cliffs.
 
 ## Known Limitations
 
-- On Windows only the graph backend is available, so returns that need OTS
-  (2018–2023, and the 2024–2025 states `auto` keeps on OTS) raise
-  `BackendUnavailableError` there; see [Installation](#installation). The Colab
-  notebook linked above, or WSL, runs both backends.
+- On Windows only the graph backend is available. Valid routes needing OTS
+  raise `BackendUnavailableError`; routing refusals can raise
+  `UnsupportedReturnError` first. Supported graph returns need no backend
+  argument; see [Installation](#installation). The Colab notebook linked above,
+  or WSL, runs both backends.
 - Net Investment Income Tax (Form 8960) and Additional Medicare Tax (Form 8959)
   are computed for the 2024 and 2025 tax years only. For earlier years they are
   reported as zero, so if they apply to your situation the total tax will be
