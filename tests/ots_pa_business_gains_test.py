@@ -271,3 +271,38 @@ def test_batch_rows_carry_the_record_exactly_where_the_scalar_does():
             and row["self_employment_income"] != 0
         )
         assert (PA_JOINT_CLASSES in encoded) is expected
+
+
+FORMERLY_REFUSED = {
+    "self_employment_income": 20_000.0,
+    "short_term_capital_gains": 10_000.0,
+    "long_term_capital_gains": 10_000.0,
+}
+"""2025.14 refused these on OTS PA because the map dropped them (s48h.46)."""
+
+
+@pytest.mark.parametrize("year", YEARS)
+@pytest.mark.parametrize("backend", ["ots", "auto", None])
+@pytest.mark.parametrize("name", sorted(FORMERLY_REFUSED))
+def test_formerly_refused_inputs_now_compute_and_raise_pa_tax(year, backend, name):
+    """Each input 2025.14 refused now computes on OTS PA and raises the PA tax."""
+    choice = {} if backend is None else {"backend": backend}
+    single = {"year": year, "state": "PA", "filing_status": "Single"}
+    base = tenforty.evaluate_return(**single, w2_income=60_000.0, **choice)
+    changed = tenforty.evaluate_return(
+        **single, w2_income=60_000.0, **{name: FORMERLY_REFUSED[name]}, **choice
+    )
+    assert changed.state_total_tax > base.state_total_tax
+
+
+@pytest.mark.parametrize("year", YEARS)
+def test_rental_income_is_still_refused(year):
+    """PA rental income, which this map does not carry, keeps its r91.21 refusal."""
+    with pytest.raises(tenforty.UnsupportedInputError, match=r"tenforty-r91\.21"):
+        tenforty.evaluate_return(
+            year=year,
+            state="PA",
+            filing_status="Single",
+            w2_income=60_000.0,
+            rental_income=10_000.0,
+        )
