@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Changed (graph-only default)
+- When the compiled OTS extension is absent, an omitted `backend` follows
+  `"auto"` in `evaluate_return`, `evaluate_returns` and `get_backend`. Bare
+  supported 2024–2025 returns compute on graph, including in graph-only and
+  Windows builds. Full installs keep the OTS default. Explicit choices,
+  graph scope, state facts, typed refusals and whole-batch preflight remain
+  unchanged. Installed-artifact smoke checks now exercise the default too.
+
 ### Removed
 - Contributor tooling: removed the unused graph JIT and Makefile targets
   `graph-build-jit`, `graph-test-jit`, `graph-bench`, and `graph-throughput`.

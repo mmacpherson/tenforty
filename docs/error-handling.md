@@ -57,7 +57,8 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 
 ## Choosing a backend
 
-`backend` is `"ots"` (the default), `"auto"`, or `"graph"`:
+Omitting `backend` selects `"ots"` when its compiled extension is installed,
+and `"auto"` otherwise. Explicit choices retain these meanings:
 
 | `backend` | 2018-2023 | 2024-2025 |
 |-----------|-----------|-----------|
@@ -65,7 +66,8 @@ even when some fail. Use `"raise"` (the default) to stop at the first failure.
 | `"graph"` | raises `UnsupportedReturnError` | graph for federal-only returns and states in graph scope; another state raises `UnsupportedReturnError` unless `allow_unvalidated=True` |
 | `"auto"` | OTS | graph for federal-only returns and states in graph scope; otherwise OTS, or `UnsupportedReturnError` |
 
-The graph backend is opt-in. `"auto"` picks the backend per return: graph for a
+The graph backend is opt-in on installs with OTS. On graph-only installs,
+omission uses `"auto"`. `"auto"` picks the backend per return: graph for a
 2024 or 2025 return that is federal-only or whose state is in graph scope
 (below), OTS otherwise. 2025.13 made `"auto"` the default; 2025.14 restored
 `"ots"` (see [Migrating between backends](./migrating-to-graph-default.md)).
@@ -153,14 +155,18 @@ raises this for `backend="graph"` and for any 2024 or 2025 return that
 `"auto"` routes to graph; it never falls back to OTS. The OTS default works
 with that package.
 
-A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every Windows build) is the
-mirror case: it has no OTS extension. It raises this for every return that
-needs OTS: every call on the OTS default, `backend="ots"`, 2018-2023, a state
-`"auto"` keeps on OTS, and `core.evaluate_form`. Pass `backend="auto"` or
-`backend="graph"` on such an install. The message names the returns and, where the graph
-backend covers them, the `backend="graph"` remedy. Like the OTS-only package,
-it never falls back to the other backend. A batch with any such row is refused
-whole.
+A graph-only install (`TENFORTY_GRAPH_ONLY=1`, and every Windows build) has no
+OTS extension. Its omitted backend uses `"auto"`, so supported 2024–2025
+federal-only and in-scope state returns compute on graph. A valid request routed
+to OTS raises `BackendUnavailableError`: an explicit `backend="ots"`, a
+2018–2023 return, a state `"auto"` keeps on OTS, or `core.evaluate_form`.
+Unsupported or known-defective routes retain their `UnsupportedReturnError`,
+and unsupported inputs retain their input errors; those checks can precede
+availability. `on_error` does not suppress these preflight refusals.
+
+The availability message names the returns and, where graph covers them, the
+explicit graph remedy. Neither install type retries a failed computation on
+another backend. A batch needing unavailable OTS is refused before any row runs.
 
 Both are raised before any return is computed, under every `on_error` policy:
 a missing backend describes the install, not a failed computation.
