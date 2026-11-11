@@ -1,0 +1,32 @@
+{
+  "FilingStatus": [
+    "from_str",
+    "head_of_household",
+    "married_joint",
+    "married_separate",
+    "qualifying_widow",
+    "single"
+  ],
+  "Graph": [
+    "eval_scenarios",
+    "eval_scenarios_zip",
+    "from_json",
+    "imports",
+    "input_names",
+    "node_names",
+    "output_names",
+    "to_dot",
+    "to_json"
+  ],
+  "Runtime": [
+    "eval",
+    "gradient",
+    "gradient_multi",
+    "gradient_multi_output",
+    "gradients_multi_output",
+    "set",
+    "solve",
+    "solve_multi",
+    "solve_multi_output"
+  ]
+}
