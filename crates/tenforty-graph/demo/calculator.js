@@ -1,6 +1,7 @@
 import {
   BrowserContractError,
   BrowserTaxRuntime,
+  isValidatedJurisdiction,
   requireValidatedJurisdiction,
 } from "./browser_contract.js";
 
@@ -145,6 +146,21 @@ function parseInput(name, specification, value) {
     throw new BrowserContractError(`${name} must be a finite number`);
   }
   return number;
+}
+
+// The calculator menu offers a jurisdiction only when it is validated in every
+// supported year, so a return keeps its state as the year changes.
+// BrowserTaxRuntime and parseScenario apply validation per year.
+export function isOfferedJurisdiction(contract, jurisdiction) {
+  return contract.supported_years.every((year) =>
+    isValidatedJurisdiction(contract, jurisdiction, year),
+  );
+}
+
+export function offeredJurisdictions(contract) {
+  return Object.keys(contract.jurisdictions).filter((code) =>
+    isOfferedJurisdiction(contract, code),
+  );
 }
 
 export function parseScenario(contract, search, fallbackScenario = null) {

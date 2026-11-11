@@ -23,6 +23,8 @@ runtime misrounds, so it flips cleanly once exact money lands. The fix is that
 work (tenforty-yxun); MS 2025 is out of graph scope until this flips.
 """
 
+import math
+
 import pytest
 
 import tenforty
@@ -40,12 +42,23 @@ def test_every_enumerated_balance_is_an_exact_tie():
     assert all((44 * n) % 1000 == 500 for n in TIES)
 
 
+class TieRoundsDown(AssertionError):
+    """Raised only for the s48h.77 defect: tie tax entered exactly $1 low."""
+
+
 @pytest.mark.xfail(
     strict=True,
+    raises=TieRoundsDown,
     reason="tenforty-s48h.77: binary float product rounds some ties down",
 )
 def test_ms_2025_line_17_rounds_every_tie_up():
-    """Every Single wage return at a tie gets the form's half-up tax."""
+    """Every Single wage return at a tie gets the form's half-up tax.
+
+    Fail closed: an evaluation error, a missing or non-finite row, or any
+    departure other than exactly -$1 is an ordinary failure. Only a nonempty
+    set of -$1 departures, the known defect, raises TieRoundsDown, which the
+    strict xfail expects; repaired arithmetic is a strict XPASS.
+    """
     wages = [float(n + BAND + SINGLE_ALLOWANCES) for n in TIES]
     frame = tenforty.evaluate_returns(
         year=2025,
@@ -55,10 +68,18 @@ def test_ms_2025_line_17_rounds_every_tie_up():
         backend="graph",
         allow_unvalidated=True,
     )
-    actual = dict(zip(TIES, frame["state_total_tax"].to_list(), strict=True))
-    misrounded = {
-        n: (tax, (44 * n + 500) // 1000)
-        for n, tax in actual.items()
+    taxes = frame["state_total_tax"].to_list()
+    assert len(taxes) == len(TIES)
+    assert all(isinstance(tax, float) and math.isfinite(tax) for tax in taxes)
+    departures = {
+        n: tax - (44 * n + 500) // 1000
+        for n, tax in zip(TIES, taxes, strict=True)
         if tax != (44 * n + 500) // 1000
     }
-    assert not misrounded, f"{len(misrounded)} ties misrounded: {misrounded}"
+    other = {n: d for n, d in departures.items() if d != -1}
+    assert not other, f"departures other than the known -$1: {other}"
+    if departures:
+        raise TieRoundsDown(
+            f"{len(departures)} of {len(TIES)} ties entered $1 low, "
+            f"first {sorted(departures)[:5]}"
+        )

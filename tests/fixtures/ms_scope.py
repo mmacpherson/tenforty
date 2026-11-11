@@ -1,40 +1,76 @@
-"""How Mississippi tests reach the graph while MS 2025 is out of scope.
+"""How Mississippi tests choose a backend while a year is out of graph scope.
 
 MS 2025 left graph scope for tenforty-s48h.77 (line 17 rounds a binary float
-product, so some exact half-dollar ties enter $1 low). ``backend="graph"`` now
-needs ``allow_unvalidated=True`` for it, and ``backend="auto"`` refuses it,
-since OTS has no Mississippi program;
-tests/graph_scope_test.py::test_ms_2025_is_out_of_scope_for_its_tie_rounding_defect
-pins that refusal. The MS tests keep checking every MS graph value and fact
-rule on the explicit graph backend, and check auto routing where it still
-routes to graph: 2024. Re-admitting MS 2025 (tenforty-yxun.7) restores the
-auto cases by deleting MS_OUT_OF_SCOPE_YEARS' entry.
+product, so some exact half-dollar ties enter $1 low). Every MS test keeps its
+full input matrix. On ``backend="graph"`` a case passes ``allow_unvalidated``
+and checks its original assertion. On ``backend="auto"`` in a year that is out
+of scope, the same call must be refused with the scope reasons before
+anything is computed; in a year in scope it computes and checks the original
+assertion.
+
+Scope is read from ``tenforty.graph_scope``, never kept here, so re-admitting
+MS 2025 (tenforty-yxun.7) turns every auto refusal case back into its original
+check with no test edit.
 """
+
+from collections.abc import Callable
+from contextlib import ExitStack
+from typing import Any
+from unittest import mock
 
 import pytest
 
-MS_OUT_OF_SCOPE_YEARS = frozenset({2025})
+from tenforty import UnsupportedInputError, UnsupportedReturnError, core
+from tenforty.backends.graph import GraphBackend
+from tenforty.graph_scope import exclusion_reasons, graph_state_in_scope
+from tenforty.models import OTSState
 
-MS_GRAPH = {"backend": "graph", "allow_unvalidated": True}
-"""Explicit graph with the opt-in, valid in every MS year."""
+MS_YEARS = (2024, 2025)
 
 
-def ms_route(backend: str, year: int = 2025) -> dict[str, object]:
-    """Keyword arguments that send an MS return to ``backend`` in ``year``."""
+def ms_in_scope(year: int) -> bool:
+    """Whether ``backend="auto"`` may compute an MS return in ``year``."""
+    return graph_state_in_scope(OTSState.MS, year)
+
+
+def ms_kwargs(backend: str) -> dict[str, object]:
+    """Send an MS return to ``backend``; explicit graph carries the opt-in."""
     if backend == "graph":
-        return MS_GRAPH
-    assert year not in MS_OUT_OF_SCOPE_YEARS, "auto refuses MS 2025 (s48h.77)"
+        return {"backend": "graph", "allow_unvalidated": True}
     return {"backend": backend}
 
 
-def ms_backends(year: int = 2025) -> list[str]:
-    """List the backends that compute an MS return in ``year``: auto only in scope."""
-    return ["graph"] if year in MS_OUT_OF_SCOPE_YEARS else ["auto", "graph"]
+def ms_auto_refuses(backend: str, year: int) -> bool:
+    """Whether this (backend, year) case is now a scope refusal contract."""
+    return backend == "auto" and not ms_in_scope(year)
 
 
-MS_BACKEND_YEARS = [
-    pytest.param(backend, year, id=f"{year}-{backend}")
-    for year in (2024, 2025)
-    for backend in ms_backends(year)
-]
-"""(backend, year) pairs for tests that ran auto and graph in both years."""
+def _must_not_compute(*_args: Any, **_kwargs: Any) -> None:
+    raise AssertionError("an out-of-scope MS return was computed before refusal")
+
+
+def assert_ms_scope_refusal(call: Callable[[], object], year: int) -> None:
+    """``call`` raises the MS scope refusal for ``year`` before computing.
+
+    The refusal must be the scope one (not an input refusal it now precedes),
+    name every reason ``graph_scope`` gives, and come before any graph or OTS
+    evaluation, scalar or batch.
+    """
+    reasons = exclusion_reasons(OTSState.MS, year)
+    assert reasons, f"MS {year} is in scope; this case should compute"
+    with ExitStack() as stack:
+        for target, name in (
+            (GraphBackend, "evaluate"),
+            (GraphBackend, "evaluate_batch"),
+            (core, "evaluate_natural_input_form"),
+        ):
+            stack.enter_context(
+                mock.patch.object(target, name, side_effect=_must_not_compute)
+            )
+        with pytest.raises(UnsupportedReturnError) as refusal:
+            call()
+    assert not isinstance(refusal.value, UnsupportedInputError), refusal.value
+    message = str(refusal.value)
+    assert f"MS {year}" in message, message
+    for reason in reasons:
+        assert reason in message, (reason, message)

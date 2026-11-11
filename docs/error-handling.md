@@ -81,7 +81,10 @@ applies the same selection.
 **graph scope**: its known graph-side defects are closed and official-value
 fixtures support it. For 2024 and 2025 that is currently:
 
-- Illinois, Mississippi and Oregon;
+- Illinois and Oregon, both years;
+- Mississippi 2024 only: MS 2025 is out of scope until its line-17 tax rounds
+  every half-dollar tie up (tenforty-s48h.77), and `"auto"` refuses it, since
+  OTS has no Mississippi program;
 - the states without an income tax: Alaska, Florida, Nevada, South Dakota,
   Tennessee, Texas, Washington and Wyoming.
 

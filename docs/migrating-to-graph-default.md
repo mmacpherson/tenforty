@@ -262,7 +262,8 @@ state itemizing from the federal Schedule A. See
   and raises `UnsupportedInputError` without it, where it used to compute with
   no joint filing credit. OH is outside graph scope, so only `backend="graph"`
   callers with `allow_unvalidated=True` see this.
-- MS remains in auto scope. MS MFJ requires both actual rounded line-13 AGIs
+- MS remained in auto scope in that release. (Since tenforty-s48h.77, MS 2025
+  is out of scope and MS 2024 stays; see "Graph scope" above.) MS MFJ requires both actual rounded line-13 AGIs
   through `state_facts.MS(taxpayer_adjusted_gross_income=..., spouse_adjusted_gross_income=...)`.
   Federal QSS requires `MS(head_of_family_eligible=...)`; HoH has the documented
   resident-dependent baseline True and an optional False override. Missing or inconsistent
