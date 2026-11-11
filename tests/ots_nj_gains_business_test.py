@@ -262,6 +262,7 @@ STILL_REFUSED = {
 """Still dropped by the NJ map and refused, under tenforty-r91.20."""
 
 
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("year", YEARS)
 @pytest.mark.parametrize("backend", ["ots", "auto", None])
 @pytest.mark.parametrize("name", sorted(FORMERLY_REFUSED))
@@ -276,6 +277,7 @@ def test_formerly_refused_inputs_now_compute_and_raise_nj_tax(year, backend, nam
     assert changed.state_total_tax > base.state_total_tax
 
 
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("year", YEARS)
 @pytest.mark.parametrize("name", sorted(STILL_REFUSED))
 def test_inputs_this_map_does_not_carry_are_still_refused(year, name):
