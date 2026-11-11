@@ -245,3 +245,46 @@ def test_nj_map_sends_business_profits_and_both_gains(year):
     for name in ("short_term_capital_gains", "long_term_capital_gains"):
         line, _ = input_map[name](1.0)
         assert line == "L19"
+
+
+FORMERLY_REFUSED = {
+    "self_employment_income": 20_000.0,
+    "short_term_capital_gains": 10_000.0,
+    "long_term_capital_gains": 10_000.0,
+}
+"""2025.14 refused these on OTS NJ because the map dropped them (r91.15)."""
+
+STILL_REFUSED = {
+    "num_dependents": 2,
+    "filer_65_or_older": True,
+    "rental_income": 10_000.0,
+}
+"""Still dropped by the NJ map and refused, under tenforty-r91.20."""
+
+
+@pytest.mark.parametrize("year", YEARS)
+@pytest.mark.parametrize("backend", ["ots", "auto", None])
+@pytest.mark.parametrize("name", sorted(FORMERLY_REFUSED))
+def test_formerly_refused_inputs_now_compute_and_raise_nj_tax(year, backend, name):
+    """Each input 2025.14 refused now computes on OTS NJ and raises the NJ tax."""
+    choice = {} if backend is None else {"backend": backend}
+    single = {"year": year, "state": "NJ", "filing_status": "Single"}
+    base = tenforty.evaluate_return(**single, w2_income=60_000.0, **choice)
+    changed = tenforty.evaluate_return(
+        **single, w2_income=60_000.0, **{name: FORMERLY_REFUSED[name]}, **choice
+    )
+    assert changed.state_total_tax > base.state_total_tax
+
+
+@pytest.mark.parametrize("year", YEARS)
+@pytest.mark.parametrize("name", sorted(STILL_REFUSED))
+def test_inputs_this_map_does_not_carry_are_still_refused(year, name):
+    """NJ dependents, 65+ and rental income keep their r91.20 refusal."""
+    with pytest.raises(tenforty.UnsupportedInputError, match=r"tenforty-r91\.20"):
+        tenforty.evaluate_return(
+            year=year,
+            state="NJ",
+            filing_status="Single",
+            w2_income=60_000.0,
+            **{name: STILL_REFUSED[name]},
+        )
