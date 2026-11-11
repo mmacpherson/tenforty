@@ -1,4 +1,6 @@
-"""Shipped API names captured from pre-removal builds at 613b625.
+"""Public API contract, initially captured from builds at 613b625.
+
+Update these fixtures deliberately when changing the public API.
 
 These are interface snapshots, not expected tax values. The WASM probe inspects
 wasm-bindgen's built JS exports, including class methods and static factories.
@@ -31,7 +33,7 @@ def python_surface():
 
 @pytest.mark.requires_graph
 def test_python_exported_names():
-    """Preserve the pre-removal Python API."""
+    """Preserve the public Python API contract."""
     assert python_surface() == json.loads((FIXTURES / "python.json").read_text())
 
 

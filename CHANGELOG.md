@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Removed
+- Contributor tooling: removed the unused graph JIT and Makefile targets
+  `graph-build-jit`, `graph-test-jit`, `graph-bench`, and `graph-throughput`.
+
 ## [2025.14] - 2026-11-07
 ### Changed (default backend)
 - **The default backend is `"ots"` again**, in `evaluate_return`,

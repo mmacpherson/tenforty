@@ -40,7 +40,6 @@
       "solve"
     ]
   },
-  "__wasm": null,
   "default": null,
   "initSync": {
     "static": [],
