@@ -1,0 +1,48 @@
+{
+  "FilingStatus": {
+    "static": [
+      "__wrap",
+      "fromString",
+      "head_of_household",
+      "married_joint",
+      "married_separate",
+      "qualifying_widow",
+      "single"
+    ],
+    "methods": [
+      "__destroy_into_raw",
+      "free",
+      "toString"
+    ]
+  },
+  "Graph": {
+    "static": [
+      "__wrap",
+      "fromJson"
+    ],
+    "methods": [
+      "__destroy_into_raw",
+      "free",
+      "inputNames",
+      "outputNames",
+      "toJson"
+    ]
+  },
+  "Runtime": {
+    "static": [],
+    "methods": [
+      "__destroy_into_raw",
+      "eval",
+      "free",
+      "gradient",
+      "gradientVector",
+      "set",
+      "solve"
+    ]
+  },
+  "default": null,
+  "initSync": {
+    "static": [],
+    "methods": []
+  }
+}

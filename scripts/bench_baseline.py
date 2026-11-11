@@ -62,7 +62,7 @@ def _scenarios(cols, n: int, seed: int = 42) -> dict[str, list[float]]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--backend", default="graph")
-    ap.add_argument("--label", required=True, help="engine label, e.g. interpreter/jit")
+    ap.add_argument("--label", required=True, help="engine label, e.g. interpreter")
     ap.add_argument("--profile", required=True, choices=sorted(PROFILES))
     ap.add_argument("--cores", type=int, required=True)
     ap.add_argument("--n", type=int, default=100_000)
