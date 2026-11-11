@@ -22,6 +22,17 @@
     $1-$3 under the table. Upstream report 22, recorded as a strict signature;
     not patched.
 
+### Changed (graph-only default)
+- When the compiled OTS extension is absent, an omitted `backend` follows
+  `"auto"` in `evaluate_return`, `evaluate_returns` and `get_backend`. Bare
+  supported 2024–2025 returns compute on graph, including in graph-only and
+  Windows builds. Full installs keep the OTS default. Explicit choices,
+  graph scope, state facts, typed refusals and whole-batch preflight remain
+  unchanged. The same supported bare call can produce different figures by
+  platform wherever the engines differ; see
+  [Migrating between backends](docs/migrating-to-graph-default.md).
+  Installed-artifact smoke checks now exercise the default too.
+
 ### Removed
 - Graph schema: removed the unused `abs` and `clamp` operations from Rust and
   the Haskell compiler. Loading graph JSON containing either now fails with an

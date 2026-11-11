@@ -1,5 +1,21 @@
 # Migrating between backends
 
+## Graph-only installs: omission follows auto
+
+On an install without the compiled OTS extension, omitting `backend` now routes
+exactly as `backend="auto"` in `evaluate_return`, `evaluate_returns` and
+`get_backend`. This includes `TENFORTY_GRAPH_ONLY=1` and Windows builds. Bare
+2024–2025 federal-only and in-scope state calls compute on graph, subject to the
+same supported inputs and required facts. No extra backend argument is needed.
+
+Installs with OTS keep the OTS default described below. An explicit backend is
+never reinterpreted. A valid route needing unavailable OTS raises
+`BackendUnavailableError`; unsupported/known-defective routes and unsupported
+inputs keep their earlier typed refusals and remedy text. `on_error` does not
+suppress preflight refusals. An omitted mixed batch is still checked whole before
+any row runs. This changes the default route on graph-only installs, not either
+backend's computed figures or graph validation scope.
+
 ## 2025.14: the OTS default is back
 
 - **The default is `backend="ots"` again.** 2025.13 made `"auto"` the default;
