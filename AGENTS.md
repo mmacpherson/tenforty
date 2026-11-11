@@ -217,7 +217,7 @@ profile's example count:
   - `backends/graph.py` — Graph backend (Rust runtime via PyO3)
   - `otslib/` — Cython bindings to OTS C++ code
 - `tenforty-spec/` — Haskell DSL defining tax form computations as graphs
-- `crates/tenforty-graph/` — Rust graph runtime (eval, autodiff, solver, JIT, WASM, Python bindings)
+- `crates/tenforty-graph/` — Rust graph runtime (eval, autodiff, solver, WASM, Python bindings)
 - `ots/` — OTS build tooling (see `ots/README.md` for amalgamation rationale)
   - `amalgamate.py` — Generates per-year .cpp files from OTS tarballs
   - `ots.template.pyx` — Cython template

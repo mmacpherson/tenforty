@@ -20,10 +20,18 @@ changes), not just the 1040:
 
 ## Re-run for comparison
 ```bash
-bash bench/run_baseline.sh      # builds jit + interpreter, sweeps cores 1/2/4/8
+bash bench/run_baseline.sh      # builds the interpreter, sweeps cores 1/2/4/8
 ```
 Output: `bench/baseline-<sha>-<date>.jsonl` (one JSON record per run, with a
 `_meta` header carrying SHA + machine). Regression sentinels for the big graph:
-**peak RSS** and **load time** (resident/one-time cost), and **JIT throughput at
-small N** (loud if the JIT compiles the whole 51-state graph instead of the
-reachable slice). Interpreter throughput should stay flat (demand-driven eval).
+**peak RSS**, **load time**, and interpreter throughput.
+
+## Retired JIT measurements
+
+The JIT was removed in tenforty-wjz.3 because the shipped Python and browser
+products use the interpreter. Historical JSONL results here remain unchanged.
+The 2026-09-24 real-graph comparison measured a 7.3–9.4x advantage over a
+prototype flat interpreter (about 8x); the 18-node throughput benchmark was
+not representative. Reconsider native compilation if a concrete native batch
+throughput requirement appears. The implementation and benchmark programs can
+be recovered from the parent of the removal commit.
