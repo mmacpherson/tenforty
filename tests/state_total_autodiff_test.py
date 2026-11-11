@@ -225,30 +225,68 @@ def test_solver_targets_the_public_total_in_every_state(state):
     assert _total_tax_at_wages(state, wages) == pytest.approx(target, abs=0.01)
 
 
+STATUTORY_STATE_RATES = {
+    # Independent derivation from the official rate schedules cited in
+    # tenforty-spec/forms/Tables{IL,MS,OR}{2024,2025}.hs, for Single wages of
+    # $120,000 and nothing else (retrieved via those modules, 2026-11-11).
+    #
+    # IL: flat 4.95% on net income (IL-1040 instructions 2024; Bulletin
+    # FY 2025-16). Federal AGI $120,000 is under the $250,000 exemption cutoff,
+    # so the exemption is a constant and the slope is the flat rate.
+    ("IL", 2024): 0.0495,
+    ("IL", 2025): 0.0495,
+    # MS: 0% on the first $10,000 of taxable income, then 4.7% (2024
+    # instructions p.21) or 4.4% (2025 instructions p.22). Taxable income is
+    # $120,000 - $2,300 standard deduction - $6,000 exemption = $111,700.
+    ("MS", 2024): 0.047,
+    ("MS", 2025): 0.044,
+    # OR: Single 8.75% bracket ($10,750-$125,000 in 2024; $11,100-$125,000 in
+    # 2025; Oregon rate charts / OR-40 instructions). Federal AGI $120,000 is
+    # under the $125,000 subtraction phase-out start, and federal tax on
+    # $120,000 of wages exceeds the $8,250 (2024) / $8,500 (2025) limit, so the
+    # federal tax subtraction sits at its constant cap. Oregon taxable income
+    # is $109,005 (2024) or $108,665 (2025), above the $50,000 tax-table
+    # ceiling, so the rate schedule applies.
+    ("OR", 2024): 0.0875,
+    ("OR", 2025): 0.0875,
+}
+
+
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
-@pytest.mark.xfail(
-    strict=True,
-    reason="tenforty-s48h.76: the graph state derivative reads zero for IL, MS, OR",
-)
-def test_state_slope_matches_a_finite_difference_in_il_ms_or(state, year):
-    """Witness for s48h.76: the state slope should match the state tax's change.
+def test_state_slope_is_the_statutory_rate_in_il_ms_or(state, year):
+    """Witness for s48h.76: the state slope is the statutory marginal rate.
 
-    At $85,000 of Single wages the state tax moves with income (a structural
-    finite difference on the graph's own evaluation, not a tax-value fixture),
-    but the derivative reads zero. When the derivative is fixed this passes,
-    the strict xfail fails, and the public refusal can be lifted.
+    Every wage path to IL, MS and OR tax crosses a whole-dollar rounding. Its
+    planning tangent is the identity, so the slope is the schedule's rate.
     """
-    kwargs = {"year": year, "state": state, "filing_status": "Single"}
-
-    def state_tax(wages: float) -> float:
-        return evaluate_return(
-            **kwargs, w2_income=wages, backend="graph", eitc_eligible=False
-        ).state_total_tax
-
-    finite_difference = (state_tax(85_500.0) - state_tax(84_500.0)) / 1_000.0
-    assert finite_difference > 0.01
     slope = marginal_rate(
-        **kwargs, w2_income=85_000.0, output="state_total_tax", eitc_eligible=False
+        year=year,
+        state=state,
+        filing_status="Single",
+        w2_income=120_000.0,
+        output="state_total_tax",
+        eitc_eligible=False,
     )
-    assert slope == pytest.approx(finite_difference, abs=0.005)
+    assert slope == pytest.approx(STATUTORY_STATE_RATES[state, year], abs=1e-12)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
+def test_state_slope_at_an_exact_rounding_tie_is_the_statutory_rate(state, year):
+    """At an exact half-dollar tie the slope is still the statutory rate.
+
+    The rule: whole-dollar rounding is half up in value, and its planning
+    tangent is the identity at every point, a tie included. Wages of
+    $120,000.50 put federal AGI, which each of these returns rounds to whole
+    dollars (IL line 1, MS line 49, OR federal AGI), exactly on a tie.
+    """
+    slope = marginal_rate(
+        year=year,
+        state=state,
+        filing_status="Single",
+        w2_income=120_000.5,
+        output="state_total_tax",
+        eitc_eligible=False,
+    )
+    assert slope == pytest.approx(STATUTORY_STATE_RATES[state, year], abs=1e-12)
