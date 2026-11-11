@@ -6,6 +6,20 @@ on:
   workflow_call:  # from release.yml, on the tagged commit
   workflow_dispatch:  # also builds the wheels, to test packaging on a branch
 
+# Branch runs share a workflow/ref group and superseded pushes cancel them.
+# Main/tags get unique run IDs: cancel-in-progress=false alone still replaces
+# an older pending run. Reusable workflows inherit the caller's workflow name,
+# so release.yml (name: release), and explicit workflow_call events, are protected.
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.ref }}-${{
+    (github.workflow == 'ci' && github.event_name != 'workflow_call' &&
+    github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')) &&
+    'branch' || github.run_id }}
+  cancel-in-progress: >-
+    ${{ github.workflow == 'ci' && github.event_name != 'workflow_call' &&
+    github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
+
 permissions:
   contents: read
 
