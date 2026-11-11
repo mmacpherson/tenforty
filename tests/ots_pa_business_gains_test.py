@@ -244,8 +244,12 @@ def test_no_class_amount_or_no_joint_return_reports_nothing(filing_status, amoun
 
 @pytest.mark.requires_ots
 def test_other_states_never_report_the_pa_record():
-    """NJ nets the same household totals but has no such spouse rule."""
-    result = _pa_return("Married/Joint", state="NJ", self_employment_income=2_500.0)
+    """Another state's joint return with a business amount carries no PA record.
+
+    NC, whose OTS map carries self_employment_income on its own; NJ does only
+    once tenforty-r91.15 (#464) lands, and 2025.14 refuses it until then.
+    """
+    result = _pa_return("Married/Joint", state="NC", self_employment_income=2_500.0)
     assert PA_JOINT_CLASSES not in _ids(result)
 
 
