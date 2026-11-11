@@ -285,6 +285,7 @@ FORMERLY_REFUSED = {
 """2025.14 refused these on OTS PA because the map dropped them (s48h.46)."""
 
 
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("year", YEARS)
 @pytest.mark.parametrize("backend", ["ots", "auto", None])
 @pytest.mark.parametrize("name", sorted(FORMERLY_REFUSED))
@@ -299,6 +300,7 @@ def test_formerly_refused_inputs_now_compute_and_raise_pa_tax(year, backend, nam
     assert changed.state_total_tax > base.state_total_tax
 
 
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("year", YEARS)
 def test_rental_income_is_still_refused(year):
     """PA rental income, which this map does not carry, keeps its r91.21 refusal."""
