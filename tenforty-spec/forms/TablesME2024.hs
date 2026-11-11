@@ -31,7 +31,7 @@ maineBrackets2024 :: NonEmpty Bracket
 maineBrackets2024 =
   Bracket (byStatus 26050 52100 26050 39050 52100) 0.058
     :| [ Bracket (byStatus 61600 123250 61600 92450 123250) 0.0675,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0715
+         TopBracket 0.0715
        ]
 
 maineBracketsTable2024 :: Table

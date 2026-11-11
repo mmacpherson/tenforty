@@ -11,7 +11,7 @@ import TenForty.Types
 -- https://www.in.gov/dor/resources/tax-rates-and-reports/rates-fees-and-penalties/
 -- Indiana uses a flat 3.00% tax rate on adjusted gross income for tax year 2025.
 -- Rate decreased from 3.05% in 2024 to 3.00% in 2025.
-inTaxRate2025 :: Double
+inTaxRate2025 :: Rational
 inTaxRate2025 = 0.03
 
 -- | 2025 Indiana personal exemption amount

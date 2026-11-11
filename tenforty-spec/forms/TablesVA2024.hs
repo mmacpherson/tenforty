@@ -31,7 +31,7 @@ virginiaBrackets2024 =
   Bracket (byStatus 3000 3000 3000 3000 3000) 0.02
     :| [ Bracket (byStatus 5000 5000 5000 5000 5000) 0.03,
          Bracket (byStatus 17000 17000 17000 17000 17000) 0.05,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0575
+         TopBracket 0.0575
        ]
 
 virginiaBracketsTable2024 :: Table

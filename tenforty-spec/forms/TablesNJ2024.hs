@@ -34,7 +34,7 @@ njBracketsSingle2024 =
          Bracket (byStatus 75000 75000 75000 75000 75000) 0.05525,
          Bracket (byStatus 500000 500000 500000 500000 500000) 0.0637,
          Bracket (byStatus 1000000 1000000 1000000 1000000 1000000) 0.0897,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.1075
+         TopBracket 0.1075
        ]
 
 njBracketsSingleTable2024 :: Table
@@ -64,7 +64,7 @@ njBracketsMfj2024 =
          Bracket (byStatus 150000 150000 150000 150000 150000) 0.05525,
          Bracket (byStatus 500000 500000 500000 500000 500000) 0.0637,
          Bracket (byStatus 1000000 1000000 1000000 1000000 1000000) 0.0897,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.1075
+         TopBracket 0.1075
        ]
 
 njBracketsMfjTable2024 :: Table

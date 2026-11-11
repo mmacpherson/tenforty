@@ -1,4 +1,7 @@
 [dependencies]
+num-bigint = "0.4"
+num-rational = "0.4"
+num-traits = "0.2"
 ouroboros = { version = "0.18", optional = true }
 rayon = { version = "1.10", optional = true }
 serde = { version = "1.0", features = ["derive"] }

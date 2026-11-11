@@ -9,14 +9,16 @@
       "2024": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
+        "schema_version": 2,
         "year": 2024,
-        "sha256": "dd1e99f7f99783f0803dd328224f1f6eb865edbe378cb438955b08d8dfd71ea4"
+        "sha256": "7c69bb4730776caa00389327d3f4b910d87b10d1f906a92f547394e6919fdff7"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
+        "schema_version": 2,
         "year": 2025,
-        "sha256": "28d4d02f8395c6a56074b7c91a093d7c44554abfbfb3b3437e6de330ebabc96d"
+        "sha256": "b9ca1042ba1f0385f5f6d06022965f1bf74b7994658162bd5a551207776bb3c1"
       }
     }
   },

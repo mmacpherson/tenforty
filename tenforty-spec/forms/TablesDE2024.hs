@@ -28,7 +28,7 @@ delawareBrackets2024 =
          Bracket (byStatus 20000 20000 20000 20000 20000) 0.048,
          Bracket (byStatus 25000 25000 25000 25000 25000) 0.052,
          Bracket (byStatus 60000 60000 60000 60000 60000) 0.0555,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.066
+         TopBracket 0.066
        ]
 
 delawareBracketsTable2024 :: Table

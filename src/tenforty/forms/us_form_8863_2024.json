@@ -20,6 +20,7 @@
     "meta": {
         "form_id": "us_form_8863",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {
@@ -55,7 +56,10 @@
             "id": 11,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "12": {
@@ -80,14 +84,20 @@
             "name": "L5_aotc_phaseout_range",
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "15": {
             "id": 15,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "16": {
@@ -102,7 +112,10 @@
             "id": 17,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "18": {
@@ -141,7 +154,10 @@
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 0.4
+                "value": {
+                    "d": "5",
+                    "n": "2"
+                }
             }
         },
         "22": {
@@ -157,7 +173,10 @@
             "id": 23,
             "op": {
                 "type": "literal",
-                "value": 0.6
+                "value": {
+                    "d": "5",
+                    "n": "3"
+                }
             }
         },
         "24": {
@@ -183,28 +202,40 @@
             "id": 26,
             "op": {
                 "type": "literal",
-                "value": 80000
+                "value": {
+                    "d": "1",
+                    "n": "80000"
+                }
             }
         },
         "27": {
             "id": 27,
             "op": {
                 "type": "literal",
-                "value": 160000
+                "value": {
+                    "d": "1",
+                    "n": "160000"
+                }
             }
         },
         "28": {
             "id": 28,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "29": {
             "id": 29,
             "op": {
                 "type": "literal",
-                "value": 80000
+                "value": {
+                    "d": "1",
+                    "n": "80000"
+                }
             }
         },
         "3": {
@@ -218,7 +249,10 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 160000
+                "value": {
+                    "d": "1",
+                    "n": "160000"
+                }
             }
         },
         "31": {
@@ -239,7 +273,10 @@
             "id": 32,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "33": {
@@ -264,14 +301,20 @@
             "name": "L15_llc_phaseout_range",
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "36": {
             "id": 36,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "37": {
@@ -286,7 +329,10 @@
             "id": 38,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "39": {
@@ -337,7 +383,10 @@
             "id": 43,
             "op": {
                 "type": "literal",
-                "value": 2000
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
             }
         },
         "44": {
@@ -353,7 +402,10 @@
             "id": 45,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "46": {
@@ -377,7 +429,10 @@
             "id": 48,
             "op": {
                 "type": "literal",
-                "value": 2000
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
             }
         },
         "49": {
@@ -392,14 +447,20 @@
             "id": 5,
             "op": {
                 "type": "literal",
-                "value": 80000
+                "value": {
+                    "d": "1",
+                    "n": "80000"
+                }
             }
         },
         "50": {
             "id": 50,
             "op": {
                 "type": "literal",
-                "value": 0.25
+                "value": {
+                    "d": "4",
+                    "n": "1"
+                }
             }
         },
         "51": {
@@ -424,7 +485,10 @@
             "id": 53,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "54": {
@@ -439,7 +503,10 @@
             "id": 55,
             "op": {
                 "type": "literal",
-                "value": 0.2
+                "value": {
+                    "d": "5",
+                    "n": "1"
+                }
             }
         },
         "56": {
@@ -455,28 +522,40 @@
             "id": 6,
             "op": {
                 "type": "literal",
-                "value": 160000
+                "value": {
+                    "d": "1",
+                    "n": "160000"
+                }
             }
         },
         "7": {
             "id": 7,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "8": {
             "id": 8,
             "op": {
                 "type": "literal",
-                "value": 80000
+                "value": {
+                    "d": "1",
+                    "n": "80000"
+                }
             }
         },
         "9": {
             "id": 9,
             "op": {
                 "type": "literal",
-                "value": 160000
+                "value": {
+                    "d": "1",
+                    "n": "160000"
+                }
             }
         }
     },

@@ -72,8 +72,10 @@ def _exact_scalars(value):
 
 
 def test_there_are_generated_graphs():
-    """Guard: the scan reads the synced graphs."""
+    """Guard: the scan reads the synced graphs, and they carry exact scalars."""
     assert len(GRAPHS) > 100
+    resolved = json.loads((FORMS / "us_tax_graph_2025.json").read_text())
+    assert len(list(_exact_scalars(resolved))) > 1000
 
 
 @pytest.mark.parametrize("path", GRAPHS, ids=lambda p: p.name)
@@ -88,9 +90,7 @@ def test_no_value_is_a_json_number(path):
 def test_exact_scalars_are_canonical_integers_in_lowest_terms(path):
     """Each numerator is a signed integer, each denominator positive, gcd 1."""
     graph = json.loads(path.read_text())
-    scalars = list(_exact_scalars(graph))
-    assert scalars
-    for scalar in scalars:
+    for scalar in _exact_scalars(graph):
         n, d = scalar["n"], scalar["d"]
         assert isinstance(n, str) and SIGNED.fullmatch(n), scalar
         assert isinstance(d, str) and POSITIVE.fullmatch(d), scalar

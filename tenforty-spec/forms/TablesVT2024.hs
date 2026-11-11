@@ -46,7 +46,7 @@ vtBrackets2024 =
   Bracket (byStatus 47900 79950 39975 64200 79950) 0.0335
     :| [ Bracket (byStatus 116000 193300 96650 165700 193300) 0.066,
          Bracket (byStatus 242000 294600 147300 268300 294600) 0.076,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0875
+         TopBracket 0.0875
        ]
 
 vtBracketsTable2024 :: Table

@@ -23,7 +23,7 @@ ohioBrackets2024 :: NonEmpty Bracket
 ohioBrackets2024 =
   Bracket (byStatus 26050 26050 26050 26050 26050) 0.0
     :| [ Bracket (byStatus 100000 100000 100000 100000 100000) 0.0275,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.035
+         TopBracket 0.035
        ]
 
 ohioBracketsTable2024 :: Table

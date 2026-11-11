@@ -13,13 +13,17 @@ Transcribed blind, session 1b251ce6, retrieved 2026-09-30, from:
 """
 
 import json
+from fractions import Fraction
 from pathlib import Path
 
 import pytest
 
+from .fixtures.graph_json import exact, scalar
+
 _FORMS_DIR = Path(__file__).parent.parent / "src" / "tenforty" / "forms"
 
-_RATES = [0.0335, 0.066, 0.076, 0.0875]
+_RATES = [Fraction(rate) for rate in ("0.0335", "0.066", "0.076", "0.0875")]
+"""The published decimal rates, compared exactly with the compiled scalars."""
 
 _OFFICIAL = {
     2025: {
@@ -49,8 +53,11 @@ def test_vt_rate_schedule_matches_official(year: int) -> None:
     brackets = _load(year)["tables"][f"vt_brackets_{year}"]["brackets"]
     for status, (thresholds, _) in _OFFICIAL[year].items():
         compiled = brackets[status]
-        assert [b["rate"] for b in compiled] == _RATES, status
-        assert tuple(b["threshold"] for b in compiled[:-1]) == thresholds, status
+        assert [scalar(b["rate"]) for b in compiled] == _RATES, status
+        assert tuple(scalar(b["threshold"]) for b in compiled[:-1]) == thresholds, (
+            status
+        )
+        assert compiled[-1]["threshold"] is None, status
 
 
 @pytest.mark.parametrize("year", sorted(_OFFICIAL))
@@ -64,4 +71,6 @@ def test_vt_standard_deduction_matches_official(year: int) -> None:
     )
     for status, (_, standard_deduction) in _OFFICIAL[year].items():
         literal = nodes[str(by_status[status])]["op"]
-        assert literal == {"type": "literal", "value": standard_deduction}, status
+        assert literal == {"type": "literal", "value": exact(standard_deduction)}, (
+            status
+        )

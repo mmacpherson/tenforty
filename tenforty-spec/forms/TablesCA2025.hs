@@ -51,7 +51,7 @@ californiaBrackets2025 =
          Bracket (byStatus 371479 742958 371479 505208 742958) 0.093,
          Bracket (byStatus 445771 891542 445771 606251 891542) 0.103,
          Bracket (byStatus 742953 1485906 742953 1010417 1485906) 0.113,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.123
+         TopBracket 0.123
        ]
 
 californiaBracketsTable2025 :: Table
@@ -93,7 +93,7 @@ caBehavioralHealthThreshold2025 :: Amount Dollars
 caBehavioralHealthThreshold2025 = 1000000
 
 -- | 2025 Behavioral Health Services Tax rate (1%)
-caBehavioralHealthRate2025 :: Double
+caBehavioralHealthRate2025 :: Rational
 caBehavioralHealthRate2025 = 0.01
 
 -- | FTB 3514 (California Earned Income Tax Credit) thresholds for 2025

@@ -4,6 +4,7 @@
     "meta": {
         "form_id": "wa_notax",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {
@@ -12,7 +13,10 @@
             "name": "L1_wa_tax",
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         }
     },

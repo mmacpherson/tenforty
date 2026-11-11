@@ -161,6 +161,11 @@ Generating and syncing graphs:
 - `make forms-sync` syncs those graphs into `src/tenforty/forms/`.
 - These Haskell checks are local-dev only; CI remains agnostic to `tenforty-spec/`.
 
+Graph JSON is schema version 2 (`meta.schema_version`). Every value scalar is
+an exact `{"n": "<integer>", "d": "<positive integer>"}` written from the spec's
+`Rational` literals, and an unbounded top bracket has a `null` threshold. Tests
+that build graph JSON by hand use `tests/fixtures/graph_json.py`.
+
 ### Logging
 
 In the author's experience, one generally needs to review the underlying generated OTS text files

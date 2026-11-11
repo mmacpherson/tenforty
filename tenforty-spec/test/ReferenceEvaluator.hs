@@ -51,7 +51,7 @@ evaluateGraph graph status wages =
               | nm == "L1a" || "L1a_" `T.isPrefixOf` nm -> wages
             _ -> 0
         OpImport {} -> 0 -- Imports from other forms treated as 0 in tests
-        OpLiteral v -> v
+        OpLiteral v -> f64 v
         OpAdd l r -> lkp l + lkp r
         OpSub l r -> lkp l - lkp r
         OpMul l r -> lkp l * lkp r
@@ -60,10 +60,11 @@ evaluateGraph graph status wages =
         OpMax l r -> max (lkp l) (lkp r)
         OpMin l r -> min (lkp l) (lkp r)
         OpFloor a -> fromIntegral (floor (lkp a) :: Int)
-        OpTaxTableQuantize mode step offset a ->
-          let scaled = lkp a / step
+        OpTaxTableQuantize mode exactStep exactOffset a ->
+          let step = f64 exactStep
+              scaled = lkp a / step
               shifted = case mode of TableFloor -> scaled; TableRound -> scaled + 0.5
-           in step * fromIntegral (floor shifted :: Integer) + offset
+           in step * fromIntegral (floor shifted :: Integer) + f64 exactOffset
         OpIfPositive c t e -> if lkp c > 0 then lkp t else lkp e
         OpBracketTax tblId incomeNode ->
           evalBracketTaxFromTable tables tblId status (lkp incomeNode)
@@ -71,8 +72,8 @@ evaluateGraph graph status wages =
           let agiVal = lkp agiNode
               thresholdVal = getStatusValue status threshold
               excess = max 0 (agiVal - thresholdVal)
-              reduction = excess * phaseRate
-           in max 0 (base - reduction)
+              reduction = excess * f64 phaseRate
+           in max 0 (f64 base - reduction)
         OpByStatus sn -> lkp (getStatusNodeId status sn)
         where
           lkp i = fromMaybe 0 (Map.lookup i acc)
@@ -98,20 +99,24 @@ evaluateGraph graph status wages =
         where
           go !acc _ [] = acc
           go !acc prevThresh (b : bs) =
-            let thresh = brThreshold b
-                bracketRate = brRate b
+            let thresh = maybe (1 / 0) f64 (brThreshold b)
+                bracketRate = f64 (brRate b)
                 taxableInBracket = min inc thresh - prevThresh
              in if inc <= prevThresh
                   then acc
                   else go (acc + max 0 taxableInBracket * bracketRate) thresh bs
 
       getStatusValue :: FilingStatus -> StatusValues -> Double
-      getStatusValue fs sv = case fs of
+      getStatusValue fs sv = f64 $ case fs of
         Single -> svSingle sv
         MarriedJoint -> svMarriedJoint sv
         MarriedSeparate -> svMarriedSeparate sv
         HeadOfHousehold -> svHeadOfHousehold sv
         QualifyingWidow -> svQualifyingWidow sv
+
+      -- The nearest Double to an exact scalar, as the Rust loader converts it.
+      f64 :: Rational -> Double
+      f64 = fromRational
 
       getStatusNodeId :: FilingStatus -> StatusNodeIds -> Int
       getStatusNodeId fs sn = case fs of

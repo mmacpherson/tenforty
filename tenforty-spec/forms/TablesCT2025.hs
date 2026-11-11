@@ -26,7 +26,7 @@ ctBrackets2025 =
          Bracket (byStatus 200000 400000 200000 320000 400000) 0.06,
          Bracket (byStatus 250000 500000 250000 400000 500000) 0.065,
          Bracket (byStatus 500000 1000000 500000 800000 1000000) 0.069,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0699
+         TopBracket 0.0699
        ]
 
 ctBracketsTable2025 :: Table

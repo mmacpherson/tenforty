@@ -168,3 +168,41 @@ fn serialization_round_trips_every_f64_exactly() {
         assert_eq!(runtime.eval_node(0).unwrap().to_bits(), value.to_bits());
     }
 }
+
+fn assert_nearest_ties_to_even(n: &str, d: &str) {
+    use num_bigint::BigInt;
+    use num_rational::BigRational;
+    use num_traits::Signed;
+    let x = graphlib::exact::scalar_to_f64(n, d).unwrap();
+    let exact = BigRational::new(n.parse::<BigInt>().unwrap(), d.parse::<BigInt>().unwrap());
+    let distance = |v: f64| (BigRational::from_float(v).unwrap() - &exact).abs();
+    let here = distance(x);
+    for neighbour in [x.next_down(), x.next_up()] {
+        if !neighbour.is_finite() {
+            continue;
+        }
+        let there = distance(neighbour);
+        assert!(here <= there, "{n}/{d} -> {x:e} is not nearest");
+        if here == there {
+            assert_eq!(x.to_bits() & 1, 0, "{n}/{d}: a tie did not go to even");
+        }
+    }
+}
+
+proptest::proptest! {
+    #[test]
+    fn every_exact_scalar_converts_to_the_nearest_double_ties_to_even(
+        n in proptest::num::i128::ANY,
+        d in 1u128..,
+    ) {
+        assert_nearest_ties_to_even(&n.to_string(), &d.to_string());
+    }
+
+    #[test]
+    fn small_ratios_with_frequent_near_ties_convert_correctly(
+        n in -(1i64 << 55)..(1i64 << 55),
+        shift in 0u32..64,
+    ) {
+        assert_nearest_ties_to_even(&n.to_string(), &(1u128 << shift).to_string());
+    }
+}

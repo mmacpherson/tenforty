@@ -29,7 +29,7 @@ import TenForty.Types
 kansasBrackets2025 :: NonEmpty Bracket
 kansasBrackets2025 =
   Bracket (byStatus 23000 46000 23000 23000 23000) 0.052
-    :| [Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0558]
+    :| [TopBracket 0.0558]
 
 kansasBracketsTable2025 :: Table
 kansasBracketsTable2025 =

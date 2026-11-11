@@ -6,13 +6,13 @@ row that divided by zero, named an unknown input or output, or referenced a
 missing table came back as 0.0 instead of an error.
 """
 
-import json
-
 import pytest
+
+from .fixtures.graph_json import upgraded_dumps
 
 pytestmark = pytest.mark.requires_graph
 
-RATIO_GRAPH = json.dumps(
+RATIO_GRAPH = upgraded_dumps(
     {
         "nodes": {
             "0": {"id": 0, "op": {"type": "input"}, "name": "numerator"},

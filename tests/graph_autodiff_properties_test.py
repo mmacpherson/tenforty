@@ -35,6 +35,7 @@ from hypothesis import strategies as st
 from tenforty import evaluate_return
 from tenforty.models import OTSFilingStatus, TaxReturnInput
 
+from .fixtures.graph_json import upgraded_dumps
 from .fixtures.planning_twin import linear_path_slope
 
 
@@ -468,7 +469,6 @@ _BRACKET_RATES = (0.10, 0.20, 0.30)
 
 
 def _bare_bracket_runtime():
-    import json
 
     from tenforty.graphlib import FilingStatus, Graph, Runtime
 
@@ -486,7 +486,7 @@ def _bare_bracket_runtime():
         "qualifying_widow",
     )
     graph = Graph.from_json(
-        json.dumps(
+        upgraded_dumps(
             {
                 "meta": None,
                 "imports": [],

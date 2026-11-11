@@ -10,7 +10,7 @@ import TenForty.Types
 -- Source: Utah State Tax Commission, Tax Rates page
 -- https://incometax.utah.gov/paying/tax-rates
 -- Rate reduced from 4.55% to 4.5% effective January 1, 2025
-utTaxRate2025 :: Double
+utTaxRate2025 :: Rational
 utTaxRate2025 = 0.045
 
 -- | 2025 Utah personal exemption per dependent

@@ -40,6 +40,7 @@
     "meta": {
         "form_id": "us_schedule_2",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {
@@ -274,7 +275,10 @@
             "id": 34,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "35": {

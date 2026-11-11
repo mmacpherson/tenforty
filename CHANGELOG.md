@@ -1,5 +1,26 @@
 ## [Unreleased]
 
+### Changed (graph JSON schema version 2: exact literals)
+- **Graph values are exact rationals from the spec** (tenforty-yxun.3). In the
+  Haskell spec, every literal, rate, bracket threshold and rate, phase-out and
+  tax-table parameter is a `Rational`, so a source literal `0.044` is exactly
+  `11/250` and never passes through a binary float. `percent p` is exactly
+  `p/100`, the same value as `rate (p/100)`. Under Double they disagreed:
+  `percent 4.4` was not the double nearest 0.044.
+- The graph JSON carries each value as `{"n": "<integer>", "d": "<positive
+  integer>"}` in lowest terms. `meta.schema_version` is 2. An unbounded top
+  bracket is an explicit `null` threshold (spec: `TopBracket`), replacing the
+  `1e12` sentinel.
+- The Rust loader converts each exact value to the nearest f64 (ties to even)
+  at load, so the runtime still computes in f64 at this stage. It rejects the
+  old numeric format, a missing or older schema version, malformed integers,
+  zero or negative denominators, and an unbounded bracket that is not last.
+  Graph JSON from earlier releases must be regenerated.
+- No computed figure changes. Every one of the 16,440 scalars in the shipped
+  graphs converts to the same double as before. The one structural change is
+  that Oregon's top tax-table increment no longer takes `min(midpoint, 1e12)`.
+  A before/after evaluation of 1.38M named-node values found no difference.
+
 ### Removed
 - Graph schema: removed the unused `abs` and `clamp` operations from Rust and
   the Haskell compiler. Loading graph JSON containing either now fails with an

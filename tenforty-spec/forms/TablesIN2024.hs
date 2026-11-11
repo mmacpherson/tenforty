@@ -10,7 +10,7 @@ import TenForty.Types
 -- Source: Indiana Department of Revenue - Rates Fees & Penalties
 -- https://www.in.gov/dor/resources/tax-rates-and-reports/rates-fees-and-penalties/
 -- Indiana uses a flat 3.05% tax rate on adjusted gross income for tax year 2024.
-inTaxRate2024 :: Double
+inTaxRate2024 :: Rational
 inTaxRate2024 = 0.0305
 
 -- | 2024 Indiana personal exemption amount

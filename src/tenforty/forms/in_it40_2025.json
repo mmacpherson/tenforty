@@ -21,6 +21,7 @@
     "meta": {
         "form_id": "in_it40",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2025
     },
     "nodes": {
@@ -51,7 +52,10 @@
             "id": 11,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "12": {
@@ -76,7 +80,10 @@
             "id": 14,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "15": {
@@ -100,21 +107,30 @@
             "id": 17,
             "op": {
                 "type": "literal",
-                "value": 1000
+                "value": {
+                    "d": "1",
+                    "n": "1000"
+                }
             }
         },
         "18": {
             "id": 18,
             "op": {
                 "type": "literal",
-                "value": 2000
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
             }
         },
         "19": {
             "id": 19,
             "op": {
                 "type": "literal",
-                "value": 1000
+                "value": {
+                    "d": "1",
+                    "n": "1000"
+                }
             }
         },
         "2": {
@@ -128,14 +144,20 @@
             "id": 20,
             "op": {
                 "type": "literal",
-                "value": 1000
+                "value": {
+                    "d": "1",
+                    "n": "1000"
+                }
             }
         },
         "21": {
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 1000
+                "value": {
+                    "d": "1",
+                    "n": "1000"
+                }
             }
         },
         "22": {
@@ -165,7 +187,10 @@
             "id": 24,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "25": {
@@ -189,7 +214,10 @@
             "id": 27,
             "op": {
                 "type": "literal",
-                "value": 3.0e-2
+                "value": {
+                    "d": "100",
+                    "n": "3"
+                }
             }
         },
         "28": {
@@ -221,7 +249,10 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "31": {
@@ -295,7 +326,10 @@
             "id": 39,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "4": {
@@ -319,7 +353,10 @@
             "id": 41,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "42": {

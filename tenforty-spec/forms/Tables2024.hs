@@ -103,7 +103,7 @@ federalBrackets2024 =
          Bracket (byStatus 191950 383900 191950 191950 383900) 0.24,
          Bracket (byStatus 243725 487450 243725 243700 487450) 0.32,
          Bracket (byStatus 609350 731200 365600 609350 731200) 0.35,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.37
+         TopBracket 0.37
        ]
 
 federalBracketsTable2024 :: Table
