@@ -162,19 +162,6 @@ fn lower_op(
             Ok(builder.ins().fneg(v))
         }
 
-        Op::Abs { arg } => {
-            let v = get_node_value(*arg, node_values)?;
-            Ok(builder.ins().fabs(v))
-        }
-
-        Op::Clamp { arg, min, max } => {
-            let v = get_node_value(*arg, node_values)?;
-            let min_val = builder.ins().f64const(*min);
-            let max_val = builder.ins().f64const(*max);
-            let clamped_min = builder.ins().fmax(v, min_val);
-            Ok(builder.ins().fmin(clamped_min, max_val))
-        }
-
         Op::ByStatus { values } => {
             let target_id = *values.get(filing_status);
             get_node_value(target_id, node_values)
@@ -444,21 +431,6 @@ fn lower_op_simd(
         Op::Neg { arg } => {
             let v = get_node_value_simd(*arg, node_values)?;
             Ok(builder.ins().fneg(v))
-        }
-
-        Op::Abs { arg } => {
-            let v = get_node_value_simd(*arg, node_values)?;
-            Ok(builder.ins().fabs(v))
-        }
-
-        Op::Clamp { arg, min, max } => {
-            let v = get_node_value_simd(*arg, node_values)?;
-            let min_scalar = builder.ins().f64const(*min);
-            let min_val = builder.ins().splat(types::F64X2, min_scalar);
-            let max_scalar = builder.ins().f64const(*max);
-            let max_val = builder.ins().splat(types::F64X2, max_scalar);
-            let clamped_min = builder.ins().fmax(v, min_val);
-            Ok(builder.ins().fmin(clamped_min, max_val))
         }
 
         Op::ByStatus { values } => {

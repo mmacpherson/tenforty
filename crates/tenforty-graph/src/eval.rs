@@ -200,16 +200,6 @@ impl<'g> Runtime<'g> {
                 Ok(-v)
             }
 
-            Op::Abs { arg } => {
-                let v = self.eval_node(*arg)?;
-                Ok(v.abs())
-            }
-
-            Op::Clamp { arg, min, max } => {
-                let v = self.eval_node(*arg)?;
-                Ok(v.clamp(*min, *max))
-            }
-
             Op::BracketTax { table, income } => {
                 let table = self
                     .graph

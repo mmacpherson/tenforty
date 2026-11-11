@@ -118,9 +118,6 @@ pub enum Op {
     Neg {
         arg: NodeId,
     },
-    Abs {
-        arg: NodeId,
-    },
     BracketTax {
         table: TableId,
         income: NodeId,
@@ -133,11 +130,6 @@ pub enum Op {
     },
     ByStatus {
         values: ByStatus<NodeId>,
-    },
-    Clamp {
-        arg: NodeId,
-        min: f64,
-        max: f64,
     },
     IfPositive {
         cond: NodeId,
@@ -183,11 +175,7 @@ impl Op {
             | Op::Div { left, right }
             | Op::Max { left, right }
             | Op::Min { left, right } => vec![*left, *right],
-            Op::Floor { arg }
-            | Op::TaxTableQuantize { arg, .. }
-            | Op::Neg { arg }
-            | Op::Abs { arg }
-            | Op::Clamp { arg, .. } => {
+            Op::Floor { arg } | Op::TaxTableQuantize { arg, .. } | Op::Neg { arg } => {
                 vec![*arg]
             }
             Op::BracketTax { income, .. } => vec![*income],

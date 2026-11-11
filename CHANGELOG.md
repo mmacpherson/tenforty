@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Removed
+- Graph schema: removed the unused `abs` and `clamp` operations from Rust and
+  the Haskell compiler. Loading graph JSON containing either now fails with an
+  `unknown variant` error naming the operation. No shipped graph uses them;
+  computed figures for shipped forms are unchanged.
+
 ## [2025.14] - 2026-11-07
 ### Changed (default backend)
 - **The default backend is `"ots"` again**, in `evaluate_return`,
