@@ -13,9 +13,6 @@ pub use eval::{
 pub use graph::{FilingStatus, Graph, Node, NodeId, Op, TableId};
 pub use solver::solve;
 
-#[cfg(feature = "jit")]
-pub mod jit;
-
 #[cfg(feature = "python")]
 mod python;
 
