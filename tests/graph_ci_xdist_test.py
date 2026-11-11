@@ -10,16 +10,24 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.parametrize(
-    ("graph_passes", "ordinary_passes", "graph_skip", "expected_exit"),
+    ("graph_passes", "ordinary_passes", "graph_skip", "graph_xfail", "expected_exit"),
     [
-        (200, 0, False, pytest.ExitCode.OK),
-        (199, 1, False, pytest.ExitCode.TESTS_FAILED),
-        (0, 200, False, pytest.ExitCode.TESTS_FAILED),
-        (200, 0, True, pytest.ExitCode.TESTS_FAILED),
+        (200, 0, False, False, pytest.ExitCode.OK),
+        (199, 1, False, False, pytest.ExitCode.TESTS_FAILED),
+        (0, 200, False, False, pytest.ExitCode.TESTS_FAILED),
+        (200, 0, True, False, pytest.ExitCode.TESTS_FAILED),
+        (199, 0, False, True, pytest.ExitCode.TESTS_FAILED),
+        (200, 0, False, True, pytest.ExitCode.OK),
     ],
 )
 def test_graph_floor_aggregates_real_worker_reports(
-    pytester, monkeypatch, graph_passes, ordinary_passes, graph_skip, expected_exit
+    pytester,
+    monkeypatch,
+    graph_passes,
+    ordinary_passes,
+    graph_skip,
+    graph_xfail,
+    expected_exit,
 ):
     """Combine workers once, count only graph calls, and reject worker skips."""
     monkeypatch.setenv("PYTHONPATH", str(ROOT))
@@ -44,6 +52,12 @@ def test_ordinary(example):
 def test_graph_skip():
     pytest.skip('unexpected worker skip')
 """
+    if graph_xfail:
+        source += """
+@pytest.mark.requires_graph
+def test_graph_xfail():
+    pytest.xfail('expected known defect')
+"""
     pytester.makepyfile(source)
     result = pytester.runpytest_subprocess(
         "-p",
@@ -59,7 +73,9 @@ def test_graph_skip():
     )
     assert result.ret == expected_exit
     result.assert_outcomes(
-        passed=graph_passes + ordinary_passes, skipped=int(graph_skip)
+        passed=graph_passes + ordinary_passes,
+        skipped=int(graph_skip),
+        xfailed=int(graph_xfail),
     )
     if expected_exit != pytest.ExitCode.OK:
         result.stdout.fnmatch_lines(
