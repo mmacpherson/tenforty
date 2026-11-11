@@ -20,7 +20,7 @@ endef
 export UV_INSTALL_MSG
 
 DEFAULT_GOAL: help
-.PHONY: help clean env env-full env-graph-only notebooks notebooks-check readme-plots test test-full test-all test-deep test-soak hooks update-hooks run-hooks run-hooks-all-files graph-build graph-build-jit graph-test graph-test-jit graph-bench graph-throughput wasm wasm-dev wasm-serve
+.PHONY: help clean env env-full env-graph-only notebooks notebooks-check readme-plots test test-full test-all test-deep test-soak hooks update-hooks run-hooks run-hooks-all-files graph-build graph-test wasm wasm-dev wasm-serve wasm-contract
 .PHONY: spec-graphs spec-test forms-sync
 .PHONY: spec-fmt spec-fmt-check spec-lint spec-lint-strict
 .PHONY: runner-image bench-zip-mode
@@ -121,22 +121,13 @@ run-hooks-all-files: check-uv ## Run hooks on all files
 graph-build: ## Build graph library (interpreter only)
 	cargo build -p tenforty-graph --release
 
-graph-build-jit: ## Build graph library with JIT+SIMD
-	cargo build -p tenforty-graph --release --features jit
-
 graph-test: ## Test graph library (interpreter only)
 	cargo test -p tenforty-graph
 
-graph-test-jit: ## Test graph library with JIT+SIMD
-	cargo test -p tenforty-graph --features jit
-
-graph-bench: ## Run JIT benchmarks
-	cargo bench -p tenforty-graph --features jit
-
-graph-throughput: ## Run throughput comparison (interpreter vs JIT vs SIMD)
-	cargo run -p tenforty-graph --example throughput_bench --features "jit parallel" --release
-
 ## WASM targets
+wasm-contract: ## Verify built WASM exports against the pre-removal API
+	uv run python scripts/check_runtime_wasm.py
+
 wasm: ## Build wasm module (release)
 	wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
 
@@ -196,11 +187,7 @@ bench-zip-mode: ## Benchmark evaluate_returns(mode="zip") across backends and co
 	cargo build -p tenforty-graph --release --features "python parallel"
 	cp target/release/libgraphlib.so src/tenforty/graphlib/graphlib$(PYTHON_EXT_SUFFIX)
 	python scripts/bench_zip_mode.py --backend graph --label graph --n $(BENCH_N_GRAPH) --cores $(BENCH_CORES) --output /tmp/bench_interp.json
-	@echo "=== Graph JIT (n=$(BENCH_N_GRAPH)) ==="
-	cargo build -p tenforty-graph --release --features "python jit parallel"
-	cp target/release/libgraphlib.so src/tenforty/graphlib/graphlib$(PYTHON_EXT_SUFFIX)
-	python scripts/bench_zip_mode.py --backend graph --label graph-jit --n $(BENCH_N_GRAPH) --cores $(BENCH_CORES) --output /tmp/bench_jit.json
-	python scripts/bench_zip_mode.py --combine /tmp/bench_ots.json /tmp/bench_interp.json /tmp/bench_jit.json --html bench_results.html
+	python scripts/bench_zip_mode.py --combine /tmp/bench_ots.json /tmp/bench_interp.json --html bench_results.html
 	@echo "Results: bench_results.html"
 
 help: ## Show this help

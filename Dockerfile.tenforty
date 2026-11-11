@@ -17,11 +17,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
 COPY Cargo.toml Cargo.lock /tmp/rust-deps/
 COPY crates/tenforty-graph/Cargo.toml /tmp/rust-deps/crates/tenforty-graph/
 RUN mkdir -p /tmp/rust-deps/crates/tenforty-graph/src \
-  /tmp/rust-deps/crates/tenforty-graph/benches \
-  /tmp/rust-deps/crates/tenforty-graph/examples \
   && echo "pub fn stub() {}" > /tmp/rust-deps/crates/tenforty-graph/src/lib.rs \
-  && touch /tmp/rust-deps/crates/tenforty-graph/benches/jit_bench.rs \
-  /tmp/rust-deps/crates/tenforty-graph/examples/throughput_bench.rs \
   && cd /tmp/rust-deps && cargo fetch \
   && rm -rf /tmp/rust-deps
 

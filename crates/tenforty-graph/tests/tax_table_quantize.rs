@@ -743,33 +743,6 @@ fn unreachable_targets_fail_and_reachable_plateaus_are_deterministic() {
     assert_eq!(rt.eval_node(1).unwrap(), 2.0);
 }
 
-#[cfg(feature = "jit")]
-#[test]
-fn scalar_and_simd_jit_match_interpreter() {
-    use graphlib::jit::{JitBatchRuntime, JitCompiler, JitRuntime};
-    for mode in [TaxTableQuantizeMode::Floor, TaxTableQuantizeMode::Round] {
-        let g = graph(vec![Op::Input, quantize(0, 25.0, 12.5, mode)]);
-        let compiler = JitCompiler::new().unwrap();
-        let compiled = compiler.compile(&g, FilingStatus::Single).unwrap();
-        let mut jit = JitRuntime::new(compiled, &g);
-        let batch_compiled = compiler
-            .compile_batch(&g, FilingStatus::Single, &g.outputs)
-            .unwrap();
-        let mut batch = JitBatchRuntime::new(batch_compiled, &g);
-        let mut rt = Runtime::new(&g, FilingStatus::Single);
-        for pair in [[0.0, 24.999], [25.0, 37.5], [-12.5, -12.501]] {
-            batch.set_batch("x", &pair).unwrap();
-            let actual = batch.eval_batch("node_1").unwrap();
-            for (index, input) in pair.into_iter().enumerate() {
-                rt.set_by_id(0, input);
-                assert_eq!(actual[index], rt.eval_node(1).unwrap());
-                jit.set("x", input).unwrap();
-                assert_eq!(jit.eval("node_1").unwrap(), rt.eval_node(1).unwrap());
-            }
-        }
-    }
-}
-
 fn whole_dollar_round_values(v: f64) -> (u64, u64, u64, u64) {
     let floor_of_half_up = graph(vec![
         Op::Input,

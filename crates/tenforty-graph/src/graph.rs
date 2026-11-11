@@ -356,7 +356,7 @@ impl Graph {
     /// DFS from `roots` (typically the requested outputs) rather than every
     /// node, so the result contains only what those outputs actually depend on.
     /// `ByStatus` follows only the branch selected by `filing_status`, matching
-    /// how the interpreter and JIT evaluate it — the other branches are neither
+    /// how the interpreter evaluates it — the other branches are neither
     /// evaluated nor emitted. The result is a valid topological order (each node
     /// appears after its dependencies), so a lowerer can consume it directly.
     pub fn reachable_topological_order(

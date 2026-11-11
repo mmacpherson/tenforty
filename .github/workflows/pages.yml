@@ -10,6 +10,8 @@ on:
     - crates/tenforty-graph/Cargo.toml
     - crates/tenforty-graph/demo/**
     - scripts/smoke_wasm_demo.mjs
+    - scripts/check_runtime_wasm.py
+    - tests/fixtures/runtime-api/wasm.json
     - src/tenforty/forms/**
     - .github/workflows/pages.yml
   pull_request:
@@ -20,6 +22,8 @@ on:
     - crates/tenforty-graph/Cargo.toml
     - crates/tenforty-graph/demo/**
     - scripts/smoke_wasm_demo.mjs
+    - scripts/check_runtime_wasm.py
+    - tests/fixtures/runtime-api/wasm.json
     - src/tenforty/forms/**
     - .github/workflows/pages.yml
   workflow_dispatch:
@@ -50,6 +54,9 @@ jobs:
 
     - name: Build WASM module
       run: wasm-pack build --target web --release crates/tenforty-graph -- --features wasm --no-default-features
+
+    - name: Check public WASM API contract
+      run: python3 scripts/check_runtime_wasm.py --skip-build
 
     - name: Stage self-contained Pages artifact
       run: |
