@@ -56,7 +56,7 @@ jobs:
       run: uv sync
 
     - name: Run tests
-      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
+      run: uv run pytest -n auto --dist worksteal --hypothesis-profile=ci --require-graph --min-graph-passes=200
 
   # A graph-only install, as every Windows wheel is: the OTS extension is not
   # built. Tests that need OTS are marked requires_ots and --graph-only
@@ -86,7 +86,7 @@ jobs:
 
     - name: Run tests on the graph-only install
       run: >-
-        uv run pytest --graph-only --hypothesis-profile=ci --require-graph
+        uv run pytest -n auto --dist worksteal --graph-only --hypothesis-profile=ci --require-graph
         --min-graph-passes=200
 
   # The jobs above test against uv.lock; this one tests what a new install
@@ -111,7 +111,7 @@ jobs:
       run: uv sync --upgrade
 
     - name: Run tests
-      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
+      run: uv run pytest -n auto --dist worksteal --hypothesis-profile=ci --require-graph --min-graph-passes=200
 
   # Installs the built wheel (not an editable build) and checks both native
   # backends load from it, on the newest Python, on every platform a wheel
