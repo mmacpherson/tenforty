@@ -155,7 +155,7 @@ fn an_unbounded_top_bracket_is_explicit_and_only_last() {
 }
 
 #[test]
-fn serialization_round_trips_every_f64_exactly() {
+fn serialization_round_trips_every_nonzero_finite_f64() {
     let sum = 0.1f64 + 0.2;
     for value in [0.044f64, sum, -0.5, 1e12, 5e-324, f64::MAX] {
         let graph = Graph::from_json(&graph_json(r#"{"n": "0", "d": "1"}"#)).unwrap();
@@ -205,4 +205,92 @@ proptest::proptest! {
     ) {
         assert_nearest_ties_to_even(&n.to_string(), &(1u128 << shift).to_string());
     }
+}
+
+fn invariant_graph(bounds: &str) -> String {
+    format!(
+        r#"{{
+            "meta": {{"schema_version": 2}},
+            "nodes": {{"0": {{"id": 0, "name": "x", "op": {{"type": "input"}}}}}},
+            "inputs": [0],
+            "outputs": [0],
+            "invariants": [{{"type": "bounds", "node": "x", {bounds}}}]
+        }}"#
+    )
+}
+
+#[test]
+fn bounds_invariant_limits_are_exact_scalars() {
+    let graph = Graph::from_json(&invariant_graph(
+        r#""min": {"n": "1", "d": "10"}, "max": {"n": "1", "d": "1"}"#,
+    ))
+    .unwrap();
+    match &graph.invariants[..] {
+        [graphlib::graph::Invariant::Bounds { min, max, .. }] => {
+            assert_eq!(min.to_bits(), 0.1f64.to_bits());
+            assert_eq!(max.to_bits(), 1.0f64.to_bits());
+        }
+        other => panic!("unexpected invariants {other:?}"),
+    }
+    let message = Graph::from_json(&invariant_graph(r#""min": 0.1, "max": 1"#))
+        .unwrap_err()
+        .to_string();
+    assert!(message.contains("exact scalar"), "{message}");
+    let reloaded = Graph::from_json(&graph.to_json().unwrap()).unwrap();
+    assert_eq!(reloaded.invariants.len(), 1);
+}
+
+#[test]
+fn signed_zero_and_exponent_limits() {
+    let two_pow = |k: u32| num_bigint::BigInt::from(2u8).pow(k).to_string();
+    // A negative rational too small for f64 rounds to negative zero.
+    assert_eq!(
+        load_literal("-1", &two_pow(2000)).to_bits(),
+        (-0.0f64).to_bits()
+    );
+    assert_eq!(
+        load_literal("1", &two_pow(2000)).to_bits(),
+        0.0f64.to_bits()
+    );
+    // Half the smallest subnormal ties to even (zero); just above rounds up.
+    assert_eq!(load_literal("1", &two_pow(1075)), 0.0);
+    assert_eq!(
+        load_literal("3", &two_pow(1076)).to_bits(),
+        f64::from_bits(1).to_bits()
+    );
+    // The normal/subnormal boundary and the largest subnormal are exact.
+    assert_eq!(load_literal("1", &two_pow(1022)), f64::MIN_POSITIVE);
+    let largest_subnormal = f64::from_bits(0x000f_ffff_ffff_ffff);
+    let (n, d) = graphlib::exact::f64_to_scalar(largest_subnormal).unwrap();
+    assert_eq!(load_literal(&n, &d).to_bits(), largest_subnormal.to_bits());
+    // f64::MAX is exact; a value that rounds past it is out of range.
+    let (n, d) = graphlib::exact::f64_to_scalar(f64::MAX).unwrap();
+    assert_eq!(load_literal(&n, &d), f64::MAX);
+    let overflow = graph_json(&format!(r#"{{"n": "{}", "d": "1"}}"#, two_pow(1024)));
+    assert!(load_error(&overflow).contains("outside the f64 range"));
+}
+
+/// Negative zero is the one f64 whose bits do not survive a save and reload:
+/// the exact rational zero is unsigned, so -0.0 serializes as 0/1 and reloads
+/// as +0.0. Canonical rational zero is deliberate (tenforty-yxun.3).
+#[test]
+fn negative_zero_serializes_as_unsigned_rational_zero() {
+    assert_eq!(
+        graphlib::exact::f64_to_scalar(-0.0).unwrap(),
+        ("0".to_string(), "1".to_string())
+    );
+}
+
+/// Known limitation until tenforty-yxun.4: a loaded graph holds only the f64,
+/// so `to_json` writes that double's exact binary value, not the spec's
+/// decimal literal. 11/250 (0.044) comes back as the dyadic nearest it. Never
+/// regenerate exact source graphs by loading and saving them.
+#[test]
+fn to_json_writes_the_loaded_double_not_the_source_literal() {
+    let graph = Graph::from_json(&graph_json(r#"{"n": "11", "d": "250"}"#)).unwrap();
+    let saved: serde_json::Value = serde_json::from_str(&graph.to_json().unwrap()).unwrap();
+    assert_eq!(
+        saved["nodes"]["0"]["op"]["value"],
+        serde_json::json!({"n": "3170534137668829", "d": "72057594037927936"})
+    );
 }
