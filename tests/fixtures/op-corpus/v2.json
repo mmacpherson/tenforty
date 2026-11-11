@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "supported_ops": [
     "add",
     "bracket_tax",
@@ -9228,8 +9228,14 @@
             "op": {
               "type": "tax_table_quantize",
               "arg": 0,
-              "step": 0,
-              "output_offset": 0,
+              "step": {
+                "n": "0",
+                "d": "1"
+              },
+              "output_offset": {
+                "n": "0",
+                "d": "1"
+              },
               "mode": "floor"
             }
           }
@@ -9239,7 +9245,10 @@
         ],
         "outputs": [
           1
-        ]
+        ],
+        "meta": {
+          "schema_version": 2
+        }
       },
       "status": "single",
       "sets": [],
@@ -9272,8 +9281,14 @@
             "op": {
               "type": "tax_table_quantize",
               "arg": 0,
-              "step": 1.5,
-              "output_offset": 0,
+              "step": {
+                "n": "3",
+                "d": "2"
+              },
+              "output_offset": {
+                "n": "0",
+                "d": "1"
+              },
               "mode": "floor"
             }
           }
@@ -9283,7 +9298,10 @@
         ],
         "outputs": [
           1
-        ]
+        ],
+        "meta": {
+          "schema_version": 2
+        }
       },
       "status": "single",
       "sets": [],
@@ -9324,7 +9342,10 @@
         ],
         "outputs": [
           1
-        ]
+        ],
+        "meta": {
+          "schema_version": 2
+        }
       },
       "status": "single",
       "sets": [],
@@ -9367,7 +9388,10 @@
         ],
         "outputs": [
           1
-        ]
+        ],
+        "meta": {
+          "schema_version": 2
+        }
       },
       "status": "single",
       "sets": [],
@@ -10848,7 +10872,10 @@
             "name": "n1",
             "op": {
               "type": "literal",
-              "value": 0
+              "value": {
+                "n": "0",
+                "d": "1"
+              }
             }
           },
           "2": {
@@ -10857,8 +10884,14 @@
             "op": {
               "type": "tax_table_quantize",
               "arg": 0,
-              "step": 0,
-              "output_offset": 0,
+              "step": {
+                "n": "0",
+                "d": "1"
+              },
+              "output_offset": {
+                "n": "0",
+                "d": "1"
+              },
               "mode": "floor"
             }
           },
@@ -10878,7 +10911,10 @@
         ],
         "outputs": [
           3
-        ]
+        ],
+        "meta": {
+          "schema_version": 2
+        }
       },
       "status": "single",
       "sets": [],
