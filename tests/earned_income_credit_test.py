@@ -474,7 +474,6 @@ def test_missouri_refusal_covers_the_whole_batch_before_evaluation(monkeypatch, 
         )
 
 
-@pytest.mark.usefixtures("lift_state_planning_refusal")
 @skip_if_graph_unavailable
 def test_missouri_refuses_a_marginal_rate_without_the_facts():
     """The graph-only entry points apply the same refusal."""

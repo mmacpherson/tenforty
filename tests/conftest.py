@@ -245,17 +245,3 @@ settings.register_profile(
     suppress_health_check=[HealthCheck.too_slow],
 )
 settings.load_profile("dev")  # Default for local dev
-
-
-@pytest.fixture
-def lift_state_planning_refusal(monkeypatch):
-    """Let an engine-level test take derivatives of state outputs.
-
-    The public API refuses them until tenforty-s48h.76 is fixed, because graph
-    state derivatives read zero for IL, MS and OR. A test that takes this
-    fixture checks another contract (a refusal, or a non-IL/MS/OR state's
-    derivative), never a value of an affected state.
-    """
-    from tenforty.backends import graph as graph_backend
-
-    monkeypatch.setattr(graph_backend, "STATE_PLANNING_DEFECT", None)

@@ -10,13 +10,13 @@
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2024,
-        "sha256": "dd1e99f7f99783f0803dd328224f1f6eb865edbe378cb438955b08d8dfd71ea4"
+        "sha256": "9e56b381c8b5a947469242e68552da1b85c3bda20ea8a1aceb758a6465b98ad6"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "year": 2025,
-        "sha256": "28d4d02f8395c6a56074b7c91a093d7c44554abfbfb3b3437e6de330ebabc96d"
+        "sha256": "7112dc1d98b8066a0917ec97564b757aa90fd241dfd12e6c44cc666660b0839e"
       }
     }
   },
@@ -2353,20 +2353,15 @@
     "tracking": "tenforty-s48h"
   },
   "state_slopes": {
-    "available": false,
-    "summary": "State and combined next-dollar slopes are withheld for every state return: graph state derivatives read zero for IL, MS and OR although their state tax moves with income. Federal slopes are unaffected, and the tax curve is computed by evaluation.",
-    "tracking": "tenforty-s48h.76"
+    "available": true,
+    "summary": "State and combined next-dollar slopes are shown for state returns. Whole-dollar rounding passes the underlying rate through; a stepwise phase-out contributes no slope.",
+    "tracking": null
   },
   "limitations": [
     {
       "id": "validated-jurisdictions",
       "summary": "Only federal-only returns and the validated states (IL, MS, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
       "tracking": "tenforty-s48h"
-    },
-    {
-      "id": "state-slopes",
-      "summary": "State and combined next-dollar slopes are withheld until state derivatives are fixed; federal slopes are shown.",
-      "tracking": "tenforty-s48h.76"
     },
     {
       "id": "tax-years",

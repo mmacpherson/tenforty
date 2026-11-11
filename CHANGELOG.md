@@ -1,4 +1,22 @@
 ## [Unreleased]
+### Fixed (graph state slopes)
+- **Graph `marginal_rate`, `marginal_rates` and `solve_for_income` answer
+  state-dependent outputs again**: the state outputs, `total_tax` on a state
+  return, and raw state node names, on the public functions and the
+  `GraphBackend` gradient, gradients and solve methods (tenforty-s48h.76).
+  Whole-dollar rounding (`roundE`) compiled to `floor(x + 0.5)`, whose slope is
+  zero, so every wage path to IL, MS and OR tax, and to ME, NC and OH tax,
+  read a zero state slope. It now compiles to the whole-dollar quantize, which
+  rounds half up exactly as before and passes the underlying rate through.
+  2024 and 2025 Single wages of $120,000 now give IL 4.95%, MS 4.7% (2024) and
+  4.4% (2025), and OR 8.75%. No computed tax value changes. A stepwise
+  phase-out (`floorE`, such as California's exemption credit) still
+  contributes no slope.
+- The MS Married/Joint spouse-ownership refusal for income derivatives and
+  solves is unchanged.
+- The browser calculator shows state and combined next-dollar slopes on state
+  returns (`state_slopes.available` is true); the `state-slopes` limitation is
+  gone.
 
 ## [2025.14] - 2026-11-07
 ### Changed (default backend)

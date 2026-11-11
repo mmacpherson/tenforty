@@ -657,9 +657,8 @@ COMPUTING_GRAPH_ONLY_FUNCTIONS = [
     pytest.param(_solve_at_own_tax, id="solve_for_income"),
 ]
 
-# A federal output: state-dependent outputs are refused until tenforty-s48h.76
-# is fixed (tests/state_planning_refusal_test.py), but the scope rule still
-# applies to the return.
+# A federal output, so these cases isolate the scope rule, which still applies
+# to the return whatever output is asked for.
 FEDERAL = {"output": "federal_total_tax"}
 
 
@@ -837,7 +836,6 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
 
 
 @pytest.mark.requires_ots
-@pytest.mark.usefixtures("lift_state_planning_refusal")
 def test_default_backend_applies_the_state_facts_contract(engine_calls):
     """Under the "ots" default, facts follow routing and are never a reroute.
 

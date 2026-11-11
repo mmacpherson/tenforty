@@ -8,10 +8,6 @@ from tenforty import marginal_rate, marginal_rates
 from tenforty.backends import GraphBackend, OTSBackend
 from tenforty.models import TaxReturnInput
 
-# Engine-level derivative tests on CA, GA and NH, which the public API refuses
-# until tenforty-s48h.76 is fixed; none of them uses IL, MS or OR.
-pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
-
 
 @pytest.fixture(scope="module")
 def graph_backend() -> GraphBackend:

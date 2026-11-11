@@ -1,10 +1,8 @@
 """State-aware total-tax autodiff and solver contract.
 
-These are engine-level checks of state derivatives, which the public API
-refuses until tenforty-s48h.76 is fixed (graph state derivatives read zero for
-IL, MS and OR). The module lifts that refusal; IL, MS and OR are left out of
-the derivative identities, which would only compare two equally broken paths,
-and their defect is pinned by a strict xfail below.
+Engine-level checks of state derivatives. Until tenforty-s48h.76 the public API
+refused them because whole-dollar rounding read a zero state slope for IL, MS
+and OR; the IL, MS and OR slopes are now pinned to their statutory rates below.
 """
 
 import pytest
@@ -16,11 +14,8 @@ from tenforty import (
 )
 from tenforty.mappings import STATE_GRAPH_CONFIGS
 
-pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
-
 GRAPH_STATES = sorted(state.value for state in STATE_GRAPH_CONFIGS if state.value)
-ZERO_STATE_SLOPE_STATES = ("IL", "MS", "OR")
-DIFFERENTIABLE_STATES = [s for s in GRAPH_STATES if s not in ZERO_STATE_SLOPE_STATES]
+ROUNDED_LINE_STATES = ("IL", "MS", "OR")
 
 
 def _total_tax_at_wages(state: str, wages: float) -> float:
@@ -160,7 +155,7 @@ def test_state_total_solver_roundtrips_public_total():
     assert result.federal_total_tax < target
 
 
-@pytest.mark.parametrize("state", DIFFERENTIABLE_STATES)
+@pytest.mark.parametrize("state", GRAPH_STATES)
 def test_total_marginal_decomposes_into_federal_plus_state(state):
     """Every state's total-tax derivative is its two parts, and nothing else.
 
@@ -253,7 +248,7 @@ STATUTORY_STATE_RATES = {
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
+@pytest.mark.parametrize("state", ROUNDED_LINE_STATES)
 def test_state_slope_is_the_statutory_rate_in_il_ms_or(state, year):
     """Witness for s48h.76: the state slope is the statutory marginal rate.
 
@@ -272,7 +267,7 @@ def test_state_slope_is_the_statutory_rate_in_il_ms_or(state, year):
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
+@pytest.mark.parametrize("state", ROUNDED_LINE_STATES)
 def test_state_slope_at_an_exact_rounding_tie_is_the_statutory_rate(state, year):
     """At an exact half-dollar tie the slope is still the statutory rate.
 

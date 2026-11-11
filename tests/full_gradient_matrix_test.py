@@ -27,10 +27,6 @@ from tenforty.models import TaxReturnInput
 
 from .fixtures.planning_twin import linear_path_slope
 
-# Engine-level derivative tests on CA, GA and NH, which the public API refuses
-# until tenforty-s48h.76 is fixed; none of them uses IL, MS or OR.
-pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
-
 
 def _graph_backend_available() -> bool:
     try:

@@ -655,12 +655,13 @@ def _require_eic_determined_for(tax_input: TaxReturnInput, nodes: list[str]) -> 
         )
 
 
-STATE_PLANNING_DEFECT: str | None = "tenforty-s48h.76"
-"""While set, derivatives and solves of a state-dependent output are refused.
+STATE_PLANNING_DEFECT: str | None = None
+"""While set to a tracking id, derivatives and solves of a state-dependent output are refused.
 
-The graph reports a zero state slope for IL, MS and OR although their state tax
-moves with income, so no state-dependent derivative or solve is trusted, for
-any state, until the bead is closed. Federal outputs are unaffected.
+It held "tenforty-s48h.76" while whole-dollar rounding lowered to a zero-slope
+floor, which read a zero state slope for IL, MS and OR (and ME, NC and OH).
+Rounding now carries the identity planning tangent, so state planning is open.
+The browser contract publishes the same switch as ``state_slopes``.
 """
 
 
@@ -678,8 +679,7 @@ def _require_federal_planning_output(
         f"Derivatives and solves of {output!r} on the {state} "
         f"{tax_input.year.value} return are refused: it depends on the state "
         f"return ({', '.join(state_nodes)}), and graph state derivatives are "
-        f"not yet reliable (they read zero for IL, MS and OR although their "
-        f"state tax moves with income; {STATE_PLANNING_DEFECT}). Ask for a "
+        f"not reliable while {STATE_PLANNING_DEFECT} is open. Ask for a "
         "federal output, such as output='federal_total_tax', or compare "
         "evaluate_return results. allow_unvalidated does not lift this."
     )

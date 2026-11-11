@@ -53,16 +53,23 @@ def test_browser_contract_covers_the_declared_backend_surface():
 
 
 def test_browser_contract_exposes_known_limitations():
-    """Known exclusions remain user-visible; no state input lacks its year's node."""
+    """Known exclusions remain user-visible; no state input lacks its year's node.
+
+    The state-slope limitation is listed exactly while state planning is closed.
+    """
+    from tenforty.backends.graph import STATE_PLANNING_DEFECT
+
     limitation_ids = {limitation["id"] for limitation in CONTRACT["limitations"]}
-    assert limitation_ids == {
+    expected = {
         "tax-years",
         "dependents-and-credits",
         "state-specific-adjustments",
         "calculation-scope",
         "validated-jurisdictions",
-        "state-slopes",
     }
+    if STATE_PLANNING_DEFECT is not None:
+        expected.add("state-slopes")
+    assert limitation_ids == expected
 
 
 def test_browser_refuses_what_python_refuses_on_the_graph():
@@ -130,7 +137,6 @@ def test_browser_parity_cases_match_python_graph_backend(case):
 @pytest.mark.parametrize(
     "case", CONTRACT["gradient_cases"], ids=lambda case: case["id"]
 )
-@pytest.mark.usefixtures("lift_state_planning_refusal")
 def test_browser_gradient_regions_match_python_graph_backend(case):
     """Pinned vectors cover the browser's consequential derivative regions."""
     state = (
@@ -177,7 +183,7 @@ def test_contract_marks_exactly_the_graph_scope_as_validated():
             ), (code, year)
 
 
-def test_contract_withholds_state_slopes_while_the_planning_defect_is_open():
+def test_contract_offers_state_slopes_exactly_when_python_allows_state_planning():
     """State slopes are offered exactly when Python allows state planning."""
     from tenforty.backends.graph import STATE_PLANNING_DEFECT
 
