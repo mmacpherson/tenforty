@@ -13,6 +13,12 @@ from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import UnsupportedInputError
 
+from .fixtures.ms_scope import (
+    MS_BACKEND_YEARS,
+    ms_backends,
+    ms_route,
+)
+
 pytestmark = pytest.mark.requires_graph
 
 PAGE2_CASES = [
@@ -150,8 +156,7 @@ PAGE2_CASES = [
 ]
 
 
-@pytest.mark.parametrize("backend", ["graph", "auto"])
-@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("backend,year", MS_BACKEND_YEARS)
 @pytest.mark.parametrize("case", PAGE2_CASES, ids=lambda c: c[0])
 def test_page2_entries_round_before_the_income_and_adjustment_sums(case, year, backend):
     """Pin the source-audit witness and each clean natural income category."""
@@ -171,7 +176,7 @@ def test_page2_entries_round_before_the_income_and_adjustment_sums(case, year, b
     ) == (agi, taxable, tax24 if year == 2024 else tax25)
 
 
-@pytest.mark.parametrize("backend", ["auto", "graph"])
+@pytest.mark.parametrize("backend", ms_backends(2025))
 @pytest.mark.parametrize(
     "field",
     [
@@ -223,7 +228,7 @@ def test_prepared_adjustments_round_before_the_adjustment_sum(year, tax):
     assert runtime.eval("ms_80105_L21_tax_after_credits") == tax
 
 
-@pytest.mark.parametrize("backend", ["auto", "graph"])
+@pytest.mark.parametrize("backend", ms_backends(2025))
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
 def test_ambiguous_ms_batch_is_refused_whole_under_every_policy(backend, on_error):
     """An invalid MS aggregate cannot become a partial batch or a NaN row."""
@@ -233,7 +238,7 @@ def test_ambiguous_ms_batch_is_refused_whole_under_every_policy(backend, on_erro
             state="MS",
             w2_income=[50_000, 50_000],
             schedule_1_income=[0, 1],
-            backend=backend,
+            **ms_route(backend),
             mode="zip",
             on_error=on_error,
         )

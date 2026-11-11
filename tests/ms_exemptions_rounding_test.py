@@ -17,6 +17,13 @@ from tenforty.graph_scope import IN_SCOPE
 from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import OTSState, UnsupportedInputError
 
+from .fixtures.ms_scope import (
+    MS_BACKEND_YEARS,
+    MS_GRAPH,
+    MS_OUT_OF_SCOPE_YEARS,
+    ms_route,
+)
+
 pytestmark = pytest.mark.requires_graph
 
 # id, status, household AGI, spouse AGI, dependents, filer65, spouse65,
@@ -358,8 +365,7 @@ STATUSES = {
 }
 
 
-@pytest.mark.parametrize("backend", ["auto", "graph"])
-@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("backend,year", MS_BACKEND_YEARS)
 @pytest.mark.parametrize(
     "case",
     [case for case in SOURCE_CASES if not case[0].startswith("J-columns-round-")],
@@ -399,7 +405,7 @@ def test_independent_ms_returns(case, year, backend):
         filer_65_or_older=filer65,
         spouse_65_or_older=spouse65,
         state_facts=fact,
-        backend=backend,
+        **ms_route(backend, year),
     )
     assert (
         result.state_adjusted_gross_income,
@@ -420,13 +426,12 @@ def test_eligible_qualifying_surviving_spouse_uses_head_of_family(year, tax):
         num_dependents=1,
         num_ctc_dependents=0,
         state_facts=state_facts.MS(head_of_family_eligible=True),
-        backend="graph",
+        **MS_GRAPH,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (37_100, tax)
 
 
-@pytest.mark.parametrize("backend", ["auto", "graph"])
-@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("backend,year", MS_BACKEND_YEARS)
 @pytest.mark.parametrize("wages", [0, 50_000])
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
 def test_missing_joint_fact_is_refused_before_computing(backend, year, wages, on_error):
@@ -440,16 +445,20 @@ def test_missing_joint_fact_is_refused_before_computing(backend, year, wages, on
             state="MS",
             filing_status="Married/Joint",
             w2_income=wages,
-            backend=backend,
+            **ms_route(backend, year),
             state_facts=None,
             on_error=on_error,
         )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-def test_ms_stays_in_auto_scope_and_discovery_describes_required_fact(year):
-    """Discovery exposes the supplied numeric fact without removing MS from auto."""
-    assert (OTSState.MS, year) in IN_SCOPE
+def test_ms_scope_and_discovery_describes_required_fact(year):
+    """Discovery exposes the supplied numeric fact; only MS 2025 is out of scope.
+
+    MS 2024 stays in auto scope; MS 2025 left it for tenforty-s48h.77, which is
+    unrelated to these facts.
+    """
+    assert ((OTSState.MS, year) in IN_SCOPE) is (year not in MS_OUT_OF_SCOPE_YEARS)
     descriptors = {d.name: d for d in state_facts.available("MS", year)}
     for name in ("taxpayer_adjusted_gross_income", "spouse_adjusted_gross_income"):
         descriptor = descriptors[name]
@@ -491,7 +500,7 @@ def test_fact_projects_to_joint_rows_in_batches(mode, year, taxes):
         state_facts=state_facts.MS(
             taxpayer_adjusted_gross_income=25_000, spouse_adjusted_gross_income=25_000
         ),
-        backend="graph",
+        **MS_GRAPH,
         mode=mode,
     )
     assert frame["state_taxable_income"].to_list() == [41_700, 33_400]

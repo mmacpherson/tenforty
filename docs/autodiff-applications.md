@@ -15,7 +15,7 @@ The examples use 2024 law and the graph backend, on federal-only returns. They
 are analysis examples, not tax advice or a general optimizer.
 
 State returns are left out deliberately. The graph is so far validated only for
-federal-only returns and IL, MS, OR and the states without an income tax, and
+federal-only returns, IL, OR, MS 2024 and the states without an income tax, and
 for IL, MS and OR its state derivative is currently zero although their state
 tax moves with income (tenforty-s48h.76), so `marginal_rates` on those returns
 reports only the federal slope.

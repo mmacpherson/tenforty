@@ -756,7 +756,7 @@ def build_contract() -> dict[str, object]:
         },
         "jurisdictions": _jurisdictions(years),
         "scope": {
-            "summary": "The graph is so far validated for 2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other jurisdictions are not yet validated: the calculator does not offer them, a shared link to one is refused, and BrowserTaxRuntime computes one only with allowUnvalidated: true.",
+            "summary": "The graph is so far validated for 2024 and 2025 federal-only returns, for IL and OR, for MS in 2024, and for the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY); the calculator offers a state validated in both years. Other jurisdictions are not yet validated: the calculator does not offer them, a shared link to one is refused, and BrowserTaxRuntime computes one only with allowUnvalidated: true.",
             "tracking": "tenforty-s48h",
         },
         "state_slopes": {
@@ -767,7 +767,7 @@ def build_contract() -> dict[str, object]:
         "limitations": [
             {
                 "id": "validated-jurisdictions",
-                "summary": "Only federal-only returns and the validated states (IL, MS, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
+                "summary": "Only federal-only returns and the states validated in both years (IL, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
                 "tracking": "tenforty-s48h",
             },
             {

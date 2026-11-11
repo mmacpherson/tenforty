@@ -1,4 +1,19 @@
 ## [Unreleased]
+### Changed (graph scope)
+- **Mississippi 2025 leaves graph scope** (tenforty-s48h.77). Form 80-105
+  line 17 is 4.4% of the taxed balance, entered in whole dollars with 50 cents
+  and over rounding up. The graph multiplies in binary floating point first, so
+  at some exact half-dollar ties it enters $1 low: 259 of the 4,000 ties under
+  $1,000,000, for example a taxed balance of $2,875 (Single wages of $21,175)
+  gives 126 instead of 127. `backend="auto"` now refuses an MS 2025 return,
+  since OTS has no Mississippi program, and `backend="graph"` computes one only
+  with `allow_unvalidated=True`. The fix is exact arithmetic at rounding points
+  (tenforty-yxun); MS 2025 returns to scope when the strict-xfail tie
+  enumeration in `tests/ms_2025_rounding_ties_test.py` passes.
+- MS 2024 stays in scope: at 4.7%, every exact tie up to $1,000,000 (cents
+  included) falls on a whole-dollar balance and rounds correctly.
+- The browser calculator no longer offers Mississippi, because it offers only
+  states validated in both 2024 and 2025.
 
 ### Removed
 - Contributor tooling: removed the unused graph JIT and Makefile targets

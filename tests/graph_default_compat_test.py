@@ -659,7 +659,8 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
         }
     else:
         kwargs = {
-            "year": [2024, 2025, 2025, 2025, 2024],
+            # MS 2024: MS 2025 is out of auto scope (tenforty-s48h.77).
+            "year": [2024, 2025, 2025, 2024, 2024],
             "state": [None, "OR", "CA", "MS", "TX"],
             "filing_status": [
                 "Single",

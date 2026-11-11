@@ -21,6 +21,12 @@ from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import UnsupportedInputError
 
+from .fixtures.ms_scope import (
+    MS_GRAPH,
+    ms_backends,
+    ms_route,
+)
+
 pytestmark = pytest.mark.requires_graph
 
 
@@ -31,7 +37,7 @@ def _joint(taxpayer=41611, spouse=20000):
     )
 
 
-@pytest.mark.parametrize("backend", ["graph", "auto"])
+@pytest.mark.parametrize("backend", ms_backends(2025))
 @pytest.mark.parametrize(
     "taxpayer,agi,tax", [(41611, 61611, 1100), (41612, 61612, 1101)]
 )
@@ -45,7 +51,7 @@ def test_independent_same_household_inputs_have_distinct_actual_column_facts(
         filing_status="Married/Joint",
         w2_income=61611.80,
         state_facts=_joint(taxpayer),
-        backend=backend,
+        **ms_route(backend),
     )
     assert (
         result.state_adjusted_gross_income,
@@ -72,7 +78,7 @@ def test_each_actual_column_fact_is_required(missing):
             filing_status="Married/Joint",
             w2_income=61611.8,
             state_facts=state_facts.MS(**supplied),
-            backend="graph",
+            **MS_GRAPH,
         )
 
 
@@ -85,7 +91,7 @@ def test_source_derived_per_entry_validity_bound_is_inclusive(offset):
         filing_status="Married/Joint",
         w2_income=61611.8,
         state_facts=_joint(41612 + offset),
-        backend="graph",
+        **MS_GRAPH,
     )
     assert result.state_adjusted_gross_income == 61612 + offset
 
@@ -101,13 +107,13 @@ def test_inconsistent_columns_refuse_the_whole_batch_before_results(offset, on_e
             filing_status="Married/Joint",
             w2_income=[61612 + offset, 61611.8],
             state_facts=_joint(41612 + offset),
-            backend="auto",
+            **MS_GRAPH,
             mode="zip",
             on_error=on_error,
         )
 
 
-@pytest.mark.parametrize("backend", ["auto", "graph"])
+@pytest.mark.parametrize("backend", ms_backends(2025))
 @pytest.mark.parametrize(
     "eligible,dependents,taxable,tax",
     [(False, 0, 41700, 1395), (False, 1, 40200, 1329), (True, 1, 37100, 1192)],
@@ -123,7 +129,7 @@ def test_qss_uses_explicit_ms_qualification(
         w2_income=50000,
         num_dependents=dependents,
         num_ctc_dependents=0,
-        backend=backend,
+        **ms_route(backend),
         state_facts=state_facts.MS(head_of_family_eligible=eligible),
     )
     assert (result.state_taxable_income, result.state_total_tax) == (taxable, tax)
@@ -139,7 +145,7 @@ def test_qss_needs_qualification_even_with_a_positive_dependent_count(on_error):
             filing_status="Widow(er)",
             w2_income=50000,
             num_dependents=1,
-            backend="auto",
+            **MS_GRAPH,
             on_error=on_error,
         )
 
@@ -155,7 +161,7 @@ def test_head_of_family_true_requires_an_actual_dependent(dependents):
             w2_income=50000,
             num_dependents=dependents,
             state_facts=state_facts.MS(head_of_family_eligible=True),
-            backend="graph",
+            **MS_GRAPH,
         )
 
 
@@ -210,7 +216,7 @@ def test_scalar_inconsistent_columns_are_never_masked(on_error):
             filing_status="Married/Joint",
             w2_income=61611.8,
             state_facts=_joint(41620),
-            backend="auto",
+            **MS_GRAPH,
             on_error=on_error,
         )
 
@@ -272,7 +278,7 @@ def test_both_column_facts_and_qss_qualification_project_in_one_batch(monkeypatc
         state="MS",
         filing_status=["Married/Joint", "Widow(er)", "Single"],
         w2_income=[61611.8, 50000, 50000],
-        backend="auto",
+        **MS_GRAPH,
         mode="zip",
         state_facts=state_facts.MS(
             taxpayer_adjusted_gross_income=41611,
@@ -310,7 +316,7 @@ def test_hoh_resident_dependent_baseline_and_parent_elsewhere_override(explicit)
         num_dependents=1,
         num_ctc_dependents=0,
         state_facts=facts,
-        backend="auto",
+        **MS_GRAPH,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (
         (40200, 1329) if explicit is False else (37100, 1192)

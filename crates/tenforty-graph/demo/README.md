@@ -12,7 +12,8 @@ the same public scenario passed to the calculator boundary in the URL fragment,
 which browsers do not send to the hosting server.
 
 The calculator offers federal-only returns and the states the graph is so far
-validated for (IL, MS, OR and the eight states without an income tax); shared
+validated for in both 2024 and 2025 (IL, OR and the eight states without an
+income tax; MS leaves the offer while MS 2025 is out of scope, tenforty-s48h.77); shared
 links to other jurisdictions are refused. The primary view is analytical rather
 than a filing interview: it places the current return on a live
 federal/state/combined tax curve, draws the exact local tangent, and decomposes

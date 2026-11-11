@@ -73,8 +73,9 @@ def _(mo):
 
     The graph backend is opt-in: pass `backend="graph"` or `backend="auto"`. It
     has forms for every state for 2024 and 2025, and is so far validated for
-    2024 and 2025 federal-only returns and for IL, MS and OR plus the eight
-    states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other states
+    2024 and 2025 federal-only returns, for IL and OR, for MS in 2024, and for
+    the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY).
+    Other states
     refuse unless you pass `allow_unvalidated=True`, because they aren't
     validated yet.
 

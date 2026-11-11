@@ -13,8 +13,9 @@ all 50 states, and the District of Columbia. “Covered” means the resolved gr
 contains the declared nodes and can calculate the listed public concepts. It does
 not imply that every line of every return is modeled.
 
-The graph is so far validated for federal-only returns and for IL, MS and OR
-plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY);
+The graph is so far validated for federal-only returns, for IL and OR, for MS
+in 2024 (MS 2025 is out of scope, tenforty-s48h.77), and for the eight states
+without an income tax (AK, FL, NV, SD, TN, TX, WA, WY);
 each jurisdiction's `validated` flag and `exclusion_reasons`, per year, come from
 `tenforty.graph_scope`. The calculator offers only validated jurisdictions, a
 shared link to another one is refused, and `BrowserTaxRuntime` computes one only

@@ -16,7 +16,10 @@ https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
 The graph multiplies in binary floating point before rounding, so at some ties
 the product lands just under the half and rounds down: 259 of the 4,000 ties
 under $1,000,000 do, 32 of the 400 below $100,000 (counted by modelling f64
-floor(n * 0.044 + 0.5) against the integer rule). The fix is the exact-money
+floor(n * 0.044 + 0.5) against the integer rule). Those counts are context,
+not pinned: every expected value comes from integer arithmetic, the test
+requires all 400 to match, and the strict xfail holds for whatever number the
+runtime misrounds, so it flips cleanly once exact money lands. The fix is that
 work (tenforty-yxun); MS 2025 is out of graph scope until this flips.
 """
 

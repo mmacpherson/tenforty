@@ -7,8 +7,9 @@
   `get_backend`. A call that names no backend computes on OTS, in every year.
   The graph backend is opt-in (`backend="graph"` or `backend="auto"`). It is
   incomplete: so far validated for 2024 and 2025 federal-only returns and for
-  IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD,
-  TN, TX, WA and WY). Other states refuse unless `allow_unvalidated=True`,
+  IL and OR, MS in 2024, and the eight states without an income tax (AK, FL,
+  NV, SD, TN, TX, WA and WY). MS 2025 is out of scope until its whole-dollar
+  tax rounds every half-dollar tie up (tenforty-s48h.77). Other states refuse unless `allow_unvalidated=True`,
   because they aren't validated yet; tenforty-s48h tracks the work to validate
   every 2024–2025 state.
 - **What the OTS default covers:** federal returns for 2018–2025, and for
@@ -116,7 +117,7 @@ default; read "the default" there as `backend="auto"`.
 - **`backend="auto"`** computes a 2024 or 2025 return on the graph backend when
   it is in graph scope, and on OTS otherwise.
 - **Graph scope (2024–2025):** federal-only returns; the eight states without
-  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); and IL, MS and OR. Other
+  an income tax (AK, FL, NV, SD, TN, TX, WA, WY); IL and OR; and MS 2024. Other
   states use OTS where covered, or raise `UnsupportedReturnError`. Years
   2018–2023 stay on OTS. `src/tenforty/graph_scope.py`
   is the list, and each excluded state names the open defect, missing evidence
