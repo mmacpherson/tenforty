@@ -73,7 +73,10 @@ The same graph scope, input restrictions and required state facts apply as for
 an explicit `backend="auto"`. A valid route needing unavailable OTS raises
 `BackendUnavailableError`; routing/input refusals can occur first. Explicit
 backends keep their meaning, including an explicit `backend="ots"`. Installs
-with OTS retain the OTS default.
+with OTS retain the OTS default. The same bare call, where both installs
+support it, computes on OTS on a full install and graph on a graph-only install,
+so results can differ between platforms wherever the engines differ; see
+[Migrating between backends](./docs/migrating-to-graph-default.md).
 
 ### Building from source
 

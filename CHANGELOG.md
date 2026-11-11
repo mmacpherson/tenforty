@@ -6,7 +6,10 @@
   supported 2024–2025 returns compute on graph, including in graph-only and
   Windows builds. Full installs keep the OTS default. Explicit choices,
   graph scope, state facts, typed refusals and whole-batch preflight remain
-  unchanged. Installed-artifact smoke checks now exercise the default too.
+  unchanged. The same supported bare call can produce different figures by
+  platform wherever the engines differ; see
+  [Migrating between backends](docs/migrating-to-graph-default.md).
+  Installed-artifact smoke checks now exercise the default too.
 
 ### Removed
 - Contributor tooling: removed the unused graph JIT and Makefile targets

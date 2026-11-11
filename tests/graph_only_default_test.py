@@ -119,3 +119,17 @@ def test_default_still_requires_mississippi_spouse_facts(
     with pytest.raises(UnsupportedInputError) as default:
         _request(entry, args)
     assert str(default.value) == str(auto.value)
+
+
+def test_public_signatures_show_readable_omission_marker():
+    """Every public default is the shared sentinel with a readable display."""
+    import inspect
+
+    from tenforty.routing import _DefaultBackend
+
+    sentinel = _DefaultBackend.OMITTED
+    assert repr(sentinel) == "<default backend>"
+    for function in (tenforty.evaluate_return, tenforty.evaluate_returns, get_backend):
+        signature = inspect.signature(function)
+        assert signature.parameters["backend"].default is sentinel
+        assert "= <default backend>" in str(signature)

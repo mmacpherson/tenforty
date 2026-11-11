@@ -30,6 +30,10 @@ class _DefaultBackend(Enum):
 
     OMITTED = "omitted"
 
+    def __repr__(self) -> str:
+        """Show the installation-dependent default in public signatures."""
+        return "<default backend>"
+
 
 BackendChoice = Literal["auto", "ots", "graph"]
 Engine = Literal["ots", "graph"]
@@ -289,7 +293,7 @@ def explain_ots_route(groups: Iterable[tuple[object, object]]) -> str:
     if graph_capable:
         it = "it" if len(graph_capable) == 1 else "them"
         sentences.append(
-            f"backend='ots' (the default) sends {_the_returns(graph_capable)} "
+            f"backend='ots' sends {_the_returns(graph_capable)} "
             "to OTS; "
             f"backend='graph' or backend='auto' computes {it} on the graph backend."
         )
