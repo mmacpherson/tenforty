@@ -1,0 +1,4738 @@
+{
+  "schema_version": 1,
+  "supported_ops": [
+    "add",
+    "bracket_tax",
+    "by_status",
+    "div",
+    "floor",
+    "if_positive",
+    "import",
+    "input",
+    "literal",
+    "max",
+    "min",
+    "mul",
+    "neg",
+    "phase_out",
+    "sub",
+    "tax_table_quantize"
+  ],
+  "cases": [
+    {
+      "id": "input-default-zero",
+      "focus": "input",
+      "evidence": "Unset inputs have the declared zero default.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "value": "0"
+      }
+    },
+    {
+      "id": "input-assigned",
+      "focus": "input",
+      "evidence": "Identity input; derivative one.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "7"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "import-value",
+      "focus": "import",
+      "evidence": "Unresolved import defaults to zero; literal is its stated constant.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "import",
+              "form": "other",
+              "line": "L1",
+              "year": 2025
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "value": "0"
+      }
+    },
+    {
+      "id": "literal-value",
+      "focus": "literal",
+      "evidence": "Unresolved import defaults to zero; literal is its stated constant.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "value": "3"
+      }
+    },
+    {
+      "id": "import-assigned",
+      "focus": "import",
+      "evidence": "Assigned imported input is an identity.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "import",
+              "form": "other",
+              "line": "L1",
+              "year": 2025
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "7"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "add-smooth",
+      "focus": "add",
+      "evidence": "Independent arithmetic at operands (2,4); add and its elementary partials.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "add",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "6",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sub-smooth",
+      "focus": "sub",
+      "evidence": "Independent arithmetic at operands (2,4); sub and its elementary partials.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "sub",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "-2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "-1",
+            "reverse": "-1",
+            "smooth_true": "-1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mul-smooth",
+      "focus": "mul",
+      "evidence": "Independent arithmetic at operands (2,4); mul and its elementary partials.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "mul",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "8",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "4",
+            "reverse": "4",
+            "smooth_true": "4"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "2",
+            "reverse": "2",
+            "smooth_true": "2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "div-smooth",
+      "focus": "div",
+      "evidence": "Independent arithmetic at operands (2,4); div and its elementary partials.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "div",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "1/2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1/4",
+            "reverse": "1/4",
+            "smooth_true": "1/4"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "-1/8",
+            "reverse": "-1/8",
+            "smooth_true": "-1/8",
+            "fd_truncation_bound": "1/67108864"
+          }
+        ]
+      }
+    },
+    {
+      "id": "max-smooth",
+      "focus": "max",
+      "evidence": "Independent arithmetic at operands (2,4); max and its elementary partials.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "max",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "4",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "min-smooth",
+      "focus": "min",
+      "evidence": "Independent arithmetic at operands (2,4); min and its elementary partials.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "min",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "add-duplicate-edge",
+      "focus": "add",
+      "evidence": "x+x=2x; duplicate operand slots both contribute.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "add",
+              "left": 0,
+              "right": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "3"
+        }
+      ],
+      "expected": {
+        "value": "6",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "2",
+            "reverse": "2",
+            "smooth_true": "2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mul-grouped-direction",
+      "focus": "mul",
+      "evidence": "(2+h)(4+h) has first-order coefficient 6.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "mul",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        },
+        {
+          "name": "n1",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "8",
+        "gradients": [
+          {
+            "inputs": [
+              0,
+              1
+            ],
+            "planning": "6",
+            "reverse": "6",
+            "smooth_true": "6"
+          }
+        ]
+      }
+    },
+    {
+      "id": "neg-smooth",
+      "focus": "neg",
+      "evidence": "Negation has slope -1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "neg",
+              "arg": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "3"
+        }
+      ],
+      "expected": {
+        "value": "-3",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "-1",
+            "reverse": "-1",
+            "smooth_true": "-1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "floor-1.25",
+      "focus": "floor",
+      "evidence": "Mathematical floor, including negatives; zero planning slope.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "floor",
+              "arg": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1.25"
+        }
+      ],
+      "expected": {
+        "value": "1",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "floor--1.25",
+      "focus": "floor",
+      "evidence": "Mathematical floor, including negatives; zero planning slope.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "floor",
+              "arg": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1.25"
+        }
+      ],
+      "expected": {
+        "value": "-2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "floor--1",
+      "focus": "floor",
+      "evidence": "Mathematical floor, including negatives; zero planning slope.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "floor",
+              "arg": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1"
+        }
+      ],
+      "expected": {
+        "value": "-1",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-floor--0.25",
+      "focus": "tax_table_quantize",
+      "evidence": "step*floor(x/step + half for Round)+offset; true plateau slope 0, planning slope 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 2,
+              "output_offset": -2,
+              "mode": "floor"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-0.25"
+        }
+      ],
+      "expected": {
+        "value": "-4",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-floor-2",
+      "focus": "tax_table_quantize",
+      "evidence": "step*floor(x/step + half for Round)+offset; true plateau slope 0, planning slope 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 2,
+              "output_offset": -2,
+              "mode": "floor"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-round-1",
+      "focus": "tax_table_quantize",
+      "evidence": "step*floor(x/step + half for Round)+offset; true plateau slope 0, planning slope 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 2,
+              "output_offset": 0,
+              "mode": "round"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        }
+      ],
+      "expected": {
+        "value": "2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-round--1",
+      "focus": "tax_table_quantize",
+      "evidence": "step*floor(x/step + half for Round)+offset; true plateau slope 0, planning slope 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 2,
+              "output_offset": 0,
+              "mode": "round"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-round--1.25",
+      "focus": "tax_table_quantize",
+      "evidence": "step*floor(x/step + half for Round)+offset; true plateau slope 0, planning slope 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 2,
+              "output_offset": 0,
+              "mode": "round"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1.25"
+        }
+      ],
+      "expected": {
+        "value": "-2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-round-1.25",
+      "focus": "tax_table_quantize",
+      "evidence": "step*floor(x/step + half for Round)+offset; true plateau slope 0, planning slope 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 2,
+              "output_offset": 0,
+              "mode": "round"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1.25"
+        }
+      ],
+      "expected": {
+        "value": "2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantize-step-one-round-negative-tie",
+      "focus": "tax_table_quantize",
+      "evidence": "floor(-1.5+0.5)=-1; ties go toward positive infinity.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 1,
+              "output_offset": 0,
+              "mode": "round"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1.5"
+        }
+      ],
+      "expected": {
+        "value": "-1",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "max-continuous-tie",
+      "focus": "max",
+      "evidence": "Right direction of max(x,0) at zero is one.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "max",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "min-continuous-tie",
+      "focus": "min",
+      "evidence": "Right direction of min(x,0) at zero is zero; reverse tie selects left.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "min",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bracket-negative",
+      "focus": "bracket_tax",
+      "evidence": "Synthetic schedule: rate 1/4 through 10, then 1/2 including extension above 20; public gradient uses right slope at origin/edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "bracket_tax",
+              "table": "rates",
+              "income": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ],
+        "tables": {
+          "rates": {
+            "brackets": {
+              "single": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_joint": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_separate": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "head_of_household": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "qualifying_widow": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ]
+            }
+          }
+        }
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bracket-origin",
+      "focus": "bracket_tax",
+      "evidence": "Synthetic schedule: rate 1/4 through 10, then 1/2 including extension above 20; public gradient uses right slope at origin/edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "bracket_tax",
+              "table": "rates",
+              "income": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ],
+        "tables": {
+          "rates": {
+            "brackets": {
+              "single": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_joint": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_separate": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "head_of_household": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "qualifying_widow": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ]
+            }
+          }
+        }
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1/4",
+            "reverse": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bracket-below-edge",
+      "focus": "bracket_tax",
+      "evidence": "Synthetic schedule: rate 1/4 through 10, then 1/2 including extension above 20; public gradient uses right slope at origin/edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "bracket_tax",
+              "table": "rates",
+              "income": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ],
+        "tables": {
+          "rates": {
+            "brackets": {
+              "single": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_joint": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_separate": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "head_of_household": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "qualifying_widow": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ]
+            }
+          }
+        }
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "1",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1/4",
+            "reverse": "1/4",
+            "smooth_true": "1/4"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bracket-edge",
+      "focus": "bracket_tax",
+      "evidence": "Synthetic schedule: rate 1/4 through 10, then 1/2 including extension above 20; public gradient uses right slope at origin/edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "bracket_tax",
+              "table": "rates",
+              "income": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ],
+        "tables": {
+          "rates": {
+            "brackets": {
+              "single": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_joint": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_separate": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "head_of_household": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "qualifying_widow": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ]
+            }
+          }
+        }
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "10"
+        }
+      ],
+      "expected": {
+        "value": "5/2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1/2",
+            "reverse": "1/4"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bracket-above-top",
+      "focus": "bracket_tax",
+      "evidence": "Synthetic schedule: rate 1/4 through 10, then 1/2 including extension above 20; public gradient uses right slope at origin/edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "bracket_tax",
+              "table": "rates",
+              "income": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ],
+        "tables": {
+          "rates": {
+            "brackets": {
+              "single": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_joint": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "married_separate": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "head_of_household": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ],
+              "qualifying_widow": [
+                {
+                  "threshold": 10,
+                  "rate": 0.25
+                },
+                {
+                  "threshold": 20,
+                  "rate": 0.5
+                }
+              ]
+            }
+          }
+        }
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "24"
+        }
+      ],
+      "expected": {
+        "value": "19/2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1/2",
+            "reverse": "1/2",
+            "smooth_true": "1/2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phase-out-below",
+      "focus": "phase_out",
+      "evidence": "max(4 - max(agi-4,0)/2,0); right directional endpoint rules.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "phase_out",
+              "base": 4,
+              "threshold": {
+                "single": 4,
+                "married_joint": 4,
+                "married_separate": 4,
+                "head_of_household": 4,
+                "qualifying_widow": 4
+              },
+              "rate": 0.5,
+              "agi": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "2"
+        }
+      ],
+      "expected": {
+        "value": "4",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phase-out-opening",
+      "focus": "phase_out",
+      "evidence": "max(4 - max(agi-4,0)/2,0); right directional endpoint rules.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "phase_out",
+              "base": 4,
+              "threshold": {
+                "single": 4,
+                "married_joint": 4,
+                "married_separate": 4,
+                "head_of_household": 4,
+                "qualifying_widow": 4
+              },
+              "rate": 0.5,
+              "agi": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "4"
+        }
+      ],
+      "expected": {
+        "value": "4",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "-1/2",
+            "reverse": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phase-out-inside",
+      "focus": "phase_out",
+      "evidence": "max(4 - max(agi-4,0)/2,0); right directional endpoint rules.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "phase_out",
+              "base": 4,
+              "threshold": {
+                "single": 4,
+                "married_joint": 4,
+                "married_separate": 4,
+                "head_of_household": 4,
+                "qualifying_widow": 4
+              },
+              "rate": 0.5,
+              "agi": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "8"
+        }
+      ],
+      "expected": {
+        "value": "2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "-1/2",
+            "reverse": "-1/2",
+            "smooth_true": "-1/2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phase-out-closing",
+      "focus": "phase_out",
+      "evidence": "max(4 - max(agi-4,0)/2,0); right directional endpoint rules.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "phase_out",
+              "base": 4,
+              "threshold": {
+                "single": 4,
+                "married_joint": 4,
+                "married_separate": 4,
+                "head_of_household": 4,
+                "qualifying_widow": 4
+              },
+              "rate": 0.5,
+              "agi": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "12"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phase-out-above",
+      "focus": "phase_out",
+      "evidence": "max(4 - max(agi-4,0)/2,0); right directional endpoint rules.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "phase_out",
+              "base": 4,
+              "threshold": {
+                "single": 4,
+                "married_joint": 4,
+                "married_separate": 4,
+                "head_of_household": 4,
+                "qualifying_widow": 4
+              },
+              "rate": 0.5,
+              "agi": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "16"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "status-single",
+      "focus": "by_status",
+      "evidence": "Status selects only its designated input and its derivative edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "input"
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "input"
+            }
+          },
+          "5": {
+            "id": 5,
+            "name": "n5",
+            "op": {
+              "type": "by_status",
+              "values": {
+                "single": 0,
+                "married_joint": 1,
+                "married_separate": 2,
+                "head_of_household": 3,
+                "qualifying_widow": 4
+              }
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "outputs": [
+          5
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        },
+        {
+          "name": "n1",
+          "value": "2"
+        },
+        {
+          "name": "n2",
+          "value": "3"
+        },
+        {
+          "name": "n3",
+          "value": "4"
+        },
+        {
+          "name": "n4",
+          "value": "5"
+        }
+      ],
+      "expected": {
+        "value": "1",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              3
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              4
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "status-married_joint",
+      "focus": "by_status",
+      "evidence": "Status selects only its designated input and its derivative edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "input"
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "input"
+            }
+          },
+          "5": {
+            "id": 5,
+            "name": "n5",
+            "op": {
+              "type": "by_status",
+              "values": {
+                "single": 0,
+                "married_joint": 1,
+                "married_separate": 2,
+                "head_of_household": 3,
+                "qualifying_widow": 4
+              }
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "outputs": [
+          5
+        ]
+      },
+      "status": "married_joint",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        },
+        {
+          "name": "n1",
+          "value": "2"
+        },
+        {
+          "name": "n2",
+          "value": "3"
+        },
+        {
+          "name": "n3",
+          "value": "4"
+        },
+        {
+          "name": "n4",
+          "value": "5"
+        }
+      ],
+      "expected": {
+        "value": "2",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              3
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              4
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          0,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "status-married_separate",
+      "focus": "by_status",
+      "evidence": "Status selects only its designated input and its derivative edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "input"
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "input"
+            }
+          },
+          "5": {
+            "id": 5,
+            "name": "n5",
+            "op": {
+              "type": "by_status",
+              "values": {
+                "single": 0,
+                "married_joint": 1,
+                "married_separate": 2,
+                "head_of_household": 3,
+                "qualifying_widow": 4
+              }
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "outputs": [
+          5
+        ]
+      },
+      "status": "married_separate",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        },
+        {
+          "name": "n1",
+          "value": "2"
+        },
+        {
+          "name": "n2",
+          "value": "3"
+        },
+        {
+          "name": "n3",
+          "value": "4"
+        },
+        {
+          "name": "n4",
+          "value": "5"
+        }
+      ],
+      "expected": {
+        "value": "3",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              3
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              4
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          0,
+          1,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "status-head_of_household",
+      "focus": "by_status",
+      "evidence": "Status selects only its designated input and its derivative edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "input"
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "input"
+            }
+          },
+          "5": {
+            "id": 5,
+            "name": "n5",
+            "op": {
+              "type": "by_status",
+              "values": {
+                "single": 0,
+                "married_joint": 1,
+                "married_separate": 2,
+                "head_of_household": 3,
+                "qualifying_widow": 4
+              }
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "outputs": [
+          5
+        ]
+      },
+      "status": "head_of_household",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        },
+        {
+          "name": "n1",
+          "value": "2"
+        },
+        {
+          "name": "n2",
+          "value": "3"
+        },
+        {
+          "name": "n3",
+          "value": "4"
+        },
+        {
+          "name": "n4",
+          "value": "5"
+        }
+      ],
+      "expected": {
+        "value": "4",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              3
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              4
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          0,
+          1,
+          2,
+          4
+        ]
+      }
+    },
+    {
+      "id": "status-qualifying_widow",
+      "focus": "by_status",
+      "evidence": "Status selects only its designated input and its derivative edge.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "input"
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "input"
+            }
+          },
+          "5": {
+            "id": 5,
+            "name": "n5",
+            "op": {
+              "type": "by_status",
+              "values": {
+                "single": 0,
+                "married_joint": 1,
+                "married_separate": 2,
+                "head_of_household": 3,
+                "qualifying_widow": 4
+              }
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "outputs": [
+          5
+        ]
+      },
+      "status": "qualifying_widow",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        },
+        {
+          "name": "n1",
+          "value": "2"
+        },
+        {
+          "name": "n2",
+          "value": "3"
+        },
+        {
+          "name": "n3",
+          "value": "4"
+        },
+        {
+          "name": "n4",
+          "value": "5"
+        }
+      ],
+      "expected": {
+        "value": "5",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              3
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              4
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ],
+        "uncached_after_value": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "conditional--1",
+      "focus": "if_positive",
+      "evidence": "IfPositive selects then iff condition is strictly greater than zero.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 1,
+              "otherwise": 2
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "uncached_after_value": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "conditional-0",
+      "focus": "if_positive",
+      "evidence": "IfPositive selects then iff condition is strictly greater than zero.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 1,
+              "otherwise": 2
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "uncached_after_value": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "conditional-1",
+      "focus": "if_positive",
+      "evidence": "IfPositive selects then iff condition is strictly greater than zero.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 1,
+              "otherwise": 2
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        }
+      ],
+      "expected": {
+        "value": "3",
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "literal-no-input-partial",
+      "focus": "literal",
+      "evidence": "A constant does not depend on an unrelated input.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "7"
+        }
+      ],
+      "expected": {
+        "value": "3",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lazy-conditional-division",
+      "focus": "if_positive",
+      "evidence": "Inactive branch errors must not occur during value evaluation.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "div",
+              "left": 1,
+              "right": 1
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 2,
+              "otherwise": 3
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          4
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "lazy-conditional-table",
+      "focus": "if_positive",
+      "evidence": "Inactive branch errors must not occur during value evaluation.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "bracket_tax",
+              "table": "missing",
+              "income": 1
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 2,
+              "otherwise": 3
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          4
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "lazy-conditional-reference",
+      "focus": "if_positive",
+      "evidence": "Inactive branch errors must not occur during value evaluation.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "neg",
+              "arg": 99
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 2,
+              "otherwise": 3
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          4
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "lazy-status-division",
+      "focus": "by_status",
+      "evidence": "ByStatus never requests unselected invalid branches.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "div",
+              "left": 0,
+              "right": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "by_status",
+              "values": {
+                "single": 2,
+                "married_joint": 1,
+                "married_separate": 1,
+                "head_of_household": 1,
+                "qualifying_widow": 1
+              }
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "value": "7",
+        "uncached_after_value": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "division-by-zero",
+      "focus": "div",
+      "evidence": "Active division by zero is an evaluation error.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "literal",
+              "value": 1
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "div",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "eval",
+          "kind": "division_by_zero",
+          "node": 2
+        }
+      }
+    },
+    {
+      "id": "missing-reference",
+      "focus": "neg",
+      "evidence": "Active missing node references fail rather than read zero.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "neg",
+              "arg": 99
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "eval",
+          "kind": "node_not_found",
+          "node": 99
+        }
+      }
+    },
+    {
+      "id": "missing-table",
+      "focus": "bracket_tax",
+      "evidence": "Active missing tables fail rather than return zero.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "bracket_tax",
+              "table": "missing",
+              "income": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "eval",
+          "kind": "table_not_found",
+          "name": "missing"
+        }
+      }
+    },
+    {
+      "id": "cycle",
+      "focus": "neg",
+      "evidence": "Active cycles are detected by the evaluator.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "neg",
+              "arg": 0
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "eval",
+          "kind": "cycle"
+        }
+      }
+    },
+    {
+      "id": "nonfinite-input-NaN",
+      "focus": "input",
+      "evidence": "Public input setter rejects nonfinite scalars.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "NaN"
+        }
+      ],
+      "expected": {
+        "error": {
+          "stage": "set",
+          "kind": "nonfinite_input",
+          "name": "n0"
+        }
+      }
+    },
+    {
+      "id": "nonfinite-input-inf",
+      "focus": "input",
+      "evidence": "Public input setter rejects nonfinite scalars.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "inf"
+        }
+      ],
+      "expected": {
+        "error": {
+          "stage": "set",
+          "kind": "nonfinite_input",
+          "name": "n0"
+        }
+      }
+    },
+    {
+      "id": "nonfinite-input--inf",
+      "focus": "input",
+      "evidence": "Public input setter rejects nonfinite scalars.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          0
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-inf"
+        }
+      ],
+      "expected": {
+        "error": {
+          "stage": "set",
+          "kind": "nonfinite_input",
+          "name": "n0"
+        }
+      }
+    },
+    {
+      "id": "invalid-quantizer-0",
+      "focus": "tax_table_quantize",
+      "evidence": "Quantizer step must be a positive integer; rejection occurs at load.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 0,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "load",
+          "kind": "invalid_quantizer",
+          "node": 1
+        }
+      }
+    },
+    {
+      "id": "invalid-quantizer-1.5",
+      "focus": "tax_table_quantize",
+      "evidence": "Quantizer step must be a positive integer; rejection occurs at load.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 1.5,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "load",
+          "kind": "invalid_quantizer",
+          "node": 1
+        }
+      }
+    },
+    {
+      "id": "removed-abs",
+      "focus": "abs",
+      "evidence": "Removed schema variants must be rejected at load.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "abs",
+              "arg": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "load",
+          "kind": "unknown_variant",
+          "name": "abs"
+        }
+      }
+    },
+    {
+      "id": "removed-clamp",
+      "focus": "clamp",
+      "evidence": "Removed schema variants must be rejected at load.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "clamp",
+              "arg": 0,
+              "min": 0,
+              "max": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          1
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "load",
+          "kind": "unknown_variant",
+          "name": "clamp"
+        }
+      }
+    },
+    {
+      "id": "conditional-input-edges--1",
+      "focus": "if_positive",
+      "evidence": "Selected branch alone supplies partials; perturbing arm inputs leaves the condition unchanged.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 1,
+              "otherwise": 2
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "-1"
+        },
+        {
+          "name": "n1",
+          "value": "3"
+        },
+        {
+          "name": "n2",
+          "value": "7"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "gradients": [
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ],
+        "uncached_after_value": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "conditional-input-edges-0",
+      "focus": "if_positive",
+      "evidence": "Selected branch alone supplies partials; perturbing arm inputs leaves the condition unchanged.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 1,
+              "otherwise": 2
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        },
+        {
+          "name": "n1",
+          "value": "3"
+        },
+        {
+          "name": "n2",
+          "value": "7"
+        }
+      ],
+      "expected": {
+        "value": "7",
+        "gradients": [
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          }
+        ],
+        "uncached_after_value": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "conditional-input-edges-1",
+      "focus": "if_positive",
+      "evidence": "Selected branch alone supplies partials; perturbing arm inputs leaves the condition unchanged.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "input"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "input"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 0,
+              "then": 1,
+              "otherwise": 2
+            }
+          }
+        },
+        "inputs": [
+          0,
+          1,
+          2
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "1"
+        },
+        {
+          "name": "n1",
+          "value": "3"
+        },
+        {
+          "name": "n2",
+          "value": "7"
+        }
+      ],
+      "expected": {
+        "value": "3",
+        "gradients": [
+          {
+            "inputs": [
+              1
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "1"
+          },
+          {
+            "inputs": [
+              2
+            ],
+            "planning": "0",
+            "reverse": "0",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "planning-equal-branch-probe",
+      "focus": "if_positive",
+      "evidence": "Quantizer plateau: true motion is zero; equal branch values allow planning slope 2, while legal reverse slope is 1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 1,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 2
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "mul",
+              "left": 1,
+              "right": 2
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "if_positive",
+              "cond": 1,
+              "then": 3,
+              "otherwise": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          4
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0.25"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "2",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "planning-unequal-branch-probe",
+      "focus": "if_positive",
+      "evidence": "Unequal candidate value rejects the planning branch switch.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 1,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 1,
+              "then": 2,
+              "otherwise": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0.25"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "planning-domain-error-probe",
+      "focus": "if_positive",
+      "evidence": "An invalid speculative candidate is rejected and the legal planning path retained.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 1,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "bracket_tax",
+              "table": "missing",
+              "income": 0
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 1,
+              "then": 2,
+              "otherwise": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0.25"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "max-decreasing-tie",
+      "focus": "max",
+      "evidence": "max(-x,0) has right slope zero at zero; reverse left-tie slope is -1.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "neg",
+              "arg": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "max",
+              "left": 1,
+              "right": 2
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "0",
+            "reverse": "-1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "min-decreasing-tie",
+      "focus": "min",
+      "evidence": "min(-x,0) has right slope -1 at zero.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "neg",
+              "arg": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "min",
+              "left": 1,
+              "right": 2
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "-1",
+            "reverse": "-1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "planning-cancellation",
+      "focus": "if_positive",
+      "evidence": "The condition q-q has zero true and planning motion; retain the legal quantized branch.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 1,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "sub",
+              "left": 1,
+              "right": 1
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "literal",
+              "value": 7
+            }
+          },
+          "4": {
+            "id": 4,
+            "name": "n4",
+            "op": {
+              "type": "if_positive",
+              "cond": 2,
+              "then": 3,
+              "otherwise": 1
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          4
+        ]
+      },
+      "status": "single",
+      "sets": [
+        {
+          "name": "n0",
+          "value": "0.25"
+        }
+      ],
+      "expected": {
+        "value": "0",
+        "gradients": [
+          {
+            "inputs": [
+              0
+            ],
+            "planning": "1",
+            "reverse": "1",
+            "smooth_true": "0"
+          }
+        ],
+        "uncached_after_value": [
+          3
+        ]
+      }
+    },
+    {
+      "id": "invalid-inactive-quantizer",
+      "focus": "if_positive",
+      "evidence": "Load validates every quantizer even when the invalid node is on an inactive value branch.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "input"
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 0
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "tax_table_quantize",
+              "arg": 0,
+              "step": 0,
+              "output_offset": 0,
+              "mode": "floor"
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "if_positive",
+              "cond": 1,
+              "then": 2,
+              "otherwise": 0
+            }
+          }
+        },
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "error": {
+          "stage": "load",
+          "kind": "invalid_quantizer",
+          "node": 2
+        }
+      }
+    },
+    {
+      "id": "rational-quotient",
+      "focus": "div",
+      "evidence": "Exact arithmetic expectation 1/3; f64 consumer compares its nearest approximation.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "literal",
+              "value": 1
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "div",
+              "left": 0,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          2
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "value": "1/3"
+      }
+    },
+    {
+      "id": "rational-cancellation",
+      "focus": "mul",
+      "evidence": "(1/3)*3=1 independently over rationals.",
+      "graph": {
+        "nodes": {
+          "0": {
+            "id": 0,
+            "name": "n0",
+            "op": {
+              "type": "literal",
+              "value": 1
+            }
+          },
+          "1": {
+            "id": 1,
+            "name": "n1",
+            "op": {
+              "type": "literal",
+              "value": 3
+            }
+          },
+          "2": {
+            "id": 2,
+            "name": "n2",
+            "op": {
+              "type": "div",
+              "left": 0,
+              "right": 1
+            }
+          },
+          "3": {
+            "id": 3,
+            "name": "n3",
+            "op": {
+              "type": "mul",
+              "left": 2,
+              "right": 1
+            }
+          }
+        },
+        "inputs": [],
+        "outputs": [
+          3
+        ]
+      },
+      "status": "single",
+      "sets": [],
+      "expected": {
+        "value": "1"
+      }
+    }
+  ]
+}
