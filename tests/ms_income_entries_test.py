@@ -161,7 +161,9 @@ def test_page2_entries_round_before_the_income_and_adjustment_sums(case, year, b
         inputs["state_facts"] = state_facts.MS(
             taxpayer_adjusted_gross_income=20_000, spouse_adjusted_gross_income=20_000
         )
-    result = evaluate_return(year=year, state="MS", backend=backend, **inputs)
+    result = evaluate_return(
+        year=year, state="MS", backend=backend, **inputs, allow_unvalidated=True
+    )
     assert (
         result.state_adjusted_gross_income,
         result.state_taxable_income,
@@ -184,7 +186,12 @@ def test_ambiguous_natural_aggregates_are_refused_for_ms(field, backend):
     """A federal aggregate cannot silently stand for a different MS line."""
     with pytest.raises(UnsupportedInputError, match=field):
         evaluate_return(
-            year=2025, state="MS", w2_income=50_000, backend=backend, **{field: 1}
+            year=2025,
+            state="MS",
+            w2_income=50_000,
+            backend=backend,
+            **{field: 1},
+            allow_unvalidated=True,
         )
 
 

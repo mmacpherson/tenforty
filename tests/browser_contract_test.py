@@ -60,9 +60,36 @@ def test_browser_contract_exposes_known_limitations():
         "dependents-and-credits",
         "state-specific-adjustments",
         "calculation-scope",
+        "validated-jurisdictions",
+        "state-slopes",
     }
-    for jurisdiction in CONTRACT["jurisdictions"].values():
-        assert all(not names for names in jurisdiction["unsupported_inputs"].values())
+
+
+def test_browser_refuses_what_python_refuses_on_the_graph():
+    """The raw-graph browser path carries Python's refusals (contract probes).
+
+    Mississippi needs facts the browser cannot supply for Married/Joint and
+    Widow(er), and a dependent for Head_of_House; its ambiguous aggregates are
+    refused, as on Python's graph path.
+    """
+    for year in ("2024", "2025"):
+        ms = CONTRACT["jurisdictions"]["MS"]
+        assert set(ms["refused_statuses"][year]) == {
+            "married_joint",
+            "qualifying_widow",
+            "head_of_household",
+        }
+        for refusal in ms["refused_statuses"][year].values():
+            assert "Python library" in refusal["message"]
+            assert "state_facts" not in refusal["message"]
+            assert refusal["detail"]
+        assert {"schedule_1_income", "itemized_deductions"} <= set(
+            ms["unsupported_inputs"][year]
+        )
+        for code in ("US", "IL", "OR", "TX"):
+            spec = CONTRACT["jurisdictions"][code]
+            assert spec["refused_statuses"][year] == {}, code
+            assert spec["unsupported_inputs"][year] == [], code
 
 
 def test_browser_ui_uses_the_public_calculation_boundary():
@@ -94,7 +121,7 @@ def test_browser_parity_cases_match_python_graph_backend(case):
         filing_status=FILING_STATUSES[case["filing_status"]],
         **case["inputs"],
     )
-    result = GraphBackend().evaluate(tax_input)
+    result = GraphBackend().evaluate(tax_input, allow_unvalidated=True)
 
     for name, expected in case["expected"].items():
         assert getattr(result, name) == pytest.approx(expected, abs=1e-6)
@@ -103,6 +130,7 @@ def test_browser_parity_cases_match_python_graph_backend(case):
 @pytest.mark.parametrize(
     "case", CONTRACT["gradient_cases"], ids=lambda case: case["id"]
 )
+@pytest.mark.usefixtures("lift_state_planning_refusal")
 def test_browser_gradient_regions_match_python_graph_backend(case):
     """Pinned vectors cover the browser's consequential derivative regions."""
     state = (
@@ -118,11 +146,13 @@ def test_browser_gradient_regions_match_python_graph_backend(case):
     )
     backend = GraphBackend()
     vectors = {
-        "federal": backend.gradients(tax_input, "federal_total_tax"),
-        "total": backend.gradients(tax_input, "total_tax"),
+        "federal": backend.gradients(
+            tax_input, "federal_total_tax", allow_unvalidated=True
+        ),
+        "total": backend.gradients(tax_input, "total_tax", allow_unvalidated=True),
     }
     vectors["state"] = (
-        backend.gradients(tax_input, "state_total_tax")
+        backend.gradients(tax_input, "state_total_tax", allow_unvalidated=True)
         if state != OTSState.NONE
         else {name: 0.0 for name in vectors["federal"]}
     )
@@ -130,3 +160,26 @@ def test_browser_gradient_regions_match_python_graph_backend(case):
     for input_name, expected_parts in case["expected"].items():
         for part, expected in expected_parts.items():
             assert vectors[part][input_name] == pytest.approx(expected, abs=1e-6)
+
+
+def test_contract_marks_exactly_the_graph_scope_as_validated():
+    """The browser offers what Python's graph scope admits, year by year."""
+    from tenforty.graph_scope import exclusion_reasons, graph_state_in_scope
+
+    for code, specification in CONTRACT["jurisdictions"].items():
+        state = None if code == "US" else OTSState(code)
+        for year in CONTRACT["supported_years"]:
+            assert specification["validated"][str(year)] == graph_state_in_scope(
+                state, year
+            ), (code, year)
+            assert specification["exclusion_reasons"][str(year)] == list(
+                exclusion_reasons(state, year)
+            ), (code, year)
+
+
+def test_contract_withholds_state_slopes_while_the_planning_defect_is_open():
+    """State slopes are offered exactly when Python allows state planning."""
+    from tenforty.backends.graph import STATE_PLANNING_DEFECT
+
+    assert CONTRACT["state_slopes"]["available"] is (STATE_PLANNING_DEFECT is None)
+    assert CONTRACT["state_slopes"]["tracking"] == STATE_PLANNING_DEFECT

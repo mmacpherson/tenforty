@@ -131,7 +131,9 @@ def test_graph_state_rates_not_defined_without_a_state():
 @graph_only
 def test_graph_state_effective_rate_is_state_tax_over_state_taxable_income():
     """The state effective rate divides state tax by state taxable income."""
-    result = evaluate_return(year=2025, state="CA", w2_income=85000, backend="graph")
+    result = evaluate_return(
+        year=2025, state="CA", w2_income=85000, backend="graph", allow_unvalidated=True
+    )
     assert result.state_taxable_income > 0
     assert result.state_effective_tax_rate == pytest.approx(
         100 * result.state_total_tax / result.state_taxable_income
@@ -143,11 +145,19 @@ def test_graph_batch_rates_match_scalar():
     """Batch rate columns equal the scalar fields, None included."""
     incomes = [0.0, 30000.0, 85000.0, 400000.0]
     frame = evaluate_returns(
-        year=2025, state="CA", w2_income=incomes, backend="graph"
+        year=2025,
+        state="CA",
+        w2_income=incomes,
+        backend="graph",
+        allow_unvalidated=True,
     ).sort("w2_income")
     for income, batch_row in zip(incomes, frame.iter_rows(named=True), strict=True):
         scalar = evaluate_return(
-            year=2025, state="CA", w2_income=income, backend="graph"
+            year=2025,
+            state="CA",
+            w2_income=income,
+            backend="graph",
+            allow_unvalidated=True,
         )
         for field in (
             "federal_tax_bracket",

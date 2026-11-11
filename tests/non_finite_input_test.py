@@ -81,6 +81,7 @@ def test_evaluate_return_rejects_non_finite_before_backend(
             **({"w2_income": 100_000} | {field: value}),
             on_error=on_error,
             backend=backend,
+            allow_unvalidated=True,
         )
     _assert_rejects_non_finite(error, field)
 
@@ -103,6 +104,7 @@ def test_evaluate_returns_rejects_non_finite_before_backend(
             on_error=on_error,
             mode=mode,
             backend=backend,
+            allow_unvalidated=True,
         )
     _assert_rejects_non_finite(error, field)
     [detail] = error.value.errors()
@@ -129,7 +131,11 @@ def test_evaluate_returns_validates_every_float_field(
     """Each float field of TaxReturnInput is checked by the real batch path."""
     with pytest.raises(ValidationError) as error:
         tenforty.evaluate_returns(
-            year=2024, **{field: [1_000.0, math.nan]}, mode=mode, backend="graph"
+            year=2024,
+            **{field: [1_000.0, math.nan]},
+            mode=mode,
+            backend="graph",
+            allow_unvalidated=True,
         )
     [detail] = error.value.errors()
     assert detail["type"] == "finite_number"
@@ -150,7 +156,11 @@ def test_graph_evaluate_return_rejects_nan_end_to_end():
     """The reported graph case (AGI nan, tax $0) now raises instead."""
     with pytest.raises(ValidationError):
         tenforty.evaluate_return(
-            2024, w2_income=100_000, taxable_interest=math.nan, backend="graph"
+            2024,
+            w2_income=100_000,
+            taxable_interest=math.nan,
+            backend="graph",
+            allow_unvalidated=True,
         )
 
 

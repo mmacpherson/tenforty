@@ -202,19 +202,28 @@ def test_auto_refusal_cites_the_defect_bead():
 
 
 @pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
-def test_explicit_graph_ignores_scope(year):
-    """backend='graph' computes an out-of-scope state; scope only steers auto."""
-    assert routing.select_backend("graph", year, "CO") == "graph"
-    assert routing.select_backend("graph", year, "CA") == "graph"
+def test_explicit_graph_needs_the_opt_in_out_of_scope(year):
+    """backend='graph' refuses an out-of-scope state unless the caller opts in."""
+    for state in ("CO", "CA"):
+        with pytest.raises(UnsupportedReturnError, match="allow_unvalidated=True"):
+            routing.select_backend("graph", year, state)
+        assert (
+            routing.select_backend("graph", year, state, allow_unvalidated=True)
+            == "graph"
+        )
 
 
 @pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
 @pytest.mark.parametrize("state", [OTSState.MD, OTSState.NC])
 def test_aggregate_itemized_contract_exclusion_is_explicit(year, state):
-    """nuc6 excludes auto while explicit graph remains available."""
+    """nuc6 excludes auto; explicit graph needs the opt-in."""
     assert not graph_state_in_scope(state, year)
     assert exclusion_reasons(state, year) == ("tenforty-nuc6",)
-    assert routing.select_backend("graph", year, state) == "graph"
+    with pytest.raises(UnsupportedReturnError, match="tenforty-nuc6"):
+        routing.select_backend("graph", year, state)
+    assert (
+        routing.select_backend("graph", year, state, allow_unvalidated=True) == "graph"
+    )
     if state == OTSState.NC:
         assert routing.select_backend("auto", year, state) == "ots"
     else:
@@ -248,4 +257,8 @@ def test_ohio_is_excluded_by_decision_and_routes_to_ots(year):
     assert (OTSState.OH, year) not in KNOWN_GRAPH_DEFECTS
     assert exclusion_reasons(OTSState.OH, year) == (OH_REQUIRED_FACT,)
     assert routing.select_backend("auto", year, "OH") == "ots"
-    assert routing.select_backend("graph", year, "OH") == "graph"
+    with pytest.raises(UnsupportedReturnError, match="policy: graph Ohio"):
+        routing.select_backend("graph", year, "OH")
+    assert (
+        routing.select_backend("graph", year, "OH", allow_unvalidated=True) == "graph"
+    )

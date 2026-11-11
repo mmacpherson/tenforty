@@ -95,7 +95,7 @@ def test_explicit_ots_for_a_state_auto_keeps_off_graph_offers_graph_alone(
     with pytest.raises(BackendUnavailableError) as raised:
         tenforty.evaluate_return(year=2025, state="CA", backend="ots", **RETURN)
     message = str(raised.value)
-    assert "only backend='graph' computes it" in message
+    assert "only backend='graph' with allow_unvalidated=True computes it" in message
     assert "backend='auto' computes" not in message
     assert "or backend='auto'" not in message
 
@@ -104,12 +104,12 @@ def test_explicit_ots_for_a_state_auto_keeps_off_graph_offers_graph_alone(
 def test_auto_state_off_graph_names_why_and_the_remedy(
     graph_only_install, no_evaluation
 ):
-    """An auto route kept on OTS says why, and that backend='graph' computes it."""
+    """An auto route kept on OTS says why, and how graph would compute it."""
     with pytest.raises(BackendUnavailableError) as raised:
-        tenforty.evaluate_return(year=2025, state="CA", **RETURN)
+        tenforty.evaluate_return(year=2025, state="CA", backend="auto", **RETURN)
     message = str(raised.value)
     assert "keeps the 2025/CA" in message
-    assert "backend='graph' computes it" in message
+    assert "backend='graph' with allow_unvalidated=True computes it" in message
 
 
 @pytest.mark.requires_graph
@@ -154,7 +154,9 @@ def test_ots_backend_object_refuses(graph_only_install):
 def test_graph_years_still_compute(graph_only_install):
     """Graph returns, auto included, evaluate on a graph-only install."""
     for backend in ("graph", "auto"):
-        result = tenforty.evaluate_return(year=2025, backend=backend, **RETURN)
+        result = tenforty.evaluate_return(
+            year=2025, backend=backend, **RETURN, allow_unvalidated=True
+        )
         assert math.isfinite(result.federal_total_tax)
         assert result.federal_total_tax > 0
     assert tenforty.marginal_rate(year=2025, w2_income=75_000.0) > 0

@@ -19,7 +19,7 @@ from tenforty.models import NUMERIC_OUTPUT_FIELDS, TaxReturnInput
 
 pytestmark = pytest.mark.requires_graph
 
-_OPTIONS = {"on_error", "backend", "mode"}
+_OPTIONS = {"on_error", "backend", "mode", "allow_unvalidated"}
 PARAMETERS = [
     name
     for name in inspect.signature(tenforty.evaluate_returns).parameters
@@ -138,7 +138,9 @@ def test_frame_schema_order_and_echo(backend, mode):
             "qbi_is_sstb": [False, True, False],
         }
     )
-    frame = tenforty.evaluate_returns(**call, mode=mode, backend=backend)
+    frame = tenforty.evaluate_returns(
+        **call, mode=mode, backend=backend, allow_unvalidated=True
+    )
     _assert_contract(frame, call, mode)
 
 
@@ -148,7 +150,9 @@ def test_backends_agree_on_everything_but_values(mode):
     """OTS and graph frames differ only in output values."""
     call = GRID if mode == "cross" else {"w2_income": [1.0, 2.0], "year": 2025}
     ots = tenforty.evaluate_returns(**call, mode=mode, backend="ots")
-    graph = tenforty.evaluate_returns(**call, mode=mode, backend="graph")
+    graph = tenforty.evaluate_returns(
+        **call, mode=mode, backend="graph", allow_unvalidated=True
+    )
     assert ots.schema == graph.schema
     assert ots.select(INPUT_COLUMNS).equals(graph.select(INPUT_COLUMNS))
 
@@ -165,7 +169,11 @@ def test_mixed_year_auto_frame_has_one_schema():
 def test_graph_column_order_is_deterministic():
     """Identical calls return identical column orders."""
     orders = {
-        tuple(tenforty.evaluate_returns(**GRID, backend="graph").columns)
+        tuple(
+            tenforty.evaluate_returns(
+                **GRID, backend="graph", allow_unvalidated=True
+            ).columns
+        )
         for _ in range(5)
     }
     assert len(orders) == 1
@@ -204,7 +212,7 @@ def test_failed_rows_keep_the_schema(monkeypatch, mode):
     monkeypatch.setattr(GraphBackend, "evaluate", fail)
     call = {"year": 2024, "w2_income": [10_000, 20_000]}
     frame = tenforty.evaluate_returns(
-        **call, mode=mode, backend="graph", on_error="ignore"
+        **call, mode=mode, backend="graph", on_error="ignore", allow_unvalidated=True
     )
     _assert_contract(frame, call, mode)
     assert all(math.isnan(value) for value in frame.select(OUTPUT_COLUMNS).row(0))
@@ -271,7 +279,7 @@ def test_schema_is_identical_for_every_kind_of_batch(request, kind, backend, mod
         backend = "auto"
     call = _call_for(kind, mode, backend)
     frame = tenforty.evaluate_returns(
-        **call, mode=mode, backend=backend, on_error="ignore"
+        **call, mode=mode, backend=backend, on_error="ignore", allow_unvalidated=True
     )
     _assert_contract(frame, call, mode)
     if kind == "empty":
@@ -313,6 +321,7 @@ def test_echo_uses_the_validated_field_value(
         mode=mode,
         backend=backend,
         on_error=on_error,
+        allow_unvalidated=True,
     )
     assert frame.schema == SCHEMA
     assert frame[column].to_list() == [echoed, echoed]

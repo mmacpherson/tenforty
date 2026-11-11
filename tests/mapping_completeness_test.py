@@ -437,9 +437,12 @@ def test_ots_refuses_a_state_it_does_not_map(state):
 
 
 def _graph_both_paths(**kw):
-    single = evaluate_return(backend="graph", **kw)
+    single = evaluate_return(backend="graph", **kw, allow_unvalidated=True)
     batch = evaluate_returns(
-        backend="graph", mode="zip", **{k: [v] for k, v in kw.items()}
+        backend="graph",
+        mode="zip",
+        **{k: [v] for k, v in kw.items()},
+        allow_unvalidated=True,
     )
     for field in STATE_RESULT_FIELDS:
         assert batch[field][0] == pytest.approx(getattr(single, field), abs=0.01)
@@ -503,7 +506,7 @@ def test_louisiana_2025_reports_agi_and_taxable_income():
     subtracts lines 8 and 9D from line 7 (9D is zero without federal itemizing),
     100,000 - 12,500 = 87,500; line 11 multiplies line 10 by .03, giving 2,625.
     """
-    result = evaluate_return(backend="graph", **LA_2025_SINGLE)
+    result = evaluate_return(backend="graph", **LA_2025_SINGLE, allow_unvalidated=True)
     assert result.state_adjusted_gross_income == pytest.approx(100_000)
     assert result.state_taxable_income == pytest.approx(87_500)
     assert result.state_total_tax == pytest.approx(2_625)

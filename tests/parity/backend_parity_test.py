@@ -7,7 +7,7 @@ import pytest
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
-from tenforty import evaluate_return
+from tenforty import evaluate_return, routing
 from tests.parity.state_parity_policy import (
     SIGNATURES,
     unexcused_parity_violations,
@@ -84,7 +84,10 @@ def test_basic_w2_parity(w2_income, filing_status):
         year=2024, w2_income=w2_income, filing_status=filing_status, backend="ots"
     )
     graph = evaluate_return(
-        year=2024, w2_income=w2_income, filing_status=filing_status, backend="graph"
+        year=2024,
+        w2_income=w2_income,
+        filing_status=filing_status,
+        backend="graph",
     )
 
     diff = abs(ots.federal_total_tax - graph.federal_total_tax)
@@ -115,7 +118,7 @@ def test_capital_gains_parity(w2_income, cap_gains, gains_type):
     }
 
     ots = evaluate_return(**kwargs, backend="ots")
-    graph = evaluate_return(**kwargs, backend="graph")
+    graph = evaluate_return(**kwargs, backend="graph", allow_unvalidated=True)
 
     agi_diff = abs(
         ots.federal_adjusted_gross_income - graph.federal_adjusted_gross_income
@@ -378,9 +381,11 @@ def test_child_tax_credit_parity(year, w2_income, num_dependents, filing_status)
     """
     common = dict(year=year, w2_income=w2_income, filing_status=filing_status)
     ots = evaluate_return(**common, num_dependents=num_dependents, backend="ots")
-    graph = evaluate_return(**common, num_dependents=num_dependents, backend="graph")
+    graph = evaluate_return(
+        **common, num_dependents=num_dependents, backend="graph", allow_unvalidated=True
+    )
     ots_base = evaluate_return(**common, backend="ots")
-    graph_base = evaluate_return(**common, backend="graph")
+    graph_base = evaluate_return(**common, backend="graph", allow_unvalidated=True)
 
     ots_credit = ots_base.federal_total_tax - ots.federal_total_tax
     graph_credit = graph_base.federal_total_tax - graph.federal_total_tax
@@ -586,7 +591,7 @@ def test_obbba_inputs_parity(
         vehicle_loan_interest=vehicle_loan_interest if year == 2025 else 0,
     )
     ots = evaluate_return(**common, backend="ots")
-    graph = evaluate_return(**common, backend="graph")
+    graph = evaluate_return(**common, backend="graph", allow_unvalidated=True)
 
     shortfall = 0.0
     if year == 2025:
@@ -838,7 +843,7 @@ def test_qbi_form_8995a_parity(
     }
 
     ots = evaluate_return(**kwargs, backend="ots")
-    graph = evaluate_return(**kwargs, backend="graph")
+    graph = evaluate_return(**kwargs, backend="graph", allow_unvalidated=True)
 
     assert ots.federal_qbi_deduction == pytest.approx(
         graph.federal_qbi_deduction, abs=0.02
@@ -902,6 +907,7 @@ def test_ca_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -959,6 +965,7 @@ def test_ca_state_tax_parity_rate_schedule_region(case):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
@@ -989,6 +996,7 @@ def test_ny_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1034,6 +1042,7 @@ def test_ma_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1079,6 +1088,7 @@ def test_nc_state_agi_parity_2024(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1121,6 +1131,7 @@ def test_nj_state_agi_parity_2024(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1163,6 +1174,7 @@ def test_pa_state_parity_2024(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1198,6 +1210,7 @@ def test_va_state_agi_parity_2024(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1225,7 +1238,13 @@ def test_va_state_tax_parity_2024(w2_income, filing_status):
 def test_oh_state_parity_2024(w2_income):
     """OH 2024: compare AGI everywhere and tax outside the OTS count defect."""
     ots = evaluate_return(year=2024, state="OH", w2_income=w2_income, backend="ots")
-    graph = evaluate_return(year=2024, state="OH", w2_income=w2_income, backend="graph")
+    graph = evaluate_return(
+        year=2024,
+        state="OH",
+        w2_income=w2_income,
+        backend="graph",
+        allow_unvalidated=True,
+    )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
     assert agi_diff <= EXACT_TOLERANCE, (
@@ -1251,20 +1270,28 @@ def test_oh_state_parity_2024(w2_income):
 @settings(max_examples=100)
 @pytest.mark.requires_graph
 def test_mi_state_parity_2024(w2_income, filing_status):
-    """MI 2024 uses a flat 4.25% tax — exact parity expected with no exemptions."""
-    ots = evaluate_return(
-        year=2024,
-        state="MI",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
+    """MI 2024 uses a flat 4.25% tax — exact parity expected with no exemptions.
+
+    Both engines apply no MI-1040 exemption yet (tenforty-s48h.45), so 2025.14
+    refuses every OTS MI return; this parity check lifts that refusal to keep
+    comparing the two engines.
+    """
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(routing, "OTS_REFUSED_RETURNS", {})
+        ots = evaluate_return(
+            year=2024,
+            state="MI",
+            w2_income=w2_income,
+            filing_status=filing_status,
+            backend="ots",
+        )
     graph = evaluate_return(
         year=2024,
         state="MI",
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1307,6 +1334,7 @@ def test_nc_state_agi_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1341,6 +1369,7 @@ def test_nc_state_tax_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
@@ -1371,6 +1400,7 @@ def test_nj_state_agi_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1405,6 +1435,7 @@ def test_nj_state_tax_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
@@ -1435,6 +1466,7 @@ def test_pa_state_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1470,6 +1502,7 @@ def test_va_state_agi_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1504,6 +1537,7 @@ def test_va_state_tax_parity_2023(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
@@ -1519,7 +1553,13 @@ def test_va_state_tax_parity_2023(w2_income, filing_status):
 def test_oh_state_parity_2023(w2_income):
     """OH 2023 income tax is filing-status-independent; parity within $20 rounding."""
     ots = evaluate_return(year=2023, state="OH", w2_income=w2_income, backend="ots")
-    graph = evaluate_return(year=2023, state="OH", w2_income=w2_income, backend="graph")
+    graph = evaluate_return(
+        year=2023,
+        state="OH",
+        w2_income=w2_income,
+        backend="graph",
+        allow_unvalidated=True,
+    )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
     assert agi_diff <= EXACT_TOLERANCE, (
@@ -1561,6 +1601,7 @@ def test_pa_state_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1586,21 +1627,25 @@ def test_mi_state_parity(w2_income, filing_status):
 
     MI uses a flat 4.25% tax on taxable income. Personal exemptions must
     be passed explicitly to both backends; with no exemptions, parity
-    is exact.
+    is exact. 2025.14 refuses every OTS MI return (tenforty-s48h.45); this
+    parity check lifts that refusal to keep comparing the two engines.
     """
-    ots = evaluate_return(
-        year=2025,
-        state="MI",
-        w2_income=w2_income,
-        filing_status=filing_status,
-        backend="ots",
-    )
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(routing, "OTS_REFUSED_RETURNS", {})
+        ots = evaluate_return(
+            year=2025,
+            state="MI",
+            w2_income=w2_income,
+            filing_status=filing_status,
+            backend="ots",
+        )
     graph = evaluate_return(
         year=2025,
         state="MI",
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1621,7 +1666,13 @@ def test_mi_state_parity(w2_income, filing_status):
 def test_oh_state_parity(w2_income):
     """OH 2025: compare AGI everywhere and tax outside the OTS count defect."""
     ots = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="ots")
-    graph = evaluate_return(year=2025, state="OH", w2_income=w2_income, backend="graph")
+    graph = evaluate_return(
+        year=2025,
+        state="OH",
+        w2_income=w2_income,
+        backend="graph",
+        allow_unvalidated=True,
+    )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
     assert agi_diff <= EXACT_TOLERANCE, (
@@ -1660,6 +1711,7 @@ def test_nc_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1702,6 +1754,7 @@ def test_nj_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1744,6 +1797,7 @@ def test_va_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -1936,7 +1990,12 @@ def test_ots_nj_owes_no_tax_at_the_filing_threshold(year):
 def test_graph_nj_owes_no_tax_below_the_filing_threshold(year):
     """NJ Single, $9,999 gross income: below the threshold no tax is due."""
     result = evaluate_return(
-        year=year, state="NJ", filing_status="Single", w2_income=9_999, backend="graph"
+        year=year,
+        state="NJ",
+        filing_status="Single",
+        w2_income=9_999,
+        backend="graph",
+        allow_unvalidated=True,
     )
     assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
 
@@ -1987,6 +2046,7 @@ def test_graph_va_owes_no_tax_below_the_filing_threshold(year):
         filing_status="Married/Joint",
         w2_income=20_000,
         backend="graph",
+        allow_unvalidated=True,
     )
     assert result.state_total_tax == pytest.approx(0.0, abs=1.0)
 
@@ -2154,6 +2214,7 @@ def test_az_state_agi_parity_2024(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -2184,6 +2245,7 @@ def test_az_state_tax_parity_2024(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
@@ -2217,6 +2279,7 @@ def test_az_state_agi_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     agi_diff = abs(ots.state_adjusted_gross_income - graph.state_adjusted_gross_income)
@@ -2247,6 +2310,7 @@ def test_az_state_tax_parity(w2_income, filing_status):
         w2_income=w2_income,
         filing_status=filing_status,
         backend="graph",
+        allow_unvalidated=True,
     )
 
     tax_diff = abs(ots.state_total_tax - graph.state_total_tax)
@@ -2261,7 +2325,13 @@ def test_az_state_tax_parity(w2_income, filing_status):
 @skip_if_graph_unavailable
 def test_ca_graph_requires_all_imports():
     """Graph backend should load the full CA import closure."""
-    result = evaluate_return(year=2024, state="CA", w2_income=100_000, backend="graph")
+    result = evaluate_return(
+        year=2024,
+        state="CA",
+        w2_income=100_000,
+        backend="graph",
+        allow_unvalidated=True,
+    )
     assert result.state_total_tax > 0
 
 
@@ -2276,6 +2346,7 @@ def _evaluate_2025_graph(w2_income, filing_status="Single", state=None):
         filing_status=filing_status,
         state=state,
         backend="graph",
+        allow_unvalidated=True,
     )
     return {
         "federal_adjusted_gross_income": result.federal_adjusted_gross_income,
@@ -2356,7 +2427,7 @@ def test_federal_itemized_parity(
         "federal_itemized": amounts,
     }
     ots = evaluate_return(**call, backend="ots")
-    graph = evaluate_return(**call, backend="graph")
+    graph = evaluate_return(**call, backend="graph", allow_unvalidated=True)
     for field in ("federal_taxable_income", "federal_amt", "federal_total_tax"):
         diff = abs(getattr(ots, field) - getattr(graph, field))
         assert diff <= EXACT_TOLERANCE, f"{field} differs by ${diff:.2f} for {call}"

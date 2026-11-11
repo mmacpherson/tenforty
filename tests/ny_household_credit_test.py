@@ -280,6 +280,7 @@ def test_natural_mfs_requires_raw_spouse_information(year, policy, api):
         w2_income=20_000,
         backend="graph",
         on_error=policy,
+        allow_unvalidated=True,
     )
     with pytest.raises(
         UnsupportedReturnError, match=r"spouse AGI/dependents.*raw graph inputs"

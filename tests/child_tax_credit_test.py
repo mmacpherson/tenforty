@@ -137,6 +137,7 @@ def test_state_returns_keep_the_federal_credit(backend, state, year):
         w2_income=100_000,
         num_dependents=2,
         backend=backend,
+        allow_unvalidated=True,
     )
     assert result.federal_total_tax == pytest.approx(expected, abs=0.005)
 
@@ -151,6 +152,7 @@ def test_unmapped_states_do_not_lower_the_count_to_exemptions(state, year):
         filing_status="Married/Joint",
         w2_income=90_000,
         backend="graph",
+        allow_unvalidated=True,
     )
     without = evaluate_return(**common)
     with_children = evaluate_return(**common, num_dependents=2)
@@ -202,7 +204,13 @@ def test_phase_out_starts_at_200k_for_every_status_but_joint(backend, status, ye
     $180,000+ of taxable income far exceeds line 12, so line 14 = line 12 and
     line 24 falls by exactly that much. The graph once used $400,000 for QSS.
     """
-    common = dict(year=year, filing_status=status, w2_income=210_000, backend=backend)
+    common = dict(
+        year=year,
+        filing_status=status,
+        w2_income=210_000,
+        backend=backend,
+        allow_unvalidated=True,
+    )
     without = evaluate_return(**common)
     with_child = evaluate_return(**common, num_dependents=1)
     expected_credit = CTC_PER_CHILD[year] - 500.0
@@ -225,7 +233,11 @@ def test_one_phase_out_step_for_the_first_thousand_over(backend, year):
     error that the parity test allows for.
     """
     common = dict(
-        year=year, filing_status="Head_of_House", w2_income=201_000, backend=backend
+        year=year,
+        filing_status="Head_of_House",
+        w2_income=201_000,
+        backend=backend,
+        allow_unvalidated=True,
     )
     without = evaluate_return(**common)
     with_child = evaluate_return(**common, num_dependents=1)

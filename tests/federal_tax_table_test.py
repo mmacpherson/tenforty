@@ -371,7 +371,10 @@ def test_solver_lands_inside_the_row_of_a_published_amount(year, status):
     column = STATUS_COLUMN[status]
     for row in (rows[200], rows[1_000], rows[-1]):
         wages = solve_for_income(
-            row.tax[column], year=year, filing_status=_PUBLIC_STATUS[status]
+            row.tax[column],
+            year=year,
+            filing_status=_PUBLIC_STATUS[status],
+            allow_unvalidated=True,
         )
         taxable_income = wages - _standard_deduction(year, status)
         assert _row(year, taxable_income).tax[column] == row.tax[column]
@@ -397,6 +400,8 @@ def test_solver_reaches_small_joint_targets(year, target, row_start):
     """
     from tenforty import solve_for_income
 
-    wages = solve_for_income(target, year=year, filing_status="Married/Joint")
+    wages = solve_for_income(
+        target, year=year, filing_status="Married/Joint", allow_unvalidated=True
+    )
     row = _row(year, wages - _standard_deduction(year, "married_joint"))
     assert (row.at_least, row.tax["married_joint"]) == (row_start, target)

@@ -8,6 +8,7 @@ from tenforty.models import (
     OTSFilingStatus,
     OTSState,
 )
+from tenforty.ots_state_gaps import ots_state_input_gap
 
 from .fixtures.helpers import is_state_supported
 
@@ -48,6 +49,11 @@ def test_basic_evaluation():
                 )
 
                 assert result.federal_total_tax > 5000
+                if any(
+                    ots_state_input_gap(name, year, state)
+                    for name in ("short_term_capital_gains", "long_term_capital_gains")
+                ):
+                    continue
 
                 result_short = evaluate_return(
                     year=year,

@@ -6,22 +6,68 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import warnings
 from pathlib import Path
 
+from tenforty import (
+    LegacyItemizedDeductionsWarning,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+    evaluate_return,
+)
 from tenforty.backends.graph import (
     FEDERAL_OUTPUT_NODES,
+    STATE_PLANNING_DEFECT,
     GraphBackend,
     _state_output_node,
 )
+from tenforty.graph_scope import exclusion_reasons, graph_state_in_scope
 from tenforty.mappings import (
     NATURAL_TO_NODES,
     STATE_FORM_NAMES,
     state_natural_to_node,
     state_output_lines,
 )
-from tenforty.models import DEDUCTION_CHOICE_ENCODING, STATE_TO_FORM
+from tenforty.models import DEDUCTION_CHOICE_ENCODING, STATE_TO_FORM, OTSFilingStatus
 
 ROOT = Path(__file__).resolve().parents[1]
+
+BROWSER_STATUSES = {
+    "single": OTSFilingStatus.SINGLE,
+    "married_joint": OTSFilingStatus.MARRIED_JOINT,
+    "married_separate": OTSFilingStatus.MARRIED_SEPARATE,
+    "head_of_household": OTSFilingStatus.HEAD_OF_HOUSEHOLD,
+    "qualifying_widow": OTSFilingStatus.WIDOW_WIDOWER,
+}
+PROBE_AMOUNT = 1_000.0
+
+_MS_SPOUSE_INCOME = (
+    "Mississippi joint and widow(er) returns need each spouse's income, which "
+    "this calculator doesn't collect yet. Single works; the Python library "
+    "supports these returns with state facts."
+)
+BROWSER_REFUSAL_MESSAGES = {
+    ("MS", "married_joint"): _MS_SPOUSE_INCOME,
+    ("MS", "qualifying_widow"): _MS_SPOUSE_INCOME,
+    ("MS", "head_of_household"): (
+        "Mississippi head-of-household returns need a dependent, which this "
+        "calculator doesn't collect yet. Single works; the Python library "
+        "supports these returns with num_dependents."
+    ),
+}
+"""User-facing text for a refused browser return; Python's message is the detail."""
+
+
+def _browser_message(state: str | None, status: str) -> str:
+    if (state, status) in BROWSER_REFUSAL_MESSAGES:
+        return BROWSER_REFUSAL_MESSAGES[(state, status)]
+    where = STATE_NAMES.get(state, "These") if state else "Federal"
+    return (
+        f"{where} returns with this filing status need information this "
+        "calculator doesn't collect yet; the Python library supports them."
+    )
+
+
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
 
 INPUTS = {
@@ -468,6 +514,57 @@ def _graph_inventory(year: int) -> tuple[set[str], set[str], dict[str, object]]:
     return input_names, output_names, metadata
 
 
+def _python_refusal(year: int, state: str | None, status: str, **inputs) -> str | None:
+    """Return Python's refusal message for this graph return, or None.
+
+    The browser runs the raw graph, which skips the Python-side rules: required
+    state facts, inputs the state graph cannot read, and return-level refusals.
+    Asking Python here carries every such rule into the contract, so the
+    browser refuses exactly what Python refuses. The scope rule is lifted:
+    the contract's ``validated`` flag carries it separately.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", LegacyItemizedDeductionsWarning)
+        try:
+            evaluate_return(
+                year=year,
+                state=state,
+                filing_status=BROWSER_STATUSES[status],
+                backend="graph",
+                allow_unvalidated=True,
+                **inputs,
+            )
+        except (UnsupportedInputError, UnsupportedReturnError) as refusal:
+            return str(refusal)
+    return None
+
+
+def _refusals(
+    year: int, state: str | None
+) -> tuple[dict[str, dict[str, str]], list[str]]:
+    """Return the statuses and nonzero money inputs Python refuses here.
+
+    When every status is refused the return never computes, so no input is
+    probed.
+    """
+    statuses = {
+        status: {"message": _browser_message(state, status), "detail": detail}
+        for status in BROWSER_STATUSES
+        if (detail := _python_refusal(year, state, status)) is not None
+    }
+    probe_status = next((s for s in BROWSER_STATUSES if s not in statuses), None)
+    if probe_status is None:
+        return statuses, []
+    inputs = sorted(
+        name
+        for name, metadata in INPUTS.items()
+        if metadata["type"] == "money"
+        and _python_refusal(year, state, probe_status, **{name: PROBE_AMOUNT})
+        is not None
+    )
+    return statuses, inputs
+
+
 def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
     inventories = {year: _graph_inventory(year) for year in years}
     jurisdictions: dict[str, object] = {
@@ -476,7 +573,12 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             "kind": "federal",
             "input_nodes": {str(year): {} for year in years},
             "output_nodes": {str(year): {} for year in years},
-            "unsupported_inputs": {str(year): [] for year in years},
+            "unsupported_inputs": {
+                str(year): _refusals(year, None)[1] for year in years
+            },
+            "refused_statuses": {str(year): _refusals(year, None)[0] for year in years},
+            "validated": {str(year): True for year in years},
+            "exclusion_reasons": {str(year): [] for year in years},
         }
     }
 
@@ -498,6 +600,13 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
             "input_nodes": {},
             "output_nodes": {},
             "unsupported_inputs": {},
+            "refused_statuses": {},
+            "validated": {
+                str(year): graph_state_in_scope(state, year) for year in years
+            },
+            "exclusion_reasons": {
+                str(year): list(exclusion_reasons(state, year)) for year in years
+            },
         }
 
         for year in years:
@@ -526,7 +635,11 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
 
             jurisdiction["input_nodes"][str(year)] = mapped_inputs
             jurisdiction["output_nodes"][str(year)] = mapped_outputs
-            jurisdiction["unsupported_inputs"][str(year)] = unsupported_inputs
+            refused_statuses, refused_inputs = _refusals(year, state_code)
+            jurisdiction["unsupported_inputs"][str(year)] = sorted(
+                set(unsupported_inputs) | set(refused_inputs)
+            )
+            jurisdiction["refused_statuses"][str(year)] = refused_statuses
 
         jurisdictions[state_code] = jurisdiction
 
@@ -642,7 +755,26 @@ def build_contract() -> dict[str, object]:
             "input_nodes": "inputs[name].federal_nodes plus jurisdiction.input_nodes[year][name] plus active derived-input nodes",
         },
         "jurisdictions": _jurisdictions(years),
+        "scope": {
+            "summary": "The graph is so far validated for 2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other jurisdictions are not yet validated: the calculator does not offer them, a shared link to one is refused, and BrowserTaxRuntime computes one only with allowUnvalidated: true.",
+            "tracking": "tenforty-s48h",
+        },
+        "state_slopes": {
+            "available": STATE_PLANNING_DEFECT is None,
+            "summary": "State and combined next-dollar slopes are withheld for every state return: graph state derivatives read zero for IL, MS and OR although their state tax moves with income. Federal slopes are unaffected, and the tax curve is computed by evaluation.",
+            "tracking": STATE_PLANNING_DEFECT,
+        },
         "limitations": [
+            {
+                "id": "validated-jurisdictions",
+                "summary": "Only federal-only returns and the validated states (IL, MS, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
+                "tracking": "tenforty-s48h",
+            },
+            {
+                "id": "state-slopes",
+                "summary": "State and combined next-dollar slopes are withheld until state derivatives are fixed; federal slopes are shown.",
+                "tracking": STATE_PLANNING_DEFECT,
+            },
             {
                 "id": "tax-years",
                 "summary": "Only tax years 2024 and 2025 are supported by the browser contract.",

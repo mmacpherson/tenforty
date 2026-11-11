@@ -93,6 +93,7 @@ def _return_at_state_taxable_income(state, year, status, taxable_income):
             w2_income=wages,
             backend="graph",
             state_facts=credit_neutral_facts(state, status),
+            allow_unvalidated=True,
         )
         shortfall = taxable_income - result.state_taxable_income
         if shortfall == 0:
@@ -218,6 +219,7 @@ def test_graph_ny_mfs_natural_api_is_refused(year):
             filing_status="Married/Sep",
             w2_income=85_000,
             backend="graph",
+            allow_unvalidated=True,
         )
     with pytest.raises(UnsupportedReturnError):
         evaluate_returns(
@@ -226,6 +228,7 @@ def test_graph_ny_mfs_natural_api_is_refused(year):
             filing_status="Married/Sep",
             w2_income=[40_000, 85_000],
             backend="graph",
+            allow_unvalidated=True,
         )
 
 

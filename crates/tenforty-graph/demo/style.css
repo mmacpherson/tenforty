@@ -1458,3 +1458,9 @@ button.sensitivity-item:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+.next-dollar-number strong.is-withheld {
+  font-size: 2.5rem;
+  letter-spacing: 0;
+  line-height: 1.1;
+}

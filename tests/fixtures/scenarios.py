@@ -81,6 +81,7 @@ def run_tax_scenario(scenario: TaxScenario):
         state_adjustment=scenario.state_adjustment,
     )
     kwargs["backend"] = scenario_backend(scenario)
+    kwargs["allow_unvalidated"] = kwargs["backend"] == "graph"
     if scenario.state_facts is not None:
         kwargs["state_facts"] = MODELS[scenario.state](**scenario.state_facts)
     result = evaluate_return(**kwargs)

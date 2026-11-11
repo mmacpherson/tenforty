@@ -4,7 +4,8 @@ A state's return enters graph scope only once its known graph-side defects are
 closed, official-value fixtures support it (tenforty-du9, approved 2026-11-03),
 and no policy decision holds it out. Scope is inferred down, never up: a (state, year) is in scope only
 by an explicit entry in ``IN_SCOPE``, and every other graph return is excluded
-for the reasons ``exclusion_reasons`` gives. ``backend="graph"`` ignores scope.
+for the reasons ``exclusion_reasons`` gives. ``backend="graph"`` refuses an
+excluded return too, unless the caller passes ``allow_unvalidated=True``.
 
 The tables below are hand-kept data. tests/graph_scope_test.py checks them
 against the known-defect signatures in tests/ and the fixture documents in
@@ -100,6 +101,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.MD: _both_years("tenforty-nuc6"),
     S.ME: _both_years("tenforty-nuc6"),
     S.MN: _both_years("tenforty-nuc6"),
+    S.MI: _both_years("tenforty-s48h.45"),
     S.MO: _both_years("tenforty-b72.46", "tenforty-nuc6"),
     S.MT: _both_years("tenforty-b72.7"),
     S.NC: _both_years("tenforty-nuc6"),
@@ -134,6 +136,7 @@ UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
         "tenforty-b72.47",
         "tenforty-b72.54",
         "tenforty-nuc6",
+        "tenforty-s48h.45",
         "tenforty-yu51",
     }
 )

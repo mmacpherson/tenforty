@@ -114,7 +114,12 @@ def test_line_19_matches_the_blind_derivation(
 ):
     """Taxable income: the standard deduction and its phase-out (b72.43, b72.44)."""
     result = evaluate_return(
-        backend="graph", year=year, state="ME", filing_status=status, w2_income=wages
+        backend="graph",
+        year=year,
+        state="ME",
+        filing_status=status,
+        w2_income=wages,
+        allow_unvalidated=True,
     )
     if case in LINE_17_AND_19_READINGS:
         line_17 = _runtime(year, status, wages).eval(f"{PREFIX}_L19_deduction")
@@ -138,7 +143,12 @@ def test_raw_graph_derives_the_status_baseline(year, status):
 def test_explicit_total_substitutes_for_the_baseline(year, status, total_offset):
     """dependent_exemptions is the TOTAL pre-phase-out amount, never added."""
     default = evaluate_return(
-        backend="graph", year=year, state="ME", filing_status=status, w2_income=80_000
+        backend="graph",
+        year=year,
+        state="ME",
+        filing_status=status,
+        w2_income=80_000,
+        allow_unvalidated=True,
     )
     explicit = evaluate_return(
         backend="graph",
@@ -147,6 +157,7 @@ def test_explicit_total_substitutes_for_the_baseline(year, status, total_offset)
         filing_status=status,
         w2_income=80_000,
         dependent_exemptions=_base(year, status) + total_offset,
+        allow_unvalidated=True,
     )
     reduction = default.state_taxable_income - explicit.state_taxable_income
     assert reduction == max(0, total_offset)
@@ -212,6 +223,7 @@ def test_scalar_and_batch_agree_across_the_phaseout(year):
         state=["ME"],
         filing_status=["Single"],
         w2_income=wages,
+        allow_unvalidated=True,
     )
     for index, wage in enumerate(wages):
         scalar = evaluate_return(
@@ -220,6 +232,7 @@ def test_scalar_and_batch_agree_across_the_phaseout(year):
             state="ME",
             filing_status="Single",
             w2_income=wage,
+            allow_unvalidated=True,
         )
         assert batch["state_taxable_income"][index] == pytest.approx(
             scalar.state_taxable_income, abs=1e-8
@@ -308,7 +321,12 @@ def test_fractional_wages_enter_maine_in_whole_dollars(
 ):
     """Line 19 and the table row use the rounded line 14, not cents."""
     result = evaluate_return(
-        backend="graph", year=year, state="ME", filing_status=status, w2_income=wages
+        backend="graph",
+        year=year,
+        state="ME",
+        filing_status=status,
+        w2_income=wages,
+        allow_unvalidated=True,
     )
     assert (result.state_taxable_income, result.state_total_tax) == (
         taxable_income,
@@ -327,6 +345,7 @@ def test_fractional_wages_in_a_batch(year):
         filing_status=[case[2] for case in cases],
         w2_income=[case[3] for case in cases],
         mode="zip",
+        allow_unvalidated=True,
     )
     for index, (_, _, _, _, taxable_income, tax) in enumerate(cases):
         assert batch["state_taxable_income"][index] == taxable_income

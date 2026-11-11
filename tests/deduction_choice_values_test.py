@@ -268,6 +268,7 @@ def test_election_matches_derivation(
         standard_or_itemized=election,
         backend=backend,
         **inputs,
+        allow_unvalidated=True,
     )
 
     rounding = WHOLE_DOLLAR_ROUNDING.get(case_id, 0.0)
