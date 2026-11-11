@@ -9,6 +9,7 @@ from tenforty import (
     BackendUnavailableError,
     UnsupportedInputError,
     UnsupportedReturnError,
+    _ots_extension,
     core,
     routing,
 )
@@ -123,13 +124,17 @@ def test_unsupported_return_error_is_a_value_error():
     assert issubclass(UnsupportedReturnError, ValueError)
 
 
-def test_public_default_backend_is_ots():
-    """Every public entry point that takes a backend defaults to "ots".
-
-    Graph is opt-in: "auto" and "graph" are chosen explicitly (2025.14).
-    """
-    for function in (tenforty.evaluate_return, tenforty.evaluate_returns, get_backend):
-        assert inspect.signature(function).parameters["backend"].default == "ots"
+def test_public_default_backend_matches_install():
+    """Omission uses OTS on full installs and auto on graph-only installs."""
+    choice = "ots" if _ots_extension.ots_extension_installed() else "auto"
+    args = dict(year=2025, w2_income=75_000)
+    assert tenforty.evaluate_return(**args) == tenforty.evaluate_return(
+        **args, backend=choice
+    )
+    assert tenforty.evaluate_returns(**args).equals(
+        tenforty.evaluate_returns(**args, backend=choice)
+    )
+    assert get_backend(year=2025) is get_backend(choice, year=2025)
 
 
 def test_every_entry_point_defaults_to_refusing_unvalidated_graph_returns():
