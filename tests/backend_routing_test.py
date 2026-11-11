@@ -253,8 +253,9 @@ def test_omitted_backend_refuses_what_ots_refuses(engine_calls, year):
 
 
 @pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
+@pytest.mark.requires_ots
 def test_omitted_backend_for_an_in_scope_state_ots_lacks_names_graph(year):
-    """IL is in graph scope and OTS has no IL return: the default offers graph."""
+    """With OTS installed, the default refuses IL and offers explicit graph."""
     with pytest.raises(UnsupportedReturnError, match="Use backend='graph'"):
         tenforty.evaluate_return(year=year, state="IL", w2_income=80_000)
 

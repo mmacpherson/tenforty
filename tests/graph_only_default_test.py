@@ -3,7 +3,12 @@
 import pytest
 
 import tenforty
-from tenforty import BackendUnavailableError, UnsupportedReturnError, _ots_extension
+from tenforty import (
+    BackendUnavailableError,
+    UnsupportedInputError,
+    UnsupportedReturnError,
+    _ots_extension,
+)
 from tenforty.backends import OTSBackend, get_backend
 
 pytestmark = pytest.mark.requires_graph
@@ -94,3 +99,23 @@ def test_present_but_unavailable_ots_is_not_a_graph_only_install(monkeypatch):
     with pytest.raises(BackendUnavailableError):
         get_backend(year=2025)
     assert get_backend("auto", 2025).name == "graph"
+
+
+@pytest.mark.parametrize("entry", ["scalar", "cross", "zip"])
+@pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
+def test_default_still_requires_mississippi_spouse_facts(
+    graph_only_install, monkeypatch, entry, on_error
+):
+    """Default graph selection cannot bypass required facts or preflight."""
+
+    def evaluated(*args, **kwargs):
+        pytest.fail("a return was evaluated before required facts were checked")
+
+    monkeypatch.setattr(tenforty.core, "_evaluate_with_engine", evaluated)
+    monkeypatch.setattr(tenforty.core, "_graph_batch_outputs", evaluated)
+    args = dict(year=2025, state="MS", filing_status="Married/Joint", on_error=on_error)
+    with pytest.raises(UnsupportedInputError) as auto:
+        _request(entry, dict(args, backend="auto"))
+    with pytest.raises(UnsupportedInputError) as default:
+        _request(entry, args)
+    assert str(default.value) == str(auto.value)
