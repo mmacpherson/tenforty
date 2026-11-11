@@ -221,27 +221,20 @@ def test_solver_targets_the_public_total_in_every_state(state):
 
 
 STATUTORY_STATE_RATES = {
-    # Independent derivation from the official rate schedules cited in
-    # tenforty-spec/forms/Tables{IL,MS,OR}{2024,2025}.hs, for Single wages of
-    # $120,000 and nothing else (retrieved via those modules, 2026-11-11).
-    #
-    # IL: flat 4.95% on net income (IL-1040 instructions 2024; Bulletin
-    # FY 2025-16). Federal AGI $120,000 is under the $250,000 exemption cutoff,
-    # so the exemption is a constant and the slope is the flat rate.
+    # Independent derivation from official IL, MS, OR and IRS sources, made
+    # without access to tenforty's implementation or output and retrieved
+    # 2026-11-11: docs/validation/derivations/state-slopes-il-ms-or-2024-2025.md.
+    # Single, wages of $120,000 only. Every deduction, exemption, subtraction
+    # and credit is locally constant there, so each slope is one schedule rate:
+    # IL flat 4.95% (exemption full below the $250,000 AGI cutoff); MS 4.7%
+    # (2024) / 4.4% (2025) above the first $10,000 (taxable $111,700); OR
+    # Chart S 8.75% (taxable $109,005 / $108,665: the federal tax subtraction
+    # is held at its $8,250 / $8,500 cap below $125,000 of AGI, the exemption
+    # credit is $0 above $100,000 of AGI).
     ("IL", 2024): 0.0495,
     ("IL", 2025): 0.0495,
-    # MS: 0% on the first $10,000 of taxable income, then 4.7% (2024
-    # instructions p.21) or 4.4% (2025 instructions p.22). Taxable income is
-    # $120,000 - $2,300 standard deduction - $6,000 exemption = $111,700.
     ("MS", 2024): 0.047,
     ("MS", 2025): 0.044,
-    # OR: Single 8.75% bracket ($10,750-$125,000 in 2024; $11,100-$125,000 in
-    # 2025; Oregon rate charts / OR-40 instructions). Federal AGI $120,000 is
-    # under the $125,000 subtraction phase-out start, and federal tax on
-    # $120,000 of wages exceeds the $8,250 (2024) / $8,500 (2025) limit, so the
-    # federal tax subtraction sits at its constant cap. Oregon taxable income
-    # is $109,005 (2024) or $108,665 (2025), above the $50,000 tax-table
-    # ceiling, so the rate schedule applies.
     ("OR", 2024): 0.0875,
     ("OR", 2025): 0.0875,
 }

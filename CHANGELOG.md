@@ -9,9 +9,10 @@
   read a zero state slope. It now compiles to the whole-dollar quantize, which
   rounds half up exactly as before and passes the underlying rate through.
   2024 and 2025 Single wages of $120,000 now give IL 4.95%, MS 4.7% (2024) and
-  4.4% (2025), and OR 8.75%. No computed tax value changes. A stepwise
-  phase-out (`floorE`, such as California's exemption credit) still
-  contributes no slope.
+  4.4% (2025), and OR 8.75%. No computed tax value changes.
+- Known limit: a planning slope through a stepwise phase-out (`floorE`:
+  California's exemption credit and FTB 3506, federal Forms 2441 and 8812,
+  Schedule 1-A) still reads zero (tenforty-s48h.78).
 - The MS Married/Joint spouse-ownership refusal for income derivatives and
   solves is unchanged.
 - The browser calculator shows state and combined next-dollar slopes on state

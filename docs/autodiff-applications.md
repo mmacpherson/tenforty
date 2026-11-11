@@ -17,7 +17,9 @@ are analysis examples, not tax advice or a general optimizer.
 State returns are left out. The graph is so far validated only for
 federal-only returns and IL, MS, OR and the states without an income tax. On
 those state returns `marginal_rates` includes the state slope: whole-dollar
-rounding passes the state's rate through.
+rounding passes the state's rate through. A stepwise phase-out, reduced per
+whole $1,000 or per interval (Forms 2441 and 8812, Schedule 1-A, California's
+exemption credit), contributes no planning slope (tenforty-s48h.78).
 
 ## 1. Which next dollar costs the most?
 
