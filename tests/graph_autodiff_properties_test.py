@@ -6,10 +6,8 @@ oracle, so the agreement is cheap to property-test -- and a fan-out / chain-rule
 sign bug that fixed points miss surfaces as a random point where the analytical
 gradient and the evaluation path disagree.
 
-Two graph-backend properties. The bead's third idea, "JIT gradient == interpreter
-gradient", does not apply: autodiff runs only on the interpreter runtime -- the JIT
-is a forward-batch optimization with no gradient path -- so there is no JIT
-gradient to compare. The Rust proptest in ``crates/tenforty-graph/src/autodiff.rs``
+Two graph-backend properties exercise the interpreter autodiff path.
+The Rust proptest in ``crates/tenforty-graph/src/autodiff.rs``
 pins the finite-difference agreement on the runtime directly.
 
 - autodiff == central finite difference, KINK-AWARE. Tax is piecewise linear, so
