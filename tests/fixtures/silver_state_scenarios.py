@@ -10,6 +10,7 @@ from .evidence import (
     MD_EVIDENCE,
     ME_EVIDENCE,
     MS_EVIDENCE,
+    MS_TIE_EVIDENCE,
     NJ_VA_EVIDENCE,
     VT_EVIDENCE,
     VT_EXEMPTION_EVIDENCE,
@@ -3912,6 +3913,37 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_tax=10146.0,  # Tax Table row 88,500-88,550
         expected_state_tax=4110.0,
         expected_federal_agi=120000.0,
+        backend="graph",
+    ),
+    # MS 2025 Single, $21,175 W2: an exact half-dollar tie on line 17.
+    # Source: MS DOR Form 80-100-25-1-1-000 instructions,
+    #   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+    #   p.5 (Single $2,300 standard deduction, $6,000 exemption), p.22 (rate;
+    #   "50 cents and over" rounds up), p.27 (schedule); as recorded in
+    #   docs/validation/derivations/ms-2024-2025-exemptions-rounding.md.
+    # Kind: derived-arithmetic, exact integers.
+    # TI: 21,175 - 2,300 - 6,000 = 12,875; taxed balance 2,875;
+    # tax: 2,875 x 0.044 = 126.50 exactly -> 127. The graph's binary product
+    # lands under the half and enters 126 (tenforty-s48h.77; every tie is
+    # enumerated in tests/ms_2025_rounding_ties_test.py).
+    TaxScenario(
+        source="MS 2025 Form 80-100 instructions (exact tie arithmetic)",
+        state_evidence=MS_TIE_EVIDENCE,
+        description="MS Single, $21,175 W2, line 17 half-dollar tie (2025)",
+        year=2025,
+        state="MS",
+        filing_status="Single",
+        w2_income=21175.0,
+        expected_state_tax=127.0,
+        known_defects=(
+            KnownDefect(
+                quantity="state_total_tax",
+                minimum=-1.0,
+                maximum=-1.0,
+                reason="MS 2025 line 17 binary float product rounds this tie "
+                "down by $1 (tenforty-s48h.77)",
+            ),
+        ),
         backend="graph",
     ),
     # ========== MONTANA SCENARIOS ==========
