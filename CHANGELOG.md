@@ -1,6 +1,10 @@
 ## [Unreleased]
 
 ### Removed
+- Graph schema: removed the unused `abs` and `clamp` operations from Rust and
+  the Haskell compiler. Loading graph JSON containing either now fails with an
+  `unknown variant` error naming the operation. No shipped graph uses them;
+  computed figures for shipped forms are unchanged.
 - Contributor tooling: removed the unused graph JIT and Makefile targets
   `graph-build-jit`, `graph-test-jit`, `graph-bench`, and `graph-throughput`.
 
