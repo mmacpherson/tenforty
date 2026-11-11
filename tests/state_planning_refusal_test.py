@@ -66,9 +66,13 @@ BACKEND_PLANNING = [
 @pytest.mark.parametrize("state", ["IL", "MS", "OR"])
 @pytest.mark.parametrize("output", ["total_tax", "state_total_tax"])
 def test_in_scope_states_refuse_state_dependent_planning(function, state, output):
-    """IL, MS and OR at $85k raise, naming the defect, before any derivative."""
+    """IL, MS and OR at $85k raise, naming the defect, before any derivative.
+
+    The opt-in clears MS 2025's separate scope refusal (tenforty-s48h.77), so
+    the planning refusal is what this checks; it does not lift that refusal.
+    """
     with pytest.raises(UnsupportedReturnError, match=r"tenforty-s48h\.76"):
-        function(**WITNESS, state=state, output=output)
+        function(**WITNESS, state=state, output=output, allow_unvalidated=True)
 
 
 @pytest.mark.parametrize("function", PLANNING)

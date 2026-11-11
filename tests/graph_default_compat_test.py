@@ -41,6 +41,8 @@ from tests.parity.state_parity_policy import (
     OR_TAX_TABLE_TOLERANCE,
 )
 
+from .fixtures.ms_scope import assert_ms_scope_refusal
+
 pytestmark = pytest.mark.requires_graph
 
 YEARS = (2024, 2025)
@@ -646,6 +648,36 @@ def _frame_rows(frame: pl.DataFrame) -> list[dict]:
     return frame.to_dicts()
 
 
+MS_2025_ZIP_BATCH = {
+    "year": [2024, 2025, 2025, 2025, 2024],
+    "state": [None, "OR", "CA", "MS", "TX"],
+    "filing_status": ["Single", "Married/Joint", "Single", "Head_of_House", "Single"],
+    "w2_income": [85_000.0, 140_000.0, 60_000.0, 95_000.0, 30_000.0],
+    "num_dependents": [0, 0, 0, 1, 0],
+    "num_ctc_dependents": [0, 0, 0, 0, 0],
+}
+"""The zip batch as it was before MS 2025 left graph scope (tenforty-s48h.77)."""
+
+
+@pytest.mark.requires_ots
+def test_a_mixed_batch_with_an_out_of_scope_ms_row_is_refused_whole():
+    """The former MS 2025 zip batch is refused under auto before any row computes.
+
+    test_batch_frames_share_schema_and_match_scalars runs the same batch with an
+    MS 2024 row instead. Once MS 2025 is back in scope this batch must compute
+    all five rows.
+    """
+    reasons = exclusion_reasons(OTSState.MS, 2025)
+    if not reasons:
+        frame = evaluate_returns(**MS_2025_ZIP_BATCH, mode="zip", backend="auto")
+        assert len(_frame_rows(frame)) == 5
+        return
+    assert_ms_scope_refusal(
+        lambda: evaluate_returns(**MS_2025_ZIP_BATCH, mode="zip", backend="auto"),
+        2025,
+    )
+
+
 @pytest.mark.parametrize("mode", ("cross", "zip"))
 @pytest.mark.requires_ots
 def test_batch_frames_share_schema_and_match_scalars(mode):
@@ -659,7 +691,8 @@ def test_batch_frames_share_schema_and_match_scalars(mode):
         }
     else:
         kwargs = {
-            "year": [2024, 2025, 2025, 2025, 2024],
+            # MS 2024: MS 2025 is out of auto scope (tenforty-s48h.77).
+            "year": [2024, 2025, 2025, 2024, 2024],
             "state": [None, "OR", "CA", "MS", "TX"],
             "filing_status": [
                 "Single",

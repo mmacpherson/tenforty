@@ -13,6 +13,12 @@ from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import UnsupportedInputError
 
+from .fixtures.ms_scope import (
+    assert_ms_scope_refusal,
+    ms_auto_refuses,
+    ms_kwargs,
+)
+
 pytestmark = pytest.mark.requires_graph
 
 PAGE2_CASES = [
@@ -161,9 +167,16 @@ def test_page2_entries_round_before_the_income_and_adjustment_sums(case, year, b
         inputs["state_facts"] = state_facts.MS(
             taxpayer_adjusted_gross_income=20_000, spouse_adjusted_gross_income=20_000
         )
-    result = evaluate_return(
-        year=year, state="MS", backend=backend, **inputs, allow_unvalidated=True
-    )
+
+    def call():
+        return evaluate_return(
+            year=year, state="MS", backend=backend, **inputs, allow_unvalidated=True
+        )
+
+    if ms_auto_refuses(backend, year):
+        assert_ms_scope_refusal(call, year)
+        return
+    result = call()
     assert (
         result.state_adjusted_gross_income,
         result.state_taxable_income,
@@ -184,8 +197,9 @@ def test_page2_entries_round_before_the_income_and_adjustment_sums(case, year, b
 )
 def test_ambiguous_natural_aggregates_are_refused_for_ms(field, backend):
     """A federal aggregate cannot silently stand for a different MS line."""
-    with pytest.raises(UnsupportedInputError, match=field):
-        evaluate_return(
+
+    def call():
+        return evaluate_return(
             year=2025,
             state="MS",
             w2_income=50_000,
@@ -193,6 +207,12 @@ def test_ambiguous_natural_aggregates_are_refused_for_ms(field, backend):
             **{field: 1},
             allow_unvalidated=True,
         )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    with pytest.raises(UnsupportedInputError, match=field):
+        call()
 
 
 @pytest.mark.parametrize("amount", [0.49, 0.50, -0.49, 25_000.49, 25_000.000000001])
@@ -227,13 +247,20 @@ def test_prepared_adjustments_round_before_the_adjustment_sum(year, tax):
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
 def test_ambiguous_ms_batch_is_refused_whole_under_every_policy(backend, on_error):
     """An invalid MS aggregate cannot become a partial batch or a NaN row."""
-    with pytest.raises(UnsupportedInputError, match="schedule_1_income"):
-        evaluate_returns(
+
+    def call():
+        return evaluate_returns(
             year=2025,
             state="MS",
             w2_income=[50_000, 50_000],
             schedule_1_income=[0, 1],
-            backend=backend,
+            **ms_kwargs(backend),
             mode="zip",
             on_error=on_error,
         )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    with pytest.raises(UnsupportedInputError, match="schedule_1_income"):
+        call()

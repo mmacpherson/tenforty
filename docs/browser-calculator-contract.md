@@ -13,13 +13,21 @@ all 50 states, and the District of Columbia. “Covered” means the resolved gr
 contains the declared nodes and can calculate the listed public concepts. It does
 not imply that every line of every return is modeled.
 
-The graph is so far validated for federal-only returns and for IL, MS and OR
-plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY);
+The graph is so far validated for federal-only returns, for IL and OR, for MS
+in 2024 (MS 2025 is out of scope, tenforty-s48h.77), and for the eight states
+without an income tax (AK, FL, NV, SD, TN, TX, WA, WY);
 each jurisdiction's `validated` flag and `exclusion_reasons`, per year, come from
-`tenforty.graph_scope`. The calculator offers only validated jurisdictions, a
-shared link to another one is refused, and `BrowserTaxRuntime` computes one only
-when constructed with `allowUnvalidated: true` (a real boolean), the same
-acknowledgment as Python's `allow_unvalidated=True` (tenforty-s48h).
+`tenforty.graph_scope`. Two rules use them:
+
+- `BrowserTaxRuntime` applies scope per year, like Python: it computes a
+  validated jurisdiction-year and refuses any other unless constructed with
+  `allowUnvalidated: true` (a real boolean), the same acknowledgment as
+  Python's `allow_unvalidated=True` (tenforty-s48h). It computes MS 2024 and
+  refuses MS 2025.
+- The calculator menu offers a jurisdiction only when every supported year is
+  validated, so a return keeps its state as the year changes. A shared link to
+  any other jurisdiction, including one validated only in the link's year (MS
+  2024 today), is refused with a notice naming the years it is validated for.
 
 State and combined next-dollar slopes are withheld for every state return
 (`state_slopes.available` is false): graph state derivatives read zero for IL,

@@ -36,6 +36,14 @@ def independent_state_evidence(record: str) -> TaxEvidence:
 
 CA_EVIDENCE = independent_state_evidence("CA-2024.md")
 MS_EVIDENCE = independent_state_evidence("MS-2024-2025.md")
+MS_TIE_EVIDENCE = TaxEvidence(
+    EvidenceKind.INDEPENDENT,
+    "docs/validation/state-fixtures/MS-2024-2025.md",
+    "Rule and amounts from the blind record (session 1b251ce6, 2026-09-30): "
+    "TI = wages - exemption - standard deduction, tax half-up; this tie case "
+    "applied by tenforty-opus-worker, 2026-11-11, in exact integer arithmetic "
+    "with no tenforty output (tenforty-s48h.77)",
+)
 VT_EVIDENCE = independent_state_evidence("VT-2024-2025.md")
 WI_EVIDENCE = independent_state_evidence("WI-2024-2025.md")
 VT_EXEMPTION_EVIDENCE = TaxEvidence(

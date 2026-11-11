@@ -155,7 +155,7 @@ const offered = Object.keys(contract.jurisdictions).filter((code) =>
 );
 assert.deepEqual(
   new Set(offered),
-  new Set(["US", "IL", "MS", "OR", "AK", "FL", "NV", "SD", "TN", "TX", "WA", "WY"]),
+  new Set(["US", "IL", "OR", "AK", "FL", "NV", "SD", "TN", "TX", "WA", "WY"]),
   "the calculator offers exactly the validated jurisdictions",
 );
 
@@ -194,9 +194,10 @@ assert.equal(
 assert.equal(illinoisAttempt.gradients.w2_income.total, null);
 assert.ok(illinoisAnalysis.results.state_total_tax > 0);
 
-const mississippi = { ...illinois, jurisdiction: "MS" };
+// MS 2024: MS 2025 is out of graph scope (tenforty-s48h.77).
+const mississippi = { ...illinois, year: 2024, jurisdiction: "MS" };
 assert.ok(
-  calculateScenario(graphlib, graphs.get(2025), contract, mississippi)
+  calculateScenario(graphlib, graphs.get(2024), contract, mississippi)
     .state_total_tax > 0,
   "a Single MS return computes",
 );
@@ -207,7 +208,7 @@ for (const filingStatus of [
 ]) {
   assert.throws(
     () =>
-      calculateScenario(graphlib, graphs.get(2025), contract, {
+      calculateScenario(graphlib, graphs.get(2024), contract, {
         ...mississippi,
         filingStatus,
       }),
@@ -222,11 +223,11 @@ for (const filingStatus of [
 for (const name of ["schedule_1_income", "itemized_deductions"]) {
   assert.throws(
     () =>
-      calculateScenario(graphlib, graphs.get(2025), contract, {
+      calculateScenario(graphlib, graphs.get(2024), contract, {
         ...mississippi,
         inputs: { ...mississippi.inputs, [name]: 1000 },
       }),
-    new RegExp(`${name} is not supported for MS/2025`),
+    new RegExp(`${name} is not supported for MS/2024`),
     `a nonzero ${name} is refused for MS, as in Python`,
   );
 }

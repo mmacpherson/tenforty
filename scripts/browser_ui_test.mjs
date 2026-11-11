@@ -96,3 +96,95 @@ assert.equal(element("analysis-lab").hidden, false);
 assert.equal(element("next-dollar-cents").textContent, "15.0");
 assert.equal(addressUpdates, 2);
 console.log("Browser UI handler regressions passed (DOM stubs).");
+
+// Share links and the jurisdiction menu agree (tenforty-s48h.77). The menu
+// offers a state only when every supported year is validated; a link naming a
+// state validated for its own year but not offered (MS 2024 once MS 2025 left
+// scope) used to render a select with no matching option and then calculate an
+// empty jurisdiction. The calculator boundary now refuses it with a notice.
+{
+  const calculator = await import("../crates/tenforty-graph/demo/calculator.js");
+  const browserContract = await import(
+    "../crates/tenforty-graph/demo/browser_contract.js"
+  );
+  const realContract = JSON.parse(
+    readFileSync(
+      new URL("../crates/tenforty-graph/demo/browser_contract.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  assert.match(
+    functionSource("populateInterface"),
+    /isOfferedJurisdiction\(contract, code\)/,
+    "the menu uses the same offered-jurisdiction rule as the link boundary",
+  );
+  const linkElements = new Map();
+  const linkElement = (id) => {
+    if (!linkElements.has(id)) linkElements.set(id, { textContent: "", hidden: true });
+    return linkElements.get(id);
+  };
+  const linkContext = vm.createContext({
+    contract: realContract,
+    byId: linkElement,
+    parseScenario: calculator.parseScenario,
+    isOfferedJurisdiction: calculator.isOfferedJurisdiction,
+    offeredJurisdictions: calculator.offeredJurisdictions,
+    isValidatedJurisdiction: browserContract.isValidatedJurisdiction,
+    UnvalidatedJurisdictionError: browserContract.UnvalidatedJurisdictionError,
+  });
+  vm.runInContext(
+    [
+      "parseCalculatorLink",
+      "coverageSentence",
+      "validatedYearsSentence",
+      "showShareLinkNotice",
+    ]
+      .map(functionSource)
+      .join("\n"),
+    linkContext,
+  );
+  const offered = new Set(calculator.offeredJurisdictions(realContract));
+  for (const code of Object.keys(realContract.jurisdictions)) {
+    for (const year of realContract.supported_years) {
+      const link = `?year=${year}&jurisdiction=${code}&filing_status=single`;
+      let parsed = null;
+      try {
+        parsed = vm.runInContext(`parseCalculatorLink(${JSON.stringify(link)})`, linkContext);
+      } catch (error) {
+        assert.ok(
+          error instanceof browserContract.UnvalidatedJurisdictionError,
+          `${code} ${year}: ${error}`,
+        );
+        assert.ok(!offered.has(code), `${code} is offered but its ${year} link failed`);
+        continue;
+      }
+      assert.ok(offered.has(parsed.jurisdiction), `${code} ${year} has no menu option`);
+    }
+  }
+  const msOffered = calculator.isOfferedJurisdiction(realContract, "MS");
+  const ms2024Validated = browserContract.isValidatedJurisdiction(realContract, "MS", 2024);
+  if (!msOffered && ms2024Validated) {
+    let refusal = null;
+    try {
+      vm.runInContext(
+        'parseCalculatorLink("?year=2024&jurisdiction=MS&filing_status=single")',
+        linkContext,
+      );
+    } catch (error) {
+      refusal = error;
+    }
+    assert.ok(refusal instanceof browserContract.UnvalidatedJurisdictionError);
+    linkContext.shareError = refusal;
+    vm.runInContext("showShareLinkNotice(shareError)", linkContext);
+    const notice = linkElement("notice-message").textContent;
+    assert.equal(linkElement("notice-banner").hidden, false);
+    assert.match(linkElement("notice-title").textContent, /Mississippi/);
+    assert.match(notice, /validated for Mississippi only in 2024/);
+    assert.doesNotMatch(
+      notice.split("The tax model")[0],
+      /Mississippi/,
+      "the coverage sentence does not list Mississippi",
+    );
+  }
+  console.log("Share links match the jurisdiction menu.");
+}

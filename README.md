@@ -97,9 +97,10 @@ every Michigan return, and the
 [state inputs its maps do not yet deliver](./docs/migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver).
 
 **The graph backend is opt-in** (`backend="graph"` or `backend="auto"`). It is
-incomplete, and so far validated for 2024 and 2025 federal-only returns and for
-IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN,
-TX, WA and WY). Other states refuse unless you pass `allow_unvalidated=True`,
+incomplete, and so far validated for 2024 and 2025 federal-only returns, for IL
+and OR, for MS in 2024, and for the eight states without an income tax (AK, FL,
+NV, SD, TN, TX, WA and WY). MS 2025 is out of scope until its whole-dollar tax
+rounds every half-dollar tie up (tenforty-s48h.77). Other states refuse unless you pass `allow_unvalidated=True`,
 because they aren't validated yet; the work to validate them is
 [tenforty-s48h](#graph-coverage).
 
@@ -107,7 +108,8 @@ because they aren't validated yet; the work to validate them is
 |---|---|---|
 | Tax years 2018–2023 | OTS, for the states OTS has that year; any other state raises | Raises `UnsupportedReturnError` |
 | 2024–2025, federal only (`state=None`) | Graph | Graph |
-| 2024–2025 in IL, MS or OR, or a state without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) | Graph | Graph |
+| 2024–2025 in IL or OR, 2024 in MS, or a state without an income tax (AK, FL, NV, SD, TN, TX, WA, WY) | Graph | Graph |
+| 2025 in MS | Raises: OTS has no Mississippi program, and graph MS 2025 misrounds some half-dollar ties (tenforty-s48h.77) | Raises, naming the reason, unless `allow_unvalidated=True` |
 | 2024–2025 in AZ, CA, MA, NC, NJ, NY, OH, PA or VA | OTS | Raises, naming the reasons, unless `allow_unvalidated=True` |
 | 2024–2025 in MI | Raises: OTS Michigan applies no personal exemption, and graph MI is not validated | Raises, naming the reasons, unless `allow_unvalidated=True` |
 | 2024–2025 in AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IN, KS, KY, LA, MD, ME, MN, MO, MT, ND, NE, NH, NM, OK, RI, SC, UT, VT, WI or WV | Raises, naming the reasons | Raises, naming the reasons, unless `allow_unvalidated=True` |
@@ -639,8 +641,9 @@ Compared with the OTS backend:
 - It has forms for many more states: in addition to the OTS states, AL, AR,
   CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MN, MO, MS, MT,
   ND, NE, NH, NM, OK, RI, SC, UT, VT, WI, and WV. It is so far validated for
-  2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states
-  without an income tax (AK, FL, NV, SD, TN, TX, WA, WY); the other states
+  2024 and 2025 federal-only returns, for IL and OR, for MS in 2024, and for the
+  eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY); the
+  other states, and MS 2025 (tenforty-s48h.77),
   compute only with `allow_unvalidated=True` until they are validated
   (tenforty-s48h).
 - Not every input is mapped for every state. It raises on an input it can't

@@ -21,6 +21,8 @@ from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Runtime
 from tenforty.models import UnsupportedInputError
 
+from .fixtures.ms_scope import assert_ms_scope_refusal, ms_auto_refuses, ms_kwargs
+
 pytestmark = pytest.mark.requires_graph
 
 
@@ -39,14 +41,21 @@ def test_independent_same_household_inputs_have_distinct_actual_column_facts(
     backend, taxpayer, agi, tax
 ):
     """Astra's identical61611.80 wages have two valid rounded-column returns."""
-    result = evaluate_return(
-        year=2025,
-        state="MS",
-        filing_status="Married/Joint",
-        w2_income=61611.80,
-        state_facts=_joint(taxpayer),
-        backend=backend,
-    )
+
+    def call():
+        return evaluate_return(
+            year=2025,
+            state="MS",
+            filing_status="Married/Joint",
+            w2_income=61611.80,
+            state_facts=_joint(taxpayer),
+            **ms_kwargs(backend),
+        )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    result = call()
     assert (
         result.state_adjusted_gross_income,
         result.state_taxable_income,
@@ -72,7 +81,7 @@ def test_each_actual_column_fact_is_required(missing):
             filing_status="Married/Joint",
             w2_income=61611.8,
             state_facts=state_facts.MS(**supplied),
-            backend="graph",
+            **ms_kwargs("graph"),
         )
 
 
@@ -85,26 +94,36 @@ def test_source_derived_per_entry_validity_bound_is_inclusive(offset):
         filing_status="Married/Joint",
         w2_income=61611.8,
         state_facts=_joint(41612 + offset),
-        backend="graph",
+        **ms_kwargs("graph"),
     )
     assert result.state_adjusted_gross_income == 61612 + offset
 
 
+@pytest.mark.parametrize("backend", ["auto", "graph"])
 @pytest.mark.parametrize("offset", [-8, 8])
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
-def test_inconsistent_columns_refuse_the_whole_batch_before_results(offset, on_error):
+def test_inconsistent_columns_refuse_the_whole_batch_before_results(
+    backend, offset, on_error
+):
     """The validity check applies to every row, even if an earlier row is valid."""
-    with pytest.raises(UnsupportedInputError, match="rounding"):
-        evaluate_returns(
+
+    def call():
+        return evaluate_returns(
             year=2025,
             state="MS",
             filing_status="Married/Joint",
             w2_income=[61612 + offset, 61611.8],
             state_facts=_joint(41612 + offset),
-            backend="auto",
+            **ms_kwargs(backend),
             mode="zip",
             on_error=on_error,
         )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    with pytest.raises(UnsupportedInputError, match="rounding"):
+        call()
 
 
 @pytest.mark.parametrize("backend", ["auto", "graph"])
@@ -116,32 +135,49 @@ def test_qss_uses_explicit_ms_qualification(
     backend, eligible, dependents, taxable, tax
 ):
     """Independent QSS exception and original valid HoF arithmetic."""
-    result = evaluate_return(
-        year=2025,
-        state="MS",
-        filing_status="Widow(er)",
-        w2_income=50000,
-        num_dependents=dependents,
-        num_ctc_dependents=0,
-        backend=backend,
-        state_facts=state_facts.MS(head_of_family_eligible=eligible),
-    )
+
+    def call():
+        return evaluate_return(
+            year=2025,
+            state="MS",
+            filing_status="Widow(er)",
+            w2_income=50000,
+            num_dependents=dependents,
+            num_ctc_dependents=0,
+            **ms_kwargs(backend),
+            state_facts=state_facts.MS(head_of_family_eligible=eligible),
+        )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    result = call()
     assert (result.state_taxable_income, result.state_total_tax) == (taxable, tax)
 
 
+@pytest.mark.parametrize("backend", ["auto", "graph"])
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
-def test_qss_needs_qualification_even_with_a_positive_dependent_count(on_error):
+def test_qss_needs_qualification_even_with_a_positive_dependent_count(
+    backend, on_error
+):
     """A dependent count cannot establish the residence/household conditions."""
-    with pytest.raises(UnsupportedInputError, match="head_of_family_eligible"):
-        evaluate_returns(
+
+    def call():
+        return evaluate_returns(
             year=2025,
             state="MS",
             filing_status="Widow(er)",
             w2_income=50000,
             num_dependents=1,
-            backend="auto",
+            **ms_kwargs(backend),
             on_error=on_error,
         )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    with pytest.raises(UnsupportedInputError, match="head_of_family_eligible"):
+        call()
 
 
 @pytest.mark.parametrize("dependents", [-1, 0])
@@ -155,7 +191,7 @@ def test_head_of_family_true_requires_an_actual_dependent(dependents):
             w2_income=50000,
             num_dependents=dependents,
             state_facts=state_facts.MS(head_of_family_eligible=True),
-            backend="graph",
+            **ms_kwargs("graph"),
         )
 
 
@@ -200,19 +236,27 @@ def test_explicit_federal_only_sensitivity_remains_available():
     ) == marginal_rate(**args, allow_unvalidated=True)
 
 
+@pytest.mark.parametrize("backend", ["auto", "graph"])
 @pytest.mark.parametrize("on_error", ["raise", "warn", "ignore"])
-def test_scalar_inconsistent_columns_are_never_masked(on_error):
+def test_scalar_inconsistent_columns_are_never_masked(backend, on_error):
     """Scalar error policy cannot hide an invalid state fact sum."""
-    with pytest.raises(UnsupportedInputError, match="rounding"):
-        evaluate_return(
+
+    def call():
+        return evaluate_return(
             year=2025,
             state="MS",
             filing_status="Married/Joint",
             w2_income=61611.8,
             state_facts=_joint(41620),
-            backend="auto",
+            **ms_kwargs(backend),
             on_error=on_error,
         )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    with pytest.raises(UnsupportedInputError, match="rounding"):
+        call()
 
 
 @pytest.mark.parametrize("operation", ["gradient", "gradients", "solve"])
@@ -252,7 +296,10 @@ def test_each_federal_only_operation_remains_available(operation):
         ).federal_total_tax == pytest.approx(target, abs=0.01)
 
 
-def test_both_column_facts_and_qss_qualification_project_in_one_batch(monkeypatch):
+@pytest.mark.parametrize("backend", ["auto", "graph"])
+def test_both_column_facts_and_qss_qualification_project_in_one_batch(
+    monkeypatch, backend
+):
     """Reuse independent joint/QSS/Single outcomes without leaking facts across statuses."""
     calls = []
     for name in (
@@ -267,19 +314,27 @@ def test_both_column_facts_and_qss_qualification_project_in_one_batch(monkeypatc
             return original(tax_input, value)
 
         monkeypatch.setitem(graph_backend.FACT_LOWERINGS, ("MS", name), capture)
-    frame = evaluate_returns(
-        year=2025,
-        state="MS",
-        filing_status=["Married/Joint", "Widow(er)", "Single"],
-        w2_income=[61611.8, 50000, 50000],
-        backend="auto",
-        mode="zip",
-        state_facts=state_facts.MS(
-            taxpayer_adjusted_gross_income=41611,
-            spouse_adjusted_gross_income=20000,
-            head_of_family_eligible=False,
-        ),
-    )
+
+    def call():
+        return evaluate_returns(
+            year=2025,
+            state="MS",
+            filing_status=["Married/Joint", "Widow(er)", "Single"],
+            w2_income=[61611.8, 50000, 50000],
+            **ms_kwargs(backend),
+            mode="zip",
+            state_facts=state_facts.MS(
+                taxpayer_adjusted_gross_income=41611,
+                spouse_adjusted_gross_income=20000,
+                head_of_family_eligible=False,
+            ),
+        )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        assert calls == []
+        return
+    frame = call()
     assert frame["state_total_tax"].to_list() == [1100, 1395, 1395]
     assert set(calls) == {
         ("taxpayer_adjusted_gross_income", "Married/Joint", 41611),
@@ -296,22 +351,32 @@ def test_both_column_facts_and_qss_qualification_project_in_one_batch(monkeypatc
     }
 
 
+@pytest.mark.parametrize("backend", ["auto", "graph"])
 @pytest.mark.parametrize("explicit", [None, True, False])
-def test_hoh_resident_dependent_baseline_and_parent_elsewhere_override(explicit):
+def test_hoh_resident_dependent_baseline_and_parent_elsewhere_override(
+    explicit, backend
+):
     """SOL-36: archived resident-HoF1192 versus Single-with-dependent1329."""
     facts = (
         None if explicit is None else state_facts.MS(head_of_family_eligible=explicit)
     )
-    result = evaluate_return(
-        year=2025,
-        state="MS",
-        filing_status="Head_of_House",
-        w2_income=50000,
-        num_dependents=1,
-        num_ctc_dependents=0,
-        state_facts=facts,
-        backend="auto",
-    )
+
+    def call():
+        return evaluate_return(
+            year=2025,
+            state="MS",
+            filing_status="Head_of_House",
+            w2_income=50000,
+            num_dependents=1,
+            num_ctc_dependents=0,
+            state_facts=facts,
+            **ms_kwargs(backend),
+        )
+
+    if ms_auto_refuses(backend, 2025):
+        assert_ms_scope_refusal(call, 2025)
+        return
+    result = call()
     assert (result.state_taxable_income, result.state_total_tax) == (
         (40200, 1329) if explicit is False else (37100, 1192)
     )
