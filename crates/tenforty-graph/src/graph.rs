@@ -231,9 +231,21 @@ pub struct GraphMeta {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Invariant {
-    Monotonic { input: String, output: String },
-    Bounds { node: String, min: f64, max: f64 },
-    Ordering { table: TableId, field: String },
+    Monotonic {
+        input: String,
+        output: String,
+    },
+    Bounds {
+        node: String,
+        #[serde(with = "crate::exact::scalar")]
+        min: f64,
+        #[serde(with = "crate::exact::scalar")]
+        max: f64,
+    },
+    Ordering {
+        table: TableId,
+        field: String,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -288,7 +300,12 @@ impl Graph {
         Ok(graph)
     }
 
-    /// Serialize as graph JSON schema version 2, exact scalars included.
+    /// Serialize as graph JSON schema version 2.
+    ///
+    /// Each value is written as the exact value of the f64 the graph holds, not
+    /// the spec's source literal: `11/250` saves as
+    /// `3170534137668829/72057594037927936`. Until tenforty-yxun.4 keeps exact
+    /// values in memory, use the spec compiler, not this, to produce graphs.
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
         let mut graph = self.clone();
         graph

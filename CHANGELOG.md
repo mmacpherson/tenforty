@@ -16,10 +16,22 @@
   old numeric format, a missing or older schema version, malformed integers,
   zero or negative denominators, and an unbounded bracket that is not last.
   Graph JSON from earlier releases must be regenerated.
-- No computed figure changes. Every one of the 16,440 scalars in the shipped
-  graphs converts to the same double as before. The one structural change is
-  that Oregon's top tax-table increment no longer takes `min(midpoint, 1e12)`.
-  A before/after evaluation of 1.38M named-node values found no difference.
+- No computed figure changes for incomes up to $1,000,000,000,000. Every one
+  of the 19,270 exact scalars in the shipped graphs converts to the same
+  double as before; the only scalars removed are Oregon's 20 `1e12` cap
+  literals, from a `min(midpoint, 1e12)` its tax-table branch (taxable
+  income under $50,000) never reaches. A before/after evaluation of 1.38M
+  named-node values found no difference.
+- Above $1e12 a bracket table's top band is now one product,
+  `(income - last threshold) * rate`, where the sentinel version stopped at
+  1e12 and added an extension at the same rate. Exactly the two are equal. In
+  f64 they differ by rounding: on the 2025 Single federal table, by -$8 at
+  $1e17 and +$64 at $1e18. Both stay within one ulp of the exact tax, and
+  neither is reliably closer. The exact runtime (tenforty-yxun.4) removes the
+  difference.
+- `Graph.to_json` writes the exact value of each loaded double, not the spec's
+  source literal (`11/250` saves as its binary fraction), and saves `-0.0`
+  as `0`. Use the spec compiler, not load-and-save, to produce graphs.
 
 ### Removed
 - Graph schema: removed the unused `abs` and `clamp` operations from Rust and

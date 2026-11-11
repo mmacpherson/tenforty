@@ -4,8 +4,19 @@
 //! integer>"}`, an exact rational written by the Haskell spec. In this stage the
 //! runtime still computes in f64: each scalar converts once, at load, to the
 //! nearest f64 (round half to even). An unbounded top bracket is a `null`
-//! threshold, held in memory as `f64::INFINITY`. Serialization writes a finite
-//! f64 back as its exact binary value, so a graph round-trips bit for bit.
+//! threshold, held in memory as `f64::INFINITY`.
+//!
+//! Serialization writes a finite f64 back as its exact binary value, so every
+//! nonzero finite value round-trips bit for bit. Two documented exceptions:
+//! - Zero is the unsigned rational 0/1, so `-0.0` (from a negative value too
+//!   small for f64) reloads as `+0.0`.
+//! - Saving does not recover the spec's literal: a graph loaded from `11/250`
+//!   holds only the nearest double and saves that double's dyadic value
+//!   (tenforty-yxun.4 keeps exact values in memory). Never regenerate exact
+//!   source graphs by loading and saving them.
+//!
+//! A scalar that rounds beyond the f64 range is rejected; one that underflows
+//! rounds to (signed) zero or a subnormal, ties to even.
 
 use num_bigint::BigInt;
 use num_rational::BigRational;
