@@ -128,18 +128,6 @@ OTS_STATE_INPUT_GAPS: tuple[StateInputGap, ...] = (
     *_gaps(
         "NJ_1040",
         range(2023, 2026),
-        "tenforty-r91.15",
-        {
-            "self_employment_income": "NJ-1040 line 18, net profits from business",
-            "short_term_capital_gains": "NJ-1040 line 19, net gains or income from "
-            "disposition of property",
-            "long_term_capital_gains": "NJ-1040 line 19, net gains or income from "
-            "disposition of property",
-        },
-    ),
-    *_gaps(
-        "NJ_1040",
-        range(2023, 2026),
         "tenforty-r91.20",
         {
             "num_dependents": "NJ-1040 lines 10 and 11, the $1,500 exemption per "
