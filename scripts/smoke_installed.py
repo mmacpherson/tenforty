@@ -112,6 +112,37 @@ def _check_auto_route(backends: frozenset[str]) -> str:
     return "auto route: backend='auto' evaluated every required year"
 
 
+def _check_default_route(backends: frozenset[str]) -> str:
+    from tenforty import evaluate_return, evaluate_returns
+    from tenforty.backends import get_backend
+
+    choice = "ots" if "ots" in backends else "auto"
+    engine = "ots" if "ots" in backends else "graph"
+    for state in (None, SMOKE_STATES[engine]):
+        args = dict(year=2025, state=state, **SMOKE_RETURN)
+        result = evaluate_return(**args)
+        _check_return(result, backend=engine, year=2025, state=state)
+        _require(
+            result == evaluate_return(**args, backend=choice),
+            f"default {state or 'federal'} differs from backend={choice!r}",
+        )
+        _require(
+            get_backend(year=2025, state=state).name == engine,
+            "get_backend's default differs from the install's evaluation default",
+        )
+        for mode in ("cross", "zip"):
+            batch = dict(
+                year=[2024, 2025], state=state, w2_income=[50_000, 75_000], mode=mode
+            )
+            _require(
+                evaluate_returns(**batch).equals(
+                    evaluate_returns(**batch, backend=choice)
+                ),
+                f"default {mode} batch differs from backend={choice!r}",
+            )
+    return f"default route: omitted backend matches {choice!r} for scalar, batch and get_backend"
+
+
 def _refusals() -> dict[str, Callable[[str], object]]:
     """Every way into OTS, each called with an ``on_error`` policy."""
     import tenforty
@@ -205,6 +236,7 @@ def main(argv: list[str] | None = None) -> int:
     ]
     print(f"evaluated {len(checked)} returns: {', '.join(checked)}")
     print(_check_auto_route(expected))
+    print(_check_default_route(expected))
     if "ots" not in expected:
         print(
             f"refused OTS, typed, under every on_error: {', '.join(_check_ots_refused(args.allow_source_tree))}"

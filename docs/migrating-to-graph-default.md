@@ -1,5 +1,21 @@
 # Migrating between backends
 
+## Graph-only installs: omission follows auto
+
+On an install without the compiled OTS extension, omitting `backend` now routes
+exactly as `backend="auto"` in `evaluate_return`, `evaluate_returns` and
+`get_backend`. This includes `TENFORTY_GRAPH_ONLY=1` and Windows builds. Bare
+2024–2025 federal-only and in-scope state calls compute on graph, subject to the
+same supported inputs and required facts. No extra backend argument is needed.
+
+Installs with OTS keep the OTS default described below. An explicit backend is
+never reinterpreted. A valid route needing unavailable OTS raises
+`BackendUnavailableError`; unsupported/known-defective routes and unsupported
+inputs keep their earlier typed refusals and remedy text. `on_error` does not
+suppress preflight refusals. An omitted mixed batch is still checked whole before
+any row runs. This changes the default route on graph-only installs, not either
+backend's computed figures or graph validation scope.
+
 ## 2025.14: the OTS default is back
 
 - **The default is `backend="ots"` again.** 2025.13 made `"auto"` the default;
@@ -87,8 +103,6 @@ the official 2024 and 2025 forms.
 | MA_1 | 2018–2025 | `filer_65_or_older`, `spouse_65_or_older` | MA Form 1 line 2, the age 65 or over exemption (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
 | MA_1 | 2019–2025 | `self_employment_income` | MA Form 1 line 6a, business income from Schedule C (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
 | MA_1 | 2019–2025 | `rental_income` | MA Form 1 line 7, rental, royalty and REMIC income (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
-| NJ_1040 | 2023–2025 | `self_employment_income` | NJ-1040 line 18, net profits from business | tenforty-r91.15 |
-| NJ_1040 | 2023–2025 | `short_term_capital_gains`, `long_term_capital_gains` | NJ-1040 line 19, net gains or income from disposition of property | tenforty-r91.15 |
 | NJ_1040 | 2023–2025 | `num_dependents` | NJ-1040 lines 10 and 11, the $1,500 exemption per dependent | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `filer_65_or_older`, `spouse_65_or_older` | NJ-1040 line 7, the $1,000 senior 65+ exemption | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `rental_income` | NJ-1040 line 23, net gains or income from rents, royalties, patents and copyrights | tenforty-r91.20 |

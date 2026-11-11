@@ -61,6 +61,7 @@ from .ots_state_gaps import require_ots_state_inputs
 from .routing import (
     BackendChoice,
     Engine,
+    _DefaultBackend,
     explain_ots_route,
     graph_covers,
     require_ots_serves,
@@ -1479,7 +1480,7 @@ def evaluate_return(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "ots",
+    backend: BackendChoice | _DefaultBackend = _DefaultBackend.OMITTED,
     *,
     state_and_local_taxes: float = 0.0,
     qualified_tips: float = 0.0,
@@ -1497,7 +1498,8 @@ def evaluate_return(
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
 
-    ``backend`` is "ots" (default), "auto", or "graph". "auto" computes a
+    An omitted ``backend`` selects "ots" when its extension is installed and
+    "auto" otherwise. Explicit choices are "ots", "auto", or "graph". "auto" computes a
     2024-2025 return on graph when it is federal-only or its state is in graph
     scope (``tenforty.graph_scope``), and on OTS otherwise. "graph" computes a
     2024-2025 return on graph; a state return outside graph scope, which graph
@@ -1604,7 +1606,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "ots",
+    backend: BackendChoice | _DefaultBackend = _DefaultBackend.OMITTED,
     mode: Literal["cross", "zip"] = "cross",
     *,
     state_and_local_taxes: list[float] | float = 0.0,
@@ -1625,7 +1627,8 @@ def evaluate_returns(
 
     Pass ``mode="cross"`` (default) for Cartesian product or ``mode="zip"``
     for element-wise evaluation with scalar broadcasting. ``backend`` is chosen
-    as in ``evaluate_return``: "ots" (default) or "graph" forces one engine;
+    as in ``evaluate_return``: omission uses "ots" when installed, "auto" otherwise;
+    an explicit "ots" or "graph" forces one engine;
     "auto" splits the batch by year and picks the engine per year and state.
     ``allow_unvalidated`` is as in ``evaluate_return``. Every row is routed
     before any is evaluated, so one refused row refuses the whole batch.
