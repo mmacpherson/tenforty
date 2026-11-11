@@ -347,6 +347,7 @@ test-suite tenforty-spec-test
     QuickCheck >=2.18,
     tenforty-spec,
     text,
+    vector,
 
   hs-source-dirs:
     test

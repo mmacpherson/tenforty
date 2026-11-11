@@ -13,13 +13,18 @@ import CAScheduleCA_2024
 import CAScheduleCA_2025
 import Control.Exception (evaluate)
 import Control.Monad (void)
+import Data.Aeson qualified as Aeson
+import Data.Aeson.Key qualified as Key
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString.Lazy qualified as BL
 import Data.Foldable (forM_)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Map.Strict qualified as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Ratio ((%))
 import Data.Set qualified as Set
 import Data.Text qualified as T
+import Data.Vector qualified as V
 import ExprProperties qualified
 import ReferenceEvaluator (evalGraph, evalGraphDetailed, evalGraphNode)
 import System.Environment (lookupEnv)
@@ -29,7 +34,7 @@ import TablesCA2024
 import TablesCA2025
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
-import TenForty.Expr (Expr (PhaseOut, TaxTableQuantize), PhaseOutParameter (..), TaxTableQuantizeMode (..), extractLineRefs, extractTableRefs)
+import TenForty.Expr (Expr (Lit, PhaseOut, TaxTableQuantize), PhaseOutParameter (..), TaxTableQuantizeMode (..), extractLineRefs, extractTableRefs)
 import TenForty.Table qualified as Table
 import Test.Hspec
 import Test.QuickCheck
@@ -649,6 +654,76 @@ spec n = do
           Right _ -> expectationFailure "invalid midpoint accepted"
     it "tracks line references through table quantization" $
       extractLineRefs (taxTableBandTax table (line (LineId "income"))) `shouldBe` Set.singleton (LineId "income")
+
+  describe "Exact literals and graph schema version 2 (tenforty-yxun.3)" $ do
+    let exact n d = Aeson.object ["n" Aeson..= (T.pack (show (n :: Integer))), "d" Aeson..= (T.pack (show (d :: Integer)))]
+        field k (Aeson.Object o) = KeyMap.lookup (Key.fromText k) o
+        field _ _ = Nothing
+        compiledValue frm = fromMaybe (error "graph JSON did not decode") (Aeson.decode (compileFormToJSON frm) :: Maybe Aeson.Value)
+        literalProbe = form (FormId "literal_probe") 2025 $ do
+          income <- input (LineId "L1a") "Income" "" Interior
+          void (compute (LineId "L2") "Rate" "" Interior (income .*. rate 0.044))
+          void (compute (LineId "L3") "Percent" "" Interior (income .*. percent 4.4))
+          void (compute (LineId "L4") "Big" "" Interior (income .+. dollars 1e12))
+          void (compute (LineId "L5") "Half" "" Interior (income .+. dollars (-0.5)))
+          void (compute (LineId "L6") "Band" "" Interior (TaxTableQuantize TableFloor 25 12.5 income))
+          outputs [LineId "L2", LineId "L3", LineId "L4", LineId "L5", LineId "L6"]
+        literalsOf v =
+          [ value
+          | Just (Aeson.Object nodes) <- [field "nodes" v],
+            node <- KeyMap.elems nodes,
+            Just op <- [field "op" node],
+            field "type" op == Just (Aeson.String "literal"),
+            Just value <- [field "value" op]
+          ]
+    it "keeps a decimal rate literal exact: 0.044 is 11/250, never a Double" $
+      toRational (unAmount (0.044 :: Amount Rate)) `shouldBe` 11 % 250
+    it "keeps percent exact: percent 4.4 is 11/250" $
+      case percent 4.4 of
+        Lit (Amount a) -> toRational a `shouldBe` 11 % 250
+        _ -> expectationFailure "percent did not build a literal"
+    it "emits every literal as an exact {n, d} integer-string pair" $
+      case literalProbe of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let literals = literalsOf (compiledValue frm)
+          forM_ [exact 11 250, exact 1000000000000 1, exact (-1) 2] $ \expected ->
+            literals `shouldSatisfy` elem expected
+    it "emits tax-table quantize parameters exactly" $
+      case literalProbe of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let quantizers =
+                [ (field "step" op, field "output_offset" op)
+                | Just (Aeson.Object nodes) <- [field "nodes" (compiledValue frm)],
+                  node <- KeyMap.elems nodes,
+                  Just op <- [field "op" node],
+                  field "type" op == Just (Aeson.String "tax_table_quantize")
+                ]
+          quantizers `shouldBe` [(Just (exact 25 1), Just (exact 25 2))]
+    it "marks the graph schema version 2 in its meta" $
+      case literalProbe of
+        Left err -> expectationFailure (show err)
+        Right frm ->
+          (field "meta" (compiledValue frm) >>= field "schema_version")
+            `shouldBe` Just (Aeson.Number 2)
+    forM_ taxYears $ \ty ->
+      it ("models every table's top bracket as explicitly unbounded (" <> show (tyYear ty) <> ")") $
+        case tyForm ty of
+          Left err -> expectationFailure (show err)
+          Right frm -> do
+            let tables = case field "tables" (compiledValue frm) of
+                  Just (Aeson.Object ts) -> KeyMap.elems ts
+                  _ -> []
+                statusLists t = case field "brackets" t of
+                  Just (Aeson.Object bs) -> [xs | Aeson.Array xs <- KeyMap.elems bs]
+                  _ -> []
+                thresholds xs = mapMaybe (field "threshold") (V.toList xs)
+            tables `shouldSatisfy` (not . null)
+            forM_ (concatMap statusLists tables) $ \xs -> do
+              let ts = thresholds xs
+              last ts `shouldBe` Aeson.Null
+              filter (== Aeson.Null) (init ts) `shouldBe` []
 
   describe "Form Compilation" $ do
     forM_ taxYears $ \ty ->
