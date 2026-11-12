@@ -6,6 +6,22 @@ on:
   workflow_call:  # from release.yml, on the tagged commit
   workflow_dispatch:  # also builds the wheels, to test packaging on a branch
 
+# Only branch pushes share a workflow/ref group and cancel superseded pushes.
+# Manual dispatches use unique run IDs, so pushes and requested wheel builds
+# cannot cancel or replace each other. Main, tags and reusable release calls
+# also get unique IDs: cancel-in-progress=false still replaces pending runs.
+# Reusable workflows inherit the caller's workflow name (release.yml: release).
+# Keep the ci-name guard below in sync with this workflow name.
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.ref }}-${{
+    (github.workflow == 'ci' && github.event_name == 'push' &&
+    github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')) &&
+    'branch' || github.run_id }}
+  cancel-in-progress: >-
+    ${{ github.workflow == 'ci' && github.event_name == 'push' &&
+    github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
+
 permissions:
   contents: read
 
@@ -47,7 +63,12 @@ jobs:
       run: uv sync
 
     - name: Run tests
-      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200 ${{ matrix.pytest-args }}
+      # Keep Windows serial until its full graph-only suite has xdist evidence.
+      run: >-
+        uv run pytest
+        ${{ runner.os != 'Windows' && '-n auto --dist worksteal' || '' }}
+        --hypothesis-profile=ci --require-graph --min-graph-passes=200
+        ${{ matrix.pytest-args }}
 
   # A graph-only install, as every Windows wheel is: the OTS extension is not
   # built. Tests that need OTS are marked requires_ots and --graph-only
@@ -77,7 +98,7 @@ jobs:
 
     - name: Run tests on the graph-only install
       run: >-
-        uv run pytest --graph-only --hypothesis-profile=ci --require-graph
+        uv run pytest -n auto --dist worksteal --graph-only --hypothesis-profile=ci --require-graph
         --min-graph-passes=200
 
   # The jobs above test against uv.lock; this one tests what a new install
@@ -102,7 +123,7 @@ jobs:
       run: uv sync --upgrade
 
     - name: Run tests
-      run: uv run pytest --hypothesis-profile=ci --require-graph --min-graph-passes=200
+      run: uv run pytest -n auto --dist worksteal --hypothesis-profile=ci --require-graph --min-graph-passes=200
 
   # Installs the built wheel (not an editable build) and checks both native
   # backends load from it, on the newest Python, on every platform a wheel
