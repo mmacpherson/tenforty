@@ -11,8 +11,10 @@ validated against what that backend covers and either honoured or refused.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from enum import Enum
 from typing import Literal
 
+from . import _ots_extension
 from .graph_scope import exclusion_reasons, graph_state_in_scope
 from .mappings import STATE_FORM_NAMES
 from .models import (
@@ -21,6 +23,17 @@ from .models import (
     OTSState,
     UnsupportedReturnError,
 )
+
+
+class _DefaultBackend(Enum):
+    """Distinguish an omitted backend from every explicit argument."""
+
+    OMITTED = "omitted"
+
+    def __repr__(self) -> str:
+        """Show the installation-dependent default in public signatures."""
+        return "<default backend>"
+
 
 BackendChoice = Literal["auto", "ots", "graph"]
 Engine = Literal["ots", "graph"]
@@ -180,7 +193,11 @@ def _refuse(backend: str, year: int, state: OTSState | None) -> UnsupportedRetur
 
 
 def select_backend(
-    backend: str, year: object, state: object, *, allow_unvalidated: bool = False
+    backend: str | _DefaultBackend,
+    year: object,
+    state: object,
+    *,
+    allow_unvalidated: bool = False,
 ) -> Engine:
     """Return the engine that computes this return, or raise before evaluation.
 
@@ -200,6 +217,8 @@ def select_backend(
             "it is an explicit acknowledgment that the graph is not yet "
             "validated for the return."
         )
+    if backend is _DefaultBackend.OMITTED:
+        backend = "ots" if _ots_extension.ots_extension_installed() else "auto"
     if backend not in BACKEND_CHOICES:
         choices = ", ".join(repr(choice) for choice in BACKEND_CHOICES)
         raise ValueError(f"Unknown backend: {backend!r}; expected one of {choices}")
@@ -274,7 +293,7 @@ def explain_ots_route(groups: Iterable[tuple[object, object]]) -> str:
     if graph_capable:
         it = "it" if len(graph_capable) == 1 else "them"
         sentences.append(
-            f"backend='ots' (the default) sends {_the_returns(graph_capable)} "
+            f"backend='ots' sends {_the_returns(graph_capable)} "
             "to OTS; "
             f"backend='graph' or backend='auto' computes {it} on the graph backend."
         )

@@ -1,4 +1,38 @@
 ## [Unreleased]
+### Fixed
+- **OTS NJ now taxes business profits and capital gains** (tenforty-r91.15).
+  `self_employment_income` goes to NJ-1040 line 18 (net profits from business),
+  and `short_term_capital_gains` with `long_term_capital_gains` go to line 19
+  (net gains from disposition of property), for 2023-2025. NJ nets every sale on
+  Schedule NJ-DOP with no short/long-term split, and a net loss in either line
+  is no entry and offsets nothing else; OTS does both. Before, OTS NJ computed
+  the return from wages, interest and dividends only, so these returns were
+  under-taxed; 2025.14 refused a nonzero value of these inputs on OTS NJ, and
+  that refusal is removed. The expected figures in
+  `tests/ots_nj_gains_business_test.py` are an independent derivation from the
+  NJ-1040 forms and instructions
+  (`docs/validation/derivations/nj-gains-business-2023-2025.md`).
+  - Limits: `self_employment_income` is taken as federal Schedule C net profit
+    and entered unchanged. NJ-BUS-1 adjustments, the NJ-BUS-2 alternative
+    business calculation and loss carryforwards are not modeled, nor are NJ-DOP
+    basis or taxability differences from the federal gains.
+  - Found while deriving them: OTS appears to price NJ taxable income that falls
+    exactly on a tax-table row's lower edge as the row below. That was checked
+    at $29,000, $53,000, $68,500 and $69,000 in 2023-2025, where the result is
+    $1-$3 under the table. Upstream report 22, recorded as a strict signature;
+    not patched.
+
+### Changed (graph-only default)
+- When the compiled OTS extension is absent, an omitted `backend` follows
+  `"auto"` in `evaluate_return`, `evaluate_returns` and `get_backend`. Bare
+  supported 2024–2025 returns compute on graph, including in graph-only and
+  Windows builds. Full installs keep the OTS default. Explicit choices,
+  graph scope, state facts, typed refusals and whole-batch preflight remain
+  unchanged. The same supported bare call can produce different figures by
+  platform wherever the engines differ; see
+  [Migrating between backends](docs/migrating-to-graph-default.md).
+  Installed-artifact smoke checks now exercise the default too.
+
 ### Fixed (graph state slopes)
 - **Graph `marginal_rate`, `marginal_rates` and `solve_for_income` answer
   state-dependent outputs again**: the state outputs, `total_tax` on a state
@@ -27,6 +61,10 @@
   gone.
 
 ### Removed
+- Graph schema: removed the unused `abs` and `clamp` operations from Rust and
+  the Haskell compiler. Loading graph JSON containing either now fails with an
+  `unknown variant` error naming the operation. No shipped graph uses them;
+  computed figures for shipped forms are unchanged.
 - Contributor tooling: removed the unused graph JIT and Makefile targets
   `graph-build-jit`, `graph-test-jit`, `graph-bench`, and `graph-throughput`.
 

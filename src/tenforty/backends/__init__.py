@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from .._ots_extension import ots_unavailable_reason
 from ..models import BackendUnavailableError
-from ..routing import BackendChoice, Engine, select_backend
+from ..routing import BackendChoice, Engine, _DefaultBackend, select_backend
 from .ots import OTSBackend
 from .protocol import TaxBackend
 
@@ -65,7 +65,7 @@ def require_available(engine: Engine) -> TaxBackend:
 
 
 def get_backend(
-    backend: BackendChoice = "ots",
+    backend: BackendChoice | _DefaultBackend = _DefaultBackend.OMITTED,
     year: int = 2024,
     state: str | None = None,
     *,
@@ -74,8 +74,9 @@ def get_backend(
     """Get the backend instance that computes this year's return.
 
     Args:
-        backend: "ots" (default), "auto" (graph for 2024-2025 within graph
-            scope, OTS otherwise), or "graph".
+        backend: "ots", "auto" (graph for 2024-2025 within graph scope, OTS
+            otherwise), or "graph". Omission selects "ots" when its extension
+            is installed, "auto" otherwise.
         year: Tax year.
         state: State code (e.g., "CA") or None for federal only.
         allow_unvalidated: Let "graph" serve a state return outside graph

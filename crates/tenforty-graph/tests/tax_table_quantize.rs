@@ -141,23 +141,7 @@ fn table_planning_partials_seed_requested_intermediate_nodes() {
 }
 
 #[test]
-fn composed_clamp_and_branch_ties_follow_incoming_direction() {
-    let g = graph(vec![
-        Op::Input,
-        band(0),
-        Op::Neg { arg: 1 },
-        Op::Clamp {
-            arg: 2,
-            min: 0.0,
-            max: 10.0,
-        },
-    ]);
-    let mut rt = Runtime::new(&g, FilingStatus::Single);
-    rt.set_by_id(0, 0.0);
-    assert_eq!(gradient_sum(&mut rt, 3, &[0]).unwrap(), 0.0);
-    rt.set_by_id(0, -10.0);
-    assert_eq!(gradient_sum(&mut rt, 3, &[0]).unwrap(), -1.0);
-
+fn composed_branch_ties_follow_incoming_direction() {
     let g = graph(vec![
         Op::Input,
         band(0),
@@ -384,31 +368,26 @@ fn continuous_whole_band_ties_agree_across_equivalent_forms() {
         Op::Literal { value: 0.0 },
         Op::Max { left: 3, right: 4 },
         Op::Max { left: 4, right: 3 },
-        Op::Clamp {
-            arg: 3,
-            min: 0.0,
-            max: 1e9,
-        },
         Op::IfPositive {
             cond: 3,
             then: 3,
             otherwise: 4,
         },
         Op::Neg { arg: 3 },
-        Op::Min { left: 9, right: 4 },
+        Op::Min { left: 8, right: 4 },
         Op::IfPositive {
             cond: 3,
-            then: 9,
+            then: 8,
             otherwise: 4,
         },
-        Op::Neg { arg: 10 },
+        Op::Neg { arg: 9 },
         Op::BracketTax {
             table: "positive_part".into(),
             income: 3,
         },
         Op::Min { left: 3, right: 4 },
         Op::IfPositive {
-            cond: 9,
+            cond: 8,
             then: 3,
             otherwise: 4,
         },
@@ -431,16 +410,16 @@ fn continuous_whole_band_ties_agree_across_equivalent_forms() {
     let mut rt = Runtime::new(&g, FilingStatus::Single);
     for x in [50.0, 60.0, 75.0, 99.0] {
         rt.set_by_id(0, x);
-        for output in [5, 6, 7, 8, 12, 13] {
+        for output in [5, 6, 7, 11, 12] {
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
             assert_eq!(gradient_sum(&mut rt, output, &[0]).unwrap(), 1.0);
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
         }
-        for output in [10, 11] {
+        for output in [9, 10] {
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
             assert_eq!(gradient_sum(&mut rt, output, &[0]).unwrap(), -1.0);
         }
-        for output in [14, 15] {
+        for output in [13, 14] {
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
             assert_eq!(gradient_sum(&mut rt, output, &[0]).unwrap(), 0.0);
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);

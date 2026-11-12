@@ -81,12 +81,10 @@ data Op
   | OpMul Int Int
   | OpDiv Int Int
   | OpNeg Int
-  | OpAbs Int
   | OpMax Int Int
   | OpMin Int Int
   | OpFloor Int
   | OpTaxTableQuantize TaxTableQuantizeMode Double Double Int
-  | OpClamp Int Double Double
   | OpIfPositive Int Int Int
   | OpBracketTax Text Int
   | OpPhaseOut Double StatusValues Double Int
@@ -177,13 +175,11 @@ instance ToJSON Op where
     OpMul a b -> object ["type" .= ("mul" :: Text), "left" .= a, "right" .= b]
     OpDiv a b -> object ["type" .= ("div" :: Text), "left" .= a, "right" .= b]
     OpNeg a -> object ["type" .= ("neg" :: Text), "arg" .= a]
-    OpAbs a -> object ["type" .= ("abs" :: Text), "arg" .= a]
     OpMax a b -> object ["type" .= ("max" :: Text), "left" .= a, "right" .= b]
     OpMin a b -> object ["type" .= ("min" :: Text), "left" .= a, "right" .= b]
     OpFloor a -> object ["type" .= ("floor" :: Text), "arg" .= a]
     OpTaxTableQuantize mode step offset a ->
       object ["type" .= ("tax_table_quantize" :: Text), "arg" .= a, "step" .= step, "output_offset" .= offset, "mode" .= (case mode of TableFloor -> "floor" :: Text; TableRound -> "round")]
-    OpClamp a lo hi -> object ["type" .= ("clamp" :: Text), "arg" .= a, "min" .= lo, "max" .= hi]
     OpIfPositive c t e -> object ["type" .= ("if_positive" :: Text), "cond" .= c, "then" .= t, "otherwise" .= e]
     OpBracketTax t a -> object ["type" .= ("bracket_tax" :: Text), "table" .= t, "income" .= a]
     OpPhaseOut base threshold r agi ->
@@ -500,12 +496,10 @@ resolveForms cgs@(cg0 : _) =
       OpMul a b -> OpMul (ref f a) (ref f b)
       OpDiv a b -> OpDiv (ref f a) (ref f b)
       OpNeg a -> OpNeg (ref f a)
-      OpAbs a -> OpAbs (ref f a)
       OpFloor a -> OpFloor (ref f a)
       OpTaxTableQuantize mode step offset a -> OpTaxTableQuantize mode step offset (ref f a)
       OpMax a b -> OpMax (ref f a) (ref f b)
       OpMin a b -> OpMin (ref f a) (ref f b)
-      OpClamp a lo hi -> OpClamp (ref f a) lo hi
       OpIfPositive c t e -> OpIfPositive (ref f c) (ref f t) (ref f e)
       OpBracketTax tbl inc -> OpBracketTax (f <> "__" <> tbl) (ref f inc)
       OpPhaseOut base sv rate agi -> OpPhaseOut base sv rate (ref f agi)
