@@ -9,9 +9,9 @@ these tests keep every profile deadline-free and show the effect.
 import time
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import Phase, given, settings
 from hypothesis import strategies as st
-from hypothesis.errors import DeadlineExceeded, Flaky
+from hypothesis.errors import DeadlineExceeded
 
 PROFILES = ("ci", "dev", "deep", "soak")
 SLOW_EXAMPLE_SECONDS = 0.3
@@ -25,8 +25,10 @@ def test_every_profile_has_no_deadline(name):
 
 
 def _slow_oracle_style_test(parent: settings):
-    @settings(parent=parent, max_examples=2, database=None)
-    @given(st.integers())
+    """One fixed example, generated once, never shrunk: a bounded timing witness."""
+
+    @settings(parent=parent, max_examples=1, database=None, phases=[Phase.generate])
+    @given(st.just(0))
     def slow(_value):
         time.sleep(SLOW_EXAMPLE_SECONDS)
 
@@ -42,5 +44,5 @@ def test_a_slow_example_passes_under_the_profiles(name):
 def test_the_old_default_deadline_would_fail_it():
     """Witness: with the 200 ms default the same test fails on timing alone."""
     old_ci = settings(settings.get_profile("ci"), deadline=200)
-    with pytest.raises((DeadlineExceeded, Flaky)):
+    with pytest.raises(DeadlineExceeded):
         _slow_oracle_style_test(old_ci)()

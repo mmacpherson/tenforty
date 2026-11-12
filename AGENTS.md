@@ -200,11 +200,15 @@ profile's example count:
   differential, the Newton solver) pin an explicit, bounded `max_examples` with a
   one-line reason — 10k of a slow example is prohibitive and adds nothing to a
   value/agreement oracle, so these deliberately do **not** scale.
-- **No test has a wall-clock deadline.** Every Hypothesis profile in
-  `tests/conftest.py` sets `deadline=None`, stated once there, so a test needs
-  no `deadline=` of its own (existing `deadline=None` decorators are redundant
-  but harmless). A deadline is not a tax assertion, and on a shared, loaded
-  machine it fails parity and solver oracles on timing alone (tenforty-up2k).
+- **The Hypothesis correctness profiles disable per-example deadlines.** Every
+  profile registered in `tests/conftest.py` (`ci`, `dev`, `deep`, `soak`) sets
+  `deadline=None`, stated once there, so a property or oracle test needs no
+  `deadline=` of its own; existing `deadline=None` decorators are redundant but
+  harmless. A Hypothesis deadline is measured after an example returns: it
+  flags a slow example, it never interrupts a hung one. On a shared, loaded
+  machine it failed parity and solver oracles on timing alone, which is not a
+  tax assertion (tenforty-up2k). Hang protection is a job-level timeout, not
+  this.
 
 ## Python Style
 
