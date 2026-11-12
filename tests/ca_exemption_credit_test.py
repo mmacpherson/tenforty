@@ -31,7 +31,7 @@ def _source_cases():
         Path(__file__).parents[1]
         / "docs/validation/derivations/ca-2024-2025-exemption-credit-cases.csv"
     )
-    with path.open() as stream:
+    with path.open(encoding="utf-8") as stream:
         return list(csv.DictReader(stream))
 
 
