@@ -159,7 +159,7 @@ def process_ots_tarball(
                         tar.extract(item, path=tmpdirname)
                         outer_namespace, inner_namespace = parse_srcname(item.name)
                         inner_namespace = inner_namespace.replace("-", "_")
-                        with open(f"{tmpdirname}/{item.name}") as fp:
+                        with open(f"{tmpdirname}/{item.name}", encoding="utf-8") as fp:
                             source = fp.read()
                         source_group[inner_namespace] = group_lines(source)
                         program_sources[shorten_inner_ns(inner_namespace)] = source
@@ -171,7 +171,7 @@ def process_ots_tarball(
                         # print(f"{item=}")
                         tar.extract(item, path=tmpdirname)
                         year, form_id = parse_templatename(item.name)
-                        with open(f"{tmpdirname}/{item.name}") as fp:
+                        with open(f"{tmpdirname}/{item.name}", encoding="utf-8") as fp:
                             source = fp.read()
                         configs.append(
                             dict(
@@ -956,7 +956,7 @@ def build_cython_sources(
             import_map[year][inner_ns_short] = f"{modname}.main"
 
     # Write out the cython module source.
-    with open(cython_template_file) as fp:
+    with open(cython_template_file, encoding="utf-8") as fp:
         template = fp.read()
 
     caps_years = caps_flag_years(source_groups)
@@ -1236,7 +1236,7 @@ def main(ots_tarballs, template_file, gen_dir):
     for fname, content in generated_files.items():
         fname_full = f"{gen_dir}/{fname}"
         pathlib.Path(fname_full).parent.mkdir(parents=True, exist_ok=True)
-        with open(fname_full, "w") as fp:
+        with open(fname_full, "w", encoding="utf-8") as fp:
             print(content, file=fp)
 
 

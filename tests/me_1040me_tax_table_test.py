@@ -82,7 +82,9 @@ SCHEDULE_AT_CEILING = {
 
 @cache
 def _printed_rows(year):
-    lines = (FIXTURES / f"me_tax_table_{year}.csv").read_text().splitlines()
+    lines = (
+        (FIXTURES / f"me_tax_table_{year}.csv").read_text(encoding="utf-8").splitlines()
+    )
     return tuple(csv.DictReader(line for line in lines if not line.startswith("#")))
 
 

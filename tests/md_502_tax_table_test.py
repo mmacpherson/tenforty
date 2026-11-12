@@ -49,7 +49,9 @@ STATE_TAX = "md_502_L21_md_state_tax"
 
 @cache
 def _rows(year):
-    lines = (FIXTURES / f"md_tax_table_{year}.csv").read_text().splitlines()
+    lines = (
+        (FIXTURES / f"md_tax_table_{year}.csv").read_text(encoding="utf-8").splitlines()
+    )
     reader = csv.DictReader(line for line in lines if not line.startswith("#"))
     rows = [
         (int(row["at_least"]), int(row["less_than"]), int(row["tax"])) for row in reader

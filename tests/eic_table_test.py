@@ -47,7 +47,7 @@ COLUMN_GROUP = {
 
 @cache
 def _rows(year: int) -> tuple[dict[str, int], ...]:
-    with (FIXTURES / f"eic_table_{year}.csv").open() as handle:
+    with (FIXTURES / f"eic_table_{year}.csv").open(encoding="utf-8") as handle:
         return tuple(
             {key: int(value) for key, value in record.items()}
             for record in csv.DictReader(handle)

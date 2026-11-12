@@ -14,7 +14,7 @@ from tenforty.models import OTSFilingStatus, OTSState, TaxReturnInput
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.json"
-CONTRACT = json.loads(CONTRACT_PATH.read_text())
+CONTRACT = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 APP_PATH = ROOT / "crates/tenforty-graph/demo/app.js"
 CALCULATOR_PATH = ROOT / "crates/tenforty-graph/demo/calculator.js"
 BROWSER_BOUNDARY_PATH = ROOT / "crates/tenforty-graph/demo/browser_contract.js"
@@ -101,9 +101,9 @@ def test_browser_refuses_what_python_refuses_on_the_graph():
 
 def test_browser_ui_uses_the_public_calculation_boundary():
     """The DOM layer must not regress to form-node bindings or silent zeros."""
-    app_source = APP_PATH.read_text()
-    calculator_source = CALCULATOR_PATH.read_text()
-    browser_boundary_source = BROWSER_BOUNDARY_PATH.read_text()
+    app_source = APP_PATH.read_text(encoding="utf-8")
+    calculator_source = CALCULATOR_PATH.read_text(encoding="utf-8")
+    browser_boundary_source = BROWSER_BOUNDARY_PATH.read_text(encoding="utf-8")
 
     assert not re.search(r"\bus_[a-z0-9_]+", app_source)
     assert not re.search(r"\bus_[a-z0-9_]+", calculator_source)

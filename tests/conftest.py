@@ -19,6 +19,7 @@ _ALLOWED_GRAPH_LANE_SKIPS = {
     "live TaxCalc version is checked only under the oracle gate": "tests/taxcalc/goldens_test.py",
     "Graph backend has no 2023 state form specs yet": "tests/parity/backend_parity_test.py",
     "Graph backend is available": "tests/unified_api_test.py",
+    "builds the vendored OTS programs with a POSIX toolchain; tenforty never builds OTS on Windows": "tests/ots_patch_behavior_test.py",
 }
 
 

@@ -56,7 +56,11 @@ class TableRow:
 
 @cache
 def _fixture(year: int) -> tuple[dict[str, str], tuple[TableRow, ...]]:
-    lines = (FIXTURES / f"irs_tax_table_{year}.csv").read_text().splitlines()
+    lines = (
+        (FIXTURES / f"irs_tax_table_{year}.csv")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    )
     provenance = dict(
         line[2:].split(": ", 1)
         for line in lines
