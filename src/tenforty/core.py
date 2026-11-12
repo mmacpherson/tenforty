@@ -10,7 +10,7 @@ import pathlib
 import re
 import warnings
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import replace
 from decimal import Decimal
 from typing import Any, Literal
@@ -1351,14 +1351,20 @@ def recorded_assumptions(
     engine: Engine,
     row: _facts.FactRow,
     itemizes: bool | None,
+    inputs: Mapping[str, object],
 ) -> tuple[Assumption, ...]:
     """Every convention this engine applied to this return, ordered by id.
 
     The legacy itemized convention is applied only when the aggregate is
     nonzero and the engine's Form 1040 itemized. An engine that does not report
-    its choice is a defect, not a reason to stay silent.
+    its choice is a defect, not a reason to stay silent. ``inputs`` are the
+    return's natural inputs, for conventions that apply only when an amount is
+    present.
     """
     records = list(_facts.recorded_assumptions(row))
+    pa_joint_classes = _facts.pa_joint_class_assumption(row, inputs)
+    if pa_joint_classes is not None:
+        records.append(pa_joint_classes)
     if legacy_itemized != 0:
         if itemizes is None:
             raise RuntimeError(
@@ -1408,7 +1414,11 @@ def _evaluate_with_engine(
         return result.model_copy(
             update={
                 "assumptions": recorded_assumptions(
-                    tax_input.itemized_deductions, engine, row, itemizes
+                    tax_input.itemized_deductions,
+                    engine,
+                    row,
+                    itemizes,
+                    tax_input.model_dump(include=set(_facts.PA_CLASS_INPUTS)),
                 )
             }
         )
@@ -1947,6 +1957,7 @@ def evaluate_returns(
                                 engine,
                                 row,
                                 output[FEDERAL_ITEMIZES],
+                                params,
                             )
                         ]
                     }

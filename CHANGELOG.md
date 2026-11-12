@@ -21,6 +21,30 @@
     at $29,000, $53,000, $68,500 and $69,000 in 2023-2025, where the result is
     $1-$3 under the table. Upstream report 22, recorded as a strict signature;
     not patched.
+- **OTS PA now taxes business income and capital gains** (tenforty-s48h.46).
+  `self_employment_income` goes to PA-40 line 4 (net income from the operation
+  of a business), and `short_term_capital_gains` with
+  `long_term_capital_gains` go to line 5 (net gain from the sale of property),
+  for 2023-2025. PA nets gains and losses within the class with no
+  short/long-term split, and a class loss reduces no other class; OTS does
+  both. Before, OTS PA computed the return from compensation, interest and
+  dividends only, so these returns were under-taxed; 2025.14 refused a nonzero
+  value of these inputs on OTS PA, and that refusal is removed. The expected
+  figures in `tests/ots_pa_business_gains_test.py` are an independent
+  derivation from the PA-40 instructions
+  (`docs/validation/derivations/pa-business-gains-2023-2025.md`).
+  - Limits: `self_employment_income` is taken as federal Schedule C net profit
+    and the gains as federal gains, unchanged; PA Schedule C and basis
+    differences are not modeled. The inputs are household totals, so on a joint
+    return where one spouse has a business or gain loss and the other a profit,
+    OTS nets them, which PA does not allow (each spouse's loss is ignored
+    against the other's income).
+  - Such a joint return now reports that reading in `result.assumptions` as
+    `pa.pa_40.joint_class_household_totals`: on OTS, for PA Married/Joint
+    2023-2025 returns with a nonzero `self_employment_income`,
+    `short_term_capital_gains` or `long_term_capital_gains`. It is not refused,
+    because household totals cannot show the spouses' split. Per-spouse PA
+    class inputs are tenforty-s48h.75.
 
 ### Changed (graph-only default)
 - When the compiled OTS extension is absent, an omitted `backend` follows

@@ -141,19 +141,6 @@ OTS_STATE_INPUT_GAPS: tuple[StateInputGap, ...] = (
     *_gaps(
         "PA_40",
         range(2023, 2026),
-        "tenforty-s48h.46",
-        {
-            "self_employment_income": "PA-40 line 4, net income from the operation "
-            "of a business, profession or farm",
-            "short_term_capital_gains": "PA-40 line 5, net gain from the sale, "
-            "exchange or disposition of property",
-            "long_term_capital_gains": "PA-40 line 5, net gain from the sale, "
-            "exchange or disposition of property",
-        },
-    ),
-    *_gaps(
-        "PA_40",
-        range(2023, 2026),
         "tenforty-r91.21",
         {
             "rental_income": "PA-40 line 6, net income from rents, royalties, "

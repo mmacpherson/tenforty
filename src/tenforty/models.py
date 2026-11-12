@@ -603,17 +603,24 @@ class TaxReturnInput(BaseModel):
     short_term_capital_gains: float = Field(
         default=0.0,
         description=(
-            "Net short-term capital gain or loss (federal Schedule D). OTS NJ "
-            "enters it with long_term_capital_gains on NJ-1040 line 19, taking "
-            "the federal amount as the NJ amount: no NJ basis, taxability or "
-            "business-property difference on Schedule NJ-DOP is modeled."
+            "Net short-term capital gain or loss (federal Schedule D), taken "
+            "unchanged as the state amount. OTS NJ enters it with "
+            "long_term_capital_gains on NJ-1040 line 19: no NJ basis, "
+            "taxability or business-property difference on Schedule NJ-DOP is "
+            "modeled. OTS PA enters it with long_term_capital_gains on PA-40 "
+            "line 5, taking the household federal amount as the PA amount: PA "
+            "basis differences are not modeled, and on a joint return PA's rule "
+            "that one spouse's loss cannot offset the other's gain is not "
+            "applied; such a return reports the assumption "
+            "pa.pa_40.joint_class_household_totals."
         ),
     )
     long_term_capital_gains: float = Field(
         default=0.0,
         description=(
             "Net long-term capital gain or loss (federal Schedule D). OTS NJ "
-            "nets it with short_term_capital_gains on NJ-1040 line 19 (see "
+            "nets it with short_term_capital_gains on NJ-1040 line 19, and OTS "
+            "PA on PA-40 line 5 (see "
             "short_term_capital_gains)."
         ),
     )
@@ -621,10 +628,14 @@ class TaxReturnInput(BaseModel):
         default=0.0,
         description=(
             "Net profit or loss from a sole proprietorship (federal Schedule C "
-            "line 31), which also drives Schedule SE. OTS NJ enters it on "
-            "NJ-1040 line 18 unchanged: the NJ-BUS-1 Part I adjustments to the "
-            "federal figure and the NJ-BUS-2 alternative business calculation "
-            "(including loss carryforwards) are not modeled."
+            "line 31), which also drives Schedule SE, taken unchanged as the "
+            "state amount. OTS NJ enters it on NJ-1040 line 18: the NJ-BUS-1 "
+            "Part I adjustments to the federal figure and the NJ-BUS-2 "
+            "alternative business calculation (including loss carryforwards) "
+            "are not modeled. OTS PA enters it on PA-40 line 4: PA Schedule C "
+            "adjustments are not modeled, and on a joint return one spouse's "
+            "business loss is netted against the other's profit, which PA does "
+            "not allow (reported as pa.pa_40.joint_class_household_totals)."
         ),
     )
     qbi_w2_wages: float = Field(default=0.0, ge=0.0)
@@ -1160,6 +1171,16 @@ def _summed_line(line: str) -> Callable[[float], tuple[str, str]]:
 _NJ_DISPOSITION_GAINS = _summed_line("L19")
 
 
+# PA-40 line 5 is net gain or loss from the sale of property: PA Schedule D
+# nets every sale with no short/long-term split, and a net loss reduces no
+# other class (PA-40 instructions, line 5). The household federal gains are
+# taken as the PA gains, and line 4 takes self_employment_income (Schedule C
+# net profit) unchanged. Not modeled: PA basis and Schedule C differences, and
+# the joint-return rule that one spouse's class loss cannot offset the other's
+# income, since the inputs are household totals.
+_PA_PROPERTY_GAINS = _summed_line("L5")
+
+
 def _restricted_filing_status(
     form_id: str, supported: frozenset[OTSFilingStatus]
 ) -> Callable[[str], tuple[str, str]]:
@@ -1353,6 +1374,9 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L1a",
             "taxable_interest": "L2",
             "ordinary_dividends": "L3",
+            "self_employment_income": "L4",
+            "short_term_capital_gains": _PA_PROPERTY_GAINS,
+            "long_term_capital_gains": _PA_PROPERTY_GAINS,
         },
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -1532,6 +1556,9 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L1a",
             "taxable_interest": "L2",
             "ordinary_dividends": "L3",
+            "self_employment_income": "L4",
+            "short_term_capital_gains": _PA_PROPERTY_GAINS,
+            "long_term_capital_gains": _PA_PROPERTY_GAINS,
         },
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -1700,6 +1727,9 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L1a",
             "taxable_interest": "L2",
             "ordinary_dividends": "L3",
+            "self_employment_income": "L4",
+            "short_term_capital_gains": _PA_PROPERTY_GAINS,
+            "long_term_capital_gains": _PA_PROPERTY_GAINS,
         },
         "output_map": {
             "L9": "adjusted_gross_income",
