@@ -700,8 +700,7 @@ Compared with the OTS backend:
 
 Two function families exist only on this backend and take the same return
 arguments as `evaluate_return`, including `allow_unvalidated` for a state
-outside graph scope. Until `tenforty-s48h.76` is fixed they answer federal
-outputs only (see below):
+outside graph scope:
 
 - `marginal_rates(...)` gives the planning sensitivity of an output to every
   continuous input at once; `marginal_rate(..., wrt=...)` does one input.
@@ -746,14 +745,12 @@ rate the rows step through, not the zero inside a row. Some comparisons of nearl
 also take the wrong side of a tie in floating point, which is tracked as
 `tenforty-msj2`.
 
-**State-dependent planning is refused for now.** Graph state derivatives read
-zero for IL, MS and OR although their state tax moves with income
-(`tenforty-s48h.76`), so until that is fixed `marginal_rate`, `marginal_rates`
-and `solve_for_income` raise `UnsupportedReturnError` for any output that
-depends on the state return: the state outputs, `total_tax` on a state return,
-and raw state node names, for every state. `allow_unvalidated` does not lift
-this. Federal outputs keep working, with or without a state:
-`output="federal_total_tax"`.
+**State and total-tax slopes include the state.** Whole-dollar rounding of a
+form line passes the underlying rate through, so on a 2025 Single IL return
+with $120,000 of wages the state slope is the 4.95% flat rate. A stepwise
+phase-out (a reduction per whole $1,000 or per interval, such as California's
+exemption credit) contributes no slope. `output="federal_total_tax"` still asks for the federal
+part alone.
 
 The reproducible
 [autodiff planning examples](docs/autodiff-applications.md) show a full

@@ -646,6 +646,32 @@ def _jurisdictions(years: tuple[int, ...]) -> dict[str, object]:
     return jurisdictions
 
 
+def _state_slopes() -> dict:
+    if STATE_PLANNING_DEFECT is None:
+        return {
+            "available": True,
+            "summary": "State and combined next-dollar slopes are shown for state returns. Whole-dollar rounding passes the underlying rate through; a stepwise phase-out contributes no slope.",
+            "tracking": None,
+        }
+    return {
+        "available": False,
+        "summary": "State and combined next-dollar slopes are withheld for every state return while graph state derivatives are not reliable. Federal slopes are unaffected, and the tax curve is computed by evaluation.",
+        "tracking": STATE_PLANNING_DEFECT,
+    }
+
+
+def _state_slope_limitations() -> list[dict]:
+    if STATE_PLANNING_DEFECT is None:
+        return []
+    return [
+        {
+            "id": "state-slopes",
+            "summary": "State and combined next-dollar slopes are withheld until state derivatives are fixed; federal slopes are shown.",
+            "tracking": STATE_PLANNING_DEFECT,
+        }
+    ]
+
+
 def build_contract() -> dict[str, object]:
     years = tuple(GraphBackend.supported_years)
     inventories = {year: _graph_inventory(year) for year in years}
@@ -759,22 +785,14 @@ def build_contract() -> dict[str, object]:
             "summary": "The graph is so far validated for 2024 and 2025 federal-only returns and for IL, MS and OR plus the eight states without an income tax (AK, FL, NV, SD, TN, TX, WA, WY). Other jurisdictions are not yet validated: the calculator does not offer them, a shared link to one is refused, and BrowserTaxRuntime computes one only with allowUnvalidated: true.",
             "tracking": "tenforty-s48h",
         },
-        "state_slopes": {
-            "available": STATE_PLANNING_DEFECT is None,
-            "summary": "State and combined next-dollar slopes are withheld for every state return: graph state derivatives read zero for IL, MS and OR although their state tax moves with income. Federal slopes are unaffected, and the tax curve is computed by evaluation.",
-            "tracking": STATE_PLANNING_DEFECT,
-        },
+        "state_slopes": _state_slopes(),
         "limitations": [
             {
                 "id": "validated-jurisdictions",
                 "summary": "Only federal-only returns and the validated states (IL, MS, OR and the eight states without an income tax) are offered; the graph is not yet validated for the others.",
                 "tracking": "tenforty-s48h",
             },
-            {
-                "id": "state-slopes",
-                "summary": "State and combined next-dollar slopes are withheld until state derivatives are fixed; federal slopes are shown.",
-                "tracking": STATE_PLANNING_DEFECT,
-            },
+            *_state_slope_limitations(),
             {
                 "id": "tax-years",
                 "summary": "Only tax years 2024 and 2025 are supported by the browser contract.",

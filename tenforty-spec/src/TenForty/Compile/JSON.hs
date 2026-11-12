@@ -651,9 +651,7 @@ compileExpr mname = \case
     emitNode mname (OpFloor aid)
   Round a -> do
     aid <- compileExpr Nothing a
-    halfId <- emitAnonymousNode (OpLiteral 0.5)
-    plusHalfId <- emitAnonymousNode (OpAdd aid halfId)
-    emitNode mname (OpFloor plusHalfId)
+    emitNode mname (OpTaxTableQuantize TableRound 1 0 aid)
   TaxTableQuantize mode step offset a -> do
     if step < 1 || isNaN step || isInfinite step || step /= fromInteger (floor step) || isNaN offset || isInfinite offset
       then error "Invalid TaxTableQuantize parameters: step must be a positive finite integer, output_offset must be finite"

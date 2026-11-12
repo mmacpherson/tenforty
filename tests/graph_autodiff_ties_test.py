@@ -33,10 +33,6 @@ from tenforty.models import TaxReturnInput
 from .fixtures.planning_twin import SMALL_STEP, row_offsets, twin_output
 from .graph_autodiff_properties_test import skip_if_graph_unavailable
 
-# Engine-level derivative tests on CA, GA and NH, which the public API refuses
-# until tenforty-s48h.76 is fixed; none of them uses IL, MS or OR.
-pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
-
 STANDARD_DEDUCTION = {
     (2024, "Single"): 14_600.0,
     (2024, "Married/Joint"): 29_200.0,

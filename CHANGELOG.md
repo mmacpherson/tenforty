@@ -57,6 +57,33 @@
   text file as UTF-8, so they read the same on Windows, where Python before
   3.15 defaults to the locale's code page. The generated binding is unchanged.
 
+### Fixed (graph state slopes)
+- **Graph `marginal_rate`, `marginal_rates` and `solve_for_income` answer
+  state-dependent outputs again**: the state outputs, `total_tax` on a state
+  return, and raw state node names, on the public functions and the
+  `GraphBackend` gradient, gradients and solve methods (tenforty-s48h.76).
+  Whole-dollar rounding (`roundE`) compiled to `floor(x + 0.5)`, whose slope is
+  zero, so every wage path to IL, MS and OR tax, and to ME, NC and OH tax,
+  read a zero state slope. It now compiles to the whole-dollar quantize, which
+  rounds half up exactly as before and passes the underlying rate through.
+  2024 and 2025 Single wages of $120,000 now give IL 4.95%, MS 4.7% (2024) and
+  4.4% (2025), and OR 8.75%. No computed tax value changes.
+- Known limit: a planning slope through a stepwise phase-out (`floorE`:
+  California's exemption credit and FTB 3506, federal Forms 2441 and 8812,
+  Schedule 1-A) still reads zero (tenforty-s48h.78).
+- Known limit: `solve_for_income` uses Newton steps, and on a whole-dollar
+  stepped total it can cycle across a step without landing
+  (tenforty-s48h.79). That weakness predates this change, which shifts where
+  it bites. Solving from $50,000 for the value at $120,000.50 now works for
+  every state-only and raw state node output (impossible before, with a zero
+  slope) and for 2025 OR Married/Joint `total_tax`. It no longer converges for
+  2024 OR Married/Joint `total_tax`, which converged before.
+- The MS Married/Joint spouse-ownership refusal for income derivatives and
+  solves is unchanged.
+- The browser calculator shows state and combined next-dollar slopes on state
+  returns (`state_slopes.available` is true); the `state-slopes` limitation is
+  gone.
+
 ### Removed
 - Graph schema: removed the unused `abs` and `clamp` operations from Rust and
   the Haskell compiler. Loading graph JSON containing either now fails with an

@@ -2325,9 +2325,9 @@ def marginal_rate(
     This computes the derivative of `output` with respect to `wrt`. A state
     return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
-    Any output that depends on the state return (a state output, ``total_tax``
-    on a state return, a raw state node) is refused until tenforty-s48h.76 is
-    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    Whole-dollar rounding on a line carries an identity planning slope, so
+    state and total-tax slopes include the state's rate; a step phase-out
+    (a floor of whole thousands or intervals) contributes zero.
     """
     if wrt in _DISCRETE_INPUTS:
         raise ValueError(f"{wrt} is discrete and cannot be differentiated")
@@ -2425,9 +2425,9 @@ def marginal_rates(
     function's right-hand derivative, matching :func:`marginal_rate`. A state
     return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
-    Any output that depends on the state return (a state output, ``total_tax``
-    on a state return, a raw state node) is refused until tenforty-s48h.76 is
-    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    Whole-dollar rounding on a line carries an identity planning slope, so
+    state and total-tax slopes include the state's rate; a step phase-out
+    (a floor of whole thousands or intervals) contributes zero.
     """
     warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
@@ -2520,9 +2520,9 @@ def solve_for_income(
 
     A state return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
-    Any output that depends on the state return (a state output, ``total_tax``
-    on a state return, a raw state node) is refused until tenforty-s48h.76 is
-    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    Whole-dollar rounding on a line carries an identity planning slope, so
+    state and total-tax slopes include the state's rate; a step phase-out
+    (a floor of whole thousands or intervals) contributes zero.
     """
     if for_input in _DISCRETE_INPUTS:
         raise ValueError(f"{for_input} is discrete and cannot be solved continuously")

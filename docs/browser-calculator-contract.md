@@ -21,12 +21,12 @@ shared link to another one is refused, and `BrowserTaxRuntime` computes one only
 when constructed with `allowUnvalidated: true` (a real boolean), the same
 acknowledgment as Python's `allow_unvalidated=True` (tenforty-s48h).
 
-State and combined next-dollar slopes are withheld for every state return
-(`state_slopes.available` is false): graph state derivatives read zero for IL,
-MS and OR although their state tax moves with income (tenforty-s48h.76). The
-calculator shows federal slopes, and the tax curve, which is computed by
-evaluation; `BrowserTaxRuntime` returns `null` for the state and total parts,
-and no option restores them while the contract withholds them.
+State and combined next-dollar slopes are shown on state returns
+(`state_slopes.available` is true), and follow Python's state planning switch.
+Until tenforty-s48h.76 they were withheld, because whole-dollar rounding read a
+zero state slope for IL, MS and OR. If the contract ever withholds them again,
+`BrowserTaxRuntime` returns `null` for the state and total parts and no option
+restores them; the federal slopes and the tax curve remain.
 
 The public inputs cover wages, interest, dividends, capital gains and losses,
 self-employment income, rental income, other Schedule 1 income, aggregate

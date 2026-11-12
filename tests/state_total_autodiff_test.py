@@ -1,10 +1,8 @@
 """State-aware total-tax autodiff and solver contract.
 
-These are engine-level checks of state derivatives, which the public API
-refuses until tenforty-s48h.76 is fixed (graph state derivatives read zero for
-IL, MS and OR). The module lifts that refusal; IL, MS and OR are left out of
-the derivative identities, which would only compare two equally broken paths,
-and their defect is pinned by a strict xfail below.
+Engine-level checks of state derivatives. Until tenforty-s48h.76 the public API
+refused them because whole-dollar rounding read a zero state slope for IL, MS
+and OR; the IL, MS and OR slopes are now pinned to their statutory rates below.
 """
 
 import pytest
@@ -16,11 +14,8 @@ from tenforty import (
 )
 from tenforty.mappings import STATE_GRAPH_CONFIGS
 
-pytestmark = pytest.mark.usefixtures("lift_state_planning_refusal")
-
 GRAPH_STATES = sorted(state.value for state in STATE_GRAPH_CONFIGS if state.value)
-ZERO_STATE_SLOPE_STATES = ("IL", "MS", "OR")
-DIFFERENTIABLE_STATES = [s for s in GRAPH_STATES if s not in ZERO_STATE_SLOPE_STATES]
+ROUNDED_LINE_STATES = ("IL", "MS", "OR")
 
 
 def _total_tax_at_wages(state: str, wages: float) -> float:
@@ -160,7 +155,7 @@ def test_state_total_solver_roundtrips_public_total():
     assert result.federal_total_tax < target
 
 
-@pytest.mark.parametrize("state", DIFFERENTIABLE_STATES)
+@pytest.mark.parametrize("state", GRAPH_STATES)
 def test_total_marginal_decomposes_into_federal_plus_state(state):
     """Every state's total-tax derivative is its two parts, and nothing else.
 
@@ -225,30 +220,61 @@ def test_solver_targets_the_public_total_in_every_state(state):
     assert _total_tax_at_wages(state, wages) == pytest.approx(target, abs=0.01)
 
 
+STATUTORY_STATE_RATES = {
+    # Independent derivation from official IL, MS, OR and IRS sources, made
+    # without access to tenforty's implementation or output and retrieved
+    # 2026-11-11: docs/validation/derivations/state-slopes-il-ms-or-2024-2025.md.
+    # Single, wages of $120,000 only. Every deduction, exemption, subtraction
+    # and credit is locally constant there, so each slope is one schedule rate:
+    # IL flat 4.95% (exemption full below the $250,000 AGI cutoff); MS 4.7%
+    # (2024) / 4.4% (2025) above the first $10,000 (taxable $111,700); OR
+    # Chart S 8.75% (taxable $109,005 / $108,665: the federal tax subtraction
+    # is held at its $8,250 / $8,500 cap below $125,000 of AGI, the exemption
+    # credit is $0 above $100,000 of AGI).
+    ("IL", 2024): 0.0495,
+    ("IL", 2025): 0.0495,
+    ("MS", 2024): 0.047,
+    ("MS", 2025): 0.044,
+    ("OR", 2024): 0.0875,
+    ("OR", 2025): 0.0875,
+}
+
+
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("state", ZERO_STATE_SLOPE_STATES)
-@pytest.mark.xfail(
-    strict=True,
-    reason="tenforty-s48h.76: the graph state derivative reads zero for IL, MS, OR",
-)
-def test_state_slope_matches_a_finite_difference_in_il_ms_or(state, year):
-    """Witness for s48h.76: the state slope should match the state tax's change.
+@pytest.mark.parametrize("state", ROUNDED_LINE_STATES)
+def test_state_slope_is_the_statutory_rate_in_il_ms_or(state, year):
+    """Witness for s48h.76: the state slope is the statutory marginal rate.
 
-    At $85,000 of Single wages the state tax moves with income (a structural
-    finite difference on the graph's own evaluation, not a tax-value fixture),
-    but the derivative reads zero. When the derivative is fixed this passes,
-    the strict xfail fails, and the public refusal can be lifted.
+    Every wage path to IL, MS and OR tax crosses a whole-dollar rounding. Its
+    planning tangent is the identity, so the slope is the schedule's rate.
     """
-    kwargs = {"year": year, "state": state, "filing_status": "Single"}
-
-    def state_tax(wages: float) -> float:
-        return evaluate_return(
-            **kwargs, w2_income=wages, backend="graph", eitc_eligible=False
-        ).state_total_tax
-
-    finite_difference = (state_tax(85_500.0) - state_tax(84_500.0)) / 1_000.0
-    assert finite_difference > 0.01
     slope = marginal_rate(
-        **kwargs, w2_income=85_000.0, output="state_total_tax", eitc_eligible=False
+        year=year,
+        state=state,
+        filing_status="Single",
+        w2_income=120_000.0,
+        output="state_total_tax",
+        eitc_eligible=False,
     )
-    assert slope == pytest.approx(finite_difference, abs=0.005)
+    assert slope == pytest.approx(STATUTORY_STATE_RATES[state, year], abs=1e-12)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("state", ROUNDED_LINE_STATES)
+def test_state_slope_at_an_exact_rounding_tie_is_the_statutory_rate(state, year):
+    """At an exact half-dollar tie the slope is still the statutory rate.
+
+    The rule: whole-dollar rounding is half up in value, and its planning
+    tangent is the identity at every point, a tie included. Wages of
+    $120,000.50 put federal AGI, which each of these returns rounds to whole
+    dollars (IL line 1, MS line 49, OR federal AGI), exactly on a tie.
+    """
+    slope = marginal_rate(
+        year=year,
+        state=state,
+        filing_status="Single",
+        w2_income=120_000.5,
+        output="state_total_tax",
+        eitc_eligible=False,
+    )
+    assert slope == pytest.approx(STATUTORY_STATE_RATES[state, year], abs=1e-12)

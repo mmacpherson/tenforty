@@ -53,15 +53,17 @@ backend's computed figures or graph validation scope.
      for a state outside graph scope, decide whether you accept an unvalidated
      figure. If you do, pass `allow_unvalidated=True`.
 
-### Graph planning refuses state-dependent outputs
+### Graph planning answers state-dependent outputs again
 
-Graph state derivatives read zero for IL, MS and OR although their state tax
-moves with income (tenforty-s48h.76). Until that is fixed, `marginal_rate`,
-`marginal_rates` and `solve_for_income` (and the `GraphBackend` gradient,
-gradients and solve methods) raise `UnsupportedReturnError` for any output that
-depends on the state return, for every state: the state outputs, `total_tax`
-on a state return, and raw state node names. `allow_unvalidated` does not lift
-this. Federal outputs keep working: pass `output="federal_total_tax"`.
+2025.14 refused derivatives and solves of any output that depended on the state
+return, because graph state derivatives read zero for IL, MS and OR
+(tenforty-s48h.76). That is fixed: `marginal_rate`, `marginal_rates` and
+`solve_for_income` (and the `GraphBackend` gradient, gradients and solve
+methods) answer the state outputs, `total_tax` on a state return, and raw state
+node names. The MS Married/Joint spouse-ownership refusal for income
+derivatives and solves is separate and still applies. Code that passed
+`output="federal_total_tax"` to work around the refusal keeps its federal-only
+meaning.
 
 ### Every public entry point applies the refusals
 
