@@ -71,7 +71,7 @@ data Expr u where
   IfGte :: Expr Dollars -> Expr Dollars -> Expr u -> Expr u -> Expr u
   Floor :: Expr Dollars -> Expr Dollars
   Round :: Expr Dollars -> Expr Dollars
-  TaxTableQuantize :: TaxTableQuantizeMode -> Double -> Double -> Expr Dollars -> Expr Dollars
+  TaxTableQuantize :: TaxTableQuantizeMode -> Rational -> Rational -> Expr Dollars -> Expr Dollars
 
 data TaxTableQuantizeMode = TableFloor | TableRound
   deriving stock (Show, Eq)
@@ -125,10 +125,10 @@ unsupportedPhaseOutParameters = go
 lit :: Amount u -> Expr u
 lit = Lit
 
-dollars :: Double -> Expr Dollars
+dollars :: Rational -> Expr Dollars
 dollars = Lit . Amount
 
-rate :: Double -> Expr Rate
+rate :: Rational -> Expr Rate
 rate = Lit . Amount
 
 line :: LineId -> Expr Dollars

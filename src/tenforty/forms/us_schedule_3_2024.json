@@ -41,6 +41,7 @@
     "meta": {
         "form_id": "us_schedule_3",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {

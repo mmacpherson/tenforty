@@ -10,7 +10,7 @@ import TenForty.Types
 -- Source: Illinois Department of Revenue Bulletin FY 2025-16
 -- https://tax.illinois.gov/research/publications/bulletins/fy-2025-16.html
 -- Note: Rate unchanged from 2024 at 4.95%
-ilTaxRate2025 :: Double
+ilTaxRate2025 :: Rational
 ilTaxRate2025 = 0.0495
 
 -- | 2025 Illinois personal exemption amount

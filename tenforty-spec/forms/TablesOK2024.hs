@@ -41,7 +41,7 @@ okBrackets2024 =
          Bracket (byStatus 3750 7500 3750 7500 7500) 0.0175,
          Bracket (byStatus 4900 9800 4900 9800 9800) 0.0275,
          Bracket (byStatus 7200 12200 7200 12200 12200) 0.0375,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0475
+         TopBracket 0.0475
        ]
 
 okBracketsTable2024 :: Table

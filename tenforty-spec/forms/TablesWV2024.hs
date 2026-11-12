@@ -23,7 +23,7 @@ westVirginiaBrackets2024 =
     :| [ Bracket (byStatus 25000 25000 12500 25000 25000) 0.0315,
          Bracket (byStatus 40000 40000 20000 40000 40000) 0.0354,
          Bracket (byStatus 60000 60000 30000 60000 60000) 0.0472,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0512
+         TopBracket 0.0512
        ]
 
 westVirginiaBracketsTable2024 :: Table

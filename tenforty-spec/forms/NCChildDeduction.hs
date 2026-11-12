@@ -14,6 +14,6 @@ ncChildDeductionPerChild agi =
     joint = [(40000, 3000), (60000, 2500), (80000, 2000), (100000, 1500), (120000, 1000), (140000, 500)]
     headOfHousehold = [(30000, 3000), (45000, 2500), (60000, 2000), (75000, 1500), (90000, 1000), (105000, 500)]
 
-incomeRows :: Expr Dollars -> [(Double, Double)] -> Expr Dollars
+incomeRows :: Expr Dollars -> [(Rational, Rational)] -> Expr Dollars
 incomeRows agi =
   foldr (\(ceiling, amount) rest -> ifGte (dollars ceiling) agi (dollars amount) rest) (dollars 0)

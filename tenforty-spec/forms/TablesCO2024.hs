@@ -9,5 +9,5 @@ where
 -- Colorado uses a flat 4.25% tax rate for tax year 2024. This rate was temporarily
 -- reduced from the standard 4.4% rate due to excess state revenue under Colorado's
 -- Taxpayer's Bill of Rights (TABOR).
-coTaxRate2024 :: Double
+coTaxRate2024 :: Rational
 coTaxRate2024 = 0.0425

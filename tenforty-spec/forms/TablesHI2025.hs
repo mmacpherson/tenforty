@@ -32,7 +32,7 @@ hawaiiBrackets2025 =
          Bracket (byStatus 225000 450000 225000 337500 450000) 0.0825,
          Bracket (byStatus 275000 550000 275000 412500 550000) 0.09,
          Bracket (byStatus 325000 650000 325000 487500 650000) 0.10,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.11
+         TopBracket 0.11
        ]
 
 hawaiiBracketsTable2025 :: Table

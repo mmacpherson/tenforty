@@ -65,6 +65,7 @@ executable tenforty-compile
     AKNoTax_2025
     ALForm40_2024
     ALForm40_2025
+    AllForms
     ARAR1000F_2024
     ARAR1000F_2025
     AZForm140_2024
@@ -347,6 +348,7 @@ test-suite tenforty-spec-test
     QuickCheck >=2.18,
     tenforty-spec,
     text,
+    vector,
 
   hs-source-dirs:
     test
@@ -357,6 +359,7 @@ test-suite tenforty-spec-test
     AKNoTax_2025
     ALForm40_2024
     ALForm40_2025
+    AllForms
     ARAR1000F_2024
     ARAR1000F_2025
     AZForm140_2024

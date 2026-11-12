@@ -33,6 +33,39 @@
   [Migrating between backends](docs/migrating-to-graph-default.md).
   Installed-artifact smoke checks now exercise the default too.
 
+### Changed (graph JSON schema version 2: exact literals)
+- **Graph values are exact rationals from the spec** (tenforty-yxun.3). In the
+  Haskell spec, every literal, rate, bracket threshold and rate, phase-out and
+  tax-table parameter is a `Rational`, so a source literal `0.044` is exactly
+  `11/250` and never passes through a binary float. `percent p` is exactly
+  `p/100`, the same value as `rate (p/100)`. Under Double they disagreed:
+  `percent 4.4` was not the double nearest 0.044.
+- The graph JSON carries each value as `{"n": "<integer>", "d": "<positive
+  integer>"}` in lowest terms. `meta.schema_version` is 2. An unbounded top
+  bracket is an explicit `null` threshold (spec: `TopBracket`), replacing the
+  `1e12` sentinel.
+- The Rust loader converts each exact value to the nearest f64 (ties to even)
+  at load, so the runtime still computes in f64 at this stage. It rejects the
+  old numeric format, a missing or older schema version, malformed integers,
+  zero or negative denominators, and an unbounded bracket that is not last.
+  Graph JSON from earlier releases must be regenerated.
+- No computed figure changes for incomes up to $1,000,000,000,000. Every one
+  of the 19,270 exact scalars in the shipped graphs converts to the same
+  double as before; the only scalars removed are Oregon's 20 `1e12` cap
+  literals, from a `min(midpoint, 1e12)` its tax-table branch (taxable
+  income under $50,000) never reaches. A before/after evaluation of 1.38M
+  named-node values found no difference.
+- Above $1e12 a bracket table's top band is now one product,
+  `(income - last threshold) * rate`, where the sentinel version stopped at
+  1e12 and added an extension at the same rate. Exactly the two are equal. In
+  f64 they differ by rounding: on the 2025 Single federal table, by -$8 at
+  $1e17 and +$64 at $1e18. Both stay within one ulp of the exact tax, and
+  neither is reliably closer. The exact runtime (tenforty-yxun.4) removes the
+  difference.
+- `Graph.to_json` writes the exact value of each loaded double, not the spec's
+  source literal (`11/250` saves as its binary fraction), and saves `-0.0`
+  as `0`. Use the spec compiler, not load-and-save, to produce graphs.
+
 ### Removed
 - Graph schema: removed the unused `abs` and `clamp` operations from Rust and
   the Haskell compiler. Loading graph JSON containing either now fails with an

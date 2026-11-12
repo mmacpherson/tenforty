@@ -58,7 +58,11 @@ impl<T: Clone> ByStatus<T> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Bracket {
+    /// The bracket's upper threshold; `f64::INFINITY` is the unbounded top
+    /// bracket, written as a null threshold in graph JSON.
+    #[serde(with = "crate::exact::threshold")]
     pub threshold: f64,
+    #[serde(with = "crate::exact::scalar")]
     pub rate: f64,
 }
 
@@ -79,6 +83,7 @@ pub enum TaxTableQuantizeMode {
 pub enum Op {
     Input,
     Literal {
+        #[serde(with = "crate::exact::scalar")]
         value: f64,
     },
     Add {
@@ -111,7 +116,9 @@ pub enum Op {
     /// Exact statutory quantization with an identity planning tangent.
     TaxTableQuantize {
         arg: NodeId,
+        #[serde(with = "crate::exact::scalar")]
         step: f64,
+        #[serde(with = "crate::exact::scalar")]
         output_offset: f64,
         mode: TaxTableQuantizeMode,
     },
@@ -123,8 +130,11 @@ pub enum Op {
         income: NodeId,
     },
     PhaseOut {
+        #[serde(with = "crate::exact::scalar")]
         base: f64,
+        #[serde(with = "crate::exact::by_status")]
         threshold: ByStatus<f64>,
+        #[serde(with = "crate::exact::scalar")]
         rate: f64,
         agi: NodeId,
     },
@@ -204,8 +214,12 @@ pub struct Node {
     pub name: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GraphMeta {
+    /// Graph JSON schema version; the loader requires
+    /// [`crate::exact::SCHEMA_VERSION`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema_version: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub form_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -217,9 +231,21 @@ pub struct GraphMeta {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Invariant {
-    Monotonic { input: String, output: String },
-    Bounds { node: String, min: f64, max: f64 },
-    Ordering { table: TableId, field: String },
+    Monotonic {
+        input: String,
+        output: String,
+    },
+    Bounds {
+        node: String,
+        #[serde(with = "crate::exact::scalar")]
+        min: f64,
+        #[serde(with = "crate::exact::scalar")]
+        max: f64,
+    },
+    Ordering {
+        table: TableId,
+        field: String,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -240,7 +266,32 @@ pub struct Graph {
 
 impl Graph {
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        use serde::de::Error as _;
         let graph: Self = serde_json::from_str(json)?;
+        let version = graph.meta.as_ref().and_then(|meta| meta.schema_version);
+        if version != Some(crate::exact::SCHEMA_VERSION) {
+            return Err(serde_json::Error::custom(format!(
+                "graph JSON schema version {} is required, found {}: regenerate the graph",
+                crate::exact::SCHEMA_VERSION,
+                version.map_or("none".to_string(), |v| v.to_string()),
+            )));
+        }
+        for (table_id, table) in &graph.tables {
+            for brackets in [
+                &table.brackets.single,
+                &table.brackets.married_joint,
+                &table.brackets.married_separate,
+                &table.brackets.head_of_household,
+                &table.brackets.qualifying_widow,
+            ] {
+                let interior = &brackets[..brackets.len().saturating_sub(1)];
+                if interior.iter().any(|b| b.threshold == f64::INFINITY) {
+                    return Err(serde_json::Error::custom(format!(
+                        "table {table_id}: only the last bracket may be unbounded"
+                    )));
+                }
+            }
+        }
         for (id, node) in &graph.nodes {
             node.op
                 .validate(*id)
@@ -249,8 +300,19 @@ impl Graph {
         Ok(graph)
     }
 
+    /// Serialize as graph JSON schema version 2.
+    ///
+    /// Each value is written as the exact value of the f64 the graph holds, not
+    /// the spec's source literal: `11/250` saves as
+    /// `3170534137668829/72057594037927936`. Until tenforty-yxun.4 keeps exact
+    /// values in memory, use the spec compiler, not this, to produce graphs.
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string_pretty(self)
+        let mut graph = self.clone();
+        graph
+            .meta
+            .get_or_insert_with(GraphMeta::default)
+            .schema_version = Some(crate::exact::SCHEMA_VERSION);
+        serde_json::to_string_pretty(&graph)
     }
 
     pub fn node_by_name(&self, name: &str) -> Option<&Node> {
@@ -443,9 +505,10 @@ mod tests {
     #[test]
     fn test_graph_json_roundtrip() {
         let json = r#"{
+            "meta": {"schema_version": 2},
             "nodes": {
                 "0": {"id": 0, "op": {"type": "input"}, "name": "income"},
-                "1": {"id": 1, "op": {"type": "literal", "value": 12950}, "name": "std_ded"},
+                "1": {"id": 1, "op": {"type": "literal", "value": {"n": "12950", "d": "1"}}, "name": "std_ded"},
                 "2": {"id": 2, "op": {"type": "sub", "left": 0, "right": 1}, "name": "taxable"}
             },
             "tables": {},

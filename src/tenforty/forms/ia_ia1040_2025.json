@@ -33,6 +33,7 @@
     "meta": {
         "form_id": "ia_ia1040",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2025
     },
     "nodes": {
@@ -112,7 +113,10 @@
             "id": 18,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "19": {
@@ -144,7 +148,10 @@
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "22": {
@@ -169,7 +176,10 @@
             "id": 24,
             "op": {
                 "type": "literal",
-                "value": 3.8e-2
+                "value": {
+                    "d": "500",
+                    "n": "19"
+                }
             }
         },
         "25": {
@@ -211,7 +221,10 @@
             "id": 29,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "3": {
@@ -242,7 +255,10 @@
             "id": 32,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "33": {
@@ -266,7 +282,10 @@
             "id": 35,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "36": {
@@ -290,7 +309,10 @@
             "id": 38,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "39": {
@@ -411,7 +433,10 @@
             "id": 51,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "52": {
@@ -428,7 +453,10 @@
             "id": 53,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "54": {

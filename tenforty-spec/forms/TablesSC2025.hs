@@ -32,7 +32,7 @@ scBrackets2025 :: NonEmpty Bracket
 scBrackets2025 =
   Bracket (byStatus 3560 3560 3560 3560 3560) 0.00
     :| [ Bracket (byStatus 17830 17830 17830 17830 17830) 0.03,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.06
+         TopBracket 0.06
        ]
 
 scBracketsTable2025 :: Table

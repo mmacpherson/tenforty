@@ -52,7 +52,7 @@ californiaBrackets2024 =
          Bracket (byStatus 360659 721318 360659 490493 721318) 0.093,
          Bracket (byStatus 432787 865574 432787 588593 865574) 0.103,
          Bracket (byStatus 721314 1442628 721314 980987 1442628) 0.113,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.123
+         TopBracket 0.123
        ]
 
 californiaBracketsTable2024 :: Table
@@ -94,7 +94,7 @@ caMentalHealthThreshold2024 :: Amount Dollars
 caMentalHealthThreshold2024 = 1000000
 
 -- | 2024 Mental Health Services Tax rate (1%)
-caMentalHealthRate2024 :: Double
+caMentalHealthRate2024 :: Rational
 caMentalHealthRate2024 = 0.01
 
 -- | FTB 3514 (California Earned Income Tax Credit) thresholds for 2024

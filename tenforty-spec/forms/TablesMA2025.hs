@@ -28,13 +28,13 @@ import TenForty.Types
 -- | 2025 Massachusetts base income tax rate
 -- Source: MA Form 1 Instructions (2025), pg 14, Line 22
 -- Massachusetts has a flat 5.0% tax rate on most income (unchanged from 2024).
-maBaseRate2025 :: Double
+maBaseRate2025 :: Rational
 maBaseRate2025 = 0.05
 
 -- | 2025 Massachusetts surtax rate (additional tax on high earners)
 -- Source: MA Form 1 Instructions (2025), pg 1, 4% Surtax section
 -- An additional 4% tax applies to taxable income over the surtax threshold (unchanged from 2024).
-maSurtaxRate2025 :: Double
+maSurtaxRate2025 :: Rational
 maSurtaxRate2025 = 0.04
 
 -- | 2025 Massachusetts surtax threshold
@@ -46,13 +46,13 @@ maSurtaxThreshold2025 = 1083150
 -- | 2025 Massachusetts short-term capital gains tax rate
 -- Source: MA Form 1 Instructions (2025), pg 14, Line 23a
 -- Short-term capital gains from sales or exchanges of capital assets are taxed at 8.5% (unchanged from 2024).
-maShortTermCapitalGainsRate2025 :: Double
+maShortTermCapitalGainsRate2025 :: Rational
 maShortTermCapitalGainsRate2025 = 0.085
 
 -- | 2025 Massachusetts long-term collectibles tax rate
 -- Source: MA Form 1 Instructions (2025), pg 14, Line 23b
 -- Long-term gains on collectibles are taxed at 12% (unchanged from 2024).
-maLongTermCollectiblesRate2025 :: Double
+maLongTermCollectiblesRate2025 :: Rational
 maLongTermCollectiblesRate2025 = 0.12
 
 -- | 2025 Massachusetts personal exemption amounts
@@ -93,10 +93,10 @@ maContributionDeductionCap2025 = 2000
 maSocialSecurityWageBase2025 :: Amount Dollars
 maSocialSecurityWageBase2025 = 176100
 
-maSocialSecurityRate :: Double
+maSocialSecurityRate :: Rational
 maSocialSecurityRate = 0.062
 
-maMedicareRate :: Double
+maMedicareRate :: Rational
 maMedicareRate = 0.0145
 
 -- | Capital losses offset at most \$2,000 of interest and dividends, short- and

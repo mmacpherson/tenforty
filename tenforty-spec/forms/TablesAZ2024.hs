@@ -9,7 +9,7 @@ import TenForty.Types
 -- | 2024 Arizona State flat tax rate
 -- Source: Arizona DOR Individual Income Tax Highlights (https://azdor.gov/forms/individual-income-tax-highlights)
 -- Arizona uses a flat 2.5% tax rate on all taxable income for all filing statuses.
-azTaxRate2024 :: Double
+azTaxRate2024 :: Rational
 azTaxRate2024 = 0.025
 
 -- | 2024 Arizona standard deduction amounts

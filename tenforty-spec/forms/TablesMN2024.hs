@@ -28,7 +28,7 @@ mnBrackets2024 =
   Bracket (byStatus 31690 46330 23165 39010 46330) 0.0535
     :| [ Bracket (byStatus 104090 184040 92020 156760 184040) 0.0680,
          Bracket (byStatus 193240 321450 160725 256880 321450) 0.0785,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0985
+         TopBracket 0.0985
        ]
 
 mnBracketsTable2024 :: Table

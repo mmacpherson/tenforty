@@ -30,6 +30,7 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Foldable (for_)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
+import Data.Ratio (denominator, numerator)
 import Data.Text (Text)
 import Data.Text qualified as T
 import TenForty.Expr hiding (Line)
@@ -75,7 +76,7 @@ data Node = Node
 data Op
   = OpInput
   | OpImport Text Text Int -- (form_id, line_id, year)
-  | OpLiteral Double
+  | OpLiteral Rational
   | OpAdd Int Int
   | OpSub Int Int
   | OpMul Int Int
@@ -84,19 +85,19 @@ data Op
   | OpMax Int Int
   | OpMin Int Int
   | OpFloor Int
-  | OpTaxTableQuantize TaxTableQuantizeMode Double Double Int
+  | OpTaxTableQuantize TaxTableQuantizeMode Rational Rational Int
   | OpIfPositive Int Int Int
   | OpBracketTax Text Int
-  | OpPhaseOut Double StatusValues Double Int
+  | OpPhaseOut Rational StatusValues Rational Int
   | OpByStatus StatusNodeIds
   deriving stock (Show)
 
 data StatusValues = StatusValues
-  { svSingle :: Double,
-    svMarriedJoint :: Double,
-    svMarriedSeparate :: Double,
-    svHeadOfHousehold :: Double,
-    svQualifyingWidow :: Double
+  { svSingle :: Rational,
+    svMarriedJoint :: Rational,
+    svMarriedSeparate :: Rational,
+    svHeadOfHousehold :: Rational,
+    svQualifyingWidow :: Rational
   }
   deriving stock (Show)
 
@@ -123,9 +124,11 @@ data StatusBrackets = StatusBrackets
   }
   deriving stock (Show)
 
+-- | A compiled bracket. 'Nothing' marks the unbounded top bracket, emitted as
+-- a null threshold.
 data Bracket = Bracket
-  { brThreshold :: Double,
-    brRate :: Double
+  { brThreshold :: Maybe Rational,
+    brRate :: Rational
   }
   deriving stock (Show)
 
@@ -151,10 +154,25 @@ instance ToJSON ComputationGraph where
       importToJSON :: (Text, Text, Int) -> Value
       importToJSON (fid, lid, yr) = object ["form" .= fid, "line" .= lid, "year" .= yr]
 
+-- | Graph JSON schema version. Version 2 (tenforty-yxun.3) encodes every value
+-- scalar exactly as integer strings and the top bracket as a null threshold.
+graphSchemaVersion :: Int
+graphSchemaVersion = 2
+
+-- | An exact scalar: {"n": "<signed integer>", "d": "<positive integer>"}.
+-- 'Rational' is always in lowest terms with a positive denominator.
+exactScalar :: Rational -> Value
+exactScalar r =
+  object
+    [ "n" .= T.pack (show (numerator r)),
+      "d" .= T.pack (show (denominator r))
+    ]
+
 instance ToJSON GraphMeta where
   toJSON GraphMeta {..} =
     object
-      [ "form_id" .= gmFormId,
+      [ "schema_version" .= graphSchemaVersion,
+        "form_id" .= gmFormId,
         "year" .= gmYear,
         "generated_by" .= gmGeneratedBy
       ]
@@ -169,7 +187,7 @@ instance ToJSON Op where
   toJSON = \case
     OpInput -> object ["type" .= ("input" :: Text)]
     OpImport fid lid yr -> object ["type" .= ("import" :: Text), "form" .= fid, "line" .= lid, "year" .= yr]
-    OpLiteral v -> object ["type" .= ("literal" :: Text), "value" .= v]
+    OpLiteral v -> object ["type" .= ("literal" :: Text), "value" .= exactScalar v]
     OpAdd a b -> object ["type" .= ("add" :: Text), "left" .= a, "right" .= b]
     OpSub a b -> object ["type" .= ("sub" :: Text), "left" .= a, "right" .= b]
     OpMul a b -> object ["type" .= ("mul" :: Text), "left" .= a, "right" .= b]
@@ -179,15 +197,15 @@ instance ToJSON Op where
     OpMin a b -> object ["type" .= ("min" :: Text), "left" .= a, "right" .= b]
     OpFloor a -> object ["type" .= ("floor" :: Text), "arg" .= a]
     OpTaxTableQuantize mode step offset a ->
-      object ["type" .= ("tax_table_quantize" :: Text), "arg" .= a, "step" .= step, "output_offset" .= offset, "mode" .= (case mode of TableFloor -> "floor" :: Text; TableRound -> "round")]
+      object ["type" .= ("tax_table_quantize" :: Text), "arg" .= a, "step" .= exactScalar step, "output_offset" .= exactScalar offset, "mode" .= (case mode of TableFloor -> "floor" :: Text; TableRound -> "round")]
     OpIfPositive c t e -> object ["type" .= ("if_positive" :: Text), "cond" .= c, "then" .= t, "otherwise" .= e]
     OpBracketTax t a -> object ["type" .= ("bracket_tax" :: Text), "table" .= t, "income" .= a]
     OpPhaseOut base threshold r agi ->
       object
         [ "type" .= ("phase_out" :: Text),
-          "base" .= base,
+          "base" .= exactScalar base,
           "threshold" .= threshold,
-          "rate" .= r,
+          "rate" .= exactScalar r,
           "agi" .= agi
         ]
     OpByStatus sn ->
@@ -199,11 +217,11 @@ instance ToJSON Op where
 instance ToJSON StatusValues where
   toJSON StatusValues {..} =
     object
-      [ "single" .= svSingle,
-        "married_joint" .= svMarriedJoint,
-        "married_separate" .= svMarriedSeparate,
-        "head_of_household" .= svHeadOfHousehold,
-        "qualifying_widow" .= svQualifyingWidow
+      [ "single" .= exactScalar svSingle,
+        "married_joint" .= exactScalar svMarriedJoint,
+        "married_separate" .= exactScalar svMarriedSeparate,
+        "head_of_household" .= exactScalar svHeadOfHousehold,
+        "qualifying_widow" .= exactScalar svQualifyingWidow
       ]
 
 instance ToJSON StatusNodeIds where
@@ -235,8 +253,8 @@ instance ToJSON StatusBrackets where
 instance ToJSON Bracket where
   toJSON Bracket {..} =
     object
-      [ "threshold" .= brThreshold,
-        "rate" .= brRate
+      [ "threshold" .= fmap exactScalar brThreshold,
+        "rate" .= exactScalar brRate
       ]
 
 data CompileState = CompileState
@@ -655,8 +673,8 @@ compileExpr mname = \case
     plusHalfId <- emitAnonymousNode (OpAdd aid halfId)
     emitNode mname (OpFloor plusHalfId)
   TaxTableQuantize mode step offset a -> do
-    if step < 1 || isNaN step || isInfinite step || step /= fromInteger (floor step) || isNaN offset || isInfinite offset
-      then error "Invalid TaxTableQuantize parameters: step must be a positive finite integer, output_offset must be finite"
+    if step < 1 || denominator step /= 1
+      then error "Invalid TaxTableQuantize parameters: step must be a positive integer"
       else do
         aid <- compileExpr Nothing a
         emitNode mname (OpTaxTableQuantize mode step offset aid)
@@ -680,7 +698,7 @@ compileExpr mname = \case
     qwId <- compileExpr Nothing (bsQualifyingWidow bs)
     emitNode mname (OpByStatus $ StatusNodeIds sId mjId msId hhId qwId)
 
-evalConstExpr :: PhaseOutParameter -> Expr u -> Compile Double
+evalConstExpr :: PhaseOutParameter -> Expr u -> Compile Rational
 evalConstExpr parameter = \case
   Lit (Amount v) -> pure v
   _ -> do
@@ -722,7 +740,7 @@ compileBracketTable bt =
 compileBracketsForStatus :: FilingStatus -> T.BracketTable -> [Bracket]
 compileBracketsForStatus status bt =
   [ Bracket
-      { brThreshold = unAmount (forStatus (T.bracketThreshold b) status),
+      { brThreshold = unAmount . (`forStatus` status) <$> T.bracketThreshold b,
         brRate = unAmount (T.bracketRate b)
       }
   | b <- T.bracketTableList bt

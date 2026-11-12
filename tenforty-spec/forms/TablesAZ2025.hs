@@ -10,7 +10,7 @@ import TenForty.Types
 -- Source: Arizona DOR Individual Income Tax Highlights (https://azdor.gov/forms/individual-income-tax-highlights)
 -- Arizona continues to use a flat 2.5% tax rate on all taxable income for all filing statuses.
 -- The Optional Tax Table and the X and Y Tax Table are now obsolete.
-azTaxRate2025 :: Double
+azTaxRate2025 :: Rational
 azTaxRate2025 = 0.025
 
 -- | 2025 Arizona standard deduction amounts

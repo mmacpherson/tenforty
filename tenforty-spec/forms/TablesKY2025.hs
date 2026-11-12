@@ -10,7 +10,7 @@ import TenForty.Types
 -- Source: Kentucky Department of Revenue - Form 740 Instructions (2025)
 -- https://revenue.ky.gov/Forms/740%20Packet%20Instructions%20(2025).pdf
 -- Kentucky uses a flat 4% tax rate on taxable income for tax year 2025.
-kyTaxRate2025 :: Double
+kyTaxRate2025 :: Rational
 kyTaxRate2025 = 0.04
 
 -- | 2025 Kentucky standard deduction

@@ -27,7 +27,7 @@ import TenForty.Types
 montanaOrdinaryBrackets2025 :: NonEmpty Bracket
 montanaOrdinaryBrackets2025 =
   Bracket (byStatus 21100 42200 21100 31700 42200) 0.047
-    :| [Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.059]
+    :| [TopBracket 0.059]
 
 montanaOrdinaryBracketsTable2025 :: Table
 montanaOrdinaryBracketsTable2025 =
@@ -51,7 +51,7 @@ montanaOrdinaryBracketsTable2025 =
 montanaCapitalGainsBrackets2025 :: NonEmpty Bracket
 montanaCapitalGainsBrackets2025 =
   Bracket (byStatus 21100 42200 21100 31700 42200) 0.030
-    :| [Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.041]
+    :| [TopBracket 0.041]
 
 montanaCapitalGainsBracketsTable2025 :: Table
 montanaCapitalGainsBracketsTable2025 =

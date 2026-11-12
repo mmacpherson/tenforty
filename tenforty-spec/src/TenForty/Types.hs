@@ -51,7 +51,7 @@ data Rate
 
 data Count
 
-newtype Amount (u :: Type) = Amount {unAmount :: Double}
+newtype Amount (u :: Type) = Amount {unAmount :: Rational}
   deriving stock (Show, Read)
   deriving newtype (Eq, Ord)
 

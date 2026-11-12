@@ -9,7 +9,7 @@ import TenForty.Types
 -- | 2024 Illinois State flat tax rate
 -- Source: Illinois Department of Revenue Form IL-1040 Instructions (2024)
 -- https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/incometax/documents/currentyear/individual/il-1040-instr.pdf
-ilTaxRate2024 :: Double
+ilTaxRate2024 :: Rational
 ilTaxRate2024 = 0.0495
 
 -- | 2024 Illinois personal exemption amount

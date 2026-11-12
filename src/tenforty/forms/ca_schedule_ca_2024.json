@@ -42,6 +42,7 @@
     "meta": {
         "form_id": "ca_schedule_ca",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {

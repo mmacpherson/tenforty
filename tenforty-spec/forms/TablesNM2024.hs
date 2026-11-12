@@ -19,7 +19,7 @@ newMexicoBrackets2024 =
     :| [ Bracket (byStatus 11000 16000 8000 16000 16000) 0.032,
          Bracket (byStatus 16000 24000 12000 24000 24000) 0.047,
          Bracket (byStatus 210000 315000 157500 315000 315000) 0.049,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.059
+         TopBracket 0.059
        ]
 
 newMexicoBracketsTable2024 :: Table

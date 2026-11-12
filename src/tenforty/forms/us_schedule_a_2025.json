@@ -26,6 +26,7 @@
     "meta": {
         "form_id": "us_schedule_a",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2025
     },
     "nodes": {
@@ -92,7 +93,10 @@
             "id": 16,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "17": {
@@ -107,7 +111,10 @@
             "id": 18,
             "op": {
                 "type": "literal",
-                "value": 7.5e-2
+                "value": {
+                    "d": "40",
+                    "n": "3"
+                }
             }
         },
         "19": {
@@ -130,7 +137,10 @@
             "id": 20,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "21": {
@@ -171,35 +181,50 @@
             "id": 25,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "26": {
             "id": 26,
             "op": {
                 "type": "literal",
-                "value": 500000
+                "value": {
+                    "d": "1",
+                    "n": "500000"
+                }
             }
         },
         "27": {
             "id": 27,
             "op": {
                 "type": "literal",
-                "value": 500000
+                "value": {
+                    "d": "1",
+                    "n": "500000"
+                }
             }
         },
         "28": {
             "id": 28,
             "op": {
                 "type": "literal",
-                "value": 250000
+                "value": {
+                    "d": "1",
+                    "n": "250000"
+                }
             }
         },
         "29": {
             "id": 29,
             "op": {
                 "type": "literal",
-                "value": 500000
+                "value": {
+                    "d": "1",
+                    "n": "500000"
+                }
             }
         },
         "3": {
@@ -213,7 +238,10 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 500000
+                "value": {
+                    "d": "1",
+                    "n": "500000"
+                }
             }
         },
         "31": {
@@ -250,14 +278,20 @@
             "id": 34,
             "op": {
                 "type": "literal",
-                "value": 40000
+                "value": {
+                    "d": "1",
+                    "n": "40000"
+                }
             }
         },
         "35": {
             "id": 35,
             "op": {
                 "type": "literal",
-                "value": 0.3
+                "value": {
+                    "d": "10",
+                    "n": "3"
+                }
             }
         },
         "36": {
@@ -281,7 +315,10 @@
             "id": 38,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "39": {
@@ -304,35 +341,50 @@
             "id": 40,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "41": {
             "id": 41,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "42": {
             "id": 42,
             "op": {
                 "type": "literal",
-                "value": 0.5
+                "value": {
+                    "d": "2",
+                    "n": "1"
+                }
             }
         },
         "43": {
             "id": 43,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "44": {
             "id": 44,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "45": {
@@ -437,7 +489,10 @@
             "id": 55,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "56": {

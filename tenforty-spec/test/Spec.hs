@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import AllForms (allForms)
 import CA540_2024
 import CA540_2025
 import CAFTB3506_2024
@@ -13,13 +14,18 @@ import CAScheduleCA_2024
 import CAScheduleCA_2025
 import Control.Exception (evaluate)
 import Control.Monad (void)
+import Data.Aeson qualified as Aeson
+import Data.Aeson.Key qualified as Key
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString.Lazy qualified as BL
-import Data.Foldable (forM_)
+import Data.Foldable (forM_, for_)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Map.Strict qualified as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Ratio (denominator, (%))
 import Data.Set qualified as Set
 import Data.Text qualified as T
+import Data.Vector qualified as V
 import ExprProperties qualified
 import ReferenceEvaluator (evalGraph, evalGraphDetailed, evalGraphNode)
 import System.Environment (lookupEnv)
@@ -29,7 +35,7 @@ import TablesCA2024
 import TablesCA2025
 import TenForty
 import TenForty.Compile.JSON qualified as JSON
-import TenForty.Expr (Expr (PhaseOut, TaxTableQuantize), PhaseOutParameter (..), TaxTableQuantizeMode (..), extractLineRefs, extractTableRefs)
+import TenForty.Expr (Expr (Lit, PhaseOut, TaxTableQuantize), PhaseOutParameter (..), TaxTableQuantizeMode (..), extractLineRefs, extractTableRefs)
 import TenForty.Table qualified as Table
 import Test.Hspec
 import Test.QuickCheck
@@ -94,7 +100,7 @@ caTaxYears =
     CATaxYear 2025 californiaBrackets2025 caStandardDeduction2025 ca540_2025
   ]
 
-evalBracketRateAt :: Table -> FilingStatus -> Double -> Double
+evalBracketRateAt :: Table -> FilingStatus -> Rational -> Double
 evalBracketRateAt table status income =
   case form "rate_probe" 2025 (void (compute "result" "Result" "Result" Interior (dollars 1 .*. bracketRateAt table (dollars income)))) of
     Left err -> error ("evalBracketRateAt: " ++ show err)
@@ -123,10 +129,10 @@ spec n = do
        in map (forStatus bs) allFilingStatuses `shouldBe` [1, 2, 3, 4, 5]
 
   describe "Amount" $ do
-    it "addition is commutative" $ property $ \(a :: Double) (b :: Double) ->
+    it "addition is commutative" $ property $ \(a :: Rational) (b :: Rational) ->
       Amount a + Amount b == (Amount b + Amount a :: Amount Dollars)
 
-    it "multiplication by rate scales correctly" $ property $ \(d :: Double) (r :: Double) ->
+    it "multiplication by rate scales correctly" $ property $ \(d :: Rational) (r :: Rational) ->
       unAmount (Amount d * Amount r :: Amount Dollars) == d * r
 
   describe "Form 6251 MFS line-4 tables" $ do
@@ -192,18 +198,19 @@ spec n = do
           case mkBracketTable (tyBrackets ty) of
             Right bt ->
               evalBracketRateAt (TableBracket "rate_probe" bt) status inc
-                === unAmount (marginalRate bt status (Amount inc))
+                === fromRational (unAmount (marginalRate bt status (Amount inc)))
             Left _ -> property False
 
       it ("bracketRateAt puts an exact breakpoint in the lower bracket (" ++ yr ++ ")") $
         forM_ allFilingStatuses $ \status ->
           case mkBracketTable (tyBrackets ty) of
             Right bt ->
-              forM_ (zip (bracketTableList bt) (drop 1 (bracketTableList bt))) $ \(lower, upper) -> do
-                let threshold = unAmount (forStatus (bracketThreshold lower) status)
-                    probe = evalBracketRateAt (TableBracket "rate_probe" bt) status
-                probe threshold `shouldBe` unAmount (bracketRate lower)
-                probe (threshold + 1) `shouldBe` unAmount (bracketRate upper)
+              forM_ (zip (bracketTableList bt) (drop 1 (bracketTableList bt))) $ \(lower, upper) ->
+                for_ (bracketThreshold lower) $ \thresholds -> do
+                  let threshold = unAmount (forStatus thresholds status)
+                      probe = evalBracketRateAt (TableBracket "rate_probe" bt) status
+                  probe threshold `shouldBe` fromRational (unAmount (bracketRate lower))
+                  probe (threshold + 1) `shouldBe` fromRational (unAmount (bracketRate upper))
             Left err -> expectationFailure err
 
   describe "California BracketTable" $ do
@@ -623,8 +630,7 @@ spec n = do
     let tableId = TableId "probe_rates"
         Right table = mkTaxTable 50 (Amount 25) tableId
         toyForm = form (FormId "table_probe") 2024 $ do
-          let upper = Amount (1 / 0)
-          defineTable (Table.TableBracket tableId (Table.BracketTable (Table.Bracket (byStatus upper upper upper upper upper) (Amount 0.1) :| [])))
+          defineTable (Table.TableBracket tableId (Table.BracketTable (Table.TopBracket (Amount 0.1) :| [])))
           income <- input (LineId "L1a") "Income" "" Interior
           void (compute (LineId "L2") "Tax" "" Interior (taxTableBandTax table income))
           outputs [LineId "L2"]
@@ -642,13 +648,121 @@ spec n = do
         case mkTaxTable step (Amount 25) tableId of
           Left err -> err `shouldBe` "mkTaxTable: step must be a positive integer number of dollars"
           Right _ -> expectationFailure "invalid band width accepted"
-    it "rejects nonfinite midpoint offsets at the combinator" $
-      forM_ [1 / 0, 0 / 0, -1, 50] $ \offset ->
+    -- Since tenforty-yxun.3 an offset is a Rational, so the former nonfinite
+    -- cases (1/0, 0/0) cannot be constructed at all; the out-of-band cases
+    -- remain the combinator's job.
+    it "rejects midpoint offsets outside the band at the combinator" $
+      forM_ [-1, 50] $ \offset ->
         case mkTaxTable 50 (Amount offset) tableId of
           Left err -> err `shouldBe` "mkTaxTable: midpoint offset must be finite and inside the band"
           Right _ -> expectationFailure "invalid midpoint accepted"
     it "tracks line references through table quantization" $
       extractLineRefs (taxTableBandTax table (line (LineId "income"))) `shouldBe` Set.singleton (LineId "income")
+
+  describe "Exact literals and graph schema version 2 (tenforty-yxun.3)" $ do
+    let exact n d = Aeson.object ["n" Aeson..= T.pack (show (n :: Integer)), "d" Aeson..= T.pack (show (d :: Integer))]
+        field k (Aeson.Object o) = KeyMap.lookup (Key.fromText k) o
+        field _ _ = Nothing
+        compiledValue frm = fromMaybe (error "graph JSON did not decode") (Aeson.decode (compileFormToJSON frm) :: Maybe Aeson.Value)
+        literalProbe = form (FormId "literal_probe") 2025 $ do
+          income <- input (LineId "L1a") "Income" "" Interior
+          void (compute (LineId "L2") "Rate" "" Interior (income .*. rate 0.044))
+          void (compute (LineId "L3") "Percent" "" Interior (income .*. percent 4.4))
+          void (compute (LineId "L4") "Big" "" Interior (income .+. dollars 1e12))
+          void (compute (LineId "L5") "Half" "" Interior (income .+. dollars (-0.5)))
+          void (compute (LineId "L6") "Band" "" Interior (TaxTableQuantize TableFloor 25 12.5 income))
+          outputs [LineId "L2", LineId "L3", LineId "L4", LineId "L5", LineId "L6"]
+        literalsOf v =
+          [ value
+          | Just (Aeson.Object nodes) <- [field "nodes" v],
+            node <- KeyMap.elems nodes,
+            Just op <- [field "op" node],
+            field "type" op == Just (Aeson.String "literal"),
+            Just value <- [field "value" op]
+          ]
+    it "keeps a decimal rate literal exact: 0.044 is 11/250, never a Double" $
+      toRational (unAmount (0.044 :: Amount Rate)) `shouldBe` 11 % 250
+    it "keeps percent exact: percent 4.4 is 11/250" $
+      case percent 4.4 of
+        Lit (Amount a) -> toRational a `shouldBe` 11 % 250
+        _ -> expectationFailure "percent did not build a literal"
+    it "emits every literal as an exact {n, d} integer-string pair" $
+      case literalProbe of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let literals = literalsOf (compiledValue frm)
+          forM_ [exact 11 250, exact 1000000000000 1, exact (-1) 2] $ \expected ->
+            literals `shouldSatisfy` elem expected
+    it "emits tax-table quantize parameters exactly" $
+      case literalProbe of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let quantizers =
+                [ (field "step" op, field "output_offset" op)
+                | Just (Aeson.Object nodes) <- [field "nodes" (compiledValue frm)],
+                  node <- KeyMap.elems nodes,
+                  Just op <- [field "op" node],
+                  field "type" op == Just (Aeson.String "tax_table_quantize")
+                ]
+          quantizers `shouldBe` [(Just (exact 25 1), Just (exact 25 2))]
+    it "marks the graph schema version 2 in its meta" $
+      case literalProbe of
+        Left err -> expectationFailure (show err)
+        Right frm ->
+          (field "meta" (compiledValue frm) >>= field "schema_version")
+            `shouldBe` Just (Aeson.Number 2)
+    forM_ taxYears $ \ty ->
+      it ("models every table's top bracket as explicitly unbounded (" <> show (tyYear ty) <> ")") $
+        case tyForm ty of
+          Left err -> expectationFailure (show err)
+          Right frm -> do
+            let tables = case field "tables" (compiledValue frm) of
+                  Just (Aeson.Object ts) -> KeyMap.elems ts
+                  _ -> []
+                statusLists t = case field "brackets" t of
+                  Just (Aeson.Object bs) -> [xs | Aeson.Array xs <- KeyMap.elems bs]
+                  _ -> []
+                thresholds xs = mapMaybe (field "threshold") (V.toList xs)
+            tables `shouldSatisfy` (not . null)
+            forM_ (concatMap statusLists tables) $ \xs -> do
+              let ts = thresholds xs
+              last ts `shouldBe` Aeson.Null
+              filter (== Aeson.Null) (init ts) `shouldBe` []
+
+  describe "Rate literals: percent and rate agree exactly (tenforty-yxun.3)" $ do
+    let compiled = [(path, compileForm frm) | (path, Right frm) <- allForms]
+        literalValues graph =
+          [v | JSON.Node {JSON.nodeOp = JSON.OpLiteral v} <- Map.elems (JSON.cgNodes graph)]
+            <> [ JSON.brRate b
+               | table <- Map.elems (JSON.cgTables graph),
+                 let sb = JSON.btBrackets table,
+                 bs <- [JSON.sbSingle sb, JSON.sbMarriedJoint sb, JSON.sbMarriedSeparate sb, JSON.sbHeadOfHousehold sb, JSON.sbQualifyingWidow sb],
+                 b <- bs
+               ]
+        litValue :: Expr Rate -> Maybe Rational
+        litValue expr = case expr of
+          Lit (Amount a) -> Just a
+          _ -> Nothing
+        terminatingDecimal r = strip 2 (strip 5 (denominator r)) == 1
+          where
+            strip f n = if n `mod` f == 0 then strip f (n `div` f) else n
+        -- Statutory quotients, not decimals: CA FTB 3506 line 10 reduces the
+        -- credit by 50% / 60 (2024) and 50% / 61.92 (2025) per $1,000 step.
+        statutoryQuotients =
+          [ ("ca_ftb_3506_2024.json", 5 % 6),
+            ("ca_ftb_3506_2025.json", 625 % 774)
+          ]
+    it "covers every compiled form" $
+      length compiled `shouldBe` length allForms
+    it "percent (100 r) and rate r build the same exact literal, for every literal in every form" $
+      forM_ compiled $ \(path, graph) ->
+        forM_ (literalValues graph) $ \r ->
+          (path, litValue (percent (100 * r))) `shouldBe` (path, litValue (rate r))
+    it "every literal in every form is an exact decimal, apart from listed statutory quotients" $
+      forM_ compiled $ \(path, graph) ->
+        forM_ (literalValues graph) $ \r ->
+          (terminatingDecimal r || (path, r) `elem` statutoryQuotients)
+            `shouldBe` True
 
   describe "Form Compilation" $ do
     forM_ taxYears $ \ty ->
@@ -1291,7 +1405,7 @@ spec n = do
               Right frm ->
                 let graph = compileForm frm
                     stdDed = forStatus (tyStdDed ty) status
-                    wages = unAmount stdDed + 10000
+                    wages = fromRational (unAmount stdDed) + 10000
                     tax = evalGraph graph status wages
                  in tax > 0
               Left _ -> False
@@ -1374,7 +1488,7 @@ spec n = do
         case tyForm ty of
           Right frm -> do
             let graph = compileForm frm
-                stdDed = unAmount (forStatus (tyStdDed ty) Single)
+                stdDed = fromRational (unAmount (forStatus (tyStdDed ty) Single))
                 -- Test just above standard deduction (10% bracket)
                 tax1 = evalGraph graph Single (stdDed + 100)
             -- Should be ~$10 (10% of $100)

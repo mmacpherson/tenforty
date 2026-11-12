@@ -117,7 +117,7 @@ federalBrackets2025 =
          Bracket (byStatus 197300 394600 197300 197300 394600) 0.24,
          Bracket (byStatus 250525 501050 250525 250500 501050) 0.32,
          Bracket (byStatus 626350 751600 375800 626350 751600) 0.35,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.37
+         TopBracket 0.37
        ]
 
 federalBracketsTable2025 :: Table

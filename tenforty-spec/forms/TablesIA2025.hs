@@ -10,5 +10,5 @@ where
 -- Iowa law provides for a flat tax rate of 3.8% for all levels of taxable individual income
 -- beginning with tax year 2025 (Iowa Senate File 2442, enacted May 2024).
 -- There are no income tax brackets in 2025.
-iaTaxRate2025 :: Double
+iaTaxRate2025 :: Rational
 iaTaxRate2025 = 0.038

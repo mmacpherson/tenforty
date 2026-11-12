@@ -28,7 +28,7 @@ ndBrackets2025 :: NonEmpty Bracket
 ndBrackets2025 =
   Bracket (byStatus 48475 80975 40475 64950 80975) 0.00
     :| [ Bracket (byStatus 244825 298075 149025 271450 298075) 0.0195,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.025
+         TopBracket 0.025
        ]
 
 ndBracketsTable2025 :: Table
