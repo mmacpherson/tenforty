@@ -6,19 +6,20 @@ on:
   workflow_call:  # from release.yml, on the tagged commit
   workflow_dispatch:  # also builds the wheels, to test packaging on a branch
 
-# Branch runs share a workflow/ref group and superseded pushes cancel them.
+# Only branch pushes share a workflow/ref group and cancel superseded pushes.
+# Manual dispatches use unique run IDs, so pushes and requested wheel builds
+# cannot cancel or replace each other. Main, tags and reusable release calls
+# also get unique IDs: cancel-in-progress=false still replaces pending runs.
+# Reusable workflows inherit the caller's workflow name (release.yml: release).
 # Keep the ci-name guard below in sync with this workflow name.
-# Main/tags get unique run IDs: cancel-in-progress=false alone still replaces
-# an older pending run. Reusable workflows inherit the caller's workflow name,
-# so release.yml (name: release), and explicit workflow_call events, are protected.
 concurrency:
   group: >-
     ${{ github.workflow }}-${{ github.ref }}-${{
-    (github.workflow == 'ci' && github.event_name != 'workflow_call' &&
+    (github.workflow == 'ci' && github.event_name == 'push' &&
     github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')) &&
     'branch' || github.run_id }}
   cancel-in-progress: >-
-    ${{ github.workflow == 'ci' && github.event_name != 'workflow_call' &&
+    ${{ github.workflow == 'ci' && github.event_name == 'push' &&
     github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
