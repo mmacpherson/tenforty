@@ -1,6 +1,7 @@
 """Evaluate the workflow's concurrency expressions across event contexts."""
 
 import re
+import shlex
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -23,13 +24,18 @@ def test_workflow_name_matches_concurrency_guard(workflow):
     assert workflow["name"] == "ci"
 
 
-def _expression(source, context):
+def _expression(source, context, runner=None):
     """Translate the string/boolean expression subset used by this policy."""
     source = source.replace("&&", " and ").replace("||", " or ")
     source = re.sub(r"!(?!=)", " not ", source)
     return eval(
         source.strip(),
-        {"__builtins__": {}, "github": context, "startsWith": str.startswith},
+        {
+            "__builtins__": {},
+            "github": context,
+            "runner": runner,
+            "startsWith": str.startswith,
+        },
     )
 
 
@@ -78,3 +84,35 @@ def test_dispatch_and_push_do_not_replace_each_other(workflow, events):
     first, _ = _policy(workflow, events[0], "refs/heads/feature", 101)
     second, _ = _policy(workflow, events[1], "refs/heads/feature", 102)
     assert first != second
+
+
+@pytest.mark.parametrize("runner_os", ["Linux", "macOS", "Windows"])
+def test_validate_keeps_windows_serial_and_other_platforms_parallel(
+    workflow, runner_os
+):
+    """Preserve Windows graph-only flags while Linux/macOS use work stealing."""
+    command = next(
+        step["run"]
+        for step in workflow["jobs"]["validate"]["steps"]
+        if step.get("name") == "Run tests"
+    )
+    command = command.replace(
+        "${{ matrix.pytest-args }}", "--graph-only" if runner_os == "Windows" else ""
+    )
+    command = re.sub(
+        r"\$\{\{(.*?)\}\}",
+        lambda match: str(
+            _expression(match.group(1), None, SimpleNamespace(os=runner_os))
+        ),
+        command,
+        flags=re.DOTALL,
+    )
+    arguments = shlex.split(command)
+    assert ("--graph-only" in arguments) is (runner_os == "Windows")
+    assert ("-n" in arguments) is (runner_os != "Windows")
+    assert ("--dist" in arguments) is (runner_os != "Windows")
+    if runner_os != "Windows":
+        assert arguments[arguments.index("-n") + 1] == "auto"
+        assert arguments[arguments.index("--dist") + 1] == "worksteal"
+    assert "--require-graph" in arguments
+    assert "--min-graph-passes=200" in arguments

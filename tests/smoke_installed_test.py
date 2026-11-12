@@ -33,12 +33,16 @@ def test_smoke_passes_against_dev_install(smoke, capsys):
     assert "evaluated" in capsys.readouterr().out
 
 
-def test_smoke_rejects_source_tree_import(smoke):
-    """Without the override, importing from the source tree fails the check."""
+def test_smoke_rejects_source_tree_import(smoke, monkeypatch, tmp_path):
+    """Source rejection is checked independently of the current install path."""
     import tenforty
 
-    if not Path(tenforty.__file__).resolve().is_relative_to(smoke.SOURCE_TREE):
-        pytest.skip("tenforty is installed outside the source tree")
+    source_tree = tmp_path / "checkout"
+    source_file = source_tree / "src" / "tenforty" / "__init__.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text("", encoding="utf-8")
+    monkeypatch.setattr(smoke, "SOURCE_TREE", source_tree)
+    monkeypatch.setattr(tenforty, "__file__", str(source_file))
     with pytest.raises(smoke.SmokeFailure, match="source tree"):
         smoke.main([])
 
