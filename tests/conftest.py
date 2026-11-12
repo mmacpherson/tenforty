@@ -205,14 +205,20 @@ def graph_only_install(monkeypatch):
     monkeypatch.setattr(_ots_extension, "ots_extension_installed", lambda: False)
 
 
+# No profile sets a wall-clock deadline (tenforty-up2k). A deadline is not a tax
+# assertion: under a shared, loaded machine it fails parity and solver oracles
+# on timing alone. Every profile states deadline=None once, here, so no test
+# needs to; tests/hypothesis_profiles_test.py keeps it that way.
 settings.register_profile(
     "ci",
     max_examples=500,
+    deadline=None,
     suppress_health_check=[HealthCheck.too_slow],
 )
 settings.register_profile(
     "dev",
     max_examples=50,
+    deadline=None,
     suppress_health_check=[HealthCheck.too_slow],
 )
 # Ad-hoc deep sweep: `uv run pytest --hypothesis-profile=deep`. Reaches rare
