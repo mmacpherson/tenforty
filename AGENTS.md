@@ -194,12 +194,17 @@ profile's example count:
 
 - **Invariant / corner-hunting property tests** (monotonicity, continuity,
   wiring, gradients — cheap, one or two evaluations per example) omit
-  `max_examples` and use `@settings(deadline=None)`, so they run 500 under `ci`,
-  10,000 under `deep`, and 100,000 under `soak`.
+  `max_examples`, so they run 500 under `ci`, 10,000 under `deep`, and 100,000
+  under `soak`.
 - **Oracle / expensive tests** (parity across both backends, the taxcalc
   differential, the Newton solver) pin an explicit, bounded `max_examples` with a
   one-line reason — 10k of a slow example is prohibitive and adds nothing to a
   value/agreement oracle, so these deliberately do **not** scale.
+- **No test has a wall-clock deadline.** Every Hypothesis profile in
+  `tests/conftest.py` sets `deadline=None`, stated once there, so a test needs
+  no `deadline=` of its own (existing `deadline=None` decorators are redundant
+  but harmless). A deadline is not a tax assertion, and on a shared, loaded
+  machine it fails parity and solver oracles on timing alone (tenforty-up2k).
 
 ## Python Style
 
