@@ -27,7 +27,7 @@ repos:
     exclude: ^tests/(fixtures/|taxcalc/(taxcalc_policy|__init__)\.py|parity/state_parity_policy\.py)
   - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.17.4
+  rev: v0.17.5
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]
@@ -49,7 +49,7 @@ repos:
     # Pin the formatter: an unpinned one varies with when each machine's hook
     # environment was built (toml-sort 0.24 and 0.25 space inline tables
     # differently). The weekly update-pre-commit-hooks workflow bumps this pin.
-    additional_dependencies: [toml-sort==0.25.0]
+    additional_dependencies: [toml-sort==0.26.0]
     # Lockfiles are machine-written; reformatting them only makes churn.
     exclude: ^(Cargo|uv)\.lock$
   - id: pretty-format-yaml
