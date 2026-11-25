@@ -220,9 +220,10 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.RI: _both_years("tenforty-b72.85", "tenforty-b72.86"),
     S.SC: {
         2024: (
-            "tenforty-b72.80",
+            "tenforty-b72.42",
             "tenforty-b72.82",
             "tenforty-s48h.66",
+            "tenforty-tj2.20",
         ),
         2025: (
             "tenforty-b72.81",

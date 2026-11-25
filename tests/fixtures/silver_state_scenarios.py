@@ -3184,14 +3184,16 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # SC 2025: 3 brackets (0%, 3%, 6%), same for all filing statuses
     # Brackets: $0-$3,560 (0%), $3,560-$17,830 (3%), over $17,830 (6%)
     # Dependent exemption: $4,930 per dependent
+    # (2024 brackets are $0-$3,460, $3,460-$17,330, over $17,330, 6.2%:
+    # SC1040TT 2024 first non-zero row and p.4 schedule, tenforty-b72.80)
     #
     # SC Single, $50,000 W2 (2024, no dependents)
     # Fed AGI: $50,000, Fed std deduction: $14,600
     # Fed taxable: $50,000 - $14,600 = $35,400
     # SC taxable: $35,400 (no exemptions)
-    # SC tax: $0 + ($17,830 - $3,560) * 0.03 + ($35,400 - $17,830) * 0.062
-    #       = $0 + $14,270 * 0.03 + $17,570 * 0.062
-    #       = $0 + $428.10 + $1,089.34 = $1,517.44
+    # SC tax: $0 + ($17,330 - $3,460) * 0.03 + ($35,400 - $17,330) * 0.062
+    #       = $0 + $13,870 * 0.03 + $18,070 * 0.062
+    #       = $0 + $416.10 + $1,120.34 = $1,536.44
     # Federal tax (OTS tables): $4,016.00
     TaxScenario(
         source="SC 2024 Tax Brackets (computed)",
@@ -3201,7 +3203,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=1517.44,
+        expected_state_tax=1536.44,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -3209,9 +3211,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Fed AGI: $100,000, Fed std deduction: $29,200
     # Fed taxable: $100,000 - $29,200 = $70,800
     # SC taxable: $70,800 (no exemptions)
-    # SC tax: $0 + $14,270 * 0.03 + ($70,800 - $17,830) * 0.062
-    #       = $0 + $428.10 + $52,970 * 0.062
-    #       = $0 + $428.10 + $3,284.14 = $3,712.24
+    # SC tax: $0 + $13,870 * 0.03 + ($70,800 - $17,330) * 0.062
+    #       = $0 + $416.10 + $53,470 * 0.062
+    #       = $0 + $416.10 + $3,315.14 = $3,731.24
     # Federal tax (OTS tables): $8,032.00
     TaxScenario(
         source="SC 2024 Tax Brackets (computed)",
@@ -3221,7 +3223,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=3712.24,
+        expected_state_tax=3731.24,
         expected_federal_agi=100000.0,
         backend="graph",
     ),

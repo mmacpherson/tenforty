@@ -35,7 +35,6 @@ EVIDENCE = register_evidence(
 DEPENDENTS_AND_GAINS = "tenforty-s48h.66"
 AGE_65 = "tenforty-b72.82"
 CONFORMITY_ADDBACK = "tenforty-b72.81"
-SCHEDULE_2024 = "tenforty-b72.80"
 TABLE_ROW = "tenforty-tj2.20"
 WHOLE_DOLLAR = "tenforty-b72.42"
 
@@ -44,12 +43,18 @@ TOP_RATE = {2024: 0.062, 2025: 0.06}
 # SC1040TT p. 4 rate schedule: line 5 times the top rate, less this constant.
 PUBLISHED_CONSTANT = {2024: 659.0, 2025: 642.0}
 
-# The spec's brackets: 0% to 3,560, 3% to 17,830, the top rate above. Tax at
-# the top of the 3% band is 3% of 14,270; the schedule's constant that follows
-# is the top rate times 17,830 less that tax.
+# The spec's brackets: 0% to the first threshold, 3% to the second, the top
+# rate above (2024: 3,460 and 17,330, SC1040TT 2024; 2025: 3,560 and 17,830).
+# Tax at the top of the 3% band is 3% of the band's width; the schedule's
+# constant that follows is the top rate times the second threshold less that
+# tax. The 2024 constant is 658.36, which the schedule prints as 659.
+SPEC_THRESHOLDS = {2024: (3_460, 17_330), 2025: (3_560, 17_830)}
 SPEC_CONSTANT = {
-    year: round(rate * 17_830 - 0.03 * (17_830 - 3_560), 2)
-    for year, rate in TOP_RATE.items()
+    year: round(
+        TOP_RATE[year] * upper - 0.03 * (upper - lower),
+        2,
+    )
+    for year, (lower, upper) in SPEC_THRESHOLDS.items()
 }
 
 WHOLE_DOLLAR_SLACK = 0.5
@@ -256,10 +261,10 @@ def _tax_defect(year: int, scenario: Scenario, taxable_income_bead: str | None):
     centre = rate * difference + PUBLISHED_CONSTANT[year] - SPEC_CONSTANT[year]
     if taxable_income_bead is not None:
         bead = taxable_income_bead
-    elif year == 2024:
-        bead = SCHEDULE_2024
+    elif scenario.from_table:
+        bead = f"{TABLE_ROW}+{WHOLE_DOLLAR}"
     else:
-        bead = TABLE_ROW if scenario.from_table else WHOLE_DOLLAR
+        bead = WHOLE_DOLLAR
     return GraphDefect(
         bead,
         "state_total_tax",

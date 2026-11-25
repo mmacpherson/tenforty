@@ -48,6 +48,7 @@
   an empty jurisdiction menu.
 
 ### Fixed
+- **South Carolina 2024 graph brackets use the SC1040TT thresholds** (tenforty-b72.80). The 3% band ran 3,560 to 17,830 (schedule constant 677.36); the 2024 SC1040TT prices it from 3,460 to 17,330 against a printed $659 schedule constant. 2024 South Carolina tax was about $18 low above $17,830.
 - **Arkansas 2025 graph tables carry the 2025 values** (tenforty-b72.56). `TablesAR2025.hs` repeated 2024: standard deduction 2,410 / 4,820 and bracket thresholds 5,499 / 10,899 / 15,599 / 25,699 (minus adjustments 409.86 and 281.37). It now uses the 2025 Indexed Tax Brackets sheet (5,599 / 11,199 / 15,999 / 26,399; 419.96 and 287.97) and the 2025 AR1000F instructions' standard deduction of 2,470 / 4,940. Taxable income was $60 (Single, HoH) or $120 (MFJ) too high on every 2025 Arkansas return.
 - **OTS NJ now taxes business profits and capital gains** (tenforty-r91.15).
   `self_employment_income` goes to NJ-1040 line 18 (net profits from business),
