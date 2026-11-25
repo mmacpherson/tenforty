@@ -139,15 +139,6 @@ OTS_STATE_INPUT_GAPS: tuple[StateInputGap, ...] = (
         },
     ),
     *_gaps(
-        "PA_40",
-        range(2023, 2026),
-        "tenforty-r91.21",
-        {
-            "rental_income": "PA-40 line 6, net income from rents, royalties, "
-            "patents or copyrights",
-        },
-    ),
-    *_gaps(
         "VA_760",
         range(2023, 2026),
         "tenforty-r91.16",

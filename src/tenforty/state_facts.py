@@ -436,12 +436,14 @@ PA_CLASS_INPUTS: tuple[str, ...] = (
     "self_employment_income",
     "short_term_capital_gains",
     "long_term_capital_gains",
+    "rental_income",
 )
 _PA_JOINT_CLASSES_YEARS: tuple[int, ...] = (2023, 2024, 2025)
 _PA_JOINT_CLASSES_TEXT = (
-    "Pennsylvania PA-40 lines 4 (business income) and 5 (gains from the sale of "
-    "property) are computed from household totals: self_employment_income and "
-    "the capital gains are not split by spouse, so on this joint return one "
+    "Pennsylvania PA-40 lines 4 (business income), 5 (gains from the sale of "
+    "property) and 6 (rents, royalties, patents and copyrights) are computed "
+    "from household totals: self_employment_income, the capital gains and "
+    "rental_income are not split by spouse, so on this joint return one "
     "spouse's loss in a class is netted against the other spouse's income in "
     "that class. PA does not allow that netting; it ignores one spouse's class "
     "loss against the other's income (PA-40 instructions). If the spouses' "
@@ -454,8 +456,9 @@ def pa_joint_class_assumption(
 ) -> Assumption | None:
     """Return the PA household-totals convention where OTS applied it.
 
-    It applies to an OTS PA Married/Joint return with a nonzero business or
-    capital-gain amount: those reach PA-40 lines 4 and 5 as household totals.
+    It applies to an OTS PA Married/Joint return with a nonzero business,
+    capital-gain or rental amount: those reach PA-40 lines 4, 5 and 6 as
+    household totals.
     The graph's PA program does not read them, so it makes no such reading.
     """
     if not (
@@ -598,7 +601,7 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         None,
         "Conductor decision 2026-11-07, following Mike's MA one-earner "
         "precedent: no refusal, since household totals cannot reveal a split; "
-        "reported on OTS PA joint returns with a business or gain amount until "
+        "reported on OTS PA joint returns with a business, gain or rental amount until "
         "per-spouse PA class inputs (tenforty-s48h.75) exist.",
     ),
     DefaultDecision(

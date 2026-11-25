@@ -109,7 +109,6 @@ the official 2024 and 2025 forms.
 | NJ_1040 | 2023–2025 | `num_dependents` | NJ-1040 lines 10 and 11, the $1,500 exemption per dependent | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `filer_65_or_older`, `spouse_65_or_older` | NJ-1040 line 7, the $1,000 senior 65+ exemption | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `rental_income` | NJ-1040 line 23, net gains or income from rents, royalties, patents and copyrights | tenforty-r91.20 |
-| PA_40 | 2023–2025 | `rental_income` | PA-40 line 6, net income from rents, royalties, patents or copyrights | tenforty-r91.21 |
 | VA_760 | 2023–2025 | `filer_65_or_older`, `spouse_65_or_older` | Form 760 line 12, the $800 exemption per 65-or-over box, and line 4, the age deduction | tenforty-r91.16 |
 | VA_760 | 2023–2025 | `federal_itemized`, `itemized_deductions`, `state_and_local_taxes` (unless `standard_or_itemized="Standard"`) | Form 760 line 10, itemized deductions, which Virginia requires when the federal return itemizes | tenforty-r91.16 |
 | VA_760 | 2023–2025 | `num_dependents` | Form 760 line 12, the $930 exemption per dependent | tenforty-r91.22 |

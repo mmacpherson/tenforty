@@ -300,17 +300,3 @@ def test_formerly_refused_inputs_now_compute_and_raise_pa_tax(year, backend, nam
         **single, w2_income=60_000.0, **{name: FORMERLY_REFUSED[name]}, **choice
     )
     assert changed.state_total_tax > base.state_total_tax
-
-
-@pytest.mark.requires_ots
-@pytest.mark.parametrize("year", YEARS)
-def test_rental_income_is_still_refused(year):
-    """PA rental income, which this map does not carry, keeps its r91.21 refusal."""
-    with pytest.raises(tenforty.UnsupportedInputError, match=r"tenforty-r91\.21"):
-        tenforty.evaluate_return(
-            year=year,
-            state="PA",
-            filing_status="Single",
-            w2_income=60_000.0,
-            rental_income=10_000.0,
-        )
