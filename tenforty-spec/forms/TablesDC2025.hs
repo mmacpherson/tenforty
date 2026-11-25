@@ -46,12 +46,11 @@ dcBracketsTable2025 =
 
 -- | District of Columbia 2025 standard deduction by filing status
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: 2025 D-40ES Estimated Tax Booklet, Worksheet 2, Line 2b
--- https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/publication/attachments/2025_D40ES_Booklet_121824.pdf
---
--- Standard deductions for tax year 2025 (OBBBA, per federal conformity):
--- - Single/MFS: $15,750
--- - MFJ/QW: $31,500
--- - HoH: $23,625
+-- Source: DC OTR, 2025 D-40 booklet (2025_D40_Book_082026_v1.pdf), p.4 "New for
+-- 2025" and p.13 "Standard Deduction", and the CFO letter on its PDF p.2: DC
+-- does not conform to the OBBBA federal standard deduction and keeps
+-- - Single/MFS: $15,000
+-- - MFJ/QW: $30,000
+-- - HoH: $22,500
 dcStandardDeduction2025 :: ByStatus (Amount Dollars)
-dcStandardDeduction2025 = byStatus 15750 31500 15750 23625 31500
+dcStandardDeduction2025 = byStatus 15000 30000 15000 22500 30000

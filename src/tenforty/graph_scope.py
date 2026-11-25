@@ -153,18 +153,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     ),
     S.CO: _both_years("tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"),
     S.CT: _both_years("tenforty-b72.62"),
-    S.DC: {
-        2024: (
-            "tenforty-b72.64",
-            "tenforty-s48h.73",
-            "tenforty-tj2.20",
-        ),
-        2025: (
-            "tenforty-b72.63",
-            "tenforty-b72.64",
-            "tenforty-s48h.73",
-        ),
-    },
+    S.DC: _both_years("tenforty-b72.64", "tenforty-s48h.73", "tenforty-tj2.20"),
     S.DE: _both_years("tenforty-nuc6", "tenforty-s48h.52"),
     S.GA: _both_years("tenforty-b72.42", "tenforty-nuc6"),
     S.HI: _both_years("tenforty-b72.41", "tenforty-nuc6", "tenforty-tj2.20"),

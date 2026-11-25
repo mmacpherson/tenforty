@@ -1084,9 +1084,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     ),
     # DC Single, $50,000 W2 (2025) - test 2025 standard deduction
     # Federal: AGI=$50k, Std Ded=$15,750 (2025 OBBBA), Taxable=$34,250
-    # DC: AGI=$50k, Std Ded=$15,750, Taxable=$34,250
-    # DC tax: $0-$10k: $10k*0.04=$400, $10k-$34,250: $24,250*0.06=$1,455
-    #         Total: $400 + $1,455 = $1,855
+    # DC: AGI=$50k, Std Ded=$15,000 (DC does not adopt the OBBBA increase: 2025
+    #     D-40 booklet pp. 4 and 13), Taxable=$35,000
+    # DC tax: $0-$10k: $10k*0.04=$400, $10k-$35,000: $25,000*0.06=$1,500
+    #         Total: $400 + $1,500 = $1,900
     TaxScenario(
         source="DC 2025 Tax Rate Schedules (computed)",
         description="DC Single, $50,000 W2 (2025)",
@@ -1095,7 +1096,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1855.0,
+        expected_state_tax=1900.0,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
