@@ -11,14 +11,14 @@
         "generated_by": "resolveForms",
         "schema_version": 2,
         "year": 2024,
-        "sha256": "d423ad59efbbcce7b73c99979681aa8faa21e9ac8b20e28bc9756fe7eec88c34"
+        "sha256": "cdd4f1ef791978508051b5dd724be0a4b628d972e79b15c5a817fd2d1b8e93dd"
       },
       "2025": {
         "form_id": "resolved",
         "generated_by": "resolveForms",
         "schema_version": 2,
         "year": 2025,
-        "sha256": "00c02c69e33a946dd5640b4b1155b0a50f25861387e9e9d3d1cad5bfb8c20026"
+        "sha256": "9101a3b3b00aefe9072cfe33e4c060b0f5b690af820da7bd39031f230b236966"
       }
     }
   },
@@ -443,7 +443,6 @@
           "tenforty-tj2.20"
         ],
         "2025": [
-          "tenforty-b72.56",
           "tenforty-b72.57",
           "tenforty-b72.58",
           "tenforty-b72.59",
@@ -652,7 +651,7 @@
       },
       "exclusion_reasons": {
         "2024": ["tenforty-b72.64", "tenforty-s48h.73", "tenforty-tj2.20"],
-        "2025": ["tenforty-b72.63", "tenforty-b72.64", "tenforty-s48h.73"]
+        "2025": ["tenforty-b72.64", "tenforty-s48h.73", "tenforty-tj2.20"]
       }
     },
     "DE": {
@@ -1253,7 +1252,6 @@
       "exclusion_reasons": {
         "2024": [
           "tenforty-b72.42",
-          "tenforty-b72.70",
           "tenforty-b72.71",
           "tenforty-nuc6",
           "tenforty-s48h.59",
@@ -1261,7 +1259,6 @@
         ],
         "2025": [
           "tenforty-b72.42",
-          "tenforty-b72.70",
           "tenforty-b72.71",
           "tenforty-nuc6",
           "tenforty-s48h.59",
@@ -1873,8 +1870,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-b72.78", "tenforty-b72.79"],
-        "2025": ["tenforty-b72.78", "tenforty-b72.79"]
+        "2024": ["tenforty-b72.78"],
+        "2025": ["tenforty-b72.78"]
       }
     },
     "OR": {
@@ -2025,7 +2022,12 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-b72.80", "tenforty-b72.82", "tenforty-s48h.66"],
+        "2024": [
+          "tenforty-b72.42",
+          "tenforty-b72.82",
+          "tenforty-s48h.66",
+          "tenforty-tj2.20"
+        ],
         "2025": ["tenforty-b72.81", "tenforty-b72.82", "tenforty-s48h.66"]
       }
     },
