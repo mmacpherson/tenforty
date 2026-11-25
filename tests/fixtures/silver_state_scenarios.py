@@ -31,11 +31,10 @@ def _row_departure(
 
     A row prices its midpoint and the graph prices the exact income, so they
     differ by at most the rate times half the row width on either side of the
-    centre, plus the printed whole-dollar rounding. The row half-width used is
-    the full ``row_width`` times the rate, the same bound the batch-2 fixtures
-    use.
+    centre, plus the printed whole-dollar rounding. ``row_width`` is the
+    form's actual row width ($50 for DC and OK, $100 for SC and AR).
     """
-    slack = rate * row_width + _ROW_ROUNDING
+    slack = rate * row_width / 2 + _ROW_ROUNDING
     return KnownDefect("state_total_tax", centre - slack, centre + slack, reason)
 
 
@@ -50,7 +49,7 @@ def _sc_2024_row_departure() -> KnownDefect:
     return _row_departure(
         659 - (0.062 * 17_330 - 0.03 * (17_330 - 3_460)),
         0.062,
-        50,
+        100,
         "SC requires the $100 tax-table row below $100,000 (tenforty-tj2.20); "
         "the graph prices the exact income (tenforty-b72.42) on brackets whose "
         "constant is 658.36, not the printed 659 (tenforty-b72.80)",
@@ -78,14 +77,15 @@ def _ar_2025_departure(personal_credits: float, adjustment_gap: float) -> KnownD
     """Graph minus an AR 2025 row net of personal credits.
 
     The graph leaves the line 34 credits at zero (tenforty-b72.87), so it is
-    high by the credits. Inside the indexed band (tenforty-b72.57) the record's
-    minus adjustment (369.30) exceeds the graph's flat 419.96 by
-    ``adjustment_gap``; rows are $100 wide.
+    high by the credits. Inside the indexed band (tenforty-b72.57) the graph
+    subtracts its flat 419.96 where the band subtracts 369.30, so it is low by
+    419.96 - 369.30 = 50.66 (``adjustment_gap`` = -50.66); with the omitted
+    credits (+58) the centre is +7.34. Rows are $100 wide.
     """
     return _row_departure(
         personal_credits + adjustment_gap,
         0.039,
-        50,
+        100,
         "AR line 34 credits are not applied (tenforty-b72.87); the form "
         "requires the $100 table row (tenforty-tj2.20)"
         + (

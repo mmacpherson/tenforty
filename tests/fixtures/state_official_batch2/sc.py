@@ -59,6 +59,7 @@ SPEC_CONSTANT = {
 }
 
 WHOLE_DOLLAR_SLACK = 0.5
+CENT = 0.005
 TABLE_ROW_WIDTH = 100
 """SC1040TT rows are $100 wide and price the row midpoint."""
 
@@ -202,11 +203,11 @@ WORKED_EXAMPLE = TaxEvidence(
     "(https://dor.sc.gov/forms-site/Forms/SC1040TT_2024.pdf)",
 )
 CUTOFF_DERIVATION = TaxEvidence(
-    EvidenceKind.INDEPENDENT,
+    EvidenceKind.UNVERIFIED,
     "docs/validation/state-fixtures/SC-2024-2025.md",
-    "SC1040TT 2024 p.4: the Tax Rate Schedule applies at line 5 of $100,000 or "
-    "more (the Tax Tables below it); 6.2% x 100,000 = 6,200, less $659 = $5,541, "
-    "applied by hand",
+    "source-verified application of the published SC1040TT 2024 p.4 schedule "
+    "(which explicitly includes $100,000): 6,200 - 659 = 5,541; verified by "
+    "Codex, 2026-11-25",
 )
 SCHEDULE_CASES: tuple[tuple[str, int, int, TaxEvidence], ...] = (
     ("pub1", 101_000, 5_603, WORKED_EXAMPLE),
@@ -324,6 +325,24 @@ def _tax_defect(
     )
 
 
+def _schedule_constant_defect(scenario: Scenario) -> GraphDefect:
+    """Exactly the schedule-constant gap: official results are whole dollars.
+
+    At and above $100,000 the form's line 6 is 6.2% x line 5 - 659, and each
+    pinned result is an exact whole dollar. The only signed mechanism is the
+    brackets' constant, 658.36 against 659, so the graph is +0.64 within the
+    comparison cent, with no whole-dollar or row slack.
+    """
+    gap = PUBLISHED_CONSTANT[2024] - SPEC_CONSTANT[2024]
+    return GraphDefect(
+        SCHEDULE_2024,
+        "state_total_tax",
+        gap - CENT,
+        gap + CENT,
+        "the brackets imply a schedule constant of 658.36 where SC1040TT prints 659",
+    )
+
+
 def _defects() -> dict[str, dict[str, GraphDefect]]:
     defects: dict[str, dict[str, GraphDefect]] = {}
     for year, scenarios in RECORD.items():
@@ -340,7 +359,7 @@ def _defects() -> dict[str, dict[str, GraphDefect]]:
     for label, line_5, _, _ in SCHEDULE_CASES:
         schedule_case = Scenario(label, "S", {}, line_5, line_5, 0, False)
         defects[f"SC-2024-{label}"] = {
-            "state_total_tax": _tax_defect(2024, schedule_case, None)
+            "state_total_tax": _schedule_constant_defect(schedule_case)
         }
     return defects
 
