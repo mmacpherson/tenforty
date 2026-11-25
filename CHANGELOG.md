@@ -22,7 +22,14 @@
   is unchanged. The record's values stay pinned as strict xfails with the
   refusal lifted. OTS before 2024 also computes no QBI deduction for rental
   income, which the 2018 rental test accepts as S2a or S2b because the section
-  199A qualification is a fact no input carries.
+  199A qualification is a fact no input carries. A nonzero `rental_income` on
+  OTS 2018-2023 now records the assumption
+  `federal.qbi.rental_not_qualified_ots_pre_2024` on the result (scalar and
+  batch, `backend="ots"` and `"auto"`): OTS computes no QBI deduction before
+  2024, so a rental that qualifies is over-taxed (about $2,400 on the 2018
+  record case). 2019-2023 accept `rental_income` too and are covered. The
+  refusal message now says this integration cannot determine the Schedule SE
+  and QBI amounts before 2024.
 ### Added (validation)
 - **Official-value fixtures for 23 more graph states, 2024 and 2025**
   (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,

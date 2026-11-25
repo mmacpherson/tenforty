@@ -904,9 +904,11 @@ _OTS_REFUSED_INCOMPLETE_YEARS = {
     "self_employment_income": (
         range(2018, 2024),
         (
-            "Schedule SE and Form 8995 are not orchestrated for OTS before 2024 "
-            "(tenforty-nt4h), so self-employment tax, its deductible half and "
-            "the QBI deduction would be omitted. backend='graph' covers "
+            "This integration cannot determine the Schedule SE and QBI amounts "
+            "the return needs before 2024: OTS does not orchestrate Schedule SE "
+            "or Form 8995 (tenforty-nt4h), so self-employment tax, its "
+            "deductible half and the QBI deduction would be omitted. "
+            "backend='graph' covers "
             "2024-2025 only. Pass self_employment_income=0 only if the return "
             "has no self-employment income."
         ),
@@ -1380,6 +1382,9 @@ def recorded_assumptions(
     pa_joint_classes = _facts.pa_joint_class_assumption(row, inputs)
     if pa_joint_classes is not None:
         records.append(pa_joint_classes)
+    rental_qbi = _facts.rental_qbi_assumption(row, inputs)
+    if rental_qbi is not None:
+        records.append(rental_qbi)
     if legacy_itemized != 0:
         if itemizes is None:
             raise RuntimeError(
@@ -1433,7 +1438,9 @@ def _evaluate_with_engine(
                     engine,
                     row,
                     itemizes,
-                    tax_input.model_dump(include=set(_facts.PA_CLASS_INPUTS)),
+                    tax_input.model_dump(
+                        include={*_facts.PA_CLASS_INPUTS, "rental_income"}
+                    ),
                 )
             }
         )

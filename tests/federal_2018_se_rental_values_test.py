@@ -115,6 +115,38 @@ def _evaluate(inputs):
     return {field: getattr(result, field) for field in _outcome(0, 0, 0, 0, 0, 0)}
 
 
+def _inputs_of(return_id):
+    by_id = {scenario_id: inputs for scenario_id, inputs, _ in SCENARIOS}
+    return by_id[RETURNS[return_id][0]]
+
+
+def _outcomes_of(return_id):
+    by_id = {scenario_id: outcomes for scenario_id, _, outcomes in SCENARIOS}
+    return [
+        outcome for scenario_id in RETURNS[return_id] for outcome in by_id[scenario_id]
+    ]
+
+
+def _lift_the_nt4h_refusal(monkeypatch):
+    """Lift only the self_employment_income entry; the rest of the table stays."""
+    _, remedy = core._OTS_REFUSED_INCOMPLETE_YEARS["self_employment_income"]
+    monkeypatch.setitem(
+        core._OTS_REFUSED_INCOMPLETE_YEARS, "self_employment_income", (range(0), remedy)
+    )
+
+
+@pytest.fixture
+def evaluated_2018_return(request, monkeypatch):
+    """Evaluate the parametrized 2018 return outside any xfail.
+
+    A refusal or an exception here is an error, never an expected failure.
+    """
+    return_id = request.node.callspec.params["return_id"]
+    if return_id in FIELDS_UNDER_GAP:
+        _lift_the_nt4h_refusal(monkeypatch)
+    return _evaluate(_inputs_of(return_id))
+
+
 def _field_cases() -> list:
     cases = []
     for return_id in RETURNS:
@@ -128,28 +160,42 @@ def _field_cases() -> list:
     return cases
 
 
+# Passing witness, from the inputs alone (no tenforty output): Schedule C net
+# profit is Schedule 1 line 3 income, so Form 1040 line 7 before the omitted
+# deductible half of SE tax is wages plus the Schedule C profit.
+SCHEDULE_C_AGI_BEFORE_SE_DEDUCTION = {"S1": 110_000, "S3": 50_000}
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize("return_id", ["S1", "S3"])
+def test_schedule_c_income_reaches_schedule_1_line_12_with_the_refusal_lifted(
+    return_id, monkeypatch
+):
+    """With only the nt4h entry lifted, the call succeeds and the profit is in AGI."""
+    _lift_the_nt4h_refusal(monkeypatch)
+    actual = _evaluate(_inputs_of(return_id))
+    assert actual["federal_adjusted_gross_income"] == pytest.approx(
+        SCHEDULE_C_AGI_BEFORE_SE_DEDUCTION[return_id], abs=ROUNDING
+    )
+
+
 @pytest.mark.requires_ots
 @pytest.mark.parametrize(("return_id", "field"), _field_cases())
-def test_2018_ots_matches_a_whole_derived_outcome(return_id, field, monkeypatch):
+def test_2018_ots_matches_a_whole_derived_outcome(
+    return_id, field, evaluated_2018_return
+):
     """Each line matches one of the return's whole derived outcomes.
 
     S2 mixes the rental outcomes S2a and S2b because whether the rental is a
     section 199A qualified trade or business is a fact no input carries; OTS
     before 2024 computes no QBI deduction, so it lands on S2b. The Schedule C
-    returns run with the refusal lifted.
+    returns are evaluated with the nt4h refusal lifted, before the strict xfail
+    on the known numerical departure applies.
     """
-    monkeypatch.setattr(core, "_OTS_REFUSED_INCOMPLETE_YEARS", {})
-    by_id = {
-        scenario_id: (inputs, outcomes) for scenario_id, inputs, outcomes in SCENARIOS
-    }
-    inputs = by_id[RETURNS[return_id][0]][0]
-    outcomes = [
-        outcome
-        for scenario_id in RETURNS[return_id]
-        for outcome in by_id[scenario_id][1]
-    ]
-    actual = _evaluate(inputs)
-    assert any(_matches(actual, outcome, [field]) for outcome in outcomes), actual
+    assert any(
+        _matches(evaluated_2018_return, outcome, [field])
+        for outcome in _outcomes_of(return_id)
+    ), evaluated_2018_return
 
 
 @pytest.mark.requires_ots
@@ -175,6 +221,7 @@ def test_self_employment_income_is_refused_before_2024(year, inputs, backend):
         tenforty.evaluate_return(year=year, backend=backend, **inputs)
     message = str(raised.value)
     assert "tenforty-nt4h" in message
+    assert "cannot determine the Schedule SE and QBI amounts" in message
     assert "self_employment_income=50000.0" in message
     assert "backend='graph' covers 2024-2025 only" in message
 
