@@ -12,24 +12,21 @@ import TenForty.Types
 
 -- | 2025 Arkansas State income tax brackets
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Arkansas Department of Finance and Administration - Tax Year 2025 Withholding Tax Formula
--- https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2024_1.pdf
---
--- All filing statuses use the same bracket thresholds (unchanged from 2024):
---  0-5,499: 0.00%
---  5,500-10,899: 2.00%
---  10,900-15,599: 3.00%
---  15,600-25,699: 3.40%
---  25,700+: 3.90%
---
--- Note: Arkansas Code 26-51-201(d)(1) requires annual inflation adjustment to brackets,
--- rounded to nearest $100. For 2025, the indexed brackets remained at the same thresholds.
+-- Source: Arkansas DFA, "2025 Indexed Tax Brackets" (2025_TaxBrackets.pdf), p.1,
+-- first five rows (the regular bracket sheet; the table's 94,701+ adjustment
+-- band is not modelled here, tenforty-b72.57):
+--  0-5,599: 0.00%
+--  5,600-11,199: 2.00% (minus adjustment 111.98)
+--  11,200-15,999: 3.00% (minus adjustment 223.97)
+--  16,000-26,399: 3.40% (minus adjustment 287.97)
+--  26,400+: 3.90% (minus adjustment 419.96)
+-- All filing statuses use the same thresholds.
 arBrackets2025 :: NonEmpty Bracket
 arBrackets2025 =
-  Bracket (byStatus 5499 5499 5499 5499 5499) 0.00
-    :| [ Bracket (byStatus 10899 10899 10899 10899 10899) 0.02,
-         Bracket (byStatus 15599 15599 15599 15599 15599) 0.03,
-         Bracket (byStatus 25699 25699 25699 25699 25699) 0.034,
+  Bracket (byStatus 5599 5599 5599 5599 5599) 0.00
+    :| [ Bracket (byStatus 11199 11199 11199 11199 11199) 0.02,
+         Bracket (byStatus 15999 15999 15999 15999 15999) 0.03,
+         Bracket (byStatus 26399 26399 26399 26399 26399) 0.034,
          TopBracket 0.039
        ]
 
@@ -40,16 +37,10 @@ arBracketsTable2025 =
     Left err -> error $ "Invalid Arkansas brackets: " ++ err
 
 -- | 2025 Arkansas standard deduction by filing status
--- Source: Arkansas Department of Finance and Administration - Tax Year 2025 Withholding Tax Formula
--- https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2024_1.pdf
---
--- Single: $2,410
--- MFJ: $4,820
--- MFS: $2,410
--- HoH: $2,410
--- QW: $4,820
---
--- Note: Standard deduction amounts unchanged from 2024.
+-- Source: Arkansas DFA, 2025 AR1000F and AR1000NR Instructions
+-- (2025_AR1000F_and_AR1000NR_Instructions.pdf), p.14, "Standard Deduction":
+-- Single $2,470; MFJ $4,940; HOH $2,470.
+-- MFS and QW follow Single and MFJ respectively (as the 2024 table does).
 arStandardDeduction2025 :: ByStatus (Amount Dollars)
 arStandardDeduction2025 =
-  byStatus 2410 4820 2410 2410 4820
+  byStatus 2470 4940 2470 2470 4940

@@ -5174,15 +5174,19 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         expected_federal_agi=60000.0,
         backend="graph",
     ),
-    # AR 2025 Single, $50,000 W2, no dependents (same rates/brackets as 2024)
+    # AR 2025 Single, $50,000 W2, no dependents
+    # (2025 brackets: 0-5,599: 0%, 5,600-11,199: 2%, 11,200-15,999: 3%,
+    #  16,000-26,399: 3.4%, 26,400+: 3.9%; 2025 Indexed Tax Brackets sheet.
+    #  Standard deduction Single/HoH $2,470, MFJ $4,940; 2025 AR1000F
+    #  instructions p.14; tenforty-b72.56)
     # Fed AGI: $50,000, Fed std ded 2025: $15,000, Fed taxable: $35,000
     # Fed tax: $11,925 * 0.10 + $23,075 * 0.12 = $1,192.50 + $2,769 = $3,961.50
     # AR AGI: $50,000
-    # AR std ded: $2,410, AR taxable: $50,000 - $2,410 = $47,590
-    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
-    #       + ($25,699 - $15,599) * 0.034 + ($47,590 - $25,699) * 0.039
-    #       = $0 + $108.00 + $141.00 + $343.40 + $853.749
-    #       = $1,446.149
+    # AR std ded: $2,470, AR taxable: $50,000 - $2,470 = $47,530
+    # AR tax: $5,599 * 0.00 + ($11,199 - $5,599) * 0.02 + ($15,999 - $11,199) * 0.03
+    #       + ($26,399 - $15,999) * 0.034 + ($47,530 - $26,399) * 0.039
+    #       = $0 + $112.00 + $144.00 + $353.60 + $824.109
+    #       = $1,433.709
     TaxScenario(
         source="AR 2025 Tax Brackets (computed)",
         description="AR Single, $50,000 W2, no dependents (2025, same rates as 2024)",
@@ -5191,19 +5195,19 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1446.149,
+        expected_state_tax=1433.709,
         expected_federal_agi=50000.0,
         backend="graph",
     ),
-    # AR 2025 MFJ, $100,000 W2, no dependents (same rates/brackets as 2024)
+    # AR 2025 MFJ, $100,000 W2, no dependents (2025 brackets and deduction as above)
     # Fed AGI: $100,000, Fed std ded 2025: $30,000, Fed taxable: $70,000
     # Fed tax: $23,850 * 0.10 + $46,150 * 0.12 = $2,385 + $5,538 = $7,923
     # AR AGI: $100,000
-    # AR std ded: $4,820, AR taxable: $100,000 - $4,820 = $95,180
-    # AR tax: $5,499 * 0.00 + ($10,899 - $5,499) * 0.02 + ($15,599 - $10,899) * 0.03
-    #       + ($25,699 - $15,599) * 0.034 + ($95,180 - $25,699) * 0.039
-    #       = $0 + $108.00 + $141.00 + $343.40 + $2,709.759
-    #       = $3,302.159
+    # AR std ded: $4,940, AR taxable: $100,000 - $4,940 = $95,060
+    # AR tax: $5,599 * 0.00 + ($11,199 - $5,599) * 0.02 + ($15,999 - $11,199) * 0.03
+    #       + ($26,399 - $15,999) * 0.034 + ($95,060 - $26,399) * 0.039
+    #       = $0 + $112.00 + $144.00 + $353.60 + $2,677.779
+    #       = $3,287.379
     TaxScenario(
         source="AR 2025 Tax Brackets (computed)",
         description="AR MFJ, $100,000 W2, no dependents (2025, same rates as 2024)",
@@ -5212,7 +5216,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=7746.0,  # Tax Table row 68,500-68,550
-        expected_state_tax=3302.159,
+        expected_state_tax=3287.379,
         expected_federal_agi=100000.0,
         backend="graph",
     ),

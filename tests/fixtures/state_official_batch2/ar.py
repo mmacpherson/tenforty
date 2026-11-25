@@ -94,8 +94,6 @@ PERSONAL_CREDITS = {
 }
 """Record "Personal credits" (L34) column, the same in both years."""
 
-_STATUS_KEY = {"Single": "S", "Married/Joint": "MFJ", "Head_of_House": "HoH"}
-
 CASES: list[OfficialCase] = [
     case("AR", year, label, status, (taxable_income, tax), **inputs)
     for year, lines in LINES_28_AND_NET_TAX.items()
@@ -109,7 +107,6 @@ UNPINNED: list[UnpinnedCase] = []
 TABLE = "tenforty-tj2.20"
 BAND = "tenforty-b72.57"
 OVER_100K = "tenforty-b72.58"
-STALE_2025 = "tenforty-b72.56"
 LTCG = "tenforty-b72.59"
 PERSONAL_CREDIT = "tenforty-b72.87"
 
@@ -118,17 +115,11 @@ ROW_HALF_WIDTH = 50
 CAPITAL_GAIN_EXCLUDED = 5_000
 """AR1000D line 8: 50% of the 10,000 net long-term gain is taxable (record s10)."""
 
-STANDARD_DEDUCTION_GAIN_2025 = {"S": 60, "MFJ": 120, "HoH": 60}
-"""Record's 2025 minus 2024 standard deduction (Single/HoH 2,470 - 2,410, MFJ 4,940 - 4,820)."""
-
-# Minus adjustment of the schedule the graph prices: the record's 2024 bracket
-# sheet, 3.9% bracket and (for s1 only) 3.4% bracket. The graph's 2025 spec
-# comments say its brackets are unchanged from 2024.
-GRAPH_ADJUSTMENT = {0.039: 409.86, 0.034: 281.37}
-
-# Minus adjustment the record's own sources apply to each return's row: the
-# year's regular bracket, the indexed band or top row, or (s5) the over-100,000
-# rule's 3,900 less its base amount.
+# Minus adjustment of the regular bracket the graph prices (the record's K24 and
+# K25 bracket sheets, 3.9% bracket and, for s1 only, the 3.4% bracket), and
+# what the record's own sources apply to each return's row: the regular bracket,
+# the indexed band or top row, or (s5) the over-100,000 rule's 3,900 less its
+# base amount.
 REGULAR_ADJUSTMENT = {
     2024: {0.039: 409.86, 0.034: 281.37},
     2025: {0.039: 419.96, 0.034: 287.97},
@@ -155,7 +146,7 @@ BAND_CASES = {
 }
 
 
-def _defects_for(year: int, label: str, status: str) -> dict[str, GraphDefect]:
+def _defects_for(year: int, label: str) -> dict[str, GraphDefect]:
     """Bound graph minus record from each mechanism and the record's own figures.
 
     The graph prices its schedule at the taxable income it computes. Against the
@@ -165,17 +156,13 @@ def _defects_for(year: int, label: str, status: str) -> dict[str, GraphDefect]:
     differences below, and the omitted line 34 personal credits.
     """
     rate = 0.034 if label == "s1" else 0.039
-    taxable_income_excess = 0
-    if year == 2025:
-        taxable_income_excess += STANDARD_DEDUCTION_GAIN_2025[status]
-    if label == "s10":
-        taxable_income_excess += CAPITAL_GAIN_EXCLUDED
+    taxable_income_excess = CAPITAL_GAIN_EXCLUDED if label == "s10" else 0
     record_adjustment = RECORD_ADJUSTMENT.get(
         (year, label), REGULAR_ADJUSTMENT[year][rate]
     )
     tax_center = (
         rate * taxable_income_excess
-        + (record_adjustment - GRAPH_ADJUSTMENT[rate])
+        + (record_adjustment - REGULAR_ADJUSTMENT[year][rate])
         + PERSONAL_CREDITS[label]
     )
     over_100k = label == "s5"
@@ -183,8 +170,6 @@ def _defects_for(year: int, label: str, status: str) -> dict[str, GraphDefect]:
     beads = [OVER_100K if over_100k else TABLE, PERSONAL_CREDIT]
     if (year, label) in BAND_CASES:
         beads.append(BAND)
-    if year == 2025:
-        beads.append(STALE_2025)
     if label == "s10":
         beads.append(LTCG)
     bead = "+".join(beads)
@@ -194,19 +179,16 @@ def _defects_for(year: int, label: str, status: str) -> dict[str, GraphDefect]:
             "state_total_tax",
             tax_center - slack,
             tax_center + slack,
-            "graph omits the line 34 personal credits and prices the 2024 rate schedule at the taxable income it computes",
+            "graph omits the line 34 personal credits and prices the regular rate schedule at the taxable income it computes",
         )
     }
     if taxable_income_excess:
         defects["state_taxable_income"] = GraphDefect(
-            "+".join(
-                ([STALE_2025] if year == 2025 else [])
-                + ([LTCG] if label == "s10" else [])
-            ),
+            LTCG,
             "state_taxable_income",
             taxable_income_excess - CENT,
             taxable_income_excess + CENT,
-            "2025 standard deduction left at the 2024 amount; full capital gain taxed",
+            "full capital gain taxed",
         )
     return defects
 
@@ -214,8 +196,6 @@ def _defects_for(year: int, label: str, status: str) -> dict[str, GraphDefect]:
 CENT = 0.005
 
 DEFECTS: dict[str, dict[str, GraphDefect]] = {
-    pinned.case_id: _defects_for(
-        pinned.year, pinned.case_id.split("-")[2], _STATUS_KEY[pinned.filing_status]
-    )
+    pinned.case_id: _defects_for(pinned.year, pinned.case_id.split("-")[2])
     for pinned in CASES
 }

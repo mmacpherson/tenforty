@@ -123,7 +123,6 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
             "tenforty-tj2.20",
         ),
         2025: (
-            "tenforty-b72.56",
             "tenforty-b72.57",
             "tenforty-b72.58",
             "tenforty-b72.59",
