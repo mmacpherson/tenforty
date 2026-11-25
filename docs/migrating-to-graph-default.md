@@ -53,15 +53,17 @@ backend's computed figures or graph validation scope.
      for a state outside graph scope, decide whether you accept an unvalidated
      figure. If you do, pass `allow_unvalidated=True`.
 
-### Graph planning refuses state-dependent outputs
+### Graph planning answers state-dependent outputs again
 
-Graph state derivatives read zero for IL, MS and OR although their state tax
-moves with income (tenforty-s48h.76). Until that is fixed, `marginal_rate`,
-`marginal_rates` and `solve_for_income` (and the `GraphBackend` gradient,
-gradients and solve methods) raise `UnsupportedReturnError` for any output that
-depends on the state return, for every state: the state outputs, `total_tax`
-on a state return, and raw state node names. `allow_unvalidated` does not lift
-this. Federal outputs keep working: pass `output="federal_total_tax"`.
+2025.14 refused derivatives and solves of any output that depended on the state
+return, because graph state derivatives read zero for IL, MS and OR
+(tenforty-s48h.76). That is fixed: `marginal_rate`, `marginal_rates` and
+`solve_for_income` (and the `GraphBackend` gradient, gradients and solve
+methods) answer the state outputs, `total_tax` on a state return, and raw state
+node names. The MS Married/Joint spouse-ownership refusal for income
+derivatives and solves is separate and still applies. Code that passed
+`output="federal_total_tax"` to work around the refusal keeps its federal-only
+meaning.
 
 ### Every public entry point applies the refusals
 
@@ -106,8 +108,6 @@ the official 2024 and 2025 forms.
 | NJ_1040 | 2023–2025 | `num_dependents` | NJ-1040 lines 10 and 11, the $1,500 exemption per dependent | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `filer_65_or_older`, `spouse_65_or_older` | NJ-1040 line 7, the $1,000 senior 65+ exemption | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `rental_income` | NJ-1040 line 23, net gains or income from rents, royalties, patents and copyrights | tenforty-r91.20 |
-| PA_40 | 2023–2025 | `self_employment_income` | PA-40 line 4, net income from the operation of a business, profession or farm | tenforty-s48h.46 |
-| PA_40 | 2023–2025 | `short_term_capital_gains`, `long_term_capital_gains` | PA-40 line 5, net gain from the sale, exchange or disposition of property | tenforty-s48h.46 |
 | PA_40 | 2023–2025 | `rental_income` | PA-40 line 6, net income from rents, royalties, patents or copyrights | tenforty-r91.21 |
 | VA_760 | 2023–2025 | `filer_65_or_older`, `spouse_65_or_older` | Form 760 line 12, the $800 exemption per 65-or-over box, and line 4, the age deduction | tenforty-r91.16 |
 | VA_760 | 2023–2025 | `federal_itemized`, `itemized_deductions`, `state_and_local_taxes` (unless `standard_or_itemized="Standard"`) | Form 760 line 10, itemized deductions, which Virginia requires when the federal return itemizes | tenforty-r91.16 |

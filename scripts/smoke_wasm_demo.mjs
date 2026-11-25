@@ -172,26 +172,39 @@ const illinoisAnalysis = analyzeScenario(
   contract,
   illinois,
 );
-assert.equal(contract.state_slopes.available, false);
-assert.equal(illinoisAnalysis.gradients.w2_income.state, null);
-assert.equal(illinoisAnalysis.gradients.w2_income.total, null);
 assert.ok(
   illinoisAnalysis.gradients.w2_income.federal > 0,
   "federal slopes stay available on a state return",
 );
-const illinoisAttempt = analyzeScenario(
-  graphlib,
-  graphs.get(2025),
-  contract,
-  illinois,
-  { includeStateSlopes: true, allowUnvalidated: false },
-);
-assert.equal(
-  illinoisAttempt.gradients.w2_income.state,
-  null,
-  "no caller option restores a withheld state slope",
-);
-assert.equal(illinoisAttempt.gradients.w2_income.total, null);
+if (contract.state_slopes.available) {
+  // Illinois 2025 flat rate on net income: 4.95% (IL Bulletin FY 2025-16),
+  // through the whole-dollar rounding of every IL-1040 line.
+  const { federal, state, total } = illinoisAnalysis.gradients.w2_income;
+  assert.ok(
+    Math.abs(state - 0.0495) <= 1e-12,
+    `the IL state slope is the 4.95% flat rate, received ${state}`,
+  );
+  assert.ok(
+    Math.abs(total - (federal + state)) <= 1e-12,
+    "the total slope is the federal plus the state slope",
+  );
+} else {
+  assert.equal(illinoisAnalysis.gradients.w2_income.state, null);
+  assert.equal(illinoisAnalysis.gradients.w2_income.total, null);
+  const illinoisAttempt = analyzeScenario(
+    graphlib,
+    graphs.get(2025),
+    contract,
+    illinois,
+    { includeStateSlopes: true, allowUnvalidated: false },
+  );
+  assert.equal(
+    illinoisAttempt.gradients.w2_income.state,
+    null,
+    "no caller option restores a withheld state slope",
+  );
+  assert.equal(illinoisAttempt.gradients.w2_income.total, null);
+}
 assert.ok(illinoisAnalysis.results.state_total_tax > 0);
 
 const mississippi = { ...illinois, jurisdiction: "MS" };

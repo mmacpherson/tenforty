@@ -159,7 +159,6 @@ def test_head_of_family_true_requires_an_actual_dependent(dependents):
         )
 
 
-@pytest.mark.usefixtures("lift_state_planning_refusal")
 @pytest.mark.parametrize(
     "output", ["total_tax", "state_total_tax", "ms_80105_L21_tax_after_credits"]
 )
@@ -341,7 +340,6 @@ def test_retained_zero_dependent_literal_hof_components_are_raw_only(
     assert runtime.eval("ms_80105_L21_tax_after_credits") == tax
 
 
-@pytest.mark.usefixtures("lift_state_planning_refusal")
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("output", ["total_tax", "state_total_tax"])
 @pytest.mark.parametrize("operation", ["gradient", "solve"])

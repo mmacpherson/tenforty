@@ -33,7 +33,7 @@ IMAGE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
 def _segments() -> list[tuple[str, str]]:
     """Split the README into (kind, text): python, value, table or image."""
-    lines = README.read_text().splitlines()
+    lines = README.read_text(encoding="utf-8").splitlines()
     segments: list[tuple[str, str]] = []
     pending: str | None = None
     index = 0

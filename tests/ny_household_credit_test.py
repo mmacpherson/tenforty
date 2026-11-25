@@ -48,7 +48,7 @@ def _published_cases():
         Path(__file__).parents[1]
         / "docs/validation/derivations/ny-2024-2025-household-credit.csv"
     )
-    with path.open() as source:
+    with path.open(encoding="utf-8") as source:
         rows = list(csv.DictReader(source))
     for status, (table, count) in STATUS_TABLES.items():
         for year in (2024, 2025):
@@ -76,7 +76,7 @@ def _all_rows():
         Path(__file__).parents[1]
         / "docs/validation/derivations/ny-2024-2025-household-credit.csv"
     )
-    with path.open() as source:
+    with path.open(encoding="utf-8") as source:
         return list(csv.DictReader(source))
 
 

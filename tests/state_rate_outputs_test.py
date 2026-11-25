@@ -39,7 +39,7 @@ def _derived_state_vectors() -> list[tuple[str, int, str, int, float]]:
     row = re.compile(r"^\| ([\d,]+) \| [^|]+ \| ([\d.]+) \|$")
     vectors = []
     current = None
-    for text in DERIVATION.read_text().splitlines():
+    for text in DERIVATION.read_text(encoding="utf-8").splitlines():
         if match := heading.match(text):
             statuses = [
                 STATUS_NAMES[name.strip()]

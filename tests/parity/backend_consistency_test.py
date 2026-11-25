@@ -159,7 +159,7 @@ def run_comparison():
     if discrepancies:
         print("\n=== Discrepancy Details ===")
         log_file = "discovered_bugs.txt"
-        with open(log_file, "w") as f:
+        with open(log_file, "w", encoding="utf-8") as f:
             for idx, d in enumerate(discrepancies):
                 msg = f"\nCase #{idx + 1}:\nInputs: {d.inputs}\nIssues: {d.diff_description}\n"
                 print(msg)

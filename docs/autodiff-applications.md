@@ -14,11 +14,12 @@ uv run python examples/autodiff_planning.py --benchmark
 The examples use 2024 law and the graph backend, on federal-only returns. They
 are analysis examples, not tax advice or a general optimizer.
 
-State returns are left out deliberately. The graph is so far validated only for
-federal-only returns and IL, MS, OR and the states without an income tax, and
-for IL, MS and OR its state derivative is currently zero although their state
-tax moves with income (tenforty-s48h.76), so `marginal_rates` on those returns
-reports only the federal slope.
+State returns are left out. The graph is so far validated only for
+federal-only returns and IL, MS, OR and the states without an income tax. On
+those state returns `marginal_rates` includes the state slope: whole-dollar
+rounding passes the state's rate through. A stepwise phase-out, reduced per
+whole $1,000 or per interval (Forms 2441 and 8812, Schedule 1-A, California's
+exemption credit), contributes no planning slope (tenforty-s48h.78).
 
 ## 1. Which next dollar costs the most?
 

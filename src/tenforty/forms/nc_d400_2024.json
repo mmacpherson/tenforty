@@ -38,28 +38,36 @@
         },
         "10": {
             "id": 10,
-            "name": "L6_federal_agi",
             "op": {
-                "arg": 9,
-                "type": "floor"
+                "arg": 2,
+                "mode": "round",
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
+                "type": "tax_table_quantize"
             }
         },
         "100": {
             "id": 100,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "75000"
-                }
+                "left": 8,
+                "right": 99,
+                "type": "sub"
             }
         },
         "101": {
             "id": 101,
             "op": {
-                "left": 10,
-                "right": 100,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "1000"
+                }
             }
         },
         "102": {
@@ -68,26 +76,26 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "1500"
+                    "n": "105000"
                 }
             }
         },
         "103": {
             "id": 103,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "90000"
-                }
+                "left": 8,
+                "right": 102,
+                "type": "sub"
             }
         },
         "104": {
             "id": 104,
             "op": {
-                "left": 10,
-                "right": 103,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "500"
+                }
             }
         },
         "105": {
@@ -96,63 +104,59 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "1000"
+                    "n": "0"
                 }
             }
         },
         "106": {
             "id": 106,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "105000"
-                }
+                "cond": 103,
+                "otherwise": 104,
+                "then": 105,
+                "type": "if_positive"
             }
         },
         "107": {
             "id": 107,
             "op": {
-                "left": 10,
-                "right": 106,
-                "type": "sub"
+                "cond": 100,
+                "otherwise": 101,
+                "then": 106,
+                "type": "if_positive"
             }
         },
         "108": {
             "id": 108,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "500"
-                }
+                "cond": 97,
+                "otherwise": 98,
+                "then": 107,
+                "type": "if_positive"
             }
         },
         "109": {
             "id": 109,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "0"
-                }
+                "cond": 94,
+                "otherwise": 95,
+                "then": 108,
+                "type": "if_positive"
             }
         },
         "11": {
             "id": 11,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "0"
-                }
+                "left": 9,
+                "right": 10,
+                "type": "max"
             }
         },
         "110": {
             "id": 110,
             "op": {
-                "cond": 107,
-                "otherwise": 108,
+                "cond": 91,
+                "otherwise": 92,
                 "then": 109,
                 "type": "if_positive"
             }
@@ -160,50 +164,14 @@
         "111": {
             "id": 111,
             "op": {
-                "cond": 104,
-                "otherwise": 105,
+                "cond": 88,
+                "otherwise": 89,
                 "then": 110,
                 "type": "if_positive"
             }
         },
         "112": {
             "id": 112,
-            "op": {
-                "cond": 101,
-                "otherwise": 102,
-                "then": 111,
-                "type": "if_positive"
-            }
-        },
-        "113": {
-            "id": 113,
-            "op": {
-                "cond": 98,
-                "otherwise": 99,
-                "then": 112,
-                "type": "if_positive"
-            }
-        },
-        "114": {
-            "id": 114,
-            "op": {
-                "cond": 95,
-                "otherwise": 96,
-                "then": 113,
-                "type": "if_positive"
-            }
-        },
-        "115": {
-            "id": 115,
-            "op": {
-                "cond": 92,
-                "otherwise": 93,
-                "then": 114,
-                "type": "if_positive"
-            }
-        },
-        "116": {
-            "id": 116,
             "op": {
                 "type": "literal",
                 "value": {
@@ -212,16 +180,16 @@
                 }
             }
         },
-        "117": {
-            "id": 117,
+        "113": {
+            "id": 113,
             "op": {
-                "left": 10,
-                "right": 116,
+                "left": 8,
+                "right": 112,
                 "type": "sub"
             }
         },
-        "118": {
-            "id": 118,
+        "114": {
+            "id": 114,
             "op": {
                 "type": "literal",
                 "value": {
@@ -230,8 +198,8 @@
                 }
             }
         },
-        "119": {
-            "id": 119,
+        "115": {
+            "id": 115,
             "op": {
                 "type": "literal",
                 "value": {
@@ -240,26 +208,16 @@
                 }
             }
         },
-        "12": {
-            "id": 12,
+        "116": {
+            "id": 116,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "2",
-                    "n": "1"
-                }
-            }
-        },
-        "120": {
-            "id": 120,
-            "op": {
-                "left": 10,
-                "right": 119,
+                "left": 8,
+                "right": 115,
                 "type": "sub"
             }
         },
-        "121": {
-            "id": 121,
+        "117": {
+            "id": 117,
             "op": {
                 "type": "literal",
                 "value": {
@@ -268,8 +226,8 @@
                 }
             }
         },
-        "122": {
-            "id": 122,
+        "118": {
+            "id": 118,
             "op": {
                 "type": "literal",
                 "value": {
@@ -278,16 +236,26 @@
                 }
             }
         },
-        "123": {
-            "id": 123,
+        "119": {
+            "id": 119,
             "op": {
-                "left": 10,
-                "right": 122,
+                "left": 8,
+                "right": 118,
                 "type": "sub"
             }
         },
-        "124": {
-            "id": 124,
+        "12": {
+            "id": 12,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "20000"
+                }
+            }
+        },
+        "120": {
+            "id": 120,
             "op": {
                 "type": "literal",
                 "value": {
@@ -296,8 +264,8 @@
                 }
             }
         },
-        "125": {
-            "id": 125,
+        "121": {
+            "id": 121,
             "op": {
                 "type": "literal",
                 "value": {
@@ -306,16 +274,16 @@
                 }
             }
         },
-        "126": {
-            "id": 126,
+        "122": {
+            "id": 122,
             "op": {
-                "left": 10,
-                "right": 125,
+                "left": 8,
+                "right": 121,
                 "type": "sub"
             }
         },
-        "127": {
-            "id": 127,
+        "123": {
+            "id": 123,
             "op": {
                 "type": "literal",
                 "value": {
@@ -324,8 +292,8 @@
                 }
             }
         },
-        "128": {
-            "id": 128,
+        "124": {
+            "id": 124,
             "op": {
                 "type": "literal",
                 "value": {
@@ -334,24 +302,16 @@
                 }
             }
         },
-        "129": {
-            "id": 129,
+        "125": {
+            "id": 125,
             "op": {
-                "left": 10,
-                "right": 128,
+                "left": 8,
+                "right": 124,
                 "type": "sub"
             }
         },
-        "13": {
-            "id": 13,
-            "op": {
-                "left": 2,
-                "right": 12,
-                "type": "add"
-            }
-        },
-        "130": {
-            "id": 130,
+        "126": {
+            "id": 126,
             "op": {
                 "type": "literal",
                 "value": {
@@ -360,8 +320,8 @@
                 }
             }
         },
-        "131": {
-            "id": 131,
+        "127": {
+            "id": 127,
             "op": {
                 "type": "literal",
                 "value": {
@@ -370,16 +330,16 @@
                 }
             }
         },
-        "132": {
-            "id": 132,
+        "128": {
+            "id": 128,
             "op": {
-                "left": 10,
-                "right": 131,
+                "left": 8,
+                "right": 127,
                 "type": "sub"
             }
         },
-        "133": {
-            "id": 133,
+        "129": {
+            "id": 129,
             "op": {
                 "type": "literal",
                 "value": {
@@ -388,8 +348,16 @@
                 }
             }
         },
-        "134": {
-            "id": 134,
+        "13": {
+            "id": 13,
+            "op": {
+                "left": 8,
+                "right": 12,
+                "type": "sub"
+            }
+        },
+        "130": {
+            "id": 130,
             "op": {
                 "type": "literal",
                 "value": {
@@ -398,11 +366,47 @@
                 }
             }
         },
+        "131": {
+            "id": 131,
+            "op": {
+                "cond": 128,
+                "otherwise": 129,
+                "then": 130,
+                "type": "if_positive"
+            }
+        },
+        "132": {
+            "id": 132,
+            "op": {
+                "cond": 125,
+                "otherwise": 126,
+                "then": 131,
+                "type": "if_positive"
+            }
+        },
+        "133": {
+            "id": 133,
+            "op": {
+                "cond": 122,
+                "otherwise": 123,
+                "then": 132,
+                "type": "if_positive"
+            }
+        },
+        "134": {
+            "id": 134,
+            "op": {
+                "cond": 119,
+                "otherwise": 120,
+                "then": 133,
+                "type": "if_positive"
+            }
+        },
         "135": {
             "id": 135,
             "op": {
-                "cond": 132,
-                "otherwise": 133,
+                "cond": 116,
+                "otherwise": 117,
                 "then": 134,
                 "type": "if_positive"
             }
@@ -410,8 +414,8 @@
         "136": {
             "id": 136,
             "op": {
-                "cond": 129,
-                "otherwise": 130,
+                "cond": 113,
+                "otherwise": 114,
                 "then": 135,
                 "type": "if_positive"
             }
@@ -419,56 +423,60 @@
         "137": {
             "id": 137,
             "op": {
-                "cond": 126,
-                "otherwise": 127,
-                "then": 136,
-                "type": "if_positive"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 111,
+                    "married_joint": 61,
+                    "married_separate": 86,
+                    "qualifying_widow": 136,
+                    "single": 36
+                }
             }
         },
         "138": {
             "id": 138,
             "op": {
-                "cond": 123,
-                "otherwise": 124,
-                "then": 137,
-                "type": "if_positive"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "139": {
             "id": 139,
             "op": {
-                "cond": 120,
-                "otherwise": 121,
-                "then": 138,
-                "type": "if_positive"
+                "left": 137,
+                "right": 138,
+                "type": "div"
             }
         },
         "14": {
             "id": 14,
             "op": {
-                "arg": 13,
-                "type": "floor"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "3000"
+                }
             }
         },
         "140": {
             "id": 140,
+            "name": "L9_child_deduction",
             "op": {
-                "cond": 117,
-                "otherwise": 118,
-                "then": 139,
-                "type": "if_positive"
+                "left": 11,
+                "right": 139,
+                "type": "mul"
             }
         },
         "141": {
             "id": 141,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 115,
-                    "married_joint": 65,
-                    "married_separate": 90,
-                    "qualifying_widow": 140,
-                    "single": 40
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "12750"
                 }
             }
         },
@@ -478,59 +486,22 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "1"
+                    "n": "25500"
                 }
             }
         },
         "143": {
             "id": 143,
             "op": {
-                "left": 141,
-                "right": 142,
-                "type": "div"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "12750"
+                }
             }
         },
         "144": {
             "id": 144,
-            "name": "L9_child_deduction",
-            "op": {
-                "left": 15,
-                "right": 143,
-                "type": "mul"
-            }
-        },
-        "145": {
-            "id": 145,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "12750"
-                }
-            }
-        },
-        "146": {
-            "id": 146,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "25500"
-                }
-            }
-        },
-        "147": {
-            "id": 147,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "12750"
-                }
-            }
-        },
-        "148": {
-            "id": 148,
             "op": {
                 "type": "literal",
                 "value": {
@@ -539,8 +510,8 @@
                 }
             }
         },
-        "149": {
-            "id": 149,
+        "145": {
+            "id": 145,
             "op": {
                 "type": "literal",
                 "value": {
@@ -549,64 +520,47 @@
                 }
             }
         },
-        "15": {
-            "id": 15,
-            "op": {
-                "left": 11,
-                "right": 14,
-                "type": "max"
-            }
-        },
-        "150": {
-            "id": 150,
+        "146": {
+            "id": 146,
             "name": "L10_std",
             "op": {
                 "type": "by_status",
                 "values": {
-                    "head_of_household": 148,
-                    "married_joint": 146,
-                    "married_separate": 147,
-                    "qualifying_widow": 149,
-                    "single": 145
+                    "head_of_household": 144,
+                    "married_joint": 142,
+                    "married_separate": 143,
+                    "qualifying_widow": 145,
+                    "single": 141
                 }
             }
         },
-        "151": {
-            "id": 151,
+        "147": {
+            "id": 147,
             "op": {
                 "left": 3,
-                "right": 150,
+                "right": 146,
                 "type": "max"
             }
         },
-        "152": {
-            "id": 152,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "2",
-                    "n": "1"
-                }
-            }
-        },
-        "153": {
-            "id": 153,
-            "op": {
-                "left": 151,
-                "right": 152,
-                "type": "add"
-            }
-        },
-        "154": {
-            "id": 154,
+        "148": {
+            "id": 148,
             "name": "L10_deduction_amount",
             "op": {
-                "arg": 153,
-                "type": "floor"
+                "arg": 147,
+                "mode": "round",
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
+                "type": "tax_table_quantize"
             }
         },
-        "155": {
-            "id": 155,
+        "149": {
+            "id": 149,
             "op": {
                 "type": "literal",
                 "value": {
@@ -615,109 +569,91 @@
                 }
             }
         },
-        "156": {
-            "id": 156,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "2",
-                    "n": "1"
-                }
-            }
-        },
-        "157": {
-            "id": 157,
-            "op": {
-                "left": 0,
-                "right": 156,
-                "type": "add"
-            }
-        },
-        "158": {
-            "id": 158,
-            "op": {
-                "arg": 157,
-                "type": "floor"
-            }
-        },
-        "159": {
-            "id": 159,
-            "op": {
-                "left": 10,
-                "right": 158,
-                "type": "add"
-            }
-        },
-        "16": {
-            "id": 16,
+        "15": {
+            "id": 15,
             "op": {
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "20000"
+                    "n": "30000"
                 }
             }
         },
-        "160": {
-            "id": 160,
+        "150": {
+            "id": 150,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "2",
+                "arg": 0,
+                "mode": "round",
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
                     "n": "1"
-                }
+                },
+                "type": "tax_table_quantize"
             }
         },
-        "161": {
-            "id": 161,
+        "151": {
+            "id": 151,
             "op": {
-                "left": 1,
-                "right": 160,
+                "left": 8,
+                "right": 150,
                 "type": "add"
             }
         },
-        "162": {
-            "id": 162,
+        "152": {
+            "id": 152,
             "op": {
-                "arg": 161,
-                "type": "floor"
+                "arg": 1,
+                "mode": "round",
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
+                "type": "tax_table_quantize"
             }
         },
-        "163": {
-            "id": 163,
+        "153": {
+            "id": 153,
             "op": {
-                "left": 144,
+                "left": 140,
+                "right": 148,
+                "type": "add"
+            }
+        },
+        "154": {
+            "id": 154,
+            "op": {
+                "left": 152,
+                "right": 153,
+                "type": "add"
+            }
+        },
+        "155": {
+            "id": 155,
+            "op": {
+                "left": 151,
                 "right": 154,
-                "type": "add"
-            }
-        },
-        "164": {
-            "id": 164,
-            "op": {
-                "left": 162,
-                "right": 163,
-                "type": "add"
-            }
-        },
-        "165": {
-            "id": 165,
-            "op": {
-                "left": 159,
-                "right": 164,
                 "type": "sub"
             }
         },
-        "166": {
-            "id": 166,
+        "156": {
+            "id": 156,
             "name": "L11_nc_taxable_income",
             "op": {
-                "left": 155,
-                "right": 165,
+                "left": 149,
+                "right": 155,
                 "type": "max"
             }
         },
-        "167": {
-            "id": 167,
+        "157": {
+            "id": 157,
             "op": {
                 "type": "literal",
                 "value": {
@@ -726,67 +662,58 @@
                 }
             }
         },
-        "168": {
-            "id": 168,
+        "158": {
+            "id": 158,
             "op": {
-                "left": 166,
-                "right": 167,
+                "left": 156,
+                "right": 157,
                 "type": "mul"
             }
         },
-        "169": {
-            "id": 169,
+        "159": {
+            "id": 159,
+            "name": "L12_nc_tax",
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "2",
+                "arg": 158,
+                "mode": "round",
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
                     "n": "1"
-                }
+                },
+                "type": "tax_table_quantize"
             }
         },
-        "17": {
-            "id": 17,
+        "16": {
+            "id": 16,
             "op": {
-                "left": 10,
-                "right": 16,
+                "left": 8,
+                "right": 15,
                 "type": "sub"
             }
         },
-        "170": {
-            "id": 170,
-            "op": {
-                "left": 168,
-                "right": 169,
-                "type": "add"
-            }
-        },
-        "171": {
-            "id": 171,
-            "name": "L12_nc_tax",
-            "op": {
-                "arg": 170,
-                "type": "floor"
-            }
-        },
-        "172": {
-            "id": 172,
+        "160": {
+            "id": 160,
             "op": {
                 "left": 5,
                 "right": 6,
                 "type": "add"
             }
         },
-        "173": {
-            "id": 173,
+        "161": {
+            "id": 161,
             "name": "L16_total_payments",
             "op": {
                 "left": 4,
-                "right": 172,
+                "right": 160,
                 "type": "add"
             }
         },
-        "174": {
-            "id": 174,
+        "162": {
+            "id": 162,
             "op": {
                 "type": "literal",
                 "value": {
@@ -795,46 +722,66 @@
                 }
             }
         },
-        "175": {
-            "id": 175,
+        "163": {
+            "id": 163,
             "op": {
-                "left": 171,
-                "right": 173,
+                "left": 159,
+                "right": 161,
                 "type": "sub"
             }
         },
-        "176": {
-            "id": 176,
+        "164": {
+            "id": 164,
             "name": "L17_tax_due",
             "op": {
-                "left": 174,
-                "right": 175,
+                "left": 162,
+                "right": 163,
                 "type": "max"
             }
         },
-        "177": {
-            "id": 177,
+        "165": {
+            "id": 165,
             "op": {
-                "left": 173,
-                "right": 171,
+                "left": 161,
+                "right": 159,
                 "type": "sub"
             }
         },
-        "178": {
-            "id": 178,
+        "166": {
+            "id": 166,
             "op": {
-                "left": 173,
-                "right": 171,
+                "left": 161,
+                "right": 159,
                 "type": "sub"
             }
         },
-        "179": {
-            "id": 179,
+        "167": {
+            "id": 167,
             "op": {
                 "type": "literal",
                 "value": {
                     "d": "1",
                     "n": "0"
+                }
+            }
+        },
+        "168": {
+            "id": 168,
+            "name": "L18_overpayment",
+            "op": {
+                "cond": 165,
+                "otherwise": 167,
+                "then": 166,
+                "type": "if_positive"
+            }
+        },
+        "17": {
+            "id": 17,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "2500"
                 }
             }
         },
@@ -844,28 +791,16 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "3000"
+                    "n": "40000"
                 }
-            }
-        },
-        "180": {
-            "id": 180,
-            "name": "L18_overpayment",
-            "op": {
-                "cond": 177,
-                "otherwise": 179,
-                "then": 178,
-                "type": "if_positive"
             }
         },
         "19": {
             "id": 19,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "30000"
-                }
+                "left": 8,
+                "right": 18,
+                "type": "sub"
             }
         },
         "2": {
@@ -878,9 +813,11 @@
         "20": {
             "id": 20,
             "op": {
-                "left": 10,
-                "right": 19,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
             }
         },
         "21": {
@@ -889,58 +826,20 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "2500"
+                    "n": "50000"
                 }
             }
         },
         "22": {
             "id": 22,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "40000"
-                }
+                "left": 8,
+                "right": 21,
+                "type": "sub"
             }
         },
         "23": {
             "id": 23,
-            "op": {
-                "left": 10,
-                "right": 22,
-                "type": "sub"
-            }
-        },
-        "24": {
-            "id": 24,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "2000"
-                }
-            }
-        },
-        "25": {
-            "id": 25,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "50000"
-                }
-            }
-        },
-        "26": {
-            "id": 26,
-            "op": {
-                "left": 10,
-                "right": 25,
-                "type": "sub"
-            }
-        },
-        "27": {
-            "id": 27,
             "op": {
                 "type": "literal",
                 "value": {
@@ -949,8 +848,8 @@
                 }
             }
         },
-        "28": {
-            "id": 28,
+        "24": {
+            "id": 24,
             "op": {
                 "type": "literal",
                 "value": {
@@ -959,12 +858,50 @@
                 }
             }
         },
+        "25": {
+            "id": 25,
+            "op": {
+                "left": 8,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "26": {
+            "id": 26,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "1000"
+                }
+            }
+        },
+        "27": {
+            "id": 27,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "70000"
+                }
+            }
+        },
+        "28": {
+            "id": 28,
+            "op": {
+                "left": 8,
+                "right": 27,
+                "type": "sub"
+            }
+        },
         "29": {
             "id": 29,
             "op": {
-                "left": 10,
-                "right": 28,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "500"
+                }
             }
         },
         "3": {
@@ -980,53 +917,51 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "1000"
+                    "n": "0"
                 }
             }
         },
         "31": {
             "id": 31,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "70000"
-                }
+                "cond": 28,
+                "otherwise": 29,
+                "then": 30,
+                "type": "if_positive"
             }
         },
         "32": {
             "id": 32,
             "op": {
-                "left": 10,
-                "right": 31,
-                "type": "sub"
+                "cond": 25,
+                "otherwise": 26,
+                "then": 31,
+                "type": "if_positive"
             }
         },
         "33": {
             "id": 33,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "500"
-                }
+                "cond": 22,
+                "otherwise": 23,
+                "then": 32,
+                "type": "if_positive"
             }
         },
         "34": {
             "id": 34,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "0"
-                }
+                "cond": 19,
+                "otherwise": 20,
+                "then": 33,
+                "type": "if_positive"
             }
         },
         "35": {
             "id": 35,
             "op": {
-                "cond": 32,
-                "otherwise": 33,
+                "cond": 16,
+                "otherwise": 17,
                 "then": 34,
                 "type": "if_positive"
             }
@@ -1034,8 +969,8 @@
         "36": {
             "id": 36,
             "op": {
-                "cond": 29,
-                "otherwise": 30,
+                "cond": 13,
+                "otherwise": 14,
                 "then": 35,
                 "type": "if_positive"
             }
@@ -1043,28 +978,29 @@
         "37": {
             "id": 37,
             "op": {
-                "cond": 26,
-                "otherwise": 27,
-                "then": 36,
-                "type": "if_positive"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "40000"
+                }
             }
         },
         "38": {
             "id": 38,
             "op": {
-                "cond": 23,
-                "otherwise": 24,
-                "then": 37,
-                "type": "if_positive"
+                "left": 8,
+                "right": 37,
+                "type": "sub"
             }
         },
         "39": {
             "id": 39,
             "op": {
-                "cond": 20,
-                "otherwise": 21,
-                "then": 38,
-                "type": "if_positive"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "3000"
+                }
             }
         },
         "4": {
@@ -1077,43 +1013,6 @@
         "40": {
             "id": 40,
             "op": {
-                "cond": 17,
-                "otherwise": 18,
-                "then": 39,
-                "type": "if_positive"
-            }
-        },
-        "41": {
-            "id": 41,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "40000"
-                }
-            }
-        },
-        "42": {
-            "id": 42,
-            "op": {
-                "left": 10,
-                "right": 41,
-                "type": "sub"
-            }
-        },
-        "43": {
-            "id": 43,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "3000"
-                }
-            }
-        },
-        "44": {
-            "id": 44,
-            "op": {
                 "type": "literal",
                 "value": {
                     "d": "1",
@@ -1121,16 +1020,16 @@
                 }
             }
         },
-        "45": {
-            "id": 45,
+        "41": {
+            "id": 41,
             "op": {
-                "left": 10,
-                "right": 44,
+                "left": 8,
+                "right": 40,
                 "type": "sub"
             }
         },
-        "46": {
-            "id": 46,
+        "42": {
+            "id": 42,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1139,8 +1038,8 @@
                 }
             }
         },
-        "47": {
-            "id": 47,
+        "43": {
+            "id": 43,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1149,12 +1048,50 @@
                 }
             }
         },
+        "44": {
+            "id": 44,
+            "op": {
+                "left": 8,
+                "right": 43,
+                "type": "sub"
+            }
+        },
+        "45": {
+            "id": 45,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
+            }
+        },
+        "46": {
+            "id": 46,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "100000"
+                }
+            }
+        },
+        "47": {
+            "id": 47,
+            "op": {
+                "left": 8,
+                "right": 46,
+                "type": "sub"
+            }
+        },
         "48": {
             "id": 48,
             "op": {
-                "left": 10,
-                "right": 47,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "1500"
+                }
             }
         },
         "49": {
@@ -1163,7 +1100,7 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "2000"
+                    "n": "120000"
                 }
             }
         },
@@ -1177,51 +1114,13 @@
         "50": {
             "id": 50,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "100000"
-                }
+                "left": 8,
+                "right": 49,
+                "type": "sub"
             }
         },
         "51": {
             "id": 51,
-            "op": {
-                "left": 10,
-                "right": 50,
-                "type": "sub"
-            }
-        },
-        "52": {
-            "id": 52,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "1500"
-                }
-            }
-        },
-        "53": {
-            "id": 53,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "120000"
-                }
-            }
-        },
-        "54": {
-            "id": 54,
-            "op": {
-                "left": 10,
-                "right": 53,
-                "type": "sub"
-            }
-        },
-        "55": {
-            "id": 55,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1230,8 +1129,8 @@
                 }
             }
         },
-        "56": {
-            "id": 56,
+        "52": {
+            "id": 52,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1240,16 +1139,16 @@
                 }
             }
         },
-        "57": {
-            "id": 57,
+        "53": {
+            "id": 53,
             "op": {
-                "left": 10,
-                "right": 56,
+                "left": 8,
+                "right": 52,
                 "type": "sub"
             }
         },
-        "58": {
-            "id": 58,
+        "54": {
+            "id": 54,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1258,14 +1157,50 @@
                 }
             }
         },
-        "59": {
-            "id": 59,
+        "55": {
+            "id": 55,
             "op": {
                 "type": "literal",
                 "value": {
                     "d": "1",
                     "n": "0"
                 }
+            }
+        },
+        "56": {
+            "id": 56,
+            "op": {
+                "cond": 53,
+                "otherwise": 54,
+                "then": 55,
+                "type": "if_positive"
+            }
+        },
+        "57": {
+            "id": 57,
+            "op": {
+                "cond": 50,
+                "otherwise": 51,
+                "then": 56,
+                "type": "if_positive"
+            }
+        },
+        "58": {
+            "id": 58,
+            "op": {
+                "cond": 47,
+                "otherwise": 48,
+                "then": 57,
+                "type": "if_positive"
+            }
+        },
+        "59": {
+            "id": 59,
+            "op": {
+                "cond": 44,
+                "otherwise": 45,
+                "then": 58,
+                "type": "if_positive"
             }
         },
         "6": {
@@ -1278,8 +1213,8 @@
         "60": {
             "id": 60,
             "op": {
-                "cond": 57,
-                "otherwise": 58,
+                "cond": 41,
+                "otherwise": 42,
                 "then": 59,
                 "type": "if_positive"
             }
@@ -1287,50 +1222,14 @@
         "61": {
             "id": 61,
             "op": {
-                "cond": 54,
-                "otherwise": 55,
+                "cond": 38,
+                "otherwise": 39,
                 "then": 60,
                 "type": "if_positive"
             }
         },
         "62": {
             "id": 62,
-            "op": {
-                "cond": 51,
-                "otherwise": 52,
-                "then": 61,
-                "type": "if_positive"
-            }
-        },
-        "63": {
-            "id": 63,
-            "op": {
-                "cond": 48,
-                "otherwise": 49,
-                "then": 62,
-                "type": "if_positive"
-            }
-        },
-        "64": {
-            "id": 64,
-            "op": {
-                "cond": 45,
-                "otherwise": 46,
-                "then": 63,
-                "type": "if_positive"
-            }
-        },
-        "65": {
-            "id": 65,
-            "op": {
-                "cond": 42,
-                "otherwise": 43,
-                "then": 64,
-                "type": "if_positive"
-            }
-        },
-        "66": {
-            "id": 66,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1339,16 +1238,16 @@
                 }
             }
         },
-        "67": {
-            "id": 67,
+        "63": {
+            "id": 63,
             "op": {
-                "left": 10,
-                "right": 66,
+                "left": 8,
+                "right": 62,
                 "type": "sub"
             }
         },
-        "68": {
-            "id": 68,
+        "64": {
+            "id": 64,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1357,14 +1256,50 @@
                 }
             }
         },
-        "69": {
-            "id": 69,
+        "65": {
+            "id": 65,
             "op": {
                 "type": "literal",
                 "value": {
                     "d": "1",
                     "n": "30000"
                 }
+            }
+        },
+        "66": {
+            "id": 66,
+            "op": {
+                "left": 8,
+                "right": 65,
+                "type": "sub"
+            }
+        },
+        "67": {
+            "id": 67,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "2500"
+                }
+            }
+        },
+        "68": {
+            "id": 68,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "40000"
+                }
+            }
+        },
+        "69": {
+            "id": 69,
+            "op": {
+                "left": 8,
+                "right": 68,
+                "type": "sub"
             }
         },
         "7": {
@@ -1379,9 +1314,11 @@
         "70": {
             "id": 70,
             "op": {
-                "left": 10,
-                "right": 69,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
             }
         },
         "71": {
@@ -1390,58 +1327,20 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "2500"
+                    "n": "50000"
                 }
             }
         },
         "72": {
             "id": 72,
             "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "40000"
-                }
+                "left": 8,
+                "right": 71,
+                "type": "sub"
             }
         },
         "73": {
             "id": 73,
-            "op": {
-                "left": 10,
-                "right": 72,
-                "type": "sub"
-            }
-        },
-        "74": {
-            "id": 74,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "2000"
-                }
-            }
-        },
-        "75": {
-            "id": 75,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "1",
-                    "n": "50000"
-                }
-            }
-        },
-        "76": {
-            "id": 76,
-            "op": {
-                "left": 10,
-                "right": 75,
-                "type": "sub"
-            }
-        },
-        "77": {
-            "id": 77,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1450,8 +1349,8 @@
                 }
             }
         },
-        "78": {
-            "id": 78,
+        "74": {
+            "id": 74,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1460,26 +1359,16 @@
                 }
             }
         },
-        "79": {
-            "id": 79,
+        "75": {
+            "id": 75,
             "op": {
-                "left": 10,
-                "right": 78,
+                "left": 8,
+                "right": 74,
                 "type": "sub"
             }
         },
-        "8": {
-            "id": 8,
-            "op": {
-                "type": "literal",
-                "value": {
-                    "d": "2",
-                    "n": "1"
-                }
-            }
-        },
-        "80": {
-            "id": 80,
+        "76": {
+            "id": 76,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1488,8 +1377,8 @@
                 }
             }
         },
-        "81": {
-            "id": 81,
+        "77": {
+            "id": 77,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1498,16 +1387,16 @@
                 }
             }
         },
-        "82": {
-            "id": 82,
+        "78": {
+            "id": 78,
             "op": {
-                "left": 10,
-                "right": 81,
+                "left": 8,
+                "right": 77,
                 "type": "sub"
             }
         },
-        "83": {
-            "id": 83,
+        "79": {
+            "id": 79,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1516,8 +1405,25 @@
                 }
             }
         },
-        "84": {
-            "id": 84,
+        "8": {
+            "id": 8,
+            "name": "L6_federal_agi",
+            "op": {
+                "arg": 7,
+                "mode": "round",
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
+                "type": "tax_table_quantize"
+            }
+        },
+        "80": {
+            "id": 80,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1526,11 +1432,47 @@
                 }
             }
         },
+        "81": {
+            "id": 81,
+            "op": {
+                "cond": 78,
+                "otherwise": 79,
+                "then": 80,
+                "type": "if_positive"
+            }
+        },
+        "82": {
+            "id": 82,
+            "op": {
+                "cond": 75,
+                "otherwise": 76,
+                "then": 81,
+                "type": "if_positive"
+            }
+        },
+        "83": {
+            "id": 83,
+            "op": {
+                "cond": 72,
+                "otherwise": 73,
+                "then": 82,
+                "type": "if_positive"
+            }
+        },
+        "84": {
+            "id": 84,
+            "op": {
+                "cond": 69,
+                "otherwise": 70,
+                "then": 83,
+                "type": "if_positive"
+            }
+        },
         "85": {
             "id": 85,
             "op": {
-                "cond": 82,
-                "otherwise": 83,
+                "cond": 66,
+                "otherwise": 67,
                 "then": 84,
                 "type": "if_positive"
             }
@@ -1538,58 +1480,14 @@
         "86": {
             "id": 86,
             "op": {
-                "cond": 79,
-                "otherwise": 80,
+                "cond": 63,
+                "otherwise": 64,
                 "then": 85,
                 "type": "if_positive"
             }
         },
         "87": {
             "id": 87,
-            "op": {
-                "cond": 76,
-                "otherwise": 77,
-                "then": 86,
-                "type": "if_positive"
-            }
-        },
-        "88": {
-            "id": 88,
-            "op": {
-                "cond": 73,
-                "otherwise": 74,
-                "then": 87,
-                "type": "if_positive"
-            }
-        },
-        "89": {
-            "id": 89,
-            "op": {
-                "cond": 70,
-                "otherwise": 71,
-                "then": 88,
-                "type": "if_positive"
-            }
-        },
-        "9": {
-            "id": 9,
-            "op": {
-                "left": 7,
-                "right": 8,
-                "type": "add"
-            }
-        },
-        "90": {
-            "id": 90,
-            "op": {
-                "cond": 67,
-                "otherwise": 68,
-                "then": 89,
-                "type": "if_positive"
-            }
-        },
-        "91": {
-            "id": 91,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1598,16 +1496,16 @@
                 }
             }
         },
-        "92": {
-            "id": 92,
+        "88": {
+            "id": 88,
             "op": {
-                "left": 10,
-                "right": 91,
+                "left": 8,
+                "right": 87,
                 "type": "sub"
             }
         },
-        "93": {
-            "id": 93,
+        "89": {
+            "id": 89,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1616,8 +1514,18 @@
                 }
             }
         },
-        "94": {
-            "id": 94,
+        "9": {
+            "id": 9,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
+            }
+        },
+        "90": {
+            "id": 90,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1626,16 +1534,16 @@
                 }
             }
         },
-        "95": {
-            "id": 95,
+        "91": {
+            "id": 91,
             "op": {
-                "left": 10,
-                "right": 94,
+                "left": 8,
+                "right": 90,
                 "type": "sub"
             }
         },
-        "96": {
-            "id": 96,
+        "92": {
+            "id": 92,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1644,8 +1552,8 @@
                 }
             }
         },
-        "97": {
-            "id": 97,
+        "93": {
+            "id": 93,
             "op": {
                 "type": "literal",
                 "value": {
@@ -1654,12 +1562,50 @@
                 }
             }
         },
+        "94": {
+            "id": 94,
+            "op": {
+                "left": 8,
+                "right": 93,
+                "type": "sub"
+            }
+        },
+        "95": {
+            "id": 95,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "2000"
+                }
+            }
+        },
+        "96": {
+            "id": 96,
+            "op": {
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "75000"
+                }
+            }
+        },
+        "97": {
+            "id": 97,
+            "op": {
+                "left": 8,
+                "right": 96,
+                "type": "sub"
+            }
+        },
         "98": {
             "id": 98,
             "op": {
-                "left": 10,
-                "right": 97,
-                "type": "sub"
+                "type": "literal",
+                "value": {
+                    "d": "1",
+                    "n": "1500"
+                }
             }
         },
         "99": {
@@ -1668,19 +1614,19 @@
                 "type": "literal",
                 "value": {
                     "d": "1",
-                    "n": "2000"
+                    "n": "90000"
                 }
             }
         }
     },
     "outputs": [
-        166,
-        171,
-        173,
-        176,
-        180,
-        10,
-        144
+        156,
+        159,
+        161,
+        164,
+        168,
+        8,
+        140
     ],
     "tables": {}
 }

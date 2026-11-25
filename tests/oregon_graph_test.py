@@ -122,7 +122,7 @@ def _published_rows():
             Path(__file__).parents[1]
             / f"docs/validation/derivations/or-{year}-tax-table.csv"
         )
-        with path.open() as source:
+        with path.open(encoding="utf-8") as source:
             for row in csv.DictReader(source):
                 yield (
                     year,

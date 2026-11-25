@@ -35,7 +35,7 @@ def test_reviewed_state_derivations_are_explicit_and_durable():
         evidence = case.state_evidence
         assert evidence.deriver
         assert evidence.record
-        record = (ROOT / evidence.record).read_text()
+        record = (ROOT / evidence.record).read_text(encoding="utf-8")
         assert "https://" in record
         derivation_date = {
             "NJ": "2026-10-02",
@@ -62,7 +62,9 @@ def test_unaudited_state_cases_are_not_presented_as_independent_evidence():
 def test_state_value_fixture_modules_do_not_import_the_implementation():
     """Keep implementation evaluation in test runners, outside value fixtures."""
     for name in ("silver_state_scenarios.py", "tax_scenario.py", "evidence.py"):
-        tree = ast.parse((ROOT / "tests" / "fixtures" / name).read_text())
+        tree = ast.parse(
+            (ROOT / "tests" / "fixtures" / name).read_text(encoding="utf-8")
+        )
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 assert all(

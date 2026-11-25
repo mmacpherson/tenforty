@@ -17,8 +17,7 @@ links to other jurisdictions are refused. The primary view is analytical rather
 than a filing interview: it places the current return on a live
 federal/state/combined tax curve, draws the exact local tangent, and decomposes
 selected next-dollar sensitivities from a grouped autodiff vector. State and
-combined slopes are withheld on state returns until state derivatives are fixed
-(tenforty-s48h.76); federal slopes and the curve remain. Effective rates remain separate from these local effects, and
+combined slopes are shown on state returns. Effective rates remain separate from these local effects, and
 qualified-dividend sensitivity is labeled as a reclassification.
 
 Build and serve it locally with:

@@ -19,6 +19,7 @@ _ALLOWED_GRAPH_LANE_SKIPS = {
     "live TaxCalc version is checked only under the oracle gate": "tests/taxcalc/goldens_test.py",
     "Graph backend has no 2023 state form specs yet": "tests/parity/backend_parity_test.py",
     "Graph backend is available": "tests/unified_api_test.py",
+    "builds the vendored OTS programs with a POSIX toolchain; tenforty never builds OTS on Windows": "tests/ots_patch_behavior_test.py",
 }
 
 
@@ -204,14 +205,20 @@ def graph_only_install(monkeypatch):
     monkeypatch.setattr(_ots_extension, "ots_extension_installed", lambda: False)
 
 
+# No profile sets a wall-clock deadline (tenforty-up2k). A deadline is not a tax
+# assertion: under a shared, loaded machine it fails parity and solver oracles
+# on timing alone. Every profile states deadline=None once, here, so no test
+# needs to; tests/hypothesis_profiles_test.py keeps it that way.
 settings.register_profile(
     "ci",
     max_examples=500,
+    deadline=None,
     suppress_health_check=[HealthCheck.too_slow],
 )
 settings.register_profile(
     "dev",
     max_examples=50,
+    deadline=None,
     suppress_health_check=[HealthCheck.too_slow],
 )
 # Ad-hoc deep sweep: `uv run pytest --hypothesis-profile=deep`. Reaches rare
@@ -245,17 +252,3 @@ settings.register_profile(
     suppress_health_check=[HealthCheck.too_slow],
 )
 settings.load_profile("dev")  # Default for local dev
-
-
-@pytest.fixture
-def lift_state_planning_refusal(monkeypatch):
-    """Let an engine-level test take derivatives of state outputs.
-
-    The public API refuses them until tenforty-s48h.76 is fixed, because graph
-    state derivatives read zero for IL, MS and OR. A test that takes this
-    fixture checks another contract (a refusal, or a non-IL/MS/OR state's
-    derivative), never a value of an affected state.
-    """
-    from tenforty.backends import graph as graph_backend
-
-    monkeypatch.setattr(graph_backend, "STATE_PLANNING_DEFECT", None)

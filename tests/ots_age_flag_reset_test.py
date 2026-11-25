@@ -161,7 +161,8 @@ def _ots_input(path: Path, inputs: dict) -> Path:
         natural, NATURAL_FORM_CONFIG[(2025, "US_1040")].input_map
     )
     path.write_text(
-        generate_ots_return(values, OTS_FORM_CONFIG[(2025, "US_1040")]) + "\n"
+        generate_ots_return(values, OTS_FORM_CONFIG[(2025, "US_1040")]) + "\n",
+        encoding="utf-8",
     )
     return path
 
@@ -177,7 +178,7 @@ def _run_vendored_1040(workdir: Path, *returns: Path) -> float:
         capture_output=True,
     )
     output = returns[-1].with_name(returns[-1].stem + "_out.txt")
-    return float(parse_ots_return(output.read_text())["L15"])
+    return float(parse_ots_return(output.read_text(encoding="utf-8"))["L15"])
 
 
 def _main_with(source: str, inserted: str) -> str:
@@ -197,7 +198,7 @@ def _sequences(workdir: Path, inserted: str | None = None) -> dict:
     if inserted is not None:
         text = source.read_text(encoding="latin-1")
         source.write_text(_main_with(text, inserted), encoding="latin-1")
-    (workdir / "driver.c").write_text(_DRIVER)
+    (workdir / "driver.c").write_text(_DRIVER, encoding="utf-8")
     for command in (
         [compiler, "-w", "-c", "-Dmain=ots_1040_main", source.name, "-o", "ots.o"],
         [compiler, "-w", "driver.c", "ots.o", "-o", "harness", "-lm"],

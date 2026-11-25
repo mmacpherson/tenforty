@@ -16,7 +16,7 @@ def _bracket_tax(
     """Evaluate the generated WI bracket table alone, at a given taxable income."""
     from tenforty.graphlib import FilingStatus, Graph, Runtime
 
-    form = json.loads((FORMS_DIR / f"wi_form1_{year}.json").read_text())
+    form = json.loads((FORMS_DIR / f"wi_form1_{year}.json").read_text(encoding="utf-8"))
     table_id = f"wi_brackets_{year}"
     bracket_graph = {
         "meta": form["meta"],
