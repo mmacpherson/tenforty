@@ -1,4 +1,14 @@
 ## [Unreleased]
+### Fixed
+- **OTS Ohio 2024 and 2025 now read the exemption count** (tenforty-r91.11).
+  The natural `OH_IT1040` maps left `Exemptions` empty, so OTS used 0 and
+  dropped the per-MAGI personal exemption and the $20 exemption credit. The
+  count is now the taxpayer, plus the spouse on a joint return, plus
+  `num_dependents` (IT 1040 line 4). OTS taxable income now equals the archived
+  official figure on every case it can express; its tax is the unrounded form
+  of the printed whole-dollar tax and is pinned as a bounded strict departure
+  in `tests/ots_oh_official_values_test.py`. Filing status stays unmapped
+  (tenforty-r91.10).
 ### Added (validation)
 - **Official-value fixtures for 23 more graph states, 2024 and 2025**
   (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,
