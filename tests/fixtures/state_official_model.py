@@ -45,11 +45,13 @@ class OfficialCase:
     outcomes: tuple[Outcome, ...]
     check_taxable_income: bool = True
     note: str = ""
+    own_evidence: TaxEvidence | None = None
+    """Provenance of this case alone, where it differs from the state's record."""
 
     @property
     def evidence(self) -> TaxEvidence:
         """Provenance of every value in this case."""
-        return EVIDENCE_BY_STATE[self.state]
+        return self.own_evidence or EVIDENCE_BY_STATE[self.state]
 
 
 @dataclass(frozen=True)
@@ -81,6 +83,7 @@ def case(
     outcomes: tuple[Outcome, ...] | Outcome,
     note: str = "",
     check_taxable_income: bool = True,
+    own_evidence: TaxEvidence | None = None,
     **inputs: float,
 ) -> OfficialCase:
     """Build a case; ``outcomes`` is one (taxable income, tax) pair or several."""
@@ -95,4 +98,5 @@ def case(
         outcomes,
         check_taxable_income,
         note,
+        own_evidence,
     )
