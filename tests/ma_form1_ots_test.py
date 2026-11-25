@@ -3,8 +3,8 @@
 The MA_1 input map set only line 3 wages, so OTS never saw line 11 ("not more
 than $2,000" per person) and over-taxed every W-2 return by up to $100. That
 gap was in our mapping layer (models.py), not in OpenTaxSolver, which reads
-L11a/L11b in every year. MA_1 still maps nothing but wages, so interest,
-dividends, capital gains and self-employment income remain outside its domain.
+L11a/L11b in every year. The 2024 and 2025 income inputs beyond wages are
+covered in ma_form1_ots_income_test.py.
 
 Expected values for 2024 and 2025 are the blind derivation in
 docs/validation/derivations/ma-2024-2025.md (cases A-E, W-2 only; evidence kind:

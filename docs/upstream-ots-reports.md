@@ -7,7 +7,7 @@ and the text to send.
 
 **Status: drafted, not sent.** Sending is Mike's, in his own time.
 
-**Bundle for one email (2026-11-04):** reports 1, 2, 4–18; report 22 (2026-11-07) is newer and not yet in that bundle. Report 3 is withdrawn
+**Bundle for one email (2026-11-04):** reports 1, 2, 4–18; reports 22 and 23 (2026-11-07 and later) are newer and not yet in that bundle. Report 3 is withdrawn
 (our own error), and report 9 is offered tentatively because it is not
 reproduced end to end. The "Pending adjudication" section at the end lists
 OTS-vs-Tax-Calculator disagreements that are **not** yet established as OTS
@@ -1051,6 +1051,31 @@ $70,001 of wages it reports $2,321. 2023 and 2024 behave the same way.
 at-least/less-than). We may be missing why the epsilon is there, so we offer
 this tentatively. Not patched locally: it changes a computed figure. Recorded
 as a strict signature in `tests/ots_nj_gains_business_test.py`.
+
+---
+
+## 23. MA Form 1: the 4% surtax ignores Schedule B and D income, and excess exemptions are never applied (finding MA-OTS-SCHEDB-SURTAX-EXEMPTION)
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06 (MA_1)
+**Files:** `src/taxsolve_MA_1_2024.c`, `src/taxsolve_MA_1_2025.c` (surtax test on
+`L[19]`; line 20 and 23a read as entered)
+
+We read the 2024 and 2025 Form 1 and Schedule 4% Surtax as taking the surtax on
+Form 1 line 19 plus Schedule B line 37 plus Schedule D line 21 above $1,053,750
+(2024) or $1,083,150 (2025). The program tests `L[19]` alone, so Schedule B and
+D income never reaches it. Separately, the Form 1 line 19 instructions apply
+exemptions in excess of line 17 against interest, dividends and 8.5% income
+(Schedule B line 36); the program takes line 20 as entered and does not.
+
+**Reproducers (our blind derivation, `docs/validation/derivations/
+ma-2024-2025.md`, cases N2 and O):** 2025 Married/Joint, wages $1,000,000 and a
+$200,000 short-term gain (line 23a): the derivation gives total tax $70,702, OTS
+reports $66,460 (no surtax). 2025 Single, wages $4,000 and $9,000 interest
+(line 20): the derivation gives $414, OTS about $451.
+
+We may be misreading how the form is meant to be fed, so we offer this
+tentatively. Not patched locally. tenforty refuses these domains on OTS and
+records both cases as strict xfails in `tests/ma_form1_ots_income_test.py`.
 
 ---
 

@@ -10,6 +10,7 @@ from tenforty.core import ots_drops_input, ots_reads_input
 from tenforty.models import (
     OTSFilingStatus,
     OTSState,
+    UnsupportedInputError,
 )
 from tenforty.ots_state_gaps import ots_state_input_gap
 
@@ -427,14 +428,19 @@ def test_qualified_dividends_properly_taxed(
     assume(is_state_supported(year, state, filing_status))
     assume(not ots_state_input_gap("ordinary_dividends", year, state))
     # Test with only qualified dividends
-    result = tenforty.evaluate_return(
-        year=year,
-        state=state,
-        filing_status=filing_status,
-        w2_income=0,
-        qualified_dividends=qualified_dividends,
-        backend="ots",
-    )
+    try:
+        result = tenforty.evaluate_return(
+            year=year,
+            state=state,
+            filing_status=filing_status,
+            w2_income=0,
+            qualified_dividends=qualified_dividends,
+            backend="ots",
+        )
+    except UnsupportedInputError as refusal:
+        # MA 2024-2025 refuses dividends outside what OTS MA_1 computes
+        assume("outside what OTS computes" not in str(refusal))
+        raise
 
     # Compare with ordinary dividends explicitly set
     result_with_ordinary = tenforty.evaluate_return(

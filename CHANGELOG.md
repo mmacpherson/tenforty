@@ -1,4 +1,13 @@
 ## [Unreleased]
+### Fixed
+- **OTS Massachusetts 2024 and 2025 now carries interest, dividends, short- and
+  long-term gains, self-employment income and rental income** (tenforty-r91.14).
+  The MA_1 map passed only wages, so these inputs were dropped. They now reach
+  Form 1 lines 20, 23a, 24, 6a and 7, and self-employment tax joins the line 11
+  deduction. Values are pinned to the blind Massachusetts derivation (cases F,
+  G, H, L, M). OTS has no Schedule B or D, so returns it would misprice are
+  refused: capital losses, income near the 4% surtax threshold, and exemptions
+  that exceed ordinary income. Filer/spouse 65 or older stays refused.
 ### Added (validation)
 - **Official-value fixtures for 23 more graph states, 2024 and 2025**
   (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,
@@ -251,8 +260,8 @@
   used to compute the state tax without them. Zero passes; an input the state
   does not use is never refused. The full table, with each form line and bead,
   is in [Migrating between backends](docs/migrating-to-graph-default.md#ots-refuses-state-inputs-its-maps-do-not-deliver):
-  - MA_1: interest, dividends, short- and long-term gains, self-employment and
-    rental income, and filer/spouse 65 or older (tenforty-r91.14);
+  - MA_1: filer/spouse 65 or older, and the income inputs below for 2018 to
+    2023 (tenforty-r91.14);
   - NJ_1040: self-employment income and capital gains (tenforty-r91.15),
     `num_dependents`, filer/spouse 65 or older and rental income
     (tenforty-r91.20);

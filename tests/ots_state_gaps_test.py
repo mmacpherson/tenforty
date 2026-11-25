@@ -85,10 +85,13 @@ def test_every_gap_names_a_bead_and_a_form_line():
 
 @pytest.mark.parametrize("state", ["MA"])
 def test_qualified_dividends_alone_are_refused_as_ordinary_dividends(state):
-    """Qualified dividends lift ordinary_dividends, which the MA gap refuses."""
+    """Qualified dividends lift ordinary_dividends, which MA 2023 still refuses.
+
+    MA 2024 and 2025 map interest and dividends (tenforty-r91.14); 2023 does not.
+    """
     with pytest.raises(UnsupportedInputError, match="ordinary_dividends="):
         tenforty.evaluate_return(
-            year=2025, state=state, qualified_dividends=5_000.0, **SINGLE
+            year=2023, state=state, qualified_dividends=5_000.0, **SINGLE
         )
 
 
@@ -190,7 +193,7 @@ def test_one_refused_row_refuses_the_whole_batch(monkeypatch, mode, backend):
             year=2025,
             state="MA",
             w2_income=[60_000.0, 70_000.0],
-            long_term_capital_gains=[0.0, 10_000.0],
+            filer_65_or_older=[False, True],
             mode=mode,
             backend=backend,
         )

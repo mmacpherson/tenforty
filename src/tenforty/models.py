@@ -10,6 +10,7 @@ import json
 import math
 import warnings
 from collections.abc import Callable
+from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
 from functools import partial
 from typing import Any
@@ -814,10 +815,45 @@ class TaxReturnInput(BaseModel):
         Security wage base, so the base never enters. `w2_income` is a household
         aggregate, so a joint return takes the one-earner reading (all on 11a),
         as `schedule_se_ss_wages` does and as the graph's line 11 does; a two-earner
-        couple is then at most $100 high, or $180 once the 4% surtax applies. MA_1 maps
-        no self-employment income, so its SE-tax share is not added here.
+        couple is then at most $100 high, or $180 once the 4% surtax applies.
+
+        Self-employment tax counts toward the same $2,000 (the DOR line 11
+        instruction, derivation ambiguity 1 in docs/validation/derivations/
+        ma-2024-2025.md): 15.3% of 92.35% of net earnings. The wage base never
+        enters, because wages or earnings past it already exceed the cap.
         """
-        return min(2_000.0, 0.0765 * max(0.0, float(self.w2_income)))
+        wage_tax = 0.0765 * max(0.0, float(self.w2_income))
+        self_employment_tax = (
+            0.153 * 0.9235 * float(self.self_employment_income)
+            if self.self_employment_income * 0.9235 >= 400.0
+            else 0.0
+        )
+        return min(2_000.0, wage_tax + self_employment_tax)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def ma_interest_and_dividends(self) -> float:
+        """Massachusetts Form 1 line 20, the Schedule B interest and dividends.
+
+        OTS MA_1 reads line 20 as one amount and floors it at zero. Interest and
+        dividends are taxed at 5% on line 21 (M.G.L. c.62 4(a)(2)).
+        """
+        return float(self.taxable_interest) + float(self.ordinary_dividends)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def ma_long_term_gain_tax(self) -> float:
+        """Massachusetts Form 1 line 24, the Schedule D tax on long-term gains.
+
+        OTS MA_1 takes the tax, not the gain: Schedule D line 22 is 5% of the
+        taxable long-term gain, in whole dollars rounded half up.
+        """
+        gain = max(0.0, float(self.long_term_capital_gains))
+        return float(
+            (Decimal(str(gain)) * Decimal("0.05")).quantize(
+                Decimal(1), rounding=ROUND_HALF_UP
+            )
+        )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1318,6 +1354,11 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L3",
             "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
+            "self_employment_income": "L6a",
+            "rental_income": "L7",
+            "ma_interest_and_dividends": "L20",
+            "short_term_capital_gains": "L23a",
+            "ma_long_term_gain_tax": "L24",
         },
         "output_map": {
             "L21": "taxable_income",
@@ -1500,6 +1541,11 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L3",
             "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
+            "self_employment_income": "L6a",
+            "rental_income": "L7",
+            "ma_interest_and_dividends": "L20",
+            "short_term_capital_gains": "L23a",
+            "ma_long_term_gain_tax": "L24",
         },
         "output_map": {
             "L21": "taxable_income",
