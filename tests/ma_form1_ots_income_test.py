@@ -65,15 +65,18 @@ def test_ots_ma_income_returns_match_the_derivation(
 
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_interest_above_the_no_tax_threshold_is_taxed(year):
-    """Independent derivation (Form 1 line 20 and the AGI worksheet, 2026-11-25).
+    """Line 28 is the published row's 604 for wages 7,000 plus interest 10,000.
+
+    Evidence: published table row (MA Form 1 instructions 2024 p.36 / 2025 p.38,
+    row 12,050-12,100); scenario arithmetic source-verified by Codex, 2026-11-25.
 
     Single, wages 7,000 and interest 10,000. Line 11a = 7,000 x 7.65% = 535.50,
     whole dollars 536. L17 = 6,464; L18 = 4,400; L19 = 2,064; no excess exemption
-    (L17 exceeds L18); L21 = 2,064 + 10,000 = 12,064. The tax table row 12,050 to
-    12,100 gives 5% of the 12,075 midpoint, 603.75, so 604 (the record's own
-    rounding in case O: 8,275 gives 413.75, published 414). MA AGI is the
-    worksheet's line 10 plus line 20 = 17,000, above the 8,000 No Tax Status and
-    14,000 Limited Income thresholds, so line 28 is 604 and not zero.
+    (L17 exceeds L18); L21 = 2,064 + 10,000 = 12,064. The row over 12,050 and not
+    over 12,100 gives 604. MA AGI is the worksheet's line 10 plus line 20 =
+    17,000, above the 8,000 No Tax Status and 14,000 Limited Income thresholds,
+    so line 28 is 604 and not zero. Here OTS's in-row departure
+    (see MA-OTS-TABLE-INCOME-PLUS-25 below) rounds away, so OTS matches.
     """
     result = tenforty.evaluate_return(
         backend="ots",
@@ -88,11 +91,69 @@ def test_interest_above_the_no_tax_threshold_is_taxed(year):
     assert result.state_total_tax == pytest.approx(604, abs=FLOAT_CENT)
 
 
+TABLE_ROW_LOWER_BOUND = 12_050
+PUBLISHED_ROW_TAX = 604
+MA_TAX_RATE = 0.05
+# MA-OTS-TABLE-INCOME-PLUS-25 (upstream report 23). OTS prices a table row below
+# $24,000 as 5% x (income + 25) where the published row prices 5% x (row lower
+# bound + 25), the $50 row's midpoint. Before rounding OTS exceeds the row price
+# by 5% x (income - lower bound), in [0, 2.50) over a $50 row. Both figures are
+# then rounded to whole dollars (half up), a shift of at most half a dollar each
+# way, and the published 604 is itself 603.75 rounded up by 0.25.
+ROW_PRICE = MA_TAX_RATE * (TABLE_ROW_LOWER_BOUND + 25)
+ROW_WIDTH = 50
+SIGNATURE_LOW = -0.5 - (PUBLISHED_ROW_TAX - ROW_PRICE)
+SIGNATURE_HIGH = MA_TAX_RATE * ROW_WIDTH + 0.5 - (PUBLISHED_ROW_TAX - ROW_PRICE)
+
+
+def _interest_return(year, interest):
+    return tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status="Single",
+        w2_income=7_000,
+        taxable_interest=interest,
+    )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_ots_table_departure_is_zero_at_the_row_midpoint_neighbour(year):
+    """Line 21 = 12,064 (departure 5% x 14 = 0.70) rounds to the published 604."""
+    result = _interest_return(year, 10_000)
+    assert result.state_taxable_income == 12_064
+    assert result.state_total_tax == pytest.approx(PUBLISHED_ROW_TAX, abs=FLOAT_CENT)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_ots_table_prices_income_plus_25_within_a_row(year):
+    """Strict xfail for MA-OTS-TABLE-INCOME-PLUS-25, failing outside its signature.
+
+    Evidence: published table row (2024 p.36 / 2025 p.38, row 12,050-12,100 is
+    604 for every income in it); scenario source-verified by Codex, 2026-11-25.
+    Wages 7,000 plus interest 10,030 gives line 21 = 12,094, in the same row.
+    """
+    result = _interest_return(year, 10_030)
+    assert result.state_taxable_income == 12_094
+    delta = result.state_total_tax - PUBLISHED_ROW_TAX
+    if abs(delta) <= FLOAT_CENT:
+        pytest.fail(
+            "OTS prices the row correctly now; drop MA-OTS-TABLE-INCOME-PLUS-25"
+        )
+    if not SIGNATURE_LOW <= delta <= SIGNATURE_HIGH:
+        pytest.fail(
+            f"delta {delta:+.2f} outside MA-OTS-TABLE-INCOME-PLUS-25 "
+            f"[{SIGNATURE_LOW:+.2f}, {SIGNATURE_HIGH:+.2f}]"
+        )
+    pytest.xfail(f"MA-OTS-TABLE-INCOME-PLUS-25: OTS prices income + 25 ({delta:+.2f})")
+
+
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_interest_within_the_no_tax_threshold_owes_nothing(year):
     """Single, wages 5,000 and interest 3,000: AGI 8,000 is at most 8,000.
 
-    Independent derivation from the No Tax Status threshold ($8,000, Single).
+    Evidence: No Tax Status threshold ($8,000, Single, inclusive) from the Form 1
+    instructions; scenario arithmetic source-verified by Codex, 2026-11-25.
     Line 11a = 382.50, whole dollars 383, so line 17 = 4,617 exceeds the 4,400
     exemption and no interest is transferred (the return is not refused).
     """
@@ -294,7 +355,8 @@ def test_one_million_wages_with_a_dollar_of_interest_is_computed(year):
 
 
 # (status, wages whose line 17 just equals the exemption, wages one dollar less)
-# Line 11a is 7.65% of wages in whole dollars, half up. Hand-derived:
+# Contract-test wages, source-verified by Codex, 2026-11-25. Line 11a is 7.65%
+# of wages in whole dollars, half up:
 #   Single 4,764: 364.45 -> 364, line 17 = 4,400; 4,763: 364.37 -> 364, 4,399.
 #   HoH 7,363: 563.27 -> 563, line 17 = 6,800; 7,362: 563.19 -> 563, 6,799.
 #   Joint 9,529: 728.97 -> 729, line 17 = 8,800; 9,528: 728.89 -> 729, 8,799.
@@ -312,7 +374,9 @@ EXCESS_EXEMPTION_BOUNDARY = [
 def test_excess_exemption_boundary_for_transferring_statuses(
     year, status, at_exemption, under_exemption
 ):
-    """Schedule B line 36 moves exemptions left after line 17 onto interest.
+    """Contract test (wages hand-chosen so line 17 straddles the exemption).
+
+    Schedule B line 36 moves exemptions left after line 17 onto interest.
 
     Line 17 equal to the exemption leaves no excess, so the return computes; one
     dollar less leaves an excess, so it refuses.
