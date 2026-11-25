@@ -69,6 +69,25 @@
     at $29,000, $53,000, $68,500 and $69,000 in 2023-2025, where the result is
     $1-$3 under the table. Upstream report 22, recorded as a strict signature;
     not patched.
+- **OTS NJ now takes dependents, the 65-or-older exemption and rental income**
+  (tenforty-r91.20), 2023-2025. NJ-1040 lines 10 and 11 ($1,500 each) are fed
+  from the same split as the federal child tax credit: `num_ctc_dependents`
+  (every dependent when unset) to line 10, the other dependents to line 11. The
+  two lines carry the same $1,500, so only the total count changes the tax; a
+  child 17 or older who is not a CTC child counts on line 11. `filer_65_or_older`
+  and, on a joint return, `spouse_65_or_older` give the $1,000 line 7 exemption
+  each. `rental_income` goes to line 23; a net loss is no entry and reduces no
+  other income, as the form says. 2025.14 refused a nonzero value of these
+  inputs on OTS NJ, and that refusal is removed. 2024 and 2025 expected figures
+  in `tests/ots_nj_exemptions_rental_test.py` are an independent derivation
+  (`docs/validation/derivations/nj-exemptions-rental-2024-2025.md`); 2023 has no
+  such record, so its tests assert only direction.
+  - Limits: the line 12 college-student exemption, the line 8 blind/disabled
+    and line 9 veteran exemptions, and NJ-BUS-1 Part IV adjustments to rental
+    income are not modeled. Every scenario in the derivation lands exactly on a
+    tax-table row edge, so its tax is a strict NJ-OTS-TABLE-ROW-EDGE signature
+    (upstream report 22) rather than an exact match; taxable income matches
+    exactly.
 - **OTS PA now taxes business income and capital gains** (tenforty-s48h.46).
   `self_employment_income` goes to PA-40 line 4 (net income from the operation
   of a business), and `short_term_capital_gains` with

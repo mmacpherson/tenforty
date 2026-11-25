@@ -1171,6 +1171,33 @@ def _summed_line(line: str) -> Callable[[float], tuple[str, str]]:
 _NJ_DISPOSITION_GAINS = _summed_line("L19")
 
 
+# NJ-1040 lines 10 and 11 are $1,500 per dependent child and per other
+# dependent. The dependent count feeds them through the same split the federal
+# child tax credit uses: num_ctc_dependents (every dependent when unset) to
+# line 10, the remaining dependents to line 11. Both lines carry the same
+# $1,500, so the tax does not depend on the split; a child 17 or older who is
+# not a CTC child lands on line 11 though NJ calls it a child. Not modeled:
+# line 12 (a further $1,000 for each dependent under 22 in full-time school),
+# line 8 (blind/disabled) and line 9 (veteran) exemptions.
+def _nj_filer_65_box(value):
+    return ("YouOver65", "Y" if value else "N")
+
+
+def _nj_spouse_65_box(value):
+    return ("SpouseOver65", "Y" if value else "N")
+
+
+# NJ-1040 line 7 is $1,000 for the filer and, on a joint return only, for the
+# spouse; OTS ignores the spouse box for every other status, as the form does.
+#
+# Line 23 is net income from rents, royalties, patents and copyrights
+# (Schedule NJ-BUS-1 Part IV line 4). OTS adds line 23 as given, but the form
+# says a net loss is no entry and offsets no other income, so a loss is sent as
+# nothing. NJ-BUS-1 adjustments to federal Schedule E are not modeled.
+def _nj_rental_income(value: float) -> tuple[str, str]:
+    return ("L23", str(max(value, 0.0)))
+
+
 # PA-40 line 5 is net gain or loss from the sale of property: PA Schedule D
 # nets every sale with no short/long-term split, and a net loss reduces no
 # other class (PA-40 instructions, line 5). The household federal gains are
@@ -1359,6 +1386,11 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "L18",
             "short_term_capital_gains": _NJ_DISPOSITION_GAINS,
             "long_term_capital_gains": _NJ_DISPOSITION_GAINS,
+            "schedule_8812_qualifying_children": "L10",
+            "schedule_8812_other_dependents": "L11",
+            "filer_65_or_older": _nj_filer_65_box,
+            "spouse_65_or_older": _nj_spouse_65_box,
+            "rental_income": _nj_rental_income,
         },
         "output_map": {
             "L29": "adjusted_gross_income",
@@ -1541,6 +1573,11 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "L18",
             "short_term_capital_gains": _NJ_DISPOSITION_GAINS,
             "long_term_capital_gains": _NJ_DISPOSITION_GAINS,
+            "schedule_8812_qualifying_children": "L10",
+            "schedule_8812_other_dependents": "L11",
+            "filer_65_or_older": _nj_filer_65_box,
+            "spouse_65_or_older": _nj_spouse_65_box,
+            "rental_income": _nj_rental_income,
         },
         "output_map": {
             "L29": "adjusted_gross_income",
@@ -1712,6 +1749,11 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "L18",
             "short_term_capital_gains": _NJ_DISPOSITION_GAINS,
             "long_term_capital_gains": _NJ_DISPOSITION_GAINS,
+            "schedule_8812_qualifying_children": "L10",
+            "schedule_8812_other_dependents": "L11",
+            "filer_65_or_older": _nj_filer_65_box,
+            "spouse_65_or_older": _nj_spouse_65_box,
+            "rental_income": _nj_rental_income,
         },
         "output_map": {
             "L29": "adjusted_gross_income",
