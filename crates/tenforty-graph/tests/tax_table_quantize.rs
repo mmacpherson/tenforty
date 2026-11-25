@@ -141,23 +141,7 @@ fn table_planning_partials_seed_requested_intermediate_nodes() {
 }
 
 #[test]
-fn composed_clamp_and_branch_ties_follow_incoming_direction() {
-    let g = graph(vec![
-        Op::Input,
-        band(0),
-        Op::Neg { arg: 1 },
-        Op::Clamp {
-            arg: 2,
-            min: 0.0,
-            max: 10.0,
-        },
-    ]);
-    let mut rt = Runtime::new(&g, FilingStatus::Single);
-    rt.set_by_id(0, 0.0);
-    assert_eq!(gradient_sum(&mut rt, 3, &[0]).unwrap(), 0.0);
-    rt.set_by_id(0, -10.0);
-    assert_eq!(gradient_sum(&mut rt, 3, &[0]).unwrap(), -1.0);
-
+fn composed_branch_ties_follow_incoming_direction() {
     let g = graph(vec![
         Op::Input,
         band(0),
@@ -384,31 +368,26 @@ fn continuous_whole_band_ties_agree_across_equivalent_forms() {
         Op::Literal { value: 0.0 },
         Op::Max { left: 3, right: 4 },
         Op::Max { left: 4, right: 3 },
-        Op::Clamp {
-            arg: 3,
-            min: 0.0,
-            max: 1e9,
-        },
         Op::IfPositive {
             cond: 3,
             then: 3,
             otherwise: 4,
         },
         Op::Neg { arg: 3 },
-        Op::Min { left: 9, right: 4 },
+        Op::Min { left: 8, right: 4 },
         Op::IfPositive {
             cond: 3,
-            then: 9,
+            then: 8,
             otherwise: 4,
         },
-        Op::Neg { arg: 10 },
+        Op::Neg { arg: 9 },
         Op::BracketTax {
             table: "positive_part".into(),
             income: 3,
         },
         Op::Min { left: 3, right: 4 },
         Op::IfPositive {
-            cond: 9,
+            cond: 8,
             then: 3,
             otherwise: 4,
         },
@@ -431,16 +410,16 @@ fn continuous_whole_band_ties_agree_across_equivalent_forms() {
     let mut rt = Runtime::new(&g, FilingStatus::Single);
     for x in [50.0, 60.0, 75.0, 99.0] {
         rt.set_by_id(0, x);
-        for output in [5, 6, 7, 8, 12, 13] {
+        for output in [5, 6, 7, 11, 12] {
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
             assert_eq!(gradient_sum(&mut rt, output, &[0]).unwrap(), 1.0);
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
         }
-        for output in [10, 11] {
+        for output in [9, 10] {
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
             assert_eq!(gradient_sum(&mut rt, output, &[0]).unwrap(), -1.0);
         }
-        for output in [14, 15] {
+        for output in [13, 14] {
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
             assert_eq!(gradient_sum(&mut rt, output, &[0]).unwrap(), 0.0);
             assert_eq!(rt.eval_node(output).unwrap(), 0.0);
@@ -741,4 +720,87 @@ fn unreachable_targets_fail_and_reachable_plateaus_are_deterministic() {
     let midpoint = solve_bisection(&mut rt, 1, 2.0, 0, 0.0, 4.0, 1e-6, 100).unwrap();
     assert_eq!(midpoint, 2.0);
     assert_eq!(rt.eval_node(1).unwrap(), 2.0);
+}
+
+fn whole_dollar_round_values(v: f64) -> (u64, u64, u64, u64) {
+    let floor_of_half_up = graph(vec![
+        Op::Input,
+        Op::Literal { value: 0.5 },
+        Op::Add { left: 0, right: 1 },
+        Op::Floor { arg: 2 },
+    ]);
+    let quantized = graph(vec![
+        Op::Input,
+        quantize(0, 1.0, 0.0, TaxTableQuantizeMode::Round),
+    ]);
+    let mut floor_runtime = Runtime::new(&floor_of_half_up, FilingStatus::Single);
+    let mut quantize_runtime = Runtime::new(&quantized, FilingStatus::Single);
+    floor_runtime.set_by_id(0, v);
+    quantize_runtime.set_by_id(0, v);
+    (
+        (v + 0.5).floor().to_bits(),
+        graphlib::primitives::tax_table_quantize(v, 1.0, 0.0, TaxTableQuantizeMode::Round)
+            .to_bits(),
+        floor_runtime.eval_node(3).unwrap().to_bits(),
+        quantize_runtime.eval_node(1).unwrap().to_bits(),
+    )
+}
+
+fn assert_round_lowering_is_value_identical(v: f64) {
+    let (reference, primitive, floor_graph, quantize_graph) = whole_dollar_round_values(v);
+    assert_eq!(primitive, reference, "primitive differs at {v:?}");
+    assert_eq!(
+        floor_graph, reference,
+        "floor(x + 0.5) graph differs at {v:?}"
+    );
+    assert_eq!(quantize_graph, reference, "quantize graph differs at {v:?}");
+}
+
+/// tenforty-s48h.76 lowers `roundE x` from `floor(x + 0.5)` to a
+/// whole-dollar half-up quantize. The two must agree bit for bit, sign of zero
+/// included, so the lowering changes no value anywhere.
+#[test]
+fn whole_dollar_round_quantize_matches_floor_half_up_at_ties_and_edges() {
+    let mut cases = vec![
+        0.0,
+        -0.0,
+        0.5,
+        -0.5,
+        0.49999999999999994,
+        -0.49999999999999994,
+        -0.5000000000000001,
+        f64::MIN_POSITIVE,
+        -f64::MIN_POSITIVE,
+        4_503_599_627_370_496.0,
+        4_503_599_627_370_495.5,
+        -4_503_599_627_370_495.5,
+        9_007_199_254_740_993.0,
+        f64::MAX,
+        f64::MIN,
+    ];
+    for n in -2_000..=2_000 {
+        let tie = f64::from(n) + 0.5;
+        cases.extend([tie, tie.next_down(), tie.next_up(), f64::from(n)]);
+    }
+    for v in cases {
+        assert_round_lowering_is_value_identical(v);
+    }
+}
+
+proptest::proptest! {
+    #[test]
+    fn whole_dollar_round_quantize_matches_floor_half_up_for_finite_values(
+        v in proptest::num::f64::NORMAL
+            | proptest::num::f64::SUBNORMAL
+            | proptest::num::f64::ZERO
+    ) {
+        assert_round_lowering_is_value_identical(v);
+    }
+
+    #[test]
+    fn whole_dollar_round_quantize_matches_floor_half_up_at_exact_ties(
+        n in -1_000_000_000_000i64..1_000_000_000_000i64
+    ) {
+        assert_round_lowering_is_value_identical(n as f64 + 0.5);
+    }
 }

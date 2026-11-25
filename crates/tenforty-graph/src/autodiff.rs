@@ -224,10 +224,6 @@ fn table_directional_uncached(
             let (v, d) = child(arg)?;
             (-v, -d)
         }
-        Op::Abs { arg } => {
-            let (v, d) = child(arg)?;
-            (v.abs(), if v == 0.0 { d.abs() } else { v.signum() * d })
-        }
         Op::Floor { arg } => {
             let (v, _) = child(arg)?;
             let value = v.floor();
@@ -239,19 +235,6 @@ fn table_directional_uncached(
                 },
                 0.0,
             )
-        }
-        Op::Clamp { arg, min, max } => {
-            let (v, d) = child(arg)?;
-            let d = if min == max || v < min || v > max {
-                0.0
-            } else if v == min {
-                d.max(0.0)
-            } else if v == max {
-                d.min(0.0)
-            } else {
-                d
-            };
-            (v.clamp(min, max), d)
         }
         Op::IfPositive {
             cond,
@@ -374,11 +357,6 @@ fn has_active_kink(
             Op::Max { left, right } | Op::Min { left, right } => {
                 values.get(left).copied().unwrap_or(0.0)
                     == values.get(right).copied().unwrap_or(0.0)
-            }
-            Op::Abs { arg } => values.get(arg).copied().unwrap_or(0.0) == 0.0,
-            Op::Clamp { arg, min, max } => {
-                let value = values.get(arg).copied().unwrap_or(0.0);
-                value == *min || value == *max
             }
             Op::BracketTax { table, income } => {
                 let income = values.get(income).copied().unwrap_or(0.0);
@@ -560,19 +538,6 @@ fn backprop(
 
         Op::Neg { arg } => {
             *adjoints.entry(*arg).or_insert(0.0) -= adj;
-        }
-
-        Op::Abs { arg } => {
-            let v = values.get(arg).copied().unwrap_or(0.0);
-            let sign = if v >= 0.0 { 1.0 } else { -1.0 };
-            *adjoints.entry(*arg).or_insert(0.0) += adj * sign;
-        }
-
-        Op::Clamp { arg, min, max } => {
-            let v = values.get(arg).copied().unwrap_or(0.0);
-            if v >= *min && v <= *max {
-                *adjoints.entry(*arg).or_insert(0.0) += adj;
-            }
         }
 
         Op::BracketTax { table, income } => {

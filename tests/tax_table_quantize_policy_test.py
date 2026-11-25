@@ -7,7 +7,7 @@ from pathlib import Path
 def _production_source_directories(spec):
     directories = set()
     in_sources = False
-    for line in (spec / "tenforty-spec.cabal").read_text().splitlines():
+    for line in (spec / "tenforty-spec.cabal").read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if stripped.startswith("hs-source-dirs:"):
             in_sources = True
@@ -32,7 +32,8 @@ def test_specs_use_table_combinator_not_raw_quantize():
         str(path.relative_to(spec))
         for directory in _production_source_directories(spec)
         for path in sorted(directory.rglob("*.hs"))
-        if path not in constructor_modules and forbidden.search(path.read_text())
+        if path not in constructor_modules
+        and forbidden.search(path.read_text(encoding="utf-8"))
     ]
     assert not violations, (
         f"Use taxTableBandTax instead of raw quantization: {violations}"

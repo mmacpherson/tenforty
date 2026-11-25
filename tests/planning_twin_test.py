@@ -90,7 +90,7 @@ def test_twin_base_values_equal_every_legal_node_value():
     spec = json.loads(
         (
             Path(__file__).parents[1] / "src/tenforty/forms/us_tax_graph_2024.json"
-        ).read_text()
+        ).read_text(encoding="utf-8")
     )
     names = [node["name"] for node in spec["nodes"].values() if "name" in node]
     mismatches = [

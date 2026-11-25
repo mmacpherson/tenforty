@@ -235,6 +235,7 @@ does not mean the return makes no assumptions.
 | Convention | Where | Backends | Replaced by |
 |---|---|---|---|
 | `ma.form_1.line_11.one_earner` | MA Married/Joint, every year | OTS and graph | per-spouse earnings, tenforty-r6ap (not yet an input) |
+| `pa.pa_40.joint_class_household_totals` | PA Married/Joint, 2023-2025, with a nonzero `self_employment_income`, `short_term_capital_gains` or `long_term_capital_gains`: PA-40 lines 4 and 5 take household totals, so one spouse's class loss is netted against the other's income, which PA does not allow | OTS (`household_totals`); graph PA does not read these inputs | per-spouse PA class inputs, tenforty-s48h.75 (not yet an input) |
 | `federal.itemized_deductions.legacy_amt` | Any return whose Form 1040 itemized with a nonzero deprecated `itemized_deductions` (`state` is null) | OTS (`added_back`) and graph (`allowed`) | `federal_itemized` ([Itemized deductions](itemized-deductions.md)) |
 
 ## Batch columns

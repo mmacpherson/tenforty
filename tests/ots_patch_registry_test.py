@@ -287,7 +287,7 @@ def test_source_witness(patch_id):
 
 
 def _patch_functions_defined() -> set[str]:
-    tree = ast.parse((OTS_DIR / "amalgamate.py").read_text())
+    tree = ast.parse((OTS_DIR / "amalgamate.py").read_text(encoding="utf-8"))
     return {
         node.name
         for node in tree.body
@@ -342,7 +342,9 @@ def test_the_binding_clears_the_caps_flag_of_every_year_that_declares_it():
     """OTS-P4's replacement: every year with the shared flag is reset before each call."""
     years = amalgamate.caps_flag_years(_source_groups())
     assert years == _tracked_years()
-    binding = (OTS_DIR.parent / "src" / "tenforty" / "otslib" / "ots.pyx").read_text()
+    binding = (OTS_DIR.parent / "src" / "tenforty" / "otslib" / "ots.pyx").read_text(
+        encoding="utf-8"
+    )
     reset_body = binding.partition("cdef void _restore_fresh_process_state(")[2]
     reset_body = reset_body.partition("\ndef ")[0]
     for year in years:
@@ -395,7 +397,7 @@ def test_exit_rewrite_refuses_an_exit_it_cannot_rewrite():
 
 def test_exit_calls_outside_main_are_left_as_disclosed():
     """OTS-P3 discloses the helper-function exits it leaves; the count is pinned."""
-    remaining = re.findall(r"\bexit\s*\(", AMALGAMATION.read_text())
+    remaining = re.findall(r"\bexit\s*\(", AMALGAMATION.read_text(encoding="utf-8"))
     assert len(remaining) == 302
     assert "302 `exit()` calls" in (ENTRIES["OTS-P3"].note or "")
 
@@ -413,7 +415,9 @@ def test_registry_ids_run_in_order_and_statuses_are_known():
 def test_reported_entries_name_an_existing_upstream_report():
     """A reported entry cites a numbered report and whether it is drafted or sent."""
     headings = set(
-        re.findall(r"^## (\d+)\. ", UPSTREAM_REPORTS.read_text(), re.MULTILINE)
+        re.findall(
+            r"^## (\d+)\. ", UPSTREAM_REPORTS.read_text(encoding="utf-8"), re.MULTILINE
+        )
     )
     for entry in OTS_PATCHES:
         if entry.status == "reported-upstream":
@@ -423,7 +427,7 @@ def test_reported_entries_name_an_existing_upstream_report():
 
 
 def _test_functions_in(path: Path) -> set[str]:
-    tree = ast.parse(path.read_text())
+    tree = ast.parse(path.read_text(encoding="utf-8"))
     return {
         node.name
         for node in ast.walk(tree)
@@ -471,7 +475,7 @@ def _normalized(text: str) -> list[str]:
 def test_committed_amalgamation_is_what_the_registry_generates():
     """Regenerating applies every registered patch and reproduces the committed file."""
     assert _normalized(_regenerate_amalgamation()) == _normalized(
-        AMALGAMATION.read_text()
+        AMALGAMATION.read_text(encoding="utf-8")
     )
 
 
@@ -512,4 +516,6 @@ def test_registry_doc_shows_the_registry():
 
     ``uv run python ots/ots_patches.py`` rewrites the section in place.
     """
-    assert ots_patches.render_into(REGISTRY_DOC.read_text()) == REGISTRY_DOC.read_text()
+    assert ots_patches.render_into(
+        REGISTRY_DOC.read_text(encoding="utf-8")
+    ) == REGISTRY_DOC.read_text(encoding="utf-8")

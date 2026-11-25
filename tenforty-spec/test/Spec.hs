@@ -650,6 +650,26 @@ spec n = do
     it "tracks line references through table quantization" $
       extractLineRefs (taxTableBandTax table (line (LineId "income"))) `shouldBe` Set.singleton (LineId "income")
 
+  describe "Whole-dollar rounding lowering (tenforty-s48h.76)" $ do
+    let roundedForm = form (FormId "round_probe") 2024 $ do
+          income <- input (LineId "L1a") "Income" "" Interior
+          void (compute (LineId "L2") "Rounded" "" Interior (roundE income))
+          outputs [LineId "L2"]
+    it "lowers roundE to one half-up whole-dollar quantize over its operand, with no floor of x + 0.5" $
+      case roundedForm of
+        Left err -> expectationFailure (show err)
+        Right frm -> do
+          let nodes = JSON.cgNodes (compileForm frm)
+              inputIds = [JSON.nodeId n | n@JSON.Node {JSON.nodeOp = JSON.OpInput} <- Map.elems nodes]
+              quantizers = [(mode, step, offset, arg) | JSON.Node {JSON.nodeOp = JSON.OpTaxTableQuantize mode step offset arg} <- Map.elems nodes]
+              floors = [() | JSON.Node {JSON.nodeOp = JSON.OpFloor _} <- Map.elems nodes]
+              halves = [() | JSON.Node {JSON.nodeOp = JSON.OpLiteral 0.5} <- Map.elems nodes]
+          case (inputIds, quantizers) of
+            ([inputId], [(TableRound, 1, 0, arg)]) -> arg `shouldBe` inputId
+            _ -> expectationFailure ("expected one round quantize over the input, got " <> show quantizers)
+          length floors `shouldBe` 0
+          length halves `shouldBe` 0
+
   describe "Form Compilation" $ do
     forM_ taxYears $ \ty ->
       it ("compiles US 1040 " ++ show (tyYear ty) ++ " to valid JSON") $

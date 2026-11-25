@@ -534,4 +534,4 @@ if __name__ == "__main__":
     from pathlib import Path
 
     doc = Path(__file__).resolve().parent.parent / "docs" / "ots-patches.md"
-    doc.write_text(render_into(doc.read_text()))
+    doc.write_text(render_into(doc.read_text(encoding="utf-8")), encoding="utf-8")

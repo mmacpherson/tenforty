@@ -9,6 +9,7 @@ from tenforty import (
     BackendUnavailableError,
     UnsupportedInputError,
     UnsupportedReturnError,
+    _ots_extension,
     core,
     routing,
 )
@@ -123,13 +124,17 @@ def test_unsupported_return_error_is_a_value_error():
     assert issubclass(UnsupportedReturnError, ValueError)
 
 
-def test_public_default_backend_is_ots():
-    """Every public entry point that takes a backend defaults to "ots".
-
-    Graph is opt-in: "auto" and "graph" are chosen explicitly (2025.14).
-    """
-    for function in (tenforty.evaluate_return, tenforty.evaluate_returns, get_backend):
-        assert inspect.signature(function).parameters["backend"].default == "ots"
+def test_public_default_backend_matches_install():
+    """Omission uses OTS on full installs and auto on graph-only installs."""
+    choice = "ots" if _ots_extension.ots_extension_installed() else "auto"
+    args = dict(year=2025, w2_income=75_000)
+    assert tenforty.evaluate_return(**args) == tenforty.evaluate_return(
+        **args, backend=choice
+    )
+    assert tenforty.evaluate_returns(**args).equals(
+        tenforty.evaluate_returns(**args, backend=choice)
+    )
+    assert get_backend(year=2025) is get_backend(choice, year=2025)
 
 
 def test_every_entry_point_defaults_to_refusing_unvalidated_graph_returns():
@@ -248,8 +253,9 @@ def test_omitted_backend_refuses_what_ots_refuses(engine_calls, year):
 
 
 @pytest.mark.parametrize("year", AUTO_GRAPH_YEARS)
+@pytest.mark.requires_ots
 def test_omitted_backend_for_an_in_scope_state_ots_lacks_names_graph(year):
-    """IL is in graph scope and OTS has no IL return: the default offers graph."""
+    """With OTS installed, the default refuses IL and offers explicit graph."""
     with pytest.raises(UnsupportedReturnError, match="Use backend='graph'"):
         tenforty.evaluate_return(year=year, state="IL", w2_income=80_000)
 
@@ -657,9 +663,8 @@ COMPUTING_GRAPH_ONLY_FUNCTIONS = [
     pytest.param(_solve_at_own_tax, id="solve_for_income"),
 ]
 
-# A federal output: state-dependent outputs are refused until tenforty-s48h.76
-# is fixed (tests/state_planning_refusal_test.py), but the scope rule still
-# applies to the return.
+# A federal output, so these cases isolate the scope rule, which still applies
+# to the return whatever output is asked for.
 FEDERAL = {"output": "federal_total_tax"}
 
 
@@ -837,7 +842,6 @@ def test_graph_evaluate_batch_accepts_an_enum_year():
 
 
 @pytest.mark.requires_ots
-@pytest.mark.usefixtures("lift_state_planning_refusal")
 def test_default_backend_applies_the_state_facts_contract(engine_calls):
     """Under the "ots" default, facts follow routing and are never a reroute.
 

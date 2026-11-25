@@ -237,7 +237,7 @@ def test_point_switch_propagates_right_limit_for_tangents_not_reported_values():
     )
 )
 def test_continuous_whole_band_ties_agree_across_equivalent_forms(income):
-    """Conditional, max, min, clamp and bracket tax share the planning direction."""
+    """Conditional, max, min and bracket tax share the planning direction."""
     statuses = [
         "single",
         "married_joint",
@@ -261,25 +261,24 @@ def test_continuous_whole_band_ties_agree_across_equivalent_forms(income):
             {"type": "literal", "value": 0.0},
             {"type": "max", "left": 3, "right": 4},
             {"type": "max", "left": 4, "right": 3},
-            {"type": "clamp", "arg": 3, "min": 0.0, "max": 1e9},
             {"type": "if_positive", "cond": 3, "then": 3, "otherwise": 4},
             {"type": "neg", "arg": 3},
-            {"type": "min", "left": 9, "right": 4},
-            {"type": "if_positive", "cond": 3, "then": 9, "otherwise": 4},
-            {"type": "neg", "arg": 10},
+            {"type": "min", "left": 8, "right": 4},
+            {"type": "if_positive", "cond": 3, "then": 8, "otherwise": 4},
+            {"type": "neg", "arg": 9},
             {"type": "bracket_tax", "table": "positive_part", "income": 3},
             {"type": "min", "left": 3, "right": 4},
-            {"type": "if_positive", "cond": 9, "then": 3, "otherwise": 4},
+            {"type": "if_positive", "cond": 8, "then": 3, "otherwise": 4},
         ],
         {"positive_part": {"brackets": dict.fromkeys(statuses, brackets)}},
     )
     runtime.set("node_0", income)
-    for output in [5, 6, 7, 8, 12, 13]:
+    for output in [5, 6, 7, 11, 12]:
         name = f"node_{output}"
         assert runtime.eval(name) == 0.0
         assert runtime.gradient(name, "node_0") == 1.0
         assert runtime.eval(name) == 0.0
-    for output, slope in [(10, -1.0), (11, -1.0), (14, 0.0), (15, 0.0)]:
+    for output, slope in [(9, -1.0), (10, -1.0), (13, 0.0), (14, 0.0)]:
         name = f"node_{output}"
         assert runtime.eval(name) == 0.0
         assert runtime.gradient(name, "node_0") == slope

@@ -20,7 +20,120 @@
   with a notice naming the years MS is validated for, instead of opening with
   an empty jurisdiction menu.
 
+### Fixed
+- **OTS NJ now taxes business profits and capital gains** (tenforty-r91.15).
+  `self_employment_income` goes to NJ-1040 line 18 (net profits from business),
+  and `short_term_capital_gains` with `long_term_capital_gains` go to line 19
+  (net gains from disposition of property), for 2023-2025. NJ nets every sale on
+  Schedule NJ-DOP with no short/long-term split, and a net loss in either line
+  is no entry and offsets nothing else; OTS does both. Before, OTS NJ computed
+  the return from wages, interest and dividends only, so these returns were
+  under-taxed; 2025.14 refused a nonzero value of these inputs on OTS NJ, and
+  that refusal is removed. The expected figures in
+  `tests/ots_nj_gains_business_test.py` are an independent derivation from the
+  NJ-1040 forms and instructions
+  (`docs/validation/derivations/nj-gains-business-2023-2025.md`).
+  - Limits: `self_employment_income` is taken as federal Schedule C net profit
+    and entered unchanged. NJ-BUS-1 adjustments, the NJ-BUS-2 alternative
+    business calculation and loss carryforwards are not modeled, nor are NJ-DOP
+    basis or taxability differences from the federal gains.
+  - Found while deriving them: OTS appears to price NJ taxable income that falls
+    exactly on a tax-table row's lower edge as the row below. That was checked
+    at $29,000, $53,000, $68,500 and $69,000 in 2023-2025, where the result is
+    $1-$3 under the table. Upstream report 22, recorded as a strict signature;
+    not patched.
+- **OTS PA now taxes business income and capital gains** (tenforty-s48h.46).
+  `self_employment_income` goes to PA-40 line 4 (net income from the operation
+  of a business), and `short_term_capital_gains` with
+  `long_term_capital_gains` go to line 5 (net gain from the sale of property),
+  for 2023-2025. PA nets gains and losses within the class with no
+  short/long-term split, and a class loss reduces no other class; OTS does
+  both. Before, OTS PA computed the return from compensation, interest and
+  dividends only, so these returns were under-taxed; 2025.14 refused a nonzero
+  value of these inputs on OTS PA, and that refusal is removed. The expected
+  figures in `tests/ots_pa_business_gains_test.py` are an independent
+  derivation from the PA-40 instructions
+  (`docs/validation/derivations/pa-business-gains-2023-2025.md`).
+  - Limits: `self_employment_income` is taken as federal Schedule C net profit
+    and the gains as federal gains, unchanged; PA Schedule C and basis
+    differences are not modeled. The inputs are household totals, so on a joint
+    return where one spouse has a business or gain loss and the other a profit,
+    OTS nets them, which PA does not allow (each spouse's loss is ignored
+    against the other's income).
+  - Such a joint return now reports that reading in `result.assumptions` as
+    `pa.pa_40.joint_class_household_totals`: on OTS, for PA Married/Joint
+    2023-2025 returns with a nonzero `self_employment_income`,
+    `short_term_capital_gains` or `long_term_capital_gains`. It is not refused,
+    because household totals cannot show the spouses' split. Per-spouse PA
+    class inputs are tenforty-s48h.75.
+
+### Changed (graph-only default)
+- When the compiled OTS extension is absent, an omitted `backend` follows
+  `"auto"` in `evaluate_return`, `evaluate_returns` and `get_backend`. Bare
+  supported 2024–2025 returns compute on graph, including in graph-only and
+  Windows builds. Full installs keep the OTS default. Explicit choices,
+  graph scope, state facts, typed refusals and whole-batch preflight remain
+  unchanged. The same supported bare call can produce different figures by
+  platform wherever the engines differ; see
+  [Migrating between backends](docs/migrating-to-graph-default.md).
+  Installed-artifact smoke checks now exercise the default too.
+
+### Added (Windows)
+- **Windows wheels, graph backend only.** `pip install tenforty` on Windows
+  x86_64 (CPython 3.10–3.15) now installs a prebuilt wheel with the graph
+  backend and without OTS, which still crashes when built for Windows
+  ([Windows build research](docs/windows-build-research.md)).
+  - With no backend argument, Windows calls follow `backend="auto"`:
+    supported 2024–2025 federal-only returns and in-scope state returns compute
+    on graph. Graph scope, input restrictions and required facts still apply.
+  - Valid routes needing OTS (2018–2023, CA returns that `auto` keeps on OTS,
+    explicit `backend="ots"` for supported OTS returns, `evaluate_form`)
+    raise `BackendUnavailableError` before computing, under every `on_error`.
+    Routing refusals precede availability: Michigan returns under `auto` and explicit
+    `backend="ots"` for Illinois raise `UnsupportedReturnError`. Required-fact
+    and unsupported-input checks can also raise `UnsupportedInputError`.
+  - The README's Installation section says which of its examples need OTS.
+  - CI runs the graph-only suite on Windows (Python 3.10 and 3.15), tests an
+    installed wheel and a wheel built from the sdist, and smoke-checks every
+    Windows wheel it builds.
+
+### Fixed (testing)
+- The tests and the OTS binding generator (`ots/amalgamate.py`) open every
+  text file as UTF-8, so they read the same on Windows, where Python before
+  3.15 defaults to the locale's code page. The generated binding is unchanged.
+
+### Fixed (graph state slopes)
+- **Graph `marginal_rate`, `marginal_rates` and `solve_for_income` answer
+  state-dependent outputs again**: the state outputs, `total_tax` on a state
+  return, and raw state node names, on the public functions and the
+  `GraphBackend` gradient, gradients and solve methods (tenforty-s48h.76).
+  Whole-dollar rounding (`roundE`) compiled to `floor(x + 0.5)`, whose slope is
+  zero, so every wage path to IL, MS and OR tax, and to ME, NC and OH tax,
+  read a zero state slope. It now compiles to the whole-dollar quantize, which
+  rounds half up exactly as before and passes the underlying rate through.
+  2024 and 2025 Single wages of $120,000 now give IL 4.95%, MS 4.7% (2024) and
+  4.4% (2025, with `allow_unvalidated=True`), and OR 8.75%. No computed tax value changes.
+- Known limit: a planning slope through a stepwise phase-out (`floorE`:
+  California's exemption credit and FTB 3506, federal Forms 2441 and 8812,
+  Schedule 1-A) still reads zero (tenforty-s48h.78).
+- Known limit: `solve_for_income` uses Newton steps, and on a whole-dollar
+  stepped total it can cycle across a step without landing
+  (tenforty-s48h.79). That weakness predates this change, which shifts where
+  it bites. Solving from $50,000 for the value at $120,000.50 now works for
+  every state-only and raw state node output (impossible before, with a zero
+  slope) and for 2025 OR Married/Joint `total_tax`. It no longer converges for
+  2024 OR Married/Joint `total_tax`, which converged before.
+- The MS Married/Joint spouse-ownership refusal for income derivatives and
+  solves is unchanged.
+- The browser calculator shows state and combined next-dollar slopes on state
+  returns (`state_slopes.available` is true); the `state-slopes` limitation is
+  gone.
+
 ### Removed
+- Graph schema: removed the unused `abs` and `clamp` operations from Rust and
+  the Haskell compiler. Loading graph JSON containing either now fails with an
+  `unknown variant` error naming the operation. No shipped graph uses them;
+  computed figures for shipped forms are unchanged.
 - Contributor tooling: removed the unused graph JIT and Makefile targets
   `graph-build-jit`, `graph-test-jit`, `graph-bench`, and `graph-throughput`.
 

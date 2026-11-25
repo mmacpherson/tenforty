@@ -40,7 +40,9 @@ _OFFICIAL = {
 
 
 def _load(year: int) -> dict:
-    return json.loads((_FORMS_DIR / f"vt_in111_{year}.json").read_text())
+    return json.loads(
+        (_FORMS_DIR / f"vt_in111_{year}.json").read_text(encoding="utf-8")
+    )
 
 
 @pytest.mark.parametrize("year", sorted(_OFFICIAL))

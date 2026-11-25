@@ -18,7 +18,7 @@ INVENTORY = ROOT / "tests" / "mapping_completeness_test.py"
 
 def _active_audit_ids() -> set[str]:
     active = set()
-    for line in AUDIT.read_text().splitlines():
+    for line in AUDIT.read_text(encoding="utf-8").splitlines():
         if not re.match(r"\| F\d+ ", line):
             continue
         cells = [cell.strip() for cell in line.strip("|").split("|")]
@@ -29,7 +29,7 @@ def _active_audit_ids() -> set[str]:
 
 
 def _strict_burn_in_ids() -> set[str]:
-    source = "\n".join(path.read_text() for path in BURN_IN_SOURCES)
+    source = "\n".join(path.read_text(encoding="utf-8") for path in BURN_IN_SOURCES)
     return set(re.findall(r'reason="(F\d+):', source))
 
 
@@ -44,7 +44,9 @@ def test_active_findings_have_one_signature_and_strict_burn_in():
 
 def test_inventory_findings_are_active_and_burned_in():
     """Any mapping-level missing:F marker participates in the same lifecycle."""
-    inventory_ids = set(re.findall(r"missing:(F\d+)", INVENTORY.read_text()))
+    inventory_ids = set(
+        re.findall(r"missing:(F\d+)", INVENTORY.read_text(encoding="utf-8"))
+    )
 
     assert inventory_ids <= _active_audit_ids()
     assert inventory_ids <= _strict_burn_in_ids()
@@ -52,7 +54,7 @@ def test_inventory_findings_are_active_and_burned_in():
 
 def test_every_signature_matches_a_committed_golden_case():
     """A signature with no golden witness is stale or untested policy."""
-    cases = json.loads(FIXTURE.read_text())["cases"]
+    cases = json.loads(FIXTURE.read_text(encoding="utf-8"))["cases"]
     missing = []
     for defect in SIGNATURES:
         if not any(

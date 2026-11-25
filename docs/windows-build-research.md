@@ -98,6 +98,12 @@ graph-only install computes the 2024 and 2025 graph returns, and every route
 into OTS raises `BackendUnavailableError`, naming the reason. Running OTS
 itself on Windows stays deferred until the crash root cause is found.
 
+tenforty publishes graph-only Windows wheels for CPython 3.10–3.15 on AMD64.
+CI builds them with cibuildwheel and smoke-checks each one: it must evaluate
+graph and refuse OTS, typed. CI also runs the test suite with `--graph-only` on
+Windows at Python 3.10 and 3.15, tests an installed wheel, and builds a wheel
+from the sdist, which must come out graph-only with no variable set.
+
 ## Related Issues
 
 - GitHub Issue #19: Windows support tracking issue

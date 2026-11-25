@@ -194,12 +194,21 @@ profile's example count:
 
 - **Invariant / corner-hunting property tests** (monotonicity, continuity,
   wiring, gradients — cheap, one or two evaluations per example) omit
-  `max_examples` and use `@settings(deadline=None)`, so they run 500 under `ci`,
-  10,000 under `deep`, and 100,000 under `soak`.
+  `max_examples`, so they run 500 under `ci`, 10,000 under `deep`, and 100,000
+  under `soak`.
 - **Oracle / expensive tests** (parity across both backends, the taxcalc
   differential, the Newton solver) pin an explicit, bounded `max_examples` with a
   one-line reason — 10k of a slow example is prohibitive and adds nothing to a
   value/agreement oracle, so these deliberately do **not** scale.
+- **The Hypothesis correctness profiles disable per-example deadlines.** Every
+  profile registered in `tests/conftest.py` (`ci`, `dev`, `deep`, `soak`) sets
+  `deadline=None`, stated once there, so a property or oracle test needs no
+  `deadline=` of its own; existing `deadline=None` decorators are redundant but
+  harmless. A Hypothesis deadline is measured after an example returns: it
+  flags a slow example, it never interrupts a hung one. On a shared, loaded
+  machine it failed parity and solver oracles on timing alone, which is not a
+  tax assertion (tenforty-up2k). Hang protection is a job-level timeout, not
+  this.
 
 ## Python Style
 

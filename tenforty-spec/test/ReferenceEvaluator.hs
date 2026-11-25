@@ -57,7 +57,6 @@ evaluateGraph graph status wages =
         OpMul l r -> lkp l * lkp r
         OpDiv l r -> let rv = lkp r in if rv == 0 then 0 else lkp l / rv
         OpNeg a -> negate (lkp a)
-        OpAbs a -> abs (lkp a)
         OpMax l r -> max (lkp l) (lkp r)
         OpMin l r -> min (lkp l) (lkp r)
         OpFloor a -> fromIntegral (floor (lkp a) :: Int)
@@ -65,7 +64,6 @@ evaluateGraph graph status wages =
           let scaled = lkp a / step
               shifted = case mode of TableFloor -> scaled; TableRound -> scaled + 0.5
            in step * fromIntegral (floor shifted :: Integer) + offset
-        OpClamp a lo hi -> max lo (min hi (lkp a))
         OpIfPositive c t e -> if lkp c > 0 then lkp t else lkp e
         OpBracketTax tblId incomeNode ->
           evalBracketTaxFromTable tables tblId status (lkp incomeNode)

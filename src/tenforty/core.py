@@ -10,7 +10,7 @@ import pathlib
 import re
 import warnings
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import replace
 from decimal import Decimal
 from typing import Any, Literal
@@ -61,6 +61,7 @@ from .ots_state_gaps import require_ots_state_inputs
 from .routing import (
     BackendChoice,
     Engine,
+    _DefaultBackend,
     explain_ots_route,
     graph_covers,
     require_ots_serves,
@@ -1350,14 +1351,20 @@ def recorded_assumptions(
     engine: Engine,
     row: _facts.FactRow,
     itemizes: bool | None,
+    inputs: Mapping[str, object],
 ) -> tuple[Assumption, ...]:
     """Every convention this engine applied to this return, ordered by id.
 
     The legacy itemized convention is applied only when the aggregate is
     nonzero and the engine's Form 1040 itemized. An engine that does not report
-    its choice is a defect, not a reason to stay silent.
+    its choice is a defect, not a reason to stay silent. ``inputs`` are the
+    return's natural inputs, for conventions that apply only when an amount is
+    present.
     """
     records = list(_facts.recorded_assumptions(row))
+    pa_joint_classes = _facts.pa_joint_class_assumption(row, inputs)
+    if pa_joint_classes is not None:
+        records.append(pa_joint_classes)
     if legacy_itemized != 0:
         if itemizes is None:
             raise RuntimeError(
@@ -1407,7 +1414,11 @@ def _evaluate_with_engine(
         return result.model_copy(
             update={
                 "assumptions": recorded_assumptions(
-                    tax_input.itemized_deductions, engine, row, itemizes
+                    tax_input.itemized_deductions,
+                    engine,
+                    row,
+                    itemizes,
+                    tax_input.model_dump(include=set(_facts.PA_CLASS_INPUTS)),
                 )
             }
         )
@@ -1479,7 +1490,7 @@ def evaluate_return(
     state_adjustment: float = 0.0,
     incentive_stock_option_gains: float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "ots",
+    backend: BackendChoice | _DefaultBackend = _DefaultBackend.OMITTED,
     *,
     state_and_local_taxes: float = 0.0,
     qualified_tips: float = 0.0,
@@ -1497,7 +1508,8 @@ def evaluate_return(
 ) -> InterpretedTaxReturn:
     """Calculate an estimated tax return based on the provided parameters.
 
-    ``backend`` is "ots" (default), "auto", or "graph". "auto" computes a
+    An omitted ``backend`` selects "ots" when its extension is installed and
+    "auto" otherwise. Explicit choices are "ots", "auto", or "graph". "auto" computes a
     2024-2025 return on graph when it is federal-only or its state is in graph
     scope (``tenforty.graph_scope``), and on OTS otherwise. "graph" computes a
     2024-2025 return on graph; a state return outside graph scope, which graph
@@ -1604,7 +1616,7 @@ def evaluate_returns(
     state_adjustment: list[float] | float = 0.0,
     incentive_stock_option_gains: list[float] | float = 0.0,
     on_error: str = "raise",
-    backend: BackendChoice = "ots",
+    backend: BackendChoice | _DefaultBackend = _DefaultBackend.OMITTED,
     mode: Literal["cross", "zip"] = "cross",
     *,
     state_and_local_taxes: list[float] | float = 0.0,
@@ -1625,7 +1637,8 @@ def evaluate_returns(
 
     Pass ``mode="cross"`` (default) for Cartesian product or ``mode="zip"``
     for element-wise evaluation with scalar broadcasting. ``backend`` is chosen
-    as in ``evaluate_return``: "ots" (default) or "graph" forces one engine;
+    as in ``evaluate_return``: omission uses "ots" when installed, "auto" otherwise;
+    an explicit "ots" or "graph" forces one engine;
     "auto" splits the batch by year and picks the engine per year and state.
     ``allow_unvalidated`` is as in ``evaluate_return``. Every row is routed
     before any is evaluated, so one refused row refuses the whole batch.
@@ -1944,6 +1957,7 @@ def evaluate_returns(
                                 engine,
                                 row,
                                 output[FEDERAL_ITEMIZES],
+                                params,
                             )
                         ]
                     }
@@ -2322,9 +2336,9 @@ def marginal_rate(
     This computes the derivative of `output` with respect to `wrt`. A state
     return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
-    Any output that depends on the state return (a state output, ``total_tax``
-    on a state return, a raw state node) is refused until tenforty-s48h.76 is
-    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    Whole-dollar rounding on a line carries an identity planning slope, so
+    state and total-tax slopes include the state's rate; a step phase-out
+    (a floor of whole thousands or intervals) contributes zero.
     """
     if wrt in _DISCRETE_INPUTS:
         raise ValueError(f"{wrt} is discrete and cannot be differentiated")
@@ -2422,9 +2436,9 @@ def marginal_rates(
     function's right-hand derivative, matching :func:`marginal_rate`. A state
     return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
-    Any output that depends on the state return (a state output, ``total_tax``
-    on a state return, a raw state node) is refused until tenforty-s48h.76 is
-    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    Whole-dollar rounding on a line carries an identity planning slope, so
+    state and total-tax slopes include the state's rate; a step phase-out
+    (a floor of whole thousands or intervals) contributes zero.
     """
     warn_legacy_itemized([itemized_deductions])
     tax_input = TaxReturnInput(
@@ -2517,9 +2531,9 @@ def solve_for_income(
 
     A state return outside graph scope, which graph is not yet validated for, raises
     ``UnsupportedReturnError`` before computing unless ``allow_unvalidated=True``.
-    Any output that depends on the state return (a state output, ``total_tax``
-    on a state return, a raw state node) is refused until tenforty-s48h.76 is
-    fixed, whatever ``allow_unvalidated`` says; federal outputs are unaffected.
+    Whole-dollar rounding on a line carries an identity planning slope, so
+    state and total-tax slopes include the state's rate; a step phase-out
+    (a floor of whole thousands or intervals) contributes zero.
     """
     if for_input in _DISCRETE_INPUTS:
         raise ValueError(f"{for_input} is discrete and cannot be solved continuously")

@@ -87,74 +87,81 @@
         "100": {
             "id": 100,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 74,
+                "right": 99,
+                "type": "sub"
             }
         },
         "101": {
             "id": 101,
             "op": {
                 "type": "literal",
-                "value": 7000
+                "value": 40
             }
         },
         "102": {
             "id": 102,
             "op": {
-                "left": 82,
-                "right": 101,
-                "type": "sub"
+                "type": "literal",
+                "value": 28000
             }
         },
         "103": {
             "id": 103,
             "op": {
-                "type": "literal",
-                "value": 50
+                "left": 74,
+                "right": 102,
+                "type": "sub"
             }
         },
         "104": {
             "id": 104,
             "op": {
                 "type": "literal",
-                "value": 20000
+                "value": 20
             }
         },
         "105": {
             "id": 105,
             "op": {
-                "left": 82,
-                "right": 104,
-                "type": "sub"
+                "type": "literal",
+                "value": 0
             }
         },
         "106": {
             "id": 106,
             "op": {
-                "type": "literal",
-                "value": 45
+                "cond": 103,
+                "otherwise": 104,
+                "then": 105,
+                "type": "if_positive"
             }
         },
         "107": {
             "id": 107,
             "op": {
-                "type": "literal",
-                "value": 25000
+                "cond": 100,
+                "otherwise": 101,
+                "then": 106,
+                "type": "if_positive"
             }
         },
         "108": {
             "id": 108,
             "op": {
-                "left": 82,
-                "right": 107,
-                "type": "sub"
+                "cond": 97,
+                "otherwise": 98,
+                "then": 107,
+                "type": "if_positive"
             }
         },
         "109": {
             "id": 109,
             "op": {
-                "type": "literal",
-                "value": 40
+                "cond": 94,
+                "otherwise": 95,
+                "then": 108,
+                "type": "if_positive"
             }
         },
         "11": {
@@ -167,85 +174,79 @@
         "110": {
             "id": 110,
             "op": {
-                "type": "literal",
-                "value": 28000
+                "cond": 91,
+                "otherwise": 92,
+                "then": 109,
+                "type": "if_positive"
             }
         },
         "111": {
             "id": 111,
+            "name": "HouseholdSingleCredit",
             "op": {
-                "left": 82,
-                "right": 110,
-                "type": "sub"
+                "cond": 88,
+                "otherwise": 89,
+                "then": 110,
+                "type": "if_positive"
             }
         },
         "112": {
             "id": 112,
             "op": {
                 "type": "literal",
-                "value": 20
+                "value": 5000
             }
         },
         "113": {
             "id": 113,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 74,
+                "right": 112,
+                "type": "sub"
             }
         },
         "114": {
             "id": 114,
             "op": {
-                "cond": 111,
-                "otherwise": 112,
-                "then": 113,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "115": {
             "id": 115,
             "op": {
-                "cond": 108,
-                "otherwise": 109,
-                "then": 114,
-                "type": "if_positive"
+                "left": 86,
+                "right": 114,
+                "type": "sub"
             }
         },
         "116": {
             "id": 116,
             "op": {
-                "cond": 105,
-                "otherwise": 106,
-                "then": 115,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 90
             }
         },
         "117": {
             "id": 117,
             "op": {
-                "cond": 102,
-                "otherwise": 103,
-                "then": 116,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "118": {
             "id": 118,
             "op": {
-                "cond": 99,
-                "otherwise": 100,
-                "then": 117,
-                "type": "if_positive"
+                "left": 86,
+                "right": 117,
+                "type": "sub"
             }
         },
         "119": {
             "id": 119,
-            "name": "HouseholdSingleCredit",
             "op": {
-                "cond": 96,
-                "otherwise": 97,
-                "then": 118,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 105
             }
         },
         "12": {
@@ -259,13 +260,13 @@
             "id": 120,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": 3
             }
         },
         "121": {
             "id": 121,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 120,
                 "type": "sub"
             }
@@ -274,59 +275,58 @@
             "id": 122,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 120
             }
         },
         "123": {
             "id": 123,
             "op": {
-                "left": 94,
-                "right": 122,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "124": {
             "id": 124,
             "op": {
-                "type": "literal",
-                "value": 90
+                "left": 86,
+                "right": 123,
+                "type": "sub"
             }
         },
         "125": {
             "id": 125,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 135
             }
         },
         "126": {
             "id": 126,
             "op": {
-                "left": 94,
-                "right": 125,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "127": {
             "id": 127,
             "op": {
-                "type": "literal",
-                "value": 105
+                "left": 86,
+                "right": 126,
+                "type": "sub"
             }
         },
         "128": {
             "id": 128,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 150
             }
         },
         "129": {
             "id": 129,
             "op": {
-                "left": 94,
-                "right": 128,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "13": {
@@ -339,43 +339,43 @@
         "130": {
             "id": 130,
             "op": {
-                "type": "literal",
-                "value": 120
+                "left": 86,
+                "right": 129,
+                "type": "sub"
             }
         },
         "131": {
             "id": 131,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 165
             }
         },
         "132": {
             "id": 132,
             "op": {
-                "left": 94,
-                "right": 131,
-                "type": "sub"
+                "type": "literal",
+                "value": 180
             }
         },
         "133": {
             "id": 133,
             "op": {
                 "type": "literal",
-                "value": 135
+                "value": 0
             }
         },
         "134": {
             "id": 134,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "135": {
             "id": 135,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 134,
                 "type": "sub"
             }
@@ -383,30 +383,32 @@
         "136": {
             "id": 136,
             "op": {
-                "type": "literal",
-                "value": 150
+                "left": 133,
+                "right": 135,
+                "type": "max"
             }
         },
         "137": {
             "id": 137,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 15
             }
         },
         "138": {
             "id": 138,
             "op": {
-                "left": 94,
+                "left": 136,
                 "right": 137,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "139": {
             "id": 139,
             "op": {
-                "type": "literal",
-                "value": 165
+                "left": 132,
+                "right": 138,
+                "type": "add"
             }
         },
         "14": {
@@ -419,79 +421,85 @@
         "140": {
             "id": 140,
             "op": {
-                "type": "literal",
-                "value": 180
+                "cond": 130,
+                "otherwise": 131,
+                "then": 139,
+                "type": "if_positive"
             }
         },
         "141": {
             "id": 141,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 127,
+                "otherwise": 128,
+                "then": 140,
+                "type": "if_positive"
             }
         },
         "142": {
             "id": 142,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 124,
+                "otherwise": 125,
+                "then": 141,
+                "type": "if_positive"
             }
         },
         "143": {
             "id": 143,
             "op": {
-                "left": 94,
-                "right": 142,
-                "type": "sub"
+                "cond": 121,
+                "otherwise": 122,
+                "then": 142,
+                "type": "if_positive"
             }
         },
         "144": {
             "id": 144,
             "op": {
-                "left": 141,
-                "right": 143,
-                "type": "max"
+                "cond": 118,
+                "otherwise": 119,
+                "then": 143,
+                "type": "if_positive"
             }
         },
         "145": {
             "id": 145,
             "op": {
-                "type": "literal",
-                "value": 15
+                "cond": 115,
+                "otherwise": 116,
+                "then": 144,
+                "type": "if_positive"
             }
         },
         "146": {
             "id": 146,
             "op": {
-                "left": 144,
-                "right": 145,
-                "type": "mul"
+                "type": "literal",
+                "value": 6000
             }
         },
         "147": {
             "id": 147,
             "op": {
-                "left": 140,
+                "left": 74,
                 "right": 146,
-                "type": "add"
+                "type": "sub"
             }
         },
         "148": {
             "id": 148,
             "op": {
-                "cond": 138,
-                "otherwise": 139,
-                "then": 147,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "149": {
             "id": 149,
             "op": {
-                "cond": 135,
-                "otherwise": 136,
-                "then": 148,
-                "type": "if_positive"
+                "left": 86,
+                "right": 148,
+                "type": "sub"
             }
         },
         "15": {
@@ -504,50 +512,43 @@
         "150": {
             "id": 150,
             "op": {
-                "cond": 132,
-                "otherwise": 133,
-                "then": 149,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 75
             }
         },
         "151": {
             "id": 151,
             "op": {
-                "cond": 129,
-                "otherwise": 130,
-                "then": 150,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "152": {
             "id": 152,
             "op": {
-                "cond": 126,
-                "otherwise": 127,
-                "then": 151,
-                "type": "if_positive"
+                "left": 86,
+                "right": 151,
+                "type": "sub"
             }
         },
         "153": {
             "id": 153,
             "op": {
-                "cond": 123,
-                "otherwise": 124,
-                "then": 152,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 90
             }
         },
         "154": {
             "id": 154,
             "op": {
                 "type": "literal",
-                "value": 6000
+                "value": 3
             }
         },
         "155": {
             "id": 155,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 154,
                 "type": "sub"
             }
@@ -556,29 +557,29 @@
             "id": 156,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 105
             }
         },
         "157": {
             "id": 157,
             "op": {
-                "left": 94,
-                "right": 156,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "158": {
             "id": 158,
             "op": {
-                "type": "literal",
-                "value": 75
+                "left": 86,
+                "right": 157,
+                "type": "sub"
             }
         },
         "159": {
             "id": 159,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 120
             }
         },
         "16": {
@@ -591,73 +592,72 @@
         "160": {
             "id": 160,
             "op": {
-                "left": 94,
-                "right": 159,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "161": {
             "id": 161,
             "op": {
-                "type": "literal",
-                "value": 90
+                "left": 86,
+                "right": 160,
+                "type": "sub"
             }
         },
         "162": {
             "id": 162,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 135
             }
         },
         "163": {
             "id": 163,
             "op": {
-                "left": 94,
-                "right": 162,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "164": {
             "id": 164,
             "op": {
-                "type": "literal",
-                "value": 105
+                "left": 86,
+                "right": 163,
+                "type": "sub"
             }
         },
         "165": {
             "id": 165,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 150
             }
         },
         "166": {
             "id": 166,
             "op": {
-                "left": 94,
-                "right": 165,
-                "type": "sub"
+                "type": "literal",
+                "value": 165
             }
         },
         "167": {
             "id": 167,
             "op": {
                 "type": "literal",
-                "value": 120
+                "value": 0
             }
         },
         "168": {
             "id": 168,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "169": {
             "id": 169,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 168,
                 "type": "sub"
             }
@@ -672,74 +672,86 @@
         "170": {
             "id": 170,
             "op": {
-                "type": "literal",
-                "value": 135
+                "left": 167,
+                "right": 169,
+                "type": "max"
             }
         },
         "171": {
             "id": 171,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 15
             }
         },
         "172": {
             "id": 172,
             "op": {
-                "left": 94,
+                "left": 170,
                 "right": 171,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "173": {
             "id": 173,
             "op": {
-                "type": "literal",
-                "value": 150
+                "left": 166,
+                "right": 172,
+                "type": "add"
             }
         },
         "174": {
             "id": 174,
             "op": {
-                "type": "literal",
-                "value": 165
+                "cond": 164,
+                "otherwise": 165,
+                "then": 173,
+                "type": "if_positive"
             }
         },
         "175": {
             "id": 175,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 161,
+                "otherwise": 162,
+                "then": 174,
+                "type": "if_positive"
             }
         },
         "176": {
             "id": 176,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 158,
+                "otherwise": 159,
+                "then": 175,
+                "type": "if_positive"
             }
         },
         "177": {
             "id": 177,
             "op": {
-                "left": 94,
-                "right": 176,
-                "type": "sub"
+                "cond": 155,
+                "otherwise": 156,
+                "then": 176,
+                "type": "if_positive"
             }
         },
         "178": {
             "id": 178,
             "op": {
-                "left": 175,
-                "right": 177,
-                "type": "max"
+                "cond": 152,
+                "otherwise": 153,
+                "then": 177,
+                "type": "if_positive"
             }
         },
         "179": {
             "id": 179,
             "op": {
-                "type": "literal",
-                "value": 15
+                "cond": 149,
+                "otherwise": 150,
+                "then": 178,
+                "type": "if_positive"
             }
         },
         "18": {
@@ -752,84 +764,73 @@
         "180": {
             "id": 180,
             "op": {
-                "left": 178,
-                "right": 179,
-                "type": "mul"
+                "type": "literal",
+                "value": 7000
             }
         },
         "181": {
             "id": 181,
             "op": {
-                "left": 174,
+                "left": 74,
                 "right": 180,
-                "type": "add"
+                "type": "sub"
             }
         },
         "182": {
             "id": 182,
             "op": {
-                "cond": 172,
-                "otherwise": 173,
-                "then": 181,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "183": {
             "id": 183,
             "op": {
-                "cond": 169,
-                "otherwise": 170,
-                "then": 182,
-                "type": "if_positive"
+                "left": 86,
+                "right": 182,
+                "type": "sub"
             }
         },
         "184": {
             "id": 184,
             "op": {
-                "cond": 166,
-                "otherwise": 167,
-                "then": 183,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 65
             }
         },
         "185": {
             "id": 185,
             "op": {
-                "cond": 163,
-                "otherwise": 164,
-                "then": 184,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "186": {
             "id": 186,
             "op": {
-                "cond": 160,
-                "otherwise": 161,
-                "then": 185,
-                "type": "if_positive"
+                "left": 86,
+                "right": 185,
+                "type": "sub"
             }
         },
         "187": {
             "id": 187,
             "op": {
-                "cond": 157,
-                "otherwise": 158,
-                "then": 186,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 80
             }
         },
         "188": {
             "id": 188,
             "op": {
                 "type": "literal",
-                "value": 7000
+                "value": 3
             }
         },
         "189": {
             "id": 189,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 188,
                 "type": "sub"
             }
@@ -845,73 +846,73 @@
             "id": 190,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 95
             }
         },
         "191": {
             "id": 191,
             "op": {
-                "left": 94,
-                "right": 190,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "192": {
             "id": 192,
             "op": {
-                "type": "literal",
-                "value": 65
+                "left": 86,
+                "right": 191,
+                "type": "sub"
             }
         },
         "193": {
             "id": 193,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 110
             }
         },
         "194": {
             "id": 194,
             "op": {
-                "left": 94,
-                "right": 193,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "195": {
             "id": 195,
             "op": {
-                "type": "literal",
-                "value": 80
+                "left": 86,
+                "right": 194,
+                "type": "sub"
             }
         },
         "196": {
             "id": 196,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 125
             }
         },
         "197": {
             "id": 197,
             "op": {
-                "left": 94,
-                "right": 196,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "198": {
             "id": 198,
             "op": {
-                "type": "literal",
-                "value": 95
+                "left": 86,
+                "right": 197,
+                "type": "sub"
             }
         },
         "199": {
             "id": 199,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 140
             }
         },
         "2": {
@@ -931,29 +932,28 @@
         "200": {
             "id": 200,
             "op": {
-                "left": 94,
-                "right": 199,
-                "type": "sub"
+                "type": "literal",
+                "value": 155
             }
         },
         "201": {
             "id": 201,
             "op": {
                 "type": "literal",
-                "value": 110
+                "value": 0
             }
         },
         "202": {
             "id": 202,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "203": {
             "id": 203,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 202,
                 "type": "sub"
             }
@@ -961,44 +961,50 @@
         "204": {
             "id": 204,
             "op": {
-                "type": "literal",
-                "value": 125
+                "left": 201,
+                "right": 203,
+                "type": "max"
             }
         },
         "205": {
             "id": 205,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 15
             }
         },
         "206": {
             "id": 206,
             "op": {
-                "left": 94,
+                "left": 204,
                 "right": 205,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "207": {
             "id": 207,
             "op": {
-                "type": "literal",
-                "value": 140
+                "left": 200,
+                "right": 206,
+                "type": "add"
             }
         },
         "208": {
             "id": 208,
             "op": {
-                "type": "literal",
-                "value": 155
+                "cond": 198,
+                "otherwise": 199,
+                "then": 207,
+                "type": "if_positive"
             }
         },
         "209": {
             "id": 209,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 195,
+                "otherwise": 196,
+                "then": 208,
+                "type": "if_positive"
             }
         },
         "21": {
@@ -1011,83 +1017,81 @@
         "210": {
             "id": 210,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 192,
+                "otherwise": 193,
+                "then": 209,
+                "type": "if_positive"
             }
         },
         "211": {
             "id": 211,
             "op": {
-                "left": 94,
-                "right": 210,
-                "type": "sub"
+                "cond": 189,
+                "otherwise": 190,
+                "then": 210,
+                "type": "if_positive"
             }
         },
         "212": {
             "id": 212,
             "op": {
-                "left": 209,
-                "right": 211,
-                "type": "max"
+                "cond": 186,
+                "otherwise": 187,
+                "then": 211,
+                "type": "if_positive"
             }
         },
         "213": {
             "id": 213,
             "op": {
-                "type": "literal",
-                "value": 15
+                "cond": 183,
+                "otherwise": 184,
+                "then": 212,
+                "type": "if_positive"
             }
         },
         "214": {
             "id": 214,
             "op": {
-                "left": 212,
-                "right": 213,
-                "type": "mul"
+                "type": "literal",
+                "value": 20000
             }
         },
         "215": {
             "id": 215,
             "op": {
-                "left": 208,
+                "left": 74,
                 "right": 214,
-                "type": "add"
+                "type": "sub"
             }
         },
         "216": {
             "id": 216,
             "op": {
-                "cond": 206,
-                "otherwise": 207,
-                "then": 215,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "217": {
             "id": 217,
             "op": {
-                "cond": 203,
-                "otherwise": 204,
-                "then": 216,
-                "type": "if_positive"
+                "left": 86,
+                "right": 216,
+                "type": "sub"
             }
         },
         "218": {
             "id": 218,
             "op": {
-                "cond": 200,
-                "otherwise": 201,
-                "then": 217,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 60
             }
         },
         "219": {
             "id": 219,
             "op": {
-                "cond": 197,
-                "otherwise": 198,
-                "then": 218,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "22": {
@@ -1100,32 +1104,29 @@
         "220": {
             "id": 220,
             "op": {
-                "cond": 194,
-                "otherwise": 195,
-                "then": 219,
-                "type": "if_positive"
+                "left": 86,
+                "right": 219,
+                "type": "sub"
             }
         },
         "221": {
             "id": 221,
             "op": {
-                "cond": 191,
-                "otherwise": 192,
-                "then": 220,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 75
             }
         },
         "222": {
             "id": 222,
             "op": {
                 "type": "literal",
-                "value": 20000
+                "value": 3
             }
         },
         "223": {
             "id": 223,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 222,
                 "type": "sub"
             }
@@ -1134,44 +1135,44 @@
             "id": 224,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 90
             }
         },
         "225": {
             "id": 225,
             "op": {
-                "left": 94,
-                "right": 224,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "226": {
             "id": 226,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 86,
+                "right": 225,
+                "type": "sub"
             }
         },
         "227": {
             "id": 227,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 105
             }
         },
         "228": {
             "id": 228,
             "op": {
-                "left": 94,
-                "right": 227,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "229": {
             "id": 229,
             "op": {
-                "type": "literal",
-                "value": 75
+                "left": 86,
+                "right": 228,
+                "type": "sub"
             }
         },
         "23": {
@@ -1185,57 +1186,56 @@
             "id": 230,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 120
             }
         },
         "231": {
             "id": 231,
             "op": {
-                "left": 94,
-                "right": 230,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "232": {
             "id": 232,
             "op": {
-                "type": "literal",
-                "value": 90
+                "left": 86,
+                "right": 231,
+                "type": "sub"
             }
         },
         "233": {
             "id": 233,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 135
             }
         },
         "234": {
             "id": 234,
             "op": {
-                "left": 94,
-                "right": 233,
-                "type": "sub"
+                "type": "literal",
+                "value": 150
             }
         },
         "235": {
             "id": 235,
             "op": {
                 "type": "literal",
-                "value": 105
+                "value": 0
             }
         },
         "236": {
             "id": 236,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "237": {
             "id": 237,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 236,
                 "type": "sub"
             }
@@ -1243,15 +1243,16 @@
         "238": {
             "id": 238,
             "op": {
-                "type": "literal",
-                "value": 120
+                "left": 235,
+                "right": 237,
+                "type": "max"
             }
         },
         "239": {
             "id": 239,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 15
             }
         },
         "24": {
@@ -1264,76 +1265,86 @@
         "240": {
             "id": 240,
             "op": {
-                "left": 94,
+                "left": 238,
                 "right": 239,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "241": {
             "id": 241,
             "op": {
-                "type": "literal",
-                "value": 135
+                "left": 234,
+                "right": 240,
+                "type": "add"
             }
         },
         "242": {
             "id": 242,
             "op": {
-                "type": "literal",
-                "value": 150
+                "cond": 232,
+                "otherwise": 233,
+                "then": 241,
+                "type": "if_positive"
             }
         },
         "243": {
             "id": 243,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 229,
+                "otherwise": 230,
+                "then": 242,
+                "type": "if_positive"
             }
         },
         "244": {
             "id": 244,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 226,
+                "otherwise": 227,
+                "then": 243,
+                "type": "if_positive"
             }
         },
         "245": {
             "id": 245,
             "op": {
-                "left": 94,
-                "right": 244,
-                "type": "sub"
+                "cond": 223,
+                "otherwise": 224,
+                "then": 244,
+                "type": "if_positive"
             }
         },
         "246": {
             "id": 246,
             "op": {
-                "left": 243,
-                "right": 245,
-                "type": "max"
+                "cond": 220,
+                "otherwise": 221,
+                "then": 245,
+                "type": "if_positive"
             }
         },
         "247": {
             "id": 247,
             "op": {
-                "type": "literal",
-                "value": 15
+                "cond": 217,
+                "otherwise": 218,
+                "then": 246,
+                "type": "if_positive"
             }
         },
         "248": {
             "id": 248,
             "op": {
-                "left": 246,
-                "right": 247,
-                "type": "mul"
+                "type": "literal",
+                "value": 22000
             }
         },
         "249": {
             "id": 249,
             "op": {
-                "left": 242,
+                "left": 74,
                 "right": 248,
-                "type": "add"
+                "type": "sub"
             }
         },
         "25": {
@@ -1346,68 +1357,58 @@
         "250": {
             "id": 250,
             "op": {
-                "cond": 240,
-                "otherwise": 241,
-                "then": 249,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "251": {
             "id": 251,
             "op": {
-                "cond": 237,
-                "otherwise": 238,
-                "then": 250,
-                "type": "if_positive"
+                "left": 86,
+                "right": 250,
+                "type": "sub"
             }
         },
         "252": {
             "id": 252,
             "op": {
-                "cond": 234,
-                "otherwise": 235,
-                "then": 251,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 60
             }
         },
         "253": {
             "id": 253,
             "op": {
-                "cond": 231,
-                "otherwise": 232,
-                "then": 252,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "254": {
             "id": 254,
             "op": {
-                "cond": 228,
-                "otherwise": 229,
-                "then": 253,
-                "type": "if_positive"
+                "left": 86,
+                "right": 253,
+                "type": "sub"
             }
         },
         "255": {
             "id": 255,
             "op": {
-                "cond": 225,
-                "otherwise": 226,
-                "then": 254,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 70
             }
         },
         "256": {
             "id": 256,
             "op": {
                 "type": "literal",
-                "value": 22000
+                "value": 3
             }
         },
         "257": {
             "id": 257,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 256,
                 "type": "sub"
             }
@@ -1416,15 +1417,14 @@
             "id": 258,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 80
             }
         },
         "259": {
             "id": 259,
             "op": {
-                "left": 94,
-                "right": 258,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "26": {
@@ -1437,74 +1437,74 @@
         "260": {
             "id": 260,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 86,
+                "right": 259,
+                "type": "sub"
             }
         },
         "261": {
             "id": 261,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 90
             }
         },
         "262": {
             "id": 262,
             "op": {
-                "left": 94,
-                "right": 261,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "263": {
             "id": 263,
             "op": {
-                "type": "literal",
-                "value": 70
+                "left": 86,
+                "right": 262,
+                "type": "sub"
             }
         },
         "264": {
             "id": 264,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 100
             }
         },
         "265": {
             "id": 265,
             "op": {
-                "left": 94,
-                "right": 264,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "266": {
             "id": 266,
             "op": {
-                "type": "literal",
-                "value": 80
+                "left": 86,
+                "right": 265,
+                "type": "sub"
             }
         },
         "267": {
             "id": 267,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 110
             }
         },
         "268": {
             "id": 268,
             "op": {
-                "left": 94,
-                "right": 267,
-                "type": "sub"
+                "type": "literal",
+                "value": 120
             }
         },
         "269": {
             "id": 269,
             "op": {
                 "type": "literal",
-                "value": 90
+                "value": 0
             }
         },
         "27": {
@@ -1518,13 +1518,13 @@
             "id": 270,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "271": {
             "id": 271,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 270,
                 "type": "sub"
             }
@@ -1532,59 +1532,68 @@
         "272": {
             "id": 272,
             "op": {
-                "type": "literal",
-                "value": 100
+                "left": 269,
+                "right": 271,
+                "type": "max"
             }
         },
         "273": {
             "id": 273,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 10
             }
         },
         "274": {
             "id": 274,
             "op": {
-                "left": 94,
+                "left": 272,
                 "right": 273,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "275": {
             "id": 275,
             "op": {
-                "type": "literal",
-                "value": 110
+                "left": 268,
+                "right": 274,
+                "type": "add"
             }
         },
         "276": {
             "id": 276,
             "op": {
-                "type": "literal",
-                "value": 120
+                "cond": 266,
+                "otherwise": 267,
+                "then": 275,
+                "type": "if_positive"
             }
         },
         "277": {
             "id": 277,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 263,
+                "otherwise": 264,
+                "then": 276,
+                "type": "if_positive"
             }
         },
         "278": {
             "id": 278,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 260,
+                "otherwise": 261,
+                "then": 277,
+                "type": "if_positive"
             }
         },
         "279": {
             "id": 279,
             "op": {
-                "left": 94,
-                "right": 278,
-                "type": "sub"
+                "cond": 257,
+                "otherwise": 258,
+                "then": 278,
+                "type": "if_positive"
             }
         },
         "28": {
@@ -1597,86 +1606,78 @@
         "280": {
             "id": 280,
             "op": {
-                "left": 277,
-                "right": 279,
-                "type": "max"
+                "cond": 254,
+                "otherwise": 255,
+                "then": 279,
+                "type": "if_positive"
             }
         },
         "281": {
             "id": 281,
             "op": {
-                "type": "literal",
-                "value": 10
+                "cond": 251,
+                "otherwise": 252,
+                "then": 280,
+                "type": "if_positive"
             }
         },
         "282": {
             "id": 282,
             "op": {
-                "left": 280,
-                "right": 281,
-                "type": "mul"
+                "type": "literal",
+                "value": 25000
             }
         },
         "283": {
             "id": 283,
             "op": {
-                "left": 276,
+                "left": 74,
                 "right": 282,
-                "type": "add"
+                "type": "sub"
             }
         },
         "284": {
             "id": 284,
             "op": {
-                "cond": 274,
-                "otherwise": 275,
-                "then": 283,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "285": {
             "id": 285,
             "op": {
-                "cond": 271,
-                "otherwise": 272,
-                "then": 284,
-                "type": "if_positive"
+                "left": 86,
+                "right": 284,
+                "type": "sub"
             }
         },
         "286": {
             "id": 286,
             "op": {
-                "cond": 268,
-                "otherwise": 269,
-                "then": 285,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 50
             }
         },
         "287": {
             "id": 287,
             "op": {
-                "cond": 265,
-                "otherwise": 266,
-                "then": 286,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "288": {
             "id": 288,
             "op": {
-                "cond": 262,
-                "otherwise": 263,
-                "then": 287,
-                "type": "if_positive"
+                "left": 86,
+                "right": 287,
+                "type": "sub"
             }
         },
         "289": {
             "id": 289,
             "op": {
-                "cond": 259,
-                "otherwise": 260,
-                "then": 288,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 60
             }
         },
         "29": {
@@ -1690,13 +1691,13 @@
             "id": 290,
             "op": {
                 "type": "literal",
-                "value": 25000
+                "value": 3
             }
         },
         "291": {
             "id": 291,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 290,
                 "type": "sub"
             }
@@ -1705,59 +1706,58 @@
             "id": 292,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 70
             }
         },
         "293": {
             "id": 293,
             "op": {
-                "left": 94,
-                "right": 292,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "294": {
             "id": 294,
             "op": {
-                "type": "literal",
-                "value": 50
+                "left": 86,
+                "right": 293,
+                "type": "sub"
             }
         },
         "295": {
             "id": 295,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 80
             }
         },
         "296": {
             "id": 296,
             "op": {
-                "left": 94,
-                "right": 295,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "297": {
             "id": 297,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 86,
+                "right": 296,
+                "type": "sub"
             }
         },
         "298": {
             "id": 298,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 90
             }
         },
         "299": {
             "id": 299,
             "op": {
-                "left": 94,
-                "right": 298,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "3": {
@@ -1777,43 +1777,43 @@
         "300": {
             "id": 300,
             "op": {
-                "type": "literal",
-                "value": 70
+                "left": 86,
+                "right": 299,
+                "type": "sub"
             }
         },
         "301": {
             "id": 301,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 100
             }
         },
         "302": {
             "id": 302,
             "op": {
-                "left": 94,
-                "right": 301,
-                "type": "sub"
+                "type": "literal",
+                "value": 110
             }
         },
         "303": {
             "id": 303,
             "op": {
                 "type": "literal",
-                "value": 80
+                "value": 0
             }
         },
         "304": {
             "id": 304,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "305": {
             "id": 305,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 304,
                 "type": "sub"
             }
@@ -1821,30 +1821,32 @@
         "306": {
             "id": 306,
             "op": {
-                "type": "literal",
-                "value": 90
+                "left": 303,
+                "right": 305,
+                "type": "max"
             }
         },
         "307": {
             "id": 307,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 10
             }
         },
         "308": {
             "id": 308,
             "op": {
-                "left": 94,
+                "left": 306,
                 "right": 307,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "309": {
             "id": 309,
             "op": {
-                "type": "literal",
-                "value": 100
+                "left": 302,
+                "right": 308,
+                "type": "add"
             }
         },
         "31": {
@@ -1857,79 +1859,85 @@
         "310": {
             "id": 310,
             "op": {
-                "type": "literal",
-                "value": 110
+                "cond": 300,
+                "otherwise": 301,
+                "then": 309,
+                "type": "if_positive"
             }
         },
         "311": {
             "id": 311,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 297,
+                "otherwise": 298,
+                "then": 310,
+                "type": "if_positive"
             }
         },
         "312": {
             "id": 312,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 294,
+                "otherwise": 295,
+                "then": 311,
+                "type": "if_positive"
             }
         },
         "313": {
             "id": 313,
             "op": {
-                "left": 94,
-                "right": 312,
-                "type": "sub"
+                "cond": 291,
+                "otherwise": 292,
+                "then": 312,
+                "type": "if_positive"
             }
         },
         "314": {
             "id": 314,
             "op": {
-                "left": 311,
-                "right": 313,
-                "type": "max"
+                "cond": 288,
+                "otherwise": 289,
+                "then": 313,
+                "type": "if_positive"
             }
         },
         "315": {
             "id": 315,
             "op": {
-                "type": "literal",
-                "value": 10
+                "cond": 285,
+                "otherwise": 286,
+                "then": 314,
+                "type": "if_positive"
             }
         },
         "316": {
             "id": 316,
             "op": {
-                "left": 314,
-                "right": 315,
-                "type": "mul"
+                "type": "literal",
+                "value": 28000
             }
         },
         "317": {
             "id": 317,
             "op": {
-                "left": 310,
+                "left": 74,
                 "right": 316,
-                "type": "add"
+                "type": "sub"
             }
         },
         "318": {
             "id": 318,
             "op": {
-                "cond": 308,
-                "otherwise": 309,
-                "then": 317,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "319": {
             "id": 319,
             "op": {
-                "cond": 305,
-                "otherwise": 306,
-                "then": 318,
-                "type": "if_positive"
+                "left": 86,
+                "right": 318,
+                "type": "sub"
             }
         },
         "32": {
@@ -1942,50 +1950,43 @@
         "320": {
             "id": 320,
             "op": {
-                "cond": 302,
-                "otherwise": 303,
-                "then": 319,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 40
             }
         },
         "321": {
             "id": 321,
             "op": {
-                "cond": 299,
-                "otherwise": 300,
-                "then": 320,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "322": {
             "id": 322,
             "op": {
-                "cond": 296,
-                "otherwise": 297,
-                "then": 321,
-                "type": "if_positive"
+                "left": 86,
+                "right": 321,
+                "type": "sub"
             }
         },
         "323": {
             "id": 323,
             "op": {
-                "cond": 293,
-                "otherwise": 294,
-                "then": 322,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 45
             }
         },
         "324": {
             "id": 324,
             "op": {
                 "type": "literal",
-                "value": 28000
+                "value": 3
             }
         },
         "325": {
             "id": 325,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 324,
                 "type": "sub"
             }
@@ -1994,29 +1995,29 @@
             "id": 326,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 50
             }
         },
         "327": {
             "id": 327,
             "op": {
-                "left": 94,
-                "right": 326,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "328": {
             "id": 328,
             "op": {
-                "type": "literal",
-                "value": 40
+                "left": 86,
+                "right": 327,
+                "type": "sub"
             }
         },
         "329": {
             "id": 329,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 55
             }
         },
         "33": {
@@ -2029,73 +2030,72 @@
         "330": {
             "id": 330,
             "op": {
-                "left": 94,
-                "right": 329,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "331": {
             "id": 331,
             "op": {
-                "type": "literal",
-                "value": 45
+                "left": 86,
+                "right": 330,
+                "type": "sub"
             }
         },
         "332": {
             "id": 332,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 60
             }
         },
         "333": {
             "id": 333,
             "op": {
-                "left": 94,
-                "right": 332,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "334": {
             "id": 334,
             "op": {
-                "type": "literal",
-                "value": 50
+                "left": 86,
+                "right": 333,
+                "type": "sub"
             }
         },
         "335": {
             "id": 335,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 65
             }
         },
         "336": {
             "id": 336,
             "op": {
-                "left": 94,
-                "right": 335,
-                "type": "sub"
+                "type": "literal",
+                "value": 70
             }
         },
         "337": {
             "id": 337,
             "op": {
                 "type": "literal",
-                "value": 55
+                "value": 0
             }
         },
         "338": {
             "id": 338,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "339": {
             "id": 339,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 338,
                 "type": "sub"
             }
@@ -2110,74 +2110,86 @@
         "340": {
             "id": 340,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 337,
+                "right": 339,
+                "type": "max"
             }
         },
         "341": {
             "id": 341,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 5
             }
         },
         "342": {
             "id": 342,
             "op": {
-                "left": 94,
+                "left": 340,
                 "right": 341,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "343": {
             "id": 343,
             "op": {
-                "type": "literal",
-                "value": 65
+                "left": 336,
+                "right": 342,
+                "type": "add"
             }
         },
         "344": {
             "id": 344,
             "op": {
-                "type": "literal",
-                "value": 70
+                "cond": 334,
+                "otherwise": 335,
+                "then": 343,
+                "type": "if_positive"
             }
         },
         "345": {
             "id": 345,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 331,
+                "otherwise": 332,
+                "then": 344,
+                "type": "if_positive"
             }
         },
         "346": {
             "id": 346,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 328,
+                "otherwise": 329,
+                "then": 345,
+                "type": "if_positive"
             }
         },
         "347": {
             "id": 347,
             "op": {
-                "left": 94,
-                "right": 346,
-                "type": "sub"
+                "cond": 325,
+                "otherwise": 326,
+                "then": 346,
+                "type": "if_positive"
             }
         },
         "348": {
             "id": 348,
             "op": {
-                "left": 345,
-                "right": 347,
-                "type": "max"
+                "cond": 322,
+                "otherwise": 323,
+                "then": 347,
+                "type": "if_positive"
             }
         },
         "349": {
             "id": 349,
             "op": {
-                "type": "literal",
-                "value": 5
+                "cond": 319,
+                "otherwise": 320,
+                "then": 348,
+                "type": "if_positive"
             }
         },
         "35": {
@@ -2190,84 +2202,73 @@
         "350": {
             "id": 350,
             "op": {
-                "left": 348,
-                "right": 349,
-                "type": "mul"
+                "type": "literal",
+                "value": 32000
             }
         },
         "351": {
             "id": 351,
             "op": {
-                "left": 344,
+                "left": 74,
                 "right": 350,
-                "type": "add"
+                "type": "sub"
             }
         },
         "352": {
             "id": 352,
             "op": {
-                "cond": 342,
-                "otherwise": 343,
-                "then": 351,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "353": {
             "id": 353,
             "op": {
-                "cond": 339,
-                "otherwise": 340,
-                "then": 352,
-                "type": "if_positive"
+                "left": 86,
+                "right": 352,
+                "type": "sub"
             }
         },
         "354": {
             "id": 354,
             "op": {
-                "cond": 336,
-                "otherwise": 337,
-                "then": 353,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 20
             }
         },
         "355": {
             "id": 355,
             "op": {
-                "cond": 333,
-                "otherwise": 334,
-                "then": 354,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "356": {
             "id": 356,
             "op": {
-                "cond": 330,
-                "otherwise": 331,
-                "then": 355,
-                "type": "if_positive"
+                "left": 86,
+                "right": 355,
+                "type": "sub"
             }
         },
         "357": {
             "id": 357,
             "op": {
-                "cond": 327,
-                "otherwise": 328,
-                "then": 356,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 25
             }
         },
         "358": {
             "id": 358,
             "op": {
                 "type": "literal",
-                "value": 32000
+                "value": 3
             }
         },
         "359": {
             "id": 359,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 358,
                 "type": "sub"
             }
@@ -2283,73 +2284,73 @@
             "id": 360,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 30
             }
         },
         "361": {
             "id": 361,
             "op": {
-                "left": 94,
-                "right": 360,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "362": {
             "id": 362,
             "op": {
-                "type": "literal",
-                "value": 20
+                "left": 86,
+                "right": 361,
+                "type": "sub"
             }
         },
         "363": {
             "id": 363,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 35
             }
         },
         "364": {
             "id": 364,
             "op": {
-                "left": 94,
-                "right": 363,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "365": {
             "id": 365,
             "op": {
-                "type": "literal",
-                "value": 25
+                "left": 86,
+                "right": 364,
+                "type": "sub"
             }
         },
         "366": {
             "id": 366,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 40
             }
         },
         "367": {
             "id": 367,
             "op": {
-                "left": 94,
-                "right": 366,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "368": {
             "id": 368,
             "op": {
-                "type": "literal",
-                "value": 30
+                "left": 86,
+                "right": 367,
+                "type": "sub"
             }
         },
         "369": {
             "id": 369,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 45
             }
         },
         "37": {
@@ -2362,29 +2363,28 @@
         "370": {
             "id": 370,
             "op": {
-                "left": 94,
-                "right": 369,
-                "type": "sub"
+                "type": "literal",
+                "value": 50
             }
         },
         "371": {
             "id": 371,
             "op": {
                 "type": "literal",
-                "value": 35
+                "value": 0
             }
         },
         "372": {
             "id": 372,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "373": {
             "id": 373,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 372,
                 "type": "sub"
             }
@@ -2392,44 +2392,50 @@
         "374": {
             "id": 374,
             "op": {
-                "type": "literal",
-                "value": 40
+                "left": 371,
+                "right": 373,
+                "type": "max"
             }
         },
         "375": {
             "id": 375,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 5
             }
         },
         "376": {
             "id": 376,
             "op": {
-                "left": 94,
+                "left": 374,
                 "right": 375,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "377": {
             "id": 377,
             "op": {
-                "type": "literal",
-                "value": 45
+                "left": 370,
+                "right": 376,
+                "type": "add"
             }
         },
         "378": {
             "id": 378,
             "op": {
-                "type": "literal",
-                "value": 50
+                "cond": 368,
+                "otherwise": 369,
+                "then": 377,
+                "type": "if_positive"
             }
         },
         "379": {
             "id": 379,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 365,
+                "otherwise": 366,
+                "then": 378,
+                "type": "if_positive"
             }
         },
         "38": {
@@ -2442,54 +2448,60 @@
         "380": {
             "id": 380,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 362,
+                "otherwise": 363,
+                "then": 379,
+                "type": "if_positive"
             }
         },
         "381": {
             "id": 381,
             "op": {
-                "left": 94,
-                "right": 380,
-                "type": "sub"
+                "cond": 359,
+                "otherwise": 360,
+                "then": 380,
+                "type": "if_positive"
             }
         },
         "382": {
             "id": 382,
             "op": {
-                "left": 379,
-                "right": 381,
-                "type": "max"
+                "cond": 356,
+                "otherwise": 357,
+                "then": 381,
+                "type": "if_positive"
             }
         },
         "383": {
             "id": 383,
             "op": {
-                "type": "literal",
-                "value": 5
+                "cond": 353,
+                "otherwise": 354,
+                "then": 382,
+                "type": "if_positive"
             }
         },
         "384": {
             "id": 384,
             "op": {
-                "left": 382,
-                "right": 383,
-                "type": "mul"
+                "type": "literal",
+                "value": 0
             }
         },
         "385": {
             "id": 385,
             "op": {
-                "left": 378,
-                "right": 384,
-                "type": "add"
+                "cond": 351,
+                "otherwise": 383,
+                "then": 384,
+                "type": "if_positive"
             }
         },
         "386": {
             "id": 386,
             "op": {
-                "cond": 376,
-                "otherwise": 377,
+                "cond": 317,
+                "otherwise": 349,
                 "then": 385,
                 "type": "if_positive"
             }
@@ -2497,8 +2509,8 @@
         "387": {
             "id": 387,
             "op": {
-                "cond": 373,
-                "otherwise": 374,
+                "cond": 283,
+                "otherwise": 315,
                 "then": 386,
                 "type": "if_positive"
             }
@@ -2506,8 +2518,8 @@
         "388": {
             "id": 388,
             "op": {
-                "cond": 370,
-                "otherwise": 371,
+                "cond": 249,
+                "otherwise": 281,
                 "then": 387,
                 "type": "if_positive"
             }
@@ -2515,8 +2527,8 @@
         "389": {
             "id": 389,
             "op": {
-                "cond": 367,
-                "otherwise": 368,
+                "cond": 215,
+                "otherwise": 247,
                 "then": 388,
                 "type": "if_positive"
             }
@@ -2534,8 +2546,8 @@
         "390": {
             "id": 390,
             "op": {
-                "cond": 364,
-                "otherwise": 365,
+                "cond": 181,
+                "otherwise": 213,
                 "then": 389,
                 "type": "if_positive"
             }
@@ -2543,80 +2555,72 @@
         "391": {
             "id": 391,
             "op": {
-                "cond": 361,
-                "otherwise": 362,
+                "cond": 147,
+                "otherwise": 179,
                 "then": 390,
                 "type": "if_positive"
             }
         },
         "392": {
             "id": 392,
+            "name": "HouseholdJointCredit",
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 113,
+                "otherwise": 145,
+                "then": 391,
+                "type": "if_positive"
             }
         },
         "393": {
             "id": 393,
             "op": {
-                "cond": 359,
-                "otherwise": 391,
-                "then": 392,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 5000
             }
         },
         "394": {
             "id": 394,
             "op": {
-                "cond": 325,
-                "otherwise": 357,
-                "then": 393,
-                "type": "if_positive"
+                "left": 74,
+                "right": 393,
+                "type": "sub"
             }
         },
         "395": {
             "id": 395,
             "op": {
-                "cond": 291,
-                "otherwise": 323,
-                "then": 394,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "396": {
             "id": 396,
             "op": {
-                "cond": 257,
-                "otherwise": 289,
-                "then": 395,
-                "type": "if_positive"
+                "left": 86,
+                "right": 395,
+                "type": "sub"
             }
         },
         "397": {
             "id": 397,
             "op": {
-                "cond": 223,
-                "otherwise": 255,
-                "then": 396,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 45
             }
         },
         "398": {
             "id": 398,
             "op": {
-                "cond": 189,
-                "otherwise": 221,
-                "then": 397,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "399": {
             "id": 399,
             "op": {
-                "cond": 155,
-                "otherwise": 187,
-                "then": 398,
-                "type": "if_positive"
+                "left": 86,
+                "right": 398,
+                "type": "sub"
             }
         },
         "4": {
@@ -2636,25 +2640,22 @@
         },
         "400": {
             "id": 400,
-            "name": "HouseholdJointCredit",
             "op": {
-                "cond": 121,
-                "otherwise": 153,
-                "then": 399,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 53
             }
         },
         "401": {
             "id": 401,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": 3
             }
         },
         "402": {
             "id": 402,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 401,
                 "type": "sub"
             }
@@ -2663,51 +2664,51 @@
             "id": 403,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 60
             }
         },
         "404": {
             "id": 404,
             "op": {
-                "left": 94,
-                "right": 403,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "405": {
             "id": 405,
             "op": {
-                "type": "literal",
-                "value": 45
+                "left": 86,
+                "right": 404,
+                "type": "sub"
             }
         },
         "406": {
             "id": 406,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 68
             }
         },
         "407": {
             "id": 407,
             "op": {
-                "left": 94,
-                "right": 406,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "408": {
             "id": 408,
             "op": {
-                "type": "literal",
-                "value": 53
+                "left": 86,
+                "right": 407,
+                "type": "sub"
             }
         },
         "409": {
             "id": 409,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 75
             }
         },
         "41": {
@@ -2721,51 +2722,50 @@
         "410": {
             "id": 410,
             "op": {
-                "left": 94,
-                "right": 409,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "411": {
             "id": 411,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 86,
+                "right": 410,
+                "type": "sub"
             }
         },
         "412": {
             "id": 412,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 83
             }
         },
         "413": {
             "id": 413,
             "op": {
-                "left": 94,
-                "right": 412,
-                "type": "sub"
+                "type": "literal",
+                "value": 90
             }
         },
         "414": {
             "id": 414,
             "op": {
                 "type": "literal",
-                "value": 68
+                "value": 0
             }
         },
         "415": {
             "id": 415,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "416": {
             "id": 416,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 415,
                 "type": "sub"
             }
@@ -2773,23 +2773,24 @@
         "417": {
             "id": 417,
             "op": {
-                "type": "literal",
-                "value": 75
+                "left": 414,
+                "right": 416,
+                "type": "max"
             }
         },
         "418": {
             "id": 418,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 8
             }
         },
         "419": {
             "id": 419,
             "op": {
-                "left": 94,
+                "left": 417,
                 "right": 418,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "42": {
@@ -2803,77 +2804,85 @@
         "420": {
             "id": 420,
             "op": {
-                "type": "literal",
-                "value": 83
+                "left": 413,
+                "right": 419,
+                "type": "add"
             }
         },
         "421": {
             "id": 421,
             "op": {
-                "type": "literal",
-                "value": 90
+                "cond": 411,
+                "otherwise": 412,
+                "then": 420,
+                "type": "if_positive"
             }
         },
         "422": {
             "id": 422,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 408,
+                "otherwise": 409,
+                "then": 421,
+                "type": "if_positive"
             }
         },
         "423": {
             "id": 423,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 405,
+                "otherwise": 406,
+                "then": 422,
+                "type": "if_positive"
             }
         },
         "424": {
             "id": 424,
             "op": {
-                "left": 94,
-                "right": 423,
-                "type": "sub"
+                "cond": 402,
+                "otherwise": 403,
+                "then": 423,
+                "type": "if_positive"
             }
         },
         "425": {
             "id": 425,
             "op": {
-                "left": 422,
-                "right": 424,
-                "type": "max"
+                "cond": 399,
+                "otherwise": 400,
+                "then": 424,
+                "type": "if_positive"
             }
         },
         "426": {
             "id": 426,
             "op": {
-                "type": "literal",
-                "value": 8
+                "cond": 396,
+                "otherwise": 397,
+                "then": 425,
+                "type": "if_positive"
             }
         },
         "427": {
             "id": 427,
             "op": {
-                "left": 425,
-                "right": 426,
-                "type": "mul"
+                "type": "literal",
+                "value": 6000
             }
         },
         "428": {
             "id": 428,
             "op": {
-                "left": 421,
+                "left": 74,
                 "right": 427,
-                "type": "add"
+                "type": "sub"
             }
         },
         "429": {
             "id": 429,
             "op": {
-                "cond": 419,
-                "otherwise": 420,
-                "then": 428,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "43": {
@@ -2888,59 +2897,51 @@
         "430": {
             "id": 430,
             "op": {
-                "cond": 416,
-                "otherwise": 417,
-                "then": 429,
-                "type": "if_positive"
+                "left": 86,
+                "right": 429,
+                "type": "sub"
             }
         },
         "431": {
             "id": 431,
             "op": {
-                "cond": 413,
-                "otherwise": 414,
-                "then": 430,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 38
             }
         },
         "432": {
             "id": 432,
             "op": {
-                "cond": 410,
-                "otherwise": 411,
-                "then": 431,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "433": {
             "id": 433,
             "op": {
-                "cond": 407,
-                "otherwise": 408,
-                "then": 432,
-                "type": "if_positive"
+                "left": 86,
+                "right": 432,
+                "type": "sub"
             }
         },
         "434": {
             "id": 434,
             "op": {
-                "cond": 404,
-                "otherwise": 405,
-                "then": 433,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 45
             }
         },
         "435": {
             "id": 435,
             "op": {
                 "type": "literal",
-                "value": 6000
+                "value": 3
             }
         },
         "436": {
             "id": 436,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 435,
                 "type": "sub"
             }
@@ -2949,22 +2950,22 @@
             "id": 437,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 53
             }
         },
         "438": {
             "id": 438,
             "op": {
-                "left": 94,
-                "right": 437,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "439": {
             "id": 439,
             "op": {
-                "type": "literal",
-                "value": 38
+                "left": 86,
+                "right": 438,
+                "type": "sub"
             }
         },
         "44": {
@@ -2981,73 +2982,72 @@
             "id": 440,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 60
             }
         },
         "441": {
             "id": 441,
             "op": {
-                "left": 94,
-                "right": 440,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "442": {
             "id": 442,
             "op": {
-                "type": "literal",
-                "value": 45
+                "left": 86,
+                "right": 441,
+                "type": "sub"
             }
         },
         "443": {
             "id": 443,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 68
             }
         },
         "444": {
             "id": 444,
             "op": {
-                "left": 94,
-                "right": 443,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "445": {
             "id": 445,
             "op": {
-                "type": "literal",
-                "value": 53
+                "left": 86,
+                "right": 444,
+                "type": "sub"
             }
         },
         "446": {
             "id": 446,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 75
             }
         },
         "447": {
             "id": 447,
             "op": {
-                "left": 94,
-                "right": 446,
-                "type": "sub"
+                "type": "literal",
+                "value": 83
             }
         },
         "448": {
             "id": 448,
             "op": {
                 "type": "literal",
-                "value": 60
+                "value": 0
             }
         },
         "449": {
             "id": 449,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "45": {
@@ -3063,7 +3063,7 @@
         "450": {
             "id": 450,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 449,
                 "type": "sub"
             }
@@ -3071,67 +3071,77 @@
         "451": {
             "id": 451,
             "op": {
-                "type": "literal",
-                "value": 68
+                "left": 448,
+                "right": 450,
+                "type": "max"
             }
         },
         "452": {
             "id": 452,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 8
             }
         },
         "453": {
             "id": 453,
             "op": {
-                "left": 94,
+                "left": 451,
                 "right": 452,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "454": {
             "id": 454,
             "op": {
-                "type": "literal",
-                "value": 75
+                "left": 447,
+                "right": 453,
+                "type": "add"
             }
         },
         "455": {
             "id": 455,
             "op": {
-                "type": "literal",
-                "value": 83
+                "cond": 445,
+                "otherwise": 446,
+                "then": 454,
+                "type": "if_positive"
             }
         },
         "456": {
             "id": 456,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 442,
+                "otherwise": 443,
+                "then": 455,
+                "type": "if_positive"
             }
         },
         "457": {
             "id": 457,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 439,
+                "otherwise": 440,
+                "then": 456,
+                "type": "if_positive"
             }
         },
         "458": {
             "id": 458,
             "op": {
-                "left": 94,
-                "right": 457,
-                "type": "sub"
+                "cond": 436,
+                "otherwise": 437,
+                "then": 457,
+                "type": "if_positive"
             }
         },
         "459": {
             "id": 459,
             "op": {
-                "left": 456,
-                "right": 458,
-                "type": "max"
+                "cond": 433,
+                "otherwise": 434,
+                "then": 458,
+                "type": "if_positive"
             }
         },
         "46": {
@@ -3145,85 +3155,76 @@
         "460": {
             "id": 460,
             "op": {
-                "type": "literal",
-                "value": 8
+                "cond": 430,
+                "otherwise": 431,
+                "then": 459,
+                "type": "if_positive"
             }
         },
         "461": {
             "id": 461,
             "op": {
-                "left": 459,
-                "right": 460,
-                "type": "mul"
+                "type": "literal",
+                "value": 7000
             }
         },
         "462": {
             "id": 462,
             "op": {
-                "left": 455,
+                "left": 74,
                 "right": 461,
-                "type": "add"
+                "type": "sub"
             }
         },
         "463": {
             "id": 463,
             "op": {
-                "cond": 453,
-                "otherwise": 454,
-                "then": 462,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "464": {
             "id": 464,
             "op": {
-                "cond": 450,
-                "otherwise": 451,
-                "then": 463,
-                "type": "if_positive"
+                "left": 86,
+                "right": 463,
+                "type": "sub"
             }
         },
         "465": {
             "id": 465,
             "op": {
-                "cond": 447,
-                "otherwise": 448,
-                "then": 464,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 33
             }
         },
         "466": {
             "id": 466,
             "op": {
-                "cond": 444,
-                "otherwise": 445,
-                "then": 465,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "467": {
             "id": 467,
             "op": {
-                "cond": 441,
-                "otherwise": 442,
-                "then": 466,
-                "type": "if_positive"
+                "left": 86,
+                "right": 466,
+                "type": "sub"
             }
         },
         "468": {
             "id": 468,
             "op": {
-                "cond": 438,
-                "otherwise": 439,
-                "then": 467,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 40
             }
         },
         "469": {
             "id": 469,
             "op": {
                 "type": "literal",
-                "value": 7000
+                "value": 3
             }
         },
         "47": {
@@ -3237,7 +3238,7 @@
         "470": {
             "id": 470,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 469,
                 "type": "sub"
             }
@@ -3246,66 +3247,66 @@
             "id": 471,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 48
             }
         },
         "472": {
             "id": 472,
             "op": {
-                "left": 94,
-                "right": 471,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "473": {
             "id": 473,
             "op": {
-                "type": "literal",
-                "value": 33
+                "left": 86,
+                "right": 472,
+                "type": "sub"
             }
         },
         "474": {
             "id": 474,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 55
             }
         },
         "475": {
             "id": 475,
             "op": {
-                "left": 94,
-                "right": 474,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "476": {
             "id": 476,
             "op": {
-                "type": "literal",
-                "value": 40
+                "left": 86,
+                "right": 475,
+                "type": "sub"
             }
         },
         "477": {
             "id": 477,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 63
             }
         },
         "478": {
             "id": 478,
             "op": {
-                "left": 94,
-                "right": 477,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "479": {
             "id": 479,
             "op": {
-                "type": "literal",
-                "value": 48
+                "left": 86,
+                "right": 478,
+                "type": "sub"
             }
         },
         "48": {
@@ -3320,35 +3321,34 @@
             "id": 480,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 70
             }
         },
         "481": {
             "id": 481,
             "op": {
-                "left": 94,
-                "right": 480,
-                "type": "sub"
+                "type": "literal",
+                "value": 78
             }
         },
         "482": {
             "id": 482,
             "op": {
                 "type": "literal",
-                "value": 55
+                "value": 0
             }
         },
         "483": {
             "id": 483,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "484": {
             "id": 484,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 483,
                 "type": "sub"
             }
@@ -3356,37 +3356,41 @@
         "485": {
             "id": 485,
             "op": {
-                "type": "literal",
-                "value": 63
+                "left": 482,
+                "right": 484,
+                "type": "max"
             }
         },
         "486": {
             "id": 486,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 8
             }
         },
         "487": {
             "id": 487,
             "op": {
-                "left": 94,
+                "left": 485,
                 "right": 486,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "488": {
             "id": 488,
             "op": {
-                "type": "literal",
-                "value": 70
+                "left": 481,
+                "right": 487,
+                "type": "add"
             }
         },
         "489": {
             "id": 489,
             "op": {
-                "type": "literal",
-                "value": 78
+                "cond": 479,
+                "otherwise": 480,
+                "then": 488,
+                "type": "if_positive"
             }
         },
         "49": {
@@ -3400,81 +3404,83 @@
         "490": {
             "id": 490,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 476,
+                "otherwise": 477,
+                "then": 489,
+                "type": "if_positive"
             }
         },
         "491": {
             "id": 491,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 473,
+                "otherwise": 474,
+                "then": 490,
+                "type": "if_positive"
             }
         },
         "492": {
             "id": 492,
             "op": {
-                "left": 94,
-                "right": 491,
-                "type": "sub"
+                "cond": 470,
+                "otherwise": 471,
+                "then": 491,
+                "type": "if_positive"
             }
         },
         "493": {
             "id": 493,
             "op": {
-                "left": 490,
-                "right": 492,
-                "type": "max"
+                "cond": 467,
+                "otherwise": 468,
+                "then": 492,
+                "type": "if_positive"
             }
         },
         "494": {
             "id": 494,
             "op": {
-                "type": "literal",
-                "value": 8
+                "cond": 464,
+                "otherwise": 465,
+                "then": 493,
+                "type": "if_positive"
             }
         },
         "495": {
             "id": 495,
             "op": {
-                "left": 493,
-                "right": 494,
-                "type": "mul"
+                "type": "literal",
+                "value": 20000
             }
         },
         "496": {
             "id": 496,
             "op": {
-                "left": 489,
+                "left": 74,
                 "right": 495,
-                "type": "add"
+                "type": "sub"
             }
         },
         "497": {
             "id": 497,
             "op": {
-                "cond": 487,
-                "otherwise": 488,
-                "then": 496,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "498": {
             "id": 498,
             "op": {
-                "cond": 484,
-                "otherwise": 485,
-                "then": 497,
-                "type": "if_positive"
+                "left": 86,
+                "right": 497,
+                "type": "sub"
             }
         },
         "499": {
             "id": 499,
             "op": {
-                "cond": 481,
-                "otherwise": 482,
-                "then": 498,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 30
             }
         },
         "5": {
@@ -3495,41 +3501,36 @@
         "500": {
             "id": 500,
             "op": {
-                "cond": 478,
-                "otherwise": 479,
-                "then": 499,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "501": {
             "id": 501,
             "op": {
-                "cond": 475,
-                "otherwise": 476,
-                "then": 500,
-                "type": "if_positive"
+                "left": 86,
+                "right": 500,
+                "type": "sub"
             }
         },
         "502": {
             "id": 502,
             "op": {
-                "cond": 472,
-                "otherwise": 473,
-                "then": 501,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 38
             }
         },
         "503": {
             "id": 503,
             "op": {
                 "type": "literal",
-                "value": 20000
+                "value": 3
             }
         },
         "504": {
             "id": 504,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 503,
                 "type": "sub"
             }
@@ -3538,37 +3539,36 @@
             "id": 505,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 45
             }
         },
         "506": {
             "id": 506,
             "op": {
-                "left": 94,
-                "right": 505,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "507": {
             "id": 507,
             "op": {
-                "type": "literal",
-                "value": 30
+                "left": 86,
+                "right": 506,
+                "type": "sub"
             }
         },
         "508": {
             "id": 508,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 53
             }
         },
         "509": {
             "id": 509,
             "op": {
-                "left": 94,
-                "right": 508,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "51": {
@@ -3583,65 +3583,65 @@
         "510": {
             "id": 510,
             "op": {
-                "type": "literal",
-                "value": 38
+                "left": 86,
+                "right": 509,
+                "type": "sub"
             }
         },
         "511": {
             "id": 511,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 60
             }
         },
         "512": {
             "id": 512,
             "op": {
-                "left": 94,
-                "right": 511,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "513": {
             "id": 513,
             "op": {
-                "type": "literal",
-                "value": 45
+                "left": 86,
+                "right": 512,
+                "type": "sub"
             }
         },
         "514": {
             "id": 514,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 68
             }
         },
         "515": {
             "id": 515,
             "op": {
-                "left": 94,
-                "right": 514,
-                "type": "sub"
+                "type": "literal",
+                "value": 75
             }
         },
         "516": {
             "id": 516,
             "op": {
                 "type": "literal",
-                "value": 53
+                "value": 0
             }
         },
         "517": {
             "id": 517,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "518": {
             "id": 518,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 517,
                 "type": "sub"
             }
@@ -3649,8 +3649,9 @@
         "519": {
             "id": 519,
             "op": {
-                "type": "literal",
-                "value": 60
+                "left": 516,
+                "right": 518,
+                "type": "max"
             }
         },
         "52": {
@@ -3666,74 +3667,84 @@
             "id": 520,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 8
             }
         },
         "521": {
             "id": 521,
             "op": {
-                "left": 94,
+                "left": 519,
                 "right": 520,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "522": {
             "id": 522,
             "op": {
-                "type": "literal",
-                "value": 68
+                "left": 515,
+                "right": 521,
+                "type": "add"
             }
         },
         "523": {
             "id": 523,
             "op": {
-                "type": "literal",
-                "value": 75
+                "cond": 513,
+                "otherwise": 514,
+                "then": 522,
+                "type": "if_positive"
             }
         },
         "524": {
             "id": 524,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 510,
+                "otherwise": 511,
+                "then": 523,
+                "type": "if_positive"
             }
         },
         "525": {
             "id": 525,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 507,
+                "otherwise": 508,
+                "then": 524,
+                "type": "if_positive"
             }
         },
         "526": {
             "id": 526,
             "op": {
-                "left": 94,
-                "right": 525,
-                "type": "sub"
+                "cond": 504,
+                "otherwise": 505,
+                "then": 525,
+                "type": "if_positive"
             }
         },
         "527": {
             "id": 527,
             "op": {
-                "left": 524,
-                "right": 526,
-                "type": "max"
+                "cond": 501,
+                "otherwise": 502,
+                "then": 526,
+                "type": "if_positive"
             }
         },
         "528": {
             "id": 528,
             "op": {
-                "type": "literal",
-                "value": 8
+                "cond": 498,
+                "otherwise": 499,
+                "then": 527,
+                "type": "if_positive"
             }
         },
         "529": {
             "id": 529,
             "op": {
-                "left": 527,
-                "right": 528,
-                "type": "mul"
+                "type": "literal",
+                "value": 22000
             }
         },
         "53": {
@@ -3746,76 +3757,66 @@
         "530": {
             "id": 530,
             "op": {
-                "left": 523,
+                "left": 74,
                 "right": 529,
-                "type": "add"
+                "type": "sub"
             }
         },
         "531": {
             "id": 531,
             "op": {
-                "cond": 521,
-                "otherwise": 522,
-                "then": 530,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "532": {
             "id": 532,
             "op": {
-                "cond": 518,
-                "otherwise": 519,
-                "then": 531,
-                "type": "if_positive"
+                "left": 86,
+                "right": 531,
+                "type": "sub"
             }
         },
         "533": {
             "id": 533,
             "op": {
-                "cond": 515,
-                "otherwise": 516,
-                "then": 532,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 30
             }
         },
         "534": {
             "id": 534,
             "op": {
-                "cond": 512,
-                "otherwise": 513,
-                "then": 533,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "535": {
             "id": 535,
             "op": {
-                "cond": 509,
-                "otherwise": 510,
-                "then": 534,
-                "type": "if_positive"
+                "left": 86,
+                "right": 534,
+                "type": "sub"
             }
         },
         "536": {
             "id": 536,
             "op": {
-                "cond": 506,
-                "otherwise": 507,
-                "then": 535,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 35
             }
         },
         "537": {
             "id": 537,
             "op": {
                 "type": "literal",
-                "value": 22000
+                "value": 3
             }
         },
         "538": {
             "id": 538,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 537,
                 "type": "sub"
             }
@@ -3824,7 +3825,7 @@
             "id": 539,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 40
             }
         },
         "54": {
@@ -3837,75 +3838,74 @@
         "540": {
             "id": 540,
             "op": {
-                "left": 94,
-                "right": 539,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "541": {
             "id": 541,
             "op": {
-                "type": "literal",
-                "value": 30
+                "left": 86,
+                "right": 540,
+                "type": "sub"
             }
         },
         "542": {
             "id": 542,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 45
             }
         },
         "543": {
             "id": 543,
             "op": {
-                "left": 94,
-                "right": 542,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "544": {
             "id": 544,
             "op": {
-                "type": "literal",
-                "value": 35
+                "left": 86,
+                "right": 543,
+                "type": "sub"
             }
         },
         "545": {
             "id": 545,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 50
             }
         },
         "546": {
             "id": 546,
             "op": {
-                "left": 94,
-                "right": 545,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "547": {
             "id": 547,
             "op": {
-                "type": "literal",
-                "value": 40
+                "left": 86,
+                "right": 546,
+                "type": "sub"
             }
         },
         "548": {
             "id": 548,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 55
             }
         },
         "549": {
             "id": 549,
             "op": {
-                "left": 94,
-                "right": 548,
-                "type": "sub"
+                "type": "literal",
+                "value": 60
             }
         },
         "55": {
@@ -3919,20 +3919,20 @@
             "id": 550,
             "op": {
                 "type": "literal",
-                "value": 45
+                "value": 0
             }
         },
         "551": {
             "id": 551,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "552": {
             "id": 552,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 551,
                 "type": "sub"
             }
@@ -3940,51 +3940,59 @@
         "553": {
             "id": 553,
             "op": {
-                "type": "literal",
-                "value": 50
+                "left": 550,
+                "right": 552,
+                "type": "max"
             }
         },
         "554": {
             "id": 554,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 5
             }
         },
         "555": {
             "id": 555,
             "op": {
-                "left": 94,
+                "left": 553,
                 "right": 554,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "556": {
             "id": 556,
             "op": {
-                "type": "literal",
-                "value": 55
+                "left": 549,
+                "right": 555,
+                "type": "add"
             }
         },
         "557": {
             "id": 557,
             "op": {
-                "type": "literal",
-                "value": 60
+                "cond": 547,
+                "otherwise": 548,
+                "then": 556,
+                "type": "if_positive"
             }
         },
         "558": {
             "id": 558,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 544,
+                "otherwise": 545,
+                "then": 557,
+                "type": "if_positive"
             }
         },
         "559": {
             "id": 559,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 541,
+                "otherwise": 542,
+                "then": 558,
+                "type": "if_positive"
             }
         },
         "56": {
@@ -3997,85 +4005,80 @@
         "560": {
             "id": 560,
             "op": {
-                "left": 94,
-                "right": 559,
-                "type": "sub"
+                "cond": 538,
+                "otherwise": 539,
+                "then": 559,
+                "type": "if_positive"
             }
         },
         "561": {
             "id": 561,
             "op": {
-                "left": 558,
-                "right": 560,
-                "type": "max"
+                "cond": 535,
+                "otherwise": 536,
+                "then": 560,
+                "type": "if_positive"
             }
         },
         "562": {
             "id": 562,
             "op": {
-                "type": "literal",
-                "value": 5
+                "cond": 532,
+                "otherwise": 533,
+                "then": 561,
+                "type": "if_positive"
             }
         },
         "563": {
             "id": 563,
             "op": {
-                "left": 561,
-                "right": 562,
-                "type": "mul"
+                "type": "literal",
+                "value": 25000
             }
         },
         "564": {
             "id": 564,
             "op": {
-                "left": 557,
+                "left": 74,
                 "right": 563,
-                "type": "add"
+                "type": "sub"
             }
         },
         "565": {
             "id": 565,
             "op": {
-                "cond": 555,
-                "otherwise": 556,
-                "then": 564,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "566": {
             "id": 566,
             "op": {
-                "cond": 552,
-                "otherwise": 553,
-                "then": 565,
-                "type": "if_positive"
+                "left": 86,
+                "right": 565,
+                "type": "sub"
             }
         },
         "567": {
             "id": 567,
             "op": {
-                "cond": 549,
-                "otherwise": 550,
-                "then": 566,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 25
             }
         },
         "568": {
             "id": 568,
             "op": {
-                "cond": 546,
-                "otherwise": 547,
-                "then": 567,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "569": {
             "id": 569,
             "op": {
-                "cond": 543,
-                "otherwise": 544,
-                "then": 568,
-                "type": "if_positive"
+                "left": 86,
+                "right": 568,
+                "type": "sub"
             }
         },
         "57": {
@@ -4088,23 +4091,21 @@
         "570": {
             "id": 570,
             "op": {
-                "cond": 540,
-                "otherwise": 541,
-                "then": 569,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 30
             }
         },
         "571": {
             "id": 571,
             "op": {
                 "type": "literal",
-                "value": 25000
+                "value": 3
             }
         },
         "572": {
             "id": 572,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 571,
                 "type": "sub"
             }
@@ -4113,51 +4114,51 @@
             "id": 573,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 35
             }
         },
         "574": {
             "id": 574,
             "op": {
-                "left": 94,
-                "right": 573,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "575": {
             "id": 575,
             "op": {
-                "type": "literal",
-                "value": 25
+                "left": 86,
+                "right": 574,
+                "type": "sub"
             }
         },
         "576": {
             "id": 576,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 40
             }
         },
         "577": {
             "id": 577,
             "op": {
-                "left": 94,
-                "right": 576,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "578": {
             "id": 578,
             "op": {
-                "type": "literal",
-                "value": 30
+                "left": 86,
+                "right": 577,
+                "type": "sub"
             }
         },
         "579": {
             "id": 579,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 45
             }
         },
         "58": {
@@ -4177,51 +4178,50 @@
         "580": {
             "id": 580,
             "op": {
-                "left": 94,
-                "right": 579,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "581": {
             "id": 581,
             "op": {
-                "type": "literal",
-                "value": 35
+                "left": 86,
+                "right": 580,
+                "type": "sub"
             }
         },
         "582": {
             "id": 582,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 50
             }
         },
         "583": {
             "id": 583,
             "op": {
-                "left": 94,
-                "right": 582,
-                "type": "sub"
+                "type": "literal",
+                "value": 55
             }
         },
         "584": {
             "id": 584,
             "op": {
                 "type": "literal",
-                "value": 40
+                "value": 0
             }
         },
         "585": {
             "id": 585,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "586": {
             "id": 586,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 585,
                 "type": "sub"
             }
@@ -4229,23 +4229,24 @@
         "587": {
             "id": 587,
             "op": {
-                "type": "literal",
-                "value": 45
+                "left": 584,
+                "right": 586,
+                "type": "max"
             }
         },
         "588": {
             "id": 588,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 5
             }
         },
         "589": {
             "id": 589,
             "op": {
-                "left": 94,
+                "left": 587,
                 "right": 588,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "59": {
@@ -4260,77 +4261,85 @@
         "590": {
             "id": 590,
             "op": {
-                "type": "literal",
-                "value": 50
+                "left": 583,
+                "right": 589,
+                "type": "add"
             }
         },
         "591": {
             "id": 591,
             "op": {
-                "type": "literal",
-                "value": 55
+                "cond": 581,
+                "otherwise": 582,
+                "then": 590,
+                "type": "if_positive"
             }
         },
         "592": {
             "id": 592,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 578,
+                "otherwise": 579,
+                "then": 591,
+                "type": "if_positive"
             }
         },
         "593": {
             "id": 593,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 575,
+                "otherwise": 576,
+                "then": 592,
+                "type": "if_positive"
             }
         },
         "594": {
             "id": 594,
             "op": {
-                "left": 94,
-                "right": 593,
-                "type": "sub"
+                "cond": 572,
+                "otherwise": 573,
+                "then": 593,
+                "type": "if_positive"
             }
         },
         "595": {
             "id": 595,
             "op": {
-                "left": 592,
-                "right": 594,
-                "type": "max"
+                "cond": 569,
+                "otherwise": 570,
+                "then": 594,
+                "type": "if_positive"
             }
         },
         "596": {
             "id": 596,
             "op": {
-                "type": "literal",
-                "value": 5
+                "cond": 566,
+                "otherwise": 567,
+                "then": 595,
+                "type": "if_positive"
             }
         },
         "597": {
             "id": 597,
             "op": {
-                "left": 595,
-                "right": 596,
-                "type": "mul"
+                "type": "literal",
+                "value": 28000
             }
         },
         "598": {
             "id": 598,
             "op": {
-                "left": 591,
+                "left": 74,
                 "right": 597,
-                "type": "add"
+                "type": "sub"
             }
         },
         "599": {
             "id": 599,
             "op": {
-                "cond": 589,
-                "otherwise": 590,
-                "then": 598,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "6": {
@@ -4350,59 +4359,51 @@
         "600": {
             "id": 600,
             "op": {
-                "cond": 586,
-                "otherwise": 587,
-                "then": 599,
-                "type": "if_positive"
+                "left": 86,
+                "right": 599,
+                "type": "sub"
             }
         },
         "601": {
             "id": 601,
             "op": {
-                "cond": 583,
-                "otherwise": 584,
-                "then": 600,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 20
             }
         },
         "602": {
             "id": 602,
             "op": {
-                "cond": 580,
-                "otherwise": 581,
-                "then": 601,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "603": {
             "id": 603,
             "op": {
-                "cond": 577,
-                "otherwise": 578,
-                "then": 602,
-                "type": "if_positive"
+                "left": 86,
+                "right": 602,
+                "type": "sub"
             }
         },
         "604": {
             "id": 604,
             "op": {
-                "cond": 574,
-                "otherwise": 575,
-                "then": 603,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 23
             }
         },
         "605": {
             "id": 605,
             "op": {
                 "type": "literal",
-                "value": 28000
+                "value": 3
             }
         },
         "606": {
             "id": 606,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 605,
                 "type": "sub"
             }
@@ -4411,22 +4412,22 @@
             "id": 607,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 25
             }
         },
         "608": {
             "id": 608,
             "op": {
-                "left": 94,
-                "right": 607,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "609": {
             "id": 609,
             "op": {
-                "type": "literal",
-                "value": 20
+                "left": 86,
+                "right": 608,
+                "type": "sub"
             }
         },
         "61": {
@@ -4441,73 +4442,72 @@
             "id": 610,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 28
             }
         },
         "611": {
             "id": 611,
             "op": {
-                "left": 94,
-                "right": 610,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "612": {
             "id": 612,
             "op": {
-                "type": "literal",
-                "value": 23
+                "left": 86,
+                "right": 611,
+                "type": "sub"
             }
         },
         "613": {
             "id": 613,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 30
             }
         },
         "614": {
             "id": 614,
             "op": {
-                "left": 94,
-                "right": 613,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "615": {
             "id": 615,
             "op": {
-                "type": "literal",
-                "value": 25
+                "left": 86,
+                "right": 614,
+                "type": "sub"
             }
         },
         "616": {
             "id": 616,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 33
             }
         },
         "617": {
             "id": 617,
             "op": {
-                "left": 94,
-                "right": 616,
-                "type": "sub"
+                "type": "literal",
+                "value": 35
             }
         },
         "618": {
             "id": 618,
             "op": {
                 "type": "literal",
-                "value": 28
+                "value": 0
             }
         },
         "619": {
             "id": 619,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "62": {
@@ -4522,7 +4522,7 @@
         "620": {
             "id": 620,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 619,
                 "type": "sub"
             }
@@ -4530,67 +4530,77 @@
         "621": {
             "id": 621,
             "op": {
-                "type": "literal",
-                "value": 30
+                "left": 618,
+                "right": 620,
+                "type": "max"
             }
         },
         "622": {
             "id": 622,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 3
             }
         },
         "623": {
             "id": 623,
             "op": {
-                "left": 94,
+                "left": 621,
                 "right": 622,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "624": {
             "id": 624,
             "op": {
-                "type": "literal",
-                "value": 33
+                "left": 617,
+                "right": 623,
+                "type": "add"
             }
         },
         "625": {
             "id": 625,
             "op": {
-                "type": "literal",
-                "value": 35
+                "cond": 615,
+                "otherwise": 616,
+                "then": 624,
+                "type": "if_positive"
             }
         },
         "626": {
             "id": 626,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 612,
+                "otherwise": 613,
+                "then": 625,
+                "type": "if_positive"
             }
         },
         "627": {
             "id": 627,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 609,
+                "otherwise": 610,
+                "then": 626,
+                "type": "if_positive"
             }
         },
         "628": {
             "id": 628,
             "op": {
-                "left": 94,
-                "right": 627,
-                "type": "sub"
+                "cond": 606,
+                "otherwise": 607,
+                "then": 627,
+                "type": "if_positive"
             }
         },
         "629": {
             "id": 629,
             "op": {
-                "left": 626,
-                "right": 628,
-                "type": "max"
+                "cond": 603,
+                "otherwise": 604,
+                "then": 628,
+                "type": "if_positive"
             }
         },
         "63": {
@@ -4603,85 +4613,76 @@
         "630": {
             "id": 630,
             "op": {
-                "type": "literal",
-                "value": 3
+                "cond": 600,
+                "otherwise": 601,
+                "then": 629,
+                "type": "if_positive"
             }
         },
         "631": {
             "id": 631,
             "op": {
-                "left": 629,
-                "right": 630,
-                "type": "mul"
+                "type": "literal",
+                "value": 32000
             }
         },
         "632": {
             "id": 632,
             "op": {
-                "left": 625,
+                "left": 74,
                 "right": 631,
-                "type": "add"
+                "type": "sub"
             }
         },
         "633": {
             "id": 633,
             "op": {
-                "cond": 623,
-                "otherwise": 624,
-                "then": 632,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 1
             }
         },
         "634": {
             "id": 634,
             "op": {
-                "cond": 620,
-                "otherwise": 621,
-                "then": 633,
-                "type": "if_positive"
+                "left": 86,
+                "right": 633,
+                "type": "sub"
             }
         },
         "635": {
             "id": 635,
             "op": {
-                "cond": 617,
-                "otherwise": 618,
-                "then": 634,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 10
             }
         },
         "636": {
             "id": 636,
             "op": {
-                "cond": 614,
-                "otherwise": 615,
-                "then": 635,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 2
             }
         },
         "637": {
             "id": 637,
             "op": {
-                "cond": 611,
-                "otherwise": 612,
-                "then": 636,
-                "type": "if_positive"
+                "left": 86,
+                "right": 636,
+                "type": "sub"
             }
         },
         "638": {
             "id": 638,
             "op": {
-                "cond": 608,
-                "otherwise": 609,
-                "then": 637,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 13
             }
         },
         "639": {
             "id": 639,
             "op": {
                 "type": "literal",
-                "value": 32000
+                "value": 3
             }
         },
         "64": {
@@ -4695,7 +4696,7 @@
         "640": {
             "id": 640,
             "op": {
-                "left": 82,
+                "left": 86,
                 "right": 639,
                 "type": "sub"
             }
@@ -4704,66 +4705,66 @@
             "id": 641,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 15
             }
         },
         "642": {
             "id": 642,
             "op": {
-                "left": 94,
-                "right": 641,
-                "type": "sub"
+                "type": "literal",
+                "value": 4
             }
         },
         "643": {
             "id": 643,
             "op": {
-                "type": "literal",
-                "value": 10
+                "left": 86,
+                "right": 642,
+                "type": "sub"
             }
         },
         "644": {
             "id": 644,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 18
             }
         },
         "645": {
             "id": 645,
             "op": {
-                "left": 94,
-                "right": 644,
-                "type": "sub"
+                "type": "literal",
+                "value": 5
             }
         },
         "646": {
             "id": 646,
             "op": {
-                "type": "literal",
-                "value": 13
+                "left": 86,
+                "right": 645,
+                "type": "sub"
             }
         },
         "647": {
             "id": 647,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": 20
             }
         },
         "648": {
             "id": 648,
             "op": {
-                "left": 94,
-                "right": 647,
-                "type": "sub"
+                "type": "literal",
+                "value": 6
             }
         },
         "649": {
             "id": 649,
             "op": {
-                "type": "literal",
-                "value": 15
+                "left": 86,
+                "right": 648,
+                "type": "sub"
             }
         },
         "65": {
@@ -4779,35 +4780,34 @@
             "id": 650,
             "op": {
                 "type": "literal",
-                "value": 4
+                "value": 23
             }
         },
         "651": {
             "id": 651,
             "op": {
-                "left": 94,
-                "right": 650,
-                "type": "sub"
+                "type": "literal",
+                "value": 25
             }
         },
         "652": {
             "id": 652,
             "op": {
                 "type": "literal",
-                "value": 18
+                "value": 0
             }
         },
         "653": {
             "id": 653,
             "op": {
                 "type": "literal",
-                "value": 5
+                "value": 7
             }
         },
         "654": {
             "id": 654,
             "op": {
-                "left": 94,
+                "left": 86,
                 "right": 653,
                 "type": "sub"
             }
@@ -4815,37 +4815,41 @@
         "655": {
             "id": 655,
             "op": {
-                "type": "literal",
-                "value": 20
+                "left": 652,
+                "right": 654,
+                "type": "max"
             }
         },
         "656": {
             "id": 656,
             "op": {
                 "type": "literal",
-                "value": 6
+                "value": 3
             }
         },
         "657": {
             "id": 657,
             "op": {
-                "left": 94,
+                "left": 655,
                 "right": 656,
-                "type": "sub"
+                "type": "mul"
             }
         },
         "658": {
             "id": 658,
             "op": {
-                "type": "literal",
-                "value": 23
+                "left": 651,
+                "right": 657,
+                "type": "add"
             }
         },
         "659": {
             "id": 659,
             "op": {
-                "type": "literal",
-                "value": 25
+                "cond": 649,
+                "otherwise": 650,
+                "then": 658,
+                "type": "if_positive"
             }
         },
         "66": {
@@ -4860,61 +4864,69 @@
         "660": {
             "id": 660,
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 646,
+                "otherwise": 647,
+                "then": 659,
+                "type": "if_positive"
             }
         },
         "661": {
             "id": 661,
             "op": {
-                "type": "literal",
-                "value": 7
+                "cond": 643,
+                "otherwise": 644,
+                "then": 660,
+                "type": "if_positive"
             }
         },
         "662": {
             "id": 662,
             "op": {
-                "left": 94,
-                "right": 661,
-                "type": "sub"
+                "cond": 640,
+                "otherwise": 641,
+                "then": 661,
+                "type": "if_positive"
             }
         },
         "663": {
             "id": 663,
             "op": {
-                "left": 660,
-                "right": 662,
-                "type": "max"
+                "cond": 637,
+                "otherwise": 638,
+                "then": 662,
+                "type": "if_positive"
             }
         },
         "664": {
             "id": 664,
             "op": {
-                "type": "literal",
-                "value": 3
+                "cond": 634,
+                "otherwise": 635,
+                "then": 663,
+                "type": "if_positive"
             }
         },
         "665": {
             "id": 665,
             "op": {
-                "left": 663,
-                "right": 664,
-                "type": "mul"
+                "type": "literal",
+                "value": 0
             }
         },
         "666": {
             "id": 666,
             "op": {
-                "left": 659,
-                "right": 665,
-                "type": "add"
+                "cond": 632,
+                "otherwise": 664,
+                "then": 665,
+                "type": "if_positive"
             }
         },
         "667": {
             "id": 667,
             "op": {
-                "cond": 657,
-                "otherwise": 658,
+                "cond": 598,
+                "otherwise": 630,
                 "then": 666,
                 "type": "if_positive"
             }
@@ -4922,8 +4934,8 @@
         "668": {
             "id": 668,
             "op": {
-                "cond": 654,
-                "otherwise": 655,
+                "cond": 564,
+                "otherwise": 596,
                 "then": 667,
                 "type": "if_positive"
             }
@@ -4931,8 +4943,8 @@
         "669": {
             "id": 669,
             "op": {
-                "cond": 651,
-                "otherwise": 652,
+                "cond": 530,
+                "otherwise": 562,
                 "then": 668,
                 "type": "if_positive"
             }
@@ -4940,15 +4952,18 @@
         "67": {
             "id": 67,
             "op": {
-                "type": "literal",
-                "value": 0.5
+                "arg": 39,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
             }
         },
         "670": {
             "id": 670,
             "op": {
-                "cond": 648,
-                "otherwise": 649,
+                "cond": 496,
+                "otherwise": 528,
                 "then": 669,
                 "type": "if_positive"
             }
@@ -4956,8 +4971,8 @@
         "671": {
             "id": 671,
             "op": {
-                "cond": 645,
-                "otherwise": 646,
+                "cond": 462,
+                "otherwise": 494,
                 "then": 670,
                 "type": "if_positive"
             }
@@ -4965,189 +4980,114 @@
         "672": {
             "id": 672,
             "op": {
-                "cond": 642,
-                "otherwise": 643,
+                "cond": 428,
+                "otherwise": 460,
                 "then": 671,
                 "type": "if_positive"
             }
         },
         "673": {
             "id": 673,
+            "name": "HouseholdSeparateCredit",
             "op": {
-                "type": "literal",
-                "value": 0
+                "cond": 394,
+                "otherwise": 426,
+                "then": 672,
+                "type": "if_positive"
             }
         },
         "674": {
             "id": 674,
             "op": {
-                "cond": 640,
-                "otherwise": 672,
-                "then": 673,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 0
             }
         },
         "675": {
             "id": 675,
             "op": {
-                "cond": 606,
-                "otherwise": 638,
-                "then": 674,
-                "type": "if_positive"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 392,
+                    "married_joint": 392,
+                    "married_separate": 673,
+                    "qualifying_widow": 392,
+                    "single": 111
+                }
             }
         },
         "676": {
             "id": 676,
+            "name": "L40_household_credit",
             "op": {
-                "cond": 572,
-                "otherwise": 604,
-                "then": 675,
+                "cond": 14,
+                "otherwise": 675,
+                "then": 674,
                 "type": "if_positive"
             }
         },
         "677": {
             "id": 677,
             "op": {
-                "cond": 538,
-                "otherwise": 570,
-                "then": 676,
-                "type": "if_positive"
-            }
-        },
-        "678": {
-            "id": 678,
-            "op": {
-                "cond": 504,
-                "otherwise": 536,
-                "then": 677,
-                "type": "if_positive"
-            }
-        },
-        "679": {
-            "id": 679,
-            "op": {
-                "cond": 470,
-                "otherwise": 502,
-                "then": 678,
-                "type": "if_positive"
-            }
-        },
-        "68": {
-            "id": 68,
-            "op": {
-                "left": 39,
-                "right": 67,
-                "type": "add"
-            }
-        },
-        "680": {
-            "id": 680,
-            "op": {
-                "cond": 436,
-                "otherwise": 468,
-                "then": 679,
-                "type": "if_positive"
-            }
-        },
-        "681": {
-            "id": 681,
-            "name": "HouseholdSeparateCredit",
-            "op": {
-                "cond": 402,
-                "otherwise": 434,
-                "then": 680,
-                "type": "if_positive"
-            }
-        },
-        "682": {
-            "id": 682,
-            "op": {
-                "type": "literal",
-                "value": 0
-            }
-        },
-        "683": {
-            "id": 683,
-            "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 400,
-                    "married_joint": 400,
-                    "married_separate": 681,
-                    "qualifying_widow": 400,
-                    "single": 119
-                }
-            }
-        },
-        "684": {
-            "id": 684,
-            "name": "L40_household_credit",
-            "op": {
-                "cond": 14,
-                "otherwise": 683,
-                "then": 682,
-                "type": "if_positive"
-            }
-        },
-        "685": {
-            "id": 685,
-            "op": {
                 "left": 17,
                 "right": 18,
                 "type": "add"
             }
         },
-        "686": {
-            "id": 686,
+        "678": {
+            "id": 678,
             "name": "L43_total_credits",
             "op": {
-                "left": 684,
-                "right": 685,
+                "left": 676,
+                "right": 677,
                 "type": "add"
             }
         },
-        "687": {
-            "id": 687,
+        "679": {
+            "id": 679,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "688": {
-            "id": 688,
+        "68": {
+            "id": 68,
+            "op": {
+                "arg": 15,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
+            }
+        },
+        "680": {
+            "id": 680,
             "op": {
                 "left": 66,
-                "right": 686,
+                "right": 678,
                 "type": "sub"
             }
         },
-        "689": {
-            "id": 689,
+        "681": {
+            "id": 681,
             "name": "L44_tax_after_credits",
             "op": {
-                "left": 687,
-                "right": 688,
+                "left": 679,
+                "right": 680,
                 "type": "max"
             }
         },
-        "69": {
-            "id": 69,
-            "op": {
-                "arg": 68,
-                "type": "floor"
-            }
-        },
-        "690": {
-            "id": 690,
+        "682": {
+            "id": 682,
             "name": "L46_ny_total_state_tax",
             "op": {
-                "left": 689,
+                "left": 681,
                 "right": 19,
                 "type": "add"
             }
         },
-        "691": {
-            "id": 691,
+        "683": {
+            "id": 683,
             "name": "L47a_nyc_tax",
             "op": {
                 "income": 20,
@@ -5155,43 +5095,117 @@
                 "type": "bracket_tax"
             }
         },
-        "692": {
-            "id": 692,
+        "684": {
+            "id": 684,
             "op": {
                 "type": "literal",
                 "value": 0
             }
         },
-        "693": {
-            "id": 693,
+        "685": {
+            "id": 685,
             "op": {
-                "left": 691,
+                "left": 683,
                 "right": 21,
                 "type": "sub"
             }
         },
-        "694": {
-            "id": 694,
+        "686": {
+            "id": 686,
             "name": "L49_nyc_tax_after_credit",
             "op": {
-                "left": 692,
-                "right": 693,
+                "left": 684,
+                "right": 685,
                 "type": "max"
             }
         },
-        "695": {
-            "id": 695,
+        "687": {
+            "id": 687,
             "op": {
                 "left": 22,
                 "right": 23,
                 "type": "add"
             }
         },
-        "696": {
-            "id": 696,
+        "688": {
+            "id": 688,
             "name": "L52_nyc_subtotal",
             "op": {
-                "left": 694,
+                "left": 686,
+                "right": 687,
+                "type": "add"
+            }
+        },
+        "689": {
+            "id": 689,
+            "op": {
+                "type": "literal",
+                "value": 0
+            }
+        },
+        "69": {
+            "id": 69,
+            "name": "HouseholdOwnAgi",
+            "op": {
+                "left": 67,
+                "right": 68,
+                "type": "sub"
+            }
+        },
+        "690": {
+            "id": 690,
+            "op": {
+                "left": 688,
+                "right": 24,
+                "type": "sub"
+            }
+        },
+        "691": {
+            "id": 691,
+            "name": "L54_nyc_tax_after_all_credits",
+            "op": {
+                "left": 689,
+                "right": 690,
+                "type": "max"
+            }
+        },
+        "692": {
+            "id": 692,
+            "op": {
+                "left": 25,
+                "right": 26,
+                "type": "add"
+            }
+        },
+        "693": {
+            "id": 693,
+            "op": {
+                "left": 691,
+                "right": 692,
+                "type": "add"
+            }
+        },
+        "694": {
+            "id": 694,
+            "name": "L61_total_all_taxes",
+            "op": {
+                "left": 682,
+                "right": 693,
+                "type": "add"
+            }
+        },
+        "695": {
+            "id": 695,
+            "op": {
+                "left": 32,
+                "right": 33,
+                "type": "add"
+            }
+        },
+        "696": {
+            "id": 696,
+            "op": {
+                "left": 31,
                 "right": 695,
                 "type": "add"
             }
@@ -5199,25 +5213,25 @@
         "697": {
             "id": 697,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 30,
+                "right": 696,
+                "type": "add"
             }
         },
         "698": {
             "id": 698,
             "op": {
-                "left": 696,
-                "right": 24,
-                "type": "sub"
+                "left": 29,
+                "right": 697,
+                "type": "add"
             }
         },
         "699": {
             "id": 699,
-            "name": "L54_nyc_tax_after_all_credits",
             "op": {
-                "left": 697,
+                "left": 28,
                 "right": 698,
-                "type": "max"
+                "type": "add"
             }
         },
         "7": {
@@ -5230,31 +5244,35 @@
         "70": {
             "id": 70,
             "op": {
-                "type": "literal",
-                "value": 0.5
+                "arg": 12,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
             }
         },
         "700": {
             "id": 700,
+            "name": "L70_total_refundable_credits",
             "op": {
-                "left": 25,
-                "right": 26,
+                "left": 27,
+                "right": 699,
                 "type": "add"
             }
         },
         "701": {
             "id": 701,
             "op": {
-                "left": 699,
-                "right": 700,
+                "left": 35,
+                "right": 36,
                 "type": "add"
             }
         },
         "702": {
             "id": 702,
-            "name": "L61_total_all_taxes",
+            "name": "L74_total_withholding",
             "op": {
-                "left": 690,
+                "left": 34,
                 "right": 701,
                 "type": "add"
             }
@@ -5262,242 +5280,241 @@
         "703": {
             "id": 703,
             "op": {
-                "left": 32,
-                "right": 33,
+                "left": 37,
+                "right": 38,
                 "type": "add"
             }
         },
         "704": {
             "id": 704,
+            "name": "L77_total_payments",
             "op": {
-                "left": 31,
+                "left": 702,
                 "right": 703,
                 "type": "add"
             }
         },
         "705": {
             "id": 705,
+            "name": "L78_total_payments_and_credits",
             "op": {
-                "left": 30,
-                "right": 704,
+                "left": 704,
+                "right": 700,
                 "type": "add"
             }
         },
         "706": {
             "id": 706,
             "op": {
-                "left": 29,
-                "right": 705,
-                "type": "add"
+                "left": 705,
+                "right": 694,
+                "type": "sub"
             }
         },
         "707": {
             "id": 707,
             "op": {
-                "left": 28,
-                "right": 706,
-                "type": "add"
+                "left": 705,
+                "right": 694,
+                "type": "sub"
             }
         },
         "708": {
             "id": 708,
-            "name": "L70_total_refundable_credits",
             "op": {
-                "left": 27,
-                "right": 707,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "709": {
             "id": 709,
+            "name": "L80_overpayment",
             "op": {
-                "left": 35,
-                "right": 36,
-                "type": "add"
+                "cond": 706,
+                "otherwise": 708,
+                "then": 707,
+                "type": "if_positive"
             }
         },
         "71": {
             "id": 71,
             "op": {
-                "left": 15,
+                "left": 69,
                 "right": 70,
                 "type": "add"
             }
         },
         "710": {
             "id": 710,
-            "name": "L74_total_withholding",
             "op": {
-                "left": 34,
-                "right": 709,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "711": {
             "id": 711,
             "op": {
-                "left": 37,
-                "right": 38,
-                "type": "add"
+                "left": 694,
+                "right": 705,
+                "type": "sub"
             }
         },
         "712": {
             "id": 712,
-            "name": "L77_total_payments",
+            "name": "L81_amount_owed",
             "op": {
                 "left": 710,
                 "right": 711,
-                "type": "add"
+                "type": "max"
             }
         },
         "713": {
             "id": 713,
-            "name": "L78_total_payments_and_credits",
             "op": {
-                "left": 712,
-                "right": 708,
-                "type": "add"
+                "type": "literal",
+                "value": 1
             }
         },
         "714": {
             "id": 714,
             "op": {
-                "left": 713,
-                "right": 702,
-                "type": "sub"
+                "type": "literal",
+                "value": 8500
             }
         },
         "715": {
             "id": 715,
             "op": {
-                "left": 713,
-                "right": 702,
-                "type": "sub"
+                "type": "literal",
+                "value": 17150
             }
         },
         "716": {
             "id": 716,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 8500
             }
         },
         "717": {
             "id": 717,
-            "name": "L80_overpayment",
             "op": {
-                "cond": 714,
-                "otherwise": 716,
-                "then": 715,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 12800
             }
         },
         "718": {
             "id": 718,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 17150
             }
         },
         "719": {
             "id": 719,
             "op": {
-                "left": 702,
-                "right": 713,
-                "type": "sub"
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 717,
+                    "married_joint": 715,
+                    "married_separate": 716,
+                    "qualifying_widow": 718,
+                    "single": 714
+                }
             }
         },
         "72": {
             "id": 72,
             "op": {
-                "arg": 71,
-                "type": "floor"
+                "arg": 16,
+                "mode": "round",
+                "output_offset": 0,
+                "step": 1,
+                "type": "tax_table_quantize"
             }
         },
         "720": {
             "id": 720,
-            "name": "L81_amount_owed",
             "op": {
-                "left": 718,
+                "left": 65,
                 "right": 719,
-                "type": "max"
+                "type": "sub"
             }
         },
         "721": {
             "id": 721,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 11700
             }
         },
         "722": {
             "id": 722,
             "op": {
                 "type": "literal",
-                "value": 8500
+                "value": 23600
             }
         },
         "723": {
             "id": 723,
             "op": {
                 "type": "literal",
-                "value": 17150
+                "value": 11700
             }
         },
         "724": {
             "id": 724,
             "op": {
                 "type": "literal",
-                "value": 8500
+                "value": 17650
             }
         },
         "725": {
             "id": 725,
             "op": {
                 "type": "literal",
-                "value": 12800
+                "value": 23600
             }
         },
         "726": {
             "id": 726,
             "op": {
-                "type": "literal",
-                "value": 17150
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 724,
+                    "married_joint": 722,
+                    "married_separate": 723,
+                    "qualifying_widow": 725,
+                    "single": 721
+                }
             }
         },
         "727": {
             "id": 727,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 725,
-                    "married_joint": 723,
-                    "married_separate": 724,
-                    "qualifying_widow": 726,
-                    "single": 722
-                }
+                "left": 65,
+                "right": 726,
+                "type": "sub"
             }
         },
         "728": {
             "id": 728,
             "op": {
-                "left": 65,
-                "right": 727,
-                "type": "sub"
+                "type": "literal",
+                "value": 13900
             }
         },
         "729": {
             "id": 729,
             "op": {
                 "type": "literal",
-                "value": 11700
+                "value": 27900
             }
         },
         "73": {
             "id": 73,
-            "name": "HouseholdOwnAgi",
             "op": {
-                "left": 69,
+                "left": 71,
                 "right": 72,
                 "type": "sub"
             }
@@ -5506,442 +5523,449 @@
             "id": 730,
             "op": {
                 "type": "literal",
-                "value": 23600
+                "value": 13900
             }
         },
         "731": {
             "id": 731,
             "op": {
                 "type": "literal",
-                "value": 11700
+                "value": 20900
             }
         },
         "732": {
             "id": 732,
             "op": {
                 "type": "literal",
-                "value": 17650
+                "value": 27900
             }
         },
         "733": {
             "id": 733,
             "op": {
-                "type": "literal",
-                "value": 23600
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 731,
+                    "married_joint": 729,
+                    "married_separate": 730,
+                    "qualifying_widow": 732,
+                    "single": 728
+                }
             }
         },
         "734": {
             "id": 734,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 732,
-                    "married_joint": 730,
-                    "married_separate": 731,
-                    "qualifying_widow": 733,
-                    "single": 729
-                }
+                "left": 65,
+                "right": 733,
+                "type": "sub"
             }
         },
         "735": {
             "id": 735,
             "op": {
-                "left": 65,
-                "right": 734,
-                "type": "sub"
+                "type": "literal",
+                "value": 80650
             }
         },
         "736": {
             "id": 736,
             "op": {
                 "type": "literal",
-                "value": 13900
+                "value": 161550
             }
         },
         "737": {
             "id": 737,
             "op": {
                 "type": "literal",
-                "value": 27900
+                "value": 80650
             }
         },
         "738": {
             "id": 738,
             "op": {
                 "type": "literal",
-                "value": 13900
+                "value": 107650
             }
         },
         "739": {
             "id": 739,
             "op": {
                 "type": "literal",
-                "value": 20900
+                "value": 161550
             }
         },
         "74": {
             "id": 74,
+            "name": "HouseholdAgi",
             "op": {
-                "type": "literal",
-                "value": 0.5
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 69,
+                    "married_joint": 69,
+                    "married_separate": 73,
+                    "qualifying_widow": 69,
+                    "single": 69
+                }
             }
         },
         "740": {
             "id": 740,
             "op": {
-                "type": "literal",
-                "value": 27900
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 738,
+                    "married_joint": 736,
+                    "married_separate": 737,
+                    "qualifying_widow": 739,
+                    "single": 735
+                }
             }
         },
         "741": {
             "id": 741,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 739,
-                    "married_joint": 737,
-                    "married_separate": 738,
-                    "qualifying_widow": 740,
-                    "single": 736
-                }
+                "left": 65,
+                "right": 740,
+                "type": "sub"
             }
         },
         "742": {
             "id": 742,
             "op": {
-                "left": 65,
-                "right": 741,
-                "type": "sub"
+                "type": "literal",
+                "value": 215400
             }
         },
         "743": {
             "id": 743,
             "op": {
                 "type": "literal",
-                "value": 80650
+                "value": 323200
             }
         },
         "744": {
             "id": 744,
             "op": {
                 "type": "literal",
-                "value": 161550
+                "value": 215400
             }
         },
         "745": {
             "id": 745,
             "op": {
                 "type": "literal",
-                "value": 80650
+                "value": 269300
             }
         },
         "746": {
             "id": 746,
             "op": {
                 "type": "literal",
-                "value": 107650
+                "value": 323200
             }
         },
         "747": {
             "id": 747,
             "op": {
-                "type": "literal",
-                "value": 161550
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 745,
+                    "married_joint": 743,
+                    "married_separate": 744,
+                    "qualifying_widow": 746,
+                    "single": 742
+                }
             }
         },
         "748": {
             "id": 748,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 746,
-                    "married_joint": 744,
-                    "married_separate": 745,
-                    "qualifying_widow": 747,
-                    "single": 743
-                }
+                "left": 65,
+                "right": 747,
+                "type": "sub"
             }
         },
         "749": {
             "id": 749,
             "op": {
-                "left": 65,
-                "right": 748,
-                "type": "sub"
+                "type": "literal",
+                "value": 1077550
             }
         },
         "75": {
             "id": 75,
             "op": {
-                "left": 12,
-                "right": 74,
-                "type": "add"
+                "type": "literal",
+                "value": 0
             }
         },
         "750": {
             "id": 750,
             "op": {
                 "type": "literal",
-                "value": 215400
+                "value": 2155350
             }
         },
         "751": {
             "id": 751,
             "op": {
                 "type": "literal",
-                "value": 323200
+                "value": 1077550
             }
         },
         "752": {
             "id": 752,
             "op": {
                 "type": "literal",
-                "value": 215400
+                "value": 1616450
             }
         },
         "753": {
             "id": 753,
             "op": {
                 "type": "literal",
-                "value": 269300
+                "value": 2155350
             }
         },
         "754": {
             "id": 754,
             "op": {
-                "type": "literal",
-                "value": 323200
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 752,
+                    "married_joint": 750,
+                    "married_separate": 751,
+                    "qualifying_widow": 753,
+                    "single": 749
+                }
             }
         },
         "755": {
             "id": 755,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 753,
-                    "married_joint": 751,
-                    "married_separate": 752,
-                    "qualifying_widow": 754,
-                    "single": 750
-                }
+                "left": 65,
+                "right": 754,
+                "type": "sub"
             }
         },
         "756": {
             "id": 756,
             "op": {
-                "left": 65,
-                "right": 755,
-                "type": "sub"
+                "type": "literal",
+                "value": 5000000
             }
         },
         "757": {
             "id": 757,
             "op": {
                 "type": "literal",
-                "value": 1077550
+                "value": 5000000
             }
         },
         "758": {
             "id": 758,
             "op": {
                 "type": "literal",
-                "value": 2155350
+                "value": 5000000
             }
         },
         "759": {
             "id": 759,
             "op": {
                 "type": "literal",
-                "value": 1077550
+                "value": 5000000
             }
         },
         "76": {
             "id": 76,
             "op": {
-                "arg": 75,
-                "type": "floor"
+                "left": 75,
+                "right": 11,
+                "type": "max"
             }
         },
         "760": {
             "id": 760,
             "op": {
                 "type": "literal",
-                "value": 1616450
+                "value": 5000000
             }
         },
         "761": {
             "id": 761,
             "op": {
-                "type": "literal",
-                "value": 2155350
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 759,
+                    "married_joint": 757,
+                    "married_separate": 758,
+                    "qualifying_widow": 760,
+                    "single": 756
+                }
             }
         },
         "762": {
             "id": 762,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 760,
-                    "married_joint": 758,
-                    "married_separate": 759,
-                    "qualifying_widow": 761,
-                    "single": 757
-                }
+                "left": 65,
+                "right": 761,
+                "type": "sub"
             }
         },
         "763": {
             "id": 763,
             "op": {
-                "left": 65,
-                "right": 762,
-                "type": "sub"
+                "type": "literal",
+                "value": 25000000
             }
         },
         "764": {
             "id": 764,
             "op": {
                 "type": "literal",
-                "value": 5000000
+                "value": 25000000
             }
         },
         "765": {
             "id": 765,
             "op": {
                 "type": "literal",
-                "value": 5000000
+                "value": 25000000
             }
         },
         "766": {
             "id": 766,
             "op": {
                 "type": "literal",
-                "value": 5000000
+                "value": 25000000
             }
         },
         "767": {
             "id": 767,
             "op": {
                 "type": "literal",
-                "value": 5000000
+                "value": 25000000
             }
         },
         "768": {
             "id": 768,
             "op": {
-                "type": "literal",
-                "value": 5000000
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 766,
+                    "married_joint": 764,
+                    "married_separate": 765,
+                    "qualifying_widow": 767,
+                    "single": 763
+                }
             }
         },
         "769": {
             "id": 769,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 767,
-                    "married_joint": 765,
-                    "married_separate": 766,
-                    "qualifying_widow": 768,
-                    "single": 764
-                }
+                "left": 65,
+                "right": 768,
+                "type": "sub"
             }
         },
         "77": {
             "id": 77,
             "op": {
-                "left": 73,
-                "right": 76,
-                "type": "add"
+                "type": "literal",
+                "value": 1
             }
         },
         "770": {
             "id": 770,
             "op": {
-                "left": 65,
-                "right": 769,
-                "type": "sub"
+                "type": "literal",
+                "value": 0.109
             }
         },
         "771": {
             "id": 771,
             "op": {
                 "type": "literal",
-                "value": 25000000
+                "value": 0.103
             }
         },
         "772": {
             "id": 772,
             "op": {
-                "type": "literal",
-                "value": 25000000
+                "cond": 769,
+                "otherwise": 771,
+                "then": 770,
+                "type": "if_positive"
             }
         },
         "773": {
             "id": 773,
             "op": {
                 "type": "literal",
-                "value": 25000000
+                "value": 9.65e-2
             }
         },
         "774": {
             "id": 774,
             "op": {
-                "type": "literal",
-                "value": 25000000
+                "cond": 762,
+                "otherwise": 773,
+                "then": 772,
+                "type": "if_positive"
             }
         },
         "775": {
             "id": 775,
             "op": {
                 "type": "literal",
-                "value": 25000000
+                "value": 6.85e-2
             }
         },
         "776": {
             "id": 776,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 774,
-                    "married_joint": 772,
-                    "married_separate": 773,
-                    "qualifying_widow": 775,
-                    "single": 771
-                }
+                "cond": 755,
+                "otherwise": 775,
+                "then": 774,
+                "type": "if_positive"
             }
         },
         "777": {
             "id": 777,
             "op": {
-                "left": 65,
-                "right": 776,
-                "type": "sub"
+                "type": "literal",
+                "value": 6.0e-2
             }
         },
         "778": {
             "id": 778,
             "op": {
-                "type": "literal",
-                "value": 0.109
+                "cond": 748,
+                "otherwise": 777,
+                "then": 776,
+                "type": "if_positive"
             }
         },
         "779": {
             "id": 779,
             "op": {
                 "type": "literal",
-                "value": 0.103
+                "value": 5.5e-2
             }
         },
         "78": {
             "id": 78,
             "op": {
                 "type": "literal",
-                "value": 0.5
+                "value": 2
             }
         },
         "780": {
             "id": 780,
             "op": {
-                "cond": 777,
+                "cond": 741,
                 "otherwise": 779,
                 "then": 778,
                 "type": "if_positive"
@@ -5951,13 +5975,13 @@
             "id": 781,
             "op": {
                 "type": "literal",
-                "value": 9.65e-2
+                "value": 5.25e-2
             }
         },
         "782": {
             "id": 782,
             "op": {
-                "cond": 770,
+                "cond": 734,
                 "otherwise": 781,
                 "then": 780,
                 "type": "if_positive"
@@ -5967,13 +5991,13 @@
             "id": 783,
             "op": {
                 "type": "literal",
-                "value": 6.85e-2
+                "value": 4.5e-2
             }
         },
         "784": {
             "id": 784,
             "op": {
-                "cond": 763,
+                "cond": 727,
                 "otherwise": 783,
                 "then": 782,
                 "type": "if_positive"
@@ -5983,13 +6007,13 @@
             "id": 785,
             "op": {
                 "type": "literal",
-                "value": 6.0e-2
+                "value": 4.0e-2
             }
         },
         "786": {
             "id": 786,
             "op": {
-                "cond": 756,
+                "cond": 720,
                 "otherwise": 785,
                 "then": 784,
                 "type": "if_positive"
@@ -5997,114 +6021,49 @@
         },
         "787": {
             "id": 787,
+            "name": "L38BracketRate_ny_bracket_rate",
             "op": {
-                "type": "literal",
-                "value": 5.5e-2
+                "left": 713,
+                "right": 786,
+                "type": "mul"
             }
         },
         "788": {
             "id": 788,
             "op": {
-                "cond": 749,
-                "otherwise": 787,
-                "then": 786,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 0
             }
         },
         "789": {
             "id": 789,
+            "name": "L58_nyc_total_taxes",
             "op": {
-                "type": "literal",
-                "value": 5.25e-2
+                "left": 691,
+                "right": 788,
+                "type": "add"
             }
         },
         "79": {
             "id": 79,
             "op": {
-                "left": 16,
-                "right": 78,
-                "type": "add"
+                "type": "literal",
+                "value": 2
             }
         },
         "790": {
             "id": 790,
             "op": {
-                "cond": 742,
-                "otherwise": 789,
-                "then": 788,
-                "type": "if_positive"
+                "type": "literal",
+                "value": 0
             }
         },
         "791": {
             "id": 791,
-            "op": {
-                "type": "literal",
-                "value": 4.5e-2
-            }
-        },
-        "792": {
-            "id": 792,
-            "op": {
-                "cond": 735,
-                "otherwise": 791,
-                "then": 790,
-                "type": "if_positive"
-            }
-        },
-        "793": {
-            "id": 793,
-            "op": {
-                "type": "literal",
-                "value": 4.0e-2
-            }
-        },
-        "794": {
-            "id": 794,
-            "op": {
-                "cond": 728,
-                "otherwise": 793,
-                "then": 792,
-                "type": "if_positive"
-            }
-        },
-        "795": {
-            "id": 795,
-            "name": "L38BracketRate_ny_bracket_rate",
-            "op": {
-                "left": 721,
-                "right": 794,
-                "type": "mul"
-            }
-        },
-        "796": {
-            "id": 796,
-            "op": {
-                "type": "literal",
-                "value": 0
-            }
-        },
-        "797": {
-            "id": 797,
-            "name": "L58_nyc_total_taxes",
-            "op": {
-                "left": 699,
-                "right": 796,
-                "type": "add"
-            }
-        },
-        "798": {
-            "id": 798,
-            "op": {
-                "type": "literal",
-                "value": 0
-            }
-        },
-        "799": {
-            "id": 799,
             "name": "L62_total_tax",
             "op": {
-                "left": 702,
-                "right": 798,
+                "left": 694,
+                "right": 790,
                 "type": "add"
             }
         },
@@ -6118,81 +6077,82 @@
         "80": {
             "id": 80,
             "op": {
-                "arg": 79,
-                "type": "floor"
+                "type": "literal",
+                "value": 0
             }
         },
         "81": {
             "id": 81,
             "op": {
-                "left": 77,
-                "right": 80,
-                "type": "sub"
+                "left": 80,
+                "right": 13,
+                "type": "max"
             }
         },
         "82": {
             "id": 82,
-            "name": "HouseholdAgi",
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 73,
-                    "married_joint": 73,
-                    "married_separate": 81,
-                    "qualifying_widow": 73,
-                    "single": 73
-                }
+                "left": 79,
+                "right": 81,
+                "type": "add"
             }
         },
         "83": {
             "id": 83,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": 1
             }
         },
         "84": {
             "id": 84,
             "op": {
-                "left": 83,
-                "right": 11,
-                "type": "max"
+                "type": "literal",
+                "value": 1
             }
         },
         "85": {
             "id": 85,
             "op": {
-                "type": "literal",
-                "value": 1
+                "type": "by_status",
+                "values": {
+                    "head_of_household": 83,
+                    "married_joint": 78,
+                    "married_separate": 82,
+                    "qualifying_widow": 84,
+                    "single": 77
+                }
             }
         },
         "86": {
             "id": 86,
+            "name": "HouseholdCount",
             "op": {
-                "type": "literal",
-                "value": 2
+                "left": 76,
+                "right": 85,
+                "type": "add"
             }
         },
         "87": {
             "id": 87,
             "op": {
                 "type": "literal",
-                "value": 2
+                "value": 5000
             }
         },
         "88": {
             "id": 88,
             "op": {
-                "type": "literal",
-                "value": 0
+                "left": 74,
+                "right": 87,
+                "type": "sub"
             }
         },
         "89": {
             "id": 89,
             "op": {
-                "left": 88,
-                "right": 13,
-                "type": "max"
+                "type": "literal",
+                "value": 75
             }
         },
         "9": {
@@ -6205,82 +6165,74 @@
         "90": {
             "id": 90,
             "op": {
-                "left": 87,
-                "right": 89,
-                "type": "add"
+                "type": "literal",
+                "value": 6000
             }
         },
         "91": {
             "id": 91,
             "op": {
-                "type": "literal",
-                "value": 1
+                "left": 74,
+                "right": 90,
+                "type": "sub"
             }
         },
         "92": {
             "id": 92,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": 60
             }
         },
         "93": {
             "id": 93,
             "op": {
-                "type": "by_status",
-                "values": {
-                    "head_of_household": 91,
-                    "married_joint": 86,
-                    "married_separate": 90,
-                    "qualifying_widow": 92,
-                    "single": 85
-                }
+                "type": "literal",
+                "value": 7000
             }
         },
         "94": {
             "id": 94,
-            "name": "HouseholdCount",
             "op": {
-                "left": 84,
+                "left": 74,
                 "right": 93,
-                "type": "add"
+                "type": "sub"
             }
         },
         "95": {
             "id": 95,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": 50
             }
         },
         "96": {
             "id": 96,
             "op": {
-                "left": 82,
-                "right": 95,
-                "type": "sub"
+                "type": "literal",
+                "value": 20000
             }
         },
         "97": {
             "id": 97,
             "op": {
-                "type": "literal",
-                "value": 75
+                "left": 74,
+                "right": 96,
+                "type": "sub"
             }
         },
         "98": {
             "id": 98,
             "op": {
                 "type": "literal",
-                "value": 6000
+                "value": 45
             }
         },
         "99": {
             "id": 99,
             "op": {
-                "left": 82,
-                "right": 98,
-                "type": "sub"
+                "type": "literal",
+                "value": 25000
             }
         }
     },
@@ -6288,18 +6240,18 @@
         39,
         52,
         65,
-        795,
+        787,
         66,
-        684,
-        690,
-        691,
-        797,
-        799,
-        708,
-        712,
-        713,
-        717,
-        720
+        676,
+        682,
+        683,
+        789,
+        791,
+        700,
+        704,
+        705,
+        709,
+        712
     ],
     "tables": {
         "ny_brackets_2024": {

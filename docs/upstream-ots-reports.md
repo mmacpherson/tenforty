@@ -7,7 +7,7 @@ and the text to send.
 
 **Status: drafted, not sent.** Sending is Mike's, in his own time.
 
-**Bundle for one email (2026-11-04):** reports 1, 2, 4–18. Report 3 is withdrawn
+**Bundle for one email (2026-11-04):** reports 1, 2, 4–18; report 22 (2026-11-07) is newer and not yet in that bundle. Report 3 is withdrawn
 (our own error), and report 9 is offered tentatively because it is not
 reproduced end to end. The "Pending adjudication" section at the end lists
 OTS-vs-Tax-Calculator disagreements that are **not** yet established as OTS
@@ -1015,6 +1015,42 @@ or copy into a fixed buffer, as the 2021 program does with `YourName`.
 lines. See `docs/ots-patches.md`. A source witness
 (`test_source_witness[OTS-P12]`) fails once a release carries the
 correction, which prompts retiring the patch.
+
+---
+
+## 22. NJ-1040 tax table: income on a row's lower edge is priced as the row below (finding NJ-OTS-TABLE-ROW-EDGE)
+
+**Releases:** OpenTaxSolver2023_21.06, OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06
+**Files:** `src/taxsolve_NJ_1040_2023.c:112`, `src/taxsolve_NJ_1040_2024.c:112`,
+`src/taxsolve_NJ_1040_2025.c:112` (`TaxRateFunction`)
+
+```c
+   k = (income - 0.000001) / x;
+   x = x * (double)k + dx;
+```
+
+As we read the NJ-1040 instructions, the tax table's rows are "At least" /
+"But less than" (2025 booklet, Tax Table, p.54 onward; the 2023 and 2024
+booklets read the same). Taxable income of exactly $69,000 therefore falls in
+the row "69,000 / 69,050", tax $2,321 for status 1 or 3. Subtracting the
+epsilon before dividing puts it in the row "68,950 / 69,000" instead, so the
+program prices that row's midpoint and reports $2,318. We checked this at
+four lower edges, $29,000, $53,000, $68,500 and $69,000 (status 1 or 3), in
+2023, 2024 and 2025, where OTS is $1 to $3 under the table. We have not
+checked every edge. From the code it looks as though other positive multiples
+of $50 under $100,000 would also be priced one row low, but the visible effect
+can vary: it is nil where the two adjacent rows round to the same tax, it does
+not arise at zero, and it can reach about $4 in the top single-filer table
+band.
+
+**Minimal reproducer:** 2025 Single, $70,000 of wages, no other entries. Line
+39/42 is $69,000. OTS reports line 43 = $2,318; the table gives $2,321. At
+$70,001 of wages it reports $2,321. 2023 and 2024 behave the same way.
+
+**Possible fix:** `k = income / x;` (the row containing `income` when rows are
+at-least/less-than). We may be missing why the epsilon is there, so we offer
+this tentatively. Not patched locally: it changes a computed figure. Recorded
+as a strict signature in `tests/ots_nj_gains_business_test.py`.
 
 ---
 

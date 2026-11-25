@@ -93,7 +93,7 @@ def build_twin(spec: dict) -> Twin:
 def resolved_twin(year: int) -> Twin:
     """Twin of the resolved per-year graph the Python graph backend loads."""
     path = graph_backend._forms_dir() / f"us_tax_graph_{year}.json"
-    return build_twin(json.loads(path.read_text()))
+    return build_twin(json.loads(path.read_text(encoding="utf-8")))
 
 
 @contextmanager

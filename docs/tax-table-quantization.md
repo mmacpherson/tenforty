@@ -32,7 +32,7 @@ on the other side of a bracket edge. At composed ties on table-dependent paths,
 directional tangent propagation uses first-order incoming directions to resolve
 branch/rate ties for an increasing requested input or input group. Conditional
 ties use that same planning direction when the two branch values agree. Thus
-`Max(c,0)`, `Clamp(c,0,limit)` and `IfPositive(c,c,0)` agree even when `c=0`
+`Max(c,0)` and `IfPositive(c,c,0)` agree even when `c=0`
 throughout a quantization band. A conditional with different branch values uses
 a separate exact-motion direction with quantizers frozen (zero slope): a flat
 condition must not invent a jump to a branch the legal evaluator never takes.

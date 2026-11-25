@@ -70,8 +70,6 @@ fn node_label(node: &crate::graph::Node) -> String {
             mode, step, output_offset
         ),
         Op::Neg { .. } => "neg".to_string(),
-        Op::Abs { .. } => "abs".to_string(),
-        Op::Clamp { min, max, .. } => format!("clamp[{},{}]", min, max),
         Op::BracketTax { table, .. } => format!("bracket_tax\\n({})", table),
         Op::PhaseOut { base, rate, .. } => format!("phase_out\\nbase={}, rate={}", base, rate),
         Op::ByStatus { .. } => "by_status".to_string(),
@@ -117,8 +115,6 @@ fn op_type_name(op: &Op) -> &'static str {
         Op::Floor { .. } => "floor",
         Op::TaxTableQuantize { .. } => "tax_table_quantize",
         Op::Neg { .. } => "neg",
-        Op::Abs { .. } => "abs",
-        Op::Clamp { .. } => "clamp",
         Op::BracketTax { .. } => "bracket_tax",
         Op::PhaseOut { .. } => "phase_out",
         Op::ByStatus { .. } => "by_status",
