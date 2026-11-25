@@ -12,10 +12,14 @@ import TenForty.Types
 
 -- | 2025 Oklahoma State income tax brackets
 -- Order: Single, MFJ, MFS, HoH, QW
--- Source: Oklahoma Tax Commission - 2025 Tax Rate Schedules
--- https://www.filelater.com/resources/oklahoma-state-tax-guide-2025-navigating-tax-returns-brackets-and-extensions/
---
--- Tax brackets and rates remain unchanged from 2024 to 2025.
+-- Source: Oklahoma Tax Commission, "2025 Form 511 Oklahoma Resident Individual
+-- Income Tax Forms Packet & Instructions"
+-- (https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/individuals/current/511-Pkt.pdf).
+-- The packet prints no rate schedule: the thresholds below are the ones whose
+-- cumulative tax reproduces every $50 row of its Tax Table (pp. 27-38, column
+-- "Single or married filing separate" and column "Married filing joint or head
+-- of household") and its p.38 $100,000-or-more worksheet anchors ($4,562
+-- Single/MFS, $4,373 MFJ/HoH/QW, each plus 0.0475 over $100,000).
 --
 -- Single/MFS:
 --  0-1,000: 0.25%
@@ -25,24 +29,22 @@ import TenForty.Types
 --  4,901-7,200: 3.75%
 --  7,201+: 4.75%
 --
--- MFJ/HoH:
+-- MFJ/HoH/QW:
 --  0-2,000: 0.25%
 --  2,001-5,000: 0.75%
 --  5,001-7,500: 1.75%
 --  7,501-9,800: 2.75%
---  9,801-12,200: 3.75%
---  12,201+: 4.75%
+--  9,801-14,400: 3.75%
+--  14,401+: 4.75%
 --
--- Oklahoma uses the same brackets for Single and MFS filers.
--- Head of Household follows the same brackets as MFJ.
--- QW (Qualifying Widow/er) follows MFJ brackets.
+-- Single and MFS share a column, as do MFJ and HoH; QW follows MFJ.
 okBrackets2025 :: NonEmpty Bracket
 okBrackets2025 =
   Bracket (byStatus 1000 2000 1000 2000 2000) 0.0025
     :| [ Bracket (byStatus 2500 5000 2500 5000 5000) 0.0075,
          Bracket (byStatus 3750 7500 3750 7500 7500) 0.0175,
          Bracket (byStatus 4900 9800 4900 9800 9800) 0.0275,
-         Bracket (byStatus 7200 12200 7200 12200 12200) 0.0375,
+         Bracket (byStatus 7200 14400 7200 14400 14400) 0.0375,
          TopBracket 0.0475
        ]
 
@@ -53,8 +55,8 @@ okBracketsTable2025 =
     Left err -> error $ "Invalid Oklahoma brackets: " ++ err
 
 -- | 2025 Oklahoma standard deduction by filing status
--- Source: Oklahoma Tax Commission - 2025 Form 511 Instructions
--- https://learn.valur.com/oklahoma-income-tax/
+-- Source: Oklahoma Tax Commission, 2025 Form 511 packet, p.10 (Line 10 instructions):
+-- Single/MFS $6,350, HoH $9,350, MFJ/QW $12,700
 --
 -- Standard deduction amounts remain unchanged from 2024 to 2025.
 --

@@ -4991,7 +4991,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Single/MFS: 0-1,000: 0.25%, 1,001-2,500: 0.75%, 2,501-3,750: 1.75%,
     #             3,751-4,900: 2.75%, 4,901-7,200: 3.75%, 7,201+: 4.75%
     # MFJ/HoH/QW: 0-2,000: 0.25%, 2,001-5,000: 0.75%, 5,001-7,500: 1.75%,
-    #             7,501-9,800: 2.75%, 9,801-12,200: 3.75%, 12,201+: 4.75%
+    #             7,501-9,800: 2.75%, 9,801-14,400: 3.75%, 14,401+: 4.75%
+    #             (the 2024 and 2025 Form 511 packet Tax Tables and p.38
+    #             worksheet; tenforty-b72.79)
     # Standard deduction: Single $6,350, MFJ $12,700, HoH $9,350
     # OK taxable income = OK AGI - standard deduction
     # Rates and deductions unchanged between 2024 and 2025
@@ -5024,10 +5026,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # OK AGI: $80,000
     # OK std ded: $12,700, OK taxable: $80,000 - $12,700 = $67,300
     # OK tax: $2,000 * 0.0025 + ($5,000 - $2,000) * 0.0075 + ($7,500 - $5,000) * 0.0175
-    #       + ($9,800 - $7,500) * 0.0275 + ($12,200 - $9,800) * 0.0375
-    #       + ($67,300 - $12,200) * 0.0475
-    #       = $5.00 + $22.50 + $43.75 + $63.25 + $90.00 + $2,617.25
-    #       = $2,841.75
+    #       + ($9,800 - $7,500) * 0.0275 + ($14,400 - $9,800) * 0.0375
+    #       + ($67,300 - $14,400) * 0.0475
+    #       = $5.00 + $22.50 + $43.75 + $63.25 + $172.50 + $2,512.75
+    #       = $2,819.75
     TaxScenario(
         source="OK 2024 Tax Brackets (computed)",
         description="OK MFJ, $80,000 W2, no dependents",
@@ -5036,7 +5038,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=80000.0,
         expected_federal_tax=5635.0,  # Tax Table row 50,800-50,850
-        expected_state_tax=2841.75,
+        expected_state_tax=2819.75,
         expected_federal_agi=80000.0,
         backend="graph",
     ),
@@ -5047,10 +5049,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # OK std ded: $9,350, OK taxable: $60,000 - $9,350 = $50,650
     # OK tax (HoH follows MFJ brackets):
     # $2,000 * 0.0025 + ($5,000 - $2,000) * 0.0075 + ($7,500 - $5,000) * 0.0175
-    #       + ($9,800 - $7,500) * 0.0275 + ($12,200 - $9,800) * 0.0375
-    #       + ($50,650 - $12,200) * 0.0475
-    #       = $5.00 + $22.50 + $43.75 + $63.25 + $90.00 + $1,826.38
-    #       = $2,050.88
+    #       + ($9,800 - $7,500) * 0.0275 + ($14,400 - $9,800) * 0.0375
+    #       + ($50,650 - $14,400) * 0.0475
+    #       = $5.00 + $22.50 + $43.75 + $63.25 + $172.50 + $1,721.875
+    #       = $2,028.875
     TaxScenario(
         source="OK 2024 Tax Brackets (computed)",
         description="OK HoH, $60,000 W2, no dependents",
@@ -5059,7 +5061,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=60000.0,
         expected_federal_tax=4244.0,  # Tax Table row 38,100-38,150
-        expected_state_tax=2050.88,
+        expected_state_tax=2028.875,
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -5091,10 +5093,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # OK AGI: $100,000
     # OK std ded: $12,700, OK taxable: $100,000 - $12,700 = $87,300
     # OK tax: $2,000 * 0.0025 + ($5,000 - $2,000) * 0.0075 + ($7,500 - $5,000) * 0.0175
-    #       + ($9,800 - $7,500) * 0.0275 + ($12,200 - $9,800) * 0.0375
-    #       + ($87,300 - $12,200) * 0.0475
-    #       = $5.00 + $22.50 + $43.75 + $63.25 + $90.00 + $3,567.25
-    #       = $3,791.75
+    #       + ($9,800 - $7,500) * 0.0275 + ($14,400 - $9,800) * 0.0375
+    #       + ($87,300 - $14,400) * 0.0475
+    #       = $5.00 + $22.50 + $43.75 + $63.25 + $172.50 + $3,462.75
+    #       = $3,769.75
     TaxScenario(
         source="OK 2025 Tax Brackets (computed)",
         description="OK MFJ, $100,000 W2, no dependents (2025, same rates as 2024)",
@@ -5103,7 +5105,7 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=7746.0,  # Tax Table row 68,500-68,550
-        expected_state_tax=3791.75,
+        expected_state_tax=3769.75,
         expected_federal_agi=100000.0,
         backend="graph",
     ),
