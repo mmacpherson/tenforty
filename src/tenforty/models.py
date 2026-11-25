@@ -641,7 +641,17 @@ class TaxReturnInput(BaseModel):
     qbi_w2_wages: float = Field(default=0.0, ge=0.0)
     qbi_ubia: float = Field(default=0.0, ge=0.0)
     qbi_is_sstb: bool = False
-    rental_income: float = 0.0
+    rental_income: float = Field(
+        default=0.0,
+        description=(
+            "Net rental, royalty, patent and copyright income or loss. OTS PA "
+            "enters it on PA-40 line 6: a line 6 loss is reported and offsets "
+            "no other income, and on a joint return the household total is "
+            "taken, so one spouse's loss is netted against the other's income, "
+            "which PA does not allow (reported as "
+            "pa.pa_40.joint_class_household_totals)."
+        ),
+    )
     schedule_1_income: float = 0.0
     itemized_deductions: float = Field(
         default=0.0,
@@ -1377,6 +1387,7 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "L4",
             "short_term_capital_gains": _PA_PROPERTY_GAINS,
             "long_term_capital_gains": _PA_PROPERTY_GAINS,
+            "rental_income": "L6",
         },
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -1559,6 +1570,7 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "L4",
             "short_term_capital_gains": _PA_PROPERTY_GAINS,
             "long_term_capital_gains": _PA_PROPERTY_GAINS,
+            "rental_income": "L6",
         },
         "output_map": {
             "L9": "adjusted_gross_income",
@@ -1730,6 +1742,7 @@ _NATURAL_FORM_CONFIG = [
             "self_employment_income": "L4",
             "short_term_capital_gains": _PA_PROPERTY_GAINS,
             "long_term_capital_gains": _PA_PROPERTY_GAINS,
+            "rental_income": "L6",
         },
         "output_map": {
             "L9": "adjusted_gross_income",

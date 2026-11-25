@@ -69,6 +69,20 @@
     at $29,000, $53,000, $68,500 and $69,000 in 2023-2025, where the result is
     $1-$3 under the table. Upstream report 22, recorded as a strict signature;
     not patched.
+- **OTS PA now taxes rental income** (tenforty-r91.21). `rental_income` goes
+  to PA-40 line 6 (net income or loss from rents, royalties, patents or
+  copyrights), 2023-2025. PA adds only a positive line 6 to total taxable
+  income: a loss is reported and offsets no other class, and OTS does the same.
+  Before, OTS PA computed the return without it, and 2025.14 refused a nonzero
+  value on OTS PA; that refusal is removed. The expected figures in
+  `tests/ots_pa_rental_test.py` are a blind derivation from the PA-40 and
+  PA-40 E instructions for 2024 and 2025
+  (`docs/validation/derivations/pa-rental-2024-2025.md`); 2023 maps the same
+  line but has no independent figures.
+  - Limits: the amount is the household total, so on a joint return where one
+    spouse has a rental loss and the other income, OTS nets them, which PA does
+    not allow. Such a return reports `pa.pa_40.joint_class_household_totals`
+    in `result.assumptions`, as for business income and gains.
 - **OTS PA now taxes business income and capital gains** (tenforty-s48h.46).
   `self_employment_income` goes to PA-40 line 4 (net income from the operation
   of a business), and `short_term_capital_gains` with
@@ -256,8 +270,8 @@
   - NJ_1040: self-employment income and capital gains (tenforty-r91.15),
     `num_dependents`, filer/spouse 65 or older and rental income
     (tenforty-r91.20);
-  - PA_40: self-employment income and capital gains (tenforty-s48h.46), and
-    rental income (tenforty-r91.21);
+  - PA_40: self-employment income and capital gains (tenforty-s48h.46); rental
+    income (tenforty-r91.21) was refused too until its map landed;
   - VA_760: filer/spouse 65 or older and itemizing (tenforty-r91.16), and
     `num_dependents` (tenforty-r91.22);
   - NC_D400: itemizing (tenforty-r91.17);
