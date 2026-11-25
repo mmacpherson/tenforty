@@ -27,6 +27,12 @@ import pytest
 import tenforty
 from tenforty import UnsupportedInputError, ots_state_gaps
 
+from .parity.state_parity_policy import (
+    MA_OTS_TABLE_INCOME_PLUS_25,
+    ma_ots_table_departure,
+    ma_published_table_tax,
+)
+
 pytestmark = [
     pytest.mark.requires_ots,
     pytest.mark.filterwarnings("ignore::DeprecationWarning"),
@@ -91,19 +97,7 @@ def test_interest_above_the_no_tax_threshold_is_taxed(year):
     assert result.state_total_tax == pytest.approx(604, abs=FLOAT_CENT)
 
 
-TABLE_ROW_LOWER_BOUND = 12_050
 PUBLISHED_ROW_TAX = 604
-MA_TAX_RATE = 0.05
-# MA-OTS-TABLE-INCOME-PLUS-25 (upstream report 23). OTS prices a table row below
-# $24,000 as 5% x (income + 25) where the published row prices 5% x (row lower
-# bound + 25), the $50 row's midpoint. Before rounding OTS exceeds the row price
-# by 5% x (income - lower bound), in [0, 2.50) over a $50 row. Both figures are
-# then rounded to whole dollars (half up), a shift of at most half a dollar each
-# way, and the published 604 is itself 603.75 rounded up by 0.25.
-ROW_PRICE = MA_TAX_RATE * (TABLE_ROW_LOWER_BOUND + 25)
-ROW_WIDTH = 50
-SIGNATURE_LOW = -0.5 - (PUBLISHED_ROW_TAX - ROW_PRICE)
-SIGNATURE_HIGH = MA_TAX_RATE * ROW_WIDTH + 0.5 - (PUBLISHED_ROW_TAX - ROW_PRICE)
 
 
 def _interest_return(year, interest):
@@ -127,7 +121,7 @@ def test_ots_table_departure_is_zero_at_the_row_midpoint_neighbour(year):
 
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_ots_table_prices_income_plus_25_within_a_row(year):
-    """Strict xfail for MA-OTS-TABLE-INCOME-PLUS-25, failing outside its signature.
+    """Strict xfail for MA-OTS-TABLE-INCOME-PLUS-25: exactly the mechanism's departure.
 
     Evidence: published table row (2024 p.36 / 2025 p.38, row 12,050-12,100 is
     604 for every income in it); scenario source-verified by Codex, 2026-11-25.
@@ -135,17 +129,21 @@ def test_ots_table_prices_income_plus_25_within_a_row(year):
     """
     result = _interest_return(year, 10_030)
     assert result.state_taxable_income == 12_094
+    assert ma_published_table_tax(12_094) == PUBLISHED_ROW_TAX
     delta = result.state_total_tax - PUBLISHED_ROW_TAX
     if abs(delta) <= FLOAT_CENT:
         pytest.fail(
-            "OTS prices the row correctly now; drop MA-OTS-TABLE-INCOME-PLUS-25"
+            f"OTS prices the row correctly now; drop {MA_OTS_TABLE_INCOME_PLUS_25}"
         )
-    if not SIGNATURE_LOW <= delta <= SIGNATURE_HIGH:
+    expected = ma_ots_table_departure(12_094)
+    if abs(delta - expected) > FLOAT_CENT:
         pytest.fail(
-            f"delta {delta:+.2f} outside MA-OTS-TABLE-INCOME-PLUS-25 "
-            f"[{SIGNATURE_LOW:+.2f}, {SIGNATURE_HIGH:+.2f}]"
+            f"delta {delta:+.2f} is not the {MA_OTS_TABLE_INCOME_PLUS_25} departure "
+            f"{expected:+d} (5% x (12,094 + 25) = 605.95 -> 606 against the row's 604)"
         )
-    pytest.xfail(f"MA-OTS-TABLE-INCOME-PLUS-25: OTS prices income + 25 ({delta:+.2f})")
+    pytest.xfail(
+        f"{MA_OTS_TABLE_INCOME_PLUS_25}: OTS prices income + 25 ({delta:+.2f})"
+    )
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -429,3 +427,13 @@ def test_taxable_income_never_exceeds_agi_with_interest_and_dividends(year):
         ordinary_dividends=4_765.0,
     )
     assert result.state_taxable_income <= result.state_adjusted_gross_income
+
+
+@pytest.mark.parametrize(
+    ("line_21", "row_tax", "departure"),
+    [(12_051, 604, 0), (12_064, 604, 0), (12_094, 604, 2), (12_100, 604, 2)],
+)
+def test_the_income_plus_25_mechanism(line_21, row_tax, departure):
+    """Row 12,050-12,100 is 604 throughout; OTS's income + 25 price drifts across it."""
+    assert ma_published_table_tax(line_21) == row_tax
+    assert ma_ots_table_departure(line_21) == departure
