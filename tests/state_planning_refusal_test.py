@@ -64,6 +64,11 @@ def _assert_round_trip(output: str, wages: float | None, target: float, **kw) ->
     )
 
 
+def _scope_opt_in(state: str | None, year: int) -> dict[str, bool]:
+    """Return the acknowledgement MS 2025 needs while out of scope (s48h.77)."""
+    return {"allow_unvalidated": True} if (state, year) == ("MS", 2025) else {}
+
+
 def _finite(value) -> bool:
     if isinstance(value, dict):
         return bool(value) and all(math.isfinite(v) for v in value.values())
@@ -79,8 +84,14 @@ def test_the_state_planning_switch_is_open():
 @pytest.mark.parametrize("state", ["IL", "MS", "OR"])
 @pytest.mark.parametrize("output", ["total_tax", "state_total_tax"])
 def test_in_scope_states_compute_state_dependent_derivatives(function, state, output):
-    """IL, MS and OR at $85k answer state and total-tax derivatives."""
-    assert _finite(function(**WITNESS, state=state, output=output))
+    """IL, MS and OR at $85k answer state and total-tax derivatives.
+
+    MS 2025 is out of scope for its tie rounding (tenforty-s48h.77), so its
+    planning calls carry the opt-in.
+    """
+    assert _finite(
+        function(**WITNESS, state=state, output=output, **_scope_opt_in(state, 2025))
+    )
 
 
 @pytest.mark.parametrize("function", DERIVATIVES)
@@ -145,7 +156,7 @@ def test_state_dependent_solves_round_trip(year, state, filing_status, output):
         "state": state,
         "filing_status": filing_status,
         "eitc_eligible": False,
-    }
+    } | _scope_opt_in(state, year)
     target = _output_value(output, **kw, w2_income=TARGET_WAGES)
 
     def solve() -> float | None:
@@ -228,6 +239,7 @@ def test_ms_married_joint_income_solves_are_still_refused(output):
                 spouse_adjusted_gross_income=20_000,
             ),
             output=output,
+            allow_unvalidated=True,
         )
 
 

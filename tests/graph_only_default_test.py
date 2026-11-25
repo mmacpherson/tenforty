@@ -113,7 +113,7 @@ def test_default_still_requires_mississippi_spouse_facts(
 
     monkeypatch.setattr(tenforty.core, "_evaluate_with_engine", evaluated)
     monkeypatch.setattr(tenforty.core, "_graph_batch_outputs", evaluated)
-    args = dict(year=2025, state="MS", filing_status="Married/Joint", on_error=on_error)
+    args = dict(year=2024, state="MS", filing_status="Married/Joint", on_error=on_error)
     with pytest.raises(UnsupportedInputError) as auto:
         _request(entry, dict(args, backend="auto"))
     with pytest.raises(UnsupportedInputError) as default:

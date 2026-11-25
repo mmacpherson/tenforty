@@ -174,7 +174,8 @@ def test_no_income_tax_states_levy_no_state_tax(state, year, w2_income, filing_s
 @pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
 def test_auto_routes_by_scope(year):
     """In scope goes to graph; out of scope to OTS where OTS has the state."""
-    assert routing.select_backend("auto", year, "MS") == "graph"
+    if year == 2024:
+        assert routing.select_backend("auto", year, "MS") == "graph"
     assert routing.select_backend("auto", year, "OR") == "graph"
     assert routing.select_backend("auto", year, "IL") == "graph"
     assert routing.select_backend("auto", year, "NC") == "ots"
@@ -192,6 +193,23 @@ def test_auto_refuses_out_of_scope_state_ots_lacks_with_its_reason(year):
     message = str(refusal.value)
     assert EVIDENCE in message
     assert "backend='graph'" in message
+
+
+def test_ms_2025_is_out_of_scope_for_its_tie_rounding_defect():
+    """MS 2025 leaves scope for tenforty-s48h.77; auto refuses it, naming the bead.
+
+    OTS has no Mississippi program, so auto cannot fall back. MS 2024 stays in
+    scope: its 4.7% product has no misrounded tie (every exact tie up to
+    $1,000,000 falls on a whole-dollar balance and rounds right).
+    """
+    assert graph_state_in_scope(OTSState.MS, 2024)
+    assert not graph_state_in_scope(OTSState.MS, 2025)
+    assert exclusion_reasons(OTSState.MS, 2025) == ("tenforty-s48h.77",)
+    with pytest.raises(UnsupportedReturnError, match=r"tenforty-s48h\.77"):
+        routing.select_backend("auto", 2025, "MS")
+    assert (
+        routing.select_backend("graph", 2025, "MS", allow_unvalidated=True) == "graph"
+    )
 
 
 def test_auto_refusal_cites_the_defect_bead():

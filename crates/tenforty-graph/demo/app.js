@@ -11,6 +11,8 @@ import {
   SENSITIVITY_INPUTS,
   analyzeScenario,
   createDefaultScenario,
+  isOfferedJurisdiction,
+  offeredJurisdictions,
   parseScenario,
   serializeScenario,
   sweepScenario,
@@ -207,11 +209,7 @@ function populateInterface() {
 
   const jurisdictionSelect = byId("jurisdiction");
   const jurisdictions = Object.entries(contract.jurisdictions)
-    .filter(([code]) =>
-      contract.supported_years.every((year) =>
-        isValidatedJurisdiction(contract, code, year),
-      ),
-    )
+    .filter(([code]) => isOfferedJurisdiction(contract, code))
     .sort(([leftCode, left], [rightCode, right]) => {
       if (leftCode === "US") return -1;
       if (rightCode === "US") return 1;
@@ -760,6 +758,43 @@ function scheduleCalculation() {
   });
 }
 
+// A share link may name a jurisdiction validated for its year but not offered
+// in the menu (validated in only some years); refuse it here rather than
+// render a select with no matching option.
+function parseCalculatorLink(location) {
+  const parsed = parseScenario(contract, location);
+  if (!isOfferedJurisdiction(contract, parsed.jurisdiction)) {
+    throw new UnvalidatedJurisdictionError(
+      `${parsed.jurisdiction} is not offered in this calculator`,
+      { jurisdiction: parsed.jurisdiction, year: parsed.year },
+    );
+  }
+  return parsed;
+}
+
+function coverageSentence() {
+  const states = offeredJurisdictions(contract)
+    .map((code) => contract.jurisdictions[code])
+    .filter((specification) => specification.kind === "state_income_tax")
+    .map((specification) => specification.name)
+    .sort();
+  const listed =
+    states.length > 1
+      ? `${states.slice(0, -1).join(", ")} and ${states.at(-1)}`
+      : states.join("");
+  return `The calculator so far covers federal returns, ${listed}, and the states without an income tax, for every year it offers.`;
+}
+
+function validatedYearsSentence(jurisdiction, name) {
+  const years = contract.supported_years.filter((year) =>
+    isValidatedJurisdiction(contract, jurisdiction, year),
+  );
+  if (years.length === 0) {
+    return `The tax model isn’t validated for ${name} yet.`;
+  }
+  return `The tax model is validated for ${name} only in ${years.join(", ")}, and the calculator offers a state only when every year is validated.`;
+}
+
 function showShareLinkNotice(error) {
   const unvalidated = error instanceof UnvalidatedJurisdictionError;
   const name = unvalidated
@@ -769,7 +804,7 @@ function showShareLinkNotice(error) {
     ? `${name} isn’t available in this calculator yet.`
     : "This share link couldn’t be opened.";
   byId("notice-message").textContent = unvalidated
-    ? `We opened a federal-only return instead. The calculator so far covers federal returns and Illinois, Mississippi, Oregon and the eight states without an income tax; the tax model isn’t validated for ${name} yet.`
+    ? `We opened a federal-only return instead. ${coverageSentence()} ${validatedYearsSentence(error.jurisdiction, name)}`
     : `We opened a federal-only return instead. (${error.message})`;
   byId("notice-banner").hidden = false;
 }
@@ -836,7 +871,7 @@ function bindEvents() {
   });
   window.addEventListener("popstate", () => {
     try {
-      scenario = parseScenario(contract, scenarioLocation());
+      scenario = parseCalculatorLink(scenarioLocation());
       renderScenario(scenario);
       scheduleCalculation();
     } catch (error) {
@@ -852,7 +887,7 @@ async function main() {
     contract = await loadBrowserContract();
     populateInterface();
     try {
-      scenario = parseScenario(contract, scenarioLocation());
+      scenario = parseCalculatorLink(scenarioLocation());
     } catch (error) {
       invalidShareLink = error;
       scenario = createDefaultScenario(contract);
