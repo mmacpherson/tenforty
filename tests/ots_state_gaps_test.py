@@ -193,7 +193,7 @@ def test_one_refused_row_refuses_the_whole_batch(monkeypatch, mode, backend):
             year=2025,
             state="MA",
             w2_income=[60_000.0, 70_000.0],
-            filer_65_or_older=[False, True],
+            long_term_capital_gains=[0.0, 10_000.0],
             mode=mode,
             backend=backend,
         )

@@ -1054,28 +1054,50 @@ as a strict signature in `tests/ots_nj_gains_business_test.py`.
 
 ---
 
-## 23. MA Form 1: the 4% surtax ignores Schedule B and D income, and excess exemptions are never applied (finding MA-OTS-SCHEDB-SURTAX-EXEMPTION)
+## 23. MA Form 1: the 4% surtax ignores Schedule B and D income, and the No Tax Status test omits gains (finding MA-OTS-SCHEDB-SURTAX-NOTAX)
+
+**Status: draft, not sent.** Mike sends.
 
 **Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06 (MA_1)
 **Files:** `src/taxsolve_MA_1_2024.c`, `src/taxsolve_MA_1_2025.c` (surtax test on
-`L[19]`; line 20 and 23a read as entered)
+`L[19]`; No Tax Status worksheet `ws[5] = L[20]`, no capital component)
 
-We read the 2024 and 2025 Form 1 and Schedule 4% Surtax as taking the surtax on
-Form 1 line 19 plus Schedule B line 37 plus Schedule D line 21 above $1,053,750
-(2024) or $1,083,150 (2025). The program tests `L[19]` alone, so Schedule B and
-D income never reaches it. Separately, the Form 1 line 19 instructions apply
-exemptions in excess of line 17 against interest, dividends and 8.5% income
-(Schedule B line 36); the program takes line 20 as entered and does not.
+Three separate findings. The first is ours, not OTS's.
 
-**Reproducers (our blind derivation, `docs/validation/derivations/
-ma-2024-2025.md`, cases N2 and O):** 2025 Married/Joint, wages $1,000,000 and a
-$200,000 short-term gain (line 23a): the derivation gives total tax $70,702, OTS
-reports $66,460 (no surtax). 2025 Single, wages $4,000 and $9,000 interest
-(line 20): the derivation gives $414, OTS about $451.
+**(a) Not an OTS defect: our missing Schedule B calculation (case O).** The
+record's case O is Single, wages $4,000 and $9,000 of gross interest. The Form 1
+line 19 instructions apply exemptions in excess of line 17 against interest, so
+Schedule B line 36 is $706 and the Schedule B total carried to Form 1 line 20 is
+$8,294. OTS line 20 takes that completed Schedule B amount, and we fed it the
+gross $9,000. Entering $9,000 in the 2025 raw form gives tax $451. Entering
+$8,294 gives $416. That $451 is our error and is not reported upstream. tenforty
+refuses the domain (Single, Head of Household or joint, exemptions exceeding
+other income) until the mapping layer computes Schedule B.
 
-We may be misreading how the form is meant to be fed, so we offer this
-tentatively. Not patched locally. tenforty refuses these domains on OTS and
-records both cases as strict xfails in `tests/ma_form1_ots_income_test.py`.
+**(b) Residual native table discrepancy, offered tentatively.** With the
+completed amount entered ($8,294), OTS returns $416 where the published tax
+table row (2025 instructions, 8,250 to 8,300) gives $414 (5% of the 8,275
+midpoint, 413.75). We have not established whether OTS's table computation or our
+reading of the row is at fault.
+
+**(c) Native surtax and No Tax Status defects, independently demonstrable.**
+Reproducible from the raw form without our mapping:
+
+- The program tests the surtax on `L[19]` alone. The 2024 and 2025 Form 1 and
+  Schedule 4% Surtax take Form 1 line 19 plus Schedule B line 37 plus Schedule D
+  line 21 above $1,053,750 (2024) or $1,083,150 (2025). 2025 Married/Joint,
+  wages $1,000,000 and a $200,000 short-term gain (line 23a), record case N2: the
+  derivation gives total tax $70,702, OTS reports $66,460 (no surtax).
+- The No Tax Status worksheet takes line 20 but hardcodes its capital component
+  to zero, although the DOR AGI worksheet counts Schedule B and D gains. Single,
+  wages $7,000 with $10,000 of long-term gain (Schedule D tax $500 on line 24):
+  the official AGI is $17,000, above the $8,000 No Tax Status threshold, yet OTS
+  computes AGI $7,000 and sets line 28 to $0.
+
+We may be misreading how the form is meant to be fed, so we offer (b) and (c)
+tentatively. Not patched locally. tenforty refuses capital gains on MA 2024 and
+2025 and the Schedule B domains above, and records cases F, G, N2 and O as strict
+xfails in `tests/ma_form1_ots_income_test.py`.
 
 ---
 

@@ -178,10 +178,10 @@ def test_ots_entry_point_refuses_michigan(name):
 @pytest.mark.requires_ots
 @pytest.mark.parametrize("name", sorted(OTS_ENTRY_POINTS))
 def test_ots_entry_point_refuses_an_undelivered_state_input(name):
-    """No public OTS path drops the MA age 65 exemption silently."""
+    """No public OTS path drops MA long-term gains silently."""
     with pytest.raises(UnsupportedInputError, match=r"tenforty-r91\.14"):
         OTS_ENTRY_POINTS[name](
-            year=2025, state="MA", w2_income=60_000.0, filer_65_or_older=True
+            year=2025, state="MA", w2_income=60_000.0, long_term_capital_gains=1.0
         )
 
 

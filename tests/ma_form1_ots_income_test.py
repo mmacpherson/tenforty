@@ -1,24 +1,25 @@
-"""OTS MA_1 carries interest, dividends, gains, self-employment and rental income.
+"""OTS MA_1 carries interest, dividends, self-employment and rental income.
 
 The MA_1 input map passed only wages, the line 11a deduction, status and
 dependents, so every other income input was dropped (tenforty-r91.14). OTS MA_1
 has no Schedule B or D: line 20 takes the Schedule B interest and dividend
-total, line 23a the 8.5% income (OTS applies the rate), line 24 the Schedule D
-*tax* (5% of the long-term gain, whole dollars), line 6a Schedule C income and
-line 7 rental income.
+total, line 6a Schedule C income and line 7 rental income. Capital gains stay
+refused: OTS has no Schedule D, and its No Tax Status worksheet takes line 20 but
+hardcodes the gain component to zero, so a low-wage return with large gains
+would get zero tax (Codex review of f74533ae, finding 1).
 
 Expected values are the blind derivation archived in
 docs/validation/derivations/ma-2024-2025.md (evidence kind: independent
 derivation from Massachusetts DOR Form 1, its instructions, Schedules B and D,
-and M.G.L. c.62, retrieved 2026-11-03), cases F, G, H, L and M, identical in
-2024 and 2025. Case L counts self-employment tax toward the $2,000 line 11
-deduction per the DOR line 11 instruction (derivation ambiguity 1).
+and M.G.L. c.62, retrieved 2026-11-03), cases F, G, H, L, M, N2 and O, identical
+in 2024 and 2025 except the surtax. Case L counts self-employment tax toward the
+$2,000 line 11 deduction per the DOR line 11 instruction (derivation ambiguity
+1). Cases F, G and N2 use gains and O uses excess exemptions: all are refused,
+and their record values are parked as strict xfails on the unrefused path.
 
-N2 (surtax on Schedule B income) and O (excess exemptions applied to interest)
-are derived cases OTS MA_1 does not compute; they are refused, and recorded as
-strict xfails with the refusal lifted. Losses are refused because OTS has no
-Schedule B or D netting. Age 65 is refused: OTS prices it at $700 while the
-derivation quotes $1,700 for line 2, and no derived case uses it.
+Age 65 stays refused: the public age input is not yet verified. Both years' line
+2c instructions give $700 per eligible person (see the erratum in the
+derivation), which is what OTS applies.
 """
 
 import pytest
@@ -31,13 +32,13 @@ pytestmark = [
     pytest.mark.filterwarnings("ignore::DeprecationWarning"),
 ]
 
-WHOLE_DOLLAR = 0.50
-LINE_11_TAX_ROUNDING = 0.05 * WHOLE_DOLLAR + WHOLE_DOLLAR
+# Every archived line 11 is a whole-dollar $2,000 cap, so taxable income carries
+# no rounding. OTS reports line 28 as the tax-table dollar figure or 5% of whole
+# dollars; half a cent only absorbs float representation of 5% of a dollar total.
+FLOAT_CENT = 0.005
 
 # (case, inputs, taxable income (line 21), total tax (line 28))
 DERIVED_CASES = [
-    ("F", {"w2_income": 100_000, "short_term_capital_gains": 10_000}, 93_600, 5_530),
-    ("G", {"w2_income": 100_000, "long_term_capital_gains": 10_000}, 93_600, 5_180),
     (
         "H",
         {"w2_income": 80_000, "taxable_interest": 3_000, "ordinary_dividends": 2_000},
@@ -58,10 +59,53 @@ def test_ots_ma_income_returns_match_the_derivation(
     result = tenforty.evaluate_return(
         backend="ots", year=year, state="MA", filing_status="Single", **inputs
     )
-    assert result.state_taxable_income == pytest.approx(
-        taxable_income, abs=WHOLE_DOLLAR + 0.5
+    assert result.state_taxable_income == taxable_income
+    assert result.state_total_tax == pytest.approx(total_tax, abs=FLOAT_CENT)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_interest_above_the_no_tax_threshold_is_taxed(year):
+    """Independent derivation (Form 1 line 20 and the AGI worksheet, 2026-11-25).
+
+    Single, wages 7,000 and interest 10,000. Line 11a = 7,000 x 7.65% = 535.50,
+    whole dollars 536. L17 = 6,464; L18 = 4,400; L19 = 2,064; no excess exemption
+    (L17 exceeds L18); L21 = 2,064 + 10,000 = 12,064. The tax table row 12,050 to
+    12,100 gives 5% of the 12,075 midpoint, 603.75, so 604 (the record's own
+    rounding in case O: 8,275 gives 413.75, published 414). MA AGI is the
+    worksheet's line 10 plus line 20 = 17,000, above the 8,000 No Tax Status and
+    14,000 Limited Income thresholds, so line 28 is 604 and not zero.
+    """
+    result = tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status="Single",
+        w2_income=7_000,
+        taxable_interest=10_000,
     )
-    assert result.state_total_tax == pytest.approx(total_tax, abs=LINE_11_TAX_ROUNDING)
+    assert result.state_taxable_income == 12_064
+    assert result.state_adjusted_gross_income == 17_000
+    assert result.state_total_tax == pytest.approx(604, abs=FLOAT_CENT)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_interest_within_the_no_tax_threshold_owes_nothing(year):
+    """Single, wages 5,000 and interest 3,000: AGI 8,000 is at most 8,000.
+
+    Independent derivation from the No Tax Status threshold ($8,000, Single).
+    Line 11a = 382.50, whole dollars 383, so line 17 = 4,617 exceeds the 4,400
+    exemption and no interest is transferred (the return is not refused).
+    """
+    result = tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status="Single",
+        w2_income=5_000,
+        taxable_interest=3_000,
+    )
+    assert result.state_adjusted_gross_income == 8_000
+    assert result.state_total_tax == 0
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
@@ -69,18 +113,20 @@ def test_ots_ma_income_returns_match_the_derivation(
     "name",
     ["short_term_capital_gains", "long_term_capital_gains"],
 )
-def test_capital_losses_are_refused(year, name):
-    """OTS MA_1 has no Schedule B or D netting, so a loss would be dropped."""
-    with pytest.raises(UnsupportedInputError, match=name):
+@pytest.mark.parametrize("gain", [10_000, -3_000])
+def test_capital_gains_are_refused(year, name, gain):
+    """OTS MA_1 has no Schedule D and its No Tax Status test omits gains."""
+    with pytest.raises(UnsupportedInputError, match="No Tax Status") as refusal:
         tenforty.evaluate_return(
-            backend="ots", year=year, state="MA", w2_income=80_000, **{name: -3_000}
+            backend="ots", year=year, state="MA", w2_income=7_000, **{name: gain}
         )
+    assert "tenforty-r91.14" in str(refusal.value)
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("name", ["filer_65_or_older", "spouse_65_or_older"])
 def test_age_exemption_stays_refused(year, name):
-    """No derived case uses line 2c, and OTS prices it differently."""
+    """The public age input is not yet verified, so line 2c stays refused."""
     with pytest.raises(UnsupportedInputError, match=name):
         tenforty.evaluate_return(
             backend="ots",
@@ -92,8 +138,13 @@ def test_age_exemption_stays_refused(year, name):
         )
 
 
-# Derived cases OTS MA_1 does not compute: (case, inputs, 2024 tax, 2025 tax)
-UNCOMPUTED_CASES = [
+class RecordValueMismatch(AssertionError):
+    """The parked record figure differs from what OTS returns."""
+
+
+GAIN_CASES = [
+    ("F", {"w2_income": 100_000, "short_term_capital_gains": 10_000}, 93_600, 5_530),
+    ("G", {"w2_income": 100_000, "long_term_capital_gains": 10_000}, 93_600, 5_180),
     (
         "N2",
         {
@@ -101,42 +152,200 @@ UNCOMPUTED_CASES = [
             "w2_income": 1_000_000,
             "short_term_capital_gains": 200_000,
         },
+        None,
         {2024: 71_878, 2025: 70_702},
     ),
+]
+EXEMPTION_CASES = [
     (
         "O",
         {"filing_status": "Single", "w2_income": 4_000, "taxable_interest": 9_000},
-        {2024: 414, 2025: 414},
+        None,
+        414,
     ),
 ]
 
 
+def _expected_tax(total_tax, year):
+    return total_tax[year] if isinstance(total_tax, dict) else total_tax
+
+
+def _raise_unless_record_value(year, inputs, taxable_income, total_tax):
+    result = tenforty.evaluate_return(backend="ots", year=year, state="MA", **inputs)
+    expected = _expected_tax(total_tax, year)
+    if abs(result.state_total_tax - expected) > FLOAT_CENT or (
+        taxable_income is not None
+        and abs(result.state_taxable_income - taxable_income) > FLOAT_CENT
+    ):
+        raise RecordValueMismatch(
+            f"OTS returned tax {result.state_total_tax} and taxable income "
+            f"{result.state_taxable_income}; the record gives {expected}"
+        )
+
+
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("case,inputs,expected", UNCOMPUTED_CASES)
-def test_uncomputed_derived_cases_are_refused(year, case, inputs, expected):
-    """N2 and O fall in a domain OTS MA_1 does not compute, so they refuse."""
-    with pytest.raises(UnsupportedInputError, match="Schedule B"):
+@pytest.mark.parametrize("case,inputs,taxable_income,total_tax", GAIN_CASES)
+def test_gain_cases_are_refused(year, case, inputs, taxable_income, total_tax):
+    """F, G and N2 use gains, which OTS MA_1 cannot price, so they refuse."""
+    with pytest.raises(UnsupportedInputError, match="Schedule D"):
         tenforty.evaluate_return(backend="ots", year=year, state="MA", **inputs)
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.parametrize("case,inputs,expected", UNCOMPUTED_CASES)
+@pytest.mark.parametrize("case,inputs,taxable_income,total_tax", EXEMPTION_CASES)
+def test_excess_exemption_case_is_refused(
+    year, case, inputs, taxable_income, total_tax
+):
+    """O: exemptions exceed ordinary income, so OTS would over-tax the interest."""
+    with pytest.raises(UnsupportedInputError, match="Schedule B line 36"):
+        tenforty.evaluate_return(backend="ots", year=year, state="MA", **inputs)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("case,inputs,taxable_income,total_tax", GAIN_CASES)
 @pytest.mark.xfail(
     strict=True,
+    raises=RecordValueMismatch,
     reason=(
-        "OTS MA_1 takes the 4% surtax on line 19 alone (omitting Schedule B and D "
-        "income) and applies no excess exemptions to interest or gains; "
-        "docs/upstream-ots-reports.md"
+        "OTS MA_1 has no Schedule D, drops the gain from the 5% base and the "
+        "surtax, and its No Tax Status worksheet omits gains; "
+        "docs/upstream-ots-reports.md report 23"
     ),
 )
-def test_ots_ma_uncomputed_cases_with_the_refusal_lifted(
-    monkeypatch, year, case, inputs, expected
+def test_gain_cases_with_the_refusal_lifted(
+    monkeypatch, year, case, inputs, taxable_income, total_tax
 ):
-    """Witness: the derived figure that OTS does not reach, with the refusal lifted."""
+    """Parked record values F, G, N2: evaluated only on the unrefused path."""
+    monkeypatch.setattr(
+        ots_state_gaps,
+        "OTS_STATE_INPUT_GAPS",
+        tuple(
+            gap
+            for gap in ots_state_gaps.OTS_STATE_INPUT_GAPS
+            if not (gap.form_id == "MA_1" and "capital_gains" in gap.name)
+        ),
+    )
+    _raise_unless_record_value(year, inputs, taxable_income, total_tax)
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize("case,inputs,taxable_income,total_tax", EXEMPTION_CASES)
+@pytest.mark.xfail(
+    strict=True,
+    raises=RecordValueMismatch,
+    reason=(
+        "Case O feeds gross interest where OTS takes the completed Schedule B "
+        "amount (our missing Schedule B calculation), and OTS's table row "
+        "differs from the published one; docs/upstream-ots-reports.md report 23"
+    ),
+)
+def test_excess_exemption_case_with_the_refusal_lifted(
+    monkeypatch, year, case, inputs, taxable_income, total_tax
+):
+    """Parked record value O: evaluated only on the unrefused path."""
     monkeypatch.setattr(ots_state_gaps, "OTS_STATE_DOMAIN_LIMITS", ())
-    result = tenforty.evaluate_return(backend="ots", year=year, state="MA", **inputs)
-    assert result.state_total_tax == pytest.approx(
-        expected[year], abs=LINE_11_TAX_ROUNDING
+    _raise_unless_record_value(year, inputs, taxable_income, total_tax)
+
+
+SURTAX_THRESHOLD = {2024: 1_053_750, 2025: 1_083_150}
+LINE_11_AND_EXEMPTION = 2_000 + 4_400  # Single, wages past the $2,000 cap
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_surtax_screen_uses_the_year_threshold_on_line_19_plus_interest(year):
+    """Refuse when line 19 plus interest passes the threshold; compute at it.
+
+    Single wages W with $1 interest: line 19 = W - 2,000 - 4,400, so the base is
+    W - 6,399. The base equals the statutory threshold at W = threshold + 6,399
+    (no surtax, since the surtax needs more than the threshold), and passes it
+    one dollar later.
+    """
+    at_threshold = SURTAX_THRESHOLD[year] + LINE_11_AND_EXEMPTION - 1
+    tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status="Single",
+        w2_income=at_threshold,
+        taxable_interest=1,
+    )
+    with pytest.raises(UnsupportedInputError, match="surtax"):
+        tenforty.evaluate_return(
+            backend="ots",
+            year=year,
+            state="MA",
+            filing_status="Single",
+            w2_income=at_threshold + 1,
+            taxable_interest=1,
+        )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_one_million_wages_with_a_dollar_of_interest_is_computed(year):
+    """Gross income $1,000,001 is below both statutory surtax thresholds."""
+    tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status="Single",
+        w2_income=1_000_000,
+        taxable_interest=1,
+    )
+
+
+# (status, wages whose line 17 just equals the exemption, wages one dollar less)
+# Line 11a is 7.65% of wages in whole dollars, half up. Hand-derived:
+#   Single 4,764: 364.45 -> 364, line 17 = 4,400; 4,763: 364.37 -> 364, 4,399.
+#   HoH 7,363: 563.27 -> 563, line 17 = 6,800; 7,362: 563.19 -> 563, 6,799.
+#   Joint 9,529: 728.97 -> 729, line 17 = 8,800; 9,528: 728.89 -> 729, 8,799.
+EXCESS_EXEMPTION_BOUNDARY = [
+    ("Single", 4_764, 4_763),
+    ("Head_of_House", 7_363, 7_362),
+    ("Married/Joint", 9_529, 9_528),
+]
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+@pytest.mark.parametrize(
+    "status,at_exemption,under_exemption", EXCESS_EXEMPTION_BOUNDARY
+)
+def test_excess_exemption_boundary_for_transferring_statuses(
+    year, status, at_exemption, under_exemption
+):
+    """Schedule B line 36 moves exemptions left after line 17 onto interest.
+
+    Line 17 equal to the exemption leaves no excess, so the return computes; one
+    dollar less leaves an excess, so it refuses.
+    """
+    tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status=status,
+        w2_income=at_exemption,
+        taxable_interest=1,
+    )
+    with pytest.raises(UnsupportedInputError, match="Schedule B line 36"):
+        tenforty.evaluate_return(
+            backend="ots",
+            year=year,
+            state="MA",
+            filing_status=status,
+            w2_income=under_exemption,
+            taxable_interest=1,
+        )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_married_separate_excess_exemption_is_computed(year):
+    """Schedule B line 36 does not allow Married/Sep to transfer, so no refusal."""
+    tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        filing_status="Married/Sep",
+        w2_income=4_000,
+        taxable_interest=1_000,
     )
 
 
@@ -144,9 +353,9 @@ def test_ots_ma_uncomputed_cases_with_the_refusal_lifted(
 def test_taxable_income_never_exceeds_agi_with_interest_and_dividends(year):
     """Structure: line 21 adds line 20, so the AGI worksheet adds it too.
 
-    Found by the property sweep: wages 4,765 and dividends 4,765 gave taxable
-    income 4,765.48 against AGI 4,765, from an unrounded line 11a and an AGI
-    that left out line 20.
+    The property sweep found wages 4,765 with dividends 4,765 giving taxable
+    income above AGI, from an unrounded line 11a and an AGI that left out line
+    20. Gains are not in public AGI because they are refused.
     """
     result = tenforty.evaluate_return(
         backend="ots",
@@ -156,5 +365,3 @@ def test_taxable_income_never_exceeds_agi_with_interest_and_dividends(year):
         ordinary_dividends=4_765.0,
     )
     assert result.state_taxable_income <= result.state_adjusted_gross_income
-    assert result.state_adjusted_gross_income == 9_530.0
-    assert result.state_taxable_income == 4_765.0

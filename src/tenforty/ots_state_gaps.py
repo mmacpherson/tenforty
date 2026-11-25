@@ -96,6 +96,11 @@ def _itemizing(form_id: str, years: range, bead: str, line: str) -> list[StateIn
 _MA_OTS_TEMPLATE = "(label from the OTS 2024 and 2025 MA_1 templates)"
 _MA_AGE = f"MA Form 1 line 2, the age 65 or over exemption {_MA_OTS_TEMPLATE}"
 _MA_UNMAPPED_YEARS = range(2018, 2024)
+_MA_GAINS_REMEDY = (
+    " OTS MA_1 has no Schedule D: Massachusetts gains need the Schedule B and D "
+    "amounts and the No Tax Status test on them, which OTS does not compute "
+    "(its worksheet takes line 20 but no gain). Tracked in tenforty-r91.14."
+)
 
 OTS_STATE_INPUT_GAPS: tuple[StateInputGap, ...] = (
     *_gaps(
@@ -107,11 +112,19 @@ OTS_STATE_INPUT_GAPS: tuple[StateInputGap, ...] = (
             f"Schedule B {_MA_OTS_TEMPLATE}",
             "ordinary_dividends": "MA Form 1 line 20, interest and dividends from "
             f"Schedule B {_MA_OTS_TEMPLATE}",
+        },
+    ),
+    *_gaps(
+        "MA_1",
+        range(2018, 2026),
+        "tenforty-r91.14",
+        {
             "short_term_capital_gains": "MA Form 1 line 23a, 8.5% income from "
             f"Schedule B {_MA_OTS_TEMPLATE}",
             "long_term_capital_gains": "MA Form 1 line 24, long-term capital gains "
             f"from Schedule D {_MA_OTS_TEMPLATE}",
         },
+        remedy=_MA_GAINS_REMEDY,
     ),
     *_gaps(
         "MA_1",
@@ -220,22 +233,20 @@ class StateDomainLimit:
         )
 
 
-_MA_MAPPED_YEARS = frozenset({2024, 2025})
-_MA_INVESTMENT_INPUTS = (
-    "taxable_interest",
-    "ordinary_dividends",
-    "short_term_capital_gains",
-    "long_term_capital_gains",
-)
+_MA_INTEREST_AND_DIVIDENDS = ("taxable_interest", "ordinary_dividends")
 _MA_PERSONAL_EXEMPTION = {
     "Single": 4_400.0,
     "Married/Sep": 4_400.0,
     "Head_of_House": 6_800.0,
     "Married/Joint": 8_800.0,
 }
-# The 4% surtax starts above $1,053,750 (2024) and $1,083,150 (2025); anything
-# near it is refused, since OTS measures it on line 19 without Schedule B and D.
-_MA_SURTAX_SCREEN = 1_000_000.0
+# Statutory 4% surtax thresholds (2024 and 2025 Form 1 instructions).
+_MA_SURTAX_THRESHOLD = {2024: 1_053_750.0, 2025: 1_083_150.0}
+# Schedule B line 36 moves excess exemptions onto interest and dividends for
+# these statuses only; Married/Sep cannot transfer them.
+_MA_EXEMPTION_TRANSFER_STATUSES = frozenset(
+    {"Single", "Head_of_House", "Married/Joint"}
+)
 
 
 def _ma_ordinary_income(values: dict[str, Any]) -> float:
@@ -245,67 +256,70 @@ def _ma_ordinary_income(values: dict[str, Any]) -> float:
     )
 
 
-def _ma_income_nears_the_surtax(values: dict[str, Any]) -> bool:
-    investments = sum(float(values.get(name) or 0.0) for name in _MA_INVESTMENT_INPUTS)
-    return _ma_ordinary_income(values) + investments > _MA_SURTAX_SCREEN
+def _ma_exemptions(values: dict[str, Any]) -> float:
+    return _MA_PERSONAL_EXEMPTION.get(
+        str(values.get("filing_status")), 0.0
+    ) + 1_000.0 * int(values.get("num_dependents") or 0)
+
+
+def _ma_income_past_the_surtax(values: dict[str, Any], threshold: float) -> bool:
+    """Whether Form 1 line 19 plus Schedule B interest and dividends pass the surtax."""
+    line_19 = max(
+        0.0,
+        _ma_ordinary_income(values)
+        - float(values.get("ma_contribution_deduction") or 0.0)
+        - _ma_exemptions(values),
+    )
+    interest_and_dividends = sum(
+        float(values.get(name) or 0.0) for name in _MA_INTEREST_AND_DIVIDENDS
+    )
+    return line_19 + interest_and_dividends > threshold
 
 
 def _ma_exemptions_exceed_ordinary_income(values: dict[str, Any]) -> bool:
-    exemptions = _MA_PERSONAL_EXEMPTION.get(
-        str(values.get("filing_status")), 0.0
-    ) + 1_000.0 * int(values.get("num_dependents") or 0)
+    if str(values.get("filing_status")) not in _MA_EXEMPTION_TRANSFER_STATUSES:
+        return False
     deduction = float(values.get("ma_contribution_deduction") or 0.0)
-    return _ma_ordinary_income(values) - deduction < exemptions
+    return _ma_ordinary_income(values) - deduction < _ma_exemptions(values)
 
 
 _MA_SURTAX_REASON = (
     "OTS MA_1 measures the 4% surtax on Form 1 line 19 alone, leaving out "
-    "Schedule B and Schedule D income, so it would under-tax a return near the "
-    "surtax threshold"
+    "Schedule B interest and dividends, so it would under-tax a return whose "
+    "line 19 plus Schedule B income passes the surtax threshold"
 )
 _MA_EXCESS_EXEMPTION_REASON = (
     "OTS MA_1 does not apply excess personal exemptions against Schedule B "
-    "interest, dividends and 8.5% gains (Form 1 line 19 instructions), so it "
-    "would over-tax a return whose exemptions exceed its other income"
-)
-_MA_LOSS_REASON = (
-    "OTS MA_1 has no Schedule B or Schedule D netting and ignores a loss, so it "
-    "would tax the return as if the loss were zero"
+    "interest and dividends (Schedule B line 36), so it would over-tax a "
+    "Single, Head of Household or joint return whose exemptions exceed its other "
+    "income"
 )
 
 OTS_STATE_DOMAIN_LIMITS: tuple[StateDomainLimit, ...] = (
     *(
         StateDomainLimit(
             "MA_1",
-            _MA_MAPPED_YEARS,
+            frozenset({year}),
             name,
             _MA_SURTAX_REASON,
             "tenforty-r91.14",
-            _ma_income_nears_the_surtax,
+            lambda values, threshold=threshold: _ma_income_past_the_surtax(
+                values, threshold
+            ),
         )
-        for name in _MA_INVESTMENT_INPUTS
+        for year, threshold in _MA_SURTAX_THRESHOLD.items()
+        for name in _MA_INTEREST_AND_DIVIDENDS
     ),
     *(
         StateDomainLimit(
             "MA_1",
-            _MA_MAPPED_YEARS,
+            frozenset(_MA_SURTAX_THRESHOLD),
             name,
             _MA_EXCESS_EXEMPTION_REASON,
             "tenforty-r91.14",
             _ma_exemptions_exceed_ordinary_income,
         )
-        for name in _MA_INVESTMENT_INPUTS
-    ),
-    *(
-        StateDomainLimit(
-            "MA_1",
-            _MA_MAPPED_YEARS,
-            name,
-            _MA_LOSS_REASON,
-            "tenforty-r91.14",
-            lambda values, name=name: float(values[name]) < 0.0,
-        )
-        for name in ("short_term_capital_gains", "long_term_capital_gains")
+        for name in _MA_INTEREST_AND_DIVIDENDS
     ),
 )
 
