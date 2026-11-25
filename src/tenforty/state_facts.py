@@ -475,6 +475,43 @@ def pa_joint_class_assumption(
     )
 
 
+RENTAL_QBI_ID = "federal.qbi.rental_not_qualified_ots_pre_2024"
+_RENTAL_QBI_YEARS: tuple[int, ...] = tuple(range(2018, 2024))
+_RENTAL_QBI_TEXT = (
+    "OTS before 2024 computes no QBI deduction (Form 8995 "
+    "is not orchestrated, tenforty-nt4h), so the computation excludes "
+    "rental_income from the QBI deduction, as if the rental were not a section "
+    "199A qualified trade or business. A rental that qualifies under section "
+    "199A may change the deduction and the tax (2018 Form 1040 instructions, "
+    "QBI worksheet, p. 38). backend='graph' covers 2024-2025 only, and "
+    "2024-2025 do not include rental income in QBI either (tenforty-iprv)."
+)
+
+
+def rental_qbi_assumption(
+    row: FactRow, inputs: Mapping[str, object]
+) -> Assumption | None:
+    """Return the nonqualifying-rental convention where OTS applied it.
+
+    It applies to an OTS return for 2018-2023 with a nonzero rental_income. OTS
+    2024 and later do not carry this record, but they do not include rental
+    income in QBI either (tenforty-iprv).
+    """
+    if not (
+        row.engine == "ots"
+        and row.year in _RENTAL_QBI_YEARS
+        and inputs.get("rental_income")
+    ):
+        return None
+    return Assumption(
+        id=RENTAL_QBI_ID,
+        state=None,
+        input_path=None,
+        value="not_qualified",
+        text=_RENTAL_QBI_TEXT,
+    )
+
+
 @dataclass(frozen=True)
 class DefaultDecision:
     """The recorded category of one default.
@@ -600,6 +637,14 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "precedent: no refusal, since household totals cannot reveal a split; "
         "reported on OTS PA joint returns with a business or gain amount until "
         "per-spouse PA class inputs (tenforty-s48h.75) exist.",
+    ),
+    DefaultDecision(
+        RENTAL_QBI_ID,
+        "transition",
+        None,
+        "OTS 2018-2023 computes no QBI deduction (tenforty-nt4h), so a rental is "
+        "treated as not qualified; reported on every such return with a nonzero "
+        "rental_income until Form 8995 is orchestrated there.",
     ),
     DefaultDecision(
         "ma.form_1.line_11.one_earner",

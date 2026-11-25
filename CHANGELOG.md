@@ -1,4 +1,37 @@
 ## [Unreleased]
+### Fixed
+- **OTS 2018 now reads `self_employment_income` and `rental_income`**
+  (tenforty-s2gx). They were mapped to Schedule 1 lines 3 and 5, which the 2018
+  template lacks (2018 numbers business income line 12 and rental real estate
+  line 17), so the values were dropped; the 2018 map now sends them to `S1_12`
+  and `S1_17` and the refusal added by tenforty-48hh no longer applies to them.
+  A 2018 rental return matches the blind derivation
+  (`docs/validation/derivations/federal-2018-se-rental.md`) only because OTS
+  2018 computes no QBI deduction, so it lands on the outcome where the rental
+  is not a qualified trade or business. 2018 Schedule C income still omits
+  Schedule SE tax, its deduction and the QBI deduction, as 2019-2023 do; see
+  Changed.
+### Changed
+- **OTS refuses nonzero `self_employment_income` for 2018-2023**
+  (tenforty-nt4h). Schedule SE and Form 8995 are orchestrated only for 2024 and
+  2025, so earlier years returned AGI, tax and total tax without self-employment
+  tax, its deductible half or the QBI deduction (a $50,000 Schedule C return
+  missed about $7,065 of tax). Calls that used to return a wrong figure now
+  raise `UnsupportedInputError` under every `on_error` policy, on
+  `backend="ots"` and `"auto"`; `backend="graph"` covers 2024-2025 only. Zero
+  is unchanged. The record's values stay pinned as strict xfails with the
+  refusal lifted. OTS before 2024 also computes no QBI deduction for rental
+  income, which the 2018 rental test accepts as S2a or S2b because the section
+  199A qualification is a fact no input carries. A nonzero `rental_income` on
+  OTS 2018-2023 now records the assumption
+  `federal.qbi.rental_not_qualified_ots_pre_2024` on the result (scalar and
+  batch, `backend="ots"` and `"auto"`): OTS computes no QBI deduction before
+  2024, so the computation excludes rental income from QBI and a rental that
+  qualifies under section 199A may change the deduction and the tax (the 2018
+  record case differs by $2,400 of tax). 2024-2025 do not include rental income
+  in QBI either (tenforty-iprv). 2019-2023 accept `rental_income` too and are covered. The
+  refusal message now says this integration cannot determine the Schedule SE
+  and QBI amounts before 2024.
 ### Added (validation)
 - **Official-value fixtures for 23 more graph states, 2024 and 2025**
   (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,

@@ -886,23 +886,32 @@ _OTS_REFUSED_WHEN_UNREAD = {
 # lacks, so the value never reached OTS. They are refused only where a map in
 # the return does that (``ots_drops_input``); elsewhere they behave as before.
 _OTS_REFUSED_WHEN_DROPPED = {
-    "self_employment_income": (
-        "tenforty maps it to a 2018 Schedule 1 line the 2018 OTS template does "
-        "not have (tenforty-s2gx), and no other backend computes 2018: the "
-        "graph covers 2024 and later. Pass self_employment_income=0 only if the "
-        "return has no self-employment income."
-    ),
-    "rental_income": (
-        "tenforty maps it to a 2018 Schedule 1 line the 2018 OTS template does "
-        "not have (tenforty-s2gx), and no other backend computes 2018: the "
-        "graph covers 2024 and later. Pass rental_income=0 only if the return "
-        "has no rental income."
-    ),
     "state_adjustment": (
         "tenforty maps it to a CA 540 line the 2018 and 2019 OTS templates do "
         "not have (tenforty-8tlh), and no other backend computes CA for those "
         "years: the graph covers 2024 and later. Pass state_adjustment=0 only "
         "if the return has no California adjustment."
+    ),
+}
+
+
+# Inputs whose OTS return before 2024 is mapped and read but incomplete: the
+# program takes Schedule SE tax, its deductible half and the QBI deduction as
+# inputs and nothing orchestrates Schedule SE or Form 8995 for those years, so
+# the return would omit them (tenforty-nt4h). Maps a name to the years OTS
+# cannot compute it for and the remedy the refusal offers.
+_OTS_REFUSED_INCOMPLETE_YEARS = {
+    "self_employment_income": (
+        range(2018, 2024),
+        (
+            "This integration cannot determine the Schedule SE and QBI amounts "
+            "the return needs before 2024: OTS does not orchestrate Schedule SE "
+            "or Form 8995 (tenforty-nt4h), so self-employment tax, its "
+            "deductible half and the QBI deduction would be omitted. "
+            "backend='graph' covers "
+            "2024-2025 only. Pass self_employment_income=0 only if the return "
+            "has no self-employment income."
+        ),
     ),
 }
 
@@ -992,6 +1001,14 @@ def _require_ots_reads_inputs(
             f"OTS does not use {name}={value!r} on {where}, so it would "
             f"compute the return without it. {remedy}"
         )
+    for name, (years, remedy) in _OTS_REFUSED_INCOMPLETE_YEARS.items():
+        value = natural_form_values.get(name, 0.0)
+        if value and year in years:
+            raise UnsupportedInputError(
+                f"OTS cannot compute {name}={value!r} completely on "
+                f"{_ots_return_where(year, state)}, so it would compute the "
+                f"return without what it requires. {remedy}"
+            )
     for name, remedy in _OTS_REFUSED_WHEN_DROPPED.items():
         value = natural_form_values.get(name, 0.0)
         if value and ots_drops_input(name, year, state):
@@ -1365,6 +1382,9 @@ def recorded_assumptions(
     pa_joint_classes = _facts.pa_joint_class_assumption(row, inputs)
     if pa_joint_classes is not None:
         records.append(pa_joint_classes)
+    rental_qbi = _facts.rental_qbi_assumption(row, inputs)
+    if rental_qbi is not None:
+        records.append(rental_qbi)
     if legacy_itemized != 0:
         if itemizes is None:
             raise RuntimeError(
@@ -1418,7 +1438,9 @@ def _evaluate_with_engine(
                     engine,
                     row,
                     itemizes,
-                    tax_input.model_dump(include=set(_facts.PA_CLASS_INPUTS)),
+                    tax_input.model_dump(
+                        include={*_facts.PA_CLASS_INPUTS, "rental_income"}
+                    ),
                 )
             }
         )

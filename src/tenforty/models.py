@@ -2051,8 +2051,8 @@ _NATURAL_FORM_CONFIG = [
             "ordinary_dividends": "L3b",  # Ordinary Dividends
             "short_term_capital_gains": partial(capital_gains_pre2021, "short", 2018),
             "long_term_capital_gains": partial(capital_gains_pre2021, "long", 2018),
-            "self_employment_income": "S1_3",
-            "rental_income": "S1_5",
+            "self_employment_income": "S1_12",
+            "rental_income": "S1_17",
             "schedule_1_income": "S1_21",  # Assuming 'Other income' covers Schedule 1 income types
             "schedule_a_other_deductions": "A6",
             "schedule_a_other_itemized": "A16",
