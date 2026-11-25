@@ -236,6 +236,7 @@ does not mean the return makes no assumptions.
 |---|---|---|---|
 | `ma.form_1.line_11.one_earner` | MA Married/Joint, every year | OTS and graph | per-spouse earnings, tenforty-r6ap (not yet an input) |
 | `pa.pa_40.joint_class_household_totals` | PA Married/Joint, 2023-2025, with a nonzero `self_employment_income`, `short_term_capital_gains` or `long_term_capital_gains`: PA-40 lines 4 and 5 take household totals, so one spouse's class loss is netted against the other's income, which PA does not allow | OTS (`household_totals`); graph PA does not read these inputs | per-spouse PA class inputs, tenforty-s48h.75 (not yet an input) |
+| `nj.nj_1040.age_65_from_federal_flag` | NJ, 2023-2025, when `filer_65_or_older` is set, or `spouse_65_or_older` on a Married/Joint return: the federal flag is taken as NJ age 65 by December 31 (NJ-1040 line 7, born 1958 or earlier for 2023, 1959 for 2024, 1960 for 2025), so a person born January 1 of 1959, 1960 or 1961 (2023, 2024, 2025) qualifies federally but not for NJ and the exemption is $1,000 too high | OTS (`federal_flag`); graph NJ is not in scope | a birth-year input (not yet an input) |
 | `federal.itemized_deductions.legacy_amt` | Any return whose Form 1040 itemized with a nonzero deprecated `itemized_deductions` (`state` is null) | OTS (`added_back`) and graph (`allowed`) | `federal_itemized` ([Itemized deductions](itemized-deductions.md)) |
 
 ## Batch columns

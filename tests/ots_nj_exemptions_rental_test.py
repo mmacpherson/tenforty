@@ -202,3 +202,111 @@ def test_a_net_rental_loss_is_no_entry_on_line_23(year):
     )
     assert loss.state_adjusted_gross_income == base.state_adjusted_gross_income
     assert loss.state_total_tax == base.state_total_tax
+
+
+# --- Age flag taken as NJ age 65 (astra review of tenforty-r91.20) ------------
+
+NJ_AGE_65 = "nj.nj_1040.age_65_from_federal_flag"
+
+
+def _nj_return(filing_status, year=2025, backend="ots", **flags):
+    return tenforty.evaluate_return(
+        year=year,
+        state="NJ",
+        filing_status=filing_status,
+        w2_income=60_000.0,
+        backend=backend,
+        **flags,
+    )
+
+
+def _nj_ids(result):
+    return [record.id for record in result.assumptions]
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize("year", ALL_YEARS)
+@pytest.mark.parametrize(
+    ("filing_status", "flags"),
+    [
+        ("Single", {"filer_65_or_older": True}),
+        ("Married/Joint", {"filer_65_or_older": True}),
+        ("Married/Joint", {"spouse_65_or_older": True}),
+        ("Married/Sep", {"filer_65_or_older": True}),
+    ],
+)
+def test_an_age_flag_that_reaches_line_7_is_reported(year, filing_status, flags):
+    """The federal flag is taken as NJ age 65; the record says what that costs."""
+    (record,) = [
+        r
+        for r in _nj_return(filing_status, year, **flags).assumptions
+        if r.id == NJ_AGE_65
+    ]
+    assert record.state == "NJ"
+    assert record.input_path is None
+    assert record.value == "federal_flag"
+    cutoffs = {2023: ("1958", "1959"), 2024: ("1959", "1960"), 2025: ("1960", "1961")}
+    assert all(birth_year in record.text for birth_year in cutoffs[year])
+    assert "$1,000 too high" in record.text
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize(
+    ("filing_status", "flags"),
+    [
+        ("Single", {}),
+        ("Married/Joint", {}),
+        ("Single", {"spouse_65_or_older": False}),
+        ("Married/Sep", {"spouse_65_or_older": True}),
+    ],
+)
+def test_no_age_flag_reaching_line_7_reports_nothing(filing_status, flags):
+    """No flag, or a spouse flag on a return OTS does not count it for, is silent."""
+    assert NJ_AGE_65 not in _nj_ids(_nj_return(filing_status, **flags))
+
+
+@pytest.mark.requires_ots
+def test_another_state_never_reports_the_nj_record():
+    """A federal age flag on NC carries no NJ line 7 convention."""
+    other_state = tenforty.evaluate_return(
+        year=2025,
+        state="NC",
+        filing_status="Single",
+        w2_income=60_000.0,
+        filer_65_or_older=True,
+        backend="ots",
+    )
+    assert NJ_AGE_65 not in _nj_ids(other_state)
+
+
+@pytest.mark.requires_ots
+def test_batch_rows_carry_the_record_exactly_where_the_scalar_does():
+    """The frame's assumptions column agrees with evaluate_return row by row."""
+    import json
+
+    rows = [
+        ("Single", False, False),
+        ("Single", True, False),
+        ("Married/Joint", False, True),
+        ("Married/Sep", False, True),
+        ("Married/Joint", False, False),
+    ]
+    frame = tenforty.evaluate_returns(
+        year=2025,
+        state="NJ",
+        filing_status=[status for status, _, _ in rows],
+        w2_income=60_000.0,
+        filer_65_or_older=[filer for _, filer, _ in rows],
+        spouse_65_or_older=[spouse for _, _, spouse in rows],
+        mode="zip",
+        backend="ots",
+    )
+    for (status, filer, spouse), row in zip(
+        rows, frame.iter_rows(named=True), strict=True
+    ):
+        scalar = _nj_return(status, filer_65_or_older=filer, spouse_65_or_older=spouse)
+        encoded = [json.loads(item)["id"] for item in row["assumptions"]]
+        assert encoded == _nj_ids(scalar)
+        assert (NJ_AGE_65 in encoded) is (
+            filer or (status == "Married/Joint" and spouse)
+        )

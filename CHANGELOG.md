@@ -82,6 +82,12 @@
   in `tests/ots_nj_exemptions_rental_test.py` are an independent derivation
   (`docs/validation/derivations/nj-exemptions-rental-2024-2025.md`); 2023 has no
   such record, so its tests assert only direction.
+  - Reported assumption `nj.nj_1040.age_65_from_federal_flag` (OTS NJ,
+    2023-2025, when an age flag reaches line 7): the federal flag is taken as
+    NJ age 65 by December 31, so a filer or spouse born January 1 of 1959, 1960
+    or 1961 (2023, 2024, 2025) qualifies federally but not for NJ line 7, and
+    the exemption is $1,000 too high for that person. Not refused, since the
+    flag carries no birth date.
   - Limits: the line 12 college-student exemption, the line 8 blind/disabled
     and line 9 veteran exemptions, and NJ-BUS-1 Part IV adjustments to rental
     income are not modeled. Every scenario in the derivation lands exactly on a
