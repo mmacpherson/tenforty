@@ -39,8 +39,8 @@ arBracketsTable2025 =
 -- | 2025 Arkansas standard deduction by filing status
 -- Source: Arkansas DFA, 2025 AR1000F and AR1000NR Instructions
 -- (2025_AR1000F_and_AR1000NR_Instructions.pdf), p.14, "Standard Deduction":
--- Single $2,470; MFJ $4,940; HOH $2,470.
--- MFS and QW follow Single and MFJ respectively (as the 2024 table does).
+-- 1 Single $2,470; 2 Married Filing Joint $4,940; 3 Head of Household $2,470;
+-- 4 and 5 Married Filing Separately $2,470; 6 Surviving Spouse $2,470.
 arStandardDeduction2025 :: ByStatus (Amount Dollars)
 arStandardDeduction2025 =
-  byStatus 2470 4940 2470 2470 4940
+  byStatus 2470 4940 2470 2470 2470
