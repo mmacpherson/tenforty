@@ -842,6 +842,7 @@ def map_ots_to_natural_output(
     natural_mapping: dict[str, str],
     retained_keys=frozenset(["tax_bracket", "effective_tax_rate", "amt"]),
     transforms: dict[str, Callable[[float], float]] | None = None,
+    line_transforms: dict[str, Callable[[dict[str, Any]], float]] | None = None,
 ):
     """Translate line-level OTS output labels into human-readable quantity labels."""
     named = {
@@ -850,6 +851,9 @@ def map_ots_to_natural_output(
     for name, transform in (transforms or {}).items():
         if name in named:
             named[name] = transform(named[name])
+    for name, line_transform in (line_transforms or {}).items():
+        if name in named:
+            named[name] = line_transform(ots_output)
     return {k: v for k, v in ots_output.items() if k in retained_keys} | named
 
 
@@ -1287,6 +1291,7 @@ def evaluate_natural_input_form(
             ots_output["state"],
             state_natural_config.output_map,
             transforms=state_natural_config.output_transforms,
+            line_transforms=state_natural_config.output_line_transforms,
         )
 
     itemizing = ots_output["federal"].get(_ITEMIZING_FIELD)

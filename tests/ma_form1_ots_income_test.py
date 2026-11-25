@@ -138,3 +138,23 @@ def test_ots_ma_uncomputed_cases_with_the_refusal_lifted(
     assert result.state_total_tax == pytest.approx(
         expected[year], abs=LINE_11_TAX_ROUNDING
     )
+
+
+@pytest.mark.parametrize("year", [2024, 2025])
+def test_taxable_income_never_exceeds_agi_with_interest_and_dividends(year):
+    """Structure: line 21 adds line 20, so the AGI worksheet adds it too.
+
+    Found by the property sweep: wages 4,765 and dividends 4,765 gave taxable
+    income 4,765.48 against AGI 4,765, from an unrounded line 11a and an AGI
+    that left out line 20.
+    """
+    result = tenforty.evaluate_return(
+        backend="ots",
+        year=year,
+        state="MA",
+        w2_income=4_765.0,
+        ordinary_dividends=4_765.0,
+    )
+    assert result.state_taxable_income <= result.state_adjusted_gross_income
+    assert result.state_adjusted_gross_income == 9_530.0
+    assert result.state_taxable_income == 4_765.0

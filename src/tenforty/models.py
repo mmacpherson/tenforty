@@ -412,6 +412,9 @@ class NaturalFormMapping(BaseModel):
     # Applied to a natural output after `output_map` names it, for a quantity the
     # form defines from an OTS line rather than reporting the line itself.
     output_transforms: dict[str, Callable[[float], float]] = {}
+    # Like `output_transforms`, but computed from the form's raw OTS output lines
+    # for a quantity that no single line reports.
+    output_line_transforms: dict[str, Callable[[dict[str, Any]], float]] = {}
 
 
 class SubordinateFormConfig(BaseModel):
@@ -828,7 +831,11 @@ class TaxReturnInput(BaseModel):
             if self.self_employment_income * 0.9235 >= 400.0
             else 0.0
         )
-        return min(2_000.0, wage_tax + self_employment_tax)
+        return float(
+            Decimal(str(min(2_000.0, wage_tax + self_employment_tax))).quantize(
+                Decimal(1), rounding=ROUND_HALF_UP
+            )
+        )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1241,17 +1248,17 @@ def _restricted_filing_status(
     return status_line
 
 
-def _ma_adjusted_gross_income(total_5_percent_income: float) -> float:
-    """MA AGI from Form 1 line 10, as the No Tax Status AGI worksheet computes it.
+def _ma_adjusted_gross_income(ots_lines: dict[str, Any]) -> float:
+    """MA AGI as the No Tax Status AGI worksheet computes it.
 
     Worksheet line 1 is Form 1 line 10 floored at zero (OTS computes it as
-    ``ws[1] = NotLessThanZero(L[10])`` in every MA_1 year). Its remaining
-    lines (Schedule Y deductions, exempt bank interest, line 20 interest and
-    dividends) are zero for every input the MA_1 input map sets, so the floored
-    line 10 is the worksheet's AGI. OTS fills the worksheet only for the
-    statuses eligible for No Tax Status, but prints line 10 for all of them.
+    ``ws[1] = NotLessThanZero(L[10])`` in every MA_1 year) and line 5 adds the
+    Schedule B interest and dividends of Form 1 line 20, which line 21 taxes.
+    Schedule Y deductions and exempt bank interest are zero for every input the
+    MA_1 input map sets. OTS fills the worksheet only for the statuses eligible
+    for No Tax Status, but prints lines 10 and 20 for all of them.
     """
-    return max(0.0, total_5_percent_income)
+    return max(0.0, float(ots_lines["L10"])) + float(ots_lines.get("L20", 0.0))
 
 
 # MA_1 parses Widow(er) but its exemption switch has no case for it, so the
@@ -1365,7 +1372,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2024,
@@ -1552,7 +1559,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2025,
@@ -1723,7 +1730,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2023,
@@ -1863,7 +1870,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2022,
@@ -1933,7 +1940,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2021,
@@ -2003,7 +2010,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2020,
@@ -2072,7 +2079,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2019,
@@ -2141,7 +2148,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2018,
