@@ -15,8 +15,114 @@ from .evidence import (
     VT_EVIDENCE,
     VT_EXEMPTION_EVIDENCE,
     WI_EVIDENCE,
+    EvidenceKind,
+    TaxEvidence,
 )
 from .tax_scenario import KnownDefect, TaxScenario
+
+_ROW_ROUNDING = 0.50
+"""Printed-row rounding to the dollar (every table below prints whole dollars)."""
+
+
+def _row_departure(
+    centre: float, rate: float, row_width: float, reason: str
+) -> KnownDefect:
+    """Graph minus a published row: a mechanism centre, the row width, rounding.
+
+    A row prices its midpoint and the graph prices the exact income, so they
+    differ by at most the rate times half the row width on either side of the
+    centre, plus the printed whole-dollar rounding. The row half-width used is
+    the full ``row_width`` times the rate, the same bound the batch-2 fixtures
+    use.
+    """
+    slack = rate * row_width + _ROW_ROUNDING
+    return KnownDefect("state_total_tax", centre - slack, centre + slack, reason)
+
+
+def _sc_2024_row_departure() -> KnownDefect:
+    """Graph minus an SC 2024 table row: the schedule-constant gap plus row slack.
+
+    The brackets (3,460 and 17,330) imply a schedule constant of 658.36 where
+    SC1040TT prints 659, so the graph is 659 - 658.36 = 0.64 high at every
+    income above 17,330 (tenforty-b72.80); rows are $100 wide, so the row
+    midpoint adds at most 6.2% of 50 on either side.
+    """
+    return _row_departure(
+        659 - (0.062 * 17_330 - 0.03 * (17_330 - 3_460)),
+        0.062,
+        50,
+        "SC requires the $100 tax-table row below $100,000 (tenforty-tj2.20); "
+        "the graph prices the exact income (tenforty-b72.42) on brackets whose "
+        "constant is 658.36, not the printed 659 (tenforty-b72.80)",
+    )
+
+
+def _ok_exemption_departure(exemptions: int) -> KnownDefect:
+    """Graph minus an OK joint-column row: omitted exemptions plus row slack.
+
+    The graph has no Form 511 line 12 exemption (tenforty-b72.78), so it taxes
+    $1,000 per exemption more, at the 4.75% marginal rate; rows are $50 wide.
+    The $1.00 whole-dollar allowance of the batch-2 OK fixtures is used.
+    """
+    return _row_departure(
+        0.0475 * 1_000 * exemptions,
+        0.0475,
+        50,
+        "OK has no line 12 exemptions (tenforty-b72.78); the form requires the "
+        "$50 tax-table row and the graph prices the exact income "
+        "(tenforty-tj2.20, tenforty-b72.42)",
+    )
+
+
+def _ar_2025_departure(personal_credits: float, adjustment_gap: float) -> KnownDefect:
+    """Graph minus an AR 2025 row net of personal credits.
+
+    The graph leaves the line 34 credits at zero (tenforty-b72.87), so it is
+    high by the credits. Inside the indexed band (tenforty-b72.57) the record's
+    minus adjustment (369.30) exceeds the graph's flat 419.96 by
+    ``adjustment_gap``; rows are $100 wide.
+    """
+    return _row_departure(
+        personal_credits + adjustment_gap,
+        0.039,
+        50,
+        "AR line 34 credits are not applied (tenforty-b72.87); the form "
+        "requires the $100 table row (tenforty-tj2.20)"
+        + (
+            " inside the indexed adjustment band (tenforty-b72.57)"
+            if adjustment_gap
+            else ""
+        ),
+    )
+
+
+DC_ROW_EVIDENCE = TaxEvidence(
+    EvidenceKind.TABLE_ROW,
+    "docs/validation/state-fixtures/DC-2024-2025.md",
+    "DC 2025 D-40 booklet tax table, line 20, row 35,000-35,049: $1,902 "
+    "(2025_D40_Book_082026_v1.pdf); DC rows are $50 wide",
+)
+SC_ROW_EVIDENCE = TaxEvidence(
+    EvidenceKind.TABLE_ROW,
+    "docs/validation/state-fixtures/SC-2024-2025.md",
+    "SCDOR 2024 SC1040TT, rows 35,400-35,500 ($1,539) and 70,800-70,900 "
+    "($3,734; archived record scenario 4); SC rows are $100 wide",
+)
+OK_ROW_EVIDENCE = TaxEvidence(
+    EvidenceKind.TABLE_ROW,
+    "docs/validation/state-fixtures/OK-2024-2025.md",
+    "Oklahoma Form 511 packet Tax Table, 'married filing joint or head of "
+    "household' column, line 14: 2024 rows 65,300-65,350 ($2,726) and 49,650-"
+    "49,700 ($1,983); 2025 row 85,300-85,350 ($3,676; archived record "
+    "scenario 5); OK rows are $50 wide",
+)
+AR_ROW_EVIDENCE = TaxEvidence(
+    EvidenceKind.TABLE_ROW,
+    "docs/validation/state-fixtures/AR-2024-2025.md",
+    "Arkansas 2025 Regular Income Tax Table, line 29: row 47,500-47,600 "
+    "($1,434) less the $29 personal credit; and the archived record scenario "
+    "6 (row 95,001-95,101, $3,338, less two $29 credits); AR rows are $100 wide",
+)
 
 
 def _wi_band_tolerance(
@@ -1086,8 +1192,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # Federal: AGI=$50k, Std Ded=$15,750 (2025 OBBBA), Taxable=$34,250
     # DC: AGI=$50k, Std Ded=$15,000 (DC does not adopt the OBBBA increase: 2025
     #     D-40 booklet pp. 4 and 13), Taxable=$35,000
-    # DC tax: $0-$10k: $10k*0.04=$400, $10k-$35,000: $25,000*0.06=$1,500
-    #         Total: $400 + $1,500 = $1,900
+    # Official line 20: the table row 35,000-35,049 prints $1,902. The graph
+    # prices the schedule at $35,000 ($400 + $25,000 * 0.06 = $1,900).
     TaxScenario(
         source="DC 2025 Tax Rate Schedules (computed)",
         description="DC Single, $50,000 W2 (2025)",
@@ -1096,7 +1202,17 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1900.0,
+        expected_state_tax=1902.0,
+        state_evidence=DC_ROW_EVIDENCE,
+        known_defects=(
+            _row_departure(
+                0.0,
+                0.06,
+                50,
+                "D-40 requires the $50 tax-table row below $100,000; the graph "
+                "prices the schedule at the exact income (tenforty-tj2.20)",
+            ),
+        ),
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -3194,7 +3310,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # SC taxable: $35,400 (no exemptions)
     # SC tax: $0 + ($17,330 - $3,460) * 0.03 + ($35,400 - $17,330) * 0.062
     #       = $0 + $13,870 * 0.03 + $18,070 * 0.062
-    #       = $0 + $416.10 + $1,120.34 = $1,536.44
+    #       = $0 + $416.10 + $1,120.34 = $1,536.44 (graph, continuous)
+    # Official line 6: the table row 35,400-35,500 prints $1,539.
     # Federal tax (OTS tables): $4,016.00
     TaxScenario(
         source="SC 2024 Tax Brackets (computed)",
@@ -3204,7 +3321,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=4019.0,  # Tax Table row 35,400-35,450
-        expected_state_tax=1536.44,
+        expected_state_tax=1539.0,
+        state_evidence=SC_ROW_EVIDENCE,
+        known_defects=(_sc_2024_row_departure(),),
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -3214,7 +3333,8 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # SC taxable: $70,800 (no exemptions)
     # SC tax: $0 + $13,870 * 0.03 + ($70,800 - $17,330) * 0.062
     #       = $0 + $416.10 + $53,470 * 0.062
-    #       = $0 + $416.10 + $3,315.14 = $3,731.24
+    #       = $0 + $416.10 + $3,315.14 = $3,731.24 (graph, continuous)
+    # Official line 6: the table row 70,800-70,900 prints $3,734.
     # Federal tax (OTS tables): $8,032.00
     TaxScenario(
         source="SC 2024 Tax Brackets (computed)",
@@ -3224,7 +3344,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=8035.0,  # Tax Table row 70,800-70,850
-        expected_state_tax=3731.24,
+        expected_state_tax=3734.0,
+        state_evidence=SC_ROW_EVIDENCE,
+        known_defects=(_sc_2024_row_departure(),),
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -5030,7 +5152,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #       + ($9,800 - $7,500) * 0.0275 + ($14,400 - $9,800) * 0.0375
     #       + ($67,300 - $14,400) * 0.0475
     #       = $5.00 + $22.50 + $43.75 + $63.25 + $172.50 + $2,512.75
-    #       = $2,819.75
+    #       = $2,819.75 (graph, continuous, before the two $1,000 exemptions)
+    # Official: OK taxable income $65,300 (line 12 deducts $2,000 of
+    # exemptions); line 14 row 65,300-65,350 prints $2,726.
     TaxScenario(
         source="OK 2024 Tax Brackets (computed)",
         description="OK MFJ, $80,000 W2, no dependents",
@@ -5039,7 +5163,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=80000.0,
         expected_federal_tax=5635.0,  # Tax Table row 50,800-50,850
-        expected_state_tax=2819.75,
+        expected_state_tax=2726.0,
+        state_evidence=OK_ROW_EVIDENCE,
+        known_defects=(_ok_exemption_departure(2),),
         expected_federal_agi=80000.0,
         backend="graph",
     ),
@@ -5053,7 +5179,10 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #       + ($9,800 - $7,500) * 0.0275 + ($14,400 - $9,800) * 0.0375
     #       + ($50,650 - $14,400) * 0.0475
     #       = $5.00 + $22.50 + $43.75 + $63.25 + $172.50 + $1,721.875
-    #       = $2,028.875
+    #       = $2,028.875 (graph, continuous, before the $1,000 exemption)
+    # Official: OK taxable income $49,650 (one $1,000 exemption; filing
+    # status taken as given, no dependent claimed); line 14 row 49,650-49,700
+    # prints $1,983.
     TaxScenario(
         source="OK 2024 Tax Brackets (computed)",
         description="OK HoH, $60,000 W2, no dependents",
@@ -5062,7 +5191,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Head_of_House",
         w2_income=60000.0,
         expected_federal_tax=4244.0,  # Tax Table row 38,100-38,150
-        expected_state_tax=2028.875,
+        expected_state_tax=1983.0,
+        state_evidence=OK_ROW_EVIDENCE,
+        known_defects=(_ok_exemption_departure(1),),
         expected_federal_agi=60000.0,
         backend="graph",
     ),
@@ -5097,7 +5228,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     #       + ($9,800 - $7,500) * 0.0275 + ($14,400 - $9,800) * 0.0375
     #       + ($87,300 - $14,400) * 0.0475
     #       = $5.00 + $22.50 + $43.75 + $63.25 + $172.50 + $3,462.75
-    #       = $3,769.75
+    #       = $3,769.75 (graph, continuous, before the two $1,000 exemptions)
+    # Official: OK taxable income $85,300; line 14 row 85,300-85,350 prints
+    # $3,676 (archived record scenario 5).
     TaxScenario(
         source="OK 2025 Tax Brackets (computed)",
         description="OK MFJ, $100,000 W2, no dependents (2025, same rates as 2024)",
@@ -5106,7 +5239,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=7746.0,  # Tax Table row 68,500-68,550
-        expected_state_tax=3769.75,
+        expected_state_tax=3676.0,
+        state_evidence=OK_ROW_EVIDENCE,
+        known_defects=(_ok_exemption_departure(2),),
         expected_federal_agi=100000.0,
         backend="graph",
     ),
@@ -5191,7 +5326,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # AR tax: $5,599 * 0.00 + ($11,199 - $5,599) * 0.02 + ($15,999 - $11,199) * 0.03
     #       + ($26,399 - $15,999) * 0.034 + ($47,530 - $26,399) * 0.039
     #       = $0 + $112.00 + $144.00 + $353.60 + $824.109
-    #       = $1,433.709
+    #       = $1,433.709 (graph, continuous, before credits)
+    # Official: line 29 row 47,500-47,600 prints $1,434, less the $29 personal
+    # credit (line 34) = $1,405.
     TaxScenario(
         source="AR 2025 Tax Brackets (computed)",
         description="AR Single, $50,000 W2, no dependents (2025, same rates as 2024)",
@@ -5200,7 +5337,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Single",
         w2_income=50000.0,
         expected_federal_tax=3875.0,  # Tax Table row 34,250-34,300
-        expected_state_tax=1433.709,
+        expected_state_tax=1405.0,
+        state_evidence=AR_ROW_EVIDENCE,
+        known_defects=(_ar_2025_departure(29, 0.0),),
         expected_federal_agi=50000.0,
         backend="graph",
     ),
@@ -5212,7 +5351,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
     # AR tax: $5,599 * 0.00 + ($11,199 - $5,599) * 0.02 + ($15,999 - $11,199) * 0.03
     #       + ($26,399 - $15,999) * 0.034 + ($95,060 - $26,399) * 0.039
     #       = $0 + $112.00 + $144.00 + $353.60 + $2,677.779
-    #       = $3,287.379
+    #       = $3,287.379 (graph, continuous, no adjustment band)
+    # Official (archived record scenario 6): row 95,001-95,101 prints $3,338
+    # (inside the 94,701-97,800 adjustment band), less two $29 credits = $3,280.
     TaxScenario(
         source="AR 2025 Tax Brackets (computed)",
         description="AR MFJ, $100,000 W2, no dependents (2025, same rates as 2024)",
@@ -5221,7 +5362,9 @@ SILVER_STANDARD_STATE_SCENARIOS = [
         filing_status="Married/Joint",
         w2_income=100000.0,
         expected_federal_tax=7746.0,  # Tax Table row 68,500-68,550
-        expected_state_tax=3287.379,
+        expected_state_tax=3280.0,
+        state_evidence=AR_ROW_EVIDENCE,
+        known_defects=(_ar_2025_departure(58, 369.30 - 419.96),),
         expected_federal_agi=100000.0,
         backend="graph",
     ),
