@@ -186,9 +186,9 @@ def test_auto_routes_by_scope(year):
 @pytest.mark.parametrize("year", GRAPH_SCOPE_YEARS)
 def test_auto_refuses_out_of_scope_state_ots_lacks_with_its_reason(year):
     """Without OTS coverage, auto names the scope reason and the graph escape."""
-    assert not routing.ots_covers(year, OTSState.UT)
+    assert not routing.ots_covers(year, OTSState.NH)
     with pytest.raises(UnsupportedReturnError) as refusal:
-        routing.select_backend("auto", year, "UT")
+        routing.select_backend("auto", year, "NH")
     message = str(refusal.value)
     assert EVIDENCE in message
     assert "backend='graph'" in message

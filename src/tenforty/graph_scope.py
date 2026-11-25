@@ -72,6 +72,35 @@ OFFICIAL_FIXTURES: frozenset[tuple[OTSState, int]] = frozenset(
         for year in GRAPH_SCOPE_YEARS
     }
     | {(state, year) for state in (S.VT, S.WI) for year in GRAPH_SCOPE_YEARS}
+    | {
+        (state, year)
+        for state in (
+            S.AL,
+            S.AR,
+            S.AZ,
+            S.CA,
+            S.CT,
+            S.DC,
+            S.DE,
+            S.IA,
+            S.ID,
+            S.KY,
+            S.MI,
+            S.MN,
+            S.MT,
+            S.ND,
+            S.NE,
+            S.NM,
+            S.NY,
+            S.OK,
+            S.PA,
+            S.RI,
+            S.SC,
+            S.UT,
+            S.WV,
+        )
+        for year in GRAPH_SCOPE_YEARS
+    }
 )
 """Returns with a docs/validation/state-fixtures document of official values."""
 
@@ -84,38 +113,133 @@ def _both_years(*beads: str) -> dict[int, tuple[str, ...]]:
 # deprecated itemized_deductions (and, for now, federal_itemized.regular_tax)
 # straight into its own itemized line, which no state's law defines that way.
 _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
-    S.AL: _both_years("tenforty-yu51", "tenforty-nuc6"),
-    S.AR: _both_years("tenforty-nuc6"),
-    S.AZ: _both_years("tenforty-nuc6"),
+    S.AL: _both_years("tenforty-nuc6", "tenforty-s48h.47", "tenforty-yu51"),
+    S.AR: {
+        2024: (
+            "tenforty-b72.57",
+            "tenforty-b72.58",
+            "tenforty-b72.59",
+            "tenforty-b72.87",
+            "tenforty-nuc6",
+            "tenforty-tj2.20",
+        ),
+        2025: (
+            "tenforty-b72.56",
+            "tenforty-b72.57",
+            "tenforty-b72.58",
+            "tenforty-b72.59",
+            "tenforty-b72.87",
+            "tenforty-nuc6",
+            "tenforty-tj2.20",
+        ),
+    },
+    S.AZ: {
+        2024: (
+            "tenforty-b72.60",
+            "tenforty-b72.61",
+            "tenforty-nuc6",
+        ),
+        2025: (
+            "tenforty-b72.42",
+            "tenforty-b72.61",
+            "tenforty-nuc6",
+        ),
+    },
     S.CA: _both_years(
-        "tenforty-b72.54", "tenforty-tj2.20", "tenforty-yu51", "tenforty-nuc6"
+        "tenforty-b72.42",
+        "tenforty-b72.54",
+        "tenforty-nuc6",
+        "tenforty-s48h.44",
+        "tenforty-tj2.20",
+        "tenforty-yu51",
     ),
     S.CO: _both_years("tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"),
-    S.DE: _both_years("tenforty-nuc6"),
+    S.CT: _both_years("tenforty-b72.62"),
+    S.DC: {
+        2024: (
+            "tenforty-b72.64",
+            "tenforty-s48h.73",
+            "tenforty-tj2.20",
+        ),
+        2025: (
+            "tenforty-b72.63",
+            "tenforty-b72.64",
+            "tenforty-s48h.73",
+        ),
+    },
+    S.DE: _both_years("tenforty-nuc6", "tenforty-s48h.52"),
     S.GA: _both_years("tenforty-b72.42", "tenforty-nuc6"),
-    S.HI: _both_years("tenforty-b72.41", "tenforty-tj2.20", "tenforty-nuc6"),
+    S.HI: _both_years("tenforty-b72.41", "tenforty-nuc6", "tenforty-tj2.20"),
+    S.IA: _both_years("tenforty-b72.65", "tenforty-b72.66"),
+    S.ID: {
+        2024: (
+            "tenforty-b72.42",
+            "tenforty-s48h.53",
+        ),
+        2025: (
+            "tenforty-b72.42",
+            "tenforty-b72.67",
+            "tenforty-s48h.53",
+        ),
+    },
     S.IN: _both_years("tenforty-b72.42"),
-    S.KS: _both_years("tenforty-b72.42", "tenforty-tj2.20", "tenforty-nuc6"),
+    S.KS: _both_years("tenforty-b72.42", "tenforty-nuc6", "tenforty-tj2.20"),
+    S.KY: _both_years("tenforty-b72.42", "tenforty-b72.68", "tenforty-b72.69"),
     S.LA: {2024: ("tenforty-tj2.20",)},
     S.MA: _both_years("tenforty-b72.40"),
     S.MD: _both_years("tenforty-nuc6"),
     S.ME: _both_years("tenforty-nuc6"),
-    S.MN: _both_years("tenforty-nuc6"),
     S.MI: _both_years("tenforty-s48h.45"),
+    S.MN: _both_years(
+        "tenforty-b72.42",
+        "tenforty-b72.70",
+        "tenforty-b72.71",
+        "tenforty-nuc6",
+        "tenforty-s48h.59",
+        "tenforty-tj2.20",
+    ),
     S.MO: _both_years("tenforty-b72.46", "tenforty-nuc6"),
-    S.MT: _both_years("tenforty-b72.7"),
+    S.MT: _both_years("tenforty-b72.7", "tenforty-b72.42", "tenforty-b72.72"),
     S.NC: _both_years("tenforty-nuc6"),
+    S.ND: _both_years(
+        "tenforty-b72.42", "tenforty-b72.73", "tenforty-b72.74", "tenforty-tj2.20"
+    ),
+    S.NE: _both_years("tenforty-b72.42", "tenforty-b72.75", "tenforty-b72.76"),
     S.NJ: _both_years("tenforty-b72.38", "tenforty-tj2.20"),
-    S.NY: _both_years("tenforty-b72.4", "tenforty-tj2.20", "tenforty-nuc6"),
+    S.NM: _both_years("tenforty-b72.77", "tenforty-s48h.62", "tenforty-tj2.20"),
+    S.NY: _both_years(
+        "tenforty-b72.4",
+        "tenforty-b72.42",
+        "tenforty-b72.49",
+        "tenforty-nuc6",
+        "tenforty-tj2.20",
+    ),
+    S.OK: _both_years("tenforty-b72.78", "tenforty-b72.79"),
+    S.PA: _both_years("tenforty-b72.42", "tenforty-s48h.46"),
+    S.RI: _both_years("tenforty-b72.85", "tenforty-b72.86"),
+    S.SC: {
+        2024: (
+            "tenforty-b72.80",
+            "tenforty-b72.82",
+            "tenforty-s48h.66",
+        ),
+        2025: (
+            "tenforty-b72.81",
+            "tenforty-b72.82",
+            "tenforty-s48h.66",
+        ),
+    },
+    S.UT: _both_years("tenforty-b72.83", "tenforty-b72.84"),
     S.VA: _both_years("tenforty-b72.37", "tenforty-b72.42", "tenforty-nuc6"),
     S.VT: _both_years(
         "tenforty-b72.20",
         "tenforty-b72.42",
         "tenforty-b72.47",
-        "tenforty-tj2.20",
         "tenforty-nuc6",
+        "tenforty-tj2.20",
     ),
     S.WI: _both_years("tenforty-b72.20", "tenforty-nuc6"),
+    S.WV: _both_years("tenforty-b72.42", "tenforty-tj2.20"),
 }
 
 KNOWN_GRAPH_DEFECTS: dict[tuple[OTSState, int], tuple[str, ...]] = {
@@ -127,16 +251,18 @@ KNOWN_GRAPH_DEFECTS: dict[tuple[OTSState, int], tuple[str, ...]] = {
 
 UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
     {
-        "tenforty-b72.7",
         "tenforty-b72.20",
         "tenforty-b72.37",
         "tenforty-b72.38",
         "tenforty-b72.40",
         "tenforty-b72.46",
         "tenforty-b72.47",
-        "tenforty-b72.54",
+        "tenforty-b72.68",
+        "tenforty-b72.69",
+        "tenforty-b72.70",
+        "tenforty-b72.71",
+        "tenforty-b72.86",
         "tenforty-nuc6",
-        "tenforty-s48h.45",
         "tenforty-yu51",
     }
 )
