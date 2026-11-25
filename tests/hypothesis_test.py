@@ -10,6 +10,7 @@ from tenforty.core import ots_drops_input, ots_reads_input
 from tenforty.models import (
     OTSFilingStatus,
     OTSState,
+    UnsupportedInputError,
 )
 from tenforty.ots_state_gaps import ots_state_input_gap
 
@@ -302,23 +303,28 @@ def test_evaluate_return_properties(
     if "long_term_capital_gains" in gaps:
         long_term_capital_gains = 0.0
     itemized_deductions = 0.0 if "itemized_deductions" in gaps else itemized_deductions
-    result = tenforty.evaluate_return(
-        year=year,
-        state=state,
-        filing_status=filing_status,
-        num_dependents=num_dependents,
-        w2_income=w2_income,
-        taxable_interest=taxable_interest,
-        qualified_dividends=qualified_dividends,
-        ordinary_dividends=ordinary_dividends,
-        short_term_capital_gains=short_term_capital_gains,
-        long_term_capital_gains=long_term_capital_gains,
-        schedule_1_income=schedule_1_income,
-        itemized_deductions=itemized_deductions,
-        state_adjustment=state_adjustment,
-        incentive_stock_option_gains=incentive_stock_option_gains,
-        backend="ots",
-    )
+    try:
+        result = tenforty.evaluate_return(
+            year=year,
+            state=state,
+            filing_status=filing_status,
+            num_dependents=num_dependents,
+            w2_income=w2_income,
+            taxable_interest=taxable_interest,
+            qualified_dividends=qualified_dividends,
+            ordinary_dividends=ordinary_dividends,
+            short_term_capital_gains=short_term_capital_gains,
+            long_term_capital_gains=long_term_capital_gains,
+            schedule_1_income=schedule_1_income,
+            itemized_deductions=itemized_deductions,
+            state_adjustment=state_adjustment,
+            incentive_stock_option_gains=incentive_stock_option_gains,
+            backend="ots",
+        )
+    except UnsupportedInputError as refusal:
+        # Value-dependent domain limits (MA 2024-2025) cannot be zeroed up front.
+        assume("outside what OTS computes" not in str(refusal))
+        raise
 
     assert (
         abs((result.federal_total_tax + result.state_total_tax) - result.total_tax)
@@ -427,14 +433,19 @@ def test_qualified_dividends_properly_taxed(
     assume(is_state_supported(year, state, filing_status))
     assume(not ots_state_input_gap("ordinary_dividends", year, state))
     # Test with only qualified dividends
-    result = tenforty.evaluate_return(
-        year=year,
-        state=state,
-        filing_status=filing_status,
-        w2_income=0,
-        qualified_dividends=qualified_dividends,
-        backend="ots",
-    )
+    try:
+        result = tenforty.evaluate_return(
+            year=year,
+            state=state,
+            filing_status=filing_status,
+            w2_income=0,
+            qualified_dividends=qualified_dividends,
+            backend="ots",
+        )
+    except UnsupportedInputError as refusal:
+        # MA 2024-2025 refuses dividends outside what OTS MA_1 computes
+        assume("outside what OTS computes" not in str(refusal))
+        raise
 
     # Compare with ordinary dividends explicitly set
     result_with_ordinary = tenforty.evaluate_return(

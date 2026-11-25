@@ -100,12 +100,14 @@ the official 2024 and 2025 forms.
 
 | State form | Years | Refused when nonzero | Where the state form uses it | Tracked in |
 |---|---|---|---|---|
-| MA_1 | 2018–2025 | `taxable_interest`, `ordinary_dividends` | MA Form 1 line 20, interest and dividends from Schedule B (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
-| MA_1 | 2018–2025 | `short_term_capital_gains` | MA Form 1 line 23a, 8.5% income from Schedule B (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
-| MA_1 | 2018–2025 | `long_term_capital_gains` | MA Form 1 line 24, long-term capital gains from Schedule D (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
-| MA_1 | 2018–2025 | `filer_65_or_older`, `spouse_65_or_older` | MA Form 1 line 2, the age 65 or over exemption (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
-| MA_1 | 2019–2025 | `self_employment_income` | MA Form 1 line 6a, business income from Schedule C (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
-| MA_1 | 2019–2025 | `rental_income` | MA Form 1 line 7, rental, royalty and REMIC income (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
+| MA_1 | 2018–2023 | `taxable_interest`, `ordinary_dividends` | MA Form 1 line 20, interest and dividends from Schedule B (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
+| MA_1 | 2018–2025 | `short_term_capital_gains` | MA Form 1 line 23a, 8.5% income from Schedule B (label from the OTS 2024 and 2025 MA_1 templates). OTS has no Schedule D, and its No Tax Status test omits gains | tenforty-r91.14 |
+| MA_1 | 2018–2025 | `long_term_capital_gains` | MA Form 1 line 24, long-term capital gains from Schedule D (label from the OTS 2024 and 2025 MA_1 templates). OTS has no Schedule D, and its No Tax Status test omits gains | tenforty-r91.14 |
+| MA_1 | 2018–2025 | `filer_65_or_older`, `spouse_65_or_older` | MA Form 1 line 2c, the age 65 or over exemption ($700 per person; label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
+| MA_1 | 2019–2023 | `self_employment_income` | MA Form 1 line 6a, business income from Schedule C (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
+| MA_1 | 2019–2023 | `rental_income` | MA Form 1 line 7, rental, royalty and REMIC income (label from the OTS 2024 and 2025 MA_1 templates) | tenforty-r91.14 |
+| MA_1 | 2024–2025 | `taxable_interest`, `ordinary_dividends`, when Form 1 line 19 plus the interest and dividends exceeds the 4% surtax threshold ($1,053,750 for 2024, $1,083,150 for 2025) | The 4% surtax base includes Schedule B income; OTS measures it on line 19 alone | tenforty-r91.14 |
+| MA_1 | 2024–2025 | `taxable_interest`, `ordinary_dividends`, for Single, Head of Household or joint returns whose exemptions exceed ordinary income less line 11 | Schedule B line 36: excess exemptions apply against interest and dividends; OTS does not. Married/Sep cannot transfer, so it is not refused | tenforty-r91.14 |
 | NJ_1040 | 2023–2025 | `num_dependents` | NJ-1040 lines 10 and 11, the $1,500 exemption per dependent | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `filer_65_or_older`, `spouse_65_or_older` | NJ-1040 line 7, the $1,000 senior 65+ exemption | tenforty-r91.20 |
 | NJ_1040 | 2023–2025 | `rental_income` | NJ-1040 line 23, net gains or income from rents, royalties, patents and copyrights | tenforty-r91.20 |

@@ -10,6 +10,7 @@ import json
 import math
 import warnings
 from collections.abc import Callable
+from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
 from functools import partial
 from typing import Any
@@ -411,6 +412,9 @@ class NaturalFormMapping(BaseModel):
     # Applied to a natural output after `output_map` names it, for a quantity the
     # form defines from an OTS line rather than reporting the line itself.
     output_transforms: dict[str, Callable[[float], float]] = {}
+    # Like `output_transforms`, but computed from the form's raw OTS output lines
+    # for a quantity that no single line reports.
+    output_line_transforms: dict[str, Callable[[dict[str, Any]], float]] = {}
 
 
 class SubordinateFormConfig(BaseModel):
@@ -814,10 +818,42 @@ class TaxReturnInput(BaseModel):
         Security wage base, so the base never enters. `w2_income` is a household
         aggregate, so a joint return takes the one-earner reading (all on 11a),
         as `schedule_se_ss_wages` does and as the graph's line 11 does; a two-earner
-        couple is then at most $100 high, or $180 once the 4% surtax applies. MA_1 maps
-        no self-employment income, so its SE-tax share is not added here.
+        couple is then at most $100 high, or $180 once the 4% surtax applies.
+
+        For 2024 and 2025, self-employment tax counts toward the same $2,000 (the
+        DOR line 11 instruction, derivation ambiguity 1 in docs/validation/
+        derivations/ma-2024-2025.md): 15.3% of 92.35% of net earnings. The wage
+        base never enters, because wages or earnings past it already exceed the
+        cap. Earlier years' instructions are not verified here, and MA_1 delivers
+        no self-employment income for them, so they keep the wage-only figure.
+        The whole-dollar rounding the 2024 and 2025 return requires is likewise
+        applied to those years only.
         """
-        return min(2_000.0, 0.0765 * max(0.0, float(self.w2_income)))
+        wage_tax = 0.0765 * max(0.0, float(self.w2_income))
+        counts_self_employment_tax = (
+            self.year.value >= 2024 and self.self_employment_income * 0.9235 >= 400.0
+        )
+        self_employment_tax = (
+            0.153 * 0.9235 * float(self.self_employment_income)
+            if counts_self_employment_tax
+            else 0.0
+        )
+        deduction = min(2_000.0, wage_tax + self_employment_tax)
+        if self.year.value < 2024:
+            return deduction
+        return float(Decimal(str(deduction)).quantize(Decimal(1), ROUND_HALF_UP))
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def ma_interest_and_dividends(self) -> float:
+        """Massachusetts Form 1 line 20, the Schedule B interest and dividends.
+
+        OTS MA_1 reads line 20 as one amount and floors it at zero. Interest and
+        dividends are taxed at 5% on line 21 (M.G.L. c.62 4(a)(2)). Gains are not
+        mapped: OTS has no Schedule B or D, and its No Tax Status worksheet takes
+        line 20 but no gain.
+        """
+        return float(self.taxable_interest) + float(self.ordinary_dividends)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -1205,17 +1241,18 @@ def _restricted_filing_status(
     return status_line
 
 
-def _ma_adjusted_gross_income(total_5_percent_income: float) -> float:
-    """MA AGI from Form 1 line 10, as the No Tax Status AGI worksheet computes it.
+def _ma_adjusted_gross_income(ots_lines: dict[str, Any]) -> float:
+    """MA AGI as the No Tax Status AGI worksheet computes it.
 
     Worksheet line 1 is Form 1 line 10 floored at zero (OTS computes it as
-    ``ws[1] = NotLessThanZero(L[10])`` in every MA_1 year). Its remaining
-    lines (Schedule Y deductions, exempt bank interest, line 20 interest and
-    dividends) are zero for every input the MA_1 input map sets, so the floored
-    line 10 is the worksheet's AGI. OTS fills the worksheet only for the
-    statuses eligible for No Tax Status, but prints line 10 for all of them.
+    ``ws[1] = NotLessThanZero(L[10])`` in every MA_1 year) and line 5 adds the
+    Schedule B interest and dividends of Form 1 line 20, which line 21 taxes.
+    Gains are left out because the OTS map refuses them (tenforty-r91.14).
+    Schedule Y deductions and exempt bank interest are zero for every input the
+    MA_1 input map sets. OTS fills the worksheet only for the statuses eligible
+    for No Tax Status, but prints lines 10 and 20 for all of them.
     """
-    return max(0.0, total_5_percent_income)
+    return max(0.0, float(ots_lines["L10"])) + float(ots_lines.get("L20", 0.0))
 
 
 # MA_1 parses Widow(er) but its exemption switch has no case for it, so the
@@ -1318,13 +1355,16 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L3",
             "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
+            "self_employment_income": "L6a",
+            "rental_income": "L7",
+            "ma_interest_and_dividends": "L20",
         },
         "output_map": {
             "L21": "taxable_income",
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2024,
@@ -1500,13 +1540,16 @@ _NATURAL_FORM_CONFIG = [
             "w2_income": "L3",
             "ma_contribution_deduction": "L11a",
             "num_dependents": "Dependents",
+            "self_employment_income": "L6a",
+            "rental_income": "L7",
+            "ma_interest_and_dividends": "L20",
         },
         "output_map": {
             "L21": "taxable_income",
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2025,
@@ -1677,7 +1720,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2023,
@@ -1817,7 +1860,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2022,
@@ -1887,7 +1930,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2021,
@@ -1957,7 +2000,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2020,
@@ -2026,7 +2069,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2019,
@@ -2095,7 +2138,7 @@ _NATURAL_FORM_CONFIG = [
             "L10": "adjusted_gross_income",
             "L28": "total_tax",
         },
-        "output_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
+        "output_line_transforms": {"adjusted_gross_income": _ma_adjusted_gross_income},
     },
     {
         "year": 2018,

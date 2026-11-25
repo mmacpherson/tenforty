@@ -7,7 +7,7 @@ and the text to send.
 
 **Status: drafted, not sent.** Sending is Mike's, in his own time.
 
-**Bundle for one email (2026-11-04):** reports 1, 2, 4–18; report 22 (2026-11-07) is newer and not yet in that bundle. Report 3 is withdrawn
+**Bundle for one email (2026-11-04):** reports 1, 2, 4–18; reports 22 and 23 (2026-11-07 and later) are newer and not yet in that bundle. Report 3 is withdrawn
 (our own error), and report 9 is offered tentatively because it is not
 reproduced end to end. The "Pending adjudication" section at the end lists
 OTS-vs-Tax-Calculator disagreements that are **not** yet established as OTS
@@ -1051,6 +1051,73 @@ $70,001 of wages it reports $2,321. 2023 and 2024 behave the same way.
 at-least/less-than). We may be missing why the epsilon is there, so we offer
 this tentatively. Not patched locally: it changes a computed figure. Recorded
 as a strict signature in `tests/ots_nj_gains_business_test.py`.
+
+---
+
+## 23. MA Form 1: the 4% surtax ignores Schedule B and D income, the No Tax Status test omits gains, and table rows are priced at income plus 25 (findings MA-OTS-SCHEDB-SURTAX-NOTAX, MA-OTS-TABLE-INCOME-PLUS-25)
+
+**Status: draft, not sent.** Mike sends.
+
+**Releases:** OpenTaxSolver2024_22.06, OpenTaxSolver2025_23.06 (MA_1)
+**Files:** `src/taxsolve_MA_1_2024.c`, `src/taxsolve_MA_1_2025.c` (surtax test on
+`L[19]`; No Tax Status worksheet `ws[5] = L[20]`, no capital component)
+
+Four separate findings. The first is ours, not OTS's.
+
+**(a) Not an OTS defect: our missing Schedule B calculation (case O).** The
+record's case O is Single, wages $4,000 and $9,000 of gross interest. The Form 1
+line 19 instructions apply exemptions in excess of line 17 against interest, so
+Schedule B line 36 is $706 and the Schedule B total carried to Form 1 line 20 is
+$8,294. OTS line 20 takes that completed Schedule B amount, and we fed it the
+gross $9,000. Entering $9,000 in the 2025 raw form gives tax $451. Entering
+$8,294 gives $416. That $451 is our error and is not reported upstream. tenforty
+refuses the domain (Single, Head of Household or joint, exemptions exceeding
+other income) until the mapping layer computes Schedule B.
+
+**(b) Residual table discrepancy, explained by (d).** With the completed amount
+entered ($8,294), OTS returns $416 where the published tax table row (2025
+instructions, 8,250 to 8,300) gives $414. The mechanism in (d) accounts for it:
+5% x (8,294 + 25) = 415.95, against 5% x (8,250 + 25) = 413.75 for the row.
+
+**(c) Native surtax and No Tax Status defects, independently demonstrable.**
+Reproducible from the raw form without our mapping:
+
+- The program tests the surtax on `L[19]` alone. The 2024 and 2025 Form 1 and
+  Schedule 4% Surtax take Form 1 line 19 plus Schedule B line 37 plus Schedule D
+  line 21 above $1,053,750 (2024) or $1,083,150 (2025). 2025 Married/Joint,
+  wages $1,000,000 and a $200,000 short-term gain (line 23a), record case N2: the
+  derivation gives total tax $70,702, OTS reports $66,460 (no surtax).
+- The No Tax Status worksheet takes line 20 but hardcodes its capital component
+  to zero, although the DOR AGI worksheet counts Schedule B and D gains. Single,
+  wages $7,000 with $10,000 of long-term gain (Schedule D tax $500 on line 24):
+  the official AGI is $17,000, above the $8,000 No Tax Status threshold, yet OTS
+  computes AGI $7,000 and sets line 28 to $0.
+
+**(d) Table rows below $24,000 are priced at income plus 25 (finding
+MA-OTS-TABLE-INCOME-PLUS-25), confirmed.** `ComputeTax` in both releases is
+
+```c
+if (taxableIncome < 24000.0)
+  return (int)(taxrate * (taxableIncome + 25.0) + 0.5);
+```
+
+(in our amalgamation `src/tenforty/otslib/ots_amalgamation.cpp:80747` for 2024
+and `:94087` for 2025). The published table prices a $50 row at 5% of its
+midpoint, which is the row's lower bound plus 25. OTS adds 25 to the actual
+income instead, so within a row its tax rises with income by 5% x (income -
+lower bound), up to $2.50 across a row, before whole-dollar rounding. Reproducer
+in the supported domain, 2024 and 2025 Single: wages $7,000 plus interest
+$10,000 gives line 21 $12,064 and line 28 $604, matching the published row
+(over $12,050, not over $12,100: $604; 2024 instructions p.36, 2025 p.38).
+Interest $10,030 gives line 21 $12,094, the same row, and OTS reports $606.
+Recorded as a strict signature in `tests/ma_form1_ots_income_test.py`. Possible
+fix: price the row's midpoint, for example from `floor((income-eps)/50)*50 + 25`.
+Not patched locally: it changes a computed figure.
+
+We may be misreading how the form is meant to be fed, so we offer (c)
+tentatively; (d) is confirmed from the source. Not patched locally. tenforty refuses capital gains on MA 2024 and
+2025 and the Schedule B domains above, and records cases F, G, N2 and O as strict
+xfails in `tests/ma_form1_ots_income_test.py`.
 
 ---
 

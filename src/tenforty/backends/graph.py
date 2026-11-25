@@ -52,9 +52,13 @@ _CARRIED_BY_DERIVED_FIELDS = {
     "eitc_eligible",
 }
 # Computed fields that exist only to fill an OTS form line the graph derives in
-# its own spec from the same naturals: Massachusetts line 11a comes from
-# w2_income on both backends.
-_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction", *OTS_INPUT_CARRIERS.values()}
+# its own spec from the same naturals: Massachusetts lines 11a and 20 come
+# from the income naturals on both backends.
+_OTS_ONLY_DERIVED_FIELDS = {
+    "ma_contribution_deduction",
+    "ma_interest_and_dividends",
+    *OTS_INPUT_CARRIERS.values(),
+}
 
 
 def _ohio_natural_joint_credit_values(
