@@ -18,7 +18,7 @@
         "generated_by": "resolveForms",
         "schema_version": 2,
         "year": 2025,
-        "sha256": "9101a3b3b00aefe9072cfe33e4c060b0f5b690af820da7bd39031f230b236966"
+        "sha256": "20a1bd4e9cb88300174d5aeaa2148c1083a644828d83f14f1e68be549dcbacb9"
       }
     }
   },
@@ -1870,8 +1870,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-b72.78"],
-        "2025": ["tenforty-b72.78"]
+        "2024": ["tenforty-b72.42", "tenforty-b72.78", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.42", "tenforty-b72.78", "tenforty-tj2.20"]
       }
     },
     "OR": {
@@ -2024,6 +2024,7 @@
       "exclusion_reasons": {
         "2024": [
           "tenforty-b72.42",
+          "tenforty-b72.80",
           "tenforty-b72.82",
           "tenforty-s48h.66",
           "tenforty-tj2.20"
