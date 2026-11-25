@@ -16,9 +16,15 @@ graph starts matching (the defect was fixed, so the signature must go).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 from .evidence import EvidenceKind, TaxEvidence
+from .state_official_batch2 import BATCH2_CASES, BATCH2_DEFECTS, BATCH2_UNPINNED
+from .state_official_model import (
+    GraphDefect,
+    OfficialCase,
+    UnpinnedCase,
+    case,
+    register_evidence,
+)
 
 OH_ONE_EARNER = {"spouses_both_have_qualifying_income": False}
 """A one-earner couple: the spouses do not both have $500 of qualifying income
@@ -26,8 +32,6 @@ OH_ONE_EARNER = {"spouses_both_have_qualifying_income": False}
 
 OH_TWO_EARNERS = {"spouses_both_have_qualifying_income": True}
 """The archived split-earner cases explicitly give each spouse at least $500."""
-
-Outcome = tuple[float, float]
 
 
 def _evidence(record: str, sources: str) -> TaxEvidence:
@@ -47,81 +51,17 @@ IL_EVIDENCE = _evidence("il-2024-2025.md", "IDOR IL-1040 instructions and forms"
 NC_EVIDENCE = _evidence("nc-2024-2025.md", "NCDOR D-401/D-400 and G.S. 105")
 OH_EVIDENCE = _evidence("oh-2024-2025.md", "Ohio IT 1040 booklets and ORC 5747")
 
-_EVIDENCE = {
+for _state, _evidence_record in {
     "CO": CO_EVIDENCE,
     "GA": GA_EVIDENCE,
     "IL": IL_EVIDENCE,
     "NC": NC_EVIDENCE,
     "OH": OH_EVIDENCE,
-}
-
-STATUS = {
-    "S": "Single",
-    "MFJ": "Married/Joint",
-    "HoH": "Head_of_House",
-}
+}.items():
+    register_evidence(_state, _evidence_record)
 
 
-@dataclass(frozen=True)
-class OfficialCase:
-    """One derived return and the outcomes its sources permit."""
-
-    case_id: str
-    state: str
-    year: int
-    filing_status: str
-    inputs: dict[str, float]
-    outcomes: tuple[Outcome, ...]
-    check_taxable_income: bool = True
-    note: str = ""
-
-    @property
-    def evidence(self) -> TaxEvidence:
-        """Provenance of every value in this case."""
-        return _EVIDENCE[self.state]
-
-
-@dataclass(frozen=True)
-class UnpinnedCase:
-    """A derived case the public inputs cannot express, and why."""
-
-    case_id: str
-    reason: str
-
-
-@dataclass(frozen=True)
-class GraphDefect:
-    """A bounded graph-side departure: graph minus the primary outcome."""
-
-    bead: str
-    quantity: str
-    minimum: float
-    maximum: float
-    reason: str = field(default="")
-
-
-def _case(
-    state: str,
-    year: int,
-    label: str,
-    status: str,
-    outcomes: tuple[Outcome, ...] | Outcome,
-    note: str = "",
-    check_taxable_income: bool = True,
-    **inputs: float,
-) -> OfficialCase:
-    if outcomes and not isinstance(outcomes[0], tuple):
-        outcomes = (outcomes,)
-    return OfficialCase(
-        f"{state}-{year}-{label}",
-        state,
-        year,
-        STATUS[status],
-        inputs,
-        outcomes,
-        check_taxable_income,
-        note,
-    )
+_case = case
 
 
 def _ga(year: int, label, status, ti, tax, **inputs) -> OfficialCase:
@@ -509,11 +449,11 @@ CO_CASES = [
     _co(2025, "T4", "S", (50_000, 2_198), w2_income=65_750),
 ]
 
-OFFICIAL_CASES: list[OfficialCase] = (
-    CO_CASES + GA_CASES + IL_CASES + NC_CASES + OH_CASES
-)
+BATCH1_CASES: list[OfficialCase] = CO_CASES + GA_CASES + IL_CASES + NC_CASES + OH_CASES
 
-UNPINNED: list[UnpinnedCase] = []
+OFFICIAL_CASES: list[OfficialCase] = BATCH1_CASES + BATCH2_CASES
+
+UNPINNED: list[UnpinnedCase] = [*BATCH2_UNPINNED]
 
 ROUNDING = "tenforty-b72.42"
 TABLE = "tenforty-tj2.20"
@@ -548,13 +488,24 @@ def _has_cents(amount: float) -> bool:
 
 
 def _rounding(case: OfficialCase) -> dict[str, GraphDefect]:
-    """Bound the graph's cents where the form rounds tax to the dollar."""
+    """Bound the graph's cents where the form rounds tax to the dollar.
+
+    The bound is measured from the first permitted outcome whose rate product
+    has cents: at Colorado's T1 threshold only the booklet reading's does.
+    """
     rate = RATE[(case.state, case.year)]
-    if not any(
-        taxable > 0 and _has_cents(taxable * rate) for taxable, _ in case.outcomes
-    ):
+    with_cents = [
+        index
+        for index, (taxable, _) in enumerate(case.outcomes)
+        if taxable > 0 and _has_cents(taxable * rate)
+    ]
+    if not with_cents:
         return {}
-    return {"state_total_tax": GraphDefect(ROUNDING, "state_total_tax", -0.5, 0.5)}
+    return {
+        "state_total_tax": GraphDefect(
+            ROUNDING, "state_total_tax", -0.5, 0.5, outcome=with_cents[0]
+        )
+    }
 
 
 def _deduction_missing(
@@ -609,8 +560,8 @@ def _defects(case: OfficialCase) -> dict[str, GraphDefect]:
 
 
 GRAPH_DEFECTS: dict[str, dict[str, GraphDefect]] = {
-    case.case_id: defects for case in OFFICIAL_CASES if (defects := _defects(case))
-}
+    case.case_id: defects for case in BATCH1_CASES if (defects := _defects(case))
+} | BATCH2_DEFECTS
 """case_id -> quantity -> bounded graph-side departure.
 
 Bounds come from each defect's mechanism and the record's own figures (the

@@ -1,4 +1,31 @@
 ## [Unreleased]
+### Added (validation)
+- **Official-value fixtures for 23 more graph states, 2024 and 2025**
+  (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,
+  NE, NM, NY, OK, PA, RI, SC, UT and WV. 440 returns are pinned to blind
+  derivations from each state's own forms, instructions and tax tables
+  (`docs/validation/derivations/`), committed before any comparison with
+  tenforty; 16 more are recorded as not expressible with public inputs. A
+  second blind derivation of 56 of these returns (NY, CA, MN, CT, AL, IA, MT)
+  agreed on every tax value.
+- Each pinned quantity's graph departure is a bounded strict signature naming
+  its bead, and the return stays out of `backend="auto"` scope while the bead
+  is open. No state enters scope with this change.
+- Limits: Kentucky's `state_total_tax` is mapped to Form 740 line 12, before
+  credits, so its fixtures pin line 12 and cannot see the missing family size
+  and age credits (tenforty-b72.68, tenforty-b72.69). Departures in quantities
+  the fixtures do not pin, such as credits after the pinned line, are filed as
+  beads without a signature. 32 new defects are filed (tenforty-b72.56 to
+  b72.87), among them stale or copied tables (AR 2025 repeats 2024; SC 2024
+  brackets; MN 2024 head-of-household standard deduction; OK joint brackets),
+  missing exemptions and credits (MI, UT, OK, RI, AZ, NE, DE, KY), and DC's
+  2025 standard deduction, which follows federal law where DC does not.
+- The official-value judge accepts a permitted alternative only as an exact
+  match, measures each signature from the outcome it names (the primary unless
+  stated), and fails a return that matches a permitted outcome while a
+  signature remains on it.
+- Every income-tax state the graph covers now has official fixtures for 2024
+  and 2025 except NH and LA 2025.
 ### Changed (graph scope)
 - **Mississippi 2025 leaves graph scope** (tenforty-s48h.77). Form 80-105
   line 17 is 4.4% of the taxed balance, entered in whole dollars with 50 cents

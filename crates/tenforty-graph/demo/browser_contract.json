@@ -394,8 +394,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-yu51", "tenforty-nuc6", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-yu51", "tenforty-nuc6", "evidence: tenforty-b72.12"]
+        "2024": ["tenforty-nuc6", "tenforty-s48h.47", "tenforty-yu51"],
+        "2025": ["tenforty-nuc6", "tenforty-s48h.47", "tenforty-yu51"]
       }
     },
     "AR": {
@@ -434,8 +434,23 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
+        "2024": [
+          "tenforty-b72.57",
+          "tenforty-b72.58",
+          "tenforty-b72.59",
+          "tenforty-b72.87",
+          "tenforty-nuc6",
+          "tenforty-tj2.20"
+        ],
+        "2025": [
+          "tenforty-b72.56",
+          "tenforty-b72.57",
+          "tenforty-b72.58",
+          "tenforty-b72.59",
+          "tenforty-b72.87",
+          "tenforty-nuc6",
+          "tenforty-tj2.20"
+        ]
       }
     },
     "AZ": {
@@ -474,8 +489,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.60", "tenforty-b72.61", "tenforty-nuc6"],
+        "2025": ["tenforty-b72.42", "tenforty-b72.61", "tenforty-nuc6"]
       }
     },
     "CA": {
@@ -515,17 +530,20 @@
       },
       "exclusion_reasons": {
         "2024": [
+          "tenforty-b72.42",
           "tenforty-b72.54",
+          "tenforty-nuc6",
+          "tenforty-s48h.44",
           "tenforty-tj2.20",
-          "tenforty-yu51",
-          "tenforty-nuc6"
+          "tenforty-yu51"
         ],
         "2025": [
+          "tenforty-b72.42",
           "tenforty-b72.54",
-          "tenforty-tj2.20",
-          "tenforty-yu51",
           "tenforty-nuc6",
-          "evidence: tenforty-b72.12"
+          "tenforty-s48h.44",
+          "tenforty-tj2.20",
+          "tenforty-yu51"
         ]
       }
     },
@@ -597,8 +615,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.62"],
+        "2025": ["tenforty-b72.62"]
       }
     },
     "DC": {
@@ -633,8 +651,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.64", "tenforty-s48h.73", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.63", "tenforty-b72.64", "tenforty-s48h.73"]
       }
     },
     "DE": {
@@ -673,8 +691,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
+        "2024": ["tenforty-nuc6", "tenforty-s48h.52"],
+        "2025": ["tenforty-nuc6", "tenforty-s48h.52"]
       }
     },
     "FL": {
@@ -785,8 +803,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-b72.41", "tenforty-tj2.20", "tenforty-nuc6"],
-        "2025": ["tenforty-b72.41", "tenforty-tj2.20", "tenforty-nuc6"]
+        "2024": ["tenforty-b72.41", "tenforty-nuc6", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.41", "tenforty-nuc6", "tenforty-tj2.20"]
       }
     },
     "IA": {
@@ -821,8 +839,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.65", "tenforty-b72.66"],
+        "2025": ["tenforty-b72.65", "tenforty-b72.66"]
       }
     },
     "ID": {
@@ -857,8 +875,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.42", "tenforty-s48h.53"],
+        "2025": ["tenforty-b72.42", "tenforty-b72.67", "tenforty-s48h.53"]
       }
     },
     "IL": {
@@ -969,8 +987,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-b72.42", "tenforty-tj2.20", "tenforty-nuc6"],
-        "2025": ["tenforty-b72.42", "tenforty-tj2.20", "tenforty-nuc6"]
+        "2024": ["tenforty-b72.42", "tenforty-nuc6", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.42", "tenforty-nuc6", "tenforty-tj2.20"]
       }
     },
     "KY": {
@@ -1005,8 +1023,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.42", "tenforty-b72.68", "tenforty-b72.69"],
+        "2025": ["tenforty-b72.42", "tenforty-b72.68", "tenforty-b72.69"]
       }
     },
     "LA": {
@@ -1193,8 +1211,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-s48h.45", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-s48h.45", "evidence: tenforty-b72.12"]
+        "2024": ["tenforty-s48h.45"],
+        "2025": ["tenforty-s48h.45"]
       }
     },
     "MN": {
@@ -1233,8 +1251,22 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-nuc6", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-nuc6", "evidence: tenforty-b72.12"]
+        "2024": [
+          "tenforty-b72.42",
+          "tenforty-b72.70",
+          "tenforty-b72.71",
+          "tenforty-nuc6",
+          "tenforty-s48h.59",
+          "tenforty-tj2.20"
+        ],
+        "2025": [
+          "tenforty-b72.42",
+          "tenforty-b72.70",
+          "tenforty-b72.71",
+          "tenforty-nuc6",
+          "tenforty-s48h.59",
+          "tenforty-tj2.20"
+        ]
       }
     },
     "MO": {
@@ -1425,8 +1457,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["tenforty-b72.7", "evidence: tenforty-b72.12"],
-        "2025": ["tenforty-b72.7", "evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.7", "tenforty-b72.42", "tenforty-b72.72"],
+        "2025": ["tenforty-b72.7", "tenforty-b72.42", "tenforty-b72.72"]
       }
     },
     "NC": {
@@ -1501,8 +1533,18 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": [
+          "tenforty-b72.42",
+          "tenforty-b72.73",
+          "tenforty-b72.74",
+          "tenforty-tj2.20"
+        ],
+        "2025": [
+          "tenforty-b72.42",
+          "tenforty-b72.73",
+          "tenforty-b72.74",
+          "tenforty-tj2.20"
+        ]
       }
     },
     "NE": {
@@ -1537,8 +1579,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.42", "tenforty-b72.75", "tenforty-b72.76"],
+        "2025": ["tenforty-b72.42", "tenforty-b72.75", "tenforty-b72.76"]
       }
     },
     "NH": {
@@ -1651,8 +1693,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.77", "tenforty-s48h.62", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.77", "tenforty-s48h.62", "tenforty-tj2.20"]
       }
     },
     "NV": {
@@ -1735,15 +1777,17 @@
       "exclusion_reasons": {
         "2024": [
           "tenforty-b72.4",
-          "tenforty-tj2.20",
+          "tenforty-b72.42",
+          "tenforty-b72.49",
           "tenforty-nuc6",
-          "evidence: tenforty-b72.12"
+          "tenforty-tj2.20"
         ],
         "2025": [
           "tenforty-b72.4",
-          "tenforty-tj2.20",
+          "tenforty-b72.42",
+          "tenforty-b72.49",
           "tenforty-nuc6",
-          "evidence: tenforty-b72.12"
+          "tenforty-tj2.20"
         ]
       }
     },
@@ -1829,8 +1873,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.78", "tenforty-b72.79"],
+        "2025": ["tenforty-b72.78", "tenforty-b72.79"]
       }
     },
     "OR": {
@@ -1909,8 +1953,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.42", "tenforty-s48h.46"],
+        "2025": ["tenforty-b72.42", "tenforty-s48h.46"]
       }
     },
     "RI": {
@@ -1945,8 +1989,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.85", "tenforty-b72.86"],
+        "2025": ["tenforty-b72.85", "tenforty-b72.86"]
       }
     },
     "SC": {
@@ -1981,8 +2025,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.80", "tenforty-b72.82", "tenforty-s48h.66"],
+        "2025": ["tenforty-b72.81", "tenforty-b72.82", "tenforty-s48h.66"]
       }
     },
     "SD": {
@@ -2113,8 +2157,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.83", "tenforty-b72.84"],
+        "2025": ["tenforty-b72.83", "tenforty-b72.84"]
       }
     },
     "VA": {
@@ -2197,15 +2241,15 @@
           "tenforty-b72.20",
           "tenforty-b72.42",
           "tenforty-b72.47",
-          "tenforty-tj2.20",
-          "tenforty-nuc6"
+          "tenforty-nuc6",
+          "tenforty-tj2.20"
         ],
         "2025": [
           "tenforty-b72.20",
           "tenforty-b72.42",
           "tenforty-b72.47",
-          "tenforty-tj2.20",
-          "tenforty-nuc6"
+          "tenforty-nuc6",
+          "tenforty-tj2.20"
         ]
       }
     },
@@ -2313,8 +2357,8 @@
         "2025": false
       },
       "exclusion_reasons": {
-        "2024": ["evidence: tenforty-b72.12"],
-        "2025": ["evidence: tenforty-b72.12"]
+        "2024": ["tenforty-b72.42", "tenforty-tj2.20"],
+        "2025": ["tenforty-b72.42", "tenforty-tj2.20"]
       }
     },
     "WY": {

@@ -1,6 +1,14 @@
 [default]
 # Preserve the source PDF hash in the verbatim negative-half derivation archive.
-extend-ignore-re = ["\\b19113ba3\\b"]
+extend-ignore-re = [
+  "\\b19113ba3\\b",
+  # Source-PDF hash prefixes and download path ids in the verbatim b72.12
+  # derivation records.
+  "\\b[0-9a-f]{7,}\\b",
+  "\\b[0-9a-f]{4,}(-[0-9a-f]{4,})+\\b",
+  # "mis-read" in the verbatim Minnesota record.
+  "\\bmis-read\\b"
+]
 
 [default.extend-words]
 # "Ded" abbreviates "Deduction" in upstream OpenTaxSolver identifiers such as

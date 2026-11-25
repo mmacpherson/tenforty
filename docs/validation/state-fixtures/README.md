@@ -35,6 +35,29 @@ Their inputs and federal expectations are unchanged.
 | IL 2024–2025, 24 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [IL 2024–2025](IL-2024-2025.md) |
 | NC 2024–2025, 46 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [NC 2024–2025](NC-2024-2025.md) |
 | OH 2024–2025, 32 returns pinned | Independent derivation; blind Claude subagent, 2026-11-03, official sources only (b72.12) | [OH 2024–2025](OH-2024-2025.md) |
+| AL 2024–2025, 22 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [AL 2024–2025](AL-2024-2025.md) |
+| AR 2024–2025, 24 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [AR 2024–2025](AR-2024-2025.md) |
+| AZ 2024–2025, 15 returns pinned, 6 unpinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [AZ 2024–2025](AZ-2024-2025.md) |
+| CA 2024–2025, 21 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [CA 2024–2025](CA-2024-2025.md) |
+| CT 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [CT 2024–2025](CT-2024-2025.md) |
+| DC 2024–2025, 20 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [DC 2024–2025](DC-2024-2025.md) |
+| DE 2024–2025, 20 returns pinned, 2 unpinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [DE 2024–2025](DE-2024-2025.md) |
+| IA 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [IA 2024–2025](IA-2024-2025.md) |
+| ID 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [ID 2024–2025](ID-2024-2025.md) |
+| KY 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [KY 2024–2025](KY-2024-2025.md) |
+| MI 2024–2025, 16 returns pinned, 2 unpinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [MI 2024–2025](MI-2024-2025.md) |
+| MN 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [MN 2024–2025](MN-2024-2025.md) |
+| MT 2024–2025, 22 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [MT 2024–2025](MT-2024-2025.md) |
+| ND 2024–2025, 20 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [ND 2024–2025](ND-2024-2025.md) |
+| NE 2024–2025, 20 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [NE 2024–2025](NE-2024-2025.md) |
+| NM 2024–2025, 20 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [NM 2024–2025](NM-2024-2025.md) |
+| NY 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [NY 2024–2025](NY-2024-2025.md) |
+| OK 2024–2025, 16 returns pinned, 2 unpinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [OK 2024–2025](OK-2024-2025.md) |
+| PA 2024–2025, 20 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [PA 2024–2025](PA-2024-2025.md) |
+| RI 2024–2025, 20 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [RI 2024–2025](RI-2024-2025.md) |
+| SC 2024–2025, 18 returns pinned, 2 unpinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [SC 2024–2025](SC-2024-2025.md) |
+| UT 2024–2025, 18 returns pinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [UT 2024–2025](UT-2024-2025.md) |
+| WV 2024–2025, 20 returns pinned, 2 unpinned | Independent derivation; blind Claude subagent, 2026-11-11, official sources only (b72.12 batch 2) | [WV 2024–2025](WV-2024-2025.md) |
 
 For the two VA joint cases, wages are attributed entirely to the primary filer,
 so the official Spouse Tax Adjustment is zero. The simplified graph's
