@@ -475,6 +475,48 @@ def pa_joint_class_assumption(
     )
 
 
+NJ_AGE_65_ID = "nj.nj_1040.age_65_from_federal_flag"
+NJ_AGE_INPUTS: tuple[str, ...] = ("filer_65_or_older", "spouse_65_or_older")
+_NJ_AGE_65_YEARS: tuple[int, ...] = (2023, 2024, 2025)
+_NJ_AGE_65_TEXT = (
+    "New Jersey NJ-1040 line 7 gives $1,000 to a filer or spouse who was 65 or "
+    "older on December 31 of the tax year (born in 1958 or earlier for 2023, "
+    "1959 for 2024, 1960 for 2025). filer_65_or_older and spouse_65_or_older "
+    "carry no birth date and are the federal flags, which the IRS also sets for "
+    "a person born January 1 of the following year (1959 for 2023, 1960 for "
+    "2024, 1961 for 2025). Each flag is taken as NJ age 65 by December 31, so "
+    "for a filer or spouse born on that January 1 the NJ exemption is $1,000 "
+    "too high."
+)
+
+
+def nj_age_65_assumption(
+    row: FactRow, inputs: Mapping[str, object]
+) -> Assumption | None:
+    """Return the NJ age convention where an age flag reached line 7 on OTS.
+
+    The filer's flag always reaches line 7; the spouse's only on a joint
+    return, where OTS counts it.
+    """
+    if not (
+        row.state == "NJ"
+        and row.engine == "ots"
+        and row.year in _NJ_AGE_65_YEARS
+        and (
+            inputs.get("filer_65_or_older")
+            or (row.status == "Married/Joint" and inputs.get("spouse_65_or_older"))
+        )
+    ):
+        return None
+    return Assumption(
+        id=NJ_AGE_65_ID,
+        state="NJ",
+        input_path=None,
+        value="federal_flag",
+        text=_NJ_AGE_65_TEXT,
+    )
+
+
 @dataclass(frozen=True)
 class DefaultDecision:
     """The recorded category of one default.
@@ -600,6 +642,15 @@ DEFAULT_INVENTORY: tuple[DefaultDecision, ...] = (
         "precedent: no refusal, since household totals cannot reveal a split; "
         "reported on OTS PA joint returns with a business or gain amount until "
         "per-spouse PA class inputs (tenforty-s48h.75) exist.",
+    ),
+    DefaultDecision(
+        NJ_AGE_65_ID,
+        "transition",
+        None,
+        "Coordinator decision 2026-11-25 (astra review of r91.20): no refusal, "
+        "since the flag carries no birth date and the January 1 case is rare; "
+        "reported on OTS NJ returns where an age flag reaches line 7, until a "
+        "birth-year input exists.",
     ),
     DefaultDecision(
         "ma.form_1.line_11.one_earner",

@@ -1365,6 +1365,9 @@ def recorded_assumptions(
     pa_joint_classes = _facts.pa_joint_class_assumption(row, inputs)
     if pa_joint_classes is not None:
         records.append(pa_joint_classes)
+    nj_age_65 = _facts.nj_age_65_assumption(row, inputs)
+    if nj_age_65 is not None:
+        records.append(nj_age_65)
     if legacy_itemized != 0:
         if itemizes is None:
             raise RuntimeError(
@@ -1418,7 +1421,9 @@ def _evaluate_with_engine(
                     engine,
                     row,
                     itemizes,
-                    tax_input.model_dump(include=set(_facts.PA_CLASS_INPUTS)),
+                    tax_input.model_dump(
+                        include={*_facts.PA_CLASS_INPUTS, *_facts.NJ_AGE_INPUTS}
+                    ),
                 )
             }
         )

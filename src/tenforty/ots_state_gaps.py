@@ -126,19 +126,6 @@ OTS_STATE_INPUT_GAPS: tuple[StateInputGap, ...] = (
         },
     ),
     *_gaps(
-        "NJ_1040",
-        range(2023, 2026),
-        "tenforty-r91.20",
-        {
-            "num_dependents": "NJ-1040 lines 10 and 11, the $1,500 exemption per "
-            "dependent",
-            "filer_65_or_older": "NJ-1040 line 7, the $1,000 senior 65+ exemption",
-            "spouse_65_or_older": "NJ-1040 line 7, the $1,000 senior 65+ exemption",
-            "rental_income": "NJ-1040 line 23, net gains or income from rents, "
-            "royalties, patents and copyrights",
-        },
-    ),
-    *_gaps(
         "PA_40",
         range(2023, 2026),
         "tenforty-r91.21",
