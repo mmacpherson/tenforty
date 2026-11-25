@@ -1,4 +1,4 @@
-"""Strict source witness for our OTS Ohio exemption-count mapping gap."""
+"""Witness that the OTS Ohio map carries the exemption count (tenforty-r91.11)."""
 
 import pytest
 
@@ -8,10 +8,6 @@ pytestmark = pytest.mark.requires_ots
 
 
 @pytest.mark.parametrize("year", [2024, 2025])
-@pytest.mark.xfail(
-    strict=True,
-    reason="tenforty-r91.11: our OTS OH map leaves Exemptions at zero",
-)
 def test_ots_personal_exemption_keeps_archived_cliff_case_tax_free(year):
     """Independent archived OH case 14: 28450 - 2400 = 26050; tax zero."""
     result = evaluate_return(

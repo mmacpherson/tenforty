@@ -884,6 +884,15 @@ class TaxReturnInput(BaseModel):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
+    def oh_exemption_count(self) -> int:
+        """Ohio IT 1040 line 4 exemptions: filer and spouse by status, plus dependents."""
+        taxpayer_and_spouse = (
+            2 if self.filing_status == OTSFilingStatus.MARRIED_JOINT else 1
+        )
+        return taxpayer_and_spouse + self.num_dependents
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
     def schedule_a_other_deductions(self) -> float:
         """Schedule A line 6 as OTS receives it: none when Standard is forced.
 
@@ -1398,7 +1407,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2024,
         "form_id": "OH_IT1040",
-        "input_map": {},
+        "input_map": {"oh_exemption_count": "Exemptions"},
         "fed_import_map": {"L11": "L1"},
         "output_map": {
             "L3": "adjusted_gross_income",
@@ -1580,7 +1589,7 @@ _NATURAL_FORM_CONFIG = [
     {
         "year": 2025,
         "form_id": "OH_IT1040",
-        "input_map": {},
+        "input_map": {"oh_exemption_count": "Exemptions"},
         "fed_import_map": {"L11b": "L1"},
         "output_map": {
             "L3": "adjusted_gross_income",

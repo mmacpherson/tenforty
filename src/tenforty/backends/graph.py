@@ -53,8 +53,13 @@ _CARRIED_BY_DERIVED_FIELDS = {
 }
 # Computed fields that exist only to fill an OTS form line the graph derives in
 # its own spec from the same naturals: Massachusetts line 11a comes from
-# w2_income on both backends.
-_OTS_ONLY_DERIVED_FIELDS = {"ma_contribution_deduction", *OTS_INPUT_CARRIERS.values()}
+# w2_income on both backends. Ohio's exemption count is likewise derived from
+# the filing status and num_dependents, which the graph reads directly.
+_OTS_ONLY_DERIVED_FIELDS = {
+    "ma_contribution_deduction",
+    "oh_exemption_count",
+    *OTS_INPUT_CARRIERS.values(),
+}
 
 
 def _ohio_natural_joint_credit_values(
