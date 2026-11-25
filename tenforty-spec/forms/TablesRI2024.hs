@@ -26,7 +26,7 @@ riBrackets2024 :: NonEmpty Bracket
 riBrackets2024 =
   Bracket (byStatus 77450 77450 77450 77450 77450) 0.0375
     :| [ Bracket (byStatus 176050 176050 176050 176050 176050) 0.0475,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0599
+         TopBracket 0.0599
        ]
 
 riBracketsTable2024 :: Table

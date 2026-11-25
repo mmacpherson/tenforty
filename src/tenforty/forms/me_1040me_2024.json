@@ -35,6 +35,7 @@
     "meta": {
         "form_id": "me_1040me",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {
@@ -63,21 +64,30 @@
             "id": 100,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": {
+                    "d": "1",
+                    "n": "5000"
+                }
             }
         },
         "101": {
             "id": 101,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": {
+                    "d": "1",
+                    "n": "5000"
+                }
             }
         },
         "102": {
             "id": 102,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": {
+                    "d": "1",
+                    "n": "5000"
+                }
             }
         },
         "103": {
@@ -99,8 +109,14 @@
             "op": {
                 "arg": 12,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -117,28 +133,40 @@
             "id": 106,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "107": {
             "id": 107,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "108": {
             "id": 108,
             "op": {
                 "type": "literal",
-                "value": 323900
+                "value": {
+                    "d": "1",
+                    "n": "323900"
+                }
             }
         },
         "109": {
             "id": 109,
             "op": {
                 "type": "literal",
-                "value": 388650
+                "value": {
+                    "d": "1",
+                    "n": "388650"
+                }
             }
         },
         "11": {
@@ -152,21 +180,30 @@
             "id": 110,
             "op": {
                 "type": "literal",
-                "value": 194325
+                "value": {
+                    "d": "1",
+                    "n": "194325"
+                }
             }
         },
         "111": {
             "id": 111,
             "op": {
                 "type": "literal",
-                "value": 356300
+                "value": {
+                    "d": "1",
+                    "n": "356300"
+                }
             }
         },
         "112": {
             "id": 112,
             "op": {
                 "type": "literal",
-                "value": 388650
+                "value": {
+                    "d": "1",
+                    "n": "388650"
+                }
             }
         },
         "113": {
@@ -194,35 +231,50 @@
             "id": 115,
             "op": {
                 "type": "literal",
-                "value": 323900
+                "value": {
+                    "d": "1",
+                    "n": "323900"
+                }
             }
         },
         "116": {
             "id": 116,
             "op": {
                 "type": "literal",
-                "value": 388650
+                "value": {
+                    "d": "1",
+                    "n": "388650"
+                }
             }
         },
         "117": {
             "id": 117,
             "op": {
                 "type": "literal",
-                "value": 194325
+                "value": {
+                    "d": "1",
+                    "n": "194325"
+                }
             }
         },
         "118": {
             "id": 118,
             "op": {
                 "type": "literal",
-                "value": 356300
+                "value": {
+                    "d": "1",
+                    "n": "356300"
+                }
             }
         },
         "119": {
             "id": 119,
             "op": {
                 "type": "literal",
-                "value": 388650
+                "value": {
+                    "d": "1",
+                    "n": "388650"
+                }
             }
         },
         "12": {
@@ -257,7 +309,10 @@
             "id": 122,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "123": {
@@ -273,7 +328,10 @@
             "id": 124,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "125": {
@@ -288,28 +346,40 @@
             "id": 126,
             "op": {
                 "type": "literal",
-                "value": 125000
+                "value": {
+                    "d": "1",
+                    "n": "125000"
+                }
             }
         },
         "127": {
             "id": 127,
             "op": {
                 "type": "literal",
-                "value": 125000
+                "value": {
+                    "d": "1",
+                    "n": "125000"
+                }
             }
         },
         "128": {
             "id": 128,
             "op": {
                 "type": "literal",
-                "value": 62500
+                "value": {
+                    "d": "1",
+                    "n": "62500"
+                }
             }
         },
         "129": {
             "id": 129,
             "op": {
                 "type": "literal",
-                "value": 125000
+                "value": {
+                    "d": "1",
+                    "n": "125000"
+                }
             }
         },
         "13": {
@@ -323,7 +393,10 @@
             "id": 130,
             "op": {
                 "type": "literal",
-                "value": 125000
+                "value": {
+                    "d": "1",
+                    "n": "125000"
+                }
             }
         },
         "131": {
@@ -360,8 +433,14 @@
             "op": {
                 "arg": 133,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -369,7 +448,10 @@
             "id": 135,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "136": {
@@ -384,7 +466,10 @@
             "id": 137,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "138": {
@@ -414,7 +499,10 @@
             "id": 140,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "141": {
@@ -438,8 +526,14 @@
             "op": {
                 "arg": 142,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -456,7 +550,10 @@
             "id": 145,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "146": {
@@ -480,7 +577,10 @@
             "id": 148,
             "op": {
                 "type": "literal",
-                "value": 50
+                "value": {
+                    "d": "1",
+                    "n": "50"
+                }
             }
         },
         "149": {
@@ -502,14 +602,20 @@
             "id": 150,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "151": {
             "id": 151,
             "op": {
                 "type": "literal",
-                "value": 100
+                "value": {
+                    "d": "1",
+                    "n": "100"
+                }
             }
         },
         "152": {
@@ -524,14 +630,20 @@
             "id": 153,
             "op": {
                 "type": "literal",
-                "value": 3
+                "value": {
+                    "d": "1",
+                    "n": "3"
+                }
             }
         },
         "154": {
             "id": 154,
             "op": {
                 "type": "literal",
-                "value": 100000
+                "value": {
+                    "d": "1",
+                    "n": "100000"
+                }
             }
         },
         "155": {
@@ -547,8 +659,14 @@
             "op": {
                 "arg": 147,
                 "mode": "floor",
-                "output_offset": 50,
-                "step": 100,
+                "output_offset": {
+                    "d": "1",
+                    "n": "50"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "100"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -556,21 +674,30 @@
             "id": 157,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "158": {
             "id": 158,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "159": {
             "id": 159,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "16": {
@@ -584,14 +711,20 @@
             "id": 160,
             "op": {
                 "type": "literal",
-                "value": 92450
+                "value": {
+                    "d": "1",
+                    "n": "92450"
+                }
             }
         },
         "161": {
             "id": 161,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "162": {
@@ -619,35 +752,50 @@
             "id": 164,
             "op": {
                 "type": "literal",
-                "value": 3911
+                "value": {
+                    "d": "1",
+                    "n": "3911"
+                }
             }
         },
         "165": {
             "id": 165,
             "op": {
                 "type": "literal",
-                "value": 7825
+                "value": {
+                    "d": "1",
+                    "n": "7825"
+                }
             }
         },
         "166": {
             "id": 166,
             "op": {
                 "type": "literal",
-                "value": 3911
+                "value": {
+                    "d": "1",
+                    "n": "3911"
+                }
             }
         },
         "167": {
             "id": 167,
             "op": {
                 "type": "literal",
-                "value": 5870
+                "value": {
+                    "d": "1",
+                    "n": "5870"
+                }
             }
         },
         "168": {
             "id": 168,
             "op": {
                 "type": "literal",
-                "value": 7825
+                "value": {
+                    "d": "1",
+                    "n": "7825"
+                }
             }
         },
         "169": {
@@ -675,8 +823,14 @@
             "op": {
                 "arg": 147,
                 "mode": "floor",
-                "output_offset": 50,
-                "step": 100,
+                "output_offset": {
+                    "d": "1",
+                    "n": "50"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "100"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -684,35 +838,50 @@
             "id": 171,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "172": {
             "id": 172,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "173": {
             "id": 173,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "174": {
             "id": 174,
             "op": {
                 "type": "literal",
-                "value": 92450
+                "value": {
+                    "d": "1",
+                    "n": "92450"
+                }
             }
         },
         "175": {
             "id": 175,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "176": {
@@ -740,7 +909,10 @@
             "id": 178,
             "op": {
                 "type": "literal",
-                "value": 7.15e-2
+                "value": {
+                    "d": "2000",
+                    "n": "143"
+                }
             }
         },
         "179": {
@@ -771,8 +943,14 @@
             "op": {
                 "arg": 147,
                 "mode": "floor",
-                "output_offset": 50,
-                "step": 100,
+                "output_offset": {
+                    "d": "1",
+                    "n": "50"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "100"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -780,35 +958,50 @@
             "id": 182,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "183": {
             "id": 183,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "184": {
             "id": 184,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "185": {
             "id": 185,
             "op": {
                 "type": "literal",
-                "value": 39050
+                "value": {
+                    "d": "1",
+                    "n": "39050"
+                }
             }
         },
         "186": {
             "id": 186,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "187": {
@@ -836,7 +1029,10 @@
             "id": 189,
             "op": {
                 "type": "literal",
-                "value": 1511
+                "value": {
+                    "d": "1",
+                    "n": "1511"
+                }
             }
         },
         "19": {
@@ -850,28 +1046,40 @@
             "id": 190,
             "op": {
                 "type": "literal",
-                "value": 3022
+                "value": {
+                    "d": "1",
+                    "n": "3022"
+                }
             }
         },
         "191": {
             "id": 191,
             "op": {
                 "type": "literal",
-                "value": 1511
+                "value": {
+                    "d": "1",
+                    "n": "1511"
+                }
             }
         },
         "192": {
             "id": 192,
             "op": {
                 "type": "literal",
-                "value": 2265
+                "value": {
+                    "d": "1",
+                    "n": "2265"
+                }
             }
         },
         "193": {
             "id": 193,
             "op": {
                 "type": "literal",
-                "value": 3022
+                "value": {
+                    "d": "1",
+                    "n": "3022"
+                }
             }
         },
         "194": {
@@ -892,8 +1100,14 @@
             "op": {
                 "arg": 147,
                 "mode": "floor",
-                "output_offset": 50,
-                "step": 100,
+                "output_offset": {
+                    "d": "1",
+                    "n": "50"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "100"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -901,28 +1115,40 @@
             "id": 196,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "197": {
             "id": 197,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "198": {
             "id": 198,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "199": {
             "id": 199,
             "op": {
                 "type": "literal",
-                "value": 39050
+                "value": {
+                    "d": "1",
+                    "n": "39050"
+                }
             }
         },
         "2": {
@@ -943,7 +1169,10 @@
             "id": 200,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "201": {
@@ -971,7 +1200,10 @@
             "id": 203,
             "op": {
                 "type": "literal",
-                "value": 6.75e-2
+                "value": {
+                    "d": "400",
+                    "n": "27"
+                }
             }
         },
         "204": {
@@ -995,8 +1227,14 @@
             "op": {
                 "arg": 147,
                 "mode": "floor",
-                "output_offset": 50,
-                "step": 100,
+                "output_offset": {
+                    "d": "1",
+                    "n": "50"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "100"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1004,7 +1242,10 @@
             "id": 207,
             "op": {
                 "type": "literal",
-                "value": 5.8e-2
+                "value": {
+                    "d": "500",
+                    "n": "29"
+                }
             }
         },
         "208": {
@@ -1045,8 +1286,14 @@
             "op": {
                 "arg": 210,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1054,35 +1301,50 @@
             "id": 212,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "213": {
             "id": 213,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "214": {
             "id": 214,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "215": {
             "id": 215,
             "op": {
                 "type": "literal",
-                "value": 92450
+                "value": {
+                    "d": "1",
+                    "n": "92450"
+                }
             }
         },
         "216": {
             "id": 216,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "217": {
@@ -1110,7 +1372,10 @@
             "id": 219,
             "op": {
                 "type": "literal",
-                "value": 3911
+                "value": {
+                    "d": "1",
+                    "n": "3911"
+                }
             }
         },
         "22": {
@@ -1124,28 +1389,40 @@
             "id": 220,
             "op": {
                 "type": "literal",
-                "value": 7825
+                "value": {
+                    "d": "1",
+                    "n": "7825"
+                }
             }
         },
         "221": {
             "id": 221,
             "op": {
                 "type": "literal",
-                "value": 3911
+                "value": {
+                    "d": "1",
+                    "n": "3911"
+                }
             }
         },
         "222": {
             "id": 222,
             "op": {
                 "type": "literal",
-                "value": 5870
+                "value": {
+                    "d": "1",
+                    "n": "5870"
+                }
             }
         },
         "223": {
             "id": 223,
             "op": {
                 "type": "literal",
-                "value": 7825
+                "value": {
+                    "d": "1",
+                    "n": "7825"
+                }
             }
         },
         "224": {
@@ -1165,35 +1442,50 @@
             "id": 225,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "226": {
             "id": 226,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "227": {
             "id": 227,
             "op": {
                 "type": "literal",
-                "value": 61600
+                "value": {
+                    "d": "1",
+                    "n": "61600"
+                }
             }
         },
         "228": {
             "id": 228,
             "op": {
                 "type": "literal",
-                "value": 92450
+                "value": {
+                    "d": "1",
+                    "n": "92450"
+                }
             }
         },
         "229": {
             "id": 229,
             "op": {
                 "type": "literal",
-                "value": 123250
+                "value": {
+                    "d": "1",
+                    "n": "123250"
+                }
             }
         },
         "23": {
@@ -1228,7 +1520,10 @@
             "id": 232,
             "op": {
                 "type": "literal",
-                "value": 7.15e-2
+                "value": {
+                    "d": "2000",
+                    "n": "143"
+                }
             }
         },
         "233": {
@@ -1251,35 +1546,50 @@
             "id": 235,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "236": {
             "id": 236,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "237": {
             "id": 237,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "238": {
             "id": 238,
             "op": {
                 "type": "literal",
-                "value": 39050
+                "value": {
+                    "d": "1",
+                    "n": "39050"
+                }
             }
         },
         "239": {
             "id": 239,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "24": {
@@ -1316,35 +1626,50 @@
             "id": 242,
             "op": {
                 "type": "literal",
-                "value": 1511
+                "value": {
+                    "d": "1",
+                    "n": "1511"
+                }
             }
         },
         "243": {
             "id": 243,
             "op": {
                 "type": "literal",
-                "value": 3022
+                "value": {
+                    "d": "1",
+                    "n": "3022"
+                }
             }
         },
         "244": {
             "id": 244,
             "op": {
                 "type": "literal",
-                "value": 1511
+                "value": {
+                    "d": "1",
+                    "n": "1511"
+                }
             }
         },
         "245": {
             "id": 245,
             "op": {
                 "type": "literal",
-                "value": 2265
+                "value": {
+                    "d": "1",
+                    "n": "2265"
+                }
             }
         },
         "246": {
             "id": 246,
             "op": {
                 "type": "literal",
-                "value": 3022
+                "value": {
+                    "d": "1",
+                    "n": "3022"
+                }
             }
         },
         "247": {
@@ -1364,14 +1689,20 @@
             "id": 248,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "249": {
             "id": 249,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "25": {
@@ -1380,8 +1711,14 @@
             "op": {
                 "arg": 24,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1389,21 +1726,30 @@
             "id": 250,
             "op": {
                 "type": "literal",
-                "value": 26050
+                "value": {
+                    "d": "1",
+                    "n": "26050"
+                }
             }
         },
         "251": {
             "id": 251,
             "op": {
                 "type": "literal",
-                "value": 39050
+                "value": {
+                    "d": "1",
+                    "n": "39050"
+                }
             }
         },
         "252": {
             "id": 252,
             "op": {
                 "type": "literal",
-                "value": 52100
+                "value": {
+                    "d": "1",
+                    "n": "52100"
+                }
             }
         },
         "253": {
@@ -1431,7 +1777,10 @@
             "id": 255,
             "op": {
                 "type": "literal",
-                "value": 6.75e-2
+                "value": {
+                    "d": "400",
+                    "n": "27"
+                }
             }
         },
         "256": {
@@ -1454,7 +1803,10 @@
             "id": 258,
             "op": {
                 "type": "literal",
-                "value": 5.8e-2
+                "value": {
+                    "d": "500",
+                    "n": "29"
+                }
             }
         },
         "259": {
@@ -1470,8 +1822,14 @@
             "op": {
                 "arg": 0,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1498,8 +1856,14 @@
             "op": {
                 "arg": 261,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1536,8 +1900,14 @@
             "op": {
                 "arg": 13,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1546,8 +1916,14 @@
             "op": {
                 "arg": 14,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1556,8 +1932,14 @@
             "op": {
                 "arg": 15,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1566,8 +1948,14 @@
             "op": {
                 "arg": 16,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1576,8 +1964,14 @@
             "op": {
                 "arg": 1,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1610,7 +2004,10 @@
             "id": 273,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "274": {
@@ -1635,8 +2032,14 @@
             "op": {
                 "arg": 17,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1654,8 +2057,14 @@
             "op": {
                 "arg": 18,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1664,8 +2073,14 @@
             "op": {
                 "arg": 19,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1674,8 +2089,14 @@
             "op": {
                 "arg": 2,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1684,8 +2105,14 @@
             "op": {
                 "arg": 20,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1711,8 +2138,14 @@
             "op": {
                 "arg": 21,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1721,8 +2154,14 @@
             "op": {
                 "arg": 22,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1731,8 +2170,14 @@
             "op": {
                 "arg": 23,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1775,8 +2220,14 @@
             "op": {
                 "arg": 3,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1792,7 +2243,10 @@
             "id": 291,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "292": {
@@ -1809,7 +2263,10 @@
             "id": 293,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "294": {
@@ -1875,8 +2332,14 @@
             "op": {
                 "arg": 4,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1885,8 +2348,14 @@
             "op": {
                 "arg": 5,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1895,8 +2364,14 @@
             "op": {
                 "arg": 6,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1905,8 +2380,14 @@
             "op": {
                 "arg": 7,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1915,8 +2396,14 @@
             "op": {
                 "arg": 8,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1925,8 +2412,14 @@
             "op": {
                 "arg": 9,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -1942,8 +2435,14 @@
             "op": {
                 "arg": 10,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -2009,14 +2508,20 @@
             "id": 48,
             "op": {
                 "type": "literal",
-                "value": 14600
+                "value": {
+                    "d": "1",
+                    "n": "14600"
+                }
             }
         },
         "49": {
             "id": 49,
             "op": {
                 "type": "literal",
-                "value": 29200
+                "value": {
+                    "d": "1",
+                    "n": "29200"
+                }
             }
         },
         "5": {
@@ -2030,21 +2535,30 @@
             "id": 50,
             "op": {
                 "type": "literal",
-                "value": 14600
+                "value": {
+                    "d": "1",
+                    "n": "14600"
+                }
             }
         },
         "51": {
             "id": 51,
             "op": {
                 "type": "literal",
-                "value": 21900
+                "value": {
+                    "d": "1",
+                    "n": "21900"
+                }
             }
         },
         "52": {
             "id": 52,
             "op": {
                 "type": "literal",
-                "value": 29200
+                "value": {
+                    "d": "1",
+                    "n": "29200"
+                }
             }
         },
         "53": {
@@ -2066,8 +2580,14 @@
             "op": {
                 "arg": 11,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -2084,28 +2604,40 @@
             "id": 56,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "57": {
             "id": 57,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "58": {
             "id": 58,
             "op": {
                 "type": "literal",
-                "value": 97150
+                "value": {
+                    "d": "1",
+                    "n": "97150"
+                }
             }
         },
         "59": {
             "id": 59,
             "op": {
                 "type": "literal",
-                "value": 194300
+                "value": {
+                    "d": "1",
+                    "n": "194300"
+                }
             }
         },
         "6": {
@@ -2119,21 +2651,30 @@
             "id": 60,
             "op": {
                 "type": "literal",
-                "value": 97150
+                "value": {
+                    "d": "1",
+                    "n": "97150"
+                }
             }
         },
         "61": {
             "id": 61,
             "op": {
                 "type": "literal",
-                "value": 145750
+                "value": {
+                    "d": "1",
+                    "n": "145750"
+                }
             }
         },
         "62": {
             "id": 62,
             "op": {
                 "type": "literal",
-                "value": 194300
+                "value": {
+                    "d": "1",
+                    "n": "194300"
+                }
             }
         },
         "63": {
@@ -2161,35 +2702,50 @@
             "id": 65,
             "op": {
                 "type": "literal",
-                "value": 97150
+                "value": {
+                    "d": "1",
+                    "n": "97150"
+                }
             }
         },
         "66": {
             "id": 66,
             "op": {
                 "type": "literal",
-                "value": 194300
+                "value": {
+                    "d": "1",
+                    "n": "194300"
+                }
             }
         },
         "67": {
             "id": 67,
             "op": {
                 "type": "literal",
-                "value": 97150
+                "value": {
+                    "d": "1",
+                    "n": "97150"
+                }
             }
         },
         "68": {
             "id": 68,
             "op": {
                 "type": "literal",
-                "value": 145750
+                "value": {
+                    "d": "1",
+                    "n": "145750"
+                }
             }
         },
         "69": {
             "id": 69,
             "op": {
                 "type": "literal",
-                "value": 194300
+                "value": {
+                    "d": "1",
+                    "n": "194300"
+                }
             }
         },
         "7": {
@@ -2224,7 +2780,10 @@
             "id": 72,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "73": {
@@ -2240,7 +2799,10 @@
             "id": 74,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "75": {
@@ -2255,28 +2817,40 @@
             "id": 76,
             "op": {
                 "type": "literal",
-                "value": 75000
+                "value": {
+                    "d": "1",
+                    "n": "75000"
+                }
             }
         },
         "77": {
             "id": 77,
             "op": {
                 "type": "literal",
-                "value": 150000
+                "value": {
+                    "d": "1",
+                    "n": "150000"
+                }
             }
         },
         "78": {
             "id": 78,
             "op": {
                 "type": "literal",
-                "value": 75000
+                "value": {
+                    "d": "1",
+                    "n": "75000"
+                }
             }
         },
         "79": {
             "id": 79,
             "op": {
                 "type": "literal",
-                "value": 112500
+                "value": {
+                    "d": "1",
+                    "n": "112500"
+                }
             }
         },
         "8": {
@@ -2290,7 +2864,10 @@
             "id": 80,
             "op": {
                 "type": "literal",
-                "value": 150000
+                "value": {
+                    "d": "1",
+                    "n": "150000"
+                }
             }
         },
         "81": {
@@ -2327,8 +2904,14 @@
             "op": {
                 "arg": 83,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -2336,7 +2919,10 @@
             "id": 85,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "86": {
@@ -2351,7 +2937,10 @@
             "id": 87,
             "op": {
                 "type": "literal",
-                "value": 1
+                "value": {
+                    "d": "1",
+                    "n": "1"
+                }
             }
         },
         "88": {
@@ -2381,7 +2970,10 @@
             "id": 90,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         },
         "91": {
@@ -2405,8 +2997,14 @@
             "op": {
                 "arg": 92,
                 "mode": "round",
-                "output_offset": 0,
-                "step": 1,
+                "output_offset": {
+                    "d": "1",
+                    "n": "0"
+                },
+                "step": {
+                    "d": "1",
+                    "n": "1"
+                },
                 "type": "tax_table_quantize"
             }
         },
@@ -2423,7 +3021,10 @@
             "id": 95,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "96": {
@@ -2447,14 +3048,20 @@
             "id": 98,
             "op": {
                 "type": "literal",
-                "value": 5000
+                "value": {
+                    "d": "1",
+                    "n": "5000"
+                }
             }
         },
         "99": {
             "id": 99,
             "op": {
                 "type": "literal",
-                "value": 10000
+                "value": {
+                    "d": "1",
+                    "n": "10000"
+                }
             }
         }
     },
@@ -2475,72 +3082,147 @@
             "brackets": {
                 "head_of_household": [
                     {
-                        "rate": 5.8e-2,
-                        "threshold": 39050
+                        "rate": {
+                            "d": "500",
+                            "n": "29"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "39050"
+                        }
                     },
                     {
-                        "rate": 6.75e-2,
-                        "threshold": 92450
+                        "rate": {
+                            "d": "400",
+                            "n": "27"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "92450"
+                        }
                     },
                     {
-                        "rate": 7.15e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "2000",
+                            "n": "143"
+                        },
+                        "threshold": null
                     }
                 ],
                 "married_joint": [
                     {
-                        "rate": 5.8e-2,
-                        "threshold": 52100
+                        "rate": {
+                            "d": "500",
+                            "n": "29"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "52100"
+                        }
                     },
                     {
-                        "rate": 6.75e-2,
-                        "threshold": 123250
+                        "rate": {
+                            "d": "400",
+                            "n": "27"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "123250"
+                        }
                     },
                     {
-                        "rate": 7.15e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "2000",
+                            "n": "143"
+                        },
+                        "threshold": null
                     }
                 ],
                 "married_separate": [
                     {
-                        "rate": 5.8e-2,
-                        "threshold": 26050
+                        "rate": {
+                            "d": "500",
+                            "n": "29"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "26050"
+                        }
                     },
                     {
-                        "rate": 6.75e-2,
-                        "threshold": 61600
+                        "rate": {
+                            "d": "400",
+                            "n": "27"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "61600"
+                        }
                     },
                     {
-                        "rate": 7.15e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "2000",
+                            "n": "143"
+                        },
+                        "threshold": null
                     }
                 ],
                 "qualifying_widow": [
                     {
-                        "rate": 5.8e-2,
-                        "threshold": 52100
+                        "rate": {
+                            "d": "500",
+                            "n": "29"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "52100"
+                        }
                     },
                     {
-                        "rate": 6.75e-2,
-                        "threshold": 123250
+                        "rate": {
+                            "d": "400",
+                            "n": "27"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "123250"
+                        }
                     },
                     {
-                        "rate": 7.15e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "2000",
+                            "n": "143"
+                        },
+                        "threshold": null
                     }
                 ],
                 "single": [
                     {
-                        "rate": 5.8e-2,
-                        "threshold": 26050
+                        "rate": {
+                            "d": "500",
+                            "n": "29"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "26050"
+                        }
                     },
                     {
-                        "rate": 6.75e-2,
-                        "threshold": 61600
+                        "rate": {
+                            "d": "400",
+                            "n": "27"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "61600"
+                        }
                     },
                     {
-                        "rate": 7.15e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "2000",
+                            "n": "143"
+                        },
+                        "threshold": null
                     }
                 ]
             }

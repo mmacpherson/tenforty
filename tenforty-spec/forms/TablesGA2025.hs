@@ -11,7 +11,7 @@ import TenForty.Types
 -- Source: Georgia HB 111 (signed April 2024), retroactive to January 1, 2025
 -- https://www.paylocity.com/resources/tax-compliance/alerts/georgia-passes-bill-lowering-income-tax-rate-for-2025/
 -- The rate was reduced from 5.39% to 5.19% for tax year 2025.
-gaTaxRate2025 :: Double
+gaTaxRate2025 :: Rational
 gaTaxRate2025 = 0.0519
 
 -- | 2025 Georgia standard deduction amounts

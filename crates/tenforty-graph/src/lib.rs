@@ -1,5 +1,6 @@
 pub mod autodiff;
 pub mod eval;
+pub mod exact;
 pub mod graph;
 pub mod primitives;
 pub mod solver;

@@ -33,7 +33,7 @@ marylandBracketsSingle2024 =
          Bracket (byStatus 125000 125000 125000 125000 125000) 0.05,
          Bracket (byStatus 150000 150000 150000 150000 150000) 0.0525,
          Bracket (byStatus 250000 250000 250000 250000 250000) 0.055,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0575
+         TopBracket 0.0575
        ]
 
 marylandBracketsSingleTable2024 :: Table
@@ -54,7 +54,7 @@ marylandBracketsJoint2024 =
          Bracket (byStatus 175000 175000 175000 175000 175000) 0.05,
          Bracket (byStatus 225000 225000 225000 225000 225000) 0.0525,
          Bracket (byStatus 300000 300000 300000 300000 300000) 0.055,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0575
+         TopBracket 0.0575
        ]
 
 marylandBracketsJointTable2024 :: Table
@@ -66,7 +66,7 @@ marylandBracketsJointTable2024 =
 -- | 2024 Maryland standard deduction
 -- Standard deduction is 15% of Maryland adjusted gross income
 -- Source: Maryland Form 502 Instructions (2024), page 11
-mdStandardDeductionRate2024 :: Double
+mdStandardDeductionRate2024 :: Rational
 mdStandardDeductionRate2024 = 0.15
 
 -- | Standard deduction minimum and maximum, by status

@@ -34,7 +34,7 @@ alBrackets2024 :: NonEmpty Bracket
 alBrackets2024 =
   Bracket (byStatus 500 1000 500 500 1000) 0.02
     :| [ Bracket (byStatus 3000 6000 3000 3000 6000) 0.04,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.05
+         TopBracket 0.05
        ]
 
 alBracketsTable2024 :: Table

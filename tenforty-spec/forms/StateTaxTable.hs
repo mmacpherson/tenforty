@@ -19,9 +19,9 @@ import TenForty.TaxTable (taxTableBandIncome)
 
 data TableSegment
   = -- | Rows of @step@ dollars anchored at zero, priced at row start + offset.
-    GridRows {segmentLessThan :: Double, segmentStep :: Int, segmentMidpointOffset :: Double}
+    GridRows {segmentLessThan :: Rational, segmentStep :: Int, segmentMidpointOffset :: Rational}
   | -- | One printed row whose amount is fixed.
-    FixedRow {segmentLessThan :: Double, segmentTax :: Double}
+    FixedRow {segmentLessThan :: Rational, segmentTax :: Rational}
 
 -- | A table whose rows price the bracket table @rateSchedule@.
 stateTaxTable :: [TableSegment] -> TableId -> Expr Dollars -> Expr Dollars -> Expr Dollars

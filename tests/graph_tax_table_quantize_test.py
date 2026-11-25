@@ -1,6 +1,5 @@
 """Exact table values and scoped planning sensitivities through Python FFI."""
 
-import json
 import math
 
 import pytest
@@ -10,10 +9,12 @@ from hypothesis import strategies as st
 pytest.importorskip("tenforty.graphlib")
 from tenforty.graphlib import FilingStatus, Graph, Runtime
 
+from .fixtures.graph_json import upgraded_dumps
+
 
 def _runtime(step=50.0, offset=25.0, mode="floor"):
     graph = Graph.from_json(
-        json.dumps(
+        upgraded_dumps(
             {
                 "nodes": {
                     "0": {"id": 0, "name": "x", "op": {"type": "input"}},
@@ -55,7 +56,9 @@ def _intermediate_runtime():
         str(index): {"id": index, "name": name, "op": op}
         for index, (name, op) in enumerate(zip(names, ops, strict=True))
     }
-    graph = Graph.from_json(json.dumps({"nodes": nodes, "inputs": [0], "outputs": [3]}))
+    graph = Graph.from_json(
+        upgraded_dumps({"nodes": nodes, "inputs": [0], "outputs": [3]})
+    )
     return Runtime(graph, FilingStatus.single())
 
 
@@ -65,7 +68,7 @@ def _expression_runtime(ops, tables=None):
         for index, op in enumerate(ops)
     }
     graph = Graph.from_json(
-        json.dumps(
+        upgraded_dumps(
             {
                 "nodes": nodes,
                 "tables": tables or {},

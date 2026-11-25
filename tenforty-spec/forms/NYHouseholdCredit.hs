@@ -48,14 +48,14 @@ separateHouseholdCredit combinedAgi combinedCount =
       (32000, householdRow combinedCount [10, 13, 15, 18, 20, 23, 25] 3)
     ]
 
-incomeRows :: Expr Dollars -> [(Double, Expr Dollars)] -> Expr Dollars
+incomeRows :: Expr Dollars -> [(Rational, Expr Dollars)] -> Expr Dollars
 incomeRows agi =
   foldr (\(upper, credit) rest -> ifGte (dollars upper) agi credit rest) (dollars 0)
 
-householdRow :: Expr Dollars -> [Double] -> Double -> Expr Dollars
+householdRow :: Expr Dollars -> [Rational] -> Rational -> Expr Dollars
 householdRow count = go 1
   where
-    go :: Double -> [Double] -> Double -> Expr Dollars
+    go :: Rational -> [Rational] -> Rational -> Expr Dollars
     go _ [] _ = error "A household-credit row must contain credit columns"
     go index [credit] increment =
       dollars credit .+. (maxE (dollars 0) (count .-. dollars index) .*. rate increment)

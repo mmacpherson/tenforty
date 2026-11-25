@@ -12,7 +12,7 @@ import TenForty.Types
 -- https://tax.idaho.gov/taxes/income-tax/individual-income/individual-income-tax-rate-schedule/
 -- Rate: 5.3%
 -- Rate reduced from 5.695% in 2024 per Idaho HB 40, signed March 6, 2025
-idTaxRate2025 :: Double
+idTaxRate2025 :: Rational
 idTaxRate2025 = 0.053
 
 -- | 2025 Idaho standard deduction amounts

@@ -11,7 +11,7 @@ import TenForty.Types
 -- Source: Idaho State Tax Commission, Individual Income Tax Rate Schedule
 -- https://tax.idaho.gov/taxes/income-tax/individual-income/individual-income-tax-rate-schedule/
 -- Rate: 5.695%
-idTaxRate2024 :: Double
+idTaxRate2024 :: Rational
 idTaxRate2024 = 0.05695
 
 -- | 2024 Idaho standard deduction amounts

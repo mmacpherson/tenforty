@@ -1,6 +1,8 @@
 module TenForty.Table
   ( -- * Tax Brackets
     Bracket (..),
+    bracketThreshold,
+    bracketRate,
     BracketTable (..),
     mkBracketTable,
     bracketTableList,
@@ -27,29 +29,46 @@ import Data.List.NonEmpty qualified as NE
 import Data.Ord (comparing)
 import TenForty.Types
 
-data Bracket = Bracket
-  { bracketThreshold :: ByStatus (Amount Dollars),
-    bracketRate :: Amount Rate
-  }
+-- | One bracket of a rate schedule. 'Bracket' has a finite upper threshold
+-- per filing status; 'TopBracket' is the explicitly unbounded last bracket
+-- (tenforty-yxun.3), replacing a large sentinel threshold.
+data Bracket
+  = Bracket (ByStatus (Amount Dollars)) (Amount Rate)
+  | TopBracket (Amount Rate)
   deriving stock (Show, Eq)
+
+-- | The bracket's upper threshold per status; 'Nothing' for the top bracket.
+bracketThreshold :: Bracket -> Maybe (ByStatus (Amount Dollars))
+bracketThreshold = \case
+  Bracket threshold _ -> Just threshold
+  TopBracket _ -> Nothing
+
+bracketRate :: Bracket -> Amount Rate
+bracketRate = \case
+  Bracket _ r -> r
+  TopBracket r -> r
 
 newtype BracketTable = BracketTable {unBracketTable :: NonEmpty Bracket}
   deriving stock (Show, Eq)
 
+-- | Validate a schedule: finite brackets ascend for every status and exactly
+-- the last bracket is the unbounded 'TopBracket'.
 mkBracketTable :: NonEmpty Bracket -> Either String BracketTable
 mkBracketTable brackets =
-  let sorted = NE.sortBy (comparing (bsSingle . bracketThreshold)) brackets
-   in if validateMonotonic (NE.toList sorted)
-        then Right (BracketTable sorted)
-        else Left "Bracket thresholds must be monotonically increasing for all filing statuses"
+  let finite = [threshold | Bracket threshold _ <- NE.toList brackets]
+      tops = [() | TopBracket _ <- NE.toList brackets]
+      sorted = NE.sortBy (comparing upperKey) brackets
+      upperKey b = maybe (1 :: Int, Nothing) (\t -> (0, Just (bsSingle t))) (bracketThreshold b)
+   in case (tops, NE.last brackets) of
+        ([()], TopBracket _)
+          | validateMonotonic finite -> Right (BracketTable sorted)
+          | otherwise -> Left "Bracket thresholds must be monotonically increasing for all filing statuses"
+        _ -> Left "A bracket table needs exactly one TopBracket, and it must be last"
 
-validateMonotonic :: [Bracket] -> Bool
-validateMonotonic bs = all checkStatus allFilingStatuses
+validateMonotonic :: [ByStatus (Amount Dollars)] -> Bool
+validateMonotonic thresholds = all checkStatus allFilingStatuses
   where
-    checkStatus status =
-      let thresholds = map (forStatus . bracketThreshold) bs
-          values = map ($ status) thresholds
-       in isAscending values
+    checkStatus status = isAscending (map (`forStatus` status) thresholds)
     isAscending xs = and $ zipWith (<=) xs (drop 1 xs)
 
 bracketTableList :: BracketTable -> [Bracket]
@@ -98,16 +117,18 @@ evalBracketTax (BracketTable brackets) status income =
     go :: Amount Dollars -> Amount Dollars -> [Bracket] -> Amount Dollars
     go acc _ [] = acc
     go acc prevThreshold (b : bs) =
-      let threshold = forStatus (bracketThreshold b) status
+      let upper = (`forStatus` status) <$> bracketThreshold b
           rate' = bracketRate b
-          taxableInBracket = min income threshold - prevThreshold
+          taxableInBracket = maybe income (min income) upper - prevThreshold
        in if income <= prevThreshold
             then acc
-            else
-              go
-                (acc + max 0 taxableInBracket * coerceAmount rate')
-                threshold
-                bs
+            else case upper of
+              Nothing -> acc + max 0 taxableInBracket * coerceAmount rate'
+              Just threshold ->
+                go
+                  (acc + max 0 taxableInBracket * coerceAmount rate')
+                  threshold
+                  bs
 
     coerceAmount :: Amount Rate -> Amount Dollars
     coerceAmount (Amount x) = Amount x
@@ -127,7 +148,8 @@ marginalRate (BracketTable brackets) status income =
     go :: Amount Dollars -> [Bracket] -> Amount Rate
     go _ [] = 0
     go _prevThreshold (b : bs) =
-      let threshold = forStatus (bracketThreshold b) status
-       in if income <= threshold
-            then bracketRate b
-            else go threshold bs
+      case (`forStatus` status) <$> bracketThreshold b of
+        Nothing -> bracketRate b
+        Just threshold
+          | income <= threshold -> bracketRate b
+          | otherwise -> go threshold bs

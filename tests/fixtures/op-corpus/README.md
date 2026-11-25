@@ -1,4 +1,4 @@
-# Shared operation corpus, version 1
+# Shared operation corpus, version 2
 
 This is shared **data**, initially consumed by Rust's `tests/op_corpus.rs`.
 It covers the 16 operations after tenforty-yxun.8. This preparation changes tests
@@ -20,19 +20,18 @@ nonfinite tokens and nonpositive denominators are rejected; unknown scalar
 fields are rejected too. Nonfinite setter rejection uses a separate `nonfinite`
 field, never an exact scalar. A setter has exactly one of these fields.
 
-`graph_encoding: exact_scalars` identifies corpus graphs. The legacy Rust test
-adapter recursively converts their exact scalar objects to f64 JSON numbers
-**before** calling today's production graph loader. It does not change the
-production schema. `raw_json` instead identifies deliberately malformed production
-schema/error payloads, passed unchanged to the loader. No exact consumer may
-reuse the f64 adapter: it must parse integer strings directly into its value type.
+`graph_encoding: exact_scalars` identifies corpus graphs. Since version 2
+(tenforty-yxun.3) the production loader reads graph JSON schema version 2, whose
+scalars are these same exact `{n, d}` objects: the Rust test adapter passes a
+corpus graph through unchanged apart from adding `meta.schema_version: 2`, and
+the production exact-scalar reader parses each scalar (to the nearest f64 until
+tenforty-yxun.4). `raw_json` identifies deliberately malformed production
+payloads, passed unchanged to the loader; in version 2 they carry the schema
+marker and exact scalars, so each still fails at load for its stated reason
+(an invalid quantizer step, or a removed `abs`/`clamp` variant).
 
-Tenforty-yxun.3 will version the production graph schema to exact `{n,d}` strings.
-Expect a corpus **v2** when that happens: update schema/error payloads and adapter
-contracts deliberately, while retaining these independently stated scalars.
-Version 1 is still an unpublished preparation format, not a public graph format.
-The current scalar parser is bounded by the f64 consumer; arbitrary precision
-parsing belongs to the independent rational consumer, without that limitation.
+Version 1 to 2 changed only the corpus `schema_version` and those five
+`raw_json` payloads; every independently stated case scalar is unchanged.
 
 ## Meaning and strict migration witnesses
 

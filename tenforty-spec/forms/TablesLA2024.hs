@@ -33,7 +33,7 @@ louisianaBrackets2024 :: NonEmpty Bracket
 louisianaBrackets2024 =
   Bracket (byStatus 12500 25000 12500 12500 25000) 0.0185
     :| [ Bracket (byStatus 50000 100000 50000 50000 100000) 0.035,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0425
+         TopBracket 0.0425
        ]
 
 louisianaBracketsTable2024 :: Table

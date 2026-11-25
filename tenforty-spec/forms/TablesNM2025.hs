@@ -22,7 +22,7 @@ newMexicoBrackets2025 =
          Bracket (byStatus 33500 50000 25000 50000 50000) 0.043,
          Bracket (byStatus 66500 100000 50000 100000 100000) 0.047,
          Bracket (byStatus 210000 315000 157500 315000 315000) 0.049,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.059
+         TopBracket 0.059
        ]
 
 newMexicoBracketsTable2025 :: Table

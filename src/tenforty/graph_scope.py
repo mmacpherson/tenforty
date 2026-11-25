@@ -30,7 +30,6 @@ NO_INCOME_TAX_STATES: frozenset[OTSState] = frozenset(
 IN_SCOPE: frozenset[tuple[OTSState, int]] = frozenset(
     {
         (S.MS, 2024),
-        (S.MS, 2025),
         (S.OR, 2024),
         (S.OR, 2025),
         (S.IL, 2024),
@@ -198,6 +197,9 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
         "tenforty-s48h.59",
         "tenforty-tj2.20",
     ),
+    # MS 2025 line 17 rounds the binary product 4.4% x balance, so some exact
+    # half-dollar ties enter $1 low; re-admit when the strict xfail flips.
+    S.MS: {2025: ("tenforty-s48h.77",)},
     S.MO: _both_years("tenforty-b72.46", "tenforty-nuc6"),
     S.MT: _both_years("tenforty-b72.7", "tenforty-b72.42", "tenforty-b72.72"),
     S.NC: _both_years("tenforty-nuc6"),

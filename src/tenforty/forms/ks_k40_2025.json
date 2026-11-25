@@ -26,6 +26,7 @@
     "meta": {
         "form_id": "ks_k40",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2025
     },
     "nodes": {
@@ -101,21 +102,30 @@
             "id": 17,
             "op": {
                 "type": "literal",
-                "value": 3605
+                "value": {
+                    "d": "1",
+                    "n": "3605"
+                }
             }
         },
         "18": {
             "id": 18,
             "op": {
                 "type": "literal",
-                "value": 8240
+                "value": {
+                    "d": "1",
+                    "n": "8240"
+                }
             }
         },
         "19": {
             "id": 19,
             "op": {
                 "type": "literal",
-                "value": 4120
+                "value": {
+                    "d": "1",
+                    "n": "4120"
+                }
             }
         },
         "2": {
@@ -129,14 +139,20 @@
             "id": 20,
             "op": {
                 "type": "literal",
-                "value": 6180
+                "value": {
+                    "d": "1",
+                    "n": "6180"
+                }
             }
         },
         "21": {
             "id": 21,
             "op": {
                 "type": "literal",
-                "value": 6180
+                "value": {
+                    "d": "1",
+                    "n": "6180"
+                }
             }
         },
         "22": {
@@ -166,35 +182,50 @@
             "id": 24,
             "op": {
                 "type": "literal",
-                "value": 9160
+                "value": {
+                    "d": "1",
+                    "n": "9160"
+                }
             }
         },
         "25": {
             "id": 25,
             "op": {
                 "type": "literal",
-                "value": 18320
+                "value": {
+                    "d": "1",
+                    "n": "18320"
+                }
             }
         },
         "26": {
             "id": 26,
             "op": {
                 "type": "literal",
-                "value": 9160
+                "value": {
+                    "d": "1",
+                    "n": "9160"
+                }
             }
         },
         "27": {
             "id": 27,
             "op": {
                 "type": "literal",
-                "value": 9160
+                "value": {
+                    "d": "1",
+                    "n": "9160"
+                }
             }
         },
         "28": {
             "id": 28,
             "op": {
                 "type": "literal",
-                "value": 9160
+                "value": {
+                    "d": "1",
+                    "n": "9160"
+                }
             }
         },
         "29": {
@@ -221,35 +252,50 @@
             "id": 30,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "31": {
             "id": 31,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "32": {
             "id": 32,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "33": {
             "id": 33,
             "op": {
                 "type": "literal",
-                "value": 2320
+                "value": {
+                    "d": "1",
+                    "n": "2320"
+                }
             }
         },
         "34": {
             "id": 34,
             "op": {
                 "type": "literal",
-                "value": 2320
+                "value": {
+                    "d": "1",
+                    "n": "2320"
+                }
             }
         },
         "35": {
@@ -296,7 +342,10 @@
             "id": 39,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "4": {
@@ -336,7 +385,10 @@
             "id": 43,
             "op": {
                 "type": "literal",
-                "value": 100
+                "value": {
+                    "d": "1",
+                    "n": "100"
+                }
             }
         },
         "44": {
@@ -402,7 +454,10 @@
             "id": 50,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "51": {
@@ -426,7 +481,10 @@
             "id": 53,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "54": {
@@ -498,7 +556,10 @@
             "id": 61,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "62": {
@@ -538,7 +599,10 @@
             "id": 66,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "67": {
@@ -587,52 +651,97 @@
             "brackets": {
                 "head_of_household": [
                     {
-                        "rate": 5.2e-2,
-                        "threshold": 23000
+                        "rate": {
+                            "d": "250",
+                            "n": "13"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "23000"
+                        }
                     },
                     {
-                        "rate": 5.58e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "5000",
+                            "n": "279"
+                        },
+                        "threshold": null
                     }
                 ],
                 "married_joint": [
                     {
-                        "rate": 5.2e-2,
-                        "threshold": 46000
+                        "rate": {
+                            "d": "250",
+                            "n": "13"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "46000"
+                        }
                     },
                     {
-                        "rate": 5.58e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "5000",
+                            "n": "279"
+                        },
+                        "threshold": null
                     }
                 ],
                 "married_separate": [
                     {
-                        "rate": 5.2e-2,
-                        "threshold": 23000
+                        "rate": {
+                            "d": "250",
+                            "n": "13"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "23000"
+                        }
                     },
                     {
-                        "rate": 5.58e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "5000",
+                            "n": "279"
+                        },
+                        "threshold": null
                     }
                 ],
                 "qualifying_widow": [
                     {
-                        "rate": 5.2e-2,
-                        "threshold": 23000
+                        "rate": {
+                            "d": "250",
+                            "n": "13"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "23000"
+                        }
                     },
                     {
-                        "rate": 5.58e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "5000",
+                            "n": "279"
+                        },
+                        "threshold": null
                     }
                 ],
                 "single": [
                     {
-                        "rate": 5.2e-2,
-                        "threshold": 23000
+                        "rate": {
+                            "d": "250",
+                            "n": "13"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "23000"
+                        }
                     },
                     {
-                        "rate": 5.58e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "5000",
+                            "n": "279"
+                        },
+                        "threshold": null
                     }
                 ]
             }

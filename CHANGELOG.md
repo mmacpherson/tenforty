@@ -26,6 +26,27 @@
   signature remains on it.
 - Every income-tax state the graph covers now has official fixtures for 2024
   and 2025 except NH and LA 2025.
+### Changed (graph scope)
+- **Mississippi 2025 leaves graph scope** (tenforty-s48h.77). Form 80-105
+  line 17 is 4.4% of the taxed balance, entered in whole dollars with 50 cents
+  and over rounding up. The graph multiplies in binary floating point first, so
+  at some exact half-dollar ties it enters $1 low: 259 of the 4,000 ties under
+  $1,000,000, for example a taxed balance of $2,875 (Single wages of $21,175)
+  gives 126 instead of 127. `backend="auto"` now refuses an MS 2025 return,
+  since OTS has no Mississippi program, and `backend="graph"` computes one only
+  with `allow_unvalidated=True`. The fix is exact arithmetic at rounding points
+  (tenforty-yxun); MS 2025 returns to scope when the strict-xfail tie
+  enumeration in `tests/ms_2025_rounding_ties_test.py` passes.
+- MS 2024 stays in scope: at 4.7%, every exact tie falls on a whole-dollar
+  balance of 500 (mod 1000), and binary64(0.047) exceeds 4.7%, so the product
+  cannot undershoot; joint returns round one combined balance. All 1,000 ties up
+  to $1,000,000 check
+  (`docs/validation/derivations/ms-2024-line17-tie-exactness.md`).
+- The browser calculator no longer offers Mississippi, because it offers only
+  states validated in both 2024 and 2025. A share link to MS 2024 is refused
+  with a notice naming the years MS is validated for, instead of opening with
+  an empty jurisdiction menu.
+
 ### Fixed
 - **OTS NJ now taxes business profits and capital gains** (tenforty-r91.15).
   `self_employment_income` goes to NJ-1040 line 18 (net profits from business),
@@ -84,6 +105,39 @@
   [Migrating between backends](docs/migrating-to-graph-default.md).
   Installed-artifact smoke checks now exercise the default too.
 
+### Changed (graph JSON schema version 2: exact literals)
+- **Graph values are exact rationals from the spec** (tenforty-yxun.3). In the
+  Haskell spec, every literal, rate, bracket threshold and rate, phase-out and
+  tax-table parameter is a `Rational`, so a source literal `0.044` is exactly
+  `11/250` and never passes through a binary float. `percent p` is exactly
+  `p/100`, the same value as `rate (p/100)`. Under Double they disagreed:
+  `percent 4.4` was not the double nearest 0.044.
+- The graph JSON carries each value as `{"n": "<integer>", "d": "<positive
+  integer>"}` in lowest terms. `meta.schema_version` is 2. An unbounded top
+  bracket is an explicit `null` threshold (spec: `TopBracket`), replacing the
+  `1e12` sentinel.
+- The Rust loader converts each exact value to the nearest f64 (ties to even)
+  at load, so the runtime still computes in f64 at this stage. It rejects the
+  old numeric format, a missing or older schema version, malformed integers,
+  zero or negative denominators, and an unbounded bracket that is not last.
+  Graph JSON from earlier releases must be regenerated.
+- No computed figure changes for incomes up to $1,000,000,000,000. Every one
+  of the 19,896 exact scalars in the shipped graphs converts to the same
+  double as before; the only scalars removed are Oregon's 20 `1e12` cap
+  literals, from a `min(midpoint, 1e12)` its tax-table branch (taxable
+  income under $50,000) never reaches. A before/after evaluation of 1.38M
+  named-node values found no difference.
+- Above $1e12 a bracket table's top band is now one product,
+  `(income - last threshold) * rate`, where the sentinel version stopped at
+  1e12 and added an extension at the same rate. Exactly the two are equal. In
+  f64 they differ by rounding: on the 2025 Single federal table, by -$8 at
+  $1e17 and +$64 at $1e18. Both stay within one ulp of the exact tax, and
+  neither is reliably closer. The exact runtime (tenforty-yxun.4) removes the
+  difference.
+- `Graph.to_json` writes the exact value of each loaded double, not the spec's
+  source literal (`11/250` saves as its binary fraction), and saves `-0.0`
+  as `0`. Use the spec compiler, not load-and-save, to produce graphs.
+
 ### Added (Windows)
 - **Windows wheels, graph backend only.** `pip install tenforty` on Windows
   x86_64 (CPython 3.10–3.15) now installs a prebuilt wheel with the graph
@@ -118,7 +172,7 @@
   read a zero state slope. It now compiles to the whole-dollar quantize, which
   rounds half up exactly as before and passes the underlying rate through.
   2024 and 2025 Single wages of $120,000 now give IL 4.95%, MS 4.7% (2024) and
-  4.4% (2025), and OR 8.75%. No computed tax value changes.
+  4.4% (2025, with `allow_unvalidated=True`), and OR 8.75%. No computed tax value changes.
 - Known limit: a planning slope through a stepwise phase-out (`floorE`:
   California's exemption credit and FTB 3506, federal Forms 2441 and 8812,
   Schedule 1-A) still reads zero (tenforty-s48h.78).

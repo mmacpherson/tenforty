@@ -31,7 +31,7 @@ hawaiiBrackets2024 =
          Bracket (byStatus 150000 300000 150000 225000 300000) 0.0825,
          Bracket (byStatus 175000 350000 175000 262500 350000) 0.09,
          Bracket (byStatus 200000 400000 200000 300000 400000) 0.10,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.11
+         TopBracket 0.11
        ]
 
 hawaiiBracketsTable2024 :: Table

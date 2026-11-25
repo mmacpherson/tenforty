@@ -240,6 +240,11 @@ STATUTORY_STATE_RATES = {
 }
 
 
+def _scope_opt_in(state: str, year: int) -> dict[str, bool]:
+    """Return the acknowledgement MS 2025 needs while out of scope (s48h.77)."""
+    return {"allow_unvalidated": True} if (state, year) == ("MS", 2025) else {}
+
+
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("state", ROUNDED_LINE_STATES)
 def test_state_slope_is_the_statutory_rate_in_il_ms_or(state, year):
@@ -255,6 +260,7 @@ def test_state_slope_is_the_statutory_rate_in_il_ms_or(state, year):
         w2_income=120_000.0,
         output="state_total_tax",
         eitc_eligible=False,
+        **_scope_opt_in(state, year),
     )
     assert slope == pytest.approx(STATUTORY_STATE_RATES[state, year], abs=1e-12)
 
@@ -276,5 +282,6 @@ def test_state_slope_at_an_exact_rounding_tie_is_the_statutory_rate(state, year)
         w2_income=120_000.5,
         output="state_total_tax",
         eitc_eligible=False,
+        **_scope_opt_in(state, year),
     )
     assert slope == pytest.approx(STATUTORY_STATE_RATES[state, year], abs=1e-12)
