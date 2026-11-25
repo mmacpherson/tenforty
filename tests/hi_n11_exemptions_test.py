@@ -25,6 +25,8 @@ from tenforty.backends.graph import GraphBackend, _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Graph, Runtime
 from tenforty.models import TaxReturnInput
 
+from .fixtures.graph_json import literal
+
 pytestmark = pytest.mark.requires_graph
 
 EXEMPTION = 1_144
@@ -140,7 +142,7 @@ def test_removing_the_base_reintroduces_the_default_gap(year):
         for node in data["nodes"].values()
         if node.get("name") == "hi_n11_MandatoryExemptions"
     )
-    mandatory["op"] = {"type": "literal", "value": 0.0}
+    mandatory["op"] = literal(0.0)
     mutant = Graph.from_json(json.dumps(data))
     amounts = []
     for graph in (original, mutant):

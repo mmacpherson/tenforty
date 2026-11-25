@@ -18,7 +18,7 @@ import TenForty.Types
 -- | 2025 Mississippi flat tax rate on taxable income over $10,000
 -- p.22 "Tax Rates": "0% on the first $10,000.00 of taxable income and 4.4% on
 -- taxable income in excess of $10,000.00"; Schedule of Tax Computation, p.27.
-msTaxRate2025 :: Double
+msTaxRate2025 :: Rational
 msTaxRate2025 = 0.044
 
 -- | 2025 Mississippi filing-status exemption (Line 11)

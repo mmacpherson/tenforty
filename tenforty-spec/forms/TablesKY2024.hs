@@ -10,7 +10,7 @@ import TenForty.Types
 -- Source: Kentucky Department of Revenue - Form 740 Instructions (2024)
 -- https://revenue.ky.gov/Forms/740%20Packet%20Instructions%20(2024).pdf
 -- Kentucky uses a flat 4% tax rate on taxable income for tax year 2024.
-kyTaxRate2024 :: Double
+kyTaxRate2024 :: Rational
 kyTaxRate2024 = 0.04
 
 -- | 2024 Kentucky standard deduction

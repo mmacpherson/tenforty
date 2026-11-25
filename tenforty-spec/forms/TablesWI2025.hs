@@ -42,7 +42,7 @@ wisconsinBrackets2025 =
   Bracket (byStatus 14680 19580 9790 14680 14680) 0.035
     :| [ Bracket (byStatus 50480 67300 33650 50480 50480) 0.044,
          Bracket (byStatus 323290 431060 215530 323290 323290) 0.053,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0765
+         TopBracket 0.0765
        ]
 
 wisconsinBracketsTable2025 :: Table

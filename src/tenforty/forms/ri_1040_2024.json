@@ -20,6 +20,7 @@
     "meta": {
         "form_id": "ri_1040",
         "generated_by": "tenforty-dsl",
+        "schema_version": 2,
         "year": 2024
     },
     "nodes": {
@@ -50,35 +51,50 @@
             "id": 11,
             "op": {
                 "type": "literal",
-                "value": 10550
+                "value": {
+                    "d": "1",
+                    "n": "10550"
+                }
             }
         },
         "12": {
             "id": 12,
             "op": {
                 "type": "literal",
-                "value": 21150
+                "value": {
+                    "d": "1",
+                    "n": "21150"
+                }
             }
         },
         "13": {
             "id": 13,
             "op": {
                 "type": "literal",
-                "value": 10550
+                "value": {
+                    "d": "1",
+                    "n": "10550"
+                }
             }
         },
         "14": {
             "id": 14,
             "op": {
                 "type": "literal",
-                "value": 15850
+                "value": {
+                    "d": "1",
+                    "n": "15850"
+                }
             }
         },
         "15": {
             "id": 15,
             "op": {
                 "type": "literal",
-                "value": 21150
+                "value": {
+                    "d": "1",
+                    "n": "21150"
+                }
             }
         },
         "16": {
@@ -99,7 +115,10 @@
             "id": 17,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "18": {
@@ -130,7 +149,10 @@
             "id": 20,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "21": {
@@ -180,7 +202,10 @@
             "id": 26,
             "op": {
                 "type": "literal",
-                "value": 0
+                "value": {
+                    "d": "1",
+                    "n": "0"
+                }
             }
         },
         "27": {
@@ -298,72 +323,147 @@
             "brackets": {
                 "head_of_household": [
                     {
-                        "rate": 3.75e-2,
-                        "threshold": 77450
+                        "rate": {
+                            "d": "80",
+                            "n": "3"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "77450"
+                        }
                     },
                     {
-                        "rate": 4.75e-2,
-                        "threshold": 176050
+                        "rate": {
+                            "d": "400",
+                            "n": "19"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "176050"
+                        }
                     },
                     {
-                        "rate": 5.99e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "10000",
+                            "n": "599"
+                        },
+                        "threshold": null
                     }
                 ],
                 "married_joint": [
                     {
-                        "rate": 3.75e-2,
-                        "threshold": 77450
+                        "rate": {
+                            "d": "80",
+                            "n": "3"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "77450"
+                        }
                     },
                     {
-                        "rate": 4.75e-2,
-                        "threshold": 176050
+                        "rate": {
+                            "d": "400",
+                            "n": "19"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "176050"
+                        }
                     },
                     {
-                        "rate": 5.99e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "10000",
+                            "n": "599"
+                        },
+                        "threshold": null
                     }
                 ],
                 "married_separate": [
                     {
-                        "rate": 3.75e-2,
-                        "threshold": 77450
+                        "rate": {
+                            "d": "80",
+                            "n": "3"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "77450"
+                        }
                     },
                     {
-                        "rate": 4.75e-2,
-                        "threshold": 176050
+                        "rate": {
+                            "d": "400",
+                            "n": "19"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "176050"
+                        }
                     },
                     {
-                        "rate": 5.99e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "10000",
+                            "n": "599"
+                        },
+                        "threshold": null
                     }
                 ],
                 "qualifying_widow": [
                     {
-                        "rate": 3.75e-2,
-                        "threshold": 77450
+                        "rate": {
+                            "d": "80",
+                            "n": "3"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "77450"
+                        }
                     },
                     {
-                        "rate": 4.75e-2,
-                        "threshold": 176050
+                        "rate": {
+                            "d": "400",
+                            "n": "19"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "176050"
+                        }
                     },
                     {
-                        "rate": 5.99e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "10000",
+                            "n": "599"
+                        },
+                        "threshold": null
                     }
                 ],
                 "single": [
                     {
-                        "rate": 3.75e-2,
-                        "threshold": 77450
+                        "rate": {
+                            "d": "80",
+                            "n": "3"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "77450"
+                        }
                     },
                     {
-                        "rate": 4.75e-2,
-                        "threshold": 176050
+                        "rate": {
+                            "d": "400",
+                            "n": "19"
+                        },
+                        "threshold": {
+                            "d": "1",
+                            "n": "176050"
+                        }
                     },
                     {
-                        "rate": 5.99e-2,
-                        "threshold": 1000000000000
+                        "rate": {
+                            "d": "10000",
+                            "n": "599"
+                        },
+                        "threshold": null
                     }
                 ]
             }

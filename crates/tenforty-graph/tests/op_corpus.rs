@@ -243,30 +243,28 @@ struct QueryResult {
 }
 
 fn corpus() -> Corpus {
-    serde_json::from_str(include_str!("../../../tests/fixtures/op-corpus/v1.json")).unwrap()
+    serde_json::from_str(include_str!("../../../tests/fixtures/op-corpus/v2.json")).unwrap()
 }
 
-fn legacy_graph(value: &serde_json::Value) -> serde_json::Value {
-    match value {
-        serde_json::Value::Object(map) if map.contains_key("n") || map.contains_key("d") => {
-            let scalar: Scalar = serde_json::from_value(value.clone()).unwrap();
-            serde_json::json!(scalar.as_f64())
-        }
-        serde_json::Value::Object(map) => serde_json::Value::Object(
-            map.iter()
-                .map(|(k, v)| (k.clone(), legacy_graph(v)))
-                .collect(),
-        ),
-        serde_json::Value::Array(values) => {
-            serde_json::Value::Array(values.iter().map(legacy_graph).collect())
-        }
-        value => value.clone(),
-    }
+/// Corpus v2 (tenforty-yxun.3): the production loader reads graph JSON schema
+/// version 2, whose scalars are the corpus's own exact `{n, d}` objects. The
+/// graph passes through unchanged apart from the schema marker; each scalar is
+/// parsed by the production exact-scalar reader, not converted here.
+fn production_graph(value: &serde_json::Value) -> serde_json::Value {
+    let mut graph = value.clone();
+    graph
+        .as_object_mut()
+        .expect("a corpus graph is an object")
+        .insert(
+            "meta".to_string(),
+            serde_json::json!({"schema_version": graphlib::exact::SCHEMA_VERSION}),
+        );
+    graph
 }
 
 fn graph_for(case: &Case) -> Result<Graph, serde_json::Error> {
     let graph = match case.graph_encoding {
-        GraphEncoding::ExactScalars => legacy_graph(&case.graph),
+        GraphEncoding::ExactScalars => production_graph(&case.graph),
         GraphEncoding::RawJson => {
             assert!(
                 case.expected
@@ -481,7 +479,7 @@ fn validate_jet(jet: &Jet) {
 #[test]
 fn every_case_conforms_to_the_shared_data() {
     let corpus = corpus();
-    assert_eq!(corpus.schema_version, 1);
+    assert_eq!(corpus.schema_version, 2);
     let mut ids = BTreeSet::new();
     for case in &corpus.cases {
         assert!(ids.insert(&case.id), "duplicate case {}", case.id);
@@ -792,7 +790,7 @@ fn exact_scalar_parser_rejects_malformed_and_nonfinite_rationals() {
 #[test]
 fn migration_expectations_fail_when_legacy_departures_are_disallowed() {
     let mut data: serde_json::Value =
-        serde_json::from_str(include_str!("../../../tests/fixtures/op-corpus/v1.json")).unwrap();
+        serde_json::from_str(include_str!("../../../tests/fixtures/op-corpus/v2.json")).unwrap();
     let mut count = 0;
     for case in data["cases"].as_array_mut().unwrap() {
         if case.get("migration").is_none() {

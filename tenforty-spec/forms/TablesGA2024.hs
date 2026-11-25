@@ -11,7 +11,7 @@ import TenForty.Types
 -- Source: Georgia Department of Revenue 2024 IT-511 Individual Income Tax Booklet
 -- https://dor.georgia.gov/document/document/2024-it-511-individual-income-tax-booklet/download
 -- Effective January 1, 2024, the income tax rate is 5.39%.
-gaTaxRate2024 :: Double
+gaTaxRate2024 :: Rational
 gaTaxRate2024 = 0.0539
 
 -- | 2024 Georgia standard deduction amounts

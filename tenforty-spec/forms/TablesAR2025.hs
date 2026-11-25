@@ -30,7 +30,7 @@ arBrackets2025 =
     :| [ Bracket (byStatus 10899 10899 10899 10899 10899) 0.02,
          Bracket (byStatus 15599 15599 15599 15599 15599) 0.03,
          Bracket (byStatus 25699 25699 25699 25699 25699) 0.034,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.039
+         TopBracket 0.039
        ]
 
 arBracketsTable2025 :: Table

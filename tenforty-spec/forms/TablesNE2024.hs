@@ -18,7 +18,7 @@ nebraskaBrackets2024 =
   Bracket (byStatus 3900 7790 3900 7270 7790) 0.0246
     :| [ Bracket (byStatus 23370 46760 23370 37400 46760) 0.0351,
          Bracket (byStatus 37670 75340 37670 55850 75340) 0.0501,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0584
+         TopBracket 0.0584
        ]
 
 nebraskaBracketsTable2024 :: Table

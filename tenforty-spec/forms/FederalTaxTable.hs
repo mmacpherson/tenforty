@@ -22,12 +22,12 @@ module FederalTaxTable (form1040TaxOnAmount) where
 import TenForty
 
 data TableSegment = TableSegment
-  { segmentLessThan :: Double,
+  { segmentLessThan :: Rational,
     segmentStep :: Int,
-    segmentMidpointOffset :: Double
+    segmentMidpointOffset :: Rational
   }
 
-taxTableCeiling :: Double
+taxTableCeiling :: Rational
 taxTableCeiling = 100000
 
 taxTableSegments :: [TableSegment]

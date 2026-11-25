@@ -34,7 +34,7 @@ newYorkBrackets2025 =
          Bracket (byStatus 1077550 2155350 1077550 1616450 2155350) 0.0685,
          Bracket (byStatus 5000000 5000000 5000000 5000000 5000000) 0.0965,
          Bracket (byStatus 25000000 25000000 25000000 25000000 25000000) 0.103,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.109
+         TopBracket 0.109
        ]
 
 newYorkBracketsTable2025 :: Table
@@ -63,7 +63,7 @@ nycBrackets2025 =
   Bracket (byStatus 12000 21600 12000 14400 21600) 0.03078
     :| [ Bracket (byStatus 25000 45000 25000 30000 45000) 0.03762,
          Bracket (byStatus 50000 90000 50000 60000 90000) 0.03819,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.03876
+         TopBracket 0.03876
        ]
 
 nycBracketsTable2025 :: Table

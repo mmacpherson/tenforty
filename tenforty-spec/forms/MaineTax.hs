@@ -32,9 +32,9 @@ import TenForty
 
 -- | One year's printed Tax Rate Schedules #1-#3, by filing status.
 data MaineSchedule = MaineSchedule
-  { lowRate :: Double,
-    middleRate :: Double,
-    topRate :: Double,
+  { lowRate :: Rational,
+    middleRate :: Rational,
+    topRate :: Rational,
     middleStart :: ByStatus (Amount Dollars),
     middleBase :: ByStatus (Amount Dollars),
     topStart :: ByStatus (Amount Dollars),

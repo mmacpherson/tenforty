@@ -168,12 +168,13 @@ bracketRateAt table income =
     _ -> error ("bracketRateAt: " ++ show (tableId table) ++ " is not a bracket table")
   where
     rateFrom [] = error "bracketRateAt: empty bracket table"
-    rateFrom [top] = lit (bracketRate top)
-    rateFrom (b : rest) =
-      ifPos
-        (income .-. byStatusE (fmap lit (bracketThreshold b)))
-        (rateFrom rest)
-        (lit (bracketRate b))
+    rateFrom (b : rest) = case bracketThreshold b of
+      Nothing -> lit (bracketRate b)
+      Just threshold ->
+        ifPos
+          (income .-. byStatusE (fmap lit threshold))
+          (rateFrom rest)
+          (lit (bracketRate b))
 
 tableLookup :: TableId -> Expr Dollars -> Expr Dollars
 tableLookup = TableLookup
@@ -198,5 +199,5 @@ greaterOf :: Expr u -> Expr u -> Expr u
 greaterOf = maxE
 
 -- | "Multiply by X%" - e.g., percent 22 for 22%
-percent :: Double -> Expr Rate
+percent :: Rational -> Expr Rate
 percent p = rate (p / 100)

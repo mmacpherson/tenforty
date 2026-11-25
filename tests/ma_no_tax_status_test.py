@@ -21,6 +21,8 @@ from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Graph, Runtime
 from tests.parity.state_parity_policy import SIGNATURES
 
+from .fixtures.graph_json import literal
+
 pytestmark = pytest.mark.requires_graph
 
 
@@ -338,7 +340,7 @@ def test_qualification_is_computed_in_the_graph_with_a_negative_control():
         for node in model["nodes"].values()
         if node.get("name") == "ma_1_L27_no_tax_status"
     )
-    node["op"] = {"type": "literal", "value": 0.0}
+    node["op"] = literal(0.0)
     mutant = Runtime(
         Graph.from_json(json.dumps(model)), FilingStatus.from_str("single")
     )

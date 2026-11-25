@@ -35,7 +35,7 @@ dcBrackets2025 =
          Bracket (byStatus 250000 250000 250000 250000 250000) 0.085,
          Bracket (byStatus 500000 500000 500000 500000 500000) 0.0925,
          Bracket (byStatus 1000000 1000000 1000000 1000000 1000000) 0.0975,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.1075
+         TopBracket 0.1075
        ]
 
 dcBracketsTable2025 :: Table

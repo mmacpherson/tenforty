@@ -34,7 +34,7 @@ missouriBrackets2024 =
          Bracket (byStatus 6365 6365 6365 6365 6365) 0.035,
          Bracket (byStatus 7638 7638 7638 7638 7638) 0.04,
          Bracket (byStatus 8911 8911 8911 8911 8911) 0.045,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.048
+         TopBracket 0.048
        ]
 
 missouriBracketsTable2024 :: Table

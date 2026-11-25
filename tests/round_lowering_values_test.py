@@ -11,12 +11,15 @@ lowering, not a tax-value expectation.
 import json
 import math
 import struct
+from fractions import Fraction
 from functools import cache
 from pathlib import Path
 
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
+
+from .fixtures.graph_json import literal, scalar
 
 pytest.importorskip("tenforty.graphlib")
 from tenforty.graphlib import FilingStatus, Graph, Runtime
@@ -36,8 +39,8 @@ def _is_whole_dollar_round(op: dict) -> bool:
     return (
         op["type"] == "tax_table_quantize"
         and op["mode"] == "round"
-        and op["step"] == 1
-        and op["output_offset"] == 0
+        and scalar(op["step"]) == 1
+        and scalar(op["output_offset"]) == 0
     )
 
 
@@ -53,7 +56,7 @@ def _floor_of_half_up_twin(graph: dict) -> dict:
         next_id += 2
         nodes[str(half_id)] = {
             "id": half_id,
-            "op": {"type": "literal", "value": 0.5},
+            "op": literal(Fraction(1, 2)),
         }
         nodes[str(sum_id)] = {
             "id": sum_id,

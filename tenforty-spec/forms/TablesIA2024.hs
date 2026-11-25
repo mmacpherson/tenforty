@@ -30,7 +30,7 @@ iowaBrackets2024 :: NonEmpty Bracket
 iowaBrackets2024 =
   Bracket (byStatus 6210 12420 6210 6210 12420) 0.044
     :| [ Bracket (byStatus 31050 62100 31050 31050 62100) 0.0482,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.057
+         TopBracket 0.057
        ]
 
 iowaBracketsTable2024 :: Table

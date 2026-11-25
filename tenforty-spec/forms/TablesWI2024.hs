@@ -36,7 +36,7 @@ wisconsinBrackets2024 =
   Bracket (byStatus 14320 19090 9550 14320 14320) 0.035
     :| [ Bracket (byStatus 28640 38190 19090 28640 28640) 0.044,
          Bracket (byStatus 315310 420420 210210 315310 315310) 0.053,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0765
+         TopBracket 0.0765
        ]
 
 wisconsinBracketsTable2024 :: Table

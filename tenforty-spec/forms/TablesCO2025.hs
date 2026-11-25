@@ -8,5 +8,5 @@ where
 -- https://tax.colorado.gov/sites/tax/files/documents/Book104_2025.pdf
 -- Colorado's standard flat tax rate of 4.4% applies to tax year 2025. The rate
 -- returned to the standard 4.4% rate from the temporary 4.25% rate used in 2024.
-coTaxRate2025 :: Double
+coTaxRate2025 :: Rational
 coTaxRate2025 = 0.044

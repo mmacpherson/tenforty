@@ -36,7 +36,7 @@ marylandBracketsSingle2025 =
          Bracket (byStatus 250000 250000 250000 250000 250000) 0.055,
          Bracket (byStatus 500000 500000 500000 500000 500000) 0.0575,
          Bracket (byStatus 1000000 1000000 1000000 1000000 1000000) 0.0625,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.065
+         TopBracket 0.065
        ]
 
 marylandBracketsSingleTable2025 :: Table
@@ -61,7 +61,7 @@ marylandBracketsJoint2025 =
          Bracket (byStatus 300000 300000 300000 300000 300000) 0.055,
          Bracket (byStatus 600000 600000 600000 600000 600000) 0.0575,
          Bracket (byStatus 1200000 1200000 1200000 1200000 1200000) 0.0625,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.065
+         TopBracket 0.065
        ]
 
 marylandBracketsJointTable2025 :: Table

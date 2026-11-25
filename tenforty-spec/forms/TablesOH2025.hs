@@ -24,7 +24,7 @@ ohioBrackets2025 :: NonEmpty Bracket
 ohioBrackets2025 =
   Bracket (byStatus 26050 26050 26050 26050 26050) 0.0
     :| [ Bracket (byStatus 100000 100000 100000 100000 100000) 0.0275,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.03125
+         TopBracket 0.03125
        ]
 
 ohioBracketsTable2025 :: Table

@@ -21,6 +21,8 @@ from unittest import mock
 from tenforty.backends import graph as graph_backend
 from tenforty.models import TaxReturnInput
 
+from .graph_json import scalar, upgraded_dumps
+
 _OFFSET_PREFIX = "planning_twin_offset_"
 _ARGUMENT_PREFIX = "planning_twin_argument_"
 
@@ -58,6 +60,11 @@ class Twin:
         return offsets
 
 
+def _as_float(value) -> float:
+    """Return a quantizer parameter written by a test (number) or a graph (exact)."""
+    return float(scalar(value)) if isinstance(value, dict) else float(value)
+
+
 def build_twin(spec: dict) -> Twin:
     """Replace every ``tax_table_quantize`` node of a graph spec by ``arg + c``."""
     from tenforty.graphlib import Graph
@@ -68,7 +75,7 @@ def build_twin(spec: dict) -> Twin:
         if node["op"]["type"] == "tax_table_quantize":
             argument = nodes[str(node["op"]["arg"])]
             argument.setdefault("name", f"{_ARGUMENT_PREFIX}{argument['id']}")
-    legal_graph = Graph.from_json(json.dumps(spec))
+    legal_graph = Graph.from_json(upgraded_dumps(spec))
     next_id = max(int(key) for key in nodes) + 1
     quantizers = []
     for key, node in list(nodes.items()):
@@ -82,11 +89,15 @@ def build_twin(spec: dict) -> Twin:
         node["op"] = {"type": "add", "left": op["arg"], "right": next_id}
         quantizers.append(
             Quantizer(
-                argument["name"], offset, op["mode"], op["step"], op["output_offset"]
+                argument["name"],
+                offset,
+                op["mode"],
+                _as_float(op["step"]),
+                _as_float(op["output_offset"]),
             )
         )
         next_id += 1
-    return Twin(Graph.from_json(json.dumps(spec)), legal_graph, tuple(quantizers))
+    return Twin(Graph.from_json(upgraded_dumps(spec)), legal_graph, tuple(quantizers))
 
 
 @cache

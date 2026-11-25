@@ -26,7 +26,7 @@ riBrackets2025 :: NonEmpty Bracket
 riBrackets2025 =
   Bracket (byStatus 79900 79900 79900 79900 79900) 0.0375
     :| [ Bracket (byStatus 181650 181650 181650 181650 181650) 0.0475,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.0599
+         TopBracket 0.0599
        ]
 
 riBracketsTable2025 :: Table

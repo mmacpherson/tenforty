@@ -16,7 +16,7 @@ import TenForty.Types
 -- Act 11 of the 2024 Third Extraordinary Session repealed the graduated rates and brackets
 -- in favor of a flat 3% tax rate applicable to all taxable income, effective for taxable periods
 -- beginning on or after January 1, 2025.
-laTaxRate2025 :: Double
+laTaxRate2025 :: Rational
 laTaxRate2025 = 0.03
 
 -- | 2025 Louisiana standard deduction amounts

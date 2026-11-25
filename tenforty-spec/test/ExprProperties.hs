@@ -38,11 +38,15 @@ instance Arbitrary (Expr Rate) where
 finiteDouble :: Gen Double
 finiteDouble = arbitrary `suchThat` (\x -> not (isNaN x) && not (isInfinite x))
 
+-- | The exact value of a finite Double, so a literal evaluates back to it.
+finiteExact :: Gen Rational
+finiteExact = toRational <$> finiteDouble
+
 exprDollars :: Int -> Gen (Expr Dollars)
-exprDollars 0 = Lit . Amount <$> finiteDouble
+exprDollars 0 = Lit . Amount <$> finiteExact
 exprDollars n =
   oneof
-    [ Lit . Amount <$> finiteDouble,
+    [ Lit . Amount <$> finiteExact,
       Add <$> subD <*> subD,
       Sub <$> subD <*> subD,
       Mul <$> subD <*> subR,
@@ -57,10 +61,10 @@ exprDollars n =
     subR = exprRate (n `div` 2)
 
 exprRate :: Int -> Gen (Expr Rate)
-exprRate 0 = Lit . Amount <$> finiteDouble
+exprRate 0 = Lit . Amount <$> finiteExact
 exprRate n =
   oneof
-    [ Lit . Amount <$> finiteDouble,
+    [ Lit . Amount <$> finiteExact,
       Div <$> subD <*> subD
     ]
   where
@@ -69,7 +73,7 @@ exprRate n =
 spec :: Spec
 spec = describe "Expr Properties" $ do
   it "eval (Lit a) == a" $ property $ forAll finiteDouble $ \d ->
-    evalExpr (Lit (Amount d)) `shouldBe` d
+    evalExpr (Lit (Amount (toRational d))) `shouldBe` d
 
   it "eval (a .+. b) == eval a + eval b" $ property $ \a b ->
     evalExpr (a .+. b) `shouldApproxEq` (evalExpr a + evalExpr b)

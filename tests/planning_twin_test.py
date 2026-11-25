@@ -9,6 +9,7 @@ pytest.importorskip("tenforty.graphlib")
 from tenforty.backends.graph import _load_resolved_graph
 from tenforty.graphlib import FilingStatus, Graph, Runtime
 
+from .fixtures.graph_json import upgraded_dumps
 from .fixtures.planning_twin import build_twin, resolved_twin
 
 _STEP = 0.01
@@ -59,7 +60,7 @@ def test_final_round_keeps_its_legal_value_for_a_downstream_max():
         "inputs": [0],
         "outputs": [3],
     }
-    legal = Runtime(Graph.from_json(json.dumps(spec)), FilingStatus.single())
+    legal = Runtime(Graph.from_json(upgraded_dumps(spec)), FilingStatus.single())
     legal.set("x", 0.49)
 
     def prepare(runtime, value):

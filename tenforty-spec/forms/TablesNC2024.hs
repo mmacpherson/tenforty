@@ -8,7 +8,7 @@ import TenForty.Types
 
 -- | 2024 North Carolina State flat tax rate
 -- Source: North Carolina DOR Form D-400 Instructions (2024)
-ncTaxRate2024 :: Double
+ncTaxRate2024 :: Rational
 ncTaxRate2024 = 0.045
 
 -- | 2024 North Carolina standard deduction amounts

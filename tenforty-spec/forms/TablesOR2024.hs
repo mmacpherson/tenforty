@@ -30,7 +30,7 @@ oregonBrackets2024 =
   Bracket (byStatus 4300 8600 4300 8600 8600) 0.0475
     :| [ Bracket (byStatus 10750 21500 10750 21500 21500) 0.0675,
          Bracket (byStatus 125000 250000 125000 250000 250000) 0.0875,
-         Bracket (byStatus 1e12 1e12 1e12 1e12 1e12) 0.099
+         TopBracket 0.099
        ]
 
 oregonBracketsTable2024 :: Table
@@ -87,7 +87,8 @@ oregonTaxTable2024 income =
         Left err -> error $ "Invalid Oregon tax table: " ++ err
     roundedIncrements _ [] = E.lit 0
     roundedIncrements lower (bracket : remaining) =
-      let upper = E.ByStatusE (E.lit <$> bracketThreshold bracket)
-          taxable = E.maxE (E.lit 0) (E.minE midpoint upper E..-. lower)
+      let upper = maybe midpoint (E.ByStatusE . fmap E.lit) (bracketThreshold bracket)
+          capped = maybe midpoint (const (E.minE midpoint upper)) (bracketThreshold bracket)
+          taxable = E.maxE (E.lit 0) (capped E..-. lower)
        in E.roundE (E.lit 1 E..*. ((taxable E..*. E.lit (bracketRate bracket * 10000)) E../. E.lit 10000))
             E..+. roundedIncrements upper remaining
