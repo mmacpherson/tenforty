@@ -22,6 +22,8 @@ Age 65 stays refused: the public age input is not yet verified. Both years' line
 derivation), which is what OTS applies.
 """
 
+import math
+
 import pytest
 
 import tenforty
@@ -130,13 +132,14 @@ def test_ots_table_prices_income_plus_25_within_a_row(year):
     result = _interest_return(year, 10_030)
     assert result.state_taxable_income == 12_094
     assert ma_published_table_tax(12_094) == PUBLISHED_ROW_TAX
+    assert math.isfinite(result.state_total_tax), result.state_total_tax
     delta = result.state_total_tax - PUBLISHED_ROW_TAX
     if abs(delta) <= FLOAT_CENT:
         pytest.fail(
             f"OTS prices the row correctly now; drop {MA_OTS_TABLE_INCOME_PLUS_25}"
         )
     expected = ma_ots_table_departure(12_094)
-    if abs(delta - expected) > FLOAT_CENT:
+    if not abs(delta - expected) <= FLOAT_CENT:
         pytest.fail(
             f"delta {delta:+.2f} is not the {MA_OTS_TABLE_INCOME_PLUS_25} departure "
             f"{expected:+d} (5% x (12,094 + 25) = 605.95 -> 606 against the row's 604)"
@@ -431,9 +434,19 @@ def test_taxable_income_never_exceeds_agi_with_interest_and_dividends(year):
 
 @pytest.mark.parametrize(
     ("line_21", "row_tax", "departure"),
-    [(12_051, 604, 0), (12_064, 604, 0), (12_094, 604, 2), (12_100, 604, 2)],
+    [
+        (9, 0, 2),
+        (10, 1, 1),
+        (12_051, 604, 0),
+        (12_064, 604, 0),
+        (12_094, 604, 2),
+        (12_100, 604, 2),
+    ],
 )
 def test_the_income_plus_25_mechanism(line_21, row_tax, departure):
-    """Row 12,050-12,100 is 604 throughout; OTS's income + 25 price drifts across it."""
+    """Row 12,050-12,100 is 604 throughout; OTS's income + 25 price drifts across it.
+
+    Below $10 the table prints zero; OTS prices $9 as int(0.05 x 34 + 0.5) = 2.
+    """
     assert ma_published_table_tax(line_21) == row_tax
     assert ma_ots_table_departure(line_21) == departure

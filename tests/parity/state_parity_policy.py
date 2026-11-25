@@ -553,6 +553,7 @@ def _ma_no_tax_status(case: dict) -> bool:
 MA_OTS_TABLE_INCOME_PLUS_25 = "MA-OTS-TABLE-INCOME-PLUS-25"
 """Upstream report 23 (d): OTS prices the tax table at income + 25, not the row."""
 MA_TAX_TABLE_ROW = 50.0
+MA_TAX_TABLE_ZERO_BELOW = 10.0
 
 
 def ma_ots_table_tax(line_21: float) -> int:
@@ -564,8 +565,12 @@ def ma_published_table_tax(line_21: float) -> int:
     """Return the Form 1 Tax Table row price: 5% of the midpoint, half up.
 
     Rows run over a multiple of $50 to the next one ("over 12,050 and no more
-    than 12,100"), so the midpoint is the row's lower bound plus $25.
+    than 12,100"), so the midpoint is the row's lower bound plus $25. The
+    first interval is special: the table sets tax to zero below $10 (2024
+    instructions p.36, 2025 p.38).
     """
+    if line_21 < MA_TAX_TABLE_ZERO_BELOW:
+        return 0
     lower = math.ceil(line_21 / MA_TAX_TABLE_ROW) * MA_TAX_TABLE_ROW - MA_TAX_TABLE_ROW
     return int(MA_RATE * (lower + MA_TAX_TABLE_HALF_ROW) + 0.5)
 
