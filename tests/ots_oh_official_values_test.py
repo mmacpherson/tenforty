@@ -26,14 +26,16 @@ OTS_UNROUNDED_TAX = (
 )
 
 
+@pytest.mark.requires_ots
 @pytest.mark.parametrize("case", OTS_EXPRESSIBLE, ids=lambda case: case.case_id)
 def test_ots_matches_official_values(case: OfficialCase):
     """Taxable income equals the official figure; tax equals it or is its unrounded form.
 
     OTS computes the Ohio tax from the rate schedule without the form's
-    whole-dollar rounding, so a nonzero official tax is bounded by half a dollar
-    and must differ (strict: an OTS that rounds drops the departure). A zero
-    official tax cannot be an unrounded departure and must match exactly.
+    whole-dollar rounding, so a nonzero official tax is the half-up rounding of
+    OTS's figure: OTS minus official lies in [-$0.50, +$0.50), and must differ
+    (strict: an OTS that rounds drops the departure). +$0.50 would round to the
+    next dollar, so it is refused. A zero official tax must match exactly.
     """
     result = evaluate_return(
         year=case.year,
@@ -52,9 +54,23 @@ def test_ots_matches_official_values(case: OfficialCase):
     if tax == 0:
         assert abs(delta) <= CENT, where
         return
-    assert abs(delta) <= WHOLE_DOLLAR_HALF, where
+    assert unrounded_departure_is_lawful(delta), where
     assert abs(delta) > CENT, f"matches now; drop the departure: {where}"
     pytest.xfail(f"{OTS_UNROUNDED_TAX}: delta {delta:+.2f}")
+
+
+def unrounded_departure_is_lawful(delta: float) -> bool:
+    """Whether OTS minus a half-up whole-dollar official tax is within [-0.50, +0.50)."""
+    return -WHOLE_DOLLAR_HALF - CENT <= delta < WHOLE_DOLLAR_HALF - CENT
+
+
+@pytest.mark.parametrize(
+    ("delta", "lawful"),
+    [(-0.5, True), (-0.49, True), (0.49, True), (0.5, False), (-0.51, False)],
+)
+def test_the_rounding_bound_is_half_open(delta, lawful):
+    """$0.50 over the official tax rounds up to the next dollar, so it is refused."""
+    assert unrounded_departure_is_lawful(delta) is lawful
 
 
 @pytest.mark.parametrize("case", OTS_FACT_CASES, ids=lambda case: case.case_id)
