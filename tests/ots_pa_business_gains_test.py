@@ -34,6 +34,7 @@ from dataclasses import dataclass
 import pytest
 
 import tenforty
+from tenforty import core
 from tenforty.models import NATURAL_FORM_CONFIG
 
 YEARS = (2023, 2024, 2025)
@@ -155,8 +156,9 @@ def _accepted_tax(case: Case) -> tuple[float, ...]:
 @pytest.mark.parametrize("year", YEARS)
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case.name)
 @pytest.mark.requires_ots
-def test_ots_pa_matches_the_independent_derivation(case, year):
+def test_ots_pa_matches_the_independent_derivation(case, year, monkeypatch):
     """Evidence: independent derivation, RECORD summary table, case by case."""
+    monkeypatch.setattr(core, "_OTS_REFUSED_INCOMPLETE_YEARS", {})
     result = tenforty.evaluate_return(
         year=year,
         state="PA",
@@ -173,6 +175,33 @@ def test_ots_pa_matches_the_independent_derivation(case, year):
     assert any(
         abs(result.state_total_tax - amount) <= CENT for amount in _accepted_tax(case)
     ), (result.state_total_tax, _accepted_tax(case))
+
+
+REFUSED_BEFORE_2024 = {"self_employment_income"}
+"""Inputs OTS refuses for 2018-2023 until Schedule SE is orchestrated (tenforty-nt4h).
+
+The derivation tests above lift that refusal for them: the PA figures do not
+depend on the federal Schedule SE tax, which is what OTS omits.
+"""
+
+
+@pytest.mark.parametrize("backend", ["ots", "auto"])
+@pytest.mark.parametrize(
+    "case",
+    [case for case in CASES if REFUSED_BEFORE_2024 & case.inputs.keys()],
+    ids=lambda case: case.name,
+)
+@pytest.mark.requires_ots
+def test_2023_self_employment_cases_are_refused_for_schedule_se(case, backend):
+    """The nt4h refusal precedes the PA computation for 2023 SE income."""
+    with pytest.raises(tenforty.UnsupportedInputError, match=r"tenforty-nt4h"):
+        tenforty.evaluate_return(
+            year=2023,
+            state="PA",
+            filing_status=case.filing_status,
+            backend=backend,
+            **case.inputs,
+        )
 
 
 @pytest.mark.parametrize("year", YEARS)
@@ -291,8 +320,12 @@ FORMERLY_REFUSED = {
 @pytest.mark.parametrize("year", YEARS)
 @pytest.mark.parametrize("backend", ["ots", "auto", None])
 @pytest.mark.parametrize("name", sorted(FORMERLY_REFUSED))
-def test_formerly_refused_inputs_now_compute_and_raise_pa_tax(year, backend, name):
+def test_formerly_refused_inputs_now_compute_and_raise_pa_tax(
+    year, backend, name, monkeypatch
+):
     """Each input 2025.14 refused now computes on OTS PA and raises the PA tax."""
+    if name in REFUSED_BEFORE_2024:
+        monkeypatch.setattr(core, "_OTS_REFUSED_INCOMPLETE_YEARS", {})
     choice = {} if backend is None else {"backend": backend}
     single = {"year": year, "state": "PA", "filing_status": "Single"}
     base = tenforty.evaluate_return(**single, w2_income=60_000.0, **choice)

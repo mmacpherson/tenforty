@@ -18,6 +18,7 @@ from tenforty import (
     FederalItemized,
     UnsupportedInputError,
     UnsupportedReturnError,
+    core,
     ots_state_gaps,
     routing,
 )
@@ -60,6 +61,12 @@ GAP_CASES = [
     for gap in OTS_STATE_INPUT_GAPS
     for year in sorted(gap.years)
 ]
+
+
+def _refused_for_schedule_se_first(gap, year) -> bool:
+    """Whether the nt4h refusal (SE income, OTS 2018-2023) precedes this gap."""
+    name_years = core._OTS_REFUSED_INCOMPLETE_YEARS.get(gap.name)
+    return name_years is not None and year in name_years[0]
 
 
 def _base(gap) -> dict:
@@ -105,13 +112,22 @@ def test_gaps_are_unique():
 @pytest.mark.parametrize(("gap", "year"), GAP_CASES)
 @pytest.mark.parametrize("backend", ["ots", "auto", None])
 def test_a_nonzero_gap_input_is_refused(gap, year, backend):
-    """Default, explicit OTS and auto all refuse, naming input, state, year, bead."""
+    """Default, explicit OTS and auto all refuse, naming input, state, year, bead.
+
+    Self-employment income on 2018-2023 is refused first for Schedule SE
+    (tenforty-nt4h), before the state gap is reached; those cases assert that
+    precedence and the 2024-2025 cases assert the state-gap refusal.
+    """
     choice = {} if backend is None else {"backend": backend}
     with pytest.raises(UnsupportedInputError) as refusal:
         tenforty.evaluate_return(
             year=year, state=_state(gap), **_with(gap, NONZERO[gap.name]), **choice
         )
     message = str(refusal.value)
+    if _refused_for_schedule_se_first(gap, year):
+        assert "tenforty-nt4h" in message
+        assert f"{gap.name}=" in message
+        return
     assert f"{gap.name}=" in message
     assert f"for {_state(gap)} on OTS ({gap.form_id} {year})" in message
     assert gap.bead in message
@@ -205,6 +221,7 @@ def test_each_gap_still_drops_its_input(monkeypatch, gap, year):
     fix is done.
     """
     monkeypatch.setattr(ots_state_gaps, "OTS_STATE_INPUT_GAPS", ())
+    monkeypatch.setattr(core, "_OTS_REFUSED_INCOMPLETE_YEARS", {})
     before_call = dict(_base(gap))
     after_call = _with(gap, NONZERO[gap.name])
     if gap.name == "state_and_local_taxes":
