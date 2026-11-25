@@ -31,9 +31,11 @@ def test_rental_return_reports_the_nonqualifying_assumption(year, backend):
     assert record.state is None
     assert record.value == "not_qualified"
     assert "no QBI deduction" in record.text
-    assert "over-taxed" in record.text
     assert "p. 38" in record.text
     assert "backend='graph' covers 2024-2025" in record.text
+    assert "may change the deduction and the tax" in record.text
+    assert "tenforty-iprv" in record.text
+    assert "over-taxed" not in record.text
 
 
 @pytest.mark.requires_ots
@@ -56,7 +58,11 @@ def test_zero_rental_reports_nothing(year):
 @pytest.mark.parametrize("year", [2024, 2025])
 @pytest.mark.parametrize("backend", ["ots", "auto"])
 def test_2024_and_2025_report_nothing(year, backend):
-    """OTS 2024-2025 computes the QBI deduction, so nothing is assumed."""
+    """The pre-2024 record is not emitted on OTS 2024-2025.
+
+    This does not show those years handle rental QBI: they report a zero QBI
+    deduction on this return too (tenforty-iprv).
+    """
     result = tenforty.evaluate_return(year=year, backend=backend, **RENTAL_RETURN)
     assert RENTAL_QBI not in _ids(result)
 
@@ -64,7 +70,7 @@ def test_2024_and_2025_report_nothing(year, backend):
 @pytest.mark.requires_graph
 @pytest.mark.parametrize("year", [2024, 2025])
 def test_graph_reports_nothing(year):
-    """The graph computes the QBI deduction, so nothing is assumed."""
+    """The pre-2024 record is not emitted by the graph (rental QBI: tenforty-iprv)."""
     result = tenforty.evaluate_return(year=year, backend="graph", **RENTAL_RETURN)
     assert RENTAL_QBI not in _ids(result)
 

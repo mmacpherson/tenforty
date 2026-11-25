@@ -85,6 +85,7 @@ RETURNS = {
     "S3": ("S3-schedule-c-only",),
 }
 
+
 # Self-employment income is refused on OTS for 2018-2023 (tenforty-nt4h): OTS
 # takes the Schedule SE deduction (S1_27), the self-employment tax (S4_57) and
 # the QBI deduction (L9) as inputs and nothing orchestrates Schedule SE or Form
@@ -93,7 +94,12 @@ RETURNS = {
 # refusal lifted, so it flips when OTS 2018 computes the figure and the refusal
 # and these marks are then removed. Rental income is not refused: the rental
 # return is S2 below.
+class RecordDeparture(AssertionError):
+    """Raised only after a successful evaluation whose figures miss the record."""
+
+
 SCHEDULE_C_GAP = pytest.mark.xfail(
+    raises=RecordDeparture,
     strict=True,
     reason="2018 OTS neither computes nor is fed Schedule SE, S1_27 or the QBI "
     "deduction (L9); the Schedule C return omits them (tenforty-nt4h)",
@@ -192,10 +198,11 @@ def test_2018_ots_matches_a_whole_derived_outcome(
     returns are evaluated with the nt4h refusal lifted, before the strict xfail
     on the known numerical departure applies.
     """
-    assert any(
+    if not any(
         _matches(evaluated_2018_return, outcome, [field])
         for outcome in _outcomes_of(return_id)
-    ), evaluated_2018_return
+    ):
+        raise RecordDeparture(evaluated_2018_return)
 
 
 @pytest.mark.requires_ots

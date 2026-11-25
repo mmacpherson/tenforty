@@ -26,8 +26,10 @@
   OTS 2018-2023 now records the assumption
   `federal.qbi.rental_not_qualified_ots_pre_2024` on the result (scalar and
   batch, `backend="ots"` and `"auto"`): OTS computes no QBI deduction before
-  2024, so a rental that qualifies is over-taxed (about $2,400 on the 2018
-  record case). 2019-2023 accept `rental_income` too and are covered. The
+  2024, so the computation excludes rental income from QBI and a rental that
+  qualifies under section 199A may change the deduction and the tax (the 2018
+  record case differs by $2,400 of tax). 2024-2025 do not include rental income
+  in QBI either (tenforty-iprv). 2019-2023 accept `rental_income` too and are covered. The
   refusal message now says this integration cannot determine the Schedule SE
   and QBI amounts before 2024.
 ### Added (validation)

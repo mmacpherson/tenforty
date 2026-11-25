@@ -479,11 +479,12 @@ RENTAL_QBI_ID = "federal.qbi.rental_not_qualified_ots_pre_2024"
 _RENTAL_QBI_YEARS: tuple[int, ...] = tuple(range(2018, 2024))
 _RENTAL_QBI_TEXT = (
     "OTS before 2024 computes no QBI deduction (Form 8995 "
-    "is not orchestrated, tenforty-nt4h), so a nonzero rental_income is computed "
-    "as if the rental were not a section 199A qualified trade or business. If "
-    "the rental qualifies, the return is over-taxed by the deduction it omits "
-    "(2018 Form 1040 instructions, QBI worksheet, p. 38). backend='graph' covers "
-    "2024-2025 only."
+    "is not orchestrated, tenforty-nt4h), so the computation excludes "
+    "rental_income from the QBI deduction, as if the rental were not a section "
+    "199A qualified trade or business. A rental that qualifies under section "
+    "199A may change the deduction and the tax (2018 Form 1040 instructions, "
+    "QBI worksheet, p. 38). backend='graph' covers 2024-2025 only, and "
+    "2024-2025 do not include rental income in QBI either (tenforty-iprv)."
 )
 
 
@@ -493,7 +494,8 @@ def rental_qbi_assumption(
     """Return the nonqualifying-rental convention where OTS applied it.
 
     It applies to an OTS return for 2018-2023 with a nonzero rental_income. OTS
-    2024 and later, and the graph, compute the QBI deduction.
+    2024 and later do not carry this record, but they do not include rental
+    income in QBI either (tenforty-iprv).
     """
     if not (
         row.engine == "ots"
