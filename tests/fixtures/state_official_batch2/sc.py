@@ -34,8 +34,8 @@ EVIDENCE = register_evidence(
 
 DEPENDENTS_AND_GAINS = "tenforty-s48h.66"
 AGE_65 = "tenforty-b72.82"
-CONFORMITY_ADDBACK = "tenforty-b72.81"
 SCHEDULE_2024 = "tenforty-b72.80"
+CONFORMITY_ADDBACK = "tenforty-b72.81"
 TABLE_ROW = "tenforty-tj2.20"
 WHOLE_DOLLAR = "tenforty-b72.42"
 
@@ -44,15 +44,22 @@ TOP_RATE = {2024: 0.062, 2025: 0.06}
 # SC1040TT p. 4 rate schedule: line 5 times the top rate, less this constant.
 PUBLISHED_CONSTANT = {2024: 659.0, 2025: 642.0}
 
-# The spec's brackets: 0% to 3,560, 3% to 17,830, the top rate above. Tax at
-# the top of the 3% band is 3% of 14,270; the schedule's constant that follows
-# is the top rate times 17,830 less that tax.
+# The spec's brackets: 0% to the first threshold, 3% to the second, the top
+# rate above (2024: 3,460 and 17,330, SC1040TT 2024; 2025: 3,560 and 17,830).
+# Tax at the top of the 3% band is 3% of the band's width; the schedule's
+# constant that follows is the top rate times the second threshold less that
+# tax. The 2024 constant is 658.36, which the schedule prints as 659.
+SPEC_THRESHOLDS = {2024: (3_460, 17_330), 2025: (3_560, 17_830)}
 SPEC_CONSTANT = {
-    year: round(rate * 17_830 - 0.03 * (17_830 - 3_560), 2)
-    for year, rate in TOP_RATE.items()
+    year: round(
+        TOP_RATE[year] * upper - 0.03 * (upper - lower),
+        2,
+    )
+    for year, (lower, upper) in SPEC_THRESHOLDS.items()
 }
 
 WHOLE_DOLLAR_SLACK = 0.5
+CENT = 0.005
 TABLE_ROW_WIDTH = 100
 """SC1040TT rows are $100 wide and price the row midpoint."""
 
@@ -188,6 +195,31 @@ RECORD: dict[int, tuple[Scenario, ...]] = {
     ),
 }
 
+WORKED_EXAMPLE = TaxEvidence(
+    EvidenceKind.WORKED_EXAMPLE,
+    "docs/validation/state-fixtures/SC-2024-2025.md",
+    "SCDOR 2024 SC1040TT p.4, Tax Rate Schedule example: line 5 of $101,000 "
+    "gives 6.2% x 101,000 = 6,262, less $659 = $5,603 on line 6 "
+    "(https://dor.sc.gov/forms-site/Forms/SC1040TT_2024.pdf)",
+)
+CUTOFF_DERIVATION = TaxEvidence(
+    EvidenceKind.UNVERIFIED,
+    "docs/validation/state-fixtures/SC-2024-2025.md",
+    "source-verified application of the published SC1040TT 2024 p.4 schedule "
+    "(which explicitly includes $100,000): 6,200 - 659 = 5,541; verified by "
+    "Codex, 2026-11-25",
+)
+SCHEDULE_CASES: tuple[tuple[str, int, int, TaxEvidence], ...] = (
+    ("pub1", 101_000, 5_603, WORKED_EXAMPLE),
+    ("cut", 100_000, 5_541, CUTOFF_DERIVATION),
+)
+"""(label, line 5, line 6, evidence), 2024, Single: no SC adjustment of line 1.
+
+Federal taxable income is line 5 for a Single return with no SC adjustments, so
+w2_income is line 5 plus the 14,600 federal standard deduction.
+"""
+FEDERAL_STANDARD_DEDUCTION_SINGLE_2024 = 14_600
+
 CASES: list[OfficialCase] = [
     case(
         "SC",
@@ -202,6 +234,17 @@ CASES: list[OfficialCase] = [
     )
     for year, scenarios in RECORD.items()
     for scenario in scenarios
+] + [
+    case(
+        "SC",
+        2024,
+        label,
+        "S",
+        (line_5, line_6),
+        own_evidence=evidence,
+        w2_income=line_5 + FEDERAL_STANDARD_DEDUCTION_SINGLE_2024,
+    )
+    for label, line_5, line_6, evidence in SCHEDULE_CASES
 ]
 
 UNPINNED: list[UnpinnedCase] = [
@@ -247,7 +290,11 @@ def _taxable_income_defect(
     )
 
 
-def _tax_defect(year: int, scenario: Scenario, taxable_income_bead: str | None):
+def _tax_defect(
+    year: int,
+    scenario: Scenario,
+    taxable_income_bead: str | None,
+):
     rate = TOP_RATE[year]
     difference = scenario.federal_taxable_income - scenario.taxable_income
     slack = WHOLE_DOLLAR_SLACK
@@ -256,17 +303,43 @@ def _tax_defect(year: int, scenario: Scenario, taxable_income_bead: str | None):
     centre = rate * difference + PUBLISHED_CONSTANT[year] - SPEC_CONSTANT[year]
     if taxable_income_bead is not None:
         bead = taxable_income_bead
-    elif year == 2024:
-        bead = SCHEDULE_2024
+    elif scenario.from_table:
+        bead = f"{TABLE_ROW}+{WHOLE_DOLLAR}"
     else:
-        bead = TABLE_ROW if scenario.from_table else WHOLE_DOLLAR
+        bead = WHOLE_DOLLAR
+    if year == 2024:
+        beads = [
+            bead
+            for bead in bead.split("+")
+            if bead != WHOLE_DOLLAR or scenario.from_table
+        ]
+        bead = "+".join([*beads, SCHEDULE_2024])
     return GraphDefect(
         bead,
         "state_total_tax",
         round(centre - slack, 2),
         round(centre + slack, 2),
         "top rate times the omitted line 5 amount, plus the published schedule "
-        "constant less the spec's, within the row midpoint and whole-dollar slack",
+        "constant less the spec's, within the whole-dollar slack and, below "
+        "$100,000, the row midpoint slack",
+    )
+
+
+def _schedule_constant_defect(scenario: Scenario) -> GraphDefect:
+    """Exactly the schedule-constant gap: official results are whole dollars.
+
+    At and above $100,000 the form's line 6 is 6.2% x line 5 - 659, and each
+    pinned result is an exact whole dollar. The only signed mechanism is the
+    brackets' constant, 658.36 against 659, so the graph is +0.64 within the
+    comparison cent, with no whole-dollar or row slack.
+    """
+    gap = PUBLISHED_CONSTANT[2024] - SPEC_CONSTANT[2024]
+    return GraphDefect(
+        SCHEDULE_2024,
+        "state_total_tax",
+        gap - CENT,
+        gap + CENT,
+        "the brackets imply a schedule constant of 658.36 where SC1040TT prints 659",
     )
 
 
@@ -283,6 +356,11 @@ def _defects() -> dict[str, dict[str, GraphDefect]]:
             if taxable_income:
                 entry["state_taxable_income"] = taxable_income[0]
             defects[f"SC-{year}-{scenario.label}"] = entry
+    for label, line_5, _, _ in SCHEDULE_CASES:
+        schedule_case = Scenario(label, "S", {}, line_5, line_5, 0, False)
+        defects[f"SC-2024-{label}"] = {
+            "state_total_tax": _schedule_constant_defect(schedule_case)
+        }
     return defects
 
 

@@ -40,9 +40,10 @@ mnBracketsTable2024 =
 -- | 2024 Minnesota state standard deduction amounts
 -- Order: Single, MFJ, MFS, HoH, QW
 --
--- Source: Minnesota Department of Revenue press release (Dec 12, 2023)
--- https://www.revenue.state.mn.us/press-release/2023-12-12/minnesota-income-tax-brackets-standard-deduction-and-dependent-exemption
---
--- Standard deduction: $14,575 (Single/MFS), $29,150 (MFJ), $14,575 (MFS), $21,862.50 (HoH), $29,150 (QW)
+-- Source: Minnesota Department of Revenue, 2024 Form M1 instructions
+-- (m1-inst-24.pdf), p.12, "Standard Deduction Table for Line 4", no boxes
+-- checked: Single $14,575, MFJ $29,150, HOH $21,900. The HOH amount is printed
+-- in the table, not 1.5 x Single.
+-- MFS and QW follow Single and MFJ respectively.
 mnStandardDeduction2024 :: ByStatus (Amount Dollars)
-mnStandardDeduction2024 = byStatus 14575 29150 14575 21862.50 29150
+mnStandardDeduction2024 = byStatus 14575 29150 14575 21900 29150

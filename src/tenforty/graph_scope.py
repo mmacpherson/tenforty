@@ -123,7 +123,6 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
             "tenforty-tj2.20",
         ),
         2025: (
-            "tenforty-b72.56",
             "tenforty-b72.57",
             "tenforty-b72.58",
             "tenforty-b72.59",
@@ -154,18 +153,7 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     ),
     S.CO: _both_years("tenforty-b72.42", "tenforty-b72.51", "tenforty-tj2.20"),
     S.CT: _both_years("tenforty-b72.62"),
-    S.DC: {
-        2024: (
-            "tenforty-b72.64",
-            "tenforty-s48h.73",
-            "tenforty-tj2.20",
-        ),
-        2025: (
-            "tenforty-b72.63",
-            "tenforty-b72.64",
-            "tenforty-s48h.73",
-        ),
-    },
+    S.DC: _both_years("tenforty-b72.64", "tenforty-s48h.73", "tenforty-tj2.20"),
     S.DE: _both_years("tenforty-nuc6", "tenforty-s48h.52"),
     S.GA: _both_years("tenforty-b72.42", "tenforty-nuc6"),
     S.HI: _both_years("tenforty-b72.41", "tenforty-nuc6", "tenforty-tj2.20"),
@@ -191,7 +179,6 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
     S.MI: _both_years("tenforty-s48h.45"),
     S.MN: _both_years(
         "tenforty-b72.42",
-        "tenforty-b72.70",
         "tenforty-b72.71",
         "tenforty-nuc6",
         "tenforty-s48h.59",
@@ -216,14 +203,16 @@ _DEFECTS_BY_STATE: dict[OTSState, dict[int, tuple[str, ...]]] = {
         "tenforty-nuc6",
         "tenforty-tj2.20",
     ),
-    S.OK: _both_years("tenforty-b72.78", "tenforty-b72.79"),
+    S.OK: _both_years("tenforty-b72.42", "tenforty-b72.78", "tenforty-tj2.20"),
     S.PA: _both_years("tenforty-b72.42", "tenforty-s48h.46"),
     S.RI: _both_years("tenforty-b72.85", "tenforty-b72.86"),
     S.SC: {
         2024: (
+            "tenforty-b72.42",
             "tenforty-b72.80",
             "tenforty-b72.82",
             "tenforty-s48h.66",
+            "tenforty-tj2.20",
         ),
         2025: (
             "tenforty-b72.81",
@@ -261,7 +250,6 @@ UNSIGNED_DEFECT_BEADS: frozenset[str] = frozenset(
         "tenforty-b72.47",
         "tenforty-b72.68",
         "tenforty-b72.69",
-        "tenforty-b72.70",
         "tenforty-b72.71",
         "tenforty-b72.86",
         "tenforty-nuc6",

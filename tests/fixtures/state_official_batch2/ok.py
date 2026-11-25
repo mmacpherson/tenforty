@@ -57,29 +57,21 @@ UNPINNED: list[UnpinnedCase] = [
     for year in (2024, 2025)
 ]
 
-_SCENARIO_FACTS = {
-    label: (status, exemptions) for label, status, _, _, exemptions, _ in SCENARIOS
-}
+_EXEMPTIONS = {label: exemptions for label, _, _, _, exemptions, _ in SCENARIOS}
 
 EXEMPTION_DOLLARS = 1_000
 TOP_RATE = 0.0475
 TABLE_ROW_WIDTH = 50
 WHOLE_DOLLAR_SLACK = 1.0
-# Graph tax on $100,000 for MFJ/HoH (4,395, from the spec's brackets: $224.50
-# through $12,200, then 4.75%) minus the packet's printed $4,373 on p. 38.
-JOINT_SCHEDULE_OFFSET = 22.0
 
 OMITTED_EXEMPTIONS = "tenforty-b72.78"
-JOINT_BRACKETS = "tenforty-b72.79"
 TABLE_PRICING = "tenforty-tj2.20"
 
 
 def _defects(label: str) -> dict[str, GraphDefect]:
-    status, exemptions = _SCENARIO_FACTS[label]
-    omitted = exemptions * EXEMPTION_DOLLARS
-    joint = status != "S"
+    omitted = _EXEMPTIONS[label] * EXEMPTION_DOLLARS
     on_table = label != "s4"
-    center = TOP_RATE * omitted + (JOINT_SCHEDULE_OFFSET if joint else 0.0)
+    center = TOP_RATE * omitted
     half_width = WHOLE_DOLLAR_SLACK + (TOP_RATE * TABLE_ROW_WIDTH if on_table else 0)
     return {
         "state_taxable_income": GraphDefect(
@@ -91,12 +83,11 @@ def _defects(label: str) -> dict[str, GraphDefect]:
             "high by exactly the omitted exemption dollars",
         ),
         "state_total_tax": GraphDefect(
-            JOINT_BRACKETS if joint else OMITTED_EXEMPTIONS,
+            OMITTED_EXEMPTIONS,
             "state_total_tax",
             center - half_width,
             center + half_width,
             "tax on the omitted exemption dollars at the 4.75% marginal rate"
-            + (", plus the joint schedule offset" if joint else "")
             + (
                 "; the form requires a table row and the graph prices the "
                 "schedule (tenforty-tj2.20), and keeps cents (tenforty-b72.42)"

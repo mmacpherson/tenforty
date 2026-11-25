@@ -15,29 +15,24 @@ import TenForty.Types
 -- | 2024 South Carolina state income tax brackets
 -- SC uses the same brackets for all filing statuses.
 --
--- Source: South Carolina DOR 2024 Individual Income Tax Tables (SC1040TT)
--- https://dor.sc.gov/sites/dor/files/forms/SC1040TT_2024.pdf
+-- Source: SCDOR 2024 SC1040TT, "2024 South Carolina Individual Income Tax
+-- Tables (Revised 7/11/24)" (SC1040TT_2024.pdf): the table prints $0 through
+-- the 3,450-3,500 row and the first non-zero row (3,500-3,550, $2) prices
+-- the midpoint at 3% above 3,460; p.4 Tax Rate Schedule: line 5 x 6.2%, then
+-- subtract 659.
 --
--- Rate schedule (for income $100,000 or more):
---  Multiply income by 6.2% and subtract $659
+-- Brackets:
+--  0% up to $3,460
+--  3% from $3,460 to $17,330
+--  6.2% over $17,330
 --
--- This corresponds to:
---  0% on first $10,629 (10,629 * 0.062 = 659)
---  3% on income from $10,629 to $17,830
---  6.2% on income over $17,830
---
--- From tax tables (income under $100,000), the effective brackets are:
---  0% up to $3,560
---  3% from $3,560 to $17,830
---  6.2% over $17,830
---
--- The rate schedule formula indicates the effective zero-bracket threshold
--- is $10,629 (since 10,629 * 0.062 = 659), but the tax tables show 0% up
--- to $3,560. We use the tax table breakpoints for consistency.
+-- At the top of the 3% band the cumulative tax is 3% x 13,870 = 416.10, so the
+-- schedule constant is 0.062 x 17,330 - 416.10 = 658.36, which the schedule
+-- prints as 659 (whole dollars).
 scBrackets2024 :: NonEmpty Bracket
 scBrackets2024 =
-  Bracket (byStatus 3560 3560 3560 3560 3560) 0.00
-    :| [ Bracket (byStatus 17830 17830 17830 17830 17830) 0.03,
+  Bracket (byStatus 3460 3460 3460 3460 3460) 0.00
+    :| [ Bracket (byStatus 17330 17330 17330 17330 17330) 0.03,
          TopBracket 0.062
        ]
 

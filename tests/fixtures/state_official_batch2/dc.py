@@ -107,20 +107,10 @@ MARGINAL_RATE = {
 edge as the graph's line 19 in each case that departs."""
 TABLE_ROW_LABELS = {"s1", "s2", "s4", "s5", "s6", "s7", "s8", "s10"}
 
-STANDARD_DEDUCTION_BEAD = "tenforty-b72.63"
 AGE_BEAD = "tenforty-b72.64"
 ITEMIZING_BEAD = "tenforty-s48h.73"
 TABLE_BEAD = "tenforty-tj2.20"
 
-# DC 2025 booklet p. 4 and the CFO letter: DC keeps $15,000 / $30,000 / $22,500
-# and does not conform to the federal OBBBA increase. The graph's 2025 table
-# carries the federal 2025 amounts ($15,750 / $31,500 / $23,625), so its
-# deduction is larger by these amounts.
-GRAPH_EXCESS_STANDARD_DEDUCTION_2025 = {
-    "S": 750.0,
-    "MFJ": 1_500.0,
-    "HoH": 1_125.0,
-}
 OMITTED_AGE_DEDUCTION = {2024: 1_950.0, 2025: 2_000.0}
 RECORD_STANDARD_DEDUCTION = {2024: 14_600.0, 2025: 15_000.0}
 RECORD_ITEMIZED_DEDUCTION = 12_000.0
@@ -130,20 +120,13 @@ def _income_shift(pinned: OfficialCase) -> tuple[float, str]:
     """Graph minus record on line 19 from the mechanisms that move it, and its bead."""
     label = pinned.case_id.rsplit("-", 1)[1]
     year = pinned.year
-    excess = (
-        GRAPH_EXCESS_STANDARD_DEDUCTION_2025[_STATUS_KEY[pinned.filing_status]]
-        if year == 2025
-        else 0.0
-    )
-    graph_standard = RECORD_STANDARD_DEDUCTION[year] + excess
     if label == "s7":
-        return OMITTED_AGE_DEDUCTION[year] - excess, AGE_BEAD
+        return OMITTED_AGE_DEDUCTION[year], AGE_BEAD
     if label == "s10":
-        return RECORD_ITEMIZED_DEDUCTION - graph_standard, ITEMIZING_BEAD
-    return -excess, STANDARD_DEDUCTION_BEAD
-
-
-_STATUS_KEY = {"Single": "S", "Married/Joint": "MFJ", "Head_of_House": "HoH"}
+        return RECORD_ITEMIZED_DEDUCTION - RECORD_STANDARD_DEDUCTION[
+            year
+        ], ITEMIZING_BEAD
+    return 0.0, ""
 
 
 def _defects(pinned: OfficialCase) -> dict[str, GraphDefect]:

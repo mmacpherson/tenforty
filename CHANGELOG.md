@@ -48,6 +48,11 @@
   an empty jurisdiction menu.
 
 ### Fixed
+- **DC 2025 standard deduction keeps the DC amounts** (tenforty-b72.63): 15,000 / 30,000 / 22,500 per the 2025 D-40 booklet (pp. 4 and 13), not the federal OBBBA amounts 15,750 / 31,500 / 23,625, which DC does not adopt.
+- **Oklahoma MFJ/HoH brackets match the Form 511 packet table** (tenforty-b72.79). The 3.75% bracket of the joint schedule ended at 12,200 (from a third-party site); the 2024 and 2025 packet Tax Tables and the p. 38 worksheet ($4,373 at $100,000) require 14,400. Joint and head-of-household tax was too high above 12,200, by $22 at $100,000.
+- **Minnesota 2024 head-of-household standard deduction is 21,900** (tenforty-b72.70), as the 2024 Form M1 instructions print (p. 12), not 1.5 x 14,575 = 21,862.50.
+- **South Carolina 2024 graph brackets use the SC1040TT thresholds** (tenforty-b72.80, still open). The 3% band ran 3,560 to 17,830 (schedule constant 677.36); the 2024 SC1040TT prices it from 3,460 to 17,330. The brackets imply a constant of 658.36 against the printed $659, so tax at and above $100,000 is $0.64 high before rounding; that remains, with the published $101,000 example pinned as a signature.
+- **Arkansas 2025 graph tables carry the 2025 values** (tenforty-b72.56). `TablesAR2025.hs` repeated 2024: standard deduction 2,410 / 4,820 and bracket thresholds 5,499 / 10,899 / 15,599 / 25,699 (minus adjustments 409.86 and 281.37). It now uses the 2025 Indexed Tax Brackets sheet (5,599 / 11,199 / 15,999 / 26,399; 419.96 and 287.97) and the 2025 AR1000F instructions' standard deduction of 2,470 (Single, HoH, MFS, surviving spouse) and 4,940 (MFJ). Taxable income was $60 (Single, HoH) or $120 (MFJ) too high on every 2025 Arkansas return.
 - **OTS NJ now taxes business profits and capital gains** (tenforty-r91.15).
   `self_employment_income` goes to NJ-1040 line 18 (net profits from business),
   and `short_term_capital_gains` with `long_term_capital_gains` go to line 19
