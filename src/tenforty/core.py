@@ -895,6 +895,25 @@ _OTS_REFUSED_WHEN_DROPPED = {
 }
 
 
+# Inputs whose OTS return before 2024 is mapped and read but incomplete: the
+# program takes Schedule SE tax, its deductible half and the QBI deduction as
+# inputs and nothing orchestrates Schedule SE or Form 8995 for those years, so
+# the return would omit them (tenforty-nt4h). Maps a name to the years OTS
+# cannot compute it for and the remedy the refusal offers.
+_OTS_REFUSED_INCOMPLETE_YEARS = {
+    "self_employment_income": (
+        range(2018, 2024),
+        (
+            "Schedule SE and Form 8995 are not orchestrated for OTS before 2024 "
+            "(tenforty-nt4h), so self-employment tax, its deductible half and "
+            "the QBI deduction would be omitted. backend='graph' covers "
+            "2024-2025 only. Pass self_employment_income=0 only if the return "
+            "has no self-employment income."
+        ),
+    ),
+}
+
+
 def _ots_return_input_maps(
     year: int, state: OTSState
 ) -> list[tuple[str, dict[str, Any]]]:
@@ -980,6 +999,14 @@ def _require_ots_reads_inputs(
             f"OTS does not use {name}={value!r} on {where}, so it would "
             f"compute the return without it. {remedy}"
         )
+    for name, (years, remedy) in _OTS_REFUSED_INCOMPLETE_YEARS.items():
+        value = natural_form_values.get(name, 0.0)
+        if value and year in years:
+            raise UnsupportedInputError(
+                f"OTS cannot compute {name}={value!r} completely on "
+                f"{_ots_return_where(year, state)}, so it would compute the "
+                f"return without what it requires. {remedy}"
+            )
     for name, remedy in _OTS_REFUSED_WHEN_DROPPED.items():
         value = natural_form_values.get(name, 0.0)
         if value and ots_drops_input(name, year, state):

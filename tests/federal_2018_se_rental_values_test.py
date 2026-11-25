@@ -28,6 +28,8 @@ $0.50 on a line.
 import pytest
 
 import tenforty
+from tenforty import core
+from tenforty.models import UnsupportedInputError
 
 ROUNDING = 0.50
 
@@ -83,17 +85,18 @@ RETURNS = {
     "S3": ("S3-schedule-c-only",),
 }
 
-# OTS 2018 reads the Schedule SE deduction (S1_27), the self-employment tax
-# (S4_57) and the QBI deduction (L9) as inputs and computes none of them. The
-# 2019-2023 programs are the same; only 2024 and 2025 get them from the
-# Schedule SE and Form 8995 subordinate forms. The mapping layer never feeds
-# those keys for 2018, so the two Schedule C returns miss every figure they move
-# (tenforty-s2gx follow-up). Each field is a strict signature: it flips when the
-# 2018 return computes the figure.
+# Self-employment income is refused on OTS for 2018-2023 (tenforty-nt4h): OTS
+# takes the Schedule SE deduction (S1_27), the self-employment tax (S4_57) and
+# the QBI deduction (L9) as inputs and nothing orchestrates Schedule SE or Form
+# 8995 before 2024, so the return would omit them. The record's S1 and S3 values
+# stay pinned as parked expectations: each field is a strict xfail run with the
+# refusal lifted, so it flips when OTS 2018 computes the figure and the refusal
+# and these marks are then removed. Rental income is not refused: the rental
+# return is S2 below.
 SCHEDULE_C_GAP = pytest.mark.xfail(
     strict=True,
     reason="2018 OTS neither computes nor is fed Schedule SE, S1_27 or the QBI "
-    "deduction (L9); the Schedule C return omits them",
+    "deduction (L9); the Schedule C return omits them (tenforty-nt4h)",
 )
 FIELDS_UNDER_GAP = {
     "S1": set(_outcome(0, 0, 0, 0, 0, 0)),
@@ -127,8 +130,15 @@ def _field_cases() -> list:
 
 @pytest.mark.requires_ots
 @pytest.mark.parametrize(("return_id", "field"), _field_cases())
-def test_2018_ots_matches_a_whole_derived_outcome(return_id, field):
-    """Each line matches one of the return's whole derived outcomes."""
+def test_2018_ots_matches_a_whole_derived_outcome(return_id, field, monkeypatch):
+    """Each line matches one of the return's whole derived outcomes.
+
+    S2 mixes the rental outcomes S2a and S2b because whether the rental is a
+    section 199A qualified trade or business is a fact no input carries; OTS
+    before 2024 computes no QBI deduction, so it lands on S2b. The Schedule C
+    returns run with the refusal lifted.
+    """
+    monkeypatch.setattr(core, "_OTS_REFUSED_INCOMPLETE_YEARS", {})
     by_id = {
         scenario_id: (inputs, outcomes) for scenario_id, inputs, outcomes in SCENARIOS
     }
@@ -153,3 +163,26 @@ def test_2018_rental_return_matches_one_whole_outcome():
         if any(_matches(actual, outcome, list(outcome)) for outcome in outcomes)
     ]
     assert matched, actual
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize("year", range(2018, 2024))
+@pytest.mark.parametrize("inputs", [SCENARIOS[0][1], SCENARIOS[3][1]])
+@pytest.mark.parametrize("backend", ["ots", "auto"])
+def test_self_employment_income_is_refused_before_2024(year, inputs, backend):
+    """SE tax, its deductible half and the QBI deduction would be omitted."""
+    with pytest.raises(UnsupportedInputError) as raised:
+        tenforty.evaluate_return(year=year, backend=backend, **inputs)
+    message = str(raised.value)
+    assert "tenforty-nt4h" in message
+    assert "self_employment_income=50000.0" in message
+    assert "backend='graph' covers 2024-2025 only" in message
+
+
+@pytest.mark.requires_ots
+@pytest.mark.parametrize("year", range(2018, 2024))
+def test_zero_self_employment_income_is_accepted(year):
+    """Zero, explicit, computes as before."""
+    tenforty.evaluate_return(
+        year=year, backend="ots", w2_income=60_000, self_employment_income=0
+    )

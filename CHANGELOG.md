@@ -9,8 +9,20 @@
   (`docs/validation/derivations/federal-2018-se-rental.md`) only because OTS
   2018 computes no QBI deduction, so it lands on the outcome where the rental
   is not a qualified trade or business. 2018 Schedule C income still omits
-  Schedule SE tax, its deduction and the QBI deduction, as 2019-2023 do; each
-  line is a strict known defect.
+  Schedule SE tax, its deduction and the QBI deduction, as 2019-2023 do; see
+  Changed.
+### Changed
+- **OTS refuses nonzero `self_employment_income` for 2018-2023**
+  (tenforty-nt4h). Schedule SE and Form 8995 are orchestrated only for 2024 and
+  2025, so earlier years returned AGI, tax and total tax without self-employment
+  tax, its deductible half or the QBI deduction (a $50,000 Schedule C return
+  missed about $7,065 of tax). Calls that used to return a wrong figure now
+  raise `UnsupportedInputError` under every `on_error` policy, on
+  `backend="ots"` and `"auto"`; `backend="graph"` covers 2024-2025 only. Zero
+  is unchanged. The record's values stay pinned as strict xfails with the
+  refusal lifted. OTS before 2024 also computes no QBI deduction for rental
+  income, which the 2018 rental test accepts as S2a or S2b because the section
+  199A qualification is a fact no input carries.
 ### Added (validation)
 - **Official-value fixtures for 23 more graph states, 2024 and 2025**
   (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,
