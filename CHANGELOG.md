@@ -74,7 +74,7 @@
   zero or negative denominators, and an unbounded bracket that is not last.
   Graph JSON from earlier releases must be regenerated.
 - No computed figure changes for incomes up to $1,000,000,000,000. Every one
-  of the 19,270 exact scalars in the shipped graphs converts to the same
+  of the 19,896 exact scalars in the shipped graphs converts to the same
   double as before; the only scalars removed are Oregon's 20 `1e12` cap
   literals, from a `min(midpoint, 1e12)` its tax-table branch (taxable
   income under $50,000) never reaches. A before/after evaluation of 1.38M
