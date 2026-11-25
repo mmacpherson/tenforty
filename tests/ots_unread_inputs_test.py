@@ -4,10 +4,8 @@
 - ``incentive_stock_option_gains``: mapped to AMTws3 every year, but the 2018
   and 2019 US_1040 programs parse that line and never store it
   (``OTS_UNREAD_INPUT_KEYS``, checked against the vendored release source).
-- ``self_employment_income`` and ``rental_income`` on 2018, and
-  ``state_adjustment`` on CA 2018/2019: our map sends them to lines those
-  years' templates lack, so they never reached OTS (tenforty-s2gx,
-  tenforty-8tlh).
+- ``state_adjustment`` on CA 2018/2019: our map sends it to a line those
+  years' templates lack, so it never reached OTS (tenforty-8tlh).
 
 Before this contract such a value was dropped and the return computed without
 it. It is now an ``UnsupportedInputError`` under every ``on_error`` policy,
@@ -319,8 +317,6 @@ def test_zero_iso_is_accepted_in_unread_years(year):
 # --- inputs mapped onto lines the year's template lacks (tenforty-48hh) --------
 
 TEMPLATE_ABSENT_CASES = [
-    (2018, None, "self_employment_income", "S1_3", "tenforty-s2gx"),
-    (2018, None, "rental_income", "S1_5", "tenforty-s2gx"),
     (2018, "CA", "state_adjustment", "CA540_P2_Add_6", "tenforty-8tlh"),
     (2019, "CA", "state_adjustment", "CA540_P2_Add_6", "tenforty-8tlh"),
 ]

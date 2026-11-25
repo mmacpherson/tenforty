@@ -227,13 +227,13 @@ adjustment was dropped and the AMT computed without it. A nonzero value there
 now raises `UnsupportedInputError`; no backend computes those years with the
 adjustment. 2020 onward read the line and are unchanged.
 
-It also covers three inputs tenforty mapped to lines a year's OTS template does
-not have, so they never reached OTS: `self_employment_income` and
-`rental_income` on 2018 returns (a 2018 return reported the same AGI with or
-without them), and `state_adjustment` on CA 2018 and 2019 returns. A nonzero
-value there now raises `UnsupportedInputError`; no other backend computes those
-years. The mappings are being corrected (tenforty-s2gx, tenforty-8tlh). Zero is
-unchanged.
+It also covers an input tenforty mapped to a line a year's OTS template does
+not have, so it never reached OTS: `state_adjustment` on CA 2018 and 2019
+returns. A nonzero value there now raises `UnsupportedInputError`; no other
+backend computes those years. The mapping is being corrected (tenforty-8tlh).
+Zero is unchanged. `self_employment_income` and `rental_income` on 2018 returns
+had the same defect and are now mapped to Schedule 1 lines 12 and 17
+(tenforty-s2gx).
 
 ### Deduction choice
 

@@ -886,18 +886,6 @@ _OTS_REFUSED_WHEN_UNREAD = {
 # lacks, so the value never reached OTS. They are refused only where a map in
 # the return does that (``ots_drops_input``); elsewhere they behave as before.
 _OTS_REFUSED_WHEN_DROPPED = {
-    "self_employment_income": (
-        "tenforty maps it to a 2018 Schedule 1 line the 2018 OTS template does "
-        "not have (tenforty-s2gx), and no other backend computes 2018: the "
-        "graph covers 2024 and later. Pass self_employment_income=0 only if the "
-        "return has no self-employment income."
-    ),
-    "rental_income": (
-        "tenforty maps it to a 2018 Schedule 1 line the 2018 OTS template does "
-        "not have (tenforty-s2gx), and no other backend computes 2018: the "
-        "graph covers 2024 and later. Pass rental_income=0 only if the return "
-        "has no rental income."
-    ),
     "state_adjustment": (
         "tenforty maps it to a CA 540 line the 2018 and 2019 OTS templates do "
         "not have (tenforty-8tlh), and no other backend computes CA for those "

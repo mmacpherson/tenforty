@@ -1,4 +1,16 @@
 ## [Unreleased]
+### Fixed
+- **OTS 2018 now reads `self_employment_income` and `rental_income`**
+  (tenforty-s2gx). They were mapped to Schedule 1 lines 3 and 5, which the 2018
+  template lacks (2018 numbers business income line 12 and rental real estate
+  line 17), so the values were dropped; the 2018 map now sends them to `S1_12`
+  and `S1_17` and the refusal added by tenforty-48hh no longer applies to them.
+  A 2018 rental return matches the blind derivation
+  (`docs/validation/derivations/federal-2018-se-rental.md`) only because OTS
+  2018 computes no QBI deduction, so it lands on the outcome where the rental
+  is not a qualified trade or business. 2018 Schedule C income still omits
+  Schedule SE tax, its deduction and the QBI deduction, as 2019-2023 do; each
+  line is a strict known defect.
 ### Added (validation)
 - **Official-value fixtures for 23 more graph states, 2024 and 2025**
   (tenforty-b72.12): AL, AR, AZ, CA, CT, DC, DE, IA, ID, KY, MI, MN, MT, ND,
