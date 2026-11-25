@@ -103,7 +103,7 @@ TABLE_ROW = 100
 
 # The schedule rate on each scenario's line 9, the same in both years. Where
 # the graph omits a subtraction, its higher line 9 is still in this bracket
-# (record, rate schedules): the widest reach is 2024 scenario 6, 38,137.50
+# (record, rate schedules): the widest reach is 2024 scenario 6, 38,100
 # against the 39,010 head of household bracket top.
 MARGINAL_RATE = {
     "s1": 0.0535,
@@ -121,18 +121,12 @@ MARGINAL_RATE = {
 # as graph line 9 minus record line 9. Scenarios 5, 6 and 9: the Worksheet for
 # Line 5 dependent exemption (5,050 each for 2024, 5,200 for 2025). Scenario 7:
 # the one-box standard deduction less the no-box one (16,525 - 14,575;
-# 16,950 - 14,950). 2024 scenario 6 adds the head of household standard
-# deduction the booklet prints, 21,900, less the 21,862.50 the graph uses.
+# 16,950 - 14,950).
 # Scenario 9 nets off the Worksheet A reduction the graph does not make
 # (29,150 - 27,125; 29,900 - 28,069).
 TWO_EXEMPTIONS = "line 5 exemptions for two dependents"
 ONE_EXEMPTION = "line 5 exemption for one dependent"
 AGE_BOX = "line 4 age-65 standard deduction box"
-HOH_2024 = (
-    f"{ONE_EXEMPTION}, and the head of household standard deduction is "
-    "21,862.50 where the booklet prints 21,900 "
-    "(tenforty-b72.70)"
-)
 LIMITATION = (
     f"{TWO_EXEMPTIONS}, net of the Worksheet A standard deduction limitation "
     "the graph also omits (tenforty-b72.71)"
@@ -140,7 +134,7 @@ LIMITATION = (
 OMITTED_SUBTRACTIONS: dict[tuple[int, str], tuple[float, str]] = {
     (2024, "s5"): (2 * 5_050, TWO_EXEMPTIONS),
     (2025, "s5"): (2 * 5_200, TWO_EXEMPTIONS),
-    (2024, "s6"): (5_050 + (21_900 - 21_862.50), HOH_2024),
+    (2024, "s6"): (5_050, ONE_EXEMPTION),
     (2025, "s6"): (5_200, ONE_EXEMPTION),
     (2024, "s7"): (16_525 - 14_575, AGE_BOX),
     (2025, "s7"): (16_950 - 14_950, AGE_BOX),
